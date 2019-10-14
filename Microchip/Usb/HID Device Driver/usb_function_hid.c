@@ -90,22 +90,29 @@
     C:\\Microchip Solutions\\My Demo Application  
 *******************************************************************/
 
+#ifndef USB_FUNCTION_HID_C
+#define USB_FUNCTION_HID_C
+
 /** INCLUDES *******************************************************/
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
+#include "./USB/usb.h"
 #include "./USB/usb_function_hid.h"
+
 
 /** VARIABLES ******************************************************/
 #pragma udata
 BYTE idle_rate;
 BYTE active_protocol;   // [0] Boot Protocol [1] Report Protocol
-BYTE hid_rpt_rx_len;
 
-/** PRIVATE PROTOTYPES *********************************************/
-void HIDGetReportHandler(void);
-void HIDSetReportHandler(void);
+/** EXTERNAL PROTOTYPES ********************************************/
+#if defined USER_GET_REPORT_HANDLER
+    void USER_GET_REPORT_HANDLER(void);
+#endif
+
+#if defined USER_SET_REPORT_HANDLER
+    void USER_SET_REPORT_HANDLER(void);
+#endif     
 
 /** Section: DECLARATIONS ***************************************************/
 #pragma code
@@ -188,14 +195,22 @@ void USBCheckHIDRequest(void)
         }//end switch(SetupPkt.bDescriptorType)
     }//end if(SetupPkt.bRequest == GET_DSC)
     
-    if(SetupPkt.RequestType != CLASS) return;
+    if(SetupPkt.RequestType != CLASS)
+    {
+        return;
+    }
+
     switch(SetupPkt.bRequest)
     {
         case GET_REPORT:
-            HIDGetReportHandler();
+            #if defined USER_GET_REPORT_HANDLER
+                USER_GET_REPORT_HANDLER();
+            #endif
             break;
         case SET_REPORT:
-            HIDSetReportHandler();            
+            #if defined USER_SET_REPORT_HANDLER
+                USER_SET_REPORT_HANDLER();
+            #endif       
             break;
         case GET_IDLE:
             USBEP0SendRAMPtr(
@@ -221,14 +236,7 @@ void USBCheckHIDRequest(void)
 
 }//end USBCheckHIDRequest
 
-void HIDGetReportHandler(void)
-{
-}//end HIDGetReportHandler
-
-void HIDSetReportHandler(void)
-{
-}//end HIDSetReportHandler
-
 /** USER API *******************************************************/
 
+#endif
 /** EOF usb_function_hid.c ******************************************************/

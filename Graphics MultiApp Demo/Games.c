@@ -102,6 +102,8 @@ extern void Int2Str(XCHAR *pStr, WORD value, SHORT charCount);
 void    InitializeRandomNumberGenerator( void );
 SHORT   Random( SHORT max );
 
+#define WAIT_UNTIL_FINISH(x) while(!x)
+
 /****************************************************************************
   Function:
     void InitializeRandomNumberGenerator( void )
@@ -645,36 +647,36 @@ void ShowScreenScore( void )
 	textHeight = GetTextHeight((void*)&GAMEBIGFONT); 
 
 	SetColor(TEXT_COLOR_BG);
-	OutTextXY( (GetMaxX()-textWidth)>>1, 
+	WAIT_UNTIL_FINISH(OutTextXY( (GetMaxX()-textWidth)>>1, 
 			  ((GetMaxY()-CTRLBTN_HEIGHT)>>1)-textHeight, 
-			    gameOverStr);
+			    gameOverStr));
 	SetColor(TEXT_COLOR_FG);
-	OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
+	WAIT_UNTIL_FINISH(OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
 			  (((GetMaxY()-CTRLBTN_HEIGHT)>>1)-textHeight)+TEXT_SHADOW_OFFSET, 
-			    gameOverStr);
+			    gameOverStr));
 
 	textWidth  = GetTextWidth(pScoreInfo, (void*)&GAMESMALLFONT); 
 
 	SetColor(TEXT_COLOR_BG);
-	OutTextXY( (GetMaxX()-textWidth)>>1, 
+	WAIT_UNTIL_FINISH(OutTextXY( (GetMaxX()-textWidth)>>1, 
 			   (GetMaxY()-CTRLBTN_HEIGHT)>>1, 
-			    pScoreInfo);
+			    pScoreInfo));
 	SetColor(TEXT_COLOR_FG);
-	OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
+	WAIT_UNTIL_FINISH(OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
 			   ((GetMaxY()-CTRLBTN_HEIGHT)>>1)+TEXT_SHADOW_OFFSET, 
-			    pScoreInfo);
+			    pScoreInfo));
 
 	textHeight = GetTextHeight((void*)&GAMESMALLFONT); 
 	textWidth  = GetTextWidth(scoreText, (void*)&GAMESMALLFONT); 
 
 	SetColor(TEXT_COLOR_BG);
-	OutTextXY( (GetMaxX()-textWidth)>>1, 
+	WAIT_UNTIL_FINISH(OutTextXY( (GetMaxX()-textWidth)>>1, 
 			  ((GetMaxY()-CTRLBTN_HEIGHT)>>1)+textHeight, 
-			    scoreText);
+			    scoreText));
 	SetColor(TEXT_COLOR_FG);
-	OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
+	WAIT_UNTIL_FINISH(OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
 			  (((GetMaxY()-CTRLBTN_HEIGHT)>>1)+textHeight)+TEXT_SHADOW_OFFSET, 
-			    scoreText);
+			    scoreText));
 
 }	
 

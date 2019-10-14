@@ -8,7 +8,7 @@
  *****************************************************************************
  * FileName:        MainDemo.c
  * Dependencies:    MainDemo.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -41,15 +41,23 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		10/17/07	...
  * Anton Alkhimenok		02/05/08	PIC32 support is added
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  *****************************************************************************/
 #include "MainDemo.h"
-
 // Configuration bits
-#ifdef __PIC32MX
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+_FOSCSEL(FNOSC_PRI);			
+_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF  & POSCMD_XT);  
+_FWDT(FWDTEN_OFF);              
+#elif defined(__PIC32MX__)
 #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
 #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
 #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
+	#if defined (__PIC24FJ256GB110__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+    #endif	
 	#if defined (__PIC24FJ256GA110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
@@ -118,6 +126,20 @@ BYTE  byte;
     FLASHInit();  
     UARTInit();
 
+
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+    // If S3 button on Explorer 16 board is pressed calibrate touch screen
+    TRISAbits.TRISA9 = 1; 
+    if(PORTAbits.RA9 == 0)
+	{
+		TRISAbits.TRISA9 = 0; 
+        ChipErase();
+#if (GRAPHICS_PICTAIL_VERSION < 3)
+        Beep();
+#endif
+    }
+    TRISAbits.TRISA9 = 0;
+#else
     // If S3 button on Explorer 16 board is pressed erase memory
     if(PORTDbits.RD6 == 0){
         ChipErase();
@@ -125,12 +147,12 @@ BYTE  byte;
         Beep();
 #endif
     }
+#endif
 
     state = START;
     address.Val = 0;
     
     while(1){
-
         byte = UARTWaitChar();
 
         switch(state){

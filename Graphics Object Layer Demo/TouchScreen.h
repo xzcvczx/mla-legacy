@@ -3,7 +3,7 @@
  *****************************************************************************
  * FileName:        TouchScreen.h
  * Dependencies:    Graphics.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -46,6 +46,7 @@
 #define _TOUCHSCREEN_H
 
 #include "Graphics\Graphics.h"
+#include "MainDemo.h"
 
 #if (GRAPHICS_PICTAIL_VERSION == 1)
 

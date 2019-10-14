@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        DisplayDriver.h
  * Dependencies:    p24Fxxxx.h or plib.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -55,23 +55,23 @@
 
 #elif  (DISPLAY_CONTROLLER == S6D0129)
 
-#include "Graphics\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.h"
+#include "Graphics\drvTFT001.h"
 
 #elif  (DISPLAY_CONTROLLER == S6D0139)
 
-#include "Graphics\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.h"
+#include "Graphics\drvTFT001.h"
 
 #elif  (DISPLAY_CONTROLLER == LGDP4531)
 
-#include "Graphics\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.h"
+#include "Graphics\drvTFT001.h"
 
 #elif  (DISPLAY_CONTROLLER == R61505)
 
-#include "Graphics\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.h"
+#include "Graphics\drvTFT001.h"
 
 #elif  (DISPLAY_CONTROLLER == SPFD5408)
 
-#include "Graphics\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.h"
+#include "Graphics\drvTFT001.h"
 
 #elif  (DISPLAY_CONTROLLER == SSD1339)
 
@@ -97,7 +97,23 @@
 
 #include "Graphics\UC1610.h"
 
+#elif  (DISPLAY_CONTROLLER == ILI9320)
+
+#include "Graphics\drvTFT001.h"
+
+#elif  (DISPLAY_CONTROLLER == HX8347)
+
+#include "Graphics\HX8347.h"
+
+#elif  (DISPLAY_CONTROLLER == SSD1289)
+
+#include "Graphics\SSD1289.h"
+
 #elif  (DISPLAY_CONTROLLER == NO_CONTROLLER_DEFINED)
+
+#elif  (DISPLAY_CONTROLLER == R61580)
+
+#include "Graphics\drvTFT001.h"
 
 #else
 

@@ -170,7 +170,7 @@ file_046=no
 [FILE_INFO]
 file_000=MainDemo.c
 file_001=Font25PixelsHeight.c
-file_002=Pictures PIC24.c
+file_002=Pictures C30.c
 file_003=Font35PixelsHeight.c
 file_004=..\Microchip\Graphics\Window.c
 file_005=..\Microchip\Graphics\Button.c

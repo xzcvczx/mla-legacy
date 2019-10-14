@@ -117,7 +117,7 @@
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT   
 
-#elif defined(PIC18F46J50_PIM)
+#elif defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
      #pragma config STVREN = ON            //stack overflow/underflow reset enabled
@@ -173,7 +173,12 @@
 #elif defined(EXPLORER_16)
     #ifdef __PIC24FJ256GB110__ //Defined by MPLAB when using 24FJ256GB110 device
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+    #elif defined(__PIC24FJ64GB004__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__32MX460F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
@@ -230,8 +235,12 @@
 #pragma udata
 BYTE old_sw2,old_sw3;
 char buffer[8];
-USB_HANDLE lastTransmission;
+unsigned char OutBuffer[8];
+USB_HANDLE lastINTransmission;
+USB_HANDLE lastOUTTransmission;
 BOOL Keyboard_out;
+BOOL BlinkStatusValid;
+DWORD CountdownTimerToShowUSBStatusOnLEDs;
 /** PRIVATE PROTOTYPES *********************************************/
 void BlinkUSBStatus(void);
 BOOL Switch2IsPressed(void);
@@ -243,6 +252,7 @@ void YourHighPriorityISRCode();
 void YourLowPriorityISRCode();
 void Keyboard(void);
 
+void USBHIDCBSetReportComplete(void);
 
 /** VECTOR REMAPPING ***********************************************/
 #if defined(__18CXX)
@@ -469,7 +479,7 @@ static void InitializeSystem(void)
         AD1PCFG = 0xFFFF;
     #endif
 
-    #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM)
+    #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
 	//On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -494,7 +504,7 @@ static void InitializeSystem(void)
     WDTCONbits.ADSHR = 0;			// Select normal SFR locations
     #endif
 
-    #if defined(PIC18F46J50_PIM)
+    #if defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
 	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
 	//use the ANCONx registers to control this, which is different from other devices which
 	//use the ADCON1 register for this purpose.
@@ -502,6 +512,23 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
     
+   #if defined(PIC24FJ64GB004_PIM)
+	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+	//This allows the device to power up at a lower initial operating frequency, which can be
+	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+	//power up the PLL.
+    {
+        unsigned int pll_startup_counter = 600;
+        CLKDIVbits.PLLEN = 1;
+        while(pll_startup_counter--);
+    }
+
+    //Device switches over automatically to PLL output after PLL is locked and ready.
+    #endif
+
+
 //	The USB specifications require that USB peripheral devices must never source
 //	current onto the Vbus pin.  Additionally, USB peripherals should not source
 //	current on D+ or D- when the host/hub is not actively powering the Vbus line.
@@ -568,6 +595,7 @@ void UserInit(void)
 {
     //Initialize all of the LED pins
     mInitAllLEDs();
+    BlinkStatusValid = TRUE;
     
     //Initialize all of the push buttons
     mInitAllSwitches();
@@ -577,7 +605,8 @@ void UserInit(void)
     //initialize the variable holding the handle for the last
     // transmission
 
-    lastTransmission = 0;
+    lastINTransmission = 0;
+    lastOUTTransmission = 0;
 
 }//end UserInit
 
@@ -602,20 +631,41 @@ void UserInit(void)
 void ProcessIO(void)
 {   
     //Blink the LEDs according to the USB device status
-    BlinkUSBStatus();
+    //However, the LEDs are also used temporarily for showing the Num Lock 
+    //keyboard LED status.  If the host sends an LED state update interrupt
+    //out report, or sends it by a SET_REPORT control transfer, then
+    //the demo board LEDs are temporarily taken over to show the Num Lock
+    //LED state info.  After a countdown timout, the firmware will switch
+    //back to showing the USB state on the LEDs, instead of the num lock status.
+    if(BlinkStatusValid == TRUE)
+    {
+	    BlinkUSBStatus();
+	}
+	else
+	{
+		CountdownTimerToShowUSBStatusOnLEDs--;
+		if(CountdownTimerToShowUSBStatusOnLEDs == 0)
+		{
+			BlinkStatusValid = TRUE;
+		}	
+	}	 
 
     // User Application USB tasks
     if((USBDeviceState < CONFIGURED_STATE)||(USBSuspendControl==1)) return;
 
-   Keyboard();        
-    //Call the function that behaves like a keyboard   
+	//Call the function that behaves like a keyboard  
+    Keyboard();        
+     
 }//end ProcessIO
+
 
 void Keyboard(void)
 {
 	static unsigned char key = 4;	
 
-    if(!HIDTxHandleBusy(lastTransmission))
+	//Check if the IN endpoint is not busy, and if it isn't check if we want to send 
+	//keystroke data to the host.
+    if(!HIDTxHandleBusy(lastINTransmission))
     {
         if(Switch2IsPressed())
         {
@@ -629,7 +679,7 @@ void Keyboard(void)
         	hid_report_in[6] = 0;
         	hid_report_in[7] = 0;
            	//Send the 8 byte packet over USB to the host.
-           	lastTransmission = HIDTxPacket(HID_EP, (BYTE*)hid_report_in, 0x08);
+           	lastINTransmission = HIDTxPacket(HID_EP, (BYTE*)hid_report_in, 0x08);
     
             if(key == 40)
             {
@@ -648,9 +698,39 @@ void Keyboard(void)
         	hid_report_in[6] = 0;
         	hid_report_in[7] = 0;
            	//Send the 8 byte packet over USB to the host.
-           	lastTransmission = HIDTxPacket(HID_EP, (BYTE*)hid_report_in, 0x08);
+           	lastINTransmission = HIDTxPacket(HID_EP, (BYTE*)hid_report_in, 0x08);
         }
     }
+    
+    
+    //Check if any data was sent from the PC to the keyboard device.  Report descriptor allows
+    //host to send 1 byte of data.  Bits 0-4 are LED states, bits 5-7 are unused pad bits.
+    //The host can potentially send this OUT report data through the HID OUT endpoint (EP1 OUT),
+    //or, alternatively, the host may try to send LED state information by sending a
+    //SET_REPORT control transfer on EP0.  See the USBHIDCBSetReportHandler() function.
+    if(!HIDRxHandleBusy(lastOUTTransmission))
+    {
+		//Do something useful with the data now.  Data is in the OutBuffer[0].
+		//Num Lock LED state is in Bit0.
+		if(hid_report_out[0] & 0x01) //Make LED1 and LED2 match Num Lock state.
+		{
+			mLED_1_On();
+			mLED_2_On();
+		}
+		else
+		{
+			mLED_1_Off();
+			mLED_2_Off();			
+		}
+		
+		//Stop toggling the LEDs, so you can temporily see the Num lock LED state instead.
+		//Once the CountdownTimerToShowUSBStatusOnLEDs reaches 0, the LEDs will go back to showing USB state instead.
+		BlinkStatusValid = FALSE;
+		CountdownTimerToShowUSBStatusOnLEDs = 140000;
+	
+		lastOUTTransmission = HIDRxPacket(HID_EP,(BYTE*)&hid_report_out,1);
+	} 
+    
     return;		
 }//end keyboard()
 
@@ -1084,7 +1164,10 @@ void USBCBStdSetDscHandler(void)
 void USBCBInitEP(void)
 {
     //enable the HID endpoint
-    USBEnableEndpoint(HID_EP,USB_IN_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
+    USBEnableEndpoint(HID_EP,USB_IN_ENABLED|USB_OUT_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
+
+	lastOUTTransmission = HIDRxPacket(HID_EP,(BYTE*)&hid_report_out,1);
+
 }
 
 /********************************************************************
@@ -1226,5 +1309,57 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
     return TRUE; 
 }
 
+
+// *****************************************************************************
+// ************** USB Class Specific Callback Function(s) **********************
+// *****************************************************************************
+
+/********************************************************************
+ * Function:        void USBHIDCBSetReportHandler(void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        USBHIDCBSetReportHandler() is used to respond to
+ *					the HID device class specific SET_REPORT control
+ *					transfer request (starts with SETUP packet on EP0 OUT).  
+ * Note:            
+ *******************************************************************/
+void USBHIDCBSetReportHandler(void)
+{
+	//Prepare to receive the keyboard LED state data through a SET_REPORT
+	//control transfer on endpoint 0.  The host should only send 1 byte,
+	//since this is all that the report descriptor allows it to send.
+	USBEP0Receive((BYTE*)&CtrlTrfData, USB_EP0_BUFF_SIZE, USBHIDCBSetReportComplete);
+}
+
+//Secondary callback function that gets called when the above
+//control transfer completes for the USBHIDCBSetReportHandler()
+void USBHIDCBSetReportComplete(void)
+{
+	//1 byte of LED state data should now be in the CtrlTrfData buffer.
+
+	//Num Lock LED state is in Bit0.
+	if(CtrlTrfData[0] & 0x01)	//Make LED1 and LED2 match Num Lock state.
+	{
+		mLED_1_On();
+		mLED_2_On();
+	}
+	else
+	{
+		mLED_1_Off();
+		mLED_2_Off();			
+	}
+	
+	//Stop toggling the LEDs, so you can temporily see the Num lock LED state instead.
+	//Once the CountdownTimerToShowUSBStatusOnLEDs reaches 0, the LEDs will go back to showing USB state instead.
+	BlinkStatusValid = FALSE;	
+	CountdownTimerToShowUSBStatusOnLEDs = 140000; 
+}	
 /** EOF Keyboard.c **********************************************/
 #endif

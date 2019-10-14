@@ -67,7 +67,14 @@ SHORT _clipBottom;
 * Note: delay is defined for 16MIPS
 *
 ********************************************************************/
-#ifdef __PIC32MX
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+#define DELAY_1MS 40000/5  // for 40MIPS
+void  DelayMs(WORD time){
+unsigned delay;
+	while(time--)
+		for(delay=0; delay<DELAY_1MS; delay++);	
+}
+#elif defined(__PIC32MX__)
 void  DelayMs(WORD time)
 {
     while(time--)
@@ -121,15 +128,20 @@ void ResetDevice(void){
 	// Set up chip select signal to be IO controlled
 	CS_TRIS_BIT = 0;
 	CS_LAT_BIT = 1;       
-	// Set up the power signal to be IO controlled
-    PWR_TRIS_BIT = 0;
-	PWR_LAT_BIT = 1;
-   
+ 
+#if defined(__dsPIC33F__) || defined(__PIC24H__) 
     // PMP setup 
     PMMODEbits.MODE  = 0b10;	// Master 2, controller pins should be set BS0=0,BS1=1,BS2=1 on board
-    PMMODEbits.WAITB = 0b00;	// 0 tcy data set up
-    PMMODEbits.WAITM = 0b0111;	// 3 tcy additional wait 
+    PMMODEbits.WAITB = 0b01;	// 1 tcy data set up
+    PMMODEbits.WAITM = 0b0011;	// 3 tcy additional wait 
     PMMODEbits.WAITE = 0b00;	// 0 tcy data hold 
+#else
+    // PMP setup 
+    PMMODEbits.MODE  = 0b10;	// Master 2, controller pins should be set BS0=0,BS1=1,BS2=1 on board
+    PMMODEbits.WAITB = 0b01;	// 1 tcy data set up
+    PMMODEbits.WAITM = 0b0010;	// 2 tcy additional wait 
+    PMMODEbits.WAITE = 0b00;	// 0 tcy data hold 
+#endif
 
     PMAENbits.PTEN0  = 1;		// Address line 0 is enabled
     PMAENbits.PTEN14 = 0;		// Address line 14 is used as an IO port
@@ -303,9 +315,9 @@ BYTE mask, display;
 	ReadData(display);				// Read to initiate Read transaction on PMP and dummy read
 									// (requirement for data synchronization in the controller)
 	ReadData(display);				// Read actual data from from display buffer
-	PMCONbits.PMPEN  = 0;			// disable PMP module
-	display = PMDIN1;				// Read data from PMP register
-   	PMCONbits.PMPEN  = 1;			// enable PMP module
+
+	ReadData(display);				// Read data from PMP register
+
 
 	if(_color > 0)					// If non-zero for pixel on
 		display |= mask;			// or in mask
@@ -376,9 +388,9 @@ BYTE mask, temp, display;
 									// lower and higher column address pointers)
 	ReadData(display);				// Read to initiate Read transaction on PMP
 	ReadData(display);				// Dummy Read (requirement for data synchronization in the controller)
-	PMCONbits.PMPEN  = 0;			// disable PMP module
-	display = PMDIN1;				// Read data from display buffer
-   	PMCONbits.PMPEN  = 1;			// enable PMP module
+
+	ReadData(display);				// Read data from display buffer
+
 
 	CS_LAT_BIT=1;
 

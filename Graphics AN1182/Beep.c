@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Beep.c
  * Dependencies:    Beep.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -105,6 +105,7 @@ void  __T2_ISR _T2Interrupt(void)
 *
 ********************************************************************/
 void BeepInit(){
+
     // clear pulse counter
     pulseCounter = 0;
 
@@ -113,6 +114,10 @@ void BeepInit(){
     PR2 =  TIMER_BASE;
     //set prescale to 1:8
     T2CONbits.TCKPS = 1;
+
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+	RPOR2 = 0b0000000000010010;	
+#endif
 
 #ifdef __PIC32MX__
     ConfigIntTimer2(T2_INT_ON | T2_INT_PRIOR_2);

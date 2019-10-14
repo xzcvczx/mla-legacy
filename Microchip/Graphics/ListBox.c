@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        ListBox.c
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -498,10 +498,8 @@ static SHORT  temp;
         case LB_STATE_START:
 
           	if (GetState(pLb, LB_HIDE)) {
-                if(IsDeviceBusy())
-                    return 0;
    	   	        SetColor(pLb->hdr.pGolScheme->CommonBkColor);
-    	        Bar(pLb->hdr.left,pLb->hdr.top,pLb->hdr.right,pLb->hdr.bottom);
+    	        if(!Bar(pLb->hdr.left,pLb->hdr.top,pLb->hdr.right,pLb->hdr.bottom)) return 0;
     	        return 1;
     	    }    
 
@@ -593,10 +591,11 @@ if((GetY()+ pLb->textHeight) >= (pLb->hdr.top+GOL_EMBOSS_SIZE+LB_INDENT)){
                 }
             }
 
-            Bar(pLb->hdr.left+GOL_EMBOSS_SIZE+LB_INDENT,
+            if(!Bar(pLb->hdr.left+GOL_EMBOSS_SIZE+LB_INDENT,
                 GetY(),
                 pLb->hdr.right-GOL_EMBOSS_SIZE-LB_INDENT,
-                GetY()+ pLb->textHeight);
+                GetY()+ pLb->textHeight))
+                return 0;
 
 
             if (!GetState(pLb, LB_CENTER_ALIGN|LB_RIGHT_ALIGN)) {
@@ -630,10 +629,11 @@ if((GetY()+ pLb->textHeight) >= (pLb->hdr.top+GOL_EMBOSS_SIZE+LB_INDENT)){
             if(pCurItem->pBitmap != NULL)
             {
 
-                PutImage(GetX(),
+                if(!PutImage(GetX(),
                          GetY()+((pLb->textHeight-GetImageHeight(pCurItem->pBitmap))>>1),
                          pCurItem->pBitmap,
-                         1);
+                         1))
+                         return 0;
 
                 MoveRel(GetImageWidth(pCurItem->pBitmap)+LB_INDENT,0);
             }
@@ -662,10 +662,11 @@ L_LB_NEXTITEM:
           
                 SetLineType(FOCUS_LINE);
                 temp = GetY();
-                Rectangle(pLb->hdr.left+GOL_EMBOSS_SIZE+LB_INDENT,
+                if(!Rectangle(pLb->hdr.left+GOL_EMBOSS_SIZE+LB_INDENT,
                           GetY(),
                           pLb->hdr.right-GOL_EMBOSS_SIZE-LB_INDENT,
-                          GetY()+pLb->textHeight-1);
+                          GetY()+pLb->textHeight-1))
+                          return 0;
                 MoveTo(0,temp);
                 SetLineType(SOLID_LINE);
 

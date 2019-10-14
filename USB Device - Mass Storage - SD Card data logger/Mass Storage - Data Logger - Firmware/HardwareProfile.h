@@ -53,13 +53,16 @@
 
 //#define DEMO_BOARD USER_DEFINED_BOARD
 
-#include "Compiler.h"
 #include "usb_config.h"
 
 #if !defined(DEMO_BOARD)
-    #if defined(__PIC32MX__)
+    #if defined(__C32__)
         #if defined(__32MX460F512L__)
-            #include "HardwareProfile - PIC32MX460F512L PIM.h"
+            #if defined(PIC32MX460F512L_PIM)
+                #include "HardwareProfile - PIC32MX460F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
         #endif
     #endif
 
@@ -68,6 +71,9 @@
             #include "HardwareProfile - PIC24FJ256GB110 PIM.h"
         #elif defined(__PIC24FJ256GB106__)
             #include "HardwareProfile - PIC24F Starter Kit.h"
+        #elif defined(__PIC24FJ64GB004__)
+            #error "This demo does not support the PIC24FJ64GB004 PIM."
+            #error "There is a hardware conflict between the SDI line and the potentiometer."
         #endif
     #endif
 

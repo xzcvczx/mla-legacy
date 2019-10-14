@@ -2,7 +2,7 @@
 
 * FileName:        Application.c
 * Dependencies:    Image decoding library;
-* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
+* Processor:       PIC24F, PIC24H, dsPIC, PIC32
 * Compiler:        C30 v2.01/C32 v0.00.18
 * Company:         Microchip Technology, Inc.
 
@@ -40,11 +40,20 @@ Pradeep Budagutta    25-Jun-2008    First release
 #include "Image Decoders\ImageDecoder.h"
 #include "FlashImage.h"
 
-#ifdef __PIC32MX__
+// Configuration bits
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+_FOSCSEL(FNOSC_PRI);			
+_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF  & POSCMD_XT);  
+_FWDT(FWDTEN_OFF);              
+#elif defined(__PIC32MX__)
 #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
 #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
 #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
+	#if defined (__PIC24FJ256GB110__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+    #endif	
 	#if defined (__PIC24FJ256GA110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
@@ -58,6 +67,8 @@ Pradeep Budagutta    25-Jun-2008    First release
 
 #define DELAY_MS 1500
 #define DELAY_NEXT 3000
+
+#define WAIT_UNTIL_FINISH(x) while(!x)
 
 void PixelOutput(IMG_PIXEL_XY_RGB_888 *pPix)
 {
@@ -85,10 +96,34 @@ int main(void)
 	LATBbits.LATB15 = 0;
 	TRISBbits.TRISB15 = 0;
 /////////////////////////////////////////////////////////////////////////////
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+// Configure Oscillator to operate the device at 40Mhz
+// Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+	PLLFBD=38;					// M=40
+	CLKDIVbits.PLLPOST=0;		// N1=2
+	CLKDIVbits.PLLPRE=0;		// N2=2
+	OSCTUN=0;					// Tune FRC oscillator, if FRC is used
 
-#ifdef __PIC32MX__
+// Disable Watch Dog Timer
+	RCONbits.SWDTEN=0;
+
+
+// Clock switching to incorporate PLL
+	__builtin_write_OSCCONH(0x03);		// Initiate Clock Switch to Primary
+													// Oscillator with PLL (NOSC=0b011)
+	__builtin_write_OSCCONL(0x01);		// Start clock switching
+	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
+
+// Wait for PLL to lock
+	while(OSCCONbits.LOCK!=1) {};
+#elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());	
+#endif
+
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+	AD1PCFGL = 0xffff;
 #endif
 
     InitGraph();
@@ -109,13 +144,13 @@ int main(void)
     Y = (GetMaxY()+1-(3*bTextHeight))/2;
     SetColor(LIGHTRED);
     X = GetMaxX()+1-GetTextWidth("Welcome to the demo", (void*)&GOLFontDefault);
-    OutTextXY(X/2, Y, "Welcome to the demo");
+    WAIT_UNTIL_FINISH(OutTextXY(X/2, Y, "Welcome to the demo"));
     DelayMs(DELAY_MS/3);
     X = GetMaxX()+1-GetTextWidth("of", (void*)&GOLFontDefault);
-    OutTextXY(X/2, Y + bTextHeight, "of");
+    WAIT_UNTIL_FINISH(OutTextXY(X/2, Y + bTextHeight, "of"));
     DelayMs(DELAY_MS/3);
     X = GetMaxX()+1-GetTextWidth("Image Decoding Library", (void*)&GOLFontDefault);
-    OutTextXY(X/2, Y + 2*bTextHeight, "Image Decoding Library");
+    WAIT_UNTIL_FINISH(OutTextXY(X/2, Y + 2*bTextHeight, "Image Decoding Library"));
     DelayMs(DELAY_NEXT);
 
     while(1)
@@ -123,13 +158,13 @@ int main(void)
         SetColor(BLACK);
         ClearDevice();
         SetColor(LIGHTRED);
-        OutTextXY(0, 0, "1. Full screen decoding of");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 0, "1. Full screen decoding of"));
         DelayMs(DELAY_MS);
         SetColor(YELLOW);
-        OutTextXY(0, bTextHeight + 2, "MchpIcon.bmp");
+        WAIT_UNTIL_FINISH(OutTextXY(0, bTextHeight + 2, "MchpIcon.bmp"));
         DelayMs(DELAY_MS);
         SetColor(WHITE);
-        OutTextXY(0, 240 - 1*(bTextHeight + 2), "(w/o Double Buffering)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 1*(bTextHeight + 2), "(w/o Double Buffering)"));
         DelayMs(DELAY_MS);
         ImageFullScreenDecode(FlashImage_fopen(MCHPICON_BMP), IMG_BMP, &FlashFileApi, PixelOutput);
         DelayMs(DELAY_NEXT);
@@ -137,16 +172,16 @@ int main(void)
         SetColor(BLACK);
         ClearDevice();
         SetColor(YELLOW);
-        OutTextXY(0, 240 - 4*(bTextHeight + 2), "2. Decoding of MchpIcon.bmp");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 4*(bTextHeight + 2), "2. Decoding of MchpIcon.bmp"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTRED);
-        OutTextXY(0, 240 - 3*(bTextHeight + 2), "Flags = 0");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 3*(bTextHeight + 2), "Flags = 0"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTBLUE);
-        OutTextXY(0, 240 - 2*(bTextHeight + 2), "Rect = (0, 0) to (320, 240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 2*(bTextHeight + 2), "Rect = (0, 0) to (320, 240)"));
         DelayMs(DELAY_MS);
         SetColor(WHITE);
-        OutTextXY(0, 240 - 1*(bTextHeight + 2), "(w/o Double Buffering)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 1*(bTextHeight + 2), "(w/o Double Buffering)"));
         DelayMs(DELAY_MS);
         ImageDecode(FlashImage_fopen(MCHPICON_BMP), IMG_BMP, 0, 0, 320, 240, 0, &FlashFileApi, PixelOutput);
         DelayMs(DELAY_NEXT);
@@ -154,19 +189,19 @@ int main(void)
         SetColor(BLACK);
         ClearDevice();
         SetColor(YELLOW);
-        OutTextXY(0, 240 - 5*(bTextHeight - 1), "3. Decoding of MchpLogo.jpg");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 5*(bTextHeight - 1), "3. Decoding of MchpLogo.jpg"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTRED);
-        OutTextXY(0, 240 - 4*(bTextHeight - 1), "Flags = 0");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 4*(bTextHeight - 1), "Flags = 0"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTBLUE);
-        OutTextXY(0, 240 - 3*(bTextHeight - 1), "Rect = (0, 0) to (320, 240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 3*(bTextHeight - 1), "Rect = (0, 0) to (320, 240)"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTGREEN);
-        OutTextXY(0, 240 - 2*(bTextHeight - 1), "(w/o Double Buffering)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 2*(bTextHeight - 1), "(w/o Double Buffering)"));
         DelayMs(DELAY_MS);
         SetColor(WHITE);
-        OutTextXY(0, 240 - 1*(bTextHeight - 1), "(Image is larger than 320x240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 1*(bTextHeight - 1), "(Image is larger than 320x240)"));
         DelayMs(DELAY_MS);
         ImageDecode(FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 0, 0, 320, 240, 0, &FlashFileApi, PixelOutput);
         DelayMs(DELAY_NEXT);
@@ -174,19 +209,19 @@ int main(void)
         SetColor(BLACK);
         ClearDevice();
         SetColor(YELLOW);
-        OutTextXY(0, 240 - 5*(bTextHeight + 2), "4. Decoding of MchpLogo.jpg");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 5*(bTextHeight + 2), "4. Decoding of MchpLogo.jpg"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTRED);
-        OutTextXY(0, 240 - 4*(bTextHeight + 2), "Flags = IMG_DOWN_SCALE");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 4*(bTextHeight + 2), "Flags = IMG_DOWN_SCALE"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTBLUE);
-        OutTextXY(0, 240 - 3*(bTextHeight + 2), "Rect = (0, 0) to (320, 240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 3*(bTextHeight + 2), "Rect = (0, 0) to (320, 240)"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTGREEN);
-        OutTextXY(0, 240 - 2*(bTextHeight + 2), "(w/o Double Buffering)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 2*(bTextHeight + 2), "(w/o Double Buffering)"));
         DelayMs(DELAY_MS);
         SetColor(WHITE);
-        OutTextXY(0, 240 - 1*(bTextHeight + 2), "(Image is larger than 320x240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 1*(bTextHeight + 2), "(Image is larger than 320x240)"));
         DelayMs(DELAY_MS);
         ImageDecode(FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 0, 0, 320, 240, IMG_DOWN_SCALE, &FlashFileApi, PixelOutput);
         DelayMs(DELAY_NEXT);
@@ -194,20 +229,20 @@ int main(void)
         SetColor(BLACK);
         ClearDevice();
         SetColor(YELLOW);
-        OutTextXY(0, 0, "5. Decoding of MchpLogo.jpg");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 0, "5. Decoding of MchpLogo.jpg"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTRED);
-        OutTextXY(0, bTextHeight + 2, "Flags = (IMG_DOWN_SCALE |");
-        OutTextXY(0, 2*(bTextHeight + 2), "IMG_ALIGN_CENTER)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, bTextHeight + 2, "Flags = (IMG_DOWN_SCALE |"));
+        WAIT_UNTIL_FINISH(OutTextXY(0, 2*(bTextHeight + 2), "IMG_ALIGN_CENTER)"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTBLUE);
-        OutTextXY(0, 240 - 3*(bTextHeight + 2), "Rect = (0, 0) to (320, 240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 3*(bTextHeight + 2), "Rect = (0, 0) to (320, 240)"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTGREEN);
-        OutTextXY(0, 240 - 2*(bTextHeight + 2), "(w/o Double Buffering)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 2*(bTextHeight + 2), "(w/o Double Buffering)"));
         DelayMs(DELAY_MS);
         SetColor(WHITE);
-        OutTextXY(0, 240 - 1*(bTextHeight + 2), "(Image is larger than 320x240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 1*(bTextHeight + 2), "(Image is larger than 320x240)"));
         DelayMs(DELAY_MS);
         ImageDecode(FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 0, 0, 320, 240, IMG_DOWN_SCALE | IMG_ALIGN_CENTER, &FlashFileApi, PixelOutput);
         DelayMs(DELAY_NEXT);
@@ -215,20 +250,20 @@ int main(void)
         SetColor(BLACK);
         ClearDevice();
         SetColor(YELLOW);
-        OutTextXY(0, 0, "6. Decoding of MchpLogo.jpg");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 0, "6. Decoding of MchpLogo.jpg"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTRED);
-        OutTextXY(0, bTextHeight + 2, "Flags = (IMG_DOWN_SCALE |");
-        OutTextXY(0, 2*(bTextHeight + 2), "IMG_ALIGN_CENTER)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, bTextHeight + 2, "Flags = (IMG_DOWN_SCALE |"));
+        WAIT_UNTIL_FINISH(OutTextXY(0, 2*(bTextHeight + 2), "IMG_ALIGN_CENTER)"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTBLUE);
-        OutTextXY(0, 3*(bTextHeight + 2), "Rect = (160, 120) to (320, 240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 3*(bTextHeight + 2), "Rect = (160, 120) to (320, 240)"));
         DelayMs(DELAY_MS);
         SetColor(LIGHTGREEN);
-        OutTextXY(0, 4*(bTextHeight + 2), "(w/o Double Buffering)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 4*(bTextHeight + 2), "(w/o Double Buffering)"));
         DelayMs(DELAY_MS);
         SetColor(WHITE);
-        OutTextXY(0, 240 - (bTextHeight + 2), "(Image is larger than 320x240)");
+        WAIT_UNTIL_FINISH(OutTextXY(0, 240 - (bTextHeight + 2), "(Image is larger than 320x240)"));
         DelayMs(DELAY_MS);
         ImageDecode(FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 160, 120, 160, 120, IMG_DOWN_SCALE | IMG_ALIGN_CENTER, &FlashFileApi, PixelOutput);
         DelayMs(DELAY_NEXT);

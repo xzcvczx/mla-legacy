@@ -86,7 +86,13 @@ KO          15-Oct-2007 First release
     #define ADC_READING_POTENTIOMETER   ADC1BUF1     
     #define ADC_READING_TEMPERATURE     ADC1BUF0
     #define ADC_READING_VBUS            ADC1BUF2
-    #define SCAN_MASK                   0x0130      // Mask for AN4, AN5, and AN8
+    #if defined(__PIC24FJ256GB110__)
+        #define SCAN_MASK                   0x0130      // Mask for AN4, AN5, and AN8
+    #elif defined(__PIC24FJ64GB004__)
+        #define SCAN_MASK                   0x01C0      // Mask for AN6, AN7, and AN8
+    #else
+        #error "Device not supported.  Please add support."
+    #endif
 #elif defined( __PIC32MX__ )
     #define ADC_READING_POTENTIOMETER   ADC1BUF0
     #define ADC_READING_TEMPERATURE     ADC1BUF1
@@ -101,7 +107,7 @@ KO          15-Oct-2007 First release
 #define MAX_COMMAND_LENGTH              50
 #define MAX_LOG_BUFFER_SIZE             MEDIA_SECTOR_SIZE
 #define NUM_LOG_BUFFERS                 2
-#define VERSION                         "v1.01"
+#define VERSION                         "v1.02"
 
 // RTCC Format Correlation Constants
 // The 16-bit and 32-bit architectures use two different formats for the RTCC.
@@ -178,8 +184,7 @@ KO          15-Oct-2007 First release
 #if defined(__C30__)
     #define PLL_96MHZ_OFF   0xFFFF
     #define PLL_96MHZ_ON    0xF7FF
-    
-    
+
     // Configuration Bit settings  for an Explorer 16 with USB PICtail Plus
     //      Primary Oscillator:             HS
     //      Internal USB 3.3v Regulator:    Disabled
@@ -201,6 +206,11 @@ KO          15-Oct-2007 First release
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
+    #elif defined(__PIC24FJ64GB004__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__PIC24FJ256GB106__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
@@ -394,6 +404,13 @@ typedef struct _OLD_COMMANDS
 #endif
 
 
+typedef struct 
+{
+    WORD        vid;
+    WORD        pid;
+} THUMB_DRIVE_ID;
+
+    
 typedef struct _VOLUME_INFO
 {
     char        label[12];
@@ -493,6 +510,11 @@ void    WriteOneBuffer( FSFILE *fptr, BYTE *data, WORD size );
         #error No time structure defined
     #endif
 
+    // These thumb drives appear to have electrical issues that makes their
+    // operation at full speed marginal.
+    THUMB_DRIVE_ID      problemThumbDrives[] = { {0x0930, 0x6545} };
+    #define PROBLEM_THUMB_DRIVE_COUNT   (sizeof(problemThumbDrives) / sizeof(THUMB_DRIVE_ID))
+    
 #endif
 
 //******************************************************************************
@@ -529,6 +551,35 @@ int main (void)
             CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
 
             TRISD = 0x00C0;
+
+       #elif defined(__PIC24FJ64GB004__)
+            OSCCON = 0x3302;    // Enable secondary oscillator
+            CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
+
+        	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+        	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+        	//This allows the device to power up at a lower initial operating frequency, which can be
+        	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+        	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+        	//power up the PLL.
+            {
+                unsigned int pll_startup_counter = 6000;
+                CLKDIVbits.PLLEN = 1;
+                while(pll_startup_counter--);
+            }
+        
+            //Device switches over automatically to PLL output after PLL is locked and ready.
+        
+            // PPS - Configure U2RX - put on RC3/pin 36 (RP19)
+            RPINR19bits.U2RXR = 19;
+    
+            // PPS - Configure U2TX - put on RC9/pin 5 (RP25)
+            RPOR12bits.RP25R = 5;
+
+            TRISCbits.TRISC9 = 0;
+
+            AD1PCFG = 0xFFFF;   // Set analog pins to digital.
+
         #elif defined(__PIC32MX__)
         
             #if defined(RUN_AT_60MHZ)
@@ -723,15 +774,15 @@ int main (void)
                                     }
                                     else
                                     {
-                                        BYTE    charsRead;
-                                        BYTE    readBuffer[COPY_BUFFER_SIZE];
+                                        WORD    charsRead;
+                                        // We will use one of the log buffers to save stack space
 
                                         while (!FSfeof( filePointer1 ))
                                         {
-                                            charsRead = FSfread( readBuffer, 1, COPY_BUFFER_SIZE, filePointer1 );
+                                            charsRead = FSfread( (BYTE *)logData[0].buffer, 1, COPY_BUFFER_SIZE, filePointer1 );
                                             if (charsRead)
                                             {
-                                                if (FSfwrite( readBuffer, 1, charsRead, filePointer2) != charsRead)
+                                                if (FSfwrite( (BYTE *)logData[0].buffer, 1, charsRead, filePointer2) != charsRead)
                                                 {
                                                     PrintString( " - Error writing file\r\n" );
                                                     break;
@@ -1351,7 +1402,7 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
                 }
                 else
                 {
-                PrintString( "\r\n***** USB Error - device requires too much current *****\r\n" );
+                    PrintString( "\r\n***** USB Error - device requires too much current *****\r\n" );
                     RedoCommandPrompt();
                 }
                 break;
@@ -1363,13 +1414,13 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
                 break;
 
             case EVENT_HUB_ATTACH:
-            PrintString( "\r\n***** USB Error - hubs are not supported *****\r\n" );
+                PrintString( "\r\n***** USB Error - hubs are not supported *****\r\n" );
                 RedoCommandPrompt();
                 return TRUE;
                 break;
 
             case EVENT_UNSUPPORTED_DEVICE:
-            PrintString( "\r\n***** USB Error - device is not supported *****\r\n" );
+                PrintString( "\r\n***** USB Error - device is not supported *****\r\n" );
                 UART2PrintString( "   If the device is a thumb drive, it probably uses a\r\n" );
                 UART2PrintString( "   transport protocol other than SCSI, such as SFF-8070i.\r\n" );
                 RedoCommandPrompt();
@@ -1377,25 +1428,25 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
                 break;
 
             case EVENT_CANNOT_ENUMERATE:
-            PrintString( "\r\n***** USB Error - cannot enumerate device *****\r\n" );
+                PrintString( "\r\n***** USB Error - cannot enumerate device *****\r\n" );
                 RedoCommandPrompt();
                 return TRUE;
                 break;
 
             case EVENT_CLIENT_INIT_ERROR:
-            PrintString( "\r\n***** USB Error - client driver initialization error *****\r\n" );
+                PrintString( "\r\n***** USB Error - client driver initialization error *****\r\n" );
                 RedoCommandPrompt();
                 return TRUE;
                 break;
 
             case EVENT_OUT_OF_MEMORY:
-            PrintString( "\r\n***** USB Error - out of heap memory *****\r\n" );
+                PrintString( "\r\n***** USB Error - out of heap memory *****\r\n" );
                 RedoCommandPrompt();
                 return TRUE;
                 break;
 
             case EVENT_UNSPECIFIED_ERROR:   // This should never be generated.
-            PrintString( "\r\n***** USB Error - unspecified *****\r\n" );
+                PrintString( "\r\n***** USB Error - unspecified *****\r\n" );
                 RedoCommandPrompt();
                 return TRUE;
                 break;
@@ -1924,17 +1975,17 @@ void InitializeAnalogMonitor( void )
 {
     // Set up the A/D converter
     #if defined( __C30__ )
-    AD1PCFGL    &= ~SCAN_MASK; // Disable digital input on AN4, AN5, AN8
-    AD1CSSL     = SCAN_MASK;    // Scan AN4, AN5, AN8
-    AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 5*Tcy
-    AD1CON2     = 0x040C;       // Scan inputs, 3 conversions per interrupt, MUX A only
-    AD1CON1     = 0x8046;       // Turn on, start sampling, convert on Timer 3
+	    AD1PCFGL    &= ~SCAN_MASK; // Disable digital input on AN4, AN5, AN8
+	    AD1CSSL     = SCAN_MASK;    // Scan AN4, AN5, AN8
+	    AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 5*Tcy
+	    AD1CON2     = 0x040C;       // Scan inputs, 3 conversions per interrupt, MUX A only
+	    AD1CON1     = 0x8046;       // Turn on, start sampling, convert on Timer 3
     #elif defined( __PIC32MX__ )
-    AD1PCFG     &= ~SCAN_MASK;  // Disable digital input on AN4, AN5, AN8
-    AD1CSSL     = SCAN_MASK;    // Scan AN4, AN5, AN8
-    AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 5*Tcy
-    AD1CON2     = 0x0408;       // Scan inputs, 3 conversions per interrupt, MUX A only
-    AD1CON1     = 0x8046;       // Turn on, start sampling, convert on Timer 3
+	    AD1PCFG     &= ~SCAN_MASK;  // Disable digital input on AN4, AN5, AN8
+	    AD1CSSL     = SCAN_MASK;    // Scan AN4, AN5, AN8
+	    AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 5*Tcy
+	    AD1CON2     = 0x0408;       // Scan inputs, 3 conversions per interrupt, MUX A only
+	    AD1CON1     = 0x8046;       // Turn on, start sampling, convert on Timer 3
     #endif
 
     // Enable A/D interrupts
@@ -2017,16 +2068,36 @@ void MonitorMedia( void )
                 }
                 else
                 {
-                    loggerStatus.mediaPresent = TRUE;
-
-                    // Find the volume label.  We need to do this here while we are at the
-                    // root directory.
-                    if (!FindFirst( "*.*", ATTR_VOLUME, &searchRecord ))
+                    int                     i;
+                    USB_DEVICE_DESCRIPTOR   *pDescriptor;
+                    
+                    pDescriptor = (USB_DEVICE_DESCRIPTOR *)USBHostGetDeviceDescriptor( 1 );
+                    i = 0;
+                    while ((i<PROBLEM_THUMB_DRIVE_COUNT) && 
+                           (pDescriptor->idVendor != problemThumbDrives[i].vid) && (pDescriptor->idProduct != problemThumbDrives[i].pid))
                     {
-                        strcpy( volume.label, searchRecord.filename );
-                        volume.valid = TRUE;
+                        i++;
                     }
-
+                    
+                    if (i < PROBLEM_THUMB_DRIVE_COUNT)
+                    {    
+                        UART2PrintString( "\r\nThis thumb drive is not supported. Please replace with a different model.\r\n" );
+                        loggerStatus.mediaPresent       = FALSE;
+                        loggerStatus.cannotInitialize   = TRUE;
+                    }
+                    else
+                    {
+                        loggerStatus.mediaPresent = TRUE;
+    
+                        // Find the volume label.  We need to do this here while we are at the
+                        // root directory.
+                        if (!FindFirst( "*.*", ATTR_VOLUME, &searchRecord ))
+                        {
+                            strcpy( volume.label, searchRecord.filename );
+                            volume.valid = TRUE;
+                        }
+                    }
+                                        
                     RedoCommandPrompt();
                 }
             }
@@ -2257,7 +2328,7 @@ void MonitorVBUS( void )
         if (loggerStatus.overcurrentStateUSB)
         {
             USBHostVbusEvent( EVENT_VBUS_POWER_AVAILABLE, USB_ROOT_HUB, 0 );
-                PrintString( "\r\n***** USB overcurrent condition removed *****\r\n" );
+            PrintString( "\r\n***** USB overcurrent condition removed *****\r\n" );
             RedoCommandPrompt();
         }
         loggerStatus.overcurrentStateUSB    = FALSE;

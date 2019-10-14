@@ -78,6 +78,8 @@
 void InitHWData(void);								// initialize string struct arrays
 void AnimateText(BYTE inc);							// refresh the string function
 
+#define WAIT_UNTIL_FINISH(x) while(!x)
+
 /////////////////////////////////////////////////////////////////////////////
 //                            FONTS USED
 /////////////////////////////////////////////////////////////////////////////
@@ -140,7 +142,7 @@ void CreateMultiFontsDemo(void)
 	// we need this since Static cannot have an uninitialized pointer to text
 	// plus we need the static text area but we are only using it as a place
 	// holder for the text that we will overwrite on the static text area
-	static XCHAR *pDummy = " ";				
+	static XCHAR spaceChar[2] = {0x20,0};				
 		
   	GOLFree();   // free memory for the objects in the previous linked list and start new list
 
@@ -151,7 +153,7 @@ void CreateMultiFontsDemo(void)
     SetColor(RGB565CONVERT(0x4C, 0x8E, 0xFF));
     for (j = 5; j <= GetMaxY(); j+=16) {
 	    for (i = 5; i <= GetMaxX(); i+=16) {
-		    Bar(i, j, i+3, j+3);
+		    WAIT_UNTIL_FINISH(Bar(i, j, i+3, j+3));
 		}
 	}
 	InitHWData();    		
@@ -164,7 +166,7 @@ void CreateMultiFontsDemo(void)
 	StCreate(	ID_STXT, 
 			 	STXXPOS, STXYPOS, STXXPOS+STXWIDTH, STXYPOS+STXHEIGHT, 
 			    ST_DRAW|ST_FRAME, 
-			    pDummy, 
+			    (void*)&spaceChar, 
 			    FontScheme2);
 	
 	CreateCtrlButtons(ExitStr, LeftArrowStr, NULL, RightArrowStr);
@@ -226,13 +228,13 @@ void AnimateText(BYTE mov)
     	// remove the old position of the character
 		SetColor(FontScheme2->CommonBkColor);
 		MoveTo(oldX,oldY);
-        OutChar(NewChar);
+        WAIT_UNTIL_FINISH(OutChar(NewChar));
         oldX = GetX();
         oldY = GetY();
     	// display the character in the new position
 		SetColor(BRIGHTBLUE);
 		MoveTo(newX,newY);
-        OutChar(NewChar);
+        WAIT_UNTIL_FINISH(OutChar(NewChar));
         newX = GetX();
         newY = GetY();
    	}	
@@ -393,6 +395,7 @@ void InitHWData(void)
 		}
 	}
 	pHWData = &HWLang[0];
+
 }	
 
 

@@ -99,11 +99,57 @@ Description:
 
  *************************************************************************/
 
-//#if !defined(USB_HAL_PIC32_H)
+#if !defined(USB_HAL_PIC32_H)
+#define USB_HAL_PIC32_H
+
+// Buffer Descriptor Status Register layout.
+typedef union __attribute__ ((packed)) _BD_STAT 
+{
+    struct __attribute__ ((packed)){
+        unsigned            :2;
+        unsigned    BSTALL  :1;     //Buffer Stall Enable
+        unsigned    DTSEN   :1;     //Data Toggle Synch Enable
+        unsigned            :2;     //Reserved - write as 00
+        unsigned    DTS     :1;     //Data Toggle Synch Value
+        unsigned    UOWN    :1;     //USB Ownership
+    };
+    struct __attribute__ ((packed)){
+        unsigned            :2;
+        unsigned    PID0    :1;
+        unsigned    PID1    :1;
+        unsigned    PID2    :1;
+        unsigned    PID3    :1;
+
+    };
+    struct __attribute__ ((packed)){
+        unsigned            :2;
+        unsigned    PID     :4;         //Packet Identifier
+    };
+    WORD           Val;
+} BD_STAT;
+
+// BDT Entry Layout
+typedef union __attribute__ ((packed))__BDT
+{
+    struct __attribute__ ((packed))
+    {
+        BD_STAT     STAT;
+        WORD       CNT:10;
+        BYTE*       ADR;                      //Buffer Address
+    };
+    struct __attribute__ ((packed))
+    {
+        DWORD       res  :16;
+        DWORD       count:10;
+    };
+    DWORD           w[2];
+    WORD            v[4];
+    QWORD           Val;
+} BDT_ENTRY;
+
 #if defined(USB_SUPPORT_DEVICE) | defined(USB_SUPPORT_OTG)
 #include "Compiler.h"
 
-#define USB_HAL_PIC32_H
 
 #define USBSetBDTAddress(addr)         U1BDTP1 = (((unsigned int)addr)/256);
 #define USBPowerModule() U1PWRCbits.USBPWR = 1;
@@ -178,50 +224,6 @@ Description:
 
 #define _STAT_MASK  0xFC
 
-// Buffer Descriptor Status Register layout.
-typedef union __attribute__ ((packed)) _BD_STAT 
-{
-    struct __attribute__ ((packed)){
-        unsigned            :2;
-        unsigned    BSTALL  :1;     //Buffer Stall Enable
-        unsigned    DTSEN   :1;     //Data Toggle Synch Enable
-        unsigned            :2;     //Reserved - write as 00
-        unsigned    DTS     :1;     //Data Toggle Synch Value
-        unsigned    UOWN    :1;     //USB Ownership
-    };
-    struct __attribute__ ((packed)){
-        unsigned            :2;
-        unsigned    PID0    :1;
-        unsigned    PID1    :1;
-        unsigned    PID2    :1;
-        unsigned    PID3    :1;
-
-    };
-    struct __attribute__ ((packed)){
-        unsigned            :2;
-        unsigned    PID     :4;         //Packet Identifier
-    };
-    WORD           Val;
-} BD_STAT;
-
-// BDT Entry Layout
-typedef union __attribute__ ((packed))__BDT
-{
-    struct __attribute__ ((packed))
-    {
-        BD_STAT     STAT;
-        WORD       CNT:10;
-        BYTE*       ADR;                      //Buffer Address
-    };
-    struct __attribute__ ((packed))
-    {
-        DWORD       res  :16;
-        DWORD       count:10;
-    };
-    DWORD           w[2];
-    WORD            v[4];
-    QWORD           Val;
-} BDT_ENTRY;
 
 
 #define USTAT_EP0_PP_MASK   ~0x04
@@ -241,7 +243,6 @@ typedef union
 } _UEP;
 
 #define UEP_STALL 0x0002
-#define USB_VOLATILE
 
 typedef union _POINTER
 {
@@ -286,10 +287,9 @@ typedef union _POINTER
 #define USB_FULL_SPEED 0x00
 //USB_LOW_SPEED not currently supported in PIC24F USB products
 
-//#define USB_PING_PONG__NO_PING_PONG         0x00    //0b00
-//#define USB_PING_PONG__EP0_OUT_ONLY         0x01    //0b01
-#define USB_PING_PONG__FULL_PING_PONG       0x02    //0b10
-//#define USB_PING_PONG__ALL_BUT_EP0          0x03    //0b11
+#if(USB_PING_PONG_MODE != USB_PING_PONG__FULL_PING_PONG)
+    #error "Unsupported ping pong mode for this device"
+#endif
 
 #define ConvertToPhysicalAddress(a) KVA_TO_PA(a)
 
@@ -331,7 +331,7 @@ typedef union _POINTER
 #endif
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
-#define USBEnableInterrupts() {U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT; IEC1bits.USBIE = 1;IPC11CLR=0x0000FF00;IPC11SET=0x00001000;INTEnableSystemMultiVectoredInt(); INTEnableInterrupts();}
+#define USBEnableInterrupts() {IEC1bits.USBIE = 1;IPC11CLR=0x0000FF00;IPC11SET=0x00001000;INTEnableSystemMultiVectoredInt(); INTEnableInterrupts();}
 #if defined(USB_INTERRUPT)
     #define USBMaskInterrupts() {IEC1bits.USBIE = 0;}
     #define USBUnmaskInterrupts() {IEC1bits.USBIE = 1;}
@@ -341,3 +341,5 @@ typedef union _POINTER
 #endif
 
 #endif
+
+#endif  //USB_HAL_PIC32_H

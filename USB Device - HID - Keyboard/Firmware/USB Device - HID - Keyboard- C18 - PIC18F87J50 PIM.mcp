@@ -6,9 +6,9 @@ device=PIC18F87J50
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
 dir_bin=
-dir_tmp=.\Objects\USB Device - HID Keyboard - C18 - PICDEM FSUSB
+dir_tmp=.\Objects\USB Device - HID Keyboard - C18
 dir_sin=
-dir_inc=C:\MCC18\h;..\..\Include;..\..\..\Include;..\..\Microchip\Include;..\..\USB Device - HID - Keyboard\Firmware;..\..\..\USB Device - HID - Keyboard\Firmware
+dir_inc=C:\MCC18\h;..\..\Microchip\Include;..\..\USB Device - HID - Keyboard\Firmware
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

@@ -2,7 +2,7 @@
  FileName:     	HardwareProfile - PIC24FJ256GB110 PIM.h
  Dependencies:  See INCLUDES section
  Processor:     PIC24FJ256GB110
- Hardware:      PIC24F Starter Kit
+ Hardware:      PIC24FJ256GB110 PIM
  Compiler:      Microchip C30
  Company:       Microchip Technology, Inc.
 

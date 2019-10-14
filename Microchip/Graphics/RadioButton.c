@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        RadioButton.c
  * Dependencies:    Graphics.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -305,10 +305,8 @@ WORD faceClr;
 
         case REMOVE:
             if(GetState(pRb,(RB_HIDE|RB_DRAW))){
-                if(IsDeviceBusy())
-                    return 0;
                	SetColor(pRb->hdr.pGolScheme->CommonBkColor);
-                Bar(pRb->hdr.left,pRb->hdr.top,pRb->hdr.right,pRb->hdr.bottom);
+                if(!Bar(pRb->hdr.left,pRb->hdr.top,pRb->hdr.right,pRb->hdr.bottom)) return 0;
             }
             if(GetState(pRb,RB_HIDE))
                 return 1;
@@ -411,8 +409,9 @@ rb_draw_check:
                     SetColor(pRb->hdr.pGolScheme->CommonBkColor);
                 }
     	        SetLineType(FOCUS_LINE);
-		        Rectangle(pRb->hdr.left, pRb->hdr.top,
-                          pRb->hdr.right, pRb->hdr.bottom);
+		        if(!Rectangle(pRb->hdr.left, pRb->hdr.top,
+                          pRb->hdr.right, pRb->hdr.bottom))
+                          return 0;
 		        SetLineType(SOLID_LINE);
 	        }
 

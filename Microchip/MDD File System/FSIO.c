@@ -303,7 +303,7 @@ DWORD GetFullClusterNumber(DIRENTRY entry);
     The FSerrno variable will be changed.
   Description:
     Initializes the static or dynamic memory slots for holding file
-    structures.  Initializes the device with the DISKmount function. Loads 
+    structures.  Initializes the device with the DISKmount function. Loads
     MBR and boot sector information.  Initializes the current working
     directory to the root directory for the device if directory support
     is enabled.
@@ -367,11 +367,11 @@ int FSInit(void)
     foDest -       FSFILE object containing information of the file found
     foCompareTo -  FSFILE object containing the name/attr of the file to be
                    found
-    cmd -          
-        -          LOOK_FOR_EMPTY_ENTRY: Search for empty entry. 
+    cmd -
+        -          LOOK_FOR_EMPTY_ENTRY: Search for empty entry.
         -          LOOK_FOR_MATCHING_ENTRY: Search for matching entry.
-    mode -         
-         -         0: Match file exactly with default attributes. 
+    mode -
+         -         0: Match file exactly with default attributes.
          -         1: Match file to user-specified attributes.
   Return Values:
     CE_GOOD -            File found.
@@ -382,15 +382,15 @@ int FSInit(void)
     The FILEfind function will sequentially cache directory entries within
     the current working directory into the foDest FSFILE object.  If the cmd
     parameter is specified as LOOK_FOR_EMPTY_ENTRY the search will continue
-    until an empty directory entry is found. If the cmd parameter is specified 
-    as LOOK_FOR_MATCHING_ENTRY these entries will be compared to the foCompareTo 
-    object until a match is found or there are no more entries in the current 
-    working directory. If the mode is specified a '0' the attributes of the FSFILE 
-    entries are irrelevant. If the mode is specified as '1' the attributes of the 
-    foDest entry must match the attributes specified in the foCompareTo file and 
+    until an empty directory entry is found. If the cmd parameter is specified
+    as LOOK_FOR_MATCHING_ENTRY these entries will be compared to the foCompareTo
+    object until a match is found or there are no more entries in the current
+    working directory. If the mode is specified a '0' the attributes of the FSFILE
+    entries are irrelevant. If the mode is specified as '1' the attributes of the
+    foDest entry must match the attributes specified in the foCompareTo file and
     partial string search characters may bypass portions of the comparison.
   Remarks:
-    None                                                                         
+    None
   ********************************************************************************/
 
 CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
@@ -559,9 +559,9 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
          -     READ -   Read data from an existing file
          -     APPEND - Append data to an existing file
   Return Values:
-    CE_GOOD -            FILEopen successful 
-    CE_NOT_INIT -        Device is not yet initialized 
-    CE_FILE_NOT_FOUND -  Could not find the file on the device 
+    CE_GOOD -            FILEopen successful
+    CE_NOT_INIT -        Device is not yet initialized
+    CE_FILE_NOT_FOUND -  Could not find the file on the device
     CE_BAD_SECTOR_READ - A bad read of a sector occured
   Side Effects:
     None
@@ -569,7 +569,7 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
     This function will cache a directory entry in the directory specified
     by the dirclus parameter of hte FSFILE object 'fo.'  The offset of the
     entry in the directory is specified by fHandle.  Once the directory entry
-    has been loaded, the first sector of the file can be loaded using the 
+    has been loaded, the first sector of the file can be loaded using the
     cluster value specified in the directory entry. The type argument will
     specify the mode the files will be opened in.  This will allow this
     function to set the correct read/write flags for the file.
@@ -584,7 +584,7 @@ CETYPE FILEopen (FILEOBJ fo, WORD *fHandle, char type)
     BYTE    r;               //Result of search for file
     DWORD    l;               //lba of first sector of first cluster
     CETYPE    error = CE_GOOD;
-    
+
     dsk = (DISK *)(fo->dsk);
     if (dsk->mount == FALSE)
     {
@@ -626,7 +626,7 @@ CETYPE FILEopen (FILEOBJ fo, WORD *fHandle, char type)
             fo->ccls = fo->cluster;     // first cluster
             fo->sec = 0;                // first sector in the cluster
             fo->pos = 0;                // first byte in sector/cluster
-            
+
             if  ( r == NOT_FOUND)
             {
                 error = CE_FILE_NOT_FOUND;
@@ -683,8 +683,8 @@ CETYPE FILEopen (FILEOBJ fo, WORD *fHandle, char type)
     fo - The file to get the next cluster of
     n -  Number of links in the FAT cluster chain to jump through
   Return Values:
-    CE_GOOD - Operation successful 
-    CE_BAD_SECTOR_READ - A bad read occured of a sector 
+    CE_GOOD - Operation successful
+    CE_BAD_SECTOR_READ - A bad read occured of a sector
     CE_INVALID_CLUSTER - Invalid cluster value \> maxcls
     CE_FAT_EOF - Fat attempt to read beyond EOF
   Side Effects:
@@ -696,7 +696,7 @@ CETYPE FILEopen (FILEOBJ fo, WORD *fHandle, char type)
     a file, or if the device tries to read beyond the last cluster used
     by the device.
   Remarks:
-    None                                                                  
+    None
   *************************************************************************/
 
 BYTE FILEget_next_cluster(FILEOBJ fo, DWORD n)
@@ -704,9 +704,9 @@ BYTE FILEget_next_cluster(FILEOBJ fo, DWORD n)
     DWORD         c, c2, ClusterFailValue, LastClustervalue;
     BYTE          error = CE_GOOD;
     DISK *      disk;
-    
+
     disk = fo->dsk;
-    
+
     /* Settings based on FAT type */
     switch (disk->type)
     {
@@ -769,9 +769,9 @@ BYTE FILEget_next_cluster(FILEOBJ fo, DWORD n)
   Input:
     dsk -  The disk structure to be initialized.
   Return Values:
-    CE_GOOD -       Disk mounted 
+    CE_GOOD -       Disk mounted
     CE_INIT_ERROR - Initialization error has occured
-    CE_UNSUPPORTED_SECTOR_SIZE - Media sector size does not equal 
+    CE_UNSUPPORTED_SECTOR_SIZE - Media sector size does not equal
                 MEDIA_SECTOR_SIZE as defined in FSconfig.h.
   Side Effects:
     None
@@ -783,7 +783,7 @@ BYTE FILEget_next_cluster(FILEOBJ fo, DWORD n)
     These two functions will be used to initialize a global DISK structure
     that will be used when accessing file information in the future.
   Remarks:
-    None                                                                   
+    None
   **************************************************************************/
 
 BYTE DISKmount( DISK *dsk)
@@ -814,7 +814,7 @@ BYTE DISKmount( DISK *dsk)
                 return error;
             }
         }
-                
+
         // Load the Master Boot Record (partition)
         if((error = LoadMBR(dsk)) == CE_GOOD)
         {
@@ -839,8 +839,8 @@ BYTE DISKmount( DISK *dsk)
   Input:
     dsk -  The disk containing the master boot record to be loaded
   Return Values:
-    CE_GOOD -            MBR loaded successfully 
-    CE_BAD_SECTOR_READ - A bad read occured of a sector 
+    CE_GOOD -            MBR loaded successfully
+    CE_BAD_SECTOR_READ - A bad read occured of a sector
     CE_BAD_PARTITION -   The boot record is bad
   Side Effects:
     None
@@ -856,7 +856,7 @@ BYTE DISKmount( DISK *dsk)
     location of the boot sector will be loaded from the MBR into
     the DISK structure pointed to by 'dsk.'
   Remarks:
-    None                                                             
+    None
   ********************************************************************/
 
 BYTE LoadMBR(DISK *dsk)
@@ -920,7 +920,7 @@ BYTE LoadMBR(DISK *dsk)
                     dsk->type = FAT32;
                     return CE_GOOD;
                 }
-            }    
+            }
         }
         // assign it the partition table strucutre
         Partition = (PT_MBR)dsk->buffer;
@@ -985,8 +985,8 @@ BYTE LoadMBR(DISK *dsk)
   Input:
     dsk -  The disk containing the boot sector
   Return Values:
-    CE_GOOD -                    Boot sector loaded 
-    CE_BAD_SECTOR_READ -         A bad read occured of a sector 
+    CE_GOOD -                    Boot sector loaded
+    CE_BAD_SECTOR_READ -         A bad read occured of a sector
     CE_NOT_FORMATTED -           The disk is of an unsupported format
     CE_CARDFAT32 -               FAT 32 device not supported
     CE_UNSUPPORTED_SECTOR_SIZE - The sector size is not supported
@@ -999,7 +999,7 @@ BYTE LoadMBR(DISK *dsk)
     partition information will be calcualted from it and copied into the DISK
     structure pointed to by 'dsk.'
   Remarks:
-    None                                                                   
+    None
   **************************************************************************/
 
 
@@ -1068,7 +1068,7 @@ BYTE LoadBootSector(DISK *dsk)
                 // Calculate the number of sectors in the root (will be 0 for FAT32)
                 RootDirSectors = ((BSec->FAT.FAT_16.BootSec_RootDirEnts * 32) + (BSec->FAT.FAT_16.BootSec_BPS - 1)) / BSec->FAT.FAT_16.BootSec_BPS;
                 // Calculate the number of data sectors on the card
-                DataSec = TotSec - (dsk->root + RootDirSectors) + dsk->firsts + 2;
+                DataSec = TotSec - (dsk->root + RootDirSectors);
                 // Calculate the maximum number of clusters on the card
                 dsk->maxcls = DataSec / dsk->SecPerClus;
 
@@ -1107,7 +1107,7 @@ BYTE LoadBootSector(DISK *dsk)
                 // Calculate the number of sectors in the root (will be 0 for FAT32)
                 RootDirSectors = ((dsk->maxroot * NUMBER_OF_BYTES_IN_DIR_ENTRY) + (BytesPerSec - 1)) / BytesPerSec;
                 // Calculate the number of data sectors on the card
-                DataSec = TotSec - (ReservedSectorCount + (dsk->fatcopy * dsk->fatsize )  + RootDirSectors );
+                DataSec = TotSec - (ReservedSectorCount + (dsk->fatcopy * dsk->fatsize )  + RootDirSectors);
                 // Calculate the maximum number of clusters on the card
                 dsk->maxcls = DataSec / dsk->SecPerClus;
 
@@ -1186,7 +1186,7 @@ BYTE LoadBootSector(DISK *dsk)
     values of a file from a directory entry and copy them into a 32-bit
     cluster number variable, which will be returned.
   Remarks:
-    None                                                                  
+    None
   *************************************************************************/
 
 DWORD GetFullClusterNumber(DIRENTRY entry)
@@ -1228,7 +1228,7 @@ DWORD GetFullClusterNumber(DIRENTRY entry)
     EOF - MBR could not be created
   Side Effects:
     None
-  Description:  
+  Description:
     This function can be used to create a master boot record for a device.  Note
     that this function should not be used on a device that is already formatted
     with a master boot record (i.e. most SD cards, CF cards, USB keys).  This
@@ -1354,11 +1354,11 @@ int FSCreateMBR (unsigned long firstSector, unsigned long numSectors)
     values from the master boot record.  Once the boot sector has
     been successfully loaded/created, the locations of the FAT and
     root will be loaded from it, and they will be completely
-    erased.  If the user has specified a volumeID parameter, a 
+    erased.  If the user has specified a volumeID parameter, a
     VOLUME attribute entry will be created in the root directory
     to name the device.
   Remarks:
-    FAT12 and FAT16 formatting is supported.                        
+    FAT12 and FAT16 formatting is supported.
   *******************************************************************/
 
 int FSformat (char mode, long int serialNumber, char * volumeID)
@@ -1449,7 +1449,7 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
         // True: Rewrite the whole boot sector
         case 1:
             secCount = masterBootRecord->Partition0.PTE_NumSect;
-            
+
             if (secCount < 0x1039)
             {
                 disk->type = FAT12;
@@ -1478,7 +1478,7 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
 
                 // Prepare a boot sector
                 memset (gDataBuffer, 0x00, MEDIA_SECTOR_SIZE);
-                
+
                 // Last digit of file system name (FAT12   )
                 gDataBuffer[58] = '2';
             }
@@ -1510,7 +1510,7 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
 
                 // Prepare a boot sector
                 memset (gDataBuffer, 0x00, MEDIA_SECTOR_SIZE);
-                
+
                 // Last digit of file system name (FAT16   )
                 gDataBuffer[58] = '6';
             }
@@ -1615,7 +1615,7 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
 #endif
 
             disk->root = disk->fat + (disk->fatcopy * disk->fatsize);
-            
+
             if (MDD_SectorWrite (disk->firsts, gDataBuffer, FALSE) == FALSE)
             {
                 FSerrno = CE_WRITE_ERROR;
@@ -1713,7 +1713,7 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
     fo -        \File structure
     curEntry -  Write destination
   Return Values:
-    TRUE - Operation successful 
+    TRUE - Operation successful
     FALSE - Operation failed
   Side Effects:
     None
@@ -1726,7 +1726,7 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
     in the global data buffer (which should already
     contain the entries for that sector) to the device.
   Remarks:
-    None                                                
+    None
   *******************************************************/
 
 #ifdef ALLOW_WRITES
@@ -1737,14 +1737,14 @@ BYTE Write_File_Entry( FILEOBJ fo, WORD * curEntry)
     BYTE   offset2;
     DWORD   sector;
     DWORD   ccls;
-    
+
     dsk = fo->dsk;
-    
+
     // get the cluster of this entry
     ccls = fo->dirccls;
-    
+
      // figure out the offset from the base sector
-    offset2  = (*curEntry / (MEDIA_SECTOR_SIZE/32)); 
+    offset2  = (*curEntry / (MEDIA_SECTOR_SIZE/32));
 
     /* Settings based on FAT type */
     switch (dsk->type)
@@ -1766,7 +1766,7 @@ BYTE Write_File_Entry( FILEOBJ fo, WORD * curEntry)
 
     // Now write it
     // "Offset" ensures writing of data belonging to a file entry only. Hence it doesn't change other file entries.
-    if ( !MDD_SectorWrite( sector + offset2, dsk->buffer, FALSE)) 
+    if ( !MDD_SectorWrite( sector + offset2, dsk->buffer, FALSE))
         status = FALSE;
     else
         status = TRUE;
@@ -1795,9 +1795,9 @@ BYTE Write_File_Entry( FILEOBJ fo, WORD * curEntry)
     This function will parse through a cluster chain
     starting with the cluster pointed to by 'cluster' and
     mark all of the FAT entries as empty until the end of
-    the chain has been reached or an error occurs. 
+    the chain has been reached or an error occurs.
   Remarks:
-    None                                                   
+    None
   **********************************************************/
 
 #ifdef ALLOW_WRITES
@@ -1866,7 +1866,7 @@ BYTE FAT_erase_cluster_chain (DWORD cluster, DISK * dsk)
     }// cluster == 0
 
     WriteFAT (dsk, 0, 0, TRUE);
-    
+
     if(status == Exit)
         return(TRUE);
     else
@@ -1890,7 +1890,7 @@ BYTE FAT_erase_cluster_chain (DWORD cluster, DISK * dsk)
   Side Effects:
     Any unwritten data in the data buffer will be written to the device.
   Description:
-    Load the sector containing the file entry pointed to by 'curEntry' 
+    Load the sector containing the file entry pointed to by 'curEntry'
     from the directory pointed to by the variables in 'fo.'
   Remarks:
     Any modification of this function is extremely likely to
@@ -1914,8 +1914,8 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
     ccls = fo->dirccls;
 
      // figure out the offset from the base sector
-    offset2  = (*curEntry / (MEDIA_SECTOR_SIZE/32)); 
-    
+    offset2  = (*curEntry / (MEDIA_SECTOR_SIZE/32));
+
     offset2 = offset2; // emulator issue
 
     /* Settings based on FAT type */
@@ -1924,10 +1924,10 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
 #ifdef SUPPORT_FAT32 // If FAT32 supported.
         case FAT32:
             // the ROOT is always cluster based in FAT32
-            /* In FAT32: There is no ROOT region. Root etries are made in DATA region only. 
-            Every cluster of DATA which is accupied by ROOT is tracked by FAT table/entry so the ROOT can grow 
+            /* In FAT32: There is no ROOT region. Root etries are made in DATA region only.
+            Every cluster of DATA which is accupied by ROOT is tracked by FAT table/entry so the ROOT can grow
             to an amount which is restricted only by available free DATA region. */
-            offset2  = offset2 % (dsk->SecPerClus);   // figure out the offset 
+            offset2  = offset2 % (dsk->SecPerClus);   // figure out the offset
             LastClusterLimit = LAST_CLUSTER_FAT32;
             break;
 #endif
@@ -1958,25 +1958,25 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
                 // Otherwise just read the next sector
                 else
                     numofclus = 1;
-            
+
                 // move to the correct cluster
                 while(numofclus)
                 {
-                    ccls = ReadFAT(dsk, ccls);  
-                    
+                    ccls = ReadFAT(dsk, ccls);
+
                     if(ccls >= LastClusterLimit)
                         break;
-                    else          
+                    else
                         numofclus--;
                 }
-            }   
+            }
         }
 
         // see if that we have a valid cluster number
         if(ccls < LastClusterLimit)
         {
             fo->dirccls = ccls; // write it back
-            
+
             sector = Cluster2Sector(dsk,ccls);
 
             /* see if we are root and about to go pass our boundaries
@@ -2047,7 +2047,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
     new file will be located and allocated, and its value will be
     written into the file entry.
   Remarks:
-    None                                                                  
+    None
   *************************************************************************/
 
 #ifdef ALLOW_WRITES
@@ -2158,7 +2158,7 @@ CETYPE CreateFirstCluster(FILEOBJ fo)
     fo -       Pointer to file structure
     fHandle -  Start of entries
   Return Values:
-    TRUE - One found 
+    TRUE - One found
     FALSE - None found
   Side Effects:
     None
@@ -2168,7 +2168,7 @@ CETYPE CreateFirstCluster(FILEOBJ fo)
     then search through the entries until an unused one
     is found.  If the end of the cluster chain for the
     directory is reached, a new cluster will be allocated
-    to the directory (unless it's a FAT12 or FAT16 root) 
+    to the directory (unless it's a FAT12 or FAT16 root)
     and the first entry of the new cluster will be used.
   Remarks:
     None.
@@ -2202,10 +2202,10 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
             {
                 // Get the entry
                 dir = Cache_File_Entry( fo, fHandle, FALSE);
-                
+
                 // Read the first char of the file name
                 a = dir->DIR_Name[0];
-                
+
                 // increase number
                 (*fHandle)++;
             }while((a == DIR_DEL || a == DIR_EMPTY) && (dir != (DIRENTRY)NULL) &&  (++amountfound < 1));
@@ -2224,7 +2224,7 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
                     else
                     {
                         fo->ccls = b;
-                        
+
                         if(FILEallocate_new_cluster(fo, 1) == CE_DISK_FULL)
                             status = NO_MORE;
                         else
@@ -2237,7 +2237,7 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
                 else
                 {
                     fo->ccls = b;
-                    
+
                     if(FILEallocate_new_cluster(fo, 1) == CE_DISK_FULL)
                         status = NO_MORE;
                     else
@@ -2296,16 +2296,16 @@ BYTE PopulateEntries(FILEOBJ fo, char *name , WORD *fHandle, BYTE mode)
 {
     BYTE error = CE_GOOD;
     DIRENTRY    dir;
-    
+
     fo->dirccls = fo->dirclus;
     dir = Cache_File_Entry( fo, fHandle, TRUE);
-    
+
     if (dir == NULL)
         return CE_BADCACHEREAD;
 
     // copy the contents over
     strncpy(dir->DIR_Name,name,DIR_NAMECOMP);
-    
+
     // setup no attributes
     if (mode == DIRECTORY)
         dir->DIR_Attr = ATTR_DIRECTORY;
@@ -2379,11 +2379,11 @@ BYTE PopulateEntries(FILEOBJ fo, char *name , WORD *fHandle, BYTE mode)
     fo->date        = dir->DIR_CrtDate;
     fo->attributes  = dir->DIR_Attr;
     fo->entry       = *fHandle;
-    
+
     // just write the last entry in
     if (Write_File_Entry(fo,fHandle) != TRUE)
         error = CE_WRITE_ERROR;
-    
+
     return(error);
 }
 
@@ -2412,7 +2412,7 @@ void CacheTime (void)
 {
     WORD    year, monthday, weekhour, minsec, c, result;
     BYTE    ptr1, ptr0;
-    
+
 #if defined (__PIC32MX__)   // Added support for PIC32. -Bud (3/4/2008)
 
 	unsigned int	t0, t1;
@@ -2447,7 +2447,7 @@ void CacheTime (void)
         ptr1 = 1;
     else
         ptr1 = 0;
-    
+
     RCFGCALbits.RTCPTR0 = 1;
     RCFGCALbits.RTCPTR1 = 1;
     year = RTCVAL;
@@ -2457,21 +2457,21 @@ void CacheTime (void)
 
     if (ptr0 == 1)
         RCFGCALbits.RTCPTR0 = 1;
-    
+
     if (ptr1 == 1)
         RCFGCALbits.RTCPTR1 = 1;
-    
+
 #endif
-    
+
     c = 0;
     c += (year & 0x0F);
     c += ((year & 0xF0) >> 4) * 10;
     // c equals the last 2 digits of the year from 2000 to 2099
     // Add 20 to adjust it to FAT time (from 1980 to 2107)
     c += 20;
-    // shift the result to bits 
+    // shift the result to bits
     result = c << 9;
-    
+
     if ((monthday & 0x1000) == 0x1000)
     {
         c = 10;
@@ -2483,37 +2483,37 @@ void CacheTime (void)
     c += ((monthday & 0x0F00) >> 8);
     c <<= 5;
     result |= c;
-    
+
     c = (monthday & 0x00F0) >> 4;
     c *= 10;
     c += (monthday & 0x000F);
-    
+
     result |= c;
-    
+
     gTimeCrtDate = result;
     gTimeWrtDate = result;
     gTimeAccDate = result;
-    
+
     c = ((weekhour & 0x00F0) >> 4) * 10;
-    c += (weekhour & 0x000F); 
+    c += (weekhour & 0x000F);
     result = c << 11;
     c = ((minsec & 0xF000) >> 12) * 10;
     c += (minsec & 0x0F00) >> 8;
     result |= (c << 5);
     c = ((minsec & 0x00F0) >> 4) * 10;
     c += (minsec & 0x000F);
-    
+
     // If seconds mod 2 is 1, add 1000 ms
     if (c % 2)
         gTimeCrtMS = 100;
     else
         gTimeCrtMS = 0;
-    
+
     c >>= 1;
     result |= c;
-    
+
     gTimeCrtTime = result;
-    gTimeWrtTime = result; 
+    gTimeWrtTime = result;
 }
 #endif
 
@@ -2542,7 +2542,7 @@ void CacheTime (void)
     used by the FAT timestamps.
   Remarks:
     Call this before creating a file or directory (set create time) and
-    before closing a file (set last access time, last modified time)                                        
+    before closing a file (set last access time, last modified time)
   ***********************************************************************************************************/
 
 int SetClockVars (unsigned int year, unsigned char month, unsigned char day, unsigned char hour, unsigned char minute, unsigned char second)
@@ -2592,11 +2592,11 @@ int SetClockVars (unsigned int year, unsigned char month, unsigned char day, uns
     Should not be called by the user.
   Input:
     fo -    Pointer to file structure
-    mode -  
+    mode -
          - 0 - Allocate a cluster to a file
          - 1 - Allocate a cluster to a directory
   Return Values:
-    CE_GOOD -      Cluster allocated 
+    CE_GOOD -      Cluster allocated
     CE_DISK_FULL - No clusters available
   Side Effects:
     None
@@ -2678,7 +2678,7 @@ BYTE FILEallocate_new_cluster( FILEOBJ fo, BYTE mode)
     This function will search through the FAT to
     find the next available cluster on the device.
   Remarks:
-    Should not be called by user                
+    Should not be called by user
   ***********************************************/
 
 #ifdef ALLOW_WRITES
@@ -2733,7 +2733,7 @@ DWORD FATfindEmptyCluster(FILEOBJ fo)
 
         c++;    // check next cluster in FAT
         // check if reached last cluster in FAT, re-start from top
-        if (value == EndClusterLimit || c >= disk->maxcls)
+        if (value == EndClusterLimit || c >= (disk->maxcls+2))
             c = 2;
 
         // check if full circle done, disk full
@@ -2748,6 +2748,202 @@ DWORD FATfindEmptyCluster(FILEOBJ fo)
 }
 #endif
 
+
+/*********************************************************************************
+  Function:
+    void FSGetDiskProperties(FS_DISK_PROPERTIES* properties)
+  Summary:
+    Allows user to get the disk properties (size of disk, free space, etc)
+  Conditions:
+    1) ALLOW_GET_DISK_PROPERTIES must be defined in FSconfig.h
+    2) a FS_DISK_PROPERTIES object must be created before the function is called
+    3) the new_request member of the FS_DISK_PROPERTIES object must be set before
+        calling the function for the first time.  This will start a new search.
+    4) this function should not be called while there is a file open.  Close all
+        files before calling this function.
+  Input:
+    properties - a pointer to a FS_DISK_PROPERTIES object where the results should
+      be stored.
+  Return Values:
+    This function returns void.  The properties_status of the previous call of this 
+      function is located in the properties.status field.  This field has the 
+      following possible values:
+
+    FS_GET_PROPERTIES_NO_ERRORS - operation completed without error.  Results
+      are in the properties object passed into the function.
+    FS_GET_PROPERTIES_DISK_NOT_MOUNTED - there is no mounted disk.  Results in
+      properties object is not valid
+    FS_GET_PROPERTIES_CLUSTER_FAILURE - there was a failure trying to read a 
+      cluster from the drive.  The results in the properties object is a partial
+      result up until the point of the failure.
+    FS_GET_PROPERTIES_STILL_WORKING - the search for free sectors is still in
+      process.  Continue calling this function with the same properties pointer 
+      until either the function completes or until the partial results meets the
+      application needs.  The properties object contains the partial results of
+      the search and can be used by the application.  
+  Side Effects:
+    Can cause errors if called when files are open.  Close all files before
+    calling this function.
+
+    Calling this function without setting the new_request member on the first
+    call can result in undefined behavior and results.
+
+    Calling this function after a result is returned other than
+    FS_GET_PROPERTIES_STILL_WORKING can result in undefined behavior and results.
+  Description:  
+    This function returns the information about the mounted drive.  The results 
+    member of the properties object passed into the function is populated with 
+    the information about the drive.    
+
+    Before starting a new request, the new_request member of the properties
+    input parameter should be set to TRUE.  This will initiate a new search
+    request.
+
+    This function will return before the search is complete with partial results.
+    All of the results except the free_clusters will be correct after the first
+    call.  The free_clusters will contain the number of free clusters found up
+    until that point, thus the free_clusters result will continue to grow until
+    the entire drive is searched.  If an application only needs to know that a 
+    certain number of bytes is available and doesn't need to know the total free 
+    size, then this function can be called until the required free size is
+    verified.  To continue a search, pass a pointer to the same FS_DISK_PROPERTIES
+    object that was passed in to create the search.
+
+    A new search request sould be made once this function has returned a value 
+    other than FS_GET_PROPERTIES_STILL_WORKING.  Continuing a completed search
+    can result in undefined behavior or results.
+
+    Typical Usage:
+    <code>
+    FS_DISK_PROPERTIES disk_properties;
+
+    disk_properties.new_request = TRUE;
+
+    do
+    {
+        my_results = FSGetDiskProperties(&disk_properties);
+    } while (disk_properties->properties_status == FS_GET_PROPERTIES_STILL_WORKING);
+    </code>
+
+    results.disk_format - contains the format of the drive.  Valid results are 
+      FAT12(1), FAT16(2), or FAT32(3).
+
+    results.sector_size - the sector size of the mounted drive.  Valid values are
+      512, 1024, 2048, and 4096.
+
+    results.sectors_per_cluster - the number sectors per cluster.
+
+    results.total_clusters - the number of total clusters on the drive.  This 
+      can be used to calculate the total disk size (total_clusters * 
+      sectors_per_cluster * sector_size = total size of drive in bytes)
+
+    results.free_clusters - the number of free (unallocated) clusters on the drive.
+      This can be used to calculate the total free disk size (free_clusters * 
+      sectors_per_cluster * sector_size = total size of drive in bytes)
+
+  Remarks:
+    PIC24F size estimates:
+      Flash - 400 bytes (-Os setting)
+
+    PIC24F speed estimates:
+      Search takes approximately 7 seconds per Gigabyte of drive space.  Speed
+        will vary based on the number of sectors per cluster and the sector size.
+  *********************************************************************************/
+#if defined(ALLOW_GET_DISK_PROPERTIES)
+void FSGetDiskProperties(FS_DISK_PROPERTIES* properties)
+{
+    BYTE    i;
+    DWORD   value = 0x0;
+
+    if(properties->new_request == TRUE)
+    {
+        properties->disk = &gDiskData;
+        properties->results.free_clusters = 0;
+        properties->new_request = FALSE;
+
+        if(properties->disk->mount != TRUE)
+        {
+            properties->properties_status = FS_GET_PROPERTIES_DISK_NOT_MOUNTED;
+            return;
+        }
+
+        properties->properties_status = FS_GET_PROPERTIES_STILL_WORKING;
+   
+        properties->results.disk_format = properties->disk->type;
+        properties->results.sector_size = MEDIA_SECTOR_SIZE;
+        properties->results.sectors_per_cluster = properties->disk->SecPerClus;
+        properties->results.total_clusters = properties->disk->maxcls;
+
+        /* Settings based on FAT type */
+        switch (properties->disk->type)
+        {
+    #ifdef SUPPORT_FAT32 // If FAT32 supported.
+            case FAT32:
+                properties->private.EndClusterLimit = END_CLUSTER_FAT32;
+                properties->private.ClusterFailValue = CLUSTER_FAIL_FAT32;
+                break;
+    #endif
+            case FAT16:
+                properties->private.EndClusterLimit = END_CLUSTER_FAT16;
+                properties->private.ClusterFailValue = CLUSTER_FAIL_FAT16;
+                break;
+            case FAT12:
+                properties->private.EndClusterLimit = END_CLUSTER_FAT12;
+                properties->private.ClusterFailValue = CLUSTER_FAIL_FAT16;
+                break;
+        }
+    
+        properties->private.c = 2;
+
+        properties->private.curcls = properties->private.c;
+        ReadFAT(properties->disk, properties->private.c);
+    }
+
+    if(properties->disk == NULL)
+    {
+        properties->properties_status = FS_GET_PROPERTIES_DISK_NOT_MOUNTED;
+        return;
+    }
+
+    if(properties->properties_status != FS_GET_PROPERTIES_STILL_WORKING)
+    {
+        return;
+    }
+
+    // sequentially scan through the FAT looking for an empty cluster
+    for(i=0;i<255;i++)
+    {
+        // look at its value
+        if ( (value = ReadFAT(properties->disk, properties->private.c)) == properties->private.ClusterFailValue)
+        {
+            properties->properties_status = FS_GET_PROPERTIES_CLUSTER_FAILURE;
+            return;
+        }
+
+        // check if empty cluster found
+        if (value == CLUSTER_EMPTY)
+        {
+            properties->results.free_clusters++;
+        }
+
+        properties->private.c++;    // check next cluster in FAT
+        // check if reached last cluster in FAT, re-start from top
+        if (value == properties->private.EndClusterLimit || properties->private.c >= (properties->results.total_clusters + 2))
+            properties->private.c = 2;
+
+        // check if full circle done, disk full
+        if ( properties->private.c == properties->private.curcls)
+        {
+            properties->properties_status = FS_GET_PROPERTIES_NO_ERRORS;
+            return;
+        }
+    }  // scanning for an empty cluster
+
+    properties->properties_status = FS_GET_PROPERTIES_STILL_WORKING;
+    return;
+}
+#endif
+
 /************************************************************
   Function:
     int FSfclose(FSFILE *fo)
@@ -2758,12 +2954,12 @@ DWORD FATfindEmptyCluster(FILEOBJ fo)
   Input:
     fo -  Pointer to the file to close
   Return Values:
-    0 -   File closed successfully 
+    0 -   File closed successfully
     EOF - Error closing the file
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    This function will update the directory entry for the 
+    This function will update the directory entry for the
     file pointed to by 'fo' with the information contained
     in 'fo,' including the new file size and attributes.
     Timestamp information will also be loaded based on the
@@ -2888,7 +3084,7 @@ int FSfclose(FSFILE   *fo)
     the 'dir' directory entry.  This is used for the
     don't-care timing method.
   Remarks:
-    None                                                
+    None
   *******************************************************/
 #ifdef INCREMENTTIMESTAMP
 void IncrementTimeStamp(DIRENTRY dir)
@@ -2900,15 +3096,15 @@ void IncrementTimeStamp(DIRENTRY dir)
     BYTE          day;
     BYTE          month;
     BYTE          year;
-    
+
     seconds = (dir->DIR_WrtTime & 0x1f);
     minutes = ((dir->DIR_WrtTime & 0x07E0) >> 5);
     hours   = ((dir->DIR_WrtTime & 0xF800) >> 11);
-    
+
     day     = (dir->DIR_WrtDate & 0x1f);
     month   = ((dir->DIR_WrtDate & 0x01E0) >> 5);
     year    = ((dir->DIR_WrtDate & 0xFE00) >> 9);
-    
+
     if(seconds < 29)
     {
         // Increment number of seconds by 2
@@ -2918,7 +3114,7 @@ void IncrementTimeStamp(DIRENTRY dir)
     else
     {
         seconds = 0x00;
-    
+
         if(minutes < 59)
         {
             minutes++;
@@ -2926,7 +3122,7 @@ void IncrementTimeStamp(DIRENTRY dir)
         else
         {
             minutes = 0;
-    
+
             if(hours < 23)
             {
                 hours++;
@@ -2941,7 +3137,7 @@ void IncrementTimeStamp(DIRENTRY dir)
                 else
                 {
                     day = 1;
-    
+
                     if(month < 12)
                     {
                         month++;
@@ -2957,11 +3153,11 @@ void IncrementTimeStamp(DIRENTRY dir)
             }
         }
     }
-    
+
     dir->DIR_WrtTime = (WORD)(seconds);
     dir->DIR_WrtTime |= ((WORD)(minutes) << 5);
     dir->DIR_WrtTime |= ((WORD)(hours) << 11);
-    
+
     dir->DIR_WrtDate = (WORD)(day);
     dir->DIR_WrtDate |= ((WORD)(month) << 5);
     dir->DIR_WrtDate |= ((WORD)(year) << 9);
@@ -2979,13 +3175,13 @@ void IncrementTimeStamp(DIRENTRY dir)
     fo -       Pointer to file structure
     fHandle -  Passed member's location
   Return Values:
-    FOUND -     Operation successful 
+    FOUND -     Operation successful
     NOT_FOUND - Operation failed
   Side Effects:
     None
   Description:
     This function will cache the sector of directory entries
-    in the directory pointed to by the dirclus value in 
+    in the directory pointed to by the dirclus value in
     the FSFILE object 'fo' that contains the entry that
     corresponds to the fHandle offset.  It will then copy
     the file information for that entry into the 'fo' FSFILE
@@ -3001,7 +3197,7 @@ BYTE Fill_File_Object(FILEOBJ fo, WORD *fHandle)
     BYTE        character;
     BYTE        status;
     BYTE        test = 0;
-    
+
     // Get the entry
     if (((*fHandle & MASK_MAX_FILE_ENTRY_LIMIT_BITS) == 0) && (*fHandle != 0)) // 4-bit mask because 16-root entries max per sector
     {
@@ -3012,15 +3208,15 @@ BYTE Fill_File_Object(FILEOBJ fo, WORD *fHandle)
     {
         dir = Cache_File_Entry (fo, fHandle, FALSE);
     }
-    
-    
+
+
     // Make sure there is a directory left
     if(dir == (DIRENTRY)NULL)
     {
         status = NO_MORE;
     }
     else
-    { 
+    {
         // Read the first char of the file name
         a = dir->DIR_Name[0];
 
@@ -3037,7 +3233,7 @@ BYTE Fill_File_Object(FILEOBJ fo, WORD *fHandle)
         {
             // Get the attributes
             a = dir->DIR_Attr;
-        
+
             // print the file name and extension
             for (index=0; index < DIR_NAMESIZE; index++)
             {
@@ -3065,20 +3261,20 @@ BYTE Fill_File_Object(FILEOBJ fo, WORD *fHandle)
 
             // Now store the identifier
             fo->entry = *fHandle;
-            
+
             // see if we are still a good file
             a = dir->DIR_Name[0];
-            
+
             if(a == DIR_DEL)
                 status = NOT_FOUND;
             else
                 status = FOUND;
-        
+
             // Now store the size
             fo->size = (dir->DIR_FileSize);
-            
+
             fo->cluster = GetFullClusterNumber(dir); // Get Complete Cluster number.
-            
+
             /// -Get and store the attributes
             a = dir->DIR_Attr;
             fo->attributes = a;
@@ -3094,7 +3290,7 @@ BYTE Fill_File_Object(FILEOBJ fo, WORD *fHandle)
                 fo->time = dir->DIR_WrtTime;
                 fo->date = dir->DIR_WrtDate;
             }
-        
+
         }// deleted directory
     }// Ensure we are still good
     return(status);
@@ -3118,7 +3314,7 @@ BYTE Fill_File_Object(FILEOBJ fo, WORD *fHandle)
     None
   Description:
     This function will cache the sector of directory entries
-    in the directory pointed to by the dirclus value in 
+    in the directory pointed to by the dirclus value in
     the FSFILE object 'fo' that contains the entry that
     corresponds to the fHandle offset.  It will then return a pointer
     to the directory entry in the global data buffer.
@@ -3130,7 +3326,7 @@ DIRENTRY LoadDirAttrib(FILEOBJ fo, WORD *fHandle)
 {
     DIRENTRY    dir;
     BYTE      a;
-    
+
     fo->dirccls = fo->dirclus;
     // Get the entry
     dir = Cache_File_Entry( fo, fHandle, TRUE);
@@ -3153,7 +3349,7 @@ DIRENTRY LoadDirAttrib(FILEOBJ fo, WORD *fHandle)
         {
             // Get the attributes
             a = dir->DIR_Attr;
-            
+
             // scan through all the long dir entries
             while(a == ATTR_LONG_NAME)
             {
@@ -3165,7 +3361,7 @@ DIRENTRY LoadDirAttrib(FILEOBJ fo, WORD *fHandle)
             } // long file name while loop
         } // deleted dir
     }// Ensure we are still good
-    
+
     return(dir);
 } // LoadDirAttrib
 
@@ -3182,14 +3378,14 @@ DIRENTRY LoadDirAttrib(FILEOBJ fo, WORD *fHandle)
     fHandle -       Location of file information
     EraseClusters - Remove cluster allocation from FAT?
   Return Values:
-    CE_GOOD - File erased successfully 
-    CE_FILE_NOT_FOUND - Could not find the file on the card 
+    CE_GOOD - File erased successfully
+    CE_FILE_NOT_FOUND - Could not find the file on the card
     CE_ERASE_FAIL - Internal Card erase failed
   Side Effects:
     None
   Description:
-    This function will cache the sector of directory entries in the directory 
-    pointed to by the dirclus value in the FSFILE object 'fo' that contains 
+    This function will cache the sector of directory entries in the directory
+    pointed to by the dirclus value in the FSFILE object 'fo' that contains
     the entry that corresponds to the fHandle offset.  It will then mark that
     entry as deleted.  If the EraseClusters argument is TRUE, the chain of
     clusters for that file will be marked as unused in the FAT by the
@@ -3206,9 +3402,9 @@ CETYPE FILEerase( FILEOBJ fo, WORD *fHandle, BYTE EraseClusters)
     CETYPE      status = CE_GOOD;
     DWORD       clus;
     DISK *      disk;
-    
+
     disk = fo->dsk;
-    
+
     // reset the cluster
     clus = fo->dirclus;
     fo->dirccls = clus;
@@ -3297,7 +3493,7 @@ CETYPE FILEerase( FILEOBJ fo, WORD *fHandle, BYTE EraseClusters)
     the new filename will be written to the file entry of the
     file pointed to by 'fo.'
   Remarks:
-    None                                                        
+    None
   ***************************************************************/
 
 #ifdef ALLOW_WRITES
@@ -3729,7 +3925,7 @@ FSFILE * FSfopen( const char * fileName, const char *mode )
     FSFILE object, which is used to keep track of the absolute
     location of the current position in the file.
   Remarks:
-    None                                                            
+    None
   *******************************************************************/
 
 long FSftell (FSFILE * fo)
@@ -3751,7 +3947,7 @@ long FSftell (FSFILE * fo)
   Input:
     fileName -  Name of the file to erase
   Return Values:
-    0 -   File removed 
+    0 -   File removed
     EOF - File was not removed
   Side Effects:
     The FSerrno variable will be changed.
@@ -3760,7 +3956,7 @@ long FSftell (FSFILE * fo)
     the FILEfind function.  If the file is found, it will be erased
     using the FILEerase function.
   Remarks:
-    None                                       
+    None
   **********************************************************************/
 
 int FSremove (const char * fileName)
@@ -3771,7 +3967,7 @@ int FSremove (const char * fileName)
     FSerrno = CE_GOOD;
 
     if (MDD_WriteProtectState())
-    {   
+    {
         FSerrno = CE_WRITE_PROTECTED;
         return (-1);
     }
@@ -3809,7 +4005,7 @@ int FSremove (const char * fileName)
         FSerrno = CE_FILE_NOT_FOUND;
         return -1;
     }
-    
+
     if (fo->attributes & ATTR_DIRECTORY)
     {
         FSerrno = CE_DELETE_DIR;
@@ -3875,172 +4071,172 @@ void FSrewind (FSFILE * fo)
   Side Effects:
     None.
   Return Values:
-    FSInit       - 
-                 - CE_GOOD –                  No Error 
+    FSInit       -
+                 - CE_GOOD –                  No Error
                  - CE_INIT_ERROR –            The physical media could not be initialized
                  - CE_BAD_SECTOR_READ –       The MBR or the boot sector could not be
                                               read correctly
                  - CE_BAD_PARITION –          The MBR signature code was incorrect.
                  - CE_NOT_FORMATTED –         The boot sector signature code was incorrect or
                                               indicates an invalid number of bytes per sector.
-                 - CE_UNSUPPORTED_SECTOR_SIZE - The number of bytes per sector is unsupported 
-                 - CE_CARDFAT32 –             The physical media is FAT32 type (only an error 
-                                              when FAT32 support is disabled). 
-                 - CE_UNSUPPORTED_FS –        The device is formatted with an unsupported file 
+                 - CE_UNSUPPORTED_SECTOR_SIZE - The number of bytes per sector is unsupported
+                 - CE_CARDFAT32 –             The physical media is FAT32 type (only an error
+                                              when FAT32 support is disabled).
+                 - CE_UNSUPPORTED_FS –        The device is formatted with an unsupported file
                                               system (not FAT12 or 16).
     FSfopen      -
-                 - CE_GOOD –                  No Error 
-                 - CE_NOT_INIT –              The device has not been initialized. 
-                 - CE_TOO_MANY_FILES_OPEN –   The function could not allocate any 
-                                              additional file information to the array 
-                                              of FSFILE structures or the heap. 
+                 - CE_GOOD –                  No Error
+                 - CE_NOT_INIT –              The device has not been initialized.
+                 - CE_TOO_MANY_FILES_OPEN –   The function could not allocate any
+                                              additional file information to the array
+                                              of FSFILE structures or the heap.
                  - CE_INVALID_FILENAME –      The file name argument was invalid.
-                 - CE_INVALID_ARGUMENT –      The user attempted to open a directory in a 
-                                              write mode or specified an invalid mode argument. 
-                 - CE_FILE_NOT_FOUND –        The specified file (which was to be opened in read 
-                                              mode) does not exist on the device. 
+                 - CE_INVALID_ARGUMENT –      The user attempted to open a directory in a
+                                              write mode or specified an invalid mode argument.
+                 - CE_FILE_NOT_FOUND –        The specified file (which was to be opened in read
+                                              mode) does not exist on the device.
                  - CE_BADCACHEREAD –          A read from the device failed.
-                 - CE_ERASE_FAIL –            The existing file could not be erased (when opening 
-                                              a file in WRITE mode). 
-                 - CE_DIR_FULL –              The directory is full. 
-                 - CE_DISK_FULL–              The data memory section is full. 
-                 - CE_WRITE_ERROR –           A write to the device failed. 
-                 - CE_SEEK_ERROR –            The current position in the file could not be set to 
+                 - CE_ERASE_FAIL –            The existing file could not be erased (when opening
+                                              a file in WRITE mode).
+                 - CE_DIR_FULL –              The directory is full.
+                 - CE_DISK_FULL–              The data memory section is full.
+                 - CE_WRITE_ERROR –           A write to the device failed.
+                 - CE_SEEK_ERROR –            The current position in the file could not be set to
                                               the end (when the file was opened in APPEND mode).
-    FSfclose     - 
-                 - CE_GOOD –                  No Error 
+    FSfclose     -
+                 - CE_GOOD –                  No Error
                  - CE_WRITE_ERROR –           The existing data in the data buffer or the new file
                                               entry information could not be written to the device.
                  - CE_BADCACHEREAD –          The file entry information could not be cached
-    FSfread      - 
-                 - CE_GOOD –                  No Error 
+    FSfread      -
+                 - CE_GOOD –                  No Error
                  - CE_WRITEONLY –             The file was opened in a write-only mode.
-                 - CE_WRITE_ERROR –           The existing data in the data buffer could not be 
-                                              written to the device. 
-                 - CE_BAD_SECTOR_READ –       The data sector could not be read. 
+                 - CE_WRITE_ERROR –           The existing data in the data buffer could not be
+                                              written to the device.
+                 - CE_BAD_SECTOR_READ –       The data sector could not be read.
                  - CE_EOF –                   The end of the file was reached.
                  - CE_COULD_NOT_GET_CLUSTER – Additional clusters in the file could not be loaded.
-    FSfwrite     - 
-                 - CE_GOOD –                  No Error 
-                 - CE_READONLY –              The file was opened in a read-only mode. 
-                 - CE_WRITE_PROTECTED –       The device write-protect check function indicated 
+    FSfwrite     -
+                 - CE_GOOD –                  No Error
+                 - CE_READONLY –              The file was opened in a read-only mode.
+                 - CE_WRITE_PROTECTED –       The device write-protect check function indicated
                                               that the device has been write-protected.
                  - CE_WRITE_ERROR –           There was an error writing data to the device.
                  - CE_BADCACHEREAD –          The data sector to be modified could not be read from
-                                              the device. 
+                                              the device.
                  - CE_DISK_FULL –             All data clusters on the device are in use.
     FSfseek      -
-                 - CE_GOOD –                  No Error 
+                 - CE_GOOD –                  No Error
                  - CE_WRITE_ERROR –           The existing data in the data buffer could not be
-                                              written to the device. 
-                 - CE_INVALID_ARGUMENT –      The specified offset exceeds the size of the file. 
-                 - CE_BADCACHEREAD –          The sector that contains the new current position 
+                                              written to the device.
+                 - CE_INVALID_ARGUMENT –      The specified offset exceeds the size of the file.
+                 - CE_BADCACHEREAD –          The sector that contains the new current position
                                               could not be loaded.
-                 - CE_COULD_NOT_GET_CLUSTER – Additional clusters in the file could not be 
+                 - CE_COULD_NOT_GET_CLUSTER – Additional clusters in the file could not be
                                               loaded/allocated.
-    FSftell      - 
+    FSftell      -
                  - CE_GOOD –                  No Error
     FSattrib     -
-                 - CE_GOOD –                  No Error 
-                 - CE_INVALID_ARGUMENT –      The attribute argument was invalid. 
-                 - CE_BADCACHEREAD –          The existing file entry information could not be 
-                                              loaded. 
-                 - CE_WRITE_ERROR –           The file entry information could not be written to 
+                 - CE_GOOD –                  No Error
+                 - CE_INVALID_ARGUMENT –      The attribute argument was invalid.
+                 - CE_BADCACHEREAD –          The existing file entry information could not be
+                                              loaded.
+                 - CE_WRITE_ERROR –           The file entry information could not be written to
                                               the device.
     FSrename     -
-                 - CE_GOOD –                  No Error 
-                 - CE_FILENOTOPENED –         A null file pointer was passed into the function. 
-                 - CE_INVALID_FILENAME –      The file name passed into the function was invalid. 
-                 - CE_BADCACHEREAD –          A read from the device failed. 
-                 - CE_FILENAME_EXISTS –       A file with the specified name already exists. 
-                 - CE_WRITE_ERROR –           The new file entry data could not be written to the 
+                 - CE_GOOD –                  No Error
+                 - CE_FILENOTOPENED –         A null file pointer was passed into the function.
+                 - CE_INVALID_FILENAME –      The file name passed into the function was invalid.
+                 - CE_BADCACHEREAD –          A read from the device failed.
+                 - CE_FILENAME_EXISTS –       A file with the specified name already exists.
+                 - CE_WRITE_ERROR –           The new file entry data could not be written to the
                                               device.
     FSfeof       -
                  - CE_GOOD –                  No Error
     FSformat     -
-                 - CE_GOOD –                  No Error 
-                 - CE_INIT_ERROR –            The device could not be initialized. 
-                 - CE_BADCACHEREAD –          The master boot record or boot sector could not be 
-                                              loaded successfully. 
-                 - CE_INVALID_ARGUMENT –      The user selected to create their own boot sector on 
-                                              a device that has no master boot record, or the mode 
-                                              argument was invalid. 
-                 - CE_WRITE_ERROR –           The updated MBR/Boot sector could not be written to 
+                 - CE_GOOD –                  No Error
+                 - CE_INIT_ERROR –            The device could not be initialized.
+                 - CE_BADCACHEREAD –          The master boot record or boot sector could not be
+                                              loaded successfully.
+                 - CE_INVALID_ARGUMENT –      The user selected to create their own boot sector on
+                                              a device that has no master boot record, or the mode
+                                              argument was invalid.
+                 - CE_WRITE_ERROR –           The updated MBR/Boot sector could not be written to
                                               the device.
-                 - CE_BAD_PARTITION –         The calculated number of sectors per clusters was 
-                                              invalid. 
-                 - CE_NONSUPPORTED_SIZE –     The card has too many sectors to be formatted as 
+                 - CE_BAD_PARTITION –         The calculated number of sectors per clusters was
+                                              invalid.
+                 - CE_NONSUPPORTED_SIZE –     The card has too many sectors to be formatted as
                                               FAT12 or FAT16.
-    FSremove     - 
-                 - CE_GOOD –                  No Error 
-                 - CE_WRITE_PROTECTED –       The device write-protect check function indicated 
-                                              that the device has been write-protected. 
-                 - CE_INVALID_FILENAME –      The specified filename was invalid. 
+    FSremove     -
+                 - CE_GOOD –                  No Error
+                 - CE_WRITE_PROTECTED –       The device write-protect check function indicated
+                                              that the device has been write-protected.
+                 - CE_INVALID_FILENAME –      The specified filename was invalid.
                  - CE_FILE_NOT_FOUND –        The specified file could not be found.
                  - CE_ERASE_FAIL –            The file could not be erased.
     FSchdir      -
-                 - CE_GOOD –                  No Error 
-                 - CE_INVALID_ARGUMENT –      The path string was mis-formed or the user tried to 
+                 - CE_GOOD –                  No Error
+                 - CE_INVALID_ARGUMENT –      The path string was mis-formed or the user tried to
                                               change to a non-directory file.
                  - CE_BADCACHEREAD –          A directory entry could not be cached.
                  - CE_DIR_NOT_FOUND –         Could not find a directory in the path.
     FSgetcwd     -
-                 - CE_GOOD –                  No Error 
+                 - CE_GOOD –                  No Error
                  - CE_INVALID_ARGUMENT –      The user passed a 0-length buffer into the function.
-                 - CE_BADCACHEREAD –          A directory entry could not be cached. 
-                 - CE_BAD_SECTOR_READ –       The function could not determine a previous directory 
+                 - CE_BADCACHEREAD –          A directory entry could not be cached.
+                 - CE_BAD_SECTOR_READ –       The function could not determine a previous directory
                                               of the current working directory.
     FSmkdir      -
-                 - CE_GOOD –                  No Error 
-                 - CE_WRITE_PROTECTED –       The device write-protect check function indicated 
-                                              that the device has been write-protected. 
+                 - CE_GOOD –                  No Error
+                 - CE_WRITE_PROTECTED –       The device write-protect check function indicated
+                                              that the device has been write-protected.
                  - CE_INVALID_ARGUMENT –      The path string was mis-formed.
-                 - CE_BADCACHEREAD –          Could not successfully change to a recently created 
-                                              directory to store its dir entry information, or 
-                                              could not cache directory entry information. 
-                 - CE_INVALID_FILENAME –      One or more of the directory names has an invalid 
-                                              format. 
-                 - CE_WRITE_ERROR –           The existing data in the data buffer could not be 
-                                              written to the device or the dot/dotdot entries could 
+                 - CE_BADCACHEREAD –          Could not successfully change to a recently created
+                                              directory to store its dir entry information, or
+                                              could not cache directory entry information.
+                 - CE_INVALID_FILENAME –      One or more of the directory names has an invalid
+                                              format.
+                 - CE_WRITE_ERROR –           The existing data in the data buffer could not be
+                                              written to the device or the dot/dotdot entries could
                                               not be written to a newly created directory.
                  - CE_DIR_FULL –              There are no available dir entries in the CWD.
-                 - CE_DISK_FULL –             There are no available clusters in the data region of 
-                                              the device.    
-    FSrmdir      - 
-                 - CE_GOOD –                  No Error 
-                 - CE_DIR_NOT_FOUND –         The directory specified could not be found or the 
-                                              function could not change to a subdirectory within 
-                                              the directory to be deleted (when recursive delete is 
+                 - CE_DISK_FULL –             There are no available clusters in the data region of
+                                              the device.
+    FSrmdir      -
+                 - CE_GOOD –                  No Error
+                 - CE_DIR_NOT_FOUND –         The directory specified could not be found or the
+                                              function could not change to a subdirectory within
+                                              the directory to be deleted (when recursive delete is
                                               enabled).
-                 - CE_INVALID_ARGUMENT –      The user tried to remove the CWD or root directory. 
+                 - CE_INVALID_ARGUMENT –      The user tried to remove the CWD or root directory.
                  - CE_BADCACHEREAD –          A directory entry could not be cached.
-                 - CE_DIR_NOT_EMPTY –         The directory to be deleted was not empty and 
-                                              recursive subdirectory removal was disabled. 
-                 - CE_ERASE_FAIL –            The directory or one of the directories or files 
-                                              within it could not be deleted. 
-                 - CE_BAD_SECTOR_READ –       The function could not determine a previous directory 
+                 - CE_DIR_NOT_EMPTY –         The directory to be deleted was not empty and
+                                              recursive subdirectory removal was disabled.
+                 - CE_ERASE_FAIL –            The directory or one of the directories or files
+                                              within it could not be deleted.
+                 - CE_BAD_SECTOR_READ –       The function could not determine a previous directory
                                               of the CWD.
     SetClockVars -
-                 - CE_GOOD –                  No Error 
-                 - CE_INVALID_ARGUMENT –      The time values passed into the function were 
-                                              invalid.    
-    FindFirst    - 
-                 - CE_GOOD –                  No Error 
-                 - CE_INVALID_FILENAME –      The specified filename was invalid. 
-                 - CE_FILE_NOT_FOUND –        No file matching the specified criteria was found. 
-                 - CE_BADCACHEREAD –          The file information for the file that was found 
-                                              could not be cached.
-    FindNext     - 
-                 - CE_GOOD –                  No Error 
-                 - CE_NOT_INIT –              The SearchRec object was not initialized by a call to 
-                                              FindFirst. 
-                 - CE_INVALID_ARGUMENT –      The SearchRec object was initialized in a different 
-                                              directory from the CWD.
-                 - CE_INVALID_FILENAME –      The filename is invalid. 
+                 - CE_GOOD –                  No Error
+                 - CE_INVALID_ARGUMENT –      The time values passed into the function were
+                                              invalid.
+    FindFirst    -
+                 - CE_GOOD –                  No Error
+                 - CE_INVALID_FILENAME –      The specified filename was invalid.
                  - CE_FILE_NOT_FOUND –        No file matching the specified criteria was found.
-    FSfprintf    - 
-                 - CE_GOOD –                  No Error 
-                 - CE_WRITE_ERROR –           Characters could not be written to the file.                                                   
+                 - CE_BADCACHEREAD –          The file information for the file that was found
+                                              could not be cached.
+    FindNext     -
+                 - CE_GOOD –                  No Error
+                 - CE_NOT_INIT –              The SearchRec object was not initialized by a call to
+                                              FindFirst.
+                 - CE_INVALID_ARGUMENT –      The SearchRec object was initialized in a different
+                                              directory from the CWD.
+                 - CE_INVALID_FILENAME –      The filename is invalid.
+                 - CE_FILE_NOT_FOUND –        No file matching the specified criteria was found.
+    FSfprintf    -
+                 - CE_GOOD –                  No Error
+                 - CE_WRITE_ERROR –           Characters could not be written to the file.
   Description:
     The FSerror function will return the FSerrno variable.  This global
     variable will have been set to an error value during the last call of a
@@ -4073,7 +4269,7 @@ int FSerror (void)
     The FileObjectCopy function will make an exacy copy of
     a specified FSFILE object.
   Remarks:
-    None                                                       
+    None
   **************************************************************/
 
 void FileObjectCopy(FILEOBJ foDest,FILEOBJ foSource)
@@ -4082,12 +4278,12 @@ void FileObjectCopy(FILEOBJ foDest,FILEOBJ foSource)
     BYTE *dest;
     BYTE *source;
     BYTE Index;
-    
+
     dest = (BYTE *)foDest;
     source = (BYTE *)foSource;
-    
+
     size = sizeof(FSFILE);
-    
+
     for(Index=0;Index< size; Index++)
     {
         dest[Index] = source[Index];
@@ -4105,14 +4301,14 @@ void FileObjectCopy(FILEOBJ foDest,FILEOBJ foSource)
     fo -       Pointer to file structure
     cluster -  Cluster location
   Return Values:
-    CE_GOOD - File closed successfully 
-    CE_WRITE_ERROR - Could not write to the sector 
+    CE_GOOD - File closed successfully
+    CE_WRITE_ERROR - Could not write to the sector
     CE_DISK_FULL - All clusters in partition are taken
   Side Effects:
     None
   Description:
     The FILECreateHeadCluster function will create the first cluster
-    of a file.  First, it will find an empty cluster with the 
+    of a file.  First, it will find an empty cluster with the
     FATfindEmptyCluster function and mark it as the last cluster in the
     file.  It will then erase the cluster using the EraseCluster function.
   Remarks:
@@ -4184,7 +4380,7 @@ CETYPE FILECreateHeadCluster( FILEOBJ fo, DWORD *cluster)
     dsk -      Disk structure
     cluster -  Cluster to be erased
   Return Values:
-    CE_GOOD - File closed successfully 
+    CE_GOOD - File closed successfully
     CE_WRITE_ERROR - Could not write to the sector
   Side Effects:
     None
@@ -4280,7 +4476,7 @@ WORD ReadWord( BYTE* pBuffer, WORD index )
 {
     BYTE loByte, hiByte;
     WORD res;
-    
+
     loByte = pBuffer[index];
     hiByte = pBuffer[index+1];
     res = hiByte;
@@ -4314,10 +4510,10 @@ DWORD ReadDWord( BYTE* pBuffer, WORD index )
 {
     WORD loWord, hiWord;
     DWORD result;
-    
+
     loWord = ReadWord( pBuffer, index );
     hiWord = ReadWord( pBuffer, index+2 );
-    
+
     result = hiWord;
     result *= 0x10000;
     result |= loWord;
@@ -4332,7 +4528,7 @@ DWORD ReadDWord( BYTE* pBuffer, WORD index )
   Function:
     DWORD Cluster2Sector(DISK * dsk, DWORD cluster)
   Summary:
-    Convert a cluster number to the corresponding sector    
+    Convert a cluster number to the corresponding sector
   Conditions:
     This function should not be called by the user.
   Input:
@@ -4354,14 +4550,14 @@ DWORD ReadDWord( BYTE* pBuffer, WORD index )
 DWORD Cluster2Sector(DISK * dsk, DWORD cluster)
 {
     DWORD sector;
-   
+
     /* Rt: Settings based on FAT type */
     switch (dsk->type)
     {
 #ifdef SUPPORT_FAT32 // If FAT32 supported.
         case FAT32:
             /* In FAT32, there is no separate ROOT region. It is as well stored in DATA region */
-            sector = (((DWORD)cluster-2) * dsk->SecPerClus) + dsk->data;            
+            sector = (((DWORD)cluster-2) * dsk->SecPerClus) + dsk->data;
             break;
 #endif
         case FAT12:
@@ -4370,12 +4566,12 @@ DWORD Cluster2Sector(DISK * dsk, DWORD cluster)
             if(cluster == 0 ||cluster == 1)
                 sector = dsk->root + cluster;
             else
-                sector = (((DWORD)cluster-2) * dsk->SecPerClus) + dsk->data;            
+                sector = (((DWORD)cluster-2) * dsk->SecPerClus) + dsk->data;
             break;
     }
 
     return(sector);
-   
+
 }
 
 
@@ -4389,13 +4585,13 @@ DWORD Cluster2Sector(DISK * dsk, DWORD cluster)
   Input:
     file -        Pointer to file structure
     attributes -  The attributes to set for the file
-               -  Attribute -      Value - Indications 
+               -  Attribute -      Value - Indications
                -  ATTR_READ_ONLY - 0x01  - The read-only attribute
-               -  ATTR_HIDDEN -    0x02  - The hidden attribute 
-               -  ATTR_SYSTEM -    0x04  - The system attribute 
+               -  ATTR_HIDDEN -    0x02  - The hidden attribute
+               -  ATTR_SYSTEM -    0x04  - The system attribute
                -  ATTR_ARCHIVE -   0x20  - The archive attribute
   Return Values:
-    0 -  Attribute change was successful 
+    0 -  Attribute change was successful
     -1 - Attribute change was unsuccessful
   Side Effects:
     The FSerrno variable will be changed.
@@ -4406,7 +4602,7 @@ DWORD Cluster2Sector(DISK * dsk, DWORD cluster)
     the attributes back.  If the specified file is a directory, the
     directory attribute will be preserved.
   Remarks:
-    None                                                                
+    None
   ***************************************************************************/
 
 #ifdef ALLOW_WRITES
@@ -4447,9 +4643,9 @@ int FSattrib (FSFILE * file, unsigned char attributes)
 
     // Don't remove the directory attribute from DIR files
     if (file->attributes & ATTR_DIRECTORY)
-        dir->DIR_Attr = attributes | ATTR_DIRECTORY;
+        file->attributes = attributes | ATTR_DIRECTORY;
     else
-        dir->DIR_Attr = attributes;
+        file->attributes = attributes;
 
     // just write the last entry in
     if(!Write_File_Entry(file,&fHandle))
@@ -4458,7 +4654,7 @@ int FSattrib (FSFILE * file, unsigned char attributes)
         return -1;
     }
 
-    return 0;    
+    return 0;
 }
 #endif
 
@@ -4487,9 +4683,9 @@ int FSattrib (FSFILE * file, unsigned char attributes)
     If the end of a cluster is reached, the next cluster will be loaded, unless
     the end-of-file flag for the specified file has been set.  If it has, a new
     cluster will be allocated to the file.  Finally, the new position and filezize
-    will be stored in the FSFILE object.  The parameters 'size' and 'n' indicate how 
-    much data to write.  'Size' refers to the size of one object to write (in bytes), 
-    and 'n' will refer to the number of these objects to write.  The value returned 
+    will be stored in the FSFILE object.  The parameters 'size' and 'n' indicate how
+    much data to write.  'Size' refers to the size of one object to write (in bytes),
+    and 'n' will refer to the number of these objects to write.  The value returned
     will be equal  to 'n' unless an error occured.
   Remarks:
     None.
@@ -4691,7 +4887,7 @@ size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream)
     buffer into the current cluster of the FSFILE object
     that is stored in the gBufferOwner global variable.
   Remarks:
-    None                                                   
+    None
   **********************************************************/
 
 #ifdef ALLOW_WRITES
@@ -4730,7 +4926,7 @@ BYTE flushData (void)
   Input:
     stream -  Pointer to the target file
   Return Values:
-    Non-Zero - EOF reached 
+    Non-Zero - EOF reached
     0 - Not at end of File
   Side Effects:
     The FSerrno variable will be changed.
@@ -4772,8 +4968,8 @@ int FSfeof( FSFILE * stream )
     the specified buffer until the specified number of bytes have been read.
     When a cluster boundary is reached, a new cluster will be loaded.  The
     parameters 'size' and 'n' indicate how much data to read.  'Size'
-    refers to the size of one object to read (in bytes), and 'n' will refer 
-    to the number of these objects to read.  The value returned will be equal 
+    refers to the size of one object to read (in bytes), and 'n' will refer
+    to the number of these objects to read.  The value returned will be equal
     to 'n' unless an error occured or the user tried to read beyond the end
     of the file.
   Remarks:
@@ -4901,13 +5097,13 @@ size_t FSfread (void *ptr, size_t size, size_t n, FSFILE *stream)
     fN2 -       The location the formatted name will be stored
     mode -      Non-zero if parital string search chars are allowed
   Return Values:
-    TRUE - Name formatted successfully 
+    TRUE - Name formatted successfully
     FALSE - File name could not be formatted
   Side Effects:
     None
   Description:
     Format an 8.3 filename into FSFILE structure format. If filename is less
-    than 8 chars, then it will be padded with spaces. If the extension name is 
+    than 8 chars, then it will be padded with spaces. If the extension name is
     fewer than 3 chars, then it will also be oadded with spaces. The
     ValidateChars function is used to ensure the characters in the specified
     filename are valid in this filesystem.
@@ -4984,11 +5180,11 @@ BYTE FormatFileName( const char* fileName, char* fN2, BYTE mode)
     This function should not be called by the user.
   Input:
     string -  The name to be formatted
-    mode -    
-         - TRUE -  Partial string search characters are allowed 
+    mode -
+         - TRUE -  Partial string search characters are allowed
          - FALSE - Partial string search characters are forbidden
   Return Values:
-    TRUE - The name was formatted correctly 
+    TRUE - The name was formatted correctly
     FALSE - The name contained invalid characters
   Side Effects:
     None
@@ -5021,7 +5217,7 @@ BYTE FormatDirName (char * string, BYTE mode)
     {
         tempString [i++] = 0x20;
     }
-    
+
     if (*(string + j) == '.')
     {
         j++;
@@ -5037,18 +5233,18 @@ BYTE FormatDirName (char * string, BYTE mode)
     }
 
     tempString[11] = 0;
-    
+
     // Forbidden
     if (tempString[0] == 0x20)
     {
         tempString[0] = '_';
     }
-    
+
     for (i = 0; i < 12; i++)
     {
         *(string + i) = tempString[i];
     }
-    
+
     return TRUE;
 }
 #endif
@@ -5065,7 +5261,7 @@ BYTE FormatDirName (char * string, BYTE mode)
     fileName -  The name to be validated
     mode -      Determines if partial string search is allowed
   Return Values:
-    TRUE - Name was validated 
+    TRUE - Name was validated
     FALSE - File name was not valid
   Side Effects:
     None
@@ -5082,18 +5278,18 @@ BYTE ValidateChars( char * FileName , BYTE mode)
 {
     int StrSz, index;
     unsigned char radix = FALSE;
-    
+
     StrSz = strlen(FileName);
-    
+
     for( index = 0; index < StrSz; index++ )
     {
-        if (((FileName[index] <= 0x20) && (FileName[index] != 0x05)) || 
-            (FileName[index] == 0x22) || (FileName[index] == 0x2B) || 
-            (FileName[index] == 0x2C) || (FileName[index] == 0x2F) || 
-            (FileName[index] == 0x3A) || (FileName[index] == 0x3B) || 
-            (FileName[index] == 0x3C) || (FileName[index] == 0x3D) || 
-            (FileName[index] == 0x3E) || (FileName[index] == 0x5B) || 
-            (FileName[index] == 0x5C) || (FileName[index] == 0x5D) || 
+        if (((FileName[index] <= 0x20) && (FileName[index] != 0x05)) ||
+            (FileName[index] == 0x22) || (FileName[index] == 0x2B) ||
+            (FileName[index] == 0x2C) || (FileName[index] == 0x2F) ||
+            (FileName[index] == 0x3A) || (FileName[index] == 0x3B) ||
+            (FileName[index] == 0x3C) || (FileName[index] == 0x3D) ||
+            (FileName[index] == 0x3E) || (FileName[index] == 0x5B) ||
+            (FileName[index] == 0x5C) || (FileName[index] == 0x5D) ||
             (FileName[index] == 0x7C) || ((FileName[index] == 0x2E) && radix == TRUE))
         {
             return FALSE;
@@ -5130,12 +5326,12 @@ BYTE ValidateChars( char * FileName , BYTE mode)
   Input:
     stream -    Pointer to file structure
     offset -    Offset from base location
-    whence -    
+    whence -
            - SEEK_SET -  Seek from start of file
            - SEEK_CUR -  Seek from current location
            - SEEK_END -  Seek from end of file (subtract offset)
   Return Values:
-    0 -  Operation successful 
+    0 -  Operation successful
     -1 - Operation unsuccesful
   Side Effects:
     The FSerrno variable will be changed.
@@ -5149,7 +5345,7 @@ BYTE ValidateChars( char * FileName , BYTE mode)
     to the file and the position will be set to the first byte of that
     cluster.
   Remarks:
-    None                                                               
+    None
   **********************************************************************/
 
 int FSfseek(FSFILE *stream, long offset, int whence)
@@ -5315,7 +5511,7 @@ int FSfseek(FSFILE *stream, long offset, int whence)
     by the user into a RAM array and pass that array into the
     FSrename function.
   Remarks:
-    This function is for use with PIC18 when passing arguments in ROM.                       
+    This function is for use with PIC18 when passing arguments in ROM.
   *****************************************************************/
 
 int FSrenamepgm (const rom char * fileName, FSFILE * fo)
@@ -5472,7 +5668,7 @@ int FindFirstpgm (const rom char * fileName, unsigned int attr, SearchRec * rec)
     The ReadFAT function will read the FAT and
     determine the next cluster value after the
     cluster specified by 'ccls.' Note that the
-    FAT sector that is read is stored in the 
+    FAT sector that is read is stored in the
     global FAT cache buffer.
   Remarks:
     None.
@@ -5511,7 +5707,7 @@ DWORD ReadFAT (DISK *dsk, DWORD ccls)
             break;
     }
 
-    l = dsk->fat + (p / MEDIA_SECTOR_SIZE);     // 
+    l = dsk->fat + (p / MEDIA_SECTOR_SIZE);     //
     p &= MEDIA_SECTOR_SIZE - 1;                 // Restrict 'p' within the FATbuffer size
 
     // Check if the appropriate FAT sector is already loaded
@@ -5709,7 +5905,7 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
             break;
     }
 
-    l = dsk->fat + (p / MEDIA_SECTOR_SIZE);     // 
+    l = dsk->fat + (p / MEDIA_SECTOR_SIZE);     //
     p &= MEDIA_SECTOR_SIZE - 1;                 // Restrict 'p' within the FATbuffer size
 
     if (gLastFATSectorRead != l)
@@ -5830,7 +6026,7 @@ char defaultString [13];
     The FSchdir function passes a RAM pointer to the path to the
     chdirhelper function.
   Remarks:
-    None                                            
+    None
   **************************************************************************/
 
 int FSchdir (char * path)
@@ -5901,7 +6097,7 @@ int FSchdirpgm (const rom char * path)
     path is processed).  The third case statement will handle actual
     directory name strings.
   Remarks:
-    None.                                                                 
+    None.
   *************************************************************************/
 
 #ifdef ALLOW_PGMFUNCTIONS
@@ -5996,7 +6192,7 @@ int chdirhelper (BYTE mode, char * ramptr, char * romptr)
                         }
 
                         // Get the cluster
-                        tempCWD->dirclus = GetFullClusterNumber(entry); // Get Complete Cluster number.                        
+                        tempCWD->dirclus = GetFullClusterNumber(entry); // Get Complete Cluster number.
                         tempCWD->dirccls = tempCWD->dirclus;
 
                         // If we changed to root, record the name
@@ -6010,7 +6206,7 @@ int chdirhelper (BYTE mode, char * ramptr, char * romptr)
 
                             /* While moving to Root, get the Root cluster value */
                             tempCWD->dirccls = FatRootDirClusterValue;
-                            tempCWD->dirclus = FatRootDirClusterValue; 
+                            tempCWD->dirclus = FatRootDirClusterValue;
                         }
                         else
                         {
@@ -6308,19 +6504,19 @@ char defaultArray [10];
     working directory, if it isn't already present.  This could
     occur if the user switched to the dotdot entry of a
     subdirectory immediately before calling this function.  The
-    function will then copy the current working directory name 
-    into the buffer backwards, and insert a backslash character.  
-    Next, the function will continuously switch to the previous 
+    function will then copy the current working directory name
+    into the buffer backwards, and insert a backslash character.
+    Next, the function will continuously switch to the previous
     directories and copy their names backwards into the buffer
     until it reaches the root.  If the buffer overflows, it
     will be treated as a circular buffer, and data will be
     copied over existing characters, starting at the beginning.
     Once the root directory is reached, the text in the buffer
     will be swapped, so that the buffer contains as much of the
-    current working directory name as possible, starting at the 
+    current working directory name as possible, starting at the
     root.
   Remarks:
-    None                                                       
+    None
   **************************************************************/
 char * FSgetcwd (char * path, int numchars)
 {
@@ -6375,7 +6571,7 @@ char * FSgetcwd (char * path, int numchars)
         }
 
 
-       // Get the cluster 
+       // Get the cluster
        TempClusterCalc = GetFullClusterNumber(entry); // Get complete cluster number.
 
         // For FAT32, if the .. entry is 0, the cluster won't be 0
@@ -6463,7 +6659,7 @@ char * FSgetcwd (char * path, int numchars)
                 {
                     index = 0;
                     bufferOverflow = TRUE;
-                }    
+                }
             }
 
             while (tempCWD->name[j] == 0x20)
@@ -6563,7 +6759,7 @@ char * FSgetcwd (char * path, int numchars)
   Input:
     fo -  The file to get the previous entry of
   Return Values:
-    0 -  The previous entry was successfully retrieved 
+    0 -  The previous entry was successfully retrieved
     -1 - The previous entry could not be retrieved
   Side Effects:
     None
@@ -6683,13 +6879,13 @@ BYTE GetPreviousEntry (FSFILE * fo)
     0 -   The specified directory was created successfully
     EOF - The specified directory could not be created
   Side Effects:
-    Will create all non-existent directories in the path. The FSerrno 
+    Will create all non-existent directories in the path. The FSerrno
     variable will be changed.
   Description:
     The FSmkdir function passes a RAM pointer to the path to the
     mkdirhelper function.
   Remarks:
-    None                                            
+    None
   **************************************************************************/
 
 #ifdef ALLOW_WRITES
@@ -6711,7 +6907,7 @@ int FSmkdir (char * path)
     0 -   The specified directory was created successfully
     EOF - The specified directory could not be created
   Side Effects:
-    Will create all non-existent directories in the path. The FSerrno 
+    Will create all non-existent directories in the path. The FSerrno
     variable will be changed.
   Description:
     The FSmkdirpgm function passes a PIC18 ROM path pointer to the
@@ -6749,18 +6945,18 @@ int FSmkdirpgm (const rom char * path)
     Will create all non-existant directories in the path.
     The FSerrno variable will be changed.
   Description:
-    This helper function is used by the FSchdir function. If the path 
-    argument is specified in ROM for PIC18 this function will be able 
+    This helper function is used by the FSchdir function. If the path
+    argument is specified in ROM for PIC18 this function will be able
     to parse it correctly.  This function will first scan through the path
     to ensure that any DIR names don't exceed 11 characters.  It will then
-    backup the current working directory and begin changing directories 
-    through the path until it reaches a directory than can't be changed to.  
-    It will then create the specified directory and change directories to 
-    the new directory. The function will continue creating and changing to 
-    directories until the end of the path is reached.  The function will 
+    backup the current working directory and begin changing directories
+    through the path until it reaches a directory than can't be changed to.
+    It will then create the specified directory and change directories to
+    the new directory. The function will continue creating and changing to
+    directories until the end of the path is reached.  The function will
     then restore the original current working directory.
   Remarks:
-    None                                                
+    None
   **************************************************************************/
 
 #ifdef ALLOW_PGMFUNCTIONS
@@ -7265,7 +7461,7 @@ int CreateDIR (char * path)
   Side Effects:
     None
   Description:
-    The writeDotEntries function will create and write dot and dotdot entries 
+    The writeDotEntries function will create and write dot and dotdot entries
     to a newly created directory.
   Remarks:
     None.
@@ -7380,7 +7576,7 @@ BYTE writeDotEntries (DISK * disk, DWORD dotAddress, DWORD dotdotAddress)
     None
   Input:
     path -      The path of the directory to remove
-    rmsubdirs - 
+    rmsubdirs -
               - TRUE -  All sub-dirs and files in the target dir will be removed
               - FALSE - FSrmdir will not remove non-empty directories
   Return Values:
@@ -7409,7 +7605,7 @@ int FSrmdir (char * path, unsigned char rmsubdirs)
     None.
   Input:
     path -      The path of the directory to remove (ROM)
-    rmsubdirs - 
+    rmsubdirs -
               - TRUE -  All sub-dirs and files in the target dir will be removed
               - FALSE - FSrmdir will not remove non-empty directories
   Return Values:
@@ -7443,8 +7639,8 @@ int FSrmdirpgm (const rom char * path, unsigned char rmsubdirs)
     This function should not be called by the user.
   Input:
     path -      The path of the dir to delete
-    rmsubdirs -  
-              - TRUE -  Remove all sub-directories and files in the directory 
+    rmsubdirs -
+              - TRUE -  Remove all sub-directories and files in the directory
               - FALSE - Non-empty directories can not be removed
   Return Values:
     0 -   The specified directory was successfully removed.
@@ -7454,11 +7650,11 @@ int FSrmdirpgm (const rom char * path, unsigned char rmsubdirs)
   Description:
     This helper function is used by the FSmkdir function.  If the path
     argument is specified in ROM for PIC18 this function will be able
-    to parse it correctly.  This function will first change to the 
+    to parse it correctly.  This function will first change to the
     specified directory.  If the rmsubdirs argument is FALSE the function
     will search through the directory to ensure that it is empty and then
-    remove it.  If the rmsubdirs argument is TRUE the function will also 
-    search through the directory for subdirectories or files.  When the 
+    remove it.  If the rmsubdirs argument is TRUE the function will also
+    search through the directory for subdirectories or files.  When the
     function finds a file, the file will be erased.  When the function
     finds a subdirectory, it will switch to the subdirectory and begin
     removing all of the files in that subdirectory.  Once the subdirectory
@@ -7622,7 +7818,7 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
                         }
 
                         fo->dsk = &gDiskData;
-                        
+
                         fo->entry = handle;
                         fo->dirclus = cwdptr->dirclus;
                         fo->dirccls = cwdptr->dirccls;
@@ -7903,12 +8099,12 @@ int eraseDir (char * path)
   Description:
     The FindFirst function will search for a file based on parameters passed in
     by the user.  This function will use the FILEfind function to parse through
-    the current working directory searching for entries that match the specified 
-    parameters.  If a file is found, its parameters are copied into the SearchRec 
-    structure, as are the initial parameters passed in by the user and the position 
+    the current working directory searching for entries that match the specified
+    parameters.  If a file is found, its parameters are copied into the SearchRec
+    structure, as are the initial parameters passed in by the user and the position
     of the file entry in the current working directory.
   Remarks:
-    Call FindFirst or FindFirstpgm before calling FindNext                          
+    Call FindFirst or FindFirstpgm before calling FindNext
   ***********************************************************************************/
 
 int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
@@ -8039,7 +8235,7 @@ int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
     found, rather than at the beginning of the current working
     directory.
   Remarks:
-    Call FindFirst or FindFirstpgm before calling this function        
+    Call FindFirst or FindFirstpgm before calling this function
   **********************************************************************/
 
 int FindNext (SearchRec * rec)
@@ -8166,7 +8362,7 @@ int FindNext (SearchRec * rec)
     This is a helper function for FSfprintf.  It will write one
     character to a file.
   Remarks:
-    None        
+    None
   **********************************************************************/
 
 int FSputc (char c, FSFILE * file)
@@ -8237,7 +8433,7 @@ unsigned char str_put_n_chars (FSFILE * handle, unsigned char n, char c)
     Writes a specially formatted string to a file.
   Remarks:
     Consult AN1045 for a full description of how to use format
-    specifiers.        
+    specifiers.
   **********************************************************************/
 
 #ifdef __18CXX
@@ -8279,7 +8475,7 @@ int FSfprintf (FSFILE *fptr, const char * fmt, ...)
     This helper function will access the elements passed to FSfprintf
   Remarks:
     Consult AN1045 for a full description of how to use format
-    specifiers.        
+    specifiers.
   **********************************************************************/
 
 #ifdef __18CXX
@@ -8698,13 +8894,13 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                                 ' ' and '+' flags */
                             if (!(flags & _FLAG_SIGNED))
                                 flags &= ~(_FLAG_PLUS | _FLAG_SPACE);
-    
+
                             /* if it's a negative value, we need to negate the
                                 unsigned version before we convert to text. Using
                                 unsigned for this allows us to (ab)use the 2's
                                 complement system to avoid overflow and be able to
                                 adequately handle LONG_MIN.
-                            
+
                                 We'll figure out what sign character to print, if
                                 any, here as well. */
 #ifdef __18CXX

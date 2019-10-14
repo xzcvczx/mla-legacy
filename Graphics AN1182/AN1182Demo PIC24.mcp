@@ -111,7 +111,7 @@ file_025=no
 file_026=no
 file_027=no
 [FILE_INFO]
-file_000=Pictures PIC24.c
+file_000=Pictures C30.c
 file_001=TouchScreen.c
 file_002=EEPROM.c
 file_003=HelloWorldFonts.c

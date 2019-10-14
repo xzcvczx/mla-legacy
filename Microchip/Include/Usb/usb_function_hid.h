@@ -128,29 +128,6 @@
 #define HID_PROTOCOL_KEYBOARD       0x01
 #define HID_PROTOCOL_MOUSE          0x02
 
-/********************************************************************
-    Macro:
-        BYTE mHIDGetRptRxLength(void)
-        
-    Description:
-        mHIDGetRptRxLength is used to retrieve the number
-        of bytes copied to user's buffer by the most
-        recent call to HIDRxReport function.
-        
-    Precondition:
-        None
-        
-    Parameters:
-        None
-        
-    Return Values:
-        BYTE : mHIDGetRptRxLength returns hid_rpt_rx_len
-        
-    Remarks:
-        None
-  
- *******************************************************************/
-#define mHIDGetRptRxLength()        hid_rpt_rx_len
 
 /********************************************************************
     Function:
@@ -352,7 +329,6 @@ typedef struct _USB_HID_DSC
 } USB_HID_DSC;
 
 /** Section: EXTERNS ********************************************************/
-extern BYTE hid_rpt_rx_len;
 
 /** Section: PUBLIC PROTOTYPES **********************************************/
 void USBCheckHIDRequest(void);

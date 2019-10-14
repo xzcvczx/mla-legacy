@@ -6,7 +6,7 @@
  *****************************************************************************
  * FileName:        SST25VF016.h
  * Dependencies:    none
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -42,6 +42,8 @@
 
 #ifndef _SST25VF016_H
 #define _SST25VF016_H
+
+#include "GenericTypeDefs.h"
 
 /************************************************************************
 * SST25 Commands                                                       
@@ -211,18 +213,6 @@ void SST25ChipErase(void);
 *                                                                       
 ************************************************************************/
 void SST25ResetWriteProtection();
-
-/************************************************************************
-* Function: void SST25SectorErase(DWORD address)                                           
-*                                                                       
-* Overview: this function erases a 4Kb sector
-*                                                                       
-* Input: address within sector to be erased
-*                                                                       
-* Output: none                                 
-*                                                                       
-************************************************************************/
-void SST25SectorErase(DWORD address);
 
 #endif //_SST25VF016_H
 

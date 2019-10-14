@@ -458,6 +458,7 @@ void SST25SectorErase(DWORD address)
     SST25CSHigh();
 
     // Wait for write end
+    DelayMs(100);
     while(SST25IsWriteBusy());
 }
 

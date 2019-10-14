@@ -188,7 +188,7 @@ file_052=no
 [FILE_INFO]
 file_000=TouchScreen.c
 file_001=EEPROM.c
-file_002=Pictures PIC32.c
+file_002=Pictures C32.c
 file_003=AN1136Demo.c
 file_004=..\Microchip\Graphics\Window.c
 file_005=..\Microchip\Graphics\Button.c

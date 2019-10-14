@@ -42,9 +42,6 @@
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
  *
- * Author               Date		Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Howard Schlunder		10/03/06	Original, copied from Compiler.h
  ********************************************************************/
 #ifndef __HARDWARE_PROFILE_H
 #define __HARDWARE_PROFILE_H
@@ -587,5 +584,11 @@
     #define BRGH2           1 
 #endif
 
+
+#if defined(__PIC24FJ256GB110__) || defined(__PIC32MX__)
+    #define Switch3() PORTDbits.RD6
+#elif defined(__PIC24FJ64GB004__)
+    #define Switch3() PORTAbits.RA10
+#endif
 
 #endif // __HARDWARE_PROFILE_H

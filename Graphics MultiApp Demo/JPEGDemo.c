@@ -141,7 +141,9 @@ const XCHAR JPEGFormatStr[]      = {'F','o','r','m','a','t',0};
 void FillNewElements(void);
 void DisplayErrorInfo(void);
 BYTE ShowNextSlide(void);
- 
+
+#define WAIT_UNTIL_FINISH(x) while(!x)
+
 /************************************************************************
  Function: WORD CreateJPEGDemo(void)
                                                                        
@@ -171,15 +173,15 @@ WORD CreateJPEGDemo(void)
 
     SetColor(BRIGHTRED);
     TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)ImageDisplayStr, (void*)&GOLFontDefault))/2;
-    OutTextXY(TextX,1*TextHeight,(XCHAR*)ImageDisplayStr);
+    WAIT_UNTIL_FINISH(OutTextXY(TextX,1*TextHeight,(XCHAR*)ImageDisplayStr));
 
     SetColor(BLACK);
     TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)DetectingStr, (void*)&GOLFontDefault))/2;
-    OutTextXY(TextX,3*TextHeight,(XCHAR*)DetectingStr);
+    WAIT_UNTIL_FINISH(OutTextXY(TextX,3*TextHeight,(XCHAR*)DetectingStr));
     TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)ThumbDriveStr, (void*)&GOLFontDefault))/2;
-    OutTextXY(TextX,4*TextHeight,(XCHAR*)ThumbDriveStr);
+    WAIT_UNTIL_FINISH(OutTextXY(TextX,4*TextHeight,(XCHAR*)ThumbDriveStr));
     TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)PleaseWaitStr, (void*)&GOLFontDefault))/2;
-    OutTextXY(TextX,6*TextHeight,(XCHAR*)PleaseWaitStr);
+    WAIT_UNTIL_FINISH(OutTextXY(TextX,6*TextHeight,(XCHAR*)PleaseWaitStr));
     
     #if defined (ENABLE_SD_MSD_DEMO)
     	MDD_SDSPI_InitIO();
@@ -191,15 +193,15 @@ WORD CreateJPEGDemo(void)
 		// erase the last line
 	    SetColor(WHITE);
 	    TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)PleaseWaitStr, (void*)&GOLFontDefault))/2;
-    	OutTextXY(TextX,6*TextHeight,(XCHAR*)PleaseWaitStr);
+    	WAIT_UNTIL_FINISH(OutTextXY(TextX,6*TextHeight,(XCHAR*)PleaseWaitStr));
 
 		// replace it with these
 	    SetColor(BRIGHTRED);
 	    TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)Exiting1Str, (void*)&GOLFontDefault))/2;
-    	OutTextXY(TextX,6*TextHeight,(XCHAR*)Exiting1Str);
+    	WAIT_UNTIL_FINISH(OutTextXY(TextX,6*TextHeight,(XCHAR*)Exiting1Str));
 
 	    TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)Exiting2Str, (void*)&GOLFontDefault))/2;
-    	OutTextXY(TextX,7*TextHeight,(XCHAR*)Exiting2Str);
+    	WAIT_UNTIL_FINISH(OutTextXY(TextX,7*TextHeight,(XCHAR*)Exiting2Str));
     	DelayMs(1000);
 	    return 0;
 	} 
@@ -617,13 +619,14 @@ void DisplayErrorInfo(void)
     SetColor(BRIGHTRED);
     TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)JPEGUnsupportedStr, (void*)&GOLFontDefault))/2;
     TextY = (IMG_SCREEN_HEIGHT - 3*TextHeight)/2;
-    OutTextXY(TextX, TextY, (XCHAR*)JPEGUnsupportedStr);
+    WAIT_UNTIL_FINISH(OutTextXY(TextX, TextY, (XCHAR*)JPEGUnsupportedStr));
     TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)JPEGImageStr, (void*)&GOLFontDefault))/2;
-    OutTextXY(TextX, TextY + TextHeight, (XCHAR*)JPEGImageStr);
+    WAIT_UNTIL_FINISH(OutTextXY(TextX, TextY + TextHeight, (XCHAR*)JPEGImageStr));
     TextX = (IMG_SCREEN_WIDTH - GetTextWidth((XCHAR*)JPEGFormatStr, (void*)&GOLFontDefault))/2;
-    OutTextXY(TextX, TextY + 2*TextHeight, (XCHAR*)JPEGFormatStr);
+    WAIT_UNTIL_FINISH(OutTextXY(TextX, TextY + 2*TextHeight, (XCHAR*)JPEGFormatStr));
     
-    DelayMs(800);}
+    DelayMs(800);
+}
 
 /************************************************************************
  Function: BYTE ShowNextSlide(void)

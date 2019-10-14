@@ -117,7 +117,7 @@
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT   
 
-#elif defined(PIC18F46J50_PIM)
+#elif defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
      #pragma config STVREN = ON            //stack overflow/underflow reset enabled
@@ -125,7 +125,7 @@
      #pragma config CPUDIV = OSC1        //No CPU system clock divide
      #pragma config CP0 = OFF            //Program memory is not code-protected
      #pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
-     #pragma config T1DIG = ON           //Sec Osc clock source may be selected
+     #pragma config T1DIG = OFF          //Sec Osc clock source may not be selected, unless T1OSCEN = 1
      #pragma config LPT1OSC = OFF        //high power Timer1 mode
      #pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
      #pragma config IESO = OFF           //Two-Speed Start-up disabled
@@ -174,6 +174,11 @@
     #ifdef __PIC24FJ256GB110__ //Defined by MPLAB when using 24FJ256GB110 device
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+    #elif defined(__PIC24FJ64GB004__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__32MX460F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
@@ -482,7 +487,7 @@ static void InitializeSystem(void)
         AD1PCFG = 0xFFFF;
     #endif
 
-    #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM)
+    #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
 	//On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -507,7 +512,7 @@ static void InitializeSystem(void)
     WDTCONbits.ADSHR = 0;			// Select normal SFR locations
     #endif
 
-    #if defined(PIC18F46J50_PIM)
+    #if defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
 	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
 	//use the ANCONx registers to control this, which is different from other devices which
 	//use the ADCON1 register for this purpose.
@@ -515,6 +520,23 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
     
+   #if defined(PIC24FJ64GB004_PIM)
+	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+	//This allows the device to power up at a lower initial operating frequency, which can be
+	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+	//power up the PLL.
+    {
+        unsigned int pll_startup_counter = 600;
+        CLKDIVbits.PLLEN = 1;
+        while(pll_startup_counter--);
+    }
+
+    //Device switches over automatically to PLL output after PLL is locked and ready.
+    #endif
+
+
 //	The USB specifications require that USB peripheral devices must never source
 //	current onto the Vbus pin.  Additionally, USB peripherals should not source
 //	current on D+ or D- when the host/hub is not actively powering the Vbus line.
@@ -717,8 +739,18 @@ WORD_VAL ReadPOT(void)
         w.v[1] = ADRESH;
 
     #elif defined(__C30__) || defined(__C32__)
-        #if defined(EXPLORER_16) && !defined(PIC32MX460F512L_PIM)
+        #if defined(PIC24FJ256GB110_PIM)
             AD1CHS = 0x5;           //MUXA uses AN5
+
+            // Get an ADC sample
+            AD1CON1bits.SAMP = 1;           //Start sampling
+            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            AD1CON1bits.SAMP = 0;           //Start sampling
+            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            while(!AD1CON1bits.DONE);       //Wait for conversion to complete
+
+        #elif defined(PIC24FJ64GB004_PIM)
+            AD1CHS = 0x7;           //MUXA uses AN7
 
             // Get an ADC sample
             AD1CON1bits.SAMP = 1;           //Start sampling
@@ -737,7 +769,7 @@ WORD_VAL ReadPOT(void)
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
-        #elif defined(PIC32MX460F512L_PIM)
+        #elif defined(PIC32MX460F512L_PIM) || defined(PIC32_USB_STARTER_KIT)
             AD1PCFG = 0xFFFB; // PORTB = Digital; RB2 = analog
             AD1CON1 = 0x0000; // SAMP bit = 0 ends sampling ...
             // and starts converting
@@ -752,6 +784,8 @@ WORD_VAL ReadPOT(void)
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             AD1CON1CLR = 0x0002; // start Converting
             while (!(AD1CON1 & 0x0001));// conversion done?
+        #else
+            #error
         #endif
 
         w.Val = ADC1BUF0;
@@ -916,10 +950,7 @@ void USBCBSuspend(void)
         IEC5bits.USB1IE = 1;
         U1OTGIEbits.ACTVIE = 1;
         U1OTGIRbits.ACTVIF = 1;
-        TRISA &= 0xFF3F;
-        LATAbits.LATA6 = 1;
         Sleep();
-        LATAbits.LATA6 = 0;
     #endif
     #endif
 }

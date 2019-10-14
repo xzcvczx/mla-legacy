@@ -86,11 +86,9 @@
 /** INCLUDES *******************************************************/
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
-#include "./USB/usb_ch9.h"
 #include "./USB/USB.h"
-#include "./USB/usb_device.h"
 #include "HardwareProfile.h"
-#include "usb_config.h"
+
 
 #if defined(USB_USE_MSD)
     #include "./USB/usb_function_msd.h"
@@ -128,6 +126,7 @@ USB_VOLATILE OUT_PIPE outPipes[1];
 USB_VOLATILE BYTE *pDst;
 USB_VOLATILE BOOL RemoteWakeup;
 USB_VOLATILE BYTE USTATcopy;
+USB_VOLATILE BOOL BothEP0OutUOWNsSet;
 USB_VOLATILE WORD USBInMaxPacketSize[USB_MAX_EP_NUMBER]; 
 USB_VOLATILE BYTE *USBInData[USB_MAX_EP_NUMBER];
 
@@ -228,11 +227,8 @@ void USBDeviceInit(void)
        
     // Clears all USB interrupts          
     USBClearInterruptRegister(U1IR); 
-    #if defined(USB_POLLING)
-                       
-    U1EIE = 0x9F;                   // Unmask all USB error interrupts
-    U1IE = 0xFB;                    // Enable all interrupts except ACTVIE
-    #endif
+
+    SetConfigurationOptions();
 
     //power up the module
     USBPowerModule();
@@ -240,15 +236,17 @@ void USBDeviceInit(void)
     //set the address of the BDT (if applicable)
     USBSetBDTAddress(BDT);
 
-    // Reset all of the Ping Pong buffers
+    // Assert reset request to all of the Ping Pong buffer pointers
     USBPingPongBufferReset = 1;                    
-    USBPingPongBufferReset = 0;
 
     // Reset to default address
     U1ADDR = 0x00;                   
 
     //Clear all of the endpoint control registers
     memset((void*)&U1EP1,0x00,(USB_MAX_EP_NUMBER-1));
+
+    //Stop trying to reset ping pong buffer pointers
+    USBPingPongBufferReset = 0;
 
     //Clear all of the BDT entries
     for(i=0;i<(sizeof(BDT)/sizeof(BDT_ENTRY));i++)
@@ -331,8 +329,6 @@ void USBDeviceTasks(void)
 {
     BYTE i;
 
-    USBClearUSBInterrupt();
-
 #ifdef USB_SUPPORT_OTG
     //SRP Time Out Check
     if (USBOTGSRPIsReady())
@@ -394,13 +390,14 @@ void USBDeviceTasks(void)
          #endif
             //return so that we don't go through the rest of 
             //the state machine
-          return;
+         USBClearUSBInterrupt();
+         return;
     }
 
-#ifdef USB_SUPPORT_OTG
+	#ifdef USB_SUPPORT_OTG
     //If Session Is Started Then
-   else
-   {
+    else
+	{
         //If SRP Is Ready
         if (USBOTGSRPIsReady())
         {   
@@ -414,18 +411,20 @@ void USBDeviceTasks(void)
             UART2PrintString( "\r\n***** USB OTG B Event - Session Started  *****\r\n" );
         }
     }
-#endif
+	#endif	//#ifdef USB_SUPPORT_OTG
 
     //if we are in the detached state
     if(USBDeviceState == DETACHED_STATE)
     {
-        //#if defined(__18CXX)
-            U1CON = 0;                           // Disable module & detach from bus
-        //#else
-        //#endif
+	    //Initialize register to known value
+        U1CON = 0;                          
 
         // Mask all USB interrupts
         U1IE = 0;                                
+
+        //Enable/set things like: pull ups, full/low-speed mode, 
+        //set the ping pong mode, and set internal transceiver
+        SetConfigurationOptions();
 
         // Enable module & attach to bus
         while(!U1CONbits.USBEN){U1CONbits.USBEN = 1;}
@@ -433,15 +432,11 @@ void USBDeviceTasks(void)
         //moved to the attached state
         USBDeviceState = ATTACHED_STATE;
 
-        //Enable/set things like: pull ups, full/low-speed mode, 
-        //set the ping pong mode, and set internal transceiver
-        SetConfigurationOptions();
-
         #ifdef  USB_SUPPORT_OTG
             U1OTGCON |= USB_OTG_DPLUS_ENABLE | USB_OTG_ENABLE;  
         #endif
     }
-#endif  //#if defined(USB_POLLING)
+	#endif  //#if defined(USB_POLLING)
 
     if(USBDeviceState == ATTACHED_STATE)
     {
@@ -495,6 +490,7 @@ void USBDeviceTasks(void)
      */
     if(USBSuspendControl==1)
     {
+        USBClearUSBInterrupt();
         return;
     }
 
@@ -576,7 +572,11 @@ void USBDeviceTasks(void)
      * Once bus reset is received, the device transitions into the DEFAULT
      * state and is ready for communication.
      */
-    if(USBDeviceState < DEFAULT_STATE) return;
+    if(USBDeviceState < DEFAULT_STATE)
+    {
+	    USBClearUSBInterrupt();
+	    return; 
+	}  
 
     /*
      * Task D: Servicing USB Transaction Complete Interrupt
@@ -612,6 +612,8 @@ void USBDeviceTasks(void)
 		    	break;	//USTAT FIFO must be empty.
 		}//end for()
 	}//end if(USBTransactionCompleteIE)   
+
+    USBClearUSBInterrupt();
 }//end of USBDeviceTasks()
 
 /********************************************************************
@@ -732,16 +734,21 @@ void USBSuspend(void)
  *******************************************************************/
 void USBWakeFromSuspend(void)
 {
-    #if defined(__18CXX)
-    U1CONbits.SUSPND = 0;                   // Bring USB module out of power conserve
-                                            // mode.
-    #endif
-
     /*
      * If using clock switching, the place to restore the original
      * microcontroller core clock frequency is in the USBCBWakeFromSuspend() callback
      */
     USB_WAKEUP_FROM_SUSPEND_HANDLER(EVENT_RESUME,0,0);
+
+    #if defined(__18CXX)
+    //To avoid improperly clocking the USB module, make sure the oscillator
+    //settings are consistant with USB operation before clearing the SUSPND bit.
+    //Make sure the correct oscillator settings are selected in the 
+    //"USB_WAKEUP_FROM_SUSPEND_HANDLER(EVENT_RESUME,0,0)" handler.
+    U1CONbits.SUSPND = 0;   // Bring USB module out of power conserve
+                            // mode.
+    #endif
+
 
     USBActivityIE = 0;
 
@@ -792,7 +799,7 @@ void USBWakeFromSuspend(void)
  *******************************************************************/
 void USBCtrlEPService(void)
 {
-	//If the last packet was a EP0 OUT packet
+	//Check if the last transaction was on  EP0 OUT endpoint (of any kind, to either the even or odd buffer if ping pong buffers used)
     if((USTATcopy & USTAT_EP0_PP_MASK) == USTAT_EP0_OUT_EVEN)
     {
 		//Point to the EP0 OUT buffer of the buffer that arrived
@@ -809,10 +816,24 @@ void USBCtrlEPService(void)
 		//Toggle it to the next ping pong buffer (if applicable)
         ((BYTE_VAL*)&pBDTEntryEP0OutNext)->Val ^= USB_NEXT_EP0_OUT_PING_PONG;
 
-		//If the current EP0 OUT buffer has a SETUP token
+		//If the current EP0 OUT buffer has a SETUP packet
         if(pBDTEntryEP0OutCurrent->STAT.PID == SETUP_TOKEN)
         {
-			//Handle the control transfer
+	        //Check if the SETUP transaction data went into the CtrlTrfData buffer.
+	        //If so, need to copy it to the SetupPkt buffer so that it can be 
+	        //processed correctly by USBCtrlTrfSetupHandler().
+	        if(pBDTEntryEP0OutCurrent->ADR == (BYTE*)ConvertToPhysicalAddress(&CtrlTrfData))	
+	        {
+		        unsigned char setup_cnt;
+		
+		        pBDTEntryEP0OutCurrent->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
+		        for(setup_cnt = 0; setup_cnt < sizeof(CTRL_TRF_SETUP); setup_cnt++)
+		        {
+		            *(((BYTE*)&SetupPkt)+setup_cnt) = *(((BYTE*)&CtrlTrfData)+setup_cnt);
+		        }//end for
+		    } 
+	        
+			//Handle the control transfer (parse the 8-byte SETUP command and figure out what to do)
             USBCtrlTrfSetupHandler();
         }
         else
@@ -857,8 +878,8 @@ void USBCtrlEPService(void)
  * Note:            Microchip USB Firmware has three different states for
  *                  the control transfer state machine:
  *                  1. WAIT_SETUP
- *                  2. CTRL_TRF_TX
- *                  3. CTRL_TRF_RX
+ *                  2. CTRL_TRF_TX (device sends data to host through IN transactions)
+ *                  3. CTRL_TRF_RX (device receives data from host through OUT transactions)
  *                  Refer to firmware manual to find out how one state
  *                  is transitioned to another.
  *
@@ -921,11 +942,26 @@ void USBCtrlTrfOutHandler(void)
 {
     if(controlTransferState == CTRL_TRF_RX)
     {
-        USBCtrlTrfRxService();
+        USBCtrlTrfRxService();	//Copies the newly received data into the appropriate buffer and configures EP0 OUT for next transaction.
     }
-    else    // CTRL_TRF_TX
+    else //In this case the last OUT transaction must have been a status stage of a CTRL_TRF_TX
     {
-        USBPrepareForNextSetupTrf();
+	    //Prepare EP0 OUT for the next SETUP transaction, however, it may have
+	    //already been prepared if ping-pong buffering was enabled on EP0 OUT,
+	    //and the last control transfer was of direction: device to host, see
+	    //USBCtrlEPServiceComplete().  If it was already prepared, do not want
+	    //to do anything to the BDT.
+		USBPrepareForNextSetupTrf();
+		if(BothEP0OutUOWNsSet == FALSE)
+		{
+	        pBDTEntryEP0OutNext->CNT = USB_EP0_BUFF_SIZE;
+	        pBDTEntryEP0OutNext->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
+	        pBDTEntryEP0OutNext->STAT.Val = _USIE|_DAT0|_DTSEN|_BSTALL;			
+		}
+		else
+		{
+			BothEP0OutUOWNsSet = FALSE;
+		}
     }
 }
 
@@ -942,7 +978,6 @@ void USBCtrlTrfOutHandler(void)
  *
  * Overview:        This routine handles an IN transaction according to
  *                  which control transfer state is currently active.
- *
  *
  * Note:            A Set Address Request must not change the acutal address
  *                  of the device until the completion of the control
@@ -1001,10 +1036,11 @@ void USBCtrlTrfInHandler(void)
             }
         }//end if(...)else
     }
-    else // CTRL_TRF_RX
-    {
-        USBPrepareForNextSetupTrf();
-    }
+	else // must have been a CTRL_TRF_RX status stage IN packet
+	{
+		USBPrepareForNextSetupTrf();
+	}	
+
 }
 
 /********************************************************************
@@ -1026,88 +1062,19 @@ void USBCtrlTrfInHandler(void)
  *******************************************************************/
 void USBPrepareForNextSetupTrf(void)
 {
-    /********************************************************************
-    Bug Fix: Feb 26, 2007 v2.1
-    *********************************************************************
-    Facts:
-    A Setup Packet should never be stalled. (USB 2.0 Section 8.5.3)
-    If a Setup PID is detected by the SIE, the DTSEN setting is ignored.
-    This causes a problem at the end of a control write transaction.
-    In USBCtrlEPServiceComplete(), during a control write (Host to Device),
-    the EP0_OUT is setup to write any data to the CtrlTrfData buffer.
-    If <SETUP[0]><IN[1]> is completed and USBCtrlTrfInHandler() is not
-    called before the next <SETUP[0]> is received, then the latest Setup
-    data will be written to the CtrlTrfData buffer instead of the SetupPkt
-    buffer.
+    controlTransferState = WAIT_SETUP;
+	
+	//Don't need to do anything to EP0 OUT BDT here, as EP0 OUT next is
+	//already configured and ready to receive a SETUP transaction.  This is
+	//done in the USBCtrlTrfOutHandler() or USBCtrlEPServiceComplete() function,
+	//depending upon the type of the last control transfer.
 
-    If USBCtrlTrfInHandler() was called before the latest <SETUP[0]> is
-    received, then there would be no problem,
-    because USBPrepareForNextSetupTrf() would have been called and updated
-    ep0Bo.ADR to point to the SetupPkt buffer.
-
-    Work around:
-    Check for the problem as described above and copy the Setup data from
-    CtrlTrfData to SetupPkt.
-    ********************************************************************/
-    if((controlTransferState == CTRL_TRF_RX) &&
-       (USBPacketDisable == 1) &&
-       (pBDTEntryEP0OutCurrent->CNT == sizeof(CTRL_TRF_SETUP)) &&
-       (pBDTEntryEP0OutCurrent->STAT.PID == SETUP_TOKEN) &&
-       (pBDTEntryEP0OutNext->STAT.UOWN == 0))
+    pBDTEntryIn[0]->STAT.Val = _UCPU;    
     {
-        unsigned char setup_cnt;
+        BDT_ENTRY* p;
 
-        pBDTEntryEP0OutNext->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
-
-        // The Setup data was written to the CtrlTrfData buffer, must copy
-        // it back to the SetupPkt buffer so that it can be processed correctly
-        // by USBCtrlTrfSetupHandler().
-        for(setup_cnt = 0; setup_cnt < sizeof(CTRL_TRF_SETUP); setup_cnt++)
-        {
-            *(((BYTE*)&SetupPkt)+setup_cnt) = *(((BYTE*)&CtrlTrfData)+setup_cnt);
-        }//end for
-    }
-    /* End v3b fix */
-    else
-    {
-        controlTransferState = WAIT_SETUP;
-        pBDTEntryEP0OutNext->CNT = USB_EP0_BUFF_SIZE;      // Defined in usb_config.h
-        pBDTEntryEP0OutNext->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
-
-        /********************************************************************
-        Bug Fix: Feb 26, 2007 v2.1 (#F1)
-        *********************************************************************
-        In the original firmware, if an OUT token is sent by the host
-        before a SETUP token is sent, the firmware would respond with an ACK.
-        This is not a correct response, the firmware should have sent a STALL.
-        This is a minor non-compliance since a compliant host should not
-        send an OUT before sending a SETUP token. The fix allows a SETUP
-        transaction to be accepted while stalling OUT transactions.
-        ********************************************************************/
-        //ep0Bo.Stat.Val = _USIE|_DAT0|_DTSEN;        // Removed
-        pBDTEntryEP0OutNext->STAT.Val = _USIE|_DAT0|_DTSEN|_BSTALL;  //Added #F1
-
-        /********************************************************************
-        Bug Fix: Feb 26, 2007 v2.1 (#F3)
-        *********************************************************************
-        In the original firmware, if an IN token is sent by the host
-        before a SETUP token is sent, the firmware would respond with an ACK.
-        This is not a correct response, the firmware should have sent a STALL.
-        This is a minor non-compliance since a compliant host should not
-        send an IN before sending a SETUP token.
-
-        Comment why this fix (#F3) is interfering with fix (#AF1).
-        ********************************************************************/
-        pBDTEntryIn[0]->STAT.Val = _UCPU;             // Should be removed
-
-        {
-            BDT_ENTRY* p;
-
-            p = (BDT_ENTRY*)(((unsigned int)pBDTEntryIn[0])^USB_NEXT_EP0_IN_PING_PONG);
-            p->STAT.Val = _UCPU;
-        }
-
-        //ep0Bi.Stat.Val = _USIE|_BSTALL;   // Should be added #F3
+        p = (BDT_ENTRY*)(((unsigned int)pBDTEntryIn[0])^USB_NEXT_EP0_IN_PING_PONG);
+        p->STAT.Val = _UCPU;
     }
 
     //if someone is still expecting data from the control transfer
@@ -1121,7 +1088,6 @@ void USBPrepareForNextSetupTrf(void)
         }
         outPipes[0].info.bits.busy = 0;
     }
-
 }//end USBPrepareForNextSetupTrf
 
 /********************************************************************
@@ -1171,7 +1137,7 @@ void USBCheckStdRequest(void)
             USBStdFeatureReqHandler();
             break;
         case GET_INTF:
-            inPipes[0].pSrc.bRam = (BYTE*)&USBAlternateInterface+SetupPkt.bIntfID;  // Set source
+            inPipes[0].pSrc.bRam = (BYTE*)&USBAlternateInterface[SetupPkt.bIntfID];  // Set source
             inPipes[0].info.bits.ctrl_trf_mem = _RAM;               // Set memory type
             inPipes[0].wCount.v[0] = 1;                         // Set data count
             inPipes[0].info.bits.busy = 1;
@@ -1474,7 +1440,7 @@ void USBStdGetStatusHandler(void)
  *
  * Side Effects:    None
  *
- * Overview:        This routine wrap up the ramaining tasks in servicing
+ * Overview:        This routine wrap up the remaining tasks in servicing
  *                  a Setup Request. Its main task is to set the endpoint
  *                  controls appropriately for a given situation. See code
  *                  below.
@@ -1531,8 +1497,6 @@ void USBCtrlEPServiceComplete(void)
              */
             pBDTEntryEP0OutNext->CNT = USB_EP0_BUFF_SIZE;
             pBDTEntryEP0OutNext->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
-    
-            /* v2b fix */
             pBDTEntryEP0OutNext->STAT.Val = _USIE|_DAT0|_DTSEN|_BSTALL;
             pBDTEntryIn[0]->STAT.Val = _USIE|_BSTALL; 
         }
@@ -1572,11 +1536,15 @@ void USBCtrlEPServiceComplete(void)
 				 */
 				pBDTEntryEP0OutNext->CNT = USB_EP0_BUFF_SIZE;
 				pBDTEntryEP0OutNext->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
-				pBDTEntryEP0OutNext->STAT.Val = _USIE;           // Note: DTSEN is 0!
+				pBDTEntryEP0OutNext->STAT.Val = _USIE;           // Note: DTSEN is 0
+				BothEP0OutUOWNsSet = FALSE;	//Indicator flag used in USBCtrlTrfOutHandler()
 
+				#if (USB_PING_PONG_MODE == USB_PING_PONG__EP0_OUT_ONLY) || (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG) 
 				pBDTEntryEP0OutCurrent->CNT = USB_EP0_BUFF_SIZE;
-				pBDTEntryEP0OutCurrent->ADR = (BYTE*)&SetupPkt;
-				pBDTEntryEP0OutCurrent->STAT.Val = _USIE;           // Note: DTSEN is 0!
+				pBDTEntryEP0OutCurrent->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
+				pBDTEntryEP0OutCurrent->STAT.Val = _USIE|_BSTALL; //Prepare endpoint to accept a SETUP transaction
+				BothEP0OutUOWNsSet = TRUE;	//Indicator flag used in USBCtrlTrfOutHandler()
+				#endif
 
 				/*
 				 * 2. Prepare IN EP to transfer data, Cnt should have
@@ -1624,10 +1592,12 @@ void USBCtrlEPServiceComplete(void)
  *
  * Side Effects:    None
  *
- * Overview:        This routine should be called from only two places.
- *                  One from USBCtrlEPServiceComplete() and one from
- *                  USBCtrlTrfInHandler(). It takes care of managing a
+ * Overview:        This routine is used for device to host control transfers 
+ *					(IN transactions).  This function takes care of managing a
  *                  transfer over multiple USB transactions.
+ *					This routine should be called from only two places.
+ *                  One from USBCtrlEPServiceComplete() and one from
+ *                  USBCtrlTrfInHandler().
  *
  * Note:            This routine works with isochronous endpoint larger than
  *                  256 bytes and is shown here as an example of how to deal
@@ -1719,8 +1689,13 @@ void USBCtrlTrfTxService(void)
  *
  * Side Effects:    None
  *
- * Overview:        *** This routine is only partially complete. Check for
- *                  new version of the firmware.
+ * Overview:        This routine is used for host to device control transfers
+ *					(uses OUT transactions).  This function receives the data that arrives
+ *					on EP0 OUT, and copies it into the appropriate outPipes[0].pDst.bRam
+ *					buffer.  Once the host has sent all the data it was intending
+ *					to send, this function will call the appropriate outPipes[0].pFunc()
+ *					handler (unless it is NULL), so that it can be used by the
+ *					intended target firmware.
  *
  * Note:            None
  *****************************************************************************/
@@ -1769,17 +1744,19 @@ void USBCtrlTrfRxService(void)
     }
     else
     {
+        pBDTEntryEP0OutNext->CNT = USB_EP0_BUFF_SIZE;
         pBDTEntryEP0OutNext->ADR = (BYTE*)ConvertToPhysicalAddress(&SetupPkt);
+        //Configure EP0 OUT to receive the next SETUP transaction for any future
+        //control transfers.  However, set BSTALL in case the host tries to send
+        //more data than it claims it was going to send.
+        pBDTEntryEP0OutNext->STAT.Val = _USIE|_BSTALL;
+
         if(outPipes[0].pFunc != NULL)
         {
             outPipes[0].pFunc();
         }
         outPipes[0].info.bits.busy = 0;
     }
-
-
-    // reset ep0Bo.Cnt to USB_EP0_BUFF_SIZE
-
 }//end USBCtrlTrfRxService
 
 /********************************************************************
@@ -2027,7 +2004,8 @@ void USBStallEndpoint(BYTE ep, BYTE dir)
  *   BYTE* data - pointer to the data to be sent
  *   BYTE len - length of the data needing to be sent
  *
- * Output:          None
+ * Output:          
+ *   USB_HANDLE - handle to the transfer
  *
  * Side Effects:    None
  *
@@ -2037,7 +2015,7 @@ void USBStallEndpoint(BYTE ep, BYTE dir)
  *******************************************************************/
 USB_HANDLE USBTransferOnePacket(BYTE ep,BYTE dir,BYTE* data,BYTE len)
 {
-    USB_HANDLE handle;
+    volatile BDT_ENTRY* handle;
 
     //If the direction is IN
     if(dir != 0)
@@ -2078,7 +2056,7 @@ USB_HANDLE USBTransferOnePacket(BYTE ep,BYTE dir,BYTE* data,BYTE len)
         //toggle over the to the next buffer for an OUT endpoint
         ((BYTE_VAL*)&pBDTEntryOut[ep])->Val ^= USB_NEXT_PING_PONG;
     }
-    return handle;
+    return (USB_HANDLE)handle;
 }
 
 /********************************************************************
@@ -2199,7 +2177,14 @@ void USBDeviceDetach(void)
     Description:
                 
     Precondition:
-        
+  			//For normal USB devices:
+  			//Make sure that if the module was previously on, that it has been turned off 
+  			//for a long time (ex: 100ms+) before calling this function to re-enable the module.
+			//If the device turns off the D+ (for full speed) or D- (for low speed) ~1.5k ohm
+			//pull up resistor, and then turns it back on very quickly, common hosts will sometimes 
+			//reject this event, since no human could ever unplug and reattach a USB device in a 
+			//microseconds (or nanoseconds) timescale.  The host could simply treat this as some kind 
+			//of glitch and ignore the event altogether.  
     Parameters:
         None
      
@@ -2215,22 +2200,23 @@ void USBDeviceAttach(void)
     //if we are in the detached state
     if(USBDeviceState == DETACHED_STATE)
     {
-        U1CON = 0;                           // Disable module & detach from bus
+	    //Initialize registers to known states.
+        U1CON = 0;          
 
         // Mask all USB interrupts
         U1IE = 0;                                
+
+        //Configure things like: pull ups, full/low-speed mode, 
+        //set the ping pong mode, and set internal transceiver
+        SetConfigurationOptions();
+
+        USBEnableInterrupts();
 
         // Enable module & attach to bus
         while(!U1CONbits.USBEN){U1CONbits.USBEN = 1;}
 
         //moved to the attached state
         USBDeviceState = ATTACHED_STATE;
-
-        //Enable/set things like: pull ups, full/low-speed mode, 
-        //set the ping pong mode, and set internal transceiver
-        SetConfigurationOptions();
-
-        USBEnableInterrupts();
 
         #ifdef  USB_SUPPORT_OTG
             U1OTGCON = USB_OTG_DPLUS_ENABLE | USB_OTG_ENABLE;  

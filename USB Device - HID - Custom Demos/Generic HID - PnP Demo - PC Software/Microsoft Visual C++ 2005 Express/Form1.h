@@ -539,7 +539,7 @@ BOOL	CheckIfPresentAndGetUSBDevicePath(void)
 			if(SetupDiEnumDeviceInterfacesUM(DeviceInfoTable, NULL, &InterfaceClassGuid, InterfaceIndex, InterfaceDataStructure))
 			{
 				ErrorStatus = GetLastError();
-				if(ERROR_NO_MORE_ITEMS == GetLastError())	//Did we reach the end of the list of matching devices in the DeviceInfoTable?
+				if(ErrorStatus == ERROR_NO_MORE_ITEMS)	//Did we reach the end of the list of matching devices in the DeviceInfoTable?
 				{	//Cound not find the device.  Must not have been attached.
 					SetupDiDestroyDeviceInfoListUM(DeviceInfoTable);	//Clean up the old structure we no longer need.
 					return FALSE;		

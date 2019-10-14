@@ -265,7 +265,7 @@ extern CLIENT_DRIVER_TABLE usbDeviceInterfaceTable;
 
 /*******************************************************************************
   Function:
-    BOOL USBHostCDCInitAddress( BYTE address, DWORD flags )
+    BOOL USBHostCDCInitAddress( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Precondition:
     The device has been enumerated without any errors.
@@ -283,6 +283,7 @@ extern CLIENT_DRIVER_TABLE usbDeviceInterfaceTable;
   Parameters:
     BYTE address    -   Address of the new device
     DWORD flags     -   Initialization flags
+    BYTE clientDriverID - Client driver identification for device requests
 
   Return Values:
     TRUE    -   We can support the device.
@@ -291,7 +292,7 @@ extern CLIENT_DRIVER_TABLE usbDeviceInterfaceTable;
   Remarks:
     None
 *******************************************************************************/
-BOOL USBHostCDCInitAddress( BYTE address, DWORD flags )
+BOOL USBHostCDCInitAddress( BYTE address, DWORD flags, BYTE clientDriverID )
 {
     #ifndef MINIMUM_BUILD
 //        UART2PrintString( "CDC: Device attached.\r\n" );
@@ -542,16 +543,16 @@ void USBHostCDCTasks( void )
                         break;
 
                     case SUBSTATE_DEVICE_ENUMERATED:
-                        USBHostCDCInitAddress( deviceInfoCDC[i].deviceAddress,0 ); // Initialize device address for application use 
+                        USBHostCDCInitAddress( deviceInfoCDC[i].deviceAddress,0, deviceInfoCDC[i].clientDriverID ); // Initialize device address for application use 
                        _USBHostCDC_SetNextSubState(); /* need to add sub states to Set Config, Get LANGID & String Descriptors */
                         break;
 
 
                    case SUBSTATE_GET_LINE_CODING:
                          
-                       if(!USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                       if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                             USB_CDC_GET_LINE_CODING, 0 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_LINE_CODING_LENGTH, (BYTE*)&CDC_DEV_LINE_CODING_Buffer,
-                                            USB_DEVICE_REQUEST_GET ))
+                                            USB_DEVICE_REQUEST_GET , deviceInfoCDC[i].clientDriverID ))
                        {           
                             _USBHostCDC_SetNextSubState();
                        }
@@ -586,9 +587,9 @@ void USBHostCDCTasks( void )
 
                    case SUBSTATE_SET_LINE_CODING:
                          
-                       if(!USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                       if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                             USB_CDC_SET_LINE_CODING, 1 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_LINE_CODING_LENGTH, (BYTE*)PTR_HOST_LINE_CODING_BUFFER,
-                                            USB_DEVICE_REQUEST_SET ))
+                                            USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID ))
                        {           
                             _USBHostCDC_SetNextSubState();
                        }
@@ -611,9 +612,9 @@ void USBHostCDCTasks( void )
 
                    case SUBSTATE_SET_CONTROL_LINE_STATE:
                          
-                       if(!USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                       if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                             USB_CDC_SET_CONTROL_LINE_STATE , 0 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_CONTROL_LINE_LENGTH, (BYTE*)PTR_HOST_CONTROL_LINE_BUFFER,
-                                            USB_DEVICE_REQUEST_SET ))
+                                            USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID ))
                        {           
                             _USBHostCDC_SetNextSubState();
                        }
@@ -653,9 +654,9 @@ void USBHostCDCTasks( void )
 
                             if(deviceInfoCDC[i].endpointDATA == 0x00)
                             {
-                                errorCode   = USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                                errorCode   = USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                                                     deviceInfoCDC[i].commRequest, 0, deviceInfoCDC[i].interface,deviceInfoCDC[i].reportSize, deviceInfoCDC[i].userData,
-                                                                    USB_DEVICE_REQUEST_GET );
+                                                                    USB_DEVICE_REQUEST_GET , deviceInfoCDC[i].clientDriverID );
                             }
                             else
                             {
@@ -724,9 +725,9 @@ void USBHostCDCTasks( void )
                             // otherwise request is for data interface transfer
                               if(deviceInfoCDC[i].endpointDATA == 0x00)
                               {
-                                  errorCode   = USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                                  errorCode   = USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                                deviceInfoCDC[i].commRequest, 0, deviceInfoCDC[i].interface,deviceInfoCDC[i].reportSize, deviceInfoCDC[i].userData,
-                                               USB_DEVICE_REQUEST_SET );
+                                               USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID );
                               }
                               else
                               {   // if transfer size is more than 64 Bytes, multiple transactions are used to transfer the data
@@ -813,8 +814,8 @@ void USBHostCDCTasks( void )
                 switch (deviceInfoCDC[i].state & SUBSTATE_MASK)
                 {
                     case SUBSTATE_SEND_RESET:   /* Not sure of rest request */
-                            errorCode = USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                                            USB_CDC_RESET, 0, deviceInfoCDC[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET );
+                            errorCode = USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                                            USB_CDC_RESET, 0, deviceInfoCDC[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID );
 
                             if (errorCode)
                             {
@@ -967,9 +968,9 @@ BYTE USBHostCDCTransfer( BYTE deviceAddress,BYTE request , BYTE direction, BYTE 
             {
                 if(deviceInfoCDC[i].endpointDATA == 0x00)// if endpoint 0 then use control transfer for COMM interface request
                 {
-                    errorCode   = USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                    errorCode   = USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                                         request, 0, deviceInfoCDC[i].interface,deviceInfoCDC[i].reportSize, deviceInfoCDC[i].userData,
-                                                        USB_DEVICE_REQUEST_SET );
+                                                        USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID );
                     deviceInfoCDC[i].state         = STATE_WRITE_REQ_WAIT;
                 }
                 else
@@ -983,9 +984,9 @@ BYTE USBHostCDCTransfer( BYTE deviceAddress,BYTE request , BYTE direction, BYTE 
             {
                 if(deviceInfoCDC[i].endpointDATA == 0x00)// if endpoint 0 then use control transfer for COMM interface request
                 {
-                    errorCode   = USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                    errorCode   = USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                                         request, 0, deviceInfoCDC[i].interface,deviceInfoCDC[i].reportSize, deviceInfoCDC[i].userData,
-                                                        USB_DEVICE_REQUEST_GET );
+                                                        USB_DEVICE_REQUEST_GET , deviceInfoCDC[i].clientDriverID );
                     deviceInfoCDC[i].state         = STATE_READ_REQ_WAIT;
                 }
                 else
@@ -1176,9 +1177,9 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                     if(0 == memcmp(&CDC_DEV_LINE_CODING_Buffer, PTR_HOST_LINE_CODING_BUFFER, USB_CDC_LINE_CODING_LENGTH))
                                     {
                                         // if fine goto set  Control line state
-                                       if(!USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                                       if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                                             USB_CDC_SET_CONTROL_LINE_STATE , 0 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_CONTROL_LINE_LENGTH, (BYTE*)PTR_HOST_CONTROL_LINE_BUFFER,
-                                                            USB_DEVICE_REQUEST_SET ))
+                                                            USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID ))
                                        {           
                                             deviceInfoCDC[i].state = STATE_WAIT_FOR_SET_CONTROL_LINE_STATE;
                                        }
@@ -1190,9 +1191,9 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                     else
                                     {
                                         // if data not as expected goto Set Line coding
-                                       if(!USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                                       if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                                             USB_CDC_SET_LINE_CODING, 1 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_LINE_CODING_LENGTH, (BYTE*)PTR_HOST_LINE_CODING_BUFFER,
-                                                            USB_DEVICE_REQUEST_SET ))
+                                                            USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID ))
                                        {           
                                             deviceInfoCDC[i].state = STATE_WAIT_FOR_SET_LINE_CODING;
                                        }
@@ -1216,9 +1217,9 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                 else
                                 {    // check again if line coding is correctly set
                                     // Send GET Line Coding request to the device 
-                                    if(!USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+                                    if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                                                  USB_CDC_GET_LINE_CODING, 0 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_LINE_CODING_LENGTH, (BYTE*)&CDC_DEV_LINE_CODING_Buffer,
-                                                                 USB_DEVICE_REQUEST_GET ))
+                                                                 USB_DEVICE_REQUEST_GET , deviceInfoCDC[i].clientDriverID ))
                                     {           
                                         // wait for transfer event for and then decide to alter the settings or not
                                         deviceInfoCDC[i].state     = STATE_WAIT_FOR_GET_LINE_CODING;
@@ -1360,7 +1361,7 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
 
 /*******************************************************************************
   Function:
-    BOOL USBHostCDCInitialize( BYTE address, DWORD flags )
+    BOOL USBHostCDCInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is the initialization routine for this client driver.
@@ -1378,6 +1379,7 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
   Parameters:
     BYTE address        - Address of the new device
     DWORD flags          - Initialization flags
+    BYTE clientDriverID - Client driver identification for device requests
 
   Return Values:
     TRUE   - We can support the device.
@@ -1386,7 +1388,7 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
   Remarks:
     None
 *******************************************************************************/
-BOOL USBHostCDCInitialize( BYTE address, DWORD flags )
+BOOL USBHostCDCInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 {
     BYTE   *descriptor         = NULL;
     WORD    i                  = 0;
@@ -1577,15 +1579,18 @@ BOOL USBHostCDCInitialize( BYTE address, DWORD flags )
         {
             return FALSE;
         }
+
+        deviceInfoCDC[device].clientDriverID = clientDriverID;
+
         #ifndef USB_ENABLE_TRANSFER_EVENT
            deviceInfoCDC[device].state                = STATE_INITIALIZE_DEVICE;
         #else
            // Initialize device address for application use 
-           USBHostCDCInitAddress( deviceInfoCDC[device].deviceAddress,0 );
+           USBHostCDCInitAddress( deviceInfoCDC[device].deviceAddress,0,deviceInfoCDC[device].clientDriverID );
            // Send GET Line Coding request to the device 
-           if(USBHostDeviceRequest( deviceInfoCDC[device].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
+           if(USBHostIssueDeviceRequest( deviceInfoCDC[device].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
                                      USB_CDC_GET_LINE_CODING, 0 , deviceInfoCDC[device].commInterface.interfaceNum , USB_CDC_LINE_CODING_LENGTH, (BYTE*)&CDC_DEV_LINE_CODING_Buffer,
-                                     USB_DEVICE_REQUEST_GET ))
+                                     USB_DEVICE_REQUEST_GET , deviceInfoCDC[device].clientDriverID ))
            {           
                 return FALSE;
            }
@@ -1634,8 +1639,8 @@ void _USBHostCDC_ResetStateJump( BYTE i )
         #ifndef USB_ENABLE_TRANSFER_EVENT
             deviceInfoCDC[i].state = STATE_CDC_RESET_RECOVERY;
         #else
-             errorCode = USBHostDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                            USB_CDC_RESET, 0, deviceInfoCDC[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET );
+             errorCode = USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                            USB_CDC_RESET, 0, deviceInfoCDC[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID );
 
             if (errorCode)
             {

@@ -1,14 +1,14 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ256GB110
+device=PIC24FJ64GB004
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
 dir_bin=
 dir_tmp=./Objects\USB Device - Mass Storage - Internal Flash Demo - C30 - PIC24FJ256GB110 PIM
 dir_sin=
-dir_inc=..\..\..\..\USB Device - Mass Storage - Internal Flash\Firmware;..\..\..\Include;..\..\..\USB Device - Mass Storage - Internal Flash\Firmware;..\..\Microchip\Include;..\..\Include;.
+dir_inc=..\..\Microchip\Include;..\..\USB Device - Mass Storage - Internal Flash\Firmware
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]
@@ -47,6 +47,7 @@ file_019=MDD File System
 file_020=MDD File System
 file_021=Hardware Profile
 file_022=Hardware Profile
+file_023=Hardware Profile
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -71,6 +72,7 @@ file_019=no
 file_020=no
 file_021=no
 file_022=no
+file_023=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -95,6 +97,7 @@ file_019=no
 file_020=no
 file_021=no
 file_022=no
+file_023=no
 [FILE_INFO]
 file_000=main.c
 file_001=Files.c
@@ -119,6 +122,7 @@ file_019=..\..\Microchip\Include\MDD File System\FSIO.h
 file_020=..\..\Microchip\Include\MDD File System\Internal Flash.h
 file_021=HardwareProfile - PIC24FJ256GB110 PIM.h
 file_022=HardwareProfile - PIC24F Starter Kit.h
+file_023=HardwareProfile - PIC24FJ64GB004 PIM.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

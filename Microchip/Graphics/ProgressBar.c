@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        ProgressBar.c
  * Dependencies:    Graphics.h 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -198,7 +198,7 @@ typedef enum {
 
 static PB_DRAW_STATES state = REMOVE;
 static DWORD x1;
-DWORD        x2;
+volatile DWORD x2;
 static XCHAR  text[5] = {'0','0','%',0};
 
     if(IsDeviceBusy())
@@ -208,13 +208,12 @@ static XCHAR  text[5] = {'0','0','%',0};
 
         case REMOVE:
             if(GetState(pPb,PB_HIDE)){
-                if(IsDeviceBusy())
-                    return 0;
                 SetColor(pPb->hdr.pGolScheme->CommonBkColor);
-                Bar(	pPb->hdr.left,
+                if(!Bar(	pPb->hdr.left,
                 		pPb->hdr.top,
                 		pPb->hdr.right,
-                		pPb->hdr.bottom);
+                		pPb->hdr.bottom))
+                		return 0;
                 return 1;
             }
             state = BOX_DRAW;
@@ -239,10 +238,8 @@ static XCHAR  text[5] = {'0','0','%',0};
             }
 
             state = BAR_DRAW;
-                        
+
         case BAR_DRAW:
-            if(IsDeviceBusy())
-                return 0;
 
             x1 = ((DWORD)pPb->pos)*(pPb->hdr.right-pPb->hdr.left-(2*GOL_EMBOSS_SIZE))/pPb->range;
             x2 = ((DWORD)pPb->prevPos)*(pPb->hdr.right-pPb->hdr.left-(2*GOL_EMBOSS_SIZE))/pPb->range;
@@ -252,37 +249,38 @@ static XCHAR  text[5] = {'0','0','%',0};
             if(pPb->prevPos > pPb->pos){
 
                SetColor(pPb->hdr.pGolScheme->Color0);
-               Bar(x1,pPb->hdr.top+GOL_EMBOSS_SIZE,
-                   x2,pPb->hdr.bottom-GOL_EMBOSS_SIZE );
+               if(!Bar(x1,pPb->hdr.top+GOL_EMBOSS_SIZE,
+                   x2,pPb->hdr.bottom-GOL_EMBOSS_SIZE ))
+                   return 0;
 
             }else{
 
                SetColor(pPb->hdr.pGolScheme->Color1);
-               Bar(x2,pPb->hdr.top+GOL_EMBOSS_SIZE,
-                   x1,pPb->hdr.bottom-GOL_EMBOSS_SIZE );
+               if(!Bar(x2,pPb->hdr.top+GOL_EMBOSS_SIZE,
+                   x1,pPb->hdr.bottom-GOL_EMBOSS_SIZE ))
+                   return 0;
             }
 
             state = TEXT_DRAW1;
 
         case TEXT_DRAW1:
-            if(IsDeviceBusy())
-                return 0;
+ 
             SetColor(pPb->hdr.pGolScheme->Color1);
-            Bar((pPb->hdr.left+pPb->hdr.right-GetTextWidth(text,pPb->hdr.pGolScheme->pFont))>>1,
+            if(!Bar((pPb->hdr.left+pPb->hdr.right-GetTextWidth(text,pPb->hdr.pGolScheme->pFont))>>1,
                  pPb->hdr.top+GOL_EMBOSS_SIZE,
                  x1,
-                 pPb->hdr.bottom-GOL_EMBOSS_SIZE);
+                 pPb->hdr.bottom-GOL_EMBOSS_SIZE))
+                 return 0;
           
             state = TEXT_DRAW2;
 
         case TEXT_DRAW2:
-            if(IsDeviceBusy())
-                return 0;
 
             SetColor(pPb->hdr.pGolScheme->Color0);
-            Bar(x1,pPb->hdr.top+GOL_EMBOSS_SIZE,
+            if(!Bar(x1,pPb->hdr.top+GOL_EMBOSS_SIZE,
                 (pPb->hdr.left+pPb->hdr.right+GetTextWidth(text,pPb->hdr.pGolScheme->pFont))>>1,
-                 pPb->hdr.bottom-GOL_EMBOSS_SIZE);
+                 pPb->hdr.bottom-GOL_EMBOSS_SIZE))
+                 return 0;
 
             PbWordToString((DWORD)pPb->pos*100/pPb->range,text);
             SetColor(pPb->hdr.pGolScheme->TextColor0);

@@ -59,59 +59,68 @@ KO          03-31-2008  First release
 // *****************************************************************************
 // *****************************************************************************
 
-// Configuration Bit settings
-//      Primary Oscillator:             HS
-//      Internal USB 3.3v Regulator:    Disabled
-//      IOLOCK:                         Set Once
-//      Primary Oscillator Output:      Digital I/O
-//      Clock Switching and Monitor:    Both disabled
-//      Oscillator:                     Primary with PLL
-//      USB 96MHz PLL Prescale:         Divide by 2
-//      Internal/External Switch Over:  Enabled
-//      WDT Postscaler:                 1:32768
-//      WDT Prescaler:                  1:128
-//      WDT Window:                     Non-window Mode
-//      Comm Channel:                   EMUC2/EMUD2
-//      Clip on Emulation Mode:         Reset into Operation Mode
-//      Write Protect:                  Disabled
-//      Code Protect:                   Disabled
-//      JTAG Port Enable:               Disabled
-
-#if defined(__C30__)
+#ifdef __C30__
     #define PLL_96MHZ_OFF   0xFFFF
     #define PLL_96MHZ_ON    0xF7FF
-    
-    _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
-    _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
-#endif
 
-#if defined(__32MX460F512L__)
-        #ifdef USB_A0_SILICON_WORK_AROUND
-            #pragma config UPLLEN   = OFF       // USB PLL Enabled (A0 bit inverted)
-        #else
-            #pragma config UPLLEN   = ON        // USB PLL Enabled
-        #endif
-        
-        #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
-        #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
-        #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
-        #pragma config FPLLODIV = DIV_1         // PLL Output Divider
-        #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
-        #pragma config FWDTEN   = OFF           // Watchdog Timer
-        #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
-        #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
-        #pragma config OSCIOFNC = OFF           // CLKO Enable
-        #pragma config POSCMOD  = HS            // Primary Oscillator
-        #pragma config IESO     = OFF           // Internal/External Switch-over
-        #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
-        #pragma config FNOSC    = PRIPLL        // Oscillator Selection
-        #pragma config CP       = OFF           // Code Protect
-        #pragma config BWP      = OFF           // Boot Flash Write Protect
-        #pragma config PWP      = OFF           // Program Flash Write Protect
-        #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
-#endif
+    // Configuration Bit settings  for an Explorer 16 with USB PICtail Plus
+    //      Primary Oscillator:             HS
+    //      Internal USB 3.3v Regulator:    Disabled
+    //      IOLOCK:                         Set Once
+    //      Primary Oscillator Output:      Digital I/O
+    //      Clock Switching and Monitor:    Both disabled
+    //      Oscillator:                     Primary with PLL
+    //      USB 96MHz PLL Prescale:         Divide by 2
+    //      Internal/External Switch Over:  Enabled
+    //      WDT Postscaler:                 1:32768
+    //      WDT Prescaler:                  1:128
+    //      WDT Window:                     Non-window Mode
+    //      Comm Channel:                   EMUC2/EMUD2
+    //      Clip on Emulation Mode:         Reset into Operation Mode
+    //      Write Protect:                  Disabled
+    //      Code Protect:                   Disabled
+    //      JTAG Port Enable:               Disabled
 
+    #if defined(__PIC24FJ256GB110__)
+        _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
+        _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
+    #elif defined(__PIC24FJ64GB004__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
+    #elif defined(__PIC24FJ256GB106__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    #endif
+
+#elif defined( __PIC32MX__ )
+
+    #pragma config UPLLEN   = ON            // USB PLL Enabled
+    #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
+    #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
+    #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
+    #pragma config FPLLODIV = DIV_1         // PLL Output Divider
+    #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
+    #pragma config FWDTEN   = OFF           // Watchdog Timer
+    #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
+    #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
+    #pragma config OSCIOFNC = OFF           // CLKO Enable
+    #pragma config POSCMOD  = HS            // Primary Oscillator
+    #pragma config IESO     = OFF           // Internal/External Switch-over
+    #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
+    #pragma config FNOSC    = PRIPLL        // Oscillator Selection
+    #pragma config CP       = OFF           // Code Protect
+    #pragma config BWP      = OFF           // Boot Flash Write Protect
+    #pragma config PWP      = OFF           // Program Flash Write Protect
+    #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
+    #pragma config DEBUG    = ON            // Background Debugger Enable
+
+#else
+
+    #error Cannot define configuration bits.
+
+#endif
 // *****************************************************************************
 // *****************************************************************************
 // Constants
@@ -258,6 +267,23 @@ BOOL InitializeSystem ( void )
 
         OSCCON = 0x3302;    // Enable secondary oscillator
         CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
+
+        TRISA = 0x0000;
+        TRISD = 0x00C0;
+
+   #elif defined(__PIC24FJ64GB004__)
+	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+	//This allows the device to power up at a lower initial operating frequency, which can be
+	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+	//power up the PLL.
+    {
+        unsigned int pll_startup_counter = 600;
+        CLKDIVbits.PLLEN = 1;
+        while(pll_startup_counter--);
+    }
+
     #elif defined(__PIC32MX__)
         {
             int  value;
@@ -276,8 +302,6 @@ BOOL InitializeSystem ( void )
             }
         }
     #endif
-    TRISA = 0x0000;
-    TRISD = 0x00C0;
 
     // Init LCD
     LCDInit();
@@ -544,14 +568,14 @@ BOOL Switch3WasPressed(void)
 {
     WORD sw3_state;
 
-    sw3_state = PORTD & IOPORT_BIT_6;
+    sw3_state = sw3_port & sw3_bit;
 
-    if( sw3_state != (SwitchState & IOPORT_BIT_6) )
+    if( sw3_state != (SwitchState & sw3_bit) )
     {
-        SwitchState &= ~IOPORT_BIT_6;
+        SwitchState &= ~sw3_bit;
         SwitchState |= sw3_state;
 
-        if(SwitchState & IOPORT_BIT_6)
+        if(SwitchState & sw3_bit)
             return TRUE;                // Was pressed
     }
 
@@ -563,14 +587,14 @@ BOOL Switch6WasPressed(void)
 {
     WORD sw6_state;
 
-    sw6_state = PORTD & IOPORT_BIT_7;
+    sw6_state = sw6_port & sw6_bit;
 
-    if( sw6_state != (SwitchState & IOPORT_BIT_7) )
+    if( sw6_state != (SwitchState & sw6_bit) )
     {
-        SwitchState &= ~IOPORT_BIT_7;
+        SwitchState &= ~sw6_bit;
         SwitchState |= sw6_state;
 
-        if(SwitchState & IOPORT_BIT_7)
+        if(SwitchState & sw6_bit)
             return TRUE;                // Was pressed
     }
 

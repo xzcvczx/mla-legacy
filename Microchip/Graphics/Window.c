@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Window.c
  * Dependencies:    Graphics.h 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -171,7 +171,10 @@ static WND_DRAW_STATES state = WND_REMOVE;
             case WND_REMOVE:
                 if(GetState(pW,WND_HIDE)){
                     SetColor(pW->hdr.pGolScheme->CommonBkColor);
-                    Bar(pW->hdr.left,pW->hdr.top,pW->hdr.right,pW->hdr.bottom);
+                    if(!Bar(pW->hdr.left,pW->hdr.top,pW->hdr.right,pW->hdr.bottom))
+                    {
+                        return 0;
+                    }
                     return 1;                  
                 }
                 
@@ -214,8 +217,11 @@ if(GetState(pW,WND_DRAW_CLIENT)){
                         SetColor(pW->hdr.pGolScheme->ColorDisabled);
                 }
 
-                Bar(pW->hdr.left+GOL_EMBOSS_SIZE, pW->hdr.top+GOL_EMBOSS_SIZE,
-                    pW->hdr.right-GOL_EMBOSS_SIZE, pW->hdr.top+GOL_EMBOSS_SIZE+WND_TITLE_HEIGHT);
+                if(!Bar(pW->hdr.left+GOL_EMBOSS_SIZE, pW->hdr.top+GOL_EMBOSS_SIZE,
+                    pW->hdr.right-GOL_EMBOSS_SIZE, pW->hdr.top+GOL_EMBOSS_SIZE+WND_TITLE_HEIGHT))
+                {
+                    return 0;
+                }
 
                 state = WND_TITLE_BAR_BITMAP;
                 
@@ -224,9 +230,12 @@ if(GetState(pW,WND_DRAW_CLIENT)){
             case WND_TITLE_BAR_BITMAP:
 
         	    if (pW->pBitmap != NULL){
-                    PutImage(pW->hdr.left+GOL_EMBOSS_SIZE,
+                    if(!PutImage(pW->hdr.left+GOL_EMBOSS_SIZE,
                              pW->hdr.top+GOL_EMBOSS_SIZE+((WND_TITLE_HEIGHT-GetImageHeight(pW->pBitmap))>>1),
-                             pW->pBitmap,IMAGE_NORMAL);
+                             pW->pBitmap,IMAGE_NORMAL))
+                             {
+                                 return 0;
+                             }
                 }
 
 if (pW->pText != NULL){

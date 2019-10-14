@@ -184,6 +184,7 @@ status flags and device identification.
 typedef struct _USB_PRINTER_DEVICE
 {
     USB_PRINTER_DEVICE_ID           ID;             // Identification information about the device
+    BYTE                            clientDriverID;
     DWORD                           rxLength;       // Number of bytes received in the last IN transfer
     #ifdef USB_PRINTER_ALLOW_DYNAMIC_LANGUAGE_DETERMINATION
         char*                       deviceIDString;
@@ -248,7 +249,7 @@ BYTE _USBHostPrinter_WriteFromQueue( BYTE deviceAddress );
 
 /****************************************************************************
   Function:
-    BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags )
+    BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is called by the USB Embedded Host layer when a printer
@@ -266,7 +267,8 @@ BYTE _USBHostPrinter_WriteFromQueue( BYTE deviceAddress );
   Parameters:
     BYTE address    - Device's address on the bus
     DWORD flags     - Initialization flags
-
+    BYTE clientDriverID - Client driver identification for device requests
+    
   Return Values:
     TRUE    - Initialization was successful
     FALSE   - Initialization failed
@@ -277,7 +279,7 @@ BYTE _USBHostPrinter_WriteFromQueue( BYTE deviceAddress );
     attached device.
   ***************************************************************************/
 
-BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags )
+BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
 {
     BYTE        endpointIN;
     BYTE        endpointOUT;
@@ -325,14 +327,15 @@ BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags )
         usbPrinters[currentPrinterRecord].deviceIDStringIndex   = 0;
     #endif
 
-    // Save device the address, VID, & PID
+    // Save device the address, VID, & PID, and client driver ID.
     usbPrinters[currentPrinterRecord].ID.deviceAddress          = address;
     pDesc += 8;
     usbPrinters[currentPrinterRecord].ID.vid                    =  (WORD)*pDesc;        pDesc++;
     usbPrinters[currentPrinterRecord].ID.vid                    |= ((WORD)*pDesc) << 8; pDesc++;
     usbPrinters[currentPrinterRecord].ID.pid                    =  (WORD)*pDesc;        pDesc++;
     usbPrinters[currentPrinterRecord].ID.pid                    |= ((WORD)*pDesc) << 8; pDesc++;
-
+    usbPrinters[currentPrinterRecord].clientDriverID            = clientDriverID;
+    
     #ifdef DEBUG_MODE
         UART2PrintString( "PRN: USB Printer Client Initalized: flags=0x" );
         UART2PutHex(      flags );
@@ -458,9 +461,10 @@ BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags )
                             // No printer language has been specified for this printer.
                             // Get the printer device ID string, so we can try to determine
                             // what printer languages it supports.
-                            errorCode = USBHostDeviceRequest( address, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                            errorCode = USBHostIssueDeviceRequest( address, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
                                             PRINTER_DEVICE_REQUEST_GET_DEVICE_ID, 0, 0, ((USB_DEVICE_DESCRIPTOR*)pDeviceDescriptor)->bMaxPacketSize0,
-                                            (BYTE *)usbPrinters[currentPrinterRecord].deviceIDString, USB_DEVICE_REQUEST_GET );
+                                            (BYTE *)usbPrinters[currentPrinterRecord].deviceIDString, USB_DEVICE_REQUEST_GET,
+                                            usbPrinters[currentPrinterRecord].clientDriverID );
                             if (errorCode)
                             {
                                 #ifdef DEBUG_MODE
@@ -992,6 +996,53 @@ DWORD USBHostPrinterGetRxLength( BYTE deviceAddress )
 
 /****************************************************************************
   Function:
+    BYTE USBHostPrinterGetStatus( BYTE deviceAddress, BYTE *status )
+
+  Summary:
+    This function issues the Printer class-specific Device Request to
+    obtain the printer status.
+
+  Description:
+    This function issues the Printer class-specific Device Request to
+    obtain the printer status.  The returned status should have the following
+    format, per the USB specification.  Any deviation will be due to the
+    specific printer implementation.
+    * Bit 5 - Paper Empty; 1 = paper empty, 0 = paper not empty
+    * Bit 4 - Select; 1 = selected, 0 = not selected
+    * Bit 3 - Not Error; 1 = no error, 0 = error
+    * All other bits are reserved.
+
+  Preconditions:
+    The device must be connected and enumerated.
+
+  Parameters:
+    deviceAddress   - USB Address of the device
+    *status         - pointer to the returned status byte
+
+  Returns:
+    See the return values for the USBHostIssueDeviceRequest() function.
+
+  Remarks:
+    None
+  ***************************************************************************/
+
+BYTE USBHostPrinterGetStatus( BYTE deviceAddress, BYTE *status )
+{
+    if (!_USBHostPrinter_FindDevice( deviceAddress ))
+    {
+        return USB_UNKNOWN_DEVICE;
+    }
+    
+   return USBHostIssueDeviceRequest( deviceAddress,                                                            
+        USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,    
+        PRINTER_DEVICE_REQUEST_GET_PORT_STATUS,                                             
+        0, 0x0000, 1,                                                                       
+        status, USB_DEVICE_REQUEST_GET, usbPrinters[currentPrinterRecord].clientDriverID );
+}
+
+
+/****************************************************************************
+  Function:
     void USBHostPrinterRead( BYTE deviceAddress, BYTE *buffer, DWORD length,
                 BYTE transferFlags )
 
@@ -1059,6 +1110,42 @@ BYTE USBHostPrinterRead( BYTE deviceAddress, void *buffer, DWORD length,
         return _USBHostPrinter_ReadFromQueue( deviceAddress );
     }
 } // USBHostPrinterRead
+
+
+/****************************************************************************
+  Function:
+    BYTE USBHostPrinterReset( BYTE deviceAddress )
+
+  Description:
+    This function issues the Printer class-specific Device Request to
+    perform a soft reset.
+
+  Preconditions:
+    The device must be connected and enumerated.
+
+  Parameters:
+    BYTE deviceAddress  - USB Address of the device
+
+  Returns:
+    See the return values for the USBHostIssueDeviceRequest() function.
+
+  Remarks:
+    Not all printers support this command.
+  ***************************************************************************/
+
+BYTE USBHostPrinterReset( BYTE deviceAddress )
+{
+    if (!_USBHostPrinter_FindDevice( deviceAddress ))
+    {
+        return USB_UNKNOWN_DEVICE;
+    }
+
+    return USBHostIssueDeviceRequest( deviceAddress,                                                            
+        USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,    
+        PRINTER_DEVICE_REQUEST_SOFT_RESET,                                                  
+        0, 0x0000, 0,                                                                       
+        NULL, USB_DEVICE_REQUEST_SET, usbPrinters[currentPrinterRecord].clientDriverID );
+}
 
 
 /****************************************************************************
@@ -1338,10 +1425,11 @@ BOOL _USBHostPrinter_GetDeviceIDString( void )
         else
         {
             // Get the full string
-            errorCode = USBHostDeviceRequest(  usbPrinters[currentPrinterRecord].ID.deviceAddress,
+            errorCode = USBHostIssueDeviceRequest(  usbPrinters[currentPrinterRecord].ID.deviceAddress,
                             USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
                             PRINTER_DEVICE_REQUEST_GET_DEVICE_ID, 0, 0, usbPrinters[currentPrinterRecord].deviceIDStringLength,
-                            (BYTE *)usbPrinters[currentPrinterRecord].deviceIDString, USB_DEVICE_REQUEST_GET );
+                            (BYTE *)usbPrinters[currentPrinterRecord].deviceIDString, USB_DEVICE_REQUEST_GET,
+                            usbPrinters[currentPrinterRecord].clientDriverID );
             if (errorCode)
             {
                 #ifdef DEBUG_MODE

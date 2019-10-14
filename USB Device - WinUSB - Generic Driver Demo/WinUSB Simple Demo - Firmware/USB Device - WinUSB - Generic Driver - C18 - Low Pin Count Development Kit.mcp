@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - Generic Driver Demo - C18 - PICDEM FSUSB
 dir_sin=
-dir_inc=c:\mcc18\h;..\..\..\USB Device - MCHPUSB - Generic Driver Demo\Generic Driver Demo - Firmware;..\..\USB Device - MCHPUSB - Generic Driver Demo\Generic Driver Demo - Firmware;..\..\Microchip\Include;..\..\..\Include;..\..\Include;.
+dir_inc=c:\mcc18\h;..\..\Microchip\Include;..\..\USB Device - WinUSB - Generic Driver Demo\WinUSB Simple Demo - Firmware
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]
@@ -40,6 +40,7 @@ file_012=USB Stack
 file_013=USB Stack
 file_014=USB Stack
 file_015=.
+file_016=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -57,6 +58,7 @@ file_012=no
 file_013=no
 file_014=no
 file_015=no
+file_016=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -74,6 +76,7 @@ file_012=no
 file_013=no
 file_014=no
 file_015=no
+file_016=no
 [FILE_INFO]
 file_000=main.c
 file_001=usb_descriptors.c
@@ -90,7 +93,8 @@ file_011=..\..\Microchip\Include\USB\usb_common.h
 file_012=..\..\Microchip\Include\USB\usb_device.h
 file_013=..\..\Microchip\Include\USB\usb_function_generic.h
 file_014=..\..\Microchip\Include\USB\usb_hal.h
-file_015=rm18f14k50.lkr
+file_015=HardwareProfile - Low Pin Count USB Development Kit.h
+file_016=rm18f14k50.lkr
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        CheckBox.c
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, C32
  * Linker:          MPLAB LINK30, LINK32
  * Company:         Microchip Technology Incorporated
@@ -224,10 +224,11 @@ SHORT checkIndent;
         case REMOVE:
             if(GetState(pCb,CB_HIDE|CB_DRAW)){
 
-                if(IsDeviceBusy())
-                    return 0;
                 SetColor(pCb->hdr.pGolScheme->CommonBkColor);
-                Bar(pCb->hdr.left,pCb->hdr.top,pCb->hdr.right,pCb->hdr.bottom);
+                if(!Bar(pCb->hdr.left,pCb->hdr.top,pCb->hdr.right,pCb->hdr.bottom))
+                {
+                    return 0;
+                }
                 if(GetState(pCb,CB_HIDE))
                     return 1;
             }
@@ -295,8 +296,6 @@ SHORT checkIndent;
         case CHECK_DRAW:
 
             if(GetState(pCb,CB_DRAW|CB_DRAW_CHECK)){
-                if(IsDeviceBusy())
-                    return 0;
 
                 if(!GetState(pCb,CB_DISABLED)){
                     if(GetState(pCb,CB_CHECKED)){
@@ -314,25 +313,29 @@ SHORT checkIndent;
 
                 checkIndent = (pCb->hdr.bottom-pCb->hdr.top)>>2;
 
-                Bar(pCb->hdr.left+checkIndent+GOL_EMBOSS_SIZE,
+                if(!Bar(pCb->hdr.left+checkIndent+GOL_EMBOSS_SIZE,
                     pCb->hdr.top+checkIndent+GOL_EMBOSS_SIZE,
                     pCb->hdr.left+(pCb->hdr.bottom-pCb->hdr.top)-checkIndent-GOL_EMBOSS_SIZE,
-                    pCb->hdr.bottom-checkIndent-GOL_EMBOSS_SIZE);
+                    pCb->hdr.bottom-checkIndent-GOL_EMBOSS_SIZE))
+                    {
+                        return 0;
+                    }
             }
             state = FOCUS_DRAW;
 
         case FOCUS_DRAW:
 	        if(GetState(pCb,CB_DRAW|CB_DRAW_FOCUS)){
-                if(IsDeviceBusy())
-                    return 0;
 	            if(GetState(pCb,CB_FOCUSED)){
 		            SetColor(pCb->hdr.pGolScheme->TextColor0);
                 }else{
                     SetColor(pCb->hdr.pGolScheme->CommonBkColor);
                 }
     	        SetLineType(FOCUS_LINE);
-		        Rectangle(pCb->hdr.left, pCb->hdr.top,
-                          pCb->hdr.right, pCb->hdr.bottom);
+		        if(!Rectangle(pCb->hdr.left, pCb->hdr.top,
+                          pCb->hdr.right, pCb->hdr.bottom))
+                {
+                    return 0;
+                }
 		        SetLineType(SOLID_LINE);
 	        }
             state = REMOVE;

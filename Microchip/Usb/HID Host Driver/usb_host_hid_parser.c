@@ -13,7 +13,7 @@ This file consists of HID parser. Report descriptor received from device is
 validated for proper format. If the report descriptor is not in proper format
 as mandated by USB forum the device is not allowed on the bus. Only after the
 report descriptor is validated, the information is populated in data structures.
-Interface functions provided in file 'usb_host_hid_appl_interface.c' can be
+Interface functions provided in file 'usb_host_hid.c' can be
 used to understand the device capabilities. User of this code is advised to
 refer document "Device Class Definition for Human Interface Devices (HID)"
 available on website 'www.usb.org' for more details on content and format
@@ -76,12 +76,21 @@ ADG          9-Apr-2008 First release
 //******************************************************************************
 //******************************************************************************
 
+
+//******************************************************************************
+//******************************************************************************
+// Section: Macros
+//******************************************************************************
+//******************************************************************************
+
+#define freezHID(x)                        { free(x); x = NULL; }
+
 //******************************************************************************
 //******************************************************************************
 // Section: Local Prototypes
 //******************************************************************************
 //******************************************************************************
-/* Function Prototypes */
+
 static void _USBHostHID_InitDeviceRptInfo(void);
 static void _USBHostHID_Parse_Collection(HID_ITEM_INFO* ptrItem);
 static void _USBHostHID_Parse_EndCollection(HID_ITEM_INFO* ptrItem);
@@ -93,6 +102,7 @@ static void _USBHostHID_ConvertDataToSigned(HID_ITEM_INFO* item);
 // Section: HID Host Global Variables
 //******************************************************************************
 //******************************************************************************
+
 USB_HID_DEVICE_RPT_INFO deviceRptInfo = {0};
 USB_HID_ITEM_LIST       itemListPtrs   ={NULL};
 BYTE*                   parsedDataMem = NULL;

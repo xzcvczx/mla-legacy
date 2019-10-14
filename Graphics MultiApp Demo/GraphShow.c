@@ -192,9 +192,11 @@ CHART   *pMyChart;
 			  			NULL, 							// no paraters and data yet
 			  			graphScheme);					// style scheme used
 
-	if (pMyChart == NULL)
+	if (pMyChart == NULL) 
+	{
+       	screenState = CREATE_DEMOSELECTION;
 		return 0;
-
+	}
 	// create the demo navigation/control buttons
     CreateCtrlButtons(ExitStr, (XCHAR*)BarStr, (XCHAR*)MultiStr, RightArrowStr);
 

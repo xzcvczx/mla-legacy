@@ -87,7 +87,7 @@ Description:
 #define _USB_HAL_H_
 //DOM-IGNORE-END
 
-#include ".\USB\usb_common.h"
+//#include ".\USB\usb_common.h"
 
 #if defined(USB_SUPPORT_HOST) || defined(USB_SUPPORT_OTG)
 

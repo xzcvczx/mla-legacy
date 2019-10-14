@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Textentry.c
  * Dependencies:    Textentry.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 Version 3.00, C32
  * Linker:          MPLAB LINK30, LINK32
  * Company:         Microchip Technology Incorporated
@@ -37,6 +37,7 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Harold Serrano		10/24/08	...
+ * PAT					07/01/09	Updated for 2D accelerated primitive support.
  *****************************************************************************/
  
  #include "Graphics\Graphics.h"
@@ -129,7 +130,8 @@ static WORD counter = 0;
 static XCHAR hideChar[2] = {0x2A, 0x00};
 
 typedef enum {
-	TE_REMOVE,
+	TE_START,
+	TE_HIDE_WIDGET,
 	TE_DRAW_PANEL,
 	TE_INIT_DRAW_EDITBOX,
 	TE_DRAW_EDITBOX,
@@ -140,16 +142,18 @@ typedef enum {
 	TE_DRAW_KEY_UPDATE,
 	TE_UPDATE_STRING_INIT,
 	TE_UPDATE_STRING,		
+	TE_WAIT_ERASE_EBOX_AREA,
+	TE_UPDATE_CHARACTERS,
 } TE_DRAW_STATES;
 	
-static TE_DRAW_STATES state=TE_REMOVE;
+static TE_DRAW_STATES state=TE_START;
 
 	if(IsDeviceBusy())
         return 0;	
 	
 switch(state)
 	{
-		case TE_REMOVE:
+		case TE_START:
 		
 			if(IsDeviceBusy())
                 return 0; 
@@ -158,7 +162,8 @@ switch(state)
 			{
 			    SetColor(pTe->hdr.pGolScheme->CommonBkColor);
        	        Bar(pTe->hdr.left, pTe->hdr.top, pTe->hdr.right, pTe->hdr.bottom);
-		        return 1;	
+       	        state = TE_HIDE_WIDGET; 
+       	        goto te_hide_widget;
 			} else {
 
 			    if(GetState(pTe,TE_DRAW)) {
@@ -170,6 +175,7 @@ switch(state)
                 		 NULL,
 	               		 GOL_EMBOSS_SIZE);	
 				    state = TE_DRAW_PANEL;
+				    goto te_draw_panel;
 			    } 
 			    // update the keys (if TE_UPDATE_TEXT is also set it will also be redrawn)
 			    // at the states after the keys are updated
@@ -183,10 +189,18 @@ switch(state)
 				    state = TE_UPDATE_STRING_INIT; 
 				    goto te_update_string_init_st;
 			    }  
-			}    
+			}   
+		/*hide the widget*/
+		case TE_HIDE_WIDGET:
+te_hide_widget:			 
+			if(IsDeviceBusy())
+                return 0; 
+			state = TE_START;
+	        return 1;	
 										
 		/*Draw the widget of the Text-Entry*/
 		case TE_DRAW_PANEL:
+te_draw_panel:		
 		
 			if(!GOLPanelDrawTsk())
            	    return 0;		
@@ -333,14 +347,14 @@ te_update_string_init_st:
 		
 				if (pTe->pActiveKey->command == TE_DELETE_COM) {
 					if (pTe->CurrentLength == 0) {
-						state=TE_REMOVE;
+						state=TE_START;
 						return 1;	
 					}	
 				}
             } else {
 			    // check if text indeed needs to be updated
 				if (pTe->CurrentLength == pTe->outputLenMax) {
-					state=TE_REMOVE;
+					state=TE_START;
 					return 1;	
 				}	
 			}	
@@ -370,55 +384,75 @@ te_update_string_init_st:
                 SetColor(pTe->hdr.pGolScheme->Color1);
                 Bar(pTe->hdr.left+GOL_EMBOSS_SIZE, pTe->hdr.top+GOL_EMBOSS_SIZE, 
                     pTe->hdr.right-GOL_EMBOSS_SIZE, pTe->hdr.top+GOL_EMBOSS_SIZE+GetTextHeight(pTe->pDisplayFont));
-
-                // check if the command given is delete a character
-                if(pTe->pActiveKey->command == TE_DELETE_COM) {
-	                *(pTe->pTeOutput + (--pTe->CurrentLength))=0;	
-                } 
-                               
-                // position the cursor to the start of string rendering
-                // notice that we need to remove the characters first before we position the cursor when
-                // deleting characters
-                if (GetState(pTe, TE_ECHO_HIDE)) {
-                    // fill the area with '*' character so we use the width of this character
-                    MoveTo(	pTe->hdr.right-4-GOL_EMBOSS_SIZE-(GetTextWidth(hideChar,pTe->pDisplayFont)*(pTe->CurrentLength)),
-                            pTe->hdr.top+GOL_EMBOSS_SIZE);	  
-                } else {        
-                    MoveTo(pTe->hdr.right-4-GOL_EMBOSS_SIZE-GetTextWidth(pTe->pTeOutput,pTe->pDisplayFont),
-					       pTe->hdr.top+GOL_EMBOSS_SIZE);  
-			    }
                 
+                // we have to make sure we finish the Bar() first before we continue.    
+				state = TE_WAIT_ERASE_EBOX_AREA;
+				goto te_wait_erase_ebox_area;
 			} else {
 			
 			    SetClip(0);		//reset the clipping
-				state = TE_REMOVE;
+				state = TE_START;
 				return 1;	
 			}
-			//pTe->pActiveKey = NULL;
             counter = 0;
 			state=TE_UPDATE_STRING;
-			
-		case TE_UPDATE_STRING:	
+			goto te_update_string;
 
+		case TE_WAIT_ERASE_EBOX_AREA:
+te_wait_erase_ebox_area:		
+			if(IsDeviceBusy())
+                return 0; 
+
+            // check if the command given is delete a character
+            if(pTe->pActiveKey->command == TE_DELETE_COM) {
+                *(pTe->pTeOutput + (--pTe->CurrentLength))=0;	
+            } 
+                               
+            // position the cursor to the start of string rendering
+            // notice that we need to remove the characters first before we position the cursor when
+            // deleting characters
+            if (GetState(pTe, TE_ECHO_HIDE)) {
+            	// fill the area with '*' character so we use the width of this character
+                MoveTo(	pTe->hdr.right-4-GOL_EMBOSS_SIZE-(GetTextWidth(hideChar,pTe->pDisplayFont)*(pTe->CurrentLength)),
+                		pTe->hdr.top+GOL_EMBOSS_SIZE);	  
+            } else {        
+            	MoveTo(pTe->hdr.right-4-GOL_EMBOSS_SIZE-GetTextWidth(pTe->pTeOutput,pTe->pDisplayFont),
+				       pTe->hdr.top+GOL_EMBOSS_SIZE);  
+		   	}
+			counter = 0;
+			state = TE_UPDATE_STRING;
+										
+		case TE_UPDATE_STRING:	
+te_update_string:
 			//output the text
             SetColor(pTe->hdr.pGolScheme->TextColor1);
             SetFont(pTe->pDisplayFont);
 
             // this is manually doing the OutText() function but with the capability to replace the
             // characters to the * character when hide echo is enabled.							
-            while((unsigned XCHAR)(XcharTmp = *((pTe->pTeOutput)+counter)) > (unsigned XCHAR)15){
-                if(IsDeviceBusy())
-                    return 0;
-                if (GetState(pTe, TE_ECHO_HIDE)) 
+            XcharTmp = *((pTe->pTeOutput)+counter);
+            if (XcharTmp < (unsigned XCHAR)15)
+            {
+	            // update is done time to return to start and exit with success
+	            SetClip(0);		//reset the clipping								
+				state = TE_START;
+				return 1;
+	        } else {
+	        	if (GetState(pTe, TE_ECHO_HIDE)) 
                     OutChar(0x2A);	    
 			    else    
                     OutChar(XcharTmp);
-                counter++;
-            }
-        	
-            SetClip(0);		//reset the clipping								
-			state=TE_REMOVE;
-		    return 1;	
+                state = TE_UPDATE_CHARACTERS;
+	        }
+                        
+		case TE_UPDATE_CHARACTERS:
+te_update_characters:
+            if(IsDeviceBusy())
+                return 0;
+            counter++;
+			state = TE_UPDATE_STRING;
+			goto  te_update_string;
+
 	}//end switch
 	return 1;
 }//end TeDraw()

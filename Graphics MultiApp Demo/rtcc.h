@@ -117,6 +117,7 @@ extern void RTCCSetBinSec(unsigned char Sec);
 extern void RTCCSetBinMin(unsigned char Min);
 extern void RTCCSetBinHour(unsigned char Hour);
 extern void RTCCSetBinDay(unsigned char Day);
+#define     RTCCSetBinWkDay(x)  mRTCCSetWkDay(x)
 extern void RTCCSetBinMonth(unsigned char Month);
 // Set a new year value and correct Feb 29 for none leap year
 extern void RTCCSetBinYear(unsigned char Year);

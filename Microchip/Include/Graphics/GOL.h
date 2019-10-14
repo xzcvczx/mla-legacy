@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        GOL.h
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -39,6 +39,9 @@
  * Anton Alkhimenok and
  * Paolo A. Tamayo	
  *                      11/12/07	Version 1.0 release
+ * PAT 					06/29/09	Added BTN_MSG_STILLPRESSED message for 
+ *									button object and EVENT_STILLPRESS for
+ *									INPUT_DEVICE_EVENT list.
  *****************************************************************************/
 
 #ifndef _GOL_H
@@ -94,6 +97,7 @@ typedef enum {
         OBJ_GRID,               // Type defined for Grid Object.
         OBJ_CHART,              // Type defined for Chart Object.
         OBJ_TEXTENTRY,			// Type defined for Text-Entry Object.
+        OBJ_DIGITALMETER,       // Type defined for DIGITALMETER Object.
         OBJ_UNKNOWN             // Type is undefined and not supported by the library.
 } GOL_OBJ_TYPE;
 
@@ -109,6 +113,7 @@ typedef enum {
 *			- EVENT_INVALID 
 *			- EVENT_MOVE 
 *			- EVENT_PRESS 
+*			- EVENT_STILLPRESS
 *			- EVENT_RELEASE 
 *   	- for keyboard:
 *			- EVENT_KEYSCAN (param2 contains scan code)
@@ -151,6 +156,7 @@ typedef enum {
     EVENT_INVALID = 0,			// An invalid event.
     EVENT_MOVE,					// A move event.
     EVENT_PRESS,				// A press event.
+    EVENT_STILLPRESS,			// A continuous press event.
     EVENT_RELEASE,				// A release event.
     EVENT_KEYSCAN,				// A keyscan event, parameters has the object ID keyboard scan code.
     EVENT_CHARCODE,				// Character code is presented at the parameters.
@@ -176,6 +182,7 @@ typedef enum {
     WND_MSG_TITLE,				// Window title bar selected action ID.
 	
     BTN_MSG_PRESSED,			// Button pressed action ID.
+    BTN_MSG_STILLPRESSED,		// Button is continuously pressed ID.
     BTN_MSG_RELEASED,			// Button released action ID.
     BTN_MSG_CANCELPRESS,		// Button released action ID with button press canceled.
 
@@ -189,6 +196,8 @@ typedef enum {
     SLD_MSG_DEC,				// Slider or Scroll Bar decrement action ID.
 
     ST_MSG_SELECTED,			// Static Text selected action ID.
+
+    DM_MSG_SELECTED,			// Digital Meter selected action ID.
 
     PB_MSG_SELECTED,			// Progress Bar selected action ID.
     

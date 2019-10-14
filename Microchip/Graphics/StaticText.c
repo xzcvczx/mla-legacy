@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        StaticText.c
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -162,7 +162,8 @@ XCHAR   ch = 0;
 
            	if (GetState(pSt, ST_HIDE)) {
    	   	        SetColor(pSt->hdr.pGolScheme->CommonBkColor);
-    	        Bar(pSt->hdr.left,pSt->hdr.top,pSt->hdr.right,pSt->hdr.bottom);
+    	        if(!Bar(pSt->hdr.left,pSt->hdr.top,pSt->hdr.right,pSt->hdr.bottom))
+    	            return 0;
     	        // State is still IDLE STATE so no need to set
     	        return 1;
     	    }    
@@ -171,16 +172,19 @@ XCHAR   ch = 0;
 		       	if (GetState(pSt, ST_FRAME)) {
 			       	// show frame if specified to be shown
 	   	   	        SetLineType(SOLID_LINE);
-	   	   	        SetLineThickness(NORMAL_LINE);		            if(!GetState(pSt,ST_DISABLED)){
+	   	   	        SetLineThickness(NORMAL_LINE);
+		            if(!GetState(pSt,ST_DISABLED)){
 			            // show enabled color
 	    	   	        SetColor(pSt->hdr.pGolScheme->Color1);
-		    	        Rectangle(pSt->hdr.left,pSt->hdr.top,pSt->hdr.right,pSt->hdr.bottom);
+		    	        if(!Rectangle(pSt->hdr.left,pSt->hdr.top,pSt->hdr.right,pSt->hdr.bottom))
+		    	            return 0;
 	
 	            	}
 		            else {
 	       	        	// show disabled color
 	    	   	        SetColor(pSt->hdr.pGolScheme->ColorDisabled);
-			            Rectangle(pSt->hdr.left,pSt->hdr.top,pSt->hdr.right,pSt->hdr.bottom);
+			            if(!Rectangle(pSt->hdr.left,pSt->hdr.top,pSt->hdr.right,pSt->hdr.bottom))
+			                return 0;
 	    	        }
 	    	    }    
     	    }
@@ -192,12 +196,10 @@ XCHAR   ch = 0;
 
         case ST_STATE_CLEANAREA:
         
-            if(IsDeviceBusy())
-                return 0;
-
 			// clean area where text will be placed.
 			SetColor(pSt->hdr.pGolScheme->CommonBkColor);
-    	    Bar(pSt->hdr.left+1,pSt->hdr.top + 1,pSt->hdr.right-1,pSt->hdr.bottom-1);
+    	    if(!Bar(pSt->hdr.left+1,pSt->hdr.top + 1,pSt->hdr.right-1,pSt->hdr.bottom-1))
+    	        return 0;
             state = ST_STATE_INIT;
     	    
         case ST_STATE_INIT:
@@ -248,10 +250,8 @@ st_state_alignment:
 			ch = *(pCurLine + charCtr);
 			// output one character at time until a newline character or a NULL character is sampled
 		    while((0x0000 != ch) && (0x000A != ch )) {
-		        if(IsDeviceBusy()) {
-			        return 0;								// device is busy return 
-		        }	
-		        OutChar(ch);								// render the character
+		        if(!OutChar(ch))
+		            return 0;								// render the character
 		        charCtr++;									// update to next character
 				ch = *(pCurLine + charCtr);
 		    }

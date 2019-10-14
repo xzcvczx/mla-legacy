@@ -78,7 +78,6 @@
     //  final application design.
     #define DEMO_BOARD PIC32MX460F512L_PIM
     #define EXPLORER_16
-    #define PIC32MX460F512L_PIM
 
     /** CPU Clock Speed Assignment *************************************/
     //#define RUN_AT_48MHZ

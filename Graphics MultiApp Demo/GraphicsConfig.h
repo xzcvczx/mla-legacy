@@ -127,6 +127,12 @@
 #elif (GRAPHICS_PICTAIL_VERSION == 3)
 
 /*********************************************************************
+* Overview: Allows using 16bit PMP interface for PIC devices that 
+*           supports 16-bit interface on PMP.
+*********************************************************************/
+//#define USE_16BIT_PMP
+
+/*********************************************************************
 * Overview: Defines color depth. 
 ********************************************************************/
 #define COLOR_DEPTH						16
@@ -144,7 +150,7 @@
 //#define DISPLAY_PANEL                   TFT_G240320LTSW_118W_TP_E
 #define DISPLAY_PANEL                   TFT_G240320LTSW_118W_E
 
-#if (DISPLAY_PANEL==TFT_G240320LTSW_118W_E)
+#if (DISPLAY_PANEL==TFT_G240320LTSW_118W_E)||(DISPLAY_PANEL==TFT2N0369_E)||(DISPLAY_PANEL==DT032TFT_TS)||(DISPLAY_PANEL==DT032TFT)
 /*********************************************************************
 * Overview: Horizontal and vertical display resolution
 *                  (from the glass datasheet).
@@ -179,7 +185,7 @@
 #define DISP_VER_BACK_PORCH				0
 #define DISP_VER_FRONT_PORCH			0
 
-#elif (DISPLAY_PANEL==TFT_G320240DTSW_69W_TP_E)
+#elif (DISPLAY_PANEL==TFT_G320240DTSW_69W_TP_E)||(DISPLAY_PANEL==_35QVW0T)
 
 /*********************************************************************
 * Overview: Horizontal and vertical display resolution
@@ -214,6 +220,42 @@
 #define DISP_VER_PULSE_WIDTH		    8
 #define DISP_VER_BACK_PORCH				7
 #define DISP_VER_FRONT_PORCH			5
+
+#elif (DISPLAY_PANEL==PH480272T_005_I06Q)||(DISPLAY_PANEL==PH480272T_005_I11Q)
+
+/*********************************************************************
+* Overview: Horizontal and vertical display resolution
+*                  (from the glass datasheet).
+*********************************************************************/
+#define DISP_HOR_RESOLUTION				480
+#define DISP_VER_RESOLUTION				272
+/*********************************************************************
+* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
+*********************************************************************/
+#define DISP_ORIENTATION				0
+/*********************************************************************
+* Overview: Panel Data Width (can be 18 or 24 bits).
+*********************************************************************/
+#define DISP_DATA_WIDTH                 24
+/*********************************************************************
+* Overview: LSHIFT Polarity Swap
+* If defined LSHIFT is a falling trigger
+*********************************************************************/
+//#define DISP_INV_LSHIFT
+/*********************************************************************
+* Overview: Horizontal synchronization timing in pixels
+*                  (from the glass datasheet).
+*********************************************************************/
+#define DISP_HOR_PULSE_WIDTH		    41
+#define DISP_HOR_BACK_PORCH				2
+#define DISP_HOR_FRONT_PORCH			2
+/*********************************************************************
+* Overview: Vertical synchronization timing in lines
+*                  (from the glass datasheet).
+*********************************************************************/
+#define DISP_VER_PULSE_WIDTH		    10
+#define DISP_VER_BACK_PORCH				2
+#define DISP_VER_FRONT_PORCH			2
 
 #endif // (DISPLAY_PANEL== ...
 
@@ -277,7 +319,7 @@
 *			for details.
 *
 *********************************************************************/
-//#define USE_MULTIBYTECHAR
+#define USE_MULTIBYTECHAR
 
 /*********************************************************************
 * Overview: Font data can be placed in two locations. One is in 

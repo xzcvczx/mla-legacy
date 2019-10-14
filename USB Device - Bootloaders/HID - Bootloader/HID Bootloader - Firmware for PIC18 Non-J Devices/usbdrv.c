@@ -37,6 +37,8 @@
  * Fritz Schlunder		05/31/07	A few non-critical changes made to
  *									decrease code size for use in
  *									bootloader application.
+ * Fritz Schlunder		05/07/09	Small update to work with the
+ *									new usbctrltrf.c file.
  ********************************************************************/
 
 /** I N C L U D E S **********************************************************/
@@ -705,7 +707,11 @@ properly updated before being checked again.
 
     UCONbits.PKTDIS = 0;            // Make sure packet processing is enabled
     USBPrepareForNextSetupTrf();    // Declared in usbctrltrf.c
-
+    //Prepare EP0 OUT to receive the first SETUP packet
+    ep0Bo.Cnt = EP0_BUFF_SIZE;
+    ep0Bo.ADR = (byte*)(&SetupPkt);
+    ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;	
+    
     usb_stat.RemoteWakeup = 0;      // Default status flag to disable
     usb_active_cfg = 0;             // Clear active configuration
     usb_device_state = DEFAULT_STATE;

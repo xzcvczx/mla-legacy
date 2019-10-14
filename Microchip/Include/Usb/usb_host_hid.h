@@ -89,6 +89,9 @@ ADG          9-Apr-2008 First release
 #define _USB_HOST_HID_H_
 //DOM-IGNORE-END
 
+
+#include "usb_host_hid_parser.h"
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Constants
@@ -96,7 +99,7 @@ ADG          9-Apr-2008 First release
 // *****************************************************************************
 
 // *****************************************************************************
-// HID Class Error Codes
+// Section: HID Class Error Codes
 // *****************************************************************************
 
 #define USB_HID_CLASS_ERROR              USB_ERROR_CLASS_DEFINED
@@ -108,7 +111,7 @@ ADG          9-Apr-2008 First release
 #define USB_HID_DEVICE_BUSY             (USB_HID_CLASS_ERROR | 0x04)               // A transfer is currently in progress.
 #define USB_HID_NO_REPORT_DESCRIPTOR    (USB_HID_CLASS_ERROR | 0x05)               // No report descriptor found
 #define USB_HID_INTERFACE_ERROR         (USB_HID_CLASS_ERROR | 0x06)               // The interface layer cannot support the device.
-#define USB_HID_REPORT_DESCRIPTOR_BAD   (USB_HID_CLASS_ERROR | 0x05)               // Report Descriptor for not proper
+#define USB_HID_REPORT_DESCRIPTOR_BAD   (USB_HID_CLASS_ERROR | 0x07)               // Report Descriptor for not proper
 #define USB_HID_RESET_ERROR             (USB_HID_CLASS_ERROR | 0x0A) // An error occurred while resetting the device.
 #define USB_HID_ILLEGAL_REQUEST         (USB_HID_CLASS_ERROR | 0x0B) // Cannot perform requested operation.
 
@@ -124,7 +127,7 @@ ADG          9-Apr-2008 First release
 #define DSC_PHY                      0x23 /* Pysical Descriptor Code */
 
 // *****************************************************************************
-// Additional return values for USBHostHIDDeviceStatus (see USBHostDeviceStatus also)
+// Section: Additional return values for USBHostHIDDeviceStatus (see USBHostDeviceStatus also)
 // *****************************************************************************
 
 #define USB_HID_DEVICE_DETACHED             0x50    // Device is detached.
@@ -143,18 +146,136 @@ ADG          9-Apr-2008 First release
     #define EVENT_HID_OFFSET    0
 #endif
 
-#define EVENT_HID_NONE            EVENT_HID_BASE + EVENT_HID_OFFSET + 0   // No event occured (NULL event)
-#define EVENT_HID_RPT_DESC_PARSED EVENT_HID_BASE + EVENT_HID_OFFSET + 1   // Report Descriptor is parsed application must collect details
-#define EVENT_HID_TRANSFER        EVENT_HID_BASE + EVENT_HID_OFFSET + 3   // A HID transfer has completed
-#define EVENT_HID_READ_DONE       EVENT_HID_BASE + EVENT_HID_OFFSET + 4   // A HID Read transfer has completed
-#define EVENT_HID_WRITE_DONE      EVENT_HID_BASE + EVENT_HID_OFFSET + 5   // A HID Write transfer has completed
-#define EVENT_HID_RESET           EVENT_HID_BASE + EVENT_HID_OFFSET + 6   // HID reset complete
+    // No event occured (NULL event)
+#define EVENT_HID_NONE                      EVENT_HID_BASE + EVENT_HID_OFFSET + 0   
+    // A Report Descriptor has been parsed.  The returned data pointer is NULL.
+    // The application must collect details, or simply return TRUE if the 
+    // application is already aware of the data format.
+#define EVENT_HID_RPT_DESC_PARSED           EVENT_HID_BASE + EVENT_HID_OFFSET + 1   
+//#define EVENT_HID_TRANSFER        EVENT_HID_BASE + EVENT_HID_OFFSET + 3   // Unused - value retained for legacy.
+    // A HID Read transfer has completed.  The returned data pointer points to a 
+    // HID_TRANSFER_DATA structure, with information about the transfer.  
+#define EVENT_HID_READ_DONE                 EVENT_HID_BASE + EVENT_HID_OFFSET + 4   
+    // A HID Write transfer has completed.  The returned data pointer points to a 
+    // HID_TRANSFER_DATA structure, with information about the transfer.  
+#define EVENT_HID_WRITE_DONE                EVENT_HID_BASE + EVENT_HID_OFFSET + 5 
+    // HID reset complete.  The returned data pointer is NULL.
+#define EVENT_HID_RESET                     EVENT_HID_BASE + EVENT_HID_OFFSET + 6   
+    // A HID device has attached.  The returned data pointer points to a
+    // USB_HID_DEVICE_ID structure.
+#define EVENT_HID_ATTACH                    EVENT_HID_BASE + EVENT_HID_OFFSET + 7   
+    // A HID device has detached.  The returned data pointer points to a
+    // byte with the previous address of the detached device.
+#define EVENT_HID_DETACH                    EVENT_HID_BASE + EVENT_HID_OFFSET + 8  
+    // There was a problem parsing the report descriptor of the attached device.
+    // Communication with the device is not allowed, and the device should be
+    // detached. 
+#define EVENT_HID_BAD_REPORT_DESCRIPTOR     EVENT_HID_BASE + EVENT_HID_OFFSET + 9   
+    // An error occurred while trying to do a HID reset.  The returned data pointer 
+    // is NULL.
+#define EVENT_HID_RESET_ERROR               EVENT_HID_BASE + EVENT_HID_OFFSET + 10   
 
-#define freezHID(x)                        { free(x); x = NULL; }
 
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Data Structures
+// *****************************************************************************
+// *****************************************************************************
+
+//******************************************************************************
+/* HID Data Details
+
+This structure defines the objects used by the application to access required
+report. Application must use parser interface functions to fill these details.
+e.g. USBHostHID_ApiFindValue
+*/
+typedef struct _HID_DATA_DETAILS
+{
+    WORD reportLength;                // reportLength - the expected length of the parent report.
+    WORD reportID;                    // reportID - report ID - the first byte of the parent report.
+    BYTE bitOffset;                   // BitOffset - bit offset within the report.
+    BYTE bitLength;                   // bitlength - length of the data in bits.
+    BYTE count;                       // count - what's left of the message after this data.
+    BYTE signExtend;                  // extend - sign extend the data.
+    BYTE interfaceNum;                // interfaceNum - informs HID layer about interface number.
+}   HID_DATA_DETAILS;
+// Note: One would ordinarily get these values from a parser
+//       find. (e.g. USBHostHID_ApiFindValue)
+
+
+// *****************************************************************************
+/* HID User Data Size
+
+This defines the data type required to hold the maximum field size data.
+*/
+#if((HID_MAX_DATA_FIELD_SIZE >= 1) && (HID_MAX_DATA_FIELD_SIZE <= 8))  /* Maximum size of data field within a report */
+    typedef unsigned char    HID_USER_DATA_SIZE;
+#elif((HID_MAX_DATA_FIELD_SIZE >= 9) && (HID_MAX_DATA_FIELD_SIZE <= 16))
+    typedef unsigned int     HID_USER_DATA_SIZE;
+#elif((HID_MAX_DATA_FIELD_SIZE >= 17) && (HID_MAX_DATA_FIELD_SIZE <= 32))
+    typedef unsigned long    HID_USER_DATA_SIZE;
+#else
+    typedef unsigned char    HID_USER_DATA_SIZE;
+#endif
+
+
+// *****************************************************************************
+/* HID Device ID Information
+
+This structure contains identification information about an attached device.
+*/
+typedef struct _USB_HID_DEVICE_ID
+{
+    WORD                            vid;                    // Vendor ID of the device
+    WORD                            pid;                    // Product ID of the device
+    BYTE                            deviceAddress;          // Address of the device on the USB
+    BYTE                            clientDriverID;         // Client driver ID for device requests
+} USB_HID_DEVICE_ID;
+
+
+// *****************************************************************************
+/* HID Transfer Information
+
+This structure is used when the event handler is used to notify the upper layer
+of transfer completion (EVENT_HID_READ_DONE or EVENT_HID_WRITE_DONE).
+*/
+
+typedef struct _HID_TRANSFER_DATA
+{
+   DWORD                dataCount;          // Count of bytes transferred.
+   BYTE                 bErrorCode;         // Transfer error code.
+} HID_TRANSFER_DATA;
+
+
+// *****************************************************************************
 // *****************************************************************************
 // Section: Function Prototypes 
 // *****************************************************************************
+// *****************************************************************************
+
+/*******************************************************************************
+  Function:
+    BOOL USBHostHIDDeviceDetect( BYTE deviceAddress )
+
+  Description:
+    This function determines if a HID device is attached and ready to use.
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE deviceAddress  - Address of the attached device.
+
+  Return Values:
+    TRUE   -  HID present and ready
+    FALSE  -  HID not present or not ready
+
+  Remarks:
+    None
+*******************************************************************************/
+BOOL USBHostHIDDeviceDetect( BYTE deviceAddress );
+
 
 /*******************************************************************************
   Function:
@@ -190,37 +311,8 @@ BYTE    USBHostHIDDeviceStatus( BYTE deviceAddress );
 
 /*******************************************************************************
   Function:
-    BOOL USBHostHIDInitialize( BYTE address, DWORD flags )
-
-  Summary:
-    This function is the initialization routine for this client driver.
-
-  Description:
-    This function is the initialization routine for this client driver.  It
-    is called by the host layer when the USB device is being enumerated.For a 
-    HID device we need to look into HID descriptor, interface descriptor and 
-    endpoint descriptor.
-
-  Precondition:
-    None
-
-  Parameters:
-    BYTE address        - Address of the new device
-    DWORD flags          - Initialization flags
-
-  Return Values:
-    TRUE   - We can support the device.
-    FALSE  - We cannot support the device.
-
-  Remarks:
-    None
-*******************************************************************************/
-BOOL USBHostHIDInitialize( BYTE address, DWORD flags );
-
-
-/*******************************************************************************
-  Function:
-    BYTE USBHostHIDRead( BYTE deviceAddress,BYTE reportid, BYTE size, BYTE *data)
+    BYTE USBHostHIDRead( BYTE deviceAddress,BYTE reportid, BYTE interface, 
+                BYTE size, BYTE *data)
 
   Summary:
      This function starts a Get report transfer reuest from the device,
@@ -232,6 +324,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags );
   Parameters:
     BYTE deviceAddress      - Device address
     BYTE reportid           - Report ID of the requested report
+    BYTE interface          - Interface number
     BYTE size               - Byte size of the data buffer
     BYTE *data              - Pointer to the data buffer
 
@@ -240,40 +333,14 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags );
     USB_HID_DEVICE_NOT_FOUND    - No device with specified address
     USB_HID_DEVICE_BUSY         - Device not in proper state for
                                   performing a transfer
+    Others                      - Return values from USBHostRead()
+
   Remarks:
     None
 *******************************************************************************/
 #define USBHostHIDRead( deviceAddress,reportid,interface,size,data) \
          USBHostHIDTransfer( deviceAddress,1,interface,reportid,size,data)
 
-
-/*******************************************************************************
-  Function:
-    BYTE USBHostHIDWrite( BYTE deviceAddress,BYTE reportid, BYTE size, BYTE *data)
-
-  Summary:
-    This function starts a Set report transfer request to the device,
-    utilizing the function USBHostHIDTransfer();
-
-  Precondition:
-    None
-
-  Parameters:
-    BYTE deviceAddress      - Device address
-    BYTE reportid           - Report ID of the requested report
-    BYTE size               - Byte size of the data buffer
-    BYTE *data              - Pointer to the data buffer
-
-  Return Values:
-    USB_SUCCESS                 - Request started successfully
-    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
-    USB_HID_DEVICE_BUSY         - Device not in proper state for
-                                  performing a transfer
-  Remarks:
-    None
-*******************************************************************************/
-#define USBHostHIDWrite( address,reportid,interface,size,data) \
-               USBHostHIDTransfer( address,0,interface,reportid,size,data)
 
 /*******************************************************************************
   Function:
@@ -332,7 +399,37 @@ void    USBHostHIDTasks( void );
 
 /*******************************************************************************
   Function:
-    USBHostHIDTransfer( BYTE deviceAddress, BYTE direction, BYTE reportid, BYTE size, BYTE *data)
+     BYTE USBHostHIDTerminateTransfer( BYTE deviceAddress, BYTE direction, BYTE interfaceNum )
+
+  Summary:
+    This function terminates a transfer that is in progress.
+
+  Description:
+    This function terminates a transfer that is in progress.
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE deviceAddress  - Device address
+    BYTE direction      - Transfer direction.  Valid values are:
+                            * 1 = In (Read)
+                            * 0 = Out (Write)
+    BYTE interfaceNum   - Interface number
+                            
+  Return Values:
+    USB_SUCCESS                 - Transfer terminated
+    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
+    
+  Remarks:
+    None
+*******************************************************************************/
+BYTE USBHostHIDTerminateTransfer( BYTE deviceAddress, BYTE direction, BYTE interfaceNum );
+
+/*******************************************************************************
+  Function:
+    USBHostHIDTransfer( BYTE deviceAddress, BYTE direction, BYTE interfaceNum, 
+                BYTE reportid, BYTE size, BYTE *data)
 
   Summary:
     This function starts a HID transfer.
@@ -347,6 +444,7 @@ void    USBHostHIDTasks( void );
   Parameters:
     BYTE deviceAddress      - Device address
     BYTE direction          - 1=read, 0=write
+    BYTE interfaceNum       - Interface number
     BYTE reportid           - Report ID of the requested report
     BYTE size               - Byte size of the data buffer
     BYTE *data              - Pointer to the data buffer
@@ -391,15 +489,228 @@ BYTE USBHostHIDTransfer( BYTE deviceAddress, BYTE direction, BYTE interfaceNum, 
 BOOL    USBHostHIDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE *byteCount );
 
 
+/*******************************************************************************
+  Function:
+    BYTE USBHostHIDWrite( BYTE deviceAddress,BYTE reportid, BYTE interface,
+                BYTE size, BYTE *data)
+
+  Summary:
+    This function starts a Set report transfer request to the device,
+    utilizing the function USBHostHIDTransfer();
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE deviceAddress      - Device address
+    BYTE reportid           - Report ID of the requested report
+    BYTE interface          - Interface number
+    BYTE size               - Byte size of the data buffer
+    BYTE *data              - Pointer to the data buffer
+
+  Return Values:
+    USB_SUCCESS                 - Request started successfully
+    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
+    USB_HID_DEVICE_BUSY         - Device not in proper state for
+                                  performing a transfer
+    Others                      - Return values from USBHostIssueDeviceRequest(),
+                                    and USBHostWrite()
+                                    
+  Remarks:
+    None
+*******************************************************************************/
+#define USBHostHIDWrite( address,reportid,interface,size,data) \
+               USBHostHIDTransfer( address,0,interface,reportid,size,data)
+
+/*******************************************************************************
+  Function:
+    BOOL USBHostHID_ApiFindBit(WORD usagePage,WORD usage,HIDReportTypeEnum type,
+                          BYTE* Report_ID, BYTE* Report_Length, BYTE* Start_Bit)
+
+  Description:
+    This function is used to locate a specific button or indicator.
+    Once the report descriptor is parsed by the HID layer without any error,
+    data from the report descriptor is stored in pre defined dat structures.
+    This function traverses these data structure and exract data required
+    by application
+
+  Precondition:
+    None
+
+  Parameters:
+    WORD usagePage         - usage page supported by application
+    WORD usage             - usage supported by application
+    HIDReportTypeEnum type - report type Input/Output for the particular
+                             usage
+    BYTE* Report_ID        - returns the report ID of the required usage
+    BYTE* Report_Length    - returns the report length of the required usage
+    BYTE* Start_Bit        - returns  the start bit of the usage in a
+                             particular report
+
+  Return Values:
+    TRUE    - If the required usage is located in the report descriptor
+    FALSE   - If the application required usage is not supported by the 
+              device(i.e report descriptor).
+
+  Remarks:
+    Application event handler with event 'EVENT_HID_RPT_DESC_PARSED' is called.
+    Application is suppose to fill in data details in structure 'HID_DATA_DETAILS'.
+    This function can be used to the get the details of the required usages.
+*******************************************************************************/
+BOOL USBHostHID_ApiFindBit(WORD usagePage,WORD usage,HIDReportTypeEnum type,BYTE* Report_ID,
+                    BYTE* Report_Length, BYTE* Start_Bit);
+
+
+/*******************************************************************************
+  Function:
+    BOOL USBHostHID_ApiFindValue(WORD usagePage,WORD usage,
+                HIDReportTypeEnum type,BYTE* Report_ID,BYTE* Report_Length,BYTE*
+                Start_Bit, BYTE* Bit_Length)
+
+  Description:
+    Find a specific Usage Value. Once the report descriptor is parsed by the HID
+    layer without any error, data from the report descriptor is stored in
+    pre defined dat structures. This function traverses these data structure and
+    exract data required by application.
+
+  Precondition:
+    None
+
+  Parameters:
+    WORD usagePage         - usage page supported by application
+    WORD usage             - usage supported by application
+    HIDReportTypeEnum type - report type Input/Output for the particular
+                             usage
+    BYTE* Report_ID        - returns the report ID of the required usage
+    BYTE* Report_Length    - returns the report length of the required usage
+    BYTE* Start_Bit        - returns  the start bit of the usage in a
+                             particular report
+    BYTE* Bit_Length       - returns size of requested usage type data in bits
+
+  Return Values:
+    TRUE    - If the required usage is located in the report descriptor
+    FALSE   - If the application required usage is not supported by the 
+              device(i.e report descriptor).
+
+  Remarks:
+    Application event handler with event 'EVENT_HID_RPT_DESC_PARSED' is called.
+    Application is suppose to fill in data details structure 'HID_DATA_DETAILS'
+    This function can be used to the get the details of the required usages.
+*******************************************************************************/
+BOOL USBHostHID_ApiFindValue(WORD usagePage,WORD usage,HIDReportTypeEnum type,BYTE* Report_ID,
+                    BYTE* Report_Length,BYTE* Start_Bit, BYTE* Bit_Length);
+
+
+/*******************************************************************************
+  Function:
+    BYTE USBHostHID_ApiGetCurrentInterfaceNum(void)
+
+  Description:
+    This function reurns the interface number of the cuurent report descriptor
+    parsed. This function must be called to fill data interface detail data
+    structure and passed as parameter when requesinf for report transfers.
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE *errorCode     - Error code from last transfer
+    DWORD *byteCount    - Number of bytes transferred
+
+  Return Values:
+    TRUE    - Transfer is complete, errorCode is valid
+    FALSE   - Transfer is not complete, errorCode is not valid
+
+  Remarks:
+    None
+*******************************************************************************/
+BYTE USBHostHID_ApiGetCurrentInterfaceNum(void);
+
+
+/****************************************************************************
+  Function:
+    BYTE* USBHostHID_GetCurrentReportInfo()
+
+  Description:
+    This function returns a pointer to the current report info structure.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    BYTE *  - Pointer to the report Info structure.
+
+  Remarks:
+    None
+  ***************************************************************************/
+
+#define USBHostHID_GetCurrentReportInfo() (&deviceRptInfo)
+
+
+/****************************************************************************
+  Function:
+    BYTE* USBHostHID_GetItemListPointers()
+
+  Description:
+    This function returns a pointer to list of item pointers storedin a
+    structure.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    BYTE *  - Pointer to list of item pointers structure.
+
+  Remarks:
+    None
+  ***************************************************************************/
+#define USBHostHID_GetItemListPointers() (&itemListPtrs)
+
+
+/*******************************************************************************
+  Function:
+    BOOL USBHostHID_ApiImportData(BYTE *report, WORD reportLength, 
+                     HID_USER_DATA_SIZE *buffer,HID_DATA_DETAILS *pDataDetails)
+  Description:
+    This function can be used by application to extract data from the input 
+    reports. On receiving the input report from the device application can call
+    the function with required inputs 'HID_DATA_DETAILS'.
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE *report                    - Input report received from device
+    WORD reportLength               - Length of input report report
+    HID_USER_DATA_SIZE *buffer      - Buffer into which data needs to be
+                                      populated
+    HID_DATA_DETAILS *pDataDetails  - data details extracted from report
+                                      descriptor
+  Return Values:
+    TRUE    - If the required data is retrieved from the report
+    FALSE   - If required data is not found.
+
+  Remarks:
+    None
+*******************************************************************************/
+BOOL USBHostHID_ApiImportData(BYTE *report,WORD reportLength,HID_USER_DATA_SIZE *buffer, HID_DATA_DETAILS *pDataDetails);;
+
+
 // *****************************************************************************
 // *****************************************************************************
-// USB Host Callback Function Prototypes
+// Section: USB Host Callback Function Prototypes
 // *****************************************************************************
 // *****************************************************************************
 
 /*******************************************************************************
   Function:
-    BOOL USBHostHIDInitialize( BYTE address, WORD flags )
+    BOOL USBHostHIDInitialize( BYTE address, WORD flags, BYTE clientDriverID )
 
   Summary:
     This function is the initialization routine for this client driver.
@@ -416,6 +727,7 @@ BOOL    USBHostHIDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE 
   Parameters:
     BYTE address        - Address of the new device
     DWORD flags          - Initialization flags
+    BYTE clientDriverID - Client driver identification for device requests
 
   Return Values:
     TRUE   - We can support the device.
@@ -424,7 +736,7 @@ BOOL    USBHostHIDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE 
   Remarks:
     None
 *******************************************************************************/
-BOOL USBHostHIDInitialize( BYTE address, DWORD flags );
+BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID );
 
 /*******************************************************************************
   Function:
@@ -455,6 +767,29 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags );
     None
 *******************************************************************************/
 BOOL USBHostHIDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size );
+
+
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Legacy Macros 
+// *****************************************************************************
+// *****************************************************************************
+
+    // This macro provides legacy support for an older API function.
+#define USBHostHID_ApiDeviceDetect()                USBHostHIDDeviceDetect( 1 )
+
+    // This macro provides legacy support for an older API function.
+#define USBHostHID_ApiGetReport( r, i, s, d )       USBHostHIDRead( 1, r, i, s, d )
+
+    // This macro provides legacy support for an older API function.
+#define USBHostHID_ApiSendReport( r, i, s, d )      USBHostHIDWrite( 1, r, i, s, d )
+
+    // This macro provides legacy support for an older API function.
+#define USBHostHID_ApiResetDevice()                 USBHostHIDResetDeviceWithWait( 1 )
+
+    // This macro provides legacy support for an older API function.
+#define USBHostHID_ApiTransferIsComplete( e, c )    USBHostHIDTransferIsComplete( 1, e, c )
 
 
 #endif

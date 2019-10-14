@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        25LC256.c
  * Dependencies:    EEPROM.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -85,16 +85,19 @@ void EEPROMInit()
     EEPROM_SDO_TRIS = 0;
     EEPROM_SDI_TRIS = 1;
 
-#if defined( __PIC24FJ256GA110__ )
-
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) 
+	AD1PCFGL = 0xFFFF;
+	RPOR9bits.RP18R = 11;	// assign RP18 for SCK2
+	RPOR8bits.RP16R = 10;	// assign RP16 for SDO2
+	RPINR22bits.SDI2R = 17; // assign RP17 for SDI2
+#elif defined( __PIC24FJ256GA110__ )
     __builtin_write_OSCCONL(OSCCON & 0xbf);  // unlock PPS
     
     RPOR10bits.RP21R = 11;  // assign RP21 for SCK2
-    RPOR9bits.RP19R = 10;  // assign RP19 for SDO2
+    RPOR9bits.RP19R = 10;  	// assign RP19 for SDO2
     RPINR22bits.SDI2R = 26; // assign RP26 for SDI2
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
-
 #endif
 }
 
@@ -212,6 +215,12 @@ BYTE temp;
 ************************************************************************/
 void EEPROMWriteWord(WORD data, WORD address)
 {
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) 
+	AD1PCFGLbits.PCFG0 = 1;
+	AD1PCFGLbits.PCFG6 = 1;
+	AD1PCFGLbits.PCFG7 = 1;
+	AD1PCFGLbits.PCFG8 = 1;
+#endif
     EEPROMWriteByte(((WORD_VAL)data).v[0],address);
     EEPROMWriteByte(((WORD_VAL)data).v[1],address+1);
 }
@@ -229,6 +238,12 @@ void EEPROMWriteWord(WORD data, WORD address)
 WORD EEPROMReadWord(WORD address){
 WORD_VAL temp;
 
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) 
+	AD1PCFGLbits.PCFG0 = 1;
+	AD1PCFGLbits.PCFG6 = 1;
+	AD1PCFGLbits.PCFG7 = 1;
+	AD1PCFGLbits.PCFG8 = 1;
+#endif
     temp.v[0] = EEPROMReadByte(address);
     temp.v[1] = EEPROMReadByte(address+1);
 

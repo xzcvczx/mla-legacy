@@ -7,7 +7,7 @@
  *****************************************************************************
  * FileName:        Template.h
  * Dependencies:    None 
- * Processor:       PIC24
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00
  * Linker:          MPLAB LINK30
  * Company:         Microchip Technology Incorporated

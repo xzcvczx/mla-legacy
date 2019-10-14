@@ -91,6 +91,8 @@
 //                            LOCAL PROTOTYPES
 /////////////////////////////////////////////////////////////////////////////
 
+#define WAIT_UNTIL_FINISH(x) while(!x)
+
 // Macros to interface with memory
 #if (GRAPHICS_PICTAIL_VERSION != 3)
 
@@ -228,7 +230,7 @@ GOL_MSG msg;        			// GOL message structure to interact with GOL
     	BeepInit();     			// Initialize beeper
     #endif	
 
-    // If S3 button on Explorer 16 board is pressed erase memory
+    // If S6 button on Explorer 16 board is pressed erase memory
     // display uses the same signals as the external flash memory so we cannot
     // use the display while programming the flash.
     if(PORTDbits.RD7 == 0){
@@ -352,7 +354,9 @@ GOL_MSG msg;        			// GOL message structure to interact with GOL
 			#ifdef ENABLE_DEMO_MODE
 				// when running in demo mode enabled fake the messages to perform
 				// demo on selected screens
-				UpdateDemoMode(&msg);		// update the next step of the automatic demo
+				if (gEnableDemoFlag == TRUE) { 
+					UpdateDemoMode(&msg);		// update the next step of the automatic demo
+				}	
 			#endif
        
             GOLMsg(&msg);       			// Process message
@@ -625,19 +629,20 @@ WORD ytemp, xtemp, srRes = 0x0001;
     SetColor(WHITE); 
     ClearDevice();      
 
-    PutImage(0,0,(void*)&mchpLogo,IMAGE_NORMAL);
-    PutImage(2,60,(void*)&intro,IMAGE_X2);
+    WAIT_UNTIL_FINISH(PutImage(0,0,(void*)&mchpLogo,IMAGE_NORMAL));
+    WAIT_UNTIL_FINISH(PutImage(2,60,(void*)&intro,IMAGE_X2));
 
     for(counter=0;counter<320-32;counter++){  // move Microchip icon
-        PutImage(counter,205,(void*)&mchpIcon0,IMAGE_NORMAL);
+        WAIT_UNTIL_FINISH(PutImage(counter,205,(void*)&mchpIcon0,IMAGE_NORMAL));
     }
     SetColor(BRIGHTRED);
     SetFont((void*)&FONTDEFAULT);
 
     MoveTo((GetMaxX()-GetTextWidth((XCHAR*)text,(void*)&FONTDEFAULT))>>1,182);
-    while(!OutText((XCHAR*)text));
+    WAIT_UNTIL_FINISH(OutText((XCHAR*)text));
 
-   	DelayMs(1200);	
+   	DelayMs(1200);
+	
 	// random fade effect using a Linear Feedback Shift Register (LFSR)
     SetColor(WHITE);
     for (i = 1800; i > 0 ; i--) {
@@ -810,51 +815,51 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
     
     // output the standard USB error string
     MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgStandard,(void*)&GOLFontDefault))>>1,yPos);
-	while(!OutText((XCHAR*)ErrMsgStandard));
+	WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgStandard));
 	yPos += TextHeight;
 
  	switch( event )
     {
         case EVENT_HUB_ATTACH:
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgHUBAttachedStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgHUBAttachedStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgHUBAttachedStr));
 			yPos += TextHeight;
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrNotSupported,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrNotSupported));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrNotSupported));
 		    break;
 
         case EVENT_UNSUPPORTED_DEVICE:
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgUDAttachedStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgUDAttachedStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgUDAttachedStr));
 			yPos += TextHeight;
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrNotSupported,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrNotSupported));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrNotSupported));
 		    break;
 
         case EVENT_CANNOT_ENUMERATE:
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgEnumerationStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgEnumerationStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgEnumerationStr));
 			yPos += TextHeight;
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgFailedStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgFailedStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgFailedStr));
 		    break;
 
         case EVENT_CLIENT_INIT_ERROR:
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgClientInitStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgClientInitStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgClientInitStr));
 			yPos += TextHeight;
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgFailedStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgFailedStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgFailedStr));
 		    break;
 
         case EVENT_OUT_OF_MEMORY:
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgOutofMemoryStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgOutofMemoryStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgOutofMemoryStr));
         	break;
         	
         case EVENT_UNSPECIFIED_ERROR:
 	   	    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)ErrMsgUnpecifiedErrStr,(void*)&GOLFontDefault))>>1,yPos);
-		    while(!OutText((XCHAR*)ErrMsgUnpecifiedErrStr));
+		    WAIT_UNTIL_FINISH(OutText((XCHAR*)ErrMsgUnpecifiedErrStr));
 		    break;
         
         default:
@@ -863,7 +868,7 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
 	
 	yPos += TextHeight;
 	MoveTo((GetMaxX()-GetTextWidth((XCHAR*)MsgTouchToProceedStr,(void*)&GOLFontDefault))>>1,yPos);
-	while(!OutText((XCHAR*)MsgTouchToProceedStr));
+	WAIT_UNTIL_FINISH(OutText((XCHAR*)MsgTouchToProceedStr));
     
     // wait for touch
     while(TouchGetX() == -1); 

@@ -129,10 +129,10 @@ KO/BC       15-Oct-2007 First release
 // *****************************************************************************
 // *****************************************************************************
 
-// Section: Values for USBHostDeviceRequest(), dataDirection
+// Section: Values for USBHostIssueDeviceRequest(), dataDirection
 
-#define USB_DEVICE_REQUEST_SET                  0       // USBHostDeviceRequest() will set information.
-#define USB_DEVICE_REQUEST_GET                  1       // USBHostDeviceRequest() will get information.
+#define USB_DEVICE_REQUEST_SET                  0       // USBHostIssueDeviceRequest() will set information.
+#define USB_DEVICE_REQUEST_GET                  1       // USBHostIssueDeviceRequest() will get information.
 
 // Section: Dummy Device ID's
 
@@ -175,8 +175,63 @@ typedef struct _HOST_TRANSFER_DATA
    BYTE                *pUserData;          // Pointer to transfer data.
    BYTE                 bEndpointAddress;   // Transfer endpoint.
    BYTE                 bErrorCode;         // Transfer error code.
-   TRANSFER_ATTRIBUTES  bmAttributes;       // Endpoint transfer attributes.
+   TRANSFER_ATTRIBUTES  bmAttributes;       // INTERNAL USE ONLY - Endpoint transfer attributes.
+   BYTE                 clientDriver;       // INTERNAL USE ONLY - Client driver index for sending the event.
 } HOST_TRANSFER_DATA;
+
+
+// *****************************************************************************
+/* Isochronous Data Buffer
+
+Isochronous data transfers are continuous, until they are explicitly terminated.
+The maximum transfer size is given in the endpoint descriptor, but a single
+transfer may contain less data than the maximum.  Also, the USB peripheral can
+store data to RAM in a linear fashion only.  Therefore, we cannot use a simple
+circular buffer for the data.  Instead, the application or client driver must
+allocate multiple independent data buffers.  These buffers must be the
+maximum transfer size.  This structure contains a pointer to an allocated
+buffer, plus the valid data length of the buffer.
+*/
+
+typedef struct _ISOCHRONOUS_DATA_BUFFER
+{
+    BYTE                *pBuffer;               // Data buffer pointer.
+    WORD                dataLength;             // Amount of valid data in the buffer.
+    BYTE                bfDataLengthValid : 1;  // dataLength value is valid.
+} ISOCHRONOUS_DATA_BUFFER;
+
+
+// *****************************************************************************
+/* Isochronous Data
+
+Isochronous data transfers are continuous, until they are explicitly terminated.
+This requires a tighter integration between the host layer and the application
+layer to manage the streaming data.
+
+If an application uses isochronous transfers, it must allocate one variable
+of type ISOCHRONOUS_DATA for each concurrent transfer.  When the device 
+attaches, the client driver must inform the application layer of the maximum
+transfer size.  At this point, the application must allocate space for the 
+data buffers, and set the data buffer points in this structure to point to them.
+*/
+
+#if !defined( USB_MAX_ISOCHRONOUS_DATA_BUFFERS )
+    #define USB_MAX_ISOCHRONOUS_DATA_BUFFERS    2
+#endif
+#if USB_MAX_ISOCHRONOUS_DATA_BUFFERS < 2
+    #error At least two buffers must be defined for isochronous data.
+#endif
+
+typedef struct _ISOCHRONOUS_DATA
+{
+    BYTE    totalBuffers;       // Total number of buffers available.
+    BYTE    currentBufferUSB;   // The current buffer the USB peripheral is accessing.
+    BYTE    currentBufferUser;  // The current buffer the user is reading/writing.
+    BYTE    *pDataUser;         // User pointer for accessing data.
+    
+    ISOCHRONOUS_DATA_BUFFER buffers[USB_MAX_ISOCHRONOUS_DATA_BUFFERS];  // Data buffer information.
+} ISOCHRONOUS_DATA;
+    
 
 // *****************************************************************************
 /* Targeted Peripheral List
@@ -275,7 +330,7 @@ typedef BOOL (*USB_CLIENT_EVENT_HANDLER) ( BYTE address, USB_EVENT event, void *
 
 /****************************************************************************
   Function:
-    BOOL (*USB_CLIENT_INIT)   ( BYTE address, DWORD flags )
+    BOOL (*USB_CLIENT_INIT)   ( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This is a typedef to use when defining a client driver initialization
@@ -291,9 +346,11 @@ typedef BOOL (*USB_CLIENT_EVENT_HANDLER) ( BYTE address, USB_EVENT event, void *
     The device has been configured.
 
   Parameters:
-    BYTE address - Device's address on the bus
-    WORD flags   - Initialization flags
-
+    BYTE address        - Device's address on the bus
+    DWORD flags         - Initialization flags
+    BYTE clientDriverID - ID to send when issuing a Device Request via
+                            USBHostIssueDeviceRequest() or USBHostSetDeviceConfiguration().
+                            
   Return Values:
     TRUE    - Successful
     FALSE   - Not successful
@@ -304,7 +361,7 @@ typedef BOOL (*USB_CLIENT_EVENT_HANDLER) ( BYTE address, USB_EVENT event, void *
     selected configuration.
   ***************************************************************************/
 
-typedef BOOL (*USB_CLIENT_INIT)   ( BYTE address, DWORD flags );
+typedef BOOL (*USB_CLIENT_INIT)   ( BYTE address, DWORD flags, BYTE clientDriverID );
 
 
 /****************************************************************************
@@ -427,65 +484,6 @@ extern CLIENT_DRIVER_TABLE  usbClientDrvTable[];                // Application's
   ***************************************************************************/
 
 BYTE    USBHostClearEndpointErrors( BYTE deviceAddress, BYTE endpoint );
-
-
-/****************************************************************************
-  Function:
-    BYTE USBHostDeviceRequest( BYTE deviceAddress, BYTE bmRequestType,
-                    BYTE bRequest, WORD wValue, WORD wIndex, WORD wLength,
-                    BYTE *data, BYTE dataDirection )
-
-  Summary:
-    This function sends a standard device request to the attached device.
-
-  Description:
-    This function sends a standard device request to the attached device.
-    The user must pass in the parameters of the device request.  If there is
-    input or output data associated with the request, a pointer to the data
-    must be provided.  The direction of the associated data (input or output)
-    must also be indicated.
-
-    This function does no special processing in regards to the request except
-    for three requests.  If SET INTERFACE is sent, then DTS is reset for all
-    endpoints.  If CLEAR FEATURE (ENDPOINT HALT) is sent, then DTS is reset
-    for that endpoint.  If SET CONFIGURATION is sent, the request is aborted
-    with a failure.  The function USBHostSetDeviceConfiguration() must be
-    called to change the device configuration, since endpoint definitions may
-    change.
-
-  Precondition:
-    The host state machine should be in the running state, and no reads or
-    writes to EP0 should be in progress.
-
-  Parameters:
-    BYTE deviceAddress  - Device address
-    BYTE bmRequestType  - The request type as defined by the USB
-                            specification.
-    BYTE bRequest       - The request as defined by the USB specification.
-    WORD wValue         - The value for the request as defined by the USB
-                            specification.
-    WORD wIndex         - The index for the request as defined by the USB
-                            specification.
-    WORD wLength        - The data length for the request as defined by the
-                            USB specification.
-    BYTE *data          - Pointer to the data for the request.
-    BYTE dataDirection  - USB_DEVICE_REQUEST_SET or USB_DEVICE_REQUEST_GET
-
-  Return Values:
-    USB_SUCCESS                 - Request processing started
-    USB_UNKNOWN_DEVICE          - Device not found
-    USB_INVALID_STATE           - The host must be in a normal running state
-                                    to do this request
-    USB_ENDPOINT_BUSY           - A read or write is already in progress
-    USB_ILLEGAL_REQUEST         - SET CONFIGURATION cannot be performed with
-                                    this function.
-
-  Remarks:
-    DTS reset is done before the command is issued.
-  ***************************************************************************/
-
-BYTE    USBHostDeviceRequest( BYTE deviceAddress, BYTE bmRequestType, BYTE bRequest,
-             WORD wValue, WORD wIndex, WORD wLength, BYTE *data, BYTE dataDirection );
 
 
 /****************************************************************************
@@ -630,7 +628,8 @@ BYTE    USBHostDeviceStatus( BYTE deviceAddress );
 /****************************************************************************
   Function:
     BYTE USBHostGetStringDescriptor ( BYTE deviceAddress,  BYTE stringNumber,
-                        BYTE *stringDescriptor, BYTE stringLength )
+                        BYTE LangID, BYTE *stringDescriptor, BYTE stringLength, 
+                        BYTE clientDriverID )
 
   Summary:
     This routine initiates a request to obtains the requested string
@@ -642,15 +641,50 @@ BYTE    USBHostDeviceStatus( BYTE deviceAddress );
     error.  Otherwise, the request is started, and the requested string
     descriptor is stored in the designated location.
 
+    Example Usage:
+    <code>
+    USBHostGetStringDescriptor(
+        deviceAddress,
+        stringDescriptorNum,
+        LangID,
+        stringDescriptorBuffer,
+        sizeof(stringDescriptorBuffer),
+        0xFF 
+        );
+
+    while(1)
+    {
+        if(USBHostTransferIsComplete( deviceAddress , 0, &errorCode, &byteCount))
+        {
+            if(errorCode)
+            {
+                //There was an error reading the string, bail out of loop
+            }
+            else
+            {
+                //String is located in specified buffer, do something with it.
+
+                //The length of the string is both in the byteCount variable
+                //  as well as the first byte of the string itself
+            }
+            break;
+        }
+        USBTasks();
+    }
+    </code>
+
   Precondition:
     None
 
   Parameters:
     deviceAddress       - Address of the device
     stringNumber        - Index of the desired string descriptor
+    LangID              - The Language ID of the string to read (should be 0
+                            if trying to read the language ID list
     *stringDescriptor   - Pointer to where to store the string.
     stringLength        - Maximum length of the returned string.
-
+    clientDriverID      - Client driver to return the completion event to.
+    
   Return Values:
     USB_SUCCESS             - The request was started successfully.
     USB_UNKNOWN_DEVICE      - Device not found
@@ -665,10 +699,10 @@ BYTE    USBHostDeviceStatus( BYTE deviceAddress );
     for more information about the format of string descriptors.
   ***************************************************************************/
 
-#define USBHostGetStringDescriptor( deviceAddress, stringNumber, stringDescriptor, stringLength )                               \
-        USBHostDeviceRequest( deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_DEVICE,   \
-                USB_REQUEST_GET_DESCRIPTOR, (USB_DESCRIPTOR_STRING << 8) | stringNumber,                                        \
-                0, stringLength, stringDescriptor, USB_DEVICE_REQUEST_GET )
+#define USBHostGetStringDescriptor( deviceAddress, stringNumber, LangID, stringDescriptor, stringLength, clientDriverID )                   \
+        USBHostIssueDeviceRequest( deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_DEVICE,   \
+                USB_REQUEST_GET_DESCRIPTOR, (USB_DESCRIPTOR_STRING << 8) | stringNumber,                                            \
+                LangID, stringLength, stringDescriptor, USB_DEVICE_REQUEST_GET, clientDriverID )
 
 
 /****************************************************************************
@@ -706,10 +740,168 @@ BOOL USBHostInit(  unsigned long flags  );
 
 /****************************************************************************
   Function:
+    BOOL USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, 
+            BYTE numberOfBuffers, WORD bufferSize )
+    
+  Description:
+    This function initializes the isochronous data buffer information and
+    allocates memory for each buffer.  
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Return Values:
+    TRUE    - All buffers are allocated successfully.
+    FALSE   - Not enough heap space to allocate all buffers - adjust the 
+                project to provide more heap space.
+
+  Remarks:
+    This function is available only if USB_SUPPORT_ISOCHRONOUS_TRANSFERS
+    is defined in usb_config.h.
+***************************************************************************/
+
+#ifdef USB_SUPPORT_ISOCHRONOUS_TRANSFERS
+BOOL USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, BYTE numberOfBuffers, WORD bufferSize );
+#endif
+
+
+/****************************************************************************
+  Function:
+    void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, BYTE numberOfBuffers )
+    
+  Description:
+    This function releases all of the memory allocated for the isochronous
+    data buffers.  It also resets all other information about the buffers.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    None
+
+  Remarks:
+    This function is available only if USB_SUPPORT_ISOCHRONOUS_TRANSFERS
+    is defined in usb_config.h.
+***************************************************************************/
+
+#ifdef USB_SUPPORT_ISOCHRONOUS_TRANSFERS
+void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, BYTE numberOfBuffers );
+#endif
+
+
+/****************************************************************************
+  Function:
+    void USBHostIsochronousBuffersReset( ISOCHRONOUS_DATA * isocData, BYTE numberOfBuffers )
+    
+  Description:
+    This function resets all the isochronous data buffers.  It does not do 
+    anything with the space allocated for the buffers.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    None
+
+  Remarks:
+    This function is available only if USB_SUPPORT_ISOCHRONOUS_TRANSFERS
+    is defined in usb_config.h.
+***************************************************************************/
+
+#ifdef USB_SUPPORT_ISOCHRONOUS_TRANSFERS
+void USBHostIsochronousBuffersReset( ISOCHRONOUS_DATA * isocData, BYTE numberOfBuffers );
+#endif
+
+
+/****************************************************************************
+  Function:
+    BYTE USBHostIssueDeviceRequest( BYTE deviceAddress, BYTE bmRequestType,
+                    BYTE bRequest, WORD wValue, WORD wIndex, WORD wLength,
+                    BYTE *data, BYTE dataDirection, BYTE clientDriverID )
+
+  Summary:
+    This function sends a standard device request to the attached device.
+
+  Description:
+    This function sends a standard device request to the attached device.
+    The user must pass in the parameters of the device request.  If there is
+    input or output data associated with the request, a pointer to the data
+    must be provided.  The direction of the associated data (input or output)
+    must also be indicated.
+
+    This function does no special processing in regards to the request except
+    for three requests.  If SET INTERFACE is sent, then DTS is reset for all
+    endpoints.  If CLEAR FEATURE (ENDPOINT HALT) is sent, then DTS is reset
+    for that endpoint.  If SET CONFIGURATION is sent, the request is aborted
+    with a failure.  The function USBHostSetDeviceConfiguration() must be
+    called to change the device configuration, since endpoint definitions may
+    change.
+
+  Precondition:
+    The host state machine should be in the running state, and no reads or
+    writes to EP0 should be in progress.
+
+  Parameters:
+    BYTE deviceAddress  - Device address
+    BYTE bmRequestType  - The request type as defined by the USB
+                            specification.
+    BYTE bRequest       - The request as defined by the USB specification.
+    WORD wValue         - The value for the request as defined by the USB
+                            specification.
+    WORD wIndex         - The index for the request as defined by the USB
+                            specification.
+    WORD wLength        - The data length for the request as defined by the
+                            USB specification.
+    BYTE *data          - Pointer to the data for the request.
+    BYTE dataDirection  - USB_DEVICE_REQUEST_SET or USB_DEVICE_REQUEST_GET
+    BYTE clientDriverID - Client driver to send the event to.
+
+  Return Values:
+    USB_SUCCESS                 - Request processing started
+    USB_UNKNOWN_DEVICE          - Device not found
+    USB_INVALID_STATE           - The host must be in a normal running state
+                                    to do this request
+    USB_ENDPOINT_BUSY           - A read or write is already in progress
+    USB_ILLEGAL_REQUEST         - SET CONFIGURATION cannot be performed with
+                                    this function.
+
+  Remarks:
+    DTS reset is done before the command is issued.
+  ***************************************************************************/
+
+BYTE    USBHostIssueDeviceRequest( BYTE deviceAddress, BYTE bmRequestType, BYTE bRequest,
+             WORD wValue, WORD wIndex, WORD wLength, BYTE *data, BYTE dataDirection, 
+             BYTE clientDriverID );
+
+
+/****************************************************************************
+  Function:
     BYTE USBHostRead( BYTE deviceAddress, BYTE endpoint, BYTE *pData,
                         DWORD size )
+  Summary:
+    This function initiates a read from the attached device.
+
   Description:
     This function initiates a read from the attached device.
+
+    If the endpoint is isochronous, special conditions apply.  The pData and
+    size parameters have slightly different meanings, since multiple buffers
+    are required.  Once started, an isochronous transfer will continue with
+    no upper layer intervention until USBHostTerminateTransfer() is called.
+    The ISOCHRONOUS_DATA_BUFFERS structure should not be manipulated until
+    the transfer is terminated.
+
+    To clarify parameter usage and to simplify casting, use the macro
+    USBHostReadIsochronous() when reading from an isochronous endpoint.
 
   Precondition:
     None
@@ -717,8 +909,13 @@ BOOL USBHostInit(  unsigned long flags  );
   Parameters:
     BYTE deviceAddress  - Device address
     BYTE endpoint       - Endpoint number
-    BYTE *pData         - Pointer to where to store the data
-    DWORD size          - Number of data bytes to store
+    BYTE *pData         - Pointer to where to store the data. If the endpoint
+                            is isochronous, this points to an
+                            ISOCHRONOUS_DATA_BUFFERS structure, with multiple
+                            data buffer pointers.
+    DWORD size          - Number of data bytes to read. If the endpoint is
+                            isochronous, this is the number of data buffer
+                            pointers pointed to by pData.
 
   Return Values:
     USB_SUCCESS                     - Read started successfully.
@@ -739,6 +936,54 @@ BOOL USBHostInit(  unsigned long flags  );
   ***************************************************************************/
 
 BYTE    USBHostRead( BYTE deviceAddress, BYTE endpoint, BYTE *data, DWORD size );
+
+
+/****************************************************************************
+  Function:
+    BYTE USBHostReadIsochronous( BYTE deviceAddress, BYTE endpoint,
+            ISOCHRONOUS_DATA *pIsochronousData )
+
+  Summary:
+    This function initiates a read from an isochronous endpoint on the
+    attached device.
+
+  Description:
+    This function initiates a read from an isochronous endpoint on the
+    attached device.  If the endpoint is not isochronous, use USBHostRead().
+
+    Once started, an isochronous transfer will continue with no upper layer
+    intervention until USBHostTerminateTransfer() is called.  
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE deviceAddress  - Device address
+    BYTE endpoint       - Endpoint number
+    ISOCHRONOUS_DATA *pIsochronousData - Pointer to an ISOCHRONOUS_DATA
+                            structure, containing information for the
+                            application and the host driver for the
+                            isochronous transfer.
+
+  Return Values:
+    USB_SUCCESS                     - Read started successfully.
+    USB_UNKNOWN_DEVICE              - Device with the specified address not found.
+    USB_INVALID_STATE               - We are not in a normal running state.
+    USB_ENDPOINT_ILLEGAL_TYPE       - Must use USBHostControlRead to read
+                                        from a control endpoint.
+    USB_ENDPOINT_ILLEGAL_DIRECTION  - Must read from an IN endpoint.
+    USB_ENDPOINT_STALLED            - Endpoint is stalled.  Must be cleared
+                                        by the application.
+    USB_ENDPOINT_ERROR              - Endpoint has too many errors.  Must be
+                                        cleared by the application.
+    USB_ENDPOINT_BUSY               - A Read is already in progress.
+    USB_ENDPOINT_NOT_FOUND          - Invalid endpoint.
+
+  Remarks:
+    None
+  ***************************************************************************/
+
+#define USBHostReadIsochronous( a, e, p ) USBHostRead( a, e, (BYTE *)p, (DWORD)0 );
 
 
 /****************************************************************************
@@ -805,8 +1050,7 @@ BYTE    USBHostResumeDevice( BYTE deviceAddress );
 
 /****************************************************************************
   Function:
-    BYTE USBHostSetDeviceConfiguration( BYTE deviceAddress,
-                    BYTE configuration )
+    BYTE USBHostSetDeviceConfiguration( BYTE deviceAddress, BYTE configuration )
 
   Summary:
     This function changes the device's configuration.
@@ -814,7 +1058,11 @@ BYTE    USBHostResumeDevice( BYTE deviceAddress );
   Description:
     This function is used by the application to change the device's
     Configuration.  This function must be used instead of
-    USBHostDeviceRequest(), because the endpoint definitions may change.
+    USBHostIssueDeviceRequest(), because the endpoint definitions may change.
+
+    To see when the reconfiguration is complete, use the USBHostDeviceStatus()
+    function.  If configuration is still in progress, this function will
+    return USB_DEVICE_ENUMERATING.
 
   Precondition:
     The host state machine should be in the running state, and no reads or
@@ -823,7 +1071,7 @@ BYTE    USBHostResumeDevice( BYTE deviceAddress );
   Parameters:
     BYTE deviceAddress  - Device address
     BYTE configuration  - Index of the new configuration
-
+    
   Return Values:
     USB_SUCCESS         - Process of changing the configuration was started
                             successfully.
@@ -832,14 +1080,34 @@ BYTE    USBHostResumeDevice( BYTE deviceAddress );
                             or while performing a device request.
     USB_BUSY            - No IN or OUT transfers may be in progress.
 
+  Example:
+    <code>
+    rc = USBHostSetDeviceConfiguration( attachedDevice, configuration );
+    if (rc)
+    {
+        // Error - cannot set configuration.
+    }
+    else
+    {
+        while (USBHostDeviceStatus( attachedDevice ) == USB_DEVICE_ENUMERATING)
+        {
+            USBHostTasks();
+        }
+    }
+    if (USBHostDeviceStatus( attachedDevice ) != USB_DEVICE_ATTACHED)
+    {
+        // Error - cannot set configuration.
+    }
+    </code>
+
   Remarks:
     If an invalid configuration is specified, this function cannot return
     an error.  Instead, the event USB_UNSUPPORTED_DEVICE will the sent to the
     application layer and the device will be placed in a holding state with a
-    USB_HOLDING_UNSUPPORTED_DEVICE error.
+    USB_HOLDING_UNSUPPORTED_DEVICE error returned by USBHostDeviceStatus().
   ***************************************************************************/
 
-BYTE    USBHostSetDeviceConfiguration( BYTE deviceAddress, BYTE configuration );
+BYTE USBHostSetDeviceConfiguration( BYTE deviceAddress, BYTE configuration );
 
 
 /****************************************************************************
@@ -984,7 +1252,8 @@ void    USBHostTasks( void );
   Description:
     This function terminates the current transfer for the given endpoint.  It
     can be used to terminate reads or writes that the device is not
-    responding to.
+    responding to.  It is also the only way to terminate an isochronous
+    transfer.
 
   Precondition:
     None
@@ -1017,6 +1286,10 @@ void    USBHostTerminateTransfer( BYTE deviceAddress, BYTE endpoint );
     complete.  If it is complete, an error code and the number of bytes
     transferred are returned.
 
+    For isochronous transfers, byteCount is not valid.  Instead, use the
+    returned byte counts for each EVENT_TRANSFER event that was generated
+    during the transfer.
+
   Precondition:
     None
 
@@ -1025,7 +1298,8 @@ void    USBHostTerminateTransfer( BYTE deviceAddress, BYTE endpoint );
     BYTE endpoint       - Endpoint number
     BYTE *errorCode     - Error code indicating the status of the transfer.
                             Only valid if the transfer is complete.
-    DWORD *byteCount    - The number of bytes sent or received.
+    DWORD *byteCount    - The number of bytes sent or received.  Invalid
+                            for isochronous transfers.
 
   Return Values:
     TRUE    - Transfer is complete.
@@ -1105,14 +1379,29 @@ BYTE    USBHostVbusEvent(USB_EVENT vbusEvent, BYTE hubAddress, BYTE portNumber);
     pointed to by *data must remain valid during the entire time that the
     write is taking place; the data is not buffered by the stack.
 
+    If the endpoint is isochronous, special conditions apply.  The pData and
+    size parameters have slightly different meanings, since multiple buffers
+    are required.  Once started, an isochronous transfer will continue with
+    no upper layer intervention until USBHostTerminateTransfer() is called.
+    The ISOCHRONOUS_DATA_BUFFERS structure should not be manipulated until
+    the transfer is terminated.
+
+    To clarify parameter usage and to simplify casting, use the macro
+    USBHostWriteIsochronous() when writing to an isochronous endpoint.
+
   Precondition:
     None
 
   Parameters:
     BYTE deviceAddress  - Device address
     BYTE endpoint       - Endpoint number
-    BYTE *data          - Pointer to where the data is stored
-    DWORD size          - Number of data bytes to send
+    BYTE *data          - Pointer to where the data is stored. If the endpoint
+                            is isochronous, this points to an
+                            ISOCHRONOUS_DATA_BUFFERS structure, with multiple
+                            data buffer pointers.
+    DWORD size          - Number of data bytes to send. If the endpoint is
+                            isochronous, this is the number of data buffer
+                            pointers pointed to by pData.
 
   Return Values:
     USB_SUCCESS                     - Write started successfully.
@@ -1133,6 +1422,54 @@ BYTE    USBHostVbusEvent(USB_EVENT vbusEvent, BYTE hubAddress, BYTE portNumber);
   ***************************************************************************/
 
 BYTE    USBHostWrite( BYTE deviceAddress, BYTE endpoint, BYTE *data, DWORD size );
+
+
+/****************************************************************************
+  Function:
+    BYTE USBHostWriteIsochronous( BYTE deviceAddress, BYTE endpoint,
+            ISOCHRONOUS_DATA *pIsochronousData )
+
+  Summary:
+    This function initiates a write to an isochronous endpoint on the
+    attached device.
+
+  Description:
+    This function initiates a write to an isochronous endpoint on the
+    attached device.  If the endpoint is not isochronous, use USBHostWrite().
+
+    Once started, an isochronous transfer will continue with
+    no upper layer intervention until USBHostTerminateTransfer() is called.
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE deviceAddress  - Device address
+    BYTE endpoint       - Endpoint number
+    ISOCHRONOUS_DATA *pIsochronousData - Pointer to an ISOCHRONOUS_DATA
+                            structure, containing information for the
+                            application and the host driver for the
+                            isochronous transfer.
+
+  Return Values:
+    USB_SUCCESS                     - Write started successfully.
+    USB_UNKNOWN_DEVICE              - Device with the specified address not found.
+    USB_INVALID_STATE               - We are not in a normal running state.
+    USB_ENDPOINT_ILLEGAL_TYPE       - Must use USBHostControlWrite to write
+                                        to a control endpoint.
+    USB_ENDPOINT_ILLEGAL_DIRECTION  - Must write to an OUT endpoint.
+    USB_ENDPOINT_STALLED            - Endpoint is stalled.  Must be cleared
+                                        by the application.
+    USB_ENDPOINT_ERROR              - Endpoint has too many errors.  Must be
+                                        cleared by the application.
+    USB_ENDPOINT_BUSY               - A Write is already in progress.
+    USB_ENDPOINT_NOT_FOUND          - Invalid endpoint.
+
+  Remarks:
+    None
+  ***************************************************************************/
+
+#define USBHostWriteIsochronous( a, e, p ) USBHostWrite( a, e, (BYTE *)p, (DWORD)0 );
 
 
 #endif

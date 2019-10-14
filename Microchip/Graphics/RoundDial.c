@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        RoundDial.c
  * Dependencies:    math.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 Version 3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -115,7 +115,76 @@ void RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg)
 
 }
 
-      
+/*********************************************************************
+* Function: SHORT RdiaCosine( SHORT v )
+*
+*
+* Notes: Returns the cosine of the dial position.
+*
+********************************************************************/
+
+#ifdef USE_KEYBOARD
+    // Dimple position table for 15 degree increments
+//    #define QUADRANT_POSITIONS     6
+//    SHORT   _cosine[QUADRANT_POSITIONS] = { 100, 97, 87, 71, 50, 26 };
+    SHORT   _cosine[RDIA_QUADRANT_POSITIONS] = { 100, 97, 87, 71, 50, 26 };
+#endif        
+
+SHORT RdiaCosine( SHORT v )
+{
+    if (v >= RDIA_QUADRANT_POSITIONS*3)
+    {
+        v -= RDIA_QUADRANT_POSITIONS*3;
+        return _cosine[RDIA_QUADRANT_POSITIONS-1 - v];
+    }
+    else if (v >= RDIA_QUADRANT_POSITIONS*2)    
+    {
+        v -= RDIA_QUADRANT_POSITIONS*2;
+        return -(_cosine[v]);
+    }
+    else if (v >= RDIA_QUADRANT_POSITIONS)
+    {
+        v -= RDIA_QUADRANT_POSITIONS;
+        return -(_cosine[RDIA_QUADRANT_POSITIONS-1 - v]);
+    }
+    else
+    {
+        return _cosine[v];
+    }    
+}            
+    
+/*********************************************************************
+* Function: SHORT RdiaSine( SHORT v )
+*
+*
+* Notes: Returns the sine of the dial position.
+*
+********************************************************************/
+
+SHORT RdiaSine( SHORT v )
+{
+    if (v >= RDIA_QUADRANT_POSITIONS*3)
+    {
+        v -= RDIA_QUADRANT_POSITIONS*3;
+        return -(_cosine[v]);
+    }
+    else if (v >= RDIA_QUADRANT_POSITIONS*2)    
+    {
+        v -= RDIA_QUADRANT_POSITIONS*2;
+        return -(_cosine[RDIA_QUADRANT_POSITIONS-1 - v]);
+    }
+    else if (v >= RDIA_QUADRANT_POSITIONS)
+    {
+        v -= RDIA_QUADRANT_POSITIONS;
+        return _cosine[v];
+    }
+    else
+    {
+        return _cosine[RDIA_QUADRANT_POSITIONS-1 - v];
+    }
+}            
+    
+        
 /*********************************************************************
 * Function: WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
 *
@@ -219,6 +288,44 @@ WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
 		}
 	}
 #endif
+
+#ifdef USE_KEYBOARD
+    SHORT   newValue;
+    
+	// Evaluate if the message is for the button
+    // Check if disabled first
+	if (GetState(pDia,RDIA_DISABLED))
+		return OBJ_MSG_INVALID;
+
+    if ((pMsg->type == TYPE_KEYBOARD) && 
+        (pMsg->param1 == pDia->ID) &&
+        (pMsg->uiEvent == EVENT_KEYSCAN))
+    {
+        if (pMsg->param2 == SCAN_RIGHT_PRESSED)
+        {
+            newValue = pDia->value + pDia->res;
+			if (newValue > pDia->max)
+			{
+    			newValue -= (pDia->max + 1);
+    	    }
+    		pDia->new_xPos = pDia->radius*2*RdiaCosine(newValue)/100/3; 
+    		pDia->new_yPos = pDia->radius*2*RdiaSine(newValue)/100/3; 
+            return RD_MSG_CLOCKWISE;
+        }    
+        if (pMsg->param2 == SCAN_LEFT_PRESSED)
+        {
+            newValue = pDia->value - pDia->res;
+			if (newValue < 0)
+			{
+    			newValue += (pDia->max + 1);
+    	    }
+    		pDia->new_xPos = pDia->radius*2*RdiaCosine(newValue)/100/3; 
+    		pDia->new_yPos = pDia->radius*2*RdiaSine(newValue)/100/3; 
+            return RD_MSG_CTR_CLOCKWISE;
+        }    
+    }    
+#endif    
+
 	return OBJ_MSG_INVALID;	
 }
 
@@ -252,8 +359,9 @@ WORD faceClr;
 
 	        if (GetState(pDia,RDIA_HIDE)) {  				      // Hide the dial (remove from screen)
        	        SetColor(pDia->pGolScheme->CommonBkColor);
-       	        Bar(pDia->xCenter-pDia->radius, pDia->yCenter-pDia->radius, 
-       	        	pDia->xCenter+pDia->radius, pDia->yCenter+pDia->radius);
+       	        if(!Bar(pDia->xCenter-pDia->radius, pDia->yCenter-pDia->radius, 
+       	        	pDia->xCenter+pDia->radius, pDia->yCenter+pDia->radius))
+       	        	return 0;
 		        return 1;
 		    }
 		    
@@ -287,12 +395,11 @@ WORD faceClr;
 
 		case ERASE_POSITION:			
 erase_current_pos:
-			if(IsDeviceBusy())
-                return 0;  			
 
 			SetColor(pDia->pGolScheme->Color0);
-			Bar(pDia->curr_xPos-dimpleRadius, pDia->curr_yPos-dimpleRadius,
-			 	pDia->curr_xPos+dimpleRadius, pDia->curr_yPos+dimpleRadius);
+			if(!Bar(pDia->curr_xPos-dimpleRadius, pDia->curr_yPos-dimpleRadius,
+			 	pDia->curr_xPos+dimpleRadius, pDia->curr_yPos+dimpleRadius))
+			 	return 0;
 			
 			// determine if the value will increment or decrement
 			#if defined USE_TOUCHSCREEN
@@ -306,6 +413,23 @@ erase_current_pos:
     				if (pDia->value < 0)
     					pDia->value = 0;
     			}
+    	    #elif defined USE_KEYBOARD
+                if (GetState(pDia, RDIA_ROT_CW))
+                {
+                    pDia->value = pDia->value + pDia->res;
+        			if (pDia->value > pDia->max)
+        			{
+            			pDia->value -= (pDia->max + 1);
+            	    }
+                }    
+                else if (GetState(pDia, RDIA_ROT_CCW))
+                {
+                    pDia->value = pDia->value - pDia->res;
+        			if (pDia->value < 0)
+        			{
+            			pDia->value += (pDia->max + 1);
+            	    }
+                }    
     	    #endif
 		
 			// else do not update counter yet 
@@ -326,9 +450,9 @@ draw_current_pos:
 			SetColor(pDia->pGolScheme->EmbossLtColor);
    			SetLineThickness(NORMAL_LINE);
 			SetLineType(SOLID_LINE);			
-			Circle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius); 
+			if(!Circle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius)) return 0;
 			SetColor(pDia->pGolScheme->EmbossDkColor);
-			FillCircle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius-1); 
+			if(!FillCircle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius-1)) return 0;
 
            	state = REMOVE;
             return 1;

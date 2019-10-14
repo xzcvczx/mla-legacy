@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        RoundDial.h
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -51,6 +51,13 @@
 #define RDIA_ROT_CCW    	0x0008  // Bit for rotate counter clockwise state.
 #define RDIA_DRAW        	0x4000  // Bit to indicate object must be redrawn.
 #define RDIA_HIDE        	0x8000  // Bit to indicate object must be removed from screen.
+
+#ifdef USE_KEYBOARD
+    #define RDIA_QUADRANT_POSITIONS 6
+    extern SHORT                    _cosine[RDIA_QUADRANT_POSITIONS];
+    SHORT RdiaCosine( SHORT v );
+    SHORT RdiaSine( SHORT v );
+#endif
 
 /*********************************************************************
 * Overview: Defines the parameters required for a dial Object.
@@ -133,7 +140,7 @@ ROUNDDIAL  *RdiaCreate(	WORD ID, SHORT x, SHORT y, SHORT radius,
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates the translated 
-*			messages for each event of the touch screen inputs.
+*			messages for each event of the touch screen and keyboard inputs.
 *
 *	<TABLE>
 *    	Translated Message      Input Source  Events        Description

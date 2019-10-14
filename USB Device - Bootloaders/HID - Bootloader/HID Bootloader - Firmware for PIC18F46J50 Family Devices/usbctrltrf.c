@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                Microchip USB C18 Firmware Version 1.2
+ *                Microchip USB C18 Firmware Version 1.3a
  *
  *********************************************************************
  * FileName:        usbctrltrf.c
@@ -33,6 +33,9 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Rawin Rojvanit       11/19/04    Original.
  * Rawin Rojvanit       05/14/07    Bug fixes.
+ * Fritz Schlunder		04/14/09	Improved SETUP response for hosts
+ *									with aggressive control transfer
+ *									timing.
  ********************************************************************/
 
 /** I N C L U D E S **********************************************************/
@@ -100,10 +103,34 @@ byte USBCtrlEPService(void)
     if(USTAT == EP00_OUT)
     {
         UIRbits.TRNIF = 0;
-        if(ep0Bo.Stat.PID == SETUP_TOKEN)           // EP0 SETUP
+
+		//If the current EP0 OUT buffer has a SETUP packet
+        if(ep0Bo.Stat.PID == SETUP_TOKEN)
+        {
+	        //Check if the SETUP transaction data went into the CtrlTrfData buffer.
+	        //If so, need to copy it to the SetupPkt buffer so that it can be 
+	        //processed correctly by USBCtrlTrfSetupHandler().
+	        if(ep0Bo.ADR == (byte*)(&CtrlTrfData))	
+	        {
+		        unsigned char setup_cnt;
+		
+		        ep0Bo.ADR = (byte*)(&SetupPkt);
+		        for(setup_cnt = 0; setup_cnt < sizeof(CTRL_TRF_SETUP); setup_cnt++)
+		        {
+		            *(((byte*)&SetupPkt)+setup_cnt) = *(((byte*)&CtrlTrfData)+setup_cnt);
+		        }//end for
+		    } 
+	        
+			//Handle the control transfer (parse the 8-byte SETUP command and figure out what to do)
             USBCtrlTrfSetupHandler();
-        else                                        // EP0 OUT
+        }
+        else
+        {
+			//Handle the DATA transfer
             USBCtrlTrfOutHandler();
+        }
+
+
     }
     else if(USTAT == EP00_IN)            	        // EP0 IN
     {
@@ -190,14 +217,11 @@ is also re-initialized.
     /* Stage 2 */
     USBCheckStdRequest();                   // See system\usb9\usb9.c
 
-    /* Modifiable Section */
     for(i=0;i < (sizeof(ClassReqHandler)/sizeof(pFunc));i++)
     {
         if(ctrl_trf_session_owner != MUID_NULL)break;
         ClassReqHandler[i]();               // See autofiles\usbdsc.c
     }//end while
-
-    /* End Modifiable Section */
 
     /* Stage 3 */
     USBCtrlEPServiceComplete();
@@ -235,13 +259,23 @@ void USBCtrlTrfOutHandler(void)
          * because if _KEEP was set, TRNIF would not have been
          * generated in the first place.
          */
+		ep0Bo.ADR = (byte*)(&CtrlTrfData);
+		ep0Bo.Cnt = EP0_BUFF_SIZE;
         if(ep0Bo.Stat.DTS == 0)
             ep0Bo.Stat._byte = _USIE|_DAT1|_DTSEN;
         else
             ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN;
     }
-    else    // CTRL_TRF_TX
-        USBPrepareForNextSetupTrf();
+    else //In this case the last OUT transaction must have been a status stage of a CTRL_TRF_TX
+    {
+	    //Prepare EP0 OUT for the next SETUP transaction.
+		USBPrepareForNextSetupTrf();
+        ep0Bo.Cnt = EP0_BUFF_SIZE;
+        ep0Bo.ADR = (byte*)(&SetupPkt);
+        ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;			
+    }
+
+
 
 }//end USBCtrlTrfOutHandler
 
@@ -596,66 +630,7 @@ any EP0 endpoints.
  *****************************************************************************/
 void USBPrepareForNextSetupTrf(void)
 {
-/********************************************************************
-Bug Fix: May 14, 2007
-*********************************************************************
-Facts:
-A Setup Packet should never be stalled. (USB 2.0 Section 8.5.3)
-If a Setup PID is detected by the SIE, the DTSEN setting is ignored.
-This causes a problem at the end of a control write transaction.
-In USBCtrlEPServiceComplete(), during a control write (Host to Device),
-the EP0_OUT is setup to write any data to the CtrlTrfData buffer.
-If <SETUP[0]><IN[1]> is completed and USBCtrlTrfInHandler() is not
-called before the next <SETUP[0]> is received, then the latest Setup
-data will be written to the CtrlTrfData buffer instead of the SetupPkt
-buffer.
-
-If USBCtrlTrfInHandler() was called before the latest <SETUP[0]> is
-received, then there would be no problem,
-because USBPrepareForNextSetupTrf() would have been called and updated
-ep0Bo.ADR to point to the SetupPkt buffer.
-
-Work around:
-Check for the problem as described above and copy the Setup data from
-CtrlTrfData to SetupPkt.
-********************************************************************/
-    if((ctrl_trf_state == CTRL_TRF_RX) &&
-       (UCONbits.PKTDIS == 1) &&
-       (ep0Bo.Cnt == sizeof(CTRL_TRF_SETUP)) &&
-       (ep0Bo.Stat.PID == SETUP_TOKEN) &&
-       (ep0Bo.Stat.UOWN == 0))
-    {
-        unsigned char setup_cnt;
-
-        ep0Bo.ADR = (byte*)&SetupPkt;
-
-        // The Setup data was written to the CtrlTrfData buffer, must copy
-        // it back to the SetupPkt buffer so that it can be processed correctly
-        // by USBCtrlTrfSetupHandler().
-        for(setup_cnt = 0; setup_cnt < sizeof(CTRL_TRF_SETUP); setup_cnt++)
-        {
-            *(((byte*)&SetupPkt)+setup_cnt) = *(((byte*)&CtrlTrfData)+setup_cnt);
-        }//end for
-    }
-/*******************************************************************/
-    else
-    {
-        ctrl_trf_state = WAIT_SETUP;            // See usbctrltrf.h
-        ep0Bo.Cnt = EP0_BUFF_SIZE;              // Defined in usbcfg.h
-        ep0Bo.ADR = (byte*)&SetupPkt;
-
-/********************************************************************
-Bug Fix: May 14, 2007 (#F1)
-*********************************************************************
-In the original firmware, if an OUT token is sent by the host
-before a SETUP token is sent, the firmware would respond with an ACK.
-This is not a correct response, the firmware should have sent a STALL.
-This is a minor non-compliance since a compliant host should not
-send an OUT before sending a SETUP token. The fix allows a SETUP
-transaction to be accepted while stalling OUT transactions.
-********************************************************************/
-        //ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN;        // Removed
-        ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;  // Added #F1
+    ctrl_trf_state = WAIT_SETUP;            // See usbctrltrf.h
 
 /********************************************************************
 Bug Fix: May 14, 2007 (#F3)
@@ -671,10 +646,12 @@ Although this fix is known, it is not implemented because it
 breaks the #AF1 fix in USBCtrlEPServiceComplete().
 Since #AF1 fix is more important, this fix, #F3 is commented out.
 ********************************************************************/
-        ep0Bi.Stat._byte = _UCPU;               // Should be removed
-        //ep0Bi.Stat._byte = _USIE|_BSTALL;     // Should be added #F3
-    }//end if(...)else(...)
+    ep0Bi.Stat._byte = _UCPU;               // Should be removed
+    //ep0Bi.Stat._byte = _USIE|_BSTALL;     // Should be added #F3
+
 
 }//end USBPrepareForNextSetupTrf
+
+
 
 /** EOF usbctrltrf.c *********************************************************/

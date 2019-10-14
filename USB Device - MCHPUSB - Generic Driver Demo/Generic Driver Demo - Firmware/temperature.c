@@ -135,7 +135,7 @@ BOOL AcquireTemperature(void)
 
 		//get ready to sample the A/D
 
-        #if defined(__C30__)
+        #if defined(PIC24FJ256GB110_PIM)
     		AD1CHS = 0x4;           //MUXA uses AN4
     		AD1PCFGLbits.PCFG4 = 0;
     		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay
@@ -145,6 +145,19 @@ BOOL AcquireTemperature(void)
     		AD1CON1bits.SAMP = 0;           //Start sampling
     		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
     		while(!AD1CON1bits.DONE);       //Wait for conversion to complete
+        #elif defined(PIC24FJ64GB004_PIM)
+    		AD1CHS = 0x6;           //MUXA uses AN6
+    		AD1PCFGLbits.PCFG6 = 0;
+    		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay
+    		// Get an ADC sample
+    		AD1CON1bits.SAMP = 1;           //Start sampling
+    		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
+    		AD1CON1bits.SAMP = 0;           //Start sampling
+    		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
+    		while(!AD1CON1bits.DONE);       //Wait for conversion to complete
+	    #elif defined(PIC24F_STARTER_KIT)
+	        temperature.Val = 0x0000;
+	        return TRUE;
 
         #else
             AD1PCFGbits.PCFG4 = 0;
@@ -242,6 +255,9 @@ BOOL AcquireTemperature(void)
         temperature.Val = (WORD)tempADC;
         temperature.Val |= 0x7;
 
+        return TRUE;
+    #elif defined(PIC18F_STARTER_KIT_1)
+        temperature.Val = 0x0000;
         return TRUE;
 	#else
 		#error "Unknown temperature acquire configuration.  See AcquireTemperature function in __FILE__"

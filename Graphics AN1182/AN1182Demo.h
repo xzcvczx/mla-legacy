@@ -4,7 +4,7 @@
  *********************************************************************
  * FileName:        MainDemo.h
  * Dependencies:    See INCLUDES section below
- * Processor:       PIC24/PIC30/PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:        C30/C32
  * Company:         Microchip Technology, Inc.
  *
@@ -40,11 +40,16 @@
 #define _AN1182DEMO_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#ifdef __PIC32MX
+#if defined(__dsPIC33F__) 
+#include <p33Fxxxx.h>
+#elif  defined(__PIC24H__)
+#include <p24Hxxxx.h>
+#elif defined(__PIC32MX__)
 #include <plib.h>
 #else
 #include <p24Fxxxx.h>
 #endif
+
 #include "GenericTypeDefs.h"
 #include "Graphics\Graphics.h"
 #include "EEPROM.h"

@@ -39,7 +39,7 @@
 #include "MDD File System\FSIO.h"
 #include "MDD File System\FSDefs.h"
 #include "string.h"
-#include "MDD File System\internal flash.h"
+#include "MDD File System\Internal Flash.h"
 #include "HardwareProfile.h"
 #include "FSConfig.h"
 
@@ -204,8 +204,8 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
         WORD PSVPageSave;
 
         PSVPageSave = PSVPAG;
-        //TODO: fix this so it is not static but rather based on the requested sector
-        PSVPAG = 0x01;
+
+        PSVPAG = (FILES_ADDRESS + sector_addr)/0x8000;
     #endif
 
     memcpypgm2ram

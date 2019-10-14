@@ -11,8 +11,8 @@ Acronyms/abbreviations used by this class:
     * CBW - Command Block Wrapper
     * CSW - Command Status Wrapper
 
-To interface with usb_host.c, the routine USBMSDClientInitialize() should be
-specified as the Initialize() function, and USBMSDClientEventHandler() should
+To interface with usb_host.c, the routine USBHostMSDClientInitialize() should be
+specified as the Initialize() function, and USBHostMSDClientEventHandler() should
 be specified as the EventHandler() function in the usbClientDrvTable[] array
 declared in usb_config.h.
 
@@ -210,6 +210,7 @@ typedef struct _USB_MSD_DEVICE_INFO
 {
     BYTE                                blockData[31];          // Data buffer for device communication.
     BYTE                                deviceAddress;          // Address of the device on the bus.
+    BYTE                                clientDriverID;         // Client driver ID for device requests.
     BYTE                                errorCode;              // Error code of last error.
     BYTE                                state;                  // State machine state of the device.
     BYTE                                returnState;            // State to return to after performing error handling.
@@ -591,8 +592,8 @@ void USBHostMSDTasks( void )
                             if (U1CONbits.TOKBUSY)
                                 break;
 
-                            if (!USBHostDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                                    USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[i].interface, 1, deviceInfoMSD[i].blockData, USB_DEVICE_REQUEST_GET ))
+                            if (!USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                                    USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[i].interface, 1, deviceInfoMSD[i].blockData, USB_DEVICE_REQUEST_GET, deviceInfoMSD[i].clientDriverID ))
                             {
                                 _USBHostMSD_SetNextSubState();
                             }
@@ -627,7 +628,7 @@ void USBHostMSDTasks( void )
                             #endif
 
                             // Tell the media interface layer that we have a MSD attached.
-                            if (usbMediaInterfaceTable.Initialize( deviceInfoMSD[i].deviceAddress, usbMediaInterfaceTable.flags ))
+                            if (usbMediaInterfaceTable.Initialize( deviceInfoMSD[i].deviceAddress, usbMediaInterfaceTable.flags, 0 ))
                             {
                                 usbMediaInterfaceTable.EventHandler( deviceInfoMSD[i].deviceAddress, EVENT_MSD_MAX_LUN, &(deviceInfoMSD[i].maxLUN), 1 );
                                 _USBHostMSD_SetNextState();
@@ -759,10 +760,11 @@ void USBHostMSDTasks( void )
                                     }
                                     else
                                     {
-                                        //Error recovery here is not explicitly covered in the spec.
+                                        //Error recovery here is not explicitly covered in the spec. Unfortunately, some
+                                        // thumb drives generate a turn-around time error here sometimes.
                                         //_USBHostMSD_TerminateTransfer( errorCode );
                                         deviceInfoMSD[i].flags.val |= MARK_RESET_RECOVERY;
-                                        deviceInfoMSD[i].returnState = STATE_RUNNING | SUBSTATE_HOLDING;
+                                        deviceInfoMSD[i].returnState = STATE_RUNNING | SUBSTATE_SEND_CBW;   // Try the transfer again.
                                         _USBHostMSD_ResetStateJump( i );
                                     }
                                 }
@@ -854,8 +856,8 @@ void USBHostMSDTasks( void )
                     switch (deviceInfoMSD[i].state & SUBSTATE_MASK)
                     {
                         case SUBSTATE_SEND_RESET:
-                            errorCode = USBHostDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                                            USB_MSD_RESET, 0, deviceInfoMSD[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET );
+                            errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                                            USB_MSD_RESET, 0, deviceInfoMSD[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoMSD[i].clientDriverID );
 
                             if (errorCode)
                             {
@@ -894,8 +896,8 @@ void USBHostMSDTasks( void )
                     switch (deviceInfoMSD[i].state & SUBSTATE_MASK)
                     {
                         case SUBSTATE_SEND_CLEAR_IN:
-                            errorCode = USBHostDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
-                                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointIN, 0, NULL, USB_DEVICE_REQUEST_SET );
+                            errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
+                                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointIN, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoMSD[i].clientDriverID );
 
                             if (errorCode)
                             {
@@ -934,8 +936,8 @@ void USBHostMSDTasks( void )
                     switch (deviceInfoMSD[i].state & SUBSTATE_MASK)
                     {
                         case SUBSTATE_SEND_CLEAR_OUT:
-                            errorCode = USBHostDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
-                                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointOUT, 0, NULL, USB_DEVICE_REQUEST_SET );
+                            errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
+                                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointOUT, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoMSD[i].clientDriverID );
 
                             if (errorCode)
                             {
@@ -1252,7 +1254,7 @@ BOOL USBHostMSDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, DWORD *b
 
 /****************************************************************************
   Function:
-    BOOL USBHostMSDInitialize( BYTE address, DWORD flags )
+    BOOL USBHostMSDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is the initialization routine for this client driver.
@@ -1269,7 +1271,10 @@ BOOL USBHostMSDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, DWORD *b
 
   Parameters:
     BYTE address        - Address of the new device
-    DWORD flags          - Initialization flags
+    DWORD flags         - Initialization flags
+    BYTE clientDriverID - ID to send when issuing a Device Request via
+                            USBHostIssueDeviceRequest(), USBHostSetDeviceConfiguration(),
+                            or USBHostSetDeviceInterface().
 
   Return Values:
     TRUE   - We can support the device.
@@ -1279,7 +1284,7 @@ BOOL USBHostMSDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, DWORD *b
     None
   ***************************************************************************/
 
-BOOL USBHostMSDInitialize( BYTE address, DWORD flags )
+BOOL USBHostMSDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 {
     BYTE   *descriptor;
     BYTE    device;
@@ -1291,7 +1296,7 @@ BOOL USBHostMSDInitialize( BYTE address, DWORD flags )
     BYTE    endpointOUT;
 
     #ifdef DEBUG_MODE
-        UART2PrintString( "MSD: USBMSDClientInitialize(0x" );
+        UART2PrintString( "MSD: USBHostMSDClientInitialize(0x" );
         UART2PutHex( flags );
         UART2PrintString( ")\r\n" );
     #endif
@@ -1365,6 +1370,7 @@ BOOL USBHostMSDInitialize( BYTE address, DWORD flags )
                     {
                         // Initialize the device information.
                         deviceInfoMSD[device].deviceAddress    = address;
+                        deviceInfoMSD[device].clientDriverID   = clientDriverID;
                         deviceInfoMSD[device].endpointIN       = endpointIN;
                         deviceInfoMSD[device].endpointOUT      = endpointOUT;
                         #ifdef DEBUG_MODE
@@ -1382,10 +1388,10 @@ BOOL USBHostMSDInitialize( BYTE address, DWORD flags )
                         #else
                             // Initiate the request to get the max LUN.  If we can't initiate the request,
                             // then we can't enumerate the device.
-                            errorCode = USBHostDeviceRequest( deviceInfoMSD[device].deviceAddress,
+                            errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[device].deviceAddress,
                                     USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
                                     USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[device].interface, 1, deviceInfoMSD[device].blockData,
-                                    USB_DEVICE_REQUEST_GET );
+                                    USB_DEVICE_REQUEST_GET, deviceInfoMSD[i].clientDriverID );
                             if (errorCode)
                             {
                                 #ifdef DEBUG_MODE
@@ -1517,7 +1523,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                         }
 
                         // Tell the media interface layer that we have a MSD attached.
-                        if (usbMediaInterfaceTable.Initialize( deviceInfoMSD[i].deviceAddress, usbMediaInterfaceTable.flags ))
+                        if (usbMediaInterfaceTable.Initialize( deviceInfoMSD[i].deviceAddress, usbMediaInterfaceTable.flags, 0 ))
                         {
                             usbMediaInterfaceTable.EventHandler( deviceInfoMSD[i].deviceAddress, EVENT_MSD_MAX_LUN, &(deviceInfoMSD[i].maxLUN), 1 );
                             deviceInfoMSD[i].state = STATE_RUNNING;
@@ -1624,7 +1630,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                             else
                             {
                                 //Error recovery here is not explicitly covered in the spec.
-								//_USBHostMSD_TerminateTransfer( errorCode );
+                                //_USBHostMSD_TerminateTransfer( errorCode );
                                 deviceInfoMSD[i].flags.val |= MARK_RESET_RECOVERY;
                                 deviceInfoMSD[i].returnState = STATE_RUNNING;
                                 _USBHostMSD_ResetStateJump( i );
@@ -1825,8 +1831,8 @@ void _USBHostMSD_ResetStateJump( BYTE i )
         #ifndef USB_ENABLE_TRANSFER_EVENT
             deviceInfoMSD[i].state = STATE_MSD_RESET_RECOVERY;
         #else
-            errorCode = USBHostDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                            USB_MSD_RESET, 0, deviceInfoMSD[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET );
+            errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+                            USB_MSD_RESET, 0, deviceInfoMSD[i].interface, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoMSD[i].clientDriverID );
 
             if (errorCode)
             {
@@ -1844,8 +1850,8 @@ void _USBHostMSD_ResetStateJump( BYTE i )
         #ifndef USB_ENABLE_TRANSFER_EVENT
             deviceInfoMSD[i].state = STATE_MSD_CLEAR_DATA_IN;
         #else
-            errorCode = USBHostDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
-                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointIN, 0, NULL, USB_DEVICE_REQUEST_SET );
+            errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
+                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointIN, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoMSD[i].clientDriverID );
 
             if (errorCode)
             {
@@ -1863,8 +1869,8 @@ void _USBHostMSD_ResetStateJump( BYTE i )
         #ifndef USB_ENABLE_TRANSFER_EVENT
             deviceInfoMSD[i].state = STATE_MSD_CLEAR_DATA_OUT;
         #else
-            errorCode = USBHostDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
-                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointOUT, 0, NULL, USB_DEVICE_REQUEST_SET );
+            errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_ENDPOINT,
+                            USB_REQUEST_CLEAR_FEATURE, USB_FEATURE_ENDPOINT_HALT, deviceInfoMSD[i].endpointOUT, 0, NULL, USB_DEVICE_REQUEST_SET, deviceInfoMSD[i].clientDriverID );
 
             if (errorCode)
             {
@@ -1880,6 +1886,10 @@ void _USBHostMSD_ResetStateJump( BYTE i )
     else
     {
         usbMediaInterfaceTable.EventHandler( deviceInfoMSD[i].deviceAddress, EVENT_MSD_RESET, NULL, 0 );
+
+        // Clear the errors so we can try again.
+        USBHostClearEndpointErrors( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN );
+        USBHostClearEndpointErrors( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointOUT );
 
         #ifndef USB_ENABLE_TRANSFER_EVENT
             deviceInfoMSD[i].state = deviceInfoMSD[i].returnState;

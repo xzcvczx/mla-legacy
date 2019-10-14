@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        Grid.c
  * Dependencies:    string.h, Graphics.h 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -121,7 +121,7 @@ WORD GridDraw( GRID *pGrid )
         {
             // Clear the entire region.
             SetColor( pGrid->hdr.pGolScheme->CommonBkColor );
-            Bar( pGrid->hdr.left, pGrid->hdr.top, pGrid->hdr.right, pGrid->hdr.bottom );
+            while(!Bar( pGrid->hdr.left, pGrid->hdr.top, pGrid->hdr.right, pGrid->hdr.bottom ));
 
             // Draw the grid lines
             if (pGrid->hdr.state & (GRID_SHOW_LINES | GRID_SHOW_BORDER_ONLY | GRID_SHOW_SEPARATORS_ONLY))
@@ -133,7 +133,7 @@ WORD GridDraw( GRID *pGrid )
                 // TODO This should have some 3D effects added with GOL_EMBOSS_SIZE
                 if (pGrid->hdr.state & (GRID_SHOW_LINES | GRID_SHOW_BORDER_ONLY))
                 {
-                    Line( pGrid->hdr.left, pGrid->hdr.top,  pGrid->hdr.right, pGrid->hdr.top );
+                    while(!Line( pGrid->hdr.left, pGrid->hdr.top,  pGrid->hdr.right, pGrid->hdr.top ));
                     LineTo( _cursorX, pGrid->hdr.bottom );
                     LineTo( pGrid->hdr.left, _cursorY );
                     LineTo( pGrid->hdr.left, pGrid->hdr.top );
@@ -144,13 +144,13 @@ WORD GridDraw( GRID *pGrid )
                 {
                     for (i=1; i< pGrid->numColumns; i++)
                     {
-                        Line( pGrid->hdr.left + i * (pGrid->cellWidth+1), pGrid->hdr.top, 
-                              pGrid->hdr.left + i * (pGrid->cellWidth+1), pGrid->hdr.top + pGrid->numRows * (pGrid->cellHeight+1) );
+                        while(!Line( pGrid->hdr.left + i * (pGrid->cellWidth+1), pGrid->hdr.top, 
+                              pGrid->hdr.left + i * (pGrid->cellWidth+1), pGrid->hdr.top + pGrid->numRows * (pGrid->cellHeight+1)));
                     }
                     for (i=1; i<pGrid->numRows; i++)
                     {
-                        Line( pGrid->hdr.left,  pGrid->hdr.top + i * (pGrid->cellHeight+1),  
-                              pGrid->hdr.right, pGrid->hdr.top + i * (pGrid->cellHeight+1) );
+                        while(!Line( pGrid->hdr.left,  pGrid->hdr.top + i * (pGrid->cellHeight+1),  
+                              pGrid->hdr.right, pGrid->hdr.top + i * (pGrid->cellHeight+1) ));
                     }
                 }    
             }
@@ -166,7 +166,7 @@ WORD GridDraw( GRID *pGrid )
                 {
                     // Clear the cell
                     SetColor( pGrid->hdr.pGolScheme->CommonBkColor );
-                    Bar( CELL_LEFT, CELL_TOP, CELL_RIGHT, CELL_BOTTOM );
+                    while(!Bar( CELL_LEFT, CELL_TOP, CELL_RIGHT, CELL_BOTTOM ));
 
                     // Draw the cell
                     if ((pGrid->gridObjects[CELL_AT(i,j)].status & GRID_TYPE_MASK) == GRIDITEM_IS_BITMAP)
@@ -174,7 +174,7 @@ WORD GridDraw( GRID *pGrid )
                         // Draw the bitmap
                         if (pGrid->gridObjects[CELL_AT(i,j)].data)
                         {
-                            PutImage( CELL_LEFT, CELL_TOP, pGrid->gridObjects[CELL_AT(i,j)].data, BITMAP_SCALE );
+                            while(!PutImage( CELL_LEFT, CELL_TOP, pGrid->gridObjects[CELL_AT(i,j)].data, BITMAP_SCALE ));
                         }
                     }
                     else
@@ -188,7 +188,7 @@ WORD GridDraw( GRID *pGrid )
                         SetColor( pGrid->hdr.pGolScheme->EmbossLtColor );
                         SetLineType( DOTTED_LINE );
                         SetLineThickness( NORMAL_LINE );   	        
-                        Rectangle( CELL_LEFT, CELL_TOP, CELL_RIGHT, CELL_BOTTOM );
+                        while(!Rectangle( CELL_LEFT, CELL_TOP, CELL_RIGHT, CELL_BOTTOM ));
                     }  
                     
                     // If the cell is selected, indicate it.
@@ -204,7 +204,7 @@ WORD GridDraw( GRID *pGrid )
                         {
                             SetLineThickness( NORMAL_LINE );   	        
                         }    
-                        Rectangle( CELL_LEFT-1, CELL_TOP-1, CELL_RIGHT+1, CELL_BOTTOM+1 );
+                        while(!Rectangle( CELL_LEFT-1, CELL_TOP-1, CELL_RIGHT+1, CELL_BOTTOM+1 ));
                     }
                     
                     GridClearCellState( pGrid, i, j, GRIDITEM_DRAW );  

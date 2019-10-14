@@ -4,7 +4,7 @@
  *********************************************************************
  * FileName:        none
  * Dependencies:    See INCLUDES section below
- * Processor:       PIC24/PIC30/PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:        C30 V3.00/C32
  * Company:         Microchip Technology, Inc.
  *

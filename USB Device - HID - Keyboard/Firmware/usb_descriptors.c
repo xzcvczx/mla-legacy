@@ -177,7 +177,7 @@ ROM USB_DEVICE_DESCRIPTOR device_dsc=
     0x00,                   // Protocol code
     USB_EP0_BUFF_SIZE,          // Max packet size for EP0, see usb_config.h
     MY_VID,                 // Vendor ID
-    MY_PID,                 // Product ID: Mouse in a circle fw demo
+    MY_PID,                 // Product ID: Keyboard fw demo
     0x0001,                 // Device release number in BCD format
     0x01,                   // Manufacturer string index
     0x02,                   // Product string index
@@ -190,7 +190,7 @@ ROM BYTE configDescriptor1[]={
     /* Configuration Descriptor */
     0x09,//sizeof(USB_CFG_DSC),    // Size of this descriptor in bytes
     USB_DESCRIPTOR_CONFIGURATION,                // CONFIGURATION descriptor type
-    DESC_CONFIG_WORD(0x0022),   // Total length of data for this cfg
+    DESC_CONFIG_WORD(0x0029),   // Total length of data for this cfg
     1,                      // Number of interfaces in this cfg
     1,                      // Index value of this configuration
     0,                      // Configuration string index
@@ -202,7 +202,7 @@ ROM BYTE configDescriptor1[]={
     USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type
     0,                      // Interface Number
     0,                      // Alternate Setting Number
-    1,                      // Number of endpoints in this intf
+    2,                      // Number of endpoints in this intf
     HID_INTF,               // Class code
     BOOT_INTF_SUBCLASS,     // Subclass code
     HID_PROTOCOL_KEYBOARD,     // Protocol code
@@ -223,7 +223,16 @@ ROM BYTE configDescriptor1[]={
     HID_EP | _EP_IN,            //EndpointAddress
     _INTERRUPT,                       //Attributes
     DESC_CONFIG_WORD(8),        //size
+    0x01,                        //Interval
+
+    /* Endpoint Descriptor */
+    0x07,/*sizeof(USB_EP_DSC)*/
+    USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
+    HID_EP | _EP_OUT,            //EndpointAddress
+    _INTERRUPT,                       //Attributes
+    DESC_CONFIG_WORD(8),        //size
     0x01                        //Interval
+
 };
 
 
@@ -245,9 +254,9 @@ sizeof(sd002),USB_DESCRIPTOR_STRING,
 {'K','e','y','b','o','a','r','d',' ','D','e','m','o'
 }};
 
-//Class specific descriptor - HID mouse
+//Class specific descriptor - HID Keyboard
 ROM struct{BYTE report[HID_RPT01_SIZE];}hid_rpt01={
-    {    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+{   0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x06,                    // USAGE (Keyboard)
     0xa1, 0x01,                    // COLLECTION (Application)
     0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
@@ -278,8 +287,8 @@ ROM struct{BYTE report[HID_RPT01_SIZE];}hid_rpt01={
     0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))
     0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
     0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
-    0xc0      }
-};/* End Collection,End Collection            */
+    0xc0}                          // End Collection
+};
 
 //Array of configuration descriptors
 ROM BYTE *ROM USB_CD_Ptr[]=

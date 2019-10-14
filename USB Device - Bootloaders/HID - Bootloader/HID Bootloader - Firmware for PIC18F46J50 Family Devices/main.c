@@ -39,6 +39,7 @@
  *							Boot46J50Family.c file.
  * 1.01			01/23/2009	Minor modifications.  Added firmware only
  *							entry point (goto 0x001C)
+ * 1.02			07/06/2009  Slight change to report descriptor.
  ********************************************************************/
 
 /*********************************************************************
@@ -130,8 +131,8 @@ project will have to be modified to make the BootPage section larger.
      #pragma config CPUDIV = OSC1        //No CPU system clock divide
      #pragma config CP0 = OFF            //Program memory is not code-protected
      #pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
-     #pragma config T1DIG = ON           //Sec Osc clock source may be selected
-     #pragma config LPT1OSC = ON         //high power Timer1 mode
+     #pragma config T1DIG = OFF          //Sec Osc clock source may not be selected, unless T1OSCEN = 1
+     #pragma config LPT1OSC = OFF        //high power Timer1 mode
      #pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
      #pragma config IESO = OFF           //Two-Speed Start-up disabled
      #pragma config WDTPS = 32768        //1:32768

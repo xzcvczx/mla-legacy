@@ -78,7 +78,6 @@
     //  final application design.
     #define DEMO_BOARD PIC32MX460F512L_PIM
     #define EXPLORER_16
-    #define PIC32MX460F512L_PIM
 
     //#define RUN_AT_48MHZ
     //#define RUN_AT_24MHZ

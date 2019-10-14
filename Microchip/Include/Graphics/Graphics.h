@@ -5,7 +5,7 @@
  *********************************************************************
  * FileName:        Graphics.h
  * Dependencies:    See INCLUDES section below
- * Processor:       PIC24/PIC30/PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:        C30 V3.00/C32
  * Company:         Microchip Technology, Inc.
  *
@@ -58,18 +58,26 @@
 #define SSD1303         11
 #define HIT1270         12
 #define UC1610          13
+#define ILI9320         14
+#define SSD1289			15
+#define HX8347          16
+#define R61580          17
 #define NO_CONTROLLER_DEFINED -1
 
 ////////////// GRAPHICS DISPLAYS CODES FOR DRIVER LAYER //////////////
 
 #define TFT_G240320LTSW_118W_E          0
 #define TFT2N0369_E						0
+#define DT032TFT_TS                     0
+#define DT032TFT                        0
 #define TFT_G320240DTSW_69W_TP_E        1
+#define _35QVW0T						1
 #define PH480272T_005_I06Q              2
+#define PH480272T_005_I11Q              3
 
 /////////////////////// GRAPHICS_LIBRARY_VERSION /////////////////////
 // MSB is version, LSB is subversion
-#define GRAPHICS_LIBRARY_VERSION  0x0165
+#define GRAPHICS_LIBRARY_VERSION  0x0175
 
 ////////////////////////////// INCLUDES //////////////////////////////
 #include <stdlib.h>
@@ -82,7 +90,7 @@
 
 #include "ScanCodes.h"  // Scan codes for AT keyboard
 #include "GOL.h"        // GOL layer 
-#ifdef USE_BUTTON
+#if defined (USE_BUTTON) || defined (USE_BUTTON_MULTI_LINE)
     #include "Button.h"
 #endif
 #ifdef USE_WINDOW
@@ -129,6 +137,9 @@
 #endif
 #ifdef USE_TEXTENTRY
     #include "TextEntry.h"
+#endif
+#ifdef USE_DIGITALMETER
+    #include "DigitalMeter.h"
 #endif
 #ifdef USE_CUSTOM
     // Included for custom control demo

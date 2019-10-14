@@ -194,7 +194,7 @@ file_054=no
 [FILE_INFO]
 file_000=TouchScreen.c
 file_001=EEPROM.c
-file_002=Pictures PIC32.c
+file_002=Pictures C32.c
 file_003=Beep.c
 file_004=AN1182Demo.c
 file_005=HelloWorldFonts.c

@@ -39,18 +39,18 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 #include "HardwareProfile.h"
 #include "USB\usb.h"
 #include "USB\usb_host_hid.h"
-#include "USB\usb_host_hid_appl_interface.h"
+
 
 // *****************************************************************************
 // Application Interface Function Pointer Table for the HID client driver
 // *****************************************************************************
 
-CLIENT_DRIVER_TABLE usbDeviceInterfaceTable =
-{                                           
-    USBHostHID_APIInitialize,
-    USBHostHID_APIEventHandler,
-    0
-};
+//CLIENT_DRIVER_TABLE usbDeviceInterfaceTable =
+//{                                           
+//    USBHostHID_APIInitialize,
+//    USBHostHID_APIEventHandler,
+//    0
+//};
 
 // *****************************************************************************
 // Client Driver Function Pointer Table for the USB Embedded Host foundation

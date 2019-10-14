@@ -364,7 +364,9 @@ typedef enum
     EVENT_CDC_BASE      = 500,      // Offset for CDC class events
 
     EVENT_CHARGER_BASE  = 600,      // Offset for Charger client driver events.
-    
+
+    EVENT_AUDIO_BASE    = 700,      // Offset for Audio client driver events.
+        
 	EVENT_USER_BASE     = 10000,    // Add integral values to this event number
                                     // to create user-defined events.
 

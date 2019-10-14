@@ -6,7 +6,7 @@
  *****************************************************************************
  * FileName:        SST25VF016.c
  * Dependencies:    SST25VF016.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -61,8 +61,16 @@ void SST25Init()
 * To prevent a conflict between this EEPROM and SST25 flash
 * RD12 should be pulled up.
 ************************************************************************/
+	
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+	// Set IOs directions for EEPROM SPI
+    LATAbits.LATA0 = 1;
+    TRISAbits.TRISA0 = 0;
+#else
+	// Set IOs directions for EEPROM SPI
     LATDbits.LATD12 = 1;
     TRISDbits.TRISD12 = 0;
+#endif
 
     // Initialize SPI
 #ifdef __PIC32MX
@@ -94,8 +102,12 @@ void SST25Init()
     SST25_SDO_TRIS = 0;
     SST25_SDI_TRIS = 1;
 
-#if defined( __PIC24FJ256GA110__ )
-
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) 
+	AD1PCFGL = 0xFFFF;
+	RPOR9bits.RP18R = 11;	// assign RP18 for SCK2
+	RPOR8bits.RP16R = 10;	// assign RP16 for SDO2
+	RPINR22bits.SDI2R = 17; // assign RP17 for SDI2	
+#elif defined (__PIC24FJ256GB110__) || defined (__PIC24FJ256GA110__)
     __builtin_write_OSCCONL(OSCCON & 0xbf);  // unlock PPS
     
     RPOR10bits.RP21R = 11;  // assign RP21 for SCK2
@@ -103,7 +115,6 @@ void SST25Init()
     RPINR22bits.SDI2R = 26; // assign RP26 for SDI2
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
-
 #endif
 
     SST25ResetWriteProtection();
@@ -229,6 +240,11 @@ BYTE temp;
 ************************************************************************/
 void SST25WriteWord(WORD data, DWORD address)
 {
+	#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) 
+	AD1PCFGLbits.PCFG6 = 1;
+	AD1PCFGLbits.PCFG7 = 1;
+	AD1PCFGLbits.PCFG8 = 1;
+	#endif
     SST25WriteByte(((WORD_VAL)data).v[0],address);
     SST25WriteByte(((WORD_VAL)data).v[1],address+1);
 }
@@ -246,6 +262,11 @@ void SST25WriteWord(WORD data, DWORD address)
 WORD SST25ReadWord(DWORD address){
 WORD_VAL temp;
 
+	#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) 
+	AD1PCFGLbits.PCFG6 = 1;
+	AD1PCFGLbits.PCFG7 = 1;
+	AD1PCFGLbits.PCFG8 = 1;
+	#endif
     temp.v[0] = SST25ReadByte(address);
     temp.v[1] = SST25ReadByte(address+1);
 
@@ -450,6 +471,7 @@ void SST25SectorErase(DWORD address)
     SST25CSHigh();
 
     // Wait for write end
+    DelayMs(100);
     while(SST25IsWriteBusy());
 }
 

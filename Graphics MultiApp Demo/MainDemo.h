@@ -58,13 +58,15 @@
 	#if defined (__PIC24FJ256GB110__)
 		#include "usb_config.h"
 		#include "USB\usb.h"
-		#include "USB\usb_host_hid_appl_interface.h"
+		#include "USB\usb_host_hid_parser.h"
+		#include "USB\usb_host_hid.h"
 	#endif	
 	#include "MDD File System\FSIO.h"
 #elif defined (__PIC32MX__)	
 	#if defined (__32MX460F512L__)		#include "usb_config.h"
 		#include "USB\usb.h"
-		#include "USB\usb_host_hid_appl_interface.h"
+		#include "USB\usb_host_hid_parser.h"
+		#include "USB\usb_host_hid.h"
 	#endif	
 	#include "MDD File System\FSIO.h"
 #endif 

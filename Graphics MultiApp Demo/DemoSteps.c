@@ -184,15 +184,77 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(0)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 
 				// ********************************************
-				// External Flash Demo
+				// Chart Demo
 				// ********************************************
 
 				// event to move to page 2 of the main screen, 
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
 
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   IconLeft(1)+2, IconTop(0)+2,   	HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, IconLeft(1)+2, IconTop(0)+2,  	HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, IconLeft(1)+2, IconTop(0)+2,  	FIFTHSECDELAY},
+
+				// dummy
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
+
+				// select Bar charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select Bar charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select Multi Bar charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(2)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(2)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select Bar charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select Bar charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select Bar charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select Pie charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(1)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(1)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select pie charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select pie charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select pie charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// select pie charts
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	FIFTHSECDELAY},
+
+				// exit the chart demo
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(0)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(0)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// event to move to page 1 of the main screen, 
+				//{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(2)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				//{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(2)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// ********************************************
+				// External Flash Demo
+				// ********************************************
+
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   IconLeft(2)+2, IconTop(0)+2,   	HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, IconLeft(2)+2, IconTop(0)+2,  	HALFSECDELAY},
 
 				// dummy
 				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
@@ -233,7 +295,6 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 				//{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(2)+2, CtrlBtnTop()+2, HALFSECDELAY},
 				//{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(2)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 
-
 				// ********************************************
 				// Animation Demo 
 				// ********************************************
@@ -246,7 +307,7 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, IconLeft(0)+2, IconTop(1)+2,  	HALFSECDELAY},
 
 				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FOURSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
 
 				// change the scale
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(1)+2, CtrlBtnTop()+2, FASTDELAY},
@@ -259,24 +320,24 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(1)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 
 				// decrease the speed
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(2)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(2)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 
 				// decrease the speed
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(2)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(2)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 
 				// decrease the speed
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, FASTDELAY},
-				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   ONESECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
-
-				// increase the speed
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(2)+2, CtrlBtnTop()+2, FASTDELAY},
 				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   ONESECDELAY},
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(2)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// increase the speed
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, FASTDELAY},
+				// dummy
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 
 				// change the scale
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(1)+2, CtrlBtnTop()+2, FASTDELAY},
@@ -294,43 +355,7 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, IconLeft(1)+2, IconTop(0)+2,  	HALFSECDELAY},
 
 				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
-
-				// change the text
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
-
-				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
-
-				// change the text
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
-
-				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
-
-				// change the text
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
-
-				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
-
-				// change the text
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
-
-				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
-
-				// change the text
-				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
-				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
-
-				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
-
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
 
 				// change the text
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
@@ -352,6 +377,42 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 
 				// dummy
 				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   THREESECDELAY},
+
+				// change the text
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// dummy
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   THREESECDELAY},
+
+				// change the text
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// dummy
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   THREESECDELAY},
+
+
+				// change the text
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// dummy
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   THREESECDELAY},
+
+				// change the text
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// dummy
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   THREESECDELAY},
+
+				// change the text
+				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(3)+2, CtrlBtnTop()+2,	HALFSECDELAY},
+
+				// dummy
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
 
 				// change the text
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(3)+2, CtrlBtnTop()+2, HALFSECDELAY},
@@ -377,7 +438,7 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, IconLeft(0)+2, IconTop(0)+2,  	HALFSECDELAY},
 
 				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   THREESECDELAY},
 
 				// set the time
 				// set the Hour
@@ -431,14 +492,15 @@ const DEMO_MSG DemoPoints[] =  {  // dummy event
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(1)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 
 				// dummy
-				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   FIVESECDELAY},
+				{TYPE_TOUCHSCREEN, EVENT_INVALID, 0, 0,   TWOSECDELAY},
 
 
 				// exit the time demo
 				{TYPE_TOUCHSCREEN, EVENT_PRESS,   CtrlBtnLeft(0)+2, CtrlBtnTop()+2, HALFSECDELAY},
 				{TYPE_TOUCHSCREEN, EVENT_RELEASE, CtrlBtnLeft(0)+2, CtrlBtnTop()+2,	HALFSECDELAY},
 				
-
+				// demo loop back marker
+				{0xCC, 0x55, 0xFF, 0xFF,	0},
 
 };				
 
@@ -451,8 +513,7 @@ void InitDemoMode(void) {
 
 void UpdateDemoMode(GOL_MSG *pMsg)
 {
-		
-	if (pMsg->uiEvent != EVENT_INVALID) {
+	if (pMsg->uiEvent == EVENT_PRESS) {
 		if (gEnableDemoFlag == TRUE) { 
 			gEnableDemoFlag = FALSE;
 			demoCount = 0;
@@ -462,14 +523,19 @@ void UpdateDemoMode(GOL_MSG *pMsg)
 
 	if (gEnableDemoFlag == TRUE) {
 		if ((tick-prevDemoTime) > DemoPoints[demoCount].time) {
+			
 			pMsg->type    = DemoPoints[demoCount].type;
 			pMsg->uiEvent = DemoPoints[demoCount].uiEvent;
 			pMsg->param1  = DemoPoints[demoCount].param1;
 			pMsg->param2  = DemoPoints[demoCount].param2;
-			if (demoCount >= MAXDEMOPOINTS)	
+
+			// check if the demo loop back marker is reached
+			if (DemoPoints[demoCount].type == 0xCC) {
 				demoCount = 0;
-			else
+			} else {	
 				demoCount++;	
+			}
+
 			prevDemoTime = tick;
 		}
 	}	

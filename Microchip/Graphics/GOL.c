@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        GOL.c
  * Dependencies:    Graphics.h 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -38,6 +38,7 @@
  * Anton Alkhimenok and
  * Paolo A. Tamayo
  *                      11/12/07    Version 1.0 release
+ * PAT					06/29/09	Added multi-line support for Buttons.
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -512,7 +513,7 @@ SHORT done;
         if(IsObjUpdated(pCurrentObj)){
 
             switch(pCurrentObj->type){
-                #ifdef USE_BUTTON
+				#if defined (USE_BUTTON) || defined (USE_BUTTON_MULTI_LINE)                
 	            case OBJ_BUTTON:
                     done = BtnDraw((BUTTON*)pCurrentObj);
                     break;
@@ -555,6 +556,11 @@ SHORT done;
                 #ifdef USE_STATICTEXT
 	            case OBJ_STATICTEXT:
                     done = StDraw((STATICTEXT*)pCurrentObj);
+                    break;
+                #endif
+                #ifdef USE_DIGITALMETER
+	            case OBJ_DIGITALMETER:
+                    done = DmDraw((DIGITALMETER*)pCurrentObj);
                     break;
                 #endif
                 #ifdef USE_PICTURE
@@ -688,7 +694,7 @@ WORD   translatedMsg;
 
     while(pCurrentObj != NULL){
         switch(pCurrentObj->type){
-            #ifdef USE_BUTTON
+			#if defined (USE_BUTTON) || defined (USE_BUTTON_MULTI_LINE)            
 	        case OBJ_BUTTON:
                 translatedMsg = BtnTranslateMsg((BUTTON*)pCurrentObj, pMsg);
                 if(translatedMsg == OBJ_MSG_INVALID)
@@ -765,6 +771,14 @@ WORD   translatedMsg;
             #ifdef USE_STATICTEXT
 	        case OBJ_STATICTEXT:
                 translatedMsg = StTranslateMsg((STATICTEXT*)pCurrentObj, pMsg);
+                if(translatedMsg == OBJ_MSG_INVALID)
+                    break;
+                GOLMsgCallback(translatedMsg,pCurrentObj,pMsg);
+                break;
+            #endif
+            #ifdef USE_DIGITALMETER
+	        case OBJ_DIGITALMETER:
+                translatedMsg = DmTranslateMsg((DIGITALMETER*)pCurrentObj, pMsg);
                 if(translatedMsg == OBJ_MSG_INVALID)
                     break;
                 GOLMsgCallback(translatedMsg,pCurrentObj,pMsg);
@@ -998,11 +1012,13 @@ while(1){
 rnd_panel_draw_emboss:        
 	    	SetColor(_rpnlEmbossLtColor);
             while(counter < _rpnlEmbossSize){
-   	            if(IsDeviceBusy())
-	       	            return 0;
 	       	    // draw top        
-				Bar( _rpnlX1+counter, _rpnlY1+counter,  \
-				     _rpnlX2-counter, _rpnlY1+counter);
+				if(!Bar( _rpnlX1+counter, _rpnlY1+counter,  \
+				     _rpnlX2-counter, _rpnlY1+counter))
+                {
+				    return 0;
+				}
+
               	counter++;
            	}
             counter = 1;
@@ -1011,12 +1027,13 @@ rnd_panel_draw_emboss:
 
 		case DRAW_EMBOSS2:
            	while(counter < _rpnlEmbossSize){
-               	if(IsDeviceBusy())
-                   	return 0;
                 // draw left   	
-	        	Bar( _rpnlX1+counter, _rpnlY1+counter,  \
-	        	     _rpnlX1+counter, _rpnlY2-counter);	
-               	counter++;
+	        	if(!Bar( _rpnlX1+counter, _rpnlY1+counter,  \
+	        	     _rpnlX1+counter, _rpnlY2-counter))	
+                {
+				    return 0;
+				}
+				counter++;
            	}
            	counter = 1;
            	state = DRAW_EMBOSS3;
@@ -1026,12 +1043,13 @@ rnd_panel_draw_emboss:
 		case DRAW_EMBOSS3:
 		    SetColor(_rpnlEmbossDkColor);
 	        while(counter < _rpnlEmbossSize){
-                if(IsDeviceBusy())
-       	            return 0;
        	        // draw bottom    
-		       	Bar( _rpnlX1+counter, _rpnlY2-counter,   \
-		       	     _rpnlX2-counter, _rpnlY2-counter);
-             	counter++;
+		       	if(!Bar( _rpnlX1+counter, _rpnlY2-counter,   \
+		       	     _rpnlX2-counter, _rpnlY2-counter))
+                {
+				    return 0;
+				}
+				counter++;
            	}
            	counter = 1;
            	state = DRAW_EMBOSS4;
@@ -1039,12 +1057,13 @@ rnd_panel_draw_emboss:
 
 		case DRAW_EMBOSS4:
 			while(counter < _rpnlEmbossSize){
-               	if(IsDeviceBusy())
-                   	return 0;
                 // draw right	   	
-	        	Bar( _rpnlX2-counter, _rpnlY1+counter,  \
-	        		 _rpnlX2-counter, _rpnlY2-counter);	
-    	       	counter++;
+	        	if(!Bar( _rpnlX2-counter, _rpnlY1+counter,  \
+	        		 _rpnlX2-counter, _rpnlY2-counter))
+                {
+				    return 0;
+				}
+				counter++;
 			}
             state = DRAW_FACECOLOR;
             break;
@@ -1059,19 +1078,23 @@ rnd_panel_draw_facecolor:
 			    	return 0;
 			}
 			else  {  
-			    Bar(_rpnlX1+_rpnlEmbossSize, _rpnlY1+_rpnlEmbossSize,    \
-			    	_rpnlX2-_rpnlEmbossSize, _rpnlY2-_rpnlEmbossSize);
-			}			    
+			    if(!Bar(_rpnlX1+_rpnlEmbossSize, _rpnlY1+_rpnlEmbossSize,    \
+			    	_rpnlX2-_rpnlEmbossSize, _rpnlY2-_rpnlEmbossSize))
+                {
+				    return 0;
+				}			}
             state = DRAW_IMAGE;
             break;
             
 		case DRAW_IMAGE:            
 			if(_pRpnlBitmap != NULL) {
 				
-				PutImage(((_rpnlX2+_rpnlX1- GetImageWidth((void*)_pRpnlBitmap))>>1)+1, 
+				if(!PutImage(((_rpnlX2+_rpnlX1- GetImageWidth((void*)_pRpnlBitmap))>>1)+1, 
 						 ((_rpnlY2+_rpnlY1-GetImageHeight((void*)_pRpnlBitmap))>>1)+1,
-						 _pRpnlBitmap, IMAGE_NORMAL);
-
+						 _pRpnlBitmap, IMAGE_NORMAL))
+                {
+				    return 0;
+				}
 		    }
 			#if (COLOR_DEPTH == 1)
        	    	state = DRAW_INNERFRAME;
@@ -1086,15 +1109,20 @@ rnd_panel_draw_facecolor:
    			if (_rpnlFaceColor == BLACK) {
    				SetColor(WHITE);
 				if (_rpnlR) 
-	    			Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR-(_rpnlEmbossSize-1));	
-	    		else	
-    				Bevel(_rpnlX1+(_rpnlEmbossSize-1), _rpnlY1+(_rpnlEmbossSize-1), 
-    					  _rpnlX2-(_rpnlEmbossSize-1), _rpnlY2-(_rpnlEmbossSize-1), 0);	
+	    			if(!Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR-(_rpnlEmbossSize-1)))
+                    {
+				        return 0;
+				    }
+				else if(!Bevel(_rpnlX1+(_rpnlEmbossSize-1), _rpnlY1+(_rpnlEmbossSize-1),
+    					  _rpnlX2-(_rpnlEmbossSize-1), _rpnlY2-(_rpnlEmbossSize-1), 0))	
+                    {
+				        return 0;
+				    }
 	    			
     		}
             state = DRAW_FRAME;
             break;
-		#endif	
+		#endif
 
 		case DRAW_FRAME:
 			// check if we need to draw the frame
@@ -1106,7 +1134,10 @@ rnd_panel_draw_facecolor:
 			    #else	
 			    	SetColor(_rpnlEmbossDkColor);
 			    #endif
-			    Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR);
+			    if(!Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR))
+			    {
+			        return 0;
+			    }
 			}			 
             state = BEGIN;
             return 1;

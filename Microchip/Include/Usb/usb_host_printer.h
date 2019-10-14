@@ -1629,7 +1629,7 @@ typedef struct
 
 /***************************************************************************
   Function:
-    BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags )
+    BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is called by the USB Embedded Host layer when a printer
@@ -1647,6 +1647,7 @@ typedef struct
   Parameters:
     BYTE address    - Device's address on the bus
     DWORD flags     - Initialization flags
+    BYTE clientDriverID - Client driver identification for device requests
 
   Return Values:
     TRUE    - Initialization was successful
@@ -1658,7 +1659,7 @@ typedef struct
     attached device.
   ***************************************************************************/
 
-BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags );
+BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags, BYTE clientDriverID );
 
 
 /****************************************************************************
@@ -1979,18 +1980,13 @@ DWORD USBHostPrinterGetRxLength( BYTE deviceAddress );
     *status         - pointer to the returned status byte
 
   Returns:
-    See the return values for the USBHostDeviceRequest() function.
+    See the return values for the USBHostIssueDeviceRequest() function.
 
   Remarks:
     None
   ***************************************************************************/
 
-#define USBHostPrinterGetStatus( a, s )                                                     \
-   USBHostDeviceRequest( a,                                                                 \
-        USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,    \
-        PRINTER_DEVICE_REQUEST_GET_PORT_STATUS,                                             \
-        0, 0x0000, 1,                                                                       \
-        s, USB_DEVICE_REQUEST_GET )
+BYTE USBHostPrinterGetStatus( BYTE deviceAddress, BYTE *status );
 
 
 /****************************************************************************
@@ -2131,18 +2127,13 @@ BYTE USBHostPrinterRead( BYTE deviceAddress, void *buffer, DWORD length,
     BYTE deviceAddress  - USB Address of the device
 
   Returns:
-    See the return values for the USBHostDeviceRequest() function.
+    See the return values for the USBHostIssueDeviceRequest() function.
 
   Remarks:
     Not all printers support this command.
   ***************************************************************************/
 
-#define USBHostPrinterReset( a )                                                            \
-   USBHostDeviceRequest( a,                                                                 \
-        USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,    \
-        PRINTER_DEVICE_REQUEST_SOFT_RESET,                                                  \
-        0, 0x0000, 0,                                                                       \
-        NULL, USB_DEVICE_REQUEST_SET )
+BYTE USBHostPrinterReset( BYTE deviceAddress );
 
 /****************************************************************************
   Function:

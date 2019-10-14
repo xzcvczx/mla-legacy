@@ -1,10 +1,10 @@
 /*****************************************************************************
  *  Module for Microchip Graphics Library
- *  Main header file for the display driver
+ *  Display driver selection
  *****************************************************************************
  * FileName:        DisplayDriver.c
  * Dependencies:    p24Fxxxx.h or plib.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -54,23 +54,23 @@
 
 #elif  (DISPLAY_CONTROLLER == S6D0129)
 
-#include "Drivers\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.c"
+#include "Drivers\drvTFT001.c"
 
 #elif  (DISPLAY_CONTROLLER == S6D0139)
 
-#include "Drivers\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.c"
+#include "Drivers\drvTFT001.c"
 
 #elif  (DISPLAY_CONTROLLER == LGDP4531)
 
-#include "Drivers\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.c"
+#include "Drivers\drvTFT001.c"
 
 #elif  (DISPLAY_CONTROLLER == R61505)
 
-#include "Drivers\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.c"
+#include "Drivers\drvTFT001.c"
 
 #elif  (DISPLAY_CONTROLLER == SPFD5408)
 
-#include "Drivers\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.c"
+#include "Drivers\drvTFT001.c"
 
 #elif  (DISPLAY_CONTROLLER == SSD1339)
 
@@ -95,6 +95,22 @@
 #elif  (DISPLAY_CONTROLLER == UC1610)
 
 #include "Drivers\UC1610.c"
+
+#elif  (DISPLAY_CONTROLLER == ILI9320)
+
+#include "Drivers\drvTFT001.c"
+
+#elif  (DISPLAY_CONTROLLER == SSD1289)
+
+#include "Drivers\SSD1289.c"
+
+#elif  (DISPLAY_CONTROLLER == HX8347)
+
+#include "Drivers\HX8347.c"
+
+#elif  (DISPLAY_CONTROLLER == R61580)
+
+#include "Drivers\drvTFT001.c"
 
 #else
 

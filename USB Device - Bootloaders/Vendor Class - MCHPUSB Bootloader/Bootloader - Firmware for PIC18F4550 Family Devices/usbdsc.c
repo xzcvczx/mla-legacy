@@ -214,9 +214,9 @@ CFG01=
     0,                      // Interface Number
     0,                      // Alternate Setting Number
     2,                      // Number of endpoints in this intf
-    0x00,                   // Class code
-    0x00,                   // Subclass code
-    0x00,                   // Protocol code
+    0xFF,                   // Class code
+    0xFF,                   // Subclass code
+    0xFF,                   // Protocol code
     0,                      // Interface string index
     
     /* Endpoint Descriptors */

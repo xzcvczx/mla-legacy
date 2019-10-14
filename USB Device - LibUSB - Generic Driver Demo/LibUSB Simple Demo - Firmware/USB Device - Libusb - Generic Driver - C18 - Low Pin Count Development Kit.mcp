@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - Libusb - Generic Driver - C18 - Low Pin Count Development Kit
 dir_sin=
-dir_inc=c:\mcc18\h;..\..\..\USB Device - LibUSB - Generic Driver Demo\LibUSB Simple Demo - Firmwarer Demo - Firmware;..\..\USB Device - MCHPUSB - Generic Driver Demo\Generic Driver Demo - Firmware;..\..\Microchip\Include;..\..\..\Include;..\..\Include;.
+dir_inc=c:\mcc18\h;..\..\Microchip\Include;..\..\USB Device - MCHPUSB - Generic Driver Demo\Generic Driver Demo - Firmware
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

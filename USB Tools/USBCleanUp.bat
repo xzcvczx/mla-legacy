@@ -16,6 +16,20 @@ goto loop
 cd ".."
 
 ECHO *****************************************************************************
+ECHO Removing USB Device - Audio - MIDI
+ECHO *****************************************************************************
+cd "USB Device - Audio - MIDI\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO *****************************************************************************
+ECHO Removing PIC32 HID bootloader
+ECHO *****************************************************************************
+cd "USB Device - Bootloaders\HID - Bootloader\HID Bootloader - Firmware for PIC32MX460F512L Family Devices"
+call "CleanUp.bat"
+cd "..\..\.."
+
+ECHO *****************************************************************************
 ECHO Removing USB Device - CDC - Basic Demo information
 ECHO *****************************************************************************
 cd "USB Device - CDC - Basic Demo\CDC - Basic Demo - Firmware"
@@ -39,6 +53,48 @@ cd "..\.."
 
 ECHO.
 ECHO *****************************************************************************
+ECHO Removing USB Device - Composite - MSD + CDC
+ECHO *****************************************************************************
+cd "USB Device - Composite - MSD + CDC\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Device - HID - Simple Custom Demo
+ECHO *****************************************************************************
+cd "USB Device - HID - Custom Demos\Generic HID - Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Device - HID - Digitizers\Multi Touch - Firmware
+ECHO *****************************************************************************
+cd "USB Device - HID - Digitizers\Multi Touch - Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Device - HID - Digitizers\Single Touch - Firmware
+ECHO *****************************************************************************
+cd "USB Device - HID - Digitizers\Single Touch - Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Device - HID - Joystick\Firmware
+ECHO *****************************************************************************
+cd "USB Device - HID - Joystick\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
 ECHO Removing USB Device - HID - Keyboard
 ECHO *****************************************************************************
 cd "USB Device - HID - Keyboard\Firmware"
@@ -53,15 +109,13 @@ cd "USB Device - HID - Mouse\HID - Mouse - Firmware"
 call "CleanUp.bat"
 cd "..\.."
 
-
 ECHO.
 ECHO *****************************************************************************
-ECHO Removing USB Device - HID - Simple Custom Demo
+ECHO Removing USB Device - HID - Uninterruptible Power Supply\Firmware
 ECHO *****************************************************************************
-cd "USB Device - HID - Custom Demos\Generic HID - Firmware"
+cd "USB Device - HID - Uninterruptible Power Supply\Firmware"
 call "CleanUp.bat"
 cd "..\.."
-
 
 ECHO.
 ECHO *****************************************************************************
@@ -71,12 +125,27 @@ cd "USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger -
 call "CleanUp.bat"
 cd "..\.."
 
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Device - LibUSB - Generic Driver Demo\LibUSB Simple Demo - Firmware
+ECHO *****************************************************************************
+cd "USB Device - LibUSB - Generic Driver Demo\LibUSB Simple Demo - Firmware"
+call "CleanUp.bat"
+cd "..\.."
 
 ECHO.
 ECHO *****************************************************************************
 ECHO Removing USB Device - Mass Storage - Internal Flash
 ECHO *****************************************************************************
 cd "USB Device - Mass Storage - Internal Flash\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware
+ECHO *****************************************************************************
+cd "USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware"
 call "CleanUp.bat"
 cd "..\.."
 
@@ -108,9 +177,66 @@ cd "..\.."
 
 ECHO.
 ECHO *****************************************************************************
+ECHO Removing USB Device - WinUSB - High Bandwidth Demo\WinUSB High Bandwidth Demo - Firmware
+ECHO *****************************************************************************
+cd "USB Device - WinUSB - High Bandwidth Demo\WinUSB High Bandwidth Demo - Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Dual Role - MSD host + HID device\Firmware
+ECHO *****************************************************************************
+cd "USB Dual Role - MSD host + HID device\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Host - Bootloaders\Mass Storage Bootloader
+ECHO *****************************************************************************
+cd "USB Host - Bootloaders\Mass Storage Bootloader"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Host - CDC - Serial Demo\ACM - Serial RS232 Demo
+ECHO *****************************************************************************
+cd "USB Host - CDC - Serial Demo\ACM - Serial RS232 Demo"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Host - Charger - Simple Charger\Simple Charger
+ECHO *****************************************************************************
+cd "USB Host - Charger - Simple Charger\Simple Charger"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
 ECHO Removing USB Host - HID - Keyboard
 ECHO *****************************************************************************
 cd "USB Host - HID - Keyboard\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Host - HID - Mouse\Firmware
+ECHO *****************************************************************************
+cd "USB Host - HID - Mouse\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Host - Mass Storage - Simple Demo\Firmware
+ECHO *****************************************************************************
+cd "USB Host - Mass Storage - Simple Demo\Firmware"
 call "CleanUp.bat"
 cd "..\.."
 
@@ -127,14 +253,6 @@ ECHO ***************************************************************************
 ECHO Removing USB Host - MCHPUSB - Generic Driver Demo
 ECHO *****************************************************************************
 cd "USB Host - MCHPUSB - Generic Driver Demo\firmware"
-call "CleanUp.bat"
-cd "..\.."
-
-ECHO.
-ECHO *****************************************************************************
-ECHO Removing USB Host - CDC - Serial Demo
-ECHO *****************************************************************************
-cd "USB Host - CDC - Serial Demo\ACM - Serial RS232 Demo"
 call "CleanUp.bat"
 cd "..\.."
 
@@ -162,6 +280,13 @@ cd "USB Host - Printer - Simple POS Demo\Simple POS Demo"
 call "CleanUp.bat"
 cd "..\.."
 
+ECHO.
+ECHO *****************************************************************************
+ECHO Removing USB Host - Printer and HID - MASTERs 2008 Demo\MASTERs 2008 Printer Demo
+ECHO *****************************************************************************
+cd "USB Host - Printer and HID - MASTERs 2008 Demo\MASTERs 2008 Printer Demo"
+call "CleanUp.bat"
+cd "..\.."
 
 ECHO.
 ECHO *****************************************************************************

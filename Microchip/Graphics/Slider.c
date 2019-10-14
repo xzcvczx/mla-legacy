@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Slider.c
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -591,7 +591,8 @@ static WORD minPos, maxPos;
         
         	if (GetState(pSld, SLD_HIDE)) {
 	            SetColor(pSld->hdr.pGolScheme->CommonBkColor);		// set to common BK Color
-        		Bar(pSld->hdr.left, pSld->hdr.top, pSld->hdr.right, pSld->hdr.bottom);
+        		if(!Bar(pSld->hdr.left, pSld->hdr.top, pSld->hdr.right, pSld->hdr.bottom))
+        		    return 0;
         		return 1;
         	}	
 
@@ -648,30 +649,27 @@ static WORD minPos, maxPos;
 	        } else {
 	        	state = SLD_STATE_THUMBPATH1;					// slider: draw thumb path next
 	        }
-        
+
 	    case SLD_STATE_THUMBPATH1:
 
 			SetColor(BLACK);    								// draw the black line
     		if (!GetState(pSld, SLD_VERTICAL)) {
-    			Line(minPos, midPoint, maxPos, midPoint);		
+    			if(!Line(minPos, midPoint, maxPos, midPoint)) return 0;		
     		}	
     		else {
-    			Line(midPoint, minPos, midPoint, maxPos);
+    			if(!Line(midPoint, minPos, midPoint, maxPos)) return 0;
 			}
 			
 	        state = SLD_STATE_THUMBPATH2;
 
 	    case SLD_STATE_THUMBPATH2:
 
-            if(IsDeviceBusy())
-   	            return 0;    
-
 			SetColor(WHITE);    								// draw the white line
     		if (!GetState(pSld, SLD_VERTICAL)) { 
-    			Line(minPos, midPoint+1, maxPos, midPoint+1);
+    			if(!Line(minPos, midPoint+1, maxPos, midPoint+1)) return 0;
 			}
     		else {
-    			Line(midPoint+1, minPos, midPoint+1, maxPos);
+    			if(!Line(midPoint+1, minPos, midPoint+1, maxPos)) return 0;
 			}
 
  			if (GetState(pSld,SLD_DRAW)) {						// if drawing the whole slider
@@ -697,12 +695,14 @@ sld_state_clearthumb:
 
    	        // Remove the current thumb by drawing a bar with background color    
 	    	if (!GetState(pSld, SLD_VERTICAL)) { 
-				Bar(pSld->prevPos-thWidth, midPoint-thHeight, 
-					pSld->prevPos+thWidth, midPoint+thHeight);	            
+				if(!Bar(pSld->prevPos-thWidth, midPoint-thHeight, 
+					pSld->prevPos+thWidth, midPoint+thHeight))
+					return 0;
 			}
 			else {
-				Bar(midPoint-thWidth, pSld->prevPos-thHeight, 
-					midPoint+thWidth, pSld->prevPos+thHeight);	            
+				if(!Bar(midPoint-thWidth, pSld->prevPos-thHeight, 
+					midPoint+thWidth, pSld->prevPos+thHeight))
+					return 0;
 			}	
 			if (!GetState(pSld, SLD_SCROLLBAR)) {				// check if slider or scroll bar    
 				state = SLD_STATE_REDRAWPATH1;
@@ -713,10 +713,7 @@ sld_state_clearthumb:
 
 		case SLD_STATE_REDRAWPATH1:								// redraws the lines that it covered
 
-            if(IsDeviceBusy())
-                return 0;  
-
-			SetColor(BLACK);									// redraw the black line first
+ 			SetColor(BLACK);									// redraw the black line first
 			// Check if the redraw area exceeds the actual dimension. This will 
 	    	// adjust the redrawing area to just within the parameters
             if (!GetState(pSld, SLD_VERTICAL)) {	    		
@@ -728,7 +725,8 @@ sld_state_clearthumb:
     				right = maxPos;
     			else	
     				right = pSld->prevPos+thWidth;
-    			Line(left, midPoint, right, midPoint);
+    			if(!Line(left, midPoint, right, midPoint))
+    			    return 0;
     		}	
     		else {
     			if (minPos+thHeight > pSld->prevPos)
@@ -739,19 +737,24 @@ sld_state_clearthumb:
     				bottom = maxPos;
     			else	
     				bottom = pSld->prevPos+thHeight;
-	    		Line(midPoint, top, midPoint, bottom);
+	    		if(!Line(midPoint, top, midPoint, bottom))
+	    		    return 0;
 	    	}
             state = SLD_STATE_REDRAWPATH2;
 
         case SLD_STATE_REDRAWPATH2:
         
-            if(IsDeviceBusy())
-                return 0;    
 			SetColor(WHITE);									// redraw the white line next
     		if (!GetState(pSld, SLD_VERTICAL))
-    			Line(left, midPoint+1, right, midPoint+1);
+    		{
+    			if(!Line(left, midPoint+1, right, midPoint+1))
+    			    return 0;
+    		}
     		else	
-    			Line(midPoint+1, top, midPoint+1, bottom);
+    		{
+    			if(!Line(midPoint+1, top, midPoint+1, bottom))
+    			    return 0;
+    		}
             state = SLD_STATE_THUMB;
 				
         case SLD_STATE_THUMB:
@@ -785,18 +788,18 @@ sld_state_thumb:
 	    
             if(!GOLPanelDrawTsk())								// draw the panel of the thumb
                 return 0;
-	
+
 			pSld->prevPos = pSld->currPos; 						// record the current position as previous
 
             if (GetState(pSld, SLD_SCROLLBAR)) {				// check if scroll bar focus is not used
 	       		state = SLD_STATE_IDLE;							// go back to idle state
     	   		return 1;
     	   	}
-    	   	
+
 	        if(!GetState(pSld, SLD_DRAW_FOCUS)) { 	
 	       		state = SLD_STATE_IDLE;
     	   		return 1;
-    	   	}	
+    	   	}
           	state = SLD_STATE_FOCUS;
 
 	    case SLD_STATE_FOCUS:
@@ -810,10 +813,11 @@ sld_state_focus:
 	            else {    
 	                SetColor(colorTemp); 						// remove the focus box, colorTemp
 	            }
-	   		    Rectangle(pSld->hdr.left+GOL_EMBOSS_SIZE, 
+	   		    if(!Rectangle(pSld->hdr.left+GOL_EMBOSS_SIZE, 
 	   		    		  pSld->hdr.top+GOL_EMBOSS_SIZE, 
 	   		    		  pSld->hdr.right-GOL_EMBOSS_SIZE, 
-	   		    		  pSld->hdr.bottom-GOL_EMBOSS_SIZE);
+	   		    		  pSld->hdr.bottom-GOL_EMBOSS_SIZE))
+	   		    		  return 0;
 	
 	      	    SetLineType(SOLID_LINE);						// reset line type
 	      	}

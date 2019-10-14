@@ -182,9 +182,9 @@ file_050=no
 [FILE_INFO]
 file_000=MainDemo.c
 file_001=externalref.c
-file_002=internalfont PIC24.c
+file_002=internalfont C30.c
 file_003=SST39VF040.c
-file_004=internalbitmap PIC24.c
+file_004=internalbitmap C30.c
 file_005=..\Microchip\Graphics\Window.c
 file_006=..\Microchip\Graphics\Button.c
 file_007=..\Microchip\Graphics\Chart.c

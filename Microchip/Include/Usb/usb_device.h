@@ -95,14 +95,12 @@ Description:
 #define USBDEVICE_H
 //DOM-IGNORE-END
 
-
+#include "GenericTypeDefs.h"
 #include "Compiler.h"
+#include "usb_config.h"
 #include "USB\usb_ch9.h"
-#include "USB\usb_hal.h"
-#include "usb_config.h" //This file needs to be included after the 
-                        //  usb_hal.h file to insure that the user
-                        //  options are selected after the defines
-                        //  are created.
+//#include "USB\usb_hal.h"
+
 /** DEFINITIONS ****************************************************/
 
 /********************************************************************
@@ -291,6 +289,12 @@ typedef union __attribute__ ((packed)) _CTRL_TRF_SETUP
 
 } CTRL_TRF_SETUP;
 
+//USB_HANDLE is a pointer to an entry in the BDT.  This pointer can be used
+//  to read the length of the last transfer, the status of the last transfer,
+//  and various other information.  Insure to initialize USB_HANDLE objects
+//  to NULL so that they are in a known state during their first usage.
+#define USB_HANDLE void*
+
 // Defintion of the PIPE structure
 //  This structure is used to keep track of data that is sent out
 //  of the stack automatically.
@@ -423,21 +427,25 @@ This defintions is a return value of the function USBGetDeviceState(). */
 #if defined(__18CXX)
     #if defined(UCFG_VAL)
         //This has been depricated in v2.2 - it will be removed in future releases
-        #define SetConfigurationOptions() {U1CNFG1 = UCFG_VAL;}	//UCFG_VAL defined in usb_config.h
+        #define SetConfigurationOptions() {U1CNFG1 = UCFG_VAL;U1EIE = 0x9F;UIE = 0x39 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT; }	//UCFG_VAL defined in usb_config.h
     #else
         #define SetConfigurationOptions()   {\
                                                 U1CNFG1 = USB_PULLUP_OPTION | USB_TRANSCEIVER_OPTION | USB_SPEED_OPTION | USB_PING_PONG_MODE;\
+                                                U1EIE = 0x9F;\
+                                                UIE = 0x39 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;\
                                             }  
     #endif      
 
 #elif defined(__C30__)
    #if defined(UCFG_VAL)
         //This has been depricated in v2.2 - it will be removed in future releases
-        #define SetConfigurationOptions() {U1CNFG1 = UCFG_VAL;}	//UCFG_VAL defined in usb_config.h
+        #define SetConfigurationOptions() {U1CNFG1 = UCFG_VAL;U1EIE = 0x9F;U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;}	//UCFG_VAL defined in usb_config.h
     #else
         #define SetConfigurationOptions()   {\
                                                 U1CNFG1 = USB_PING_PONG_MODE;\
                                                 U1CNFG2 = USB_TRANSCEIVER_OPTION | USB_SPEED_OPTION | USB_PULLUP_OPTION;\
+                                                U1EIE = 0x9F;\
+                                                U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;\
                                             } 
     #endif
 
@@ -445,7 +453,9 @@ This defintions is a return value of the function USBGetDeviceState(). */
         #error "Low speed operation in device mode is not currently supported in the PIC24F family devices."
     #endif
 #elif defined(__C32__)
-    #define SetConfigurationOptions()   {U1CNFG1 = 0;}
+    #define SetConfigurationOptions()   {U1CNFG1 = 0;U1EIE = 0x9F;U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;}
+#else
+    #error
 #endif
 //#define _UTEYE      0x80            // Use Eye-Pattern test
 
@@ -493,27 +503,8 @@ This defintions is a return value of the function USBGetDeviceState(). */
     #define USB_STALL_ENDPOINT      0x02
 #endif
 
-//USB_HANDLE is a pointer to an entry in the BDT.  This pointer can be used
-//  to read the length of the last transfer, the status of the last transfer,
-//  and various other information.  Insure to initialize USB_HANDLE objects
-//  to NULL so that they are in a known state during their first usage.
-#define USB_HANDLE volatile BDT_ENTRY*
-
 #if !defined(USBDEVICE_C)
 /** EXTERNS ********************************************************/
-    //Definitions for the BDT
-    #if (USB_PING_PONG_MODE == USB_PING_PONG__NO_PING_PONG)
-        extern volatile BDT_ENTRY BDT[(USB_MAX_EP_NUMBER + 1) * 2];
-    #elif (USB_PING_PONG_MODE == USB_PING_PONG__EP0_OUT_ONLY)
-        extern volatile BDT_ENTRY BDT[((USB_MAX_EP_NUMBER+1) * 2)+1];
-    #elif (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG)
-        extern volatile BDT_ENTRY BDT[(USB_MAX_EP_NUMBER + 1) * 4];
-    #elif (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0)
-        extern volatile BDT_ENTRY BDT[((USB_MAX_EP_NUMBER + 1) * 4)-2];
-    #else
-        #error "No ping pong mode defined."
-    #endif
-
     //Depricated in v2.2 - will be removed in a future revision
     #if !defined(USB_USER_DEVICE_DESCRIPTOR)
         //Device descriptor
@@ -585,13 +576,7 @@ This defintions is a return value of the function USBGetDeviceState(). */
 #define RCPT_OTH            3
 
 /** EXTERNS ********************************************************/
-#if !defined(USBDEVICE_C)
-    extern USB_VOLATILE BYTE USBDeviceState;
-    extern USB_VOLATILE BYTE USBActiveConfiguration;
-    extern USB_VOLATILE IN_PIPE inPipes[1];
-    extern USB_VOLATILE OUT_PIPE outPipes[1];
-    extern volatile BDT_ENTRY *pBDTEntryIn[USB_MAX_EP_NUMBER+1];
-#endif
+
 
 /** PUBLIC PROTOTYPES **********************************************/
 
@@ -856,8 +841,7 @@ void USBDeviceInit(void);
   ***************************************************************************/
 #define USBIsDeviceSuspended() USBSuspendControl 
 
-
-void USBSoftDetach(void);
+#define USBSoftDetach()  U1CON = 0; U1IE = 0; USBDeviceState = DETACHED_STATE;
 void USBCtrlEPService(void);
 void USBCtrlTrfSetupHandler(void);
 void USBCtrlTrfInHandler(void);
@@ -880,7 +864,7 @@ void USBProtocolResetHandler(void);
 void USBWakeFromSuspend(void);
 void USBSuspend(void);
 void USBStallHandler(void);
-volatile USB_HANDLE USBTransferOnePacket(BYTE ep, BYTE dir, BYTE* data, BYTE len);
+USB_HANDLE USBTransferOnePacket(BYTE ep, BYTE dir, BYTE* data, BYTE len);
 void USBEnableEndpoint(BYTE ep,BYTE options);
 
 #if defined(USB_DYNAMIC_EP_CONFIG)
@@ -1303,7 +1287,7 @@ void USBCBEP0DataReceived(void);
   Remarks:
     None                                                                  
   *************************************************************************/
-#define USBHandleBusy(handle) (handle==0?0:handle->STAT.UOWN)
+#define USBHandleBusy(handle) (handle==0?0:((volatile BDT_ENTRY*)handle)->STAT.UOWN)
 
 /********************************************************************
     Function:
@@ -1334,7 +1318,7 @@ void USBCBEP0DataReceived(void);
         None
  
  *******************************************************************/
-#define USBHandleGetLength(handle) (handle->CNT)
+#define USBHandleGetLength(handle) (((volatile BDT_ENTRY*)handle)->CNT)
 
 /********************************************************************
     Function:
@@ -1363,7 +1347,7 @@ void USBCBEP0DataReceived(void);
         None
  
  *******************************************************************/
-#define USBHandleGetAddr(handle) (handle->ADR)
+#define USBHandleGetAddr(handle) (((volatile BDT_ENTRY*)handle)->ADR)
 
 /********************************************************************
     Function:
@@ -1530,6 +1514,36 @@ void USBCBEP0DataReceived(void);
 
 /********************************************************************
     Function:
+        void USBEP0Receive(BYTE* dest, WORD size, void (*function))
+        
+    Summary:
+        Sets the destination, size, and a function to call on the 
+        completion of the next control write.
+       
+    PreCondition:
+        None
+        
+    Parameters:
+        dest - address of where the incoming data will go (make sure that
+               this address is directly accessable by the USB module - for
+               parts with dedicated USB RAM this address must be in that space)
+        size - the size of the data being received (is almost always going to
+               be presented by the preceeding setup packet - SetupPkt.wLength)
+        function - a function that you want called once the data is received.  
+               If this is specificed as NULL then no function is called.
+        
+    Return Values:
+        None
+        
+    Remarks:
+        None
+ 
+ *******************************************************************/
+#define USBEP0Receive(dest,size,function)  {outPipes[0].pDst.bRam = dest;outPipes[0].wCount.Val = size;outPipes[0].pFunc = function;outPipes[0].info.bits.busy = 1; }
+
+
+/********************************************************************
+    Function:
         USB_HANDLE USBTxOnePacket(BYTE ep, BYTE* data, WORD len)
         
     Summary:
@@ -1659,6 +1673,7 @@ void USBStallEndpoint(BYTE ep, BYTE dir);
     #define USB_ENABLE_INIT_EP_HANDLER
     #define USB_ENABLE_EP0_DATA_HANDLER
     #define USB_ENABLE_TRANSFER_COMPLETE_HANDLER
+#else
 #endif
 
 #if defined USB_ENABLE_SUSPEND_HANDLER
@@ -1741,6 +1756,26 @@ void USBStallEndpoint(BYTE ep, BYTE dir);
 #if defined(USB_INTERRUPT)
 void USBDeviceDetach(void);
 void USBDeviceAttach(void);
+#endif
+
+#if defined(USB_POLLING)
+    #define USB_VOLATILE
+#else
+    #define USB_VOLATILE volatile
+#endif
+
+#define USB_PING_PONG__NO_PING_PONG         0x00    //0b00
+#define USB_PING_PONG__EP0_OUT_ONLY         0x01    //0b01
+#define USB_PING_PONG__FULL_PING_PONG       0x02    //0b10
+#define USB_PING_PONG__ALL_BUT_EP0          0x03    //0b11
+
+
+// When using the PIC32, ping pong mode must be set to FULL.
+#if defined (__PIC32MX__)
+    #if (USB_PING_PONG_MODE != USB_PING_PONG__FULL_PING_PONG)
+        #undef USB_PING_PONG_MODE
+        #define USB_PING_PONG_MODE USB_PING_PONG__FULL_PING_PONG
+    #endif
 #endif
 
 #if (USB_PING_PONG_MODE == USB_PING_PONG__NO_PING_PONG)
@@ -2052,5 +2087,9 @@ void USBDeviceAttach(void);
 #endif
 
 extern USB_VOLATILE BOOL RemoteWakeup;
+extern USB_VOLATILE BYTE USBDeviceState;
+extern USB_VOLATILE BYTE USBActiveConfiguration;
+extern USB_VOLATILE IN_PIPE inPipes[];
+extern USB_VOLATILE OUT_PIPE outPipes[];
 
 #endif //USBD_H

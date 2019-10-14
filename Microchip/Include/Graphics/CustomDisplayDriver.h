@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        CustomDisplayDriver.h
  * Dependencies:    p24Fxxxx.h or plib.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated

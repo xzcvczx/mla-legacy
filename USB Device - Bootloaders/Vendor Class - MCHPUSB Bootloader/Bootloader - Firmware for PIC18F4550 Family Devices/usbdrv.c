@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                Microchip USB Bootloader Version 1.2
+ *                Microchip USB Bootloader Version 1.2+
  *
  *********************************************************************
  * FileName:        usbdrv.c
@@ -33,6 +33,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Rawin Rojvanit       11/19/04    Original.
  * Rawin Rojvanit       05/14/07    Bug fixes.
+ * Fritz Schlunder		05/07/09	Minor change to work with new
+ *									usbctrltrf.c file.
  ********************************************************************/
 
 /******************************************************************************
@@ -274,11 +276,19 @@ TRNIF. If no additional data is preset, TRNIF will remain clear.
 Additional nops were added in this fix to guarantee that TRNIF is
 properly updated before being checked again.
 ********************************************************************/
-        Nop(); Nop(); Nop();
-        Nop(); Nop(); Nop();
+		_asm
+		bra	0	//Equivalent to bra $+2, which takes half as much code as 2 nop instructions
+		bra	0	//Equivalent to bra $+2, which takes half as much code as 2 nop instructions
+		_endasm		
+		Nop();
     }
     UCONbits.PKTDIS = 0;            // Make sure packet processing is enabled
     USBPrepareForNextSetupTrf();    // Declared in usbctrltrf.c
+    //Prepare EP0 OUT to receive the first SETUP packet
+    ep0Bo.Cnt = EP0_BUFF_SIZE;
+    ep0Bo.ADR = (byte*)(&SetupPkt);
+    ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;
+    
     usb_active_cfg = 0;             // Clear active configuration
     usb_device_state = DEFAULT_STATE;
 }//end USBProtocolResetHandler

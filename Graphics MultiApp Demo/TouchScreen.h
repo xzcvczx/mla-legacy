@@ -46,6 +46,7 @@
 #define _TOUCHSCREEN_H
 
 #include "Graphics\Graphics.h"
+#include "MainDemo.h"
 
 #if (GRAPHICS_PICTAIL_VERSION == 1)
 

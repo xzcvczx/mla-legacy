@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        TouchScreen.c
  * Dependencies:    Beep.h, TouchScreen.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24, PIC32, dsPIC, PIC24H
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -42,6 +42,8 @@
  * Sean Justice         02/07/08    PIC32 support
  * Anton Alkhimenok     05/27/08    More robust algorithm
  * Anton Alkhimenok     01/07/09    Graphics PICtail Version 3 support is added
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
+ * PAT					06/29/09	Added event EVENT_STILLPRESS to support continuous press
  *****************************************************************************/
 
 #include "Beep.h"
@@ -49,6 +51,8 @@
 
 //////////////////////// LOCAL PROTOTYPES ////////////////////////////
 void TouchGetCalPoints(void);
+
+#define WAIT_UNTIL_FINISH(x) while(!x)
 
 //////////////////////// GLOBAL VARIABLES ////////////////////////////
 #define  SAMPLE_PERIOD      100     // us
@@ -122,7 +126,11 @@ SHORT temp;
             state = RUN_POT;
 
         case RUN_POT:
-            AD1CHS = ADC_POT;      // switch ADC channel
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+			AD1CHS0 = ADC_POT;     // switch ADC channel
+#else
+    		AD1CHS = ADC_POT;      // switch ADC channel
+#endif
             AD1CON1bits.SAMP = 1;  // run conversion
             state = GET_POT;
             break;
@@ -135,7 +143,11 @@ SHORT temp;
             state  = SET_X;
 
         case SET_X:
-            AD1CHS = ADC_XPOS;     // switch ADC channel
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+			AD1CHS0 = ADC_XPOS;     // switch ADC channel
+#else
+    		AD1CHS = ADC_XPOS;      // switch ADC channel
+#endif     
 
             ADPCFG_XPOS = 0;       // analog
             ADPCFG_YPOS = 1;       // digital
@@ -195,8 +207,12 @@ SHORT temp;
                 break;
             }
 
-            AD1CHS = ADC_YPOS;     // switch ADC channel
-
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+			AD1CHS0 = ADC_YPOS;     // switch ADC channel
+#else
+    		AD1CHS = ADC_YPOS;      // switch ADC channel
+#endif 
+          
             ADPCFG_XPOS = 1;       // digital
             ADPCFG_YPOS = 0;       // analog
 
@@ -280,9 +296,15 @@ void TouchInit(void){
     // Initialize ADC
 	AD1CON1 = 0x080E0;  			// Turn on, auto-convert
 	AD1CON2 = 0;					// AVdd, AVss, int every conversion, MUXA only
-	AD1CON3 = 0x1F80;			    // 31 Tad auto-sample, Tad = 5*Tcy
-    AD1CHS = ADC_POT;
-	AD1PCFG = 0;                    // All inputs are analog
+	AD1CON3 = 0x1FFF;			    // 31 Tad auto-sample, Tad = 256*Tcy
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+	AD1CHS0 = ADC_POT;
+	AD1PCFGL = 0;                   // All inputs are analog  
+	AD1PCFGLbits.PCFG11 = AD1PCFGLbits.PCFG12 = 1;    
+#else
+    AD1CHS = ADC_POT;  
+    AD1PCFG = 0;                    // All inputs are analog   
+#endif 
 	AD1CSSL = 0;					// No scanned inputs
   
 #ifdef __PIC32MX__
@@ -417,8 +439,12 @@ SHORT x,y;
             x = -1;
     }
 
-    if( (prevX == x) && (prevY == y) )
+    if( (prevX == x) && (prevY == y) ) {
+        pMsg->uiEvent = EVENT_STILLPRESS;
+        pMsg->param1 = x;
+        pMsg->param2 = y;
         return;
+    }    
 
     if( (prevX != -1) || (prevY != -1) ){
 
@@ -559,14 +585,14 @@ SHORT textHeight;
     ClearDevice();
 
     SetColor(BRIGHTRED);
-    OutTextXY(0,0*textHeight, (XCHAR*)scr1StrLn1);
+    WAIT_UNTIL_FINISH(OutTextXY(0,0*textHeight, (XCHAR*)scr1StrLn1));
     SetColor(BLACK);
-    OutTextXY(0,1*textHeight, (XCHAR*)scr1StrLn2);
-    OutTextXY(0,2*textHeight, (XCHAR*)scr1StrLn3);
-    OutTextXY(0,3*textHeight, (XCHAR*)scr1StrLn4);
-    OutTextXY(0,4*textHeight, (XCHAR*)scr1StrLn5);
+    WAIT_UNTIL_FINISH(OutTextXY(0,1*textHeight, (XCHAR*)scr1StrLn2));
+    WAIT_UNTIL_FINISH(OutTextXY(0,2*textHeight, (XCHAR*)scr1StrLn3));
+    WAIT_UNTIL_FINISH(OutTextXY(0,3*textHeight, (XCHAR*)scr1StrLn4));
+    WAIT_UNTIL_FINISH(OutTextXY(0,4*textHeight, (XCHAR*)scr1StrLn5));
     SetColor(BRIGHTRED);
-    OutTextXY(0,6*textHeight, (XCHAR*)scr1StrLn6);
+    WAIT_UNTIL_FINISH(OutTextXY(0,6*textHeight, (XCHAR*)scr1StrLn6));
 
     // Wait for touch
     do{
@@ -584,31 +610,31 @@ SHORT textHeight;
 
 #ifdef SWAP_X_AND_Y
 
-    Line(GetMaxX()-5,5,GetMaxX()-5,15);
-    Line(GetMaxX()-4,5,GetMaxX()-4,15);
-    Line(GetMaxX()-6,5,GetMaxX()-6,15);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,5,GetMaxX()-5,15));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-4,5,GetMaxX()-4,15));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-6,5,GetMaxX()-6,15));
 
-    Line(GetMaxX()-5,5,GetMaxX()-15,5);
-    Line(GetMaxX()-5,4,GetMaxX()-15,4);
-    Line(GetMaxX()-5,6,GetMaxX()-15,6);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,5,GetMaxX()-15,5));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,4,GetMaxX()-15,4));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,6,GetMaxX()-15,6));
 
-    Line(GetMaxX()-5,6,GetMaxX()-15,16);
-    Line(GetMaxX()-5,4,GetMaxX()-15,14);
-    Line(GetMaxX()-5,5,GetMaxX()-15,15);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,6,GetMaxX()-15,16));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,4,GetMaxX()-15,14));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,5,GetMaxX()-15,15));
 
 #else
 
-    Line(5,5,5,15);
-    Line(4,5,4,15);
-    Line(6,5,6,15);
+    WAIT_UNTIL_FINISH(Line(5,5,5,15));
+    WAIT_UNTIL_FINISH(Line(4,5,4,15));
+    WAIT_UNTIL_FINISH(Line(6,5,6,15));
 
-    Line(5,5,15,5);
-    Line(5,4,15,4);
-    Line(5,6,15,6);
+    WAIT_UNTIL_FINISH(Line(5,5,15,5));
+    WAIT_UNTIL_FINISH(Line(5,4,15,4));
+    WAIT_UNTIL_FINISH(Line(5,6,15,6));
 
-    Line(5,6,15,16);
-    Line(5,4,15,14);
-    Line(5,5,15,15);
+    WAIT_UNTIL_FINISH(Line(5,6,15,16));
+    WAIT_UNTIL_FINISH(Line(5,4,15,14));
+    WAIT_UNTIL_FINISH(Line(5,5,15,15));
 
 #endif
 
@@ -626,31 +652,31 @@ SHORT textHeight;
 
 #ifdef SWAP_X_AND_Y
 
-    Line(5,5,5,15);
-    Line(4,5,4,15);
-    Line(6,5,6,15);
+    WAIT_UNTIL_FINISH(Line(5,5,5,15));
+    WAIT_UNTIL_FINISH(Line(4,5,4,15));
+    WAIT_UNTIL_FINISH(Line(6,5,6,15));
 
-    Line(5,5,15,5);
-    Line(5,4,15,4);
-    Line(5,6,15,6);
+    WAIT_UNTIL_FINISH(Line(5,5,15,5));
+    WAIT_UNTIL_FINISH(Line(5,4,15,4));
+    WAIT_UNTIL_FINISH(Line(5,6,15,6));
 
-    Line(5,6,15,16);
-    Line(5,4,15,14);
-    Line(5,5,15,15);
+    WAIT_UNTIL_FINISH(Line(5,6,15,16));
+    WAIT_UNTIL_FINISH(Line(5,4,15,14));
+    WAIT_UNTIL_FINISH(Line(5,5,15,15));
 
 #else
 
-    Line(5,GetMaxY()-5,5,GetMaxY()-15);
-    Line(4,GetMaxY()-5,4,GetMaxY()-15);
-    Line(6,GetMaxY()-5,6,GetMaxY()-15);
+    WAIT_UNTIL_FINISH(Line(5,GetMaxY()-5,5,GetMaxY()-15));
+    WAIT_UNTIL_FINISH(Line(4,GetMaxY()-5,4,GetMaxY()-15));
+    WAIT_UNTIL_FINISH(Line(6,GetMaxY()-5,6,GetMaxY()-15));
 
-    Line(5,GetMaxY()-5,15,GetMaxY()-5);
-    Line(5,GetMaxY()-4,15,GetMaxY()-4);
-    Line(5,GetMaxY()-6,15,GetMaxY()-6);
+    WAIT_UNTIL_FINISH(Line(5,GetMaxY()-5,15,GetMaxY()-5));
+    WAIT_UNTIL_FINISH(Line(5,GetMaxY()-4,15,GetMaxY()-4));
+    WAIT_UNTIL_FINISH(Line(5,GetMaxY()-6,15,GetMaxY()-6));
 
-    Line(5,GetMaxY()-6,15,GetMaxY()-16);
-    Line(5,GetMaxY()-4,15,GetMaxY()-14);
-    Line(5,GetMaxY()-5,15,GetMaxY()-15);
+    WAIT_UNTIL_FINISH(Line(5,GetMaxY()-6,15,GetMaxY()-16));
+    WAIT_UNTIL_FINISH(Line(5,GetMaxY()-4,15,GetMaxY()-14));
+    WAIT_UNTIL_FINISH(Line(5,GetMaxY()-5,15,GetMaxY()-15));
 
 #endif
 
@@ -664,31 +690,31 @@ SHORT textHeight;
 
 #ifdef SWAP_X_AND_Y
 
-    Line(GetMaxX()/2-5,GetMaxY()-5,GetMaxX()/2-5,GetMaxY()-15);
-    Line(GetMaxX()/2-4,GetMaxY()-5,GetMaxX()/2-4,GetMaxY()-15);
-    Line(GetMaxX()/2-6,GetMaxY()-5,GetMaxX()/2-6,GetMaxY()-15);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-5,GetMaxY()-5,GetMaxX()/2-5,GetMaxY()-15));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-4,GetMaxY()-5,GetMaxX()/2-4,GetMaxY()-15));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-6,GetMaxY()-5,GetMaxX()/2-6,GetMaxY()-15));
 
-    Line(GetMaxX()/2-5,GetMaxY()-5,GetMaxX()/2-15,GetMaxY()-5);
-    Line(GetMaxX()/2-5,GetMaxY()-4,GetMaxX()/2-15,GetMaxY()-4);
-    Line(GetMaxX()/2-5,GetMaxY()-6,GetMaxX()/2-15,GetMaxY()-6);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-5,GetMaxY()-5,GetMaxX()/2-15,GetMaxY()-5));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-5,GetMaxY()-4,GetMaxX()/2-15,GetMaxY()-4));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-5,GetMaxY()-6,GetMaxX()/2-15,GetMaxY()-6));
 
-    Line(GetMaxX()/2-5,GetMaxY()-6,GetMaxX()/2-15,GetMaxY()-16);
-    Line(GetMaxX()/2-5,GetMaxY()-4,GetMaxX()/2-15,GetMaxY()-14);
-    Line(GetMaxX()/2-5,GetMaxY()-5,GetMaxX()/2-15,GetMaxY()-15);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-5,GetMaxY()-6,GetMaxX()/2-15,GetMaxY()-16));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-5,GetMaxY()-4,GetMaxX()/2-15,GetMaxY()-14));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()/2-5,GetMaxY()-5,GetMaxX()/2-15,GetMaxY()-15));
 
 #else
 
-    Line(GetMaxX()-5,GetMaxY()/2-5,GetMaxX()-5,GetMaxY()/2-15);
-    Line(GetMaxX()-4,GetMaxY()/2-5,GetMaxX()-4,GetMaxY()/2-15);
-    Line(GetMaxX()-6,GetMaxY()/2-5,GetMaxX()-6,GetMaxY()/2-15);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,GetMaxY()/2-5,GetMaxX()-5,GetMaxY()/2-15));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-4,GetMaxY()/2-5,GetMaxX()-4,GetMaxY()/2-15));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-6,GetMaxY()/2-5,GetMaxX()-6,GetMaxY()/2-15));
 
-    Line(GetMaxX()-5,GetMaxY()/2-5,GetMaxX()-15,GetMaxY()/2-5);
-    Line(GetMaxX()-5,GetMaxY()/2-4,GetMaxX()-15,GetMaxY()/2-4);
-    Line(GetMaxX()-5,GetMaxY()/2-6,GetMaxX()-15,GetMaxY()/2-6);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,GetMaxY()/2-5,GetMaxX()-15,GetMaxY()/2-5));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,GetMaxY()/2-4,GetMaxX()-15,GetMaxY()/2-4));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,GetMaxY()/2-6,GetMaxX()-15,GetMaxY()/2-6));
 
-    Line(GetMaxX()-5,GetMaxY()/2-6,GetMaxX()-15,GetMaxY()/2-16);
-    Line(GetMaxX()-5,GetMaxY()/2-4,GetMaxX()-15,GetMaxY()/2-14);
-    Line(GetMaxX()-5,GetMaxY()/2-5,GetMaxX()-15,GetMaxY()/2-15);
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,GetMaxY()/2-6,GetMaxX()-15,GetMaxY()/2-16));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,GetMaxY()/2-4,GetMaxX()-15,GetMaxY()/2-14));
+    WAIT_UNTIL_FINISH(Line(GetMaxX()-5,GetMaxY()/2-5,GetMaxX()-15,GetMaxY()/2-15));
 
 #endif
 
@@ -698,12 +724,12 @@ SHORT textHeight;
     ClearDevice();
 
     SetColor(BLACK);
-    OutTextXY(10,1*textHeight,(XCHAR*)scr2StrLn1);
-    OutTextXY(10,2*textHeight,(XCHAR*)scr2StrLn2);
-    OutTextXY(10,3*textHeight,(XCHAR*)scr2StrLn3);
-    OutTextXY(10,4*textHeight,(XCHAR*)scr2StrLn4);
+    WAIT_UNTIL_FINISH(OutTextXY(10,1*textHeight,(XCHAR*)scr2StrLn1));
+    WAIT_UNTIL_FINISH(OutTextXY(10,2*textHeight,(XCHAR*)scr2StrLn2));
+    WAIT_UNTIL_FINISH(OutTextXY(10,3*textHeight,(XCHAR*)scr2StrLn3));
+    WAIT_UNTIL_FINISH(OutTextXY(10,4*textHeight,(XCHAR*)scr2StrLn4));
     SetColor(BRIGHTRED);
-    OutTextXY(10,6*textHeight,(XCHAR*)scr1StrLn6);
+    WAIT_UNTIL_FINISH(OutTextXY(10,6*textHeight,(XCHAR*)scr1StrLn6));
 
     // Wait for touch
     do{
@@ -746,9 +772,9 @@ WORD  ax[3],ay[3];
 
     SetColor(BRIGHTRED);
 
-    OutTextXY((GetMaxX()-GetTextWidth((XCHAR*)calStr,(void*)&GOLFontDefault))>>1,
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR*)calStr,(void*)&GOLFontDefault))>>1,
               (GetMaxY()-GetTextHeight((void*)&GOLFontDefault))>>1,
-              (XCHAR*)calStr);
+              (XCHAR*)calStr));
 
     for(counter=0; counter<3; counter++){
 
@@ -756,9 +782,9 @@ WORD  ax[3],ay[3];
 
         calTouchLeft[0] = '3' - counter;
 
-        OutTextXY((GetMaxX()-GetTextWidth(calTouchLeft,(void*)&GOLFontDefault))>>1,
+        WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth(calTouchLeft,(void*)&GOLFontDefault))>>1,
                   (GetMaxY()+GetTextHeight((void*)&GOLFontDefault))>>1,
-                   calTouchLeft);
+                   calTouchLeft));
 
         // Wait for press
         do{
@@ -776,9 +802,9 @@ WORD  ax[3],ay[3];
 
         SetColor(WHITE);
 
-        OutTextXY((GetMaxX()-GetTextWidth(calTouchLeft,(void*)&GOLFontDefault))>>1,
+        WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth(calTouchLeft,(void*)&GOLFontDefault))>>1,
                   (GetMaxY()+GetTextHeight((void*)&GOLFontDefault))>>1,
-                   calTouchLeft);
+                   calTouchLeft));
 
         DelayMs(500);
     }

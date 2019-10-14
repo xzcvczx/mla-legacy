@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        MainDemo.c
  * Dependencies:    MainDemo.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -41,11 +41,19 @@
 #include "MainDemo.h"
 
 // Configuration bits
-#ifdef __PIC32MX
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+_FOSCSEL(FNOSC_PRI);			
+_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF  & POSCMD_XT);  
+_FWDT(FWDTEN_OFF);              
+#elif defined(__PIC32MX__)
 #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
 #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
 #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
+	#if defined (__PIC24FJ256GB110__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+    #endif	
 	#if defined (__PIC24FJ256GA110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
@@ -66,6 +74,8 @@ extern const BITMAP_FLASH flower8bit;
 extern const BITMAP_FLASH flower4bit;
 extern const BITMAP_FLASH flower1bit;
 
+#define WAIT_UNTIL_FINISH(x) while(!x)
+
 int main(void){
 SHORT width, height;
 SHORT counter;
@@ -77,7 +87,28 @@ const SHORT polyPoints[] = {
 160,60,
 };
 
-#ifdef __PIC32MX__
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+// Configure Oscillator to operate the device at 40Mhz
+// Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+	PLLFBD=38;					// M=40
+	CLKDIVbits.PLLPOST=0;		// N1=2
+	CLKDIVbits.PLLPRE=0;		// N2=2
+	OSCTUN=0;					// Tune FRC oscillator, if FRC is used
+
+// Disable Watch Dog Timer
+	RCONbits.SWDTEN=0;
+
+
+// Clock switching to incorporate PLL
+	__builtin_write_OSCCONH(0x03);		// Initiate Clock Switch to Primary
+													// Oscillator with PLL (NOSC=0b011)
+	__builtin_write_OSCCONL(0x01);		// Start clock switching
+	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
+
+// Wait for PLL to lock
+	while(OSCCONbits.LOCK!=1) {};
+#elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());
 #endif
@@ -90,6 +121,10 @@ const SHORT polyPoints[] = {
 	TRISBbits.TRISB15 = 0;
 /////////////////////////////////////////////////////////////////////////////
 
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+	AD1PCFGL = 0xffff;
+#endif
+
     InitGraph();
 
     while(1){
@@ -97,7 +132,7 @@ const SHORT polyPoints[] = {
 		SetColor(WHITE);
 
         for(counter=0; counter<GetMaxX(); counter+=20){
-            Line(counter,0,GetMaxX()-1-counter,GetMaxY()-1);
+            WAIT_UNTIL_FINISH(Line(counter,0,GetMaxX()-1-counter,GetMaxY()-1));
         }
 
         DelayMs(4000);  
@@ -105,17 +140,17 @@ const SHORT polyPoints[] = {
         SetColor(BRIGHTRED);
 
         for(counter=10; counter<GetMaxY()>>1; counter+=10){
-            Circle(GetMaxX()>>1,GetMaxY()>>1,counter);
+            WAIT_UNTIL_FINISH(Circle(GetMaxX()>>1,GetMaxY()>>1,counter));
         }
 
         DelayMs(4000);  
 
         SetColor(BRIGHTBLUE);
-        FillCircle(GetMaxX()>>1,GetMaxY()>>1,60);
+        WAIT_UNTIL_FINISH(FillCircle(GetMaxX()>>1,GetMaxY()>>1,60));
         SetColor(BRIGHTGREEN);
-        FillCircle(GetMaxX()>>1,GetMaxY()>>1,40);
+        WAIT_UNTIL_FINISH(FillCircle(GetMaxX()>>1,GetMaxY()>>1,40));
         SetColor(BRIGHTRED);
-        FillCircle(GetMaxX()>>1,GetMaxY()>>1,20);
+        WAIT_UNTIL_FINISH(FillCircle(GetMaxX()>>1,GetMaxY()>>1,20));
 
         DelayMs(4000);  
 
@@ -123,11 +158,11 @@ const SHORT polyPoints[] = {
         ClearDevice();
 
         SetColor(BRIGHTBLUE);
-        Bevel((GetMaxX()>>1)-60,(GetMaxY()>>1)-60,(GetMaxX()>>1)+60,(GetMaxY()>>1)+60,30);
+        WAIT_UNTIL_FINISH(Bevel((GetMaxX()>>1)-60,(GetMaxY()>>1)-60,(GetMaxX()>>1)+60,(GetMaxY()>>1)+60,30));
         SetColor(BRIGHTGREEN);
-        Bevel((GetMaxX()>>1)-40,(GetMaxY()>>1)-40,(GetMaxX()>>1)+40,(GetMaxY()>>1)+40,30);
+        WAIT_UNTIL_FINISH(Bevel((GetMaxX()>>1)-40,(GetMaxY()>>1)-40,(GetMaxX()>>1)+40,(GetMaxY()>>1)+40,30));
         SetColor(BRIGHTRED);
-        Bevel((GetMaxX()>>1)-20,(GetMaxY()>>1)-20,(GetMaxX()>>1)+20,(GetMaxY()>>1)+20,30);
+        WAIT_UNTIL_FINISH(Bevel((GetMaxX()>>1)-20,(GetMaxY()>>1)-20,(GetMaxX()>>1)+20,(GetMaxY()>>1)+20,30));
 
         DelayMs(4000);  
 
@@ -135,20 +170,20 @@ const SHORT polyPoints[] = {
         ClearDevice();
 
         SetColor(BRIGHTBLUE);
-        Arc((GetMaxX()>>1)-60,(GetMaxY()>>1)-60,(GetMaxX()>>1)+60,(GetMaxY()>>1)+60,20,30,0xFF);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1)-60,(GetMaxY()>>1)-60,(GetMaxX()>>1)+60,(GetMaxY()>>1)+60,20,30,0xFF));
         SetColor(BRIGHTGREEN);
-        Arc((GetMaxX()>>1)-40,(GetMaxY()>>1)-40,(GetMaxX()>>1)+40,(GetMaxY()>>1)+40,20,30,0xFF);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1)-40,(GetMaxY()>>1)-40,(GetMaxX()>>1)+40,(GetMaxY()>>1)+40,20,30,0xFF));
         SetColor(BRIGHTRED);
-        Arc((GetMaxX()>>1)-20,(GetMaxY()>>1)-20,(GetMaxX()>>1)+20,(GetMaxY()>>1)+20,20,30,0xFF);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1)-20,(GetMaxY()>>1)-20,(GetMaxX()>>1)+20,(GetMaxY()>>1)+20,20,30,0xFF));
 
         DelayMs(4000);  
 
         SetColor(BRIGHTBLUE);
-        FillBevel((GetMaxX()>>1)-60,(GetMaxY()>>1)-60,(GetMaxX()>>1)+60,(GetMaxY()>>1)+60,30);
+        WAIT_UNTIL_FINISH(FillBevel((GetMaxX()>>1)-60,(GetMaxY()>>1)-60,(GetMaxX()>>1)+60,(GetMaxY()>>1)+60,30));
         SetColor(BRIGHTGREEN);
-        FillBevel((GetMaxX()>>1)-40,(GetMaxY()>>1)-40,(GetMaxX()>>1)+40,(GetMaxY()>>1)+40,30);
+        WAIT_UNTIL_FINISH(FillBevel((GetMaxX()>>1)-40,(GetMaxY()>>1)-40,(GetMaxX()>>1)+40,(GetMaxY()>>1)+40,30));
         SetColor(BRIGHTRED);
-        FillBevel((GetMaxX()>>1)-20,(GetMaxY()>>1)-20,(GetMaxX()>>1)+20,(GetMaxY()>>1)+20,30);
+        WAIT_UNTIL_FINISH(FillBevel((GetMaxX()>>1)-20,(GetMaxY()>>1)-20,(GetMaxX()>>1)+20,(GetMaxY()>>1)+20,30));
 
         DelayMs(4000);  
 
@@ -156,31 +191,31 @@ const SHORT polyPoints[] = {
         ClearDevice();
 
         SetColor(BRIGHTBLUE);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x11);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x11));
         SetColor(BRIGHTGREEN);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x22);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x22));
         SetColor(BRIGHTRED);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x44);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x44));
         SetColor(BRIGHTYELLOW);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x88);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-50,(GetMaxX()>>1),(GetMaxY()>>1)+50,50,60,0x88));
 
         SetColor(BRIGHTBLUE);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x11);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x11));
         SetColor(BRIGHTGREEN);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x22);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x22));
         SetColor(BRIGHTRED);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x44);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x44));
         SetColor(BRIGHTYELLOW);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x88);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1)-30,(GetMaxX()>>1),(GetMaxY()>>1)+30,35,45,0x88));
 
         SetColor(BRIGHTBLUE);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x11);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x11));
         SetColor(BRIGHTGREEN);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x22);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x22));
         SetColor(BRIGHTRED);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x44);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x44));
         SetColor(BRIGHTYELLOW);
-        Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x88);
+        WAIT_UNTIL_FINISH(Arc((GetMaxX()>>1),(GetMaxY()>>1),(GetMaxX()>>1),(GetMaxY()>>1),20,30,0x88));
 
         DelayMs(4000);  
 
@@ -190,36 +225,34 @@ const SHORT polyPoints[] = {
         SetColor(BRIGHTBLUE);
 
         for(counter=0; counter<GetMaxY()>>1; counter+=20){
-            Rectangle(GetMaxX()/2-counter,
+            WAIT_UNTIL_FINISH(Rectangle(GetMaxX()/2-counter,
                       GetMaxY()/2-counter,
                       GetMaxX()/2+counter,
-                      GetMaxY()/2+counter);
+                      GetMaxY()/2+counter));
         }
 
         DelayMs(4000);  
 
         SetColor(BRIGHTBLUE);
-        Bar(GetMaxX()/2-80,GetMaxY()/2-80,
-            GetMaxX()/2+80,GetMaxY()/2+80);
+        WAIT_UNTIL_FINISH(Bar(GetMaxX()/2-80,GetMaxY()/2-80,
+            GetMaxX()/2+80,GetMaxY()/2+80));
         SetColor(BRIGHTGREEN);
-        Bar(GetMaxX()/2-60,GetMaxY()/2-60,
-            GetMaxX()/2+60,GetMaxY()/2+60);
+        WAIT_UNTIL_FINISH(Bar(GetMaxX()/2-60,GetMaxY()/2-60,
+            GetMaxX()/2+60,GetMaxY()/2+60));
         SetColor(BRIGHTRED);
-        Bar(GetMaxX()/2-40,GetMaxY()/2-40,
-            GetMaxX()/2+40,GetMaxY()/2+40);
-
+        WAIT_UNTIL_FINISH(Bar(GetMaxX()/2-40,GetMaxY()/2-40,
+            GetMaxX()/2+40,GetMaxY()/2+40));
 
         DelayMs(4000);  
         SetColor(BLACK);
         ClearDevice();
 
         SetColor(WHITE);
-        DrawPoly(5,(SHORT*)polyPoints);
+        WAIT_UNTIL_FINISH(DrawPoly(5,(SHORT*)polyPoints));
 
         DelayMs(4000);  
         SetColor(BLACK);
         ClearDevice();
-
 
         SetFont((void*)&Font25);
         SetColor(BRIGHTGREEN);
@@ -247,35 +280,35 @@ const SHORT polyPoints[] = {
         SetColor(BLACK);
         ClearDevice();
 
-        PutImage(0,0,(void*)&flower1bit,2);
+        WAIT_UNTIL_FINISH(PutImage(0,0,(void*)&flower1bit,2));
         SetColor(WHITE);
         OutTextXY(200,0,"1BPP");
         DelayMs(8000);  
         SetColor(BLACK);
         ClearDevice();
 
-        PutImage(0,0,(void*)&flower4bit,2);
+        WAIT_UNTIL_FINISH(PutImage(0,0,(void*)&flower4bit,2));
         SetColor(WHITE);
         OutTextXY(200,0,"4BPP");
         DelayMs(8000);  
         SetColor(BLACK);
         ClearDevice();
 
-        PutImage(0,0,(void*)&flower8bit,2);
+        WAIT_UNTIL_FINISH(PutImage(0,0,(void*)&flower8bit,2));
         SetColor(WHITE);
         OutTextXY(200,0,"8BPP");
         DelayMs(8000);  
         SetColor(BLACK);
         ClearDevice();
 
-        PutImage(0,0,(void*)&flower16bit,2);
+        WAIT_UNTIL_FINISH(PutImage(0,0,(void*)&flower16bit,2));
         SetColor(WHITE);
         OutTextXY(200,0,"16BPP");
         DelayMs(8000);  
         SetColor(BLACK);
         ClearDevice();
 
-        PutImage(84,0,(void*)&flower1bit,1);
+        WAIT_UNTIL_FINISH(PutImage(84,0,(void*)&flower1bit,1));
         PutImage(169,0,(void*)&flower4bit,1);
         PutImage(84,114,(void*)&flower8bit,1);
         PutImage(169,114,(void*)&flower16bit,1);
@@ -283,5 +316,4 @@ const SHORT polyPoints[] = {
         SetColor(BLACK);
         ClearDevice();
     } 
-
 }

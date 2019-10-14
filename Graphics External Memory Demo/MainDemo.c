@@ -20,7 +20,7 @@
  *****************************************************************************
  * FileName:        MainDemo.c
  * Dependencies:    MainDemo.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -59,11 +59,19 @@
 #include "MainDemo.h"
 
 // Configuration bits
-#ifdef __PIC32MX
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+_FOSCSEL(FNOSC_PRI);			
+_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF  & POSCMD_XT);  
+_FWDT(FWDTEN_OFF);              
+#elif defined(__PIC32MX__)
 #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
 #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
 #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
+	#if defined (__PIC24FJ256GB110__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+    #endif	
 	#if defined (__PIC24FJ256GA110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
@@ -122,9 +130,34 @@ SHORT width, height;
 	TRISBbits.TRISB15 = 0;
 /////////////////////////////////////////////////////////////////////////////
 
-#ifdef __PIC32MX__
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+// Configure Oscillator to operate the device at 40Mhz
+// Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+	PLLFBD=38;					// M=40
+	CLKDIVbits.PLLPOST=0;		// N1=2
+	CLKDIVbits.PLLPRE=0;		// N2=2
+	OSCTUN=0;					// Tune FRC oscillator, if FRC is used
+
+// Disable Watch Dog Timer
+	RCONbits.SWDTEN=0;
+
+
+// Clock switching to incorporate PLL
+	__builtin_write_OSCCONH(0x03);		// Initiate Clock Switch to Primary
+													// Oscillator with PLL (NOSC=0b011)
+	__builtin_write_OSCCONL(0x01);		// Start clock switching
+	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
+
+// Wait for PLL to lock
+	while(OSCCONbits.LOCK!=1) {};
+#elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());	
+#endif
+
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+	AD1PCFGL = 0xffff;
 #endif
 
 #if (GRAPHICS_PICTAIL_VERSION == 3)

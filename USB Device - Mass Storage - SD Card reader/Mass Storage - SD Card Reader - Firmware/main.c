@@ -173,7 +173,12 @@
 #elif defined(EXPLORER_16)
     #ifdef __PIC24FJ256GB110__ //Defined by MPLAB when using 24FJ256GB110 device
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+    #elif defined(__PIC24FJ64GB004__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__32MX460F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
@@ -508,6 +513,23 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
     
+   #if defined(PIC24FJ64GB004_PIM)
+	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+	//This allows the device to power up at a lower initial operating frequency, which can be
+	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+	//power up the PLL.
+    {
+        unsigned int pll_startup_counter = 600;
+        CLKDIVbits.PLLEN = 1;
+        while(pll_startup_counter--);
+    }
+
+    //Device switches over automatically to PLL output after PLL is locked and ready.
+    #endif
+
+
 //	The USB specifications require that USB peripheral devices must never source
 //	current onto the Vbus pin.  Additionally, USB peripherals should not source
 //	current on D+ or D- when the host/hub is not actively powering the Vbus line.
@@ -558,6 +580,16 @@ static void InitializeSystem(void)
     //enable a pull-up for the card detect, just in case the SD-Card isn't attached
     //  then lets have a pull-up to make sure we don't think it is there.
     CNPU5bits.CN68PUE = 1; 
+
+    #elif defined(PIC24FJ64GB004_PIM)
+    //Initialize the SPI
+    RPINR20bits.SDI1R = 17;     //MSDI
+    RPOR8bits.RP16R = 7;        //MSDO
+    RPOR7bits.RP15R = 8;        //SCK
+
+    //enable a pull-up for the card detect, just in case the SD-Card isn't attached
+    //  then lets have a pull-up to make sure we don't think it is there.
+    CNPU1bits.CN6PUE = 1; 
 
     #elif defined(PIC18F46J50_PIM)
     //Initialize the SPI

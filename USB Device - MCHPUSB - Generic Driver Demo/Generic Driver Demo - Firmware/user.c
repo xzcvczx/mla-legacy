@@ -244,8 +244,18 @@ WORD_VAL ReadPOT(void)
         w.v[1] = ADRESH;
 
     #elif defined(__C30__) || defined(__C32__)
-        #if defined(EXPLORER_16) && !defined(PIC32MX460F512L_PIM)
+        #if defined(PIC24FJ256GB110_PIM)
             AD1CHS = 0x5;           //MUXA uses AN5
+
+            // Get an ADC sample
+            AD1CON1bits.SAMP = 1;           //Start sampling
+            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            AD1CON1bits.SAMP = 0;           //Start sampling
+            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            while(!AD1CON1bits.DONE);       //Wait for conversion to complete
+
+        #elif defined(PIC24FJ64GB004_PIM)
+            AD1CHS = 0x7;           //MUXA uses AN7
 
             // Get an ADC sample
             AD1CON1bits.SAMP = 1;           //Start sampling

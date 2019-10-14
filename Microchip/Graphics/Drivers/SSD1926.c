@@ -37,6 +37,8 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     08/27/08
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
+ * Microchip            08/26/26    Fixed Line2D() function
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -49,6 +51,10 @@ SHORT _clipLeft;
 SHORT _clipTop;
 SHORT _clipRight;
 SHORT _clipBottom;
+
+#define RED8(color16)    (BYTE)((color16 & 0xF800) >> 8)
+#define GREEN8(color16)  (BYTE)((color16 & 0x07E0) >> 3)
+#define BLUE8(color16)   (BYTE)((color16 & 0x001F) << 3)
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
 void SetAddress(DWORD address);
@@ -100,7 +106,14 @@ void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
 * Note: delay is defined for 16MIPS
 *
 ********************************************************************/
-#ifdef __PIC32MX
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+#define DELAY_1MS 40000/5  // for 40MIPS
+void  DelayMs(WORD time){
+unsigned delay;
+	while(time--)
+		for(delay=0; delay<DELAY_1MS; delay++);	
+}
+#elif defined(__PIC32MX__)
 void  DelayMs(WORD time)
 {
     while(time--)
@@ -109,9 +122,8 @@ void  DelayMs(WORD time)
 
         int_status = INTDisableInterrupts();
         OpenCoreTimer(GetSystemClock() / 2000);     // core timer is at 1/2 system clock
-        INTRestoreInterrupts(int_status);
-
         mCTClearIntFlag();
+        INTRestoreInterrupts(int_status);
 
         while(!mCTGetIntFlag());
 
@@ -142,14 +154,12 @@ unsigned delay;
 * Side Effects: none
 *
 ********************************************************************/
-#ifdef __PIC32MX
+#if defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__) 
 #define PMPWaitBusy()  while(PMMODEbits.BUSY);
-#else
-#ifdef __PIC24F__
+#elif defined(__PIC24F__)
 #define PMPWaitBusy()  Nop(); Nop(); Nop();
 #else
 #error CONTROLLER IS NOT SUPPORTED
-#endif
 #endif
 
 /*********************************************************************
@@ -316,7 +326,7 @@ void  SetReg(WORD index, BYTE value){
 ********************************************************************/
 BYTE  GetReg(WORD index){
 WORD value;
-
+	
 #ifdef USE_16BIT_PMP
 
     RS_LAT_BIT = 0;        // set RS line to low for command
@@ -414,7 +424,7 @@ void ResetDevice(void){
     PMMODEbits.MODE   = 2;  // Intel 80 master interface
 
     PMMODEbits.WAITB  = 0;
-#ifdef __PIC32MX
+#if defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__) 
     PMMODEbits.WAITM  = 3;
 #else
     PMMODEbits.WAITM  = 2;
@@ -700,14 +710,263 @@ WORD_VAL value;
 }
 
 /*********************************************************************
-* Function: void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+* Function: WORD Line2D(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+*
+* PreCondition: none
+*
+* Input: x1,y1 - starting coordinates, x2,y2 - ending coordinates
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: draws solid line
+*
+* Note: none
+*
+********************************************************************/
+static WORD Line2D(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+{
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
+
+/* Line Boundaries */
+    SetReg(REG_2D_1e4, x1 & 0xFF);
+    SetReg(REG_2D_1e5, (x1 >> 8) & 0xFF);
+    SetReg(REG_2D_1e8, y1 & 0xFF);
+    SetReg(REG_2D_1e9, (y1 >> 8) & 0xFF);
+    SetReg(REG_2D_1ec, x2 & 0xFF);
+    SetReg(REG_2D_1ed, (x2 >> 8) & 0xFF);
+    SetReg(REG_2D_1f0, y2 & 0xFF);
+    SetReg(REG_2D_1f1, (y2 >> 8) & 0xFF);
+
+/* Source & Destination Window Start Addresses */
+    SetReg(REG_2D_1d4, 0);
+    SetReg(REG_2D_1d5, 0);
+    SetReg(REG_2D_1d6, 0);
+    SetReg(REG_2D_1f4, 0);
+    SetReg(REG_2D_1f5, 0);
+    SetReg(REG_2D_1f6, 0);
+
+/* Display width */
+    SetReg(REG_2D_1f8, (GetMaxX() + 1) & 0xFF);
+    SetReg(REG_2D_1f9, ((GetMaxX() + 1) >> 8) & 0xFF);
+/* Display 2d width */
+    SetReg(REG_2D_1d8, (GetMaxX() + 1) & 0xFF);
+    SetReg(REG_2D_1d9, ((GetMaxX() + 1) >> 8) & 0xFF);
+
+/* Set Color */
+    SetReg(REG_2D_1fe, RED8(_color));
+    SetReg(REG_2D_1fd, GREEN8(_color));
+    SetReg(REG_2D_1fc, BLUE8(_color));
+
+/* 16bpp */    
+    SetReg(REG_2D_1dd, 0x00);
+
+/* Line command */
+    SetReg(REG_2D_1d1, 0x01);
+
+/* Draw2d command */
+    SetReg(REG_2D_1d2, 0x01);
+
+#ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0); /* Ready */
+#endif
+    return 1;
+}
+
+/*********************************************************************
+* Function: WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+*
+* PreCondition: none
+*
+* Input: x1,y1 - starting coordinates, x2,y2 - ending coordinates
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: draws line
+*
+* Note: none
+*
+********************************************************************/
+WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2){
+    SHORT deltaX, deltaY;
+    SHORT error, stepErrorLT, stepErrorGE;
+    SHORT stepX, stepY;
+    SHORT steep;
+    SHORT temp;
+    SHORT style, type;
+
+    stepX= 0;
+    deltaX = x2-x1;
+    if(deltaX < 0){
+        deltaX= -deltaX;
+        --stepX;
+    }else{
+        ++stepX;
+    }
+
+    stepY= 0;
+    deltaY = y2-y1;
+    if(deltaY < 0){
+        deltaY= -deltaY;
+        --stepY;
+    }else{
+        ++stepY;
+    }
+
+    steep= 0;
+    if(deltaX < deltaY){
+        ++steep; 
+    }
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
+
+
+    if(_lineType == 0)
+    {
+        if(!Line2D(x1, y1, x2, y2)) return 0;
+        if(_lineThickness)
+        {
+            if(steep)
+            {
+                if(!Line2D(x1 + 1, y1, x2 + 1, y2)) return 0;
+                if(!Line2D(x1 - 1, y1, x2 - 1, y2)) return 0;
+            }
+            else
+            {
+                if(!Line2D(x1, y1 + 1, x2, y2 + 1)) return 0;
+                if(!Line2D(x1, y1 - 1, x2, y2 - 1)) return 0;
+            }
+        }
+        return 1;
+    }
+
+     // Move cursor
+     MoveTo(x2,y2);
+
+     if(x1==x2){
+        if(y1>y2){
+            temp = y1; y1 = y2; y2 = temp;
+        }
+        style = 0; type =1;
+        for(temp=y1; temp<y2+1; temp++){
+            if((++style)==_lineType){
+                type ^=1;
+                style = 0;
+            }
+            if(type){
+                PutPixel(x1,temp);
+                if(_lineThickness){
+                    PutPixel (x1+1,temp);
+                    PutPixel (x1-1,temp);
+                }
+            }
+       }
+       return 1;
+    }
+
+    if(y1==y2){
+        if(x1>x2){
+            temp = x1; x1 = x2; x2 = temp;
+        }
+        style = 0; type =1;
+        for(temp=x1; temp<x2+1; temp++){
+            if((++style)==_lineType){
+                type ^=1;
+                style = 0;
+            }
+            if(type){
+                PutPixel(temp,y1);
+                if(_lineThickness){
+                    PutPixel (temp,y1+1);
+                    PutPixel (temp,y1-1);
+                }
+            }
+        }
+        return 1;
+    }
+
+    if(deltaX < deltaY){
+        temp = deltaX;  deltaX = deltaY;  deltaY = temp;
+        temp = x1;  x1 = y1;  y1 = temp;
+        temp = stepX;  stepX = stepY;  stepY = temp;
+        PutPixel(y1,x1);
+    }else{
+        PutPixel(x1,y1);
+    }
+
+    // If the current error greater or equal zero
+    stepErrorGE= deltaX<<1;
+    // If the current error less than zero
+    stepErrorLT= deltaY<<1;
+    // Error for the first pixel
+    error= stepErrorLT-deltaX;
+
+    style = 0; type =1;
+    
+    while(--deltaX >= 0){
+        if(error >= 0){
+            y1+= stepY;
+            error-= stepErrorGE;
+        }
+        x1+= stepX;
+        error+= stepErrorLT;
+
+        if((++style)==_lineType){
+            type ^=1;
+            style = 0;
+        }
+        if(type){
+            if(steep){
+                PutPixel (y1,x1);
+                if(_lineThickness){
+                    PutPixel (y1+1,x1);
+                    PutPixel (y1-1,x1);
+                }
+            }else{
+                PutPixel (x1,y1);
+                if(_lineThickness){
+                    PutPixel (x1,y1+1);
+                    PutPixel (x1,y1-1);
+                }
+            }
+        }
+   }// end of while
+
+   return 1;
+}
+
+/*********************************************************************
+* Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 *
 * PreCondition: none
 *
 * Input: left,top - top left corner coordinates,
 *        right,bottom - bottom right corner coordinates
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -716,9 +975,26 @@ WORD_VAL value;
 * Note: none
 *
 ********************************************************************/
-void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom){
-DWORD address;
-register SHORT  x,y;
+WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    DWORD address;
+    SHORT width, height;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
+
+    if(left > right)
+    {
+        return 1; /* Don't draw but return 1 */
+    }
+
+    if(top > bottom)
+    {
+        return 1; /* Don't draw but return 1 */
+    }
 
     if(_clipRgn){
         if(left<_clipLeft)
@@ -731,18 +1007,150 @@ register SHORT  x,y;
            bottom = _clipBottom;
     }
 
-    address = ((DWORD)(GetMaxX( )+1)*top + left)<<1;
+    width = right - left + 1;
+    height = bottom - top + 1;
 
-    CS_LAT_BIT = 0;
-    for(y=top; y<bottom+1; y++){
-        SetAddress(address);
-        for(x=left; x<right+1; x++){
-            WriteData(_color);
-        }
-        address += (GetMaxX()+1)<<1;
-    }
-    CS_LAT_BIT = 1;
+    address = top*(GetMaxX() + (DWORD)1) + left;
+
+    PutPixel(left, top);
+
+/* Source, Destination & Brush Window Start Addresses */
+    SetReg(REG_2D_1d4, address & 0xFF);
+    SetReg(REG_2D_1d5, (address >> 8) & 0xFF);
+    SetReg(REG_2D_1d6, (address >> 16) & 0xFF);
+    SetReg(REG_2D_1f4, address & 0xFF);
+    SetReg(REG_2D_1f5, (address >> 8) & 0xFF);
+    SetReg(REG_2D_1f6, (address >> 16) & 0xFF);
+    SetReg(REG_2D_204, address & 0xFF);
+    SetReg(REG_2D_205, (address >> 8) & 0xFF);
+    SetReg(REG_2D_206, (address >> 16) & 0xFF);
+
+/* Source & Destination Window Width */
+    SetReg(REG_2D_1ec, width & 0xFF);
+    SetReg(REG_2D_1ed, (width >> 8) & 0xFF);
+    SetReg(REG_2D_1e4, width & 0xFF);
+    SetReg(REG_2D_1e5, (width >> 8) & 0xFF);
+
+/* Source & Destination Window Height */
+    SetReg(REG_2D_1f0, height & 0xFF);
+    SetReg(REG_2D_1f1, (height >> 8) & 0xFF);
+    SetReg(REG_2D_1e8, height & 0xFF);
+    SetReg(REG_2D_1e9, (height >> 8) & 0xFF);
+
+/* Brush width */
+    SetReg(REG_2D_214, 1);
+    SetReg(REG_2D_215, 0);
+/* Brush height */
+    SetReg(REG_2D_218, 1);
+    SetReg(REG_2D_219, 0);
+
+/* Display width */
+    SetReg(REG_2D_1f8, (GetMaxX() + 1) & 0xFF);
+    SetReg(REG_2D_1f9, ((GetMaxX() + 1) >> 8) & 0xFF);
+/* Display 2d width */
+    SetReg(REG_2D_1d8, (GetMaxX() + 1) & 0xFF);
+    SetReg(REG_2D_1d9, ((GetMaxX() + 1) >> 8) & 0xFF);
+
+/* ROP3 Command */
+    SetReg(REG_2D_1fc, 0xF0);
+
+/* 16bpp */
+    SetReg(REG_2D_1dd, 0x00);
+
+/* ROP command */
+    SetReg(REG_2D_1d1, 0x09);
+
+/* Draw2d command */
+    SetReg(REG_2D_1d2, 0x01);
+
+#ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0); /* Ready */
+#endif
+    return 1;
 }
+
+#ifdef USE_DRV_CIRCLE
+/***************************************************************************
+* Function: WORD Circle(SHORT x, SHORT y, SHORT radius)
+*
+* Overview: This macro draws a circle with the given center and radius.
+*
+* Input: x - Center x position. 
+*		 y - Center y position.
+*		 radius - the radius of the circle.
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+********************************************************************/
+WORD Circle(SHORT x, SHORT y, SHORT radius)
+{
+    #define Rx (WORD)radius
+    #define Ry (WORD)radius
+    #define Angle1 (WORD)0
+    #define Angle2 (WORD)360
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
+
+/* Ellipse Parameters & Y-Limit */
+    SetReg(REG_2D_1d4, x & 0xFF);
+    SetReg(REG_2D_1d5, ((((GetMaxY() + (WORD)1)<<1) & 0xFE) + ((x >> 8) & 0x01)));
+    SetReg(REG_2D_1d6, ((GetMaxY() + (WORD)1)>>7) & 0x03);
+
+    SetReg(REG_2D_1e4, y & 0xFF);
+    SetReg(REG_2D_1e5, (y >> 8) & 0xFF);
+
+    SetReg(REG_2D_1e8, Rx & 0xFF);
+    SetReg(REG_2D_1e9, (Rx >> 8) & 0xFF);
+
+    SetReg(REG_2D_1d8, Ry & 0xFF);
+    SetReg(REG_2D_1d9, (Ry >> 8) & 0xFF);
+
+    SetReg(REG_2D_1ec, Angle1 & 0xFF);
+    SetReg(REG_2D_1ed, (Angle1 >> 8) & 0xFF);
+
+    SetReg(REG_2D_1f0, Angle2 & 0xFF);
+    SetReg(REG_2D_1f1, (Angle2 >> 8) & 0xFF);
+
+/* Destination Window Start Addresses */
+
+    SetReg(REG_2D_1f4, 0);
+    SetReg(REG_2D_1f5, 0);
+    SetReg(REG_2D_1f6, 0);
+
+/* Destination Window Width */
+    SetReg(REG_2D_1f8, (GetMaxX() + 1) & 0xFF);
+    SetReg(REG_2D_1f9, ((GetMaxX() + 1) >> 8) & 0xFF);
+
+/* Set Color */
+    SetReg(REG_2D_1fe, RED8(_color));
+    SetReg(REG_2D_1fd, GREEN8(_color));
+    SetReg(REG_2D_1fc, BLUE8(_color));
+
+/* 16bpp */    
+    SetReg(REG_2D_1dd, 0x00);
+
+/* Ellipse command */
+    SetReg(REG_2D_1d1, 0x03);
+
+/* Draw2d command */
+    SetReg(REG_2D_1d2, 0x01);
+
+#ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0); /* Ready */
+#endif
+    return 1;
+}
+#endif
 
 /*********************************************************************
 * Function: void ClearDevice(void)
@@ -761,19 +1169,12 @@ register SHORT  x,y;
 *
 ********************************************************************/
 void ClearDevice(void){
-DWORD     counter;
-
-    CS_LAT_BIT = 0;
-    SetAddress(0);
-    SetAddress(0);
-    for(counter=0; counter<(DWORD)(GetMaxX()+1)*(GetMaxY()+1); counter++){
-        WriteData(_color);
-    }
-    CS_LAT_BIT = 1;
+    Bar(0, 0, GetMaxX(), GetMaxY());
+    while(GetReg(REG_2D_220) == 0); /* Ready */
 }
 
 /*********************************************************************
-* Function: void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
 * PreCondition: none
 *
@@ -781,7 +1182,11 @@ DWORD     counter;
 *        bitmap - image pointer,
 *        stretch - image stretch factor
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 1 when the image is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -790,10 +1195,16 @@ DWORD     counter;
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-FLASH_BYTE* flashAddress;
-BYTE colorDepth;
-WORD colorTemp;
+WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
+    FLASH_BYTE* flashAddress;
+    BYTE colorDepth;
+    WORD colorTemp;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
     // Save current color
     colorTemp = _color;
@@ -852,6 +1263,7 @@ WORD colorTemp;
 
     // Restore current color
     _color = colorTemp;
+    return 1;
 }
 
 #ifdef USE_BITMAP_FLASH

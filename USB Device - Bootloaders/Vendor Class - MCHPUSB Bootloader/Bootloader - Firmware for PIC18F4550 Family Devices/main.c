@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                Microchip USB Bootloader Version 1.2
+ *                Microchip USB Bootloader Version 1.2+Updates
  *
  *********************************************************************
  * FileName:        main.c
@@ -156,6 +156,7 @@ void main(void)
     
     //Bootload Mode
     mInitAllLEDs();
+    led_count = 0;				//Initialize blink rate counter
     mInitializeUSBDriver();     // See usbdrv.h
     USBCheckBusStatus();        // Modified to always enable USB module
     while(1)

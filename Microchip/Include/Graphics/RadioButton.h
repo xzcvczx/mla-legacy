@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        RadioButton.h
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -50,21 +50,21 @@
 *********************************************************************/
 #define RB_FOCUSED	      0x0001  	// Bit for focused state.
 #define RB_DISABLED       0x0002  	// Bit for disabled state.
-#define RB_CHECKED        0x0004  	// Bit to indicate radio button is checked.
-#define RB_GROUP          0x0008  	// Bit to indicate the first radio button in the group.
+#define RB_CHECKED        0x0004  	// Bit to indicate <link Radio Button> is checked.
+#define RB_GROUP          0x0008  	// Bit to indicate the first <link Radio Button> in the group.
 
 #define RB_HIDE           0x8000  	// Bit to indicate that button must be removed from screen.
 #define RB_DRAW_FOCUS     0x2000  	// Bit to indicate focus must be redrawn.
 #define RB_DRAW_CHECK     0x1000  	// Bit to indicate check mark should be redrawn.
-#define RB_DRAW           0x4000  	// Bit to indicate whole radio button must be redrawn.
+#define RB_DRAW           0x4000  	// Bit to indicate whole <link Radio Button> must be redrawn.
 
 /*****************************************************************************
-* Overview: the structure contains data for the radio button
+* Overview: the structure contains data for the <link Radio Button>
 *****************************************************************************/
 typedef struct {
     OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-    OBJ_HEADER*     pHead;          // Pointer to the first radio button in the group
-    OBJ_HEADER*     pNext;          // Pointer to the next radio button in the group
+    OBJ_HEADER*     pHead;          // Pointer to the first <link Radio Button> in the group
+    OBJ_HEADER*     pNext;          // Pointer to the next <link Radio Button> in the group
 	SHORT     		textHeight;     // Pre-computed text height
 	XCHAR  			*pText;         // Pointer to the text
 } RADIOBUTTON;
@@ -106,12 +106,12 @@ void  RbSetText(RADIOBUTTON *pRb, XCHAR *pText);
 /*********************************************************************
 * Function: void RbSetCheck(RADIOBUTTON *pRb, WORD ID)
 *
-* Overview: This function sets the radio button with the given ID 
+* Overview: This function sets the <link Radio Button> with the given ID 
 *			to its checked state.
 *
 * PreCondition: none
 *
-* Input: pRb - Pointer to the radio button in the group.
+* Input: pRb - Pointer to the <link Radio Button> in the group.
 *		 ID - ID of the object to be checked.
 *
 * Output: none
@@ -128,11 +128,11 @@ void RbSetCheck(RADIOBUTTON *pRb, WORD ID);
 * Function: WORD RbGetCheck(RADIOBUTTON *pRb)
 *
 * Overview: This function returns the ID of the currently 
-*			checked radio button in the group.
+*			checked <link Radio Button> in the group.
 *
 * PreCondition: none
 *
-* Input: pRb - Pointer to the radio button in the group.
+* Input: pRb - Pointer to the <link Radio Button> in the group.
 *
 * Output: Returns the ID of the selected button in the group. 
 *		  It returns -1 if there is no object checked.
@@ -166,7 +166,7 @@ void RbSetCheck(RADIOBUTTON *pRb, WORD ID);
 *					      "RB3",                        // text
 *				          pScheme);                     // scheme used
 *
-*		// draw the radio buttons here
+*		// draw the Radio Buttons here
 *		
 *		ID = RbGetCheck(pRb[2]);              			// can also use pRb[1] or
 *		                                      			// pRb[0] to search the
@@ -204,7 +204,7 @@ WORD RbGetCheck(RADIOBUTTON *pRb);
 *		 right - Right most position of the Object
 *		 bottom - Bottom most position of the object
 *        state - Sets the initial state of the object
-*        pText – The pointer to the text used for the radio button.
+*        pText – The pointer to the text used for the <link Radio Button>.
 *        pScheme - Pointer to the style scheme used.
 *
 * Output: Returns the pointer to the object created
@@ -259,8 +259,8 @@ RADIOBUTTON  *RbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom
 *	<TABLE>
 *    	Translated Message   Input Source  Events         	Description
 *     	##################   ############  ######         	###########
-*		RB_MSG_CHECKED 		 Touch Screen  EVENT_PRESS		If event occurs and the x,y position falls in the area of the radio button while the radio button is not checked.
-*							 Keyboard	   EVENT_KEYSCAN	If event occurs and parameter1 passed matches the object’s ID and parameter 2 passed matches SCAN_CR_PRESSED or SCAN_SPACE_PRESSED while the radio button is not checked.
+*		RB_MSG_CHECKED 		 Touch Screen  EVENT_PRESS		If event occurs and the x,y position falls in the area of the <link Radio Button> while the <link Radio Button> is not checked.
+*							 Keyboard	   EVENT_KEYSCAN	If event occurs and parameter1 passed matches the object’s ID and parameter 2 passed matches SCAN_CR_PRESSED or SCAN_SPACE_PRESSED while the <link Radio Button> is not checked.
 *		OBJ_MSG_INVALID		 Any		   Any				If the message did not affect the object.
 *	</TABLE>
 *
@@ -272,8 +272,8 @@ RADIOBUTTON  *RbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom
 *        		 the user interface.
 *
 * Output: Returns the translated message depending on the received GOL message:
-*		 - RB_MSG_CHECKED – Radio Button is checked
-* 		 - OBJ_MSG_INVALID – Radio Button is not affected
+*		 - RB_MSG_CHECKED – <link Radio Button> is checked
+* 		 - OBJ_MSG_INVALID – <link Radio Button> is not affected
 *
 * Example:
 *	Usage is similar to BtnTranslateMsg() example. 

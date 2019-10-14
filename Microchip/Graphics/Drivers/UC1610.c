@@ -362,7 +362,7 @@ BYTE     pattern;
 }
 
 /*********************************************************************
-* Function: void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
 * PreCondition: none
 *
@@ -370,7 +370,11 @@ BYTE     pattern;
 *        bitmap - image pointer,
 *        stretch - image stretch factor
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 1 when the image is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -379,10 +383,16 @@ BYTE     pattern;
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
+WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
 FLASH_BYTE* flashAddress;
 BYTE colorDepth;
 BYTE colorTemp;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
     // Save current color
     colorTemp = _color;
@@ -431,6 +441,7 @@ BYTE colorTemp;
 
     // Restore current color
     _color = colorTemp;
+    return 1;
 }
 
 #ifdef USE_BITMAP_FLASH

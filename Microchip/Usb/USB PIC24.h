@@ -86,6 +86,7 @@ KO/BC       2-20-2008   Initial Creation
     
 /* Buffer Descriptor Status Register Initialization Parameters */
 
+#if !defined(USB_SUPPORT_DEVICE)
 //The _BSTALL definition is changed from 0x04 to 0x00 to
 // fix a difference in the PIC18 and PIC24 definitions of this
 // bit.  This should be changed back once the definitions are
@@ -125,11 +126,9 @@ typedef union _BD_STAT
     BYTE            Val;
 } BD_STAT;                      //Buffer Descriptor Status Register
 
-
 /********************************************************************
  * Buffer Descriptor Table Mapping
  *******************************************************************/
-
 // BDT Entry Layout
 typedef union __BDT
 {
@@ -150,6 +149,7 @@ typedef union __BDT
     DWORD           Val;
     WORD            v[2];
 } BDT_ENTRY;
+#endif
 
 
 /* Register Abstractions
@@ -195,7 +195,7 @@ typedef union __BDT
 #define USBErrorIFReg (BYTE*)&U1IR
 #define USBErrorIFBitNum 1
 
-#define USBSE0Event U1CONbits.SE0
+//#define USBSE0Event U1CONbits.SE0
 #define USBSuspendControl U1PWRCbits.USUSPEND
 #define USBPacketDisable U1CONbits.PKTDIS
 #define USBResumeControl U1CONbits.RESUME

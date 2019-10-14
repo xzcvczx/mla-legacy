@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        ListBox.h
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -214,8 +214,10 @@ LISTBOX *LbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Function: LISTITEM* LbAddItem(LISTBOX *pLb, LISTITEM *pPrevItem, 
 *								XCHAR *pText, void* pBitmap, WORD status, WORD data)
 *
-* Overview: This function allocates memory for a new item and adds 
-*			it to the list box.
+* Overview: This function allocates memory for the LISTITEM and adds 
+*			it to the list box. The newly created LISTITEM will store
+*			the location of pText, pBitmap and other parameters describing 
+*			the added item.
 *
 * PreCondition: none
 *
@@ -223,8 +225,12 @@ LISTBOX *LbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 *        pPrevItem - Pointer to the item after which a new item must 
 *					 be inserted, if this pointer is NULL, the item 
 *					 will be appended at the end of the items list.
-*        pText -  Pointer to the text that will be inserted.
-*        pBitmap - Pointer to the bitmap for the item.
+*        pText -  Pointer to the text that will be inserted. Text must
+*				  persist in memory for as long as it is referenced 
+*				  by an item in the list box.
+*        pBitmap - Pointer to the bitmap for the item. Bitmap must
+*				  persist in memory for as long as it is referenced  
+*				  by the an item in the list box.
 *        status - This parameter specifies if the item being added
 *				  will be selected or redrawn 
 *				  (LB_STS_SELECTED or LB_STS_REDRAW). Refer to 

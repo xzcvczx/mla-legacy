@@ -95,6 +95,9 @@ Description:
 
  *************************************************************************/
 
+#ifndef USB_HAL_PIC18_H
+#define USB_HAL_PIC18_H
+
 /****************************************************************
     Function:
         void USBPowerModule(void)
@@ -160,9 +163,11 @@ Description:
 
 #if defined(USB_ENABLE_SOF_HANDLER)
     #define USB_SOF_INTERRUPT 0x40
+    //#error
 #else
     #define USB_SOF_INTERRUPT 0x00
 #endif
+
 #if defined(USB_ENABLE_ERROR_HANDLER)
     #define USB_ERROR_INTERRUPT 0x02
 #else
@@ -170,7 +175,7 @@ Description:
 #endif
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
-#define USBEnableInterrupts() {RCONbits.IPEN = 1;UIE = 0x39 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT; IPR2bits.USBIP = 1;PIE2bits.USBIE = 1;INTCONbits.GIEH = 1;}
+#define USBEnableInterrupts() {RCONbits.IPEN = 1;IPR2bits.USBIP = 1;PIE2bits.USBIE = 1;INTCONbits.GIEH = 1;}
 #if defined(USB_INTERRUPT)
     #define USBMaskInterrupts() {PIE2bits.USBIE = 0;}
     #define USBUnmaskInterrupts() {PIE2bits.USBIE = 1;}
@@ -304,6 +309,23 @@ typedef union __BDT
     BYTE v[4];
 } BDT_ENTRY;
 
+//Definitions for the BDT
+#ifndef USB_PING_PONG_MODE
+    #error "No ping pong mode defined."
+#endif
+
+#if (USB_PING_PONG_MODE == USB_PING_PONG__NO_PING_PONG)
+    extern volatile BDT_ENTRY BDT[(USB_MAX_EP_NUMBER + 1) * 2];
+#elif (USB_PING_PONG_MODE == USB_PING_PONG__EP0_OUT_ONLY)
+    extern volatile BDT_ENTRY BDT[((USB_MAX_EP_NUMBER+1) * 2)+1];
+#elif (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG)
+    extern volatile BDT_ENTRY BDT[(USB_MAX_EP_NUMBER + 1) * 4];
+#elif (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0)
+    extern volatile BDT_ENTRY BDT[((USB_MAX_EP_NUMBER + 1) * 4)-2];
+#else
+    #error "No ping pong mode defined."
+#endif
+
 #define USTAT_EP0_PP_MASK   ~0x02
 #define USTAT_EP_MASK       0x7E
 #define USTAT_EP0_OUT       0x00
@@ -322,11 +344,6 @@ typedef union
 #define UEP_STALL 0x0001
 
 #define USB_BDT_ADDRESS 0x400
-#if defined(USB_POLLING)
-    #define USB_VOLATILE
-#else
-    #define USB_VOLATILE volatile
-#endif
 
 typedef union _POINTER
 {
@@ -353,11 +370,6 @@ typedef union _POINTER
     //rom far word* fwRom;
 } POINTER;
 
-#define USB_PING_PONG__NO_PING_PONG         0x00    //0b00
-#define USB_PING_PONG__EP0_OUT_ONLY         0x01    //0b01
-#define USB_PING_PONG__FULL_PING_PONG       0x02    //0b10
-#define USB_PING_PONG__ALL_BUT_EP0          0x03    //0b11
-
     //******** Depricated: v2.2 - will be removed at some point of time ***
     #define _LS         0x00            // Use Low-Speed USB Mode
     #define _FS         0x04            // Use Full-Speed USB Mode
@@ -378,3 +390,13 @@ typedef union _POINTER
 
 #define ConvertToPhysicalAddress(a) a
 #define USBClearUSBInterrupt() PIR2bits.USBIF = 0;
+
+#if !defined(USBDEVICE_C)
+    extern USB_VOLATILE BYTE USBDeviceState;
+    extern USB_VOLATILE BYTE USBActiveConfiguration;
+    extern USB_VOLATILE IN_PIPE inPipes[1];
+    extern USB_VOLATILE OUT_PIPE outPipes[1];
+    extern volatile BDT_ENTRY *pBDTEntryIn[USB_MAX_EP_NUMBER+1];
+#endif
+
+#endif //#ifndef USB_HAL_PIC18_H

@@ -137,7 +137,9 @@ DWORD_VAL	address;			// Current memory address
 
     SetLED(LED_ON, 0x08);		
 
+#if defined (__PIC24FJ256GB110__) || defined (__PIC24FJ256GA110__)
 	SetPPSPorts();
+#endif	
 
     UARTInit();
     FLASHInit();  

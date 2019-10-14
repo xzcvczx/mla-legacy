@@ -54,6 +54,8 @@
 #define PICTURE_XINDENT   ((GetMaxX()-2*PICTURE_WIDTH)/3)
 #define PICTURE_YINDENT   ((CtrlBtnTop()-PICTURE_HEIGHT)/2)
 
+#define WAIT_UNTIL_FINISH(x) while(!x)
+
 /////////////////////////////////////////////////////////////////////////////
 //                     IMAGES USED (the animated image)
 /////////////////////////////////////////////////////////////////////////////
@@ -183,7 +185,7 @@ void CreateAnimation(){
     endPoint = GetMaxY()-35;
     SetColor(RGB565CONVERT(0x4C, 0x8E, 0xFF));
     for (j = 2; j <= endPoint; j+=(height+6)) {
-	    Bar(0, j, GetMaxX(), j+height);
+	    WAIT_UNTIL_FINISH(Bar(0, j, GetMaxX(), j+height));
 	    if (height <= 0)
 	    	height = 0;
 	    else

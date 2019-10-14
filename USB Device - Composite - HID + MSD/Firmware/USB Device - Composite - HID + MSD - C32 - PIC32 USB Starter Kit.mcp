@@ -6,9 +6,9 @@ device=PIC32MX460F512L
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
 dir_bin=
-dir_tmp=./Objects\USB Device - Composite - HID + MSD v2 - C30
+dir_tmp=./Objects\USB Device - Composite - HID + MSD - C32
 dir_sin=
-dir_inc=..\..\..\USB Device - Composite - HID + MSD\Firmware;..\..\USB Device - Composite - HID + MSD\Firmware;..\..\Microchip\Include;..\..\..\Include;..\..\Include;.
+dir_inc=..\..\Microchip\Include;..\..\USB Device - Composite - HID + MSD\Firmware
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]

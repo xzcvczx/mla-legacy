@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        MainDemo.c
  * Dependencies:    MainDemo.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -41,17 +41,28 @@
  *									RTCC demos
  * Paolo Tamayo			01/21/08    Updated for v1.1
  * Sean Justice         02/07/08    PIC32 support 
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
+ * PAT					06/29/09	Added demo that shows buttons with 
+ *									multi-line text. See CreateCheckBoxes() demo.
  *****************************************************************************/
 
 #include "MainDemo.h"
 #include "MainDemoStrings.h"
 
 // Configuration bits
-#ifdef __PIC32MX__
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+_FOSCSEL(FNOSC_PRI);			
+_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF  & POSCMD_XT);  
+_FWDT(FWDTEN_OFF);              
+#elif defined(__PIC32MX__)
 #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
 #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
 #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
+	#if defined (__PIC24FJ256GB110__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+    #endif	
 	#if defined (__PIC24FJ256GA110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
@@ -122,9 +133,11 @@
 #define ID_KEYPAD       100	/* uses 100 to 110 for phone key pad demo */
 
 
-#define ID_ROUNDDIAL    120
-#define ID_METER1	    130
-#define ID_METER2	    131
+#define ID_ROUNDDIAL     120
+#define ID_METER1	     130
+#define ID_METER2	     131
+#define ID_DIGITALMETER1 132
+#define ID_DIGITALMETER2 133
 
 #define ID_BUTTONHR_P   150
 #define ID_BUTTONHR_M   151
@@ -153,10 +166,11 @@
 #define STARTHOUR		10
 #define STARTMINUTE		10
 #define STARTSECOND		1
-#define STARTDAY		15
-#define STARTMONTH		11
-#define STARTYEAR		8
+#define STARTDAY		10
+#define STARTMONTH		7
+#define STARTYEAR		9
 
+#define WAIT_UNTIL_FINISH(x) while(!x)
 /////////////////////////////////////////////////////////////////////////////
 //                            LOCAL PROTOTYPES
 /////////////////////////////////////////////////////////////////////////////
@@ -267,6 +281,7 @@ extern const BITMAP_FLASH mchpIcon;
 extern const FONT_FLASH GOLFontDefault; 	// default GOL font
 extern const FONT_FLASH GOLMediumFont; 		// medium font
 extern const FONT_FLASH GOLSmallFont; 		// small font
+extern const FONT_FLASH monofont;           // equal width font
 
 /////////////////////////////////////////////////////////////////////////////
 //                            COLORS USED
@@ -339,12 +354,13 @@ typedef enum {
 /////////////////////////////////////////////////////////////////////////////
 //                       GLOBAL VARIABLES FOR DEMO
 /////////////////////////////////////////////////////////////////////////////
-SCREEN_STATES  screenState = CREATE_BUTTONS; // current state of main demo state mashine 
+SCREEN_STATES  screenState =     CREATE_BUTTONS; // current state of main demo state mashine 
 
 GOL_SCHEME*    altScheme;					 // alternative style scheme
 GOL_SCHEME*    alt2Scheme;					 // alternative 2 style scheme
 GOL_SCHEME*    alt3Scheme;					 // alternative 3 style scheme
 GOL_SCHEME*    alt4Scheme;					 // alternative 4 style scheme
+GOL_SCHEME*    alt5Scheme;					 // alternative 5 style scheme
 GOL_SCHEME*	   timeScheme;	
 GOL_SCHEME*    meterScheme;					 // meter scheme
 GOL_SCHEME*    navScheme;		 			 // style scheme for the navigation
@@ -364,12 +380,18 @@ PROGRESSBAR*   pProgressBar;                 // pointer to progress bar object f
 
 SLIDER*		   pSlider;						 // pointer to the slider controlling the animation speed 
 
+// DEFINITIONS FOR CUSTOM CONTROL DEMO
+#define CC_ORIGIN_X    ((GetMaxX()-180+1)/2)
+#define CC_ORIGIN_Y    ((40+GetMaxY()-175+1)/2)
+
 // GLOBAL DEFINITIONS AND VARIABLES FOR SLIDER DEMO
+#define SLD_ORIGIN_X    ((GetMaxX()-260+1)/2)
+#define SLD_ORIGIN_Y    ((40+GetMaxY()-180+1)/2)
 #define CUR_BAR_SIZE    3                    // half size of center point for cursor
-#define CUR_BRD_LEFT    67+CUR_BAR_SIZE      // cursor area left border
-#define CUR_BRD_RIGHT   253-CUR_BAR_SIZE     // cursor area right border
-#define CUR_BRD_TOP     52+CUR_BAR_SIZE      // cursor area top border
-#define CUR_BRD_BOTTOM  184-CUR_BAR_SIZE     // cursor area bottom border
+#define CUR_BRD_LEFT    SLD_ORIGIN_X+37+CUR_BAR_SIZE      // cursor area left border
+#define CUR_BRD_RIGHT   SLD_ORIGIN_X+223-CUR_BAR_SIZE     // cursor area right border
+#define CUR_BRD_TOP     SLD_ORIGIN_Y+2+CUR_BAR_SIZE      // cursor area top border
+#define CUR_BRD_BOTTOM  SLD_ORIGIN_Y+134-CUR_BAR_SIZE     // cursor area bottom border
 
 SHORT x;                                     // cursor X position
 SHORT y;                                     // cursor Y position
@@ -429,7 +451,28 @@ GOL_MSG msg;        			// GOL message structure to interact with GOL
 	TRISBbits.TRISB15 = 0;
 /////////////////////////////////////////////////////////////////////////////
 
-#ifdef __PIC32MX__
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+// Configure Oscillator to operate the device at 40Mhz
+// Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+	PLLFBD=38;					// M=40
+	CLKDIVbits.PLLPOST=0;		// N1=2
+	CLKDIVbits.PLLPRE=0;		// N2=2
+	OSCTUN=0;					// Tune FRC oscillator, if FRC is used
+
+// Disable Watch Dog Timer
+	RCONbits.SWDTEN=0;
+
+
+// Clock switching to incorporate PLL
+	__builtin_write_OSCCONH(0x03);		// Initiate Clock Switch to Primary
+													// Oscillator with PLL (NOSC=0b011)
+	__builtin_write_OSCCONL(0x01);		// Start clock switching
+	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
+
+// Wait for PLL to lock
+	while(OSCCONbits.LOCK!=1) {};
+#elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());	
 #endif
@@ -444,15 +487,28 @@ GOL_MSG msg;        			// GOL message structure to interact with GOL
     TickInit();     			// Start tick counter    
     GOLInit();      			// Initialize graphics library and crete default style scheme for GOL
     TouchInit();    			// Initialize touch screen
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
     RTCCInit(); 				// Setup the RTCC
     RTCCProcessEvents();
+#endif
 
-
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+    // If S3 button on Explorer 16 board is pressed calibrate touch screen
+    TRISAbits.TRISA9 = 1; 
+    if(PORTAbits.RA9 == 0)
+	{
+		TRISAbits.TRISA9 = 0; 
+        TouchCalibration();
+        TouchStoreCalibration();
+    }
+    TRISAbits.TRISA9 = 0;
+#else
     // If S3 button on Explorer 16 board is pressed calibrate touch screen
     if(PORTDbits.RD6 == 0){
         TouchCalibration();
         TouchStoreCalibration();
     }
+#endif
 
     // If it's a new board (VERSION word is not programed) calibrate touch screen
 #if (GRAPHICS_PICTAIL_VERSION < 3)
@@ -478,6 +534,7 @@ GOL_MSG msg;        			// GOL message structure to interact with GOL
     alt2Scheme = GOLCreateScheme(); 	// create alternative 2 style scheme
     alt3Scheme = GOLCreateScheme(); 	// create alternative 3 style scheme
     alt4Scheme = GOLCreateScheme(); 	// create alternative 4 style scheme
+    alt5Scheme = GOLCreateScheme(); 	// create alternative 5 style scheme
     timeScheme = GOLCreateScheme();
     meterScheme = GOLCreateScheme(); 	// create meter scheme
     redScheme = GOLCreateScheme();   	// create red style scheme
@@ -508,7 +565,13 @@ GOL_MSG msg;        			// GOL message structure to interact with GOL
     alt4Scheme->Color1 = BRIGHTGREEN;
     alt4Scheme->TextColor0 = BLACK;
     alt4Scheme->TextColor1 = WHITE;
-	alt4Scheme->pFont = (void*)&GOLSmallFont;;
+	alt4Scheme->pFont = (void*)&GOLSmallFont;
+
+    alt5Scheme->Color0 = LIGHTBLUE; 		
+    alt5Scheme->Color1 = BRIGHTRED;
+    alt5Scheme->TextColor0 = BLACK;
+    alt5Scheme->TextColor1 = WHITE;
+    alt5Scheme->pFont=(void*)&monofont;  //monofont is equal width font, required for digitalmeter widget
 
     redScheme->Color0 = RGB565CONVERT(0xCC, 0x00, 0x00); 
     redScheme->Color1 = BRIGHTRED;
@@ -552,8 +615,10 @@ GOL_MSG msg;        			// GOL message structure to interact with GOL
             // Drawing is done here, process messages
             TouchGetMsg(&msg);     // Get message from touch screen
             GOLMsg(&msg);          // Process message
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
             SideButtonsMsg(&msg);  // Get message from side buttons
             GOLMsg(&msg);          // Process message
+#endif
         }
     } 
 
@@ -709,7 +774,7 @@ SLIDER     	*pSld;					// used when updating date and time
 LISTBOX    	*pLb;					// used when updating date and time
 WORD  		i;								
 
-
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
 	// update the time display
 	if ((screenState & 0x0000F300) != 0x0000F300) {		// process only when NOT setting time and date
 		if ((tick-prevTime) > 1000){
@@ -725,7 +790,7 @@ WORD  		i;
 			dateTimeStr[12] = 0x000A; 	// (XCHAR)'\n';
 			dateTimeStr[25] = 0x0000;	// (XCHAR)'\0';
 			
-			if (pObj = GOLFindObject(ID_STATICTEXT1)) {		// get the time display obj pointer
+			if ((pObj = GOLFindObject(ID_STATICTEXT1))) {	// get the time display obj pointer
 				StSetText((STATICTEXT *)pObj, dateTimeStr); // now display the new date & time
 				SetState(pObj, ST_DRAW);					// redraw the time display
 			}
@@ -741,6 +806,7 @@ WORD  		i;
 			}
 		}
 	}
+#endif
 	
     switch(screenState){
         case CREATE_BUTTONS:
@@ -1023,10 +1089,10 @@ WORD  		i;
                 if(arrowPos>60-SY_ARROW) 
                     arrowPos = 0;
 
-                PutImage(70,110-SY_ARROW-arrowPos,(void*)&arrowUp,1); // draw arrows
-                PutImage(70,110+arrowPos,(void*)&arrowDown,1);
-                PutImage(250-SX_ARROW,110-SY_ARROW-arrowPos,(void*)&arrowUp,1);
-                PutImage(250-SX_ARROW,110+arrowPos,(void*)&arrowDown,1);
+                WAIT_UNTIL_FINISH(PutImage(CC_ORIGIN_X+0,CC_ORIGIN_Y+60-SY_ARROW-arrowPos,(void*)&arrowUp,1)); // draw arrows
+                WAIT_UNTIL_FINISH(PutImage(CC_ORIGIN_X+0,CC_ORIGIN_Y+60+arrowPos,(void*)&arrowDown,1));
+                WAIT_UNTIL_FINISH(PutImage(CC_ORIGIN_X+180-SX_ARROW,CC_ORIGIN_Y+60-SY_ARROW-arrowPos,(void*)&arrowUp,1));
+                WAIT_UNTIL_FINISH(PutImage(CC_ORIGIN_X+180-SX_ARROW,CC_ORIGIN_Y+60+arrowPos,(void*)&arrowDown,1));
                 prevTick = tick;
             }
             return 1; 									// redraw objects if needed
@@ -1047,6 +1113,10 @@ WORD  		i;
             return 1; 									// redraw objects if needed
 
         case CREATE_POT:
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+            ADC_POT_TRIS = 1;
+            ADC_POT_PCFG = 0;
+#endif
             CreatePotentiometer();                  	// create window
             screenState = BOX_DRAW_POT; 				// switch to next state
             return 1; 									// draw objects created
@@ -1101,33 +1171,38 @@ WORD  		i;
 
 // Shows intro screen and waits for touch
 void StartScreen(void){
-	
+#define SS_ORIGIN_X    ((GetMaxX()-316+1)/2)
+#define SS_ORIGIN_Y    ((GetMaxY()-140+1)/2)
+
 SHORT counter;
 //XCHAR *text = TouchScreenStr; 		
 static const XCHAR text[] = "Touch screen to continue";
 
 WORD i, j, k;
-WORD m;
 WORD ytemp, xtemp, srRes = 0x0001; 
 
     SetColor(WHITE); 
     ClearDevice();      
-    PutImage(0,0,(void*)&mchpLogo,IMAGE_NORMAL);
-    PutImage(2,60,(void*)&intro,IMAGE_X2);
+    WAIT_UNTIL_FINISH(PutImage(0,0,(void*)&mchpLogo,IMAGE_NORMAL));
+    WAIT_UNTIL_FINISH(PutImage(SS_ORIGIN_X,SS_ORIGIN_Y,(void*)&intro,IMAGE_X2));
 
-    for(counter=0;counter<320-32;counter++){  // move Microchip icon
-        PutImage(counter,205,(void*)&mchpIcon0,IMAGE_NORMAL);
+    for(counter=0;counter<(GetMaxX()+1)-32;counter++){  // move Microchip icon
+        WAIT_UNTIL_FINISH(PutImage(counter,GetMaxY()-34,(void*)&mchpIcon0,IMAGE_NORMAL));
     }
     SetColor(BRIGHTRED);
     SetFont((void*)&FONTDEFAULT);
 
-    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)text,(void*)&FONTDEFAULT))>>1,182);
-    while(!OutText((XCHAR*)text));
+    MoveTo((GetMaxX()-GetTextWidth((XCHAR*)text,(void*)&FONTDEFAULT))>>1,SS_ORIGIN_Y+122);
+    WAIT_UNTIL_FINISH(OutText((XCHAR*)text));
 
     // wait for touch
     while(TouchGetX() == -1); 
     Beep();
 	
+    SetClipRgn(SS_ORIGIN_X,SS_ORIGIN_Y,
+    			SS_ORIGIN_X+(GetImageWidth((void*)&intro)<<1),
+    			SS_ORIGIN_Y+(GetImageHeight((void*)&intro)<<1));
+    SetClip(CLIP_ENABLE);
 	// random fade effect using a Linear Feedback Shift Register (LFSR)
     SetColor(WHITE);
     for (i = 1800; i > 0 ; i--) {
@@ -1139,10 +1214,12 @@ WORD ytemp, xtemp, srRes = 0x0001;
     	// by replicating the white (1x1) bars into 8 areas fading is faster
 		for (j = 0; j < 8; j++) {
     		for (k = 0; k < 8; k++)
-	    		PutPixel(xtemp+(j*40), ytemp+(k*30)); 
+	    		PutPixel(SS_ORIGIN_X+xtemp+(j*40), ytemp+(k*30)); 
 	    }		
 	}    
+	SetClip(CLIP_DISABLE);
 	
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
 	// initialize date and time
 	mRTCCOff();
 	RTCCSetBinHour(STARTHOUR);			// set the hour value 
@@ -1155,6 +1232,7 @@ WORD ytemp, xtemp, srRes = 0x0001;
 
 	mRTCCSet();							// copy the new values to the RTCC registers
 	RTCCProcessEvents();				// update the date and time strings
+#endif
 }
 
 void CreatePage(XCHAR *pText) {
@@ -1185,6 +1263,7 @@ SHORT i;
               RightArrowStr, 			// RIGHT arrow as text
               navScheme);          	   	// use navigation scheme
 
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
 	RTCCProcessEvents();				// update the date and time strings
 	i = 0;						
 	while (i < 12) {
@@ -1204,6 +1283,7 @@ SHORT i;
              ST_CENTER_ALIGN,     		// will be dislayed, has frame and center aligned
              dateTimeStr, 				// text is from time value
              timeScheme);             	// alternate scheme   
+ #endif
                       
 	GOLSetFocus(obj); 					// set focus for the button              
               
@@ -1352,7 +1432,7 @@ SHORT    item, left, top, right, bottom;
 	    left = pLb2->hdr.left; top = pLb2->hdr.top; 				// save the dimensions
 	    right = pLb2->hdr.right; bottom = pLb2->hdr.bottom;
 	    SetColor(pLb2->hdr.pGolScheme->CommonBkColor);				// set the color
-	    Bar(left, top, right, bottom);								// hide the pull down menu
+	    WAIT_UNTIL_FINISH(Bar(left, top, right, bottom));								// hide the pull down menu
 		GOLFree();   												// remove the pull down menu
 	   	GOLSetList(pListSaved);										// set active list back to saved list
 	    GOLRedrawRec(left, top, right, bottom);			
@@ -1364,12 +1444,15 @@ SHORT    item, left, top, right, bottom;
 
 void CreateButtons(){
 
+#define BTN_ORIGIN_X    ((GetMaxX()-258+1)/2)
+#define BTN_ORIGIN_Y    ((40+GetMaxY()-177+1)/2)
+
     GOLFree();   // free memory for the objects in the previous linked list and start new list
 
 	CreatePage(ButtonStr);	// CreatePage("Buttons");
 
     BtnCreate(ID_BUTTON1, 				// button ID 
-              30,50,156,100,           	// dimension
+              BTN_ORIGIN_X+0,BTN_ORIGIN_Y+7,BTN_ORIGIN_X+126,BTN_ORIGIN_Y+57, // dimension
               10,					   	// set radius 
               BTN_DRAW,  			   	// draw a beveled button
               NULL,                    	// no bitmap
@@ -1377,7 +1460,7 @@ void CreateButtons(){
               altScheme);              	// use alternate scheme
 
     BtnCreate(ID_BUTTON2, 				// button ID 
-              30,110,156,160,         	// dimension
+              BTN_ORIGIN_X+0,BTN_ORIGIN_Y+67,BTN_ORIGIN_X+126,BTN_ORIGIN_Y+117,	// dimension
               0,
               BTN_DRAW, 				// will be dislayed after creation 
               (void*)&gradientButton,          // use bitmap
@@ -1385,7 +1468,7 @@ void CreateButtons(){
               altScheme);	            // alternative GOL scheme 
               
     BtnCreate(ID_BUTTON3,             	// button ID 
-              165,50,215,160,          	// dimension
+              BTN_ORIGIN_X+135,BTN_ORIGIN_Y+7,BTN_ORIGIN_X+185,BTN_ORIGIN_Y+117,          	// dimension
               25,					   	// set radius 
               BTN_DRAW|BTN_TOGGLE,   	// draw a vertical capsule button 
               						   	// that has a toggle behavior
@@ -1394,7 +1477,7 @@ void CreateButtons(){
               yellowScheme);           	// use alternate scheme
 
     BtnCreate(ID_BUTTON4,             	// button ID 
-              225,43,285,103,          	// dimension
+              BTN_ORIGIN_X+195,BTN_ORIGIN_Y+0,BTN_ORIGIN_X+255,BTN_ORIGIN_Y+60,          	// dimension
               30,					   	// set radius 
               BTN_DRAW, 			   	// draw a vertical capsule button
               NULL,                    	// no bitmap
@@ -1402,7 +1485,7 @@ void CreateButtons(){
               greenScheme);             // use alternate scheme 
 
     BtnCreate(ID_BUTTON5,             	// button ID 
-              225,107,285,167,         	// dimension
+              BTN_ORIGIN_X+195,BTN_ORIGIN_Y+64,BTN_ORIGIN_X+255,BTN_ORIGIN_Y+124,         	// dimension
               30,					   	// set radius 
               BTN_DRAW|BTN_PRESSED,  	// draw a vertical capsule button
               							// that is initially pressed
@@ -1411,7 +1494,7 @@ void CreateButtons(){
               redScheme);            	// use alternate scheme 	
 
     BtnCreate(ID_BUTTON6, 				// button ID 
-              30,170,156,220,         	// dimension
+              BTN_ORIGIN_X+0,BTN_ORIGIN_Y+127,BTN_ORIGIN_X+126,BTN_ORIGIN_Y+177,         	// dimension
               0,
               BTN_DRAW|BTN_TEXTLEFT 	// will be dislayed after creation with text
               |BTN_TEXTTOP, 			// left top position
@@ -1420,7 +1503,7 @@ void CreateButtons(){
               alt2Scheme);	            // alternative GOL scheme 
 
     BtnCreate(ID_BUTTON7,          		// button ID 
-              162,170,288,220,         	// dimension
+              BTN_ORIGIN_X+132,BTN_ORIGIN_Y+127,BTN_ORIGIN_X+258,BTN_ORIGIN_Y+177,         	// dimension
               0,
               BTN_DRAW|BTN_DISABLED, 	// will be dislayed and disabled after creation
               NULL,                    	// no bitmap
@@ -1502,35 +1585,38 @@ WORD MsgButtons(WORD objMsg, OBJ_HEADER* pObj){
 
 void CreateCheckBoxes(){
 
+#define CB_ORIGIN_X    ((GetMaxX()-115+1)/2)
+#define CB_ORIGIN_Y    ((40+GetMaxY()-175+1)/2)
+
     GOLFree();   // free memory for the objects in the previous linked list and start new list
 
 	CreatePage(CheckBoxStr); 	// CreatePage("Checkboxes");
 
     CbCreate(ID_CHECKBOX1,             	// ID 
-              100,110,265,145,         	// dimension
+              CB_ORIGIN_X+0,CB_ORIGIN_Y+65,CB_ORIGIN_X+165,CB_ORIGIN_Y+100, // dimension
               CB_DRAW,                 	// will be dislayed after creation
               TextLeftStr, 				// "Text Left"
               altScheme);              	// alternative GOL scheme 
 
     CbCreate(ID_CHECKBOX2,             	// ID 
-              100,150,265,185,         	// dimension
+              CB_ORIGIN_X+0,CB_ORIGIN_Y+105,CB_ORIGIN_X+165,CB_ORIGIN_Y+140, // dimension
               CB_DRAW,      			// will be dislayed and checked after creation
               TextBottomStr, 			// "Text Bottom"
               altScheme);              	// alternative GOL scheme 
 
     CbCreate(ID_CHECKBOX3,             	// ID 
-              100,190,250,225,         	// dimension
+              CB_ORIGIN_X+0,CB_ORIGIN_Y+145,CB_ORIGIN_X+150,CB_ORIGIN_Y+180, // dimension
               CB_DRAW|CB_DISABLED,     	// will be dislayed and disabled after creation
               DisabledStr, 				// "Disabled"
               altScheme);              	// alternative GOL scheme 
               
     pGenObj = (OBJ_HEADER*)BtnCreate(
     		  ID_BUTTON1, 				// button ID 
-              100,50,215,100,         	// dimension
+              CB_ORIGIN_X+0,CB_ORIGIN_Y-8,CB_ORIGIN_X+115,CB_ORIGIN_Y+62, // dimension
               10,					   	// set radius 
               BTN_DRAW,  			   	// draw a beveled button
               NULL,                    	// no bitmap
-              HomeStr, 					// "HOME"
+              HomeLinesStr,				// "Home1\nHome2" the string has two lines \n is the new line character
               altScheme);              	// use alternate scheme
 
 }
@@ -1580,63 +1666,66 @@ WORD MsgCheckBoxes(WORD objMsg, OBJ_HEADER* pObj){
 
 void CreateRadioButtons(){
 
+#define RB_ORIGIN_X    ((GetMaxX()-260+1)/2)
+#define RB_ORIGIN_Y    ((40+GetMaxY()-185+1)/2)
+
     GOLFree();   // free memory for the objects in the previous linked list and start new list
 	
 	CreatePage(RadioButtonStr); 	// CreatePage("Radio buttons");
 
 
     GbCreate(ID_GROUPBOX1,             	// ID 
-              30,45,157,230,           	// dimension
+              RB_ORIGIN_X+0,RB_ORIGIN_Y+0,RB_ORIGIN_X+127,RB_ORIGIN_Y+185, // dimension
               GB_DRAW|GB_CENTER_ALIGN,  // will be dislayed after creation
               Group1Str, 				// "Group 1"
               alt2Scheme);              // alternate scheme 
 
     GbCreate(ID_GROUPBOX2,             	// ID 
-              160,45,290,230,           // dimension
+              RB_ORIGIN_X+130,RB_ORIGIN_Y+0,RB_ORIGIN_X+260,RB_ORIGIN_Y+185, // dimension
               GB_DRAW|GB_CENTER_ALIGN,  // will be dislayed after creation
               Group2Str, 				// "Group 2"
               alt2Scheme);              // alternate scheme 
 
     RbCreate(ID_RADIOBUTTON1,    	   	// ID 
-              35,70,155,105,           	// dimension
+              RB_ORIGIN_X+5,RB_ORIGIN_Y+25,RB_ORIGIN_X+125,RB_ORIGIN_Y+60, // dimension
               RB_DRAW|RB_GROUP|RB_CHECKED,	// will be dislayed and checked after creation
                                        	// first button in the group
               Rb1Str, 					// "Rb1"
               altScheme);              	// alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON2,          	// ID 
-              35,110,155,145,         	// dimension
+              RB_ORIGIN_X+5,RB_ORIGIN_Y+65,RB_ORIGIN_X+125,RB_ORIGIN_Y+100, // dimension
               RB_DRAW,      			// will be dislayed 
               Rb2Str, 					// "Rb2"
               altScheme);              	// alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON3,          	// ID 
-              35,150,155,185,          	// dimension
+              RB_ORIGIN_X+5,RB_ORIGIN_Y+105,RB_ORIGIN_X+125,RB_ORIGIN_Y+140, // dimension
               RB_DRAW,                 	// will be dislayed after creation
               Rb3Str, 					// "Rb3"
               altScheme);              	// alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON4,          	// ID 
-              35,190,155,225,         	// dimension
+              RB_ORIGIN_X+5,RB_ORIGIN_Y+145,RB_ORIGIN_X+125,RB_ORIGIN_Y+180, // dimension
               RB_DRAW|RB_DISABLED,     	// will be dislayed and disabled after creation
               DisabledStr, 				// "Disabled"
               altScheme);              	// alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON5,    	   	// ID 
-              165,70,285,105,           // dimension
+              RB_ORIGIN_X+135,RB_ORIGIN_Y+25,RB_ORIGIN_X+255,RB_ORIGIN_Y+60, // dimension
               RB_DRAW|RB_GROUP,        	// will be dislayed and focused after creation
                                        	// first button in the group
               Rb4Str, 					// "Rb4"
               altScheme);              	// alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON6,          	// ID 
-              165,110,285,145,          // dimension
+              RB_ORIGIN_X+135,RB_ORIGIN_Y+65,RB_ORIGIN_X+255,RB_ORIGIN_Y+100,          // dimension
               RB_DRAW|RB_CHECKED,      	// will be dislayed and checked after creation
               Rb5Str, 					// "Rb5"
               altScheme);              	// alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON7,          	// ID 
-              165,150,285,185,          // dimension
+              RB_ORIGIN_X+135,RB_ORIGIN_Y+105,RB_ORIGIN_X+255,RB_ORIGIN_Y+140,          // dimension
               RB_DRAW,                 	// will be dislayed after creation
               Rb6Str, 					// "Rb6"
               altScheme);              	// alternative GOL scheme 
@@ -1666,24 +1755,27 @@ WORD MsgRadioButtons(WORD objMsg, OBJ_HEADER* pObj){
 
 void CreateStaticText(){
 
+#define ST_ORIGIN_X    ((GetMaxX()-260+1)/2)
+#define ST_ORIGIN_Y    ((40+GetMaxY()-185+1)/2)
+
     GOLFree();  // free memory for the objects in the previous linked list and start new list
 
 	CreatePage(StaticTextStr); 	// CreatePage("Static text");
 
     GbCreate(ID_GROUPBOX1,             	// ID 
-              30,45,235,230,           	// dimension
+              ST_ORIGIN_X+0,ST_ORIGIN_Y+0,ST_ORIGIN_X+205,ST_ORIGIN_Y+185, // dimension
               GB_DRAW,                 	// will be dislayed after creation
               GroupBoxStr, 				// "Group Box"
               NULL);                   	// default GOL scheme 
 
     StCreate(ID_STATICTEXT3,           	// ID 
-              35,75,225,220,           	// dimension
+              ST_ORIGIN_X+5,ST_ORIGIN_Y+35,ST_ORIGIN_X+195,ST_ORIGIN_Y+175, // dimension
               ST_DRAW|ST_FRAME,        	// will be dislayed, has frame
               StaticTextLstStr, 		// "Microchip\nGraphics\nLibrary\nStatic Text and\nGroup Box Test.", // multi-line text
               altScheme);				// use alternate scheme scheme 
     
     RbCreate(ID_RADIOBUTTON1,          	// ID 
-              240,70,290,100,           // dimension
+              ST_ORIGIN_X+210,ST_ORIGIN_Y+25,ST_ORIGIN_X+260,ST_ORIGIN_Y+55, // dimension
               RB_DRAW|RB_GROUP|	\
               RB_CHECKED, 				// will be dislayed and checked after creation
                                        	// first button in the group
@@ -1691,13 +1783,13 @@ void CreateStaticText(){
               altScheme);              	// use alternate scheme
 
     RbCreate(ID_RADIOBUTTON2,          // ID 
-              240,110,290,140,         // dimension
+              ST_ORIGIN_X+210,ST_ORIGIN_Y+65,ST_ORIGIN_X+260,ST_ORIGIN_Y+95, // dimension
               RB_DRAW,                 // will be dislayed after creation
               CenterStr, 			   // "Center"
               altScheme);              // use alternate scheme
 
     RbCreate(ID_RADIOBUTTON3,          // ID 
-              240,150,290,180,         // dimension
+              ST_ORIGIN_X+210,ST_ORIGIN_Y+105,ST_ORIGIN_X+260,ST_ORIGIN_Y+135, // dimension
               RB_DRAW,                 // will be dislayed after creation
               RightStr, 			   // "Right"
               altScheme);              // use alternate scheme
@@ -1760,13 +1852,13 @@ void CreateSlider(){
 	CreatePage(SliderStr); 					// CreatePage("Slider");
 
     GbCreate(ID_GROUPBOX1,             		// ID 
-              65,50,255,185,           		// dimension
+              SLD_ORIGIN_X+35,SLD_ORIGIN_Y+0,SLD_ORIGIN_X+225,SLD_ORIGIN_Y+135, // dimension
               GB_DRAW,                 		// will be dislayed after creation
               NULL,                    		// no text
               altScheme);              		// alternative GOL scheme 
 
     SldCreate(ID_SLIDER1,                   // ID
-              30, 190, 290, 220,            // dimension
+              SLD_ORIGIN_X+0,SLD_ORIGIN_Y+140,SLD_ORIGIN_X+260,SLD_ORIGIN_Y+170, // dimension
               SLD_DRAW,                     // will be dislayed after creation
               CUR_BRD_RIGHT-CUR_BRD_LEFT,   // range
               10,                           // page 
@@ -1774,7 +1866,7 @@ void CreateSlider(){
               altScheme);              		// alternative GOL scheme 
 
     SldCreate(ID_SLIDER2,           		// ID
-              30, 50, 60, 185,      		// dimension
+              SLD_ORIGIN_X+0,SLD_ORIGIN_Y+0,SLD_ORIGIN_X+30,SLD_ORIGIN_Y+135, 	// dimension
               SLD_DRAW|SLD_VERTICAL|	
               SLD_DISABLED, 				// vertical, will be dislayed and disabled after creation
               100,                     		// range
@@ -1783,7 +1875,7 @@ void CreateSlider(){
               altScheme);              		// alternative GOL scheme 
 
     SldCreate(ID_SLIDER3,               	// ID
-              260, 50, 290, 185,        	// dimension
+              SLD_ORIGIN_X+230,SLD_ORIGIN_Y+0,SLD_ORIGIN_X+260,SLD_ORIGIN_Y+135,  	// dimension
               SLD_DRAW|SLD_VERTICAL,    	// vertical, will be dislayed after creation
               CUR_BRD_BOTTOM-CUR_BRD_TOP,	// range
               10,                       	// page 
@@ -1798,9 +1890,9 @@ void CreateSlider(){
 // Draw sliders' position cursor
 void DrawSliderCursor(WORD color){
     SetColor(color);
-    Bar(x-CUR_BAR_SIZE,y-CUR_BAR_SIZE,x+CUR_BAR_SIZE,y+CUR_BAR_SIZE);
-    Line(x,CUR_BRD_TOP,x,CUR_BRD_BOTTOM);
-    Line(CUR_BRD_LEFT,y,CUR_BRD_RIGHT,y);
+    WAIT_UNTIL_FINISH(Bar(x-CUR_BAR_SIZE,y-CUR_BAR_SIZE,x+CUR_BAR_SIZE,y+CUR_BAR_SIZE));
+    WAIT_UNTIL_FINISH(Line(x,CUR_BRD_TOP,x,CUR_BRD_BOTTOM));
+    WAIT_UNTIL_FINISH(Line(CUR_BRD_LEFT,y,CUR_BRD_RIGHT,y));
 }
 
 // Process messages for slider screen
@@ -1876,26 +1968,29 @@ SLIDER* pSld;
 // Creates progress bar screen
 void CreateProgressBar(){
 
+#define PB_ORIGIN_X    ((GetMaxX()-240+1)/2)
+#define PB_ORIGIN_Y    ((40+GetMaxY()-130+1)/2)
+
     GOLFree();   // free memory for the objects in the previous linked list and start new list
 
    	CreatePage(ProgressBarStr);				// CreatePage("Progress bar");
 
 	pProgressBar = PbCreate(ID_PROGRESSBAR1,// ID
-              40,85,280,135,          		// dimension
+              PB_ORIGIN_X+0,PB_ORIGIN_Y+0,PB_ORIGIN_X+240,PB_ORIGIN_Y+50, // dimension
               PB_DRAW,                 		// will be dislayed after creation
               25,                      		// position
               50,                      		// range
               NULL);         				// use default scheme
               
     StCreate(ID_STATICTEXT3,           		// ID 
-              70,155,215,215,         		// dimension
+              PB_ORIGIN_X+30,PB_ORIGIN_Y+70,PB_ORIGIN_X+185,PB_ORIGIN_Y+130, // dimension
               ST_DRAW|ST_CENTER_ALIGN,		// display text
               SpeedStr, 				    // text
               altScheme);                   // use alternate scheme
 
     pGenObj = (OBJ_HEADER*)BtnCreate(
     		  ID_BUTTON1, 					// button ID 
-              220,168,260,198,          	// dimension
+              PB_ORIGIN_X+180,PB_ORIGIN_Y+83,PB_ORIGIN_X+220,PB_ORIGIN_Y+113, // dimension
               10,					   		// set radius 
               BTN_DRAW|BTN_TOGGLE,   		// draw button
               NULL,                    		// no bitmap
@@ -1926,34 +2021,27 @@ WORD MsgProgressBar(WORD objMsg, OBJ_HEADER* pObj){
     }
 }
 
-/*
-const char pMyItemList[] = "Applications\n"
-"Home Appliances\n"
-"Home Automation\n"
-"Industrial Controls\n"
-"Medical Devices\n"
-"Automotive\n"
-"and much more...";
-*/
 XCHAR *pMyItemList = ListboxLstStr;
-
 
 // creates list box demo screen
 void CreateListBox(){
 LISTBOX*    pLb;
+
+#define LB_ORIGIN_X    ((GetMaxX()-260+1)/2)
+#define LB_ORIGIN_Y    ((40+GetMaxY()-192+1)/2)
 
     GOLFree();  // free memory for the objects in the previous linked list and start new list
 
 	CreatePage(ListBoxStr); 			// CreatePage("List box");
 
 	pLb = LbCreate(ID_LISTBOX1,        	// ID
-              40,95,250,235,            // dimension
+              LB_ORIGIN_X+10,LB_ORIGIN_Y+52,LB_ORIGIN_X+220,LB_ORIGIN_Y+192, // dimension
               LB_DRAW|LB_FOCUSED,      	// will be dislayed after creation
               pMyItemList,
               altScheme);               // use alternate scheme
 
     SldCreate(ID_SLIDER1,              	// ID
-              250,125,280,203,         	// dimension
+              LB_ORIGIN_X+220,LB_ORIGIN_Y+82,LB_ORIGIN_X+250,LB_ORIGIN_Y+160, // dimension
               SLD_DRAW|SLD_SCROLLBAR|SLD_VERTICAL,   // vertical, will be dislayed after creation
               LbGetCount(pLb),       	// range
               1,                       	// page 
@@ -1961,45 +2049,42 @@ LISTBOX*    pLb;
               altScheme);               // use alternate scheme
 
     BtnCreate(ID_BUTTON1,              	// ID 
-              250,95,280,125,0,        	// dimension (no radius)
+              LB_ORIGIN_X+220,LB_ORIGIN_Y+52,LB_ORIGIN_X+250,LB_ORIGIN_Y+82,0, // dimension (no radius)
               BTN_DRAW,                	// will be dislayed after creation
               NULL,                    	// no bitmap
               UpArrowStr, 				// Up Arrow
               altScheme);               // use alternate scheme
 
     BtnCreate(ID_BUTTON2,              	// ID 
-              250,205,280,235,0,       	// dimension (no radius)
+              LB_ORIGIN_X+220,LB_ORIGIN_Y+162,LB_ORIGIN_X+250,LB_ORIGIN_Y+192,0, // dimension (no radius)
               BTN_DRAW,                	// will be dislayed after creation
               NULL,                    	// no bitmap
-              DownArrowStr, 			// Doqn Arrow
+              DownArrowStr, 			// Down Arrow
               altScheme);               // use alternate scheme
 
     CbCreate(ID_CHECKBOX1,             	// ID 
-              40,63,140,88,           	// dimension
+              LB_ORIGIN_X+10,LB_ORIGIN_Y+20,LB_ORIGIN_X+110,LB_ORIGIN_Y+45, // dimension
               CB_DRAW,                 	// will be dislayed after creation
               SingleStr, 				// "Single"
               altScheme);              	// alternative GOL scheme 
 
     CbCreate(ID_CHECKBOX2,             	// ID 
-              170,63,270,88,          	// dimension
+              LB_ORIGIN_X+140,LB_ORIGIN_Y+20,LB_ORIGIN_X+240,LB_ORIGIN_Y+45, // dimension
               CB_DRAW,                 	// will be dislayed after creation
               AlignCenterStr, 			// "Center"
               altScheme);              	// alternative GOL scheme 
 
     GbCreate(ID_GROUPBOX1,             	// ID 
-              30,43,157,93,           	// dimension
+              LB_ORIGIN_X+0,LB_ORIGIN_Y+0,LB_ORIGIN_X+127,LB_ORIGIN_Y+50, // dimension
               GB_DRAW|GB_CENTER_ALIGN,  // will be dislayed after creation
               SelectionStr, 			// "Selection"
               alt4Scheme);              // alternate scheme 
 
     GbCreate(ID_GROUPBOX2,             	// ID 
-              160,43,290,93,            // dimension
+              LB_ORIGIN_X+130,LB_ORIGIN_Y+0,LB_ORIGIN_X+260,LB_ORIGIN_Y+50, // dimension
               GB_DRAW|GB_CENTER_ALIGN,  // will be dislayed after creation
               AlignmentStr, 			// "Alignment"
               alt4Scheme);              // alternate scheme 
-              
-              
-
 }
 
 // processes messages for list box demo screen
@@ -2108,14 +2193,16 @@ void CreateEditBox(){
 
 	CreatePage(EditBoxStr);	
 
-#define KEYSTARTX 	50
-#define KEYSTARTY 	43
+#define EB_ORIGIN_X    ((GetMaxX()-212+1)/2)
+#define EB_ORIGIN_Y    ((40+GetMaxY()-195+1)/2)
+#define KEYSTARTX 	EB_ORIGIN_X
+#define KEYSTARTY 	EB_ORIGIN_Y
 #define KEYSIZEX  	53
 #define KEYSIZEY  	39
-#define MAXCHARSIZE 20
+#define MAXCHARSIZE 17
 
 	EbCreate(ID_EDITBOX1,              	// ID
-              35,KEYSTARTY+1,GetMaxX()-35,KEYSTARTY+1*KEYSIZEY-GOL_EMBOSS_SIZE,  // dimension
+              KEYSTARTX, KEYSTARTY+1,KEYSTARTX+4*KEYSIZEX,KEYSTARTY+1*KEYSIZEY-GOL_EMBOSS_SIZE,  // dimension
               EB_DRAW|EB_CARET|EB_FOCUSED, // will be dislayed after creation
               NULL,
               MAXCHARSIZE,
@@ -2389,12 +2476,14 @@ static char status = 0;			// status to check if calling, holding or not
             if(objMsg == BTN_MSG_RELEASED){
                 screenState = CREATE_METER; 	// goto meter screen
             }
+            status = 0;
             return 1; // process by default
 
         case ID_BUTTON_BACK:
             if(objMsg == BTN_MSG_RELEASED){
                 screenState = CREATE_LISTBOX; 	// goto list box screen
             }
+            status = 0;
             return 1; // process by default
 
         default:
@@ -2410,6 +2499,8 @@ static char status = 0;			// status to check if calling, holding or not
 /*********************************************************************************/
 //			START OF DATE AND TIME SETTING
 /*********************************************************************************/
+#define DT_ORIGIN_X    ((GetMaxX()-212+1)/2)
+#define DT_ORIGIN_Y    ((40+GetMaxY()-195+1)/2)
 
 #define EB1STARTX		30
 #define EB2STARTX		122
@@ -2960,7 +3051,6 @@ LISTITEM*	pItemSel;
 // Processes messages for date and time screen
 WORD MsgDateTime(WORD objMsg, OBJ_HEADER* pObj) {
 	
-	EDITBOX *pEbObj;
 	char   hour = 0, minute = 0, second = 0;
 	WORD   btnID; 
 	WORD   ebID = 0, i;
@@ -3124,6 +3214,9 @@ void UpdateRTCCDates(LISTBOX* pLb) {
 // Creates meter screen
 void CreateMeter() {
 
+#define MTR_ORIGIN_X    ((GetMaxX()-250+1)/2)
+#define MTR_ORIGIN_Y    (((40+GetMaxY()-180+1)/2)-10)
+
 	METER *pMtr;
 	
     GOLFree();   // free memory for the objects in the previous linked list and start new list
@@ -3131,7 +3224,7 @@ void CreateMeter() {
 	CreatePage(MeterStr);		// CreatePage("Meter");
 
 	pMtr = MtrCreate(ID_METER1, 
-			  30, 50, 150, 180, 	   	// set dimension
+			  MTR_ORIGIN_X+0,MTR_ORIGIN_Y+0,MTR_ORIGIN_X+120,MTR_ORIGIN_Y+130, // set dimension
 			  MTR_DRAW|MTR_RING|MTR_ACCURACY, // draw meter object with ring scale & accuracy set
 			  MINMETER1VALUE,   		// set initial value
 			  MINMETER1VALUE,			// meter minimum value
@@ -3148,7 +3241,7 @@ void CreateMeter() {
 	MtrSetValueFont(pMtr, (void*)&GOLMediumFont);
 
 	pMtr = MtrCreate(ID_METER2, 
-			  160, 50, 280, 180, 	   	// set dimension
+			  MTR_ORIGIN_X+130,MTR_ORIGIN_Y+0,MTR_ORIGIN_X+250,MTR_ORIGIN_Y+130, // set dimension
 			  MTR_DRAW,	   				// draw normal meter object
 			  MINMETER2VALUE,			// set initial value
 			  MINMETER2VALUE, 			// set minimum value
@@ -3163,8 +3256,8 @@ void CreateMeter() {
 	MtrSetValueFont(pMtr, (void*)&GOLMediumFont);
 
     BtnCreate(ID_BUTTON1,         		// button ID 
-              50,190,					// left, top corner	
-              130,230, 		   			// right, bottom corner
+              MTR_ORIGIN_X+20,MTR_ORIGIN_Y+165,  // left, top corner	
+              MTR_ORIGIN_X+100,MTR_ORIGIN_Y+195, // right, bottom corner
               0,					   	// draw rectangular button	
               BTN_DRAW|BTN_TOGGLE,		// will be dislayed after creation
               NULL,					   	// no bitmap	
@@ -3172,13 +3265,27 @@ void CreateMeter() {
               altScheme);          	   	// use alternate scheme
 
     BtnCreate(ID_BUTTON2,         		// button ID 
-              180,190,					// left, top corner	
-              260,230, 		   			// right, bottom corner
+              MTR_ORIGIN_X+150,MTR_ORIGIN_Y+165, // left, top corner	
+              MTR_ORIGIN_X+230,MTR_ORIGIN_Y+195, // right, bottom corner
               0,					   	// draw rectangular button	
               BTN_DRAW|BTN_TOGGLE,		// will be dislayed after creation
               NULL,					   	// no bitmap	
               DecelStr, 				// decelerate
               altScheme);          	   	// use alternate scheme
+
+   DmCreate(ID_DIGITALMETER1,           		 
+              MTR_ORIGIN_X+20,MTR_ORIGIN_Y+140,  // left, top corner	
+              MTR_ORIGIN_X+100,MTR_ORIGIN_Y+160, // right, bottom corner  
+              DM_DRAW | DM_CENTER_ALIGN | DM_FRAME,     
+              1,3,1, 		 
+              alt5Scheme);
+
+   DmCreate(ID_DIGITALMETER2,           		 
+              MTR_ORIGIN_X+150,MTR_ORIGIN_Y+140, // left, top corner	
+              MTR_ORIGIN_X+230,MTR_ORIGIN_Y+160, // right, bottom corner   
+              DM_DRAW | DM_CENTER_ALIGN | DM_FRAME,     
+              1,2,0, 		 
+              alt5Scheme);  
 }
 
 // Processes messages for meter screen
@@ -3216,10 +3323,12 @@ WORD MsgMeter(WORD objMsg, OBJ_HEADER* pObj) {
 // this updates the meters on the screen
 void UpdateMeter() {
 
-	OBJ_HEADER 	*pObj; 
+	OBJ_HEADER 	*pObj, *pDigMtrObj1, *pDigMtrObj2; 
 	METER 		*pMtrObj;
 	WORD		i, value;
 
+    pDigMtrObj1= GOLFindObject(ID_DIGITALMETER1);
+    pDigMtrObj2= GOLFindObject(ID_DIGITALMETER2);
 
 	/* Meter 1 is controlled by ID_BUTTON1
   	   Meter 2 is controlled by ID_BUTTON2
@@ -3245,11 +3354,14 @@ void UpdateMeter() {
        			SetState(pObj,BTN_DRAW); 
 			}
 			if (GetState(pObj, BTN_PRESSED))				// increment meter value when button 
-   				MtrSetVal(pMtrObj, value+2); 				// is pressed
-   			else	
-   				MtrSetVal(pMtrObj, value-2); 				// decrement meter value when button
+   				value += 2;                       			// is pressed
+   			else
+   			    value -= 2;
+			MtrSetVal(pMtrObj, value); 				// decrement meter value when button
+            DmSetValue((DIGITALMETER*)pDigMtrObj1, value);
+            SetState(pDigMtrObj1,DM_DRAW);
    			SetState(pMtrObj,MTR_DRAW_UPDATE); 				// is released
-       		
+
        	} else {
        		pMtrObj = (METER*)GOLFindObject(ID_METER2);		// get meter 2 pointer
 
@@ -3257,10 +3369,14 @@ void UpdateMeter() {
 			if (GetState(pObj,BTN_PRESSED)) { 				// check if ID_BUTTON2 is pressed
 	       		MtrSetVal(pMtrObj, value+1); 				// increment value of meter
 	       		SetState(pMtrObj,MTR_DRAW_UPDATE); 			// redraw meter
+                DmSetValue((DIGITALMETER*)pDigMtrObj2, value+1);
+                SetState(pDigMtrObj2,DM_DRAW);
 			} else {
-				if (value) {								// if ID_BUTTON2 is released
+				if (value > 1) {								// if ID_BUTTON2 is released
 	       			MtrSetVal(pMtrObj, value-1); 			// decrement meter if not yet zero
 	       			SetState(pMtrObj,MTR_DRAW_UPDATE); 		// redraw meter
+                    DmSetValue((DIGITALMETER*)pDigMtrObj2, value-1);
+                    SetState(pDigMtrObj2,DM_DRAW);
 	       		}
 			}
 	
@@ -3269,25 +3385,28 @@ void UpdateMeter() {
 				BtnSetText((BUTTON*)pObj, DecelStr);	    // set text to decelerate
 				SetState(pObj, BTN_DRAW);					// redraw button
 			}
-       	}
+    	}
 	}
 }	
 	
 // Creates dial screen
 void CreateDial() {
 
-	static XCHAR nameLabel[] = {'V',0x0000}; 
+#define DIAL_ORIGIN_X    ((GetMaxX()-247+1)/2)
+#define DIAL_ORIGIN_Y    ((40+GetMaxY()-143+1)/2)
 
     GOLFree();   // free memory for the objects in the previous linked list and start new list
 
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
     TRISA = 0xFF80;		// set IO pins (0:6) to output mode, 
     					// pin 7 is used as side button S5 switch for press and release
 	LATA  = 0x0001;		// light only one LED
+#endif
 
 	CreatePage(DialStr);	// CreatePage("Dial");
 
 	RdiaCreate(ID_ROUNDDIAL,           	// ID
-              93,135,55,				// dimensions
+              DIAL_ORIGIN_X+55,DIAL_ORIGIN_Y+72,55, // dimensions
               RDIA_DRAW, 				// draw after creation
               1,						// resolution
               400,						// initial value
@@ -3295,7 +3414,7 @@ void CreateDial() {
               altScheme);              	// use alternative scheme
               
 	MtrCreate(ID_METER1, 
-			  155, 63, 285, 206, 	   	// set dimension
+			  DIAL_ORIGIN_X+117,DIAL_ORIGIN_Y+0,DIAL_ORIGIN_X+247,DIAL_ORIGIN_Y+143, // set dimension
 			  MTR_DRAW, 			   	// draw object after creation
 			  400,				   		// set initial value
 			  0, 						// set minimum value 
@@ -3330,7 +3449,8 @@ WORD MsgDial(WORD objMsg, OBJ_HEADER* pObj) {
         			return 0;
 
        	    dialVal = (dialVal-1)%70;				// -1 is used to avoid 70 which is also 0 after mod.
-       	          
+ 
+ #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))      	          
         	if (dialVal <= 10)
         		LATA  = 0x0001;						// light LED 0
         	else if (dialVal <= 20)
@@ -3345,21 +3465,26 @@ WORD MsgDial(WORD objMsg, OBJ_HEADER* pObj) {
         		LATA  = 0x0020;						// light LED 5
         	else if (dialVal <= 70)
         		LATA  = 0x0040;						// light LED 6
+#endif
 	
             break; 									// process by default
 
         case ID_BUTTON_NEXT:
             if(objMsg == BTN_MSG_RELEASED){
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))   	         
 		    	LATA  = 0xFF00;						// turn off all LED
 		    	TRISA = 0xFFFF;						// set IO pin to input mode
+#endif
                 screenState = CREATE_PICTURE; 		// goto picture control screen
             }
             break; 									// process by default
 
         case ID_BUTTON_BACK:
             if(objMsg == BTN_MSG_RELEASED){
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))   
 		    	LATA  = 0xFF00;						// turn off all LED
 		    	TRISA = 0xFFFF;						// set IO pin to input mode
+#endif
                 screenState = CREATE_METER; 		// goto meter screen
             }
             break; 									// process by default
@@ -3372,19 +3497,22 @@ WORD MsgDial(WORD objMsg, OBJ_HEADER* pObj) {
 
 void CreatePicture(){
 
+#define PIC_ORIGIN_X    ((GetMaxX()-190+1)/2)
+#define PIC_ORIGIN_Y    ((40+GetMaxY()-170+1)/2)
+
     GOLFree();   // free memory for the objects in the previous linked list and start new list
 
 	CreatePage(PictureStr);	// CreatePage("Picture control");
 
     pPicture = PictCreate(ID_PICTURE1,	// ID 
-              70,50,225,170,          	// dimension
+              PIC_ORIGIN_X+0,PIC_ORIGIN_Y+0,PIC_ORIGIN_X+155,PIC_ORIGIN_Y+120, // dimension
               PICT_DRAW|PICT_FRAME,    	// will be dislayed, has frame
               1,                       	// scale factor is x1
               (void*)&Engine1,               	// bitmap
               altScheme);               // default GOL scheme 
 
     pSlider = SldCreate(ID_SLIDER1,    	// ID
-              230,50,260,170,         	// dimension
+              PIC_ORIGIN_X+160,PIC_ORIGIN_Y+0,PIC_ORIGIN_X+190,PIC_ORIGIN_Y+120,// dimension
               SLD_DRAW|SLD_DISABLED| \
               SLD_VERTICAL, 			// draw with disabled state 
               50,   				   	// range
@@ -3393,13 +3521,13 @@ void CreatePicture(){
               altScheme);              	// alternative GOL scheme 
 
     CbCreate(ID_CHECKBOX1,             	// ID 
-              50,180,150,220,          	// dimension
+              PIC_ORIGIN_X-20,PIC_ORIGIN_Y+130,PIC_ORIGIN_X+80,PIC_ORIGIN_Y+170, // dimension
               CB_DRAW,                 	// will be dislayed after creation
               ScaleStr, 				// "Scale"
               altScheme);              	// alternative GOL scheme 
 
     CbCreate(ID_CHECKBOX2,             	// ID 
-              160,180,290,220,          // dimension
+              PIC_ORIGIN_X+90,PIC_ORIGIN_Y+130,PIC_ORIGIN_X+220,PIC_ORIGIN_Y+170, // dimension
               CB_DRAW,                 	// will be dislayed after creation
               AnimateStr, 				// "Animate"
               altScheme);              	// alternative GOL scheme 
@@ -3457,25 +3585,25 @@ void CreateCustomControl(){
 	CreatePage(CustomStr);	// CreatePage("Custom control");
 
 	CcCreate(ID_CUSTOM1,               	// ID
-              100,50,220,170,          	// dimension
+              CC_ORIGIN_X+30,CC_ORIGIN_Y+0,CC_ORIGIN_X+150,CC_ORIGIN_Y+120, // dimension
               CC_DRAW,                 	// will be dislayed after creation
               alt3Scheme);         		// use alternate 3 scheme
 
     RbCreate(ID_RADIOBUTTON1,    	   	// ID 
-              50,180,150,200,           // dimension
+              CC_ORIGIN_X-20,CC_ORIGIN_Y+130,CC_ORIGIN_X+80,CC_ORIGIN_Y+150, // dimension
               RB_DRAW|RB_GROUP,        	// will be dislayed and focused after creation
                                        	// first button in the group
               HeavyLoadStr, 			// "Heavy Load"
               alt2Scheme);              // alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON2,           // ID 
-              50,205,150,225,          	// dimension
+              CC_ORIGIN_X-20,CC_ORIGIN_Y+155,CC_ORIGIN_X+80,CC_ORIGIN_Y+175, // dimension
               RB_DRAW|RB_CHECKED,      	// will be dislayed and checked after creation
               NormalLoadStr, 			// "Normal Load"
               alt2Scheme);              // alternative GOL scheme 
 
     RbCreate(ID_RADIOBUTTON3,          	// ID 
-              170,180,270,200,          // dimension
+              CC_ORIGIN_X+100,CC_ORIGIN_Y+130,CC_ORIGIN_X+200,CC_ORIGIN_Y+150, // dimension
               RB_DRAW,                 	// will be dislayed after creation
               LightLoadStr, 			// "Light Load"
               alt2Scheme);              // alternative GOL scheme 
@@ -3544,10 +3672,13 @@ CUSTOM      *pCc;
 }
 
 // dimensions for signature box
-#define SIG_PANEL_LEFT   30
-#define SIG_PANEL_RIGHT  290
+#define SIG_ORIGIN_X    ((GetMaxX()-260+1)/2)
+#define SIG_ORIGIN_Y    ((40+GetMaxY()-170+1)/2)
+
+#define SIG_PANEL_LEFT   35
+#define SIG_PANEL_RIGHT  GetMaxX()-35
 #define SIG_PANEL_TOP    50
-#define SIG_PANEL_BOTTOM 220
+#define SIG_PANEL_BOTTOM GetMaxY()-10
 
 // Creates signature screen
 void CreateSignature(){
@@ -3607,11 +3738,11 @@ SHORT x,y;             // current point
                 if((pMsg->uiEvent == EVENT_PRESS) || (prevX < 0) ){
                     PutPixel(x,y); 					// draw pixel
                 }else{
-                    Line(prevX,prevY,x,y); 			// connect with thick line previous and current points
-                    Line(prevX-1,prevY,x-1,y);
-                    Line(prevX+1,prevY,x+1,y);
-                    Line(prevX,prevY-1,x,y-1);
-                    Line(prevX,prevY+1,x,y+1);
+                    WAIT_UNTIL_FINISH(Line(prevX,prevY,x,y)); 			// connect with thick line previous and current points
+                    WAIT_UNTIL_FINISH(Line(prevX-1,prevY,x-1,y));
+                    WAIT_UNTIL_FINISH(Line(prevX+1,prevY,x+1,y));
+                    WAIT_UNTIL_FINISH(Line(prevX,prevY-1,x,y-1));
+                    WAIT_UNTIL_FINISH(Line(prevX,prevY+1,x,y+1));
                 }
 
                 prevX = x; prevY = y;  				// store position
@@ -3642,10 +3773,13 @@ SHORT x,y;             // current point
 }
 
 // dimensions for potentiometer graph area
-#define POT_PANEL_LEFT   30
-#define POT_PANEL_RIGHT  290
-#define POT_PANEL_TOP    50
-#define POT_PANEL_BOTTOM 210
+#define POT_ORIGIN_X    ((GetMaxX()-260+1)/2)
+#define POT_ORIGIN_Y    ((40+GetMaxY()-185+1)/2)
+
+#define POT_PANEL_LEFT   POT_ORIGIN_X
+#define POT_PANEL_RIGHT  POT_ORIGIN_X+260
+#define POT_PANEL_TOP    POT_ORIGIN_Y
+#define POT_PANEL_BOTTOM POT_ORIGIN_Y+160
 
 // Graph area borders
 #define POTGR_LEFT   (POT_PANEL_LEFT+GOL_EMBOSS_SIZE)  
@@ -3691,11 +3825,11 @@ static BYTE state = POTPNL_STATE_SET;
 	    	state = POTPNL_STATE_TEXT;	// change to initial state
 		    SetFont((void*)&GOLMediumFont);           
 			SetColor(BRIGHTBLUE);
-			MoveTo(GetMaxX()-(GetTextWidth(UseR6PotStr ,(void*)&GOLMediumFont)+30),215);            
+			MoveTo((GetMaxX()-GetTextWidth(UseR6PotStr ,(void*)&GOLMediumFont))>>1,POT_ORIGIN_Y+165);            
 	    } 
 	} 
 	if (state == POTPNL_STATE_TEXT) {
-		while(!OutText(UseR6PotStr))		// "Using R6 potentiometer"))
+		WAIT_UNTIL_FINISH(OutText(UseR6PotStr))		// "Using R6 potentiometer"))
 			return 0;	
 	    state = POTPNL_STATE_SET;		// change to initial state
 	    return 1; 						// drawing is done
@@ -3751,10 +3885,10 @@ static SHORT pos;
         // draw grid
         SetColor(LIGHTGRAY);
         for(x=POTGR_LEFT+((POTGR_RIGHT-POTGR_LEFT)>>3); x<POTGR_RIGHT; x+=(POTGR_RIGHT-POTGR_LEFT)>>3)
-            Bar(x,POTGR_TOP,x,POTGR_BOTTOM);
+            WAIT_UNTIL_FINISH(Bar(x,POTGR_TOP,x,POTGR_BOTTOM));
 
         for(y=POTGR_TOP+((POTGR_BOTTOM-POTGR_TOP)>>3); y<POTGR_BOTTOM; y+=(POTGR_BOTTOM-POTGR_TOP)>>3)
-            Bar(POTGR_LEFT,y,POTGR_RIGHT,y);
+            WAIT_UNTIL_FINISH(Bar(POTGR_LEFT,y,POTGR_RIGHT,y));
 
 
         pos-=POT_MOVE_DELTA;
@@ -3812,10 +3946,13 @@ WORD MsgPotentiometer(WORD objMsg, OBJ_HEADER* pObj){
 
 
 // dimensions for ECG graph area
-#define ECG_PANEL_LEFT   29
-#define ECG_PANEL_RIGHT  291
-#define ECG_PANEL_TOP    45
-#define ECG_PANEL_BOTTOM 210
+#define ECG_ORIGIN_X    ((GetMaxX()-262+1)/2)
+#define ECG_ORIGIN_Y    ((40+GetMaxY()-190+1)/2)
+
+#define ECG_PANEL_LEFT   ECG_ORIGIN_X
+#define ECG_PANEL_RIGHT  ECG_ORIGIN_X+262
+#define ECG_PANEL_TOP    ECG_ORIGIN_Y
+#define ECG_PANEL_BOTTOM ECG_ORIGIN_Y+165
 
 // Graph area borders
 #define GR_LEFT   ECG_PANEL_LEFT+GOL_EMBOSS_SIZE  
@@ -3883,9 +4020,7 @@ static SHORT  pos;
 
         case ECG_STATE_VERLINE:
             while(pos<GR_RIGHT){       		// draw vertical grid lines
-                if(IsDeviceBusy())
-                    return 0;          		// drawing is not completed
-                Line(pos,GR_TOP,pos,GR_BOTTOM);
+                if(!Line(pos,GR_TOP,pos,GR_BOTTOM)) return 0;
                 pos+=(GR_RIGHT-GR_LEFT)>>3;
             }
             pos = GR_TOP+((GR_BOTTOM-GR_TOP)>>3);
@@ -3893,9 +4028,7 @@ static SHORT  pos;
 
         case ECG_STATE_HORLINE:
             while(pos<GR_BOTTOM){       	// draw vertical grid lines
-                if(IsDeviceBusy())
-                    return 0;          		// drawing is not completed
-                Line(GR_LEFT,pos,GR_RIGHT,pos);
+                if(!Line(GR_LEFT,pos,GR_RIGHT,pos)) return 0;
                 pos+=(GR_BOTTOM-GR_TOP)>>3;
             }
             SetLineType(SOLID_LINE);
@@ -3903,11 +4036,11 @@ static SHORT  pos;
 		    
 			SetColor(BRIGHTBLUE);
 			
-			MoveTo(GetMaxX()-(GetTextWidth(ScanModeStr ,(void*)&GOLMediumFont)+30),215);            
+			MoveTo((GetMaxX()-GetTextWidth(ScanModeStr ,(void*)&GOLMediumFont))>>1,ECG_ORIGIN_Y+170); 
             state = ECG_STATE_TEXT; 		// change to text display state
 
         case ECG_STATE_TEXT:
-			while(!OutText(ScanModeStr))		// while(!OutText("Scan mode"))
+			WAIT_UNTIL_FINISH(OutText(ScanModeStr))		// WAIT_UNTIL_FINISH(OutText("Scan mode"))
 				return 0;	
 		    state = ECG_STATE_SET;			// change to initial state
 		    return 1; 						// drawing is done
@@ -3991,10 +4124,10 @@ SHORT temp;
         for(x=GR_LEFT+((GR_RIGHT-GR_LEFT)>>3); x<GR_RIGHT; x+=(GR_RIGHT-GR_LEFT)>>3){
             if((x>=GR_LEFT+temp) &&
                (x<=GR_LEFT+ECG_WINDOW_SIZE+temp))
-                Line(x,GR_TOP,x,GR_BOTTOM);
+                WAIT_UNTIL_FINISH(Line(x,GR_TOP,x,GR_BOTTOM));
         }
         for(y=GR_TOP+((GR_BOTTOM-GR_TOP)>>3); y<GR_BOTTOM; y+=(GR_BOTTOM-GR_TOP)>>3)
-            Line(GR_LEFT+temp,y,temp+GR_LEFT+ECG_WINDOW_SIZE,y);
+            WAIT_UNTIL_FINISH(Line(GR_LEFT+temp,y,temp+GR_LEFT+ECG_WINDOW_SIZE,y));
         SetLineType(SOLID_LINE);
 }
 
@@ -4026,7 +4159,7 @@ void ErrorTrap(XCHAR* message){
     ClearDevice();
     SetFont((void*)&FONTDEFAULT);
     SetColor(WHITE);    
-    OutTextXY(0,0,message);
+    WAIT_UNTIL_FINISH(OutTextXY(0,0,message));
     while(1);
 }
 
@@ -4082,8 +4215,11 @@ void  __T4_ISR _T4Interrupt(void)
 /*********************************************************************
  * Section: Tick Delay
  *********************************************************************/
+#if defined(__dsPIC33F__) || defined(__PIC24H__) 
+// for a system clock of 40 MHz
+#define TICK_PERIOD    40000
+#elif defined(__PIC32MX__)
 // for a system clock of 72 MHz
-#ifdef __PIC32MX__
 #define TICK_PERIOD     (72000 / 8)       
 #else
 // for a system clock of 32 MHz

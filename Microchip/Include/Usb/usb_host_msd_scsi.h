@@ -325,7 +325,7 @@ BYTE    USBHostMSDSCSIWriteProtectState( void );
 
 /****************************************************************************
   Function:
-    BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags )
+    BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Description:
     This function is called when a USB Mass Storage device is being
@@ -337,7 +337,7 @@ BYTE    USBHostMSDSCSIWriteProtectState( void );
   Parameters:
     BYTE address    -   Address of the new device
     DWORD flags     -   Initialization flags
-
+    BYTE clientDriverID - ID for this layer.  Not used by the media interface layer.
 
   Return Values:
     TRUE    -   We can support the device.
@@ -347,7 +347,7 @@ BYTE    USBHostMSDSCSIWriteProtectState( void );
     None
   ***************************************************************************/
 
-BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags );
+BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags, BYTE clientDriverID );
 
 
 /****************************************************************************

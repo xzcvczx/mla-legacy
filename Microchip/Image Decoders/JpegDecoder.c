@@ -1003,7 +1003,7 @@ Output:         Error code - '0' means no error
 *******************************************************************************/
 BYTE JPEG_bDecode(IMG_FILE *pfile)
 {
-     WORD whblocks, wvblocks, wHAdd = 0, wVAdd = 0;
+     WORD whblocks, wvblocks;
      WORD wi, wj;
      JPEGDECODER JPEG_JpegDecoder;
 
@@ -1025,30 +1025,27 @@ BYTE JPEG_bDecode(IMG_FILE *pfile)
 
      if(whblocks * 8 < JPEG_JpegDecoder.wWidth) /* Odd sizes */
      {
-         wHAdd = 1;
+         whblocks++;
      }
 
      if(wvblocks * 8 < JPEG_JpegDecoder.wHeight) /* Odd sizes */
      {
-         wVAdd = 1;
+         wvblocks++;
      }
 
      if(JPEG_JpegDecoder.bSubSampleType == JPEG_SAMPLE_1x2)
      {
-         wvblocks >>= 1;
+         wvblocks =  (wvblocks>>1) + (wvblocks&1);
      }
      else if(JPEG_JpegDecoder.bSubSampleType == JPEG_SAMPLE_2x1)
      {
-         whblocks >>= 1;
+         whblocks = (whblocks>>1) + (whblocks&1);
      }
      else if(JPEG_JpegDecoder.bSubSampleType == JPEG_SAMPLE_2x2)
      {
-         whblocks >>= 1;
-         wvblocks >>= 1;
+         wvblocks =  (wvblocks>>1) + (wvblocks&1);
+         whblocks = (whblocks>>1) + (whblocks&1);
      }
-
-     whblocks += wHAdd;
-     wvblocks += wVAdd;
 
      JPEG_vInitDisplay(&JPEG_JpegDecoder);
 

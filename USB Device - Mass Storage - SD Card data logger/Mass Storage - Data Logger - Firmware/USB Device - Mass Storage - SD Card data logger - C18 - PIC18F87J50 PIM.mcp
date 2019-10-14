@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - Mass Storage - SD Card + MDD File System C18
 dir_sin=
-dir_inc=..\..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware;..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware;..\..\Microchip\Include\PIC18 salloc;..\..\..\Include\PIC18 salloc;..\..\Microchip\Include;..\..\..\Include;..;.
+dir_inc=..\..\Microchip\Include;..\..\Microchip\Include\PIC18 salloc;..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware
 dir_lib=C:\MCC18\lib
 dir_lkr=
 [CAT_FILTERS]

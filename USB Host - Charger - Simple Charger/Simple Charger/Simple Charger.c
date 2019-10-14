@@ -58,6 +58,23 @@ KO          ??-???-2008 First release
 // Configuration Bits
 // *****************************************************************************
 // *****************************************************************************
+// Configuration Bit settings
+//      Primary Oscillator:             HS
+//      Internal USB 3.3v Regulator:    Disabled
+//      IOLOCK:                         Set Once
+//      Primary Oscillator Output:      Digital I/O
+//      Clock Switching and Monitor:    Both disabled
+//      Oscillator:                     Primary with PLL
+//      USB 96MHz PLL Prescale:         Divide by 2
+//      Internal/External Switch Over:  Enabled
+//      WDT Postscaler:                 1:32768
+//      WDT Prescaler:                  1:128
+//      WDT Window:                     Non-window Mode
+//      Comm Channel:                   EMUC2/EMUD2
+//      Clip on Emulation Mode:         Reset into Operation Mode
+//      Write Protect:                  Disabled
+//      Code Protect:                   Disabled
+//      JTAG Port Enable:               Disabled
 
 #ifdef __C30__
     #define PLL_96MHZ_OFF   0xFFFF
@@ -81,8 +98,18 @@ KO          ??-???-2008 First release
     //      Code Protect:                   Disabled
     //      JTAG Port Enable:               Disabled
 
-    _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
-    _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
+    #if defined(__PIC24FJ256GB110__)
+        _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
+        _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
+    #elif defined(__PIC24FJ64GB004__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
+    #elif defined(__PIC24FJ256GB106__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    #endif
 
 #elif defined( __PIC32MX__ )
 
@@ -418,6 +445,20 @@ int main (void)
         TRISF   = 0x00;
     #else
         #error Cannot initialize.
+    #endif
+
+   #if defined(__PIC24FJ64GB004__)
+	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+	//This allows the device to power up at a lower initial operating frequency, which can be
+	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+	//power up the PLL.
+    {
+        unsigned int pll_startup_counter = 600;
+        CLKDIVbits.PLLEN = 1;
+        while(pll_startup_counter--);
+    }
     #endif
 
     UART2Init();

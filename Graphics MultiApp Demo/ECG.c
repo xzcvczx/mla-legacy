@@ -13,6 +13,8 @@ ECG_ERASE
 /////////////////////////////////////////////////////////////////////////////
 //                            MACROS
 /////////////////////////////////////////////////////////////////////////////
+#define WAIT_UNTIL_FINISH(x) while(!x)
+
 #define GR_CLR_GRID         		LIGHTGRAY
 #define GR_CLR_BACKGROUND   		BLACK
 #define GR_CLR_POINTS       		BRIGHTGREEN
@@ -144,16 +146,16 @@ SHORT        temp;
 
             ECGCalculation();
             SetColor(GR_CLR_BACKGROUND);
-            Bar(ECG_X_NUM,ECG_Y_TEXTLINE1+1,ECG_X_DIM,CtrlBtnTop()-1);
+            WAIT_UNTIL_FINISH(Bar(ECG_X_NUM,ECG_Y_TEXTLINE1+1,ECG_X_DIM,CtrlBtnTop()-1));
             SetColor(GR_CLR_ARROWS);
             temp = ecgHorX2-ecgHorX1;
             if(temp)
                 temp = 6000/temp;
             SetFont((void*)&GOLFontDefault);
             ECGShortToString(temp, buffer);            
-            OutTextXY(ECG_X_NUM, ECG_Y_TEXTLINE1, buffer);
+            WAIT_UNTIL_FINISH(OutTextXY(ECG_X_NUM, ECG_Y_TEXTLINE1, buffer));
             ECGShortToString((ecgVerY2-ecgVerY1), buffer);
-            OutTextXY(ECG_X_NUM, ECG_Y_TEXTLINE2, buffer);
+            WAIT_UNTIL_FINISH(OutTextXY(ECG_X_NUM, ECG_Y_TEXTLINE2, buffer));
 
             if(label<2){
                 SetClip(CLIP_ENABLE);
@@ -192,11 +194,11 @@ SHORT        temp;
     if((tick-prevHeartTick)>ECG_PULSE_ANIMATION_DELAY){
         switch(heartStates){
             case 1:
-                PutImage(ECG_PANEL_LEFT, ECG_Y_TEXTLINE1+10, (void*)&eheart, 1);
+                WAIT_UNTIL_FINISH(PutImage(ECG_PANEL_LEFT, ECG_Y_TEXTLINE1+10, (void*)&eheart, 1));
                 heartStates++;
                 break;
             default:
-                PutImage(ECG_PANEL_LEFT, ECG_Y_TEXTLINE1+10, (void*)&eheart2, 1);
+                WAIT_UNTIL_FINISH(PutImage(ECG_PANEL_LEFT, ECG_Y_TEXTLINE1+10, (void*)&eheart2, 1));
                 heartStates = 1;
 
         }          
@@ -221,10 +223,10 @@ void CreateECG(){
 
     SetColor(GR_CLR_POINTS);
     SetFont((void*)&GOLFontDefault);
-    OutTextXY(ECG_X_TEXT, ECG_Y_TEXTLINE1, RateStr);
-    OutTextXY(ECG_X_TEXT, ECG_Y_TEXTLINE2, AmplitudeStr);
-    OutTextXY(ECG_X_DIM, ECG_Y_TEXTLINE1, BeatsStr);
-    OutTextXY(ECG_X_DIM, ECG_Y_TEXTLINE2, mVStr);
+    WAIT_UNTIL_FINISH(OutTextXY(ECG_X_TEXT, ECG_Y_TEXTLINE1, RateStr));
+    WAIT_UNTIL_FINISH(OutTextXY(ECG_X_TEXT, ECG_Y_TEXTLINE2, AmplitudeStr));
+    WAIT_UNTIL_FINISH(OutTextXY(ECG_X_DIM, ECG_Y_TEXTLINE1, BeatsStr));
+    WAIT_UNTIL_FINISH(OutTextXY(ECG_X_DIM, ECG_Y_TEXTLINE2, mVStr));
 
     if (potInput == 0)
 	    CreateCtrlButtons(ExitStr, LabelStr, CleanStr, ExtStr);
@@ -306,7 +308,7 @@ static SHORT  pos;
             while(pos<GR_RIGHT){       		// draw vertical grid lines
                 if(IsDeviceBusy())
                     return 0;          		// drawing is not completed
-                Line(pos,GR_TOP,pos,GR_BOTTOM);
+                WAIT_UNTIL_FINISH(Line(pos,GR_TOP,pos,GR_BOTTOM));
                 pos+=(GR_RIGHT-GR_LEFT)>>3;
             }
             pos = GR_TOP+((GR_BOTTOM-GR_TOP)>>3);
@@ -316,7 +318,7 @@ static SHORT  pos;
             while(pos<GR_BOTTOM){       	// draw vertical grid lines
                 if(IsDeviceBusy())
                     return 0;          		// drawing is not completed
-                Line(GR_LEFT,pos,GR_RIGHT,pos);
+                WAIT_UNTIL_FINISH(Line(GR_LEFT,pos,GR_RIGHT,pos));
                 pos+=(GR_BOTTOM-GR_TOP)>>3;
             }
             SetLineType(SOLID_LINE);
@@ -411,10 +413,10 @@ SHORT temp;
         for(x=GR_LEFT+((GR_RIGHT-GR_LEFT)>>3); x<GR_RIGHT; x+=(GR_RIGHT-GR_LEFT)>>3){
             if((x>=GR_LEFT+temp) &&
                (x<=GR_LEFT+ECG_WINDOW_SIZE+temp))
-                Line(x,GR_TOP,x,GR_BOTTOM);
+                WAIT_UNTIL_FINISH(Line(x,GR_TOP,x,GR_BOTTOM));
         }
         for(y=GR_TOP+((GR_BOTTOM-GR_TOP)>>3); y<GR_BOTTOM; y+=(GR_BOTTOM-GR_TOP)>>3)
-            Line(GR_LEFT+temp,y,temp+GR_LEFT+ECG_WINDOW_SIZE,y);
+            WAIT_UNTIL_FINISH(Line(GR_LEFT+temp,y,temp+GR_LEFT+ECG_WINDOW_SIZE,y));
         SetLineType(SOLID_LINE);
 }
 
@@ -499,31 +501,31 @@ WORD temp;
         {
             temp = x1; x1 = x2; x2 = temp;
         }
-        Line(x1, y1, x1+ECG_ARROW_SIZE, y1+ECG_ARROW_SIZE);
-        Line(x1, y1, x1+ECG_ARROW_SIZE, y1-ECG_ARROW_SIZE);
-        Line(x2-ECG_ARROW_SIZE, y2-ECG_ARROW_SIZE, x2, y2);
-        Line(x2-ECG_ARROW_SIZE, y2+ECG_ARROW_SIZE, x2, y2);
-        Line(x1, y1, x2, y2);
+        WAIT_UNTIL_FINISH(Line(x1, y1, x1+ECG_ARROW_SIZE, y1+ECG_ARROW_SIZE));
+        WAIT_UNTIL_FINISH(Line(x1, y1, x1+ECG_ARROW_SIZE, y1-ECG_ARROW_SIZE));
+        WAIT_UNTIL_FINISH(Line(x2-ECG_ARROW_SIZE, y2-ECG_ARROW_SIZE, x2, y2));
+        WAIT_UNTIL_FINISH(Line(x2-ECG_ARROW_SIZE, y2+ECG_ARROW_SIZE, x2, y2));
+        WAIT_UNTIL_FINISH(Line(x1, y1, x2, y2));
         SetFont((void*)&FONTDEFAULT);
         ECGShortToString((x2-x1)*10, buffer);
-        OutTextXY( ((x1+x2-GetTextWidth(buffer,(void*)&FONTDEFAULT))>>1),
+        WAIT_UNTIL_FINISH(OutTextXY( ((x1+x2-GetTextWidth(buffer,(void*)&FONTDEFAULT))>>1),
                  (y1-GetTextHeight((void*)&FONTDEFAULT)-ECG_ARROW_SIZE),
-                  buffer);
+                  buffer));
     }else{
         if(y1 > y2)
         {
             temp = y1; y1 = y2; y2 = temp;
         }
-        Line(x1, y1, x2+ECG_ARROW_SIZE, y1+ECG_ARROW_SIZE);
-        Line(x1, y1, x2-ECG_ARROW_SIZE, y1+ECG_ARROW_SIZE);
-        Line(x1+ECG_ARROW_SIZE, y2-ECG_ARROW_SIZE, x2, y2);
-        Line(x1-ECG_ARROW_SIZE, y2-ECG_ARROW_SIZE, x2, y2);
-        Line(x1, y1, x2, y2);
+        WAIT_UNTIL_FINISH(Line(x1, y1, x2+ECG_ARROW_SIZE, y1+ECG_ARROW_SIZE));
+        WAIT_UNTIL_FINISH(Line(x1, y1, x2-ECG_ARROW_SIZE, y1+ECG_ARROW_SIZE));
+        WAIT_UNTIL_FINISH(Line(x1+ECG_ARROW_SIZE, y2-ECG_ARROW_SIZE, x2, y2));
+        WAIT_UNTIL_FINISH(Line(x1-ECG_ARROW_SIZE, y2-ECG_ARROW_SIZE, x2, y2));
+        WAIT_UNTIL_FINISH(Line(x1, y1, x2, y2));
         SetFont((void*)&FONTDEFAULT);
         ECGShortToString((y2-y1), buffer);
-        OutTextXY( (x1+ECG_ARROW_SIZE),
+        WAIT_UNTIL_FINISH(OutTextXY( (x1+ECG_ARROW_SIZE),
                  ((y1+y2-GetTextHeight((void*)&FONTDEFAULT))>>1),
-                  buffer);
+                  buffer));
     }
 }
 

@@ -289,8 +289,13 @@ typedef struct _COMM_INTERFACE_DETAILS
     USB_CDC_CALL_MGT_FN_DSC         Call_Mgt_Fn_Desc;     // Call Management Function Descriptor
     /* Endpoint Descriptor Details*/
     WORD                            endpointMaxDataSize;  // Max data size for a interface.
-    BYTE                            endpointIN;           // IN endpoint for comm interface. notification element not implemented
+    WORD                            endpointInDataSize;   // Max data size for a interface.
+    WORD                            endpointOutDataSize;  // Max data size for a interface.
     BYTE                            endpointPollInterval; // Polling rate of corresponding interface.
+    BYTE                            endpointType;         // Endpoint type - either Isochronous or Bulk
+    BYTE                            endpointIN;           // IN endpoint for comm interface.
+    BYTE                            endpointOUT;          // IN endpoint for comm interface.
+
 }   COMM_INTERFACE_DETAILS;
 
 
@@ -339,6 +344,7 @@ typedef struct _USB_CDC_DEVICE_INFO
     BYTE                                bytesTransferred;      // Number of bytes transferred to/from the user's data buffer.
     BYTE                                endpointDATA;          // Endpoint to use for the current transfer.
     BYTE                                commRequest;           // Current Communication code
+    BYTE                                clientDriverID;        // Client driver ID for device requests.
     COMM_INTERFACE_DETAILS              commInterface;         // This structure stores communication interface details.
     DATA_INTERFACE_DETAILS              dataInterface;         // This structure stores data interface details.
 } USB_CDC_DEVICE_INFO;
@@ -570,7 +576,7 @@ BOOL    USBHostCDCTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE 
 
 /*******************************************************************************
   Function:
-    BOOL USBHostCDCInitialize( BYTE address, WORD flags )
+    BOOL USBHostCDCInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is the initialization routine for this client driver.
@@ -587,6 +593,7 @@ BOOL    USBHostCDCTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE 
   Parameters:
     BYTE address        - Address of the new device
     DWORD flags          - Initialization flags
+    BYTE clientDriverID - Client driver identification for device requests
 
   Return Values:
     TRUE   - We can support the device.
@@ -595,7 +602,7 @@ BOOL    USBHostCDCTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE 
   Remarks:
     None
 *******************************************************************************/
-BOOL USBHostCDCInitialize( BYTE address, DWORD flags );
+BOOL USBHostCDCInitialize( BYTE address, DWORD flags, BYTE clientDriverID );
 
 /*******************************************************************************
   Function:
@@ -629,7 +636,7 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
 
 /*******************************************************************************
   Function:
-    BOOL USBHostCDCInitAddress( BYTE address, DWORD flags )
+    BOOL USBHostCDCInitAddress( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Precondition:
     The device has been enumerated without any errors.
@@ -647,6 +654,7 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
   Parameters:
     BYTE address    -   Address of the new device
     DWORD flags     -   Initialization flags
+    BYTE clientDriverID - Client driver identification for device requests
 
   Return Values:
     TRUE    -   We can support the device.
@@ -655,6 +663,6 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
   Remarks:
     None
 *******************************************************************************/
-BOOL USBHostCDCInitAddress( BYTE address, DWORD flags );
+BOOL USBHostCDCInitAddress( BYTE address, DWORD flags, BYTE clientDriverID );
 
 #endif

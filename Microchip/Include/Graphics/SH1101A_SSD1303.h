@@ -42,7 +42,9 @@
 #ifndef _SH1101A_SSD1303_OLED_H
 #define _SH1101A_SSD1303_OLED_H
 
-#ifdef __PIC24F__
+#if defined(__PIC24H__)
+#include "p24Hxxxx.h"
+#elif defined(__PIC24F__)
 #include <p24Fxxxx.h>
 #else
 #error CONTROLLER IS NOT SUPPORTED
@@ -76,6 +78,10 @@
 
 // Define this to implement PutImage function in the driver.
 //#define USE_DRV_PUTIMAGE
+
+#ifdef USE_16BIT_PMP
+#error  This driver doesn't support 16-bit PMP (remove USE_16BIT_PMP option from GraphicsConfig.h)
+#endif
 
 #ifndef DISP_HOR_RESOLUTION
 #error  DISP_HOR_RESOLUTION must be defined in GraphicsConfig.h
@@ -184,7 +190,7 @@ extern SHORT _clipBottom;
 * Side Effects: none
 *
 ********************************************************************/
-#ifdef __PIC24F__
+#if defined(__PIC24F__) || defined(__PIC24H__)
 #define PMPWaitBusy()  	while(PMMODEbits.BUSY);#else
 #error CONTROLLER IS NOT SUPPORTED
 #endif

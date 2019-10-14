@@ -54,6 +54,7 @@ byte byteTemp;
 byte trf_state;
 
 word big_counter;
+word led_count;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus(void);
@@ -332,7 +333,7 @@ void BootService(void)
  *****************************************************************************/
 void BlinkUSBStatus(void)
 {
-    static word led_count=0;
+    //static word led_count=0;  //declared globablly instead, to save code space
     
     if(led_count == 0)led_count = 20000U;
     led_count--;
@@ -350,41 +351,41 @@ void BlinkUSBStatus(void)
             mLED_2 = mLED_1;        // Both blink at the same time
         }//end if
     }
-    else
+    else    
     {
-        if(usb_device_state == DETACHED_STATE)
-        {
-            mLED_Both_Off();
-        }
-        else if(usb_device_state == ATTACHED_STATE)
-        {
-            mLED_Both_On();
-        }
-        else if(usb_device_state == POWERED_STATE)
-        {
-            mLED_Only_1_On();
-        }
-        else if(usb_device_state == DEFAULT_STATE)
-        {
-            mLED_Only_2_On();
-        }
-        else if(usb_device_state == ADDRESS_STATE)
-        {
-            if(led_count == 0)
-            {
-                mLED_1_Toggle();
-                mLED_2_Off();
-            }//end if
-        }
-        else if(usb_device_state == CONFIGURED_STATE)
-        {
-            if(led_count==0)
-            {
-                mLED_1_Toggle();
-                mLED_2 = !mLED_1;       // Alternate blink                
-            }//end if
-        }//end if(...)
-    }//end if(UCONbits.SUSPND...)
+	    switch(usb_device_state)
+    	{
+	    	case DETACHED_STATE:
+	    		mLED_Both_Off();
+	    		break;
+	    	case ATTACHED_STATE:
+	    		mLED_Both_On();
+	    		break;
+	    	case ADDRESS_STATE:
+	            if(led_count == 0)
+	            {
+	                mLED_1_Toggle();
+	                mLED_2_Off();
+	            }//end if
+	            break;
+	        case POWERED_STATE:
+	        	mLED_Only_1_On();
+	        	break;
+	        case DEFAULT_STATE:
+	        	mLED_Only_2_On();
+	        	break;
+	        case CONFIGURED_STATE:
+	            if(led_count==0)
+	            {
+	                mLED_1_Toggle();
+	                mLED_2 = !mLED_1;       // Alternate blink                
+	            }//end if
+	            break;
+	        default:		//For POWERED_STATE and DEFAULT_STATE
+	        	mLED_Both_On();
+	        	break;
+	    }    	
+    }//end else of if(UCONbits.SUSPND...)
 
 }//end BlinkUSBStatus
 /** EOF boot.c ***************************************************************/

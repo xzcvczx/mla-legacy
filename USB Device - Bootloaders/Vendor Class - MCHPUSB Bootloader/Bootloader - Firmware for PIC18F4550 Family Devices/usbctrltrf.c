@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                Microchip USB C18 Firmware Version 1.2
+ *                Microchip USB C18 Firmware Version 1.2+.MCHPBootload.Unique
  *
  *********************************************************************
  * FileName:        usbctrltrf.c
@@ -33,6 +33,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Rawin Rojvanit       11/19/04    Original.
  * Rawin Rojvanit       05/14/07    Bug fixes.
+ * Fritz Schlunder		05/07/09	Bug fix.
+ * Fritz Schlunder		07/23/09	Bug fix.
  ********************************************************************/
  
 /******************************************************************************
@@ -105,10 +107,33 @@ void USBCtrlEPService(void)
 {   
     if(USTAT == EP00_OUT)
     {
-        if(ep0Bo.Stat.PID == SETUP_TOKEN)           // EP0 SETUP
+		//If the current EP0 OUT buffer has a SETUP packet
+        if(ep0Bo.Stat.PID == SETUP_TOKEN)
+        {
+	        ep0Bi.Stat.UOWN = 0;	//Clear the UOWN bit for EP0 IN, in case it was set (ex: due to a stall)
+	        
+	        //Check if the SETUP transaction data went into the CtrlTrfData buffer.
+	        //If so, need to copy it to the SetupPkt buffer so that it can be 
+	        //processed correctly by USBCtrlTrfSetupHandler().
+	        if(ep0Bo.ADR == (byte*)(&CtrlTrfData))	
+	        {
+		        unsigned char setup_cnt;
+		
+		        ep0Bo.ADR = (byte*)(&SetupPkt);
+		        for(setup_cnt = 0; setup_cnt < sizeof(CTRL_TRF_SETUP); setup_cnt++)
+		        {
+		            *(((byte*)&SetupPkt)+setup_cnt) = *(((byte*)&CtrlTrfData)+setup_cnt);
+		        }//end for
+		    } 
+	        
+			//Handle the control transfer (parse the 8-byte SETUP command and figure out what to do)
             USBCtrlTrfSetupHandler();
-        else                                        // EP0 OUT
+        }
+        else
+        {
+			//Handle the DATA transfer
             USBCtrlTrfOutHandler();
+        }
     }
     else if(USTAT == EP00_IN)                       // EP0 IN
         USBCtrlTrfInHandler();
@@ -203,21 +228,26 @@ void USBCtrlTrfOutHandler(void)
 {
     if(ctrl_trf_state == CTRL_TRF_RX)
     {
-        USBCtrlTrfRxService();
-        
-        /*
-         * Don't have to worry about overwriting _KEEP bit
-         * because if _KEEP was set, TRNIF would not have been
-         * generated in the first place.
-         */
+		//USBCtrlTrfRxService();
+	    //Don't really need a USBCtrlTrfRxService() handler in this bootloader firmware. 
+		//The PC application doesn't use control transfers for sending data to the device.
+	
+		ep0Bo.ADR = (byte*)(&CtrlTrfData);
+		ep0Bo.Cnt = EP0_BUFF_SIZE;
         if(ep0Bo.Stat.DTS == 0)
             ep0Bo.Stat._byte = _USIE|_DAT1|_DTSEN;
         else
             ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN;
     }
-    else    // CTRL_TRF_TX
-        USBPrepareForNextSetupTrf();
-    
+    else //In this case the last OUT transaction must have been a status stage of a CTRL_TRF_TX
+    {
+	    //Prepare EP0 OUT for the next SETUP transaction.
+		USBPrepareForNextSetupTrf();
+        ep0Bo.Cnt = EP0_BUFF_SIZE;
+        ep0Bo.ADR = (byte*)(&SetupPkt);
+        ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;			
+    }
+  
 }//end USBCtrlTrfOutHandler
 
 /******************************************************************************
@@ -323,48 +353,6 @@ void USBCtrlTrfTxService(void)
     
 }//end USBCtrlTrfTxService
 
-/******************************************************************************
- * Function:        void USBCtrlTrfRxService(void)
- *
- * PreCondition:    pDst and wCount are setup properly.
- *                  pSrc is always &CtrlTrfData
- *                  usb_stat.ctrl_trf_mem is always _RAM.
- *                  wCount should be set to 0 at the start of each control
- *                  transfer.
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        *** This routine is only partially complete. Check for
- *                  new version of the firmware.
- *
- * Note:            None
- *****************************************************************************/
-void USBCtrlTrfRxService(void)
-{
-    byte byte_to_read;
-
-    byte_to_read = ep0Bo.Cnt;
-    
-    /*
-     * Accumulate total number of bytes read
-     */
-    wCount._word = wCount._word + byte_to_read;
-    
-    pSrc.bRam = (byte*)&CtrlTrfData;
-
-    while(byte_to_read)
-    {
-        *pDst.bRam = *pSrc.bRam;
-        pDst.bRam++;
-        pSrc.bRam++;
-        byte_to_read--;
-    }//end while(byte_to_read)    
-    
-}//end USBCtrlTrfRxService
 
 /******************************************************************************
  * Function:        void USBCtrlEPServiceComplete(void)
@@ -512,22 +500,22 @@ any EP0 endpoints.
 void USBPrepareForNextSetupTrf(void)
 {
     ctrl_trf_state = WAIT_SETUP;            // See usbctrltrf.h
-    ep0Bo.Cnt = EP0_BUFF_SIZE;              // Defined in usbcfg.h
-    ep0Bo.ADR = (byte*)&SetupPkt;
-
-/********************************************************************
-Bug Fix: May 14, 2007 (#F1)
-*********************************************************************
-In the original firmware, if an OUT token is sent by the host
-before a SETUP token is sent, the firmware would respond with an ACK.
-This is not a correct response, the firmware should have sent a STALL.
-This is a minor non-compliance since a compliant host should not
-send an OUT before sending a SETUP token. The fix allows a SETUP
-transaction to be accepted while stalling OUT transactions.
-********************************************************************/
-    //ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN;        // Removed
-    ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;  // Added #F1
-
+//    ep0Bo.Cnt = EP0_BUFF_SIZE;              // Defined in usbcfg.h
+//    ep0Bo.ADR = (byte*)&SetupPkt;
+//
+///********************************************************************
+//Bug Fix: May 14, 2007 (#F1)
+//*********************************************************************
+//In the original firmware, if an OUT token is sent by the host
+//before a SETUP token is sent, the firmware would respond with an ACK.
+//This is not a correct response, the firmware should have sent a STALL.
+//This is a minor non-compliance since a compliant host should not
+//send an OUT before sending a SETUP token. The fix allows a SETUP
+//transaction to be accepted while stalling OUT transactions.
+//********************************************************************/
+//    //ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN;        // Removed
+//    ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;  // Added #F1
+//
 /********************************************************************
 Bug Fix: May 14, 2007 (#F3)
 *********************************************************************

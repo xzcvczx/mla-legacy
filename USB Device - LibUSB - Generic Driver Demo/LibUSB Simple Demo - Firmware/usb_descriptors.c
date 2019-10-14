@@ -176,7 +176,7 @@ ROM USB_DEVICE_DESCRIPTOR device_dsc=
     0x00,                   // Protocol code
     USB_EP0_BUFF_SIZE,          // Max packet size for EP0, see usb_config.h
     0x04D8,                 // Vendor ID: 0x04D8 is Microchip's Vendor ID
-    0x0204,                 // Product ID: 0x0053
+    0x0204,                 // Product ID: 0x0204
     0x0000,                 // Device release number in BCD format
     0x01,                   // Manufacturer string index
     0x02,                   // Product string index
@@ -202,9 +202,9 @@ ROM BYTE configDescriptor1[]={
     0,                      // Interface Number
     0,                      // Alternate Setting Number
     2,                      // Number of endpoints in this intf
-    0x00,                   // Class code
-    0x00,                   // Subclass code
-    0x00,                   // Protocol code
+    0xFF,                   // Class code
+    0xFF,                   // Subclass code
+    0xFF,                   // Protocol code
     0,                      // Interface string index
     
     /* Endpoint Descriptor */

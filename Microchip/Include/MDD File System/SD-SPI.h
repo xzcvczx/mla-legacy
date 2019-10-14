@@ -110,6 +110,8 @@
 #define     cmdGO_IDLE_STATE        0
 // Description: This macro defines the command code to initialize the SD card
 #define     cmdSEND_OP_COND         1        
+// Description: This macro defined the command code to check for sector addressing
+#define     cmdSEND_IF_COND         8
 // Description: This macro defines the command code to get the Card Specific Data
 #define     cmdSEND_CSD             9
 // Description: This macro defines the command code to get the Card Information
@@ -148,7 +150,8 @@ typedef enum
     R1,     // R1 type response
     R1b,    // R1b type response
     R2,     // R2 type response
-    R3      // R3 type response 
+    R3,     // R3 type response 
+    R7      // R7 type response 
 }RESP;
 
 // Summary: SD card command data structure
@@ -254,6 +257,33 @@ typedef union
     };
 } RESPONSE_2;
 
+// Summary: The format of an R1 type response
+// Description: This union represents different ways to access an SD card R1 type response packet.
+typedef union
+{
+    struct
+    {
+        BYTE _byte;                         // Byte-wise access
+        DWORD _returnVal;
+    } bytewise;
+    // This structure allows bitwise access of the response
+    struct
+    {
+        struct
+        {
+            unsigned IN_IDLE_STATE:1;       // Card is in idle state
+            unsigned ERASE_RESET:1;         // Erase reset flag
+            unsigned ILLEGAL_CMD:1;         // Illegal command flag
+            unsigned CRC_ERR:1;             // CRC error flag
+            unsigned ERASE_SEQ_ERR:1;       // Erase sequence error flag
+            unsigned ADDRESS_ERR:1;         // Address error flag
+            unsigned PARAM_ERR:1;           // Parameter flag   
+            unsigned B7:1;                  // Unused bit 7
+        }bits;
+        DWORD _returnVal;
+    } bitwise;
+} RESPONSE_7;
+
 // Summary: A union of responses from an SD card
 // Description: The MMC_RESPONSE union represents any of the possible responses that an SD card can return after
 //              being issued a command.
@@ -261,6 +291,7 @@ typedef union
 {
     RESPONSE_1  r1;  
     RESPONSE_2  r2;
+    RESPONSE_7  r7;
 }MMC_RESPONSE;
 
 
@@ -386,6 +417,7 @@ typedef enum
 {
     GO_IDLE_STATE,
     SEND_OP_COND,
+    SEND_IF_COND,
     SEND_CSD,
     SEND_CID,
     STOP_TRANSMISSION,
@@ -403,6 +435,9 @@ typedef enum
     CRC_ON_OFF
 }sdmmc_cmd;
 
+
+#define SD_MODE_NORMAL  0
+#define SD_MODE_HC      1
 
 
 /***************************************************************************/

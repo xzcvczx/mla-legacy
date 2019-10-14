@@ -85,6 +85,17 @@
 	
 #endif
 
+/*********************************************************************
+* RTCC DEFAULT INITIALIZATION
+*********************************************************************/
+#define RTCC_DEFAULT_DAY        4       	// 4
+#define RTCC_DEFAULT_MONTH      7       	// July
+#define RTCC_DEFAULT_YEAR       9       	// 2009
+#define RTCC_DEFAULT_WEEKDAY    06       	// Saturday
+#define RTCC_DEFAULT_HOUR       10        	// 10:10:01
+#define RTCC_DEFAULT_MINUTE     10
+#define RTCC_DEFAULT_SECOND     01
+
 
 /*********************************************************************
 * SELECT THE HARDPROFILE FOR THE APPROPRIATE MICRO
@@ -106,6 +117,5 @@
             #include "HardwareProfile - GMAP PIC24FJ128GA010 PIM.h"
         #endif
     #endif
-
 
 #endif // __HARDWARE_PROFILE_H

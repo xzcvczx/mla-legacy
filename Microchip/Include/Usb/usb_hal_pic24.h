@@ -140,7 +140,7 @@ Description:
 #define USBErrorIFReg (BYTE*)&U1IR
 #define USBErrorIFBitNum 1
 
-#define USBSE0Event 0// U1IRbits.URSTIF//  U1CONbits.SE0
+#define USBSE0Event U1CONbits.SE0
 #define USBSuspendControl U1PWRCbits.USUSPEND
 #define USBPacketDisable U1CONbits.PKTDIS
 #define USBResumeControl U1CONbits.RESUME
@@ -235,7 +235,6 @@ typedef union
 } _UEP;
 
 #define UEP_STALL 0x0002
-#define USB_VOLATILE
 
 typedef union _POINTER
 {
@@ -339,7 +338,7 @@ typedef union _POINTER
 #endif
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
-#define USBEnableInterrupts() {U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;IEC5bits.USB1IE=1;}
+#define USBEnableInterrupts() {IEC5bits.USB1IE=1;}
 #define ENDPOINT_MASK 0b11110000
 
 #endif

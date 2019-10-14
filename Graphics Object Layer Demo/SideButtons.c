@@ -6,7 +6,7 @@
  *****************************************************************************
  * FileName:        SideButtons.c
  * Dependencies:    MainDemo.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -132,5 +132,4 @@ OBJ_HEADER* obj;
         S4 = state;
         return;
     }
-
 }

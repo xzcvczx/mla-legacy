@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Meter.c
  * Dependencies:    Meter.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 Version 3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -189,12 +189,13 @@ void MtrCalcDimensions(METER *pMtr)
 
 #elif (METER_TYPE == MTR_QUARTER_TYPE)
 	// choose the radius
-	if ((right-left-tempWidth) > (bottom-top-(GetTextHeight(pMtr->pTitleFont)+GetTextHeight(pScheme->pFont)))-(GOL_EMBOSS_SIZE<<1)) {
-		pMtr->radius = bottom-top-(GetTextHeight(pMtr->pTitleFont)+GetTextHeight(pScheme->pFont)+(GOL_EMBOSS_SIZE<<1));
+	if ((right-left-tempWidth) > (bottom-top-(GetTextHeight(pMtr->pTitleFont)+GetTextHeight(pMtr->hdr.pGolScheme->pFont)))-(GOL_EMBOSS_SIZE<<1)) {
+		pMtr->radius = bottom-top-(GetTextHeight(pMtr->pTitleFont)+GetTextHeight(pMtr->hdr.pGolScheme->pFont)+(GOL_EMBOSS_SIZE<<1));
 		
 	} else {
-		pMtr->radius = right-left-(GetTextWidth(tempChar,pScheme->pFont)*(SCALECHARCOUNT+1))-GOL_EMBOSS_SIZE;
-	}
+		pMtr->radius = right-left-(GetTextWidth(tempChar,pMtr->hdr.pGolScheme->pFont)*(SCALECHARCOUNT+1))-GOL_EMBOSS_SIZE;
+	}	
+	
 	pMtr->radius -= (((pMtr->radius)>>2) + GOL_EMBOSS_SIZE); 
 	
 	// center the meter on the given dimensions
@@ -310,7 +311,7 @@ typedef enum {
 
 			if (GetState(pMtr,MTR_HIDE)) {  				      	// Hide the meter (remove from screen)
 		    	SetColor(pMtr->hdr.pGolScheme->CommonBkColor);
-		       	Bar(pMtr->hdr.left, pMtr->hdr.top,pMtr->hdr.right, pMtr->hdr.bottom);
+		       	if(!Bar(pMtr->hdr.left, pMtr->hdr.top,pMtr->hdr.right, pMtr->hdr.bottom)) return 0;
 			    return 1;
 			}
 	
@@ -581,7 +582,7 @@ mtr_needle_draw_st:
 				// to update the needle, redraw the old position with background color
 				SetColor(pMtr->hdr.pGolScheme->Color0);
 				SetLineThickness(THICK_LINE);
-				Line(pMtr->xCenter, pMtr->yCenter, pMtr->xPos, pMtr->yPos);
+				if(!Line(pMtr->xCenter, pMtr->yCenter, pMtr->xPos, pMtr->yPos)) return 0;
 			}
 
 			state = NEEDLE_DRAW;
@@ -662,7 +663,7 @@ mtr_needle_draw_st:
 			// now draw the needle with the new position	
 			SetColor(BRIGHTRED);
 			SetLineThickness(THICK_LINE);
-			Line(pMtr->xCenter, pMtr->yCenter, pMtr->xPos, pMtr->yPos);	
+			if(!Line(pMtr->xCenter, pMtr->yCenter, pMtr->xPos, pMtr->yPos)) return 0;
 			SetLineThickness(NORMAL_LINE);	
 			#ifdef METER_DISPLAY_VALUES_ENABLE
 				state = VALUE_ERASE;
@@ -691,24 +692,27 @@ mtr_needle_draw_st:
 		
 			#if (METER_TYPE == MTR_WHOLE_TYPE) 
 		
-				Bar(    pMtr->xCenter-(temp>>1),
+				if(!Bar(    pMtr->xCenter-(temp>>1),
 		 				pMtr->yCenter+pMtr->radius,
 				    	pMtr->xCenter+(temp>>1),
-		 				pMtr->yCenter+pMtr->radius+GetTextHeight(pMtr->pValueFont));
+		 				pMtr->yCenter+pMtr->radius+GetTextHeight(pMtr->pValueFont)))
+		 				return 0;
 			 		
 			#elif (METER_TYPE == MTR_HALF_TYPE) 
 		
-				Bar(    pMtr->xCenter-(temp>>1),
+				if(!Bar(    pMtr->xCenter-(temp>>1),
 			 			pMtr->yCenter-GetTextHeight(pMtr->pValueFont),
 					    pMtr->xCenter+(temp>>1),
-					    pMtr->yCenter);
+					    pMtr->yCenter))
+					    return 0;
 
 			#elif (METER_TYPE == MTR_QUARTER_TYPE) 
 				
-				Bar(	pMtr->xCenter-1, 
+				if(!Bar(	pMtr->xCenter-1, 
 						pMtr->yCenter-GetTextHeight(pMtr->pValueFont),
 						pMtr->xCenter+temp,
-						pMtr->yCenter+1);
+						pMtr->yCenter+1))
+						return 0;
 											    		
 			#endif
 			state = VALUE_DRAW;
@@ -783,7 +787,3 @@ mtr_needle_draw_st:
 }
 
 #endif // USE_METER
-
-
-
-

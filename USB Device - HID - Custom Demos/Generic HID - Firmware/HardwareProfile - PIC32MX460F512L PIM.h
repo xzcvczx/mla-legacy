@@ -78,6 +78,7 @@
     //  final application design.
     #define DEMO_BOARD PIC32MX460F512L_PIM
     #define EXPLORER_16
+    #define CLOCK_FREQ 32000000
 
     /** LED ************************************************************/
     #define mInitAllLEDs()      LATA &= 0xFFC3; TRISA &= 0xFFC3;

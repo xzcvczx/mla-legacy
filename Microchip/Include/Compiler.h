@@ -55,7 +55,7 @@
 // Include proper device header file
 #if defined(__18CXX) || defined(HI_TECH_C)	
 	// All PIC18 processors
-	#if defined(HI_TECH_C)	// HI TECH PICC-18 compiler
+	#if defined(HI_TECH_C) && defined(__PICC18__)	// HI TECH PICC-18 compiler
 		#define __18CXX
 		#include <htc.h>
 	#else					// Microchip C18 compiler
@@ -98,11 +98,15 @@
 #elif defined(__18CXX)
 	#define PTR_BASE		WORD
 	#define ROM_PTR_BASE	unsigned short long
+	#if defined(HI_TECH_C)
+		#undef ROM_PTR_BASE
+		#define ROM_PTR_BASE	DWORD
+	#endif
 #endif
 
 
-// Definitions that apply to all compilers, except C18
-#if !defined(__18CXX) || defined(HI_TECH_C)
+// Definitions that apply to all except Microchip MPLAB C Compiler for PIC18 MCUs (formerly C18)
+#if !defined(__18CXX) || (defined(HI_TECH_C) && defined(__PICC18__))
 	#define memcmppgm2ram(a,b,c)	memcmp(a,b,c)
 	#define strcmppgm2ram(a,b)		strcmp(a,b)
 	#define memcpypgm2ram(a,b,c)	memcpy(a,b,c)
@@ -155,7 +159,12 @@
         #define FAR
 		#define Reset()				SoftReset()
 		#define ClrWdt()			(WDTCONSET = _WDTCON_WDTCLR_MASK)
-		#define Nop()				asm("nop")
+
+		// MPLAB C Compiler for PIC32 MCUs version 1.04 and below don't have a 
+		// Nop() function. However, version 1.05 has Nop() declared as _nop().
+		#if !defined(Nop)	
+			#define Nop()				asm("nop")
+		#endif
 	#endif
 #endif
 

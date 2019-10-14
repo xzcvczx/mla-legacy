@@ -124,7 +124,7 @@ static MEDIA_INFORMATION   mediaInformation;   // Information about the attached
 
 /****************************************************************************
   Function:
-    BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags )
+    BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Description:
     This function is called when a USB Mass Storage device is being
@@ -136,7 +136,7 @@ static MEDIA_INFORMATION   mediaInformation;   // Information about the attached
   Parameters:
     BYTE address    -   Address of the new device
     DWORD flags     -   Initialization flags
-
+    BYTE clientDriverID - ID for this layer.  Not used by the media interface layer.
 
   Return Values:
     TRUE    -   We can support the device.
@@ -146,7 +146,7 @@ static MEDIA_INFORMATION   mediaInformation;   // Information about the attached
     None
   ***************************************************************************/
 
-BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags )
+BOOL USBHostMSDSCSIInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 {
     #ifdef DEBUG_MODE
         UART2PrintString( "SCSI: Device attached.\r\n" );

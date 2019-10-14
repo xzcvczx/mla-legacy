@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        Primitive.c
  * Dependencies:    Graphics.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -68,7 +68,12 @@ SHORT _cursorX;
 SHORT _cursorY;
 
 // Pointer to the current font
-void*  _font;
+void *_font;
+
+#ifdef USE_PALETTE
+ void *_palette;
+#endif
+
 // First and last characters in the font
 WORD   _fontFirstChar;					// First character in the font table.
 WORD   _fontLastChar;					// Last character in the font table.
@@ -138,7 +143,11 @@ void InitGraph(void){
 *                 bit2 : third octant   bit6 : seventh octant
 *                 bit3 : fourth octant  bit7 : eigth octant
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -331,16 +340,16 @@ CHECK,
 
 				temp.Val = (DWORD)(ONEP25 -((LONG)r1<<16));
 				err1  = (SHORT)(temp.w[1]); 
-			
+
 				temp.Val = (DWORD)(ONEP25 -((LONG)r2<<16));
 				err2  = (SHORT)(temp.w[1]); 
-   
+
 				x1 = r1; x2 = r2; y1 = 0; y2 = 0;
-			
+
 				x1Cur = x1; y1Cur = y1; y1New = y1;
 				x2Cur = x2; y2Cur = y2; y2New = y2;
 	            state = CHECK;
-	
+
 	        case CHECK:
 arc_check_state:	        
 				if (y2 > y2Limit) {
@@ -349,7 +358,7 @@ arc_check_state:
 	            }
 				// y1New & y2New records the last y positions
 				y1New = y1;	y2New = y2;		
-		
+
 				if (y1 <= y1Limit) {
 			 		if(err1 > 0) {
 		    			x1--;
@@ -365,7 +374,7 @@ arc_check_state:
 					if (x1 < y1)	
 						x1 = y1;
 				}
-			
+
 			 	if(err2 > 0) {
 		    		x2--;
 		    		err2 += 5;
@@ -375,16 +384,15 @@ arc_check_state:
 		    		err2 += y2<<1;
 		    	}
 				y2++;	
-	        
+
 				state = QUAD11;
 				break;
-
 
 	        case QUAD11:
 				if ((x1Cur != x1) || (x2Cur != x2)) {
 					// 1st octant
 					if (octant&0x01) {
-						Bar(xR+y2Cur, yT-x2Cur, xR+y1New, yT-x1Cur);
+						if(Bar(xR+y2Cur, yT-x2Cur, xR+y1New, yT-x1Cur) == 0) return 0;
 					}
 				}
 				else {
@@ -393,11 +401,11 @@ arc_check_state:
 		        }
 				state = QUAD12;
 	            break;
-				
+
 	        case QUAD12:
 				// 2nd octant
 				if (octant&0x02) {
-					Bar(xR+x1Cur, yT-y1New, xR+x2Cur, yT-y2Cur);
+					if(Bar(xR+x1Cur, yT-y1New, xR+x2Cur, yT-y2Cur) == 0) return 0;
 				}
 				state = QUAD21;
 	            break;
@@ -405,7 +413,7 @@ arc_check_state:
 	        case QUAD21:
 				// 3rd octant
 				if (octant&0x04) {
-					Bar(xR+x1Cur, yB+y1Cur, xR+x2Cur, yB+y2New);
+					if(Bar(xR+x1Cur, yB+y1Cur, xR+x2Cur, yB+y2New) == 0) return 0;
 				}
 				state = QUAD22;
 	            break;
@@ -413,7 +421,7 @@ arc_check_state:
 	        case QUAD22:
 				// 4th octant
 				if (octant&0x08) {
-					Bar(xR+y1Cur, yB+x1Cur, xR+y2New, yB+x2Cur);
+					if(Bar(xR+y1Cur, yB+x1Cur, xR+y2New, yB+x2Cur) == 0) return 0;
 				}
 				state = QUAD31;
 	            break;
@@ -421,7 +429,7 @@ arc_check_state:
 	        case QUAD31:
 				// 5th octant
 				if (octant&0x10) {
-					Bar(xL-y1New, yB+x1Cur, xL-y2Cur, yB+x2Cur);
+					if(Bar(xL-y1New, yB+x1Cur, xL-y2Cur, yB+x2Cur) == 0) return 0;
 				}
 				state = QUAD32;
 	            break;
@@ -429,14 +437,15 @@ arc_check_state:
 	        case QUAD32:
 				// 6th octant
 				if (octant&0x20) {
-					Bar(xL-x2Cur, yB+y2Cur, xL-x1Cur, yB+y1New);
+					if(Bar(xL-x2Cur, yB+y2Cur, xL-x1Cur, yB+y1New) == 0) return 0;
 				}
 				state = QUAD41;
 	            break;
+
 	        case QUAD41:
 				// 7th octant
 				if (octant&0x40) {
-					Bar(xL-x2Cur, yT-y2New, xL-x1Cur, yT-y1Cur);
+					if(Bar(xL-x2Cur, yT-y2New, xL-x1Cur, yT-y1Cur) == 0) return 0;
 				}
 				state = QUAD42;
 	            break;
@@ -444,20 +453,20 @@ arc_check_state:
 	        case QUAD42:
 				// 8th octant
 				if (octant&0x80) {
-					Bar(xL-y2New, yT-x2Cur, xL-y1Cur, yT-x1Cur);
+					if(Bar(xL-y2New, yT-x2Cur, xL-y1Cur, yT-x1Cur) == 0) return 0;
 				}
 
 				// update current values
 				x1Cur = x1;	y1Cur = y1; x2Cur = x2;	y2Cur = y2;
 				state = CHECK;
 	            break;
-            
+
 	        case BARRIGHT1:   			// draw upper right
 arc_draw_width_height_state:
 			   	if ((xR-xL) || (yB-yT)) {
 					// draw right
 					if (octant&0x02) {
-						Bar(xR+r1,yT,xR+r2,(yB+yT)>>1); 
+						if(Bar(xR+r1,yT,xR+r2,(yB+yT)>>1) == 0) return 0; 
 					}
 				}
 				else {
@@ -469,7 +478,7 @@ arc_draw_width_height_state:
 
 	        case BARRIGHT2:   			// draw lower right
 				if (octant&0x04) {
-					Bar(xR+r1,((yB+yT)>>1), xR+r2, yB); 
+					if(Bar(xR+r1,((yB+yT)>>1), xR+r2, yB) == 0) return 0; 
 				}
 				state = BARBOTTOM1;
 				break;
@@ -477,22 +486,23 @@ arc_draw_width_height_state:
 	        case BARBOTTOM1:   			// draw left bottom
 				// draw bottom
 				if (octant&0x10) {
-					Bar(xL, yB+r1, ((xR+xL)>>1),yB+r2);
+					if(Bar(xL, yB+r1, ((xR+xL)>>1),yB+r2) == 0) return 0;
 				}
 				state = BARBOTTOM2;
 				break;
 
 	        case BARBOTTOM2:   			// draw right bottom
 				if (octant&0x08) {
-					Bar(((xR+xL)>>1),yB+r1,xR,yB+r2);
+					if(Bar(((xR+xL)>>1),yB+r1,xR,yB+r2) == 0) return 0;
 				}
 				state = BARTOP1;
 				break;
+
 	        case BARTOP1:   			// draw left top
 				if(xR-xL) {
 		   			// draw top
 					if (octant&0x80) {
-						Bar(xL, yT-r2, ((xR+xL)>>1),yT-r1);
+						if(Bar(xL, yT-r2, ((xR+xL)>>1),yT-r1) == 0) return 0;
 					}
 					state = BARTOP2;
 				} else
@@ -501,7 +511,7 @@ arc_draw_width_height_state:
 
 	        case BARTOP2:   			// draw right top
 				if (octant&0x01) {
-					Bar(((xR+xL)>>1),yT-r2,xR,yT-r1);
+					if(Bar(((xR+xL)>>1),yT-r2,xR,yT-r1) == 0) return 0;
 				}
 				state = BARLEFT1;
 				break;
@@ -510,7 +520,7 @@ arc_draw_width_height_state:
 			   	if (yT-yB) {
 			   		// draw left
 					if (octant&0x40) {
-						Bar(xL-r2,yT,xL-r1,((yB+yT)>>1)); 			
+						if(Bar(xL-r2,yT,xL-r1,((yB+yT)>>1)) == 0) return 0; 			
 					}
 					state = BARLEFT2;
 				} else {
@@ -521,7 +531,7 @@ arc_draw_width_height_state:
 
 	        case BARLEFT2:   			// draw lower left
 				if (octant&0x20) {
-					Bar(xL-r2,((yB+yT)>>1),xL-r1,yB); 			
+					if(Bar(xL-r2,((yB+yT)>>1),xL-r1,yB) == 0) return 0; 			
 				}
 				state = BEGIN;
 				return 1;
@@ -531,13 +541,17 @@ arc_draw_width_height_state:
 }
 
 /*********************************************************************
-* Function: void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+* Function: WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 *
 * PreCondition: none
 *
 * Input: x1,y1 - starting coordinates, x2,y2 - ending coordinates
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -547,13 +561,19 @@ arc_draw_width_height_state:
 *
 ********************************************************************/
 #ifndef USE_DRV_LINE
-void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2){
-SHORT deltaX, deltaY;
-SHORT error, stepErrorLT, stepErrorGE;
-SHORT stepX, stepY;
-SHORT steep;
-SHORT temp;
-SHORT style, type;
+WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2){
+    SHORT deltaX, deltaY;
+    SHORT error, stepErrorLT, stepErrorGE;
+    SHORT stepX, stepY;
+    SHORT steep;
+    SHORT temp;
+    SHORT style, type;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
      // Move cursor   
      MoveTo(x2,y2);
@@ -575,9 +595,8 @@ SHORT style, type;
                     PutPixel (x1-1,temp);
                 }
             }
-
        }
-       return;
+       return 1;
     }
 
     if(y1==y2){
@@ -598,7 +617,7 @@ SHORT style, type;
                 }
             }
         }
-        return;
+        return 1;
     }
 
     stepX= 0;
@@ -667,11 +686,13 @@ SHORT style, type;
             }
         }
    }// end of while
+
+   return 1;
 }
 #endif
 
 /*********************************************************************
-* Function: void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
+* Function: WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 *
 * PreCondition: None
 *
@@ -681,7 +702,11 @@ SHORT style, type;
 * 				  circle that draws the rounded corners,
 *        rad - defines the redius of the circle,
 *
-* Output: None
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Overview: Draws a beveled figure on the screen. 
 *           For a pure circular object x1 = x2 and y1 = y2. 
@@ -690,10 +715,16 @@ SHORT style, type;
 * Note: none
 *
 ********************************************************************/
-void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
+WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 {
 	SHORT  style, type, xLimit, xPos, yPos, error;
 	DWORD_VAL  temp;	
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
 	temp.Val = SIN45*rad;
 	xLimit   = temp.w[1]+1;
@@ -751,19 +782,21 @@ void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 
    	// Must use lines here since this can also be used to draw focus of round buttons
    	if (x2-x1) {
-   		Line(x1,y1-rad,x2,y1-rad);				// draw top
+   		while(!Line(x1,y1-rad,x2,y1-rad));				// draw top
    	}
    	if (y2-y1) {
-   		Line(x1-rad,y1,x1-rad,y2); 				// draw left
+   		while(!Line(x1-rad,y1,x1-rad,y2)); 				// draw left
    	}
    	if ((x2-x1) || (y2-y1)) {
-		Line(x2+rad,y1,x2+rad,y2); 				// draw right
-		Line(x1,y2+rad,x2,y2+rad);				// draw bottom
+		while(!Line(x2+rad,y1,x2+rad,y2)); 				// draw right
+		while(!Line(x1,y2+rad,x2,y2+rad));				// draw bottom
 	}
+
+	return 1;
 }
 
 /*********************************************************************
-* Function: void FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
+* Function: WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 *
 * PreCondition: None
 *
@@ -773,7 +806,11 @@ void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 * 				  circle that draws the rounded corners,
 *        rad - defines the redius of the circle,
 *
-* Output: None
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Overview: Draws a filled beveled figure on the screen. 
 *           For a filled circular object x1 = x2 and y1 = y2. 
@@ -864,7 +901,7 @@ FACE
 	static SHORT yLimit, xPos, yPos;
 	static SHORT xCur, yCur, yNew;
 
-	FILLCIRCLE_STATES state = BEGIN;
+	static FILLCIRCLE_STATES state = BEGIN;
 
 while(1){
     if(IsDeviceBusy())
@@ -905,7 +942,7 @@ bevel_fill_check:
         case Q6TOQ3:
 			if (xCur != xPos) {
 				// 6th octant to 3rd octant
-	   			Bar(x1-xCur, y2+yCur, x2+xCur, y2+yNew);				
+	   			if(Bar(x1-xCur, y2+yCur, x2+xCur, y2+yNew) == 0) return 0;
 	   			state = Q5TOQ4;
 	   			break;
 	   		}
@@ -914,19 +951,19 @@ bevel_fill_check:
 
         case Q5TOQ4:
 			// 5th octant to 4th octant
-   			Bar(x1-yNew, y2+xPos, x2+yNew, y2+xCur);
+   			if(Bar(x1-yNew, y2+xPos, x2+yNew, y2+xCur) == 0) return 0;
             state = Q8TOQ1;
             break;
 
         case Q8TOQ1:
 			// 8th octant to 1st octant
-   			Bar(x1-yNew, y1-xCur, x2+yNew, y1-xPos);				
+   			if(Bar(x1-yNew, y1-xCur, x2+yNew, y1-xPos) == 0) return 0;				
             state = Q7TOQ2;
             break;
 
         case Q7TOQ2:
 			// 7th octant to 2nd octant
-   			Bar(x1-xCur, y1-yNew, x2+xCur, y1-yCur);				
+   			if(Bar(x1-xCur, y1-yNew, x2+xCur, y1-yCur) == 0) return 0;				
 			// update current values
 			xCur = xPos;
 			yCur = yPos;
@@ -934,7 +971,7 @@ bevel_fill_check:
             break;
 		case FACE:
 			if ((x2-x1)||(y2-y1)) {
-		    	Bar(x1-rad, y1, x2+rad, y2);
+		    	if(Bar(x1-rad, y1, x2+rad, y2) == 0) return 0;
 		    	state = WAITFORDONE;
 		    }
 		    else {
@@ -953,13 +990,17 @@ bevel_fill_check:
 }
 
 /*********************************************************************
-* Function: void DrawPoly(SHORT numPoints, SHORT* polyPoints)
+* Function: WORD DrawPoly(SHORT numPoints, SHORT* polyPoints)
 *
 * PreCondition: none
 *
 * Input: numPoints - points number, polyPoints - pointer to points array
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -968,28 +1009,82 @@ bevel_fill_check:
 * Note: none
 *
 ********************************************************************/
-void DrawPoly(SHORT numPoints, SHORT* polyPoints){
-SHORT counter;
-SHORT sx,sy,ex,ey;
+WORD DrawPoly(SHORT numPoints, SHORT* polyPoints){
+
+#ifndef USE_NONBLOCKING_CONFIG
+
+    SHORT counter;
+    SHORT sx,sy,ex,ey;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
     sx = *polyPoints++; sy = *polyPoints++;
-    for(counter=0; counter<numPoints-1; counter++){
+    for(counter = 0; counter < numPoints - 1; counter++){
         ex = *polyPoints++; ey = *polyPoints++;
-        Line(sx,sy,ex,ey);
+        while(Line(sx,sy,ex,ey) == 0);
         sx = ex; sy = ey;
     }
 
+#else
+    typedef enum {
+    POLY_BEGIN,
+    POLY_DRAWING,
+    } DRAWPOLY_STATES;
+
+    static DRAWPOLY_STATES state = POLY_BEGIN;
+    static SHORT counter;
+    SHORT sx,sy,ex,ey;
+    while(1){
+        if(IsDeviceBusy())
+            return 0;
+        switch(state)   {
+            case POLY_BEGIN:    counter = 1;
+                                state = POLY_DRAWING;
+
+            case POLY_DRAWING:  if(counter == 0 || counter >= numPoints)
+                                {
+                                    state = POLY_BEGIN;
+                                    break;
+                                }
+                                while(counter < numPoints)
+                                {
+                                    sx = polyPoints[(counter - 1) * 2];
+                                    sy = polyPoints[(counter * 2) - 1];
+                                    ex = polyPoints[counter * 2];
+                                    ey = polyPoints[counter * 2 + 1];
+                                    if(Line(sx,sy,ex,ey) == 0)
+                                    {
+                                        return 0;
+                                    }
+                                    counter++;
+                                }
+                                state = POLY_BEGIN;
+                                return 1;
+        }
+    }
+
+#endif
+
+    return 1;
 }
 
 /*********************************************************************
-* Function: void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+* Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 *
 * PreCondition: none
 *
 * Input: left,top - top left corner coordinates,
 *        right,bottom - bottom right corner coordinates
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -999,11 +1094,20 @@ SHORT sx,sy,ex,ey;
 *
 ********************************************************************/
 #ifndef USE_DRV_BAR
-void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom){
-SHORT x,y;
-    for(y=top; y<bottom+1; y++)
-    for(x=left; x<right+1; x++)
-        PutPixel(x,y);
+WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom){
+    SHORT x,y;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
+
+    for(y = top; y < bottom + 1; y++)
+        for(x = left; x < right + 1; x++)
+            PutPixel(x,y);
+
+    return 1;
 }
 #endif
 
@@ -1025,14 +1129,10 @@ SHORT x,y;
 ********************************************************************/
 #ifndef USE_DRV_CLEARDEVICE
 void ClearDevice(void){
-SHORT x,y;
-    for(y=0; y<GetMaxY()+1; y++)
-    for(x=0; x<GetMaxX()+1; x++)
-        PutPixel(x,y);
+    while(Bar(0,0,GetMaxX(),GetMaxY()) == 0);
     MoveTo(0,0);
 }
 #endif
-
 
 /*********************************************************************
 * Function: void SetFont(void* font)
@@ -1101,7 +1201,7 @@ WORD OutText(XCHAR* textString){
 
 XCHAR ch;
     while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
-        OutChar(ch);
+        while(OutChar(ch) == 0);
     return 1;
 
 #else
@@ -1110,9 +1210,8 @@ XCHAR ch;
 static WORD counter = 0;
     
     while((unsigned XCHAR)(ch = *(textString+counter)) > (unsigned XCHAR)15){
-        if(IsDeviceBusy())
+        if(OutChar(ch) == 0)
             return 0;
-        OutChar(ch);
         counter++;
     }
     counter = 0;
@@ -1145,7 +1244,6 @@ WORD OutTextXY(SHORT x, SHORT y, XCHAR* textString){
     OutText(textString);
     return 1;
 
- 
 #else
 
 static BYTE start = 1;
@@ -1165,13 +1263,17 @@ static BYTE start = 1;
 }
 
 /*********************************************************************
-* Function: void OutChar(XCHAR ch)
+* Function: WORD OutChar(XCHAR ch)
 *
 * PreCondition: none
 *
 * Input: character code
 *
-* Output: non-zero if done
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the character is not yet completely drawn.
+*         - Returns 1 when the character is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -1181,32 +1283,37 @@ static BYTE start = 1;
 *
 ********************************************************************/
 #ifndef USE_DRV_FONT
-void OutChar(XCHAR ch){
+WORD OutChar(XCHAR ch){
 
-GLYPH_ENTRY* pChTable;
-BYTE*        pChImage;
+    GLYPH_ENTRY* pChTable;
+    BYTE*        pChImage;
+    
+    #ifdef USE_FONT_EXTERNAL
+    GLYPH_ENTRY  chTable;
+    BYTE         chImage[EXTERNAL_FONT_BUFFER_SIZE];
+    WORD         imageSize;
+    DWORD_VAL    glyphOffset;
+    #endif
+    
+    SHORT        chWidth;
+    SHORT        xCnt, yCnt, x, y;
+    BYTE         temp, mask;
 
-#ifdef USE_FONT_EXTERNAL
-GLYPH_ENTRY  chTable;
-BYTE         chImage[EXTERNAL_FONT_BUFFER_SIZE];
-WORD         imageSize;
-DWORD_VAL    glyphOffset;
-#endif
-
-SHORT        chWidth;
-SHORT        xCnt, yCnt, x, y;
-BYTE         temp, mask;
-
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
     if((unsigned XCHAR)ch<(unsigned XCHAR)_fontFirstChar)
-        return;
+        return -1;
     if((unsigned XCHAR)ch>(unsigned XCHAR)_fontLastChar)
-        return;
+        return -1;
 
     switch(*((SHORT*)_font)){
 #ifdef USE_FONT_FLASH
         case FLASH:
-           
+
             pChTable = (GLYPH_ENTRY*)( ((FONT_FLASH*)_font)->address+sizeof(FONT_HEADER) ) + ((unsigned XCHAR)ch-(unsigned XCHAR)_fontFirstChar);
 
             pChImage = (BYTE*)( ((FONT_FLASH*)_font)->address + pChTable->offsetLSB );
@@ -1290,6 +1397,7 @@ BYTE         temp, mask;
         // move cursor
         _cursorY = x;
     }
+    return 1;
 }
 #endif
 
@@ -1481,7 +1589,7 @@ SHORT height;
 
 #ifndef USE_DRV_PUTIMAGE
 /*********************************************************************
-* Function: void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
 * PreCondition: none
 *
@@ -1489,7 +1597,11 @@ SHORT height;
 *        bitmap - image pointer,
 *        stretch - image stretch factor
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 1 when the image is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -1498,10 +1610,16 @@ SHORT height;
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-FLASH_BYTE* flashAddress;
-BYTE colorDepth;
-WORD colorTemp;
+WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
+    FLASH_BYTE* flashAddress;
+    BYTE colorDepth;
+    WORD colorTemp;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
     // Save current color
     colorTemp = GetColor();
@@ -1574,6 +1692,7 @@ WORD colorTemp;
 
     // Restore current color
     SetColor(colorTemp);
+    return 1;
 }
 
 #ifdef USE_BITMAP_FLASH

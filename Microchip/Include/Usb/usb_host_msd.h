@@ -16,8 +16,8 @@ Acronyms/abbreviations used by this class:
     * CBW - Command Block Wrapper
     * CSW - Command Status Wrapper
 
-    To interface with usb_host.c, the routine USBMSDClientInitialize() should
-    be specified as the Initialize() function, and USBMSDClientEventHandler()
+    To interface with usb_host.c, the routine USBHostMSDClientInitialize() should
+    be specified as the Initialize() function, and USBHostMSDClientEventHandler()
     should be specified as the EventHandler() function in the
     usbClientDrvTable[] array declared in usb_config.h.
 
@@ -437,7 +437,7 @@ BOOL    USBHostMSDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, DWORD
 
 /****************************************************************************
   Function:
-    BOOL USBHostMSDInitialize( BYTE address, DWORD flags )
+    BOOL USBHostMSDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is the initialization routine for this client driver.
@@ -454,7 +454,10 @@ BOOL    USBHostMSDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, DWORD
 
   Parameters:
     BYTE address        - Address of the new device
-    DWORD flags          - Initialization flags
+    DWORD flags         - Initialization flags
+    BYTE clientDriverID - ID to send when issuing a Device Request via
+                            USBHostSendDeviceRequest(), USBHostSetDeviceConfiguration(),
+                            or USBHostSetDeviceInterface().  
 
   Return Values:
     TRUE   - We can support the device.
@@ -464,7 +467,7 @@ BOOL    USBHostMSDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, DWORD
     None
   ***************************************************************************/
 
-BOOL USBHostMSDInitialize( BYTE address, DWORD flags );
+BOOL USBHostMSDInitialize( BYTE address, DWORD flags, BYTE clientDriverID );
 
 
 /****************************************************************************

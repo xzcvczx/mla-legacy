@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Picture.c
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -145,10 +145,8 @@ static SHORT posbottom;
 
         case REMOVE:
             if(GetState(pPict,PICT_HIDE)){
-                if(IsDeviceBusy())
-                    return 0;
                 SetColor(pPict->hdr.pGolScheme->CommonBkColor);
-                Bar(pPict->hdr.left,pPict->hdr.top,pPict->hdr.right,pPict->hdr.bottom);
+                if(!Bar(pPict->hdr.left,pPict->hdr.top,pPict->hdr.right,pPict->hdr.bottom)) return 0;
                 return 1;
             }
             posleft = (pPict->hdr.left+pPict->hdr.right-pPict->scale*GetImageWidth(pPict->pBitmap))>>1;
@@ -161,43 +159,34 @@ static SHORT posbottom;
             if(pPict->pBitmap != NULL){
                 if(IsDeviceBusy())
                     return 0;
-                PutImage( posleft, postop,pPict->pBitmap, pPict->scale); 
+                if(!PutImage( posleft, postop,pPict->pBitmap, pPict->scale)) return 0;
             }
             SetColor(pPict->hdr.pGolScheme->CommonBkColor);
             state = DRAW_BACKGROUND1;
 
         case DRAW_BACKGROUND1:
-            if(IsDeviceBusy())
-                return 0;
-            Bar(pPict->hdr.left+1, pPict->hdr.top+1, pPict->hdr.right-1, postop-1);
+            if(!Bar(pPict->hdr.left+1, pPict->hdr.top+1, pPict->hdr.right-1, postop-1)) return 0;
             state = DRAW_BACKGROUND2;
 
         case DRAW_BACKGROUND2:
-            if(IsDeviceBusy())
-                return 0;
-            Bar(pPict->hdr.left+1, posbottom, pPict->hdr.right-1, pPict->hdr.bottom-1);
+            if(!Bar(pPict->hdr.left+1, posbottom, pPict->hdr.right-1, pPict->hdr.bottom-1)) return 0;
             state = DRAW_BACKGROUND3;
 
         case DRAW_BACKGROUND3:
-            if(IsDeviceBusy())
-                return 0;
-            Bar(pPict->hdr.left+1, postop, posleft-1, posbottom);
+            if(!Bar(pPict->hdr.left+1, postop, posleft-1, posbottom)) return 0;
             state = DRAW_BACKGROUND4;
 
         case DRAW_BACKGROUND4:
-            if(IsDeviceBusy())
-                return 0;
-            Bar(posright, postop, pPict->hdr.right-1, posbottom);
+            if(!Bar(posright, postop, pPict->hdr.right-1, posbottom)) return 0;
             state = DRAW_FRAME;
 
         case DRAW_FRAME:
             if(GetState(pPict,PICT_FRAME)){
-                if(IsDeviceBusy())
-                    return 0; 
 		        SetLineType(SOLID_LINE);
 		        SetColor(pPict->hdr.pGolScheme->TextColor0);
-		        Rectangle(pPict->hdr.left, pPict->hdr.top,
-                          pPict->hdr.right, pPict->hdr.bottom);
+		        if(!Rectangle(pPict->hdr.left, pPict->hdr.top,
+                          pPict->hdr.right, pPict->hdr.bottom))
+                          return 0;
 		        
             }
             state = REMOVE;

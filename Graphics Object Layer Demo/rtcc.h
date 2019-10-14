@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        rtcc.h
  * Dependencies:    
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	C30 xx.xx or higher, C32
  * Linker:          MPLINK 03.20.01 or higher, MPLINK32
  * Company:         Microchip Technology Incorporated

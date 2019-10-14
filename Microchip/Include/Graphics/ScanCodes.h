@@ -6,7 +6,7 @@
  *****************************************************************************
  * FileName:        ScanCodes.h
  * Dependencies:    None
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -52,6 +52,11 @@
 #define SCAN_CR_PRESSED      0x1C
 // Carriage return released.
 #define SCAN_CR_RELEASED     0x9C
+
+// Carriage return alternate pressed.
+#define SCAN_CRA_PRESSED     0x2C
+// Carriage return alternate released.
+#define SCAN_CRA_RELEASED    0xAC
 
 // Delete key pressed.
 #define SCAN_DEL_PRESSED     0x53

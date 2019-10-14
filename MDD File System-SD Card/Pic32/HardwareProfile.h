@@ -76,9 +76,9 @@
         #define GetSystemClock()            24000000UL
         #define GetPeripheralClock()        24000000UL
         #define GetInstructionClock()       (GetSystemClock())
-    #elif defined(RUN_AT_80MHZ)
+    #elif defined(RUN_AT_80MHZ)    
         #define GetSystemClock()            (80000000ul)
-        #define GetPeripheralClock()        (GetSystemClock()/2)
+        #define GetPeripheralClock()        (GetSystemClock()/2) 
         #define GetInstructionClock()       (GetSystemClock())
     #else
         #error Choose a speed
@@ -90,7 +90,7 @@
     #define TIMER_PRESCALER             TIMER_PRESCALER_8   // Definition for use with a tick timer
     #define TIMER_PERIOD                37500               // Definition for use with a tick timer
 #endif
-
+    
 
 
 
@@ -105,7 +105,7 @@
 // Description: Macro used to enable the CF-PMP physical layer (CF-PMP.c and .h)
 //#define USE_CF_INTERFACE_WITH_PMP
 
-// Description: Macro used to enable the CF-Manual physical layer (CF-Bit transaction.c and .h)
+// Description: Macro used to enable the CF-Manual physical layer (CF-Bit transaction.c and .h)                                                                
 //#define USE_MANUAL_CF_INTERFACE
 
 // Description: Macro used to enable the USB Host physical layer (USB host MSD library)
@@ -121,24 +121,24 @@
 
 #ifdef USE_SD_INTERFACE_WITH_SPI
     #ifdef __18CXX
-
+    
         // Sample definition for PIC18 (modify to fit your own project)
 
         // Description: SD-SPI Chip Select Output bit
         #define SD_CS               LATBbits.LATB3
         // Description: SD-SPI Chip Select TRIS bit
         #define SD_CS_TRIS          TRISBbits.TRISB3
-
+        
         // Description: SD-SPI Card Detect Input bit
         #define SD_CD               PORTBbits.RB4
         // Description: SD-SPI Card Detect TRIS bit
         #define SD_CD_TRIS          TRISBbits.TRISB4
-
+        
         // Description: SD-SPI Write Protect Check Input bit
         #define SD_WE               PORTAbits.RA4
         // Description: SD-SPI Write Protect Check TRIS bit
         #define SD_WE_TRIS          TRISAbits.TRISA4
-
+        
         // Registers for the SPI module you want to use
 
         // Description: The main SPI control register
@@ -155,7 +155,7 @@
         #define SPISTATbits         SSP1STATbits
 
         // Description: The interrupt flag for the SPI module
-        #define SPI_INTERRUPT_FLAG  PIR1bits.SSPIF
+        #define SPI_INTERRUPT_FLAG  PIR1bits.SSPIF   
         // Description: The enable bit for the SPI module
         #define SPIENABLE           SPICON1bits.SSPEN
 
@@ -213,17 +213,17 @@
         #define SD_CS				LATBbits.LATB1
         // Description: SD-SPI Chip Select TRIS bit
         #define SD_CS_TRIS			TRISBbits.TRISB1
-
+        
         // Description: SD-SPI Card Detect Input bit
         #define SD_CD               PORTFbits.RF0
         // Description: SD-SPI Card Detect TRIS bit
         #define SD_CD_TRIS          TRISFbits.TRISF0
-
+        
         // Description: SD-SPI Write Protect Check Input bit
         #define SD_WE               PORTFbits.RF1
         // Description: SD-SPI Write Protect Check TRIS bit
         #define SD_WE_TRIS          TRISFbits.TRISF1
-
+        
         // Registers for the SPI module you want to use
 
         // Description: The main SPI control register
@@ -253,7 +253,7 @@
         // Will generate an error if the clock speed is too low to interface to the card
         #if (GetSystemClock() < 100000)
             #error Clock speed must exceed 100 kHz
-        #endif
+        #endif    
 
     #elif defined (__PIC32MX__)
         // Registers for the SPI module you want to use
@@ -266,13 +266,13 @@
 
         // Define the SPI frequency
         #define SPI_FREQUENCY			(20000000)
-
+    
         #if defined MDD_USE_SPI_1
             // Description: SD-SPI Chip Select Output bit
         	#define SD_CS               LATBbits.LATB1
         	// Description: SD-SPI Chip Select TRIS bit
             #define SD_CS_TRIS          TRISBbits.TRISB1
-
+            
             // Description: SD-SPI Card Detect Input bit
             #define SD_CD               PORTFbits.RF0
             // Description: SD-SPI Card Detect TRIS bit
@@ -282,7 +282,7 @@
             #define SD_WE               PORTFbits.RF1
             // Description: SD-SPI Write Protect Check TRIS bit
             #define SD_WE_TRIS          TRISFbits.TRISF1
-
+                   
             // Description: The main SPI control register
             #define SPICON1             SPI1CON
             // Description: The SPI status register
@@ -312,13 +312,13 @@
             #define putcSPI             putcSPI1
             #define getcSPI             getcSPI1
             #define OpenSPI(config1, config2)   OpenSPI1(config1, config2)
-
+            
         #elif defined MDD_USE_SPI_2
             // Description: SD-SPI Chip Select Output bit
             #define SD_CS               LATBbits.LATB9
             // Description: SD-SPI Chip Select TRIS bit
             #define SD_CS_TRIS          TRISBbits.TRISB9
-
+            
             // Description: SD-SPI Card Detect Input bit
             #define SD_CD               PORTGbits.RG0
             // Description: SD-SPI Card Detect TRIS bit
@@ -328,7 +328,7 @@
             #define SD_WE               PORTGbits.RG1
             // Description: SD-SPI Write Protect Check TRIS bit
             #define SD_WE_TRIS          TRISGbits.TRISG1
-
+            
             // Description: The main SPI control register
             #define SPICON1             SPI2CON
             // Description: The SPI status register
@@ -358,12 +358,12 @@
             #define putcSPI             putcSPI2
             #define getcSPI             getcSPI2
             #define OpenSPI(config1, config2)   OpenSPI2(config1, config2)
-        #endif
+        #endif       
         // Will generate an error if the clock speed is too low to interface to the card
         #if (GetSystemClock() < 100000)
             #error Clock speed must exceed 100 kHz
-        #endif
-
+        #endif    
+    
     #endif
 
 #endif
@@ -373,13 +373,13 @@
 
     /* CompactFlash-PMP card definitions: change these to fit your application when
     using the PMP module to interface with CF cards                                */
-
+    
     #ifdef __18CXX
         #error The PIC18 architecture does not currently support PMP interface to CF cards
     #elif defined __dsPIC30F__
-
+    
         // Sample dsPIC30 defines
-
+        
         // Description: The output latch for the CF Reset signal
         #define CF_PMP_RST		    _RD0
         // Description: The TRIS bit for the CF Reset signal
@@ -392,9 +392,9 @@
         #define CF_PMP_CD1		    _RC4
         // Description: The TRIS bit for the CF card detect signal
         #define CF_PMP_CD1DIR	    _TRISC4
-
+    
     #elif defined __dsPIC33F__
-
+    
         // Sample dsPIC33 defines
 
         // Description: The output latch for the CF Reset signal
@@ -409,9 +409,9 @@
         #define CF_PMP_CD1		    _RC4
         // Description: The TRIS bit for the CF card detect signal
         #define CF_PMP_CD1DIR	    _TRISC4
-
+    
     #elif defined __PIC24F__
-
+    
         // Default case for PIC24F
 
         // Description: The output latch for the CF Reset signal
@@ -426,9 +426,9 @@
         #define CF_PMP_CD1		    PORTCbits.RC4
         // Description: The TRIS bit for the CF card detect signal
         #define CF_PMP_CD1DIR	    TRISCbits.TRISC4
-
+    
     #endif
-
+    
     // Description: Defines the PMP data bus direction register
     #define MDD_CFPMP_DATADIR       TRISE
 #endif
@@ -439,14 +439,14 @@
     // This will manually perform parallel port transactions
 
     #ifdef __18CXX
-
+    
         // Address lines
 
         // Description: The CF address bus output latch register (for PIC18)
         #define ADDBL                   LATA
         // Description: The CF address bus TRIS register (for PIC18)
         #define ADDDIR                  TRISA
-
+    	
         // Data bus
 
         // Description: The Manual CF data bus port register
@@ -482,9 +482,9 @@
         #define CF_BT_CD1               PORTCbits.RC2
         // Description: The CF card detect signal TRIS bit
         #define CF_BT_CD1DIR            TRISCbits.TRISC2
-
+    
     #elif defined __dsPIC30F__
-
+    
         // Address lines
 
          // Description: The CF address bus bit 0 output latch definition (for PIC24/30/33/32)
@@ -503,7 +503,7 @@
         #define ADRTRIS2                _TRISG9
         // Description: The CF address bus bit 3 TRIS definition (for PIC24/30/33/32)
         #define ADRTRIS3                _TRISG8
-
+    	
         // Data bus
 
         // Description: The Manual CF data bus port register
@@ -512,7 +512,7 @@
         #define MDD_CFBT_DATABOUT       PORTE
         // Description: The Manual CF data bus TRIS register
         #define MDD_CFBT_DATADIR        TRISE
-
+    	
         // control bus lines
 
         // Description: The CF card chip select output latch bit
@@ -522,7 +522,7 @@
         // Description: The CF card output enable strobe latch bit
         #define CF_OE                   _RD5
         // Description: The CF card output enable strobe TRIS bit
-        #define CF_OEDIR                _TRISD5
+        #define CF_OEDIR                _TRISD5	
         // Description: The CF card write enable strobe latch bit
         #define CF_WE                   _RD4
         // Description: The CF card write enable strobe TRIS bit
@@ -560,7 +560,7 @@
         #define ADRTRIS2                _TRISG9
         // Description: The CF address bus bit 3 TRIS definition (for PIC24/30/33/32)
         #define ADRTRIS3                _TRISG8
-
+    	
         // Data bus
 
         // Description: The Manual CF data bus port register
@@ -569,7 +569,7 @@
         #define MDD_CFBT_DATABOUT       PORTE
         // Description: The Manual CF data bus TRIS register
         #define MDD_CFBT_DATADIR        TRISE
-
+    	
         // control bus lines
 
         // Description: The CF card chip select output latch bit
@@ -579,7 +579,7 @@
         // Description: The CF card output enable strobe latch bit
         #define CF_OE                   _RD5
         // Description: The CF card output enable strobe TRIS bit
-        #define CF_OEDIR                _TRISD5
+        #define CF_OEDIR                _TRISD5	
         // Description: The CF card write enable strobe latch bit
         #define CF_WE                   _RD4
         // Description: The CF card write enable strobe TRIS bit
@@ -596,9 +596,9 @@
         #define CF_BT_CD1               _RC4
         // Description: The CF card detect signal TRIS bit
         #define CF_BT_CD1DIR            _TRISC4
-
+    
     #elif defined __PIC24F__
-
+    
         // Address lines
 
         // Description: The CF address bus bit 0 output latch definition (for PIC24/30/33/32)
@@ -617,7 +617,7 @@
         #define ADRTRIS2                TRISGbits.TRISG9
         // Description: The CF address bus bit 3 TRIS definition (for PIC24/30/33/32)
         #define ADRTRIS3                TRISGbits.TRISG8
-
+    	
         // Data bus
 
         // Description: The Manual CF data bus port register
@@ -626,7 +626,7 @@
         #define MDD_CFBT_DATABOUT       PORTE
         // Description: The Manual CF data bus TRIS register
         #define MDD_CFBT_DATADIR        TRISE
-
+    	
         // control bus lines
 
         // Description: The CF card chip select output latch bit
@@ -636,7 +636,7 @@
         // Description: The CF card output enable strobe latch bit
         #define CF_OE                   PORTDbits.RD5
         // Description: The CF card output enable strobe TRIS bit
-        #define CF_OEDIR                TRISDbits.TRISD5
+        #define CF_OEDIR                TRISDbits.TRISD5	
         // Description: The CF card write enable strobe latch bit
         #define CF_WE                   PORTDbits.RD4
         // Description: The CF card write enable strobe TRIS bit

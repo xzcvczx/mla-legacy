@@ -81,6 +81,10 @@
 // Define this to implement PutImage function in the driver.
 #define USE_DRV_PUTIMAGE
 
+#ifdef USE_16BIT_PMP
+#error  This driver doesn't support 16-bit PMP (remove USE_16BIT_PMP option from GraphicsConfig.h)
+#endif
+
 #ifndef DISP_HOR_RESOLUTION
 #error  DISP_HOR_RESOLUTION must be defined in GraphicsConfig.h
 #endif

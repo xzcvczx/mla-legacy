@@ -9,7 +9,7 @@
  *****************************************************************************
  * FileName:        CustomControl.c
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -155,10 +155,10 @@ static SHORT delta;
 
         case REMOVE:
             if(GetState(pCc,CC_HIDE)){
-                if(IsDeviceBusy())
-                    return 0;
+
                 SetColor(pCc->pGolScheme->CommonBkColor);
-                Bar(pCc->left,pCc->top,pCc->right,pCc->bottom);
+                if(!Bar(pCc->left,pCc->top,pCc->right,pCc->bottom))
+			return 0;
                 return 1;
             }
             state = BOX_DRAW;
@@ -186,20 +186,19 @@ static SHORT delta;
 
         case BAR_DRAW:
 
-            if(IsDeviceBusy())
-                return 0;
-
             if(pCc->prevPos > pCc->pos){
  
                SetColor(pCc->pGolScheme->Color1);
-               Bar(pCc->left+GOL_EMBOSS_SIZE,
-                   pCc->pos,pCc->right-GOL_EMBOSS_SIZE,pCc->prevPos);
+               if(!Bar(pCc->left+GOL_EMBOSS_SIZE,
+                   pCc->pos,pCc->right-GOL_EMBOSS_SIZE,pCc->prevPos))
+                   return 0;
 
             }else{
 
                SetColor(pCc->pGolScheme->Color0);
-               Bar(pCc->left+GOL_EMBOSS_SIZE,
-                   pCc->prevPos,pCc->right-GOL_EMBOSS_SIZE,pCc->pos);
+               if(!Bar(pCc->left+GOL_EMBOSS_SIZE,
+                   pCc->prevPos,pCc->right-GOL_EMBOSS_SIZE,pCc->pos))
+                   return 0;
             }
 
             SetColor(pCc->pGolScheme->TextColor0);
@@ -209,12 +208,12 @@ static SHORT delta;
 
         case GRID_DRAW:
             while(counter<8){
-                if(IsDeviceBusy())
-                    return 0;
-                Bar(pCc->left+GOL_EMBOSS_SIZE,
+
+                if(!Bar(pCc->left+GOL_EMBOSS_SIZE,
                      pCc->top+GOL_EMBOSS_SIZE+counter*delta,
                      pCc->right-GOL_EMBOSS_SIZE,
-                     pCc->top+GOL_EMBOSS_SIZE+counter*delta);
+                     pCc->top+GOL_EMBOSS_SIZE+counter*delta))
+                     return 0;
                 counter++;
             }          
             pCc->prevPos = pCc->pos;

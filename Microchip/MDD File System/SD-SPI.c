@@ -35,6 +35,8 @@
  *
 *****************************************************************************/
 
+#include "Compiler.h"
+#include "GenericTypeDefs.h"
 #include "MDD File System\FSIO.h"
 #include "MDD File System\FSDefs.h"
 #include "MDD File System\SD-SPI.h"
@@ -48,6 +50,7 @@
 
 // Description:  Used for the mass-storage library to determine capacity
 DWORD MDD_SDSPI_finalLBA;
+BYTE gSDMode;
 static MEDIA_INFORMATION mediaInformation;
 
 #ifdef __18CXX
@@ -63,6 +66,7 @@ static MEDIA_INFORMATION mediaInformation;
     // cmd                      crc     response
     {cmdGO_IDLE_STATE,          0x95,   R1,     NODATA},
     {cmdSEND_OP_COND,           0xF9,   R1,     NODATA},
+    {cmdSEND_IF_COND,      		0x87,   R7,     NODATA},
     {cmdSEND_CSD,               0xAF,   R1,     MOREDATA},
     {cmdSEND_CID,               0x1B,   R1,     MOREDATA},
     {cmdSTOP_TRANSMISSION,      0xC3,   R1,     NODATA},
@@ -76,7 +80,7 @@ static MEDIA_INFORMATION mediaInformation;
     {cmdTAG_SECTOR_END,         0xFF,   R1,     NODATA},
     {cmdERASE,                  0xDF,   R1b,    NODATA},
     {cmdAPP_CMD,                0x73,   R1,     NODATA},
-    {cmdREAD_OCR,               0x25,   R3,     NODATA},
+    {cmdREAD_OCR,               0x25,   R7,     NODATA},
     {cmdCRC_ON_OFF,             0x25,   R1,     NODATA}
 };
 
@@ -347,7 +351,7 @@ MMC_RESPONSE SendMMCCmd(BYTE cmd, DWORD address)
     WriteSPIM(CmdPacket.crc);                //Send CRC
     
     // see if we are going to get a response
-    if(sdmmc_cmdtable[cmd].responsetype == R1 || sdmmc_cmdtable[cmd].responsetype == R1b)
+    if(sdmmc_cmdtable[cmd].responsetype == R1 || sdmmc_cmdtable[cmd].responsetype == R1b || sdmmc_cmdtable[cmd].responsetype == R7)
     {
         do
         {
@@ -377,6 +381,14 @@ MMC_RESPONSE SendMMCCmd(BYTE cmd, DWORD address)
                 timeout--;
             }while(response.r1._byte == 0x00 && timeout != 0);
         }
+    }
+
+    if (sdmmc_cmdtable[cmd].responsetype == R7)
+    {
+        response.r7.bytewise._returnVal = (DWORD)MDD_SDSPI_ReadMedia() << 24;
+        response.r7.bytewise._returnVal += (DWORD)MDD_SDSPI_ReadMedia() << 16;
+        response.r7.bytewise._returnVal += (DWORD)MDD_SDSPI_ReadMedia() << 8;
+        response.r7.bytewise._returnVal += (DWORD)MDD_SDSPI_ReadMedia();
     }
 
     mSend8ClkCycles();                      //Required clocking (see spec)
@@ -446,7 +458,7 @@ MMC_RESPONSE SendMMCCmdManual(BYTE cmd, DWORD address)
     WriteSPIManual(CmdPacket.crc);                //Send CRC
     
     // see if we are going to get a response
-    if(sdmmc_cmdtable[cmd].responsetype == R1 || sdmmc_cmdtable[cmd].responsetype == R1b)
+    if(sdmmc_cmdtable[cmd].responsetype == R1 || sdmmc_cmdtable[cmd].responsetype == R1b || sdmmc_cmdtable[cmd].responsetype == R7)
     {
         do
         {
@@ -476,6 +488,13 @@ MMC_RESPONSE SendMMCCmdManual(BYTE cmd, DWORD address)
                 timeout--;
             }while(response.r1._byte == 0x00 && timeout != 0);
         }
+    }
+    if (sdmmc_cmdtable[cmd].responsetype == R7)
+    {
+        response.r7.bytewise._returnVal = (DWORD)ReadMediaManual() << 24;
+        response.r7.bytewise._returnVal += (DWORD)ReadMediaManual() << 16;
+        response.r7.bytewise._returnVal += (DWORD)ReadMediaManual() << 8;
+        response.r7.bytewise._returnVal += (DWORD)ReadMediaManual();
     }
 
     WriteSPIManual(0xFF);                      //Required clocking (see spec)
@@ -532,7 +551,10 @@ BYTE MDD_SDSPI_SectorRead(DWORD sector_addr, BYTE* buffer)
 #endif
 
     // send the cmd
-    new_addr = sector_addr << 9;
+    if (gSDMode == SD_MODE_NORMAL)
+        new_addr = sector_addr << 9;
+    else
+        new_addr = sector_addr;
     response = SendMMCCmd(READ_SINGLE_BLOCK,new_addr);
 
     // Make sure the command was accepted
@@ -670,6 +692,7 @@ BYTE MDD_SDSPI_SectorRead(DWORD sector_addr, BYTE* buffer)
 BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero)
 {
     WORD            index;
+    DWORD           counter;
     BYTE            data_response;
 #ifdef __18CXX
     BYTE            clear;
@@ -682,7 +705,11 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
     else
     {
         // send the cmd
-        response = SendMMCCmd(WRITE_SINGLE_BLOCK,(sector_addr << 9));
+
+        if (gSDMode == SD_MODE_NORMAL)
+            response = SendMMCCmd(WRITE_SINGLE_BLOCK,(sector_addr << 9));
+        else
+            response = SendMMCCmd(WRITE_SINGLE_BLOCK,(sector_addr));
         
         // see if it was accepted
         if(response.r1._byte != 0x00)
@@ -726,24 +753,28 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
 				    data_response = getcSPI();
 				}while(!data_response);
 #else
-                index = 0;            //using i as a timeout counter                
+
+#ifdef __18CXX
+                counter = GetInstructionClock() / 82;                
                 do                  //Wait for write completion
                 {
-#ifdef __18CXX
                     clear = SPIBUF;
                     SPI_INTERRUPT_FLAG = 0;
                     SPIBUF = 0xFF;
                     while(!SPI_INTERRUPT_FLAG);
                     data_response = SPIBUF;
 #else
+                counter = GetInstructionClock() / 44;                
+                do                  //Wait for write completion
+                {
                     SPIBUF = 0xFF;
                     while(!SPISTAT_RBF);
                     data_response = SPIBUF;
 #endif
-                    index++;
-                }while((data_response == 0x00) && (index != 0));
+                    counter--;
+                }while((data_response == 0x00) && (counter != 0));
 
-                if(index == 0)                                  //if timeout first
+                if(counter == 0)                                  //if timeout first
                     status = FALSE;
 #endif
             }
@@ -1363,14 +1394,38 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
         return &mediaInformation;
     }
 
+       response = SendMMCCmd(SEND_IF_COND, 0x1AA);
+    if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
+	{
+        timeout = 0xFFF;
+        do
+        {
+               response = SendMMCCmd(SEND_OP_COND, 0x40000000);
+            timeout--;
+        }while(response.r1._byte != 0x00 && timeout != 0);
+		response = SendMMCCmd(READ_OCR, 0x0);
+        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
+		{
+			gSDMode = SD_MODE_NORMAL;
+		}
+        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
+		{
+        gSDMode = SD_MODE_HC;
+		}
+	}
+    else
+	{
+        gSDMode = SD_MODE_NORMAL;
+
     // According to spec cmd1 must be repeated until the card is fully initialized
     timeout = 0xFFF;
     
     do
     {
-        response = SendMMCCmd(SEND_OP_COND,0x0);
+            response = SendMMCCmd(SEND_OP_COND,0x0);
         timeout--;
     }while(response.r1._byte != 0x00 && timeout != 0);
+	}
 
     // see if it failed
     if(timeout == 0)
@@ -1416,15 +1471,39 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
             SD_CS = 1;                               // deselect the devices
             return &mediaInformation;
         }
-    
+
+        response = SendMMCCmd(SEND_IF_COND, 0x1AA);
+        if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
+		{
+	        timeout = 0xFFF;
+	        do
+	        {
+                response = SendMMCCmd(SEND_OP_COND, 0x40000000);
+	            timeout--;
+	        }while(response.r1._byte != 0x00 && timeout != 0);
+			response = SendMMCCmd(READ_OCR, 0x0);
+	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
+			{
+				gSDMode = SD_MODE_NORMAL;
+			}
+	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
+			{
+            gSDMode = SD_MODE_HC;
+			}
+		}
+        else
+		{
+            gSDMode = SD_MODE_NORMAL;
+
         // According to spec cmd1 must be repeated until the card is fully initialized
         timeout = 0xFFF;
         
         do
         {
-            response = SendMMCCmd(SEND_OP_COND,0x0);
+                response = SendMMCCmd(SEND_OP_COND,0x0);
             timeout--;
         }while(response.r1._byte != 0x00 && timeout != 0);
+		}
 
     #else
 
@@ -1449,6 +1528,28 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
             return &mediaInformation;
         }
 
+        response = SendMMCCmdManual(SEND_IF_COND, 0x1AA);
+        if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
+		{
+	        timeout = 0xFFF;
+	        do
+	        {
+                response = SendMMCCmdManual(SEND_OP_COND, 0x40000000);
+	            timeout--;
+	        }while(response.r1._byte != 0x00 && timeout != 0);
+			response = SendMMCCmdManual(READ_OCR, 0x0);
+	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
+			{
+				gSDMode = SD_MODE_NORMAL;
+			}
+	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
+			{
+            gSDMode = SD_MODE_HC;
+			}
+		}
+        else
+		{
+            gSDMode = SD_MODE_NORMAL;
         // According to the spec cmd1 must be repeated until the card is fully initialized
         timeout = 0xFFF;
     
@@ -1457,6 +1558,7 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
             response = SendMMCCmdManual (SEND_OP_COND, 0x0);
             timeout--;
         }while(response.r1._byte != 0x00 && timeout != 0);
+		}
     #endif    
 
     // see if it failed

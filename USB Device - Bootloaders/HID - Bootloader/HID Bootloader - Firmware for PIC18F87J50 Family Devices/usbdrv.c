@@ -1,12 +1,12 @@
 /*********************************************************************
  *
- *                Microchip USB C18 Firmware Version 1.2
+ *                Microchip USB C18 Firmware Version 1.2+
  *
  *********************************************************************
  * FileName:        usbdrv.c
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.11+
+ * Compiler:        C18 3.30+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -33,9 +33,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Rawin Rojvanit       11/19/04    Original.
  * Rawin Rojvanit       08/14/07    Bug fixes.
- * Fritz Schlunder		02/17/09	Customizations to better optimize
- *									behavior and code size for use
- *									in this application (bootloader).
+ * Fritz Schlunder		05/07/09	Small update to work with the
+ *									new usbctrltrf.c file. 
  ********************************************************************/
 
 /** I N C L U D E S **********************************************************/
@@ -312,7 +311,15 @@ void USBDriverService(void)
  *
  * Side Effects:    None
  *
- * Overview:
+ * Overview:		When the USB host sends USB suspend signalling, this function
+ *					gets called.  In order to be USB compliant, the device 
+ *					firmware should configure the application so that it takes
+ *					no more than 2.5mA from the +5VBus supply from the
+ *					USB port during USB suspend events.  Bus powered devices can
+ *					meet this by suspending the USB module, and either clock switching
+ *					to a low frequency or sleeping.  This is not necessary if the
+ *					application is self powered, or if it doesn't need to meet
+ *					all USB compliance requirements.
  *
  * Note:            None
  *****************************************************************************/
@@ -320,7 +327,7 @@ void USBSuspend(void)
 {
 	unsigned char UIESave;
 	unsigned char LEDSave;
-
+	
     /*
      * NOTE: Do not clear UIRbits.ACTVIF here!
      * Reason:
@@ -344,8 +351,6 @@ void USBSuspend(void)
      *                          then it can never get out of the suspend
      *                          mode.
      */
-
-
 
     /* Modifiable Section */
     /*
@@ -403,7 +408,7 @@ void USBSuspend(void)
 	//The host will allow at least 10ms for USB resume recovery, during which it will not try to communicate
 	//with the device (other than SOFs, which will be ignored since UCONbits.SUSPND = 1)
 
-	//This code delays ~5ms @ 8MHz to execute (using C18 3.22 with full optimizations enabled), but takes much less time at 48MHz.
+	//This code delays ~5ms @ 8MHz to execute (using C18 3.21 with full optimizations enabled), but takes much less time at 48MHz.
     pll_startup_counter = 725;
     while(pll_startup_counter--)	//Device will switch clocks (if using two-speed startup) while executing this loop
     {
@@ -740,6 +745,10 @@ properly updated before being checked again.
 
     UCONbits.PKTDIS = 0;            // Make sure packet processing is enabled
     USBPrepareForNextSetupTrf();    // Declared in usbctrltrf.c
+    //Prepare EP0 OUT to receive the first SETUP packet
+    ep0Bo.Cnt = EP0_BUFF_SIZE;
+    ep0Bo.ADR = (byte*)(&SetupPkt);
+    ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;	
 
     usb_stat.RemoteWakeup = 0;      // Default status flag to disable
     usb_active_cfg = 0;             // Clear active configuration

@@ -118,10 +118,10 @@ WORD counter;
 
     SetColor(DRAW_COLOR_LINES);
     for(counter = 0; counter < DRAW_COLORS_NUMBER; counter++){
-         Rectangle((ColorBoxLeft()-1),
+         while(!Rectangle((ColorBoxLeft()-1),
                    (ColorBoxTop(counter)-1),
                    (ColorBoxRight()+1),
-                   (ColorBoxBottom(counter)+1));
+                   (ColorBoxBottom(counter)+1)));
     }
 
     SetColor(BRIGHTRED);
@@ -131,10 +131,10 @@ WORD counter;
               ColorBoxRight(),
               ColorBoxBottom(0),
               0,0,NULL,NULL,NULL);
-    Bar(ColorBoxLeft(),
+    while(!Bar(ColorBoxLeft(),
             ColorBoxTop(0),
             ColorBoxRight(),
-            ColorBoxBottom(0));
+            ColorBoxBottom(0)));
 
     SetColor(BRIGHTGREEN);
     BtnCreate(ID_BUTTON2,
@@ -143,10 +143,10 @@ WORD counter;
               ColorBoxRight(),
               ColorBoxBottom(1),
               0,0,NULL,NULL,NULL);
-    Bar(ColorBoxLeft(),
+    while(!Bar(ColorBoxLeft(),
             ColorBoxTop(1),
             ColorBoxRight(),
-            ColorBoxBottom(1));
+            ColorBoxBottom(1)));
 
     SetColor(BRIGHTBLUE);
     BtnCreate(ID_BUTTON3,
@@ -155,10 +155,10 @@ WORD counter;
               ColorBoxRight(),
               ColorBoxBottom(2),
               0,0,NULL,NULL,NULL);
-    Bar(ColorBoxLeft(),
+    while(!Bar(ColorBoxLeft(),
             ColorBoxTop(2),
             ColorBoxRight(),
-            ColorBoxBottom(2));
+            ColorBoxBottom(2)));
 
     SetColor(BRIGHTCYAN);
     BtnCreate(ID_BUTTON4,
@@ -167,10 +167,10 @@ WORD counter;
               ColorBoxRight(),
               ColorBoxBottom(3),
               0,0,NULL,NULL,NULL);
-    Bar(ColorBoxLeft(),
+    while(!Bar(ColorBoxLeft(),
             ColorBoxTop(3),
             ColorBoxRight(),
-            ColorBoxBottom(3));
+            ColorBoxBottom(3)));
 
     SetColor(BRIGHTMAGENTA);
     BtnCreate(ID_BUTTON5,
@@ -179,10 +179,10 @@ WORD counter;
               ColorBoxRight(),
               ColorBoxBottom(4),
               0,0,NULL,NULL,NULL);
-    Bar(ColorBoxLeft(),
+    while(!Bar(ColorBoxLeft(),
             ColorBoxTop(4),
             ColorBoxRight(),
-            ColorBoxBottom(4));
+            ColorBoxBottom(4)));
 
     SetColor(BRIGHTYELLOW);
     BtnCreate(ID_BUTTON6,
@@ -191,10 +191,10 @@ WORD counter;
               ColorBoxRight(),
               ColorBoxBottom(5),
               0,0,NULL,NULL,NULL);
-    Bar(ColorBoxLeft(),
+    while(!Bar(ColorBoxLeft(),
             ColorBoxTop(5),
             ColorBoxRight(),
-            ColorBoxBottom(5));
+            ColorBoxBottom(5)));
 }
 
 /************************************************************************
@@ -209,12 +209,12 @@ WORD counter;
 ************************************************************************/
 void DrawToolFrame(void){
     SetColor(drawColor);
-    Bar(FrameLeft(), FrameTop(), (FrameLeft()+DRAW_INDENT), FrameBottom());
-    Bar((FrameRight()-DRAW_INDENT), FrameTop(),FrameRight(), FrameBottom());
-    Bar((FrameLeft()+DRAW_INDENT), FrameTop(), (FrameRight()-DRAW_INDENT), (FrameTop()+DRAW_INDENT));
-    Bar((FrameLeft()+DRAW_INDENT), (FrameBottom()-DRAW_INDENT), (FrameRight()-DRAW_INDENT), FrameBottom());
+    while(!Bar(FrameLeft(), FrameTop(), (FrameLeft()+DRAW_INDENT), FrameBottom()));
+    while(!Bar((FrameRight()-DRAW_INDENT), FrameTop(),FrameRight(), FrameBottom()));
+    while(!Bar((FrameLeft()+DRAW_INDENT), FrameTop(), (FrameRight()-DRAW_INDENT), (FrameTop()+DRAW_INDENT)));
+    while(!Bar((FrameLeft()+DRAW_INDENT), (FrameBottom()-DRAW_INDENT), (FrameRight()-DRAW_INDENT), FrameBottom()));
     SetColor(DRAW_COLOR_LINES);
-    Rectangle(FrameLeft()-1,FrameTop()-1,FrameRight()+1,FrameBottom()+1);
+    while(!Rectangle(FrameLeft()-1,FrameTop()-1,FrameRight()+1,FrameBottom()+1));
 }
 
 /************************************************************************
@@ -228,8 +228,8 @@ void DrawToolFrame(void){
 ************************************************************************/
 void DrawToolPad(void){
     SetColor(DRAW_COLOR_PAD);
-    Bar((FrameLeft()+DRAW_INDENT+1), (FrameTop()+DRAW_INDENT+1),
-        (FrameRight()-DRAW_INDENT-1), (FrameBottom()-DRAW_INDENT-1));
+    while(!Bar((FrameLeft()+DRAW_INDENT+1), (FrameTop()+DRAW_INDENT+1),
+        (FrameRight()-DRAW_INDENT-1), (FrameBottom()-DRAW_INDENT-1)));
 }
 
 /************************************************************************
@@ -263,11 +263,11 @@ SHORT x,y;             // current point
         if((pMsg->uiEvent == EVENT_PRESS) || (prevX < 0) ){
             PutPixel(x,y); // Draw pixel
         }else{
-            Line(prevX,prevY,x,y);  // Connect with thick line previous and current points
-            Line(prevX-1,prevY,x-1,y);
-            Line(prevX+1,prevY,x+1,y);
-            Line(prevX,prevY-1,x,y-1);
-            Line(prevX,prevY+1,x,y+1);
+            while(!Line(prevX,prevY,x,y));  // Connect with thick line previous and current points
+            while(!Line(prevX-1,prevY,x-1,y));
+            while(!Line(prevX+1,prevY,x+1,y));
+            while(!Line(prevX,prevY-1,x,y-1));
+            while(!Line(prevX,prevY+1,x,y+1));
         }
 
         prevX = x; prevY = y; // Store position

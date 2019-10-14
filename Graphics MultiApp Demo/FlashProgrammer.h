@@ -68,4 +68,17 @@
 ************************************************************************/
 void ProgramFlash(void);
 
+/************************************************************************
+ Function: void SetPPSPorts(void)
+                                                                       
+ Overview: Set up the Peripheral Pin Select ports to map UART signals.
+		   This is only specific to PIC24FJ256GB110 and PIC24FJ256GA110
+		   devices.
+ 		                                                                          
+ Input: none
+                                                                       
+ Output: none
+************************************************************************/
+void SetPPSPorts(void);
+
 #endif // _FLASHPROGRAMMER_H

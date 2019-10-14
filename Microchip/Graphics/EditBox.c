@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        EditBox.c
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, C32
  * Linker:          MPLAB LINK30, LINK32
  * Company:         Microchip Technology Incorporated
@@ -259,7 +259,7 @@ SHORT width;
 
           	if(GetState(pEb, EB_HIDE)){
    	   	        SetColor(pEb->hdr.pGolScheme->CommonBkColor);
-    	        Bar(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom);
+    	        if(!Bar(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom)) return 0;
     	        return 1;
     	    }    
 
@@ -330,8 +330,6 @@ SHORT width;
 		    state = EB_STATE_TEXT;
 			
         case EB_STATE_TEXT:
-            if(IsDeviceBusy())
-                return 0;
             if(!OutText(pEb->pBuffer))
                 return 0;
     }else{
@@ -344,14 +342,12 @@ SHORT width;
 
         case EB_STATE_CARET:
             if(!GetState(pEb,EB_DISABLED)){
-                if(IsDeviceBusy())
-                    return 0;
                 if(GetState(pEb,EB_CARET)){
                     SetColor(pEb->hdr.pGolScheme->TextColor0);
                 }else{
                     SetColor(pEb->hdr.pGolScheme->Color0);
                 }
-                Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight);
+                if(!Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight)) return 0;
             }
             SetClip(CLIP_DISABLE);
 			state = EB_STATE_START;

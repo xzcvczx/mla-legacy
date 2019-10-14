@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - CDC - Basic Demo
 dir_sin=
-dir_inc=c:\mcc18\h;.;..\..\include;..\..\..\include;..\..\microchip\include;..\..\..\USB Device - CDC - Basic Demo\CDC - Basic Demo - Firmware;..\..\..\..\USB Device - CDC - Basic Demo\CDC - Basic Demo - Firmware
+dir_inc=c:\mcc18\h;..\..\microchip\include;..\..\USB Device - CDC - Basic Demo\CDC - Basic Demo - Firmware
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]
@@ -96,7 +96,7 @@ suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=
 [TOOL_SETTINGS]
 TS{DD2213A8-6310-47B1-8376-9430CDFC013F}=
-TS{BFD27FBA-4A02-4C0E-A5E5-B812F3E7707C}=/o"$(BINDIR_)$(TARGETBASE).cof" /M"$(BINDIR_)$(TARGETBASE).map" /W
+TS{BFD27FBA-4A02-4C0E-A5E5-B812F3E7707C}=/m"$(BINDIR_)$(TARGETBASE).map" /w /o"$(BINDIR_)$(TARGETBASE).cof"
 TS{C2AF05E7-1416-4625-923D-E114DB6E2B96}=-pa=4
 TS{ADE93A55-C7C7-4D4D-A4BA-59305F7D0391}=
 [INSTRUMENTED_TRACE]

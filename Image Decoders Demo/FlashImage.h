@@ -4,7 +4,7 @@
 
 * FileName:        FlashImage.h
 * Dependencies:    Image decoding library;
-* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
+* Processor:       PIC24F, PIC24H, dsPIC, PIC32
 * Compiler:        C30 v2.01/C32 v0.00.18
 * Company:         Microchip Technology, Inc.
 

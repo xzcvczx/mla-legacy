@@ -132,7 +132,6 @@ extern WORD demoCount;
 // local function prototypes
 void CreateDemoSelectionPage0(void);
 void CreateDemoSelectionPage1(void);
-void DemoSelectionRemoveIcons(void);
 
 // global tick counter
 extern 	DWORD tick;
@@ -143,6 +142,7 @@ char page = 0;
 
 // last page number
 #define DEMOSEL_LASTPAGE    1
+#define WAIT_UNTIL_FINISH(x) while(!x)
 
 /************************************************************************
  Function: CreateDemoSelection()
@@ -156,15 +156,8 @@ char page = 0;
 void CreateDemoSelection() {
 static char prevPage = 0;
 
-	// do this only when we are coming back to the selection screen
-	// from a particular demo, to reduce time to refresh the screen
-    if(page == prevPage){
-        SetColor(SCREEN_BACKGROUND_COLOR);
-        Bar(0,0,GetMaxX(),GetMaxY());
-        //ClearDevice();
-    } else {
-    	DemoSelectionRemoveIcons();
-    }	
+    SetColor(SCREEN_BACKGROUND_COLOR);
+    ClearDevice();
     
     prevPage = page;
     switch(page){
@@ -209,8 +202,6 @@ const XCHAR iconPix4FolderStr[] = {'S','D',' ','C','a','r','d',' ','D','e','m','
 void CreateDemoSelectionPage0(){
 
     GOLFree();   // free memory for the objects in the previous linked list and start new list
-
-    //DemoSelectionRemoveIcons();
 
 	// USB HID or Mood Lighting demo icon
     BtnCreate(ID_BUTTON1, 										// button ID 
@@ -310,8 +301,6 @@ void CreateDemoSelectionPage1(){
 	
     GOLFree();   // free memory for the objects in the previous linked list and start new list
 
-    //DemoSelectionRemoveIcons();
-    
 	// Date and Time demo icon
     BtnCreate(ID_BUTTON7, 										// button ID 
               IconLeft(0),										// dimension of the button
@@ -699,27 +688,6 @@ WORD MsgDemoSelection(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg) {
 #endif // #ifdef USE_FOCUS   	
 
     return 1;
-}
-
-/************************************************************************
- Function: WORD DemoSelectionRemoveIcons(void)
-                                                                       
- Overview: Removes the icons from the screen. Used to clear the 
- 		   menu when switching from page 0 to page 1 or returning
- 		   from a demo to selection screen.
- 		                                                                          
- Input: none
-                                                                       
- Output: none
-************************************************************************/
-void DemoSelectionRemoveIcons(void) {
-   SetColor(SCREEN_BACKGROUND_COLOR);
-   Bar(IconLeft(0),IconTop(0),IconRight(0),IconBottom(0));
-   Bar(IconLeft(1),IconTop(0),IconRight(1),IconBottom(0));
-   Bar(IconLeft(2),IconTop(0),IconRight(2),IconBottom(0));
-   Bar(IconLeft(0),IconTop(1),IconRight(0),IconBottom(1));
-   Bar(IconLeft(1),IconTop(1),IconRight(1),IconBottom(1));
-   Bar(IconLeft(2),IconTop(1),IconRight(2),IconBottom(1));
 }
 
 /************************************************************************

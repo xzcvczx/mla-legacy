@@ -21,6 +21,7 @@ const XCHAR SignatureStr[] = {0x00D0, 0x009D, 0x0000};    //Signature
 const XCHAR PlottingStr[] = {0x00D2, 0x00A0, 0x0000};    //Plotting		
 const XCHAR EcgStr[] = {0x0045, 0x0043, 0x0047, 0x0000};    //ECG 
 const XCHAR HomeStr[] = {0x0085, 0x00EB, 0x0000};    //Home			
+const XCHAR HomeLinesStr[] = {0x0085, 0x00EB, 0x0031, 0x000A, 0x0085, 0x00EB, 0x0032, 0x0000};    //Home1\nHome2
 const XCHAR LowStr[] = {0x008B, 0x0000};    //Low				
 const XCHAR HighStr[] = {0x00EC, 0x0000};    //High			
 const XCHAR OnStr[] = {0x00B0, 0x0000};    //On				

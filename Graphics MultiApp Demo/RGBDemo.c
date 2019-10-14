@@ -36,6 +36,10 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		03/10/08	... 
+ * Pradeep B.			06/24/09    Added checks for accelerated primitives.
+ * PAT					06/30/09	Added implementation of detecting continuous
+ *									touch screen press on a button on left &
+ *									right buttons that control the RED value.
  *****************************************************************************/
 
 #include "MainDemo.h"
@@ -75,6 +79,8 @@ void FadeColorControl(void);
 void DrawColorPointer(void);
 void UpdateColorPointer(SHORT center);
 WORD DrawIntensityLevel(WORD drawType);
+
+#define WAIT_UNTIL_FINISH(x) while(!x)
 
 /////////////////////////////////////////////////////////////////////////////
 //                            IMAGES USED
@@ -261,33 +267,6 @@ BYTE NUM_Lock_Pressed = 0;
 
 #endif //#ifdef ENABLE_USB_HOST_HID_DEMO 
 
-
-//******************************************************************************
-//******************************************************************************
-// USB Support Functions
-//******************************************************************************
-//******************************************************************************
-
-//BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
-//{
-//#ifndef MINIMUM_BUILD
-//    switch( event )
-//    {
-//        //case EVENT_REQUEST_POWER:
-//        case EVENT_VBUS_REQUEST_POWER:
-//            // data points to a byte that represents the amount of power
-//            // requested in mA, divided by two.
-//            //if (*(BYTE*)data <= 50)
-//            {
-//                return TRUE;
-//            }
-//            break;
-//    }
-//#endif
-//
-//    return FALSE;
-//}
-//
 
 /************************************************************************
  Function: WORD CreateRGBDemo(void)
@@ -611,9 +590,12 @@ void CreateRGBDemo(void)
 ************************************************************************/
 WORD RGBDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg){
 
-	EDITBOX* 	pEb;
-	SLIDER* 	pSld;
+	static 	DWORD 		prevTick  = 0;  		// keeps previous value of tick
+	EDITBOX* 	pEb = NULL;
+	SLIDER* 	pSld = NULL;
 	WORD 		objectID;
+	
+	SHORT 		temp;
 
     objectID = GetObjID(pObj);
 
@@ -672,7 +654,8 @@ WORD RGBDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg){
 			return 1;
 		// ignore all slider touch screen control, sliders are only 
 		// controlled using the buttons.
-		case ID_SLD1:									case ID_SLD2:
+		case ID_SLD1:							
+		case ID_SLD2:
 		case ID_SLD3:
 #ifdef DISABLECOLORSLIDER		
 			return 0;
@@ -680,7 +663,8 @@ WORD RGBDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg){
 			if (FadeModeEnable == TRUE)
 				return 0;
 			if ((objMsg == SLD_MSG_DEC) || (objMsg == SLD_MSG_INC)) 
-			{											// check if slider moved 
+			{							
+				// check if slider moved 
 				if (objectID == ID_SLD1) {
             		pEb = (EDITBOX*)GOLFindObject(ID_EB1);
             		RedPos = SldGetPos((SLIDER*)pObj);
@@ -719,9 +703,48 @@ WORD RGBDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg){
             	Int2Str(EbGetText(pEb), RedPos, 3);
 				SetState(pEb, EB_DRAW);
 				TickDiff = DEFAULTTICKDIFF;
+				prevTick = tick;
 				cptrState = CPTR_HIDE_ST;					// hide the color pointer
 				UpdateCurrent = TRUE;
 			}
+			if (objMsg == BTN_MSG_PRESSED) { 				// check if button is pressed
+				TickDiff = DEFAULTTICKDIFF;
+				prevTick = tick;
+			}	
+			
+			// This is an example to show how to use message callback to 
+			// detect continuous button press	
+			if (objMsg == BTN_MSG_STILLPRESSED) { 			// check if button is still pressed
+
+				if((tick-prevTick)>TickDiff) {
+
+					if (TickDiff > MINTICKDELAY)
+						TickDiff -= CHANGEDELAY;
+
+ 					pSld = (SLIDER*)GOLFindObject(ID_SLD1);		
+					temp = SldGetPos(pSld);
+					    if (objectID == ID_UPBTN1) {
+						    if ((++temp) > REDMAX)
+						    	RedPos = REDMAX;
+						    else
+						    	RedPos = temp;
+	                	} else {
+						    if ((--temp) < 0)
+						    	RedPos = 0;
+						    else
+						    	RedPos = temp;
+	                	}
+                		SldSetPos(pSld,RedPos);
+    	            	SetState(pSld, SLD_DRAW_THUMB);
+    	            	
+    	            	pEb = (EDITBOX*)GOLFindObject(ID_EB1);
+    	            	Int2Str(EbGetText(pEb), RedPos, 3);
+						SetState(pEb, EB_DRAW);
+						cptrState = CPTR_HIDE_ST;					// hide the color pointer
+					prevTick = tick; 
+				}		
+    	            								
+			}	
 			return 1;
 		case ID_DNBTN2: 
 		case ID_UPBTN2: 
@@ -961,32 +984,12 @@ static 	DWORD 		prevTick  = 0;  		// keeps previous value of tick
 					TickDiff -= CHANGEDELAY;
 				
 			    switch(objectID) {
-					case ID_DNBTN1: 
-					case ID_UPBTN1:	
-					
-					    pSld = (SLIDER*)GOLFindObject(ID_SLD1);		
-					    temp = SldGetPos(pSld);
-					    if (objectID == ID_UPBTN1) {
-						    if ((++temp) > REDMAX)
-						    	RedPos = REDMAX;
-						    else
-						    	RedPos = temp;
-	                		SldSetPos(pSld,RedPos);
-	                		
-	                	} else {
-						    if ((--temp) < 0)
-						    	RedPos = 0;
-						    else
-						    	RedPos = temp;
-	                		SldSetPos(pSld,RedPos);
-	                	}
-    	            	SetState(pSld, SLD_DRAW_THUMB);
-    	            	
-    	            	pEb = (EDITBOX*)GOLFindObject(ID_EB1);
-    	            	Int2Str(EbGetText(pEb), SldGetPos(pSld), 3);
-						SetState(pEb, EB_DRAW);
-						cptrState = CPTR_HIDE_ST;					// hide the color pointer
-    	            	break;
+				    // ID_DNBTN1 & ID_UPBTN1 are updated using message callback and
+				    // BTN_MSG_STILLPRESSED message.
+				    
+				    // ID_DNBTN2 & ID_UPBTN2 : ID_DNBTN3 & ID_UPBTN3  on the other hand 
+				    // are updated using the draw call back and checking the state.
+				    
 					case ID_DNBTN2: 
 					case ID_UPBTN2:	
 					    pSld = (SLIDER*)GOLFindObject(ID_SLD2);		
@@ -1241,12 +1244,10 @@ BOOL AppGetParsedReportDetails(void)
 {
   BYTE NumOfReportItem = 0;
   BYTE i;
-  BYTE ReportItemIndexModifierKeys;
   HID_REPORTITEM *reportItem;
   HID_USAGEITEM *hidUsageItem;
   BYTE usageIndex;
-  BYTE usages;
-  BYTE reportIndex;
+  BYTE reportIndex = 0;
   BOOL foundModifierKey = FALSE;
   BOOL foundNormalKey = FALSE;
 
@@ -1481,10 +1482,10 @@ void FadeColorControl(void)
 WORD ShowCurrentColor(void)
 {
 	SetColor(RGB565CONVERT(180,180,180));
-	Rectangle(CURRBARXPOS, CURRBARYPOS, CURRBARXPOS+CURRBARWIDTH,CURRBARYPOS+CURRBARHEIGHT);
+	WAIT_UNTIL_FINISH(Rectangle(CURRBARXPOS, CURRBARYPOS, CURRBARXPOS+CURRBARWIDTH,CURRBARYPOS+CURRBARHEIGHT));
 
 	SetColor(RGB565CONVERT(RedPos,GreenPos,BluePos));
-	Bar(CURRBARXPOS+2, CURRBARYPOS+2, CURRBARXPOS+CURRBARWIDTH-2,CURRBARYPOS+CURRBARHEIGHT-2);
+	WAIT_UNTIL_FINISH(Bar(CURRBARXPOS+2, CURRBARYPOS+2, CURRBARXPOS+CURRBARWIDTH-2,CURRBARYPOS+CURRBARHEIGHT-2));
 	UpdateCurrent = FALSE;
 	return TRUE;
 }	
@@ -1527,7 +1528,7 @@ WORD DrawColorPalette(void)
 		trueXPos = x + PLTXPOS;
 		
 		SetColor(RGB565CONVERT((BYTE)red, (BYTE)green, (BYTE)blue));
-		Bar(trueXPos, PLTYPOS, trueXPos, PLTYPOS+PLTHEIGHT);
+		WAIT_UNTIL_FINISH(Bar(trueXPos, PLTYPOS, trueXPos, PLTYPOS+PLTHEIGHT));
 		UpdateColor = FALSE;
 	}
 	SetColor(RGB565CONVERT(180,180,180));
@@ -1539,7 +1540,7 @@ WORD DrawColorPalette(void)
 	while (y < SLD4HEIGHT) {
 		// rectangles are drawn every 5 pixels with height = 4 pixels.
 		SetColor(RGB565CONVERT(0x4C, 0x8E, 0xFF));
-		Rectangle(SLD4XPOS,SLD4YPOS+SLD4HEIGHT-(y+3), SLD4XPOS+SLD4WIDTH,SLD4YPOS+SLD4HEIGHT-y);
+		WAIT_UNTIL_FINISH(Rectangle(SLD4XPOS,SLD4YPOS+SLD4HEIGHT-(y+3), SLD4XPOS+SLD4WIDTH,SLD4YPOS+SLD4HEIGHT-y));
 		y += 5;
 	}
 	return 1;
@@ -1580,7 +1581,7 @@ static  SHORT 		prevValue = 0;			// value of the intensity level
 			y = y - (y%5);
 				
 			// draw a bar with the background color to remove the current bar drawn
-			Bar(SLD4XPOS+1,SLD4YPOS+SLD4HEIGHT-(y+3)+1, SLD4XPOS+SLD4WIDTH-1,SLD4YPOS+SLD4HEIGHT-y-1);
+			WAIT_UNTIL_FINISH(Bar(SLD4XPOS+1,SLD4YPOS+SLD4HEIGHT-(y+3)+1, SLD4XPOS+SLD4WIDTH-1,SLD4YPOS+SLD4HEIGHT-y-1));
 			// decrement by three since we are drawing every 6 pixels
 			prevValue -= 5;
 			if (prevValue <= 0)
@@ -1605,7 +1606,7 @@ static  SHORT 		prevValue = 0;			// value of the intensity level
 				SetColor(BRIGHTRED); 	
 			}
 			// draw a bar to increase in value
-			Bar(SLD4XPOS+1,SLD4YPOS+SLD4HEIGHT-(y+3)+1, SLD4XPOS+SLD4WIDTH-1,SLD4YPOS+SLD4HEIGHT-y-1);
+			WAIT_UNTIL_FINISH(Bar(SLD4XPOS+1,SLD4YPOS+SLD4HEIGHT-(y+3)+1, SLD4XPOS+SLD4WIDTH-1,SLD4YPOS+SLD4HEIGHT-y-1));
 			// increment by three since we are drawing every 6 pixels
 			prevValue += 5;
 		}
@@ -1700,14 +1701,14 @@ void DrawColorPointer(void)
 		else	
 			pPoints = &PolyPoints[0];	
 		SetColor(RGBBACKGROUND);
-		DrawPoly(4, pPoints);
+		while(!DrawPoly(4, pPoints));
 	}
 
 	if ((cptrState == CPTR_UPDATE_ST)||(cptrState == CPTR_SHOW_ST)){
 		// now draw the new position 
 		pPoints = &PolyPoints[0];	
 		SetColor(WHITE);
-		DrawPoly(4, pPoints);
+		while(!DrawPoly(4, pPoints));
 	}
 	
 	if (cptrState == CPTR_UPDATE_ST) {

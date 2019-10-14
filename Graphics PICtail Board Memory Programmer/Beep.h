@@ -4,8 +4,8 @@
  *
  *****************************************************************************
  * FileName:        Beep.h
- * Dependencies:    none
- * Processor:       PIC24, PIC32
+ * Dependencies:    Graphics.h
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -38,13 +38,28 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		07/10/07	...
  * Anton Alkhimenok     02/07/08    PIC32 support
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  *****************************************************************************/
 
 #ifndef _BEEP_H
 #define _BEEP_H
+#include "GenericTypeDefs.h"
+#include "HardwareProfile.h"
+#if defined(__dsPIC33F__) 
+#include <p33Fxxxx.h>
+#elif  defined(__PIC24H__)
+#include <p24Hxxxx.h>
+#elif defined(__PIC32MX__)
+#include <plib.h>
+#else
+#include <p24Fxxxx.h>
+#endif
 
-
+#if defined(__dsPIC33F__) || defined(__PIC24H__) 
+#define BEEP_TIME       10
+#else
 #define BEEP_TIME       500
+#endif
 
 #ifdef __PIC32MX
 #define TIMER_BASE      4400

@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Meter.h
  * Dependencies:    None 
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -122,7 +122,7 @@
 
 #endif
 
-#define SCALECHARCOUNT		  4		// Defines how many characters will be allocated for the
+#define SCALECHARCOUNT		  3		// Defines how many characters will be allocated for the
 									// scale labels. Use this define in accordance to 
 									// the maxValue-minValue. Example: if maxValue-minValue = 500, SCALECHARCOUNT
 									// should be 3. if maxValue-minValue = 90, SCALECHARCOUNT = 2 

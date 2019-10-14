@@ -41,25 +41,21 @@
 #ifndef _SSD1926_H
 #define _SSD1926_H
 
-#ifdef __PIC32MX
+#if defined(__dsPIC33F__)
+#include <p33Fxxxx.h>
+#elif defined(__PIC24H__)
+#include <p24Hxxxx.h>
+#elif defined(__PIC32MX__)
 #include <plib.h>
 #define PMDIN1   PMDIN
-#else
-#ifdef __PIC24F__
+#elif defined(__PIC24F__)
 #include <p24Fxxxx.h>
 #else
 #error CONTROLLER IS NOT SUPPORTED
 #endif
-#endif
 
 #include "GraphicsConfig.h"
 #include "GenericTypeDefs.h"
-
-/*********************************************************************
-* Overview: Allows using 16bit PMP interface for PIC devices that 
-*           supports 16-bit interface on PMP.
-*********************************************************************/
-//#define USE_16BIT_PMP
 
 /*********************************************************************
 * Overview: Additional hardware-accelerated functions can be implemented
@@ -71,7 +67,7 @@
 //#define USE_DRV_FONT
 
 // Define this to implement Line function in the driver.
-//#define USE_DRV_LINE
+#define USE_DRV_LINE
 
 // Define this to implement Circle function in the driver.
 //#define USE_DRV_CIRCLE
@@ -209,6 +205,25 @@ extern SHORT _clipTop;
 extern SHORT _clipRight;
 // Bottom clipping region border
 extern SHORT _clipBottom;
+
+/*********************************************************************
+* Function:  BYTE GetReg(WORD index)
+*
+* PreCondition: none
+*
+* Input: index - register number
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: returns graphics controller register value (byte access)
+*
+* Note: none
+*
+********************************************************************/
+BYTE GetReg(WORD index);
+
 
 /*********************************************************************
 * Function:  void ResetDevice()
@@ -505,7 +520,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define IsDeviceBusy()  0
+#define IsDeviceBusy()  ((GetReg(REG_2D_220)&0x01) == 0)
 
 /*********************************************************************
 * Macros: SetPalette(colorNum, color)

@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Chart.c
  * Dependencies:    Chart.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 Version 3.00, C32
  * Linker:          MPLAB LINK30, LINK32
  * Company:         Microchip Technology Incorporated
@@ -38,12 +38,13 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo
  * Anton Alkhimenok		4/8/08		...
- * Paolo A. Tamayo		8/8/08		Centered values displayed on bar charts
+ * PAT					8/8/08		Centered values displayed on bar charts
  *									Removed line drawn on pie chart when no slices 
  *									are present.
- * Paolo A. Tamayo		9/30/08		3-D bar depth is now equal to chart depth.
+ * PAT					9/30/08		3-D bar depth is now equal to chart depth.
  *									Flushed 2-D Bars to equal max height of chart
  *									when equal or greater than.
+ * PAT					6/29/09		Modified Draw Sector function to be state based.
  *****************************************************************************/
 
 #include "Graphics\Graphics.h"
@@ -55,7 +56,7 @@
 // internal functions and macros
 WORD word2xchar(WORD pSmple, XCHAR *xcharArray, WORD cnt); 
 void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
-void DrawSector(SHORT cx, SHORT cy, SHORT radius, SHORT angleFrom, SHORT angleTo, WORD outLineColor);
+WORD DrawSector(SHORT cx, SHORT cy, SHORT radius, SHORT angleFrom, SHORT angleTo, WORD outLineColor);
 WORD GetColorShade(WORD color, BYTE shade); 
 WORD ChParseShowData(DATASERIES *pData);
 DATASERIES *ChGetNextShowData(DATASERIES *pData);
@@ -356,6 +357,7 @@ typedef enum {
 	PIE_DRAW_OUTLINE1,
 	PIE_DRAW_SECTOR,
 	PIE_DRAW_SECTOR_LOOP,
+	PIE_DRAW_SECTOR_ACTUAL,
 	PIE_DRAW_SECTOR_LOOP_CONTINUE,
 	PIE_DRAW_SECTOR_LOOP_CREATE_STRINGS,
 	PIE_DRAW_SECTOR_LOOP_STRINGS_RUN,
@@ -398,7 +400,7 @@ static WORD pieSectorYPos;
 
 	        if (GetState(pCh,CH_HIDE)) {  				      	// Hide the Chart (remove from screen)
        	        SetColor(pCh->hdr.pGolScheme->CommonBkColor);
-       	        Bar(pCh->hdr.left, pCh->hdr.top, pCh->hdr.right, pCh->hdr.bottom);
+       	        if(!Bar(pCh->hdr.left, pCh->hdr.top, pCh->hdr.right, pCh->hdr.bottom)) return 0;
 		        return 1;
 		    }
 
@@ -429,35 +431,29 @@ static WORD pieSectorYPos;
 						if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
 							// adjust for 3D effects
    	    				    j -= chart3DDepth;
-//#ifdef USE_MULTI_COLOR							
 							if ((GetState(pCh, CH_LEGEND)) && (ChGetShowSeriesCount(pCh) != 1)) {
-//#else								
-//							if ((GetState(pCh, CH_LEGEND)) || (GetState(pCh, CH_VALUE))) {
-//#endif								
-				   		        Bar(h,j,pCh->hdr.right-i,yStart);
+				   		        if(!Bar(h,j,pCh->hdr.right-i,yStart)) return 0;
 			   		        } else {
-				   		        Bar(h,j,pCh->hdr.right-CH_MARGIN,yStart);
+				   		        if(!Bar(h,j,pCh->hdr.right-CH_MARGIN,yStart)) return 0;
 			   		        }
 						} else {
-			   		        Bar(xStart, yStart-((CH_YGRIDCOUNT-1)*valDelta)-chart3DDepth-(GetTextHeight(pCh->hdr.pGolScheme->pFont)), 
+			   		        if(!Bar(xStart, yStart-((CH_YGRIDCOUNT-1)*valDelta)-chart3DDepth-(GetTextHeight(pCh->hdr.pGolScheme->pFont)), 
 			   		        	xStart+splDelta*(ChGetSampleRange(pCh)+1)+chart3DDepth,
-			   		        	yStart+GetTextHeight(pCh->prm.pGridLabelsFont));
+			   		        	yStart+GetTextHeight(pCh->prm.pGridLabelsFont)))
+			   		            return 0;
 			   		    }
 			   		} else {
 						if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-//#ifdef USE_MULTI_COLOR							
 							if ((GetState(pCh, CH_LEGEND)) && (ChGetShowSeriesCount(pCh) != 1)) {
-//#else
-//							if ((GetState(pCh, CH_LEGEND)) || (GetState(pCh, CH_VALUE))) {
-//#endif								
-				   		        Bar(h,j,pCh->hdr.right-i,yStart);
+				   		        if(!Bar(h,j,pCh->hdr.right-i,yStart)) return 0;
 							} else {
-				   		        Bar(h,j,pCh->hdr.right-CH_MARGIN,yStart);
+				   		        if(!Bar(h,j,pCh->hdr.right-CH_MARGIN,yStart)) return 0;
 				   		    }
 						} else {
-			   		        Bar(xStart, yStart-((CH_YGRIDCOUNT-1)*valDelta)-(GetTextHeight(pCh->hdr.pGolScheme->pFont)), 
+			   		        if(!Bar(xStart, yStart-((CH_YGRIDCOUNT-1)*valDelta)-(GetTextHeight(pCh->hdr.pGolScheme->pFont)), 
 			   		        	xStart+splDelta*(ChGetSampleRange(pCh)+1),
-			   		        	yStart+GetTextHeight(pCh->prm.pGridLabelsFont));
+			   		        	yStart+GetTextHeight(pCh->prm.pGridLabelsFont)))
+			   		        	return 0;
 						}
 					}
 				} else {
@@ -469,7 +465,7 @@ static WORD pieSectorYPos;
 					j = pCh->hdr.top+GOL_EMBOSS_SIZE+CH_MARGIN+GetTextHeight(pCh->prm.pTitleFont);
 
 					// erase the current pie chart drawn
-					Bar(h,j,i,pCh->hdr.bottom-CH_MARGIN);
+					if(!Bar(h,j,i,pCh->hdr.bottom-CH_MARGIN)) return 0;
 				}
 
 				// check the type of chart
@@ -529,11 +525,7 @@ static WORD pieSectorYPos;
             	return 0;			
 
 			// check if legend will be drawn            
-//#ifdef USE_MULTI_COLOR							
         	if(GetState(pCh, CH_LEGEND) && (ChGetShowSeriesCount(pCh) != 1)) { 
-//#else
-//        	if(GetState(pCh, CH_LEGEND)) { 
-//#endif	        	
 	            // position the x and y points to the start of the first variable
 				temp = GetLongestNameLength(pCh);
 	            	
@@ -561,9 +553,10 @@ chrt_draw_legend:
 				SetColor(*(&(*pCh->prm.pColor)+temp));
 				if ((ChGetShowSeriesCount(pCh)==1) && (GetState(pCh, CH_PIE))) {
 				} else {
-					Bar(x,y+(GetTextHeight(pCh->hdr.pGolScheme->pFont)>>2), 
+					if(!Bar(x,y+(GetTextHeight(pCh->hdr.pGolScheme->pFont)>>2), 
 						x+(GetTextHeight(pCh->hdr.pGolScheme->pFont)>>1), 
-						y+(GetTextHeight(pCh->hdr.pGolScheme->pFont)-(GetTextHeight(pCh->hdr.pGolScheme->pFont)>>2)));
+						y+(GetTextHeight(pCh->hdr.pGolScheme->pFont)-(GetTextHeight(pCh->hdr.pGolScheme->pFont)>>2))))
+					    return 0;
 				}
 				MoveTo(x+2+(GetTextHeight(pCh->hdr.pGolScheme->pFont)>>1), y); 
 				state = LEGEND_DRAW_RUN;
@@ -672,14 +665,10 @@ chrt_grid_prep:
         	// find the variable with the longest name
         	// to add space for the names of variables in the legend
         	// Text Height here refers to the legend for colors (the drawn filled rectangle)
-//#ifdef USE_MULTI_COLOR
 		   	if ((ChGetShowSeriesCount(pCh) == 1) || (GetState(pCh, CH_LEGEND) != CH_LEGEND))
 		   		temp = 0;
 		   	else 
    				temp = GetLongestNameLength(pCh) + GetTextHeight(pCh->hdr.pGolScheme->pFont);
-//#else   	
-//			temp = GetLongestNameLength(pCh) + GetTextHeight(pCh->hdr.pGolScheme->pFont);
-//#endif
 
         	// get sample delta (space between data) and value delta (defines the grid for the value) 
 			// check first if we compute in the x-axis or y-axis
@@ -696,11 +685,7 @@ chrt_grid_prep:
 	        	// get the value delta, 
 	    	   	valDelta = (pCh->hdr.right-xStart-CH_MARGIN-temp);
 			} else {
-//#ifdef USE_MULTI_COLOR							
 		   		if(GetState(pCh, CH_LEGEND) && (ChGetShowSeriesCount(pCh) != 1)) { 
-//#else			   		
-//		   		if(GetState(pCh, CH_LEGEND)) { 
-//#endif			   		
 	    	    	splDelta = (pCh->hdr.right-xStart-((CH_MARGIN<<2)+temp+GetTextHeight(pCh->hdr.pGolScheme->pFont)));
 				} else {
     		    	splDelta = (pCh->hdr.right-xStart-(CH_MARGIN<<2));
@@ -732,10 +717,10 @@ chrt_grid_prep:
 			while (temp) {
 				SetColor(pCh->hdr.pGolScheme->Color0);
         		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-					Bar(x, y, x+3, y+1); 	
+					if(!Bar(x, y, x+3, y+1)) return 0;	
 					y -= splDelta;
 	        	} else {
-					Bar(x, y, x+1, y+3); 	
+					if(!Bar(x, y, x+1, y+3)) return 0;	
 					x += splDelta;
 				}
 				--temp; 
@@ -756,7 +741,6 @@ chrt_grid_prep:
 				chart3DDepth = (barWidth > 12) ? 12:barWidth;
 				chart3DDepth = chart3DDepth>>1;
 				// set the bar 3-D depth.
-				//barDepth = chart3DDepth >> 1;
 				barDepth = chart3DDepth;
 				state = VALUE_GRID_3D_DRAW;
 			} else { 
@@ -769,12 +753,14 @@ chrt_grid_prep:
 			while(temp) {
 				SetColor(pCh->hdr.pGolScheme->Color0);
 	       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-					Bar(x+(chart3DDepth), y-(chart3DDepth)-(splDelta*(ChGetSampleRange(pCh)+1)), 
-						x+(chart3DDepth), y-(chart3DDepth)); 
+					if(!Bar(x+(chart3DDepth), y-(chart3DDepth)-(splDelta*(ChGetSampleRange(pCh)+1)), 
+						x+(chart3DDepth), y-(chart3DDepth)))
+						return 0;
 					x += valDelta;	
 				} else {
-					Bar(x+(chart3DDepth), y-(chart3DDepth), 
-						x+(chart3DDepth)+(splDelta*(ChGetSampleRange(pCh)+1)), y-(chart3DDepth)); 
+					if(!Bar(x+(chart3DDepth), y-(chart3DDepth), 
+						x+(chart3DDepth)+(splDelta*(ChGetSampleRange(pCh)+1)), y-(chart3DDepth)))
+						return 0; 
 					y -= valDelta;	
 				}
 			 	--temp;
@@ -791,18 +777,18 @@ chrt_value_grid_draw1:
 				// just draw the first one to define the x-axis
 				SetColor(pCh->hdr.pGolScheme->Color0);
 	       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-					Bar(x, y-(splDelta*(ChGetSampleRange(pCh)+1)), x, y); 
+					if(!Bar(x, y-(splDelta*(ChGetSampleRange(pCh)+1)), x, y)) return 0;
 				} else {	
-					Bar(x, y, x+(splDelta*(ChGetSampleRange(pCh)+1)), y); 
+					if(!Bar(x, y, x+(splDelta*(ChGetSampleRange(pCh)+1)), y)) return 0;
 				}
 			} else {
 				while(temp) {
 					SetColor(pCh->hdr.pGolScheme->Color0);
 		       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-						Bar(x, y-(splDelta*(ChGetSampleRange(pCh)+1)), x, y); 
+						if(!Bar(x, y-(splDelta*(ChGetSampleRange(pCh)+1)), x, y)) return 0;
 						x += valDelta;	
 					} else {
-						Bar(x, y, x+(splDelta*(ChGetSampleRange(pCh)+1)), y); 
+						if(!Bar(x, y, x+(splDelta*(ChGetSampleRange(pCh)+1)), y)) return 0;
 						y -= valDelta;	
 					}
 				 	--temp;
@@ -831,18 +817,20 @@ chrt_value_grid_draw1:
 			while(temp) {
 				if (temp == (CH_YGRIDCOUNT + 1)) {
 		       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-						Line(x,y-(splDelta*(ChGetSampleRange(pCh)+1)),
-							 x+chart3DDepth,y-(splDelta*(ChGetSampleRange(pCh)+1))-chart3DDepth);
+						if(!Line(x,y-(splDelta*(ChGetSampleRange(pCh)+1)),
+							 x+chart3DDepth,y-(splDelta*(ChGetSampleRange(pCh)+1))-chart3DDepth))
+							 return 0;
 			       	} else {
-						Line(x+(splDelta*(ChGetSampleRange(pCh)+1)),y,
-							 x+(chart3DDepth)+(splDelta*(ChGetSampleRange(pCh)+1)),y-chart3DDepth);
+						if(!Line(x+(splDelta*(ChGetSampleRange(pCh)+1)),y,
+							 x+(chart3DDepth)+(splDelta*(ChGetSampleRange(pCh)+1)),y-chart3DDepth))
+							 return 0;
 			       	}
 	
 					--temp;
 					continue;
 				}
 				else	
-					Line(x, y, x+chart3DDepth, y-chart3DDepth); 
+					if(!Line(x, y, x+chart3DDepth, y-chart3DDepth)) return 0;
 
 	       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
 					x += valDelta;	
@@ -869,24 +857,24 @@ chrt_xgrid_draw2:
 	
 					if (temp == 3) {
 			       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-							Bar(x,y,x+((CH_YGRIDCOUNT-1)*valDelta),y);
+							if(!Bar(x,y,x+((CH_YGRIDCOUNT-1)*valDelta),y)) return 0;
 						} else {
-							Bar(x,y-((CH_YGRIDCOUNT-1)*valDelta),x,y);
+							if(!Bar(x,y-((CH_YGRIDCOUNT-1)*valDelta),x,y)) return 0;
 						}
 						--temp;
 						continue;
 					}
 					else	
 			       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-							Bar(x+chart3DDepth, y-chart3DDepth, x+chart3DDepth+((CH_YGRIDCOUNT-1)*valDelta),y-chart3DDepth);
+							if(!Bar(x+chart3DDepth, y-chart3DDepth, x+chart3DDepth+((CH_YGRIDCOUNT-1)*valDelta),y-chart3DDepth)) return 0;
 						} else {
-							Bar(x+chart3DDepth, y-((CH_YGRIDCOUNT-1)*valDelta)-chart3DDepth,x+chart3DDepth,y-chart3DDepth);
+							if(!Bar(x+chart3DDepth, y-((CH_YGRIDCOUNT-1)*valDelta)-chart3DDepth,x+chart3DDepth,y-chart3DDepth)) return 0;
 						}
 				} else {
 		       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
-						Bar(x, y,x+((CH_YGRIDCOUNT-1)*valDelta),y);
+						if(!Bar(x, y,x+((CH_YGRIDCOUNT-1)*valDelta),y)) return 0;
 					} else {
-						Bar(x, y-((CH_YGRIDCOUNT-1)*valDelta),x,y);
+						if(!Bar(x, y-((CH_YGRIDCOUNT-1)*valDelta),x,y)) return 0;
 					}
 				}
 	       		if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) {
@@ -1220,29 +1208,25 @@ chrt_data_draw:
 			}		
 
 			// draw the front side of the bar
-//#ifdef USE_MULTI_COLOR			
 			if (ChGetShowSeriesCount(pCh) > 1) {
 				SetColor(*(&(*pCh->prm.pColor)+varCtr));
 			} else	{
 				SetColor(*(&(*pCh->prm.pColor)+ctr));
 			}	
-//#else
-//				SetColor(*(&(*pCh->prm.pColor)+varCtr));
-//#endif			
 			
 			if (GetState(pCh, CH_3D_ENABLE)) {
 	
 				if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-		        	Bar(xStart, y-(temp*(varCtr+1)), xStart+dTemp, y-(temp*varCtr));
+		        	if(!Bar(xStart, y-(temp*(varCtr+1)), xStart+dTemp, y-(temp*varCtr))) return 0;
 		        } else {
-		        	Bar(x+1+1+(temp*varCtr), yStart-dTemp, x+(temp*(varCtr+1)), yStart);
+		        	if(!Bar(x+1+1+(temp*varCtr), yStart-dTemp, x+(temp*(varCtr+1)), yStart)) return 0;
 		        }
 				state = BAR_DATA_DRAW_3D_PREP;
 			} else {
 				if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-		        	Bar(xStart, y-(temp*(varCtr+1)), xStart+dTemp, y-1-(temp*varCtr));
+		        	if(!Bar(xStart, y-(temp*(varCtr+1)), xStart+dTemp, y-1-(temp*varCtr))) return 0;
 		        } else {
-		        	Bar(x+1+(temp*varCtr), yStart-dTemp, x+(temp*(varCtr+1)), yStart);
+		        	if(!Bar(x+1+(temp*varCtr), yStart-dTemp, x+(temp*(varCtr+1)), yStart)) return 0;
 		        }
 	        	if((GetState(pCh, CH_VALUE)) || (GetState(pCh, CH_PERCENT))) {
 					state = BAR_DATA_DRAW_VALUE;
@@ -1276,18 +1260,13 @@ chrt_bar_data_draw_3d_loop_1:
 		        		SetColor(BLACK);	
 		        	} else {
 
-//#ifdef USE_MULTI_COLOR			
 						if (ChGetShowSeriesCount(pCh) > 1) {
 							SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 2)); 
 						} else	{
 							SetColor(GetColorShade(*(&(*pCh->prm.pColor)+ctr), 2)); 
 						}	
-//#else
-//						SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 2)); 
-//#endif
 		        	}
-					Bar(x, z-(temp*(varCtr+1)),
-							x, z-(temp*varCtr));	
+					if(!Bar(x, z-(temp*(varCtr+1)),x, z-(temp*varCtr))) return 0;
 				
 					state = BAR_DATA_DRAW_3D_LOOP_2;
 				} else {
@@ -1299,18 +1278,13 @@ chrt_bar_data_draw_3d_loop_1:
 		        	if ((y == (yStart-dTemp))||(y == (yStart-dTemp-barDepth))) {
 		        		SetColor(BLACK);	
 		        	} else {
-//#ifdef USE_MULTI_COLOR			
 						if (ChGetShowSeriesCount(pCh) > 1) {
 							SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 2)); 
 						} else	{
 							SetColor(GetColorShade(*(&(*pCh->prm.pColor)+ctr), 2)); 
 						}	
-//#else
-//						SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 2)); 
-//#endif						
 		        	}
-					Bar(z+1+(temp*varCtr), y,
-							z-1+(temp*(varCtr+1)), y);
+					if(!Bar(z+1+(temp*varCtr), y,z-1+(temp*(varCtr+1)), y)) return 0;
 						
 					state = BAR_DATA_DRAW_3D_LOOP_2;
 				} else {
@@ -1325,38 +1299,28 @@ chrt_bar_data_draw_3d_loop_1:
 	        	if ((x == (xStart+dTemp))||(x == (xStart+dTemp+barDepth))) {
 	        		SetColor(BLACK);	
 	        	} else {
-//#ifdef USE_MULTI_COLOR			
 					if (ChGetShowSeriesCount(pCh) > 1) {
 						SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 1)); 
 					} else	{
 						SetColor(GetColorShade(*(&(*pCh->prm.pColor)+ctr), 1)); 
 					}	
-//#else
-//					SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 1)); 
-//#endif					
 	        	}
 			} else {
 	        	if ((y == (yStart-dTemp))||(y == (yStart-dTemp-barDepth))) {
 	        		SetColor(BLACK);	
 	        	} else {
-//#ifdef USE_MULTI_COLOR			
 					if (ChGetShowSeriesCount(pCh) > 1) {
 						SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 1)); 
 					} else	{
 						SetColor(GetColorShade(*(&(*pCh->prm.pColor)+ctr), 1)); 
 					}	
-//#else
-//					SetColor(GetColorShade(*(&(*pCh->prm.pColor)+varCtr), 1)); 
-//#endif					
 	        	}
 			}
 			// draw the outline or shade
 			if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-				Bar(x-dTemp, z-(temp*(varCtr+1)),
-					  x, z-(temp*(varCtr+1)));
+				if(!Bar(x-dTemp, z-(temp*(varCtr+1)),x, z-(temp*(varCtr+1)))) return 0;
 			} else {
-				Bar(z+(temp*(varCtr+1)), y,
-						z+(temp*(varCtr+1)), y+dTemp);
+				if(!Bar(z+(temp*(varCtr+1)), y,z+(temp*(varCtr+1)), y+dTemp)) return 0;
 			}
 		
 			// update the loop variables
@@ -1376,53 +1340,50 @@ chrt_bar_data_draw_3d_outline_1:
         	SetColor(BLACK);
 
 			if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-        		Line(x-1, y-(temp*varCtr)-barDepth,
-        				x-1-barDepth, y-(temp*varCtr));
+        		if(!Line(x-1, y-(temp*varCtr)-barDepth,x-1-barDepth, y-(temp*varCtr))) return 0;
 			} else {
-        		Line(x+1+(temp*varCtr), yStart-dTemp, 
-        				x+1+(temp*varCtr)+barDepth, yStart-dTemp-barDepth);
+        		if(!Line(x+1+(temp*varCtr), yStart-dTemp,x+1+(temp*varCtr)+barDepth, yStart-dTemp-barDepth)) return 0;
 			}
 			state = BAR_DATA_DRAW_3D_OUTLINE2;
 
 		case BAR_DATA_DRAW_3D_OUTLINE2:
 
 			if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-        		Line(x-1, y-(temp*(varCtr+1))-barDepth,
-        				x-1-barDepth, y-(temp*(varCtr+1)));
+        		if(!Line(x-1, y-(temp*(varCtr+1))-barDepth,x-1-barDepth, y-(temp*(varCtr+1)))) return 0;
 			} else {
-				Line(x+1+(temp*(varCtr+1)), (yStart-dTemp), 
-        				x+1+(temp*(varCtr+1))+barDepth, (yStart-dTemp)-barDepth);
+				if(!Line(x+1+(temp*(varCtr+1)), (yStart-dTemp),
+        				x+1+(temp*(varCtr+1))+barDepth, (yStart-dTemp)-barDepth)) return 0;
         	}
 			state = BAR_DATA_DRAW_3D_OUTLINE3;
         			
 		case BAR_DATA_DRAW_3D_OUTLINE3:
 			if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-        		Line(x-dTemp-1, y-(temp*(varCtr+1))-barDepth,
-        				x-dTemp-barDepth-1, y-(temp*(varCtr+1)));
+        		if(!Line(x-dTemp-1, y-(temp*(varCtr+1))-barDepth,
+        				x-dTemp-barDepth-1, y-(temp*(varCtr+1)))) return 0;
 			} else {
-	        	Line(x+1+(temp*(varCtr+1)), yStart, 
-    	    			x+1+(temp*(varCtr+1))+barDepth, yStart-barDepth);
+	        	if(!Line(x+1+(temp*(varCtr+1)), yStart, 
+    	    			x+1+(temp*(varCtr+1))+barDepth, yStart-barDepth)) return 0;
     	    }
 			state = BAR_DATA_DRAW_3D_OUTLINE4;
 
 		case BAR_DATA_DRAW_3D_OUTLINE4:
 			if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-        		Bar(x-dTemp-barDepth-1, y-(temp*(varCtr+1)),
-        				x-dTemp-barDepth-1, y-(temp*(varCtr+1))+temp);
+        		if(!Bar(x-dTemp-barDepth-1, y-(temp*(varCtr+1)),
+        				x-dTemp-barDepth-1, y-(temp*(varCtr+1))+temp)) return 0;
 			} else {
-	        	Bar(x+1+(temp*varCtr), yStart-dTemp, 
-	        			x+1+(temp*varCtr), yStart);
+	        	if(!Bar(x+1+(temp*varCtr), yStart-dTemp, 
+	        			x+1+(temp*varCtr), yStart)) return 0;
 			}
 			state = BAR_DATA_DRAW_3D_OUTLINE5;
 
 		case BAR_DATA_DRAW_3D_OUTLINE5:
 			// draw the horizontal lines
 			if (GetState(pCh, CH_BAR_HOR) == CH_BAR_HOR) { 
-        		Bar(x-dTemp-barDepth-1, y-(temp*(varCtr+1))+temp,
-        				x-barDepth-1, y-(temp*(varCtr+1))+temp);
+        		if(!Bar(x-dTemp-barDepth-1, y-(temp*(varCtr+1))+temp,
+        				x-barDepth-1, y-(temp*(varCtr+1))+temp)) return 0;
 			} else {
-       			Bar(x+1+(temp*varCtr), yStart, 
-        				x+1+(temp*(varCtr+1)), yStart);
+       			if(!Bar(x+1+(temp*varCtr), yStart, 
+        				x+1+(temp*(varCtr+1)), yStart)) return 0;
     	    }
         	if((GetState(pCh, CH_VALUE)) || (GetState(pCh, CH_PERCENT)))
 				state = BAR_DATA_DRAW_VALUE;
@@ -1642,7 +1603,7 @@ chrt_pie_prep:
  			// Required items before the pie chart can be drawn
    			SetColor(LIGHTGRAY);
     		// Draw pie-chart outline
-    		Circle(ctr,ctry, z);    
+    		if(!Circle(ctr,ctry, z)) return 0;
 			state = PIE_DRAW_SECTOR;
 
 /*========================================================================*/
@@ -1707,13 +1668,11 @@ chrt_pie_draw_sector_loop:
         			state = PIE_DRAW_SECTOR_LOOP_CONTINUE;
 					goto chrt_pie_draw_sector_loop_continue;
 				}
-
-				// check if it is the last sector to be drawn
-				if ((varCtr == 1) || ((j+dTemp) >= 358)) 
-					DrawSector(ctr, ctry, z, j, 360, LIGHTGRAY);
-				else 
-					DrawSector(ctr, ctry, z, j, (j+dTemp), LIGHTGRAY);
-				state = PIE_DRAW_SECTOR_LOOP_CREATE_STRINGS;
+				// go to the state that draws only. Doing this separates the setup of static variables
+				// and rendering. So in cases when the rendering cannot continue, the variables
+				// are still set to correct values.
+        		state = PIE_DRAW_SECTOR_ACTUAL;	
+        		goto pie_draw_sector_actual;
 
 			} else {
 				if(GetState(pCh, CH_DONUT) == CH_DONUT) {
@@ -1724,6 +1683,17 @@ chrt_pie_draw_sector_loop:
 		          	return 1;	        	
 		        }
 			}
+			
+        case PIE_DRAW_SECTOR_ACTUAL:
+pie_draw_sector_actual:        
+			// check if it is the last sector to be drawn
+			if ((varCtr == 1) || ((j+dTemp) >= 358)) {
+				if(!DrawSector(ctr, ctry, z, j, 360, LIGHTGRAY)) return 0;
+			} else {
+				if(!DrawSector(ctr, ctry, z, j, (j+dTemp), LIGHTGRAY)) return 0;
+			}	
+			state = PIE_DRAW_SECTOR_LOOP_CREATE_STRINGS;
+			
 
         case PIE_DRAW_SECTOR_LOOP_CREATE_STRINGS:
 
@@ -1800,10 +1770,11 @@ chrt_pie_draw_sector_loop:
 						} else {	
 						
 							// draw the line
-							Line(pieSectorXPos, 
+							if(!Line(pieSectorXPos, 
 								 pieSectorYPos, 
 								 pieLabelXPos, 
-								 pieLabelYPos+(GetTextHeight(pVarFont)>>1)); 
+								 pieLabelYPos+(GetTextHeight(pVarFont)>>1)))
+								 return 0; 
 	
 							MoveTo(pieLabelXPos, pieLabelYPos); 
 							pieLabelYPos += GetTextHeight(pVarFont);
@@ -1842,10 +1813,11 @@ chrt_pie_draw_sector_loop:
 						}	
 							
 						// draw the line
-						Line(pieSectorXPos, 
+						if(!Line(pieSectorXPos, 
 							 pieSectorYPos, 
 							 pieLabelXPos, 
-							 pieLabelYPos2+(GetTextHeight(pVarFont)>>1)); 
+							 pieLabelYPos2+(GetTextHeight(pVarFont)>>1)))
+							 return 0; 
 
 						MoveTo(pieLabelXPos-GetTextWidth(&tempStr[STR_CHAR_CNT-h], pVarFont),
 							   pieLabelYPos2); 
@@ -1892,10 +1864,11 @@ chrt_pie_draw_sector_loop:
 						if ((pieLabelYPos2) < 
 							(pCh->hdr.top+GOL_EMBOSS_SIZE+CH_MARGIN+GetTextHeight(pCh->prm.pTitleFont)) ) {
 																
-							Line(pieSectorXPos, 
+							if(!Line(pieSectorXPos, 
 								 pieSectorYPos, 
 								 pieLabelXPos+(GetTextWidth(&tempStr[STR_CHAR_CNT-h], pVarFont)>>1), 
-								 pieLabelYPos2+((GetTextHeight(pVarFont)>>1)*3)); 
+								 pieLabelYPos2+((GetTextHeight(pVarFont)>>1)*3)))
+								 return 0; 
 
 							MoveTo(pieLabelXPos+(GetTextWidth(&tempStr[STR_CHAR_CNT-h], pVarFont)>>1), pieLabelYPos2+GetTextHeight(pVarFont));  
 							// adjust the next marker
@@ -1904,10 +1877,11 @@ chrt_pie_draw_sector_loop:
 						} else {	
 						
 							// draw the line
-							Line(pieSectorXPos, 
+							if(!Line(pieSectorXPos, 
 								 pieSectorYPos, 
 								 pieLabelXPos, 
-								 pieLabelYPos2+(GetTextHeight(pVarFont)>>1)); 
+								 pieLabelYPos2+(GetTextHeight(pVarFont)>>1)))
+								 return 0; 
 		
 							MoveTo(pieLabelXPos-GetTextWidth(&tempStr[STR_CHAR_CNT-h], pVarFont),
 												pieLabelYPos2); 
@@ -1933,10 +1907,11 @@ chrt_pie_draw_sector_loop:
 						pieSectorXPos = pieX+3;
 						pieSectorYPos = pieY-2;
 						// draw the line
-						Line(pieSectorXPos, 
+						if(!Line(pieSectorXPos, 
 							 pieSectorYPos, 
 							 pieLabelXPos, 
-							 pieLabelYPos3-(GetTextHeight(pVarFont)>>1)); 
+							 pieLabelYPos3-(GetTextHeight(pVarFont)>>1)))
+							 return 0;
 
 						MoveTo(pieLabelXPos, pieLabelYPos3-GetTextHeight(pVarFont)); 
 						pieLabelYPos3 += GetTextHeight(pVarFont);
@@ -1993,9 +1968,9 @@ chrt_pie_draw_sector_loop_continue:
 chrt_pie_donut_hole_draw:
 		case PIE_DONUT_HOLE_DRAW:
 			SetColor(LIGHTGRAY);
-			Circle(ctr, ctry, (z>>1)-(z>>3));
+			if(!Circle(ctr, ctry, (z>>1)-(z>>3))) return 0;
 			SetColor(pCh->hdr.pGolScheme->CommonBkColor);
-			FillCircle(ctr,ctry, ((z>>1)-(z>>3))-1); 
+			if(!FillCircle(ctr,ctry, ((z>>1)-(z>>3))-1)) return 0;
 
 			state = REMOVE;
 			return 1;
@@ -2248,17 +2223,19 @@ SHORT   xc, yc;
         // left scan
         left  = xc;
         do{
-            PutPixel(left--,yc);
+            left--;
             pixel = GetPixel(left,yc);
         }while(pixel != outLineColor);
+        while(!Line(xc,yc,left+1,yc));
 
         // right scan
         right = xc;
         pixel = GetPixel(right,yc);
         do{
-            PutPixel(right++,yc);
+            right++;
             pixel = GetPixel(right,yc);
         }while(pixel != outLineColor);
+        while(!Line(xc,yc,right-1,yc));
         
         xc = (left+right)>>1;
         yc++;
@@ -2284,17 +2261,19 @@ SHORT   xc, yc;
         // left scan
         left  = xc;
         do{
-            PutPixel(left--,yc);
+            left--;
             pixel = GetPixel(left,yc);
         }while(pixel != outLineColor);
+        while(!Line(xc,yc,left+1,yc));
 
         // right scan
         right = xc;
         pixel = GetPixel(right,yc);
         do{
-            PutPixel(right++,yc);
+            right++;
             pixel = GetPixel(right,yc);
         }while(pixel != outLineColor);
+        while(!Line(xc,yc,right-1,yc));
         
         xc = (left+right)>>1;
         yc--;
@@ -2339,57 +2318,107 @@ SHORT temp;
     }
 }
 
-void DrawSector(SHORT cx, SHORT cy, SHORT outRadius,
+WORD DrawSector(SHORT cx, SHORT cy, SHORT outRadius,
                  SHORT angleFrom, SHORT angleTo, WORD outLineColor)
 {
-SHORT x1, y1, x2, y2, x3, y3;
-LONG  temp;
-WORD  tempColor;
-SHORT angleMid;
-
-    angleMid =(angleTo+angleFrom)>>1;
-    GetCirclePoint(outRadius, angleFrom, &x1, &y1);
-    GetCirclePoint(outRadius, angleTo, &x2, &y2);
-    x1 += cx; y1 += cy; x2 += cx; y2 += cy;
-
-    tempColor = GetColor();
-    
-    // special case for single data shown on pie chart 
-    // we remove the line drawn at angle 0
-    if (!((angleFrom == 0) && (angleTo == 360))) {
-    
-	    // special case for small angles
-		GetCirclePoint(outRadius-1, angleFrom+1, &x3, &y3);
-	    x3 += cx; y3 += cy;
-	    Line(x3, y3, cx, cy);
 	
-	    GetCirclePoint(outRadius-1, angleTo-1, &x3, &y3);
-	    x3 += cx; y3 += cy;
-	    Line(x3, y3, cx, cy);
+typedef enum {
+	SEC_DRAW_IDLE,
+	SEC_DRAW_EDGE1,
+	SEC_DRAW_EDGE2,
+	SEC_DRAW_EDGE3,
+	SEC_DRAW_EDGE4,
+	SEC_DRAW_EDGE5,
+	SEC_DRAW_FILLINIT,
+	SEC_DRAW_FILL,
+} DRAW_SECTOR_STATES;		
 	
-	    GetCirclePoint(outRadius-1, angleMid, &x3, &y3);
-	    x3 += cx; y3 += cy;
-		Line(x3, y3, cx, cy);
-
-	    SetColor(outLineColor);
-    	Line(x1, y1, cx, cy);
-
-	    Line(x2, y2, cx, cy);
-	}
-
-    SetColor(tempColor);
-
-    temp = ((x1-x2)*(x1-x2));
-    temp += ((y1-y2)*(y1-y2));
+    static SHORT x1, y1, x2, y2, x3, y3;
+    static SHORT angleMid;
+    static WORD  tempColor;
+    LONG  temp;
     
-    if( ((DWORD)temp <= (DWORD)16) &&
-        ((angleTo-angleFrom)<90) ) 
-        return;
-    GetCirclePoint(outRadius-2, angleMid, &x3, &y3);
-    x3 += cx; y3 += cy;
-    FillSector(x3, y3, outLineColor);
+    static DRAW_SECTOR_STATES sectorState = SEC_DRAW_IDLE;
+
+    switch (sectorState) {
+	    case SEC_DRAW_IDLE:
+	    	// calculate points
+    		angleMid =(angleTo+angleFrom)>>1;
+    		GetCirclePoint(outRadius, angleFrom, &x1, &y1);
+    		GetCirclePoint(outRadius, angleTo, &x2, &y2);
+    		x1 += cx; y1 += cy; x2 += cx; y2 += cy;
+    		
+    		// grab the current color value for later use
+		    tempColor = GetColor();
+
+
+		    // check if we need to draw the edges
+		    
+		    // special case for single data shown on pie chart 
+    		// we remove the line drawn at angle 0
+    		if (!((angleFrom == 0) && (angleTo == 360))) { 
+	    		sectorState = SEC_DRAW_EDGE1;
+			    // special case for small angles
+				GetCirclePoint(outRadius-1, angleFrom+1, &x3, &y3);
+			    x3 += cx; y3 += cy;
+	    		goto sec_draw_edge1;
+	    	} else {
+	    		sectorState = SEC_DRAW_FILLINIT;
+	    		goto sec_draw_fillinit;
+	    	}	
+		case SEC_DRAW_EDGE1:
+sec_draw_edge1:
+		    if(!Line(x3, y3, cx, cy)) return 0;
+		    GetCirclePoint(outRadius-1, angleTo-1, &x3, &y3);
+		    x3 += cx; y3 += cy;
+			sectorState = SEC_DRAW_EDGE2;
+
+		case SEC_DRAW_EDGE2:
+	    	if(!Line(x3, y3, cx, cy)) return 0;
+		    GetCirclePoint(outRadius-1, angleMid, &x3, &y3);
+	    	x3 += cx; y3 += cy;
+			sectorState = SEC_DRAW_EDGE3;
+
+		case SEC_DRAW_EDGE3:
+			if(!Line(x3, y3, cx, cy)) return 0;
+		    SetColor(outLineColor);
+			sectorState = SEC_DRAW_EDGE4;
+
+		case SEC_DRAW_EDGE4:
+    		if(!Line(x1, y1, cx, cy)) return 0;
+			sectorState = SEC_DRAW_EDGE5;
+
+		case SEC_DRAW_EDGE5:
+		    if(!Line(x2, y2, cx, cy)) return 0;
+			sectorState = SEC_DRAW_FILLINIT;
     
+		case SEC_DRAW_FILLINIT:
+sec_draw_fillinit:
+
+		    SetColor(tempColor);
+	
+		    temp = ((x1-x2)*(x1-x2));
+	    	temp += ((y1-y2)*(y1-y2));
+	    
+		    if( ((DWORD)temp <= (DWORD)16) &&
+		        ((angleTo-angleFrom)<90) ) {
+	   		    sectorState = SEC_DRAW_IDLE;
+		        return 1;
+		    }
+		    GetCirclePoint(outRadius-2, angleMid, &x3, &y3);
+		    x3 += cx; y3 += cy;
+		    sectorState = SEC_DRAW_FILL;
+
+		case SEC_DRAW_FILL:
+		
+			// FillSector() is a blocking call 
+			// making it non-blocking will further add delay to the rendering
+		    FillSector(x3, y3, outLineColor);
+		    sectorState = SEC_DRAW_IDLE;
+		    break;
+	}  // end of switch()
+	    
+    return 1;
 }
-
 
 #endif // USE_CHART

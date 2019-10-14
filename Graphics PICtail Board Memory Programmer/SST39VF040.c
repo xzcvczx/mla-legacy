@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        SST39VF040.c
  * Dependencies:    SST39VF040.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -37,6 +37,7 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		01/14/08	...
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  *****************************************************************************/
 
 #include "MainDemo.h"
@@ -81,7 +82,11 @@ void SST39Init()
     PMCON = 0;
     PMMODEbits.MODE   = 2;  // Master 2
     PMMODEbits.WAITB  = 0;
+#if defined(__dsPIC33F__) || defined(__PIC24H__)    
+    PMMODEbits.WAITM  = 3;
+#else
     PMMODEbits.WAITM  = 2;
+#endif
     PMMODEbits.WAITE  = 1;
     PMMODEbits.INCM   = 1;  // auto increment address
 	PMMODEbits.MODE16 = 0;

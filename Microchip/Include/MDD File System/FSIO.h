@@ -238,7 +238,47 @@ typedef struct
     DWORD           dirccls;        // The current cluster of the file's directory
 } FSFILE;
 
+/* Summary: Possible results of the FSGetDiskProperties() function.
+** Description: See the FSGetDiskProperties() function for more information.
+*/
+typedef enum
+{
+    FS_GET_PROPERTIES_NO_ERRORS = 0,
+    FS_GET_PROPERTIES_DISK_NOT_MOUNTED,
+    FS_GET_PROPERTIES_CLUSTER_FAILURE,
+    FS_GET_PROPERTIES_STILL_WORKING = 0xFF
+} FS_DISK_ERRORS;
 
+/* Summary: Contains the disk search information, intermediate values, and results
+** Description: This structure is used in conjunction with the FSGetDiskProperties()
+**              function.  See that function for more information about the usage.
+*/
+typedef struct
+{
+    DISK *  disk;           /* pointer to the disk we are searching */
+    BOOL    new_request;    /* is this a new request or a continued request */
+    FS_DISK_ERRORS properties_status;  /* status of the last call of the function */
+
+    struct
+    {
+        BYTE disk_format;           /* disk format: FAT12, FAT16, FAT32 */
+        WORD sector_size;           /* sector size of the drive */
+        BYTE sectors_per_cluster;   /* number of sectors per cluster */
+        DWORD total_clusters;       /* the number of total clusters on the drive */
+        DWORD free_clusters;        /* the number of free (unused) clusters on drive */
+    } results;                      /* the results of the current search */
+
+    struct
+    {
+        DWORD   c;     
+        DWORD   curcls;
+        DWORD   EndClusterLimit;
+        DWORD   ClusterFailValue;
+    } private;      /* intermediate values used to continue searches.  This
+                         member should be used only by the FSGetDiskProperties()
+                         function */
+
+} FS_DISK_PROPERTIES;
 
 // Summary: A structure used for searching for files on a device.
 // Description: The SearchRec structure is used when searching for file on a device.  It contains parameters that will be loaded with
@@ -1360,5 +1400,107 @@ int FSerror (void);
   *********************************************************************************/
 
 int FSCreateMBR (unsigned long firstSector, unsigned long numSectors);
+
+/*********************************************************************************
+  Function:
+    void FSGetDiskProperties(FS_DISK_PROPERTIES* properties)
+  Summary:
+    Allows user to get the disk properties (size of disk, free space, etc)
+  Conditions:
+    1) ALLOW_GET_DISK_PROPERTIES must be defined in FSconfig.h
+    2) a FS_DISK_PROPERTIES object must be created before the function is called
+    3) the new_request member of the FS_DISK_PROPERTIES object must be set before
+        calling the function for the first time.  This will start a new search.
+    4) this function should not be called while there is a file open.  Close all
+        files before calling this function.
+  Input:
+    properties - a pointer to a FS_DISK_PROPERTIES object where the results should
+      be stored.
+  Return Values:
+    This function returns void.  The properties_status of the previous call of 
+      this function is located in the properties.status field.  This field has 
+      the following possible values:
+
+    FS_GET_PROPERTIES_NO_ERRORS - operation completed without error.  Results
+      are in the properties object passed into the function.
+    FS_GET_PROPERTIES_DISK_NOT_MOUNTED - there is no mounted disk.  Results in
+      properties object is not valid
+    FS_GET_PROPERTIES_CLUSTER_FAILURE - there was a failure trying to read a 
+      cluster from the drive.  The results in the properties object is a partial
+      result up until the point of the failure.
+    FS_GET_PROPERTIES_STILL_WORKING - the search for free sectors is still in
+      process.  Continue calling this function with the same properties pointer 
+      until either the function completes or until the partial results meets the
+      application needs.  The properties object contains the partial results of
+      the search and can be used by the application.  
+  Side Effects:
+    Can cause errors if called when files are open.  Close all files before
+    calling this function.
+
+    Calling this function without setting the new_request member on the first
+    call can result in undefined behavior and results.
+
+    Calling this function after a result is returned other than
+    FS_GET_PROPERTIES_STILL_WORKING can result in undefined behavior and results.
+  Description:  
+    This function returns the information about the mounted drive.  The results 
+    member of the properties object passed into the function is populated with 
+    the information about the drive.    
+
+    Before starting a new request, the new_request member of the properties
+    input parameter should be set to TRUE.  This will initiate a new search
+    request.
+
+    This function will return before the search is complete with partial results.
+    All of the results except the free_clusters will be correct after the first
+    call.  The free_clusters will contain the number of free clusters found up
+    until that point, thus the free_clusters result will continue to grow until
+    the entire drive is searched.  If an application only needs to know that a 
+    certain number of bytes is available and doesn't need to know the total free 
+    size, then this function can be called until the required free size is
+    verified.  To continue a search, pass a pointer to the same FS_DISK_PROPERTIES
+    object that was passed in to create the search.
+
+    A new search request sould be made once this function has returned a value 
+    other than FS_GET_PROPERTIES_STILL_WORKING.  Continuing a completed search
+    can result in undefined behavior or results.
+
+    Typical Usage:
+    <code>
+    FS_DISK_PROPERTIES disk_properties;
+
+    disk_properties.new_request = TRUE;
+
+    do
+    {
+        my_results = FSGetDiskProperties(&disk_properties);
+    } while (disk_properties->properties_status == FS_GET_PROPERTIES_STILL_WORKING);
+    </code>
+
+    results.disk_format - contains the format of the drive.  Valid results are 
+      FAT12(1), FAT16(2), or FAT32(3).
+
+    results.sector_size - the sector size of the mounted drive.  Valid values are
+      512, 1024, 2048, and 4096.
+
+    results.sectors_per_cluster - the number sectors per cluster.
+
+    results.total_clusters - the number of total clusters on the drive.  This 
+      can be used to calculate the total disk size (total_clusters * 
+      sectors_per_cluster * sector_size = total size of drive in bytes)
+
+    results.free_clusters - the number of free (unallocated) clusters on the drive.
+      This can be used to calculate the total free disk size (free_clusters * 
+      sectors_per_cluster * sector_size = total size of drive in bytes)
+
+  Remarks:
+    PIC24F size estimates:
+      Flash - 400 bytes (-Os setting)
+
+    PIC24F speed estimates:
+      Search takes approximately 7 seconds per Gigabyte of drive space.  Speed
+        will vary based on the number of sectors per cluster and the sector size.
+  *********************************************************************************/
+void FSGetDiskProperties(FS_DISK_PROPERTIES* properties);
 
 #endif

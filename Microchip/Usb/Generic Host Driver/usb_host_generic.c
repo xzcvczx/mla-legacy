@@ -114,7 +114,7 @@ GENERIC_DEVICE  gc_DevData;
 
 /****************************************************************************
   Function:
-    BOOL USBHostGenericInit ( BYTE address, DWORD flags )
+    BOOL USBHostGenericInit ( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is called by the USB Embedded Host layer when a "generic"
@@ -132,6 +132,9 @@ GENERIC_DEVICE  gc_DevData;
   Parameters:
     BYTE address    - Device's address on the bus
     DWORD flags     - Initialization flags
+    BYTE clientDriverID - ID to send when issuing a Device Request via
+                            USBHostIssueDeviceRequest(), USBHostSetDeviceConfiguration(),
+                            or USBHostSetDeviceInterface().  
 
   Return Values:
     TRUE    - Initialization was successful
@@ -143,7 +146,7 @@ GENERIC_DEVICE  gc_DevData;
     attached device.
   ***************************************************************************/
 
-BOOL USBHostGenericInit ( BYTE address, DWORD flags )
+BOOL USBHostGenericInit ( BYTE address, DWORD flags, BYTE clientDriverID )
 {
     BYTE *pDesc;
 
@@ -160,6 +163,9 @@ BOOL USBHostGenericInit ( BYTE address, DWORD flags )
     gc_DevData.ID.pid  =  (WORD)*pDesc;       pDesc++;
     gc_DevData.ID.pid |= ((WORD)*pDesc) << 8; pDesc++;
 
+    // Save the Client Driver ID
+    gc_DevData.clientDriverID = clientDriverID;
+    
     #ifdef DEBUG_MODE
         UART2PrintString( "GEN: USB Generic Client Initalized: flags=0x" );
         UART2PutHex(      flags );

@@ -359,7 +359,7 @@ BYTE USBHostPrinterLanguageESCPOS( BYTE address,
 {
     char    *buffer;
     int     i;
-    BYTE    printer;
+    BYTE    printer = 0;
 
     if (command != USB_PRINTER_ATTACHED)
     {
@@ -1332,17 +1332,17 @@ USB_DATA_POINTER USBHostPrinterPOSImageDataFormat( USB_DATA_POINTER image,
         BYTE imageLocation, WORD imageHeight, WORD imageWidth, WORD *currentRow,
         BYTE byteDepth, BYTE *imageData )
 {
-    BYTE                currentByte;
+    BYTE                currentByte = 0x00;
     WORD                j;
     WORD                k;
     WORD                m;
     BYTE                maskHorizontal;
     BYTE                maskVertical;
-    BYTE                *ptrRAM;
+    BYTE                *ptrRAM = NULL;
     #if defined( __C30__ )
-        BYTE __prog__   *ptrROM;
+        BYTE __prog__   *ptrROM = NULL;
     #elif defined( __PIC32MX__ )
-        const BYTE      *ptrROM;
+        const BYTE      *ptrROM = NULL;
     #endif
     WORD                widthBytes;
 

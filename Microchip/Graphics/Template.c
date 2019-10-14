@@ -7,7 +7,7 @@
  *****************************************************************************
  * FileName:        Template.c
  * Dependencies:    none 
- * Processor:       PIC24
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00
  * Linker:          MPLAB LINK30
  * Company:         Microchip Technology Incorporated
@@ -186,10 +186,9 @@ static CC_DRAW_STATES state = REMOVE;
 
         case REMOVE:
             if(GetState(pCc,CC_HIDE)){
-                if(IsDeviceBusy())
-                    return 0;
                 SetColor(pCc->pGolScheme->CommonBkColor);
-                Bar(pCc->left,pCc->top,pCc->right,pCc->bottom);
+                if(!Bar(pCc->left,pCc->top,pCc->right,pCc->bottom))
+                    return 0;
                 return 1;
             }
             state = BOX_DRAW;

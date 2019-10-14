@@ -4,7 +4,7 @@
  *****************************************************************************
  * FileName:        Primitive.h
  * Dependencies:    
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -37,6 +37,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok  and
  * Paolo A. Tamayo		11/12/07	Version 1.0 release
+ * Pradeep Budagutta    18/05/2009  Version 1.1 - All Primitive functions have
+ *                                  return value(To support 2d-Acceleration)
  *****************************************************************************/
 
 #ifndef _PRIMITIVE_H
@@ -364,7 +366,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
  #define GetFontOrientation() _fontOrientation
 
 /*********************************************************************
-* Function: void OutChar(XCHAR ch)
+* Function: WORD OutChar(XCHAR ch)
 *
 * Overview: This function outputs a character from the current graphic 
 *		    cursor position. OutChar() uses the current active font 
@@ -374,7 +376,12 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 *
 * Input: ch - The character code to be displayed.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the character is not yet completely drawn.
+*         - Returns 1 when the character is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
 *
 * Side Effects: After the function is completed, the graphic cursor 
 *			    position is moved in the horizontal direction by the 
@@ -382,7 +389,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 *			    is not changed.
 *
 ********************************************************************/
- void OutChar(XCHAR ch);
+ WORD OutChar(XCHAR ch);
 
 /*********************************************************************
 * Function: WORD OutText(XCHAR* textString)
@@ -554,7 +561,7 @@ void SetFont(void* font);
 #define SetLineThickness(lnThickness) _lineThickness=lnThickness;
 
 /*********************************************************************
-* Function: void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+* Function: WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 *
 * Overview: This function draws a line with the current line type 
 *	        from the start point to the end point.
@@ -564,13 +571,18 @@ void SetFont(void* font);
 *		 x2 - x coordinate of the end point.
 *		 y2 - y coordinate of the end point.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
 *
 * Side Effects: The graphic cursor position is moved to the end 
 *				point of the line.
 *
 ********************************************************************/
-void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
+WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 
 /*********************************************************************
 * Macros: LineRel(dX, dY)
@@ -582,7 +594,11 @@ void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 * Input: dX - Displacement from the current x position.
 *		 dY - Displacement from the current y position.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: The graphic cursor position is moved to the end 
 *				point of the line.
@@ -599,7 +615,11 @@ void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 * Input: x - End point x position.
 *		 y - End point y poisiton.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: The graphic cursor position is moved to the end 
 *				point of the line.
@@ -616,15 +636,23 @@ void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 *		 y - Center y position.
 *		 radius - the radius of the circle.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
 ********************************************************************/
-#define Circle(x, y, radius) 		Bevel(x,y,x,y,radius)
+#ifndef USE_DRV_CIRCLE
+    #define Circle(x, y, radius) 		Bevel(x,y,x,y,radius)
+#else
+    WORD Circle(SHORT x, SHORT y, SHORT radius);
+#endif
 
 /*********************************************************************
-* Function: void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
+* Function: WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 *
 * Overview: Draws a beveled figure on the screen. 
 *           For a pure circular object x1 = x2 and y1 = y2. 
@@ -640,15 +668,20 @@ void Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 *			  draws the rounded corners.
 *        rad - defines the redius of the circle, that draws the rounded corners.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
 *
 * Side Effects: none
 *
 ********************************************************************/
-void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad); 
+WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad); 
 
 /*********************************************************************
-* Function: void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
+* Function: WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 *
 * Overview: Draws a filled beveled figure on the screen. 
 *           For a filled circular object x1 = x2 and y1 = y2. 
@@ -664,7 +697,11 @@ void Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 *			  draws the rounded corners.
 *        rad - defines the redius of the circle, that draws the rounded corners.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -680,7 +717,11 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 *		 y1 - y coordinate position of the center of the circle.
 *        rad - defines the redius of the circle.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -700,7 +741,11 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 *		 right - x position of the right bottom corner.
 *		 bottom - y position of the right bottom corner.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -708,7 +753,7 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 #define Rectangle(left, top, right, bottom) Bevel(left, top, right, bottom, 0)
 
 /*********************************************************************
-* Function: void DrawPoly(SHORT numPoints, SHORT* polyPoints)
+* Function: WORD DrawPoly(SHORT numPoints, SHORT* polyPoints)
 *
 * Overview: This function draws a polygon with the current line 
 *			type using the given number of points. The polygon points 
@@ -721,15 +766,20 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 * Input: numPoints - Defines the number of points in the polygon.
 *		 polyPoints - Pointer to the array of polygon points.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
 *
 * Side Effects: none
 *
 ********************************************************************/
-void DrawPoly(SHORT numPoints, SHORT* polyPoints);
+WORD DrawPoly(SHORT numPoints, SHORT* polyPoints);
 
 /*********************************************************************
-* Function: void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+* Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 *
 * Overview: This function draws a bar given the left, top and right, 
 *			bottom corners with the current color.
@@ -739,12 +789,17 @@ void DrawPoly(SHORT numPoints, SHORT* polyPoints);
 *		 right - x position of the right bottom corner.
 *		 bottom - y position of the right bottom corner.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
 *
 * Side Effects: none
 *
 ********************************************************************/
-void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
+WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
 
 /*********************************************************************
 * Function: void ClearDevice(void)
@@ -772,7 +827,7 @@ void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
 void ClearDevice(void);
 
 /*********************************************************************
-* Function: void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
 * Overview: This function outputs image starting from left,top coordinates.
 *
@@ -781,12 +836,17 @@ void ClearDevice(void);
 *        bitmap - pointer to the bitmap.
 *        stretch - The image stretch factor.
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 1 when the image is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
 * 
 * Side Effects: none
 *
 ********************************************************************/
-void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch);
+WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch);
 
 /*********************************************************************
 * Function: SHORT GetImageWidth(void* bitmap)
@@ -868,7 +928,3 @@ SHORT GetImageHeight(void* bitmap);
 WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer);
 
 #endif // _PRIMITIVE_H
-
-
-
-

@@ -213,14 +213,18 @@ DWORD_VAL address;
 }
 
 /*********************************************************************
-* Function: void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+* Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 *
 * PreCondition: none
 *
 * Input: left,top - top left corner coordinates,
 *        right,bottom - bottom right corner coordinates
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -229,10 +233,16 @@ DWORD_VAL address;
 * Note: none
 *
 ********************************************************************/
-void Bar(SHORT left, SHORT top, SHORT right, SHORT bottom){
+WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom){
 DWORD_VAL address;
 register SHORT  x,y;
 WORD_VAL width, height;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
     if(_clipRgn){
         if(left<_clipLeft)
@@ -261,6 +271,7 @@ WORD_VAL width, height;
     }
 
     CS_LAT_BIT = 1;
+    return 1;
 }
 
 /*********************************************************************
@@ -292,14 +303,18 @@ DWORD     counter;
 }
 
 /*********************************************************************
-* Function: void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
 *
-* Output: none
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 1 when the image is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 *
 * Side Effects: none
 *
@@ -308,10 +323,16 @@ DWORD     counter;
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
+WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
 FLASH_BYTE* flashAddress;
 BYTE colorDepth;
 WORD colorTemp;
+
+    #ifndef USE_NONBLOCKING_CONFIG
+        while(IsDeviceBusy() != 0); /* Ready */
+    #else
+        if(IsDeviceBusy() != 0) return 0;
+    #endif
 
     // Save current color
     colorTemp = _color.Val;
@@ -370,6 +391,7 @@ WORD colorTemp;
 
     // Restore current color
     _color.Val = colorTemp;
+    return 1;
 }
 
 #ifdef USE_BITMAP_FLASH

@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        Beep.c
  * Dependencies:    Beep.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -38,6 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		07/10/07	...
  * Anton Alkhimenok     02/07/08    PIC32 support
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  *****************************************************************************/
 
 #include "Beep.h"
@@ -105,6 +106,11 @@ void  __T2_ISR _T2Interrupt(void)
 *
 ********************************************************************/
 void BeepInit(){
+
+#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+	RPOR2 = 0b0000000000010010;	
+#endif
+
     // clear pulse counter
     pulseCounter = 0;
 

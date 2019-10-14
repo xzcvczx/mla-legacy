@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=./Objects\USB Mass Storage - SD Card data logger - C30
 dir_sin=
-dir_inc=..\..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware;..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware;..\..\Microchip\Include;..\..\..\Include;..;.
+dir_inc=..\..\Microchip\Include;..\..\Microchip\Include\PIC18 salloc;..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]
@@ -19,7 +19,7 @@ filter_lib=*.a
 filter_lkr=*.gld
 [CAT_SUBFOLDERS]
 subfolder_src=MDD File System;USB Stack
-subfolder_inc=Common;MDD File System;USB Stack
+subfolder_inc=Common;HardwareProfiles;MDD File System;USB Stack
 subfolder_obj=
 subfolder_lib=
 subfolder_lkr=
@@ -45,7 +45,7 @@ file_017=USB Stack
 file_018=USB Stack
 file_019=USB Stack
 file_020=USB Stack
-file_021=.
+file_021=HardwareProfiles
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -121,7 +121,7 @@ suite_state=
 [TOOL_SETTINGS]
 TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g
 TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=800 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=-Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
 TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
 [INSTRUMENTED_TRACE]
 enable=0

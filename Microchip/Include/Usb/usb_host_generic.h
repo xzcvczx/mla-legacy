@@ -148,7 +148,8 @@ typedef struct _GENERIC_DEVICE
 {
     GENERIC_DEVICE_ID   ID;             // Identification information about the device
     DWORD               rxLength;       // Number of bytes received in the last IN transfer
-
+    BYTE                clientDriverID; // ID to send when issuing a Device Request
+    
     #ifndef USB_ENABLE_TRANSFER_EVENT
         BYTE            rxErrorCode;    // Error code of last IN transfer
         BYTE            txErrorCode;    // Error code of last OUT transfer
@@ -187,7 +188,7 @@ extern GENERIC_DEVICE   gc_DevData; // Information about the attached device.
 
 /****************************************************************************
   Function:
-    BOOL USBHostGenericInit ( BYTE address, DWORD flags )
+    BOOL USBHostGenericInit ( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is called by the USB Embedded Host layer when a "generic"
@@ -205,6 +206,9 @@ extern GENERIC_DEVICE   gc_DevData; // Information about the attached device.
   Parameters:
     BYTE address    - Device's address on the bus
     DWORD flags     - Initialization flags
+    BYTE clientDriverID - ID to send when issuing a Device Request via
+                            USBHostIssueDeviceRequest(), USBHostSetDeviceConfiguration(),
+                            or USBHostSetDeviceInterface().  
 
   Return Values:
     TRUE    - Initialization was successful
@@ -216,7 +220,7 @@ extern GENERIC_DEVICE   gc_DevData; // Information about the attached device.
     attached device.
   ***************************************************************************/
 
-BOOL USBHostGenericInit ( BYTE address, DWORD flags );
+BOOL USBHostGenericInit ( BYTE address, DWORD flags, BYTE clientDriverID );
 
 
 /****************************************************************************

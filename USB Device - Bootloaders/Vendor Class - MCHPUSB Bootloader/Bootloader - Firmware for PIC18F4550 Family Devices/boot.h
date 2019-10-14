@@ -203,6 +203,7 @@ typedef union _BOOT_DATA_PACKET
 } BOOT_DATA_PACKET;
 
 /** E X T E R N S ************************************************************/
+extern word led_count;
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void BootInitEP(void);

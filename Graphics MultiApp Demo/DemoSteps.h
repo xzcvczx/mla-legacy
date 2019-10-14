@@ -67,8 +67,6 @@ typedef struct {
 
 #define THIRTYSECDELAY	    (ONESECDELAY*30)
 
-#define MAXDEMOPOINTS ((sizeof(DemoPoints))/(sizeof(GOL_MSG)))
-
 /*********************************************************************
 * Function:  void UpdateDemoMode(GOL_MSG *pMsg)
 *

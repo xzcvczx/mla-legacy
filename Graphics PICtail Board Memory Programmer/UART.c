@@ -3,7 +3,7 @@
  *****************************************************************************
  * FileName:        UART.c
  * Dependencies:    MainDemo.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -36,6 +36,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		01/08/07	...
  * Anton Alkhimenok		02/05/08	PIC32 support is added
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  *****************************************************************************/
 
 #include "MainDemo.h"
@@ -62,7 +63,15 @@ void UARTInit()
 	TX_TRIS = 0;
 	RX_TRIS = 1;
 
-#if defined( __PIC24FJ256GA110__ )
+#ifdef __dsPIC33F__
+	AD1PCFGL=0xFFFF;
+
+	RPINR19bits.U2RXR = 2;		// assign RP16 to RX
+	RPOR1bits.RP3R   = 5;	    // assign RP17 to TX
+#endif 
+
+
+#if defined (__PIC24FJ256GB110__) || defined (__PIC24FJ256GA110__)
 
 __builtin_write_OSCCONL(OSCCON & 0xbf);
 	 RPINR19bits.U2RXR = 10;	// assign RP10 to RX

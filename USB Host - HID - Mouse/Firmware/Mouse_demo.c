@@ -68,8 +68,8 @@ ADG         14-Apr-2008 First release
 #include "usb_config.h"
 #include "lcd_demo.h"
 #include "USB\usb.h"
-#include "USB\usb_host_hid_appl_interface.h"
 #include "USB\usb_host_hid_parser.h"
+#include "USB\usb_host_hid.h"
 
 //#define DEBUG_MODE
 // *****************************************************************************
@@ -107,9 +107,36 @@ ADG         14-Apr-2008 First release
     #define PLL_96MHZ_OFF   0xFFFF
     #define PLL_96MHZ_ON    0xF7FF
 
-    _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
-    _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
+    // Configuration Bit settings  for an Explorer 16 with USB PICtail Plus
+    //      Primary Oscillator:             HS
+    //      Internal USB 3.3v Regulator:    Disabled
+    //      IOLOCK:                         Set Once
+    //      Primary Oscillator Output:      Digital I/O
+    //      Clock Switching and Monitor:    Both disabled
+    //      Oscillator:                     Primary with PLL
+    //      USB 96MHz PLL Prescale:         Divide by 2
+    //      Internal/External Switch Over:  Enabled
+    //      WDT Postscaler:                 1:32768
+    //      WDT Prescaler:                  1:128
+    //      WDT Window:                     Non-window Mode
+    //      Comm Channel:                   EMUC2/EMUD2
+    //      Clip on Emulation Mode:         Reset into Operation Mode
+    //      Write Protect:                  Disabled
+    //      Code Protect:                   Disabled
+    //      JTAG Port Enable:               Disabled
 
+    #if defined(__PIC24FJ256GB110__)
+        _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
+        _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
+    #elif defined(__PIC24FJ64GB004__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
+    #elif defined(__PIC24FJ256GB106__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    #endif
 #elif defined( __PIC32MX__ )
     #pragma config UPLLEN   = ON            // USB PLL Enabled
     #pragma config FPLLMUL  = MUL_20        // PLL Multiplier
@@ -180,6 +207,7 @@ void AppInitialize(void);
 BOOL AppGetParsedReportDetails(void);
 void App_Detect_Device(void);
 void App_ProcessInputReport(void);
+BOOL USB_HID_DataCollectionHandler(void);
 
 void LCDDisplayString(BYTE* data, BYTE lineNum);
 void LCD_Display_Routine(BYTE data, BYTE HIDData);
@@ -292,6 +320,15 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
             UART2PrintString( "\r\n***** USB Error - unspecified *****\r\n" );
             return TRUE;
             break;
+
+		case EVENT_HID_RPT_DESC_PARSED:
+			 #ifdef APPL_COLLECT_PARSED_DATA
+			     return(APPL_COLLECT_PARSED_DATA());
+		     #else
+				 return TRUE;
+			 #endif
+			break;
+
         default:
             break;
     }
@@ -319,7 +356,23 @@ int main (void)
 
         OSCCON = 0x3302;    // Enable secondary oscillator
         CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
+    TRISD = 0x00C0;
        #endif
+   #if defined(__PIC24FJ64GB004__)
+	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+	//This allows the device to power up at a lower initial operating frequency, which can be
+	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+	//power up the PLL.
+    {
+        unsigned int pll_startup_counter = 600;
+        CLKDIVbits.PLLEN = 1;
+        while(pll_startup_counter--);
+    }
+
+    //Device switches over automatically to PLL output after PLL is locked and ready.
+    #endif
     #elif defined(__PIC32MX__)
         {
             int  value;
@@ -340,10 +393,10 @@ int main (void)
         
         AD1PCFG = 0xFFFF;   // Set analog pins to digital.
         TRISF   = 0x00;
+    TRISD = 0x00C0;
     #else
         #error Cannot initialize.
     #endif
-    TRISD = 0x00C0;
 
     UART2Init();
 
