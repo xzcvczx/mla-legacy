@@ -43,61 +43,67 @@
  * Anton Alkhimenok     01/07/09    Graphics PICtail Version 3 support is added
  *****************************************************************************/
 #ifndef _TOUCHSCREEN_H
-#define _TOUCHSCREEN_H
+    #define _TOUCHSCREEN_H
+	
+    #include "Graphics\Graphics.h"
 
-#include "Graphics\Graphics.h"
-
-#if (GRAPHICS_PICTAIL_VERSION == 1)
+    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V1)
 
 //#define SWAP_X_AND_Y
-#define FLIP_X
-//#define FLIP_Y
+        #define FLIP_X
 
-#elif (GRAPHICS_PICTAIL_VERSION == 2)
+//#define FLIP_Y
+    #elif (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
+
+		#include "EEPROM.h"
 
 //#define SWAP_X_AND_Y
 //#define FLIP_X
-#define FLIP_Y
+        #define FLIP_Y
 
-#elif (GRAPHICS_PICTAIL_VERSION == 3)
+    #elif (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+		
+		#include "SST25VF016.h"
+		
 //#define SWAP_X_AND_Y
 //#define FLIP_X
 //#define FLIP_Y
-
-#endif
+    #endif
 
 // Default calibration values
-#define YMINCAL         0x74
-#define YMAXCAL         0x284
-#define XMINCAL         0x2f
-#define XMAXCAL         0x39f
+    #define YMINCAL 0x74
+    #define YMAXCAL 0x284
+    #define XMINCAL 0x2f
+    #define XMAXCAL 0x39f
 
 // Max/Min ADC values for each direction
-extern volatile WORD _calXMin;
-extern volatile WORD _calXMax;
-extern volatile WORD _calYMin;
-extern volatile WORD _calYMax;
+extern volatile WORD    _calXMin;
+extern volatile WORD    _calXMax;
+extern volatile WORD    _calYMin;
+extern volatile WORD    _calYMax;
 
-#if (GRAPHICS_PICTAIL_VERSION < 3)
+    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+
 // Addresses for calibration and version values in EEPROM on Explorer 16
-#define ADDRESS_VERSION  (unsigned)0x7FFE
-#define ADDRESS_XMIN     (unsigned)0x7FFC
-#define ADDRESS_XMAX     (unsigned)0x7FFA
-#define ADDRESS_YMIN     (unsigned)0x7FF8
-#define ADDRESS_YMAX     (unsigned)0x7FF6
-#else
-// Addresses for calibration and version values in SPI Flash on Graphics PICtail 3
-#define ADDRESS_VERSION  (unsigned long)0xFFFFFFFE
-#define ADDRESS_XMIN     (unsigned long)0xFFFFFFFC
-#define ADDRESS_XMAX     (unsigned long)0xFFFFFFFA
-#define ADDRESS_YMIN     (unsigned long)0xFFFFFFF8
-#define ADDRESS_YMAX     (unsigned long)0xFFFFFFF6
-#endif
+        #define ADDRESS_VERSION (unsigned)0x7FFE
+        #define ADDRESS_XMIN    (unsigned)0x7FFC
+        #define ADDRESS_XMAX    (unsigned)0x7FFA
+        #define ADDRESS_YMIN    (unsigned)0x7FF8
+        #define ADDRESS_YMAX    (unsigned)0x7FF6
+    #else
+
+// Addresses for calibration and version values in SPI Flash on Graphics PICtail 3 & PIC24FJ256DA210 Development Board.
+        #define ADDRESS_VERSION (unsigned long)0xFFFFFFFE
+        #define ADDRESS_XMIN    (unsigned long)0xFFFFFFFC
+        #define ADDRESS_XMAX    (unsigned long)0xFFFFFFFA
+        #define ADDRESS_YMIN    (unsigned long)0xFFFFFFF8
+        #define ADDRESS_YMAX    (unsigned long)0xFFFFFFF6
+    #endif
 
 // Current ADC values for X and Y channels and potentiometer R6
-extern volatile SHORT adcX;
-extern volatile SHORT adcY;
-extern volatile SHORT adcPot;
+extern volatile SHORT   adcX;
+extern volatile SHORT   adcY;
+extern volatile SHORT   adcPot;
 
 /*********************************************************************
 * Function: void TouchInit(void)
@@ -115,7 +121,7 @@ extern volatile SHORT adcPot;
 * Note: none
 *
 ********************************************************************/
-void TouchInit(void);
+void                    TouchInit(void);
 
 /*********************************************************************
 * Function: SHORT TouchGetX()
@@ -134,7 +140,7 @@ void TouchInit(void);
 * Note: none
 *
 ********************************************************************/
-SHORT TouchGetX();
+SHORT                   TouchGetX(void);
 
 /*********************************************************************
 * Function: SHORT TouchGetY()
@@ -153,7 +159,7 @@ SHORT TouchGetX();
 * Note: none
 *
 ********************************************************************/
-SHORT TouchGetY();
+SHORT                   TouchGetY(void);
 
 /*********************************************************************
 * Function: void TouchGetMsg(GOL_MSG* pMsg)
@@ -171,7 +177,7 @@ SHORT TouchGetY();
 * Note: none
 *
 ********************************************************************/
-void TouchGetMsg(GOL_MSG* pMsg);
+void                    TouchGetMsg(GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: void TouchCalibration()
@@ -189,7 +195,7 @@ void TouchGetMsg(GOL_MSG* pMsg);
 * Note: none
 *
 ********************************************************************/
-void TouchCalibration();
+void                    TouchCalibration(void);
 
 /*********************************************************************
 * Function: void TouchStoreCalibration(void)
@@ -207,7 +213,7 @@ void TouchCalibration();
 * Note: none
 *
 ********************************************************************/
-void TouchStoreCalibration(void);
+void                    TouchStoreCalibration(void);
 
 /*********************************************************************
 * Function: void TouchLoadCalibration(void)
@@ -225,7 +231,7 @@ void TouchStoreCalibration(void);
 * Note: none
 *
 ********************************************************************/
-void TouchLoadCalibration(void);
+void                    TouchLoadCalibration(void);
 
 /*********************************************************************
 * Macros: ADCGetX()
@@ -244,7 +250,7 @@ void TouchLoadCalibration(void);
 * Note: none
 *
 ********************************************************************/
-#define ADCGetX() adcX
+    #define ADCGetX()   adcX
 
 /*********************************************************************
 * Macros: ADCGetY()
@@ -263,7 +269,7 @@ void TouchLoadCalibration(void);
 * Note: none
 *
 ********************************************************************/
-#define ADCGetY() adcY
+    #define ADCGetY()   adcY
 
 /*********************************************************************
 * Macros: ADCGetPot()
@@ -281,7 +287,5 @@ void TouchLoadCalibration(void);
 * Note: none
 *
 ********************************************************************/
-#define ADCGetPot() adcPot
-
-
+    #define ADCGetPot() adcPot
 #endif

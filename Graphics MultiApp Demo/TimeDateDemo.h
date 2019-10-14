@@ -37,16 +37,16 @@
  * Paolo A. Tamayo		03/10/2008
  ********************************************************************/
 #ifndef _TIMEDATEDEMO_H
-#define _TIMEDATEDEMO_H
+    #define _TIMEDATEDEMO_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#ifdef __PIC32MX
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
-#include "GenericTypeDefs.h"
-#include "Graphics\Graphics.h"
+    #ifdef __PIC32MX
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+    #include "GenericTypeDefs.h"
+    #include "Graphics\Graphics.h"
 
 /************************************************************************
  Function: void CreateTimeDateDemo(void)
@@ -57,7 +57,7 @@
                                                                        
  Output: none
 ************************************************************************/
-void CreateTimeDateDemo(void);										
+void    CreateTimeDateDemo(void);
 
 /************************************************************************
  Function: WORD TimeDateDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, 
@@ -76,7 +76,7 @@ void CreateTimeDateDemo(void);
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD TimeDateDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
+WORD    TimeDateDemoMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 
 /************************************************************************
  Function: WORD TimeDateDemoDrawCallback(void)
@@ -90,6 +90,5 @@ WORD TimeDateDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
 		to GOL. GOLDraw() can proceed and re-draw objects that needs 
 		to be redrawn.
 ************************************************************************/
-WORD TimeDateDemoDrawCallback(void);
-
+WORD    TimeDateDemoDrawCallback(void);
 #endif

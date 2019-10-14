@@ -37,23 +37,22 @@
  * Anton Alkhimenok		05/29/2007
  ********************************************************************/
 #ifndef _AN1182DEMO_H
-#define _AN1182DEMO_H
+    #define _AN1182DEMO_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#if defined(__dsPIC33F__) 
-#include <p33Fxxxx.h>
-#elif  defined(__PIC24H__)
-#include <p24Hxxxx.h>
-#elif defined(__PIC32MX__)
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
-
-#include "GenericTypeDefs.h"
-#include "Graphics\Graphics.h"
-#include "EEPROM.h"
-#include "TouchScreen.h"
-#include "Beep.h"
-
+    #if defined(__dsPIC33F__)
+        #include <p33Fxxxx.h>
+    #elif defined(__PIC24H__)
+        #include <p24Hxxxx.h>
+    #elif defined(__PIC32MX__)
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+    #include "GenericTypeDefs.h"
+    #include "Graphics\Graphics.h"
+    #include "EEPROM.h"
+    #include "SST25VF016.h"
+    #include "TouchScreen.h"
+    #include "Beep.h"
 #endif

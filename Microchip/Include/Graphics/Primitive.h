@@ -40,9 +40,8 @@
  * Pradeep Budagutta    18/05/2009  Version 1.1 - All Primitive functions have
  *                                  return value(To support 2d-Acceleration)
  *****************************************************************************/
-
 #ifndef _PRIMITIVE_H
-#define _PRIMITIVE_H
+    #define _PRIMITIVE_H
 
 /*********************************************************************
 * Overview: Primitive lines are drawn using line type and line thickness.
@@ -51,16 +50,19 @@
 *********************************************************************/
 
 // Solid Line Style
-#define SOLID_LINE         0
+    #define SOLID_LINE  0
+
 // Dotted Line Style
-#define DOTTED_LINE        1
+    #define DOTTED_LINE 1
+
 // Dashed Line Style
-#define DASHED_LINE        4
+    #define DASHED_LINE 4
 
 // Normal Line (thickness is 1 pixel)
-#define NORMAL_LINE        0
+    #define NORMAL_LINE 0
+
 // Thick Line (thickness is 3 pixels)
-#define THICK_LINE         1
+    #define THICK_LINE  1
 
 /*********************************************************************
 * Overview: Drawing bitmaps will have two modes, normal rendering
@@ -71,118 +73,151 @@
 *********************************************************************/
 
 // Normal image stretch code
-#define IMAGE_NORMAL       1
+    #define IMAGE_NORMAL    1
+
 // Stretched image stretch code
-#define IMAGE_X2           2
+    #define IMAGE_X2    2
 
 // Current line style
-extern SHORT _lineType;
+extern SHORT    _lineType;
 
 // Current line thickness
-extern BYTE _lineThickness;
+extern BYTE     _lineThickness;
 
 // constants used for circle/arc computation
-#define SIN45  46341  // sin(45) * 2^16)
-#define ONEP25 81920  // 1.25 * 2^16
+    #define SIN45   46341   // sin(45) * 2^16)
+    #define ONEP25  81920   // 1.25 * 2^16
 
 // Current cursor coordinates
-extern SHORT _cursorX;
-extern SHORT _cursorY;
+extern SHORT    _cursorX;
+extern SHORT    _cursorY;
 
 // Font orientation
-extern BYTE _fontOrientation;
+extern BYTE     _fontOrientation;
 
-#define ORIENT_HOR  0
-#define ORIENT_VER  1
+    #define ORIENT_HOR  0
+    #define ORIENT_VER  1
 
-// Character type used 
-#ifdef USE_MULTIBYTECHAR
-#define XCHAR   short
-#else
-#define XCHAR   char
-#endif
+// Character type used
+    #ifdef USE_MULTIBYTECHAR
+        #define XCHAR   short
+    #else
+        #define XCHAR   char
+    #endif
 
-// Memory type enumeration to determine the source of data. 
+// Memory type enumeration to determine the source of data.
 // Used in interpreting bitmap and font from different memory sources.
-typedef enum{
-    FLASH    = 0,    // internal flash  
-    EXTERNAL = 1,    // external memory
-    VIDEOBUF = 2     // video buffer
-}TYPE_MEMORY;
+typedef enum
+{
+    FLASH   = 0,            // internal flash
+    EXTERNAL= 1,            // external memory
+    RAM		= 2,			// RAM
+    VIDEOBUF= 3             // video buffer
+} TYPE_MEMORY;
 
 /*********************************************************************
 * Overview: This structure is used to describe external memory.
 *
 *********************************************************************/
-typedef struct {
-  TYPE_MEMORY type;         // must be EXTERNAL
-  WORD        ID;           // memory ID
-  DWORD       address;      // bitmap or font image address
+typedef struct
+{
+    TYPE_MEMORY type;       // must be EXTERNAL
+    WORD        ID;         // memory ID
+    DWORD       address;    // bitmap or font image address
 } EXTDATA;
 
-#ifdef __PIC32MX__
-#define FLASH_BYTE  const BYTE 
-#define FLASH_WORD  const WORD
-#else
-// Flash data with 24bit pointers 
-#define FLASH_BYTE  char __prog__
-#define FLASH_WORD  short int __prog__
-#endif
+    #ifdef __PIC32MX__
+        #define FLASH_BYTE  const BYTE
+        #define FLASH_WORD  const WORD
+    #else
+
+// Flash data with 24bit pointers
+        #define FLASH_BYTE  char __prog__
+        #define FLASH_WORD  short int __prog__
+    #endif
 
 /*********************************************************************
 * Overview: Structure describing the bitmap header.
 *
 *********************************************************************/
-typedef struct {
-BYTE   compression;			// Compression setting
-BYTE   colorDepth;			// Color depth used
-SHORT  height;				// Image height
-SHORT  width;				// Image width
+typedef struct
+{
+    BYTE    compression;    // Compression setting
+    BYTE    colorDepth;     // Color depth used
+    SHORT   height;         // Image height
+    SHORT   width;          // Image width
 } BITMAP_HEADER;
 
 /*********************************************************************
 * Overview: Structure for bitmap stored in FLASH memory.
 *
 *********************************************************************/
-typedef struct {
-  TYPE_MEMORY type;         // must be FLASH
-  FLASH_BYTE* address; // bitmap image address
+typedef struct
+{
+    TYPE_MEMORY type;       // must be FLASH
+    FLASH_BYTE  *address;   // bitmap image address
 } BITMAP_FLASH;
 
+/*********************************************************************
+* Overview: Structure for bitmap stored in RAM memory.
+*
+*********************************************************************/
+typedef struct
+{
+    TYPE_MEMORY type;       // must be RAM
+    char  		*address;   // bitmap image address in RAM
+} BITMAP_RAM;
+
+
 // Structure for bitmap stored in EXTERNAL memory
-#define BITMAP_EXTERNAL EXTDATA
+    #define BITMAP_EXTERNAL EXTDATA
 
 /*********************************************************************
 * Overview: Structure describing the font header.
 *
 *********************************************************************/
-typedef struct {
-BYTE  info;					// Reserved for future use (must be set to 0).
-BYTE  fontID;				// User assigned value
-WORD  firstChar;			// Character code of first character (e.g. 32).
-WORD  lastChar;				// Character code of last character in font (e.g. 3006).
-BYTE  reserved;				// Reserved for future use (must be set to 0).
-BYTE  height;				// Font characters height in pixels.
+typedef struct
+{
+    BYTE    fontID;     // User assigned value
+    BYTE    res1   : 4;         // Reserved for future use (must be set to 0).
+    BYTE    orient : 2;         // Orientation
+    BYTE    res2   : 2;         // Reserved for future use (must be set to 0).
+    WORD    firstChar;  // Character code of first character (e.g. 32).
+    WORD    lastChar;   // Character code of last character in font (e.g. 3006).
+    BYTE    height;     // Font characters height in pixels.
+    BYTE    reserved;   // Reserved for future use (must be set to 0).
 } FONT_HEADER;
 
 // Structure describing font glyph entry
-typedef struct {
-BYTE  offsetMSB;
-BYTE  width;
-WORD  offsetLSB;
+typedef struct
+{
+    BYTE    width;
+    BYTE    offsetLSB;
+    WORD    offsetMSB;
 } GLYPH_ENTRY;
 
 /*********************************************************************
 * Overview: Structure for font stored in FLASH memory.
 *
 *********************************************************************/
-typedef struct {
-  TYPE_MEMORY type;         // must be FLASH
-  const char* address;      // font image address
+typedef struct
+{
+    TYPE_MEMORY type;       // must be FLASH
+    const char  *address;   // font image address
 } FONT_FLASH;
 
+/*********************************************************************
+* Overview: Structure for font stored in RAM memory.
+*
+*********************************************************************/
+typedef struct
+{
+    TYPE_MEMORY type;       // must be RAM
+    const char  *address;   // bitmap image address in RAM
+} FONT_RAM;
+
 // Structure for font stored in EXTERNAL memory
-#define FONT_EXTERNAL   EXTDATA
+    #define FONT_EXTERNAL   EXTDATA
 
 /*********************************************************************
 * Overview: This defines the size of the buffer used by font functions
@@ -192,16 +227,17 @@ typedef struct {
 *			characters stored in the font table.
 *
 ********************************************************************/
-#define EXTERNAL_FONT_BUFFER_SIZE    600
-
+    #define EXTERNAL_FONT_BUFFER_SIZE   600
 
 // Pointer to the current font image
-extern void*   _font;
+extern void     *_font;
+
 // First and last characters in the font
-extern WORD    _fontFirstChar;
-extern WORD    _fontLastChar;
+extern WORD     _fontFirstChar;
+extern WORD     _fontLastChar;
+
 // Installed font height
-extern SHORT  _fontHeight;
+extern SHORT    _fontHeight;
 
 /*********************************************************************
 * Function: WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, 
@@ -243,7 +279,7 @@ extern SHORT  _fontHeight;
 * Side Effects: none
 *
 ********************************************************************/
-WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant);
+WORD            Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant);
 
 /*********************************************************************
 * Function:  void InitGraph(void)
@@ -265,7 +301,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Side Effects: none
 *
 ********************************************************************/
- void InitGraph(void);
+void            InitGraph(void);
 
 /*********************************************************************
 * Macros:  GetX()
@@ -281,7 +317,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Side Effects: none
 *
 ********************************************************************/
-#define GetX() _cursorX
+    #define GetX()  _cursorX
 
 /*********************************************************************
 * Macros:  GetX()
@@ -297,7 +333,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Side Effects: none
 *
 ********************************************************************/
-#define GetY() _cursorY
+    #define GetY()  _cursorY
 
 /*********************************************************************
 * Macros:  MoveTo(x,y)
@@ -314,7 +350,9 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Side Effects: none
 *
 ********************************************************************/
-#define  MoveTo(x,y) _cursorX=x; _cursorY=y;
+    #define MoveTo(x, y) \
+    _cursorX = x;        \
+    _cursorY = y;
 
 /*********************************************************************
 * Macros:  MoveRel(dX,dY)
@@ -335,7 +373,9 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Side Effects: none
 *
 ********************************************************************/
-#define MoveRel(dX,dY)  _cursorX+=dX; _cursorY+=dY;
+    #define MoveRel(dX, dY) \
+    _cursorX += dX;         \
+    _cursorY += dY;
 
 /*********************************************************************
 * Macro: SetFontOrientation(orient)
@@ -349,7 +389,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Output: none
 *
 ********************************************************************/
- #define SetFontOrientation(orient) _fontOrientation = orient;
+    #define SetFontOrientation(orient)  _fontOrientation = orient;
 
 /*********************************************************************
 * Macro: GetFontOrientation()
@@ -363,7 +403,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Output: font orientation (0 == horizontal, 1 == vertical)
 *
 ********************************************************************/
- #define GetFontOrientation() _fontOrientation
+    #define GetFontOrientation()    _fontOrientation
 
 /*********************************************************************
 * Function: WORD OutChar(XCHAR ch)
@@ -389,7 +429,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 *			    is not changed.
 *
 ********************************************************************/
- WORD OutChar(XCHAR ch);
+WORD    OutChar(XCHAR ch);
 
 /*********************************************************************
 * Function: WORD OutText(XCHAR* textString)
@@ -418,7 +458,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 *				position will not be changed.
 *
 ********************************************************************/
- WORD OutText(XCHAR* textString);
+WORD    OutText(XCHAR *textString);
 
 /*********************************************************************
 * Function: WORD OutTextXY(SHORT x, SHORT y, XCHAR* textString)
@@ -469,7 +509,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 *				cursor position will not be changed.
 *
 ********************************************************************/
- WORD OutTextXY(SHORT x, SHORT y, XCHAR* textString);
+WORD    OutTextXY(SHORT x, SHORT y, XCHAR *textString);
 
 /*********************************************************************
 * Function: SHORT GetTextHeight(void* font)
@@ -488,7 +528,7 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 * Side Effects: none
 *
 ********************************************************************/
-SHORT GetTextHeight(void* font);
+SHORT   GetTextHeight(void *font);
 
 /*********************************************************************
 * Function: SHORT GetTextWidth(XCHAR* textString, void* font)
@@ -508,7 +548,7 @@ SHORT GetTextHeight(void* font);
 * Side Effects: none
 *
 ********************************************************************/
-SHORT GetTextWidth(XCHAR* textString, void* font);
+SHORT   GetTextWidth(XCHAR *textString, void *font);
 
 /*********************************************************************
 * Function: void SetFont(void* font)
@@ -526,7 +566,7 @@ SHORT GetTextWidth(XCHAR* textString, void* font);
 * Side Effects: none
 *
 ********************************************************************/
-void SetFont(void* font);
+void    SetFont(void *font);
 
 /*********************************************************************
 * Macros: SetLineType(lnType)
@@ -544,7 +584,7 @@ void SetFont(void* font);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetLineType(lnType) _lineType=lnType;
+    #define SetLineType(lnType) _lineType = lnType;
 
 /*********************************************************************
 * Macros: SetLineThickness(lnThickness)
@@ -558,7 +598,7 @@ void SetFont(void* font);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetLineThickness(lnThickness) _lineThickness=lnThickness;
+    #define SetLineThickness(lnThickness)   _lineThickness = lnThickness;
 
 /*********************************************************************
 * Function: WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
@@ -582,7 +622,7 @@ void SetFont(void* font);
 *				point of the line.
 *
 ********************************************************************/
-WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
+WORD    Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 
 /*********************************************************************
 * Macros: LineRel(dX, dY)
@@ -604,7 +644,7 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 *				point of the line.
 *
 ********************************************************************/
-#define LineRel(dX,dY) Line(GetX(),GetY(),GetX()+dX,GetY()+dY)
+    #define LineRel(dX, dY) Line(GetX(), GetY(), GetX() + dX, GetY() + dY)
 
 /*********************************************************************
 * Macros: LineTo(x,y)
@@ -625,7 +665,7 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 *				point of the line.
 *
 ********************************************************************/
-#define LineTo(x,y) Line(_cursorX,_cursorY,x,y)
+    #define LineTo(x, y)    Line(_cursorX, _cursorY, x, y)
 
 /*********************************************************************
 * Macro: Circle(x, y, radius)
@@ -645,11 +685,11 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 * Side Effects: none
 *
 ********************************************************************/
-#ifndef USE_DRV_CIRCLE
-    #define Circle(x, y, radius) 		Bevel(x,y,x,y,radius)
-#else
-    WORD Circle(SHORT x, SHORT y, SHORT radius);
-#endif
+    #ifndef USE_DRV_CIRCLE
+        #define Circle(x, y, radius)    Bevel(x, y, x, y, radius)
+    #else
+WORD    Circle(SHORT x, SHORT y, SHORT radius);
+    #endif
 
 /*********************************************************************
 * Function: WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
@@ -678,7 +718,7 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 * Side Effects: none
 *
 ********************************************************************/
-WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad); 
+WORD    Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 
 /*********************************************************************
 * Function: WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
@@ -706,7 +746,7 @@ WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 * Side Effects: none
 *
 ********************************************************************/
-WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
+WORD    FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 
 /*********************************************************************
 * Macro: FillCircle(SHORT x1, SHORT y1, SHORT rad)
@@ -726,9 +766,9 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 * Side Effects: none
 *
 ********************************************************************/
-#ifndef USE_DRV_FILLCIRCLE
-#define FillCircle(x1, y1, rad) FillBevel(x1, y1, x1, y1, rad)
-#endif // end of USE_DRV_FILLCIRCLE
+    #ifndef USE_DRV_FILLCIRCLE
+        #define FillCircle(x1, y1, rad) FillBevel(x1, y1, x1, y1, rad)
+    #endif // end of USE_DRV_FILLCIRCLE
 
 /*********************************************************************
 * Macro: Rectangle(left, top, right, bottom)
@@ -750,7 +790,7 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 * Side Effects: none
 *
 ********************************************************************/
-#define Rectangle(left, top, right, bottom) Bevel(left, top, right, bottom, 0)
+    #define Rectangle(left, top, right, bottom) Bevel(left, top, right, bottom, 0)
 
 /*********************************************************************
 * Function: WORD DrawPoly(SHORT numPoints, SHORT* polyPoints)
@@ -776,7 +816,7 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 * Side Effects: none
 *
 ********************************************************************/
-WORD DrawPoly(SHORT numPoints, SHORT* polyPoints);
+WORD    DrawPoly(SHORT numPoints, SHORT *polyPoints);
 
 /*********************************************************************
 * Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
@@ -799,7 +839,7 @@ WORD DrawPoly(SHORT numPoints, SHORT* polyPoints);
 * Side Effects: none
 *
 ********************************************************************/
-WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
+WORD    Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
 
 /*********************************************************************
 * Function: void ClearDevice(void)
@@ -824,7 +864,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
 * Side Effects: none
 *
 ********************************************************************/
-void ClearDevice(void);
+void    ClearDevice(void);
 
 /*********************************************************************
 * Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
@@ -846,7 +886,7 @@ void ClearDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch);
+WORD    PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 
 /*********************************************************************
 * Function: SHORT GetImageWidth(void* bitmap)
@@ -860,7 +900,7 @@ WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch);
 * Side Effects: none
 *
 ********************************************************************/
-SHORT GetImageWidth(void* bitmap);
+SHORT   GetImageWidth(void *bitmap);
 
 /*********************************************************************
 * Function: SHORT GetImageHeight(void* bitmap)
@@ -874,7 +914,7 @@ SHORT GetImageWidth(void* bitmap);
 * Side Effects: none
 *
 ********************************************************************/
-SHORT GetImageHeight(void* bitmap);
+SHORT   GetImageHeight(void *bitmap);
 
 /*********************************************************************
 * Function: WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer)
@@ -925,6 +965,5 @@ SHORT GetImageHeight(void* bitmap);
 * Side Effects: none
 *
 ********************************************************************/
-WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer);
-
+WORD    ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *buffer);
 #endif // _PRIMITIVE_H

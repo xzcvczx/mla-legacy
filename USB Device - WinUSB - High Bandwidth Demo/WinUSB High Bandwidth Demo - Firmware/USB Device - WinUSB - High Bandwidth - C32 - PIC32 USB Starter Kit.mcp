@@ -8,8 +8,8 @@ dir_src=
 dir_bin=
 dir_tmp=./Objects\USB Device - WinUSB - High Bandwidth - C32
 dir_sin=
-dir_inc=..\..\Microchip\Include;..\..\USB Device - WinUSB - High Bandwidth Demo\WinUSB High Bandwidth Demo - Firmware
-dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
+dir_inc=.;..\..\Microchip\Include;..\..\USB Device - WinUSB - High Bandwidth Demo\WinUSB High Bandwidth Demo - Firmware
+dir_lib=C:\Program Files\Microchip\MPLAB C32\lib
 dir_lkr=
 [CAT_FILTERS]
 filter_src=*.s;*.c

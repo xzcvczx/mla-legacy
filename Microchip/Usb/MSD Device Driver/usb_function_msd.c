@@ -58,15 +58,8 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
     ..\\..\\Microchip\\Include
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
+    .
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -78,10 +71,6 @@
 ********************************************************************/
  
 /** I N C L U D E S **************************************************/
-#include "Compiler.h"
-#include "GenericTypeDefs.h"
-#include "usb_config.h"
-#include "USB/usb_device.h"
 #include "USB/USB.h"
 #include "HardwareProfile.h"
 #include "FSConfig.h"
@@ -269,7 +258,7 @@ void USBMSDInit(void)
  *****************************************************************************/	
 void USBCheckMSDRequest(void)
 {
-    if(SetupPkt.Recipient != RCPT_INTF) return;
+    if(SetupPkt.Recipient != USB_SETUP_RECIPIENT_INTERFACE_BITFIELD) return;
     if(SetupPkt.bIntfID != MSD_INTF_ID) return;
 
 	switch(SetupPkt.bRequest)

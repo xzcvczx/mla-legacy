@@ -114,7 +114,7 @@ file_017=usbdrv.h
 file_018=usbdsc.h
 file_019=usbmmap.h
 file_020=BootPIC18NonJ.h
-file_021=BootModified.18f4550.lkr
+file_021=BootModified.18f4550_g.lkr
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

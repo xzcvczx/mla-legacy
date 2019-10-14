@@ -37,35 +37,40 @@
  * Paolo Tamayo			09/15/2007  ...
  ********************************************************************/
 #ifndef __DEMOSTEPS_H__
-#define __DEMOSTEPS_H__
+    #define __DEMOSTEPS_H__
 
 //******************************************************************************
+
 //******************************************************************************
+
 // Data Structures
+
 //******************************************************************************
+
 //******************************************************************************
+
 // Demo event structure
-typedef struct {
-	BYTE 			type;		// Type of input device.
-    BYTE 			uiEvent;	// The generic events for input device.
-    SHORT 			param1;		// Parameter 1 meaning is dependent on the type of input device.
-    SHORT 			param2; 	// Parameter 2 meaning is dependent on the type of input device.
-    SHORT			time;
+typedef struct
+{
+    BYTE    type;       // Type of input device.
+    BYTE    uiEvent;    // The generic events for input device.
+    SHORT   param1;     // Parameter 1 meaning is dependent on the type of input device.
+    SHORT   param2;     // Parameter 2 meaning is dependent on the type of input device.
+    SHORT   time;
 } DEMO_MSG;
 
 // time delay definitions
-#define QUICKDELAY	     	 100
-#define FASTDELAY	     	  10
-#define HALFSECDELAY	     500
-#define FIFTHSECDELAY	     200
+    #define QUICKDELAY      100
+    #define FASTDELAY       10
+    #define HALFSECDELAY    500
+    #define FIFTHSECDELAY   200
 
-#define ONESECDELAY	    	(1000)
-#define TWOSECDELAY	    	(ONESECDELAY*2)
-#define THREESECDELAY	    (ONESECDELAY*3)
-#define FOURSECDELAY	    (ONESECDELAY*4)
-#define FIVESECDELAY	    (ONESECDELAY*5)
-
-#define THIRTYSECDELAY	    (ONESECDELAY*30)
+    #define ONESECDELAY     (1000)
+    #define TWOSECDELAY     (ONESECDELAY * 2)
+    #define THREESECDELAY   (ONESECDELAY * 3)
+    #define FOURSECDELAY    (ONESECDELAY * 4)
+    #define FIVESECDELAY    (ONESECDELAY * 5)
+    #define THIRTYSECDELAY  (ONESECDELAY * 30)
 
 /*********************************************************************
 * Function:  void UpdateDemoMode(GOL_MSG *pMsg)
@@ -83,7 +88,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void UpdateDemoMode(GOL_MSG *pMsg);
+void    UpdateDemoMode(GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function:  void InitDemoMode(void)
@@ -99,6 +104,5 @@ void UpdateDemoMode(GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void InitDemoMode(void);
-
-#endif // __DEMOSTEPS_H__ 
+void    InitDemoMode(void);
+#endif // __DEMOSTEPS_H__

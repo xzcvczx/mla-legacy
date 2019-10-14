@@ -38,38 +38,37 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _WINDOW_H
-#define _WINDOW_H
+    #define _WINDOW_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 // Indent for the title bar text from the left side of bitmap or title bar emboss
-#define WND_INDENT          2
+    #define WND_INDENT  2
 
 // Height of the title bar
-#define WND_TITLE_HEIGHT    35
+    #define WND_TITLE_HEIGHT    35
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define WND_FOCUSED		0x0001		// Bit for focus state
-#define WND_DISABLED    0x0002     	// Bit for disabled state
-#define WND_TITLECENTER 0x0004      // Bit to center the text on the Title Area
-#define WND_HIDE        0x8000     	// Bit to indicate window must be removed from screen
-#define WND_DRAW_CLIENT 0x4000     	// Bit to indicate client area must be redrawn
-#define WND_DRAW_TITLE  0x2000     	// Bit to indicate title area must be redrawn
-#define WND_DRAW        0x6000     	// Bits to indicate whole window must be redrawn
+    #define WND_FOCUSED     0x0001  // Bit for focus state
+    #define WND_DISABLED    0x0002  // Bit for disabled state
+    #define WND_TITLECENTER 0x0004  // Bit to center the text on the Title Area
+    #define WND_HIDE        0x8000  // Bit to indicate window must be removed from screen
+    #define WND_DRAW_CLIENT 0x4000  // Bit to indicate client area must be redrawn
+    #define WND_DRAW_TITLE  0x2000  // Bit to indicate title area must be redrawn
+    #define WND_DRAW        0x6000  // Bits to indicate whole window must be redrawn
 
 /*****************************************************************************
  * Overview: The structure contains data for the window
  *****************************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-
-    SHORT         	textHeight;     // Pre-computed text height
-	XCHAR  			*pText;         // Pointer to the title text
-	void        	*pBitmap;     	// Pointer to the bitmap for the title bar
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    SHORT       textHeight; // Pre-computed text height
+    XCHAR       *pText;     // Pointer to the title text
+    void        *pBitmap;   // Pointer to the bitmap for the title bar
 } WINDOW;
 
 /*********************************************************************
@@ -115,8 +114,18 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-WINDOW *WndCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
-			      WORD state, void *pBitmap, XCHAR *pText, GOL_SCHEME *pScheme);
+WINDOW  *WndCreate
+        (
+            WORD        ID,
+            SHORT       left,
+            SHORT       top,
+            SHORT       right,
+            SHORT       bottom,
+            WORD        state,
+            void        *pBitmap,
+            XCHAR       *pText,
+            GOL_SCHEME  *pScheme
+        );
 
 /*********************************************************************
 * Macros:  WndGetText(pW)
@@ -142,7 +151,7 @@ WINDOW *WndCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-#define WndGetText(pW)                 pW->pText
+    #define WndGetText(pW)  pW->pText
 
 /*********************************************************************
 * Function: WndSetText(WINDOW *pW, XCHAR *pText)
@@ -162,7 +171,7 @@ WINDOW *WndCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-void  WndSetText(WINDOW *pW, XCHAR *pText);
+void    WndSetText(WINDOW *pW, XCHAR *pText);
 
 /*********************************************************************
 * Function: WORD WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg)
@@ -198,7 +207,7 @@ void  WndSetText(WINDOW *pW, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-WORD  WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg);
+WORD    WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD WndDraw(WINDOW *pW)
@@ -231,6 +240,5 @@ WORD  WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD WndDraw(WINDOW *pW);
-
+WORD    WndDraw(WINDOW *pW);
 #endif // _WINDOW_H

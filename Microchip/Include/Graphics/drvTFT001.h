@@ -47,24 +47,22 @@
  * Anton Alkhimenok     06/26/09    16-bit PMP support
  *****************************************************************************/
 #ifndef _DRVTFT001_H
-#define _DRVTFT001_H
+    #define _DRVTFT001_H
 
-#if defined(__dsPIC33F__)
-#include <p33Fxxxx.h>
-#elif defined(__PIC24H__)
-#include <p24Hxxxx.h>
-#elif defined(__PIC32MX__)
-#include <plib.h>
-#define PMDIN1   PMDIN
-#elif defined(__PIC24F__)
-#include <p24Fxxxx.h>
-#else
-#error CONTROLLER IS NOT SUPPORTED
-#endif
-
-
-#include "GraphicsConfig.h"
-#include "GenericTypeDefs.h"
+    #if defined(__dsPIC33F__)
+        #include <p33Fxxxx.h>
+    #elif defined(__PIC24H__)
+        #include <p24Hxxxx.h>
+    #elif defined(__PIC32MX__)
+        #include <plib.h>
+        #define PMDIN1  PMDIN
+    #elif defined(__PIC24F__)
+        #include <p24Fxxxx.h>
+    #else
+        #error CONTROLLER IS NOT SUPPORTED
+    #endif
+    #include "GraphicsConfig.h"
+    #include "GenericTypeDefs.h"
 
 /*********************************************************************
 * Overview: Additional hardware-accelerated functions can be implemented
@@ -74,130 +72,123 @@
 
 // Define this to implement Font related functions in the driver.
 //#define USE_DRV_FONT
-
 // Define this to implement Line function in the driver.
 //#define USE_DRV_LINE
-
 // Define this to implement Circle function in the driver.
 //#define USE_DRV_CIRCLE
-
 // Define this to implement FillCircle function in the driver.
 //#define USE_DRV_FILLCIRCLE
-
 // Define this to implement Bar function in the driver.
-#define USE_DRV_BAR
+    #define USE_DRV_BAR
 
 // Define this to implement ClearDevice function in the driver.
-#define USE_DRV_CLEARDEVICE
+    #define USE_DRV_CLEARDEVICE
 
 // Define this to implement PutImage function in the driver.
-#define USE_DRV_PUTIMAGE
+    #define USE_DRV_PUTIMAGE
 
-
-#ifndef DISP_HOR_RESOLUTION
-#error  DISP_HOR_RESOLUTION must be defined in GraphicsConfig.h
-#endif
-
-#ifndef DISP_VER_RESOLUTION
-#error  DISP_VER_RESOLUTION must be defined in GraphicsConfig.h
-#endif
-
-#ifndef COLOR_DEPTH
-#error  COLOR_DEPTH must be defined in GraphicsConfig.h
-#endif
-
-#ifndef DISP_ORIENTATION
-#error  DISP_ORIENTATION must be defined in GraphicsConfig.h
-#endif
-
+    #ifndef DISP_HOR_RESOLUTION
+        #error DISP_HOR_RESOLUTION must be defined in HardwareProfile.h
+    #endif
+    #ifndef DISP_VER_RESOLUTION
+        #error DISP_VER_RESOLUTION must be defined in HardwareProfile.h
+    #endif
+    #ifndef COLOR_DEPTH
+        #error COLOR_DEPTH must be defined in HardwareProfile.h
+    #endif
+    #ifndef DISP_ORIENTATION
+        #error DISP_ORIENTATION must be defined in HardwareProfile.h
+    #endif
 
 /*********************************************************************
 * Overview: Horizontal and vertical screen size.
 *********************************************************************/
-#if (DISP_HOR_RESOLUTION != 240)
-#error This driver doesn't supports this resolution. Horisontal resolution must be 240 pixels.
-#endif
-#if (DISP_VER_RESOLUTION != 320)
-#error This driver doesn't supports this resolution. Vertical resolution must be 320 pixels.
-#endif
+    #if (DISP_HOR_RESOLUTION != 240)
+        #error This driver doesn't supports this resolution. Horisontal resolution must be 240 pixels.
+    #endif
+    #if (DISP_VER_RESOLUTION != 320)
+        #error This driver doesn't supports this resolution. Vertical resolution must be 320 pixels.
+    #endif
 
 /*********************************************************************
 * Overview: Display orientation.
 *********************************************************************/
-#if (DISP_ORIENTATION != 0)&&(DISP_ORIENTATION != 90)
-#error This driver doesn't support this orientation.
-#endif
+    #if (DISP_ORIENTATION != 0) && (DISP_ORIENTATION != 90)
+        #error This driver doesn't support this orientation.
+    #endif
 
 /*********************************************************************
 * Overview: Color depth.
 *********************************************************************/
-#if (COLOR_DEPTH != 16)
-#error This driver doesn't support this color depth. It should be 16.
-#endif
+    #if (COLOR_DEPTH != 16)
+        #error This driver doesn't support this color depth. It should be 16.
+    #endif
 
 /*********************************************************************
 * Overview: Clipping region control codes to be used with SetClip(...)
 *           function. 
 *********************************************************************/
-#define CLIP_DISABLE       0 	// Disables clipping.
-#define CLIP_ENABLE        1	// Enables clipping.
+    #define CLIP_DISABLE    0   // Disables clipping.
+    #define CLIP_ENABLE     1   // Enables clipping.
 
 /*********************************************************************
 * Overview: Some basic colors definitions.
 *********************************************************************/
-
-#define BLACK               RGB565CONVERT(0,    0,      0)
-#define BRIGHTBLUE          RGB565CONVERT(0,    0,      255)
-#define BRIGHTGREEN         RGB565CONVERT(0,    255,    0)
-#define BRIGHTCYAN          RGB565CONVERT(0,    255,    255)
-#define BRIGHTRED           RGB565CONVERT(255,  0,      0)
-#define BRIGHTMAGENTA       RGB565CONVERT(255,  0,      255)
-#define BRIGHTYELLOW        RGB565CONVERT(255,  255,    0)
-#define BLUE                RGB565CONVERT(0,    0,      128)
-#define GREEN               RGB565CONVERT(0,    128,    0)
-#define CYAN                RGB565CONVERT(0,    128,    128)
-#define RED                 RGB565CONVERT(128,  0,      0)
-#define MAGENTA             RGB565CONVERT(128,  0,      128)
-#define BROWN               RGB565CONVERT(255,  128,    0)
-#define LIGHTGRAY           RGB565CONVERT(128,  128,    128)
-#define DARKGRAY            RGB565CONVERT(64,   64,     64)
-#define LIGHTBLUE           RGB565CONVERT(128,  128,    255)
-#define LIGHTGREEN          RGB565CONVERT(128,  255,    128)
-#define LIGHTCYAN           RGB565CONVERT(128,  255,    255)
-#define LIGHTRED            RGB565CONVERT(255,  128,    128)
-#define LIGHTMAGENTA        RGB565CONVERT(255,  128,    255)
-#define YELLOW              RGB565CONVERT(255,  255,    128)
-#define WHITE               RGB565CONVERT(255,  255,    255)
-                            
-#define GRAY0       	    RGB565CONVERT(224,  224,    224)
-#define GRAY1         	    RGB565CONVERT(192,  192,    192)   
-#define GRAY2               RGB565CONVERT(160,  160,    160)   
-#define GRAY3               RGB565CONVERT(128,  128,    128)
-#define GRAY4               RGB565CONVERT(96,   96,     96)
-#define GRAY5               RGB565CONVERT(64,   64,     64)
-#define GRAY6	            RGB565CONVERT(32,   32,     32)
+    #define BLACK           RGB565CONVERT(0, 0, 0)
+    #define BRIGHTBLUE      RGB565CONVERT(0, 0, 255)
+    #define BRIGHTGREEN     RGB565CONVERT(0, 255, 0)
+    #define BRIGHTCYAN      RGB565CONVERT(0, 255, 255)
+    #define BRIGHTRED       RGB565CONVERT(255, 0, 0)
+    #define BRIGHTMAGENTA   RGB565CONVERT(255, 0, 255)
+    #define BRIGHTYELLOW    RGB565CONVERT(255, 255, 0)
+    #define BLUE            RGB565CONVERT(0, 0, 128)
+    #define GREEN           RGB565CONVERT(0, 128, 0)
+    #define CYAN            RGB565CONVERT(0, 128, 128)
+    #define RED             RGB565CONVERT(128, 0, 0)
+    #define MAGENTA         RGB565CONVERT(128, 0, 128)
+    #define BROWN           RGB565CONVERT(255, 128, 0)
+    #define LIGHTGRAY       RGB565CONVERT(128, 128, 128)
+    #define DARKGRAY        RGB565CONVERT(64, 64, 64)
+    #define LIGHTBLUE       RGB565CONVERT(128, 128, 255)
+    #define LIGHTGREEN      RGB565CONVERT(128, 255, 128)
+    #define LIGHTCYAN       RGB565CONVERT(128, 255, 255)
+    #define LIGHTRED        RGB565CONVERT(255, 128, 128)
+    #define LIGHTMAGENTA    RGB565CONVERT(255, 128, 255)
+    #define YELLOW          RGB565CONVERT(255, 255, 128)
+    #define WHITE           RGB565CONVERT(255, 255, 255)
+    #define GRAY0           RGB565CONVERT(224, 224, 224)
+    #define GRAY1           RGB565CONVERT(192, 192, 192)
+    #define GRAY2           RGB565CONVERT(160, 160, 160)
+    #define GRAY3           RGB565CONVERT(128, 128, 128)
+    #define GRAY4           RGB565CONVERT(96, 96, 96)
+    #define GRAY5           RGB565CONVERT(64, 64, 64)
+    #define GRAY6           RGB565CONVERT(32, 32, 32)
 
 // Memory pitch for line
-#define LINE_MEM_PITCH      0x100 
+    #define LINE_MEM_PITCH  0x100
 
 // Color
-extern WORD _color;
+extern WORD     _color;
 
 /*********************************************************************
 * Overview: Clipping region control and border settings.
 *
 *********************************************************************/
+
 // Clipping region enable control
-extern SHORT _clipRgn;
+extern SHORT    _clipRgn;
 
 // Left clipping region border
-extern SHORT _clipLeft;
+extern SHORT    _clipLeft;
+
 // Top clipping region border
-extern SHORT _clipTop;
+extern SHORT    _clipTop;
+
 // Right clipping region border
-extern SHORT _clipRight;
+extern SHORT    _clipRight;
+
 // Bottom clipping region border
-extern SHORT _clipBottom;
+extern SHORT    _clipBottom;
 
 /*********************************************************************
 * Macros:  PMPWaitBusy()
@@ -213,13 +204,15 @@ extern SHORT _clipBottom;
 * Side Effects: none
 *
 ********************************************************************/
-#if defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__)
-#define PMPWaitBusy()  while(PMMODEbits.BUSY);
-#elif defined(__PIC24F__)
-#define PMPWaitBusy()  Nop(); Nop();
-#else
-#error CONTROLLER IS NOT SUPPORTED!!
-#endif
+    #if defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__)
+        #define PMPWaitBusy()   while(PMMODEbits.BUSY);
+    #elif defined(__PIC24F__)
+        #define PMPWaitBusy() \
+    Nop();                    \
+    Nop();
+    #else
+        #error CONTROLLER IS NOT SUPPORTED!!
+    #endif
 
 /*********************************************************************
 * Macros:  SetIndex(index)
@@ -235,11 +228,21 @@ extern SHORT _clipBottom;
 * Side Effects: none
 *
 ********************************************************************/
-#ifdef USE_16BIT_PMP
-#define SetIndex(index)  RS_LAT_BIT=0;PMDIN1=(WORD)index;PMPWaitBusy();RS_LAT_BIT=1;
-#else
-#define SetIndex(index)  RS_LAT_BIT=0;PMDIN1=0;PMPWaitBusy();PMDIN1=((WORD_VAL)(WORD)index).v[0];PMPWaitBusy();RS_LAT_BIT=1;
-#endif
+    #ifdef USE_16BIT_PMP
+        #define SetIndex(index) \
+    RS_LAT_BIT = 0;             \
+    PMDIN1 = (WORD) index;      \
+    PMPWaitBusy();              \
+    RS_LAT_BIT = 1;
+    #else
+        #define SetIndex(index)              \
+    RS_LAT_BIT = 0;                          \
+    PMDIN1 = 0;                              \
+    PMPWaitBusy();                           \
+    PMDIN1 = ((WORD_VAL) (WORD) index).v[0]; \
+    PMPWaitBusy();                           \
+    RS_LAT_BIT = 1;
+    #endif
 
 /*********************************************************************
 * Macros:  WriteData(data)
@@ -255,11 +258,17 @@ extern SHORT _clipBottom;
 * Side Effects: none
 *
 ********************************************************************/
-#ifdef USE_16BIT_PMP
-#define WriteData(data) PMDIN1=(WORD)data;PMPWaitBusy();
-#else
-#define WriteData(data) PMDIN1=((WORD_VAL)(WORD)data).v[1];PMPWaitBusy();PMDIN1=((WORD_VAL)(WORD)data).v[0];PMPWaitBusy();
-#endif
+    #ifdef USE_16BIT_PMP
+        #define WriteData(data) \
+    PMDIN1 = (WORD) data;       \
+    PMPWaitBusy();
+    #else
+        #define WriteData(data)             \
+    PMDIN1 = ((WORD_VAL) (WORD) data).v[1]; \
+    PMPWaitBusy();                          \
+    PMDIN1 = ((WORD_VAL) (WORD) data).v[0]; \
+    PMPWaitBusy();
+    #endif
 
 /*********************************************************************
 * Macros:  SetAddress(addr)
@@ -275,17 +284,29 @@ extern SHORT _clipBottom;
 * Side Effects: none
 *
 ********************************************************************/
-#ifdef USE_16BIT_PMP
-#define SetAddress(addr)  \
-SetIndex(0x0020);PMDIN1=((WORD)addr&0x00ff);PMPWaitBusy();\
-SetIndex(0x0021);PMDIN1=((WORD)((DWORD)addr>>8));PMPWaitBusy();\
-SetIndex(0x0022);
-#else
-#define SetAddress(addr)  \
-SetIndex(0x0020);PMDIN1=0;PMPWaitBusy();PMDIN1=((DWORD_VAL)(DWORD)addr).v[0];PMPWaitBusy();\
-SetIndex(0x0021);PMDIN1=((DWORD_VAL)(DWORD)addr).v[2];PMPWaitBusy();PMDIN1=((DWORD_VAL)(DWORD)addr).v[1];PMPWaitBusy();\
-SetIndex(0x0022);
-#endif
+    #ifdef USE_16BIT_PMP
+        #define SetAddress(addr)           \
+    SetIndex(0x0020);                      \
+    PMDIN1 = ((WORD) addr & 0x00ff);       \
+    PMPWaitBusy();                         \
+    SetIndex(0x0021);                      \
+    PMDIN1 = ((WORD) ((DWORD) addr >> 8)); \
+    PMPWaitBusy();                         \
+    SetIndex(0x0022);
+    #else
+        #define SetAddress(addr)              \
+    SetIndex(0x0020);                         \
+    PMDIN1 = 0;                               \
+    PMPWaitBusy();                            \
+    PMDIN1 = ((DWORD_VAL) (DWORD) addr).v[0]; \
+    PMPWaitBusy();                            \
+    SetIndex(0x0021);                         \
+    PMDIN1 = ((DWORD_VAL) (DWORD) addr).v[2]; \
+    PMPWaitBusy();                            \
+    PMDIN1 = ((DWORD_VAL) (DWORD) addr).v[1]; \
+    PMPWaitBusy();                            \
+    SetIndex(0x0022);
+    #endif
 
 /*********************************************************************
 * Function:  void ResetDevice()
@@ -301,7 +322,7 @@ SetIndex(0x0022);
 * Side Effects: none
 *
 ********************************************************************/
-void ResetDevice(void);
+void    ResetDevice(void);
 
 /*********************************************************************
 * Macros:  GetMaxX()
@@ -331,15 +352,11 @@ void ResetDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-#if (DISP_ORIENTATION == 90)
-
-#define	GetMaxX() (DISP_VER_RESOLUTION-1)
-
-#elif (DISP_ORIENTATION == 0)
-
-#define	GetMaxX() (DISP_HOR_RESOLUTION-1)
-
-#endif
+    #if (DISP_ORIENTATION == 90)
+        #define GetMaxX()   (DISP_VER_RESOLUTION - 1)
+    #elif (DISP_ORIENTATION == 0)
+        #define GetMaxX()   (DISP_HOR_RESOLUTION - 1)
+    #endif
 
 /*********************************************************************
 * Macros:  GetMaxY()
@@ -357,15 +374,11 @@ void ResetDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-#if (DISP_ORIENTATION == 90)
-
-#define	GetMaxY() (DISP_HOR_RESOLUTION-1)
-
-#elif (DISP_ORIENTATION == 0)
-
-#define	GetMaxY() (DISP_VER_RESOLUTION-1)
-
-#endif
+    #if (DISP_ORIENTATION == 90)
+        #define GetMaxY()   (DISP_HOR_RESOLUTION - 1)
+    #elif (DISP_ORIENTATION == 0)
+        #define GetMaxY()   (DISP_VER_RESOLUTION - 1)
+    #endif
 
 /*********************************************************************
 * Macros:  SetColor(color)
@@ -381,7 +394,7 @@ void ResetDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetColor(color) _color = color;
+    #define SetColor(color) _color = color;
 
 /*********************************************************************
 * Macros:  GetColor()
@@ -397,7 +410,7 @@ void ResetDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetColor() _color
+    #define GetColor()  _color
 
 /*********************************************************************
 * Macros:  SetActivePage(page)
@@ -413,7 +426,7 @@ void ResetDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetActivePage(page)
+    #define SetActivePage(page)
 
 /*********************************************************************
 * Macros: SetVisualPage(page)
@@ -429,7 +442,7 @@ void ResetDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetVisualPage(page)
+    #define SetVisualPage(page)
 
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)
@@ -446,7 +459,7 @@ void ResetDevice(void);
 * Side Effects: none
 *
 ********************************************************************/
-void PutPixel(SHORT x, SHORT y);
+void    PutPixel(SHORT x, SHORT y);
 
 /*********************************************************************
 * Function: WORD GetPixel(SHORT x, SHORT y)
@@ -463,7 +476,7 @@ void PutPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-WORD GetPixel(SHORT x, SHORT y);
+WORD    GetPixel(SHORT x, SHORT y);
 
 /*********************************************************************
 * Macros: SetClipRgn(left, top, right, bottom)
@@ -482,7 +495,11 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetClipRgn(left,top,right,bottom) _clipLeft=left; _clipTop=top; _clipRight=right; _clipBottom=bottom;
+    #define SetClipRgn(left, top, right, bottom) \
+    _clipLeft = left;                            \
+    _clipTop = top;                              \
+    _clipRight = right;                          \
+    _clipBottom = bottom;
 
 /*********************************************************************
 * Macros: GetClipLeft()
@@ -498,7 +515,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetClipLeft() _clipLeft
+    #define GetClipLeft()   _clipLeft
 
 /*********************************************************************
 * Macros: GetClipRight()
@@ -514,7 +531,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetClipRight() _clipRight
+    #define GetClipRight()  _clipRight
 
 /*********************************************************************
 * Macros: GetClipTop()
@@ -530,7 +547,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetClipTop() _clipTop
+    #define GetClipTop()    _clipTop
 
 /*********************************************************************
 * Macros: GetClipBottom()
@@ -546,7 +563,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetClipBottom() _clipBottom
+    #define GetClipBottom() _clipBottom
 
 /*********************************************************************
 * Macros: SetClip(control)
@@ -564,7 +581,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetClip(control) _clipRgn=control;
+    #define SetClip(control)    _clipRgn = control;
 
 /*********************************************************************
 * Macros: IsDeviceBusy()
@@ -581,7 +598,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define IsDeviceBusy()  0
+    #define IsDeviceBusy()  0
 
 /*********************************************************************
 * Macros: SetPalette(colorNum, color)
@@ -598,7 +615,7 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetPalette(colorNum, color)
+    #define SetPalette(colorNum, color)
 
 /*********************************************************************
 * Function:  void  DelayMs(WORD time)
@@ -615,6 +632,5 @@ WORD GetPixel(SHORT x, SHORT y);
 * Side Effects: none
 *
 ********************************************************************/
-void DelayMs(WORD time);
-
+void    DelayMs(WORD time);
 #endif // _DRVTFT001_H

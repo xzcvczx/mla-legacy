@@ -169,14 +169,14 @@ SECTIONS
 	LONG(ABSOLUTE(0xA80C)); /* __AddressError*/
 	LONG(ABSOLUTE(0xA810)); /* __StackError*/
 	LONG(ABSOLUTE(0xA814)); /* __MathError*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __ReservedTrap5 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __ReservedTrap6 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __ReservedTrap7 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __ReservedTrap5 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __ReservedTrap6 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __ReservedTrap7 not implemented */
 	LONG(ABSOLUTE(0xA818)); /* __INT0Interrupt*/
 	LONG(ABSOLUTE(0xA81C)); /* __IC1Interrupt*/
 	LONG(ABSOLUTE(0xA820)); /* __OC1Interrupt*/
 	LONG(ABSOLUTE(0xA824)); /* __T1Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt4 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt4 not implemented */
 	LONG(ABSOLUTE(0xA828)); /* __IC2Interrupt*/
 	LONG(ABSOLUTE(0xA82C)); /* __OC2Interrupt*/
 	LONG(ABSOLUTE(0xA830)); /* __T2Interrupt*/
@@ -186,17 +186,17 @@ SECTIONS
 	LONG(ABSOLUTE(0xA840)); /* __U1RXInterrupt*/
 	LONG(ABSOLUTE(0xA844)); /* __U1TXInterrupt*/
 	LONG(ABSOLUTE(0xA848)); /* __ADC1Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt14 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt15 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt14 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt15 not implemented */
 	LONG(ABSOLUTE(0xA84C)); /* __SI2C1Interrupt*/
 	LONG(ABSOLUTE(0xA850)); /* __MI2C1Interrupt*/
 	LONG(ABSOLUTE(0xA854)); /* __CompInterrupt*/
 	LONG(ABSOLUTE(0xA858)); /* __CNInterrupt*/
 	LONG(ABSOLUTE(0xA85C)); /* __INT1Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt21 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt21 not implemented */
 	LONG(ABSOLUTE(0xA860)); /* __IC7Interrupt*/
 	LONG(ABSOLUTE(0xA864)); /* __IC8Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt24 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt24 not implemented */
 	LONG(ABSOLUTE(0xA868)); /* __OC3Interrupt*/
 	LONG(ABSOLUTE(0xA86C)); /* __OC4Interrupt*/
 	LONG(ABSOLUTE(0xA870)); /* __T4Interrupt*/
@@ -206,9 +206,9 @@ SECTIONS
 	LONG(ABSOLUTE(0xA880)); /* __U2TXInterrupt*/
 	LONG(ABSOLUTE(0xA884)); /* __SPI2ErrInterrupt*/
 	LONG(ABSOLUTE(0xA888)); /* __SPI2Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt34 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt35 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt36 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt34 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt35 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt36 not implemented */
 	LONG(ABSOLUTE(0xA88C)); /* __IC3Interrupt*/
 	LONG(ABSOLUTE(0xA890)); /* __IC4Interrupt*/
 	LONG(ABSOLUTE(0xA894)); /* __IC5Interrupt*/
@@ -218,41 +218,41 @@ SECTIONS
 	LONG(ABSOLUTE(0xA8A4)); /* __OC7Interrupt*/
 	LONG(ABSOLUTE(0xA8A8)); /* __OC8Interrupt*/
 	LONG(ABSOLUTE(0xA8AC)); /* __PMPInterrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt46 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt47 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt48 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt46 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt47 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt48 not implemented */
 	LONG(ABSOLUTE(0xA8B0)); /* __SI2C2Interrupt*/
 	LONG(ABSOLUTE(0xA8B4)); /* __MI2C2Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt51 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt52 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt51 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt52 not implemented */
 	LONG(ABSOLUTE(0xA8B8)); /* __INT3Interrupt*/
 	LONG(ABSOLUTE(0xA8BC)); /* __INT4Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt55 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt56 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt57 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt58 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt59 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt60 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt61 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt55 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt56 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt57 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt58 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt59 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt60 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt61 not implemented */
 	LONG(ABSOLUTE(0xA8C0)); /* __RTCCInterrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt63 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt64 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt63 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt64 not implemented */
 	LONG(ABSOLUTE(0xA8C4)); /* __U1ErrInterrupt*/
 	LONG(ABSOLUTE(0xA8C8)); /* __U2ErrInterrupt*/
 	LONG(ABSOLUTE(0xA8CC)); /* __CRCInterrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt68 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt69 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt70 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt71 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt68 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt69 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt70 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt71 not implemented */
 	LONG(ABSOLUTE(0xA8D0)); /* __LVDInterrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt73 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt74 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt75 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt76 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt73 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt74 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt75 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt76 not implemented */
 	LONG(ABSOLUTE(0xA8D4)); /* __CTMUInterrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt78 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt79 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt80 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt78 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt79 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt80 not implemented */
 	LONG(ABSOLUTE(0xA8D8)); /* __U3ErrInterrupt*/
 	LONG(ABSOLUTE(0xA8DC)); /* __U3RXInterrupt*/
 	LONG(ABSOLUTE(0xA8E0)); /* __U3TXInterrupt*/
@@ -266,30 +266,30 @@ SECTIONS
 	LONG(ABSOLUTE(0xA900)); /* __SPI3Interrupt*/
 	LONG(ABSOLUTE(0xA904)); /* __OC9Interrupt*/
 	LONG(ABSOLUTE(0xA908)); /* __IC9Interrupt*/
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt94 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt95 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt96 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt97 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt98 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt99 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt100 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt101 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt102 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt103 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt104 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt105 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt106 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt107 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt108 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt109 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt110 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt111 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt112 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt113 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt114 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt115 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt116 not implemented */
-	LONG(ABSOLUTE(__DefaultInterrupt)); /* __Interrupt117 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt94 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt95 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt96 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt97 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt98 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt99 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt100 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt101 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt102 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt103 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt104 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt105 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt106 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt107 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt108 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt109 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt110 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt111 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt112 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt113 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt114 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt115 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt116 not implemented */
+	LONG(ABSOLUTE(0xA90C)); /* __Interrupt117 not implemented */
 
   } >ivt
 

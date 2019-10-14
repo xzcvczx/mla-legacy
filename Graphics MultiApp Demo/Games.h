@@ -38,7 +38,7 @@
  * Anton Alkhimenok		3/10/08     Ported for ESC demo.
  ********************************************************************/
 #ifndef _GAMES_H
-#define _GAMES_H
+    #define _GAMES_H
 
 /************************************************************************
  Function: void DrawSnake(DWORD tick)
@@ -51,7 +51,7 @@
                                                                        
  Output: none
 ************************************************************************/
-void DrawSnake(DWORD tick);
+void    DrawSnake(DWORD tick);
 
 /*******************************************************************************
 Function:       WORD ProcessMessageSnake( WORD translatedMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg )
@@ -78,7 +78,7 @@ Side Effects:   None
 
 Remarks:        None
 *******************************************************************************/
-WORD ProcessMessageSnake( WORD translatedMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg );
+WORD    ProcessMessageSnake(WORD translatedMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 
 /************************************************************************
  Function: void ShowScreenScore(void)
@@ -89,7 +89,7 @@ WORD ProcessMessageSnake( WORD translatedMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg );
                                                                        
  Output: none
 ************************************************************************/
-void ShowScreenScore( void );
+void    ShowScreenScore(void);
 
 /************************************************************************
  Function: void ShowScreenSnake(void)
@@ -100,7 +100,7 @@ void ShowScreenScore( void );
                                                                        
  Output: none
 ************************************************************************/
-void ShowScreenSnake( void );
+void    ShowScreenSnake(void);
 
 /************************************************************************
  Function: void InitGamesStyleScheme(GOL_SCHEME *pScheme)
@@ -112,6 +112,5 @@ void ShowScreenSnake( void );
                                                                        
  Output: none
 ************************************************************************/
-void InitGamesStyleScheme(GOL_SCHEME *pScheme);
-
+void    InitGamesStyleScheme(GOL_SCHEME *pScheme);
 #endif

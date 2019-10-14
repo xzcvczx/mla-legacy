@@ -42,21 +42,13 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
 #include "./USB/usb.h"
 #include "./USB/usb_function_cdc.h"
 
 #include "HardwareProfile.h"
-
 #include "BMA150.h"
-
 #include "oled.h"
-
 #include "soft_start.h"
-
 
 /** CONFIGURATION **************************************************/
 #if defined(PICDEM_FS_USB)      // Configuration bits for PICDEM FS USB Demo Board (based on PIC18F4550)
@@ -674,7 +666,7 @@ static void InitializeSystem(void)
 void UserInit(void)
 {
     //Make sure that the SD-card is not selected
-    TRISCbits.TRISC = 0;
+    TRISCbits.TRISC6 = 0;
     LATCbits.LATC6 = 1;
     PORTCbits.RC6 = 1;
 

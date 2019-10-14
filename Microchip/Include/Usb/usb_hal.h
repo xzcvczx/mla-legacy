@@ -21,16 +21,9 @@ Description:
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
+    .
     ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
-    
+   
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
     would be the following:
@@ -78,16 +71,18 @@ Description:
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
- Change History:
-
-
  *************************************************************************/
+
+/********************************************************************
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.6    No Change
+********************************************************************/
 
 #ifndef _USB_HAL_H_
 #define _USB_HAL_H_
 //DOM-IGNORE-END
-
-//#include ".\USB\usb_common.h"
 
 #if defined(USB_SUPPORT_HOST) || defined(USB_SUPPORT_OTG)
 

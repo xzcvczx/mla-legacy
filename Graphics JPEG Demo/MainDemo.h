@@ -37,23 +37,21 @@
  * Anton Alkhimenok		05/29/2007
  ********************************************************************/
 #ifndef _MAINDEMO_H
-#define _MAINDEMO_H
+    #define _MAINDEMO_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#if defined(__dsPIC33F__) 
-#include <p33Fxxxx.h>
-#elif  defined(__PIC24H__)
-#include <p24Hxxxx.h>
-#elif defined(__PIC32MX__)
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
-
-#include "GenericTypeDefs.h"
-#include "Graphics\Graphics.h"
-#include "SST25VF016.h"
-#include "SST39VF040.h"
-#include "JPEGImage.h"
-
+    #if defined(__dsPIC33F__)
+        #include <p33Fxxxx.h>
+    #elif defined(__PIC24H__)
+        #include <p24Hxxxx.h>
+    #elif defined(__PIC32MX__)
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+    #include "GenericTypeDefs.h"
+    #include "Graphics\Graphics.h"
+    #include "SST25VF016.h"
+    #include "SST39VF040.h"
+    #include "JPEGImage.h"
 #endif // _MAINDEMO_H

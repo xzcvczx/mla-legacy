@@ -22,7 +22,7 @@ In order to build the PC application source code, you will need to install:
 	more advanced version, the project will probably not be openable in 2005 Express Edition anymore). 
 2. Windows Server 2003 R2 Platform SDK (and follow Microsoft's recommendations for integrating it with the
 	VC++ 2005 IDE, which invovles updating the include path among other things)
-3. Windows Driver Development Kit (WDK) build 6001.18002. (also update VC++ 2005 IDE include paths)
+3. Windows Driver Development Kit (WDK) build 7600.16385.0. (also update VC++ 2005 IDE include paths)
 
 All of these tools are currently distributed by Microsoft free of charge.  Currently (22 May 2008), they 
 can be downloaded from:

@@ -11,7 +11,7 @@
  * Processor:       None
  * Compiler:        None
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.2
+ * Version:         1.2.4
  *
  * Software License Agreement
  *

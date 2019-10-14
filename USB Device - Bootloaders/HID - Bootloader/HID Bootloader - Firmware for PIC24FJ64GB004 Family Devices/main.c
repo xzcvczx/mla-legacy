@@ -2,8 +2,12 @@
  FileName:     main.c
  Dependencies: See INCLUDES section
  Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used with 
- 				PIC24FJ64GB004 Family microcontroller products.
+ Hardware:		The code is natively intended to be used on the following
+ 				hardware platforms: PICDEM™ FS USB Demo Board, 
+ 				PIC18F87J50 FS USB Plug-In Module, or
+ 				Explorer 16 + PIC24 USB PIM.  The firmware may be
+ 				modified for use on other USB platforms by editing the
+ 				HardwareProfile.h file.
  Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
  Company:		Microchip Technology, Inc.
 
@@ -43,14 +47,8 @@
 #define USBMOUSE_C
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
 #include "./USB/usb.h"
-
 #include "HardwareProfile.h"
-
 #include "./USB/usb_function_hid.h"
 
 /** CONFIGURATION **************************************************/
@@ -75,7 +73,7 @@
 //Section defining the address range to erase for the erase device command, along with the valid programming range to be reported by the QUERY_DEVICE command.
 #define VectorsStart					0x00000000	
 #define	VectorsEnd						0x00000400	//One page of vectors + general purpose program memory.
-//Bootloader resides in memory range 0x400-0x13FF
+//Bootloader resides in memory range 0x400-0x17FF
 #define ProgramMemStart					0x00001400 //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
 
 	#define	BeginPageToErase			5		 //Bootloader and vectors occupy first six 1024 word (1536 bytes due to 25% unimplemented bytes) pages

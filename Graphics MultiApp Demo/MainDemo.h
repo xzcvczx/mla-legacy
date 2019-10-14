@@ -38,78 +38,79 @@
  * Paolo Tamayo         03/10/08    ...
  ********************************************************************/
 #ifndef _MAINDEMO_H
-#define _MAINDEMO_H
+    #define _MAINDEMO_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#ifdef __PIC32MX
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
+    #ifdef __PIC32MX
+        #include <plib.h>
+        #include <p32xxxx.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+    #include <stdlib.h>
+    #include <string.h>
+    #include <stdio.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+    #include "GenericTypeDefs.h"
+    #include "Graphics\Graphics.h"
 
-#include "GenericTypeDefs.h"
-#include "Graphics\Graphics.h"
-
-#if defined (__C30__)
-	#if defined (__PIC24FJ256GB110__)
-		#include "usb_config.h"
-		#include "USB\usb.h"
-		#include "USB\usb_host_hid_parser.h"
-		#include "USB\usb_host_hid.h"
-	#endif	
-	#include "MDD File System\FSIO.h"
-#elif defined (__PIC32MX__)	
-	#if defined (__32MX460F512L__)		#include "usb_config.h"
-		#include "USB\usb.h"
-		#include "USB\usb_host_hid_parser.h"
-		#include "USB\usb_host_hid.h"
-	#endif	
-	#include "MDD File System\FSIO.h"
-#endif 
-
-#include "SST39VF040.h"
-#include "SST25VF016.h"
-#include "EEPROM.h"
-#include "TouchScreen.h"
-#include "Beep.h"
-#include "SideButtons.h"
-#include "SlideShowDemo.h"
-#include "rtcc.h"
-#include "FlashProgrammer.h"
+    #if defined(__C30__)
+        #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256DA210__)
+            #include "usb_config.h"
+            #include "USB\usb.h"
+            #include "USB\usb_host_hid_parser.h"
+            #include "USB\usb_host_hid.h"
+        #endif
+        #include "MDD File System\FSIO.h"
+    #elif defined(__PIC32MX__)
+        #if defined(__32MX460F512L__)
+            #include "usb_config.h"
+            #include "USB\usb.h"
+            #include "USB\usb_host_hid_parser.h"
+            #include "USB\usb_host_hid.h"
+        #endif
+        #include "MDD File System\FSIO.h"
+    #endif
+    #include "SST39VF040.h"
+    #include "SST25VF016.h"
+    #include "EEPROM.h"
+    #include "TouchScreen.h"
+    #include "Beep.h"
+    #include "SideButtons.h"
+    #include "SlideShowDemo.h"
+    #include "rtcc.h"
+    #include "FlashProgrammer.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED
 /////////////////////////////////////////////////////////////////////////////
-extern const FONT_FLASH GOLFontDefault; 	// default GOL font
-extern const FONT_FLASH GOLMediumFont; 		// medium font
-extern const FONT_FLASH GOLSmallFont; 		// small font
+extern const FONT_FLASH GOLFontDefault; // default GOL font
+extern const FONT_FLASH GOLMediumFont;  // medium font
+extern const FONT_FLASH GOLSmallFont;   // small font
 
 /////////////////////////////////////////////////////////////////////////////
+
 //                            ADDITIONAL COLORS USED
 /////////////////////////////////////////////////////////////////////////////
-#define GRAY20             RGB565CONVERT( 51,  51,  51)
-#define GRAY40             RGB565CONVERT(102, 102, 102)
-#define GRAY80             RGB565CONVERT(204, 204, 204)
-#define GRAY90             RGB565CONVERT(229, 229, 229)
-#define GRAY95             RGB565CONVERT(242, 242, 242)
-
-#define RED4 			   RGB565CONVERT(139,   0,   0)
-#define FIREBRICK1 		   RGB565CONVERT(255,  48,  48)
-#define DARKGREEN          RGB565CONVERT(  0, 100,   0)
-#define PALEGREEN          RGB565CONVERT(152, 251, 152)
-#define LIGHTYELLOW        RGB565CONVERT(238, 221, 130)
-#define GOLD               RGB565CONVERT(255, 215,   0)
-#define DARKORANGE		   RGB565CONVERT(255, 140,   0)
+    #define GRAY20      RGB565CONVERT(51, 51, 51)
+    #define GRAY40      RGB565CONVERT(102, 102, 102)
+    #define GRAY80      RGB565CONVERT(204, 204, 204)
+    #define GRAY90      RGB565CONVERT(229, 229, 229)
+    #define GRAY95      RGB565CONVERT(242, 242, 242)
+    #define RED4        RGB565CONVERT(139, 0, 0)
+    #define FIREBRICK1  RGB565CONVERT(255, 48, 48)
+    #define DARKGREEN   RGB565CONVERT(0, 100, 0)
+    #define PALEGREEN   RGB565CONVERT(152, 251, 152)
+    #define LIGHTYELLOW RGB565CONVERT(238, 221, 130)
+    #define GOLD        RGB565CONVERT(255, 215, 0)
+    #define DARKORANGE  RGB565CONVERT(255, 140, 0)
 
 /////////////////////////////////////////////////////////////////////////////
-//                            DEMO STATES      
+//                            DEMO STATES
 /////////////////////////////////////////////////////////////////////////////
-typedef enum {
-    CREATE_DEMOSELECTION = 0,
+typedef enum
+{
+    CREATE_DEMOSELECTION    = 0,
     DISPLAY_DEMOSELECTION,
     CREATE_RGB,
     DISPLAY_RGB,
@@ -132,48 +133,43 @@ typedef enum {
     DISPLAY_SNAKE_SCORE,
     CREATE_SLIDESHOW,
     DISPLAY_SLIDESHOW,
-#ifdef ENABLE_USB_MSD_DEMO
+        #ifdef ENABLE_USB_MSD_DEMO
     CREATE_JPEGDEMO,
     DISPLAY_JPEGDEMO,
-#endif
-#ifdef ENABLE_SD_MSD_DEMO            
+        #endif
+        #ifdef ENABLE_SD_MSD_DEMO
     CREATE_SDCARDDEMO,
     DISPLAY_SDCARDDEMO,
-#endif    
+        #endif
     CREATE_GRAPHSHOW,
     DISPLAY_GRAPHSHOW,
     DEMO_MODE,
-    
 } SCREEN_STATES;
 
 /////////////////////////////////////////////////////////////////////////////
 //                       GLOBAL VARIABLES FOR DEMO
 /////////////////////////////////////////////////////////////////////////////
-extern SCREEN_STATES  screenState; 					// current state of main demo state mashine 
-
-extern GOL_SCHEME*    altScheme;					// alternative style scheme
-extern GOL_SCHEME*    iconScheme;					// alternative style scheme for icons
-extern GOL_SCHEME*    meterScheme;					// meter scheme
-extern GOL_SCHEME*    navScheme;		 			// style scheme for the navigation
-extern GOL_SCHEME*    gridScheme;                   // alternative grid style scheme
-extern GOL_SCHEME*    graphScheme;					// style scheme for graph demo
-
+extern SCREEN_STATES    screenState;    // current state of main demo state mashine
+extern GOL_SCHEME       *altScheme;     // alternative style scheme
+extern GOL_SCHEME       *iconScheme;    // alternative style scheme for icons
+extern GOL_SCHEME       *meterScheme;   // meter scheme
+extern GOL_SCHEME       *navScheme;     // style scheme for the navigation
+extern GOL_SCHEME       *gridScheme;    // alternative grid style scheme
+extern GOL_SCHEME       *graphScheme;   // style scheme for graph demo
 
 // Control buttons dimension
-#define CTRLBTN_XINDENT 0
-#define CTRLBTN_HEIGHT  35
-#define CTRLBTN_WIDTH   (((GetMaxX()+1)-(CTRLBTN_XINDENT*2))/4)
-
-#define CtrlBtnTop() (GetMaxY()-CTRLBTN_HEIGHT)
-#define CtrlBtnBottom() GetMaxY()
-#define CtrlBtnLeft(column)  (((column+1)*CTRLBTN_XINDENT)+(column*CTRLBTN_WIDTH))
-#define CtrlBtnRight(column)  ((column+1)*(CTRLBTN_XINDENT+CTRLBTN_WIDTH))
+    #define CTRLBTN_XINDENT         0
+    #define CTRLBTN_HEIGHT          35
+    #define CTRLBTN_WIDTH           (((GetMaxX() + 1) - (CTRLBTN_XINDENT * 2)) / 4)
+    #define CtrlBtnTop()            (GetMaxY() - CTRLBTN_HEIGHT)
+    #define CtrlBtnBottom()         GetMaxY()
+    #define CtrlBtnLeft(column)     (((column + 1) * CTRLBTN_XINDENT) + (column * CTRLBTN_WIDTH))
+    #define CtrlBtnRight(column)    ((column + 1) * (CTRLBTN_XINDENT + CTRLBTN_WIDTH))
 
 // Screen background color
-#define SCREEN_BACKGROUND_COLOR RGB565CONVERT(103,195,231);
+    #define SCREEN_BACKGROUND_COLOR RGB565CONVERT(103, 195, 231);
 
-
-WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer);
+WORD    ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *buffer);
 
 /************************************************************************
  Function: void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, 
@@ -188,31 +184,25 @@ WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buf
 
  Output: none
 ************************************************************************/
-void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pTextD); 
+void    CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pTextD);
 
 // Macros to enable demos and features
-
-#define ENABLE_DEMO_MODE					// enables the automatic demo mode 
-
-#define USE_EXTERNAL_ICONS					// enable the use of icons sourced from external flash
+    #define ENABLE_DEMO_MODE            // enables the automatic demo mode
+    #define USE_EXTERNAL_ICONS          // enable the use of icons sourced from external flash
 
 //#define ENABLE_SCREEN_CAPTURE				// capture screen to PC via UART. Cannot be used with USE_FOCUS enabled
-
-#define USE_EXTERNAL_IMAGES  1				// use external pictures
-
-#include "ID.h"
-#include "DemoSelection.h"
-#include "RGBDemo.h"
-#include "MultiFontsDemo.h"
-#include "TimeDateDemo.h"
-#include "Animation.h"
-#include "DrawTool.h"
-#include "ECG.h"
-#include "Games.h"
-#include "JPEGDemo.h"
-#include "DemoSteps.h"
-#include "BitmapFile.h"
-#include "GraphShow.h"
-
-
+    #define USE_EXTERNAL_IMAGES 1       // use external pictures
+    #include "ID.h"
+    #include "DemoSelection.h"
+    #include "RGBDemo.h"
+    #include "MultiFontsDemo.h"
+    #include "TimeDateDemo.h"
+    #include "Animation.h"
+    #include "DrawTool.h"
+    #include "ECG.h"
+    #include "Games.h"
+    #include "JPEGDemo.h"
+    #include "DemoSteps.h"
+    #include "BitmapFile.h"
+    #include "GraphShow.h"
 #endif // _MAINDEMO_H

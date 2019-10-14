@@ -15,7 +15,7 @@
 * Processor:          PIC18/PIC24/dsPIC30/dsPIC33/PIC32
 * Compiler:           C18/C30/C32
 * Company:            Microchip Technology, Inc.
-* Version:            1.2.2
+* Version:            1.2.4
 *
 * Software License Agreement
 *
@@ -771,7 +771,7 @@ BYTE FILEget_next_cluster(FILEOBJ fo, DWORD n)
   Return Values:
     CE_GOOD -       Disk mounted
     CE_INIT_ERROR - Initialization error has occured
-    CE_UNSUPPORTED_SECTOR_SIZE - Media sector size does not equal
+    CE_UNSUPPORTED_SECTOR_SIZE - Media sector size bigger than
                 MEDIA_SECTOR_SIZE as defined in FSconfig.h.
   Side Effects:
     None
@@ -807,7 +807,8 @@ BYTE DISKmount( DISK *dsk)
         // check it and make sure we can support it.
         if (mediaInformation->validityFlags.bits.sectorSize)
         {
-            if (mediaInformation->sectorSize != MEDIA_SECTOR_SIZE)
+			dsk->sectorSize = mediaInformation->sectorSize;
+            if (mediaInformation->sectorSize > MEDIA_SECTOR_SIZE)
             {
                 error = CE_UNSUPPORTED_SECTOR_SIZE;
                 FSerrno = CE_UNSUPPORTED_SECTOR_SIZE;
@@ -1153,9 +1154,9 @@ BYTE LoadBootSector(DISK *dsk)
             }
 
             #ifdef __18CXX
-                if(BSec->FAT.FAT_16.BootSec_BPS != MEDIA_SECTOR_SIZE)
+                if(BSec->FAT.FAT_16.BootSec_BPS > MEDIA_SECTOR_SIZE)
             #else
-                if(BytesPerSec != MEDIA_SECTOR_SIZE)
+                if(BytesPerSec > MEDIA_SECTOR_SIZE)
             #endif
                 {
                     error = CE_UNSUPPORTED_SECTOR_SIZE;
@@ -1540,8 +1541,8 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
             gDataBuffer[8] =  'F';
             gDataBuffer[9] =  'A';
             gDataBuffer[10] = 'T';
-            gDataBuffer[11] =  MEDIA_SECTOR_SIZE & 0xFF;
-            gDataBuffer[12] =  MEDIA_SECTOR_SIZE >> 8;
+            gDataBuffer[11] = disk->sectorSize & 0xFF;
+            gDataBuffer[12] = disk->sectorSize >> 8;
             gDataBuffer[13] = disk->SecPerClus;   //Sectors per cluster
             gDataBuffer[14] = 0x08;         //Reserved sector count
             gDataBuffer[15] = 0x00;
@@ -1661,7 +1662,7 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
     }
 
     // Erase the root directory
-    RootDirSectors = ((disk->maxroot * 32) + (MEDIA_SECTOR_SIZE - 1)) / MEDIA_SECTOR_SIZE;
+    RootDirSectors = ((disk->maxroot * 32) + (disk->sectorSize - 1)) / disk->sectorSize;
 
     for (Index = 1; Index < RootDirSectors; Index++)
     {
@@ -1744,7 +1745,7 @@ BYTE Write_File_Entry( FILEOBJ fo, WORD * curEntry)
     ccls = fo->dirccls;
 
      // figure out the offset from the base sector
-    offset2  = (*curEntry / (MEDIA_SECTOR_SIZE/32));
+    offset2  = (*curEntry / (dsk->sectorSize/32));
 
     /* Settings based on FAT type */
     switch (dsk->type)
@@ -1914,7 +1915,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
     ccls = fo->dirccls;
 
      // figure out the offset from the base sector
-    offset2  = (*curEntry / (MEDIA_SECTOR_SIZE/32));
+    offset2  = (*curEntry / (dsk->sectorSize/32));
 
     offset2 = offset2; // emulator issue
 
@@ -2821,8 +2822,8 @@ DWORD FATfindEmptyCluster(FILEOBJ fo)
 
     do
     {
-        my_results = FSGetDiskProperties(&disk_properties);
-    } while (disk_properties->properties_status == FS_GET_PROPERTIES_STILL_WORKING);
+        FSGetDiskProperties(&disk_properties);
+    } while (disk_properties.properties_status == FS_GET_PROPERTIES_STILL_WORKING);
     </code>
 
     results.disk_format - contains the format of the drive.  Valid results are 
@@ -2870,7 +2871,7 @@ void FSGetDiskProperties(FS_DISK_PROPERTIES* properties)
         properties->properties_status = FS_GET_PROPERTIES_STILL_WORKING;
    
         properties->results.disk_format = properties->disk->type;
-        properties->results.sector_size = MEDIA_SECTOR_SIZE;
+        properties->results.sector_size = properties->disk->sectorSize;
         properties->results.sectors_per_cluster = properties->disk->SecPerClus;
         properties->results.total_clusters = properties->disk->maxcls;
 
@@ -4773,7 +4774,7 @@ size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream)
             stream->flags.FileWriteEOF = TRUE;
 
         // load a new sector if necessary, multiples of sector
-        if (pos == MEDIA_SECTOR_SIZE)
+        if (pos == dsk->sectorSize)
         {
             BYTE needRead = TRUE;
 
@@ -5008,7 +5009,7 @@ size_t FSfread (void *ptr, size_t size, size_t n, FSFILE *stream)
 #endif
 
     // if it not my buffer, then get it from the disk.
-    if( (gBufferOwner != stream) && (pos != MEDIA_SECTOR_SIZE ))
+    if( (gBufferOwner != stream) && (pos != dsk->sectorSize))
     {
         gBufferOwner = stream;
         sec_sel = Cluster2Sector(dsk,stream->ccls);
@@ -5035,7 +5036,7 @@ size_t FSfread (void *ptr, size_t size, size_t n, FSFILE *stream)
         }
 
         // In fopen, pos is init to 0 and the sect is loaded
-        if( pos == MEDIA_SECTOR_SIZE )
+        if( pos == dsk->sectorSize )
         {
             // reset position
             pos = 0;
@@ -5402,10 +5403,10 @@ int FSfseek(FSFILE *stream, long offset, int whence)
         stream->seek = offset2;
 
         // figure out how many sectors
-        numsector = offset2 / MEDIA_SECTOR_SIZE;
+        numsector = offset2 / dsk->sectorSize;
 
         // figure out how many bytes off of the offset
-        offset2 = offset2 - (numsector * MEDIA_SECTOR_SIZE);
+        offset2 = offset2 - (numsector * dsk->sectorSize);
         stream->pos = offset2;
 
         // figure out how many clusters
@@ -5448,7 +5449,7 @@ int FSfseek(FSFILE *stream, long offset, int whence)
                             FSerrno = CE_COULD_NOT_GET_CLUSTER;
                             return (-1);
                         }
-                        stream->pos = MEDIA_SECTOR_SIZE;
+                        stream->pos = dsk->sectorSize;
                         stream->sec = dsk->SecPerClus - 1;
 #ifdef ALLOW_WRITES
                     }
@@ -5707,8 +5708,8 @@ DWORD ReadFAT (DISK *dsk, DWORD ccls)
             break;
     }
 
-    l = dsk->fat + (p / MEDIA_SECTOR_SIZE);     //
-    p &= MEDIA_SECTOR_SIZE - 1;                 // Restrict 'p' within the FATbuffer size
+    l = dsk->fat + (p / dsk->sectorSize);     //
+    p &= dsk->sectorSize - 1;                 // Restrict 'p' within the FATbuffer size
 
     // Check if the appropriate FAT sector is already loaded
     if (gLastFATSectorRead == l)
@@ -5728,7 +5729,7 @@ DWORD ReadFAT (DISK *dsk, DWORD ccls)
                     c >>= 4;
                 }
                 // Check if the MSB is across the sector boundry
-                p = (p +1) & (MEDIA_SECTOR_SIZE-1);
+                p = (p +1) & (dsk->sectorSize-1);
                 if (p == 0)
                 {
                     // Start by writing the sector we just worked on to the card
@@ -5793,7 +5794,7 @@ DWORD ReadFAT (DISK *dsk, DWORD ccls)
                         {
                             c >>= 4;
                         }
-                        p = (p +1) & (MEDIA_SECTOR_SIZE-1);
+                        p = (p +1) & (dsk->sectorSize-1);
                         d = RAMread (gFATBuffer, p);
                         if (q)
                         {
@@ -5905,8 +5906,8 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
             break;
     }
 
-    l = dsk->fat + (p / MEDIA_SECTOR_SIZE);     //
-    p &= MEDIA_SECTOR_SIZE - 1;                 // Restrict 'p' within the FATbuffer size
+    l = dsk->fat + (p / dsk->sectorSize);     //
+    p &= dsk->sectorSize - 1;                 // Restrict 'p' within the FATbuffer size
 
     if (gLastFATSectorRead != l)
     {
@@ -5964,7 +5965,7 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
 
             // FAT12 entries can cross sector boundaries
             // Check if we need to load a new sector
-            p = (p +1) & (MEDIA_SECTOR_SIZE-1);
+            p = (p +1) & (dsk->sectorSize-1);
             if (p == 0)
             {
                 // call this function to update the FAT on the card

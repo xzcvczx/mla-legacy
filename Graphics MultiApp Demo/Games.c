@@ -6,7 +6,9 @@
 
 
 *******************************************************************************/
+
 //DOM-IGNORE-BEGIN
+
 /******************************************************************************
 
 * File Name:       Games.c
@@ -40,8 +42,8 @@ Author          Date    Comments
 KO          14-Feb-2008 First release
 
 *******************************************************************************/
-//DOM-IGNORE-END
 
+//DOM-IGNORE-END
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -52,12 +54,11 @@ KO          14-Feb-2008 First release
 // General Games Support
 //******************************************************************************
 //******************************************************************************
-
 //******************************************************************************
 // Fonts Used
 //******************************************************************************
-#define GAMEBIGFONT GOLFontDefault	
-#define GAMESMALLFONT GOLFontDefault	
+#define GAMEBIGFONT     GOLFontDefault
+#define GAMESMALLFONT   GOLFontDefault
 
 extern const FONT_FLASH GAMEBIGFONT;
 extern const FONT_FLASH GAMESMALLFONT;
@@ -65,46 +66,45 @@ extern const FONT_FLASH GAMESMALLFONT;
 //******************************************************************************
 // Strings used
 //******************************************************************************
-extern XCHAR LeftArrowStr[];
-extern XCHAR RightArrowStr[];
-extern XCHAR UpArrowStr[];
-extern XCHAR DownArrowStr[];
-extern XCHAR NewGameStr[];
-extern XCHAR ExitStr[];
+extern XCHAR            LeftArrowStr[];
+extern XCHAR            RightArrowStr[];
+extern XCHAR            UpArrowStr[];
+extern XCHAR            DownArrowStr[];
+extern XCHAR            NewGameStr[];
+extern XCHAR            ExitStr[];
 
 //******************************************************************************
 // Constants
 //******************************************************************************
-#define ID_SCORE                    51
-#define ID_SCORE_INFO               52
-#define ID_QUIT                     53
+#define ID_SCORE        51
+#define ID_SCORE_INFO   52
+#define ID_QUIT         53
 
-#define RANDOM_SEED                 3
+#define RANDOM_SEED     3
 
 //******************************************************************************
 // Global Variables
 //******************************************************************************
-GRID *                  gamesGrid;
-STATICTEXT *            pScore;
-SHORT                   score;
-XCHAR                   scoreText[20] = {'S','C','O','R','E',':',0};
-XCHAR                   scoreInfo[26];
+GRID        *gamesGrid;
+STATICTEXT  *pScore;
+SHORT       score;
+XCHAR       scoreText[20] = {'S','C','O','R','E',':',0};
+XCHAR       scoreInfo[26];
 
-XCHAR *					pScoreText;
-XCHAR *					pScoreInfo;
+XCHAR       *pScoreText;
+XCHAR       *pScoreInfo;
 
 extern void Int2Str(XCHAR *pStr, WORD value, SHORT charCount);
-
 
 //******************************************************************************
 // Internal Prototypes
 //******************************************************************************
-void    InitializeRandomNumberGenerator( void );
-SHORT   Random( SHORT max );
+void        InitializeRandomNumberGenerator(void);
+SHORT       Random(SHORT max);
 
-#define WAIT_UNTIL_FINISH(x) while(!x)
+#define WAIT_UNTIL_FINISH(x)    while(!x)
 
-/****************************************************************************
+    /****************************************************************************
   Function:
     void InitializeRandomNumberGenerator( void )
 
@@ -126,14 +126,13 @@ SHORT   Random( SHORT max );
     In its simplest form, RANDOM_SEED can be a constant.  To make things more
     interesting, RANDOM_SEED can be defined as part of a timer value.
   ***************************************************************************/
-
-void InitializeRandomNumberGenerator( void )
+    void InitializeRandomNumberGenerator(void)
 {
     static BOOL initialized;
 
-    if (!initialized)
+    if(!initialized)
     {
-        srand( RANDOM_SEED );
+        srand(RANDOM_SEED);
         initialized = TRUE;
     }
 }
@@ -158,73 +157,67 @@ void InitializeRandomNumberGenerator( void )
   Remarks:
     None
   ***************************************************************************/
-SHORT Random( SHORT max )
+SHORT Random(SHORT max)
 {
-    SHORT num = 0;
+    SHORT   num = 0;
 
     num = rand() & 0xFF;    // We only need a byte...
-    while (num >= (max+1))
+    while(num >= (max + 1))
     {
-        num -= (max+1);
+        num -= (max + 1);
     }
 
-    return num;
+    return (num);
 }
-
 
 //******************************************************************************
 //******************************************************************************
 // Snake
 //******************************************************************************
 //******************************************************************************
-#define BLANK_BALL                  (NUM_BALL_TYPES + 1)
-#define MARKING_BALL                (NUM_BALL_TYPES)
+#define BLANK_BALL      (NUM_BALL_TYPES + 1)
+#define MARKING_BALL    (NUM_BALL_TYPES)
+#define NUM_BALL_TYPES  4
 
-#define NUM_BALL_TYPES              4
+#define ballCircle      head
+#define ballSquare      body
+#define ballCross       food
+#define ballTriangle    food
+#define ballMarking     food
 
-#define ballCircle head
-#define ballSquare body
-#define ballCross food
-#define ballTriangle food
-#define ballMarking food
+extern const BITMAP_FLASH   ballCircle;
+extern const BITMAP_FLASH   ballSquare;
+extern const BITMAP_FLASH   ballCross;
+extern const BITMAP_FLASH   ballTriangle;
+extern const BITMAP_FLASH   ballMarking;
 
-extern const BITMAP_FLASH ballCircle;
-extern const BITMAP_FLASH ballSquare;
-extern const BITMAP_FLASH ballCross;
-extern const BITMAP_FLASH ballTriangle;
-extern const BITMAP_FLASH ballMarking;
+void                        *balls[NUM_BALL_TYPES + 2];
 
-void *              balls[NUM_BALL_TYPES+2];
+#define DIRECTION_NONE          0
+#define DIRECTION_UP            1
+#define DIRECTION_RIGHT         2
+#define DIRECTION_DOWN          3
+#define DIRECTION_LEFT          4
 
-#define DIRECTION_NONE                  0
-#define DIRECTION_UP                    1
-#define DIRECTION_RIGHT                 2
-#define DIRECTION_DOWN                  3
-#define DIRECTION_LEFT                  4
+#define ID_SNAKE_UP             60
+#define ID_SNAKE_RIGHT          61
+#define ID_SNAKE_DOWN           62
+#define ID_SNAKE_LEFT           63
 
-#define ID_SNAKE_UP                     60
-#define ID_SNAKE_RIGHT                  61
-#define ID_SNAKE_DOWN                   62
-#define ID_SNAKE_LEFT                   63
+#define SEGMENT_SIZE            24
 
-#define SEGMENT_SIZE                    24
+#define SNAKE_GRID_WIDTH        (GRID_WIDTH(GRID_MAX_COLUMNS(GetMaxX(), SEGMENT_SIZE), SEGMENT_SIZE) - 2 * GOL_EMBOSS_SIZE + 1)
+#define SNAKE_GRID_HEIGHT       (GRID_HEIGHT(GRID_MAX_ROWS(CtrlBtnTop(), SEGMENT_SIZE), SEGMENT_SIZE) - 2 * GOL_EMBOSS_SIZE + 1)
+#define SNAKE_GRID_TOP          ((CtrlBtnTop() - SNAKE_GRID_HEIGHT) / 2)
+#define SNAKE_GRID_BOTTOM       (SNAKE_GRID_TOP + SNAKE_GRID_HEIGHT)
+#define SNAKE_GRID_LEFT         ((GetMaxX() - SNAKE_GRID_WIDTH) / 2)
+#define SNAKE_GRID_RIGHT        (SNAKE_GRID_LEFT + SNAKE_GRID_WIDTH)
+#define SNAKE_COLUMNS           ((SNAKE_GRID_RIGHT - SNAKE_GRID_LEFT) / SEGMENT_SIZE)
+#define SNAKE_ROWS              ((SNAKE_GRID_BOTTOM - SNAKE_GRID_TOP) / SEGMENT_SIZE)
+#define FIELD_PIECES            SNAKE_COLUMNS
+#define LONGEST_SNAKE           100
 
-#define SNAKE_GRID_WIDTH                (GRID_WIDTH(GRID_MAX_COLUMNS(GetMaxX(),SEGMENT_SIZE), SEGMENT_SIZE)-2*GOL_EMBOSS_SIZE+1)
-#define SNAKE_GRID_HEIGHT               (GRID_HEIGHT(GRID_MAX_ROWS(CtrlBtnTop(),SEGMENT_SIZE), SEGMENT_SIZE)-2*GOL_EMBOSS_SIZE+1)
-
-#define SNAKE_GRID_TOP                  ((CtrlBtnTop()-SNAKE_GRID_HEIGHT)/2)
-#define SNAKE_GRID_BOTTOM               (SNAKE_GRID_TOP+SNAKE_GRID_HEIGHT)
-
-#define SNAKE_GRID_LEFT                 ((GetMaxX()-SNAKE_GRID_WIDTH)/2)
-#define SNAKE_GRID_RIGHT                (SNAKE_GRID_LEFT+SNAKE_GRID_WIDTH)
-
-#define SNAKE_COLUMNS                   ((SNAKE_GRID_RIGHT-SNAKE_GRID_LEFT)/SEGMENT_SIZE)
-#define SNAKE_ROWS                      ((SNAKE_GRID_BOTTOM-SNAKE_GRID_TOP)/SEGMENT_SIZE)
-
-#define FIELD_PIECES                    SNAKE_COLUMNS
-#define LONGEST_SNAKE                   100
-
-#define SNAKE_UPDATE_INTERVAL           (500)
+#define SNAKE_UPDATE_INTERVAL   (500)
 
 typedef struct _PIECE_INFO
 {
@@ -241,29 +234,28 @@ typedef struct _FIELD_INFO
 
 typedef struct _SNAKE_INFO
 {
-    PIECE_INFO  pieces[LONGEST_SNAKE+1];
+    PIECE_INFO  pieces[LONGEST_SNAKE + 1];
     SHORT       length;
     BOOL        addPiece;
 } SNAKE_INFO;
 
-SHORT               defaultDirection;
-FIELD_INFO          field[SNAKE_COLUMNS][SNAKE_ROWS];
-SNAKE_INFO          snake;
+SHORT                       defaultDirection;
+FIELD_INFO                  field[SNAKE_COLUMNS][SNAKE_ROWS];
+SNAKE_INFO                  snake;
 
-#define snakeHead head
-#define snakeBody body
-#define snakeFood food
+#define snakeHead   head
+#define snakeBody   body
+#define snakeFood   food
 
-extern const BITMAP_FLASH snakeHead;
-extern const BITMAP_FLASH snakeBody;
-extern const BITMAP_FLASH snakeFood;
+extern const BITMAP_FLASH   snakeHead;
+extern const BITMAP_FLASH   snakeBody;
+extern const BITMAP_FLASH   snakeFood;
 
 #define SNAKE_HEAD  snake.pieces[0]
 
-const XCHAR  CrashedStr[] = {'Y','o','u',' ','C','r','a','s','h','e','d','!',0};
-const XCHAR  ShuFullStr[] = {'Y','o','u',' ','a','r','e',' ','f','u','l','l','y',' ','g','r','o','w','n','!',0};
-const XCHAR  InAKnotStr[] = {'Y','o','u',' ','a','r','e',' ','i','n',' ','a',' ','k','n','o','t','!',0};
-
+const XCHAR                 CrashedStr[] = {'Y','o','u',' ','C','r','a','s','h','e','d','!',0};
+const XCHAR                 ShuFullStr[] = {'Y','o','u',' ','a','r','e',' ','f','u','l','l','y',' ','g','r','o','w','n','!',0};
+const XCHAR                 InAKnotStr[] = {'Y','o','u',' ','a','r','e',' ','i','n',' ','a',' ','k','n','o','t','!',0};
 
 /************************************************************************
  Function: void DrawSnake(DWORD tick)
@@ -278,137 +270,175 @@ const XCHAR  InAKnotStr[] = {'Y','o','u',' ','a','r','e',' ','i','n',' ','a',' '
 ************************************************************************/
 void DrawSnake(DWORD tick)
 {
-    SHORT i;
-    SHORT j;
-    SHORT oldTail;
-    SHORT scoreLen;
-    SHORT scoreTemp;
-    static DWORD previousTick = 0;
+    SHORT           i;
+    SHORT           j;
+    SHORT           oldTail;
+    SHORT           scoreLen;
+    SHORT           scoreTemp;
+    static DWORD    previousTick = 0;
 
-    if ((tick - previousTick) > SNAKE_UPDATE_INTERVAL)
+    if((tick - previousTick) > SNAKE_UPDATE_INTERVAL)
     {
+
         // Move the snake
-        SetState( gamesGrid, GRID_DRAW_ITEMS );
+        SetState(gamesGrid, GRID_DRAW_ITEMS);
 
         // Check for a wall
-        if (((SNAKE_HEAD.direction == DIRECTION_UP)    && (SNAKE_HEAD.row == 0)) ||
-            ((SNAKE_HEAD.direction == DIRECTION_RIGHT) && (SNAKE_HEAD.column == SNAKE_COLUMNS-1)) ||
-            ((SNAKE_HEAD.direction == DIRECTION_DOWN)  && (SNAKE_HEAD.row == SNAKE_ROWS-1)) ||
-            ((SNAKE_HEAD.direction == DIRECTION_LEFT)  && (SNAKE_HEAD.column == 0)))
+        if
+        (
+            ((SNAKE_HEAD.direction == DIRECTION_UP) && (SNAKE_HEAD.row == 0)) ||
+            ((SNAKE_HEAD.direction == DIRECTION_RIGHT) && (SNAKE_HEAD.column == SNAKE_COLUMNS - 1)) ||
+            ((SNAKE_HEAD.direction == DIRECTION_DOWN) && (SNAKE_HEAD.row == SNAKE_ROWS - 1)) ||
+            ((SNAKE_HEAD.direction == DIRECTION_LEFT) && (SNAKE_HEAD.column == 0))
+        )
         {
             pScoreText = &scoreText[7];
             scoreTemp = score;
             scoreLen = 0;
-            while(scoreTemp>0)
+            while(scoreTemp > 0)
             {
-	            scoreTemp /= (10);
-	            scoreLen++;
-	        } 
+                scoreTemp /= (10);
+                scoreLen++;
+            }
+
             Int2Str(pScoreText, score, scoreLen);
-            pScoreInfo = (XCHAR*)CrashedStr;
+            pScoreInfo = (XCHAR *)CrashedStr;
             screenState = CREATE_SNAKE_SCORE;
             return;
         }
-        score ++;
+
+        score++;
 
         // Draw the snake on the field.  We record each segment in memory, but we only
         // have to draw the head, the second segment, and possibly the space that the
         // tail just left.
-
-        oldTail = snake.length-1;
-        if (field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].hasBeenEaten)
+        oldTail = snake.length - 1;
+        if(field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].hasBeenEaten)
         {
+
             // Clear the eaten flag
             field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].hasBeenEaten = FALSE;
 
             // Add a new piece at the tail.
             snake.pieces[snake.length] = snake.pieces[oldTail];
-            GridSetCell( gamesGrid, snake.pieces[snake.length].column, snake.pieces[snake.length].row, GRIDITEM_IS_BITMAP|GRIDITEM_DRAW, (void *)&snakeBody );
+            GridSetCell
+            (
+                gamesGrid,
+                snake.pieces[snake.length].column,
+                snake.pieces[snake.length].row,
+                GRIDITEM_IS_BITMAP | GRIDITEM_DRAW,
+                (void *) &snakeBody
+            );
             snake.length++;
             score += 10;
-            if (snake.length == LONGEST_SNAKE)
+            if(snake.length == LONGEST_SNAKE)
             {
                 score += 1000;
-	            pScoreText = &scoreText[7];
-	            scoreTemp = score;
-    	        scoreLen = 0;
-        	    while(scoreTemp>0)
-            	{
-	            	scoreTemp /= (10);
-	            	scoreLen++;
-	        	} 
-            	Int2Str(pScoreText, score, scoreLen);
-                pScoreInfo = (XCHAR*)ShuFullStr;
+                pScoreText = &scoreText[7];
+                scoreTemp = score;
+                scoreLen = 0;
+                while(scoreTemp > 0)
+                {
+                    scoreTemp /= (10);
+                    scoreLen++;
+                }
+
+                Int2Str(pScoreText, score, scoreLen);
+                pScoreInfo = (XCHAR *)ShuFullStr;
                 screenState = CREATE_SNAKE_SCORE;
                 return;
             }
         }
         else
         {
+
             // Erase the tail.  If there is food, mark it.  Otherwise, clear it.
-            if (field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].hasFood)
+            if(field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].hasFood)
             {
-                GridSetCell( gamesGrid, snake.pieces[oldTail].column, snake.pieces[oldTail].row, GRIDITEM_IS_BITMAP|GRIDITEM_DRAW, (void *)&snakeFood );
+                GridSetCell
+                (
+                    gamesGrid,
+                    snake.pieces[oldTail].column,
+                    snake.pieces[oldTail].row,
+                    GRIDITEM_IS_BITMAP | GRIDITEM_DRAW,
+                    (void *) &snakeFood
+                );
             }
             else
             {
-                GridSetCell( gamesGrid, snake.pieces[oldTail].column, snake.pieces[oldTail].row, GRIDITEM_IS_BITMAP|GRIDITEM_DRAW, NULL );
+                GridSetCell
+                (
+                    gamesGrid,
+                    snake.pieces[oldTail].column,
+                    snake.pieces[oldTail].row,
+                    GRIDITEM_IS_BITMAP | GRIDITEM_DRAW,
+                    NULL
+                );
             }
         }
 
-        for (i=oldTail; i>=0; i--)
+        for(i = oldTail; i >= 0; i--)
         {
-            switch (snake.pieces[i].direction)
+            switch(snake.pieces[i].direction)
             {
-                case DIRECTION_UP:
-                    snake.pieces[i].row--;
-                    break;
-                case DIRECTION_RIGHT:
-                    snake.pieces[i].column++;
-                    break;
-                case DIRECTION_DOWN:
-                    snake.pieces[i].row++;
-                    break;
-                case DIRECTION_LEFT:
-                    snake.pieces[i].column--;
-                    break;
+                case DIRECTION_UP:      snake.pieces[i].row--; break;
+                case DIRECTION_RIGHT:   snake.pieces[i].column++; break;
+                case DIRECTION_DOWN:    snake.pieces[i].row++; break;
+                case DIRECTION_LEFT:    snake.pieces[i].column--; break;
             }
-            if (i == 0)
+
+            if(i == 0)
             {
+
                 // This is the head.  Don't update the direction.  Draw the head.
-                GridSetCell( gamesGrid, SNAKE_HEAD.column, SNAKE_HEAD.row, GRIDITEM_IS_BITMAP|GRIDITEM_DRAW, (void *)&snakeHead );
+                GridSetCell
+                (
+                    gamesGrid,
+                    SNAKE_HEAD.column,
+                    SNAKE_HEAD.row,
+                    GRIDITEM_IS_BITMAP | GRIDITEM_DRAW,
+                    (void *) &snakeHead
+                );
             }
             else
             {
-                if (i == 1)
+                if(i == 1)
                 {
+
                     // Change the head to a segment
-                    GridSetCell( gamesGrid, SNAKE_HEAD.column, SNAKE_HEAD.row, GRIDITEM_IS_BITMAP|GRIDITEM_DRAW, (void *)&snakeBody );
+                    GridSetCell
+                    (
+                        gamesGrid,
+                        SNAKE_HEAD.column,
+                        SNAKE_HEAD.row,
+                        GRIDITEM_IS_BITMAP | GRIDITEM_DRAW,
+                        (void *) &snakeBody
+                    );
                 }
 
                 // Update the next direction for the piece.
-                snake.pieces[i].direction = snake.pieces[i-1].direction;
+                snake.pieces[i].direction = snake.pieces[i - 1].direction;
             }
         }
 
         // Check for the snake hitting itself
-        for (i=0; i<snake.length-2; i++)
+        for(i = 0; i < snake.length - 2; i++)
         {
-            for (j=i+1; j<snake.length-1; j++)
+            for(j = i + 1; j < snake.length - 1; j++)
             {
-                if ((snake.pieces[i].column == snake.pieces[j].column) &&
-                    (snake.pieces[i].row    == snake.pieces[j].row))
+                if((snake.pieces[i].column == snake.pieces[j].column) && (snake.pieces[i].row == snake.pieces[j].row))
                 {
-	    	        pScoreText = &scoreText[7];
-		            scoreTemp = score;
-    		        scoreLen = 0;
-        		    while(scoreTemp>0)
-            		{
-	            		scoreTemp /= (10);
-	            		scoreLen++;
-		        	} 
-    	        	Int2Str(pScoreText, score, scoreLen);
-                    pScoreInfo = (XCHAR*)InAKnotStr;
+                    pScoreText = &scoreText[7];
+                    scoreTemp = score;
+                    scoreLen = 0;
+                    while(scoreTemp > 0)
+                    {
+                        scoreTemp /= (10);
+                        scoreLen++;
+                    }
+
+                    Int2Str(pScoreText, score, scoreLen);
+                    pScoreInfo = (XCHAR *)InAKnotStr;
                     screenState = CREATE_SNAKE_SCORE;
                     return;
                 }
@@ -416,7 +446,7 @@ void DrawSnake(DWORD tick)
         }
 
         // See if the snake is eating food.
-        if (field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasFood)
+        if(field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasFood)
         {
             field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasFood = FALSE;
             field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasBeenEaten = TRUE;
@@ -427,13 +457,13 @@ void DrawSnake(DWORD tick)
             {
                 i = Random(SNAKE_COLUMNS);
                 j = Random(SNAKE_ROWS);
-            } while (field[i][j].hasFood);
+            } while(field[i][j].hasFood);
 
             // Mark and draw the food.  Don't draw it if the snake is there!
             field[i][j].hasFood = TRUE;
-            if (!GridGetCell( gamesGrid, i, j, (WORD *)&oldTail ))
+            if(!GridGetCell(gamesGrid, i, j, (WORD *) &oldTail))
             {
-                GridSetCell( gamesGrid, i, j, GRIDITEM_IS_BITMAP|GRIDITEM_DRAW, (void *)&snakeFood );
+                GridSetCell(gamesGrid, i, j, GRIDITEM_IS_BITMAP | GRIDITEM_DRAW, (void *) &snakeFood);
             }
         }
 
@@ -466,66 +496,71 @@ Side Effects:   None
 
 Remarks:        None
 *******************************************************************************/
-WORD ProcessMessageSnake( WORD translatedMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg )
+WORD ProcessMessageSnake(WORD translatedMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 {
     WORD    buttonID;
 
     buttonID = GetObjID(pObj);
 
-   	if (screenState == DISPLAY_SNAKE_SCORE) {
-	   	
-		if (translatedMsg == BTN_MSG_RELEASED) {
-          	// do not process if user moved the touch away from the button
-           	// returning 1 wil update the button
-           	if (pMsg->uiEvent == EVENT_MOVE)
-           		return 1;
-	        switch (buttonID)
-    	    {
-        	    case ID_BUTTON_A:
-            		screenState = CREATE_DEMOSELECTION;
-        			break;    		
-	            case ID_BUTTON_D:
-		    		screenState = CREATE_SNAKE;
-        		break;    	
-        	}			
-        }	
-	} else {
-	    if(translatedMsg == BTN_MSG_PRESSED){
-	        switch (buttonID)
-	        {
-	            case ID_BUTTON_C:
-	                if (SNAKE_HEAD.direction != DIRECTION_DOWN)
-	                {
-	                    SNAKE_HEAD.direction = DIRECTION_UP;
-	                }
-	                break;
-	
-	            case ID_BUTTON_D:
-	                if (SNAKE_HEAD.direction != DIRECTION_UP)
-    	            {
-        	            SNAKE_HEAD.direction = DIRECTION_DOWN;
-            	    }
-	                break;
-	
-	            case ID_BUTTON_A:
-	                if (SNAKE_HEAD.direction != DIRECTION_RIGHT)
-    	            {
-        	            SNAKE_HEAD.direction = DIRECTION_LEFT;
-            	    }
-	                break;
-	
-	            case ID_BUTTON_B:
-	                if (SNAKE_HEAD.direction != DIRECTION_LEFT)
-	                {
-	                    SNAKE_HEAD.direction = DIRECTION_RIGHT;
-	                }
-	                break;
-	        }
-	    }
-	}
-    return 1;
-}
+    if(screenState == DISPLAY_SNAKE_SCORE)
+    {
+        if(translatedMsg == BTN_MSG_RELEASED)
+        {
 
+            // do not process if user moved the touch away from the button
+            // returning 1 wil update the button
+            if(pMsg->uiEvent == EVENT_MOVE)
+                return (1);
+            switch(buttonID)
+            {
+                case ID_BUTTON_A:   screenState = CREATE_DEMOSELECTION; break;
+                case ID_BUTTON_D:   screenState = CREATE_SNAKE; break;
+            }
+        }
+    }
+    else
+    {
+        if(translatedMsg == BTN_MSG_PRESSED)
+        {
+            switch(buttonID)
+            {
+                case ID_BUTTON_C:
+                    if(SNAKE_HEAD.direction != DIRECTION_DOWN)
+                    {
+                        SNAKE_HEAD.direction = DIRECTION_UP;
+                    }
+
+                    break;
+
+                case ID_BUTTON_D:
+                    if(SNAKE_HEAD.direction != DIRECTION_UP)
+                    {
+                        SNAKE_HEAD.direction = DIRECTION_DOWN;
+                    }
+
+                    break;
+
+                case ID_BUTTON_A:
+                    if(SNAKE_HEAD.direction != DIRECTION_RIGHT)
+                    {
+                        SNAKE_HEAD.direction = DIRECTION_LEFT;
+                    }
+
+                    break;
+
+                case ID_BUTTON_B:
+                    if(SNAKE_HEAD.direction != DIRECTION_LEFT)
+                    {
+                        SNAKE_HEAD.direction = DIRECTION_RIGHT;
+                    }
+
+                    break;
+            }
+        }
+    }
+
+    return (1);
+}
 
 /************************************************************************
  Function: void ShowScreenSnake(void)
@@ -536,92 +571,93 @@ WORD ProcessMessageSnake( WORD translatedMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg )
                                                                        
  Output: none
 ************************************************************************/
-void ShowScreenSnake( void )
+void ShowScreenSnake(void)
 {
     SHORT   i;
     SHORT   j;
     SHORT   k;
 
     GOLFree();
-    SetColor(BLACK);        // set color to BLACK
-    ClearDevice();          // set screen to all BLACK
-
+    SetColor(BLACK);                            // set color to BLACK
+    ClearDevice();                              // set screen to all BLACK
     InitializeRandomNumberGenerator();
 
-    balls[0]            = (void *) &ballCircle;
-    balls[1]            = (void *) &ballSquare;
-    balls[2]            = (void *) &ballCross;
-    balls[3]            = (void *) &ballTriangle;
+    balls[0] = (void *) &ballCircle;
+    balls[1] = (void *) &ballSquare;
+    balls[2] = (void *) &ballCross;
+    balls[3] = (void *) &ballTriangle;
     balls[MARKING_BALL] = (void *) &ballMarking;
-    balls[BLANK_BALL]   = (void *) NULL;
+    balls[BLANK_BALL] = (void *)NULL;
 
-    gamesGrid = GridCreate(
-                    ID_GAMES_GRID,      // ID
-                    SNAKE_GRID_LEFT,    // left
-                    SNAKE_GRID_TOP,     // top
-                    SNAKE_GRID_RIGHT,   // right
-                    SNAKE_GRID_BOTTOM,  // bottom
-                    GRID_DRAW_ALL|GRID_SHOW_LINES,      // state
-                    SNAKE_COLUMNS,      // numColumns
-                    SNAKE_ROWS,         // numRows
-                    SEGMENT_SIZE,       // cellWidth
-                    SEGMENT_SIZE,       // cellHeight
-                    gridScheme );       // scheme )
-
-    if (!gamesGrid)
+    gamesGrid = GridCreate
+        (
+            ID_GAMES_GRID,                      // ID
+            SNAKE_GRID_LEFT,                    // left
+            SNAKE_GRID_TOP,                     // top
+            SNAKE_GRID_RIGHT,                   // right
+            SNAKE_GRID_BOTTOM,                  // bottom
+            GRID_DRAW_ALL | GRID_SHOW_LINES,    // state
+            SNAKE_COLUMNS,                      // numColumns
+            SNAKE_ROWS,                         // numRows
+            SEGMENT_SIZE,                       // cellWidth
+            SEGMENT_SIZE,                       // cellHeight
+            gridScheme
+        );                              // scheme )
+    if(!gamesGrid)
     {
         screenState = CREATE_DEMOSELECTION;
         return;
     }
-    //gamesGrid->pGolScheme->CommonBkColor = 0xD7FF;
 
+    //gamesGrid->pGolScheme->CommonBkColor = 0xD7FF;
     CreateCtrlButtons(LeftArrowStr, RightArrowStr, UpArrowStr, DownArrowStr);
 
     // Initialize the field and the grid.
-    for (i=0; i<SNAKE_COLUMNS; i++)
+    for(i = 0; i < SNAKE_COLUMNS; i++)
     {
-        for (j=0; j<SNAKE_ROWS; j++)
+        for(j = 0; j < SNAKE_ROWS; j++)
         {
-            field[i][j].hasFood         = FALSE;
-            field[i][j].hasBeenEaten    = FALSE;
-            GridSetCell( gamesGrid, i, j, GRIDITEM_IS_BITMAP, NULL );
+            field[i][j].hasFood = FALSE;
+            field[i][j].hasBeenEaten = FALSE;
+            GridSetCell(gamesGrid, i, j, GRIDITEM_IS_BITMAP, NULL);
         }
     }
 
     // Initialize the snake.
-    SNAKE_HEAD.column       = 0;
-    SNAKE_HEAD.row          = 0;
-    SNAKE_HEAD.direction    = DIRECTION_RIGHT;
-    snake.length            = 1;
-
+    SNAKE_HEAD.column = 0;
+    SNAKE_HEAD.row = 0;
+    SNAKE_HEAD.direction = DIRECTION_RIGHT;
+    snake.length = 1;
 
     // Place random food
-    for (k=0; k<FIELD_PIECES; k++)
+    for(k = 0; k < FIELD_PIECES; k++)
     {
+
         // Find coordinates for food
-        i = Random( SNAKE_COLUMNS-1 );
-        j = Random( SNAKE_ROWS-1 );
+        i = Random(SNAKE_COLUMNS - 1);
+        j = Random(SNAKE_ROWS - 1);
 
         // Mark and draw the food
-        field[i][j].hasFood     = TRUE;
-        GridSetCell( gamesGrid, i, j, GRIDITEM_IS_BITMAP, (void *)&snakeFood );
+        field[i][j].hasFood = TRUE;
+        GridSetCell(gamesGrid, i, j, GRIDITEM_IS_BITMAP, (void *) &snakeFood);
     }
 
     // Draw the snake on the field
-    GridSetCell( gamesGrid, SNAKE_HEAD.column, SNAKE_HEAD.row, GRIDITEM_IS_BITMAP, (void *)&snakeHead );
-    score              = 0;
+    GridSetCell(gamesGrid, SNAKE_HEAD.column, SNAKE_HEAD.row, GRIDITEM_IS_BITMAP, (void *) &snakeHead);
+    score = 0;
+
     // initialize the score holder
     i = 7;
-    while (i <= 19) {
-    	scoreText[i] = 0;
-    	i++;
-    }	
-
+    while(i <= 19)
+    {
+        scoreText[i] = 0;
+        i++;
+    }
 }
 
-#define TEXT_SHADOW_OFFSET	1
-#define TEXT_COLOR_BG		(RGB565CONVERT(0x4C, 0x8E, 0xFF))
-#define TEXT_COLOR_FG		BRIGHTRED //(RGB565CONVERT(0xFF, 0xBB, 0x4C))
+#define TEXT_SHADOW_OFFSET  1
+#define TEXT_COLOR_BG       (RGB565CONVERT(0x4C, 0x8E, 0xFF))
+#define TEXT_COLOR_FG       BRIGHTRED   //(RGB565CONVERT(0xFF, 0xBB, 0x4C))
 
 /************************************************************************
  Function: void ShowScreenScore(void)
@@ -632,53 +668,63 @@ void ShowScreenSnake( void )
                                                                        
  Output: none
 ************************************************************************/
-void ShowScreenScore( void )
+void ShowScreenScore(void)
 {
-	
-	XCHAR gameOverStr[] = {'G','a','m','e',' ','O','v','e','r','!',0};
-	WORD  textWidth, textHeight;
-	
+    XCHAR   gameOverStr[] = {'G','a','m','e',' ','O','v','e','r','!',0};
+    WORD    textWidth, textHeight;
+
     GOLFree();
-    
-	// change the meaning of the buttons and show the score
+
+    // change the meaning of the buttons and show the score
     CreateCtrlButtons(ExitStr, NULL, NULL, NewGameStr);
 
-	textWidth  = GetTextWidth(gameOverStr, (void*)&GAMEBIGFONT); 
-	textHeight = GetTextHeight((void*)&GAMEBIGFONT); 
+    textWidth = GetTextWidth(gameOverStr, (void *) &GAMEBIGFONT);
+    textHeight = GetTextHeight((void *) &GAMEBIGFONT);
 
-	SetColor(TEXT_COLOR_BG);
-	WAIT_UNTIL_FINISH(OutTextXY( (GetMaxX()-textWidth)>>1, 
-			  ((GetMaxY()-CTRLBTN_HEIGHT)>>1)-textHeight, 
-			    gameOverStr));
-	SetColor(TEXT_COLOR_FG);
-	WAIT_UNTIL_FINISH(OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
-			  (((GetMaxY()-CTRLBTN_HEIGHT)>>1)-textHeight)+TEXT_SHADOW_OFFSET, 
-			    gameOverStr));
+    SetColor(TEXT_COLOR_BG);
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX() - textWidth) >> 1, ((GetMaxY() - CTRLBTN_HEIGHT) >> 1) - textHeight, gameOverStr));
+    SetColor(TEXT_COLOR_FG);
+    WAIT_UNTIL_FINISH
+    (
+        OutTextXY
+            (
+                ((GetMaxX() - textWidth) >> 1) + TEXT_SHADOW_OFFSET,
+                (((GetMaxY() - CTRLBTN_HEIGHT) >> 1) - textHeight) + TEXT_SHADOW_OFFSET,
+                gameOverStr
+            )
+    );
 
-	textWidth  = GetTextWidth(pScoreInfo, (void*)&GAMESMALLFONT); 
+    textWidth = GetTextWidth(pScoreInfo, (void *) &GAMESMALLFONT);
 
-	SetColor(TEXT_COLOR_BG);
-	WAIT_UNTIL_FINISH(OutTextXY( (GetMaxX()-textWidth)>>1, 
-			   (GetMaxY()-CTRLBTN_HEIGHT)>>1, 
-			    pScoreInfo));
-	SetColor(TEXT_COLOR_FG);
-	WAIT_UNTIL_FINISH(OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
-			   ((GetMaxY()-CTRLBTN_HEIGHT)>>1)+TEXT_SHADOW_OFFSET, 
-			    pScoreInfo));
+    SetColor(TEXT_COLOR_BG);
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX() - textWidth) >> 1, (GetMaxY() - CTRLBTN_HEIGHT) >> 1, pScoreInfo));
+    SetColor(TEXT_COLOR_FG);
+    WAIT_UNTIL_FINISH
+    (
+        OutTextXY
+            (
+                ((GetMaxX() - textWidth) >> 1) + TEXT_SHADOW_OFFSET,
+                ((GetMaxY() - CTRLBTN_HEIGHT) >> 1) + TEXT_SHADOW_OFFSET,
+                pScoreInfo
+            )
+    );
 
-	textHeight = GetTextHeight((void*)&GAMESMALLFONT); 
-	textWidth  = GetTextWidth(scoreText, (void*)&GAMESMALLFONT); 
+    textHeight = GetTextHeight((void *) &GAMESMALLFONT);
+    textWidth = GetTextWidth(scoreText, (void *) &GAMESMALLFONT);
 
-	SetColor(TEXT_COLOR_BG);
-	WAIT_UNTIL_FINISH(OutTextXY( (GetMaxX()-textWidth)>>1, 
-			  ((GetMaxY()-CTRLBTN_HEIGHT)>>1)+textHeight, 
-			    scoreText));
-	SetColor(TEXT_COLOR_FG);
-	WAIT_UNTIL_FINISH(OutTextXY( ((GetMaxX()-textWidth)>>1)+TEXT_SHADOW_OFFSET, 
-			  (((GetMaxY()-CTRLBTN_HEIGHT)>>1)+textHeight)+TEXT_SHADOW_OFFSET, 
-			    scoreText));
-
-}	
+    SetColor(TEXT_COLOR_BG);
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX() - textWidth) >> 1, ((GetMaxY() - CTRLBTN_HEIGHT) >> 1) + textHeight, scoreText));
+    SetColor(TEXT_COLOR_FG);
+    WAIT_UNTIL_FINISH
+    (
+        OutTextXY
+            (
+                ((GetMaxX() - textWidth) >> 1) + TEXT_SHADOW_OFFSET,
+                (((GetMaxY() - CTRLBTN_HEIGHT) >> 1) + textHeight) + TEXT_SHADOW_OFFSET,
+                scoreText
+            )
+    );
+}
 
 /************************************************************************
  Function: void InitGamesStyleScheme(GOL_SCHEME *pScheme)
@@ -692,5 +738,5 @@ void ShowScreenScore( void )
 ************************************************************************/
 void InitGamesStyleScheme(GOL_SCHEME *pScheme)
 {
-	gridScheme->CommonBkColor =  WHITE;//RGB565CONVERT(0xFD, 0xEE, 0xCA);
-}	
+    gridScheme->CommonBkColor = WHITE;  //RGB565CONVERT(0xFD, 0xEE, 0xCA);
+}

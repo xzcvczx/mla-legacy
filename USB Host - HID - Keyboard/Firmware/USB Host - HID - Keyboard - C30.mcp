@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\Host - HID - Keyboard
 dir_sin=
-dir_inc=.;..\..\Microchip\Include;..\..\USB Host - HID - Keyboard\Firmware;..\..\..\USB Host - HID - Keyboard\Firmware;..\..\Include;..\..\..\Include
+dir_inc=.;..\..\Microchip\Include
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]

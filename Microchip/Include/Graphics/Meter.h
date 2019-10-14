@@ -40,46 +40,48 @@
  * Albert Z.			07/31/08	Added arc colors options
  * P. A. Tamayo			08/20/08	Added accuracy option for displaying values
  *****************************************************************************/
-
 #ifndef _METER_H
-#define _METER_H
+    #define _METER_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 // Compile time Options for Meter
-#define METER_DISPLAY_VALUES_ENABLE	// This enables the display of the values.
-									// Displaying the values will have significant
-									// drawing time requirement.
-											
+    #define METER_DISPLAY_VALUES_ENABLE // This enables the display of the values.
+
+// Displaying the values will have significant
+// drawing time requirement.
+
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define MTR_DISABLED    	0x0002  // Bit for disabled state.
-#define MTR_RING     		0x0004  // Bit for ring type, scales are drawn over the ring
-									// default is only scales drawn.
-#define MTR_ACCURACY		0x0008	// Sets the meter accuracy to one decimal places 
-									// when displaying the values. Application must multiply 
-									// the minValue, maxValue and values passed to the widget
-									// by RESOLUTION. 
-#define MTR_DRAW_UPDATE    	0x1000  // Bit to indicate an update only.
-#define MTR_DRAW        	0x4000  // Bit to indicate object must be redrawn.
-#define MTR_HIDE        	0x8000  // Bit to indicate object must be removed from screen.
+    #define MTR_DISABLED    0x0002      // Bit for disabled state.
+    #define MTR_RING        0x0004      // Bit for ring type, scales are drawn over the ring
 
+// default is only scales drawn.
+    #define MTR_ACCURACY    0x0008      // Sets the meter accuracy to one decimal places
+
+// when displaying the values. Application must multiply
+// the minValue, maxValue and values passed to the widget
+// by RESOLUTION.
+    #define MTR_DRAW_UPDATE 0x1000      // Bit to indicate an update only.
+    #define MTR_DRAW        0x4000      // Bit to indicate object must be redrawn.
+    #define MTR_HIDE        0x8000      // Bit to indicate object must be removed from screen.
 
 /*********************************************************************
 * Used Constants 
 *********************************************************************/
-#define RADIAN 				1144	// Radian definition. Equivalent to sine(1) * 2^16.
-#define PIIOVER2			102944	// The constant Pii divided by two (pii/2).
+    #define RADIAN      1144            // Radian definition. Equivalent to sine(1) * 2^16.
+    #define PIIOVER2    102944          // The constant Pii divided by two (pii/2).
 
-// Meter types 
-#define MTR_WHOLE_TYPE		0
-#define MTR_HALF_TYPE		1
-#define MTR_QUARTER_TYPE	2
+// Meter types
+    #define MTR_WHOLE_TYPE      0
+    #define MTR_HALF_TYPE       1
+    #define MTR_QUARTER_TYPE    2
 
-/* ************************************************************************** */									
+/* ************************************************************************** */
+
 // Overview: This is a compile time setting to select the type if meter shape.
-// There are three types: 
+// There are three types:
 //	    - MTR_WHOLE_TYPE   - Meter drawn with 6 octants used.
 //		- MTR_HALF_TYPE    - Meter drawn with semi circle shape.
 //		- MTR_QUARTER_TYPE - Meter drawn with quarter circle shape.
@@ -88,53 +90,46 @@
 // MTR_WHOLE_TYPE will use all the arc colors (arcColor1 - arcColor6)
 // MTR_HALF_TYPE will use arc colors (arcColor5, arcColor4, arcColor3, arcColor2)
 // MTR_QUARTER_TYPE will use arc colors (arcColor3, arcColor2)
-// Set the meter type in Meter.h file and arc colors using 
+// Set the meter type in Meter.h file and arc colors using
 // MtrSetScaleColors(pMtr, arc1, arc2, arc3, arc4, arc5, arc6) macro.
-/* ************************************************************************** */	
-#define METER_TYPE					MTR_WHOLE_TYPE				
+
+/* ************************************************************************** */
+    #define METER_TYPE  MTR_WHOLE_TYPE
 
 //#define METER_TYPE					MTR_HALF_TYPE				// Meter drawn with semi circle shape.
 //#define METER_TYPE					MTR_QUARTER_TYPE			// Meter drawn with quarter circle shape.
-
-
-#define ARC1_DEGREE	180		 		// defines one arc1 limit (used for determining colors)
-#define ARC2_DEGREE	135				// defines one arc2 limit (used for determining colors)
-#define ARC3_DEGREE	90				// defines one arc3 limit (used for determining colors)
-#define ARC4_DEGREE	45				// defines one arc4 limit (used for determining colors)
-#define ARC5_DEGREE	 0				// defines one arc5 limit (used for determining colors)
-
+    #define ARC1_DEGREE 180             // defines one arc1 limit (used for determining colors)
+    #define ARC2_DEGREE 135             // defines one arc2 limit (used for determining colors)
+    #define ARC3_DEGREE 90              // defines one arc3 limit (used for determining colors)
+    #define ARC4_DEGREE 45              // defines one arc4 limit (used for determining colors)
+    #define ARC5_DEGREE 0               // defines one arc5 limit (used for determining colors)
 
 // These selects the other parameters of the meter that are dependent on the shape.
-#if (METER_TYPE == MTR_WHOLE_TYPE) 		
-	
-	#define DEGREE_START	-45		// Defines the start angle to draw the meter.
-	#define DEGREE_END		225		// Defines the end angle to draw the meter.
+    #if (METER_TYPE == MTR_WHOLE_TYPE)
+        #define DEGREE_START    - 45    // Defines the start angle to draw the meter.
+        #define DEGREE_END      225     // Defines the end angle to draw the meter.
+    #elif (METER_TYPE == MTR_HALF_TYPE)
+        #define DEGREE_START    0       // Defines the start angle to draw the meter.
+        #define DEGREE_END      180     // Defines the end angle to draw the meter.
+    #elif (METER_TYPE == MTR_QUARTER_TYPE)
+        #define DEGREE_START    0       // Defines the start angle to draw the meter.
+        #define DEGREE_END      90      // Defines the end angle to draw the meter.
+    #endif
+    #define SCALECHARCOUNT  4           // Defines how many characters will be allocated for the
 
-#elif (METER_TYPE == MTR_HALF_TYPE) 
+// scale labels. Use this define in accordance to
+// the maxValue-minValue. Example: if maxValue-minValue = 500, SCALECHARCOUNT
+// should be 3. if maxValue-minValue = 90, SCALECHARCOUNT = 2
+// You must include the decimal point if this
+// feature is enabled (see MTR_ACCURACY state bit).
+    #define DEGREECOUNT 9               // Defines how many degrees per scale, computed per octant
 
-	#define DEGREE_START	  0		// Defines the start angle to draw the meter.
-	#define DEGREE_END		180		// Defines the end angle to draw the meter.
+// Example: for 5 division per octant 45/5 = 9.
+// So every 9 degrees a scale is drawn
+// for a 5 scale division per octant.
+    #define RESOLUTION  10              // Factor that the meter widget will divide minValue, maxValue
 
-#elif (METER_TYPE == MTR_QUARTER_TYPE) 
-
-	#define DEGREE_START	  0		// Defines the start angle to draw the meter.
-	#define DEGREE_END		 90		// Defines the end angle to draw the meter.
-
-#endif
-
-#define SCALECHARCOUNT		  3		// Defines how many characters will be allocated for the
-									// scale labels. Use this define in accordance to 
-									// the maxValue-minValue. Example: if maxValue-minValue = 500, SCALECHARCOUNT
-									// should be 3. if maxValue-minValue = 90, SCALECHARCOUNT = 2 
-									// You must include the decimal point if this 
-									// feature is enabled (see MTR_ACCURACY state bit).
-#define DEGREECOUNT		 	  9		// Defines how many degrees per scale, computed per octant 
-									// Example: for 5 division per octant 45/5 = 9. 
-									// So every 9 degrees a scale is drawn
-									// for a 5 scale division per octant.
-									
-#define RESOLUTION			 10		// Factor that the meter widget will divide minValue, maxValue 
-									// and current value. Used only when MTR_ACCURACY state bit is set.
+// and current value. Used only when MTR_ACCURACY state bit is set.
 
 /*********************************************************************
 * Overview: Defines the parameters required for a meter Object.
@@ -143,34 +138,32 @@
 *			given fields.
 *
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-	XCHAR 		   *pText;			// The text label of the meter.
-	SHORT           value;			// Current value of the meter.
-	SHORT           minValue;      	// minimum value the meter can display
-	SHORT           maxValue;      	// maximum value the meter can display (range is maxValue - minValue)
+typedef struct
+{
+    OBJ_HEADER  hdr;            // Generic header for all Objects (see OBJ_HEADER).
+    XCHAR       *pText;         // The text label of the meter.
+    SHORT       value;          // Current value of the meter.
+    SHORT       minValue;       // minimum value the meter can display
+    SHORT       maxValue;       // maximum value the meter can display (range is maxValue - minValue)
+    SHORT       xCenter;        // The x coordinate center position. This is computed automatically.
+    SHORT       yCenter;        // The y coordinate center position. This is computed automatically.
+    SHORT       radius;         // Radius of the meter, also defines the needle length.
 
-	SHORT           xCenter;		// The x coordinate center position. This is computed automatically. 
-	SHORT           yCenter;		// The y coordinate center position. This is computed automatically. 
-	SHORT           radius;			// Radius of the meter, also defines the needle length. 
-									// This is computed automatically. 
+    // This is computed automatically.
+    SHORT       xPos;           // The current x position of the needle. This is computed automatically.
+    SHORT       yPos;           // The current y position of the needle. This is computed automatically.
+    WORD        arcColor6;      // Arc 6 color parameter.
+    WORD        arcColor5;      // Arc 5 color parameter
+    WORD        arcColor4;      // Arc 4 color parameter
+    WORD        arcColor3;      // Arc 3 color parameter
+    WORD        arcColor2;      // Arc 2 color parameter
+    WORD        arcColor1;      // Arc 1 color parameter
 
-	SHORT			xPos;			// The current x position of the needle. This is computed automatically. 
-	SHORT			yPos;			// The current y position of the needle. This is computed automatically. 
-	
-	WORD			arcColor6;		// Arc 6 color parameter. 
-	WORD			arcColor5;		// Arc 5 color parameter
-	WORD			arcColor4;		// Arc 4 color parameter
-	WORD			arcColor3;		// Arc 3 color parameter 
-	WORD			arcColor2;		// Arc 2 color parameter
-	WORD			arcColor1;		// Arc 1 color parameter
-	
-	// The following three points define three fonts used in meter widget, they can be different from the scheme font. 
-	// Note that the sizes of these fonts are not checked with the meter dimension. In cases where font sizes are
-	// larger than the meter dimension, some overlaps will occur.
-	void 			*pTitleFont;	// Pointer to the font used in the title of the meter
-	void 			*pValueFont;	// Pointer to the font used in the current reading (if displayed) of the meter
-	
+    // The following three points define three fonts used in meter widget, they can be different from the scheme font.
+    // Note that the sizes of these fonts are not checked with the meter dimension. In cases where font sizes are
+    // larger than the meter dimension, some overlaps will occur.
+    void        *pTitleFont;    // Pointer to the font used in the title of the meter
+    void        *pValueFont;    // Pointer to the font used in the current reading (if displayed) of the meter
 } METER;
 
 /*********************************************************************
@@ -242,11 +235,22 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-METER  *MtrCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
-				  WORD state, SHORT value, 
-				  SHORT minValue, SHORT maxValue, 
-				  void *pTitleFont, void *pValueFont,
-				  XCHAR *pText, GOL_SCHEME *pScheme);				 
+METER   *MtrCreate
+        (
+            WORD        ID,
+            SHORT       left,
+            SHORT       top,
+            SHORT       right,
+            SHORT       bottom,
+            WORD        state,
+            SHORT       value,
+            SHORT       minValue,
+            SHORT       maxValue,
+            void        *pTitleFont,
+            void        *pValueFont,
+            XCHAR       *pText,
+            GOL_SCHEME  *pScheme
+        );
 
 /*********************************************************************
 * Function: WORD MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg)
@@ -276,7 +280,7 @@ METER  *MtrCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-WORD MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg);
+WORD    MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG* pMsg)
@@ -302,7 +306,7 @@ WORD MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void  MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG* pMsg);
+void    MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Macros:  MtrGetVal(pMtr)
@@ -319,7 +323,7 @@ void  MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-#define MtrGetVal(pMtr)  	((pMtr)->value)
+    #define MtrGetVal(pMtr) ((pMtr)->value)
 
 /*********************************************************************
 * Function: MtrSetVal(METER *pMtr, SHORT newVal)
@@ -340,7 +344,7 @@ void  MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void MtrSetVal(METER *pMtr, SHORT newVal);
+void    MtrSetVal(METER *pMtr, SHORT newVal);
 
 /*********************************************************************
 * Macros:  MtrIncVal(pMtr, value)
@@ -358,7 +362,7 @@ void MtrSetVal(METER *pMtr, SHORT newVal);
 * Side Effects: none
 *
 ********************************************************************/
-#define MtrIncVal(pMtr, value)		MtrSetVal(pMtr, (pMtr->val + value))
+    #define MtrIncVal(pMtr, value)  MtrSetVal(pMtr, (pMtr->val + value))
 
 /*********************************************************************
 * Macros:  MtrDecVal(pMtr)
@@ -376,7 +380,7 @@ void MtrSetVal(METER *pMtr, SHORT newVal);
 * Side Effects: none
 *
 ********************************************************************/
-#define MtrDecVal(pMtr, value)		MtrSetVal(pMtr, (pMtr->pos - value))
+    #define MtrDecVal(pMtr, value)  MtrSetVal(pMtr, (pMtr->pos - value))
 
 /*********************************************************************
 * Macros:  MtrSetScaleColors(pMtr, arc1, arc2, arc3, arc4, arc5, arc6)	
@@ -417,14 +421,15 @@ void MtrSetVal(METER *pMtr, SHORT newVal);
 * Side Effects: none
 *
 ********************************************************************/
-#define MtrSetScaleColors(pMtr, arc1, arc2, arc3, arc4, arc5, arc6)	\
-								{	pMtr->arcColor6=arc6;			\
-									pMtr->arcColor5=arc5;			\
-									pMtr->arcColor4=arc4;			\
-									pMtr->arcColor3=arc3;			\
-									pMtr->arcColor2=arc2;			\
-									pMtr->arcColor1=arc1;	}
-
+    #define MtrSetScaleColors(pMtr, arc1, arc2, arc3, arc4, arc5, arc6) \
+    {                                                                   \
+        pMtr->arcColor6 = arc6;                                         \
+        pMtr->arcColor5 = arc5;                                         \
+        pMtr->arcColor4 = arc4;                                         \
+        pMtr->arcColor3 = arc3;                                         \
+        pMtr->arcColor2 = arc2;                                         \
+        pMtr->arcColor1 = arc1;                                         \
+    }
 
 /*********************************************************************
 * Function: WORD MtrDraw(METER *pMtr)
@@ -461,7 +466,7 @@ void MtrSetVal(METER *pMtr, SHORT newVal);
 * Side Effects: none
 *
 ********************************************************************/
-WORD MtrDraw(METER *pMtr);
+WORD    MtrDraw(METER *pMtr);
 
 /*********************************************************************
 * Macro: MtrSetTitleFont(pMtr, pNewFont)   (((METER*)pMtr)->pTitleFont = pNewFont)
@@ -478,8 +483,7 @@ WORD MtrDraw(METER *pMtr);
 * Side Effects: none
 *
 ********************************************************************/
-#define MtrSetTitleFont(pMtr, pNewFont)   (((METER*)pMtr)->pTitleFont = pNewFont)
-
+    #define MtrSetTitleFont(pMtr, pNewFont) (((METER *)pMtr)->pTitleFont = pNewFont)
 
 /*********************************************************************
 * Macro: MtrSetValueFont(pMtr, pNewFont)   (((METER*)pMtr)->pValueFont = pNewFont)
@@ -496,6 +500,5 @@ WORD MtrDraw(METER *pMtr);
 * Side Effects: none
 *
 ********************************************************************/
-#define MtrSetValueFont(pMtr, pNewFont)   (((METER*)pMtr)->pValueFont = pNewFont)
-
+    #define MtrSetValueFont(pMtr, pNewFont) (((METER *)pMtr)->pValueFont = pNewFont)
 #endif // _METER_H

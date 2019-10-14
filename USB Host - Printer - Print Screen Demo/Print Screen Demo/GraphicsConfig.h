@@ -120,6 +120,8 @@
 
 #elif (GRAPHICS_PICTAIL_VERSION == 3)
 
+#define GRAPHICS_HARDWARE_PLATFORM GFX_PICTAIL_V3
+
 /*********************************************************************
 * Overview: Defines color depth. 
 ********************************************************************/

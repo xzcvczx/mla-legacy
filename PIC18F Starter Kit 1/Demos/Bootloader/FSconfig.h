@@ -60,6 +60,9 @@
 #define MEDIA_SECTOR_SIZE 		512
 /************************************************************************/
 
+// Keep this define if the card connector does not provide a pin for the card detectiond
+#define MEDIA_SOFT_DETECT
+
 /* *******************************************************************************************************/
 /************** Compiler options to enable/Disable Features based on user's application ******************/
 /* *******************************************************************************************************/

@@ -40,7 +40,7 @@
  * Anton Alkhimenok		07/20/07	...
  *****************************************************************************/
 #ifndef _SIDEBUTTONS_H
-#define _SIDEBUTTONS_H
+    #define _SIDEBUTTONS_H
 
 /************************************************************************
 * Function: void SideButtonsMsg(GOL_MSG* msg)
@@ -55,6 +55,5 @@
 * Output: none
 *                                                                       
 ************************************************************************/
-void SideButtonsMsg(GOL_MSG* msg);
-
+void    SideButtonsMsg(GOL_MSG *msg);
 #endif

@@ -38,25 +38,22 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		07/10/07	...
  * Anton Alkhimenok     02/07/08    PIC32 support
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  *****************************************************************************/
-
 #ifndef _BEEP_H
-#define _BEEP_H
+    #define _BEEP_H
 
-#include "Graphics\Graphics.h"
+    #include "Graphics\Graphics.h"
 
-#if defined(__dsPIC33F__) || defined(__PIC24H__) 
-#define BEEP_TIME       10
-#else
-#define BEEP_TIME       500
-#endif
-
-#ifdef __PIC32MX
-#define TIMER_BASE      4400
-#else
-#define TIMER_BASE      500
-#endif
+    #if defined(__dsPIC33F__) || defined(__PIC24H__)
+        #define BEEP_TIME   10
+    #else
+        #define BEEP_TIME   500
+    #endif
+    #ifdef __PIC32MX
+        #define TIMER_BASE  4400
+    #else
+        #define TIMER_BASE  500
+    #endif
 
 /*********************************************************************
 * Function:  void BeepInit(void)
@@ -74,7 +71,7 @@
 * Note: none
 *
 ********************************************************************/
-void BeepInit();
+void    BeepInit(void);
 
 /*********************************************************************
 * Macro:  Beep()
@@ -92,10 +89,9 @@ void BeepInit();
 * Note: none
 *
 ********************************************************************/
-#if (GRAPHICS_PICTAIL_VERSION < 3)
-#define     Beep() T2CONbits.TON = 1
-#else
-#define     Beep()
-#endif
-
+    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_VER_3)
+        #define Beep()  T2CONbits.TON = 1
+    #else
+        #define Beep()
+    #endif
 #endif // _BEEP_H

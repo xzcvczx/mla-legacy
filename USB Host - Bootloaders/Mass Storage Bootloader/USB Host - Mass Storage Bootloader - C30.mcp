@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ256GB110
+device=PIC24FJ256DA210
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -59,6 +59,7 @@ file_031=.
 file_032=.
 file_033=.
 file_034=.
+file_035=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -95,6 +96,7 @@ file_031=no
 file_032=no
 file_033=no
 file_034=no
+file_035=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -131,6 +133,7 @@ file_031=no
 file_032=no
 file_033=no
 file_034=no
+file_035=no
 [FILE_INFO]
 file_000=boot_main.c
 file_001=..\..\Microchip\USB\usb_host.c
@@ -167,13 +170,14 @@ file_031=..\..\Microchip\Include\MDD File System\FSIO.h
 file_032=..\..\Microchip\Include\USB\usb_hal.h
 file_033=..\..\Microchip\Include\MDD File System\FSDefs.h
 file_034=..\..\Microchip\Include\USB\usb_hal_pic24.h
+file_035=HardwareProfile - PIC24FJ256DA210 Development Board.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=
 [TOOL_SETTINGS]
 TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall -mlarge-data -Os
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=1000 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall -mlarge-data
+TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=2000 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
 TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
 [INSTRUMENTED_TRACE]
 enable=0

@@ -72,7 +72,11 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 Author          Date    Comments
 --------------------------------------------------------------------------------
 ADG          15-Sep-2008 First release
-*******************************************************************************/
+********************************************************************************
+ Change History:
+ Revision     Description
+ v2.6         Changed format of 'bcdCDC' from word to array of byte.
+********************************************************************************/
 //DOM-IGNORE-END
 
 //DOM-IGNORE-BEGIN
@@ -243,7 +247,7 @@ typedef struct _USB_CDC_HEADER_FN_DSC
     BYTE bFNLength;         // Size of this functional descriptor, in bytes.
     BYTE bDscType;          // CS_INTERFACE
     BYTE bDscSubType;       // Header. This is defined in [USBCDC1.2], which defines this as a header.
-    WORD bcdCDC;            // USB Class Definitions for Communications Devices Specification release number in binary-coded decimal.
+    BYTE bcdCDC[2];         // USB Class Definitions for Communications Devices Specification release number in binary-coded decimal.
 } USB_CDC_HEADER_FN_DSC;
 
 /* Abstract Control Management Functional Descriptor */

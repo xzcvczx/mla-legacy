@@ -38,39 +38,39 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Arpan kumar		06/11/09	  Version 1.0 release
  *****************************************************************************/
-
 #ifndef _DIGITALMETER_H
-#define _DIGITALMETER_H
+    #define _DIGITALMETER_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define DM_DISABLED   	0x0002  // Bit for disabled state.
-#define DM_RIGHT_ALIGN 	0x0004  // Bit to indicate value is left aligned.
-#define DM_CENTER_ALIGN	0x0008  // Bit to indicate value is center aligned.
-#define DM_FRAME  	    0x0010  // Bit to indicate frame is displayed.
-#define DM_DRAW     	0x4000  // Bit to indicate object must be redrawn.
-#define DM_HIDE     	0x8000  // Bit to remove object from screen.
+    #define DM_DISABLED     0x0002  // Bit for disabled state.
+    #define DM_RIGHT_ALIGN  0x0004  // Bit to indicate value is left aligned.
+    #define DM_CENTER_ALIGN 0x0008  // Bit to indicate value is center aligned.
+    #define DM_FRAME        0x0010  // Bit to indicate frame is displayed.
+    #define DM_DRAW         0x4000  // Bit to indicate object must be redrawn.
+    #define DM_HIDE         0x8000  // Bit to remove object from screen.
 
 /* Indent constant for the text used in the frame. */
-#define DM_INDENT       0x02    // Text indent constant.
+    #define DM_INDENT   0x02        // Text indent constant.
 
 /* User should change this value depending on the number of digits he wants to display */
-#define DM_WIDTH        0x0A   // This value should be more than the no of digits displayed
+    #define DM_WIDTH    0x0A        // This value should be more than the no of digits displayed
 
 /*********************************************************************
 * Structure:   DIGITALMETER
 * Overview: Defines the parameters required for a <link Digital Meter> Object.
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-	SHORT     		textHeight;     // Pre-computed text height
-    DWORD           Cvalue;			// Current value 
-	DWORD			Pvalue;			// Previous value
-	BYTE            NoOfDigits;     // Number of digits to be displayed
-	BYTE            DotPos;         // Position of decimal point
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    SHORT       textHeight; // Pre-computed text height
+    DWORD       Cvalue;     // Current value
+    DWORD       Pvalue;     // Previous value
+    BYTE        NoOfDigits; // Number of digits to be displayed
+    BYTE        DotPos;     // Position of decimal point
 } DIGITALMETER;
 
 /*********************************************************************
@@ -88,7 +88,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define DmGetValue(pDm)                 pDm->Cvalue
+    #define DmGetValue(pDm) pDm->Cvalue
 
 /*********************************************************************
 * Function: DmSetValue(DIGITALMETER *pDm,  DWORD Value)
@@ -105,7 +105,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void  DmSetValue(DIGITALMETER *pDm, DWORD Value);
+void    DmSetValue(DIGITALMETER *pDm, DWORD Value);
 
 /*********************************************************************
 * Macros:  DmIncVal(pDm, value)
@@ -123,7 +123,7 @@ void  DmSetValue(DIGITALMETER *pDm, DWORD Value);
 * Side Effects: none
 *
 ********************************************************************/
-#define DmIncVal(pDm, value)		DmSetValue(pDm, (pDm->Cvalue + value))
+    #define DmIncVal(pDm, value)    DmSetValue(pDm, (pDm->Cvalue + value))
 
 /*********************************************************************
 * Macros:  DmDecVal(pDm, value)
@@ -141,7 +141,7 @@ void  DmSetValue(DIGITALMETER *pDm, DWORD Value);
 * Side Effects: none
 *
 ********************************************************************/
-#define DmDecVal(pDm, value)		DmSetValue(pDm, (pDm->Cvalue - value))
+    #define DmDecVal(pDm, value)    DmSetValue(pDm, (pDm->Cvalue - value))
 
 /*********************************************************************
 * Function: DIGITALMETER  *DmCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
@@ -187,9 +187,20 @@ void  DmSetValue(DIGITALMETER *pDm, DWORD Value);
 * Side Effects: none
 *
 ********************************************************************/
-DIGITALMETER *DmCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			         WORD state, DWORD Value, BYTE NoOfDigits, BYTE DotPos, GOL_SCHEME *pScheme);
-			      
+DIGITALMETER    *DmCreate
+                (
+                    WORD        ID,
+                    SHORT       left,
+                    SHORT       top,
+                    SHORT       right,
+                    SHORT       bottom,
+                    WORD        state,
+                    DWORD       Value,
+                    BYTE        NoOfDigits,
+                    BYTE        DotPos,
+                    GOL_SCHEME  *pScheme
+                );
+
 /*********************************************************************
 * Function: WORD DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg)
 *
@@ -222,7 +233,7 @@ DIGITALMETER *DmCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom
 * Side Effects: none
 *
 ********************************************************************/
-WORD  DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg);
+WORD            DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD DmDraw(DIGITALMETER *pDm)
@@ -254,7 +265,5 @@ WORD  DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD DmDraw(DIGITALMETER *pDm);
-
-
+WORD            DmDraw(DIGITALMETER *pDm);
 #endif // _DIGITALMETER_H

@@ -44,6 +44,7 @@
  *                                  Modified MPUSBGetDLLVersion return
  *                                   format.
  * v1.2.0.0             02/02/09    Fixed bugs in MPUSBRead() function
+ * v1.2.1.0             08/18/09    Added MPUSBSetPowerState() function
  ********************************************************************/
 
 #include <stdio.h>
@@ -57,7 +58,8 @@
 
 //#define MPUSBAPI_VERSION            0x00010000L   //revision 1.0.0.0
 //#define MPUSBAPI_VERSION            0x00010100L   //revision 1.0.1.0
-#define MPUSBAPI_VERSION            0x01010000L     //revision 1.1.0.0
+//#define MPUSBAPI_VERSION            0x01010000L     //revision 1.1.0.0
+#define MPUSBAPI_VERSION            0x01020100L     //revision 1.2.1.0
 
 #define	MPUSB_DEV_NO_INFO           2
 #define	MPUSB_DEV_INVALID_INST      3

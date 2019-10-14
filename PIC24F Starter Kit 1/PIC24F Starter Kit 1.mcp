@@ -6,9 +6,9 @@ device=PIC24FJ256GB106
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
 dir_bin=
-dir_tmp=.\Objects - PIC24F Starter Kit
+dir_tmp=.\Objects\PIC24F Starter Kit
 dir_sin=
-dir_inc=.;..\Microchip\Include;..\..\PIC24F Starter Kit 1;..\..\..\PIC24F Starter Kit 1;..\Include;..\..\Include
+dir_inc=.;..\Microchip\Include
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]
@@ -82,6 +82,7 @@ file_054=USB
 file_055=USB
 file_056=MDD File System
 file_057=MDD File System
+file_058=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -141,6 +142,7 @@ file_054=no
 file_055=no
 file_056=no
 file_057=no
+file_058=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -200,6 +202,7 @@ file_054=no
 file_055=no
 file_056=no
 file_057=no
+file_058=no
 [FILE_INFO]
 file_000=rtcc.c
 file_001=usb_config.c
@@ -259,6 +262,7 @@ file_054=..\Microchip\USB\USB PIC24.h
 file_055=..\Microchip\USB\usb_host_local.h
 file_056=..\Microchip\Include\MDD File System\FSDefs.h
 file_057=..\Microchip\Include\MDD File System\FSIO.h
+file_058=..\Microchip\Include\USB\usb_hal_pic24.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

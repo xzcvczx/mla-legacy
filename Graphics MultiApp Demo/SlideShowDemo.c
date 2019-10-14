@@ -37,65 +37,64 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		03/10/08	... 
  *****************************************************************************/
-
 #include "MainDemo.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //                            MACROS
 /////////////////////////////////////////////////////////////////////////////
-#define PIXDATAMAX 5
+#define PIXDATAMAX  5
 
 /////////////////////////////////////////////////////////////////////////////
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
-#if (USE_EXTERNAL_IMAGES  == 1)
-
-extern BITMAP_EXTERNAL 	vegas;
-extern BITMAP_EXTERNAL 	sunset1;
-extern BITMAP_EXTERNAL 	sunset2;
-extern BITMAP_EXTERNAL 	fallleaves;
-extern BITMAP_EXTERNAL 	rose;
+#if (USE_EXTERNAL_IMAGES == 1)
+extern BITMAP_EXTERNAL  vegas;
+extern BITMAP_EXTERNAL  sunset1;
+extern BITMAP_EXTERNAL  sunset2;
+extern BITMAP_EXTERNAL  fallleaves;
+extern BITMAP_EXTERNAL  rose;
 
 #else
-
-extern BITMAP_FLASH 	vegas;
-extern BITMAP_FLASH		sunset1;
-extern BITMAP_FLASH 	sunset2;
-extern BITMAP_FLASH 	fallleaves;
-extern BITMAP_FLASH 	rose;
-
+extern BITMAP_FLASH     vegas;
+extern BITMAP_FLASH     sunset1;
+extern BITMAP_FLASH     sunset2;
+extern BITMAP_FLASH     fallleaves;
+extern BITMAP_FLASH     rose;
 #endif
+
 /////////////////////////////////////////////////////////////////////////////
 //                            STRING USED
 /////////////////////////////////////////////////////////////////////////////
-extern XCHAR RightArrowStr[];
-extern XCHAR LeftArrowStr[];
-extern XCHAR ExitStr[];
+extern XCHAR            RightArrowStr[];
+extern XCHAR            LeftArrowStr[];
+extern XCHAR            ExitStr[];
 
 /////////////////////////////////////////////////////////////////////////////
 //                            LOCAL PROTOTYPES
 /////////////////////////////////////////////////////////////////////////////
-void InitPixData(void);
+void                    InitPixData(void);
 
 /////////////////////////////////////////////////////////////////////////////
+
 //                            STRUCTURES
 /////////////////////////////////////////////////////////////////////////////
-typedef struct {
-	void 	*pImage;							// pointer to the image used
-	void	*pPrev;								// pointer to the previous list member
-	void	*pNext;								// pointer to the next list member
-} PIXDATA;	
+typedef struct
+{
+    void    *pImage;    // pointer to the image used
+    void    *pPrev;     // pointer to the previous list member
+    void    *pNext;     // pointer to the next list member
+} PIXDATA;
 
 /////////////////////////////////////////////////////////////////////////////
 //                            GLOBALS
 /////////////////////////////////////////////////////////////////////////////
-// array of structures that will hold the strings and its pointers to corresponding font tables. 
-// this will be configured as a ringed linked list 
-PIXDATA PixArray[PIXDATAMAX];						
-	
+// array of structures that will hold the strings and its pointers to corresponding font tables.
+// this will be configured as a ringed linked list
+PIXDATA     PixArray[PIXDATAMAX];
+
 // global pointer to the linked list.
-PIXDATA *pPixData;
-GOL_SCHEME    *SlideShowScheme;       
+PIXDATA     *pPixData;
+GOL_SCHEME  *SlideShowScheme;
 
 /************************************************************************
  Function: void CreateSlideShowDemo(void)
@@ -109,39 +108,31 @@ GOL_SCHEME    *SlideShowScheme;
 ************************************************************************/
 void CreateSlideShowDemo(void)
 {
-	SHORT pixWidth, pixHeight;
-	
-   	GOLFree();   // free memory for the objects in the previous linked list and start new list
+    SHORT   pixWidth, pixHeight;
 
+    GOLFree();  // free memory for the objects in the previous linked list and start new list
     SetColor(BLACK);
-    ClearDevice();	
+    ClearDevice();
 
-   	SlideShowScheme = GOLCreateScheme(); 	
-  	
-   	SlideShowScheme->CommonBkColor = BLACK;
-	
-	InitPixData();
-	pixWidth  =  GetImageWidth(pPixData->pImage);
-	pixHeight =  GetImageHeight(pPixData->pImage);
-	
-    PictCreate(ID_PICTURE2,	
-              35,
-              10,
-              GetMaxX()-35,
-              GetMaxY()-40,
-              PICT_DRAW,    	
-#if (USE_EXTERNAL_IMAGES  == 1)
-              1,                       	// scale factor is x1
-#else
-              2,                       	// scale factor is x2
-#endif
-              (void *)&vegas,          
-              SlideShowScheme);             
+    SlideShowScheme = GOLCreateScheme();
 
-	// create the components of the demo
-	CreateCtrlButtons(ExitStr, NULL, LeftArrowStr, RightArrowStr);
-	
-}											
+    SlideShowScheme->CommonBkColor = BLACK;
+
+    InitPixData();
+    pixWidth = GetImageWidth(pPixData->pImage);
+    pixHeight = GetImageHeight(pPixData->pImage);
+
+    PictCreate(ID_PICTURE2, 35, 10, GetMaxX() - 35, GetMaxY() - 40, PICT_DRAW,
+    #if (USE_EXTERNAL_IMAGES == 1)
+    1,          // scale factor is x1
+    #else
+    2,          // scale factor is x2
+    #endif
+    (void *) &vegas, SlideShowScheme);
+
+    // create the components of the demo
+    CreateCtrlButtons(ExitStr, NULL, LeftArrowStr, RightArrowStr);
+}
 
 /************************************************************************
  Function: WORD SlideShowDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, 
@@ -160,99 +151,104 @@ void CreateSlideShowDemo(void)
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD SlideShowDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
+WORD SlideShowDemoMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 {
-	WORD objectID;
-	PICTURE *pPict;
-	
+    WORD    objectID;
+    PICTURE *pPict;
+
     objectID = GetObjID(pObj);
 
-	switch (objectID) {
-
+    switch(objectID)
+    {
         case ID_BUTTON_A:
-			if (objMsg == BTN_MSG_RELEASED) { 				// check if button is pressed
-				// do not process if user moved the touch away from the button
-           		// returning 1 wil update the button
-           		if (pMsg->uiEvent == EVENT_MOVE)
-           			return 1;	        	
-				free(SlideShowScheme);
-				// go to menu screen
-	        	screenState = CREATE_DEMOSELECTION;
-    	    } 
-   	        return 1;
-		case ID_BUTTON_C: 
-			if (objMsg == BTN_MSG_RELEASED) {				// check if button is pressed
-				// do not process if user moved the touch away from the button
-           		// returning 1 wil update the button
-           		if (pMsg->uiEvent == EVENT_MOVE)
-           			return 1;	        	
-				pPixData = pPixData->pPrev;
-				
-	            pPict = (PICTURE*) GOLFindObject(ID_PICTURE2); // get pointer to static text
-	            PictSetBitmap(pPict, pPixData->pImage);
-        	    SetState(pPict, DRAW);                     	// set redraw state
-			}
-			break;
-		case ID_BUTTON_D:
-			if (objMsg == BTN_MSG_RELEASED) {
-				// do not process if user moved the touch away from the button
-           		// returning 1 wil update the button
-           		if (pMsg->uiEvent == EVENT_MOVE)
-           			return 1;	        	
-				pPixData = pPixData->pNext;
+            if(objMsg == BTN_MSG_RELEASED)
+            {   // check if button is pressed
+                // do not process if user moved the touch away from the button
+                // returning 1 wil update the button
+                if(pMsg->uiEvent == EVENT_MOVE)
+                    return (1);
+                free(SlideShowScheme);
 
-	            pPict = (PICTURE*) GOLFindObject(ID_PICTURE2); // get pointer to static text
-	            PictSetBitmap(pPict, pPixData->pImage);
-        	    SetState(pPict, DRAW);                     	// set redraw state
-	   	    }
-	   	    break;
+                // go to menu screen
+                screenState = CREATE_DEMOSELECTION;
+            }
 
-		default:
-			return 1;	
-	}
-	return 1;
-	
+            return (1);
+
+        case ID_BUTTON_C:
+            if(objMsg == BTN_MSG_RELEASED)
+            {   // check if button is pressed
+                // do not process if user moved the touch away from the button
+                // returning 1 wil update the button
+                if(pMsg->uiEvent == EVENT_MOVE)
+                    return (1);
+                pPixData = pPixData->pPrev;
+
+                pPict = (PICTURE *)GOLFindObject(ID_PICTURE2);  // get pointer to static text
+                PictSetBitmap(pPict, pPixData->pImage);
+                SetState(pPict, DRAW);                          // set redraw state
+            }
+
+            break;
+
+        case ID_BUTTON_D:
+            if(objMsg == BTN_MSG_RELEASED)
+            {
+
+                // do not process if user moved the touch away from the button
+                // returning 1 wil update the button
+                if(pMsg->uiEvent == EVENT_MOVE)
+                    return (1);
+                pPixData = pPixData->pNext;
+
+                pPict = (PICTURE *)GOLFindObject(ID_PICTURE2);  // get pointer to static text
+                PictSetBitmap(pPict, pPixData->pImage);
+                SetState(pPict, DRAW);                          // set redraw state
+            }
+
+            break;
+
+        default:
+            return (1);
+    }
+
+    return (1);
 }
 
+/* */
 void InitPixData(void)
 {
-	int i;
-	
-	for (i = 0; i < PIXDATAMAX; i++) {
-		switch (i) {
-			case 0:
-				PixArray[i].pImage = (void *)&vegas;
-				break;
-			case 1:
-				PixArray[i].pImage = (void *)&rose;
-				break;
-			case 2:
-				PixArray[i].pImage = (void *)&sunset1;
-				break;
-			case 3:
-				PixArray[i].pImage = (void *)&sunset2;
-				break;
-			case 4:
-				PixArray[i].pImage = (void *)&fallleaves;
-				break;
-			default:
-				break;
-		}
-		// make the list a ring list
-		if (i == (PIXDATAMAX-1)) {
-			PixArray[i].pNext = (void*)&PixArray[0];
-			PixArray[i].pPrev = (void*)&PixArray[i-1];
-		}
-		else if (i == 0) {
-			PixArray[i].pNext = (void*)&PixArray[i+1];
-			PixArray[i].pPrev = (void*)&PixArray[PIXDATAMAX-1];
-		}
-		else {
-			PixArray[i].pNext = (void*)&PixArray[i+1];
-			PixArray[i].pPrev = (void*)&PixArray[i-1];
-		}
-	}
-	pPixData = &PixArray[0];
-}	
+    int i;
 
+    for(i = 0; i < PIXDATAMAX; i++)
+    {
+        switch(i)
+        {
+            case 0:     PixArray[i].pImage = (void *) &vegas; break;
+            case 1:     PixArray[i].pImage = (void *) &rose; break;
+            case 2:     PixArray[i].pImage = (void *) &sunset1; break;
+            case 3:     PixArray[i].pImage = (void *) &sunset2; break;
+            case 4:     PixArray[i].pImage = (void *) &fallleaves; break;
+            default:    break;
+        }
 
+        // make the list a ring list
+        if(i == (PIXDATAMAX - 1))
+        {
+            PixArray[i].pNext = (void *) &PixArray[0];
+            PixArray[i].pPrev = (void *) &PixArray[i - 1];
+        }
+        else if(i == 0)
+        {
+            PixArray[i].pNext = (void *) &PixArray[i + 1];
+            PixArray[i].pPrev = (void *) &PixArray[PIXDATAMAX - 1];
+        }
+        else
+        {
+            PixArray[i].pNext = (void *) &PixArray[i + 1];
+            PixArray[i].pPrev = (void *) &PixArray[i - 1];
+        }
+    }
+
+    pPixData = &PixArray[0];
+}

@@ -45,10 +45,6 @@
 
 #include <stdio.h>
 
-#include "Compiler.h"
-#include "GenericTypeDefs.h"                        // Required
-#include "usb_config.h"
-#include "USB/usb_device.h"                         // Required
 #include "USB/USB.h"
 #include "HardwareProfile.h"
 #include "MDD File System\SD-SPI.h"
@@ -182,7 +178,7 @@
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
-    #elif defined(__32MX460F512L__)
+    #elif defined(__32MX460F512L__) || defined(__32MX795F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
         #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
@@ -814,7 +810,7 @@ WORD_VAL ReadPOT(void)
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
-        #elif defined(PIC32MX460F512L_PIM)
+        #elif defined(PIC32MX460F512L_PIM) || defined(PIC32MX795F512L_PIM) || defined(PIC32MX_PIM)
             AD1PCFG = 0xFFFB; // PORTB = Digital; RB2 = analog
             AD1CON1 = 0x0000; // SAMP bit = 0 ends sampling ...
             // and starts converting

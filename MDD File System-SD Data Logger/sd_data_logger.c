@@ -63,7 +63,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #define MAX_COMMAND_LENGTH              50
 #define MAX_LOG_BUFFER_SIZE             512
 #define NUM_LOG_BUFFERS                 2
-#define VERSION                         "v1.2.0"
+#define VERSION                         "v1.2.4"
 
 // RTCC Format Correlation Constants
 // The 16-bit and 32-bit architectures use two different formats for the RTCC.
@@ -344,34 +344,23 @@ void    WriteOneBuffer( FSFILE *fptr, BYTE *data, WORD size );
     _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & ICS_PGx2 & FWDTEN_OFF)
 
 #elif defined (__PIC32MX__)
-    // Define the device configuration
-    //  System Clock = 60 MHz,  Peripherial Bus = 8 MHz
-    //  Primary Osc w/PLL (XT+,HS+,EC+PLL)
-    //  Input Divider    2x Divider
-    //  Multiplier      15x Multiplier
-    //  WDT disabled
-    //  Other options are don't care
-    #if defined(RUN_AT_48MHZ) || defined(RUN_AT_24MHZ)
-        #pragma config FPLLMUL   = MUL_24 //15    // PLL Multiplier
-    #elif defined(RUN_AT_60MHZ)
-        #pragma config FPLLMUL   = MUL_15    // PLL Multiplier
-    #endif
-    #pragma config FPLLIDIV = DIV_2     // PLL Input Divider
-    #pragma config FPLLODIV = DIV_1     // PLL Output Divider
-    #pragma config FPBDIV   = DIV_1     // PB Clock Divisor
-    #pragma config FWDTEN   = OFF       // Watchdog Timer
-    #pragma config WDTPS    = PS1       // Watchdog Timer Postscale
-    #pragma config FCKSM    = CSDCMD    // Clock Switching & Fail Safe Clock Monitor
-    #pragma config OSCIOFNC = OFF       // CLKO Enable
-    #pragma config POSCMOD  = HS        // Primary Oscillator
-    #pragma config IESO     = OFF       // Internal/External Switch-over
-    #pragma config FSOSCEN  = ON        // Secondary Oscillator Enable (KLO was off)
-    #pragma config FNOSC    = PRIPLL    // Oscillator Selection
-    #pragma config CP       = OFF       // Code Protect
-    #pragma config BWP      = OFF       // Boot Flash Write Protect
-    #pragma config PWP      = OFF       // Program Flash Write Protect
-    #pragma config ICESEL   = ICS_PGx2  // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON       // Background Debugger Enable
+    #pragma config FPLLMUL  = MUL_20        // PLL Multiplier
+    #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
+    #pragma config FPLLODIV = DIV_1         // PLL Output Divider
+    #pragma config FPBDIV   = DIV_2         // Peripheral Clock divisor
+    #pragma config FWDTEN   = OFF           // Watchdog Timer
+    #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
+    #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
+    #pragma config OSCIOFNC = OFF           // CLKO Enable
+    #pragma config POSCMOD  = HS            // Primary Oscillator
+    #pragma config IESO     = OFF           // Internal/External Switch-over
+    #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
+    #pragma config FNOSC    = PRIPLL        // Oscillator Selection
+    #pragma config CP       = OFF           // Code Protect
+    #pragma config BWP      = OFF           // Boot Flash Write Protect
+    #pragma config PWP      = OFF           // Program Flash Write Protect
+    #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
+    #pragma config DEBUG    = ON            // Background Debugger Enable
 
 #else
     #error Cannot set up configuration bits.
@@ -402,33 +391,15 @@ int main (void)
 
         #elif defined(__PIC32MX__)
         
-            #if defined(RUN_AT_60MHZ)
-                // Use OSCCON default
-            #else
-                OSCCONCLR = 0x38000000; //PLLODIV
-                #if defined(RUN_AT_48MHZ)
-                    OSCCONSET = 0x08000000; //PLLODIV /2
-                #elif defined(RUN_AT_24MHZ)
-                    OSCCONSET = 0x10000000; //PLLODIV /4
-                #else
-                    #error Cannot set OSCCON
-                #endif
-            #endif
-
-            value = SYSTEMConfigWaitStatesAndPB( GetSystemClock() );
-
-            // Enable the cache for the best performance
-            CheKseg0CacheOn();
-
-            INTEnableSystemMultiVectoredInt();
-
-            value = OSCCON;
-            while (!(value & 0x00000020))
-            {
-                value = OSCCON;    // Wait for PLL lock to stabilize
-            }
-
-            INTEnableInterrupts();
+        // Turn on the interrupts
+        INTEnableSystemMultiVectoredInt();
+        SYSTEMConfigPerformance(GetSystemClock());
+        mOSCSetPBDIV(OSC_PB_DIV_2);
+        //Initialize the RTCC
+        RtccInit();
+        while(RtccGetClkStat()!=RTCC_CLK_ON);// wait for the SOSC to be actually running and RTCC to have its clock source
+        						            // could wait here at most 32ms
+        RtccOpen(0x10073000, 0x07011602, 0);
 
         #else
             #error Cannot initialize

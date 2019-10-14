@@ -28,7 +28,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 */
 
 // Created by the Microchip USBConfig Utility, Version 2.1.1.0, 6/24/2009, 15:23:15
-
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "USB\usb.h"
@@ -39,9 +38,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // Media Interface Function Pointer Table for the Mass Storage client driver
 // *****************************************************************************
-
 CLIENT_DRIVER_TABLE usbMediaInterfaceTable =
-{                                           
+{
     USBHostMSDSCSIInitialize,
     USBHostMSDSCSIEventHandler,
     0
@@ -50,14 +48,14 @@ CLIENT_DRIVER_TABLE usbMediaInterfaceTable =
 // *****************************************************************************
 // Client Driver Function Pointer Table for the USB Embedded Host foundation
 // *****************************************************************************
-
 CLIENT_DRIVER_TABLE usbClientDrvTable[] =
-{                                        
+{
     {
         USBHostHIDInitialize,
         USBHostHIDEventHandler,
         0
     }
+
     ,
     {
         USBHostMSDInitialize,
@@ -69,11 +67,9 @@ CLIENT_DRIVER_TABLE usbClientDrvTable[] =
 // *****************************************************************************
 // USB Embedded Host Targeted Peripheral List (TPL)
 // *****************************************************************************
-
-USB_TPL usbTPL[] =
+USB_TPL             usbTPL[] =
 {
-    { INIT_VID_PID( 0x4D8ul, 0x19ul ), 0, 0, {0} } // Mood Lighting
+    { INIT_VID_PID( 0x4D8ul, 0x19ul ), 0, 0, {0} }                      // Mood Lighting
     ,
-    { INIT_CL_SC_P( 0x08ul, 0x06ul, 0x50ul ), 0, 1, {TPL_CLASS_DRV} } // USB Flash Drive
+    { INIT_CL_SC_P( 0x08ul, 0x06ul, 0x50ul ), 0, 1, {TPL_CLASS_DRV} }   // USB Flash Drive
 };
-

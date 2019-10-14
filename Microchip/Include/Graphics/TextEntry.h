@@ -38,72 +38,77 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Harold Serrano		10/24/08	...
  *****************************************************************************/
- 
 #ifndef _TEXTENTRY_H
-#define _TEXTENTRY_H
+    #define _TEXTENTRY_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define TE_KEY_PRESSED     	   0x0004  	// Bit for press state of one of the keys.
-#define TE_DISABLED    	   	   0x0002  	// Bit for disabled state.
-#define TE_ECHO_HIDE		   0x0008	// Bit to hide the entered characters and instead echo "*" characters to the display.
-#define TE_DRAW 	   		   0x4000  	// Bit to indicate object must be redrawn.
-#define TE_HIDE            	   0x8000  	// Bit to indicate object must be removed from screen.
-#define TE_UPDATE_KEY		   0x2000	// Bit to indicate redraw of a key is needed.
-#define TE_UPDATE_TEXT		   0x1000	// Bit to indicate redraw of the text displayed is needed.
+    #define TE_KEY_PRESSED  0x0004  // Bit for press state of one of the keys.
+    #define TE_DISABLED     0x0002  // Bit for disabled state.
+    #define TE_ECHO_HIDE    0x0008  // Bit to hide the entered characters and instead echo "*" characters to the display.
+    #define TE_DRAW         0x4000  // Bit to indicate object must be redrawn.
+    #define TE_HIDE         0x8000  // Bit to indicate object must be removed from screen.
+    #define TE_UPDATE_KEY   0x2000  // Bit to indicate redraw of a key is needed.
+    #define TE_UPDATE_TEXT  0x1000  // Bit to indicate redraw of the text displayed is needed.
 
 /*********************************************************************
 * Optional COMMANDS assigned to keys 
 *********************************************************************/
-#define TE_DELETE_COM		   0x01		// This macro is used to assign a "delete" command on a key. 
-#define TE_SPACE_COM		   0x02		// This macro is used to assign an insert "space" command on a key. 
-#define TE_ENTER_COM		   0x03		// This macro is used to assign an "enter" (carriage return) command on a key. 
-                                        // User can use this command to customize application code in the message 
-										// callback function. Use the returned translated TE_MSG_ENTER to detect the key 
-									    // pressed was assigned the enter command. Refer to TeTranslateMsg() for details.
+    #define TE_DELETE_COM   0x01    // This macro is used to assign a "delete" command on a key.
+    #define TE_SPACE_COM    0x02    // This macro is used to assign an insert "space" command on a key.
+    #define TE_ENTER_COM    0x03    // This macro is used to assign an "enter" (carriage return) command on a key.
+
+// User can use this command to customize application code in the message
+
+// callback function. Use the returned translated TE_MSG_ENTER to detect the key
+
+// pressed was assigned the enter command. Refer to TeTranslateMsg() for details.
 
 /*********************************************************************
 * Overview: Defines the parameters and the strings assigned for each key. 
 *********************************************************************/
-typedef struct {
-SHORT 	   left; 						// Left position of the key
-SHORT      top;							// Top position of the key
-SHORT      right;						// Right position of the key
-SHORT      bottom;						// Bottom position of the key
-SHORT 	   index;						// Index of the key in the list	
-WORD	   state;						// State of the key. Either Pressed (TE_KEY_PRESSED) or Released (0)
-BOOL	   update;						// flag to indicate key is to be redrawn with the current state
-WORD	   command;						// Command of the key. Either TE_DELETE_COM, TE_SPACE_COM or TE_ENTER_COM.
-XCHAR     *pKeyName;					// Pointer to the custom text assigned to the key. This is displayed over the face of the key.
-SHORT      textWidth;      				// Computed text width, done at creation. Used to predict size and position of text on the key face.
-SHORT      textHeight;     				// Computed text height, done at creation. Used to predict size and position of text on the key face.
-void      *pNextKey;					// Pointer to the next key parameters.
-}KEYMEMBER;
+typedef struct
+{
+    SHORT   left;       // Left position of the key
+    SHORT   top;        // Top position of the key
+    SHORT   right;      // Right position of the key
+    SHORT   bottom;     // Bottom position of the key
+    SHORT   index;      // Index of the key in the list	
+    WORD    state;      // State of the key. Either Pressed (TE_KEY_PRESSED) or Released (0)
+    BOOL    update;     // flag to indicate key is to be redrawn with the current state
+    WORD    command;    // Command of the key. Either TE_DELETE_COM, TE_SPACE_COM or TE_ENTER_COM.
+    XCHAR   *pKeyName;  // Pointer to the custom text assigned to the key. This is displayed over the face of the key.
+    SHORT   textWidth;  // Computed text width, done at creation. Used to predict size and position of text on the key face.
+    SHORT   textHeight; // Computed text height, done at creation. Used to predict size and position of text on the key face.
+    void    *pNextKey;  // Pointer to the next key parameters.
+} KEYMEMBER;
 
 /*********************************************************************
 * Overview: Defines the parameters required for a TextEntry Object.
 *********************************************************************/
 typedef struct
 {
-OBJ_HEADER 	hdr;						// Generic header for all objects (see OBJ_HEADER). 
-SHORT 		horizontalKeys;				// Number of horizontal keys
-SHORT 		verticalKeys;				// Number of vertical keys
-XCHAR 		*pTeOutput;					// Pointer to the buffer assigned by the user which holds the text shown in the editbox. 
-										// User creates and manages the buffer. Buffer can also be managed using the APIs provided 
-										// to add a character, delete the last character or clear the buffer.
-WORD 		CurrentLength;			    // Current length of the string in the buffer. The maximum value of this is equal to outputLenMax. 
-										// TextEntry object will update this parameter when adding, removing characters or clearing the buffer
-										// and switching buffers.
-WORD 		outputLenMax;				// Maximum expected length of output buffer pTeOutput
-KEYMEMBER 	*pActiveKey;				// Pointer to the active key KEYMEMBER. This is only used by the Widget. User must not change
-										// the value of this parameter directly.
-KEYMEMBER	*pHeadOfList;				// Pointer to head of the list
-void        *pDisplayFont;				// Pointer to the font used in displaying the text.
-}TEXTENTRY;
+    OBJ_HEADER  hdr;            // Generic header for all objects (see OBJ_HEADER).
+    SHORT       horizontalKeys; // Number of horizontal keys
+    SHORT       verticalKeys;   // Number of vertical keys
+    XCHAR       *pTeOutput;     // Pointer to the buffer assigned by the user which holds the text shown in the editbox.
 
+    // User creates and manages the buffer. Buffer can also be managed using the APIs provided
+    // to add a character, delete the last character or clear the buffer.
+    WORD        CurrentLength;  // Current length of the string in the buffer. The maximum value of this is equal to outputLenMax.
+
+    // TextEntry object will update this parameter when adding, removing characters or clearing the buffer
+    // and switching buffers.
+    WORD        outputLenMax;   // Maximum expected length of output buffer pTeOutput
+    KEYMEMBER   *pActiveKey;    // Pointer to the active key KEYMEMBER. This is only used by the Widget. User must not change
+
+    // the value of this parameter directly.
+    KEYMEMBER   *pHeadOfList;   // Pointer to head of the list
+    void        *pDisplayFont;  // Pointer to the font used in displaying the text.
+} TEXTENTRY;
 
 /*********************************************************************
 * Function: TEXTENTRY *TeCreate(WORD ID, SHORT left, SHORT top, 
@@ -138,10 +143,22 @@ void        *pDisplayFont;				// Pointer to the font used in displaying the text
 * Side Effects: none.
 *
 ********************************************************************/
-TEXTENTRY *TeCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state,					
-					SHORT horizontalKeys, SHORT verticalKeys, XCHAR *pText[], 								
-					void *pBuffer, WORD bufferLength, void *pDisplayFont, 									
-					GOL_SCHEME *pScheme);
+TEXTENTRY   *TeCreate
+            (
+                WORD        ID,
+                SHORT       left,
+                SHORT       top,
+                SHORT       right,
+                SHORT       bottom,
+                WORD        state,
+                SHORT       horizontalKeys,
+                SHORT       verticalKeys,
+                XCHAR       *pText[],
+                void        *pBuffer,
+                WORD        bufferLength,
+                void        *pDisplayFont,
+                GOL_SCHEME  *pScheme
+            );
 
 /*********************************************************************
 * Function: WORD TeDraw(TEXTENTRY *pTe)
@@ -168,8 +185,7 @@ TEXTENTRY *TeCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, W
 * Side Effects: none.
 *
 ********************************************************************/
-WORD TeDraw(TEXTENTRY *pTe);
-
+WORD        TeDraw(TEXTENTRY *pTe);
 
 /*********************************************************************
 * Function:  WORD TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg)
@@ -213,7 +229,7 @@ WORD TeDraw(TEXTENTRY *pTe);
 * Side Effects: none.
 *
 ********************************************************************/
-WORD TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg);
+WORD        TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG* pMsg)
@@ -257,7 +273,7 @@ WORD TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void  TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG* pMsg);
+void        TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: void TeSetBuffer(TEXTENTRY *pTe, XCHAR *pText, WORD MaxSize)  
@@ -280,7 +296,7 @@ void  TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG* pMsg);
 * Side Effects: none.
 *
 ********************************************************************/
-void TeSetBuffer(TEXTENTRY *pTe, XCHAR *pText, WORD MaxSize);
+void        TeSetBuffer(TEXTENTRY *pTe, XCHAR *pText, WORD MaxSize);
 
 /*********************************************************************
 * Macro: TeGetBuffer(pTe)  
@@ -297,7 +313,7 @@ void TeSetBuffer(TEXTENTRY *pTe, XCHAR *pText, WORD MaxSize);
 * Side Effects: none.
 *
 ********************************************************************/
-#define TeGetBuffer(pTe) (((TEXTENTRY*)pTe)->pTeOutput)
+    #define TeGetBuffer(pTe)    (((TEXTENTRY *)pTe)->pTeOutput)
 
 /*********************************************************************
 * Function: void TeClearBuffer (TEXTENTRY *pTe)  
@@ -315,7 +331,7 @@ void TeSetBuffer(TEXTENTRY *pTe, XCHAR *pText, WORD MaxSize);
 * Side Effects: none.
 *
 ********************************************************************/
-void TeClearBuffer(TEXTENTRY *pTe);
+void        TeClearBuffer(TEXTENTRY *pTe);
 
 /*********************************************************************
 * Function: BOOL TeIsKeyPressed(TEXTENTRY *pTe, WORD index)   
@@ -334,7 +350,7 @@ void TeClearBuffer(TEXTENTRY *pTe);
 * Side Effects: none.
 *
 ********************************************************************/
-BOOL TeIsKeyPressed(TEXTENTRY *pTe, WORD index);
+BOOL        TeIsKeyPressed(TEXTENTRY *pTe, WORD index);
 
 /*********************************************************************
 * Function: void TeSetKeyCommand(TEXTENTRY *pTe,WORD index,WORD command)   
@@ -353,7 +369,7 @@ BOOL TeIsKeyPressed(TEXTENTRY *pTe, WORD index);
 * Side Effects: none.
 *
 ********************************************************************/
-BOOL TeSetKeyCommand(TEXTENTRY *pTe,WORD index,WORD command);
+BOOL        TeSetKeyCommand(TEXTENTRY *pTe, WORD index, WORD command);
 
 /*********************************************************************
 * Function: TeGetKeyCommand(pTe, index)  
@@ -376,7 +392,7 @@ BOOL TeSetKeyCommand(TEXTENTRY *pTe,WORD index,WORD command);
 * Side Effects: none.
 *
 ********************************************************************/
-WORD TeGetKeyCommand(TEXTENTRY *pTe, WORD index);
+WORD        TeGetKeyCommand(TEXTENTRY *pTe, WORD index);
 
 /*********************************************************************
 * Function: KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe,XCHAR *pText[])   
@@ -402,7 +418,7 @@ WORD TeGetKeyCommand(TEXTENTRY *pTe, WORD index);
 * Side Effects: none.
 *
 ********************************************************************/
-KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe,XCHAR *pText[]);
+KEYMEMBER   *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[]);
 
 /*********************************************************************
 * Function: void TeDelKeyMembers(TEXTENTRY *pTe)   
@@ -420,7 +436,7 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe,XCHAR *pText[]);
 * Side Effects: none.
 *
 ********************************************************************/
-void TeDelKeyMembers(TEXTENTRY *pTe);
+void        TeDelKeyMembers(TEXTENTRY *pTe);
 
 /*********************************************************************
 * Function: void TeSpaceChar(TEXTENTRY *pTe)   
@@ -438,7 +454,7 @@ void TeDelKeyMembers(TEXTENTRY *pTe);
 * Side Effects: none.
 *
 ********************************************************************/
-void TeSpaceChar(TEXTENTRY *pTe);
+void        TeSpaceChar(TEXTENTRY *pTe);
 
 /*********************************************************************
 * Function: void TeAddChar(TEXTENTRY *pTe)   
@@ -457,21 +473,5 @@ void TeSpaceChar(TEXTENTRY *pTe);
 * Side Effects: none.
 *
 ********************************************************************/
-void TeAddChar(TEXTENTRY *pTe);
-
+void        TeAddChar(TEXTENTRY *pTe);
 #endif // _TEXTENTRY_H
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

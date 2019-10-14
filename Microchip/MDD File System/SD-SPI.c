@@ -11,7 +11,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.2
+ * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -50,6 +50,7 @@
 
 // Description:  Used for the mass-storage library to determine capacity
 DWORD MDD_SDSPI_finalLBA;
+WORD gMediaSectorSize;
 BYTE gSDMode;
 static MEDIA_INFORMATION mediaInformation;
 
@@ -90,7 +91,6 @@ static MEDIA_INFORMATION mediaInformation;
 /******************************************************************************
  * Prototypes
  *****************************************************************************/
-
 extern void Delayms(BYTE milliseconds);
 BYTE MDD_SDSPI_ReadMedia(void);
 MEDIA_INFORMATION * MDD_SDSPI_MediaInitialize(void);
@@ -110,8 +110,8 @@ MMC_RESPONSE SendMMCCmd(BYTE cmd, DWORD address);
     MMC_RESPONSE SendMMCCmdManual(BYTE cmd, DWORD address);
 #endif
 
-#ifdef __PIC32MX__
 
+#ifdef __PIC32MX__
 /*********************************************************
   Function:
     static inline __attribute__((always_inline)) unsigned char SPICacutateBRG (unsigned int pb_clk, unsigned int spi_clk)
@@ -168,17 +168,66 @@ static inline __attribute__((always_inline)) unsigned char SPICalutateBRG(unsign
   Side Effects:
     None.
   Description:
-    The MDD_SDSPI_MediaDetect function will determine if an
-    SD card is connected to the microcontroller by polling
+    The MDD_SDSPI_MediaDetect function determine if an SD card is connected to 
+    the microcontroller.
+    If the MEDIA_SOFT_DETECT is not defined, the detection is done by polling
     the SD card detect pin.
+    The MicroSD connector does not have a card detect pin, and therefore a
+    software mechanism must be used. To do this, the SEND_STATUS command is sent 
+    to the card. If the card is not answering with 0x00, the card is either not 
+    present, not configured, or in an error state. If this is the case, we try
+    to reconfigure the card. If the configuration fails, we consider the card not 
+    present (it still may be present, but malfunctioning). In order to use the 
+    software card detect mechanism, the MEDIA_SOFT_DETECT macro must be defined.
+    
   Remarks:
     None                                                  
   *********************************************************/
 
 BYTE MDD_SDSPI_MediaDetect (void)
 {
+#ifndef MEDIA_SOFT_DETECT
     return(!SD_CD);
+#else
+	MMC_RESPONSE    response;
+
+	if (SPIENABLE == 0)
+	{
+		/* If the SPI module is not enabled, send manually the SEND_STATUS command */
+		#if (GetSystemClock() >= 25600000)
+			/* should only be here when GetSystemClock() >= 25600000 */
+	    	response = SendMMCCmdManual(SEND_STATUS,0x0);
+		#endif
+	}
+	else
+	{
+    	response = SendMMCCmd(SEND_STATUS,0x0);
+	}
+
+	/* Check the response to the SEND_STATUS command*/
+	if(response.r2._word != 0x00)
+	{
+		/* the card has not responded correctly to the SEND_STATUS command; try to reinitialize it */
+		MDD_SDSPI_MediaInitialize();
+		if (mediaInformation.errorCode == MEDIA_NO_ERROR)
+		{
+			/* if the card was reinitialized correctly, it means it is present */
+			return 1;
+		}
+		else 
+		{
+			return 0;
+		}
+	}
+	else
+	{
+    /* No error was reported, the card is present and not  */
+		return 1;
+	}
+#endif
+
 }//end MediaDetect
+
 
 
 /*********************************************************
@@ -204,7 +253,7 @@ BYTE MDD_SDSPI_MediaDetect (void)
 
 WORD MDD_SDSPI_ReadSectorSize(void)
 {
-    return MEDIA_SECTOR_SIZE;
+    return gMediaSectorSize;
 }
 
 
@@ -527,9 +576,9 @@ MMC_RESPONSE SendMMCCmdManual(BYTE cmd, DWORD address)
   Side Effects:
     None
   Description:
-    The MDD_SDSPI_SectorRead function reads 512 bytes of data from the SD card
-    starting at the sector address and stores them in the location pointed to
-    by 'buffer.'
+    The MDD_SDSPI_SectorRead function reads a sector of data bytes (512 bytes) 
+    of data from the SD card starting at the sector address and stores them in 
+    the location pointed to by 'buffer.'
   Remarks:
     The card expects the address field in the command packet to be a byte address.
     The sector_addr value is converted to a byte address by shifting it left nine
@@ -545,11 +594,6 @@ BYTE MDD_SDSPI_SectorRead(DWORD sector_addr, BYTE* buffer)
     BYTE status = TRUE;
     DWORD   new_addr;
    
-#ifdef USB_USE_MSD
-    DWORD firstSector;
-    DWORD numSectors;
-#endif
-
     // send the cmd
     if (gSDMode == SD_MODE_NORMAL)
         new_addr = sector_addr << 9;
@@ -593,60 +637,27 @@ BYTE MDD_SDSPI_SectorRead(DWORD sector_addr, BYTE* buffer)
     }
     else
     {
-#ifdef USB_USE_MSD
-        if ((sector_addr == 0) && (buffer == NULL))
-            MDD_SDSPI_finalLBA = 0x00000000;
-#endif
-
-        for(index = 0; index < MEDIA_SECTOR_SIZE; index++)      //Reads in 512-byte of data
+        for(index = 0; index < gMediaSectorSize; index++)      //Reads in a sector of data (512 bytes)
         {
             if(buffer != NULL)
             {
-#ifdef __18CXX
-                data_token = SPIBUF;
-                SPI_INTERRUPT_FLAG = 0;
-                SPIBUF = 0xFF;
-                while(!SPI_INTERRUPT_FLAG);
-                buffer[index] = SPIBUF;
-#elif defined (__PIC32MX__)
-                buffer[index] = MDD_SDSPI_ReadMedia();
-#else
-                SPIBUF = 0xFF;
-                while (!SPISTAT_RBF);
-                buffer[index] = SPIBUF;
-#endif
+				#ifdef __18CXX
+	                data_token = SPIBUF;
+	                SPI_INTERRUPT_FLAG = 0;
+	                SPIBUF = 0xFF;
+	                while(!SPI_INTERRUPT_FLAG);
+	                buffer[index] = SPIBUF;
+				#elif defined (__PIC32MX__)
+                	buffer[index] = MDD_SDSPI_ReadMedia();
+				#else
+	                SPIBUF = 0xFF;
+	                while (!SPISTAT_RBF);
+	                buffer[index] = SPIBUF;
+				#endif
             }
             else
             {
-#ifdef USB_USE_MSD
-                if (sector_addr == 0)
-                {
-                    if ((index == 0x1C6) || (index == 0x1D6) || (index == 0x1E6) || (index == 0x1F6))
-                    {
-                        firstSector = MDD_SDSPI_ReadMedia();
-                        firstSector |= (DWORD)MDD_SDSPI_ReadMedia() << 8;
-                        firstSector |= (DWORD)MDD_SDSPI_ReadMedia() << 16;
-                        firstSector |= (DWORD)MDD_SDSPI_ReadMedia() << 24;
-                        numSectors = MDD_SDSPI_ReadMedia();
-                        numSectors |= (DWORD)MDD_SDSPI_ReadMedia() << 8;
-                        numSectors |= (DWORD)MDD_SDSPI_ReadMedia() << 16;
-                        numSectors |= (DWORD)MDD_SDSPI_ReadMedia() << 24;
-                        index += 8;
-                            if ((firstSector + numSectors) > MDD_SDSPI_finalLBA)
-                        {
-                            MDD_SDSPI_finalLBA = firstSector + numSectors - 1;
-                        }
-                    }
-                    else
-                    {
-                        MDD_SDSPI_ReadMedia();
-                    }
-                }
-                else
-                    MDD_SDSPI_ReadMedia();
-#else
                 MDD_SDSPI_ReadMedia();
-#endif
             }
         }
         // Now ensure CRC
@@ -681,8 +692,9 @@ BYTE MDD_SDSPI_SectorRead(DWORD sector_addr, BYTE* buffer)
   Side Effects:
     None.
   Description:
-    The MDD_SDSPI_SectorWrite function writes 512 bytes of data from the location
-    pointed to by 'buffer' to the specified sector of the SD card.
+    The MDD_SDSPI_SectorWrite function writes one sector of data (512 bytes) 
+    of data from the location pointed to by 'buffer' to the specified sector of 
+    the SD card.
   Remarks:
     The card expects the address field in the command packet to be a byte address.
     The sector_addr value is ocnverted to a byte address by shifting it left nine
@@ -694,9 +706,6 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
     WORD            index;
     DWORD           counter;
     BYTE            data_response;
-#ifdef __18CXX
-    BYTE            clear;
-#endif
     MMC_RESPONSE    response; 
     BYTE            status = TRUE;
 
@@ -718,21 +727,21 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
         {
             WriteSPIM(DATA_START_TOKEN);                 //Send data start token
 
-            for(index = 0; index < MEDIA_SECTOR_SIZE; index++)      //Send 512 bytes of data
+            for(index = 0; index < gMediaSectorSize; index++)      //Send 512 bytes
             {
-#ifdef __18CXX
-                clear = SPIBUF;
-                SPI_INTERRUPT_FLAG = 0;
-                SPIBUF = buffer[index];         // write byte to SSP1BUF register
-                while( !SPI_INTERRUPT_FLAG );   // wait until bus cycle complete
-                data_response = SPIBUF;         // Clear the SPIBUF
-#elif defined (__PIC32MX__)
-                WriteSPIM(buffer[index]);
-#else
-                SPIBUF = buffer[index];
-                while (!SPISTAT_RBF);
-                data_response = SPIBUF;
-#endif
+				#ifdef __18CXX
+	                data_response = SPIBUF;			//Clear BF flag, just in case it was previously left set.
+	                SPI_INTERRUPT_FLAG = 0;			//Clear interrupt flag, in case it was previously left set.
+	                SPIBUF = buffer[index];         // write byte to SSP1BUF register
+	                while( !SPI_INTERRUPT_FLAG );   // wait until bus cycle complete
+	                data_response = SPIBUF;         // Clear the SPIBUF
+				#elif defined (__PIC32MX__)
+    	            WriteSPIM(buffer[index]);
+				#else
+	                SPIBUF = buffer[index];
+	                while (!SPISTAT_RBF);
+	                data_response = SPIBUF;
+				#endif
             }
 
             // calc crc
@@ -746,37 +755,38 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
             }
             else
             {
-#if defined (__PIC32MX__)
-				do
-				{
-				    putcSPI((unsigned int)0xFF);
-				    data_response = getcSPI();
-				}while(!data_response);
-#else
-
-#ifdef __18CXX
-                counter = GetInstructionClock() / 82;                
-                do                  //Wait for write completion
-                {
-                    clear = SPIBUF;
-                    SPI_INTERRUPT_FLAG = 0;
-                    SPIBUF = 0xFF;
-                    while(!SPI_INTERRUPT_FLAG);
-                    data_response = SPIBUF;
-#else
-                counter = GetInstructionClock() / 44;                
-                do                  //Wait for write completion
-                {
-                    SPIBUF = 0xFF;
-                    while(!SPISTAT_RBF);
-                    data_response = SPIBUF;
-#endif
-                    counter--;
-                }while((data_response == 0x00) && (counter != 0));
-
-                if(counter == 0)                                  //if timeout first
-                    status = FALSE;
-#endif
+				#if defined (__PIC32MX__)
+					do
+					{
+					    putcSPI((unsigned int)0xFF);
+					    data_response = getcSPI();
+					}while(!data_response);
+				#else
+					#ifdef __18CXX
+                		counter = GetInstructionClock() / 82;                
+		                do                  //Wait for write completion
+		                {
+		                    data_response = SPIBUF;
+		                    SPI_INTERRUPT_FLAG = 0;
+		                    SPIBUF = 0xFF;
+		                    counter--;
+		                    while(!SPI_INTERRUPT_FLAG);
+		                    data_response = SPIBUF;
+		                }while((data_response == 0x00) && (counter != 0));		                    
+					#else
+                		counter = GetInstructionClock() / 44;                
+		                do                  //Wait for write completion
+		                {
+		                    SPIBUF = 0xFF;
+		                    counter--;
+		                    while(!SPISTAT_RBF);
+		                    data_response = SPIBUF;
+		                }while((data_response == 0x00) && (counter != 0));
+					#endif
+					
+	                if(counter == 0)                                  //if timeout first
+	                    status = FALSE;
+				#endif
             }
 
             mSend8ClkCycles();
@@ -1027,22 +1037,19 @@ void OpenSPIM( unsigned int sync_mode)
 }
 
 
-
-
-
 #ifdef __18CXX
 #if (GetSystemClock() >= 25600000)
 
 // Description: Delay value for the manual SPI clock
 #define MANUAL_SPI_CLOCK_VALUE             1
-
 /*****************************************************************************
   Function:
     unsigned char WriteSPIManual (unsigned char data_out)
   Summary:
     Write a character to the SD card with bit-bang SPI.
   Conditions:
-    None.
+    Make sure the SDI pin is pre-configured as a digital pin, if it is 
+    multiplexed with analog functionality.
   Input:
     data_out - Data to send.
   Return:
@@ -1058,116 +1065,29 @@ void OpenSPIM( unsigned int sync_mode)
   ***************************************************************************************/
 unsigned char WriteSPIManual(unsigned char data_out)
 {
-    char i = data_out;
+    unsigned char i;
     unsigned char clock;
 
-    ADCON1 = 0xFF;
     SPICLOCKLAT = 0;
     SPIOUTLAT = 1;
     SPICLOCK = OUTPUT;
     SPIOUT = OUTPUT;
-    
-    if ((SPIOUTPORT != SPIOUTLAT) || (SPICLOCKPORT != SPICLOCKLAT))
-        return (-1);
 
-    // Perform loop operation iteratively to reduce discrepancy
-    // Bit 7
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x80)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
-    // Bit 6
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x40)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
-    // Bit 5
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x20)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
-    // Bit 4
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x10)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
-    // Bit 3
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x08)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
-    // Bit 2
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x04)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
-    // Bit 1
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x02)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
-    // Bit 0
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    if (i & 0x01)
-        SPIOUTLAT = 1;
-    else
-        SPIOUTLAT = 0;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-
+	//Loop to send out 8 bits of SDO data and associated SCK clock.
+	for(i = 0; i < 8; i++)
+	{
+		SPICLOCKLAT = 0;
+		if(data_out & 0x80)
+			SPIOUTLAT = 1;
+		else
+			SPIOUTLAT = 0;
+		data_out = data_out << 1;				//Bit shift, so next bit to send is in MSb position
+    	clock = MANUAL_SPI_CLOCK_VALUE;
+    	while (clock--);
+    	SPICLOCKLAT = 1;
+    	clock = MANUAL_SPI_CLOCK_VALUE;
+    	while (clock--);    			
+	}	
     SPICLOCKLAT = 0;
 
     return 0; 
@@ -1198,99 +1118,29 @@ unsigned char WriteSPIManual(unsigned char data_out)
   ***************************************************************************************/
 BYTE ReadMediaManual (void)
 {
-    char i, result = 0x00;
+    unsigned char i;
     unsigned char clock;
+    unsigned char result = 0x00;
 
-    SPICLOCKLAT = 0;
     SPIOUTLAT = 1;
-    SPICLOCK = OUTPUT;
     SPIOUT = OUTPUT;
     SPIIN = INPUT;
-    
-    if ((SPIOUTPORT != SPIOUTLAT) || (SPICLOCKPORT != SPICLOCKLAT))
-        return (-1);
-
-    // Perform loop operation iteratively to reduce discrepancy
-    // Bit 7
     SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    if (SPIINPORT)
-        result |= 0x80;
-
-    // Bit 6
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    if (SPIINPORT)
-        result |= 0x40;
-
-    // Bit 5
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    if (SPIINPORT)
-        result |= 0x20;
-
-    // Bit 4
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);    
-    if (SPIINPORT)
-        result |= 0x10;
-
-    // Bit 3
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    if (SPIINPORT)
-        result |= 0x08;
-
-    // Bit 2
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    if (SPIINPORT)
-        result |= 0x04;
-
-    // Bit 1
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    if (SPIINPORT)
-        result |= 0x02;
-
-    // Bit 0
-    SPICLOCKLAT = 0;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    SPICLOCKLAT = 1;
-    clock = MANUAL_SPI_CLOCK_VALUE;
-    while (clock--);
-    if (SPIINPORT)
-        result |= 0x01;
-
+    SPICLOCK = OUTPUT;
+ 
+ 	//Loop to send 8 clock pulses and read in the returned bits of data. Data "sent" will be = 0xFF
+	for(i = 0; i < 8; i++)
+	{
+		SPICLOCKLAT = 0;
+    	clock = MANUAL_SPI_CLOCK_VALUE;
+    	while (clock--);
+    	SPICLOCKLAT = 1;
+    	clock = MANUAL_SPI_CLOCK_VALUE;
+    	while (clock--);
+		result = result << 1;	//Bit shift the previous result.  We receive the byte MSb first. This operation makes LSb = 0.  
+    	if(SPIINPORT)
+    		result++;			//Set the LSb if we detected a '1' on the SPIINPORT pin, otherwise leave as 0.
+	}	
     SPICLOCKLAT = 0;
 
     return result;
@@ -1321,245 +1171,245 @@ BYTE ReadMediaManual (void)
   Remarks:
     None.
   ***************************************************************************************/
-
 MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
 {
     WORD timeout;
-    MMC_RESPONSE    response; 
-#if defined __C30__ || defined __C32__
-    WORD spiconvalue = 0x0003;
-#endif
+    MMC_RESPONSE    response;
+	BYTE CSDResponse[20];
+	BYTE count, index;
+	DWORD c_size;
+	BYTE c_size_mult;
+ 
+	#if defined __C30__ || defined __C32__
+    	WORD spiconvalue = 0x0003;
+	#endif
     mediaInformation.errorCode = MEDIA_NO_ERROR;
     mediaInformation.validityFlags.value = 0;
+    MDD_SDSPI_finalLBA = 0x00000000;	//Will compute a valid value later, from the CSD register values we get from the card
 
     SD_CS = 1;               //Initialize Chip Select line
     
     //Media powers up in the open-drain mode and cannot handle a clock faster
     //than 400kHz. Initialize SPI port to slower than 400kHz
-#if defined __C30__ || defined __C32__
-#ifdef __PIC32MX__
-	OpenSPI(SPI_START_CFG_1, SPI_START_CFG_2);
-    SPIBRG = SPICalutateBRG(GetPeripheralClock(), 400000);
-#else
-    // Calculate the prescaler needed for the clock
-    timeout = GetSystemClock() / 400000;
-    // if timeout is less than 400k and greater than 100k use a 1:1 prescaler
-    if (timeout == 0)
-    {
-        OpenSPIM (MASTER_ENABLE_ON | PRI_PRESCAL_1_1 | SEC_PRESCAL_1_1);
-    }
-    else
-    {
-        while (timeout != 0)
-        {
-            if (timeout > 8)
-            {
-                spiconvalue--;
-                // round up
-                if ((timeout % 4) != 0)
-                    timeout += 4;
-                timeout /= 4;
-            }
-            else
-            {
-                break;
-            }
-        }
-        
-        timeout--;
-    
-        OpenSPIM (MASTER_ENABLE_ON | spiconvalue | ((~(timeout << 2)) & 0x1C));
-    }
-#endif    
+	#if defined __C30__ || defined __C32__
+		#ifdef __PIC32MX__
+			OpenSPI(SPI_START_CFG_1, SPI_START_CFG_2);
+		    SPIBRG = SPICalutateBRG(GetPeripheralClock(), 400000);
+		#else	//else C30 = PIC24/dsPIC devices
+		    // Calculate the prescaler needed for the clock
+		    timeout = GetSystemClock() / 400000;
+		    // if timeout is less than 400k and greater than 100k use a 1:1 prescaler
+		    if (timeout == 0)
+		    {
+		        OpenSPIM (MASTER_ENABLE_ON | PRI_PRESCAL_1_1 | SEC_PRESCAL_1_1);
+		    }
+		    else
+		    {
+		        while (timeout != 0)
+		        {
+		            if (timeout > 8)
+		            {
+		                spiconvalue--;
+		                // round up
+		                if ((timeout % 4) != 0)
+		                    timeout += 4;
+		                timeout /= 4;
+		            }
+		            else
+		            {
+		                break;
+		            }
+		        }
+		        
+		        timeout--;
+		    
+		        OpenSPIM (MASTER_ENABLE_ON | spiconvalue | ((~(timeout << 2)) & 0x1C));
+		    }
+		#endif   //#ifdef __PIC32MX__ (and corresponding #else)
 
 
-    // let the card power on and initialize
-    Delayms(1);
-    
-    //Media requires 80 clock cycles to startup [8 clocks/BYTE * 10 us]
-    for(timeout=0; timeout<10; timeout++)
-        mSend8ClkCycles();
-
-    SD_CS = 0;
-    
-    Delayms(1);
-    
-    // Send CMD0 to reset the media
-    response = SendMMCCmd(GO_IDLE_STATE,0x0);
-    
-    if((response.r1._byte == MMC_BAD_RESPONSE) || ((response.r1._byte & 0xF7) != 0x01))
-    {
-        SD_CS = 1;                               // deselect the devices
-        mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
-        return &mediaInformation;
-    }
-
-       response = SendMMCCmd(SEND_IF_COND, 0x1AA);
-    if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
-	{
-        timeout = 0xFFF;
-        do
-        {
-               response = SendMMCCmd(SEND_OP_COND, 0x40000000);
-            timeout--;
-        }while(response.r1._byte != 0x00 && timeout != 0);
-		response = SendMMCCmd(READ_OCR, 0x0);
-        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
-		{
-			gSDMode = SD_MODE_NORMAL;
-		}
-        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
-		{
-        gSDMode = SD_MODE_HC;
-		}
-	}
-    else
-	{
-        gSDMode = SD_MODE_NORMAL;
-
-    // According to spec cmd1 must be repeated until the card is fully initialized
-    timeout = 0xFFF;
-    
-    do
-    {
-            response = SendMMCCmd(SEND_OP_COND,0x0);
-        timeout--;
-    }while(response.r1._byte != 0x00 && timeout != 0);
-	}
-
-    // see if it failed
-    if(timeout == 0)
-    {
-        mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
-        SD_CS = 1;                               // deselect the devices
-    }
-    else      
-    {
-
-#else
-    
-    // let the card power on and initialize
-    Delayms(1);
-    
-    #if (GetSystemClock() < 25600000)
-
-        #if (GetSystemClock() < 1600000)
-            OpenSPIM (SYNC_MODE_FAST);
-        #elif (GetSystemClock() < 6400000)
-            OpenSPIM (SYNC_MODE_MED);
-        #else
-            OpenSPIM (SYNC_MODE_SLOW);
-        #endif
-        
-        // let the card power on and initialize
-        Delayms(1);
-        
-        //Media requires 80 clock cycles to startup [8 clocks/BYTE * 10 us]
-        for(timeout=0; timeout<10; timeout++)
-            mSend8ClkCycles();
-    
-        SD_CS = 0;
-        
-        Delayms(1);
-        
-        // Send CMD0 to reset the media
-        response = SendMMCCmd(GO_IDLE_STATE,0x0);
-        
-        if((response.r1._byte == MMC_BAD_RESPONSE) || ((response.r1._byte & 0xF7) != 0x01))
-        {
-            mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
-            SD_CS = 1;                               // deselect the devices
-            return &mediaInformation;
-        }
-
-        response = SendMMCCmd(SEND_IF_COND, 0x1AA);
-        if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
+	    // let the card power on and initialize
+	    Delayms(1);
+	    
+	    //Media requires 80 clock cycles to startup [8 clocks/BYTE * 10 us]
+	    for(timeout=0; timeout<10; timeout++)
+	        mSend8ClkCycles();
+	
+	    SD_CS = 0;
+	    
+	    Delayms(1);
+	    
+	    // Send CMD0 to reset the media
+	    response = SendMMCCmd(GO_IDLE_STATE,0x0);
+	    
+	    if((response.r1._byte == MMC_BAD_RESPONSE) || ((response.r1._byte & 0xF7) != 0x01))
+	    {
+	        SD_CS = 1;                               // deselect the devices
+	        mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
+	        return &mediaInformation;
+	    }
+	
+	    response = SendMMCCmd(SEND_IF_COND, 0x1AA);
+	    if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
 		{
 	        timeout = 0xFFF;
 	        do
 	        {
-                response = SendMMCCmd(SEND_OP_COND, 0x40000000);
+	        	response = SendMMCCmd(SEND_OP_COND, 0x40000000);
 	            timeout--;
 	        }while(response.r1._byte != 0x00 && timeout != 0);
 			response = SendMMCCmd(READ_OCR, 0x0);
-	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
+	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
+			{
+	        	gSDMode = SD_MODE_HC;
+			}
+	        else //if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
 			{
 				gSDMode = SD_MODE_NORMAL;
 			}
-	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
-			{
-            gSDMode = SD_MODE_HC;
-			}
 		}
-        else
+	    else
 		{
-            gSDMode = SD_MODE_NORMAL;
-
-        // According to spec cmd1 must be repeated until the card is fully initialized
-        timeout = 0xFFF;
-        
-        do
-        {
-                response = SendMMCCmd(SEND_OP_COND,0x0);
-            timeout--;
-        }while(response.r1._byte != 0x00 && timeout != 0);
+	        gSDMode = SD_MODE_NORMAL;
+	
+		    // According to spec cmd1 must be repeated until the card is fully initialized
+		    timeout = 0xFFF;
+		    do
+		    {
+		        response = SendMMCCmd(SEND_OP_COND,0x0);
+		        timeout--;
+		    }while(response.r1._byte != 0x00 && timeout != 0);
 		}
-
-    #else
-
-        // Make sure the SPI module doesn't control the bus
-        SPICON1 = 0x00;
-
-        //Media requires 80 clock cycles to startup [8 clocks/BYTE * 10 us]
-        for(timeout=0; timeout<10; timeout++)
-            WriteSPIManual(0xFF);
+	
+	    // see if it failed
+	    if(timeout == 0)
+	    {
+	        mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
+	        SD_CS = 1;                               // deselect the devices
+	    }
+	    else      
+	    {
+	#else	//PIC18 device (#else of: #if defined __C30__ || defined __C32__)
     
-        SD_CS = 0;
-        
-        Delayms(1);
-    
-        // Send CMD0 to reset the media
-        response = SendMMCCmdManual (GO_IDLE_STATE, 0x0);
-
-        if ((response.r1._byte == MMC_BAD_RESPONSE) || ((response.r1._byte & 0xF7) != 0x01))
-        {
-            SD_CS = 1;                              // deselect the devices
-            mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
-            return &mediaInformation;
-        }
-
-        response = SendMMCCmdManual(SEND_IF_COND, 0x1AA);
-        if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
-		{
-	        timeout = 0xFFF;
-	        do
+	    // let the card power on and initialize
+	    Delayms(1);
+	    
+	    #if (GetSystemClock() < 25600000)
+	
+	        #if (GetSystemClock() < 1600000)
+	            OpenSPIM (SYNC_MODE_FAST);
+	        #elif (GetSystemClock() < 6400000)
+	            OpenSPIM (SYNC_MODE_MED);
+	        #else
+	            OpenSPIM (SYNC_MODE_SLOW);
+	        #endif
+	        
+	        // let the card power on and initialize
+	        Delayms(1);
+	        
+	        //Media requires 80 clock cycles to startup [8 clocks/BYTE * 10 us]
+	        for(timeout=0; timeout<10; timeout++)
+	            mSend8ClkCycles();
+	    
+	        SD_CS = 0;
+	        
+	        Delayms(1);
+	        
+	        // Send CMD0 to reset the media
+	        response = SendMMCCmd(GO_IDLE_STATE,0x0);
+	        
+	        if((response.r1._byte == MMC_BAD_RESPONSE) || ((response.r1._byte & 0xF7) != 0x01))
 	        {
-                response = SendMMCCmdManual(SEND_OP_COND, 0x40000000);
-	            timeout--;
-	        }while(response.r1._byte != 0x00 && timeout != 0);
-			response = SendMMCCmdManual(READ_OCR, 0x0);
-	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
+	            mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
+	            SD_CS = 1;                               // deselect the devices
+	            return &mediaInformation;
+	        }
+	
+	        response = SendMMCCmd(SEND_IF_COND, 0x1AA);
+	        if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
 			{
-				gSDMode = SD_MODE_NORMAL;
+		        timeout = 0xFFF;
+		        do
+		        {
+	                response = SendMMCCmd(SEND_OP_COND, 0x40000000);
+		            timeout--;
+		        }while(response.r1._byte != 0x00 && timeout != 0);
+				response = SendMMCCmd(READ_OCR, 0x0);
+		        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
+				{
+	            	gSDMode = SD_MODE_HC;
+				}
+		        else //if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
+				{
+					gSDMode = SD_MODE_NORMAL;
+				}
 			}
-	        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
+	        else
 			{
-            gSDMode = SD_MODE_HC;
+	            gSDMode = SD_MODE_NORMAL;
+	
+		        // According to spec cmd1 must be repeated until the card is fully initialized
+		        timeout = 0xFFF;
+		        do
+		        {
+		            response = SendMMCCmd(SEND_OP_COND,0x0);
+		            timeout--;
+		        }while(response.r1._byte != 0x00 && timeout != 0);
 			}
-		}
-        else
-		{
-            gSDMode = SD_MODE_NORMAL;
-        // According to the spec cmd1 must be repeated until the card is fully initialized
-        timeout = 0xFFF;
-    
-        do
-        {
-            response = SendMMCCmdManual (SEND_OP_COND, 0x0);
-            timeout--;
-        }while(response.r1._byte != 0x00 && timeout != 0);
-		}
-    #endif    
+
+   		#else	//else of (#if (GetSystemClock() < 25600000))
+	        // Make sure the SPI module doesn't control the bus
+	        SPICON1 = 0x00;
+	
+	        //Media requires 80 clock cycles to startup [8 clocks/BYTE * 10 us]
+	        for(timeout=0; timeout<10; timeout++)
+	            WriteSPIManual(0xFF);
+	    
+	        SD_CS = 0;
+	        
+	        Delayms(1);
+	    
+	        // Send CMD0 to reset the media
+	        response = SendMMCCmdManual (GO_IDLE_STATE, 0x0);
+	
+	        if ((response.r1._byte == MMC_BAD_RESPONSE) || ((response.r1._byte & 0xF7) != 0x01))
+	        {
+	            SD_CS = 1;                              // deselect the devices
+	            mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
+	            return &mediaInformation;
+	        }
+	
+	        response = SendMMCCmdManual(SEND_IF_COND, 0x1AA);
+	        if (((response.r7.bytewise._returnVal & 0xFFF) == 0x1AA) && (!response.r7.bitwise.bits.ILLEGAL_CMD))
+			{
+		        timeout = 0xFFF;
+		        do
+		        {
+	                response = SendMMCCmdManual(SEND_OP_COND, 0x40000000);
+		            timeout--;
+		        }while(response.r1._byte != 0x00 && timeout != 0);
+				response = SendMMCCmdManual(READ_OCR, 0x0);
+		        if (((response.r7.bytewise._returnVal & 0xC0000000) == 0xC0000000) && (response.r7.bytewise._byte == 0))
+				{
+	            	gSDMode = SD_MODE_HC;
+				}
+		        else //if (((response.r7.bytewise._returnVal & 0xC0000000) == 0x80000000) && (response.r7.bytewise._byte == 0))
+				{
+					gSDMode = SD_MODE_NORMAL;
+				}
+			}
+	        else
+			{
+	            gSDMode = SD_MODE_NORMAL;
+	        	// According to the spec cmd1 must be repeated until the card is fully initialized
+	        	timeout = 0xFFF;
+		        do
+		        {
+		            response = SendMMCCmdManual (SEND_OP_COND, 0x0);
+		            timeout--;
+		        }while(response.r1._byte != 0x00 && timeout != 0);
+			}
+    	#endif //end of #if (GetSystemClock() < 25600000), and #else
 
     // see if it failed
     if (timeout == 0)
@@ -1569,7 +1419,8 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
     }
     else
     {
-#endif
+	#endif	//end of (#if defined __C30__ || defined __C32__)), and #else (PIC18)
+	//Common code below for all processors.
 
         Delayms (2);
 
@@ -1583,21 +1434,94 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
             OpenSPIM(SYNC_MODE_FAST);
         #endif
 
+		/* Send the CMD9 to read the CSD register */
+        timeout = 0xFFF;
+        do
+        {
+			response = SendMMCCmd(SEND_CSD, 0x00);
+            timeout--;
+        }while((response.r1._byte != 0x00) && (timeout != 0));
+
+		/* According to the simplified spec, section 7.2.6, the card will respond
+		with a standard response token, followed by a data block of 16 bytes
+		suffixed with a 16-bit CRC.*/
+		index = 0;
+		for (count = 0; count < 20; count ++)
+		{
+			CSDResponse[index] = MDD_SDSPI_ReadMedia();
+			index ++;			
+			/* Hopefully the first byte is the datatoken, however, some cards do
+			not send the response token before the CSD register.*/
+			if((count == 0) && (CSDResponse[0] == DATA_START_TOKEN))
+			{
+				/* As the first byte was the datatoken, we can drop it. */
+				index = 0;
+			}
+		}
+
+		//Extract some fields from the response for computing the card capacity.
+		//Note: The structure format depends on if it is a CSD V1 or V2 device.
+		//Therefore, need to first determine version of the specs that the card 
+		//is designed for, before interpreting the individual fields.
+
+ 		//-------------------------------------------------------------
+ 		//READ_BL_LEN: CSD Structure v1 cards always support 512 byte
+ 		//read and write block lengths.  Some v1 cards may optionally report
+ 		//READ_BL_LEN = 1024 or 2048 bytes (and therefore WRITE_BL_LEN also 
+ 		//1024 or 2048).  However, even on these cards, 512 byte partial reads
+ 		//and 512 byte write are required to be supported.
+ 		//On CSD structure v2 cards, it is always required that READ_BL_LEN 
+ 		//(and therefore WRITE_BL_LEN) be 512 bytes, and partial reads and
+ 		//writes are not allowed.
+ 		//Therefore, all cards support 512 byte reads/writes, but only a subset
+ 		//of cards support other sizes.  For best compatibility with all cards,
+ 		//and the simplest firmware design, it is therefore preferrable to 
+ 		//simply ignore the READ_BL_LEN and WRITE_BL_LEN values altogether,
+ 		//and simply hardcode the read/write block size as 512 bytes.
+ 		//-------------------------------------------------------------
+		gMediaSectorSize = 512u;
+		mediaInformation.validityFlags.bits.sectorSize = TRUE;
+ 		mediaInformation.sectorSize = gMediaSectorSize;
+ 		//-------------------------------------------------------------
+
+		//Calculate the MDD_SDSPI_finalLBA (see SD card physical layer simplified spec 2.0, section 5.3.2).
+		//In USB mass storage applications, we will need this information to 
+		//correctly respond to SCSI get capacity requests.  Note: method of computing 
+		//MDD_SDSPI_finalLBA depends on CSD structure spec version (either v1 or v2).
+		if(CSDResponse[0] & 0xC0)	//Check CSD_STRUCTURE field for v2+ struct device
+		{
+			//Must be a v2 device (or a reserved higher version, that doesn't currently exist)
+
+			//Extract the C_SIZE field from the response.  It is a 22-bit number in bit position 69:48.  This is different from v1.  
+			//It spans bytes 7, 8, and 9 of the response.
+			c_size = (((DWORD)CSDResponse[7] & 0x3F) << 16) | ((WORD)CSDResponse[8] << 8) | CSDResponse[9];
+			
+			MDD_SDSPI_finalLBA = ((DWORD)(c_size + 1) * (WORD)(1024u)) - 1; //-1 on end is correction factor, since LBA = 0 is valid.
+		}
+		else //if(CSDResponse[0] & 0xC0)	//Check CSD_STRUCTURE field for v1 struct device
+		{
+			//Must be a v1 device.
+			//Extract the C_SIZE field from the response.  It is a 12-bit number in bit position 73:62.  
+			//Although it is only a 12-bit number, it spans bytes 6, 7, and 8, since it isn't byte aligned.
+			c_size = ((DWORD)CSDResponse[6] << 16) | ((WORD)CSDResponse[7] << 8) | CSDResponse[8];	//Get the bytes in the correct positions
+			c_size &= 0x0003FFC0;	//Clear all bits that aren't part of the C_SIZE
+			c_size = c_size >> 6;	//Shift value down, so the 12-bit C_SIZE is properly right justified in the DWORD.
+			
+			//Extract the C_SIZE_MULT field from the response.  It is a 3-bit number in bit position 49:47.
+			c_size_mult = ((WORD)((CSDResponse[9] & 0x03) << 1)) | ((WORD)((CSDResponse[10] & 0x80) >> 7));
+			
+			//Calculate the MDD_SDSPI_finalLBA (see SD card physical layer simplified spec 2.0, section 5.3.2).
+			//In USB mass storage applications, we will need this information to 
+			//correctly respond to SCSI get capacity requests (which will cause MDD_SDSPI_ReadCapacity() to get called).
+			MDD_SDSPI_finalLBA = ((DWORD)(c_size + 1) * (WORD)((WORD)1 << (c_size_mult + 2))) - 1;	//-1 on end is correction factor, since LBA = 0 is valid.		
+		}	
+		
+
         // Turn off CRC7 if we can, might be an invalid cmd on some cards (CMD59)
         response = SendMMCCmd(CRC_ON_OFF,0x0);
 
         // Now set the block length to media sector size. It should be already
-        response = SendMMCCmd(SET_BLOCKLEN,MEDIA_SECTOR_SIZE);
-        
-        for(timeout = 0xFF; timeout > 0 && MDD_SDSPI_SectorRead(0x0,NULL) != TRUE; timeout--)
-        {;}
-
-        // see if we had an issue
-        if(timeout == 0)
-        {
-            mediaInformation.errorCode = MEDIA_CANNOT_INITIALIZE;
-            SD_CS = 1;                               // deselect the devices
-        }
+        response = SendMMCCmd(SET_BLOCKLEN,gMediaSectorSize);
     }
 
     return &mediaInformation;

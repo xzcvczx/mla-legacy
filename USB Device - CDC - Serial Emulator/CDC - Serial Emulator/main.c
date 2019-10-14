@@ -42,10 +42,6 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
 #include "./USB/usb.h"
 #include "./USB/usb_function_cdc.h"
 
@@ -181,7 +177,7 @@
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
-    #elif defined(__32MX460F512L__)
+    #elif defined(__32MX460F512L__) || defined(__32MX795F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
         #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
@@ -204,6 +200,9 @@
     #else
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__
     #endif
+#elif defined(PIC24FJ256DA210_DEV_BOARD)
+    //_CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    //_CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 #else
     #error No hardware board defined, see "HardwareProfile.h" and __FILE__
 #endif
@@ -457,7 +456,17 @@ static void InitializeSystem(void)
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif defined(__C30__)
-        AD1PCFGL = 0xFFFF;
+    	#if defined(__PIC24FJ256DA210__)
+    		ANSA = 0x0000;
+    		ANSB = 0x0000;
+    		ANSC = 0x0000;
+    		ANSD = 0x0000;
+    		ANSE = 0x0000;
+    		ANSF = 0x0000;
+    		ANSG = 0x0000;
+        #else
+        	AD1PCFGL = 0xFFFF;
+        #endif  
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
     #endif
@@ -495,7 +504,7 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
     
-   #if defined(PIC24FJ64GB004_PIM)
+   #if defined(PIC24FJ64GB004_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
 	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -642,6 +651,14 @@ void InitializeUSART(void)
 
             // PPS - Configure U2TX - put on RC9/pin 5 (RP25)
             RPOR12bits.RP25R = 5;
+        #elif defined(__PIC24FJ256DA210__)
+            // PPS - Configure U2RX - put on RC14/pin 74 (RPI37)
+            RPINR19bits.U2RXR = 37;
+    
+            // PPS - Configure U2TX - put on RF3/pin 51 (RP16)
+            RPOR8bits.RP16R = 5;
+
+            TRISFbits.TRISF3 = 0;
         #else
             #error Verify that any required PPS is done here.
         #endif

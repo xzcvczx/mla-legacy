@@ -57,8 +57,8 @@
 								// that use EP0 IN or OUT for sending large amounts of
 								// application related data.
 									
-#define USB_MAX_NUM_INT     	2   // For tracking Alternate Setting
-#define USB_MAX_EP_NUMBER	    2
+#define USB_MAX_NUM_INT     	3   // For tracking Alternate Setting
+#define USB_MAX_EP_NUMBER	    4
 
 //Device descriptor - if these two definitions are not defined then
 //  a ROM USB_DEVICE_DESCRIPTOR variable by the exact name of device_dsc
@@ -79,8 +79,8 @@
 //#define USB_PING_PONG_MODE USB_PING_PONG__ALL_BUT_EP0		//NOTE: This mode is not supported in PIC18F4550 family rev A3 devices
 
 
-#define USB_POLLING
-//#define USB_INTERRUPT
+//#define USB_POLLING
+#define USB_INTERRUPT
 
 /* Parameter definitions are defined in usb_device.h */
 #define USB_PULLUP_OPTION USB_PULLUP_ENABLE
@@ -98,18 +98,6 @@
 #define USB_SUPPORT_DEVICE
 
 #define USB_NUM_STRING_DESCRIPTORS 3
-
-//#define USB_INTERRUPT_LEGACY_CALLBACKS
-#define USB_ENABLE_ALL_HANDLERS
-//#define USB_ENABLE_SUSPEND_HANDLER
-//#define USB_ENABLE_WAKEUP_FROM_SUSPEND_HANDLER
-//#define USB_ENABLE_SOF_HANDLER
-//#define USB_ENABLE_ERROR_HANDLER
-//#define USB_ENABLE_OTHER_REQUEST_HANDLER
-//#define USB_ENABLE_SET_DESCRIPTOR_HANDLER
-//#define USB_ENABLE_INIT_EP_HANDLER
-//#define USB_ENABLE_EP0_DATA_HANDLER
-//#define USB_ENABLE_TRANSFER_COMPLETE_HANDLER
 
 /** DEVICE CLASS USAGE *********************************************/
 #define USB_USE_AUDIO_MIDI

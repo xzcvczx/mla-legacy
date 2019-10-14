@@ -1,5 +1,3 @@
-#include "Compiler.h"
-#include "GenericTypeDefs.h"
 #include "USB/usb.h"
 #include "USB/usb_host_msd.h"
 #include "USB/usb_host_msd_scsi.h"
@@ -55,7 +53,7 @@
     #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
     #pragma config FWDTEN   = OFF           // Watchdog Timer
     #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
-    #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
+    //#pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
     #pragma config OSCIOFNC = OFF           // CLKO Enable
     #pragma config POSCMOD  = HS            // Primary Oscillator
     #pragma config IESO     = OFF           // Internal/External Switch-over
@@ -100,7 +98,7 @@ int main(void)
 
     #endif
 
-   #if defined(__PIC24FJ64GB004__)
+   #if defined(__PIC24FJ64GB004__) || defined(__PIC24FJ256DA210__)
 	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -120,6 +118,16 @@ int main(void)
 
     //Initialize the stack
     USBInitialize(0);
+
+    #if defined(DEBUG_MODE)
+        // PPS - Configure U2RX - put on pin 49 (RP10)
+        RPINR19bits.U2RXR = 10;
+
+        // PPS - Configure U2TX - put on pin 50 (RP17)
+        RPOR8bits.RP17R = 5;
+
+        UART2Init();
+    #endif
 
     while(1)
     {
@@ -143,6 +151,7 @@ int main(void)
                 //Write some data to the new file.
                 FSfwrite("This is a test.",1,15,myFile);
                 
+
                 //Always make sure to close the file so that the data gets
                 //  written to the drive.
                 FSfclose(myFile);

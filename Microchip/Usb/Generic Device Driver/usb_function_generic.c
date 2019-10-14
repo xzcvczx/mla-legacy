@@ -58,15 +58,8 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
     ..\\..\\Microchip\\Include
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
+    .
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -75,13 +68,22 @@
     C:\\Microchip Solutions\\Microchip\\Include
     
     C:\\Microchip Solutions\\My Demo Application                               
-  ******************************************************************************/
+
+//DOM-IGNORE-BEGIN
+********************************************************************
+ File Description:
+
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.6    Minor changes in include file structure.
+********************************************************************
+//DOM-IGNORE-END
+
+******************************************************************************/
 
 /** I N C L U D E S **********************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
+#include "usb/usb.h"
 
 #if defined(USB_USE_GEN)
 

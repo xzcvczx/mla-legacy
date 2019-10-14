@@ -28,69 +28,55 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 */
 
 // Created by the Microchip USBConfig Utility, Version 2.1.1.0, 6/24/2009, 15:23:15
-
 #ifndef _usb_config_h_
-#define _usb_config_h_
+    #define _usb_config_h_
 
-#if defined(__PIC24F__)
-    #include <p24fxxxx.h>
-#elif defined(__18CXX)
-    #include <p18cxxx.h>
-#elif defined(__PIC32MX__)
-    #include <p32xxxx.h>
-    #include "plib.h"
-#else
-    #error No processor header file.
-#endif
-
-#define _USB_CONFIG_VERSION_MAJOR 2
-#define _USB_CONFIG_VERSION_MINOR 1
-#define _USB_CONFIG_VERSION_DOT   1
-#define _USB_CONFIG_VERSION_BUILD 0
+    #if defined(__PIC24F__)
+        #include <p24fxxxx.h>
+    #elif defined(__18CXX)
+        #include <p18cxxx.h>
+    #elif defined(__PIC32MX__)
+        #include <p32xxxx.h>
+        #include "plib.h"
+    #else
+        #error No processor header file.
+    #endif
+    #define _USB_CONFIG_VERSION_MAJOR   2
+    #define _USB_CONFIG_VERSION_MINOR   1
+    #define _USB_CONFIG_VERSION_DOT     1
+    #define _USB_CONFIG_VERSION_BUILD   0
 
 // Supported USB Configurations
-
-#define USB_SUPPORT_HOST
+    #define USB_SUPPORT_HOST
 
 // Hardware Configuration
-
-#define USB_PING_PONG_MODE  USB_PING_PONG__FULL_PING_PONG
+    #define USB_PING_PONG_MODE  USB_PING_PONG__FULL_PING_PONG
 
 // Host Configuration
-
-#define NUM_TPL_ENTRIES 2
-#define USB_NUM_CONTROL_NAKS 200
-#define USB_SUPPORT_INTERRUPT_TRANSFERS
-#define USB_NUM_INTERRUPT_NAKS 3
-#define USB_SUPPORT_BULK_TRANSFERS
-#define USB_NUM_BULK_NAKS 20000
-#define USB_INITIAL_VBUS_CURRENT (100/2)
-#define USB_INSERT_TIME (250+1)
-#define USB_HOST_APP_EVENT_HANDLER USB_ApplicationEventHandler
+    #define NUM_TPL_ENTRIES         2
+    #define USB_NUM_CONTROL_NAKS    200
+    #define USB_SUPPORT_INTERRUPT_TRANSFERS
+    #define USB_NUM_INTERRUPT_NAKS  3
+    #define USB_SUPPORT_BULK_TRANSFERS
+    #define USB_NUM_BULK_NAKS           20000
+    #define USB_INITIAL_VBUS_CURRENT    (100 / 2)
+    #define USB_INSERT_TIME             (250 + 1)
+    #define USB_HOST_APP_EVENT_HANDLER  USB_ApplicationEventHandler
 
 // Host HID Client Driver Configuration
-
-#define USB_MAX_HID_DEVICES 1
-#define HID_MAX_DATA_FIELD_SIZE 8
+    #define USB_MAX_HID_DEVICES     1
+    #define HID_MAX_DATA_FIELD_SIZE 8
 
 // Host Mass Storage Client Driver Configuration
-
-#define USB_MAX_MASS_STORAGE_DEVICES 1
+    #define USB_MAX_MASS_STORAGE_DEVICES    1
 
 // Helpful Macros
-
-#define USBTasks()                  \
-    {                               \
-        USBHostTasks();             \
-        USBHostHIDTasks();          \
-        USBHostMSDTasks();          \
+    #define USBTasks()     \
+    {                      \
+        USBHostTasks();    \
+        USBHostHIDTasks(); \
+        USBHostMSDTasks(); \
     }
 
-#define USBInitialize(x)            \
-    (                               \
-        USBHostInit(x)              \
-    )
-
-
+    #define USBInitialize(x)    (USBHostInit(x))
 #endif
-

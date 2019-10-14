@@ -30,13 +30,7 @@
     TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
     PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
     IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
-    CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
-    
-    Change History:
-     Rev   Date         Description
-     1.0   11/19/2004   Initial release
-     2.1   02/26/2007   Updated for simplicity and to use common
-                     coding style
+    CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.  
 
   Summary:
     This file contains all of functions, macros, definitions, variables,
@@ -74,15 +68,8 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
-    ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
+    ..\\..\\Microchip\\Include
+    .
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -91,6 +78,16 @@
     C:\\Microchip Solutions\\Microchip\\Include
     
     C:\\Microchip Solutions\\My Demo Application 
+
+
+ Change History:
+   Rev    Description
+   ----   ------------------------------------------
+   1.0    Initial release
+   2.1    Updated for simplicity and to use common
+          coding style
+   2.6    Minor changes in defintions
+
 *******************************************************************/
 #ifndef HID_H
 #define HID_H
@@ -329,6 +326,15 @@ typedef struct _USB_HID_DSC
 } USB_HID_DSC;
 
 /** Section: EXTERNS ********************************************************/
+extern volatile unsigned char hid_report_in[HID_INT_IN_EP_SIZE];
+extern volatile unsigned char hid_report_out[HID_INT_OUT_EP_SIZE];
+extern volatile CTRL_TRF_SETUP SetupPkt;
+extern ROM BYTE configDescriptor1[];
+extern volatile BYTE CtrlTrfData[USB_EP0_BUFF_SIZE];
+
+#if !defined(__USB_DESCRIPTORS_C)
+extern ROM struct{BYTE report[HID_RPT01_SIZE];}hid_rpt01;
+#endif
 
 /** Section: PUBLIC PROTOTYPES **********************************************/
 void USBCheckHIDRequest(void);

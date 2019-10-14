@@ -8,7 +8,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.2
+ * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -273,6 +273,7 @@ typedef struct
     DWORD       data;           // Logical block address of the data section of the device.
     WORD        maxroot;        // The maximum number of entries in the root directory.
     DWORD       maxcls;         // The maximum number of clusters in the partition.
+    DWORD       sectorSize;     // The size of a sector in bytes
     DWORD       fatsize;        // The number of sectors in the FAT
     BYTE        fatcopy;        // The number of copies of the FAT in the partition
     BYTE        SecPerClus;     // The number of sectors per cluster in the data region

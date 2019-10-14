@@ -39,9 +39,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		07/20/07	...
  *****************************************************************************/
-
 #ifndef _SCANCODES_H
-#define _SCANCODES_H
+    #define _SCANCODES_H
 
 /*********************************************************************
 * Overview: The following are the defined scan codes for AT keyboard.
@@ -49,73 +48,86 @@
 *********************************************************************/
 
 // Carriage return pressed.
-#define SCAN_CR_PRESSED      0x1C
+    #define SCAN_CR_PRESSED 0x1C
+
 // Carriage return released.
-#define SCAN_CR_RELEASED     0x9C
+    #define SCAN_CR_RELEASED    0x9C
 
 // Carriage return alternate pressed.
-#define SCAN_CRA_PRESSED     0x2C
+    #define SCAN_CRA_PRESSED    0x2C
+
 // Carriage return alternate released.
-#define SCAN_CRA_RELEASED    0xAC
+    #define SCAN_CRA_RELEASED   0xAC
 
 // Delete key pressed.
-#define SCAN_DEL_PRESSED     0x53
+    #define SCAN_DEL_PRESSED    0x53
+
 // Delete key released.
-#define SCAN_DEL_RELEASED    0xD3
+    #define SCAN_DEL_RELEASED   0xD3
 
 // Back space key pressed.
-#define SCAN_BS_PRESSED      0x0E
+    #define SCAN_BS_PRESSED 0x0E
+
 // Back space key released.
-#define SCAN_BS_RELEASED     0x8E
+    #define SCAN_BS_RELEASED    0x8E
 
 // Tab key pressed.
-#define SCAN_TAB_PRESSED     0x0F
+    #define SCAN_TAB_PRESSED    0x0F
+
 // Tab key released.
-#define SCAN_TAB_RELEASED    0x8F
+    #define SCAN_TAB_RELEASED   0x8F
 
 // Home key pressed.
-#define SCAN_HOME_PRESSED    0x47
+    #define SCAN_HOME_PRESSED   0x47
+
 // Home key released.
-#define SCAN_HOME_RELEASED   0xC7
+    #define SCAN_HOME_RELEASED  0xC7
 
 // End key pressed.
-#define SCAN_END_PRESSED     0x4F
+    #define SCAN_END_PRESSED    0x4F
+
 // End key released.
-#define SCAN_END_RELEASED    0xCF
+    #define SCAN_END_RELEASED   0xCF
 
 // Page up key pressed.
-#define SCAN_PGUP_PRESSED    0x49
+    #define SCAN_PGUP_PRESSED   0x49
+
 // Page up key released.
-#define SCAN_PGUP_RELEASED   0xC9
+    #define SCAN_PGUP_RELEASED  0xC9
 
 // Page down key pressed.
-#define SCAN_PGDOWN_PRESSED  0x51
+    #define SCAN_PGDOWN_PRESSED 0x51
+
 // Page down key released.
-#define SCAN_PGDOWN_RELEASED 0xD1
+    #define SCAN_PGDOWN_RELEASED    0xD1
 
 // Up key pressed.
-#define SCAN_UP_PRESSED      0x48
+    #define SCAN_UP_PRESSED 0x48
+
 // Up key released.
-#define SCAN_UP_RELEASED     0xC8
+    #define SCAN_UP_RELEASED    0xC8
 
 // Down key pressed.
-#define SCAN_DOWN_PRESSED    0x50
+    #define SCAN_DOWN_PRESSED   0x50
+
 // Down key released.
-#define SCAN_DOWN_RELEASED   0xD0
+    #define SCAN_DOWN_RELEASED  0xD0
 
 // Left key pressed.
-#define SCAN_LEFT_PRESSED    0x4B
+    #define SCAN_LEFT_PRESSED   0x4B
+
 // Left key released.
-#define SCAN_LEFT_RELEASED   0xCB
+    #define SCAN_LEFT_RELEASED  0xCB
 
 // Right key pressed.
-#define SCAN_RIGHT_PRESSED   0x4D
+    #define SCAN_RIGHT_PRESSED  0x4D
+
 // Right key released.
-#define SCAN_RIGHT_RELEASED  0xCD
+    #define SCAN_RIGHT_RELEASED 0xCD
 
 // Space key pressed.
-#define SCAN_SPACE_PRESSED   0x39
-// Space key released.
-#define SCAN_SPACE_RELEASED  0xB9
+    #define SCAN_SPACE_PRESSED  0x39
 
+// Space key released.
+    #define SCAN_SPACE_RELEASED 0xB9
 #endif // _SCANCODES_H

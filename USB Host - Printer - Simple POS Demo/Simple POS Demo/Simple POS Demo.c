@@ -100,6 +100,11 @@ KO          ??-???-2008 First release
     #elif defined(__PIC24FJ256GB106__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    #elif defined(__PIC24FJ256DA210__)
+        //_CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        //_CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    #else
+        #warning "No configuration bits set for this project.  USB needs specific configuration settings.  Please verify that the configuration bits are set correctly."
     #endif
 
 #elif defined( __PIC32MX__ )

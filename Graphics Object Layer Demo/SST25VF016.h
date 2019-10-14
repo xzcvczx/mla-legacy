@@ -39,23 +39,22 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		01/07/09	...
  *****************************************************************************/
-
 #ifndef _SST25VF016_H
-#define _SST25VF016_H
+    #define _SST25VF016_H
 
-#include "Graphics\Graphics.h"
+    #include "Graphics\Graphics.h"
 
 /************************************************************************
 * SST25 Commands                                                       
 ************************************************************************/
-#define SST25_CMD_READ     (unsigned)0x03
-#define SST25_CMD_WRITE    (unsigned)0x02
-#define SST25_CMD_WREN     (unsigned)0x06
-#define SST25_CMD_RDSR     (unsigned)0x05
-#define SST25_CMD_ERASE    (unsigned)0x60
-#define SST25_CMD_EWSR     (unsigned)0x50
-#define SST25_CMD_WRSR     (unsigned)0x01
-#define SST25_CMD_SER      (unsigned)0x20
+    #define SST25_CMD_READ  (unsigned)0x03
+    #define SST25_CMD_WRITE (unsigned)0x02
+    #define SST25_CMD_WREN  (unsigned)0x06
+    #define SST25_CMD_RDSR  (unsigned)0x05
+    #define SST25_CMD_ERASE (unsigned)0x60
+    #define SST25_CMD_EWSR  (unsigned)0x50
+    #define SST25_CMD_WRSR  (unsigned)0x01
+    #define SST25_CMD_SER   (unsigned)0x20
 
 /************************************************************************
 * Macro: SST25CSLow()                                                   
@@ -69,7 +68,7 @@
 * Output: none                                                         
 *                                                                       
 ************************************************************************/
-#define SST25CSLow()      SST25_CS_LAT=0;
+    #define SST25CSLow()    SST25_CS_LAT = 0;
 
 /************************************************************************
 * Macro: SST25CSHigh()
@@ -83,7 +82,7 @@
 * Output: none
 *                                                                       
 ************************************************************************/
-#define SST25CSHigh()     SST25_CS_LAT=1;
+    #define SST25CSHigh()   SST25_CS_LAT = 1;
 
 /************************************************************************
 * Function: SST25Init()
@@ -95,7 +94,7 @@
 * Output: none  
 *                                                                       
 ************************************************************************/
-void SST25Init();
+void    SST25Init(void);
 
 /************************************************************************
 * Function: BYTE SST25IsWriteBusy(void)  
@@ -107,7 +106,7 @@ void SST25Init();
 * Output: non zero if busy
 *                                                                       
 ************************************************************************/
-BYTE SST25IsWriteBusy();
+BYTE    SST25IsWriteBusy(void);
 
 /************************************************************************
 * Function: void SST25WriteByte(BYTE data, DWORD address)                                           
@@ -119,7 +118,7 @@ BYTE SST25IsWriteBusy();
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST25WriteByte(BYTE data, DWORD address);
+void    SST25WriteByte(BYTE data, DWORD address);
 
 /************************************************************************
 * Function: BYTE SST25ReadByte(DWORD address)       
@@ -131,7 +130,7 @@ void SST25WriteByte(BYTE data, DWORD address);
 * Output: data read
 *                                                                       
 ************************************************************************/
-BYTE SST25ReadByte(DWORD address);
+BYTE    SST25ReadByte(DWORD address);
 
 /************************************************************************
 * Function: void SST25WriteWord(WODR data, DWORD address)                                           
@@ -143,7 +142,7 @@ BYTE SST25ReadByte(DWORD address);
 * Output: none                                                         
 *                                                                       
 ************************************************************************/
-void SST25WriteWord(WORD data, DWORD address);
+void    SST25WriteWord(WORD data, DWORD address);
 
 /************************************************************************
 * Function: WORD SST25ReadWord(DWORD address)             
@@ -155,7 +154,7 @@ void SST25WriteWord(WORD data, DWORD address);
 * Output: data read
 *                                                                       
 ************************************************************************/
-WORD SST25ReadWord(DWORD address);
+WORD    SST25ReadWord(DWORD address);
 
 /************************************************************************
 * Function: SST25WriteEnable()                                       
@@ -168,7 +167,7 @@ WORD SST25ReadWord(DWORD address);
 * Output: none
 *
 ************************************************************************/
-void SST25WriteEnable();
+void    SST25WriteEnable(void);
 
 /************************************************************************
 * Function: BYTE SST25WriteArray(DWORD address, BYTE* pData, nCount)
@@ -180,7 +179,7 @@ void SST25WriteEnable();
 * Output: return 1 if the operation was successfull
 *                                                                     
 ************************************************************************/
-BYTE SST25WriteArray(DWORD address, BYTE* pData, WORD nCount);
+BYTE    SST25WriteArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
 * Function: void SST25ReadArray(DWORD address, BYTE* pData, nCount)
@@ -190,7 +189,7 @@ BYTE SST25WriteArray(DWORD address, BYTE* pData, WORD nCount);
 * Input: flash memory address, pointer to the buffer, data number
 *                                                                       
 ************************************************************************/
-void SST25ReadArray(DWORD address, BYTE* pData, WORD nCount);
+void    SST25ReadArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
 * Function: void SST25ChipErase(void)
@@ -200,7 +199,7 @@ void SST25ReadArray(DWORD address, BYTE* pData, WORD nCount);
 * Input: none
 *                                                                       
 ************************************************************************/
-void SST25ChipErase(void);
+void    SST25ChipErase(void);
 
 /************************************************************************
 * Function: void SST25ResetWriteProtection()
@@ -212,7 +211,7 @@ void SST25ChipErase(void);
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST25ResetWriteProtection();
+void    SST25ResetWriteProtection(void);
 
 /************************************************************************
 * Function: void SST25SectorErase(DWORD address)                                           
@@ -224,7 +223,5 @@ void SST25ResetWriteProtection();
 * Output: none                                 
 *                                                                       
 ************************************************************************/
-void SST25SectorErase(DWORD address);
-
+void    SST25SectorErase(DWORD address);
 #endif //_SST25VF016_H
-

@@ -4,12 +4,13 @@
  *	 PIC18F4553/4458/2553/2458
  *	 PIC18F4550/4455/2550/2455
  *	 PIC18F4450/2450
+ *   PIC18F14K50/13K50
  *
  *********************************************************************
  * FileName:        BootPIC18NonJ.c
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.20+
+ * Compiler:        C18 3.32+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -231,6 +232,7 @@ unsigned char ProgrammingBuffer[BufferSize];
 
 #pragma udata SomeSectionName2
 PacketToFromPC PacketFromPC;
+#pragma udata SomeSectionName3
 PacketToFromPC PacketToPC;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/

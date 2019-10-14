@@ -34,11 +34,12 @@
  File Description:
 
  Change History:
-  Rev   Date(MM/DD/YYYY)  Description
-  2.5   06/05/2009        Initial release of this demo.  Source code
-  						  was derived from the MCHPFSUSB v2.4
-  						  "USB Device - WinUSB - Generic Driver Demo"
-  						  firmware project.
+  Rev   Description
+  2.5   Initial release of this demo.  Source code
+  		was derived from the MCHPFSUSB v2.4
+  		"USB Device - WinUSB - Generic Driver Demo"
+  		firmware project.
+  2.6   No Change
 ********************************************************************/
 
 //NOTE: This main_smallSRAM.c is a small USB SRAM version of the
@@ -82,7 +83,6 @@
 #include "Compiler.h"
 #include "HardwareProfile.h"
 #include "GenericTypeDefs.h"
-#include "USB/usb_device.h"
 #include "USB/usb.h"
 #include "USB/usb_function_generic.h"
 #include "usb_config.h"

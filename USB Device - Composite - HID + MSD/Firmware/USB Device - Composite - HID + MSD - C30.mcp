@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ256GB110
+device=PIC24FJ256DA210
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -51,6 +51,7 @@ file_023=MDD File System
 file_024=HardwareProfiles
 file_025=HardwareProfiles
 file_026=HardwareProfiles
+file_027=HardwareProfiles
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -79,6 +80,7 @@ file_023=no
 file_024=no
 file_025=no
 file_026=no
+file_027=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -107,6 +109,7 @@ file_023=no
 file_024=no
 file_025=no
 file_026=no
+file_027=no
 [FILE_INFO]
 file_000=main.c
 file_001=usb_descriptors.c
@@ -135,6 +138,7 @@ file_023=..\..\Microchip\Include\MDD File System\Internal Flash.h
 file_024=HardwareProfile - PIC24FJ256GB110 PIM.h
 file_025=HardwareProfile - PIC24FJ64GB004 PIM.h
 file_026=HardwareProfile - PIC24F Starter Kit.h
+file_027=HardwareProfile - PIC24FJ256DA210 Development Board.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

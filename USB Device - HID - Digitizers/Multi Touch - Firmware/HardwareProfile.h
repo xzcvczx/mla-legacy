@@ -61,6 +61,13 @@
             #elif defined(PIC32_USB_STARTER_KIT)	//If this is defined, it is saved in the project and can be found under: Project --> Build Options... --> Project --> MPLAB PIC32 C Compiler --> Preprocessor Macros
                 #include "HardwareProfile - PIC32 USB Starter Kit.h"
             #endif
+        #elif defined(__32MX795F512L__)
+            #if defined(PIC32MX795F512L_PIM)
+                #include "HardwareProfile - PIC32MX795F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                //PIC32 USB Starter Kit II
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
         #endif
     #endif
 
@@ -71,6 +78,8 @@
             #include "HardwareProfile - PIC24F Starter Kit.h"
         #elif defined(__PIC24FJ64GB004__)
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+        #elif defined(__PIC24FJ256DA210__)
+            #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
         #endif
     #endif
 

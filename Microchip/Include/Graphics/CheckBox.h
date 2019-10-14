@@ -39,33 +39,33 @@
  * Anton Alkhimenok     11/12/07	Version 1.0 release
  *****************************************************************************/
 #ifndef _CHECKBOX_H
-#define _CHECKBOX_H
+    #define _CHECKBOX_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 // This is indent from outside borders
-#define CB_INDENT               2
+    #define CB_INDENT   2
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define CB_FOCUSED	    0x0001  // Focus state
-#define CB_DISABLED     0x0002  // Disabled state
-#define CB_CHECKED      0x0004  // Checked state
-#define CB_HIDE         0x8000  // Check box must be removed from screen
-#define CB_DRAW_FOCUS   0x2000  // Focus must be redrawn
-#define CB_DRAW         0x4000  // Whole check box must be redrawn
-#define CB_DRAW_CHECK   0x1000  // Check box mark should be redrawn
+    #define CB_FOCUSED      0x0001  // Focus state
+    #define CB_DISABLED     0x0002  // Disabled state
+    #define CB_CHECKED      0x0004  // Checked state
+    #define CB_HIDE         0x8000  // Check box must be removed from screen
+    #define CB_DRAW_FOCUS   0x2000  // Focus must be redrawn
+    #define CB_DRAW         0x4000  // Whole check box must be redrawn
+    #define CB_DRAW_CHECK   0x1000  // Check box mark should be redrawn
 
 /*********************************************************************
 * Overview: The structure contains check box data
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).   
-	SHORT     		textHeight;     // Pre-computed text height
-	XCHAR  			*pText;         // Pointer to text
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    SHORT       textHeight; // Pre-computed text height
+    XCHAR       *pText;     // Pointer to text
 } CHECKBOX;
-
 
 /*********************************************************************
 * Macros: CbGetText(pCb)
@@ -82,7 +82,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define CbGetText(pCb)                 pCb->pText
+    #define CbGetText(pCb)  pCb->pText
 
 /*********************************************************************
 * Function: CbSetText(CHECKBOX *pCb, XCHAR *pText)
@@ -99,7 +99,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void  CbSetText(CHECKBOX *pCb, XCHAR *pText);
+void        CbSetText(CHECKBOX *pCb, XCHAR *pText);
 
 /*********************************************************************
 * Function: CHECKBOX  *CbCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -149,8 +149,17 @@ void  CbSetText(CHECKBOX *pCb, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-CHECKBOX  *CbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			      WORD state, XCHAR *pText, GOL_SCHEME *pScheme);
+CHECKBOX    *CbCreate
+            (
+                WORD        ID,
+                SHORT       left,
+                SHORT       top,
+                SHORT       right,
+                SHORT       bottom,
+                WORD        state,
+                XCHAR       *pText,
+                GOL_SCHEME  *pScheme
+            );
 
 /*********************************************************************
 * Function: WORD CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg)
@@ -187,7 +196,7 @@ CHECKBOX  *CbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-WORD  CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg);
+WORD        CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG* pMsg)
@@ -215,7 +224,7 @@ WORD  CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG* pMsg);
+void        CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD CbDraw(CHECKBOX *pCb)
@@ -247,6 +256,5 @@ void CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD CbDraw(CHECKBOX *pCb);
-
+WORD        CbDraw(CHECKBOX *pCb);
 #endif // _CHECKBOX_H

@@ -5,7 +5,7 @@
  *****************************************************************************
  * FileName:        EEPROM.h
  * Dependencies:    Graphics.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
@@ -39,23 +39,22 @@
  * Anton Alkhimenok		07/10/07	...
  * Anton Alkhimenok     02/07/08    PIC32 support
  *****************************************************************************/
-
 #ifndef _EEPROM_H
-#define _EEPROM_H
+    #define _EEPROM_H
 
-#include "Graphics\Graphics.h"
+    #include "Graphics\Graphics.h"
 
 /************************************************************************
 * EEPROM Commands                                                       
 ************************************************************************/
-#define EEPROM_PAGE_SIZE    (unsigned)64
-#define EEPROM_PAGE_MASK    (unsigned)0x003f
-#define EEPROM_CMD_READ     (unsigned)0x03
-#define EEPROM_CMD_WRITE    (unsigned)0x02
-#define EEPROM_CMD_WRDI     (unsigned)0x04
-#define EEPROM_CMD_WREN     (unsigned)0x06
-#define EEPROM_CMD_RDSR     (unsigned)0x05
-#define EEPROM_CMD_WRSR     (unsigned)0x01
+    #define EEPROM_PAGE_SIZE    (unsigned)64
+    #define EEPROM_PAGE_MASK    (unsigned)0x003f
+    #define EEPROM_CMD_READ     (unsigned)0x03
+    #define EEPROM_CMD_WRITE    (unsigned)0x02
+    #define EEPROM_CMD_WRDI     (unsigned)0x04
+    #define EEPROM_CMD_WREN     (unsigned)0x06
+    #define EEPROM_CMD_RDSR     (unsigned)0x05
+    #define EEPROM_CMD_WRSR     (unsigned)0x01
 
 /************************************************************************
 * Structure STATREG and union _EEPROMStatus_                            
@@ -63,18 +62,20 @@
 * Overview: provide bits and byte access to EEPROM status value      
 *                                                                       
 ************************************************************************/
-struct  STATREG{
-BYTE    WIP:1;
-BYTE    WEL:1;
-BYTE    BP0:1;
-BYTE    BP1:1;
-BYTE    RESERVED:3;
-BYTE    WPEN:1;
+struct STATREG
+{
+    BYTE    WIP : 1;
+    BYTE    WEL : 1;
+    BYTE    BP0 : 1;
+    BYTE    BP1 : 1;
+    BYTE    RESERVED : 3;
+    BYTE    WPEN : 1;
 };
 
-union _EEPROMStatus_{
-struct  STATREG Bits;
-BYTE    Char;
+union _EEPROMStatus_
+{
+    struct STATREG  Bits;
+    BYTE            Char;
 };
 
 /************************************************************************
@@ -89,7 +90,7 @@ BYTE    Char;
 * Output: none                                                         
 *                                                                       
 ************************************************************************/
-#define EEPROMCSLow()      EEPROM_CS_LAT=0;
+    #define EEPROMCSLow()   EEPROM_CS_LAT = 0;
 
 /************************************************************************
 * Macro: EEPROMCSHigh()
@@ -103,7 +104,7 @@ BYTE    Char;
 * Output: none
 *                                                                       
 ************************************************************************/
-#define EEPROMCSHigh()     EEPROM_CS_LAT=1;
+    #define EEPROMCSHigh()  EEPROM_CS_LAT = 1;
 
 /************************************************************************
 * Function: EEPROMInit()
@@ -115,7 +116,7 @@ BYTE    Char;
 * Output: none  
 *                                                                       
 ************************************************************************/
-void EEPROMInit();
+void                    EEPROMInit(void);
 
 /************************************************************************
 * Function: union _EEPROMStatus_ EEPROMReadStatus()
@@ -127,7 +128,7 @@ void EEPROMInit();
 * Output: status register value
 *                                                                       
 ************************************************************************/
-union _EEPROMStatus_ EEPROMReadStatus();
+union _EEPROMStatus_    EEPROMReadStatus(void);
 
 /************************************************************************
 * Function: void EEPROMWriteByte()                                           
@@ -139,7 +140,7 @@ union _EEPROMStatus_ EEPROMReadStatus();
 * Output: none
 *                                                                       
 ************************************************************************/
-void EEPROMWriteByte(BYTE data, WORD address);
+void                    EEPROMWriteByte(BYTE data, WORD address);
 
 /************************************************************************
 * Function: BYTE EEPROMReadByte(WORD address)       
@@ -151,7 +152,7 @@ void EEPROMWriteByte(BYTE data, WORD address);
 * Output: data read
 *                                                                       
 ************************************************************************/
-BYTE EEPROMReadByte(WORD address);
+BYTE                    EEPROMReadByte(WORD address);
 
 /************************************************************************
 * Function: void EEPROMWriteWord(WODR data, WORD address)                                           
@@ -163,7 +164,7 @@ BYTE EEPROMReadByte(WORD address);
 * Output: none                                                         
 *                                                                       
 ************************************************************************/
-void EEPROMWriteWord(WORD data, WORD address);
+void                    EEPROMWriteWord(WORD data, WORD address);
 
 /************************************************************************
 * Function: WORD EEPROMReadWord(WORD address)             
@@ -175,7 +176,7 @@ void EEPROMWriteWord(WORD data, WORD address);
 * Output: data read
 *                                                                       
 ************************************************************************/
-WORD EEPROMReadWord(WORD address);
+WORD                    EEPROMReadWord(WORD address);
 
 /************************************************************************
 * Function: EEPROMWriteEnable()                                       
@@ -188,7 +189,7 @@ WORD EEPROMReadWord(WORD address);
 * Output: none
 *
 ************************************************************************/
-void EEPROMWriteEnable();
+void                    EEPROMWriteEnable(void);
 
 /************************************************************************
 * Function: BYTE EEPROMWriteArray(DWORD address, BYTE* pData, nCount)
@@ -200,7 +201,7 @@ void EEPROMWriteEnable();
 * Output: return 1 if the operation was successfull
 *                                                                     
 ************************************************************************/
-BYTE EEPROMWriteArray(DWORD address, BYTE* pData, WORD nCount);
+BYTE                    EEPROMWriteArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
 * Function: void EEPROMReadArray(WORD address, BYTE* pData, nCount)
@@ -210,8 +211,5 @@ BYTE EEPROMWriteArray(DWORD address, BYTE* pData, WORD nCount);
 * Input: flash memory address, pointer to the buffer, data number
 *                                                                       
 ************************************************************************/
-void EEPROMReadArray(WORD address, BYTE* pData, WORD nCount);
-
-
+void                    EEPROMReadArray(WORD address, BYTE *pData, WORD nCount);
 #endif //_EEPROM_H
-

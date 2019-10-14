@@ -38,7 +38,7 @@
  * Paolo Tamayo         03/10/08    ...
  ********************************************************************/
 #ifndef ANIMATION_H
-#define ANIMATION_H
+    #define ANIMATION_H
 
 /************************************************************************
  Function: void CreateAnimation(void)
@@ -49,7 +49,7 @@
                                                                        
  Output: none
 ************************************************************************/
-void CreateAnimation();
+void    CreateAnimation(void);
 
 /************************************************************************
  Function: void CreateAnimation(void)
@@ -60,7 +60,7 @@ void CreateAnimation();
                                                                        
  Output: none
 ************************************************************************/
-void NextAnimation();
+void    NextAnimation(DWORD tick);
 
 /************************************************************************
  Function: WORD MsgDemoSelection(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
@@ -78,7 +78,7 @@ void NextAnimation();
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD MsgAnimation(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg); 
+WORD    MsgAnimation(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 
 /************************************************************************
  Function: void InitAnimationStyleScheme(GOL_SCHEME *pScheme)
@@ -90,6 +90,5 @@ WORD MsgAnimation(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
                                                                        
  Output: none
 ************************************************************************/
-void InitAnimationStyleScheme(GOL_SCHEME *pScheme);
-
+void    InitAnimationStyleScheme(GOL_SCHEME *pScheme);
 #endif

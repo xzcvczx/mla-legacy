@@ -39,34 +39,34 @@
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
 #ifndef _RADIOBUTTON_H
-#define _RADIOBUTTON_H
+    #define _RADIOBUTTON_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
-#define RB_INDENT         2		// Indent for the text from title bar border
+    #define RB_INDENT   2           // Indent for the text from title bar border
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define RB_FOCUSED	      0x0001  	// Bit for focused state.
-#define RB_DISABLED       0x0002  	// Bit for disabled state.
-#define RB_CHECKED        0x0004  	// Bit to indicate <link Radio Button> is checked.
-#define RB_GROUP          0x0008  	// Bit to indicate the first <link Radio Button> in the group.
-
-#define RB_HIDE           0x8000  	// Bit to indicate that button must be removed from screen.
-#define RB_DRAW_FOCUS     0x2000  	// Bit to indicate focus must be redrawn.
-#define RB_DRAW_CHECK     0x1000  	// Bit to indicate check mark should be redrawn.
-#define RB_DRAW           0x4000  	// Bit to indicate whole <link Radio Button> must be redrawn.
+    #define RB_FOCUSED      0x0001  // Bit for focused state.
+    #define RB_DISABLED     0x0002  // Bit for disabled state.
+    #define RB_CHECKED      0x0004  // Bit to indicate <link Radio Button> is checked.
+    #define RB_GROUP        0x0008  // Bit to indicate the first <link Radio Button> in the group.
+    #define RB_HIDE         0x8000  // Bit to indicate that button must be removed from screen.
+    #define RB_DRAW_FOCUS   0x2000  // Bit to indicate focus must be redrawn.
+    #define RB_DRAW_CHECK   0x1000  // Bit to indicate check mark should be redrawn.
+    #define RB_DRAW         0x4000  // Bit to indicate whole <link Radio Button> must be redrawn.
 
 /*****************************************************************************
 * Overview: the structure contains data for the <link Radio Button>
 *****************************************************************************/
-typedef struct {
-    OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-    OBJ_HEADER*     pHead;          // Pointer to the first <link Radio Button> in the group
-    OBJ_HEADER*     pNext;          // Pointer to the next <link Radio Button> in the group
-	SHORT     		textHeight;     // Pre-computed text height
-	XCHAR  			*pText;         // Pointer to the text
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    OBJ_HEADER  *pHead;     // Pointer to the first <link Radio Button> in the group
+    OBJ_HEADER  *pNext;     // Pointer to the next <link Radio Button> in the group
+    SHORT       textHeight; // Pre-computed text height
+    XCHAR       *pText;     // Pointer to the text
 } RADIOBUTTON;
 
 /*********************************************************************
@@ -84,7 +84,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define RbGetText(pRb)                 pRb->pText
+    #define RbGetText(pRb)  pRb->pText
 
 /*********************************************************************
 * Function: RbSetText(RADIOBUTTON *pRb, XCHAR *pText)
@@ -101,7 +101,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void  RbSetText(RADIOBUTTON *pRb, XCHAR *pText);
+void        RbSetText(RADIOBUTTON *pRb, XCHAR *pText);
 
 /*********************************************************************
 * Function: void RbSetCheck(RADIOBUTTON *pRb, WORD ID)
@@ -122,7 +122,7 @@ void  RbSetText(RADIOBUTTON *pRb, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-void RbSetCheck(RADIOBUTTON *pRb, WORD ID);
+void        RbSetCheck(RADIOBUTTON *pRb, WORD ID);
 
 /*********************************************************************
 * Function: WORD RbGetCheck(RADIOBUTTON *pRb)
@@ -185,7 +185,7 @@ void RbSetCheck(RADIOBUTTON *pRb, WORD ID);
 * Side Effects: none
 *
 ********************************************************************/
-WORD RbGetCheck(RADIOBUTTON *pRb);
+WORD        RbGetCheck(RADIOBUTTON *pRb);
 
 /*********************************************************************
 * Function: RADIOBUTTON  *RbCreate( WORD ID, SHORT left, SHORT top, 
@@ -245,8 +245,17 @@ WORD RbGetCheck(RADIOBUTTON *pRb);
 * Side Effects: none
 *
 ********************************************************************/
-RADIOBUTTON  *RbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			           WORD state, XCHAR *pText, GOL_SCHEME *pScheme);
+RADIOBUTTON *RbCreate
+            (
+                WORD        ID,
+                SHORT       left,
+                SHORT       top,
+                SHORT       right,
+                SHORT       bottom,
+                WORD        state,
+                XCHAR       *pText,
+                GOL_SCHEME  *pScheme
+            );
 
 /*********************************************************************
 * Function: WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
@@ -281,7 +290,7 @@ RADIOBUTTON  *RbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom
 * Side Effects: none
 *
 ********************************************************************/
-WORD  RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg);
+WORD        RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG* pMsg)
@@ -310,7 +319,7 @@ WORD  RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void RbMsgDefault(WORD translatedMsg, RADIOBUTTON* pRb, GOL_MSG* pMsg);
+void        RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD RbDraw(RADIOBUTTON *pRb)
@@ -343,6 +352,5 @@ void RbMsgDefault(WORD translatedMsg, RADIOBUTTON* pRb, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD RbDraw(RADIOBUTTON *pRb);
-
+WORD        RbDraw(RADIOBUTTON *pRb);
 #endif // _RADIOBUTTON_H

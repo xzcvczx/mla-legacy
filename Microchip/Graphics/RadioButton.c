@@ -38,13 +38,12 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #include "Graphics\Graphics.h"
 
 #ifdef USE_RADIOBUTTON
 
 // This pointer is used to create linked list of radio buttons for the group
-RADIOBUTTON* _pListButtons = NULL;
+RADIOBUTTON *_pListButtons = NULL;
 
 /*********************************************************************
 * Function: RADIOBUTTON  *RbCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -53,57 +52,75 @@ RADIOBUTTON* _pListButtons = NULL;
 * Overview: creates the radio button
 *
 ********************************************************************/
-RADIOBUTTON *RbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
-                      WORD state, XCHAR *pText, GOL_SCHEME *pScheme)
+RADIOBUTTON *RbCreate
+(
+    WORD        ID,
+    SHORT       left,
+    SHORT       top,
+    SHORT       right,
+    SHORT       bottom,
+    WORD        state,
+    XCHAR       *pText,
+    GOL_SCHEME  *pScheme
+)
 {
-	RADIOBUTTON *pRb = NULL;
+    RADIOBUTTON *pRb = NULL;
     RADIOBUTTON *pointer;
-	
-	pRb = (RADIOBUTTON*)malloc(sizeof(RADIOBUTTON));
-	if (pRb == NULL)
-		return pRb;
-	
-	pRb->hdr.ID      	= ID;
-	pRb->hdr.pNxtObj 	= NULL;
-	pRb->hdr.type    	= OBJ_RADIOBUTTON;
-	pRb->hdr.left    	= left;
-	pRb->hdr.top     	= top;
-	pRb->hdr.right   	= right;
-	pRb->hdr.bottom  	= bottom;
-	pRb->pText   		= pText;
-    pRb->pNext      	= NULL;                 // last radio button in the list
-	pRb->hdr.state      = state;
 
-    if(GetState(pRb,RB_GROUP)){
+    pRb = (RADIOBUTTON *)malloc(sizeof(RADIOBUTTON));
+    if(pRb == NULL)
+        return (pRb);
+
+    pRb->hdr.ID = ID;
+    pRb->hdr.pNxtObj = NULL;
+    pRb->hdr.type = OBJ_RADIOBUTTON;
+    pRb->hdr.left = left;
+    pRb->hdr.top = top;
+    pRb->hdr.right = right;
+    pRb->hdr.bottom = bottom;
+    pRb->pText = pText;
+    pRb->pNext = NULL;  // last radio button in the list
+    pRb->hdr.state = state;
+
+    if(GetState(pRb, RB_GROUP))
+    {
+
         // If it's first button in the group start new button's list
         _pListButtons = pRb;
+
         // Attach the button to the list
-        pRb->pHead = (OBJ_HEADER*)_pListButtons;
-    }else{
+        pRb->pHead = (OBJ_HEADER *)_pListButtons;
+    }
+    else
+    {
+
         // Attach the button to the list
-        pRb->pHead = (OBJ_HEADER*)_pListButtons;
+        pRb->pHead = (OBJ_HEADER *)_pListButtons;
         pointer = _pListButtons;
-        while(pointer->pNext != NULL){
-            pointer = (RADIOBUTTON*)pointer->pNext;
+        while(pointer->pNext != NULL)
+        {
+            pointer = (RADIOBUTTON *)pointer->pNext;
         }
-        pointer->pNext = (OBJ_HEADER*)pRb;
+
+        pointer->pNext = (OBJ_HEADER *)pRb;
     }
 
-	// Set the style scheme to be used
-	if (pScheme == NULL)
-		pRb->hdr.pGolScheme = _pDefaultGolScheme; 
-	else 	
-		pRb->hdr.pGolScheme = pScheme; 	
+    // Set the style scheme to be used
+    if(pScheme == NULL)
+        pRb->hdr.pGolScheme = _pDefaultGolScheme;
+    else
+        pRb->hdr.pGolScheme = pScheme;
 
-	// Set the text height  
+    // Set the text height
     pRb->textHeight = 0;
-    if(pText != NULL){
-	    pRb->textHeight	= GetTextHeight(pRb->hdr.pGolScheme->pFont);
+    if(pText != NULL)
+    {
+        pRb->textHeight = GetTextHeight(pRb->hdr.pGolScheme->pFont);
     }
 
-    GOLAddObject((OBJ_HEADER*) pRb);
+    GOLAddObject((OBJ_HEADER *)pRb);
 
-	return pRb;
+    return (pRb);
 }
 
 /*********************************************************************
@@ -118,20 +135,26 @@ RADIOBUTTON *RbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 *           radio buttons to be redrawn
 *
 ********************************************************************/
-void RbSetCheck(RADIOBUTTON *pRb, WORD ID){
-RADIOBUTTON* pointer;
+void RbSetCheck(RADIOBUTTON *pRb, WORD ID)
+{
+    RADIOBUTTON *pointer;
 
-    pointer = (RADIOBUTTON*) pRb->pHead;
+    pointer = (RADIOBUTTON *)pRb->pHead;
 
-    while(pointer != NULL){
-        if(pointer->hdr.ID == ID){
-            SetState(pointer, RB_CHECKED|RB_DRAW_CHECK); // set check and redraw
-        }else{
-            ClrState(pointer, RB_CHECKED);     // reset checked   
-            SetState(pointer, RB_DRAW_CHECK);  // redraw
+    while(pointer != NULL)
+    {
+        if(pointer->hdr.ID == ID)
+        {
+            SetState(pointer, RB_CHECKED | RB_DRAW_CHECK);  // set check and redraw
         }
-        pointer = (RADIOBUTTON*)pointer->pNext;
-    }            
+        else
+        {
+            ClrState(pointer, RB_CHECKED);                  // reset checked
+            SetState(pointer, RB_DRAW_CHECK);               // redraw
+        }
+
+        pointer = (RADIOBUTTON *)pointer->pNext;
+    }
 }
 
 /*********************************************************************
@@ -144,19 +167,23 @@ RADIOBUTTON* pointer;
 * Overview: gets ID of checked radio button
 *
 ********************************************************************/
-WORD RbGetCheck(RADIOBUTTON *pRb){
-RADIOBUTTON* pointer;
+WORD RbGetCheck(RADIOBUTTON *pRb)
+{
+    RADIOBUTTON *pointer;
 
-    pointer = (RADIOBUTTON*) pRb->pHead;
+    pointer = (RADIOBUTTON *)pRb->pHead;
 
-    while(pointer != NULL){
-        if(GetState(pointer,RB_CHECKED)){
-            return pointer->hdr.ID;
+    while(pointer != NULL)
+    {
+        if(GetState(pointer, RB_CHECKED))
+        {
+            return (pointer->hdr.ID);
         }
-        pointer = (RADIOBUTTON*)pointer->pNext;
+
+        pointer = (RADIOBUTTON *)pointer->pNext;
     }
 
-    return -1;     
+    return (-1);
 }
 
 /*********************************************************************
@@ -172,8 +199,8 @@ RADIOBUTTON* pointer;
 ********************************************************************/
 void RbSetText(RADIOBUTTON *pRb, XCHAR *pText)
 {
-	pRb->pText = pText;
-	pRb->textHeight = GetTextHeight((BYTE *)pRb->hdr.pGolScheme->pFont);
+    pRb->pText = pText;
+    pRb->textHeight = GetTextHeight((BYTE *)pRb->hdr.pGolScheme->pFont);
 }
 
 /*********************************************************************
@@ -182,33 +209,40 @@ void RbSetText(RADIOBUTTON *pRb, XCHAR *pText)
 * Overview: changes the state of the radio button by default
 *
 ********************************************************************/
-void RbMsgDefault(WORD translatedMsg, RADIOBUTTON* pRb, GOL_MSG* pMsg){
-RADIOBUTTON* pointer;
+void RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG *pMsg)
+{
+    RADIOBUTTON *pointer;
 
-#ifdef  USE_FOCUS
-#ifdef  USE_TOUCHSCREEN
-    if(pMsg->type == TYPE_TOUCHSCREEN){
-        if(!GetState(pRb,RB_FOCUSED)){
-                GOLSetFocus((OBJ_HEADER*)pRb);
+        #ifdef USE_FOCUS
+            #ifdef USE_TOUCHSCREEN
+    if(pMsg->type == TYPE_TOUCHSCREEN)
+    {
+        if(!GetState(pRb, RB_FOCUSED))
+        {
+            GOLSetFocus((OBJ_HEADER *)pRb);
         }
     }
-#endif
-#endif
 
-    if(translatedMsg == RB_MSG_CHECKED){
+            #endif
+        #endif
+    if(translatedMsg == RB_MSG_CHECKED)
+    {
 
         // Uncheck radio buttons in the group
-        pointer = (RADIOBUTTON*) pRb->pHead;
+        pointer = (RADIOBUTTON *)pRb->pHead;
 
-        while(pointer != NULL){
-            if(GetState(pointer,RB_CHECKED)){
-               ClrState(pointer, RB_CHECKED);       // reset check
-               SetState(pointer, RB_DRAW_CHECK);  // redraw
+        while(pointer != NULL)
+        {
+            if(GetState(pointer, RB_CHECKED))
+            {
+                ClrState(pointer, RB_CHECKED);      // reset check
+                SetState(pointer, RB_DRAW_CHECK);   // redraw
             }
-            pointer = (RADIOBUTTON*)pointer->pNext;
-        }            
 
-        SetState(pRb, RB_CHECKED|RB_DRAW_CHECK); // set check and redraw
+            pointer = (RADIOBUTTON *)pointer->pNext;
+        }
+
+        SetState(pRb, RB_CHECKED | RB_DRAW_CHECK);  // set check and redraw
     }
 }
 
@@ -220,50 +254,56 @@ RADIOBUTTON* pointer;
 ********************************************************************/
 WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
 {
-	// Evaluate if the message is for the radio button
+
+    // Evaluate if the message is for the radio button
     // Check if disabled first
-	if ( GetState(pRb,RB_DISABLED) )
-		return OBJ_MSG_INVALID;
+    if(GetState(pRb, RB_DISABLED))
+        return (OBJ_MSG_INVALID);
 
-#ifdef USE_TOUCHSCREEN    
-    if(pMsg->type == TYPE_TOUCHSCREEN){
-        if(pMsg->uiEvent == EVENT_PRESS){
-    	    // Check if it falls in the radio button borders
-	        if( (pRb->hdr.left   < pMsg->param1) &&
-   	            (pRb->hdr.right  > pMsg->param1) &&
-                (pRb->hdr.top    < pMsg->param2) &&
-                (pRb->hdr.bottom > pMsg->param2) ){
+        #ifdef USE_TOUCHSCREEN
+    if(pMsg->type == TYPE_TOUCHSCREEN)
+    {
+        if(pMsg->uiEvent == EVENT_PRESS)
+        {
 
-                if(!GetState(pRb,RB_CHECKED))
-                    return RB_MSG_CHECKED;
+            // Check if it falls in the radio button borders
+            if
+            (
+                (pRb->hdr.left < pMsg->param1) &&
+                (pRb->hdr.right > pMsg->param1) &&
+                (pRb->hdr.top < pMsg->param2) &&
+                (pRb->hdr.bottom > pMsg->param2)
+            )
+            {
+                if(!GetState(pRb, RB_CHECKED))
+                    return (RB_MSG_CHECKED);
             }
         }
 
-	    return OBJ_MSG_INVALID;	
+        return (OBJ_MSG_INVALID);
     }
-#endif
 
-#ifdef USE_KEYBOARD
-
-    if(pMsg->type == TYPE_KEYBOARD){
-
-	    if(pMsg->param1 == pRb->hdr.ID){
-
-            if(pMsg->uiEvent == EVENT_KEYSCAN){
-                if( (pMsg->param2 == SCAN_SPACE_PRESSED)||
-                    (pMsg->param2 == SCAN_CR_PRESSED) ) {
-
-                    if(!GetState(pRb,RB_CHECKED))
-                        return RB_MSG_CHECKED;
+        #endif
+        #ifdef USE_KEYBOARD
+    if(pMsg->type == TYPE_KEYBOARD)
+    {
+        if(pMsg->param1 == pRb->hdr.ID)
+        {
+            if(pMsg->uiEvent == EVENT_KEYSCAN)
+            {
+                if((pMsg->param2 == SCAN_SPACE_PRESSED) || (pMsg->param2 == SCAN_CR_PRESSED))
+                {
+                    if(!GetState(pRb, RB_CHECKED))
+                        return (RB_MSG_CHECKED);
                 }
             }
         }
-        return OBJ_MSG_INVALID;	
+
+        return (OBJ_MSG_INVALID);
     }
 
-#endif
-
-	return OBJ_MSG_INVALID;	
+        #endif
+    return (OBJ_MSG_INVALID);
 }
 
 /*********************************************************************
@@ -278,147 +318,190 @@ WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
 ********************************************************************/
 WORD RbDraw(RADIOBUTTON *pRb)
 {
-typedef enum {
-	REMOVE,
-	DRAW_BUTTON0,
-	DRAW_BUTTON1,
-	DRAW_TEXT,
-	DRAW_TEXT_RUN,
-    DRAW_CHECK,
-    DRAW_CHECK_RUN,
-    DRAW_FOC
-} RB_DRAW_STATES;
+    typedef enum
+    {
+        REMOVE,
+        DRAW_BUTTON0,
+        DRAW_BUTTON1,
+        DRAW_TEXT,
+        DRAW_TEXT_RUN,
+        DRAW_CHECK,
+        DRAW_CHECK_RUN,
+        DRAW_FOC
+    } RB_DRAW_STATES;
 
-#define SIN45 46341
-static RB_DRAW_STATES state = REMOVE;
-SHORT checkIndent;
-static SHORT radius;
-static SHORT x, y;
-static DWORD_VAL  temp;
+        #define SIN45   46341
 
-WORD faceClr;
+    static RB_DRAW_STATES   state = REMOVE;
+    SHORT                   checkIndent;
+    static SHORT            radius;
+    static SHORT            x, y;
+    static DWORD_VAL        temp;
+
+    WORD                    faceClr;
 
     if(IsDeviceBusy())
-        return 0;
+        return (0);
 
-    switch(state){
-
+    switch(state)
+    {
         case REMOVE:
-            if(GetState(pRb,(RB_HIDE|RB_DRAW))){
-               	SetColor(pRb->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pRb->hdr.left,pRb->hdr.top,pRb->hdr.right,pRb->hdr.bottom)) return 0;
+            if(GetState(pRb, (RB_HIDE | RB_DRAW)))
+            {
+                SetColor(pRb->hdr.pGolScheme->CommonBkColor);
+                if(!Bar(pRb->hdr.left, pRb->hdr.top, pRb->hdr.right, pRb->hdr.bottom))
+                    return (0);
             }
-            if(GetState(pRb,RB_HIDE))
-                return 1;
 
-            radius = ((pRb->hdr.bottom-pRb->hdr.top)>>1) - RB_INDENT;
-            x = pRb->hdr.left+((pRb->hdr.bottom-pRb->hdr.top)>>1) + RB_INDENT;
-            y = (pRb->hdr.bottom+pRb->hdr.top)>>1;
+            if(GetState(pRb, RB_HIDE))
+                return (1);
+
+            radius = ((pRb->hdr.bottom - pRb->hdr.top) >> 1) - RB_INDENT;
+            x = pRb->hdr.left + ((pRb->hdr.bottom - pRb->hdr.top) >> 1) + RB_INDENT;
+            y = (pRb->hdr.bottom + pRb->hdr.top) >> 1;
             temp.Val = SIN45;
-            
-	        if(GetState(pRb,RB_DRAW)){
-	            state = DRAW_BUTTON0;
-	        } 
-	        else {
-	        	state = DRAW_CHECK;
-	        	goto rb_draw_check;
-	        }
+
+            if(GetState(pRb, RB_DRAW))
+            {
+                state = DRAW_BUTTON0;
+            }
+            else
+            {
+                state = DRAW_CHECK;
+                goto rb_draw_check;
+            }
 
         case DRAW_BUTTON0:
-            if(!GetState(pRb,RB_DISABLED)){
-	            faceClr = pRb->hdr.pGolScheme->Color0;
-            }else{
-	            faceClr = pRb->hdr.pGolScheme->ColorDisabled;
+            if(!GetState(pRb, RB_DISABLED))
+            {
+                faceClr = pRb->hdr.pGolScheme->Color0;
             }
-			GOLPanelDraw(x, y, x, y, radius, faceClr, 
-							pRb->hdr.pGolScheme->EmbossDkColor, pRb->hdr.pGolScheme->EmbossLtColor, 
-							NULL, GOL_EMBOSS_SIZE);
-            state = DRAW_BUTTON1;	
+            else
+            {
+                faceClr = pRb->hdr.pGolScheme->ColorDisabled;
+            }
 
- 		case DRAW_BUTTON1:
-            if(!GOLPanelDrawTsk()){
-                return 0;
+            GOLPanelDraw
+            (
+                x,
+                y,
+                x,
+                y,
+                radius,
+                faceClr,
+                pRb->hdr.pGolScheme->EmbossDkColor,
+                pRb->hdr.pGolScheme->EmbossLtColor,
+                NULL,
+                GOL_EMBOSS_SIZE
+            );
+            state = DRAW_BUTTON1;
+
+        case DRAW_BUTTON1:
+            if(!GOLPanelDrawTsk())
+            {
+                return (0);
             }
-   			state = DRAW_TEXT;
+
+            state = DRAW_TEXT;
 
         case DRAW_TEXT:
+            if(pRb->pText != NULL)
+            {
+                SetFont(pRb->hdr.pGolScheme->pFont);
 
-        	if(pRb->pText != NULL){
-				SetFont(pRb->hdr.pGolScheme->pFont);
-
-                if(GetState(pRb,RB_DISABLED)){
-		        	SetColor(pRb->hdr.pGolScheme->TextColorDisabled);	                
-                }else{
+                if(GetState(pRb, RB_DISABLED))
+                {
+                    SetColor(pRb->hdr.pGolScheme->TextColorDisabled);
+                }
+                else
+                {
                     SetColor(pRb->hdr.pGolScheme->TextColor0);
                 }
 
-                MoveTo( pRb->hdr.left+pRb->hdr.bottom-pRb->hdr.top+RB_INDENT,
-                		(pRb->hdr.bottom+pRb->hdr.top-pRb->textHeight)>>1 );
+                MoveTo
+                (
+                    pRb->hdr.left + pRb->hdr.bottom - pRb->hdr.top + RB_INDENT,
+                    (pRb->hdr.bottom + pRb->hdr.top - pRb->textHeight) >> 1
+                );
 
                 state = DRAW_TEXT_RUN;
 
-                case DRAW_TEXT_RUN:
-                	if(!OutText(pRb->pText))
-                    	return 0;
+            case DRAW_TEXT_RUN:
+                if(!OutText(pRb->pText))
+                    return (0);
             }
+
             state = DRAW_CHECK;
 
-rb_draw_check:
-        case DRAW_CHECK:
+    rb_draw_check:
 
-            if(GetState(pRb,RB_CHECKED)){
-                if(GetState(pRb,RB_DISABLED)){
+        case DRAW_CHECK:
+            if(GetState(pRb, RB_CHECKED))
+            {
+                if(GetState(pRb, RB_DISABLED))
+                {
                     SetColor(pRb->hdr.pGolScheme->TextColorDisabled);
-                }else{
-   	       	    #if (COLOR_DEPTH == 1)
-                	SetColor(BLACK);
-                #else
-                    SetColor(pRb->hdr.pGolScheme->TextColor0);
-                #endif    
                 }
-            }else{
-                if(GetState(pRb,RB_DISABLED)){
-                    SetColor(pRb->hdr.pGolScheme->ColorDisabled);
-                }else{
-   	       	    #if (COLOR_DEPTH == 1)
-                	SetColor(WHITE);
-                #else
-                    SetColor(pRb->hdr.pGolScheme->Color0);
-                #endif    
+                else
+                {
+                        #if (COLOR_DEPTH == 1)
+                    SetColor(BLACK);
+                        #else
+                    SetColor(pRb->hdr.pGolScheme->TextColor0);
+                        #endif
                 }
             }
-            
+            else
+            {
+                if(GetState(pRb, RB_DISABLED))
+                {
+                    SetColor(pRb->hdr.pGolScheme->ColorDisabled);
+                }
+                else
+                {
+                        #if (COLOR_DEPTH == 1)
+                    SetColor(WHITE);
+                        #else
+                    SetColor(pRb->hdr.pGolScheme->Color0);
+                        #endif
+                }
+            }
+
             state = DRAW_CHECK_RUN;
-            
+
         case DRAW_CHECK_RUN:
-            checkIndent = (pRb->hdr.bottom-pRb->hdr.top)>>2;
-            if(!FillCircle(x,y,radius-checkIndent))
-            	return 0;
+            checkIndent = (pRb->hdr.bottom - pRb->hdr.top) >> 2;
+            if(!FillCircle(x, y, radius - checkIndent))
+                return (0);
 
             state = DRAW_FOC;
 
         case DRAW_FOC:
-
-	        if(GetState(pRb,RB_DRAW|RB_DRAW_FOCUS)){
+            if(GetState(pRb, RB_DRAW | RB_DRAW_FOCUS))
+            {
                 if(IsDeviceBusy())
-                    return 0;
+                    return (0);
 
-    	        if(GetState(pRb,RB_FOCUSED)){
-		            SetColor(pRb->hdr.pGolScheme->TextColor0);
-                }else{
+                if(GetState(pRb, RB_FOCUSED))
+                {
+                    SetColor(pRb->hdr.pGolScheme->TextColor0);
+                }
+                else
+                {
                     SetColor(pRb->hdr.pGolScheme->CommonBkColor);
                 }
-    	        SetLineType(FOCUS_LINE);
-		        if(!Rectangle(pRb->hdr.left, pRb->hdr.top,
-                          pRb->hdr.right, pRb->hdr.bottom))
-                          return 0;
-		        SetLineType(SOLID_LINE);
-	        }
+
+                SetLineType(FOCUS_LINE);
+                if(!Rectangle(pRb->hdr.left, pRb->hdr.top, pRb->hdr.right, pRb->hdr.bottom))
+                    return (0);
+                SetLineType(SOLID_LINE);
+            }
 
             state = REMOVE;
-            return 1;
+            return (1);
     }
-    return 1;
+
+    return (1);
 }
 
 #endif // USE_RADIOBUTTON

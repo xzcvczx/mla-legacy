@@ -49,8 +49,9 @@
  * get/set operations.
  *
  *****************************************************************************/
-RTCC _time;
-RTCC _time_chk;
+RTCC            _time;
+RTCC            _time_chk;
+
 /*****************************************************************************
  * Arrays: _time_str and _date_str
  *
@@ -58,11 +59,12 @@ RTCC _time_chk;
  * RTCCProcessEvents updates them.
  *
  *****************************************************************************/
-char _time_str[16] = "                ";		// Sat 10:01:15
-char _date_str[16] = "                ";		// Sep 30, 2005
+char            _time_str[16] = "                "; // Sat 10:01:15
+char            _date_str[16] = "                "; // Sep 30, 2005
 
 // The flag stops updating time and date and used for get/set operations.
-unsigned char _rtcc_flag;
+unsigned char   _rtcc_flag;
+
 /*****************************************************************************
  * Function: RTCCProcessEvents
  *
@@ -79,110 +81,213 @@ unsigned char _rtcc_flag;
  *****************************************************************************/
 void RTCCProcessEvents(void)
 {
-	// Process time object only if time is not being set
-	while (!_rtcc_flag) {
 
+    // Process time object only if time is not being set
+    while(!_rtcc_flag)
+    {
+        #ifdef __PIC32MX
 
-#ifdef __PIC32MX
-		// Grab the time
-		_time.sec = *((BYTE*)&RTCTIME + 1); // SEC
-		_time.min = *((BYTE*)&RTCTIME + 2); // MIN
-		_time.hr = *((BYTE*)&RTCTIME + 3);  // HR
-		_time.wkd = RTCDATEbits.WDAY01;     // WDAY
-        _time.day = *((BYTE*)&RTCDATE + 1); // DAY;
-        _time.mth = *((BYTE*)&RTCDATE + 2); // MONTH;
-        _time.yr = *((BYTE*)&RTCDATE + 3);  // YEAR
-		
-		// Grab the time again 
-		_time_chk.sec = *((BYTE*)&RTCTIME + 1); // SEC
-		_time_chk.min = *((BYTE*)&RTCTIME + 2); // MIN
-		_time_chk.hr = *((BYTE*)&RTCTIME + 3);  // HR
-		_time_chk.wkd = RTCDATEbits.WDAY01;     // WDAY
-        _time_chk.day = *((BYTE*)&RTCDATE + 1); // DAY;
-        _time_chk.mth = *((BYTE*)&RTCDATE + 2); // MONTH;
-        _time_chk.yr = *((BYTE*)&RTCDATE + 3);  // YEAR
-#else
-		// Grab the time
-		RCFGCALbits.RTCPTR = 0;			
-		_time.prt00 = RTCVAL;
-		RCFGCALbits.RTCPTR = 1;			
-		_time.prt01 = RTCVAL;
-		RCFGCALbits.RTCPTR = 2;			
-		_time.prt10 = RTCVAL;
-		RCFGCALbits.RTCPTR = 3;			
-		_time.prt11 = RTCVAL;
+        // Grab the time
+        _time.sec = *((BYTE *) &RTCTIME + 1);       // SEC
+        _time.min = *((BYTE *) &RTCTIME + 2);       // MIN
+        _time.hr = *((BYTE *) &RTCTIME + 3);        // HR
+        _time.wkd = RTCDATEbits.WDAY01;             // WDAY
+        _time.day = *((BYTE *) &RTCDATE + 1);       // DAY;
+        _time.mth = *((BYTE *) &RTCDATE + 2);       // MONTH;
+        _time.yr = *((BYTE *) &RTCDATE + 3);        // YEAR
 
-		// Grab the time again 
-		RCFGCALbits.RTCPTR = 0;			
-		_time_chk.prt00 = RTCVAL;
-		RCFGCALbits.RTCPTR = 1;			
-		_time_chk.prt01 = RTCVAL;
-		RCFGCALbits.RTCPTR = 2;			
-		_time_chk.prt10 = RTCVAL;
-		RCFGCALbits.RTCPTR = 3;			
-		_time_chk.prt11 = RTCVAL;
-#endif
-		// Verify there is no roll-over
-		if ((_time.prt00 == _time_chk.prt00) &&
-			(_time.prt01 == _time_chk.prt01) &&
-			(_time.prt10 == _time_chk.prt10) &&
-			(_time.prt11 == _time_chk.prt11))
-		{
-			switch (_time.mth) {
-				default:
-				case 0x01: _date_str[0] = 'J'; _date_str[1] = 'a'; _date_str[2] = 'n'; break; 
-				case 0x02: _date_str[0] = 'F'; _date_str[1] = 'e'; _date_str[2] = 'b'; break; 
-				case 0x03: _date_str[0] = 'M'; _date_str[1] = 'a'; _date_str[2] = 'r'; break; 
-				case 0x04: _date_str[0] = 'A'; _date_str[1] = 'p'; _date_str[2] = 'r'; break; 
-				case 0x05: _date_str[0] = 'M'; _date_str[1] = 'a'; _date_str[2] = 'y'; break; 
-				case 0x06: _date_str[0] = 'J'; _date_str[1] = 'u'; _date_str[2] = 'n'; break; 
-				case 0x07: _date_str[0] = 'J'; _date_str[1] = 'u'; _date_str[2] = 'l'; break; 
-				case 0x08: _date_str[0] = 'A'; _date_str[1] = 'u'; _date_str[2] = 'g'; break; 
-				case 0x09: _date_str[0] = 'S'; _date_str[1] = 'e'; _date_str[2] = 'p'; break; 
-				case 0x10: _date_str[0] = 'O'; _date_str[1] = 'c'; _date_str[2] = 't'; break; 
-				case 0x11: _date_str[0] = 'N'; _date_str[1] = 'o'; _date_str[2] = 'v'; break; 
-				case 0x12: _date_str[0] = 'D'; _date_str[1] = 'e'; _date_str[2] = 'c'; break; 
-			}
+        // Grab the time again
+        _time_chk.sec = *((BYTE *) &RTCTIME + 1);   // SEC
+        _time_chk.min = *((BYTE *) &RTCTIME + 2);   // MIN
+        _time_chk.hr = *((BYTE *) &RTCTIME + 3);    // HR
+        _time_chk.wkd = RTCDATEbits.WDAY01;         // WDAY
+        _time_chk.day = *((BYTE *) &RTCDATE + 1);   // DAY;
+        _time_chk.mth = *((BYTE *) &RTCDATE + 2);   // MONTH;
+        _time_chk.yr = *((BYTE *) &RTCDATE + 3);    // YEAR
+        #else
 
-			_date_str[3] = ' ';
-			_date_str[6] = ',';
-			_date_str[7] = ' ';
-			_date_str[8] = '2';
-			_date_str[9] = '0';
+        // Grab the time
+        RCFGCALbits.RTCPTR = 0;
+        _time.prt00 = RTCVAL;
+        RCFGCALbits.RTCPTR = 1;
+        _time.prt01 = RTCVAL;
+        RCFGCALbits.RTCPTR = 2;
+        _time.prt10 = RTCVAL;
+        RCFGCALbits.RTCPTR = 3;
+        _time.prt11 = RTCVAL;
 
-			_date_str[4] = (_time.day >> 4) + '0';
-			_date_str[5] = (_time.day & 0xF) + '0';
+        // Grab the time again
+        RCFGCALbits.RTCPTR = 0;
+        _time_chk.prt00 = RTCVAL;
+        RCFGCALbits.RTCPTR = 1;
+        _time_chk.prt01 = RTCVAL;
+        RCFGCALbits.RTCPTR = 2;
+        _time_chk.prt10 = RTCVAL;
+        RCFGCALbits.RTCPTR = 3;
+        _time_chk.prt11 = RTCVAL;
+        #endif
 
-			_date_str[10] = (_time.yr >> 4) + '0';
-			_date_str[11] = (_time.yr & 0xF) + '0';
+        // Verify there is no roll-over
+        if
+        (
+            (_time.prt00 == _time_chk.prt00) &&
+            (_time.prt01 == _time_chk.prt01) &&
+            (_time.prt10 == _time_chk.prt10) &&
+            (_time.prt11 == _time_chk.prt11)
+        )
+        {
+            switch(_time.mth)
+            {
+                default:
 
-			switch (_time.wkd) {
-				default:
-				case 0x00: _time_str[0] = 'S'; _time_str[1] = 'u'; _time_str[2] = 'n'; break; 
-				case 0x01: _time_str[0] = 'M'; _time_str[1] = 'o'; _time_str[2] = 'n'; break; 
-				case 0x02: _time_str[0] = 'T'; _time_str[1] = 'u'; _time_str[2] = 'e'; break; 
-				case 0x03: _time_str[0] = 'W'; _time_str[1] = 'e'; _time_str[2] = 'd'; break; 
-				case 0x04: _time_str[0] = 'T'; _time_str[1] = 'h'; _time_str[2] = 'u'; break; 
-				case 0x05: _time_str[0] = 'F'; _time_str[1] = 'r'; _time_str[2] = 'i'; break; 
-				case 0x06: _time_str[0] = 'S'; _time_str[1] = 'a'; _time_str[2] = 't'; break;  
-			}
-			
-			_time_str[3] = ' ';
-			_time_str[6] = ':';
-			_time_str[9] = ':';
+                case 0x01:
+                    _date_str[0] = 'J';
+                    _date_str[1] = 'a';
+                    _date_str[2] = 'n';
+                    break;
 
-			_time_str[4] = (_time.hr >> 4) + '0';
-			_time_str[5] = (_time.hr & 0xF) + '0';
+                case 0x02:
+                    _date_str[0] = 'F';
+                    _date_str[1] = 'e';
+                    _date_str[2] = 'b';
+                    break;
 
-			_time_str[7] = (_time.min >> 4) + '0';
-			_time_str[8] = (_time.min & 0xF) + '0';
+                case 0x03:
+                    _date_str[0] = 'M';
+                    _date_str[1] = 'a';
+                    _date_str[2] = 'r';
+                    break;
 
-			_time_str[10] = (_time.sec >> 4) + '0';
-			_time_str[11] = (_time.sec & 0xF) + '0';
+                case 0x04:
+                    _date_str[0] = 'A';
+                    _date_str[1] = 'p';
+                    _date_str[2] = 'r';
+                    break;
 
-			break;
-		}	
-	}
+                case 0x05:
+                    _date_str[0] = 'M';
+                    _date_str[1] = 'a';
+                    _date_str[2] = 'y';
+                    break;
+
+                case 0x06:
+                    _date_str[0] = 'J';
+                    _date_str[1] = 'u';
+                    _date_str[2] = 'n';
+                    break;
+
+                case 0x07:
+                    _date_str[0] = 'J';
+                    _date_str[1] = 'u';
+                    _date_str[2] = 'l';
+                    break;
+
+                case 0x08:
+                    _date_str[0] = 'A';
+                    _date_str[1] = 'u';
+                    _date_str[2] = 'g';
+                    break;
+
+                case 0x09:
+                    _date_str[0] = 'S';
+                    _date_str[1] = 'e';
+                    _date_str[2] = 'p';
+                    break;
+
+                case 0x10:
+                    _date_str[0] = 'O';
+                    _date_str[1] = 'c';
+                    _date_str[2] = 't';
+                    break;
+
+                case 0x11:
+                    _date_str[0] = 'N';
+                    _date_str[1] = 'o';
+                    _date_str[2] = 'v';
+                    break;
+
+                case 0x12:
+                    _date_str[0] = 'D';
+                    _date_str[1] = 'e';
+                    _date_str[2] = 'c';
+                    break;
+            }
+
+            _date_str[3] = ' ';
+            _date_str[6] = ',';
+            _date_str[7] = ' ';
+            _date_str[8] = '2';
+            _date_str[9] = '0';
+
+            _date_str[4] = (_time.day >> 4) + '0';
+            _date_str[5] = (_time.day & 0xF) + '0';
+
+            _date_str[10] = (_time.yr >> 4) + '0';
+            _date_str[11] = (_time.yr & 0xF) + '0';
+
+            switch(_time.wkd)
+            {
+                default:
+
+                case 0x00:
+                    _time_str[0] = 'S';
+                    _time_str[1] = 'u';
+                    _time_str[2] = 'n';
+                    break;
+
+                case 0x01:
+                    _time_str[0] = 'M';
+                    _time_str[1] = 'o';
+                    _time_str[2] = 'n';
+                    break;
+
+                case 0x02:
+                    _time_str[0] = 'T';
+                    _time_str[1] = 'u';
+                    _time_str[2] = 'e';
+                    break;
+
+                case 0x03:
+                    _time_str[0] = 'W';
+                    _time_str[1] = 'e';
+                    _time_str[2] = 'd';
+                    break;
+
+                case 0x04:
+                    _time_str[0] = 'T';
+                    _time_str[1] = 'h';
+                    _time_str[2] = 'u';
+                    break;
+
+                case 0x05:
+                    _time_str[0] = 'F';
+                    _time_str[1] = 'r';
+                    _time_str[2] = 'i';
+                    break;
+
+                case 0x06:
+                    _time_str[0] = 'S';
+                    _time_str[1] = 'a';
+                    _time_str[2] = 't';
+                    break;
+            }
+
+            _time_str[3] = ' ';
+            _time_str[6] = ':';
+            _time_str[9] = ':';
+
+            _time_str[4] = (_time.hr >> 4) + '0';
+            _time_str[5] = (_time.hr & 0xF) + '0';
+
+            _time_str[7] = (_time.min >> 4) + '0';
+            _time_str[8] = (_time.min & 0xF) + '0';
+
+            _time_str[10] = (_time.sec >> 4) + '0';
+            _time_str[11] = (_time.sec & 0xF) + '0';
+
+            break;
+        }
+    }
 }
 
 /*****************************************************************************
@@ -198,41 +303,41 @@ void RTCCProcessEvents(void)
  *****************************************************************************/
 void RTCCInit(void)
 {
+
     // Enables the LP OSC for RTCC operation
-#ifdef __PIC32MX
+    #ifdef __PIC32MX
     OSCCONbits.SOSCEN = 1;
-#else
-	asm("mov #OSCCON,W1");
-	asm("mov.b	#0x02, W0");
-	asm("mov.b	#0x46, W2");
-	asm("mov.b	#0x57, W3");
-	asm("mov.b	W2, [W1]");
-	asm("mov.b	W3, [W1]");
-	asm("mov.b	W0, [W1]");		
-#endif
+    #else
+    asm("mov #OSCCON,W1");
+    asm("mov.b	#0x02, W0");
+    asm("mov.b	#0x46, W2");
+    asm("mov.b	#0x57, W3");
+    asm("mov.b	W2, [W1]");
+    asm("mov.b	W3, [W1]");
+    asm("mov.b	W0, [W1]");
+    #endif
 
     // Unlock sequence must take place for RTCEN to be written
-#ifdef __PIC32MX
+    #ifdef __PIC32MX
     RTCCON = 0;
-#else
-	RCFGCAL	= 0x0000;			    
-#endif
+    #else
+    RCFGCAL = 0x0000;
+    #endif
     mRTCCUnlock();
-#ifdef __PIC32MX
+    #ifdef __PIC32MX
     RTCCONbits.ON = 1;
-#else
+    #else
     RCFGCALbits.RTCEN = 1;
-#endif
+    #endif
     mRTCCOn();
-    RTCCSetBinSec(    RTCC_DEFAULT_SECOND );
-    RTCCSetBinMin(    RTCC_DEFAULT_MINUTE );
-    RTCCSetBinHour(   RTCC_DEFAULT_HOUR );
-    RTCCSetBinWkDay(  RTCC_DEFAULT_WEEKDAY );
-    RTCCSetBinDay(    RTCC_DEFAULT_DAY );
-    RTCCSetBinMonth(  RTCC_DEFAULT_MONTH );
-    RTCCSetBinYear(   RTCC_DEFAULT_YEAR );
-    mRTCCSet();	
-	
+    RTCCSetBinSec(RTCC_DEFAULT_SECOND);
+    RTCCSetBinMin(RTCC_DEFAULT_MINUTE);
+    RTCCSetBinHour(RTCC_DEFAULT_HOUR);
+    RTCCSetBinWkDay(RTCC_DEFAULT_WEEKDAY);
+    RTCCSetBinDay(RTCC_DEFAULT_DAY);
+    RTCCSetBinMonth(RTCC_DEFAULT_MONTH);
+    RTCCSetBinYear(RTCC_DEFAULT_YEAR);
+    mRTCCSet();
 }
 
 /*****************************************************************************
@@ -249,28 +354,29 @@ void RTCCInit(void)
  *****************************************************************************/
 void RTCCSet(void)
 {
-	mRTCCUnlock();			// Unlock the RTCC
-	// Set the time
-#ifdef __PIC32MX
-	*((BYTE*)&RTCTIME + 1) = _time_chk.sec; // SEC
-	*((BYTE*)&RTCTIME + 2) = _time_chk.min; // MIN
-	*((BYTE*)&RTCTIME + 3) = _time_chk.hr;  // HR
-	RTCDATEbits.WDAY01 = _time_chk.wkd;     // WDAY
-    *((BYTE*)&RTCDATE + 1) = _time_chk.day; // DAY;
-    *((BYTE*)&RTCDATE + 2) = _time_chk.mth; // MONTH;
-    *((BYTE*)&RTCDATE + 3) = _time_chk.yr;  // YEAR
-#else
-	RCFGCALbits.RTCPTR = 0;			
-	RTCVAL = _time_chk.prt00;
-	RCFGCALbits.RTCPTR = 1;			
-	RTCVAL = _time_chk.prt01;
-	RCFGCALbits.RTCPTR = 2;			
-	RTCVAL = _time_chk.prt10;
-	RCFGCALbits.RTCPTR = 3;			
-	RTCVAL = _time_chk.prt11;
-#endif
-	mRTCCLock();			// Lock the RTCC
-	_rtcc_flag = 0;			// Release the lock on the time
+    mRTCCUnlock();                              // Unlock the RTCC
+
+    // Set the time
+    #ifdef __PIC32MX
+    * ((BYTE *) &RTCTIME + 1) = _time_chk.sec;  // SEC
+    *((BYTE *) &RTCTIME + 2) = _time_chk.min;   // MIN
+    *((BYTE *) &RTCTIME + 3) = _time_chk.hr;    // HR
+    RTCDATEbits.WDAY01 = _time_chk.wkd;         // WDAY
+    *((BYTE *) &RTCDATE + 1) = _time_chk.day;   // DAY;
+    *((BYTE *) &RTCDATE + 2) = _time_chk.mth;   // MONTH;
+    *((BYTE *) &RTCDATE + 3) = _time_chk.yr;    // YEAR
+    #else
+    RCFGCALbits.RTCPTR = 0;
+    RTCVAL = _time_chk.prt00;
+    RCFGCALbits.RTCPTR = 1;
+    RTCVAL = _time_chk.prt01;
+    RCFGCALbits.RTCPTR = 2;
+    RTCVAL = _time_chk.prt10;
+    RCFGCALbits.RTCPTR = 3;
+    RTCVAL = _time_chk.prt11;
+    #endif
+    mRTCCLock();                                // Lock the RTCC
+    _rtcc_flag = 0;                             // Release the lock on the time
 }
 
 /*****************************************************************************
@@ -285,25 +391,29 @@ void RTCCSet(void)
  * Output: None.
  *
  *****************************************************************************/
-void RTCCUnlock(void){
-#ifdef __PIC32MX
-    SYSKEY = 0xaa996655; // write first unlock key to SYSKEY
-    SYSKEY = 0x556699aa; // write second unlock key to SYSKEY
-    RTCCONSET = 0x8;     // set RTCWREN in RTCCONSET
-#else
-	asm volatile("disi	#5");
-	asm volatile("mov	#0x55, w7");
-	asm volatile("mov	w7, _NVMKEY");
-	asm volatile("mov	#0xAA, w8");
-	asm volatile("mov	w8, _NVMKEY");
-//	asm volatile("bset	_NVMCON, #15");
+void RTCCUnlock(void)
+{
+    #ifdef __PIC32MX
+    SYSKEY = 0xaa996655;    // write first unlock key to SYSKEY
+    SYSKEY = 0x556699aa;    // write second unlock key to SYSKEY
+    RTCCONSET = 0x8;        // set RTCWREN in RTCCONSET
+    #else
+
+    asm volatile("disi	#5");
+    asm volatile("mov	#0x55, w7");
+    asm volatile("mov	w7, _NVMKEY");
+    asm volatile("mov	#0xAA, w8");
+    asm volatile("mov	w8, _NVMKEY");
+
+    //	asm volatile("bset	_NVMCON, #15");
     asm volatile("bset	_RCFGCAL, #13");
-	asm volatile("nop");
-	asm volatile("nop");
-#endif
-//	EECON2 = 0x55; 
-//	EECON2 = 0xAA; 
-//	RCFGCALbits.RTCWREN = 1;
+    asm volatile("nop");
+    asm volatile("nop");
+    #endif
+
+    //	EECON2 = 0x55;
+    //	EECON2 = 0xAA;
+    //	RCFGCALbits.RTCWREN = 1;
 }
 
 /*****************************************************************************
@@ -320,9 +430,12 @@ void RTCCUnlock(void){
  * Output: Checked BCD value in _time_chk structure.
  *
  *****************************************************************************/
-void RTCCSetBinSec(unsigned char Sec){
-    if(Sec == 0xff)  Sec = 59;
-    if(Sec == 60)  Sec = 0;
+void RTCCSetBinSec(unsigned char Sec)
+{
+    if(Sec == 0xff)
+        Sec = 59;
+    if(Sec == 60)
+        Sec = 0;
     mRTCCSetSec(mRTCCBin2Dec(Sec));
 }
 
@@ -340,9 +453,12 @@ void RTCCSetBinSec(unsigned char Sec){
  * Output: Checked BCD value in _time_chk structure.
  *
  *****************************************************************************/
-void RTCCSetBinMin(unsigned char Min){
-    if(Min == 0xff)   Min = 59;
-    if(Min == 60)  Min = 0;
+void RTCCSetBinMin(unsigned char Min)
+{
+    if(Min == 0xff)
+        Min = 59;
+    if(Min == 60)
+        Min = 0;
     mRTCCSetMin(mRTCCBin2Dec(Min));
 }
 
@@ -360,9 +476,12 @@ void RTCCSetBinMin(unsigned char Min){
  * Output: Checked BCD value in _time_chk structure.
  *
  *****************************************************************************/
-void RTCCSetBinHour(unsigned char Hour){
-    if(Hour == 0xff)  Hour = 23;
-    if(Hour == 24) Hour = 0;
+void RTCCSetBinHour(unsigned char Hour)
+{
+    if(Hour == 0xff)
+        Hour = 23;
+    if(Hour == 24)
+        Hour = 0;
     mRTCCSetHour(mRTCCBin2Dec(Hour));
 }
 
@@ -381,33 +500,38 @@ void RTCCSetBinHour(unsigned char Hour){
  * Output: Zero based week day in _time_chk structure.
  *
  *****************************************************************************/
-void RTCCCalculateWeekDay(){
-const char MonthOffset[] =
-//jan feb mar apr may jun jul aug sep oct nov dec
-{   0,  3,  3,  6,  1,  4,  6,  2,  5,  0,  3,  5 };
-unsigned Year;
-unsigned Month;
-unsigned Day;
-unsigned Offset;
-    // calculate week day 
-    Year  = mRTCCGetBinYear();
+void RTCCCalculateWeekDay(void)
+{
+    const char  MonthOffset[] =
+
+    //jan feb mar apr may jun jul aug sep oct nov dec
+    {   0,  3,  3,  6,  1,  4,  6,  2,  5,  0,  3,  5};
+    unsigned    Year;
+    unsigned    Month;
+    unsigned    Day;
+    unsigned    Offset;
+
+    // calculate week day
+    Year = mRTCCGetBinYear();
     Month = mRTCCGetBinMonth();
-    Day  = mRTCCGetBinDay();
-    
+    Day = mRTCCGetBinDay();
+
     // 2000s century offset = 6 +
     // every year 365%7 = 1 day shift +
     // every leap year adds 1 day
-    Offset = 6 + Year + Year/4;
+    Offset = 6 + Year + Year / 4;
+
     // Add month offset from table
-    Offset += MonthOffset[Month-1];
+    Offset += MonthOffset[Month - 1];
+
     // Add day
     Offset += Day;
 
     // If it's a leap year and before March there's no additional day yet
-    if((Year%4) == 0)
+    if((Year % 4) == 0)
         if(Month < 3)
             Offset -= 1;
-    
+
     // Week day is
     Offset %= 7;
 
@@ -428,26 +552,30 @@ unsigned Offset;
  * Output: Checked BCD value in _time_chk structure.
  *
  *****************************************************************************/
-void RTCCSetBinDay(unsigned char Day){
-const char MonthDaymax[] =
-//jan feb mar apr may jun jul aug sep oct nov dec
-{  31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-unsigned Daymax;
-unsigned Month;
-unsigned Year;
+void RTCCSetBinDay(unsigned char Day)
+{
+    const char  MonthDaymax[] =
+
+    //jan feb mar apr may jun jul aug sep oct nov dec
+    {  31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    unsigned    Daymax;
+    unsigned    Month;
+    unsigned    Year;
 
     Month = mRTCCGetBinMonth();
     Year = mRTCCGetBinYear();
 
-    Daymax = MonthDaymax[Month-1];
+    Daymax = MonthDaymax[Month - 1];
 
     // February has one day more for a leap year
     if(Month == 2)
-    if( (Year%4) == 0)
-        Daymax++;
+        if((Year % 4) == 0)
+            Daymax++;
 
-    if(Day == 0) Day = Daymax;
-    if(Day > Daymax) Day = 1;
+    if(Day == 0)
+        Day = Daymax;
+    if(Day > Daymax)
+        Day = 1;
     mRTCCSetDay(mRTCCBin2Dec(Day));
 }
 
@@ -465,9 +593,12 @@ unsigned Year;
  * Output: Checked BCD value in _time_chk structure.
  *
  *****************************************************************************/
-void RTCCSetBinMonth(unsigned char Month){
-    if(Month < 1) Month = 12;
-    if(Month > 12) Month = 1;
+void RTCCSetBinMonth(unsigned char Month)
+{
+    if(Month < 1)
+        Month = 12;
+    if(Month > 12)
+        Month = 1;
     mRTCCSetMonth(mRTCCBin2Dec(Month));
 }
 
@@ -485,10 +616,14 @@ void RTCCSetBinMonth(unsigned char Month){
  * Output: Checked BCD value in _time_chk structure.
  *
  *****************************************************************************/
-void RTCCSetBinYear(unsigned char Year){
-   if(Year == 0xff) Year = 99;
-   if(Year == 100)  Year = 0;
+void RTCCSetBinYear(unsigned char Year)
+{
+    if(Year == 0xff)
+        Year = 99;
+    if(Year == 100)
+        Year = 0;
     mRTCCSetYear(mRTCCBin2Dec(Year));
+
     // Recheck day. Leap year influences to Feb 28/29.
     RTCCSetBinDay(mRTCCGetBinDay());
 }

@@ -1,5 +1,10 @@
+/*$6*/
+
+
+
 #ifndef _FLASHIMAGE_H
- #define _FLASHIMAGE_H
+    #define _FLASHIMAGE_H
+
 /******************************************************************************
 
 * FileName:        FlashImage.h
@@ -36,15 +41,13 @@ Author                 Date           Comments
 --------------------------------------------------------------------------------
 Pradeep Budagutta    25-Jun-2008    First release
 *******************************************************************************/
- 
-#include "GenericTypeDefs.h"
-#include "FlashImageData.h"
+    #include "GenericTypeDefs.h"
+    #include "FlashImageData.h"
 
-size_t FlashImage_fread(void *ptr, size_t size, size_t n, void *stream);
-int FlashImage_fseek(void *stream, long offset, int whence);
-long FlashImage_ftell(void *fo);
-int FlashImage_feof(void *stream);
+size_t  FlashImage_fread(void *ptr, size_t size, size_t n, void *stream);
+int     FlashImage_fseek(void *stream, long offset, int whence);
+long    FlashImage_ftell(void *fo);
+int     FlashImage_feof(void *stream);
 
-void* FlashImage_fopen(IMAGE_NAME eImageName);
-
+void    *FlashImage_fopen(IMAGE_NAME eImageName);
 #endif

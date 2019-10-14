@@ -68,8 +68,8 @@
 
 //Configuration descriptors - if these two definitions do not exist then
 //  a ROM BYTE *ROM variable named exactly USB_CD_Ptr[] must exist.
-#define USB_USER_CONFIG_DESCRIPTOR USB_CD_Ptr
-#define USB_USER_CONFIG_DESCRIPTOR_INCLUDE extern ROM BYTE *ROM USB_CD_Ptr[]
+//#define USB_USER_CONFIG_DESCRIPTOR USB_CD_Ptr
+//#define USB_USER_CONFIG_DESCRIPTOR_INCLUDE extern ROM BYTE *ROM USB_CD_Ptr[]
 
 //Make sure only one of the below "#define USB_PING_PONG_MODE"
 //is uncommented.
@@ -79,8 +79,8 @@
 //#define USB_PING_PONG_MODE USB_PING_PONG__ALL_BUT_EP0		//NOTE: This mode is not supported in PIC18F4550 family rev A3 devices
 
 
-//#define USB_POLLING
-#define USB_INTERRUPT
+#define USB_POLLING
+//#define USB_INTERRUPT
 
 /* Parameter definitions are defined in usb_device.h */
 #define USB_PULLUP_OPTION USB_PULLUP_ENABLE

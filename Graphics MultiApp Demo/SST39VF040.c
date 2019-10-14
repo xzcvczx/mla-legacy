@@ -38,17 +38,15 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		01/14/08	...
  *****************************************************************************/
-
 #include "MainDemo.h"
 
-#if (GRAPHICS_PICTAIL_VERSION != 3)
-
-#define SST39PMPWaitBusy()  while(PMMODEbits.BUSY);
+#if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+    #define SST39PMPWaitBusy()  while(PMMODEbits.BUSY);
 
 /////////////////////////////////////////////////////////////////////////
 // Local prototypes
 /////////////////////////////////////////////////////////////////////////
-void SST39SetAddress(DWORD address);
+void    SST39SetAddress(DWORD address);
 
 /************************************************************************
 * Function: SST39Init                                                  
@@ -60,13 +58,15 @@ void SST39SetAddress(DWORD address);
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39Init()
-{   
-   // disable FLASH
+void SST39Init(void)
+{
+
+    // disable FLASH
     SST39_CS_LAT = 1;
-   // set FLASH CS pin as output
+
+    // set FLASH CS pin as output
     SST39_CS_TRIS = 0;
- 
+
     // upper address bits
     SST39_A18_LAT = 0;
     SST39_A17_LAT = 0;
@@ -75,28 +75,26 @@ void SST39Init()
     SST39_A17_TRIS = 0;
     SST39_A16_TRIS = 0;
 
-    // PMP setup 
+    // PMP setup
     PMMODE = 0;
     PMAEN = 0;
     PMCON = 0;
-    PMMODEbits.MODE   = 2;  // Master 2
-    PMMODEbits.WAITB  = 0;
-    PMMODEbits.WAITM  = 2;
-    PMMODEbits.WAITE  = 1;
-    PMMODEbits.INCM   = 1;  // auto increment address
-	PMMODEbits.MODE16 = 0;
+    PMMODEbits.MODE = 2;    // Master 2
+    PMMODEbits.WAITB = 0;
+    PMMODEbits.WAITM = 2;
+    PMMODEbits.WAITE = 1;
+    PMMODEbits.INCM = 1;    // auto increment address
+    PMMODEbits.MODE16 = 0;
 
     PMAENbits.PTEN0 = 1;
     PMAENbits.PTEN1 = 1;
 
     PMCONbits.ADRMUX = 2;   // address is muxed on data bus
-
-    PMCONbits.CSF    = 0;
-    PMCONbits.ALP    = 1;
-    PMCONbits.PTRDEN = 1;    
+    PMCONbits.CSF = 0;
+    PMCONbits.ALP = 1;
+    PMCONbits.PTRDEN = 1;
     PMCONbits.PTWREN = 1;
-    PMCONbits.PMPEN  = 1; 
-
+    PMCONbits.PMPEN = 1;
 }
 
 /************************************************************************
@@ -109,26 +107,27 @@ void SST39Init()
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39SetAddress(DWORD address){
+void SST39SetAddress(DWORD address)
+{
 
     // mask upper address bits
-    if(((DWORD_VAL)address).w[1]&0x01)
+    if(((DWORD_VAL) address).w[1] & 0x01)
         SST39_A16_LAT = 1;
     else
         SST39_A16_LAT = 0;
 
-    if(((DWORD_VAL)address).w[1]&0x02)
+    if(((DWORD_VAL) address).w[1] & 0x02)
         SST39_A17_LAT = 1;
     else
         SST39_A17_LAT = 0;
 
-    if(((DWORD_VAL)address).w[1]&0x04)
+    if(((DWORD_VAL) address).w[1] & 0x04)
         SST39_A18_LAT = 1;
     else
         SST39_A18_LAT = 0;
 
     // low address part
-    PMADDR=((DWORD_VAL)address).w[0];
+    PMADDR = ((DWORD_VAL) address).w[0];
 }
 
 /************************************************************************
@@ -143,39 +142,39 @@ void SST39SetAddress(DWORD address){
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39WriteByte(DWORD address, BYTE data){
-
+BYTE SST39WriteByte(DWORD address, BYTE data)
+{
     SST39SetAddress(0x55555555);
     SST39_CS_LAT = 0;
-    PMDIN1=0xaa;
+    PMDIN1 = 0xaa;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
 
     SST39SetAddress(0xaaaaaaaa);
     SST39_CS_LAT = 0;
-    PMDIN1=0x55;
+    PMDIN1 = 0x55;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
-    
+
     SST39SetAddress(0x55555555);
     SST39_CS_LAT = 0;
-    PMDIN1=0xa0;
+    PMDIN1 = 0xa0;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
-    
+
     SST39SetAddress(address);
     SST39_CS_LAT = 0;
-    PMDIN1=data;
+    PMDIN1 = data;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
 
     SST39WaitProgram();
 
     if(SST39ReadByte(address) == data)
-    if(SST39ReadByte(address) == data)
-        return 1; 
+        if(SST39ReadByte(address) == data)
+            return (1);
 
-    return 0; // failed
+    return (0); // failed
 }
 
 /************************************************************************
@@ -190,31 +189,34 @@ BYTE SST39WriteByte(DWORD address, BYTE data){
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39WriteArray(DWORD address, BYTE* pData, WORD nCount)
+BYTE SST39WriteArray(DWORD address, BYTE *pData, WORD nCount)
 {
-WORD    counter;
-BYTE*   pD;
-DWORD   addr;
+    WORD    counter;
+    BYTE    *pD;
+    DWORD   addr;
 
     pD = pData;
     addr = address;
 
     // write
-    for(counter=0; counter<nCount; counter++){
-       while(0 == SST39WriteByte(addr,*pD));
-       addr++; pD++;
+    for(counter = 0; counter < nCount; counter++)
+    {
+        while(0 == SST39WriteByte(addr, *pD));
+        addr++;
+        pD++;
     }
 
     pD = pData;
     addr = address;
 
     // verify
-    for(counter=0; counter<nCount; counter++){
+    for(counter = 0; counter < nCount; counter++)
+    {
         if(*pD++ != SST39ReadByte(addr++))
-            return 0;
+            return (0);
     }
 
-    return 1;
+    return (1);
 }
 
 /************************************************************************
@@ -227,51 +229,52 @@ DWORD   addr;
 * Output: none
 *                                                                       
 ************************************************************************/
-
-void SST39ReadArray(DWORD address, BYTE* pData, WORD nCount)
+void SST39ReadArray(DWORD address, BYTE *pData, WORD nCount)
 {
-WORD counter;
-BYTE temp;
+    WORD    counter;
+    BYTE    temp;
 
-    SST39SetAddress(address); 
+    SST39SetAddress(address);
+
     // enable
     SST39_CS_LAT = 0;
 
     // run dummy cycle to get data
     temp = PMDIN1;
 
-	for(counter=0; counter<nCount; counter++)
+    for(counter = 0; counter < nCount; counter++)
     {
         SST39PMPWaitBusy();
 
-  		if(PMADDR == 0){
-			// set upper address bits
-            address+=0x010000;
-    
-			if(((DWORD_VAL)address).v[2]&0x01)
-				SST39_A16_LAT = 1;
-			else
-				SST39_A16_LAT = 0;
+        if(PMADDR == 0)
+        {
 
-			if(((DWORD_VAL)address).v[2]&0x02)
-				SST39_A17_LAT = 1;
-			else
-				SST39_A17_LAT = 0;
+            // set upper address bits
+            address += 0x010000;
 
-			if(((DWORD_VAL)address).v[2]&0x04)
-				SST39_A18_LAT = 1;
-			else
-				SST39_A18_LAT = 0;
+            if(((DWORD_VAL) address).v[2] & 0x01)
+                SST39_A16_LAT = 1;
+            else
+                SST39_A16_LAT = 0;
 
-		}
-        
+            if(((DWORD_VAL) address).v[2] & 0x02)
+                SST39_A17_LAT = 1;
+            else
+                SST39_A17_LAT = 0;
+
+            if(((DWORD_VAL) address).v[2] & 0x04)
+                SST39_A18_LAT = 1;
+            else
+                SST39_A18_LAT = 0;
+        }
+
         *pData++ = PMDIN1;
-
     }
+
     SST39PMPWaitBusy();
+
     // disable
     SST39_CS_LAT = 1;
-
 }
 
 /************************************************************************
@@ -284,25 +287,30 @@ BYTE temp;
 * Output: data read
 *                                                                       
 ************************************************************************/
-BYTE SST39ReadByte(DWORD address){
-BYTE temp;
+BYTE SST39ReadByte(DWORD address)
+{
+    BYTE    temp;
 
-    SST39SetAddress(address); 
+    SST39SetAddress(address);
 
     // enable
     SST39_CS_LAT = 0;
 
     temp = PMDIN1;
+
     // wait for reading cycle is completed
     SST39PMPWaitBusy();
+
     // disable
     SST39_CS_LAT = 1;
-    // read result    
+
+    // read result
     temp = PMDIN1;
+
     // wait for dummy reading cycle is completed
     SST39PMPWaitBusy();
 
-    return temp;
+    return (temp);
 }
 
 /************************************************************************
@@ -315,13 +323,14 @@ BYTE temp;
 * Output: data read
 *                                                                       
 ************************************************************************/
-WORD SST39ReadWord(DWORD address){
-WORD_VAL temp;
+WORD SST39ReadWord(DWORD address)
+{
+    WORD_VAL    temp;
 
     temp.v[0] = SST39ReadByte(address);
-    temp.v[1] = SST39ReadByte(address+1);
+    temp.v[1] = SST39ReadByte(address + 1);
 
-    return temp.Val;
+    return (temp.Val);
 }
 
 /************************************************************************
@@ -334,9 +343,10 @@ WORD_VAL temp;
 * Output: 1 if it was successfull 0 - if not
 *                                                                       
 ************************************************************************/
-void SST39WaitProgram(){
-SST39STATUS stat;
-SST39STATUS prevStat;
+void SST39WaitProgram(void)
+{
+    SST39STATUS stat;
+    SST39STATUS prevStat;
 
     // enable
     SST39_CS_LAT = 0;
@@ -350,14 +360,12 @@ SST39STATUS prevStat;
     stat.Val = PMDIN1;
     SST39PMPWaitBusy();
 
-
-    while(stat.Bits.TOGGLE != prevStat.Bits.TOGGLE){
-
+    while(stat.Bits.TOGGLE != prevStat.Bits.TOGGLE)
+    {
         prevStat.Val = stat.Val;
         stat.Val = PMDIN1;
         SST39PMPWaitBusy();
-        
-    }// end of while
+    }   // end of while
 
     // disable
     SST39_CS_LAT = 1;
@@ -377,37 +385,37 @@ void SST39ChipErase(void)
 {
     SST39SetAddress(0x55555555);
     SST39_CS_LAT = 0;
-    PMDIN1=0xaa;
+    PMDIN1 = 0xaa;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
 
     SST39SetAddress(0xaaaaaaaa);
     SST39_CS_LAT = 0;
-    PMDIN1=0x55;
-    SST39PMPWaitBusy();
-    SST39_CS_LAT = 1;
-    
-    SST39SetAddress(0x55555555);
-    SST39_CS_LAT = 0;
-    PMDIN1=0x80;
+    PMDIN1 = 0x55;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
 
     SST39SetAddress(0x55555555);
     SST39_CS_LAT = 0;
-    PMDIN1=0xaa;
+    PMDIN1 = 0x80;
+    SST39PMPWaitBusy();
+    SST39_CS_LAT = 1;
+
+    SST39SetAddress(0x55555555);
+    SST39_CS_LAT = 0;
+    PMDIN1 = 0xaa;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
 
     SST39SetAddress(0xaaaaaaaa);
     SST39_CS_LAT = 0;
-    PMDIN1=0x55;
+    PMDIN1 = 0x55;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
-    
+
     SST39SetAddress(0x55555555);
     SST39_CS_LAT = 0;
-    PMDIN1=0x10;
+    PMDIN1 = 0x10;
     SST39PMPWaitBusy();
     SST39_CS_LAT = 1;
 

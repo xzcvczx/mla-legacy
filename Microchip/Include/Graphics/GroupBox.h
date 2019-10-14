@@ -38,23 +38,22 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _GROUPBOX_H
-#define _GROUPBOX_H
+    #define _GROUPBOX_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define GB_DISABLED			0x0002  // Bit for disabled state
-#define GB_RIGHT_ALIGN 		0x0004  // Bit to indicate text is right aligned
-#define GB_CENTER_ALIGN		0x0008  // Bit to indicate text is center aligned
-									// When center and right bits are zero alignment is left
-#define GB_DRAW    			0x4000  // Bit to indicate group box must be redrawn
-#define GB_HIDE    			0x8000  // Bit to remove object from screen
-																				
-									
+    #define GB_DISABLED     0x0002  // Bit for disabled state
+    #define GB_RIGHT_ALIGN  0x0004  // Bit to indicate text is right aligned
+    #define GB_CENTER_ALIGN 0x0008  // Bit to indicate text is center aligned
+
+// When center and right bits are zero alignment is left
+    #define GB_DRAW 0x4000          // Bit to indicate group box must be redrawn
+    #define GB_HIDE 0x8000          // Bit to remove object from screen
+
 /*********************************************************************
 * Overview: Defines the parameters required for a group box Object.
 * 			The textwidth and textHeight is not checked with the actual 
@@ -63,11 +62,12 @@
 *			the dimension of the Object.
 * 
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-	SHORT     		textWidth;  	// Pre-computed text width.
-	SHORT     		textHeight; 	// Pre-computed text height.
-	XCHAR  		   *pText;      	// Text string used.
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    SHORT       textWidth;  // Pre-computed text width.
+    SHORT       textHeight; // Pre-computed text height.
+    XCHAR       *pText;     // Text string used.
 } GROUPBOX;
 
 /*********************************************************************
@@ -84,7 +84,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define GbGetText(pB)                 pGb->pText
+    #define GbGetText(pB)   pGb->pText
 
 /*********************************************************************
 * Function: GbSetText(GROUPBOX *pGb, XCHAR *pText)
@@ -102,7 +102,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void  GbSetText(GROUPBOX *pGb, XCHAR *pText);
+void        GbSetText(GROUPBOX *pGb, XCHAR *pText);
 
 /*********************************************************************
 * Function: WORD GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg)
@@ -136,7 +136,7 @@ void  GbSetText(GROUPBOX *pGb, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-WORD GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg);
+WORD        GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: GROUPBOX *GbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
@@ -189,9 +189,18 @@ WORD GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-GROUPBOX *GbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-				   WORD state, XCHAR *pText, GOL_SCHEME *pScheme);
-			      
+GROUPBOX    *GbCreate
+            (
+                WORD        ID,
+                SHORT       left,
+                SHORT       top,
+                SHORT       right,
+                SHORT       bottom,
+                WORD        state,
+                XCHAR       *pText,
+                GOL_SCHEME  *pScheme
+            );
+
 /*********************************************************************
 * Function: WORD GbDraw(GROUPBOX *pGb);
 *
@@ -221,6 +230,5 @@ GROUPBOX *GbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-WORD GbDraw(GROUPBOX *pGb);
-
+WORD        GbDraw(GROUPBOX *pGb);
 #endif //_GROUPBOX_H

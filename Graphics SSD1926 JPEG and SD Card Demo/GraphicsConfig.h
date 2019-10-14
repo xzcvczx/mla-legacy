@@ -2,8 +2,8 @@
  * Module for Microchip Graphics Library
  * This file contains compile time options for the Graphics Library. 
  *********************************************************************
- * FileName:        none
- * Dependencies:    See INCLUDES section below
+ * FileName:        GraphicsConfig.h
+ * Dependencies:    none
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:        C30 V3.00/C32
  * Company:         Microchip Technology, Inc.
@@ -32,162 +32,16 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Author                   Date            Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		10/28/2007
+ * Anton Alkhimenok		    10/28/2007      Initial Version
+ * PAT						11/18/2009		Moved display parameters to 
+ *											HardwareProfile.h
  ********************************************************************/
-
 #ifndef _GRAPHICSCONFIG_H
-#define _GRAPHICSCONFIG_H
+    #define _GRAPHICSCONFIG_H
 
 //////////////////// COMPILE OPTIONS AND DEFAULTS ////////////////////
-
-/*********************************************************************
-* Overview:
-*   Graphics PICtail Plus Board Version setting. The value assigned 
-*	to this macro determines the version of the PICtail Plus Board. 
-*	- 1 - Uses Graphics PICtail Plus Board Version 1 (DON'T USE FOR THIS DEMO)   
-*	- 2 - Uses Graphics PICtail Plus Board Version 2 (DON'T USE FOR THIS DEMO)   
-*	- 3 - Uses Graphics PICtail Plus Board Version 3 (SSD1926)                                      
-********************************************************************/
-#define GRAPHICS_PICTAIL_VERSION   3
-
-#if (GRAPHICS_PICTAIL_VERSION == 3)
-
-/*********************************************************************
-* Overview: Allows using 16bit PMP interface for PIC device 
-*           supporting 16-bit interface on PMP.
-*********************************************************************/
-//#define USE_16BIT_PMP
-
-/*********************************************************************
-* Overview: Defines color depth. 
-********************************************************************/
-#define COLOR_DEPTH						16
-
-/*********************************************************************
-* Overview: Display controller selection.
-*                                          
-********************************************************************/
-#define DISPLAY_CONTROLLER				SSD1926
-
-/*********************************************************************
-* Overview: Display panel selection.
-*                                          
-********************************************************************/
-#define DISPLAY_PANEL                   TFT_G240320LTSW_118W_E
-
-#if (DISPLAY_PANEL==TFT_G240320LTSW_118W_E)||(DISPLAY_PANEL==TFT2N0369_E)||(DISPLAY_PANEL==DT032TFT_TS)||(DISPLAY_PANEL==DT032TFT)
-/*********************************************************************
-* Overview: Horizontal and vertical display resolution
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_RESOLUTION				240
-#define DISP_VER_RESOLUTION				320
-/*********************************************************************
-* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
-*********************************************************************/
-#define DISP_ORIENTATION				90
-/*********************************************************************
-* Overview: Panel Data Width (can be 18 or 24 bits).
-*********************************************************************/
-#define DISP_DATA_WIDTH                 18
-/*********************************************************************
-* Overview: LSHIFT Polarity Swap
-* If defined LSHIFT is a falling trigger
-*********************************************************************/
-#define DISP_INV_LSHIFT
-/*********************************************************************
-* Overview: Horizontal synchronization timing in pixels
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_PULSE_WIDTH		    25
-#define DISP_HOR_BACK_PORCH				4
-#define DISP_HOR_FRONT_PORCH			0
-/*********************************************************************
-* Overview: Vertical synchronization timing in lines
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_VER_PULSE_WIDTH		    4
-#define DISP_VER_BACK_PORCH				0
-#define DISP_VER_FRONT_PORCH			0
-
-#elif (DISPLAY_PANEL==TFT_G320240DTSW_69W_TP_E)||(DISPLAY_PANEL==_35QVW0T)
-
-/*********************************************************************
-* Overview: Horizontal and vertical display resolution
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_RESOLUTION				320
-#define DISP_VER_RESOLUTION				240
-/*********************************************************************
-* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
-*********************************************************************/
-#define DISP_ORIENTATION				0
-/*********************************************************************
-* Overview: Panel Data Width (can be 18 or 24 bits).
-*********************************************************************/
-#define DISP_DATA_WIDTH                 18
-/*********************************************************************
-* Overview: LSHIFT Polarity Swap
-* If defined LSHIFT is a falling trigger
-*********************************************************************/
-//#define DISP_INV_LSHIFT
-/*********************************************************************
-* Overview: Horizontal synchronization timing in pixels
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_PULSE_WIDTH		    25
-#define DISP_HOR_BACK_PORCH				8
-#define DISP_HOR_FRONT_PORCH			8
-/*********************************************************************
-* Overview: Vertical synchronization timing in lines
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_VER_PULSE_WIDTH		    8
-#define DISP_VER_BACK_PORCH				7
-#define DISP_VER_FRONT_PORCH			5
-
-#elif (DISPLAY_PANEL==PH480272T_005_I06Q)||(DISPLAY_PANEL==PH480272T_005_I11Q)
-
-/*********************************************************************
-* Overview: Horizontal and vertical display resolution
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_RESOLUTION				480
-#define DISP_VER_RESOLUTION				272
-/*********************************************************************
-* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
-*********************************************************************/
-#define DISP_ORIENTATION				0
-/*********************************************************************
-* Overview: Panel Data Width (can be 18 or 24 bits).
-*********************************************************************/
-#define DISP_DATA_WIDTH                 24
-/*********************************************************************
-* Overview: LSHIFT Polarity Swap
-* If defined LSHIFT is a falling trigger
-*********************************************************************/
-//#define DISP_INV_LSHIFT
-/*********************************************************************
-* Overview: Horizontal synchronization timing in pixels
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_PULSE_WIDTH		    41
-#define DISP_HOR_BACK_PORCH				2
-#define DISP_HOR_FRONT_PORCH			2
-/*********************************************************************
-* Overview: Vertical synchronization timing in lines
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_VER_PULSE_WIDTH		    10
-#define DISP_VER_BACK_PORCH				2
-#define DISP_VER_FRONT_PORCH			2
-
-#endif // (DISPLAY_PANEL== ...
-#else
-#error Graphics controller is not defined
-#endif
 
 /*********************************************************************
 * Overview: Blocking and Non-Blocking configuration selection. To
@@ -196,13 +50,25 @@
 *			configuration is assumed.
 *
 ********************************************************************/
-#define USE_NONBLOCKING_CONFIG // Comment this line to use blocking configuration
+    #define USE_NONBLOCKING_CONFIG  // Comment this line to use blocking configuration
+
+/*********************************************************************
+* Overview: Using Palettes, different colors can be used with the same
+*			bit depth.
+*
+********************************************************************/
+//    #define USE_PALETTE // Comment this line if Palette is not required.
+    
+    #ifdef USE_PALETTE
+        //#define USE_PALETTE_EXTERNAL // Uncomment this line if Palette must be stored in External Memory.
+    #endif
 
 /*********************************************************************
 * Overview: Keyboard control on some objects can be used by enabling
 *			the GOL Focus (USE_FOCUS)support. 
 *
 *********************************************************************/
+
 //#define USE_FOCUS
 
 /*********************************************************************
@@ -213,6 +79,7 @@
 *			- USE_KEYBOARD - enables the key board support.
 *
 *********************************************************************/
+
 //#define USE_TOUCHSCREEN			// Enable touch screen support.
 //#define USE_KEYBOARD			// Enable key board support.
 
@@ -221,20 +88,21 @@
 *			removed at compile time. 
 *
 *********************************************************************/
-//#define USE_GOL                 // Enable Graphics Object Layer.
-//#define USE_BUTTON				// Enable Button Object.
-//#define USE_WINDOW				// Enable Window Object.
+#define USE_GOL               // Enable Graphics Object Layer.
+//#define USE_BUTTON            // Enable Button Object.
+//#define USE_WINDOW			// Enable Window Object.
 //#define USE_CHECKBOX			// Enable Checkbox Object.
-//#define USE_RADIOBUTTON			// Enable Radio Button Object.
-//#define USE_EDITBOX				// Enable Edit Box Object.
-//#define USE_LISTBOX				// Enable List Box Object.
-//#define USE_SLIDER 				// Enable Slider or Scroll Bar Object.
-//#define USE_PROGRESSBAR			// Enable Progress Bar Object.
-//#define USE_STATICTEXT			// Enable Static Text Object.
-//#define USE_PICTURE				// Enable Picture Object.
+//#define USE_RADIOBUTTON		// Enable Radio Button Object.
+//#define USE_EDITBOX			// Enable Edit Box Object.
+//#define USE_LISTBOX			// Enable List Box Object.
+//#define USE_SLIDER            // Enable Slider or Scroll Bar Object.
+//#define USE_PROGRESSBAR		// Enable Progress Bar Object.
+//#define USE_STATICTEXT		// Enable Static Text Object.
+//#define USE_PICTURE			// Enable Picture Object.
 //#define USE_GROUPBOX			// Enable Group Box Object.
 //#define USE_ROUNDDIAL			// Enable Dial Object.
 //#define USE_METER				// Enable Meter Object.
+//#define USE_TEXTENTRY			// Enable TextEntry Object.
 //#define USE_CUSTOM				// Enable Custom Control Object (an example to create customized Object).
 
 /*********************************************************************
@@ -243,6 +111,7 @@
 *			for details.
 *
 *********************************************************************/
+
 //#define USE_MULTIBYTECHAR
 
 /*********************************************************************
@@ -254,7 +123,7 @@
 *	- USE_FONT_EXTERNAL - Font in external memory support.	
 *
 *********************************************************************/
-//#define USE_FONT_FLASH 			// Support for fonts located in internal flash
+//#define USE_FONT_FLASH        // Support for fonts located in internal flash
 //#define USE_FONT_EXTERNAL		// Support for fonts located in external memory
 
 /*********************************************************************
@@ -267,7 +136,8 @@
 *	- USE_BITMAP_EXTERNAL - Font in external memory support.	
 *
 *********************************************************************/
-//#define USE_BITMAP_FLASH		// Support for bitmaps located in internal flash
+
+//#define USE_BITMAP_FLASH          // Support for bitmaps located in internal flash
 //#define USE_BITMAP_EXTERNAL		// Support for bitmaps located in external memory
 
 #endif // _GRAPHICSCONFIG_H

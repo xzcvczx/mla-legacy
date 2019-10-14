@@ -37,7 +37,7 @@
  * Anton Alkhimenok		03/10/08    ...
  ********************************************************************/
 #ifndef ECG_H
-#define ECG_H
+    #define ECG_H
 
 /************************************************************************
  Function: void CreateECG(void)
@@ -48,7 +48,7 @@
                                                                        
  Output: none
 ************************************************************************/
-void CreateECG();               
+void    CreateECG(void);
 
 /************************************************************************
  Function: void PanelECG(void)
@@ -59,7 +59,7 @@ void CreateECG();
                                                                        
  Output: none
 ************************************************************************/
-WORD PanelECG();                         
+WORD    PanelECG(void);
 
 /************************************************************************
  Function: void GraphECG(void)
@@ -70,7 +70,7 @@ WORD PanelECG();
                                                                        
  Output: none
 ************************************************************************/
-void GraphECG();                      
+void    GraphECG(void);
 
 /************************************************************************
  Function: void GetECGSamples(WORD number)
@@ -83,7 +83,7 @@ void GraphECG();
  Output: Returns zero if samples number in the buffer is less 
  		 than defined by parameter
 ************************************************************************/
-WORD GetECGSamples(WORD number);            	
+WORD    GetECGSamples(WORD number);
 
 /************************************************************************
  Function: WORD MsgECG(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
@@ -101,7 +101,7 @@ WORD GetECGSamples(WORD number);
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD MsgECG(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg); 	
+WORD    MsgECG(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 
 /************************************************************************
  Function: void UpdateECG(WORD tick)
@@ -113,8 +113,7 @@ WORD MsgECG(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
                                                                        
  Output: none
  ************************************************************************/
-void UpdateECG(DWORD tick);                     
-
+void    UpdateECG(DWORD tick);
 
 /************************************************************************
  Function: void InitECGStyleScheme(GOL_SCHEME *pScheme)
@@ -126,6 +125,5 @@ void UpdateECG(DWORD tick);
                                                                        
  Output: none
 ************************************************************************/
-void InitECGStyleScheme(GOL_SCHEME *pScheme);
-
+void    InitECGStyleScheme(GOL_SCHEME *pScheme);
 #endif

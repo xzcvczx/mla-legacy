@@ -41,15 +41,15 @@ Anton Alkhimenok     05-May-2009    support for JPEG files from external memory
 /*******************************************************************************
     GLOBAL VARIABLES
 *******************************************************************************/
-DWORD               _jpegImageIndex; // pointer to current location in image
-IMG_FILE_SYSTEM_API _jpegFileApi;    // structure with data access functions pointers 
+DWORD               _jpegImageIndex;    // pointer to current location in image
+IMG_FILE_SYSTEM_API _jpegFileApi;       // structure with data access functions pointers
 
 /*******************************************************************************
     LOCAL FUNCTIONS PROTOTYPES
 *******************************************************************************/
-size_t JPEGfread(void *ptr, size_t size, size_t n, void *stream); // read form image
-int JPEGfseek(void *stream, long offset, int whence); // seek in image
-int JPEGfeof(void *stream); // eof of image
+size_t              JPEGfread(void *ptr, size_t size, size_t n, void *stream);  // read form image
+int                 JPEGfseek(void *stream, long offset, int whence);           // seek in image
+int                 JPEGfeof(void *stream); // eof of image
 
 /*******************************************************************************
 Function:       void JPEGInit()
@@ -62,12 +62,13 @@ Input:          None
 
 Output:         None
 *******************************************************************************/
-void JPEGInit(){
+void JPEGInit(void)
+{
     ImageDecoderInit();
     _jpegFileApi.pFread = JPEGfread;
     _jpegFileApi.pFseek = JPEGfseek;
     _jpegFileApi.pFtell = NULL; // not used by JPEG decoder;
-    _jpegFileApi.pFeof  = JPEGfeof;
+    _jpegFileApi.pFeof = JPEGfeof;
 }
 
 /*******************************************************************************
@@ -82,37 +83,45 @@ Input:          Data buffer, size of data chunk, size of data type, file pointer
 
 Output:         Number of bytes copied
 *******************************************************************************/
-size_t JPEGfread(void *ptr, size_t size, size_t n, void* file)
+size_t JPEGfread(void *ptr, size_t size, size_t n, void *file)
 {
-size_t index;
-FLASH_BYTE* pFile;
-DWORD address;
+    size_t      index;
+    FLASH_BYTE  *pFile;
+    DWORD       address;
 
-       switch(*((SHORT*)file)){
-#ifdef USE_JPEG_FLASH
-            case FILE_JPEG_FLASH:               
-                pFile = ((BITMAP_FLASH*)file)->address;
-                BYTE *bptr = (BYTE*)ptr;
-                for(index = 0; index < size*n; index++)
-                {
-                    bptr[index] = (BYTE)pFile[_jpegImageIndex];
-                    _jpegImageIndex++;
-                }
-                break;
-#endif
-#ifdef USE_JPEG_EXTERNAL
-            case FILE_JPEG_EXTERNAL:
-                address = _jpegImageIndex + ((BITMAP_EXTERNAL*)file)->address;
-                ReadArray(address, (BYTE*)ptr, size*n); // macro calling the ReadArray function from the external memory driver
-                                                        // see JPEGImage.h    
-                index = size*n;
-                _jpegImageIndex += index;
-                break;
-#endif
-            default:
-                return 0;
-       }
-       return index;
+    switch(*((SHORT *)file))
+    {
+            #ifdef USE_JPEG_FLASH
+
+        case FILE_JPEG_FLASH:
+            pFile = ((BITMAP_FLASH *)file)->address;
+
+            BYTE    *bptr = (BYTE *)ptr;
+            for(index = 0; index < size * n; index++)
+            {
+                bptr[index] = (BYTE) pFile[_jpegImageIndex];
+                _jpegImageIndex++;
+            }
+
+            break;
+            #endif
+            #ifdef USE_JPEG_EXTERNAL
+
+        case FILE_JPEG_EXTERNAL:
+            address = _jpegImageIndex + ((BITMAP_EXTERNAL *)file)->address;
+            ReadArray(address, (BYTE *)ptr, size * n);  // macro calling the ReadArray function from the external memory driver
+
+            // see JPEGImage.h
+            index = size * n;
+            _jpegImageIndex += index;
+            break;
+            #endif
+
+        default:
+            return (0);
+    }
+
+    return (index);
 }
 
 /*******************************************************************************
@@ -127,22 +136,22 @@ Input:          File pointer, offset and the referance position
 
 Output:         TRUE if success
 *******************************************************************************/
-int JPEGfseek(void* stream, long offset, int whence)
+int JPEGfseek(void *stream, long offset, int whence)
 {
     if(whence == 0)
     {
-              _jpegImageIndex = offset;
+        _jpegImageIndex = offset;
     }
     else if(whence == 1)
     {
-              _jpegImageIndex += offset;
+        _jpegImageIndex += offset;
     }
     else
     {
-        return FALSE;  // JPEG Decoder uses ONLY absolute and relative offsets
+        return (FALSE); // JPEG Decoder uses ONLY absolute and relative offsets
     }
 
-    return TRUE;              
+    return (TRUE);
 }
 
 /*******************************************************************************
@@ -160,7 +169,7 @@ Output:         True if end of file is reached. JPEG Decoder doesn't use EOF.
 *******************************************************************************/
 int JPEGfeof(void *stream)
 {
-    return FALSE; // JPEG Decoder doesn't use EOF
+    return (FALSE); // JPEG Decoder doesn't use EOF
 }
 
 /*******************************************************************************
@@ -175,8 +184,8 @@ Input:          pointer to JPEG file image
 
 Output:         pointer to JPEG file image
 *******************************************************************************/
-void* JPEGfopen(void* jpegImage)
+void *JPEGfopen(void *jpegImage)
 {
-  _jpegImageIndex = 0;
-  return jpegImage;
+    _jpegImageIndex = 0;
+    return (jpegImage);
 }

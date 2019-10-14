@@ -23,16 +23,9 @@ Description:
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
+    .
     ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
-    
+        
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
     would be the following:
@@ -70,13 +63,16 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date       Comments
---------------------------------------------------------------------------------
-BC/KO          15-Oct-2007 First release
-
-Change History:
-
 *******************************************************************************/
+//DOM-IGNORE-END
+
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.6    Moved many of the USB events
+********************************************************************/
 //DOM-IGNORE-END
 
 
@@ -86,9 +82,6 @@ Change History:
 //DOM-IGNORE-END
 
 #include <limits.h>
-#include "GenericTypeDefs.h"
-#include "usb_config.h"
-
 
 // *****************************************************************************
 // *****************************************************************************
@@ -186,7 +179,6 @@ typedef union
 
 } TRANSFER_FLAGS;
 
-
 // *****************************************************************************
 /* Data Transfer Flags, Endpoint Number Constants
 
@@ -251,45 +243,16 @@ typedef enum
 {
     // No event occured (NULL event)
     EVENT_NONE = 0,
-    
-    // A USB transfer has completed.  The data associated with this event is of
-    // the data type HOST_TRANSFER_DATA if the event is generated from the host
-    // stack.
-    EVENT_TRANSFER,
-    
-    // A USB Start of Frame token has been received.  This event is not
-    // used by the Host stack.
-    EVENT_SOF,                  
-    
-    // Device-mode resume received.  This event is not used by the Host stack.
-    EVENT_RESUME,
-    
-    // Device-mode suspend/idle event received.  This event is not used by the
-    // Host stack.
-    EVENT_SUSPEND,
-                  
-    // Device-mode bus reset received.  This event is not used by the Host 
-    // stack.                  
-    EVENT_RESET,                
-    
-    // Device-mode USB cable has been attached.  This event is not used by the
-    // Host stack.  The client driver may provide an application event when a
-    // device attaches.
-    EVENT_ATTACH,      
-             
-    // USB cable has been detached.  The data associated with this event is the
-    // address of detached device, a single BYTE.
-    EVENT_DETACH,               
-    
+
+    EVENT_DEVICE_STACK_BASE = 1,
+
+    EVENT_HOST_STACK_BASE = 100,
+
     // A USB hub has been attached.  Hub support is not currently available.
     EVENT_HUB_ATTACH,           
     
     // A stall has occured.  This event is not used by the Host stack.
-    EVENT_STALL,     
-               
-    // Device Mode: A setup packet received (data: SETUP_PKT).  This event is
-    // not used by the Host stack.
-    EVENT_SETUP,                
+    EVENT_STALL,                  
     
     // VBus SRP Pulse, (VBus > 2.0v),  Data: BYTE Port Number (For future support)
     EVENT_VBUS_SES_REQUEST,     
@@ -338,34 +301,46 @@ typedef enum
     EVENT_OUT_OF_MEMORY,        
     
     // Unspecified host error. (This error should not occur).
-    EVENT_UNSPECIFIED_ERROR,    
-
-    // Notification that a SET_CONFIGURATION() command was received (device)
-    EVENT_CONFIGURED,
-
-    // A SET_DESCRIPTOR request was received (device)
-    EVENT_SET_DESCRIPTOR,
-
-    // An endpoint 0 request was received that the stack did not know how to
-    // handle.  This is most often a request for one of the class drivers.  
-    // Please refer to the class driver documenation for information related
-    // to what to do if this request is received. (device)
-    EVENT_EP0_REQUEST,
+    EVENT_UNSPECIFIED_ERROR,     
+             
+    // USB cable has been detached.  The data associated with this event is the
+    // address of detached device, a single BYTE.
+    EVENT_DETACH, 
+     
+    // A USB transfer has completed.  The data associated with this event is of
+    // the data type HOST_TRANSFER_DATA if the event is generated from the host
+    // stack.
+    EVENT_TRANSFER,
+    
+    // A USB Start of Frame token has been received.  This event is not
+    // used by the Host stack.
+    EVENT_SOF,                  
+    
+    // Device-mode resume received.  This event is not used by the Host stack.
+    EVENT_RESUME,
+    
+    // Device-mode suspend/idle event received.  This event is not used by the
+    // Host stack.
+    EVENT_SUSPEND,
+                  
+    // Device-mode bus reset received.  This event is not used by the Host 
+    // stack.                  
+    EVENT_RESET,  
 
     // Class-defined event offsets start here:
-    EVENT_GENERIC_BASE  = 100,      // Offset for Generic class events
+    EVENT_GENERIC_BASE  = 400,      // Offset for Generic class events
 
-    EVENT_MSD_BASE      = 200,      // Offset for Mass Storage Device class events
+    EVENT_MSD_BASE      = 500,      // Offset for Mass Storage Device class events
 
-    EVENT_HID_BASE      = 300,      // Offset for Human Interface Device class events
+    EVENT_HID_BASE      = 600,      // Offset for Human Interface Device class events
 
-    EVENT_PRINTER_BASE  = 400,      // Offset for Printer class events
+    EVENT_PRINTER_BASE  = 700,      // Offset for Printer class events
     
-    EVENT_CDC_BASE      = 500,      // Offset for CDC class events
+    EVENT_CDC_BASE      = 800,      // Offset for CDC class events
 
-    EVENT_CHARGER_BASE  = 600,      // Offset for Charger client driver events.
+    EVENT_CHARGER_BASE  = 900,      // Offset for Charger client driver events.
 
-    EVENT_AUDIO_BASE    = 700,      // Offset for Audio client driver events.
+    EVENT_AUDIO_BASE    = 1000,      // Offset for Audio client driver events.
         
 	EVENT_USER_BASE     = 10000,    // Add integral values to this event number
                                     // to create user-defined events.
@@ -508,7 +483,7 @@ typedef BOOL (*USB_EVENT_HANDLER) ( USB_EVENT event, void *data, unsigned int si
                         TRUE : FALSE
             #endif
         #else
-            #define USBInitialize(f) USBDEVInitialize(f)
+            #define USBInitialize(f) USBDeviceInit()
         #endif
     #else
         #if defined( USB_SUPPORT_HOST )
@@ -555,7 +530,7 @@ typedef BOOL (*USB_EVENT_HANDLER) ( USB_EVENT event, void *data, unsigned int si
                 #define USBTasks() {USBHostTasks(); USBHALHandleBusEvent();}
             #endif
         #else
-            #define USBTasks() USBHALHandleBusEvent()
+            #define USBTasks() USBDeviceTasks()
         #endif
     #else
         #if defined( USB_SUPPORT_HOST )
@@ -566,6 +541,10 @@ typedef BOOL (*USB_EVENT_HANDLER) ( USB_EVENT event, void *data, unsigned int si
     #endif
 #endif
 
+#define USB_PING_PONG__NO_PING_PONG         0x00    //0b00
+#define USB_PING_PONG__EP0_OUT_ONLY         0x01    //0b01
+#define USB_PING_PONG__FULL_PING_PONG       0x02    //0b10
+#define USB_PING_PONG__ALL_BUT_EP0          0x03    //0b11
 
 #endif // _USB_COMMON_H_
 /*************************************************************************

@@ -42,11 +42,6 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-
-#include "Compiler.h"
-#include "GenericTypeDefs.h"                        // Required
-#include "usb_config.h"
-#include "USB/usb_device.h"                         // Required
 #include "USB/USB.h"
 #include "HardwareProfile.h"
 #include "MDD File System\internal flash.h"
@@ -178,7 +173,7 @@
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
-    #elif defined(__32MX460F512L__)
+    #elif defined(__32MX460F512L__) || defined(__32MX795F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
         #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
@@ -204,6 +199,9 @@
 #elif defined(PIC24F_STARTER_KIT)
     _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
     _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+#elif defined(PIC24FJ256DA210_DEV_BOARD)
+    //_CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    //_CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 #elif defined(PIC32_USB_STARTER_KIT)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
@@ -504,7 +502,17 @@ static void InitializeSystem(void)
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif defined(__C30__)
-        AD1PCFGL = 0xFFFF;
+    	#if defined(__PIC24FJ256DA210__)
+    		ANSA = 0x0000;
+    		ANSB = 0x0000;
+    		ANSC = 0x0000;
+    		ANSD = 0x0000;
+    		ANSE = 0x0000;
+    		ANSF = 0x0000;
+    		ANSG = 0x0000;
+        #else
+        	AD1PCFGL = 0xFFFF;
+		#endif        
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
     #endif
@@ -542,7 +550,7 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
     
-   #if defined(PIC24FJ64GB004_PIM)
+   #if defined(PIC24FJ64GB004_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
 	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -762,7 +770,7 @@ WORD_VAL ReadPOT(void)
         w.v[1] = ADRESH;
 
     #elif defined(__C30__) || defined(__C32__)
-        #if defined(__PIC24FJ256GB110__)
+        #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
             AD1CHS = 0x5;           //MUXA uses AN5
 
             // Get an ADC sample
@@ -771,7 +779,7 @@ WORD_VAL ReadPOT(void)
             AD1CON1bits.SAMP = 0;           //Start sampling
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
-        #elif defined(__PIC24FJ64GB004__)
+        #elif defined(PIC24FJ64GB004_PIM)
             AD1CHS = 0x7;           //MUXA uses AN5
 
             // Get an ADC sample
@@ -790,7 +798,7 @@ WORD_VAL ReadPOT(void)
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
-        #elif defined(PIC32MX460F512L_PIM)
+        #elif defined(PIC32MX460F512L_PIM) || defined(PIC32_USB_STARTER_KIT) || defined(PIC32MX795F512L_PIM)
             AD1PCFG = 0xFFFB; // PORTB = Digital; RB2 = analog
             AD1CON1 = 0x0000; // SAMP bit = 0 ends sampling ...
             // and starts converting
@@ -805,6 +813,8 @@ WORD_VAL ReadPOT(void)
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             AD1CON1CLR = 0x0002; // start Converting
             while (!(AD1CON1 & 0x0001));// conversion done?
+        #else
+            #error
         #endif
 
         w.Val = ADC1BUF0;
@@ -834,6 +844,69 @@ WORD_VAL ReadPOT(void)
  *******************************************************************/
 void BlinkUSBStatus(void)
 {
+#if defined(PIC24FJ256DA210_DEV_BOARD)
+    // No need to clear UIRbits.SOFIF to 0 here.
+    // Callback caller is already doing that.
+    #define BLINK_INTERVAL 20000
+    #define BLANK_INTERVAL 200000
+
+    static WORD blink_count=0;
+    static DWORD loop_count = 0;
+    
+    if(loop_count == 0)
+    {
+        if(blink_count != 0)
+        {
+            loop_count = BLINK_INTERVAL;
+            if(mGetLED_1())
+            {
+                mLED_1_Off();
+                blink_count--;
+            }
+            else
+            {
+                mLED_1_On();
+            }
+        }
+        else
+        {
+            loop_count = BLANK_INTERVAL;
+            switch(USBDeviceState)
+            {
+                case ATTACHED_STATE:
+                    blink_count = 1;
+                    break;
+                case POWERED_STATE:
+                    blink_count = 2;
+                    break;
+                case DEFAULT_STATE:
+                    blink_count = 3;
+                    break;
+                case ADR_PENDING_STATE:
+                    blink_count = 4;
+                    break;
+                case ADDRESS_STATE:
+                    blink_count = 5;
+                    break;
+                case CONFIGURED_STATE:
+                    blink_count = 6;
+                    break;
+                case DETACHED_STATE:
+                    //fall through
+                default:
+                    blink_count = 0;
+                    break;
+            }
+        }
+    }
+    else
+    {
+        loop_count--;
+    }
+
+#else
+    // No need to clear UIRbits.SOFIF to 0 here.
+    // Callback caller is already doing that.
     static WORD led_count=0;
     
     if(led_count == 0)led_count = 10000U;
@@ -899,9 +972,9 @@ void BlinkUSBStatus(void)
                     mLED_2_On();
                 }
             }//end if
-        }//end if(...)
-    }//end if(UCONbits.SUSPND...)
-
+        }
+    }
+#endif
 }//end BlinkUSBStatus
 
 

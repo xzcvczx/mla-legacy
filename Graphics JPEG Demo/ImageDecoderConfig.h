@@ -1,5 +1,9 @@
+/*$6*/
+
+
+
 #ifndef __IMAGEDECODERCONFIG_H__
-#define __IMAGEDECODERCONFIG_H__
+    #define __IMAGEDECODERCONFIG_H__
 
 /******************************************************************************
 * FileName:        ImageDecoderConfig.h
@@ -42,21 +46,23 @@ Pradeep Budagutta    06-Jun-2008    First release
 /************* User configuration start *************/
 
 /* Comment out the image formats which are not required */
+
 //#define IMG_SUPPORT_BMP
-#define IMG_SUPPORT_JPEG
+    #define IMG_SUPPORT_JPEG
+
 //#define IMG_SUPPORT_GIF
 
 /* Comment out if output has to be given through a callback function */
 
 /* If defined, the code is optimized to use only the graphics driver, only 16-bit-565-color-format is supported */
-#define IMG_USE_ONLY_565_GRAPHICS_DRIVER_FOR_OUTPUT
+    #define IMG_USE_ONLY_565_GRAPHICS_DRIVER_FOR_OUTPUT
 
 /* If defined, the code is optimized to use only the MDD file system */
+
 //#define IMG_USE_ONLY_MDD_FILE_SYSTEM_FOR_INPUT
 
 /* If defined, the a loop callback function is called in every decoding loop so that application can do maintainance activities such as getting data, updating display, etc... */
-#define IMG_SUPPORT_IMAGE_DECODER_LOOP_CALLBACK
+    #define IMG_SUPPORT_IMAGE_DECODER_LOOP_CALLBACK
 
 /************* User configuration end *************/
-
 #endif

@@ -30,13 +30,14 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  1.0   11/19/2004   Initial release
-  2.1   02/26/2007   Updated for simplicity and to use common
-                     coding style
-  2.3   09/15/2008   Broke out each hardware platform into its own
-                     "HardwareProfile - xxx.h" file
-  2.4b  04/08/2009   Initial support for PIC24FJ64GB004 family
+  Rev   Description
+  1.0   Initial release
+  2.1   Updated for simplicity and to use common
+        coding style
+  2.3   Broke out each hardware platform into its own
+        "HardwareProfile - xxx.h" file
+  2.4b  Initial support for PIC24FJ64GB004 family
+  2.6   No Change
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC24FJ64GB004_PIM_H

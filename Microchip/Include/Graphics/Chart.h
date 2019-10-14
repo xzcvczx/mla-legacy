@@ -39,11 +39,10 @@
  * Paolo A. Tamayo
  * Anton Alkhimenok		4/8/08		...
  *****************************************************************************/
-
 #ifndef _CHART_H
-#define _CHART_H
+    #define _CHART_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /* 
 		Chart Terminologies 
@@ -74,48 +73,50 @@ Value Range - The scale for the value axis.
 
 */
 
-
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define CH_DISABLED    	0x0002  	// Bit for disabled state.
+    #define CH_DISABLED 0x0002          // Bit for disabled state.
+    #define CH_LEGEND   0x0001          // Bit to indicate that legend is to be shown. Usable only when seriesCount > 1.
+    #define CH_VALUE    0x0004          // Bit to indicate that the values of the bar chart data or pie chart
 
-#define CH_LEGEND      	0x0001  	// Bit to indicate that legend is to be shown. Usable only when seriesCount > 1.
-#define CH_VALUE    	0x0004  	// Bit to indicate that the values of the bar chart data or pie chart 
-									// data are to be shown
-#define CH_3D_ENABLE	0x0008		// Bit to indicate that bar charts are to be drawn with 3-D effect
-#define CH_PIE     	 	0x0100  	// Bit to indicate the chart is type pie. If both PIE and BAR types 
-									// are set BAR type has higher priority.
-#define CH_BAR     	 	0x0200  	// Bit to indicate the chart is type bar. If both PIE and BAR types 
-									// are set BAR type has higher priority.
-#define CH_PERCENT		0x0010		// Bit to indicate that the pie chart will be drawn with percentage 
-									// values shown for the sample data. For bar chart, if CH_VALUE is set, 
-									// it toggles the value shown to percentage.
+// data are to be shown
+    #define CH_3D_ENABLE    0x0008      // Bit to indicate that bar charts are to be drawn with 3-D effect
+    #define CH_PIE          0x0100      // Bit to indicate the chart is type pie. If both PIE and BAR types
 
-#define CH_BAR_HOR  	0x0240  	// These bits (with CH_BAR bit set), sets the bar chart to 
-									// be drawn horizontally.  
-#define CH_DONUT		0x0140		// These bits (with CH_PIE bit set), sets the pie chart to 
-									// be drawn in a donut shape.  
-#define CH_NUMERIC		0x0080		// This bit is used only for bar charts. If this bit is set, it indicates that the 
-									// bar chart labels for variables are numeric. If this bit is not set, it indicates
-									// that the bar chart labels for variables are alphabets.
+// are set BAR type has higher priority.
+    #define CH_BAR  0x0200              // Bit to indicate the chart is type bar. If both PIE and BAR types
 
-#define CH_DRAW_DATA   	0x2000  	// Bit to indicate data portion of the chart must be redrawn.
-#define CH_DRAW        	0x4000  	// Bit to indicate chart must be redrawn.
-#define CH_HIDE        	0x8000  	// Bit to indicate chart must be removed from screen.
+// are set BAR type has higher priority.
+    #define CH_PERCENT  0x0010          // Bit to indicate that the pie chart will be drawn with percentage
+
+// values shown for the sample data. For bar chart, if CH_VALUE is set,
+// it toggles the value shown to percentage.
+    #define CH_BAR_HOR  0x0240          // These bits (with CH_BAR bit set), sets the bar chart to
+
+// be drawn horizontally.
+    #define CH_DONUT    0x0140          // These bits (with CH_PIE bit set), sets the pie chart to
+
+// be drawn in a donut shape.
+    #define CH_NUMERIC  0x0080          // This bit is used only for bar charts. If this bit is set, it indicates that the
+
+// bar chart labels for variables are numeric. If this bit is not set, it indicates
+// that the bar chart labels for variables are alphabets.
+    #define CH_DRAW_DATA    0x2000      // Bit to indicate data portion of the chart must be redrawn.
+    #define CH_DRAW         0x4000      // Bit to indicate chart must be redrawn.
+    #define CH_HIDE         0x8000      // Bit to indicate chart must be removed from screen.
 
 /*********************************************************************
 * Data Series Show Flag Definitions: 
 *********************************************************************/
-#define SHOW_DATA		1			// Macro used to set the data series show flag or indicate that the data series will be shown when the chart is drawn.
-#define HIDE_DATA		0			// Macro used to reset the data series show flag or indicate that the data series will be not be shown when the chart is drawn.
+    #define SHOW_DATA   1               // Macro used to set the data series show flag or indicate that the data series will be shown when the chart is drawn.
+    #define HIDE_DATA   0               // Macro used to reset the data series show flag or indicate that the data series will be not be shown when the chart is drawn.
 
 /* Internal Definitions - used to modify some specific rendering characteristics */
-#define CH_MARGIN       2 			// Margin from the edges.
-#define CH_YGRIDCOUNT	6			// defines the number of grids to be drawn on the y-axis (includes the origin at y).
-
-#define USE_HORZ_ASCENDING_ORDER	// use ascending order when displaying variables on horizontal mode (bar chart only)
-#define USE_PIE_ENABLE_LABEL		// use labels:  A:10%,30 where each sample is labeled A-Z followed by a colon.
+    #define CH_MARGIN       2           // Margin from the edges.
+    #define CH_YGRIDCOUNT   6           // defines the number of grids to be drawn on the y-axis (includes the origin at y).
+    #define USE_HORZ_ASCENDING_ORDER    // use ascending order when displaying variables on horizontal mode (bar chart only)
+    #define USE_PIE_ENABLE_LABEL        // use labels:  A:10%,30 where each sample is labeled A-Z followed by a colon.
 
 /*********************************************************************
 * Overview: Defines a variable for the CHART object. It specifies
@@ -127,49 +128,52 @@ Value Range - The scale for the value axis.
 *			chart will be drawn.
 *
 *********************************************************************/
-typedef struct {
-	XCHAR 		   *pSData;			// Pointer to the data series name.
-	WORD			samples;		// Indicates the number of data samples (or data points) contained in the array specified by pData.
-	BYTE		    show;			// The flag to indicate if the data series will be shown or not. If this flag is set to SHOW_DATA, the data series will be shown. If HIDE_DATA, the data series will not be shown.
-	WORD  		   *pData;          // Pointer to the array of data samples.
-	void	   	   *pNextData;		// Pointer to the next data series. NULL if no other data series follows.
-
+typedef struct
+{
+    XCHAR   *pSData;    // Pointer to the data series name.
+    WORD    samples;    // Indicates the number of data samples (or data points) contained in the array specified by pData.
+    BYTE    show;       // The flag to indicate if the data series will be shown or not. If this flag is set to SHOW_DATA, the data series will be shown. If HIDE_DATA, the data series will not be shown.
+    WORD    *pData;     // Pointer to the array of data samples.
+    void    *pNextData; // Pointer to the next data series. NULL if no other data series follows.
 } DATASERIES;
 
 /*********************************************************************
 * Overview: Defines the parameters for the CHART object. 
 *							 
 *********************************************************************/
-typedef struct {
-	XCHAR  		   *pTitle;         // Pointer to the Title of the chart.
-	XCHAR  		   *pSmplLabel;     // Pointer to the bar chart sample axis label. Depending
-									// if the bar chart is drawn vertically or horizontally, the 
-									// location of the sample will be in the x-axis or y-axis.
-	XCHAR  		   *pValLabel;      // Pointer to the bar chart value axis label. Depending
-									// if the bar chart is drawn vertically or horizontally, the 
-									// location of the sample will be in the x-axis or y-axis.
-	SHORT     		seriesCount;    // Number of data series that will be displayed when chart is drawn.
-	WORD			smplStart;		// Start point of data sample range to be displayed (minimum/default value = 1)
-	WORD			smplEnd;		// End point of data sample range to be displayed.
-	WORD			valMax;			// Maximum value of a sample that can be displayed. 
-	WORD			valMin;			// Minimum value of a sample that can be displayed. 
-	WORD			perMax;			// Maximum value of the percentage range that can be displayed. 
-	WORD			perMin;			// Minimum value of the percentage range that can be displayed. 
-	WORD		   *pColor;			// Pointer to the color table used to draw the chart data.
-	void 		   *pTitleFont;		// Pointer to the font used for the title label of the chart.
-	void 		   *pAxisLabelsFont;  // Pointer to the font used for X and Y axis labels.
-    void 		   *pGridLabelsFont;  // Pointer to the font used for X and Y axis grid labels. 
+typedef struct
+{
+    XCHAR   *pTitle;            // Pointer to the Title of the chart.
+    XCHAR   *pSmplLabel;        // Pointer to the bar chart sample axis label. Depending
+
+    // if the bar chart is drawn vertically or horizontally, the
+    // location of the sample will be in the x-axis or y-axis.
+    XCHAR   *pValLabel;         // Pointer to the bar chart value axis label. Depending
+
+    // if the bar chart is drawn vertically or horizontally, the
+    // location of the sample will be in the x-axis or y-axis.
+    SHORT   seriesCount;        // Number of data series that will be displayed when chart is drawn.
+    WORD    smplStart;          // Start point of data sample range to be displayed (minimum/default value = 1)
+    WORD    smplEnd;            // End point of data sample range to be displayed.
+    WORD    valMax;             // Maximum value of a sample that can be displayed.
+    WORD    valMin;             // Minimum value of a sample that can be displayed.
+    WORD    perMax;             // Maximum value of the percentage range that can be displayed.
+    WORD    perMin;             // Minimum value of the percentage range that can be displayed.
+    WORD    *pColor;            // Pointer to the color table used to draw the chart data.
+    void    *pTitleFont;        // Pointer to the font used for the title label of the chart.
+    void    *pAxisLabelsFont;   // Pointer to the font used for X and Y axis labels.
+    void    *pGridLabelsFont;   // Pointer to the font used for X and Y axis grid labels.
 } CHARTPARAM;
 
 /*********************************************************************
 * Overview: Defines the parameters required for a chart Object.
 *
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).   
-	CHARTPARAM		prm;			// Structure for the parameters of the chart.
-	DATASERIES	   	*pChData;		// Pointer to the first chart data series in the link list of data series.	
-
+typedef struct
+{
+    OBJ_HEADER  hdr;                    // Generic header for all Objects (see OBJ_HEADER).
+    CHARTPARAM  prm;                    // Structure for the parameters of the chart.
+    DATASERIES  *pChData;               // Pointer to the first chart data series in the link list of data series.	
 } CHART;
 
 /*********************************************************************
@@ -177,24 +181,23 @@ typedef struct {
 *	- The following macroses defines the default colors used when 
 *	  rendering chart data.  
 *********************************************************************/
-#define CH_CLR0		BRIGHTBLUE						// Bright Blue
-#define CH_CLR1		BRIGHTRED						// Bright Red
-#define CH_CLR2		BRIGHTGREEN						// Bright Green
-#define CH_CLR3		BRIGHTYELLOW					// Bright Yellow
-#define CH_CLR4		RGB565CONVERT(0xFF,0xBB,0x4C)	// Orange
-#define CH_CLR5		BLUE							// Blue
-#define CH_CLR6		RED								// Red
-#define CH_CLR7		GREEN							// Green
-#define CH_CLR8		YELLOW							// Yellow
-#define CH_CLR9		RGB565CONVERT(255,140,0)		// Dark Orange
-#define CH_CLR10	LIGHTBLUE 						// Light Orange
-#define CH_CLR11	LIGHTRED						// Light Red
-#define CH_CLR12	LIGHTGREEN						// Light Green
-#define CH_CLR13	RGB565CONVERT(255,255,150)		// Light Yellow
-#define CH_CLR14	RGB565CONVERT(255,200,  0)  	// Light Orange
-#define CH_CLR15	RGB565CONVERT(255,215,  0)		// Gold
-
-SHORT ChSetDataSeries(CHART *pCh, WORD seriesNum, BYTE status);
+    #define CH_CLR0     BRIGHTBLUE      // Bright Blue
+    #define CH_CLR1     BRIGHTRED       // Bright Red
+    #define CH_CLR2     BRIGHTGREEN     // Bright Green
+    #define CH_CLR3     BRIGHTYELLOW    // Bright Yellow
+    #define CH_CLR4     RGB565CONVERT(0xFF, 0xBB, 0x4C) // Orange
+    #define CH_CLR5     BLUE                            // Blue
+    #define CH_CLR6     RED                             // Red
+    #define CH_CLR7     GREEN                           // Green
+    #define CH_CLR8     YELLOW                          // Yellow
+    #define CH_CLR9     RGB565CONVERT(255, 140, 0)      // Dark Orange
+    #define CH_CLR10    LIGHTBLUE                       // Light Orange
+    #define CH_CLR11    LIGHTRED                        // Light Red
+    #define CH_CLR12    LIGHTGREEN                      // Light Green
+    #define CH_CLR13    RGB565CONVERT(255, 255, 150)    // Light Yellow
+    #define CH_CLR14    RGB565CONVERT(255, 200, 0)      // Light Orange
+    #define CH_CLR15    RGB565CONVERT(255, 215, 0)      // Gold
+SHORT       ChSetDataSeries(CHART *pCh, WORD seriesNum, BYTE status);
 
 /*********************************************************************
 * Function: CHART  *ChCreate( WORD ID, SHORT left, SHORT top, 
@@ -290,8 +293,18 @@ SHORT ChSetDataSeries(CHART *pCh, WORD seriesNum, BYTE status);
 * Side Effects: none
 *
 ********************************************************************/
-CHART  *ChCreate( WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-				  WORD state, DATASERIES *pData, CHARTPARAM *pParam, GOL_SCHEME *pScheme);
+CHART       *ChCreate
+            (
+                WORD        ID,
+                SHORT       left,
+                SHORT       top,
+                SHORT       right,
+                SHORT       bottom,
+                WORD        state,
+                DATASERIES  *pData,
+                CHARTPARAM  *pParam,
+                GOL_SCHEME  *pScheme
+            );
 
 /*********************************************************************
 * Function: ChAddDataSeries(CHART *pCh, WORD nSamples, WORD *pData, XCHAR *pName)
@@ -317,7 +330,7 @@ CHART  *ChCreate( WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 *				SHOW_DATA or enabled.
 *
 ********************************************************************/
-DATASERIES *ChAddDataSeries(CHART *pCh, WORD nSamples, WORD *pData, XCHAR *pName);
+DATASERIES  *ChAddDataSeries(CHART *pCh, WORD nSamples, WORD *pData, XCHAR *pName);
 
 /*********************************************************************
 * Function: ChRemoveDataSeries(CHART *pCh, WORD number)
@@ -352,7 +365,7 @@ DATASERIES *ChAddDataSeries(CHART *pCh, WORD nSamples, WORD *pData, XCHAR *pName
 * Side Effects: none.
 *
 ********************************************************************/
-void ChRemoveDataSeries(CHART *pCh, WORD number);
+void        ChRemoveDataSeries(CHART *pCh, WORD number);
 
 /*********************************************************************
 * Macros: SHORT ChShowSeries(CHART *pCh, WORD seriesNum)
@@ -386,7 +399,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChShowSeries(pCh, seriesNum)	(ChSetDataSeries(pCh, seriesNum, SHOW_DATA))
+    #define ChShowSeries(pCh, seriesNum)    (ChSetDataSeries(pCh, seriesNum, SHOW_DATA))
 
 /*********************************************************************
 * Macros: SHORT ChHideSeries(CHART *pCh, WORD seriesNum)
@@ -409,7 +422,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChHideSeries(pCh, seriesNum)	(ChSetDataSeries(pCh, seriesNum, HIDE_DATA))
+    #define ChHideSeries(pCh, seriesNum)    (ChSetDataSeries(pCh, seriesNum, HIDE_DATA))
 
 /*********************************************************************
 * Macros: ChGetShowSeriesCount(pCh)		
@@ -427,7 +440,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetShowSeriesCount(pCh)		(pCh->prm.seriesCount)
+    #define ChGetShowSeriesCount(pCh)   (pCh->prm.seriesCount)
 
 /*********************************************************************
 * Macros: ChGetShowSeriesStatus(pDSeries)		
@@ -446,7 +459,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetShowSeriesStatus(pDSeries)	(pDSeries->show)
+    #define ChGetShowSeriesStatus(pDSeries) (pDSeries->show)
 
 /*********************************************************************
 * Macros: ChGetValueMax(pCh)
@@ -463,7 +476,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetValueMax(pCh)				(pCh->prm.valMax)
+    #define ChGetValueMax(pCh)  (pCh->prm.valMax)
 
 /*********************************************************************
 * Macros: ChGetValueMin(pCh)
@@ -480,7 +493,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetValueMin(pCh)				(pCh->prm.valMin)
+    #define ChGetValueMin(pCh)  (pCh->prm.valMin)
 
 /*********************************************************************
 * Function: ChSetValueRange(CHART *pCh, WORD min, WORD max)
@@ -500,7 +513,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number);
 * Side Effects: none.
 *
 ********************************************************************/
-void ChSetValueRange(CHART *pCh, WORD min, WORD max); 
+void    ChSetValueRange(CHART *pCh, WORD min, WORD max);
 
 /*********************************************************************
 * Function: ChGetValueRange(pCh)
@@ -519,7 +532,7 @@ void ChSetValueRange(CHART *pCh, WORD min, WORD max);
 * Side Effects: none.
 *
 ********************************************************************/
-#define ChGetValueRange(pCh)	(pCh->prm.valMax-pCh->prm.valMin)
+    #define ChGetValueRange(pCh)    (pCh->prm.valMax - pCh->prm.valMin)
 
 /*********************************************************************
 * Macros: ChGetPercentMax(pCh)
@@ -537,7 +550,7 @@ void ChSetValueRange(CHART *pCh, WORD min, WORD max);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetPercentMax(pCh)				(pCh->prm.perMax)
+    #define ChGetPercentMax(pCh)    (pCh->prm.perMax)
 
 /*********************************************************************
 * Macros: ChGetPercentMin(pCh)
@@ -555,7 +568,7 @@ void ChSetValueRange(CHART *pCh, WORD min, WORD max);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetPercentMin(pCh)				(pCh->prm.perMin)
+    #define ChGetPercentMin(pCh)    (pCh->prm.perMin)
 
 /*********************************************************************
 * Function: ChSetPercentRange(CHART *pCh, WORD min, WORD max)
@@ -576,7 +589,7 @@ void ChSetValueRange(CHART *pCh, WORD min, WORD max);
 * Side Effects: none.
 *
 ********************************************************************/
-void ChSetPercentRange(CHART *pCh, WORD min, WORD max); 
+void    ChSetPercentRange(CHART *pCh, WORD min, WORD max);
 
 /*********************************************************************
 * Function: ChGetPercentRange(pCh)
@@ -595,7 +608,7 @@ void ChSetPercentRange(CHART *pCh, WORD min, WORD max);
 * Side Effects: none.
 *
 ********************************************************************/
-#define ChGetPercentRange(pCh)		(pCh->prm.perMax-pCh->prm.perMin)
+    #define ChGetPercentRange(pCh)  (pCh->prm.perMax - pCh->prm.perMin)
 
 /*********************************************************************
 * Function: ChSetSampleRange(CHART *pCh, WORD start, WORD end)
@@ -625,7 +638,7 @@ void ChSetPercentRange(CHART *pCh, WORD min, WORD max);
 * Side Effects: none.
 *
 ********************************************************************/
-void ChSetSampleRange(CHART *pCh, WORD start, WORD end); 
+void    ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 
 /*********************************************************************
 * Function: ChGetSampleRange(pCh)
@@ -642,7 +655,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none.
 *
 ********************************************************************/
-#define ChGetSampleRange(pCh)	(ChGetSampleEnd(pCh)-ChGetSampleStart(pCh))
+    #define ChGetSampleRange(pCh)   (ChGetSampleEnd(pCh) - ChGetSampleStart(pCh))
 
 /*********************************************************************
 * Macros:  ChGetSampleStart(pCh)
@@ -658,7 +671,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetSampleStart(pCh)             (((CHART*)pCh)->prm.smplStart)
+    #define ChGetSampleStart(pCh)   (((CHART *)pCh)->prm.smplStart)
 
 /*********************************************************************
 * Macros:  ChGetSampleEnd(pCh)
@@ -674,7 +687,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetSampleEnd(pCh)             ((CHART*)pCh)->prm.smplEnd
+    #define ChGetSampleEnd(pCh) ((CHART *)pCh)->prm.smplEnd
 
 /*********************************************************************
 * Macros: ChSetTitle(pCh, pNewTitle)
@@ -695,7 +708,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChSetTitle(pCh, pNewTitle)   	(((CHART*)pCh)->prm.pTitle = pNewTitle)
+    #define ChSetTitle(pCh, pNewTitle)  (((CHART *)pCh)->prm.pTitle = pNewTitle)
 
 /*********************************************************************
 * Macros: ChGetTitle(pCh)
@@ -712,7 +725,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetTitle(pCh)   				(((CHART*)pCh)->prm.pTitle)
+    #define ChGetTitle(pCh) (((CHART *)pCh)->prm.pTitle)
 
 /*********************************************************************
 * Macros: ChSetAxisLabelFont(pCh, pNewFont)
@@ -732,7 +745,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChSetAxisLabelFont(pCh, pNewFont)   (((CHART*)pCh)->prm.pAxisLabelsFont = pNewFont)
+    #define ChSetAxisLabelFont(pCh, pNewFont)   (((CHART *)pCh)->prm.pAxisLabelsFont = pNewFont)
 
 /*********************************************************************
 * Macros: ChGetAxisLabelFont(pCh)
@@ -749,7 +762,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetAxisLabelFont(pCh)   		    (((CHART*)pCh)->prm.pAxisLabelsFont)
+    #define ChGetAxisLabelFont(pCh) (((CHART *)pCh)->prm.pAxisLabelsFont)
 
 /*********************************************************************
 * Macros: ChSetGridLabelFont(pCh, pNewFont)
@@ -769,7 +782,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChSetGridLabelFont(pCh, pNewFont)   (((CHART*)pCh)->prm.pGridLabelsFont = pNewFont)
+    #define ChSetGridLabelFont(pCh, pNewFont)   (((CHART *)pCh)->prm.pGridLabelsFont = pNewFont)
 
 /*********************************************************************
 * Macros: ChGetGridLabelFont(pCh)
@@ -786,7 +799,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetGridLabelFont(pCh)   		    (((CHART*)pCh)->prm.pGridLabelsFont)
+    #define ChGetGridLabelFont(pCh) (((CHART *)pCh)->prm.pGridLabelsFont)
 
 /*********************************************************************
 * Macros: ChSetTitleFont(pCh, pNewFont)
@@ -806,7 +819,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChSetTitleFont(pCh, pNewFont)   (((CHART*)pCh)->prm.pTitleFont = pNewFont)
+    #define ChSetTitleFont(pCh, pNewFont)   (((CHART *)pCh)->prm.pTitleFont = pNewFont)
 
 /*********************************************************************
 * Macros: ChGetTitleFont(pCh)
@@ -823,7 +836,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetTitleFont(pCh)   		    (((CHART*)pCh)->prm.pTitleFont)
+    #define ChGetTitleFont(pCh) (((CHART *)pCh)->prm.pTitleFont)
 
 /*********************************************************************
 * Macros: ChSetSampleLabel(pCh, pNewXLabel)
@@ -844,7 +857,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChSetSampleLabel(pCh, pNewXLabel)   	(((CHART*)pCh)->prm.pSmplLabel = pNewXLabel)
+    #define ChSetSampleLabel(pCh, pNewXLabel)   (((CHART *)pCh)->prm.pSmplLabel = pNewXLabel)
 
 /*********************************************************************
 * Macros: ChGetSampleLabel(pCh)
@@ -862,7 +875,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetSampleLabel(pCh)   				(((CHART*)pCh)->prm.pSmplLabel)
+    #define ChGetSampleLabel(pCh)   (((CHART *)pCh)->prm.pSmplLabel)
 
 /*********************************************************************
 * Macros: ChSetValueLabel(pCh, pNewYLabel)
@@ -883,7 +896,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChSetValueLabel(pCh, pNewValueLabel)   	(((CHART*)pCh)->prm.pValLabel = pNewValueLabel)
+    #define ChSetValueLabel(pCh, pNewValueLabel)    (((CHART *)pCh)->prm.pValLabel = pNewValueLabel)
 
 /*********************************************************************
 * Macros: ChGetValueLabel(pCh)
@@ -901,7 +914,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetValueLabel(pCh)   				(((CHART*)pCh)->prm.pValLabel)
+    #define ChGetValueLabel(pCh)    (((CHART *)pCh)->prm.pValLabel)
 
 /*********************************************************************
 * Macros: ChSetColorTable(pCh, pNewTable)
@@ -919,7 +932,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChSetColorTable(pCh, pNewTable) ((((CHART*)pCh)->prm.pColor) = pNewTable)
+    #define ChSetColorTable(pCh, pNewTable) ((((CHART *)pCh)->prm.pColor) = pNewTable)
 
 /*********************************************************************
 * Macros: ChGetColorTable(pCh)
@@ -936,7 +949,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-#define ChGetColorTable(pCh) 			(((CHART*)pCh)->prm.pColor)
+    #define ChGetColorTable(pCh)    (((CHART *)pCh)->prm.pColor)
 
 /*********************************************************************
 * Function: ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg)
@@ -969,7 +982,7 @@ void ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-WORD ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg);
+WORD    ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: ChDraw(CHART *pCh)
@@ -1002,8 +1015,5 @@ WORD ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg);
 * Side Effects: none.
 *
 ********************************************************************/
-WORD ChDraw(CHART *pCh);
-
-
-
+WORD    ChDraw(CHART *pCh);
 #endif // _CHART_H

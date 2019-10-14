@@ -93,6 +93,10 @@
 
 // If FAT32 support required then uncomment the following
 #define SUPPORT_FAT32
+
+// Allows the use of the FSGetDiskProperties() function to get
+//   the size, free space, etc. of a drive
+#define ALLOW_GET_DISK_PROPERTIES
 /* ******************************************************************************************************* */
 
 

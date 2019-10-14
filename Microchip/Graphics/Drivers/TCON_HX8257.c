@@ -37,79 +37,93 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     01/12/09
  *****************************************************************************/
-
 #include "Graphics\Graphics.h"
 
-#define CS      0x01
-#define SCL     0x02
-#define SDO     0x04
+#define CS  0x01
+#define SCL 0x02
+#define SDO 0x04
 
-BYTE            value; 
+BYTE    value;
 
-void TCON_Delay()
+/* */
+
+void TCON_Delay(void)
 {
-WORD timeOut;
-        timeOut = 200;
-        while(timeOut--);
+    WORD    timeOut;
+    timeOut = 200;
+    while(timeOut--);
 }
 
+/* */
 void TCON_CTRL(BYTE mask, BYTE level)
 {
-    if(level == 0){
+    if(level == 0)
+    {
         value &= ~mask;
-    }else{
+    }
+    else
+    {
         value |= mask;
     }
+
     SetReg(0xAC, value);
 }
 
+/* */
 void TCONWriteByte(BYTE value)
 {
-BYTE mask;
+    BYTE    mask;
 
-	mask = 0x80;
-	while(mask)
-	{
-		TCON_CTRL(SCL,0);
+    mask = 0x80;
+    while(mask)
+    {
+        TCON_CTRL(SCL, 0);
         TCON_Delay();
-		if(mask&value){
-			TCON_CTRL(SDO,1);
-		}else{
-			TCON_CTRL(SDO,0);
-		}
-		TCON_CTRL(SCL,1);
-		mask >>= 1;
-	}
+        if(mask & value)
+        {
+            TCON_CTRL(SDO, 1);
+        }
+        else
+        {
+            TCON_CTRL(SDO, 0);
+        }
+
+        TCON_CTRL(SCL, 1);
+        mask >>= 1;
+    }
 }
 
+/* */
 void GPIO_TCON(WORD index, WORD value)
 {
-	TCON_CTRL(CS,0);
-    // Index
-	TCONWriteByte(0x70);
-	TCONWriteByte(((WORD_VAL)index).v[1]);
-	TCONWriteByte(((WORD_VAL)index).v[0]);
+    TCON_CTRL(CS, 0);
 
-	TCON_CTRL(CS,1);
+    // Index
+    TCONWriteByte(0x70);
+    TCONWriteByte(((WORD_VAL) index).v[1]);
+    TCONWriteByte(((WORD_VAL) index).v[0]);
+
+    TCON_CTRL(CS, 1);
     TCON_Delay();
-	TCON_CTRL(CS,0);
+    TCON_CTRL(CS, 0);
 
     // Data
-	TCONWriteByte(0x72);
-	TCONWriteByte(((WORD_VAL)value).v[1]);
-	TCONWriteByte(((WORD_VAL)value).v[0]);
-	TCON_CTRL(CS,1);
+    TCONWriteByte(0x72);
+    TCONWriteByte(((WORD_VAL) value).v[1]);
+    TCONWriteByte(((WORD_VAL) value).v[0]);
+    TCON_CTRL(CS, 1);
     TCON_Delay();
 }
 
+/* */
 void TCON_Init(void)
 {
-    SetReg(0xA8, CS|SDO|SCL);
-    TCON_CTRL(CS,1);
-	TCON_CTRL(SDO,1);
-	TCON_CTRL(SCL,1);
+    SetReg(0xA8, CS | SDO | SCL);
+    TCON_CTRL(CS, 1);
+    TCON_CTRL(SDO, 1);
+    TCON_CTRL(SCL, 1);
 
     DelayMs(20);
-	GPIO_TCON(0x0006, 0x2020);
+    GPIO_TCON(0x0006, 0x2020);
     DelayMs(20);
 }

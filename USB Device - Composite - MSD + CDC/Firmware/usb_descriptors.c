@@ -154,10 +154,7 @@ state according to the definition in the USB specification.
 #define __USB_DESCRIPTORS_C
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
+#include "./USB/usb.h"
 
 #include "./USB/usb_function_msd.h"
 #include "./USB/usb_function_cdc.h"
@@ -226,9 +223,9 @@ ROM BYTE configDescriptor1[]={
     
     /* Interface Association Descriptor */ 
 	0x08, //sizeof(USB_IAD_DSC), // Size of this descriptor in byte 
-	0x11, // Interface assocication descriptor type 
+	0x0B, // Interface assocication descriptor type 
 	1, // The first associated interface 
-	2, // Number of contiguous associated interface 
+	1, // Number of contiguous associated interface 
 	COMM_INTF, // bInterfaceClass of the first interface 
 	ABSTRACT_CONTROL_MODEL, // bInterfaceSubclass of the first interface 
 	V25TER, // bInterfaceProtocol of the first interface 

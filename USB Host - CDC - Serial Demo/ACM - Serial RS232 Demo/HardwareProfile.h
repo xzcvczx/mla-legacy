@@ -17,6 +17,9 @@
 
 #elif defined( __PIC32MX__)
 
+#define EXPLORER_16
+#define PIC32MX460F512L_PIM
+
     #define USB_A0_SILICON_WORK_AROUND
     //#define RUN_AT_48MHZ
     //#define RUN_AT_24MHZ
@@ -26,15 +29,15 @@
     #if defined(RUN_AT_48MHZ)
         #define GetSystemClock()            48000000UL
         #define GetPeripheralClock()        48000000UL
-        #define GetInstructionClock()       (GetSystemClock() / 2) ???
+        #define GetInstructionClock()       (GetSystemClock() / 2)
     #elif defined(RUN_AT_24MHZ)
         #define GetSystemClock()            24000000UL
         #define GetPeripheralClock()        24000000UL
-        #define GetInstructionClock()       (GetSystemClock() / 2) ???
+        #define GetInstructionClock()       (GetSystemClock() / 2)
     #elif defined(RUN_AT_60MHZ)    
-        #define GetSystemClock()            60000000UL
-        #define GetPeripheralClock()        30000000UL  // Will be divided down
-        #define GetInstructionClock()       (GetSystemClock() / 2) ???
+        #define GetSystemClock()            80000000UL
+        #define GetPeripheralClock()        80000000UL  // Will be divided down
+        #define GetInstructionClock()       (GetSystemClock() / 2)
     #else
         #error Choose a speed
     #endif        
@@ -138,77 +141,104 @@
     #define sw6                 PORTDbits.RD7
 
 #elif defined(__PIC32MX__)
-    #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
-//    
-//    #if defined(USE_USB_BUS_SENSE_IO)
-//    #define USB_BUS_SENSE       PORTBbits.RB5
-//    #else
-    #define USB_BUS_SENSE       1
-//    #endif
-//    
-    #define tris_self_power     TRISAbits.TRISA2    // Input
-//    
-//    #if defined(USE_SELF_POWER_SENSE_IO)
-//    #define self_power          PORTAbits.RA2
-//    #else
-    #define self_power          1
-//    #endif
-    
-    // External Transceiver Interface
-    #define tris_usb_vpo        TRISBbits.TRISB3    // Output
-    #define tris_usb_vmo        TRISBbits.TRISB2    // Output
-    #define tris_usb_rcv        TRISAbits.TRISA4    // Input
-    #define tris_usb_vp         TRISCbits.TRISC5    // Input
-    #define tris_usb_vm         TRISCbits.TRISC4    // Input
-    #define tris_usb_oe         TRISCbits.TRISC1    // Output
-    
-    #define tris_usb_suspnd     TRISAbits.TRISA3    // Output
-    
-    /** LED ************************************************************/
-    #define mInitAllLEDs()  {TRISA = 0; LATA = 0;}
-    
-    #define mLED_3              LATAbits.LATA0
-    #define mLED_4              LATAbits.LATA1
-    #define mLED_5              LATAbits.LATA2
-    #define mLED_6              LATAbits.LATA3
-    #define mLED_7              LATAbits.LATA4
-    #define mLED_8              LATAbits.LATA5
-    #define mLED_9              LATAbits.LATA6
-    #define mLED_10             LATAbits.LATA7
-    
-    #define mLED_3_On()         mLED_3  = 1;
-    #define mLED_4_On()         mLED_4  = 1;
-    #define mLED_5_On()         mLED_5  = 1;
-    #define mLED_6_On()         mLED_6  = 1;
-    #define mLED_7_On()         mLED_7  = 1;
-    #define mLED_8_On()         mLED_8  = 1;
-    #define mLED_9_On()         mLED_9  = 1;
-    #define mLED_10_On()        mLED_10 = 1;
-    
-    #define mLED_3_Off()        mLED_3  = 0;
-    #define mLED_4_Off()        mLED_4  = 0;
-    #define mLED_5_Off()        mLED_5  = 0;
-    #define mLED_6_Off()        mLED_6  = 0;
-    #define mLED_7_Off()        mLED_7  = 0;
-    #define mLED_8_Off()        mLED_8  = 0;
-    #define mLED_9_Off()        mLED_9  = 0;
-    #define mLED_10_Off()       mLED_10 = 0;
-    
-    #define mLED_3_Toggle()     mLED_3  = !mLED_3;
-    #define mLED_4_Toggle()     mLED_4  = !mLED_4;
-    #define mLED_5_Toggle()     mLED_5  = !mLED_5;
-    #define mLED_6_Toggle()     mLED_6  = !mLED_6;
-    #define mLED_7_Toggle()     mLED_7  = !mLED_7;
-    #define mLED_8_Toggle()     mLED_8  = !mLED_8;
-    #define mLED_9_Toggle()     mLED_9  = !mLED_9;
-    #define mLED_10_Toggle()    mLED_10 = !mLED_10;
-    
-    /** SWITCH *********************************************************/
-    #define mInitAllSwitches()  mPORTDSetPinsDigitalIn(IOPORT_BIT_6|IOPORT_BIT_7)
-    #define mInitSwitch3()      mPORTDSetPinsDigitalIn(IOPORT_BIT_7)
-    #define mInitSwitch6()      mPORTDSetPinsDigitalIn(IOPORT_BIT_6)
-    #define sw3                 mPORTDReadBit(IOPORT_BIT_6)
-    #define sw6                 mPORTDReadBit(IOPORT_BIT_7)
+	#ifdef PIC32MX460F512L_PIM
+		#define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
+//  //    
+//  //    #if defined(USE_USB_BUS_SENSE_IO)
+//  //    #define USB_BUS_SENSE       PORTBbits.RB5
+//  //    #else
+        #define USB_BUS_SENSE       1
+//  //    #endif
+//  //    
+        #define tris_self_power     TRISAbits.TRISA2    // Input
+//  //    
+//  //    #if defined(USE_SELF_POWER_SENSE_IO)
+//  //    #define self_power          PORTAbits.RA2
+//  //    #else
+        #define self_power          1
+//  //    #endif
+        
+        // External Transceiver Interface
+        #define tris_usb_vpo        TRISBbits.TRISB3    // Output
+        #define tris_usb_vmo        TRISBbits.TRISB2    // Output
+        #define tris_usb_rcv        TRISAbits.TRISA4    // Input
+        #define tris_usb_vp         TRISCbits.TRISC5    // Input
+        #define tris_usb_vm         TRISCbits.TRISC4    // Input
+        #define tris_usb_oe         TRISCbits.TRISC1    // Output
+        
+        #define tris_usb_suspnd     TRISAbits.TRISA3    // Output
+        
+        /** LED ************************************************************/
+        #define mInitAllLEDs()  {TRISA = 0; LATA = 0;}
+        
+        #define mLED_3              LATAbits.LATA0
+        #define mLED_4              LATAbits.LATA1
+        #define mLED_5              LATAbits.LATA2
+        #define mLED_6              LATAbits.LATA3
+        #define mLED_7              LATAbits.LATA4
+        #define mLED_8              LATAbits.LATA5
+        #define mLED_9              LATAbits.LATA6
+        #define mLED_10             LATAbits.LATA7
+        
+        #define mLED_3_On()         mLED_3  = 1;
+        #define mLED_4_On()         mLED_4  = 1;
+        #define mLED_5_On()         mLED_5  = 1;
+        #define mLED_6_On()         mLED_6  = 1;
+        #define mLED_7_On()         mLED_7  = 1;
+        #define mLED_8_On()         mLED_8  = 1;
+        #define mLED_9_On()         mLED_9  = 1;
+        #define mLED_10_On()        mLED_10 = 1;
+        
+        #define mLED_3_Off()        mLED_3  = 0;
+        #define mLED_4_Off()        mLED_4  = 0;
+        #define mLED_5_Off()        mLED_5  = 0;
+        #define mLED_6_Off()        mLED_6  = 0;
+        #define mLED_7_Off()        mLED_7  = 0;
+        #define mLED_8_Off()        mLED_8  = 0;
+        #define mLED_9_Off()        mLED_9  = 0;
+        #define mLED_10_Off()       mLED_10 = 0;
+        
+        #define mLED_3_Toggle()     mLED_3  = !mLED_3;
+        #define mLED_4_Toggle()     mLED_4  = !mLED_4;
+        #define mLED_5_Toggle()     mLED_5  = !mLED_5;
+        #define mLED_6_Toggle()     mLED_6  = !mLED_6;
+        #define mLED_7_Toggle()     mLED_7  = !mLED_7;
+        #define mLED_8_Toggle()     mLED_8  = !mLED_8;
+        #define mLED_9_Toggle()     mLED_9  = !mLED_9;
+        #define mLED_10_Toggle()    mLED_10 = !mLED_10;
+        
+        /** SWITCH *********************************************************/
+        #define mInitAllSwitches()  mPORTDSetPinsDigitalIn(IOPORT_BIT_6|IOPORT_BIT_7)
+        #define mInitSwitch3()      mPORTDSetPinsDigitalIn(IOPORT_BIT_7)
+        #define mInitSwitch6()      mPORTDSetPinsDigitalIn(IOPORT_BIT_6)
+        #define sw3                 mPORTDReadBits(IOPORT_BIT_6)
+        #define sw6                 mPORTDReadBits(IOPORT_BIT_7)
+
+		// LCD Module I/O pins
+		#define LCD_DATA0_TRIS		(TRISEbits.TRISE0)		// Multiplexed with LED6
+		#define LCD_DATA0_IO		(LATEbits.LATE0)
+		#define LCD_DATA1_TRIS		(TRISEbits.TRISE1)
+		#define LCD_DATA1_IO		(LATEbits.LATE1)
+		#define LCD_DATA2_TRIS		(TRISEbits.TRISE2)
+		#define LCD_DATA2_IO		(LATEbits.LATE2)
+		#define LCD_DATA3_TRIS		(TRISEbits.TRISE3)		// Multiplexed with LED3
+		#define LCD_DATA3_IO		(LATEbits.LATE3)
+		#define LCD_DATA4_TRIS		(TRISEbits.TRISE4)		// Multiplexed with LED2
+		#define LCD_DATA4_IO		(LATEbits.LATE4)
+		#define LCD_DATA5_TRIS		(TRISEbits.TRISE5)
+		#define LCD_DATA5_IO		(LATEbits.LATE5)
+		#define LCD_DATA6_TRIS		(TRISEbits.TRISE6)
+		#define LCD_DATA6_IO		(LATEbits.LATE6)
+		#define LCD_DATA7_TRIS		(TRISEbits.TRISE7)
+		#define LCD_DATA7_IO		(LATEbits.LATE7)
+		#define LCD_RD_WR_TRIS		(TRISDbits.TRISD5)
+		#define LCD_RD_WR_IO		(LATDbits.LATD5)
+		#define LCD_RS_TRIS			(TRISBbits.TRISB15)
+		#define LCD_RS_IO			(LATBbits.LATB15)
+		#define LCD_E_TRIS			(TRISDbits.TRISD4)
+	    #define LCD_E_IO			(LATDbits.LATD4)
+
+	#endif
 
 #endif
 

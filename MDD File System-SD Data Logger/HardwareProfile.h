@@ -64,7 +64,7 @@
     // Indicates that the PIC32 clock is running at 24 MHz
     //#define RUN_AT_24MHZ
     // Indicates that the PIC32 clock is running at 80 MHz
-    #define RUN_AT_60MHZ
+    #define RUN_AT_80MHZ
 
     // Various clock values
 
@@ -76,8 +76,8 @@
         #define GetSystemClock()            24000000UL
         #define GetPeripheralClock()        24000000UL
         #define GetInstructionClock()       (GetSystemClock())
-    #elif defined(RUN_AT_60MHZ)    
-        #define GetSystemClock()            (60000000ul)
+    #elif defined(RUN_AT_80MHZ)    
+        #define GetSystemClock()            (80000000ul)
         #define GetPeripheralClock()        (GetSystemClock()/2) 
         #define GetInstructionClock()       (GetSystemClock())
     #else

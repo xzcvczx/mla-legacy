@@ -38,34 +38,34 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _STATICTEXT_H
-#define _STATICTEXT_H
+    #define _STATICTEXT_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define ST_DISABLED   	0x0002  // Bit for disabled state.
-#define ST_RIGHT_ALIGN 	0x0004  // Bit to indicate text is left aligned.
-#define ST_CENTER_ALIGN	0x0008  // Bit to indicate text is center aligned.
-#define ST_FRAME  	    0x0010  // Bit to indicate frame is displayed.
-#define ST_UPDATE     	0x2000  // Bit to indicate that text area only is redrawn.
-#define ST_DRAW     	0x4000  // Bit to indicate static text must be redrawn.
-#define ST_HIDE     	0x8000  // Bit to remove object from screen.
+    #define ST_DISABLED     0x0002  // Bit for disabled state.
+    #define ST_RIGHT_ALIGN  0x0004  // Bit to indicate text is left aligned.
+    #define ST_CENTER_ALIGN 0x0008  // Bit to indicate text is center aligned.
+    #define ST_FRAME        0x0010  // Bit to indicate frame is displayed.
+    #define ST_UPDATE       0x2000  // Bit to indicate that text area only is redrawn.
+    #define ST_DRAW         0x4000  // Bit to indicate static text must be redrawn.
+    #define ST_HIDE         0x8000  // Bit to remove object from screen.
 
 /* Indent constant for the text used in the frame. */
-#define ST_INDENT       0x02    // Text indent constant.
+    #define ST_INDENT   0x02        // Text indent constant.
 
 /*********************************************************************
 * Overview: Defines the parameters required for a Static Text Object.
 *
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-	SHORT     		textHeight;     // Pre-computed text height.
-	XCHAR  			*pText;         // The pointer to text used.
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    SHORT       textHeight; // Pre-computed text height.
+    XCHAR       *pText;     // The pointer to text used.
 } STATICTEXT;
 
 /*********************************************************************
@@ -83,7 +83,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define StGetText(pSt)                 pSt->pText
+    #define StGetText(pSt)  pSt->pText
 
 /*********************************************************************
 * Function: StSetText(STATICTEXT *pSt, XCHAR *pText)
@@ -100,7 +100,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void  StSetText(STATICTEXT *pSt, XCHAR *pText);
+void        StSetText(STATICTEXT *pSt, XCHAR *pText);
 
 /*********************************************************************
 * Function: STATICTEXT  *StCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
@@ -144,9 +144,18 @@ void  StSetText(STATICTEXT *pSt, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-STATICTEXT *StCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			         WORD state, XCHAR *pText, GOL_SCHEME *pScheme);
-			      
+STATICTEXT  *StCreate
+            (
+                WORD        ID,
+                SHORT       left,
+                SHORT       top,
+                SHORT       right,
+                SHORT       bottom,
+                WORD        state,
+                XCHAR       *pText,
+                GOL_SCHEME  *pScheme
+            );
+
 /*********************************************************************
 * Function: WORD StTranslateMsg(STATICTEXT *pSt, GOL_MSG *pMsg)
 *
@@ -179,7 +188,7 @@ STATICTEXT *StCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-WORD  StTranslateMsg(STATICTEXT *pSt, GOL_MSG *pMsg);
+WORD        StTranslateMsg(STATICTEXT *pSt, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD StDraw(STATICTEXT *pSt)
@@ -211,7 +220,5 @@ WORD  StTranslateMsg(STATICTEXT *pSt, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD StDraw(STATICTEXT *pSt);
-
-
+WORD        StDraw(STATICTEXT *pSt);
 #endif // _STATICTEXT_H

@@ -11,7 +11,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.2
+ * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -103,42 +103,52 @@
 
 
 
-// Summary: Macro for the FSfopen APPEND mode
+// Summary: Macro for the FSfopen FS_APPEND mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
 //              be created if it doesn't exist.  If it does exist, it's file information will be loaded and the
 //              current location in the file will be set to the end.  The user will then be able to write to the file.
-#define APPEND  "a"
+#define FS_APPEND   "a"
+#define APPEND  "a"     //deprecated
 
-// Summary: Macro for the FSfopen WRITE mode
+// Summary: Macro for the FSfopen FS_WRITE mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
 //              be created if it doesn't exist.  If it does exist, it will be erased and replaced by an empty file
 //              of the same name.  The user will then be able to write to the file.
-#define WRITE   "w"
+#define FS_WRITE    "w"
+#define WRITE   "w"     //deprecated
 
-// Summary: Macro for the FSfopen READ mode
+// Summary: Macro for the FSfopen FS_READ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file information for the 
 //              specified file will be loaded.  If the file does not exist, the FSfopen function will fail.  The user 
 //              will then be able to read from the file.
-#define READ    "r"
+#define FS_READ "r"
+#if defined(__32MX795F512L__)
+    #warning FSfopen must use "r" and not READ as input on this device
+#else
+    #define READ    "r"     //deprecated
+#endif
 
-// Summary: Macro for the FSfopen APPEND+ mode
+// Summary: Macro for the FSfopen FS_APPEND+ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
 //              be created if it doesn't exist.  If it does exist, it's file information will be loaded and the
 //              current location in the file will be set to the end.  The user will then be able to write to the file
 //              or read from the file.
-#define APPENDPLUS "a+"
+#define FS_APPENDPLUS   "a+"
+#define APPENDPLUS "a+"     //deprecated
 
-// Summary: Macro for the FSfopen WRITE+ mode
+// Summary: Macro for the FSfopen FS_WRITE+ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
 //              be created if it doesn't exist.  If it does exist, it will be erased and replaced by an empty file
 //              of the same name.  The user will then be able to write to the file or read from the file.
-#define WRITEPLUS  "w+"
+#define FS_WRITEPLUS    "w+"
+#define WRITEPLUS  "w+"     //deprecated
 
-// Summary: Macro for the FSfopen READ+ mode
+// Summary: Macro for the FSfopen FS_READ+ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file information for the 
 //              specified file will be loaded.  If the file does not exist, the FSfopen function will fail.  The user 
 //              will then be able to read from the file or write to the file.
-#define READPLUS   "r+"
+#define FS_READPLUS     "r+"
+#define READPLUS   "r+"     //deprecated
 
 
 
@@ -1401,6 +1411,8 @@ int FSerror (void);
 
 int FSCreateMBR (unsigned long firstSector, unsigned long numSectors);
 
+
+#ifdef ALLOW_GET_DISK_PROPERTIES
 /*********************************************************************************
   Function:
     void FSGetDiskProperties(FS_DISK_PROPERTIES* properties)
@@ -1473,8 +1485,8 @@ int FSCreateMBR (unsigned long firstSector, unsigned long numSectors);
 
     do
     {
-        my_results = FSGetDiskProperties(&disk_properties);
-    } while (disk_properties->properties_status == FS_GET_PROPERTIES_STILL_WORKING);
+        FSGetDiskProperties(&disk_properties);
+    } while (disk_properties.properties_status == FS_GET_PROPERTIES_STILL_WORKING);
     </code>
 
     results.disk_format - contains the format of the drive.  Valid results are 
@@ -1502,5 +1514,7 @@ int FSCreateMBR (unsigned long firstSector, unsigned long numSectors);
         will vary based on the number of sectors per cluster and the sector size.
   *********************************************************************************/
 void FSGetDiskProperties(FS_DISK_PROPERTIES* properties);
+#endif
+
 
 #endif

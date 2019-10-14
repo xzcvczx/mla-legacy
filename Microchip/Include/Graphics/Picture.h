@@ -38,27 +38,27 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _PICTURE_H
-#define _PICTURE_H
+    #define _PICTURE_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define PICT_DISABLED       0x0002  // Bit to indicate Picture is in a disabled state.
-#define PICT_FRAME  	    0x0004  // Bit to indicate Picture has a frame.
-#define PICT_HIDE           0x8000  // Bit to indicate Picture must be hidden. 
-#define PICT_DRAW           0x4000  // Bit to indicate Picture will be redrawn.
+    #define PICT_DISABLED   0x0002  // Bit to indicate Picture is in a disabled state.
+    #define PICT_FRAME      0x0004  // Bit to indicate Picture has a frame.
+    #define PICT_HIDE       0x8000  // Bit to indicate Picture must be hidden.
+    #define PICT_DRAW       0x4000  // Bit to indicate Picture will be redrawn.
 
 /*****************************************************************************
  * Overview: The structure contains data for picture control
  *****************************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-    char            scale;          // Scale factor for the bitmap
- 	void  			*pBitmap;       // Pointer to the bitmap
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    char        scale;      // Scale factor for the bitmap
+    void        *pBitmap;   // Pointer to the bitmap
 } PICTURE;
 
 /*********************************************************************
@@ -75,7 +75,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define PictGetBitmap(pPict)                 pPict->pBitmap
+    #define PictGetBitmap(pPict)    pPict->pBitmap
 
 /*********************************************************************
 * Macros:  PictSetBitmap(pPict,pBtMap)
@@ -92,7 +92,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define PictSetBitmap(pPict,pBtMap)          pPict->pBitmap = pBtMap
+    #define PictSetBitmap(pPict, pBtMap)    pPict->pBitmap = pBtMap
 
 /*********************************************************************
 * Macros:  PictSetScale(pPict,scl)
@@ -111,7 +111,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define PictSetScale(pPict,scl)          pPict->scale = scl
+    #define PictSetScale(pPict, scl)    pPict->scale = scl
 
 /*********************************************************************
 * Macros:  PictGetScale(pPict,scl)
@@ -129,7 +129,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define PictGetScale(pPict)                  pPict->scale
+    #define PictGetScale(pPict) pPict->scale
 
 /*********************************************************************
 * Function: PICTURE  *PictCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -158,8 +158,11 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-PICTURE  *PictCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			           WORD state, char scale, void *pBitmap, GOL_SCHEME *pScheme);
+PICTURE * PictCreate
+    (
+        WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, char scale, void *pBitmap, GOL_SCHEME *
+        pScheme
+    );
 
 /*********************************************************************
 * Function: WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
@@ -190,7 +193,7 @@ PICTURE  *PictCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-WORD  PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg);
+WORD    PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD PictDraw(PICTURE *pPict)
@@ -218,6 +221,5 @@ WORD  PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD PictDraw(PICTURE *pPict);
-
+WORD    PictDraw(PICTURE *pPict);
 #endif // _PICTURE_H

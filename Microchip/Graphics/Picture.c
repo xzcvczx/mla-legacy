@@ -38,7 +38,6 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #include "Graphics\Graphics.h"
 
 #ifdef USE_PICTURE
@@ -51,35 +50,45 @@
 * Overview: creates the picture control
 *
 ********************************************************************/
-PICTURE *PictCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			       WORD state, char scale, void *pBitmap, GOL_SCHEME *pScheme)
+PICTURE *PictCreate
+(
+    WORD        ID,
+    SHORT       left,
+    SHORT       top,
+    SHORT       right,
+    SHORT       bottom,
+    WORD        state,
+    char        scale,
+    void        *pBitmap,
+    GOL_SCHEME  *pScheme
+)
 {
-	PICTURE *pPict = NULL;
-	
-	pPict = (PICTURE*)malloc(sizeof(PICTURE));
-	if (pPict == NULL)
-		return pPict;
+    PICTURE *pPict = NULL;
 
-	pPict->hdr.ID      	= ID;
-	pPict->hdr.pNxtObj 	= NULL;
-	pPict->hdr.type    	= OBJ_PICTURE;
-	pPict->hdr.left    	= left;
-	pPict->hdr.top     	= top;
-	pPict->hdr.right   	= right;
-	pPict->hdr.bottom  	= bottom;
-	pPict->pBitmap 	    = pBitmap;
-	pPict->hdr.state   	= state;
-	pPict->scale   	    = scale;
+    pPict = (PICTURE *)malloc(sizeof(PICTURE));
+    if(pPict == NULL)
+        return (pPict);
 
-	// Set the style scheme to be used
-	if (pScheme == NULL)
-		pPict->hdr.pGolScheme = _pDefaultGolScheme; 
-	else 	
-		pPict->hdr.pGolScheme = (GOL_SCHEME *)pScheme; 	
+    pPict->hdr.ID = ID;
+    pPict->hdr.pNxtObj = NULL;
+    pPict->hdr.type = OBJ_PICTURE;
+    pPict->hdr.left = left;
+    pPict->hdr.top = top;
+    pPict->hdr.right = right;
+    pPict->hdr.bottom = bottom;
+    pPict->pBitmap = pBitmap;
+    pPict->hdr.state = state;
+    pPict->scale = scale;
 
-    GOLAddObject((OBJ_HEADER*) pPict);
-	
-	return pPict;
+    // Set the style scheme to be used
+    if(pScheme == NULL)
+        pPict->hdr.pGolScheme = _pDefaultGolScheme;
+    else
+        pPict->hdr.pGolScheme = (GOL_SCHEME *)pScheme;
+
+    GOLAddObject((OBJ_HEADER *)pPict);
+
+    return (pPict);
 }
 
 /*********************************************************************
@@ -90,24 +99,31 @@ PICTURE *PictCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 ********************************************************************/
 WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
 {
-	// Evaluate if the message is for the picture
-    // Check if disabled first
-	if ( GetState(pPict,PICT_DISABLED) )
-		return OBJ_MSG_INVALID;
 
-#ifdef USE_TOUCHSCREEN
-    if(pMsg->type == TYPE_TOUCHSCREEN){
-    	// Check if it falls in the picture area
-		if( (pPict->hdr.left     < pMsg->param1) &&
-	  	    (pPict->hdr.right    > pMsg->param1) &&
-	   	    (pPict->hdr.top      < pMsg->param2) &&
-	   	    (pPict->hdr.bottom   > pMsg->param2) ) {
-            return PICT_MSG_SELECTED;
+    // Evaluate if the message is for the picture
+    // Check if disabled first
+    if(GetState(pPict, PICT_DISABLED))
+        return (OBJ_MSG_INVALID);
+
+        #ifdef USE_TOUCHSCREEN
+    if(pMsg->type == TYPE_TOUCHSCREEN)
+    {
+
+        // Check if it falls in the picture area
+        if
+        (
+            (pPict->hdr.left < pMsg->param1) &&
+            (pPict->hdr.right > pMsg->param1) &&
+            (pPict->hdr.top < pMsg->param2) &&
+            (pPict->hdr.bottom > pMsg->param2)
+        )
+        {
+            return (PICT_MSG_SELECTED);
         }
     }
-#endif
 
-    return OBJ_MSG_INVALID;	
+        #endif
+    return (OBJ_MSG_INVALID);
 }
 
 /*********************************************************************
@@ -122,77 +138,89 @@ WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
 ********************************************************************/
 WORD PictDraw(PICTURE *pPict)
 {
-typedef enum {
-	REMOVE,
-	DRAW_IMAGE,
-	DRAW_BACKGROUND1,
-	DRAW_BACKGROUND2,
-	DRAW_BACKGROUND3,
-	DRAW_BACKGROUND4,
-	DRAW_FRAME
-} PICT_DRAW_STATES;
+    typedef enum
+    {
+        REMOVE,
+        DRAW_IMAGE,
+        DRAW_BACKGROUND1,
+        DRAW_BACKGROUND2,
+        DRAW_BACKGROUND3,
+        DRAW_BACKGROUND4,
+        DRAW_FRAME
+    } PICT_DRAW_STATES;
 
-static PICT_DRAW_STATES state = REMOVE;
-static SHORT posleft;
-static SHORT postop;
-static SHORT posright;
-static SHORT posbottom;
+    static PICT_DRAW_STATES state = REMOVE;
+    static SHORT posleft;
+    static SHORT postop;
+    static SHORT posright;
+    static SHORT posbottom;
 
     if(IsDeviceBusy())
-        return 0;
+        return (0);
 
-    switch(state){
-
+    switch(state)
+    {
         case REMOVE:
-            if(GetState(pPict,PICT_HIDE)){
+            if(GetState(pPict, PICT_HIDE))
+            {
                 SetColor(pPict->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pPict->hdr.left,pPict->hdr.top,pPict->hdr.right,pPict->hdr.bottom)) return 0;
-                return 1;
+                if(!Bar(pPict->hdr.left, pPict->hdr.top, pPict->hdr.right, pPict->hdr.bottom))
+                    return (0);
+                return (1);
             }
-            posleft = (pPict->hdr.left+pPict->hdr.right-pPict->scale*GetImageWidth(pPict->pBitmap))>>1;
-            postop = (pPict->hdr.top+pPict->hdr.bottom-pPict->scale*GetImageHeight(pPict->pBitmap))>>1;
-            posright = (pPict->hdr.right+pPict->hdr.left+pPict->scale*GetImageWidth(pPict->pBitmap))>>1;
-            posbottom = (pPict->hdr.bottom+pPict->hdr.top+pPict->scale*GetImageHeight(pPict->pBitmap))>>1;
+
+            posleft = (pPict->hdr.left + pPict->hdr.right - pPict->scale * GetImageWidth(pPict->pBitmap)) >> 1;
+            postop = (pPict->hdr.top + pPict->hdr.bottom - pPict->scale * GetImageHeight(pPict->pBitmap)) >> 1;
+            posright = (pPict->hdr.right + pPict->hdr.left + pPict->scale * GetImageWidth(pPict->pBitmap)) >> 1;
+            posbottom = (pPict->hdr.bottom + pPict->hdr.top + pPict->scale * GetImageHeight(pPict->pBitmap)) >> 1;
             state = DRAW_IMAGE;
 
         case DRAW_IMAGE:
-            if(pPict->pBitmap != NULL){
+            if(pPict->pBitmap != NULL)
+            {
                 if(IsDeviceBusy())
-                    return 0;
-                if(!PutImage( posleft, postop,pPict->pBitmap, pPict->scale)) return 0;
+                    return (0);
+                if(!PutImage(posleft, postop, pPict->pBitmap, pPict->scale))
+                    return (0);
             }
+
             SetColor(pPict->hdr.pGolScheme->CommonBkColor);
             state = DRAW_BACKGROUND1;
 
         case DRAW_BACKGROUND1:
-            if(!Bar(pPict->hdr.left+1, pPict->hdr.top+1, pPict->hdr.right-1, postop-1)) return 0;
+            if(!Bar(pPict->hdr.left + 1, pPict->hdr.top + 1, pPict->hdr.right - 1, postop - 1))
+                return (0);
             state = DRAW_BACKGROUND2;
 
         case DRAW_BACKGROUND2:
-            if(!Bar(pPict->hdr.left+1, posbottom, pPict->hdr.right-1, pPict->hdr.bottom-1)) return 0;
+            if(!Bar(pPict->hdr.left + 1, posbottom, pPict->hdr.right - 1, pPict->hdr.bottom - 1))
+                return (0);
             state = DRAW_BACKGROUND3;
 
         case DRAW_BACKGROUND3:
-            if(!Bar(pPict->hdr.left+1, postop, posleft-1, posbottom)) return 0;
+            if(!Bar(pPict->hdr.left + 1, postop, posleft - 1, posbottom))
+                return (0);
             state = DRAW_BACKGROUND4;
 
         case DRAW_BACKGROUND4:
-            if(!Bar(posright, postop, pPict->hdr.right-1, posbottom)) return 0;
+            if(!Bar(posright, postop, pPict->hdr.right - 1, posbottom))
+                return (0);
             state = DRAW_FRAME;
 
         case DRAW_FRAME:
-            if(GetState(pPict,PICT_FRAME)){
-		        SetLineType(SOLID_LINE);
-		        SetColor(pPict->hdr.pGolScheme->TextColor0);
-		        if(!Rectangle(pPict->hdr.left, pPict->hdr.top,
-                          pPict->hdr.right, pPict->hdr.bottom))
-                          return 0;
-		        
+            if(GetState(pPict, PICT_FRAME))
+            {
+                SetLineType(SOLID_LINE);
+                SetColor(pPict->hdr.pGolScheme->TextColor0);
+                if(!Rectangle(pPict->hdr.left, pPict->hdr.top, pPict->hdr.right, pPict->hdr.bottom))
+                    return (0);
             }
+
             state = REMOVE;
-            return 1;
+            return (1);
     }
-    return 1;
+
+    return (1);
 }
 
 #endif // USE_PICTURE

@@ -43,10 +43,6 @@
 
 /** INCLUDES *******************************************************/
 
-#include "Compiler.h"
-#include "GenericTypeDefs.h"                        // Required
-#include "usb_config.h"
-#include "USB/usb_device.h"                         // Required
 #include "USB/USB.h"
 #include "HardwareProfile.h"
 #include "MDD File System\internal flash.h"
@@ -180,7 +176,7 @@
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
-    #elif defined(__32MX460F512L__)
+    #elif defined(__32MX460F512L__) || defined(__32MX795F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
         #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
@@ -206,6 +202,9 @@
 #elif defined(PIC24F_STARTER_KIT)
     _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
     _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+#elif defined(PIC24FJ256DA210_DEV_BOARD)
+    //_CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    //_CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 #elif defined(PIC32_USB_STARTER_KIT)
     #pragma config UPLLEN   = ON        // USB PLL Enabled
     #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
@@ -564,7 +563,7 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
     
-   #if defined(PIC24FJ64GB004_PIM)
+   #if defined(PIC24FJ64GB004_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
 	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -657,6 +656,7 @@ void UserInit(void)
 	stringPrinted = FALSE;
 
 	mInitAllLEDs();
+    mInitAllSwitches();
 }//end UserInit
 
 
@@ -727,16 +727,6 @@ void mySetLineCodingHandler(void)
 #endif
 
 
-
-
-
-
-
-
-
-
-
-
 /********************************************************************
  * Function:        void ProcessIO(void)
  *
@@ -777,12 +767,10 @@ void ProcessIO(void)
                 stringPrinted = TRUE;
             }
         }
-        mLED_3_On();
     }
     else
     {
         stringPrinted = FALSE;
-        mLED_3_Off();
     }
 
     if(mUSBUSARTIsTxTrfReady())

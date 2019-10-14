@@ -41,21 +41,21 @@
  * Anton Alkhimenok     06/15/07    Beta release 
  *****************************************************************************/
 #ifndef _CUSTOM_H
-#define _CUSTOM_H
+    #define _CUSTOM_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 // Control states:
-#define CC_FOCUSED      0x0001  // bit  to indicate the control is focused
-#define CC_DISABLED     0x0002  // bit  to indicate the control is disabled
-#define CC_HIDE         0x8000  // bit  to indicate the control must be removed from screen
-#define CC_DRAW         0x4000  // bits to indicate the whole control must be redrawn
+    #define CC_FOCUSED  0x0001  // bit  to indicate the control is focused
+    #define CC_DISABLED 0x0002  // bit  to indicate the control is disabled
+    #define CC_HIDE     0x8000  // bit  to indicate the control must be removed from screen
+    #define CC_DRAW     0x4000  // bits to indicate the whole control must be redrawn
 
 // The structure contains data for the control
-typedef struct {
-	OBJ_HEADER      hdr;
+typedef struct
+{
+    OBJ_HEADER  hdr;
 } CUSTOM;
-
 
 /*********************************************************************
 * Function: CUSTOM  *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -79,8 +79,7 @@ typedef struct {
 * Note: none
 *
 ********************************************************************/
-CUSTOM  *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			      WORD state, GOL_SCHEME *pScheme);
+CUSTOM  *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME *pScheme);
 
 /*********************************************************************
 * Function: WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
@@ -101,7 +100,7 @@ CUSTOM  *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 *       GOL.C FILE
 *
 ********************************************************************/
-WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
+WORD    CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg)
@@ -121,7 +120,7 @@ WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
 *        GOL.C FILE 
 *
 ********************************************************************/
-void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg);
+void    CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD CcDraw(CUSTOM *pCc)
@@ -140,6 +139,5 @@ void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg);
 *       GOL.C FILE
 *
 ********************************************************************/
-WORD CcDraw(CUSTOM *pCc);
-
+WORD    CcDraw(CUSTOM *pCc);
 #endif // _CUSTOM_H

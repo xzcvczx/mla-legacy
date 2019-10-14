@@ -37,11 +37,11 @@
  * Paolo A. Tamayo		03/10/2008
  ********************************************************************/
 #ifndef MAINDEMOSTRINGS_H
-#define MAINDEMOSTRINGS_H
+    #define MAINDEMOSTRINGS_H
 
-#include "Graphics\Graphics.h"
+    #include "Graphics\Graphics.h"
 
-XCHAR StaticTextLstStr[] = {0};
+XCHAR       StaticTextLstStr[] = {0};
 
 const XCHAR NewGameStr[] = {'N','e','w',0};
 const XCHAR ExitStr[] = {'E','x','i','t',0};
@@ -64,5 +64,4 @@ const XCHAR BeatsStr[] = {'B','e','a','t','s',0};
 
 const XCHAR ClearStr[] = {'C','l','e','a','r',0};
 const XCHAR DemoStr[] = {'D','e','m','o',0};
-
 #endif //MAINDEMOSTRINGS_H

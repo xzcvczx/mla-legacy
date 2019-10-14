@@ -41,14 +41,15 @@
 
 // Color
 WORD_VAL    _color;
-// Clipping region control
-SHORT _clipRgn;
-// Clipping region borders
-SHORT _clipLeft;
-SHORT _clipTop;
-SHORT _clipRight;
-SHORT _clipBottom;
 
+// Clipping region control
+SHORT       _clipRgn;
+
+// Clipping region borders
+SHORT       _clipLeft;
+SHORT       _clipTop;
+SHORT       _clipRight;
+SHORT       _clipBottom;
 
 /*********************************************************************
 * Function:  void  DelayMs(WORD time)
@@ -67,33 +68,38 @@ SHORT _clipBottom;
 *
 ********************************************************************/
 #ifdef __PIC32MX
-void  DelayMs(WORD time)
+
+/* */
+void DelayMs(WORD time)
 {
     while(time--)
     {
-        unsigned int int_status;
+        unsigned int    int_status;
 
         int_status = INTDisableInterrupts();
-        OpenCoreTimer(GetSystemClock() / 2000);     // core timer is at 1/2 system clock
+        OpenCoreTimer(GetSystemClock() / 2000); // core timer is at 1/2 system clock
         INTRestoreInterrupts(int_status);
 
         mCTClearIntFlag();
 
         while(!mCTGetIntFlag());
-
     }
 
     mCTClearIntFlag();
 }
-#else
-#define DELAY_1MS 16000/5  // for 16MIPS
-void  DelayMs(WORD time){
-unsigned delay;
-	while(time--)
-		for(delay=0; delay<DELAY_1MS; delay++);	
-}
-#endif
 
+#else
+    #define DELAY_1MS   16000 / 5               // for 16MIPS
+
+/* */
+void DelayMs(WORD time)
+{
+    unsigned    delay;
+    while(time--)
+        for(delay = 0; delay < DELAY_1MS; delay++);
+}
+
+#endif
 
 /*********************************************************************
 * Function:  void ResetDevice()
@@ -111,8 +117,8 @@ unsigned delay;
 * Note: none
 *
 ********************************************************************/
-void ResetDevice(void){
-}
+void ResetDevice(void)
+{ }
 
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)
@@ -130,8 +136,8 @@ void ResetDevice(void){
 * Note: none
 *
 ********************************************************************/
-void PutPixel(SHORT x, SHORT y){
-}
+void PutPixel(SHORT x, SHORT y)
+{ }
 
 /*********************************************************************
 * Function: WORD GetPixel(SHORT x, SHORT y)
@@ -149,7 +155,7 @@ void PutPixel(SHORT x, SHORT y){
 * Note: none
 *
 ********************************************************************/
-WORD GetPixel(SHORT x, SHORT y){
-	return 0;
+WORD GetPixel(SHORT x, SHORT y)
+{
+    return (0);
 }
-

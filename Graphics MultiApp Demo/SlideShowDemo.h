@@ -37,17 +37,16 @@
  * Paolo A. Tamayo		03/10/2008
  ********************************************************************/
 #ifndef _SLIDESHOWDEMO_H
-#define _SLIDESHOWDEMO_H
+    #define _SLIDESHOWDEMO_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#ifdef __PIC32MX
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
-#include "GenericTypeDefs.h"
-#include "Graphics\Graphics.h"
-
+    #ifdef __PIC32MX
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+    #include "GenericTypeDefs.h"
+    #include "Graphics\Graphics.h"
 
 /************************************************************************
  Function: void CreateSlideShowDemo(void)
@@ -59,7 +58,7 @@
                                                                        
  Output: none
 ************************************************************************/
-void CreateSlideShowDemo(void);						
+void    CreateSlideShowDemo(void);
 
 /************************************************************************
  Function: WORD SlideShowDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, 
@@ -78,6 +77,5 @@ void CreateSlideShowDemo(void);
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD SlideShowDemoMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
-
+WORD    SlideShowDemoMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 #endif

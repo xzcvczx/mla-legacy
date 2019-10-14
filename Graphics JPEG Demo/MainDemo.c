@@ -76,130 +76,153 @@ Author                 Date           Comments
 --------------------------------------------------------------------------------
 Anton Alkhimenok       05-May-2009
 *******************************************************************************/
-
 #include "MainDemo.h"
 
 // Configuration bits
 #if defined(__dsPIC33F__) || defined(__PIC24H__)
-_FOSCSEL(FNOSC_PRI);			
-_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF  & POSCMD_XT);  
-_FWDT(FWDTEN_OFF);              
+_FOSCSEL(FNOSC_PRI);
+_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
+_FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-#pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
-#pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
-#pragma config CP = OFF, BWP = OFF, PWP = OFF
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
+    #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
+    #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
-	#if defined (__PIC24FJ256GB110__)
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
-    #endif	
-	#if defined (__PIC24FJ256GA110__)
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
-    #endif	
-	#if defined (__PIC24FJ128GA010__)
-		_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
-		_CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
-	#endif	
+    #if defined(__PIC24FJ256GB110__)
+_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
+_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+    #endif
+    #if defined(__PIC24FJ256GA110__)
+_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
+_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
+    #endif
+    #if defined(__PIC24FJ128GA010__)
+_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
+_CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
+    #endif
+	#if defined (__PIC24FJ256DA210__)
+_CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+	#endif	        
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
 // JPEG Files
 /////////////////////////////////////////////////////////////////////////////
 extern BITMAP_FLASH Logo;
-extern BITMAP_EXTERNAL Scene05;
-extern BITMAP_EXTERNAL Scene04;
-extern BITMAP_EXTERNAL Scene03;
-extern BITMAP_EXTERNAL Scene02;
-extern BITMAP_EXTERNAL Scene01;
+extern BITMAP_EXTERNAL  Scene05;
+extern BITMAP_EXTERNAL  Scene04;
+extern BITMAP_EXTERNAL  Scene03;
+extern BITMAP_EXTERNAL  Scene02;
+extern BITMAP_EXTERNAL  Scene01;
 
-#define DELAY_MS 1500
+#define DELAY_MS    1500
+
+/* */
 
 int main(void)
 {
 
-/////////////////////////////////////////////////////////////////////////////
-// ADC Explorer 16 Development Board Errata (work around 2)
-// RB15 should be output
-/////////////////////////////////////////////////////////////////////////////
-	LATBbits.LATB15 = 0;
-	TRISBbits.TRISB15 = 0;
-/////////////////////////////////////////////////////////////////////////////
+    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    
+    _ANSG8 = 0; /* S1 */
+    _ANSE9 = 0; /* S2 */
+    _ANSB5 = 0; /* S3 */
+        
+    #else
 
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-// Configure Oscillator to operate the device at 40Mhz
-// Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-	PLLFBD=38;					// M=40
-	CLKDIVbits.PLLPOST=0;		// N1=2
-	CLKDIVbits.PLLPRE=0;		// N2=2
-	OSCTUN=0;					// Tune FRC oscillator, if FRC is used
+    /////////////////////////////////////////////////////////////////////////////
+    // ADC Explorer 16 Development Board Errata (work around 2)
+    // RB15 should be output
+    /////////////////////////////////////////////////////////////////////////////
+    LATBbits.LATB15 = 0;
+    TRISBbits.TRISB15 = 0;
 
-// Disable Watch Dog Timer
-	RCONbits.SWDTEN=0;
+    #endif
 
+    /////////////////////////////////////////////////////////////////////////////
+    #if defined(__dsPIC33F__) || defined(__PIC24H__)
 
-// Clock switching to incorporate PLL
-	__builtin_write_OSCCONH(0x03);		// Initiate Clock Switch to Primary
-													// Oscillator with PLL (NOSC=0b011)
-	__builtin_write_OSCCONL(0x01);		// Start clock switching
-	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
+    // Configure Oscillator to operate the device at 40Mhz
+    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+    PLLFBD = 38;                    // M=40
+    CLKDIVbits.PLLPOST = 0;         // N1=2
+    CLKDIVbits.PLLPRE = 0;          // N2=2
+    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
 
-// Wait for PLL to lock
-	while(OSCCONbits.LOCK!=1) {};
-#elif defined(__PIC32MX__)
+    // Disable Watch Dog Timer
+    RCONbits.SWDTEN = 0;
+
+    // Clock switching to incorporate PLL
+    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
+
+    // Oscillator with PLL (NOSC=0b011)
+    __builtin_write_OSCCONL(0x01);  // Start clock switching
+    while(OSCCONbits.COSC != 0b011);
+
+    // Wait for Clock switch to occur	
+    // Wait for PLL to lock
+    while(OSCCONbits.LOCK != 1)
+    { };     
+    
+    // Set PMD0 pin functionality to digital
+    AD1PCFGL = AD1PCFGL | 0x1000;
+       
+    #elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
-    SYSTEMConfigPerformance(GetSystemClock());	
-#endif
+    SYSTEMConfigPerformance(GetSystemClock());
+    #endif
 
     // Initialize external memory
-#if (GRAPHICS_PICTAIL_VERSION == 2)
+    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
     SST39Init();
-#elif (GRAPHICS_PICTAIL_VERSION == 3)
+	InitGraph();                    // Initialize graphics
+    #elif (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+	InitGraph();                    // Initialize graphics
     SST25Init();
-#else
-#error Only Graphics PICtails 2 and 3 are supported
-#endif
-
-#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-	AD1PCFGL = 0xffff;
-#endif
- 
-    InitGraph(); // Initialize graphics
-    JPEGInit();  // Initialize JPEG
+    #else
+        #error Only Graphics PICtails 2, 3 and PIC24FJ256DA210 Development Board are supported
+    #endif
+    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+    AD1PCFGL = 0xffff;
+    #endif
 
     
-    SetFont((void*)&GOLFontDefault);
+	JPEGInit();                     // Initialize JPEG
+    SetFont((void *) &GOLFontDefault);
 
     while(1)
     {
-        // FROM INTERNAL FLASH
-        JPEGPutImage(0,0,&Logo); 
-        SetColor(WHITE);
-        OutTextXY(0,0,"INTERNAL FLASH");
-        DelayMs(DELAY_MS);
         // FROM EXTERNAL MEMORY
-        JPEGPutImage(0,0,&Scene01);
+        JPEGPutImage(0, 0, &Scene01);
         SetColor(WHITE);
-        OutTextXY(0,0,"EXTERNAL MEMORY");
+        OutTextXY(0, 0, "EXTERNAL MEMORY");
         DelayMs(DELAY_MS);
-        JPEGPutImage(0,0,&Scene02);
+        JPEGPutImage(0, 0, &Scene02);
         SetColor(WHITE);
-        OutTextXY(0,0,"EXTERNAL MEMORY");
+        OutTextXY(0, 0, "EXTERNAL MEMORY");
         DelayMs(DELAY_MS);
-        JPEGPutImage(0,0,&Scene03);
+        JPEGPutImage(0, 0, &Scene03);
         SetColor(WHITE);
-        OutTextXY(0,0,"EXTERNAL MEMORY");
+        OutTextXY(0, 0, "EXTERNAL MEMORY");
         DelayMs(DELAY_MS);
-        JPEGPutImage(0,0,&Scene04);
+        JPEGPutImage(0, 0, &Scene04);
         SetColor(WHITE);
-        OutTextXY(0,0,"EXTERNAL MEMORY");
+        OutTextXY(0, 0, "EXTERNAL MEMORY");
         DelayMs(DELAY_MS);
-        JPEGPutImage(0,0,&Scene05);
+        JPEGPutImage(0, 0, &Scene05);
         SetColor(WHITE);
-        OutTextXY(0,0,"EXTERNAL MEMORY");
+        OutTextXY(0, 0, "EXTERNAL MEMORY");
+        DelayMs(DELAY_MS);
+
+        // FROM INTERNAL FLASH
+        JPEGPutImage(0, 0, &Logo);
+        SetColor(WHITE);
+        OutTextXY(0, 0, "INTERNAL FLASH");
         DelayMs(DELAY_MS);
     }
 
-    return 0;
+    return (0);
 }

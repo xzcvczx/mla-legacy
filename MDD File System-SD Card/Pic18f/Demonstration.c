@@ -41,13 +41,27 @@
 
 #include "FSIO.h"
 
-#pragma config OSC = HSPLL, FCMEN = OFF, IESO = OFF
-#pragma config PWRT = OFF, BOREN = OFF, BORV = 1
-#pragma config WDT = OFF, WDTPS = 32768
-#pragma config MODE = MC, ADDRBW = ADDR20BIT, DATABW = DATA16BIT, WAIT = OFF
-#pragma config MCLRE = ON, LPT1OSC = OFF, ECCPMX = PORTE, CCP2MX = PORTC
-#pragma config STVREN = OFF, LVP = OFF, BBSIZ = BB2K, XINST = OFF
 
+#if defined(PIC18F87J50_PIM)				// Configuration bits for PIC18F87J50 FS USB Plug-In Module board
+        #pragma config XINST    = OFF   	// Extended instruction set
+        #pragma config STVREN   = ON      	// Stack overflow reset
+        #pragma config PLLDIV   = 3         // (12 MHz crystal used on this board)
+        #pragma config WDTEN    = OFF      	// Watch Dog Timer (WDT)
+        #pragma config CP0      = OFF      	// Code protect
+        #pragma config CPUDIV   = OSC1      // OSC1 = divide by 1 mode
+        #pragma config IESO     = OFF      	// Internal External (clock) Switchover
+        #pragma config FCMEN    = OFF      	// Fail Safe Clock Monitor
+        #pragma config FOSC     = HSPLL     // Firmware must also set OSCTUNE<PLLEN> to start PLL!
+        #pragma config WDTPS    = 32768
+//      #pragma config WAIT     = OFF      	// Commented choices are
+//      #pragma config BW       = 16      	// only available on the
+//      #pragma config MODE     = MM      	// 80 pin devices in the 
+//      #pragma config EASHFT   = OFF      	// family.
+        #pragma config MSSPMSK  = MSK5
+//      #pragma config PMPMX    = DEFAULT
+//      #pragma config ECCPMX   = DEFAULT
+        #pragma config CCP2MX   = DEFAULT   
+#endif
 
 char sendBuffer[22] = "This is test string 1";
 char send2[2] = "2";

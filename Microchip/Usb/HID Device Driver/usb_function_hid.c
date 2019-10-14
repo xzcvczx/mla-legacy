@@ -159,7 +159,7 @@ BYTE active_protocol;   // [0] Boot Protocol [1] Report Protocol
  *******************************************************************/
 void USBCheckHIDRequest(void)
 {
-    if(SetupPkt.Recipient != RCPT_INTF) return;
+    if(SetupPkt.Recipient != USB_SETUP_RECIPIENT_INTERFACE_BITFIELD) return;
     if(SetupPkt.bIntfID != HID_INTF_ID) return;
     
     /*
@@ -167,7 +167,7 @@ void USBCheckHIDRequest(void)
      * 1. GET_DSC(DSC_HID,DSC_RPT,DSC_PHY);
      * 2. SET_DSC(DSC_HID,DSC_RPT,DSC_PHY);
      */
-    if(SetupPkt.bRequest == GET_DSC)
+    if(SetupPkt.bRequest == USB_REQUEST_GET_DESCRIPTOR)
     {
         switch(SetupPkt.bDescriptorType)
         {
@@ -195,7 +195,7 @@ void USBCheckHIDRequest(void)
         }//end switch(SetupPkt.bDescriptorType)
     }//end if(SetupPkt.bRequest == GET_DSC)
     
-    if(SetupPkt.RequestType != CLASS)
+    if(SetupPkt.RequestType != USB_SETUP_TYPE_CLASS_BITFIELD)
     {
         return;
     }

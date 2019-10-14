@@ -23,15 +23,9 @@ Description:
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
-    ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
+    .
+
+    ..\\..\\Microchip\\Include
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -40,6 +34,11 @@ Description:
     C:\\Microchip Solutions\\Microchip\\Include
     
     C:\\Microchip Solutions\\My Demo Application 
+
+ Change History:
+   Rev    Description
+   ----   ------------------------------------------
+   2.6    No Change
 *******************************************************************************/
 //DOM-IGNORE-BEGIN
 /*******************************************************************************

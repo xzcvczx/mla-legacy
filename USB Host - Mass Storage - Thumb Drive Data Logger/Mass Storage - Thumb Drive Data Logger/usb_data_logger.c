@@ -580,6 +580,32 @@ int main (void)
 
             AD1PCFG = 0xFFFF;   // Set analog pins to digital.
 
+       #elif defined(__PIC24FJ256DA210__)
+            OSCCON = 0x3302;    // Enable secondary oscillator
+            CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
+
+        	//On the PIC24FJ256DA210 Family of USB microcontrollers, the PLL will not power up and be enabled
+        	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+        	//This allows the device to power up at a lower initial operating frequency, which can be
+        	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+        	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+        	//power up the PLL.
+            {
+                unsigned int pll_startup_counter = 6000;
+                CLKDIVbits.PLLEN = 1;
+                while(pll_startup_counter--);
+            }
+        
+            //Device switches over automatically to PLL output after PLL is locked and ready.
+        
+            // PPS - Configure U2RX - put on RC14/pin 74 (RPI37)
+            RPINR19bits.U2RXR = 37;
+    
+            // PPS - Configure U2TX - put on RF3/pin 51 (RP16)
+            RPOR8bits.RP16R = 5;
+
+            TRISFbits.TRISF3 = 0;
+
         #elif defined(__PIC32MX__)
         
             #if defined(RUN_AT_60MHZ)
@@ -2151,7 +2177,7 @@ void MonitorUser( void )
 
     if (U2STAbits.URXDA)
     {
-        oneChar = U2RXREG;
+        oneChar = U2RXREG;  
 
         // If we are currently processing a command, throw the character away.
         if (commandInfo.reading)
@@ -2303,8 +2329,8 @@ void MonitorUser( void )
 void MonitorVBUS( void )
 {
 
-    #if defined(__PIC32MX__)    // No VBus Overcurrent protection on Rev 1 of the PIC32 USB PIM.
-        #warning  "VBus overcurrent protection not supported on PIC32 USB PIM Rev 1"
+    #if defined(__PIC32MX__)    // No VBus Overcurrent notification on Rev 1 of the PIC32 USB PIM.
+        #warning  "VBus overcurrent notification not supported on PIC32 USB PIM Rev 1"
     #else
 
         UINT32 vBusValue = ADC_READING_VBUS;
@@ -2852,6 +2878,20 @@ void _ADC1Interrupt( void )
         #if defined( __C30__ )
             IFS0bits.AD1IF = 0;
         #elif defined( __PIC32MX__ )
+            #if defined(__32MX795F512L__)
+                //Must read all channels before clearing the interrupt
+                //  These values will stick around until the next interrupt but
+                //  before we can clear the interrupt we need to touch all of
+                //  requested sample registers
+                {
+                    unsigned int bit_bucket;
+
+                    bit_bucket = ADC1BUF0;
+                    bit_bucket = ADC1BUF1;
+                    bit_bucket = ADC1BUF2;
+                }
+            #endif
+
             IFS1CLR = 0x00000002;
         #else
             #error Cannot clear ADC interrupt

@@ -36,10 +36,11 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  1.0   11/19/2004   Initial release
-  2.1   02/26/2007   Updated for simplicity and to use common
-                     coding style
+  Rev   Description
+  1.0   Initial release
+  2.1   Updated for simplicity and to use common
+        coding style
+  2.6   No Change
  *******************************************************************/
 
 /*********************************************************************

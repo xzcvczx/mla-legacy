@@ -44,29 +44,29 @@
  * Anton Alkhimenok     06/15/07    ... 
  *****************************************************************************/
 #ifndef _CUSTOM_H
-#define _CUSTOM_H
+    #define _CUSTOM_H
 
 // Control states
-#define CC_DISABLED     0x0002  // disabled
-#define CC_HIDE         0x8000  // must be removed from screen
-#define CC_DRAW_BAR     0x2000  // control bar should be redrawn
-#define CC_DRAW         0x4000  // whole control must be redrawn
+    #define CC_DISABLED 0x0002  // disabled
+    #define CC_HIDE     0x8000  // must be removed from screen
+    #define CC_DRAW_BAR 0x2000  // control bar should be redrawn
+    #define CC_DRAW     0x4000  // whole control must be redrawn
 
 // The structure contains data for the control
-typedef struct {
-	WORD			ID;				// instance unique ID
-	void            *pNxtObj;       // a pointer to the next object in the linked list
-	GOL_OBJ_TYPE 	type;	        // must be set to OBJ_CUSTOM
-	WORD 	 		state;          // state
-	SHORT     		left;       	// left border
-	SHORT     		top;            // top border     
-	SHORT     		right;      	// right border
-	SHORT     		bottom;         // bottom border
-	GOL_SCHEME      *pGolScheme;    // the style scheme used
-	WORD     		pos;            // current position
-	WORD  			prevPos;        // previous position
+typedef struct
+{
+    WORD            ID;             // instance unique ID
+    void            *pNxtObj;       // a pointer to the next object in the linked list
+    GOL_OBJ_TYPE    type;           // must be set to OBJ_CUSTOM
+    WORD            state;          // state
+    SHORT           left;           // left border
+    SHORT           top;            // top border
+    SHORT           right;          // right border
+    SHORT           bottom;         // bottom border
+    GOL_SCHEME      *pGolScheme;    // the style scheme used
+    WORD            pos;            // current position
+    WORD            prevPos;        // previous position
 } CUSTOM;
-
 
 /*********************************************************************
 * Macros:  CcGetPos(pCc)
@@ -84,7 +84,7 @@ typedef struct {
 * Note: none
 *
 ********************************************************************/
-#define CcGetPos(pCc)                 pCc->pos
+    #define CcGetPos(pCc)   pCc->pos
 
 /*********************************************************************
 * Macros: CcSetPos(pCc,position)
@@ -101,7 +101,7 @@ typedef struct {
 * Note: none
 *
 ********************************************************************/
-#define CcSetPos(pCc, position) pCc->pos = position
+    #define CcSetPos(pCc, position) pCc->pos = position
 
 /*********************************************************************
 * Function: CUSTOM  *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -123,8 +123,7 @@ typedef struct {
 * Note: none
 *
 ********************************************************************/
-CUSTOM  *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			      WORD state, GOL_SCHEME *pScheme);
+CUSTOM * CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME * pScheme);
 
 /*********************************************************************
 * Function: WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
@@ -143,7 +142,7 @@ CUSTOM  *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Note: none
 *
 ********************************************************************/
-WORD  CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
+WORD    CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg)
@@ -162,7 +161,7 @@ WORD  CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
 * Note: none
 *
 ********************************************************************/
-void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg);
+void    CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD CcDraw(CUSTOM *pCc)
@@ -182,6 +181,5 @@ void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg);
 * Note: none
 *
 ********************************************************************/
-WORD CcDraw(CUSTOM *pCc);
-
+WORD    CcDraw(CUSTOM *pCc);
 #endif // _CUSTOM_H

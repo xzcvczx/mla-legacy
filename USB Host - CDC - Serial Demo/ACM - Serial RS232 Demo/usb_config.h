@@ -76,11 +76,11 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 // Host CDC Client Driver Configuration
 
 #define USB_MAX_CDC_DEVICES  1
-#define USB_CDC_BAUDRATE_SUPPORTED 115200UL
+#define USB_CDC_BAUDRATE_SUPPORTED 19200L
 #define USB_CDC_PARITY_TYPE 0
 #define USB_CDC_STOP_BITS 0
 #define USB_CDC_NO_OF_DATA_BITS 8
-//#define USB_ENABLE_TRANSFER_EVENT
+#define USB_ENABLE_TRANSFER_EVENT
 // Helpful Macros
 
 #define USBTasks()                  \

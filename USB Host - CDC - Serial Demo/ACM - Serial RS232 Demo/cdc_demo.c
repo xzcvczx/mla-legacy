@@ -68,7 +68,11 @@ Author          Date    Comments
 --------------------------------------------------------------------------------
 ADG          15-Sep-2008 First release
 
-*******************************************************************************/
+********************************************************************************
+ Change History:
+ Revision     Description
+ v2.6         Changes to support PIC32.
+********************************************************************************/
 //DOM-IGNORE-END
 #include <stdlib.h>
 #include <string.h>
@@ -102,12 +106,44 @@ ADG          15-Sep-2008 First release
 #define GATED_TIME_DISABLED         0x0000
 #define TIMER_16BIT_MODE            0x0000
 
-#define TIMER_PRESCALER_1           0x0000
-#define TIMER_PRESCALER_8           0x0010
-#define TIMER_PRESCALER_64          0x0020
-#define TIMER_PRESCALER_256         0x0030
-#define TIMER_INTERRUPT_PRIORITY    0x0001
+#if defined( __C30__ )
+    #define TIMER_PRESCALER_1               0x0000
+    #define TIMER_PRESCALER_8               0x0010
+    #define TIMER_PRESCALER_64              0x0020
+    #define TIMER_PRESCALER_256             0x0030
+    #define TIMER_INTERRUPT_PRIORITY        0x0002
+#elif defined( __PIC32MX__ )
+    #define TIMER_PRESCALER_1               0x0000
+    #define TIMER_PRESCALER_2               0x0010
+    #define TIMER_PRESCALER_4               0x0020
+    #define TIMER_PRESCALER_8               0x0030
+    #define TIMER_PRESCALER_16              0x0040
+    #define TIMER_PRESCALER_32              0x0050
+    #define TIMER_PRESCALER_64              0x0060
+    #define TIMER_PRESCALER_256             0x0070
+#else
+    #error No timer constants
+#endif
 
+#define PIC32MX_TIMER2_INTERRUPT            0x00000100
+#define PIC32MX_TIMER3_INTERRUPT            0x00001000
+
+#define IOPORT_BIT_15                       (1 << 15)
+#define IOPORT_BIT_14                       (1 << 14)
+#define IOPORT_BIT_13                       (1 << 13)
+#define IOPORT_BIT_12                       (1 << 12)
+#define IOPORT_BIT_11                       (1 << 11)
+#define IOPORT_BIT_10                       (1 << 10)
+#define IOPORT_BIT_9                        (1 << 9)
+#define IOPORT_BIT_8                        (1 << 8)
+#define IOPORT_BIT_7                        (1 << 7)
+#define IOPORT_BIT_6                        (1 << 6)
+#define IOPORT_BIT_5                        (1 << 5)
+#define IOPORT_BIT_4                        (1 << 4)
+#define IOPORT_BIT_3                        (1 << 3)
+#define IOPORT_BIT_2                        (1 << 2)
+#define IOPORT_BIT_1                        (1 << 1)
+#define IOPORT_BIT_0                        (1 << 0)
 
 // *****************************************************************************
 // *****************************************************************************
@@ -214,8 +250,7 @@ BOOL InitializeSystem ( void );
 #define MAX_ALLOWED_CURRENT             (500)         // Maximum power we can supply in mA
 
 #define MAX_NO_OF_IN_BYTES  64
-#define MAX_NO_OF_OUT_BYTES 64 // Application can modify this macro beyond 64 bytes, client driver
-                               // will take care of completing the transfer in multiple transactions
+#define MAX_NO_OF_OUT_BYTES 64 
 
 // Macro to fill a line of LCD data.
 #define FILL_LCD_LINE(l,p) {int i; for(i=0;i<16;i++)LcdData[(l)-1][i]=(p)[i];}
@@ -271,25 +306,43 @@ BOOL InitializeSystem ( void )
 
         // Configure U2TX - put on pin 50 (RP17)
         RPOR8bits.RP17R = 5;
-    #endif
 
-    OSCCON = 0x3302;    // Enable secondary oscillator
-    CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
+        OSCCON = 0x3302;    // Enable secondary oscillator
+        CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
 
-   #if defined(__PIC24FJ64GB004__)
-	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
-	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
-	//This allows the device to power up at a lower initial operating frequency, which can be
-	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
-	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
-	//power up the PLL.
+        TRISA = 0x0000;
+        TRISD = 0x00C0;
+
+   #elif defined(__PIC24FJ64GB004__)
+    //On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+    //by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+    //This allows the device to power up at a lower initial operating frequency, which can be
+    //advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+    //operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+    //power up the PLL.
     {
         unsigned int pll_startup_counter = 600;
         CLKDIVbits.PLLEN = 1;
         while(pll_startup_counter--);
     }
 
-    //Device switches over automatically to PLL output after PLL is locked and ready.
+    #elif defined(__PIC32MX__)
+        {
+            int  value;
+    
+            value = SYSTEMConfigWaitStatesAndPB( GetSystemClock() );
+    
+            // Enable the cache for the best performance
+            CheKseg0CacheOn();
+    
+            INTEnableSystemMultiVectoredInt();
+    
+            value = OSCCON;
+            while (!(value & 0x00000020))
+            {
+                value = OSCCON;    // Wait for PLL lock to stabilize
+            }
+        }
     #endif
 
 
@@ -379,57 +432,39 @@ void InitializeTimer( void )
 {
     WORD timerPeriod;
 
-    IPC2bits.T3IP = TIMER_INTERRUPT_PRIORITY;
-    IFS0bits.T3IF = 0;
+    #if defined( __C30__ )
+        IPC2bits.T3IP = TIMER_INTERRUPT_PRIORITY;
+        IFS0bits.T3IF = 0;
+        TMR3 = 0;
+        
+         // TIMER_PERIOD is equivalent to 10micro sec , appl needs to calculate
+         // the timerPeriod from the expected BAUD Rate of the device.
+         // timerPeriod = TIMER_PERIOD *(100000/Baudrate in Bytes perSec)
+        timerPeriod = 40000;
+            // adjust the timer presaclar if poll rate is too high
+        // 20000 counts correspond to 10ms
+        PR3 = timerPeriod;
+        T3CON = TIMER_ON | STOP_TIMER_IN_IDLE_MODE | TIMER_SOURCE_INTERNAL |
+                GATED_TIME_DISABLED | TIMER_16BIT_MODE | TIMER_PRESCALER;
+        IEC0bits.T3IE = 1;
 
-    TMR3 = 0;
+    #elif defined( __PIC32MX__ )
 
-     // TIMER_PERIOD is equivalent to 10micro sec , appl needs to calculate
-     // the timerPeriod from the expected BAUD Rate of the device.
-     // timerPeriod = TIMER_PERIOD *(100000/Baudrate in Bytes perSec)
-    timerPeriod = TIMER_PERIOD*(100000/(USB_CDC_BAUDRATE_SUPPORTED/8));
+        // TIMER_PERIOD is equivalent to 10micro sec , appl needs to calculate
+        // the timerPeriod from the expected BAUD Rate of the device.
+        // timerPeriod = TIMER_PERIOD *(100000/Baudrate in Bytes perSec)
+        timerPeriod = 40000;
         // adjust the timer presaclar if poll rate is too high
-        // 20000 counts correspond to 10ms , so current pre sacaler setting will 
-        // allow maximum 30ms poll interval
-    PR3 = timerPeriod;
-    T3CON = TIMER_ON | STOP_TIMER_IN_IDLE_MODE | TIMER_SOURCE_INTERNAL |
-            GATED_TIME_DISABLED | TIMER_16BIT_MODE | TIMER_PRESCALER;
+        // 20000 counts correspond to 10ms
+        //OpenTimer3(T3_ON | T3_SOURCE_INT | T3_PS_1_8, TIMER_PERIOD);
+        OpenTimer3(T3_ON | T3_SOURCE_INT | T3_PS_1_16, timerPeriod);
 
-    IEC0bits.T3IE = 1;
-
+        // set up the timer interrupt with a priority of 2
+        ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_2);
+    #else
+        #error Cannot initialize timer.
+    #endif
     return;
-}
-
-/****************************************************************************
-  Function:
-    void __attribute__((__interrupt__, auto_psv)) _T3Interrupt(void)
-
-  Description:
-    Timer ISR, used to update application state. If no transfers are pending
-    new input request is scheduled.
-  Precondition:
-    None
-
-  Parameters:
-    None
-
-  Return Values:
-    None
-
-  Remarks:
-    None
-  ***************************************************************************/
-
-void __attribute__((__interrupt__, auto_psv)) _T3Interrupt( void )
-{
-    if (IFS0bits.T3IF)
-    {
-        IFS0bits.T3IF   = 0;
-        if(READY_TO_TX_RX == APPL_Demo_State)
-        {
-            APPL_Demo_State = GET_IN_DATA; // If no report is pending schedule new request
-        }
-    }
 }
 
 //******************************************************************************
@@ -538,7 +573,7 @@ void USBHostCDC_Clear_Out_DATA_Array(void)
 {
     BYTE i;
 
-    for(i=0;i<=MAX_NO_OF_OUT_BYTES;i++)
+    for(i=0;i<MAX_NO_OF_OUT_BYTES;i++)
         USB_CDC_OUT_Data_Array[i] = 0;
 }
 
@@ -706,5 +741,56 @@ int main (void)
             }
 
         }
+}
+
+/****************************************************************************
+  Function:
+    void __attribute__((__interrupt__, auto_psv)) _T3Interrupt(void)
+
+  Description:
+    Timer ISR, used to update application state. If no transfers are pending
+    new input request is scheduled.
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Return Values:
+    None
+
+  Remarks:
+    None
+  ***************************************************************************/
+
+#if defined( __C30__ )
+void __attribute__((__interrupt__, auto_psv)) _T3Interrupt( void )
+#elif defined( __PIC32MX__ )
+void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
+#else
+#error Cannot prototype timer interrupt
+#endif
+{
+     #if defined( __C30__ )
+    if (IFS0bits.T3IF)
+    #elif defined( __PIC32MX__ )
+    if (IFS0 & PIC32MX_TIMER3_INTERRUPT)
+    #else
+    #error Cannot check timer interrupt
+    #endif
+    {
+         // Clear the interrupt flag
+        #if defined( __C30__ )
+            IFS0bits.T3IF   = 0;
+        #elif defined( __PIC32MX__ )
+            mT3ClearIntFlag();
+        #else
+            #error Cannot clear timer interrupt.
+        #endif
+        if(READY_TO_TX_RX == APPL_Demo_State)
+        {
+            APPL_Demo_State = GET_IN_DATA; // If no report is pending schedule new request
+        }
+    }
 }
 

@@ -34,16 +34,10 @@ Description:
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
+    .
+
     ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
-    
+        
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
     would be the following:
@@ -88,12 +82,17 @@ Description:
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-********************************************************************
-
- Change History:
-
-
  *************************************************************************/
+
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.6    Changed the inplementation of the interrupt clearing macro
+         to be more efficient.  
+********************************************************************/
+//DOM-IGNORE-END
 
 #ifndef USB_HAL_PIC18_H
 #define USB_HAL_PIC18_H
@@ -161,14 +160,56 @@ Description:
   ****************************************************************/
 #define USBSetBDTAddress(addr)
 
-#if defined(USB_ENABLE_SOF_HANDLER)
-    #define USB_SOF_INTERRUPT 0x40
-    //#error
-#else
+/********************************************************************
+ * Function (macro): void USBClearInterruptFlag(register, BYTE if_and_flag_mask)
+ *
+ * PreCondition:    None
+ *
+ * Input:           
+ *   register - the register mnemonic for the register holding the interrupt 
+ 				flag to be cleared
+ *   BYTE if_and_flag_mask - an AND mask for the interrupt flag that will be 
+ 				cleared
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        Clears the specified USB interrupt flag.
+ *
+ * Note:            
+ *******************************************************************/
+#define USBClearInterruptFlag(reg_name, if_and_flag_mask)	(reg_name &= if_and_flag_mask)	
+
+/********************************************************************
+    Function:
+        void USBClearInterruptRegister(WORD reg)
+        
+    Summary:
+        Clears the specified interrupt register
+        
+    PreCondition:
+        None
+        
+    Parameters:
+        WORD reg - the register name that needs to be cleared
+        
+    Return Values:
+        None
+        
+    Remarks:
+        None
+ 
+ *******************************************************************/
+#define USBClearInterruptRegister(reg) reg = 0;
+
+#if defined(USB_DISABLE_SOF_HANDLER)
     #define USB_SOF_INTERRUPT 0x00
+#else
+    #define USB_SOF_INTERRUPT 0x40
 #endif
 
-#if defined(USB_ENABLE_ERROR_HANDLER)
+#if defined(USB_DISABLE_ERROR_HANDLER)
     #define USB_ERROR_INTERRUPT 0x02
 #else
     #define USB_ERROR_INTERRUPT 0x02
@@ -189,40 +230,41 @@ Description:
 
 #define USBPingPongBufferReset UCONbits.PPBRST
 
+
 #define USBTransactionCompleteIE UIEbits.TRNIE
 #define USBTransactionCompleteIF UIRbits.TRNIF
-#define USBTransactionCompleteIFReg (BYTE*)&UIR
-#define USBTransactionCompleteIFBitNum 3
+#define USBTransactionCompleteIFReg UIR
+#define USBTransactionCompleteIFBitNum 0xF7		//AND mask for clearing TRNIF bit position 4
 
 #define USBResetIE  UIEbits.URSTIE
 #define USBResetIF  UIRbits.URSTIF
-#define USBResetIFReg (BYTE*)&UIR
-#define USBResetIFBitNum 0
+#define USBResetIFReg UIR
+#define USBResetIFBitNum 0xFE					//AND mask for clearing URSTIF bit position 0
 
 #define USBIdleIE UIEbits.IDLEIE
 #define USBIdleIF UIRbits.IDLEIF
-#define USBIdleIFReg (BYTE*)&UIR
-#define USBIdleIFBitNum 4
+#define USBIdleIFReg UIR
+#define USBIdleIFBitNum 0xEF					//AND mask for clearing IDLEIF bit position 5
 
 #define USBActivityIE UIEbits.ACTVIE
 #define USBActivityIF UIRbits.ACTVIF
-#define USBActivityIFReg (BYTE*)&UIR
-#define USBActivityIFBitNum 2
+#define USBActivityIFReg UIR
+#define USBActivityIFBitNum 0xFB				//AND mask for clearing ACTVIF bit position 2
 
 #define USBSOFIE UIEbits.SOFIE
 #define USBSOFIF UIRbits.SOFIF
-#define USBSOFIFReg (BYTE*)&UIR
-#define USBSOFIFBitNum 6
+#define USBSOFIFReg UIR
+#define USBSOFIFBitNum 0xBF						//AND mask for clearing SOFIF bit position 6
 
 #define USBStallIE UIEbits.STALLIE
 #define USBStallIF UIRbits.STALLIF
-#define USBStallIFReg (BYTE*)&UIR
-#define USBStallIFBitNum 5
+#define USBStallIFReg UIR
+#define USBStallIFBitNum 0xDF					//AND mask for clearing STALLIF bit position 5
 
 #define USBErrorIE UIEbits.UERRIE
 #define USBErrorIF UIRbits.UERRIF
-#define USBErrorIFReg (BYTE*)&UIR
-#define USBErrorIFBitNum 1
+#define USBErrorIFReg UIR
+#define USBErrorIFBitNum 0xFD					//UERRIF bit position 1.  Note: This bit is read only and is cleared by clearing the enabled UEIR flags
 
 #define USBSE0Event UCONbits.SE0
 #define USBSuspendControl UCONbits.SUSPND
@@ -392,11 +434,38 @@ typedef union _POINTER
 #define USBClearUSBInterrupt() PIR2bits.USBIF = 0;
 
 #if !defined(USBDEVICE_C)
-    extern USB_VOLATILE BYTE USBDeviceState;
+    //extern USB_VOLATILE USB_DEVICE_STATE USBDeviceState;
     extern USB_VOLATILE BYTE USBActiveConfiguration;
     extern USB_VOLATILE IN_PIPE inPipes[1];
     extern USB_VOLATILE OUT_PIPE outPipes[1];
     extern volatile BDT_ENTRY *pBDTEntryIn[USB_MAX_EP_NUMBER+1];
 #endif
+
+/* Endpoint configuration options for USBEnableEndpoint() function */
+#define EP_CTRL     0x06            // Cfg Control pipe for this ep
+#define EP_OUT      0x0C            // Cfg OUT only pipe for this ep
+#define EP_IN       0x0A            // Cfg IN only pipe for this ep
+#define EP_OUT_IN   0x0E            // Cfg both OUT & IN pipes for this ep
+
+// Handshake should be disable for isoch
+#define USB_HANDSHAKE_ENABLED   0x10
+#define USB_HANDSHAKE_DISABLED  0x00
+
+#define USB_OUT_ENABLED         0x04
+#define USB_OUT_DISABLED        0x00
+
+#define USB_IN_ENABLED          0x02
+#define USB_IN_DISABLED         0x00
+
+#define USB_ALLOW_SETUP         0x00
+#define USB_DISALLOW_SETUP      0x08
+
+#define USB_STALL_ENDPOINT      0x01
+
+#define SetConfigurationOptions()   {\
+                                        U1CNFG1 = USB_PULLUP_OPTION | USB_TRANSCEIVER_OPTION | USB_SPEED_OPTION | USB_PING_PONG_MODE;\
+                                        U1EIE = 0x9F;\
+                                        UIE = 0x39 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;\
+                                    }  
 
 #endif //#ifndef USB_HAL_PIC18_H

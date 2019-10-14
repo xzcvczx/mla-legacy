@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ256GB106
+device=PIC24FJ256GB110
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -54,6 +54,8 @@ file_026=MDD File System
 file_027=USB Stack
 file_028=USB Stack
 file_029=USB Stack
+file_030=Hardware Profile
+file_031=Hardware Profile
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -85,6 +87,8 @@ file_026=no
 file_027=no
 file_028=no
 file_029=no
+file_030=no
+file_031=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -116,6 +120,8 @@ file_026=no
 file_027=no
 file_028=no
 file_029=no
+file_030=no
+file_031=no
 [FILE_INFO]
 file_000=usb_descriptors.c
 file_001=main.c
@@ -147,6 +153,8 @@ file_026=..\..\Microchip\Include\MDD File System\FSIO.h
 file_027=..\..\Microchip\USB\usb_hal_local.h
 file_028=..\..\Microchip\USB\usb_host_local.h
 file_029=..\..\Microchip\USB\USB PIC24.h
+file_030=HardwareProfile - PIC24FJ64GB004 PIM.h
+file_031=HardwareProfile - PIC24FJ256DA210 Development Board.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

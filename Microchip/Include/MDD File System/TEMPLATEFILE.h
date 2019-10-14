@@ -10,7 +10,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33
  * Compiler:        C18/C30
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.2
+ * Version:         1.2.4
  *
  * Software License Agreement
  *

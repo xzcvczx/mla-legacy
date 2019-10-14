@@ -40,7 +40,6 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifdef USE_CUSTOM
 
 /*********************************************************************
@@ -63,33 +62,32 @@
 * Note: none
 *
 ********************************************************************/
-CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			       WORD state, GOL_SCHEME *pScheme)
+CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME *pScheme)
 {
-	CUSTOM *pCc = NULL;
-	
-	pCc = malloc(sizeof(CUSTOM));
-	if (pCc == NULL)
-		return pCc;
+    CUSTOM  *pCc = NULL;
 
-	pCc->ID      	= ID;					// unique id assigned for referencing
-	pCc->pNxtObj 	= NULL;					// initialize pointer to NULL
-	pCc->type    	= OBJ_CUSTOM;			// set object type
-	pCc->left    	= left;       	    	// left,top corner
-	pCc->top     	= top;
-	pCc->right   	= right;     	    	// right buttom corner
-	pCc->bottom  	= bottom;
-	pCc->state   	= state;                // set state
+    pCc = malloc(sizeof(CUSTOM));
+    if(pCc == NULL)
+        return (pCc);
 
-	// Set the color scheme to be used
-	if (pScheme == NULL)
-		pCc->pGolScheme = _pDefaultGolScheme; 
-	else 	
-		pCc->pGolScheme = (GOL_SCHEME *)pScheme; 	
+    pCc->ID = ID;           // unique id assigned for referencing
+    pCc->pNxtObj = NULL;    // initialize pointer to NULL
+    pCc->type = OBJ_CUSTOM; // set object type
+    pCc->left = left;       // left,top corner
+    pCc->top = top;
+    pCc->right = right;     // right buttom corner
+    pCc->bottom = bottom;
+    pCc->state = state;     // set state
 
-    GOLAddObject((OBJ_HEADER*) pCc);
-	
-	return pCc;
+    // Set the color scheme to be used
+    if(pScheme == NULL)
+        pCc->pGolScheme = _pDefaultGolScheme;
+    else
+        pCc->pGolScheme = (GOL_SCHEME *)pScheme;
+
+    GOLAddObject((OBJ_HEADER *)pCc);
+
+    return (pCc);
 }
 
 /*********************************************************************
@@ -113,21 +111,20 @@ CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 ********************************************************************/
 WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
 {
+
     // Check if disabled first
-	if ( GetState(pCc,CC_DISABLED) )
-		return OBJ_MSG_INVALID;
+    if(GetState(pCc, CC_DISABLED))
+        return (OBJ_MSG_INVALID);
 
-// TRANSLATE MESSAGE FOR THE INPUT DEVICES
-// TRANSLATED MESSAGES SHOULD BE ADDED INTO TRANS_MSG ENUMERATION IN GOL.H FILE
-#ifdef USE_TOUCHSCREEN
-#endif
-#ifdef USE_KEYBOARD
-#endif
-#ifdef USE_MOUSE
-#endif
-
-
-	return OBJ_MSG_INVALID;	
+    // TRANSLATE MESSAGE FOR THE INPUT DEVICES
+    // TRANSLATED MESSAGES SHOULD BE ADDED INTO TRANS_MSG ENUMERATION IN GOL.H FILE
+        #ifdef USE_TOUCHSCREEN
+        #endif
+        #ifdef USE_KEYBOARD
+        #endif
+        #ifdef USE_MOUSE
+        #endif
+    return (OBJ_MSG_INVALID);
 }
 
 /*********************************************************************
@@ -148,10 +145,10 @@ WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
 *        GOL.C FILE 
 *
 ********************************************************************/
-void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg){
+void CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg)
+{
 
-// IMPLEMENT DEFAULT ACTIONS FOR TRANSLATED MESSAGES HERE
-
+    // IMPLEMENT DEFAULT ACTIONS FOR TRANSLATED MESSAGES HERE
 }
 
 /*********************************************************************
@@ -173,53 +170,61 @@ void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg){
 ********************************************************************/
 WORD CcDraw(CUSTOM *pCc)
 {
-typedef enum {
-	REMOVE,
-	BOX_DRAW,
-	RUN_DRAW
-} CC_DRAW_STATES;
+    typedef enum
+    {
+        REMOVE,
+        BOX_DRAW,
+        RUN_DRAW
+    } CC_DRAW_STATES;
 
+    static CC_DRAW_STATES state = REMOVE;
 
-static CC_DRAW_STATES state = REMOVE;
-
-    switch(state){
-
+    switch(state)
+    {
         case REMOVE:
-            if(GetState(pCc,CC_HIDE)){
+            if(GetState(pCc, CC_HIDE))
+            {
                 SetColor(pCc->pGolScheme->CommonBkColor);
-                if(!Bar(pCc->left,pCc->top,pCc->right,pCc->bottom))
-                    return 0;
-                return 1;
+                if(!Bar(pCc->left, pCc->top, pCc->right, pCc->bottom))
+                    return (0);
+                return (1);
             }
+
             state = BOX_DRAW;
 
         case BOX_DRAW:
-
-            if(GetState(pCc,CC_DRAW)){
-
-                GOLPanelDraw(pCc->left,pCc->top,
-                             pCc->right,pCc->bottom,
-                             pCc->pGolScheme->Color0,
-                             pCc->pGolScheme->EmbossDkColor,
-                             pCc->pGolScheme->EmbossLtColor,
-                             NULL, GOL_EMBOSS_SIZE);
-
-
-            }else{
+            if(GetState(pCc, CC_DRAW))
+            {
+                GOLPanelDraw
+                (
+                    pCc->left,
+                    pCc->top,
+                    pCc->right,
+                    pCc->bottom,
+                    pCc->pGolScheme->Color0,
+                    pCc->pGolScheme->EmbossDkColor,
+                    pCc->pGolScheme->EmbossLtColor,
+                    NULL,
+                    GOL_EMBOSS_SIZE
+                );
+            }
+            else
+            {
                 state = BAR_DRAW;
                 goto bar_draw;
             }
+
             state = RUN_DRAW;
 
         case RUN_DRAW:
-     
-            if(!GOLPanelDrawTsk()){
-                return 0;
+            if(!GOLPanelDrawTsk())
+            {
+                return (0);
             }
-            
+
             // DRAWING IS DONE
             state = REMOVE;
-            return 1;
+            return (1);
     }
 }
 

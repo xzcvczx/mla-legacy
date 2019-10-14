@@ -37,15 +37,14 @@
  * Anton Alkhimenok		05/29/2007
  ********************************************************************/
 #ifndef _AN1227DEMO_H
-#define _AN1227DEMO_H
+    #define _AN1227DEMO_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#ifdef __PIC32MX
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
-#include "GenericTypeDefs.h"
-#include "Graphics\Graphics.h"
-
+    #ifdef __PIC32MX
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+    #include "GenericTypeDefs.h"
+    #include "Graphics\Graphics.h"
 #endif

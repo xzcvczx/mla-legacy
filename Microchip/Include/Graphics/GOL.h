@@ -43,27 +43,27 @@
  *									button object and EVENT_STILLPRESS for
  *									INPUT_DEVICE_EVENT list.
  *****************************************************************************/
-
 #ifndef _GOL_H
-#define _GOL_H
+    #define _GOL_H
 
-#include "Graphics\Graphics.h"
+    #include "Graphics\Graphics.h"
 
 /*********************************************************************
 * Overview: GOL scheme defines the style scheme to be used by an object. 
 *
 *********************************************************************/
-typedef struct {
-	WORD  EmbossDkColor;		// Emboss dark color used for 3d effect.
-    WORD  EmbossLtColor;		// Emboss light color used for 3d effect.
-    WORD  TextColor0;			// Character color 0 used for objects that supports text.
-    WORD  TextColor1;			// Character color 1 used for objects that supports text.
-    WORD  TextColorDisabled;	// Character color used when object is in a disabled state.
-    WORD  Color0;				// Color 0 usually assigned to an Object state.
-    WORD  Color1;				// Color 1 usually assigned to an Object state.
-    WORD  ColorDisabled;		// Color used when an Object is in a disabled state.
-    WORD  CommonBkColor;		// Background color used to hide Objects.
-	void  *pFont;				// Font selected for the scheme.
+typedef struct
+{
+    WORD    EmbossDkColor;      // Emboss dark color used for 3d effect.
+    WORD    EmbossLtColor;      // Emboss light color used for 3d effect.
+    WORD    TextColor0;         // Character color 0 used for objects that supports text.
+    WORD    TextColor1;         // Character color 1 used for objects that supports text.
+    WORD    TextColorDisabled;  // Character color used when object is in a disabled state.
+    WORD    Color0;             // Color 0 usually assigned to an Object state.
+    WORD    Color1;             // Color 1 usually assigned to an Object state.
+    WORD    ColorDisabled;      // Color used when an Object is in a disabled state.
+    WORD    CommonBkColor;      // Background color used to hide Objects.
+    void    *pFont;             // Font selected for the scheme.
 } GOL_SCHEME;
 
 /*********************************************************************
@@ -73,32 +73,33 @@ typedef struct {
 *			Use GOLGetSchemeDefault() to get this pointer.
 *
 *********************************************************************/
-extern GOL_SCHEME  *_pDefaultGolScheme;
+extern GOL_SCHEME   *_pDefaultGolScheme;
 
 /*********************************************************************
 * Overview: This structure defines the Object types used in the library. 
 *
 *********************************************************************/
-typedef enum {
-		OBJ_BUTTON,				// Type defined for Button Object.
-		OBJ_WINDOW,				// Type defined for Window Object.
-		OBJ_CHECKBOX,			// Type defined for Check Box Object.
-		OBJ_RADIOBUTTON,		// Type defined for Radio Button Object.
-		OBJ_EDITBOX,			// Type defined for Edit Box Object.
-		OBJ_LISTBOX,			// Type defined for List Box Object.
-		OBJ_SLIDER,				// Type defined for Slider and/or Scroll Bar Object.
-		OBJ_PROGRESSBAR,		// Type defined for Progress Object.
-		OBJ_STATICTEXT,			// Type defined for Static Text Object.
-		OBJ_PICTURE,			// Type defined for Picture or Bitmap Object.
-		OBJ_GROUPBOX,			// Type defined for Group Box Object.
-    	OBJ_CUSTOM,				// Type defined for Custom Object.
-    	OBJ_ROUNDDIAL,			// Type defined for Dial Object.
-    	OBJ_METER,				// Type defined for Meter Object.
-        OBJ_GRID,               // Type defined for Grid Object.
-        OBJ_CHART,              // Type defined for Chart Object.
-        OBJ_TEXTENTRY,			// Type defined for Text-Entry Object.
-        OBJ_DIGITALMETER,       // Type defined for DIGITALMETER Object.
-        OBJ_UNKNOWN             // Type is undefined and not supported by the library.
+typedef enum
+{
+    OBJ_BUTTON,                 // Type defined for Button Object.
+    OBJ_WINDOW,                 // Type defined for Window Object.
+    OBJ_CHECKBOX,               // Type defined for Check Box Object.
+    OBJ_RADIOBUTTON,            // Type defined for Radio Button Object.
+    OBJ_EDITBOX,                // Type defined for Edit Box Object.
+    OBJ_LISTBOX,                // Type defined for List Box Object.
+    OBJ_SLIDER,                 // Type defined for Slider and/or Scroll Bar Object.
+    OBJ_PROGRESSBAR,            // Type defined for Progress Object.
+    OBJ_STATICTEXT,             // Type defined for Static Text Object.
+    OBJ_PICTURE,                // Type defined for Picture or Bitmap Object.
+    OBJ_GROUPBOX,               // Type defined for Group Box Object.
+    OBJ_CUSTOM,                 // Type defined for Custom Object.
+    OBJ_ROUNDDIAL,              // Type defined for Dial Object.
+    OBJ_METER,                  // Type defined for Meter Object.
+    OBJ_GRID,                   // Type defined for Grid Object.
+    OBJ_CHART,                  // Type defined for Chart Object.
+    OBJ_TEXTENTRY,              // Type defined for Text-Entry Object.
+    OBJ_DIGITALMETER,           // Type defined for DIGITALMETER Object.
+    OBJ_UNKNOWN                 // Type is undefined and not supported by the library.
 } GOL_OBJ_TYPE;
 
 /*********************************************************************
@@ -126,11 +127,12 @@ typedef enum {
 *       - for keyboard scan or key code
 *
 *********************************************************************/
-typedef struct {
-	BYTE 			type;		// Type of input device.
-    BYTE 			uiEvent;	// The generic events for input device.
-    SHORT 			param1;		// Parameter 1 meaning is dependent on the type of input device.
-    SHORT 			param2; 	// Parameter 2 meaning is dependent on the type of input device.
+typedef struct
+{
+    BYTE    type;                   // Type of input device.
+    BYTE    uiEvent;                // The generic events for input device.
+    SHORT   param1;                 // Parameter 1 meaning is dependent on the type of input device.
+    SHORT   param2;                 // Parameter 2 meaning is dependent on the type of input device.
 } GOL_MSG;
 
 /*********************************************************************
@@ -138,13 +140,14 @@ typedef struct {
 *			used in the library. 
 *
 *********************************************************************/
-typedef enum {                  
-    TYPE_UNKNOWN = 0,			// Unknown device.
-	TYPE_KEYBOARD,     			// Keyboard.
-    TYPE_TOUCHSCREEN,  			// Touchscreen.
-    TYPE_MOUSE,        			// Mouse.
-    TYPE_TIMER,	       			// Timer.
-    TYPE_SYSTEM	       			// System Messages.
+typedef enum
+{
+    TYPE_UNKNOWN    = 0,            // Unknown device.
+    TYPE_KEYBOARD,                  // Keyboard.
+    TYPE_TOUCHSCREEN,               // Touchscreen.
+    TYPE_MOUSE,                     // Mouse.
+    TYPE_TIMER,                     // Timer.
+    TYPE_SYSTEM                     // System Messages.
 } INPUT_DEVICE_TYPE;
 
 /*********************************************************************
@@ -152,17 +155,18 @@ typedef enum {
 *  			used in the library. 
 *
 *********************************************************************/
-typedef enum {                  
-    EVENT_INVALID = 0,			// An invalid event.
-    EVENT_MOVE,					// A move event.
-    EVENT_PRESS,				// A press event.
-    EVENT_STILLPRESS,			// A continuous press event.
-    EVENT_RELEASE,				// A release event.
-    EVENT_KEYSCAN,				// A keyscan event, parameters has the object ID keyboard scan code.
-    EVENT_CHARCODE,				// Character code is presented at the parameters.
-    EVENT_SET,					// A generic set event.
-    EVENT_SET_STATE,			// A set state event.	
-    EVENT_CLR_STATE				// A clear state event.
+typedef enum
+{
+    EVENT_INVALID   = 0,            // An invalid event.
+    EVENT_MOVE,                     // A move event.
+    EVENT_PRESS,                    // A press event.
+    EVENT_STILLPRESS,               // A continuous press event.
+    EVENT_RELEASE,                  // A release event.
+    EVENT_KEYSCAN,                  // A keyscan event, parameters has the object ID keyboard scan code.
+    EVENT_CHARCODE,                 // Character code is presented at the parameters.
+    EVENT_SET,                      // A generic set event.
+    EVENT_SET_STATE,                // A set state event.	
+    EVENT_CLR_STATE                 // A clear state event.
 } INPUT_DEVICE_EVENT;
 
 /*********************************************************************
@@ -170,66 +174,48 @@ typedef enum {
 *  			GOL Objects used in the library. 
 *
 *********************************************************************/
-typedef enum {
-	OBJ_MSG_INVALID = 0,		// Invalid message response.
-
-    CB_MSG_CHECKED,				// Check Box check action ID.
-    CB_MSG_UNCHECKED,			// Check Box un-check action ID.
-
-    RB_MSG_CHECKED,				// Radio Button check action ID.
-
-    WND_MSG_CLIENT,				// Window client area selected action ID.
-    WND_MSG_TITLE,				// Window title bar selected action ID.
-	
-    BTN_MSG_PRESSED,			// Button pressed action ID.
-    BTN_MSG_STILLPRESSED,		// Button is continuously pressed ID.
-    BTN_MSG_RELEASED,			// Button released action ID.
-    BTN_MSG_CANCELPRESS,		// Button released action ID with button press canceled.
-
-    PICT_MSG_SELECTED,			// Picture selected action ID.
-
-    GB_MSG_SELECTED,			// Group Box selected action ID.
-
-    CC_MSG_SELECTED,			// Custom Control selected action ID.
-
-    SLD_MSG_INC,				// Slider or Scroll Bar increment action ID.
-    SLD_MSG_DEC,				// Slider or Scroll Bar decrement action ID.
-
-    ST_MSG_SELECTED,			// Static Text selected action ID.
-
-    DM_MSG_SELECTED,			// Digital Meter selected action ID.
-
-    PB_MSG_SELECTED,			// Progress Bar selected action ID.
-    
-	RD_MSG_CLOCKWISE,			// Dial move clockwise action ID.
-	RD_MSG_CTR_CLOCKWISE,		// Dial move counter clockwise action ID.
-
-	MTR_MSG_SET,				// Meter set value action ID.
-
-    EB_MSG_CHAR,				// Edit Box insert character action ID.
-    EB_MSG_DEL,					// Edit Box remove character action ID.
-    EB_MSG_TOUCHSCREEN,			// Edit Box touchscreen selected action ID.
-
-    LB_MSG_SEL,					// List Box item select action ID.
-    LB_MSG_MOVE,				// List Box item move action ID.
-    LB_MSG_TOUCHSCREEN,			// List Box touchscreen selected action ID.
-	
-	GRID_MSG_TOUCHED,           // Grid item touched action ID.
-	GRID_MSG_ITEM_SELECTED,     // Grid item selected action ID.
-	GRID_MSG_UP,                // Grid up action ID.
-	GRID_MSG_DOWN,              // Grid down action ID.
-	GRID_MSG_LEFT,              // Grid left action ID.
-	GRID_MSG_RIGHT,             // Grid right action ID.
-	
-	CH_MSG_SELECTED,			// Chart selected action ID
-
-	TE_MSG_RELEASED,			// TextEntry released action ID
-	TE_MSG_PRESSED,			    // TextEntry pressed action ID
-	TE_MSG_ADD_CHAR,			// TextEntry add character action ID 
-	TE_MSG_DELETE,				// TextEntry delete character action ID 
-	TE_MSG_SPACE,				// TextEntry add space character action ID 
-	TE_MSG_ENTER				// TextEntry enter action ID 
-	
+typedef enum
+{
+    OBJ_MSG_INVALID         = 0,    // Invalid message response.
+    CB_MSG_CHECKED,                 // Check Box check action ID.
+    CB_MSG_UNCHECKED,               // Check Box un-check action ID.
+    RB_MSG_CHECKED,                 // Radio Button check action ID.
+    WND_MSG_CLIENT,                 // Window client area selected action ID.
+    WND_MSG_TITLE,                  // Window title bar selected action ID.
+    BTN_MSG_PRESSED,                // Button pressed action ID.
+    BTN_MSG_STILLPRESSED,           // Button is continuously pressed ID.
+    BTN_MSG_RELEASED,               // Button released action ID.
+    BTN_MSG_CANCELPRESS,            // Button released action ID with button press canceled.
+    PICT_MSG_SELECTED,              // Picture selected action ID.
+    GB_MSG_SELECTED,                // Group Box selected action ID.
+    CC_MSG_SELECTED,                // Custom Control selected action ID.
+    SLD_MSG_INC,                    // Slider or Scroll Bar increment action ID.
+    SLD_MSG_DEC,                    // Slider or Scroll Bar decrement action ID.
+    ST_MSG_SELECTED,                // Static Text selected action ID.
+    DM_MSG_SELECTED,                // Digital Meter selected action ID.
+    PB_MSG_SELECTED,                // Progress Bar selected action ID.
+    RD_MSG_CLOCKWISE,               // Dial move clockwise action ID.
+    RD_MSG_CTR_CLOCKWISE,           // Dial move counter clockwise action ID.
+    MTR_MSG_SET,                    // Meter set value action ID.
+    EB_MSG_CHAR,                    // Edit Box insert character action ID.
+    EB_MSG_DEL,                     // Edit Box remove character action ID.
+    EB_MSG_TOUCHSCREEN,             // Edit Box touchscreen selected action ID.
+    LB_MSG_SEL,                     // List Box item select action ID.
+    LB_MSG_MOVE,                    // List Box item move action ID.
+    LB_MSG_TOUCHSCREEN,             // List Box touchscreen selected action ID.
+    GRID_MSG_TOUCHED,               // Grid item touched action ID.
+    GRID_MSG_ITEM_SELECTED,         // Grid item selected action ID.
+    GRID_MSG_UP,                    // Grid up action ID.
+    GRID_MSG_DOWN,                  // Grid down action ID.
+    GRID_MSG_LEFT,                  // Grid left action ID.
+    GRID_MSG_RIGHT,                 // Grid right action ID.
+    CH_MSG_SELECTED,                // Chart selected action ID
+    TE_MSG_RELEASED,                // TextEntry released action ID
+    TE_MSG_PRESSED,                 // TextEntry pressed action ID
+    TE_MSG_ADD_CHAR,                // TextEntry add character action ID
+    TE_MSG_DELETE,                  // TextEntry delete character action ID
+    TE_MSG_SPACE,                   // TextEntry add space character action ID
+    TE_MSG_ENTER                    // TextEntry enter action ID
 } TRANS_MSG;
 
 /*********************************************************************
@@ -238,18 +224,18 @@ typedef enum {
 *			library Objects. 
 *
 *********************************************************************/
-typedef struct {
-	WORD		   ID;			// Unique id assigned for referencing.
-	void          *pNxtObj;     // A pointer to the next object.
-	GOL_OBJ_TYPE   type;	    // Identifies the type of GOL object.
-    WORD           state;       // State of object.
-	SHORT          left;        // Left position of the Object.
-	SHORT          top;			// Top position of the Object.
-	SHORT          right;       // Right position of the Object.
-	SHORT          bottom;		// Bottom position of the Object.
-	GOL_SCHEME    *pGolScheme;  // Pointer to the scheme used.
+typedef struct
+{
+    WORD            ID;                             // Unique id assigned for referencing.
+    void            *pNxtObj;                       // A pointer to the next object.
+    GOL_OBJ_TYPE    type;                           // Identifies the type of GOL object.
+    WORD            state;                          // State of object.
+    SHORT           left;                           // Left position of the Object.
+    SHORT           top;                            // Top position of the Object.
+    SHORT           right;                          // Right position of the Object.
+    SHORT           bottom;                         // Bottom position of the Object.
+    GOL_SCHEME      *pGolScheme;                    // Pointer to the scheme used.
 } OBJ_HEADER;
-
 
 /*********************************************************************
 * Overview: The following are the common Objcet States.
@@ -257,19 +243,24 @@ typedef struct {
 *********************************************************************/
 
 // Focus state bit.
-#define FOCUSED			 0x0001		
+    #define FOCUSED 0x0001
+
 // Disabled state bit.
-#define DISABLED    	 0x0002		
-// Object hide state bit. Object will be hidden from the 
+    #define DISABLED    0x0002
+
+// Object hide state bit. Object will be hidden from the
 // screen by drawing over it the common background color.
-#define HIDE        	 0x8000	
+    #define HIDE    0x8000
+
 // Object redraw state bit. The whole Object must be redrawn.	
-#define DRAW        	 0x7C00	
+    #define DRAW    0x7C00
+
 // Focus redraw state bit. The focus rectangle must be redrawn.	
-#define DRAW_FOCUS     	 0x2000		
+    #define DRAW_FOCUS  0x2000
+
 // Partial Object redraw state bit. A part or parts of
 // of the Object must be redrawn to show updated state.
-#define DRAW_UPDATE      0x3C00  	
+    #define DRAW_UPDATE 0x3C00
 
 /*********************************************************************
 * Overview: The following are the global variables of GOL.
@@ -282,8 +273,8 @@ typedef struct {
 *			objects referenced by this pointer.
 *
 *********************************************************************/
-extern OBJ_HEADER  *_pGolObjects;
-	                   
+extern OBJ_HEADER   *_pGolObjects;
+
 /*********************************************************************
 * Overview: Pointer to the object receiving keyboad input. This pointer
 *			is used or modified by the following APIs:
@@ -294,10 +285,10 @@ extern OBJ_HEADER  *_pGolObjects;
 *			- GOLCanBeFocused()
 *
 *********************************************************************/
-extern OBJ_HEADER  *_pObjectFocused;
+extern OBJ_HEADER   *_pObjectFocused;
 
 // Line type used for focus mark.
-#define FOCUS_LINE       2
+    #define FOCUS_LINE  2
 
 /*********************************************************************
 * Overview: This option defines the 3-D effect emboss size for objects. 
@@ -305,9 +296,9 @@ extern OBJ_HEADER  *_pObjectFocused;
 *			defined in GraphicsConfig.h file then the default value is used.
 *
 *********************************************************************/
-#ifndef GOL_EMBOSS_SIZE
-#define GOL_EMBOSS_SIZE                 3
-#endif
+    #ifndef GOL_EMBOSS_SIZE
+        #define GOL_EMBOSS_SIZE 3
+    #endif
 
 /*********************************************************************
 * Overview: The following are the style scheme default settings.
@@ -315,95 +306,122 @@ extern OBJ_HEADER  *_pObjectFocused;
 *********************************************************************/
 
 // Default GOL font.
-extern const FONT_FLASH GOLFontDefault; 	
+extern const FONT_FLASH GOLFontDefault;
 
 // Brown color scheme
-#define SADDLEBROWN        RGB565CONVERT(139,  69,  19)		// Saddle Color
-#define SIENNA             RGB565CONVERT(160,  82,  45)		// Sienna Color
-#define PERU               RGB565CONVERT(205, 133,  63)		// Peru Color
-#define BURLYWOOD          RGB565CONVERT(222, 184, 135)		// Burly wood Color
-#define WHEAT              RGB565CONVERT(245, 245, 220)		// Wheat Color
-#define TAN                RGB565CONVERT(210, 180, 140)		// Tan Color
-#define GRAY80             RGB565CONVERT(204, 204, 204)		// Gray80 Color
-#define GRAY90             RGB565CONVERT(229, 229, 229)		// Gray90 Color
-#define GRAY95             RGB565CONVERT(242, 242, 242)		// Gray95 Color
+    #define SADDLEBROWN RGB565CONVERT(139, 69, 19)  // Saddle Color
+    #define SIENNA      RGB565CONVERT(160, 82, 45)  // Sienna Color
+    #define PERU        RGB565CONVERT(205, 133, 63) // Peru Color
+    #define BURLYWOOD   RGB565CONVERT(222, 184, 135)    // Burly wood Color
+    #define WHEAT       RGB565CONVERT(245, 245, 220)    // Wheat Color
+    #define TAN         RGB565CONVERT(210, 180, 140)    // Tan Color
+    #define GRAY80      RGB565CONVERT(204, 204, 204)    // Gray80 Color
+    #define GRAY90      RGB565CONVERT(229, 229, 229)    // Gray90 Color
+    #define GRAY95      RGB565CONVERT(242, 242, 242)    // Gray95 Color
+    #if (COLOR_DEPTH == 1)
 
-#if (COLOR_DEPTH == 1)
+/* default settings for a monochrome display */
 
-	/* default settings for a monochrome display */ 
+// Emboss dark color default value.
+        #define EMBOSSDKCOLORDEFAULT    0x00
 
-	// Emboss dark color default value.
-	#define EMBOSSDKCOLORDEFAULT            0x00	
-	// Emboss light color default value.	
-	#define EMBOSSLTCOLORDEFAULT            0xFF	
-	// Text color 0 default value.	
-	#define TEXTCOLOR0DEFAULT               0xFF
-	// Text color 1 default value.		
-	#define TEXTCOLOR1DEFAULT               0x00	
-	// Text color disabled default value.							
-	#define TEXTCOLORDISABLEDDEFAULT        0xFF
-	// Color 0 default value.								
-	#define COLOR0DEFAULT                   0x00	
-	// Color 1 default value.	
-	#define COLOR1DEFAULT                   0xFF	
-	// Disabled color default value.	
-	#define COLORDISABLEDDEFAULT            0x00	
-	// Common background color default value.	
-	#define COMMONBACKGROUNDCOLORDEFAULT    0x00	
-	// Default Font assignement.	
-	#define FONTDEFAULT                     GOLFontDefault						
+// Emboss light color default value.	
+        #define EMBOSSLTCOLORDEFAULT    0xFF
 
-#else
+// Text color 0 default value.	
+        #define TEXTCOLOR0DEFAULT   0xFF
 
-	#if (GRAPHICS_PICTAIL_VERSION == 1)
-		/* default settings for Microtips display */ 
-	
-		// Emboss dark color default value.
-		#define EMBOSSDKCOLORDEFAULT            RGB565CONVERT(0x2B, 0x55, 0x87)	
-		// Emboss light color default value.	
-		#define EMBOSSLTCOLORDEFAULT            RGB565CONVERT(0xD4, 0xE4, 0xF7)	
-		// Text color 0 default value.	
-		#define TEXTCOLOR0DEFAULT               RGB565CONVERT(0x07, 0x1E, 0x48)
-		// Text color 1 default value.		
-		#define TEXTCOLOR1DEFAULT               WHITE	
-		// Text color disabled default value.							
-		#define TEXTCOLORDISABLEDDEFAULT        WHEAT
-		// Color 0 default value.								
-		#define COLOR0DEFAULT                   RGB565CONVERT(0x93, 0xEF, 0xFF)	
-		// Color 1 default value.	
-		#define COLOR1DEFAULT                   RGB565CONVERT(0x26, 0xC7, 0xF2)	
-		// Disabled color default value.	
-		#define COLORDISABLEDDEFAULT            RGB565CONVERT(0xB6, 0xD2, 0xFB)	
-		// Common background color default value.	
-		#define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xEF, 0xFE, 0xFF)	
-		// Default Font assignement.	
-		#define FONTDEFAULT                     GOLFontDefault			
-	
-	#else
-		/* default settings for TRULY display */
-		
-		// Emboss dark color default value.
-		#define EMBOSSDKCOLORDEFAULT            RGB565CONVERT(0x2B, 0x55, 0x87)		
-		// Emboss light color default value.
-		#define EMBOSSLTCOLORDEFAULT            RGB565CONVERT(0xD4, 0xE4, 0xF7)		
-		// Text color 0 default value.
-		#define TEXTCOLOR0DEFAULT               RGB565CONVERT(0x07, 0x1E, 0x48)		
-		// Text color 1 default value.
-		#define TEXTCOLOR1DEFAULT               WHITE								
-		// Text color disabled default value.
-		#define TEXTCOLORDISABLEDDEFAULT        WHEAT
-		// Color 0 default value.								
-		#define COLOR0DEFAULT                   RGB565CONVERT(0xA9, 0xDB, 0xEF)		
-		// Color 1 default value.
-		#define COLOR1DEFAULT                   RGB565CONVERT(0x26, 0xC7, 0xF2)		
-		// Disabled color default value.
-		#define COLORDISABLEDDEFAULT            RGB565CONVERT(0xB6, 0xD2, 0xFB)		
-		// Common background color default value.
-		#define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xD4, 0xED, 0xF7)		
-		// Default Font assignement.
-		#define FONTDEFAULT                     GOLFontDefault						
-	#endif // GRAPHICS_PICTAIL_VERSION
-#endif // USE_MONOCHROME
+// Text color 1 default value.		
+        #define TEXTCOLOR1DEFAULT   0x00
+
+// Text color disabled default value.							
+        #define TEXTCOLORDISABLEDDEFAULT    0xFF
+
+// Color 0 default value.								
+        #define COLOR0DEFAULT   0x00
+
+// Color 1 default value.	
+        #define COLOR1DEFAULT   0xFF
+
+// Disabled color default value.	
+        #define COLORDISABLEDDEFAULT    0x00
+
+// Common background color default value.	
+        #define COMMONBACKGROUNDCOLORDEFAULT    0x00
+
+// Default Font assignement.	
+        #define FONTDEFAULT GOLFontDefault
+
+    #else
+        #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V1)
+
+/* default settings for Microtips display */
+
+// Emboss dark color default value.
+            #define EMBOSSDKCOLORDEFAULT    RGB565CONVERT(0x2B, 0x55, 0x87)
+
+// Emboss light color default value.	
+            #define EMBOSSLTCOLORDEFAULT    RGB565CONVERT(0xD4, 0xE4, 0xF7)
+
+// Text color 0 default value.	
+            #define TEXTCOLOR0DEFAULT   RGB565CONVERT(0x07, 0x1E, 0x48)
+
+// Text color 1 default value.		
+            #define TEXTCOLOR1DEFAULT   WHITE
+
+// Text color disabled default value.							
+            #define TEXTCOLORDISABLEDDEFAULT    WHEAT
+
+// Color 0 default value.								
+            #define COLOR0DEFAULT   RGB565CONVERT(0x93, 0xEF, 0xFF)
+
+// Color 1 default value.	
+            #define COLOR1DEFAULT   RGB565CONVERT(0x26, 0xC7, 0xF2)
+
+// Disabled color default value.	
+            #define COLORDISABLEDDEFAULT    RGB565CONVERT(0xB6, 0xD2, 0xFB)
+
+// Common background color default value.	
+            #define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xEF, 0xFE, 0xFF)
+
+// Default Font assignement.	
+            #define FONTDEFAULT GOLFontDefault
+
+        #else
+
+/* default settings for TRULY display */
+
+// Emboss dark color default value.
+            #define EMBOSSDKCOLORDEFAULT    RGB565CONVERT(0x2B, 0x55, 0x87)
+
+// Emboss light color default value.
+            #define EMBOSSLTCOLORDEFAULT    RGB565CONVERT(0xD4, 0xE4, 0xF7)
+
+// Text color 0 default value.
+            #define TEXTCOLOR0DEFAULT   RGB565CONVERT(0x07, 0x1E, 0x48)
+
+// Text color 1 default value.
+            #define TEXTCOLOR1DEFAULT   WHITE
+
+// Text color disabled default value.
+            #define TEXTCOLORDISABLEDDEFAULT    WHEAT
+
+// Color 0 default value.								
+            #define COLOR0DEFAULT   RGB565CONVERT(0xA9, 0xDB, 0xEF)
+
+// Color 1 default value.
+            #define COLOR1DEFAULT   RGB565CONVERT(0x26, 0xC7, 0xF2)
+
+// Disabled color default value.
+            #define COLORDISABLEDDEFAULT    RGB565CONVERT(0xB6, 0xD2, 0xFB)
+
+// Common background color default value.
+            #define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xD4, 0xED, 0xF7)
+
+// Default Font assignement.
+            #define FONTDEFAULT GOLFontDefault
+        #endif // GRAPHICS_HARDWARE_PLATFORM
+    #endif // USE_MONOCHROME
 
 /*********************************************************************
 * Function: WORD GOLCanBeFocused(OBJ_HEADER* object)
@@ -424,7 +442,7 @@ extern const FONT_FLASH GOLFontDefault;
 * Side Effects: none
 *
 ********************************************************************/
-WORD GOLCanBeFocused(OBJ_HEADER* object);
+WORD        GOLCanBeFocused(OBJ_HEADER *object);
 
 /*********************************************************************
 * Function: OBJ_HEADER *GOLGetFocusNext()
@@ -445,7 +463,7 @@ WORD GOLCanBeFocused(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-OBJ_HEADER *GOLGetFocusPrev(void);
+OBJ_HEADER  *GOLGetFocusPrev(void);
 
 /*********************************************************************
 * Function: OBJ_HEADER *GOLGetFocusNext()
@@ -466,7 +484,7 @@ OBJ_HEADER *GOLGetFocusPrev(void);
 * Side Effects: none
 *
 ********************************************************************/
-OBJ_HEADER *GOLGetFocusNext(void);
+OBJ_HEADER  *GOLGetFocusNext(void);
 
 /*********************************************************************
 * Function: void GOLSetFocus(OBJ_HEADER* object)
@@ -487,7 +505,7 @@ OBJ_HEADER *GOLGetFocusNext(void);
 * Side Effects: none
 *
 ********************************************************************/
-void GOLSetFocus(OBJ_HEADER* object);
+void        GOLSetFocus(OBJ_HEADER *object);
 
 /*********************************************************************
 * Macros:  GOLGetFocus()
@@ -505,7 +523,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define GOLGetFocus() _pObjectFocused
+    #define GOLGetFocus()   _pObjectFocused
 
 /*********************************************************************
 * Macros: GetObjType(pObj)
@@ -521,7 +539,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetObjType(pObj)   		((OBJ_HEADER*)pObj)->type
+    #define GetObjType(pObj)    ((OBJ_HEADER *)pObj)->type
 
 /*********************************************************************
 * Macros: GetObjID(pObj)
@@ -554,7 +572,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetObjID(pObj)     		((OBJ_HEADER*)pObj)->ID
+    #define GetObjID(pObj)  ((OBJ_HEADER *)pObj)->ID
 
 /*********************************************************************
 * Macros: GetObjNext(pObj)
@@ -590,7 +608,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetObjNext(pObj)   		((OBJ_HEADER*)pObj)->pNxtObj
+    #define GetObjNext(pObj)    ((OBJ_HEADER *)pObj)->pNxtObj
 
 /*********************************************************************
 * Macros: IsObjUpdated(pObj)
@@ -646,7 +664,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define IsObjUpdated(pObj)   	(((OBJ_HEADER*)pObj)->state&0xfc00)
+    #define IsObjUpdated(pObj)  (((OBJ_HEADER *)pObj)->state & 0xfc00)
 
 /*********************************************************************
 * Macros: GOLDrawComplete(pObj)
@@ -704,7 +722,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define GOLDrawComplete(pObj) ((OBJ_HEADER*)pObj)->state &= 0x03ff
+    #define GOLDrawComplete(pObj)   ((OBJ_HEADER *)pObj)->state &= 0x03ff
 
 /*********************************************************************
 * Macros:  SetState(pObj, stateBits)
@@ -742,7 +760,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define SetState(pObj, stateBits)     ((OBJ_HEADER*)pObj)->state |= (stateBits)
+    #define SetState(pObj, stateBits)   ((OBJ_HEADER *)pObj)->state |= (stateBits)
 
 /*********************************************************************
 * Macros:  ClrState(pObj, stateBits)
@@ -767,7 +785,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define ClrState(pObj, stateBits)    ((OBJ_HEADER*)pObj)->state &= (~(stateBits))
+    #define ClrState(pObj, stateBits)   ((OBJ_HEADER *)pObj)->state &= (~(stateBits))
 
 /*********************************************************************
 * Macros:  GetState(pObj, stateBits)
@@ -804,7 +822,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define GetState(pObj, stateBits)    (((OBJ_HEADER*)pObj)->state&(stateBits))
+    #define GetState(pObj, stateBits)   (((OBJ_HEADER *)pObj)->state & (stateBits))
 
 /*********************************************************************
 * Function: GOL_SCHEME *GOLCreateScheme()
@@ -834,7 +852,7 @@ void GOLSetFocus(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-GOL_SCHEME *GOLCreateScheme(void);
+GOL_SCHEME  *GOLCreateScheme(void);
 
 /*********************************************************************
 * Macros:  GOLSetScheme(pObj, pScheme)
@@ -866,7 +884,7 @@ GOL_SCHEME *GOLCreateScheme(void);
 * Side Effects: none
 *
 ********************************************************************/
-#define GOLSetScheme(pObj, pScheme)  ((OBJ_HEADER*)pObj)->pGolScheme = pScheme
+    #define GOLSetScheme(pObj, pScheme) ((OBJ_HEADER *)pObj)->pGolScheme = pScheme
 
 /*********************************************************************
 * Macros:  GOLGetScheme(pObj)
@@ -892,7 +910,7 @@ GOL_SCHEME *GOLCreateScheme(void);
 * Side Effects: none
 *
 ********************************************************************/
-#define GOLGetScheme(pObj)  ((OBJ_HEADER*)pObj)->pGolScheme
+    #define GOLGetScheme(pObj)  ((OBJ_HEADER *)pObj)->pGolScheme
 
 /*********************************************************************
 * Macros:  GOLGetSchemeDefault()
@@ -908,7 +926,7 @@ GOL_SCHEME *GOLCreateScheme(void);
 * Side Effects: none
 *
 ********************************************************************/
-#define GOLGetSchemeDefault()  _pDefaultGolScheme
+    #define GOLGetSchemeDefault()   _pDefaultGolScheme
 
 /*********************************************************************
 * Function: void GOLInit()
@@ -934,7 +952,7 @@ GOL_SCHEME *GOLCreateScheme(void);
 *				clipping. This also creates a default style scheme.
 *
 ********************************************************************/
-void  GOLInit();
+void GOLInit();
 
 /*********************************************************************
 * Function: void GOLAddObject(OBJ_HEADER* object)
@@ -970,7 +988,7 @@ void  GOLInit();
 * Side Effects: none
 *
 ********************************************************************/
-void  GOLAddObject(OBJ_HEADER* object);
+void    GOLAddObject(OBJ_HEADER *object);
 
 /*********************************************************************
 * Macros: void GOLNewList()
@@ -1009,7 +1027,9 @@ void  GOLAddObject(OBJ_HEADER* object);
 *				(_pObjectFocused) to NULL.
 *
 ********************************************************************/
-#define  GOLNewList()  _pGolObjects = NULL;  _pObjectFocused = NULL
+    #define GOLNewList() \
+    _pGolObjects = NULL; \
+    _pObjectFocused = NULL
 
 /*********************************************************************
 * Macros: GOLGetList()
@@ -1028,7 +1048,7 @@ void  GOLAddObject(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-#define  GOLGetList()  _pGolObjects
+    #define GOLGetList()    _pGolObjects
 
 /*********************************************************************
 * Macros: GOLSetList(objsList)
@@ -1074,7 +1094,9 @@ void  GOLAddObject(OBJ_HEADER* object);
 *				used by the objects before calling GOLSetList().
 *
 ********************************************************************/
-#define  GOLSetList(objsList)  _pGolObjects = objsList; _pObjectFocused = NULL									
+    #define GOLSetList(objsList) \
+    _pGolObjects = objsList;     \
+    _pObjectFocused = NULL
 
 /*********************************************************************
 * Function: OBJ_HEADER* GOLFindObject(WORD ID)
@@ -1105,7 +1127,7 @@ void  GOLAddObject(OBJ_HEADER* object);
 * Side Effects: none
 *
 ********************************************************************/
-OBJ_HEADER* GOLFindObject(WORD ID);
+OBJ_HEADER * GOLFindObject(WORD ID);
 
 /*********************************************************************
 * Function: void GOLFree()
@@ -1141,7 +1163,8 @@ OBJ_HEADER* GOLFindObject(WORD ID);
 * Side Effects: All objects in the active list are deleted from memory.
 *
 ********************************************************************/
-void GOLFree();
+void    GOLFree(void);
+
 /*********************************************************************
 * Function: BOOL GOLDeleteObject(OBJ_HEADER * object)
 *
@@ -1158,7 +1181,8 @@ void GOLFree();
 * Note: none
 *
 ********************************************************************/
-BOOL  GOLDeleteObject(OBJ_HEADER * object);
+BOOL    GOLDeleteObject(OBJ_HEADER *object);
+
 /*********************************************************************
 * Function: BOOL GOLDeleteObjectByID(WORD ID)
 *
@@ -1176,7 +1200,7 @@ BOOL  GOLDeleteObject(OBJ_HEADER * object);
 * Note: none
 *
 ********************************************************************/
-BOOL  GOLDeleteObjectByID(WORD ID);
+BOOL    GOLDeleteObjectByID(WORD ID);
 
 /*********************************************************************
 * Function: WORD GOLDraw()
@@ -1213,7 +1237,7 @@ BOOL  GOLDeleteObjectByID(WORD ID);
 * Side Effects: none
 *
 ********************************************************************/
-WORD GOLDraw();
+WORD    GOLDraw(void);
 
 /*********************************************************************
 * Function: void GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom)
@@ -1255,7 +1279,7 @@ WORD GOLDraw();
 * Side Effects: none
 *
 ********************************************************************/
-void  GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom);
+void    GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom);
 
 /*********************************************************************
 * Macros: GOLRedraw(pObj)
@@ -1295,7 +1319,7 @@ void  GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom);
 * Side Effects: none
 *
 ********************************************************************/
-#define GOLRedraw(pObj) ((OBJ_HEADER*)pObj)->state |= 0x7c00
+    #define GOLRedraw(pObj) ((OBJ_HEADER *)pObj)->state |= 0x7c00
 
 /*********************************************************************
 * Function: void GOLMsg(GOL_MSG *pMsg)
@@ -1337,7 +1361,7 @@ void  GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom);
 * Side Effects: none
 *
 ********************************************************************/
-void  GOLMsg(GOL_MSG *pMsg);
+void            GOLMsg(GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
@@ -1415,7 +1439,7 @@ void  GOLMsg(GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
+WORD            GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD GOLDrawCallback()
@@ -1472,23 +1496,23 @@ WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD GOLDrawCallback();
+WORD            GOLDrawCallback(void);
 
 /*********************************************************************
 * Variables for rounded panel drawing. Used by GOLRndPanelDraw and GOLRndPanelDrawTsk
 ********************************************************************/
-extern SHORT _rpnlX1;				// Panel center x position of upper left corner
-extern SHORT _rpnlY1;				// Panel center y position of upper left corner
-extern SHORT _rpnlX2;				// Panel center x position of lower right corner
-extern SHORT _rpnlY2;				// Panel center y position of lower right corner
-extern SHORT _rpnlR;				// radius (defines the rounded corner size)
-extern WORD  _rpnlFaceColor;		// Panel face color
-extern WORD  _rpnlEmbossLtColor;	// Panel emboss light color
-extern WORD  _rpnlEmbossDkColor;	// Panel emboss dark color
-extern WORD  _rpnlEmbossSize;      	// Size of panel emboss (Usually uses GOL_EMBOSS_SIZE but maybe different 
-                        			// for some objects)emboss size 
-	  
-extern void* _pRpnlBitmap;      	// Bitmap used in the panel
+extern SHORT    _rpnlX1;            // Panel center x position of upper left corner
+extern SHORT    _rpnlY1;            // Panel center y position of upper left corner
+extern SHORT    _rpnlX2;            // Panel center x position of lower right corner
+extern SHORT    _rpnlY2;            // Panel center y position of lower right corner
+extern SHORT    _rpnlR;             // radius (defines the rounded corner size)
+extern WORD     _rpnlFaceColor;     // Panel face color
+extern WORD     _rpnlEmbossLtColor; // Panel emboss light color
+extern WORD     _rpnlEmbossDkColor; // Panel emboss dark color
+extern WORD     _rpnlEmbossSize;    // Size of panel emboss (Usually uses GOL_EMBOSS_SIZE but maybe different
+
+// for some objects)emboss size
+extern void     *_pRpnlBitmap;      // Bitmap used in the panel
 
 /*********************************************************************
 * Macros: GOLPanelDraw(	left, top, right, bottom,
@@ -1568,16 +1592,17 @@ extern void* _pRpnlBitmap;      	// Bitmap used in the panel
 * Side Effects: none
 *
 ********************************************************************/
-#define GOLPanelDraw(left,top,right,bottom,radius,faceClr,embossLtClr,embossDkClr,pBitmap,embossSize) _rpnlX1=left;\
-_rpnlY1 = top;\
-_rpnlX2 = right;\
-_rpnlY2 = bottom;\
-_rpnlR = radius;\
-_rpnlFaceColor = faceClr;\
-_rpnlEmbossLtColor = embossLtClr;\
-_rpnlEmbossDkColor = embossDkClr;\
-_pRpnlBitmap = pBitmap;\
-_rpnlEmbossSize = embossSize;
+    #define GOLPanelDraw(left, top, right, bottom, radius, faceClr, embossLtClr, embossDkClr, pBitmap, embossSize) \
+    _rpnlX1 = left;                                                                                \
+    _rpnlY1 = top;                                                                                 \
+    _rpnlX2 = right;                                                                               \
+    _rpnlY2 = bottom;                                                                              \
+    _rpnlR = radius;                                                                               \
+    _rpnlFaceColor = faceClr;                                                                      \
+    _rpnlEmbossLtColor = embossLtClr;                                                              \
+    _rpnlEmbossDkColor = embossDkClr;                                                              \
+    _pRpnlBitmap = pBitmap;                                                                        \
+    _rpnlEmbossSize = embossSize;
 
 /*********************************************************************
 * Function: WORD GOLPanelDrawTsk()
@@ -1603,6 +1628,5 @@ _rpnlEmbossSize = embossSize;
 * Side Effects: none
 *
 ********************************************************************/
-WORD GOLPanelDrawTsk(void); 
-
+WORD    GOLPanelDrawTsk(void);
 #endif // _GOL_H

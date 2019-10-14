@@ -38,7 +38,6 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #include "Graphics\Graphics.h"
 
 #ifdef USE_CHECKBOX
@@ -51,40 +50,50 @@
 * Overview: Creates the check box.
 *
 ********************************************************************/
-CHECKBOX *CbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			       WORD state, XCHAR *pText, GOL_SCHEME *pScheme)
+CHECKBOX *CbCreate
+(
+    WORD        ID,
+    SHORT       left,
+    SHORT       top,
+    SHORT       right,
+    SHORT       bottom,
+    WORD        state,
+    XCHAR       *pText,
+    GOL_SCHEME  *pScheme
+)
 {
-	CHECKBOX *pCb = NULL;
-	
-	pCb = (CHECKBOX*)malloc(sizeof(CHECKBOX));
-	if (pCb == NULL)
-		return pCb;
+    CHECKBOX    *pCb = NULL;
 
-	pCb->hdr.ID      	= ID;
-	pCb->hdr.pNxtObj 	= NULL;
-	pCb->hdr.type    	= OBJ_CHECKBOX;
-	pCb->hdr.left    	= left;
-	pCb->hdr.top     	= top;
-	pCb->hdr.right   	= right;
-	pCb->hdr.bottom  	= bottom;
-	pCb->pText   	= pText;
-	pCb->hdr.state   	= state;
+    pCb = (CHECKBOX *)malloc(sizeof(CHECKBOX));
+    if(pCb == NULL)
+        return (pCb);
 
-	// Set the style scheme
-	if (pScheme == NULL)
-		pCb->hdr.pGolScheme = _pDefaultGolScheme; 
-	else 	
-		pCb->hdr.pGolScheme = (GOL_SCHEME *)pScheme; 	
+    pCb->hdr.ID = ID;
+    pCb->hdr.pNxtObj = NULL;
+    pCb->hdr.type = OBJ_CHECKBOX;
+    pCb->hdr.left = left;
+    pCb->hdr.top = top;
+    pCb->hdr.right = right;
+    pCb->hdr.bottom = bottom;
+    pCb->pText = pText;
+    pCb->hdr.state = state;
 
-	// Set the text height  
+    // Set the style scheme
+    if(pScheme == NULL)
+        pCb->hdr.pGolScheme = _pDefaultGolScheme;
+    else
+        pCb->hdr.pGolScheme = (GOL_SCHEME *)pScheme;
+
+    // Set the text height
     pCb->textHeight = 0;
-    if(pText != NULL){
-	    pCb->textHeight = GetTextHeight(pCb->hdr.pGolScheme->pFont);
+    if(pText != NULL)
+    {
+        pCb->textHeight = GetTextHeight(pCb->hdr.pGolScheme->pFont);
     }
 
-    GOLAddObject((OBJ_HEADER*) pCb);
-	
-	return pCb;
+    GOLAddObject((OBJ_HEADER *)pCb);
+
+    return (pCb);
 }
 
 /*********************************************************************
@@ -95,8 +104,8 @@ CHECKBOX *CbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 ********************************************************************/
 void CbSetText(CHECKBOX *pCb, XCHAR *pText)
 {
-	pCb->pText = pText;
-	pCb->textHeight = GetTextHeight((BYTE *)pCb->hdr.pGolScheme->pFont);
+    pCb->pText = pText;
+    pCb->textHeight = GetTextHeight((BYTE *)pCb->hdr.pGolScheme->pFont);
 }
 
 /*********************************************************************
@@ -105,29 +114,31 @@ void CbSetText(CHECKBOX *pCb, XCHAR *pText)
 * Overview: Changes the state of the check box by default.
 *
 ********************************************************************/
-void CbMsgDefault(WORD translatedMsg, CHECKBOX* pCb, GOL_MSG* pMsg){
-
-#ifdef  USE_FOCUS
-#ifdef  USE_TOUCHSCREEN
-    if(pMsg->type == TYPE_TOUCHSCREEN){
-        if(!GetState(pCb,CB_FOCUSED)){
-                GOLSetFocus((OBJ_HEADER*)pCb);
+void CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG *pMsg)
+{
+        #ifdef USE_FOCUS
+            #ifdef USE_TOUCHSCREEN
+    if(pMsg->type == TYPE_TOUCHSCREEN)
+    {
+        if(!GetState(pCb, CB_FOCUSED))
+        {
+            GOLSetFocus((OBJ_HEADER *)pCb);
         }
     }
-#endif
-#endif
 
-    switch(translatedMsg){
+            #endif
+        #endif
+    switch(translatedMsg)
+    {
         case CB_MSG_CHECKED:
-            SetState(pCb, CB_CHECKED|CB_DRAW_CHECK); // Set checked and redraw
+            SetState(pCb, CB_CHECKED | CB_DRAW_CHECK);  // Set checked and redraw
             break;
 
         case CB_MSG_UNCHECKED:
-            ClrState(pCb, CB_CHECKED);        // Reset check   
-            SetState(pCb, CB_DRAW_CHECK);     // Redraw
+            ClrState(pCb, CB_CHECKED);                  // Reset check
+            SetState(pCb, CB_DRAW_CHECK);               // Redraw
             break;
     }
-
 }
 
 /*********************************************************************
@@ -139,55 +150,60 @@ void CbMsgDefault(WORD translatedMsg, CHECKBOX* pCb, GOL_MSG* pMsg){
 ********************************************************************/
 WORD CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg)
 {
-	// Evaluate if the message is for the check box
+
+    // Evaluate if the message is for the check box
     // Check if disabled first
-	if ( GetState(pCb,CB_DISABLED) )
-		return OBJ_MSG_INVALID;
+    if(GetState(pCb, CB_DISABLED))
+        return (OBJ_MSG_INVALID);
 
-#ifdef USE_TOUCHSCREEN
-    if(pMsg->type == TYPE_TOUCHSCREEN){
-    	// Check if it falls in the check box borders
-	    if( (pCb->hdr.left   < pMsg->param1) &&
-   	        (pCb->hdr.right  > pMsg->param1) &&
-            (pCb->hdr.top    < pMsg->param2) &&
-            (pCb->hdr.bottom > pMsg->param2) ){
+        #ifdef USE_TOUCHSCREEN
+    if(pMsg->type == TYPE_TOUCHSCREEN)
+    {
 
-            if(pMsg->uiEvent == EVENT_PRESS){
-                if(GetState(pCb,CB_CHECKED))
-                    return CB_MSG_UNCHECKED;
+        // Check if it falls in the check box borders
+        if
+        (
+            (pCb->hdr.left < pMsg->param1) &&
+            (pCb->hdr.right > pMsg->param1) &&
+            (pCb->hdr.top < pMsg->param2) &&
+            (pCb->hdr.bottom > pMsg->param2)
+        )
+        {
+            if(pMsg->uiEvent == EVENT_PRESS)
+            {
+                if(GetState(pCb, CB_CHECKED))
+                    return (CB_MSG_UNCHECKED);
                 else
-                    return CB_MSG_CHECKED;
+                    return (CB_MSG_CHECKED);
             }
         }
 
-	    return OBJ_MSG_INVALID;	
+        return (OBJ_MSG_INVALID);
     }
-#endif
 
-#ifdef USE_KEYBOARD
-
-    if(pMsg->type == TYPE_KEYBOARD){
-
-	    if(pMsg->param1 == pCb->hdr.ID){
-
-	        if(pMsg->uiEvent == EVENT_KEYSCAN){
-
-                if( (pMsg->param2 == SCAN_SPACE_PRESSED) ||
-                    (pMsg->param2 == SCAN_CR_PRESSED) ){
-
-                    if(GetState(pCb,CB_CHECKED))
-                        return CB_MSG_UNCHECKED;
+        #endif
+        #ifdef USE_KEYBOARD
+    if(pMsg->type == TYPE_KEYBOARD)
+    {
+        if(pMsg->param1 == pCb->hdr.ID)
+        {
+            if(pMsg->uiEvent == EVENT_KEYSCAN)
+            {
+                if((pMsg->param2 == SCAN_SPACE_PRESSED) || (pMsg->param2 == SCAN_CR_PRESSED))
+                {
+                    if(GetState(pCb, CB_CHECKED))
+                        return (CB_MSG_UNCHECKED);
                     else
-                        return CB_MSG_CHECKED;
+                        return (CB_MSG_CHECKED);
                 }
             }
         }
-	    return OBJ_MSG_INVALID;	
+
+        return (OBJ_MSG_INVALID);
     }
 
-#endif
-
-	return OBJ_MSG_INVALID;	
+        #endif
+    return (OBJ_MSG_INVALID);
 }
 
 /*********************************************************************
@@ -202,146 +218,185 @@ WORD CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg)
 ********************************************************************/
 WORD CbDraw(CHECKBOX *pCb)
 {
-typedef enum {
-	REMOVE,
-	BOX_DRAW,
-	RUN_DRAW,
-	TEXT_DRAW,
-    TEXT_DRAW_RUN,
-    CHECK_DRAW,
-    FOCUS_DRAW
-} CB_DRAW_STATES;
+    typedef enum
+    {
+        REMOVE,
+        BOX_DRAW,
+        RUN_DRAW,
+        TEXT_DRAW,
+        TEXT_DRAW_RUN,
+        CHECK_DRAW,
+        FOCUS_DRAW
+    } CB_DRAW_STATES;
 
-static CB_DRAW_STATES state = REMOVE;
+    static CB_DRAW_STATES state = REMOVE;
 
-SHORT checkIndent;
+    SHORT checkIndent;
 
     if(IsDeviceBusy())
-        return 0;
+        return (0);
 
-    switch(state){
-
+    switch(state)
+    {
         case REMOVE:
-            if(GetState(pCb,CB_HIDE|CB_DRAW)){
-
+            if(GetState(pCb, CB_HIDE | CB_DRAW))
+            {
                 SetColor(pCb->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pCb->hdr.left,pCb->hdr.top,pCb->hdr.right,pCb->hdr.bottom))
+                if(!Bar(pCb->hdr.left, pCb->hdr.top, pCb->hdr.right, pCb->hdr.bottom))
                 {
-                    return 0;
+                    return (0);
                 }
-                if(GetState(pCb,CB_HIDE))
-                    return 1;
+
+                if(GetState(pCb, CB_HIDE))
+                    return (1);
             }
+
             state = BOX_DRAW;
 
         case BOX_DRAW:
-
-            if(GetState(pCb,CB_DRAW)){
-
-                if(!GetState(pCb,CB_DISABLED)){
-
-                    GOLPanelDraw(pCb->hdr.left+CB_INDENT,pCb->hdr.top+CB_INDENT,
-                             pCb->hdr.left+(pCb->hdr.bottom-pCb->hdr.top)-CB_INDENT,
-                             pCb->hdr.bottom-CB_INDENT, 0,
-                             pCb->hdr.pGolScheme->Color0,
-                             pCb->hdr.pGolScheme->EmbossDkColor,
-                             pCb->hdr.pGolScheme->EmbossLtColor,
-                             NULL, GOL_EMBOSS_SIZE);
-
-
-                }else{
-
-                    GOLPanelDraw(pCb->hdr.left+CB_INDENT,pCb->hdr.top+CB_INDENT,
-                             pCb->hdr.left+(pCb->hdr.bottom-pCb->hdr.top)-CB_INDENT,
-                             pCb->hdr.bottom-CB_INDENT, 0,
-                             pCb->hdr.pGolScheme->ColorDisabled,
-                             pCb->hdr.pGolScheme->EmbossDkColor,
-                             pCb->hdr.pGolScheme->EmbossLtColor,
-                             NULL, GOL_EMBOSS_SIZE);
-
+            if(GetState(pCb, CB_DRAW))
+            {
+                if(!GetState(pCb, CB_DISABLED))
+                {
+                    GOLPanelDraw
+                    (
+                        pCb->hdr.left + CB_INDENT,
+                        pCb->hdr.top + CB_INDENT,
+                        pCb->hdr.left + (pCb->hdr.bottom - pCb->hdr.top) - CB_INDENT,
+                        pCb->hdr.bottom - CB_INDENT,
+                        0,
+                        pCb->hdr.pGolScheme->Color0,
+                        pCb->hdr.pGolScheme->EmbossDkColor,
+                        pCb->hdr.pGolScheme->EmbossLtColor,
+                        NULL,
+                        GOL_EMBOSS_SIZE
+                    );
+                }
+                else
+                {
+                    GOLPanelDraw
+                    (
+                        pCb->hdr.left + CB_INDENT,
+                        pCb->hdr.top + CB_INDENT,
+                        pCb->hdr.left + (pCb->hdr.bottom - pCb->hdr.top) - CB_INDENT,
+                        pCb->hdr.bottom - CB_INDENT,
+                        0,
+                        pCb->hdr.pGolScheme->ColorDisabled,
+                        pCb->hdr.pGolScheme->EmbossDkColor,
+                        pCb->hdr.pGolScheme->EmbossLtColor,
+                        NULL,
+                        GOL_EMBOSS_SIZE
+                    );
                 }
 
                 state = RUN_DRAW;
 
-                case RUN_DRAW:
-                    if(!GOLPanelDrawTsk())
-                        return 0;
-                    state = TEXT_DRAW;
-                    
+            case RUN_DRAW:
+                if(!GOLPanelDrawTsk())
+                    return (0);
+                state = TEXT_DRAW;
 
-                case TEXT_DRAW:
-                	if(pCb->pText != NULL){
+            case TEXT_DRAW:
+                if(pCb->pText != NULL)
+                {
+                    SetFont(pCb->hdr.pGolScheme->pFont);
 
-                        SetFont(pCb->hdr.pGolScheme->pFont);
-
-                        if (!GetState(pCb,CB_DISABLED)){
-	                        SetColor(pCb->hdr.pGolScheme->TextColor0);
-                        }else{
-		                    SetColor(pCb->hdr.pGolScheme->TextColorDisabled);
-                        }
-
-                        MoveTo(pCb->hdr.left+pCb->hdr.bottom-pCb->hdr.top+CB_INDENT,
-                              (pCb->hdr.bottom+pCb->hdr.top-pCb->textHeight)>>1);
-
-                        state = TEXT_DRAW_RUN;
-
-                        case TEXT_DRAW_RUN:
-                            if(!OutText(pCb->pText))
-                                return 0;	
+                    if(!GetState(pCb, CB_DISABLED))
+                    {
+                        SetColor(pCb->hdr.pGolScheme->TextColor0);
+                    }
+                    else
+                    {
+                        SetColor(pCb->hdr.pGolScheme->TextColorDisabled);
                     }
 
+                    MoveTo
+                    (
+                        pCb->hdr.left + pCb->hdr.bottom - pCb->hdr.top + CB_INDENT,
+                        (pCb->hdr.bottom + pCb->hdr.top - pCb->textHeight) >> 1
+                    );
+
+                    state = TEXT_DRAW_RUN;
+
+                case TEXT_DRAW_RUN:
+                    if(!OutText(pCb->pText))
+                        return (0);
+                }
             }
+
             state = CHECK_DRAW;
 
         case CHECK_DRAW:
-
-            if(GetState(pCb,CB_DRAW|CB_DRAW_CHECK)){
-
-                if(!GetState(pCb,CB_DISABLED)){
-                    if(GetState(pCb,CB_CHECKED)){
+            if(GetState(pCb, CB_DRAW | CB_DRAW_CHECK))
+            {
+                if(!GetState(pCb, CB_DISABLED))
+                {
+                    if(GetState(pCb, CB_CHECKED))
+                    {
                         SetColor(pCb->hdr.pGolScheme->TextColor0);
-                    }else{
+                    }
+                    else
+                    {
                         SetColor(pCb->hdr.pGolScheme->Color0);
                     }
-                }else{
-                    if(GetState(pCb,CB_CHECKED)){
+                }
+                else
+                {
+                    if(GetState(pCb, CB_CHECKED))
+                    {
                         SetColor(pCb->hdr.pGolScheme->TextColorDisabled);
-                    }else{
+                    }
+                    else
+                    {
                         SetColor(pCb->hdr.pGolScheme->ColorDisabled);
                     }
                 }
 
-                checkIndent = (pCb->hdr.bottom-pCb->hdr.top)>>2;
+                checkIndent = (pCb->hdr.bottom - pCb->hdr.top) >> 2;
 
-                if(!Bar(pCb->hdr.left+checkIndent+GOL_EMBOSS_SIZE,
-                    pCb->hdr.top+checkIndent+GOL_EMBOSS_SIZE,
-                    pCb->hdr.left+(pCb->hdr.bottom-pCb->hdr.top)-checkIndent-GOL_EMBOSS_SIZE,
-                    pCb->hdr.bottom-checkIndent-GOL_EMBOSS_SIZE))
-                    {
-                        return 0;
-                    }
+                if
+                (
+                    !Bar
+                        (
+                            pCb->hdr.left + checkIndent + GOL_EMBOSS_SIZE,
+                            pCb->hdr.top + checkIndent + GOL_EMBOSS_SIZE,
+                            pCb->hdr.left + (pCb->hdr.bottom - pCb->hdr.top) - checkIndent - GOL_EMBOSS_SIZE,
+                            pCb->hdr.bottom - checkIndent - GOL_EMBOSS_SIZE
+                        )
+                )
+                {
+                    return (0);
+                }
             }
+
             state = FOCUS_DRAW;
 
         case FOCUS_DRAW:
-	        if(GetState(pCb,CB_DRAW|CB_DRAW_FOCUS)){
-	            if(GetState(pCb,CB_FOCUSED)){
-		            SetColor(pCb->hdr.pGolScheme->TextColor0);
-                }else{
+            if(GetState(pCb, CB_DRAW | CB_DRAW_FOCUS))
+            {
+                if(GetState(pCb, CB_FOCUSED))
+                {
+                    SetColor(pCb->hdr.pGolScheme->TextColor0);
+                }
+                else
+                {
                     SetColor(pCb->hdr.pGolScheme->CommonBkColor);
                 }
-    	        SetLineType(FOCUS_LINE);
-		        if(!Rectangle(pCb->hdr.left, pCb->hdr.top,
-                          pCb->hdr.right, pCb->hdr.bottom))
+
+                SetLineType(FOCUS_LINE);
+                if(!Rectangle(pCb->hdr.left, pCb->hdr.top, pCb->hdr.right, pCb->hdr.bottom))
                 {
-                    return 0;
+                    return (0);
                 }
-		        SetLineType(SOLID_LINE);
-	        }
+
+                SetLineType(SOLID_LINE);
+            }
+
             state = REMOVE;
-            return 1;
+            return (1);
     }
-    return 1;
+
+    return (1);
 }
 
 #endif // USE_CHECKBOX

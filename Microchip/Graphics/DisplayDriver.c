@@ -37,83 +37,68 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     09/04/08
  *****************************************************************************/
-
 #include "Graphics\Graphics.h"
 
 #if (DISPLAY_CONTROLLER == CUSTOM_CONTROLLER)
+    #include "Drivers\CustomDisplayDriver.c"
 
-#include "Drivers\CustomDisplayDriver.c"
+#elif (DISPLAY_CONTROLLER == MCHP_DA210)
+    #include "Drivers\MicrochipGraphicsModule.c"
 
 #elif (DISPLAY_CONTROLLER == SSD1906)
+    #include "Drivers\SSD1906.c"
 
-#include "Drivers\SSD1906.c"
+#elif (DISPLAY_CONTROLLER == SSD1926)
+    #include "Drivers\SSD1926.c"
 
-#elif  (DISPLAY_CONTROLLER == SSD1926)
+#elif (DISPLAY_CONTROLLER == S6D0129)
+    #include "Drivers\drvTFT001.c"
 
-#include "Drivers\SSD1926.c"
+#elif (DISPLAY_CONTROLLER == S6D0139)
+    #include "Drivers\drvTFT001.c"
 
-#elif  (DISPLAY_CONTROLLER == S6D0129)
+#elif (DISPLAY_CONTROLLER == LGDP4531)
+    #include "Drivers\drvTFT001.c"
 
-#include "Drivers\drvTFT001.c"
+#elif (DISPLAY_CONTROLLER == R61505)
+    #include "Drivers\drvTFT001.c"
 
-#elif  (DISPLAY_CONTROLLER == S6D0139)
+#elif (DISPLAY_CONTROLLER == SPFD5408)
+    #include "Drivers\drvTFT001.c"
 
-#include "Drivers\drvTFT001.c"
+#elif (DISPLAY_CONTROLLER == SSD1339)
+    #include "Drivers\SSD1339.c"
 
-#elif  (DISPLAY_CONTROLLER == LGDP4531)
+#elif (DISPLAY_CONTROLLER == ST7529)
+    #include "Drivers\ST7529.c"
 
-#include "Drivers\drvTFT001.c"
+#elif (DISPLAY_CONTROLLER == SH1101A)
+    #include "Drivers\SH1101A_SSD1303.c"
 
-#elif  (DISPLAY_CONTROLLER == R61505)
+#elif (DISPLAY_CONTROLLER == SSD1303)
+    #include "Drivers\SH1101A_SSD1303.c"
 
-#include "Drivers\drvTFT001.c"
+#elif (DISPLAY_CONTROLLER == HIT1270)
+    #include "Drivers\HIT1270.c"
 
-#elif  (DISPLAY_CONTROLLER == SPFD5408)
+#elif (DISPLAY_CONTROLLER == UC1610)
+    #include "Drivers\UC1610.c"
 
-#include "Drivers\drvTFT001.c"
+#elif (DISPLAY_CONTROLLER == ILI9320)
+    #include "Drivers\drvTFT001.c"
 
-#elif  (DISPLAY_CONTROLLER == SSD1339)
+#elif (DISPLAY_CONTROLLER == SSD1289)
+    #include "Drivers\drvTFT002.c"
 
-#include "Drivers\SSD1339.c"
+#elif (DISPLAY_CONTROLLER == HX8347)
+    #include "Drivers\HX8347.c"
 
-#elif  (DISPLAY_CONTROLLER == ST7529)
+#elif (DISPLAY_CONTROLLER == R61580)
+    #include "Drivers\drvTFT001.c"
 
-#include "Drivers\ST7529.c"
-
-#elif  (DISPLAY_CONTROLLER == SH1101A)
-
-#include "Drivers\SH1101A_SSD1303.c"
-
-#elif  (DISPLAY_CONTROLLER == SSD1303)
-
-#include "Drivers\SH1101A_SSD1303.c"
-
-#elif  (DISPLAY_CONTROLLER == HIT1270)
-
-#include "Drivers\HIT1270.c"
-
-#elif  (DISPLAY_CONTROLLER == UC1610)
-
-#include "Drivers\UC1610.c"
-
-#elif  (DISPLAY_CONTROLLER == ILI9320)
-
-#include "Drivers\drvTFT001.c"
-
-#elif  (DISPLAY_CONTROLLER == SSD1289)
-
-#include "Drivers\SSD1289.c"
-
-#elif  (DISPLAY_CONTROLLER == HX8347)
-
-#include "Drivers\HX8347.c"
-
-#elif  (DISPLAY_CONTROLLER == R61580)
-
-#include "Drivers\drvTFT001.c"
+#elif (DISPLAY_CONTROLLER == SSD2119)
+    #include "Drivers\drvTFT002.c"
 
 #else
-
-#error	GRAPHICS CONTROLLER IS NOT SUPPORTED
-
+    #error GRAPHICS CONTROLLER IS NOT SUPPORTED
 #endif

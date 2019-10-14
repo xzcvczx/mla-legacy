@@ -3,25 +3,6 @@
 #ifndef _HARDWARE_PROFILE_H_
 #define _HARDWARE_PROFILE_H_
 
-//// Determines processor type automatically
-//#ifdef __18CXX
-//	#define USE_PIC18
-//#elif defined __PIC24F__
-//	#define USE_16BIT
-//	#define USE_PIC24F
-//#elif defined __PIC24H__
-//	#define USE_16BIT
-//	#define USE_PIC24H
-//#elif defined __dsPIC30F__
-//	#define USE_16BIT
-//	#define USE_PIC30
-//#elif defined __dsPIC33F__
-//	#define USE_16BIT
-//	#define USE_PIC33
-//#else
-//	#error "Use PIC18, PIC24, dsPIC30, or dsPIC33 processor"
-//#endif
-
 #if defined( __C30__ )
 
     // Various clock values

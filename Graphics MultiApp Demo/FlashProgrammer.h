@@ -42,18 +42,17 @@
  * Paolo Tamayo			06/19/08	Modified to be a module
  ********************************************************************/
 #ifndef _FLASHPROGRAMMER_H
-#define _FLASHPROGRAMMER_H
+    #define _FLASHPROGRAMMER_H
 
 ////////////////////////////// INCLUDES //////////////////////////////
-#ifdef __PIC32MX
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
-
-#include "GenericTypeDefs.h"
-#include "GraphicsConfig.h"
-#include "uart2.h"
+    #ifdef __PIC32MX
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+    #include "GenericTypeDefs.h"
+    #include "GraphicsConfig.h"
+    #include "uart2.h"
 
 /************************************************************************
  Function: void ProgramFlash(void)
@@ -66,7 +65,7 @@
                                                                        
  Output: none
 ************************************************************************/
-void ProgramFlash(void);
+void    ProgramFlash(void);
 
 /************************************************************************
  Function: void SetPPSPorts(void)
@@ -79,6 +78,5 @@ void ProgramFlash(void);
                                                                        
  Output: none
 ************************************************************************/
-void SetPPSPorts(void);
-
+void    SetPPSPorts(void);
 #endif // _FLASHPROGRAMMER_H

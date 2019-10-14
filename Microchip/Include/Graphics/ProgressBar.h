@@ -39,28 +39,28 @@
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
 #ifndef _PROGRESSBAR_H
-#define _PROGRESSBAR_H
+    #define _PROGRESSBAR_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define PB_DISABLED     0x0002  // Bit to indicate Progress Bar is in a disabled state.
-#define PB_HIDE         0x8000  // Bit to indicate Progress Bar must be hidden. 
-#define PB_DRAW_BAR     0x2000  // Bit to indicate Progress Bar must be redrawn.
-#define PB_DRAW         0x4000  // Bit to indicate Progress Bar must be redrawn.
+    #define PB_DISABLED 0x0002  // Bit to indicate Progress Bar is in a disabled state.
+    #define PB_HIDE     0x8000  // Bit to indicate Progress Bar must be hidden.
+    #define PB_DRAW_BAR 0x2000  // Bit to indicate Progress Bar must be redrawn.
+    #define PB_DRAW     0x4000  // Bit to indicate Progress Bar must be redrawn.
 
 /*****************************************************************************
  * Overview: The structure contains data for the progress bar
  *****************************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-	WORD     		pos;            // Current progress position.
-	WORD  			prevPos;        // Previous progress position.
-    WORD            range;          // Sets the range of the object.
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    WORD        pos;        // Current progress position.
+    WORD        prevPos;    // Previous progress position.
+    WORD        range;      // Sets the range of the object.
 } PROGRESSBAR;
-
 
 /*********************************************************************
 * Macros:  PbGetPos(pPb)
@@ -79,7 +79,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define PbGetPos(pPb)                 pPb->pos
+    #define PbGetPos(pPb)   pPb->pos
 
 /*********************************************************************
 * Function: void PbSetPos(PROGRESSBAR *pPb, WORD position)
@@ -119,7 +119,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void PbSetPos(PROGRESSBAR *pPb, WORD position);
+void        PbSetPos(PROGRESSBAR *pPb, WORD position);
 
 /*********************************************************************
 * Function: PROGRESSBAR  *PbCreate( WORD ID, SHORT left, SHORT top, 
@@ -163,8 +163,18 @@ void PbSetPos(PROGRESSBAR *pPb, WORD position);
 * Side Effects: none
 *
 ********************************************************************/
-PROGRESSBAR  *PbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			      WORD state, WORD pos, WORD range, GOL_SCHEME *pScheme);
+PROGRESSBAR *PbCreate
+            (
+                WORD        ID,
+                SHORT       left,
+                SHORT       top,
+                SHORT       right,
+                SHORT       bottom,
+                WORD        state,
+                WORD        pos,
+                WORD        range,
+                GOL_SCHEME  *pScheme
+            );
 
 /*********************************************************************
 * Function: WORD PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg)
@@ -198,7 +208,7 @@ PROGRESSBAR  *PbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom
 * Side Effects: none
 *
 ********************************************************************/
-WORD  PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg);
+WORD        PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD PbDraw(PROGRESSBAR *pPb)
@@ -230,7 +240,7 @@ WORD  PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD PbDraw(PROGRESSBAR *pPb);
+WORD        PbDraw(PROGRESSBAR *pPb);
 
 /*********************************************************************
 * Function:  PbSetRange(PROGRESSBAR *pPb, WORD range)
@@ -248,7 +258,7 @@ WORD PbDraw(PROGRESSBAR *pPb);
 * Side Effects: Sets the position equal to the new range.
 *
 ********************************************************************/
-void PbSetRange(PROGRESSBAR *pPb, WORD range);
+void        PbSetRange(PROGRESSBAR *pPb, WORD range);
 
 /*********************************************************************
 * Macros:  PbGetRange(pPb)
@@ -264,6 +274,5 @@ void PbSetRange(PROGRESSBAR *pPb, WORD range);
 * Side Effects: none
 *
 ********************************************************************/
-#define PbGetRange(pPb)                 (pPb->range)
-
+    #define PbGetRange(pPb) (pPb->range)
 #endif // _PROGRESSBAR_H

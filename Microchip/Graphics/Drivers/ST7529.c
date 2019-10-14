@@ -41,21 +41,23 @@
 
 // Color
 BYTE    _color;
+
 // Clipping region control
-SHORT _clipRgn;
+SHORT   _clipRgn;
+
 // Clipping region borders
-SHORT _clipLeft;
-SHORT _clipTop;
-SHORT _clipRight;
-SHORT _clipBottom;
+SHORT   _clipLeft;
+SHORT   _clipTop;
+SHORT   _clipRight;
+SHORT   _clipBottom;
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch);
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch);
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch);
-void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
-void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
-void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
+void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void    PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+void    PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 
 /*********************************************************************
 * Function:  void  DelayMs(WORD time)
@@ -74,31 +76,37 @@ void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
 *
 ********************************************************************/
 #ifdef __PIC32MX
-void  DelayMs(WORD time)
+
+/* */
+void DelayMs(WORD time)
 {
     while(time--)
     {
-        unsigned int int_status;
+        unsigned int    int_status;
 
         int_status = INTDisableInterrupts();
-        OpenCoreTimer(GetSystemClock() / 2000);     // core timer is at 1/2 system clock
+        OpenCoreTimer(GetSystemClock() / 2000); // core timer is at 1/2 system clock
         INTRestoreInterrupts(int_status);
 
         mCTClearIntFlag();
 
         while(!mCTGetIntFlag());
-
     }
 
     mCTClearIntFlag();
 }
+
 #else
-#define DELAY_1MS 16000/5  // for 16MIPS
-void  DelayMs(WORD time){
-unsigned delay;
-	while(time--)
-		for(delay=0; delay<DELAY_1MS; delay++);	
+    #define DELAY_1MS   16000 / 5               // for 16MIPS
+
+/* */
+void DelayMs(WORD time)
+{
+    unsigned    delay;
+    while(time--)
+        for(delay = 0; delay < DELAY_1MS; delay++);
 }
+
 #endif
 
 /*********************************************************************
@@ -117,81 +125,84 @@ unsigned delay;
 * Note: none
 *
 ********************************************************************/
-void ResetDevice(void){
+void ResetDevice(void)
+{
 
-    // Disable LCD 
+    // Disable LCD
     CS_LAT_BIT = 1;
-	CS_TRIS_BIT = 0;
+    CS_TRIS_BIT = 0;
 
     // Enable register select line
     RS_LAT_BIT = 1;
     RS_TRIS_BIT = 0;
-       
+
     // Hold in reset
     RST_LAT_BIT = 0;
     RST_TRIS_BIT = 0;
-    
-    // PMP setup 
-    PMMODE=0; PMCON=0; PMAEN=0;
-    PMMODEbits.MODE  = 2;  // Master 2
+
+    // PMP setup
+    PMMODE = 0;
+    PMCON = 0;
+    PMAEN = 0;
+    PMMODEbits.MODE = 2;    // Master 2
     PMMODEbits.WAITB = 0;
-#ifdef __PIC32MX
+    #ifdef __PIC32MX
     PMMODEbits.WAITM = 13;
-#else
-	PMMODEbits.WAITM = 2;
-#endif
+    #else
+    PMMODEbits.WAITM = 2;
+    #endif
     PMMODEbits.WAITE = 0;
-    PMCONbits.CSF    = 0;
-    PMCONbits.PTRDEN = 1;    
+    PMCONbits.CSF = 0;
+    PMCONbits.PTRDEN = 1;
     PMCONbits.PTWREN = 1;
-    PMCONbits.PMPEN  = 1; 
+    PMCONbits.PMPEN = 1;
 
     // Relese from reset
     RST_LAT_BIT = 1;
 
     DelayMs(20);
     CS_LAT_BIT = 0;
-    WriteCmd( EXTIN   ); //Ext = 0
-    WriteCmd( SLPOUT  ); //Sleep Out
-    WriteCmd( OSCON   ); //OSC On
-    WriteCmd( PWRCTRL ); //Power Control Set
-    WriteData( 0x08 ); //Booster Must Be On First
+    WriteCmd(EXTIN);        //Ext = 0
+    WriteCmd(SLPOUT);       //Sleep Out
+    WriteCmd(OSCON);        //OSC On
+    WriteCmd(PWRCTRL);      //Power Control Set
+    WriteData(0x08);        //Booster Must Be On First
     DelayMs(2);
-    WriteCmd( 0x20 ); //Power Control Set
-    WriteData( 0x0B ); //Booster, Regulator, Follower ON
-    WriteCmd( VOLCTRL ); //Electronic Control
-    WriteData( 0x3f ); //Vop=18.0V
-    WriteData( 0x04 );
-    WriteCmd( DISCTRL ); //Display Control
-    WriteData( 0x00 ); //CL=X1
-    WriteData( 0x27 ); //Duty=160
-    WriteData( 0x00 ); //FR Inverse-Set Value
-    WriteCmd( DISNOR   ); // Normal Display
-    WriteCmd( COMSCN   ); //COM Scan Direction
-    WriteData( 0x01 ); // 0->79 159->80
-    WriteCmd( DATSDR   ); //Data Scan Direction
-#if (DISP_ORIENTATION == 180)
-    WriteData( 0x01 ); //Row Reverse 
-    WriteData( 0x00 ); //Derect 3 Pixels Arrangement
-#else
-    WriteData( 0x02 ); //Column Reverse
-    WriteData( 0x01 ); //Inverse 3 Pixels Arrangement
-#endif
-    WriteData( 0x02 ); //3Byte 3Pixel mode
-    WriteCmd( LASET     ); //Line Address Set(lines from 16 to 144 are used)
-    WriteData( 0x10 ); //Start Line=16
-    WriteData( 0x8f ); //End Line =144-1
-    WriteCmd( CASET     ); //Column Address Set
-    WriteData( 0x00 ); //Start Column=0
-    WriteData( 0x54 ); //End Column =84 ((84+1)*3 == 255)
-    WriteCmd( EXTOUT    ); //Ext = 1
-    WriteCmd( ANASET    ); //Analog Circuit Set
-    WriteData( 0x00 ); //OSC Frequency =000 (Default)
-    WriteData( 0x01 ); //Booster Efficiency=01(Default)
-    WriteData( 0x00 ); //Bias=1/14
-    WriteCmd( SWINT     ); //Software Initial
-    WriteCmd( EXTIN     ); //Ext = 0
-    WriteCmd( DISON     ); //Display On
+    WriteCmd(0x20);         //Power Control Set
+    WriteData(0x0B);        //Booster, Regulator, Follower ON
+    WriteCmd(VOLCTRL);      //Electronic Control
+    WriteData(0x3f);        //Vop=18.0V
+    WriteData(0x04);
+    WriteCmd(DISCTRL);      //Display Control
+    WriteData(0x00);        //CL=X1
+    WriteData(0x27);        //Duty=160
+    WriteData(0x00);        //FR Inverse-Set Value
+    WriteCmd(DISNOR);       // Normal Display
+    WriteCmd(COMSCN);       //COM Scan Direction
+    WriteData(0x01);        // 0->79 159->80
+    WriteCmd(DATSDR);       //Data Scan Direction
+    #if (DISP_ORIENTATION == 180)
+    WriteData(0x01);        //Row Reverse
+    WriteData(0x00);        //Derect 3 Pixels Arrangement
+    #else
+    WriteData(0x02);        //Column Reverse
+    WriteData(0x01);        //Inverse 3 Pixels Arrangement
+    #endif
+    WriteData(0x02);        //3Byte 3Pixel mode
+    WriteCmd(LASET);        //Line Address Set(lines from 16 to 144 are used)
+    WriteData(0x10);        //Start Line=16
+    WriteData(0x8f);        //End Line =144-1
+    WriteCmd(CASET);        //Column Address Set
+    WriteData(0x00);        //Start Column=0
+    WriteData(0x54);        //End Column =84 ((84+1)*3 == 255)
+    WriteCmd(EXTOUT);       //Ext = 1
+    WriteCmd(ANASET);       //Analog Circuit Set
+    WriteData(0x00);        //OSC Frequency =000 (Default)
+    WriteData(0x01);        //Booster Efficiency=01(Default)
+    WriteData(0x00);        //Bias=1/14
+    WriteCmd(SWINT);        //Software Initial
+    WriteCmd(EXTIN);        //Ext = 0
+    WriteCmd(DISON);        //Display On
     CS_LAT_BIT = 1;
     DelayMs(100);
 }
@@ -212,11 +223,12 @@ void ResetDevice(void){
 * Note: none
 *
 ********************************************************************/
-void ContrastSet(WORD contrast){
+void ContrastSet(WORD contrast)
+{
     CS_LAT_BIT = 0;
-    WriteCmd( VOLCTRL ); //Electronic Control
-    WriteData( (((WORD_VAL)contrast).v[0]) ); //Vop=18.0V
-    WriteData( (((WORD_VAL)contrast).v[1]) ); //Vop=18.0V
+    WriteCmd(VOLCTRL);                          //Electronic Control
+    WriteData((((WORD_VAL) contrast).v[0]));    //Vop=18.0V
+    WriteData((((WORD_VAL) contrast).v[1]));    //Vop=18.0V
     CS_LAT_BIT = 1;
 }
 
@@ -236,9 +248,10 @@ void ContrastSet(WORD contrast){
 * Note: none
 *
 ********************************************************************/
-void ContrastUp(void){
+void ContrastUp(void)
+{
     CS_LAT_BIT = 0;
-    WriteCmd( VOLUP );
+    WriteCmd(VOLUP);
     CS_LAT_BIT = 1;
 }
 
@@ -258,9 +271,10 @@ void ContrastUp(void){
 * Note: none
 *
 ********************************************************************/
-void ContrastDown(void){
+void ContrastDown(void)
+{
     CS_LAT_BIT = 0;
-    WriteCmd( VOLDOWN ); //Electronic Control
+    WriteCmd(VOLDOWN);  //Electronic Control
     CS_LAT_BIT = 1;
 }
 
@@ -280,9 +294,10 @@ void ContrastDown(void){
 * Note: none
 *
 ********************************************************************/
-void DisplayOn(void){
+void DisplayOn(void)
+{
     CS_LAT_BIT = 0;
-    WriteCmd( DISON );
+    WriteCmd(DISON);
     CS_LAT_BIT = 1;
 }
 
@@ -302,9 +317,10 @@ void DisplayOn(void){
 * Note: none
 *
 ********************************************************************/
-void DisplayOff(void){
+void DisplayOff(void)
+{
     CS_LAT_BIT = 0;
-    WriteCmd( DISOFF );
+    WriteCmd(DISOFF);
     CS_LAT_BIT = 1;
 }
 
@@ -324,9 +340,10 @@ void DisplayOff(void){
 * Note: none
 *
 ********************************************************************/
-void SleepIn(void){
+void SleepIn(void)
+{
     CS_LAT_BIT = 0;
-    WriteCmd( SLPIN );
+    WriteCmd(SLPIN);
     CS_LAT_BIT = 1;
 }
 
@@ -346,9 +363,10 @@ void SleepIn(void){
 * Note: none
 *
 ********************************************************************/
-void WakeUp(void){
+void WakeUp(void)
+{
     CS_LAT_BIT = 0;
-    WriteCmd( SLPOUT );
+    WriteCmd(SLPOUT);
     CS_LAT_BIT = 1;
 }
 
@@ -368,17 +386,18 @@ void WakeUp(void){
 * Note: none
 *
 ********************************************************************/
-void PutPixel(SHORT x, SHORT y){
-BYTE columnPixel[3]; // 3 Pixels in each column
-
-    if(_clipRgn){
-        if(x<_clipLeft)
+void PutPixel(SHORT x, SHORT y)
+{
+    BYTE    columnPixel[3];         // 3 Pixels in each column
+    if(_clipRgn)
+    {
+        if(x < _clipLeft)
             return;
-        if(x>_clipRight)
+        if(x > _clipRight)
             return;
-        if(y<_clipTop)
+        if(y < _clipTop)
             return;
-        if(y>_clipBottom)
+        if(y > _clipBottom)
             return;
     }
 
@@ -386,32 +405,32 @@ BYTE columnPixel[3]; // 3 Pixels in each column
 
     // Set Row and Column Address
     WriteCmd(LASET);
-    WriteData(y+16);
+    WriteData(y + 16);
     WriteData(0x8f);
     WriteCmd(CASET);
-    WriteData(x/3);
+    WriteData(x / 3);
     WriteData(0x54);
 
     // Read Column
-    WriteCmd( RMWIN);
-    columnPixel[0] = ReadData(); // Dummy reading
-	PMPWaitBusy();
-    columnPixel[0] = ReadData(); // Start reading cycle for pixel 0
-    columnPixel[0] = ReadData(); // Start reading cycle for pixel 1
-    columnPixel[1] = ReadData(); // Start reading cycle for pixel 2
-    PMCONbits.PMPEN  = 0;   // Suspend PMP
-    columnPixel[2] = ReadData(); // Read last value
-    PMCONbits.PMPEN  = 1;   // Resume PMP
-    
+    WriteCmd(RMWIN);
+    columnPixel[0] = ReadData();    // Dummy reading
+    PMPWaitBusy();
+    columnPixel[0] = ReadData();    // Start reading cycle for pixel 0
+    columnPixel[0] = ReadData();    // Start reading cycle for pixel 1
+    columnPixel[1] = ReadData();    // Start reading cycle for pixel 2
+    PMCONbits.PMPEN = 0;            // Suspend PMP
+    columnPixel[2] = ReadData();    // Read last value
+    PMCONbits.PMPEN = 1;            // Resume PMP
+
     // Modify pixel
-    columnPixel[x%3] = _color;
+    columnPixel[x % 3] = _color;
 
     // Write Column
     WriteData(columnPixel[0]);
     WriteData(columnPixel[1]);
     WriteData(columnPixel[2]);
 
-    WriteCmd( RMWOUT);
+    WriteCmd(RMWOUT);
     CS_LAT_BIT = 1;
 }
 
@@ -431,33 +450,32 @@ BYTE columnPixel[3]; // 3 Pixels in each column
 * Note: none
 *
 ********************************************************************/
-WORD GetPixel(SHORT x, SHORT y){
-BYTE columnPixel[3]; // 3 Pixels in each column
-
+WORD GetPixel(SHORT x, SHORT y)
+{
+    BYTE    columnPixel[3];         // 3 Pixels in each column
     CS_LAT_BIT = 0;
 
     // Set Row and Column Address
     WriteCmd(LASET);
-    WriteData(y+16);
+    WriteData(y + 16);
     WriteData(0x8f);
     WriteCmd(CASET);
-    WriteData(x/3);
+    WriteData(x / 3);
     WriteData(0x54);
 
     // Read Column
-    WriteCmd( RMWIN);
-    columnPixel[0] = ReadData(); // Start reading cycle for pixel 0
-    columnPixel[0] = ReadData(); // Start reading cycle for pixel 0
-    columnPixel[0] = ReadData(); // Start reading cycle for pixel 1
-    columnPixel[1] = ReadData(); // Start reading cycle for pixel 2
-    PMCONbits.PMPEN  = 0;   // Suspend PMP
-    columnPixel[2] = ReadData(); // Read last value
-    PMCONbits.PMPEN  = 1;   // Resume PMP
-   
-    WriteCmd( RMWOUT);
+    WriteCmd(RMWIN);
+    columnPixel[0] = ReadData();    // Start reading cycle for pixel 0
+    columnPixel[0] = ReadData();    // Start reading cycle for pixel 0
+    columnPixel[0] = ReadData();    // Start reading cycle for pixel 1
+    columnPixel[1] = ReadData();    // Start reading cycle for pixel 2
+    PMCONbits.PMPEN = 0;            // Suspend PMP
+    columnPixel[2] = ReadData();    // Read last value
+    PMCONbits.PMPEN = 1;            // Resume PMP
+    WriteCmd(RMWOUT);
     CS_LAT_BIT = 1;
 
-    return columnPixel[x%3];
+    return (columnPixel[x % 3]);
 }
 
 /*********************************************************************
@@ -476,26 +494,26 @@ BYTE columnPixel[3]; // 3 Pixels in each column
 * Note: none
 *
 ********************************************************************/
-void ClearDevice(void){
-WORD     counter;
+void ClearDevice(void)
+{
+    WORD    counter;
 
     CS_LAT_BIT = 0;
 
     // Whole screen
-    WriteCmd( LASET     ); //Line Address Set(lines from 16 to 144 are used)
-    WriteData( 0x10 ); //Start Line=16
-    WriteData( 0x8f ); //End Line =144-1
-    WriteCmd( CASET     ); //Column Address Set
-    WriteData( 0x00 ); //Start Column=0
-    WriteData( 0x54 ); //End Column =84 ((84+1)*3 == 255)
-
-    WriteCmd( RAMWR );
-    for(counter=0; counter<(WORD)(GetMaxX()+1)*(GetMaxY()+1); counter++){
+    WriteCmd(LASET);    //Line Address Set(lines from 16 to 144 are used)
+    WriteData(0x10);    //Start Line=16
+    WriteData(0x8f);    //End Line =144-1
+    WriteCmd(CASET);    //Column Address Set
+    WriteData(0x00);    //Start Column=0
+    WriteData(0x54);    //End Column =84 ((84+1)*3 == 255)
+    WriteCmd(RAMWR);
+    for(counter = 0; counter < (WORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
+    {
         WriteData(_color);
     }
 
     CS_LAT_BIT = 1;
-
 }
 
 /*********************************************************************
@@ -520,72 +538,76 @@ WORD     counter;
 * Note: image must be located in flash
 *
 ********************************************************************/
-WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-FLASH_BYTE* flashAddress;
-BYTE colorDepth;
-BYTE colorTemp;
+WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    FLASH_BYTE  *flashAddress;
+    BYTE        colorDepth;
+    BYTE        colorTemp;
 
     #ifndef USE_NONBLOCKING_CONFIG
-        while(IsDeviceBusy() != 0); /* Ready */
+    while(IsDeviceBusy() != 0);
+
+    /* Ready */
     #else
-        if(IsDeviceBusy() != 0) return 0;
+    if(IsDeviceBusy() != 0)
+        return (0);
     #endif
 
     // Save current color
     colorTemp = _color;
 
-    switch(*((SHORT*)bitmap))
+    switch(*((SHORT *)bitmap))
     {
-#ifdef USE_BITMAP_FLASH
+            #ifdef USE_BITMAP_FLASH
+
         case FLASH:
+
             // Image address
-            flashAddress = ((BITMAP_FLASH*)bitmap)->address;
+            flashAddress = ((BITMAP_FLASH *)bitmap)->address;
+
             // Read color depth
-            colorDepth = *(flashAddress+1);
+            colorDepth = *(flashAddress + 1);
+
             // Draw picture
-            switch(colorDepth){
-                case 1:
-                    PutImage1BPP(left, top, flashAddress, stretch);
-                    break;
-                case 4:
-                    PutImage4BPP(left, top, flashAddress, stretch);
-                    break;
-                case 8:
-                    PutImage8BPP(left, top, flashAddress, stretch);
-                    break;
+            switch(colorDepth)
+            {
+                case 1:     PutImage1BPP(left, top, flashAddress, stretch); break;
+                case 4:     PutImage4BPP(left, top, flashAddress, stretch); break;
+                case 8:     PutImage8BPP(left, top, flashAddress, stretch); break;
             }
+
             break;
-#endif
-#ifdef USE_BITMAP_EXTERNAL
+            #endif
+            #ifdef USE_BITMAP_EXTERNAL
+
         case EXTERNAL:
+
             // Get color depth
             ExternalMemoryCallback(bitmap, 1, 1, &colorDepth);
+
             // Draw picture
-            switch(colorDepth){
-                case 1:
-                    PutImage1BPPExt(left, top, bitmap, stretch);
-                    break;
-                case 4:
-                    PutImage4BPPExt(left, top, bitmap, stretch);
-                    break;
-                case 8:
-                    PutImage8BPPExt(left, top, bitmap, stretch);
-                    break;
-                default:
-                    break;
+            switch(colorDepth)
+            {
+                case 1:     PutImage1BPPExt(left, top, bitmap, stretch); break;
+                case 4:     PutImage4BPPExt(left, top, bitmap, stretch); break;
+                case 8:     PutImage8BPPExt(left, top, bitmap, stretch); break;
+                default:    break;
             }
+
             break;
-#endif
+            #endif
+
         default:
             break;
     }
 
     // Restore current color
     _color = colorTemp;
-    return 1;
+    return (1);
 }
 
 #ifdef USE_BITMAP_FLASH
+
 /*********************************************************************
 * Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
 *
@@ -604,65 +626,76 @@ BYTE colorTemp;
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch){
-register FLASH_BYTE* flashAddress;
-register FLASH_BYTE* tempFlashAddress;
-BYTE temp;
-WORD sizeX, sizeY;
-WORD x,y;
-WORD cx,cy;
-BYTE stretchX,stretchY;
-BYTE palette[2];
-BYTE mask;
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    BYTE                temp;
+    WORD                sizeX, sizeY;
+    WORD                x, y;
+    WORD                cx, cy;
+    BYTE                stretchX, stretchY;
+    BYTE                palette[2];
+    BYTE                mask;
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
 
     // Read image size
-    sizeY = *((FLASH_WORD*)flashAddress);
+    sizeY = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    sizeX = *((FLASH_WORD*)flashAddress);
+    sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    palette[0] = (BYTE)*(flashAddress+1);
+    palette[0] = (BYTE) * (flashAddress + 1);
     flashAddress += 2;
-    palette[1] = (BYTE)*(flashAddress+1);
+    palette[1] = (BYTE) * (flashAddress + 1);
     flashAddress += 2;
 
     CS_LAT_BIT = 0;
     cy = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
         tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             flashAddress = tempFlashAddress;
             cx = left;
             mask = 0;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
 
                 // Read 8 pixels from flash
-                if(mask == 0){
+                if(mask == 0)
+                {
                     temp = *flashAddress;
                     flashAddress++;
                     mask = 0x80;
                 }
-                
+
                 // Set color
-                if(mask&temp){
+                if(mask & temp)
+                {
                     SetColor(palette[1]);
-                }else{
+                }
+                else
+                {
                     SetColor(palette[0]);
                 }
 
                 // Write pixel to screen
-                for(stretchX=0; stretchX<stretch; stretchX++){
-                    PutPixel(cx++,cy);
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(cx++, cy);
                 }
 
                 // Shift to the next pixel
                 mask >>= 1;
-           }
-           cy++;
+            }
+
+            cy++;
         }
     }
+
     CS_LAT_BIT = 1;
 }
 
@@ -683,60 +716,73 @@ BYTE mask;
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch){
-register FLASH_BYTE* flashAddress;
-register FLASH_BYTE* tempFlashAddress;
-WORD sizeX, sizeY;
-WORD x,y;
-WORD cx, cy;
-BYTE temp;
-register BYTE stretchX,stretchY;
-BYTE palette[16];
-WORD counter;
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    WORD                sizeX, sizeY;
+    WORD                x, y;
+    WORD                cx, cy;
+    BYTE                temp;
+    register BYTE       stretchX, stretchY;
+    BYTE                palette[16];
+    WORD                counter;
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
 
     // Read image size
-    sizeY = *((FLASH_WORD*)flashAddress);
+    sizeY = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    sizeX = *((FLASH_WORD*)flashAddress);
+    sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
     // Read pallete
-    for(counter=0;counter<16;counter++){
-        palette[counter] = (BYTE)*(flashAddress+1);
+    for(counter = 0; counter < 16; counter++)
+    {
+        palette[counter] = (BYTE) * (flashAddress + 1);
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;     
+    CS_LAT_BIT = 0;
     cy = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
         tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             flashAddress = tempFlashAddress;
             cx = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
+
                 // Read 2 pixels from flash
-                if(x&0x0001){
+                if(x & 0x0001)
+                {
+
                     // second pixel in byte
-                    SetColor(palette[temp>>4]);
-                }else{
+                    SetColor(palette[temp >> 4]);
+                }
+                else
+                {
                     temp = *flashAddress;
                     flashAddress++;
+
                     // first pixel in byte
-                    SetColor(palette[temp&0x0f]);
+                    SetColor(palette[temp & 0x0f]);
                 }
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-                    PutPixel(cx++,cy);
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(cx++, cy);
                 }
-
             }
+
             cy++;
         }
     }
+
     CS_LAT_BIT = 1;
 }
 
@@ -757,40 +803,46 @@ WORD counter;
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch){
-register FLASH_BYTE* flashAddress;
-register FLASH_BYTE* tempFlashAddress;
-WORD sizeX, sizeY;
-WORD x,y;
-WORD cx, cy;
-BYTE temp;
-BYTE stretchX, stretchY;
-BYTE palette[256];
-WORD counter;
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    WORD                sizeX, sizeY;
+    WORD                x, y;
+    WORD                cx, cy;
+    BYTE                temp;
+    BYTE                stretchX, stretchY;
+    BYTE                palette[256];
+    WORD                counter;
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
 
     // Read image size
-    sizeY = *((FLASH_WORD*)flashAddress);
+    sizeY = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    sizeX = *((FLASH_WORD*)flashAddress);
+    sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
     // Read pallete
-    for(counter=0;counter<256;counter++){
-        palette[counter] = (BYTE)*(flashAddress+1);
+    for(counter = 0; counter < 256; counter++)
+    {
+        palette[counter] = (BYTE) * (flashAddress + 1);
         flashAddress += 2;
     }
 
     CS_LAT_BIT = 0;
     cy = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
         tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             flashAddress = tempFlashAddress;
             cx = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
+
                 // Read pixels from flash
                 temp = *flashAddress;
                 flashAddress++;
@@ -798,19 +850,23 @@ WORD counter;
                 // Set color
                 SetColor(palette[temp]);
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-                    PutPixel(cx++,cy);
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(cx++, cy);
                 }
             }
+
             cy++;
         }
     }
+
     CS_LAT_BIT = 1;
 }
-#endif
 
+#endif
 #ifdef USE_BITMAP_EXTERNAL
+
 /*********************************************************************
 * Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
@@ -828,36 +884,37 @@ WORD counter;
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-register DWORD      memOffset;
-BITMAP_HEADER       bmp;
-WORD                pallete[2];
-BYTE                lineBuffer[((GetMaxX()+1)/8)+1];
-BYTE*               pData; 
-SHORT               byteWidth;
+void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            pallete[2];
+    BYTE            lineBuffer[((GetMaxX() + 1) / 8) + 1];
+    BYTE            *pData;
+    SHORT           byteWidth;
 
-BYTE                temp;
-BYTE                mask;
-WORD                sizeX, sizeY;
-WORD                x,y;
-WORD                cx,cy;
-BYTE                stretchX, stretchY;
+    BYTE            temp;
+    BYTE            mask;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            cx, cy;
+    BYTE            stretchX, stretchY;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (2 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2*sizeof(WORD), palette);
+    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), palette);
 
     palette[0] <<= 3;
     palette[1] <<= 3;
 
     // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 2*sizeof(WORD);
+    memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
 
     // Line width in bytes
-    byteWidth = bmp.width>>3;
-    if(bmp.width&0x0007)
+    byteWidth = bmp.width >> 3;
+    if(bmp.width & 0x0007)
         byteWidth++;
 
     // Get size
@@ -865,41 +922,51 @@ BYTE                stretchX, stretchY;
     sizeY = bmp.height;
 
     cy = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
         CS_LAT_BIT = 0;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             pData = lineBuffer;
             cx = left;
             mask = 0;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
 
                 // Read 8 pixels from flash
-                if(mask == 0){
+                if(mask == 0)
+                {
                     temp = *pData++;
                     mask = 0x80;
                 }
-                
+
                 // Set color
-                if(mask&temp){
+                if(mask & temp)
+                {
                     SetColor(palette[1]);
-                }else{
+                }
+                else
+                {
                     SetColor(palette[0]);
                 }
 
                 // Write pixel to screen
-                for(stretchX=0; stretchX<stretch; stretchX++){
-                    PutPixel(cx++,cy);
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(cx++, cy);
                 }
 
                 // Shift to the next pixel
                 mask >>= 1;
-           }
-           cy++;
+            }
+
+            cy++;
         }
+
         CS_LAT_BIT = 1;
     }
 }
@@ -921,36 +988,38 @@ BYTE                stretchX, stretchY;
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-register DWORD      memOffset;
-BITMAP_HEADER       bmp;
-WORD                palette[16];
-BYTE                lineBuffer[((GetMaxX()+1)/2)+1];
-BYTE*               pData; 
-SHORT               byteWidth;
+void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            palette[16];
+    BYTE            lineBuffer[((GetMaxX() + 1) / 2) + 1];
+    BYTE            *pData;
+    SHORT           byteWidth;
 
-BYTE                temp;
-WORD                sizeX, sizeY;
-WORD                x,y;
-WORD                cx,cy;
-BYTE                stretchX, stretchY;
+    BYTE            temp;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            cx, cy;
+    BYTE            stretchX, stretchY;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (16 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16*sizeof(WORD), palette);
+    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), palette);
 
-    for(temp=0; temp<16; temp++){
+    for(temp = 0; temp < 16; temp++)
+    {
         palette[temp] <<= 3;
     }
 
     // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 16*sizeof(WORD);
+    memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
 
     // Line width in bytes
-    byteWidth = bmp.width>>1;
-    if(bmp.width&0x0001)
+    byteWidth = bmp.width >> 1;
+    if(bmp.width & 0x0001)
         byteWidth++;
 
     // Get size
@@ -958,36 +1027,46 @@ BYTE                stretchX, stretchY;
     sizeY = bmp.height;
 
     cy = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
         CS_LAT_BIT = 0;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
-
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             pData = lineBuffer;
             cx = left;
 
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
 
                 // Read 2 pixels from flash
-                if(x&0x0001){
+                if(x & 0x0001)
+                {
+
                     // second pixel in byte
-                    SetColor(palette[temp>>4]);
-                }else{
+                    SetColor(palette[temp >> 4]);
+                }
+                else
+                {
                     temp = *pData++;
+
                     // first pixel in byte
-                    SetColor(palette[temp&0x0f]);
+                    SetColor(palette[temp & 0x0f]);
                 }
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-                    PutPixel(cx++,cy);
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(cx++, cy);
                 }
-           }
-           cy++;
+            }
+
+            cy++;
         }
+
         CS_LAT_BIT = 1;
     }
 }
@@ -1009,61 +1088,68 @@ BYTE                stretchX, stretchY;
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-register DWORD      memOffset;
-BITMAP_HEADER       bmp;
-WORD                palette[256];
-BYTE                lineBuffer[(GetMaxX()+1)];
-BYTE*               pData; 
+void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            palette[256];
+    BYTE            lineBuffer[(GetMaxX() + 1)];
+    BYTE            *pData;
 
-BYTE                temp;
-WORD                sizeX, sizeY;
-WORD                x,y;
-WORD                cx,cy;
-BYTE                stretchX, stretchY;
+    BYTE            temp;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            cx, cy;
+    BYTE            stretchX, stretchY;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (256 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256*sizeof(WORD), palette);
+    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), palette);
 
-    for(temp=0; temp<32; temp++){
+    for(temp = 0; temp < 32; temp++)
+    {
         palette[temp] <<= 3;
     }
 
     // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 256*sizeof(WORD);
+    memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
 
     // Get size
     sizeX = bmp.width;
     sizeY = bmp.height;
 
     cy = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
         CS_LAT_BIT = 0;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
-
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             pData = lineBuffer;
             cx = left;
 
-            for(x=0; x<sizeX; x++){
-
+            for(x = 0; x < sizeX; x++)
+            {
                 temp = *pData++;
-                SetColor(palette[temp]);                    
+                SetColor(palette[temp]);
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-                    PutPixel(cx++,cy);
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(cx++, cy);
                 }
-           }
-           cy++;
+            }
+
+            cy++;
         }
+
         CS_LAT_BIT = 1;
     }
 }
+
 #endif

@@ -40,12 +40,13 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  1.0   11/19/2004   Initial release
-  2.1   02/26/2007   Updated for simplicity and to use common
-                     coding style
-  2.3   09/15/2008   Broke out each hardware platform into its own
-                     "HardwareProfile - xxx.h" file
+  Rev   Description
+  1.0   Initial release
+  2.1   Updated for simplicity and to use common
+        coding style
+  2.3   Broke out each hardware platform into its own
+        "HardwareProfile - xxx.h" file
+  2.6   Added Support for PIC32MX795F512L
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_H
@@ -61,6 +62,13 @@
             #elif defined(PIC32_USB_STARTER_KIT)
                 #include "HardwareProfile - PIC32 USB Starter Kit.h"
             #endif
+        #elif defined(__32MX795F512L__)
+            #if defined(PIC32MX795F512L_PIM)
+                #include "HardwareProfile - PIC32MX795F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                //PIC32 USB Starter Kit II
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
         #endif
     #endif
 
@@ -71,6 +79,8 @@
             #include "HardwareProfile - PIC24F Starter Kit.h"
         #elif defined(__PIC24FJ64GB004__)
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+        #elif defined(__PIC24FJ256DA210__)
+            #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
         #endif
     #endif
 

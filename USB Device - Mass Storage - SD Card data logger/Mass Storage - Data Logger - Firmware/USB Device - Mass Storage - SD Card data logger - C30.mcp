@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=./Objects\USB Mass Storage - SD Card data logger - C30
 dir_sin=
-dir_inc=..\..\Microchip\Include;..\..\Microchip\Include\PIC18 salloc;..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware
+dir_inc=.;..\..\Microchip\Include;..\..\Microchip\Include\PIC18 salloc;..\..\USB Device - Mass Storage - SD Card data logger\Mass Storage - Data Logger - Firmware
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]

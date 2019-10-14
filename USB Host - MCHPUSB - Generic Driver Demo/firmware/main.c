@@ -155,7 +155,7 @@ KO          03-31-2008  First release
 typedef union
 {
     BYTE    byte;
-    struct _BIT
+    struct
     {
         BYTE    b0 : 1;
         BYTE    b1 : 1;

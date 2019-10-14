@@ -42,6 +42,9 @@
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
  *
+ * Author               Date		Comment
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Howard Schlunder		10/03/06	Original, copied from Compiler.h
  ********************************************************************/
 #ifndef __HARDWARE_PROFILE_H
 #define __HARDWARE_PROFILE_H
@@ -218,6 +221,7 @@
 
 #else
 
+#define SST25_CS_LAT        LATDbits.LATD1
 #define SST25_CS_TRIS       TRISDbits.TRISD1
 #define SST25_CS_PORT       PORTDbits.RD1
 //#define SST25_CS_TRIS       TRISDbits.TRISD11
@@ -328,7 +332,7 @@
     #define LAT_XPOS        LATBbits.LATB11
     #define TRIS_XPOS       TRISBbits.TRISB11
 
-    #if defined(__32MX460F512L__)
+    #if defined(__32MX460F512L__) || defined(__32MX795F512L__)
         //If this is the USB PIM
         #define TRIS_XNEG       TRISGbits.TRISG15
         #define LAT_XNEG        LATGbits.LATG15
@@ -390,11 +394,12 @@
 
 #elif (GRAPHICS_PICTAIL_VERSION == 3)
 
-//	#define SST25_CS_TRIS       TRISDbits.TRISD1
-//	#define SST25_CS_PORT       PORTDbits.RD1
-//	#define SST25_SCK_TRIS      TRISGbits.TRISG6
-//	#define SST25_SDO_TRIS      TRISGbits.TRISG8
-//	#define SST25_SDI_TRIS      TRISGbits.TRISG7
+	#define SST25_CS_LAT        LATDbits.LATD1
+	#define SST25_CS_TRIS       TRISDbits.TRISD1
+	#define SST25_CS_PORT       PORTDbits.RD1
+	#define SST25_SCK_TRIS      TRISGbits.TRISG6
+	#define SST25_SDO_TRIS      TRISGbits.TRISG8
+	#define SST25_SDI_TRIS      TRISGbits.TRISG7
 
 #endif // GRAPHICS_PICTAIL_VERSION
 

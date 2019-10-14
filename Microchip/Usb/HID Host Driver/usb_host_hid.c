@@ -67,7 +67,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
 Author          Date    Comments
 --------------------------------------------------------------------------------
-ADG          9-Apr-2008 First release
+ADG          9-Apr-2008  First release
+ADG          14-Sep-2009 Corrected heap allocation issue
 *******************************************************************************/
 #include <stdlib.h>
 #include <string.h>
@@ -2002,6 +2003,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                                 i += descriptor[i];
                             }
 
+                            i -= temp_i;
 //                                if ((endpointIN != 0) || (endpointOUT != 0))
                             // Some devices use EP0 as the OUT endpoint
                             if (endpointIN != 0)
@@ -2024,7 +2026,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 //                                    USBHostSetNAKTimeout( address, endpointIN,  0, USB_NUM_INTERRUPT_NAKS );
 //                                    USBHostSetNAKTimeout( address, endpointOUT, 0, USB_NUM_INTERRUPT_NAKS );
                             }
-                            i -= temp_i;
+//                            i -= temp_i;
 
                         }
                     }
@@ -2147,7 +2149,7 @@ void _USBHostHID_FreeRptDecriptorDataMem(BYTE deviceAddress)
     /* free memory allocated to HID parser */
         free(parsedDataMem); /* will be indexed once multiple  device support is added */
         parsedDataMem = NULL;
-//        free(deviceInfoHID[i].rptDescriptor);
+        free(deviceInfoHID[i].rptDescriptor);
         deviceInfoHID[i].rptDescriptor = NULL;
 
     /* free memory allocated to report descriptor in deviceInfoHID */

@@ -43,42 +43,44 @@
 #define USE_PRIMITIVE_BEVEL
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch);
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch);
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch);
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch);
+void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 
-void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
-void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
-void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
-void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch);
+void    PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+void    PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 
 // Current line type
-SHORT _lineType;
+SHORT   _lineType;
 
 // Current line thickness
-BYTE _lineThickness;
+BYTE    _lineThickness;
 
 // Font orientation
-BYTE _fontOrientation;
+BYTE    _fontOrientation;
 
 // Current cursor x-coordinates
-SHORT _cursorX;
+SHORT   _cursorX;
+
 // Current cursor y-coordinates
-SHORT _cursorY;
+SHORT   _cursorY;
 
 // Pointer to the current font
-void *_font;
+void    *_font;
 
 #ifdef USE_PALETTE
- void *_palette;
+void    *_palette;
 #endif
 
 // First and last characters in the font
-WORD   _fontFirstChar;					// First character in the font table.
-WORD   _fontLastChar;					// Last character in the font table.
+WORD    _fontFirstChar; // First character in the font table.
+WORD    _fontLastChar;  // Last character in the font table.
+
 // Installed font height
-SHORT  _fontHeight;
+SHORT   _fontHeight;
 
 /*********************************************************************
 * Function:  void InitGraph(void)
@@ -101,27 +103,37 @@ SHORT  _fontHeight;
 * Note: none
 *
 ********************************************************************/
-void InitGraph(void){
+void InitGraph(void)
+{
 
     // Current line type
     SetLineType(SOLID_LINE);
+
     // Current line thickness
     SetLineThickness(NORMAL_LINE);
+
     // Current cursor coordinates to 0,0
-    MoveTo(0,0);
+    MoveTo(0, 0);
+
     // Reset device
     ResetDevice();
+
     // Set active and visual pages
     SetActivePage(0);
     SetVisualPage(0);
+
     // Set color to BLACK
     SetColor(BLACK);
+
     // Clear screen
     ClearDevice();
+
     // Set color to WHITE
     SetColor(WHITE);
-    // Disable clipping 
+
+    // Disable clipping
     SetClip(CLIP_DISABLE);
+
     // Set font orientation
     SetFontOrientation(ORIENT_HOR);
 }
@@ -164,380 +176,534 @@ void InitGraph(void){
 ********************************************************************/
 WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant)
 {
-// this is using a variant of the Midpoint (Bresenham's) Algorithm
 
-#ifndef USE_NONBLOCKING_CONFIG
+    // this is using a variant of the Midpoint (Bresenham's) Algorithm
+    #ifndef USE_NONBLOCKING_CONFIG
 
-	SHORT y1Limit, y2Limit;
-	SHORT x1, x2, y1, y2;
-	SHORT err1, err2;
-	SHORT x1Cur, y1Cur, y1New;
-	SHORT x2Cur, y2Cur, y2New;
-	DWORD_VAL  temp;	
+    SHORT       y1Limit, y2Limit;
+    SHORT       x1, x2, y1, y2;
+    SHORT       err1, err2;
+    SHORT       x1Cur, y1Cur, y1New;
+    SHORT       x2Cur, y2Cur, y2New;
+    DWORD_VAL   temp;
 
-	temp.Val = SIN45*r1;
-	y1Limit  = temp.w[1];
-	temp.Val = SIN45*r2;
-	y2Limit  = temp.w[1];
+    temp.Val = SIN45 * r1;
+    y1Limit = temp.w[1];
+    temp.Val = SIN45 * r2;
+    y2Limit = temp.w[1];
 
-	temp.Val = (DWORD)(ONEP25 -((LONG)r1<<16));
-	err1  = (SHORT)(temp.w[1]); 
+    temp.Val = (DWORD) (ONEP25 - ((LONG) r1 << 16));
+    err1 = (SHORT) (temp.w[1]);
 
-	temp.Val = (DWORD)(ONEP25 -((LONG)r2<<16));
-	err2  = (SHORT)(temp.w[1]); 
+    temp.Val = (DWORD) (ONEP25 - ((LONG) r2 << 16));
+    err2 = (SHORT) (temp.w[1]);
 
-	x1 = r1; x2 = r2; y1 = 0; y2 = 0;
+    x1 = r1;
+    x2 = r2;
+    y1 = 0;
+    y2 = 0;
 
-	x1Cur = x1; y1Cur = y1; y1New = y1;
-	x2Cur = x2; y2Cur = y2; y2New = y2;
+    x1Cur = x1;
+    y1Cur = y1;
+    y1New = y1;
+    x2Cur = x2;
+    y2Cur = y2;
+    y2New = y2;
 
-	while(y2<=y2Limit) {			// just watch for y2 limit since outer circle
-									// will have greater value.
-		// Drawing of the rounded panel is done only when there is a change in the
-		// x direction. Bars are drawn to be efficient.
-			
-		// detect changes in the x position. Every change will mean a bar will be drawn 
-		// to cover the previous area. y1New records the last position of y before the 
-		// change in x position.
+    while(y2 <= y2Limit)
+    {   // just watch for y2 limit since outer circle
+        // will have greater value.
+        // Drawing of the rounded panel is done only when there is a change in the
+        // x direction. Bars are drawn to be efficient.
+        // detect changes in the x position. Every change will mean a bar will be drawn
+        // to cover the previous area. y1New records the last position of y before the
+        // change in x position.
+        // y1New & y2New records the last y positions, must remember this to
+        // draw the correct bars (non-overlapping).
+        y1New = y1;
+        y2New = y2;
 
+        if(y1 <= y1Limit)
+        {
+            if(err1 > 0)
+            {
+                x1--;
+                err1 += 5;
+                err1 += (y1 - x1) << 1;
+            }
+            else
+            {
+                err1 += 3;
+                err1 += y1 << 1;
+            }
 
-		// y1New & y2New records the last y positions, must remember this to
-		// draw the correct bars (non-overlapping).
-		y1New = y1;	y2New = y2;		
+            y1++;
+        }
+        else
+        {
+            y1++;
+            if(x1 < y1)
+                x1 = y1;
+        }
 
-		if (y1 <= y1Limit) {
-	 		if(err1 > 0) {
-    			x1--;
-    			err1 += 5;
-    			err1 += (y1-x1)<<1;
-   			} else {
-    			err1 += 3;
-    			err1 += y1<<1;
-    		}
-    		y1++;
-		} else {
-			y1++;
-			if (x1 < y1)	
-				x1 = y1;
-		}
-	
-	 	if(err2 > 0) {
-    		x2--;
-    		err2 += 5;
-    		err2 += (y2-x2)<<1;
-   		} else {
-    		err2 += 3;
-    		err2 += y2<<1;
-    	}
-		y2++;	
+        if(err2 > 0)
+        {
+            x2--;
+            err2 += 5;
+            err2 += (y2 - x2) << 1;
+        }
+        else
+        {
+            err2 += 3;
+            err2 += y2 << 1;
+        }
 
+        y2++;
 
-		if ((x1Cur != x1) || (x2Cur != x2)) {
-			if (octant&0x01) {
-				Bar(xR+y2Cur, yT-x2Cur, xR+y1New, yT-x1Cur);	// 1st octant
-			}
-			if (octant&0x02) {
-				Bar(xR+x1Cur, yT-y1New, xR+x2Cur, yT-y2Cur); 	// 2nd octant
-			}
-			if (octant&0x04) {
-				Bar(xR+x1Cur, yB+y1Cur, xR+x2Cur, yB+y2New); 	// 3rd octant
-			}
-			if (octant&0x08) {
-				Bar(xR+y1Cur, yB+x1Cur, xR+y2New, yB+x2Cur);	// 4th octant
-			}
-			if (octant&0x10) {
-				Bar(xL-y1New, yB+x1Cur, xL-y2Cur, yB+x2Cur);	// 5th octant
-			}
-			if (octant&0x20) {
-				Bar(xL-x2Cur, yB+y2Cur, xL-x1Cur, yB+y1New);	// 6th octant
-			}
-			if (octant&0x40) {
-				Bar(xL-x2Cur, yT-y2New, xL-x1Cur, yT-y1Cur); 	// 7th octant
-			}
-			if (octant&0x80) {
-				Bar(xL-y2New, yT-x2Cur, xL-y1Cur, yT-x1Cur);  	// 8th octant
-	   		}
-			// update current values
-			x1Cur = x1;	y1Cur = y1; x2Cur = x2;	y2Cur = y2;
+        if((x1Cur != x1) || (x2Cur != x2))
+        {
+            if(octant & 0x01)
+            {
+                Bar(xR + y2Cur, yT - x2Cur, xR + y1New, yT - x1Cur);    // 1st octant
+            }
 
-		} 
-					
-    } // end of while loop
+            if(octant & 0x02)
+            {
+                Bar(xR + x1Cur, yT - y1New, xR + x2Cur, yT - y2Cur);    // 2nd octant
+            }
 
-	// draw the width and height     
-   	if ((xR-xL) || (yB-yT)) {
-		// draw right
-		if (octant&0x02) {
-			Bar(xR+r1,yT,xR+r2,(yB+yT)>>1); 
-		}
-		if (octant&0x04) {
-			Bar(xR+r1,((yB+yT)>>1), xR+r2, yB); 
-		}
-		// draw bottom
-		if (octant&0x10) {
-			Bar(xL, yB+r1, ((xR+xL)>>1),yB+r2);
-		}
-		if (octant&0x08) {
-			Bar(((xR+xL)>>1),yB+r1,xR,yB+r2);
-		}
-	
-		if(xR-xL) {
-   			// draw top
-			if (octant&0x80) {
-				Bar(xL, yT-r2, ((xR+xL)>>1),yT-r1);
-			}
-			if (octant&0x01) {
-				Bar(((xR+xL)>>1),yT-r2,xR,yT-r1);
-			}
-   		}
-	   	if (yT-yB) {
-	   		// draw left
-			if (octant&0x40) {
-				Bar(xL-r2,yT,xL-r1,((yB+yT)>>1)); 			
-			}
-			if (octant&0x20) {
-				Bar(xL-r2,((yB+yT)>>1),xL-r1,yB); 			
-			}
-	   	}
-	} 
-    
-    return 1;
-#else
+            if(octant & 0x04)
+            {
+                Bar(xR + x1Cur, yB + y1Cur, xR + x2Cur, yB + y2New);    // 3rd octant
+            }
 
-typedef enum {
-BEGIN,
-QUAD11, BARRIGHT1,
-QUAD12, BARRIGHT2,
-QUAD21, BARLEFT1,
-QUAD22, BARLEFT2,
-QUAD31, BARTOP1,
-QUAD32, BARTOP2,
-QUAD41, BARBOTTOM1,
-QUAD42, BARBOTTOM2,
-CHECK,  
-} OCTANTARC_STATES;
+            if(octant & 0x08)
+            {
+                Bar(xR + y1Cur, yB + x1Cur, xR + y2New, yB + x2Cur);    // 4th octant
+            }
 
-	DWORD_VAL  temp;	
-//	LONG temp1;
-	static SHORT y1Limit, y2Limit;
-	static SHORT x1, x2, y1, y2;
-	static SHORT err1, err2;
-	static SHORT x1Cur, y1Cur, y1New;
-	static SHORT x2Cur, y2Cur, y2New;
-	static OCTANTARC_STATES state = BEGIN;
+            if(octant & 0x10)
+            {
+                Bar(xL - y1New, yB + x1Cur, xL - y2Cur, yB + x2Cur);    // 5th octant
+            }
 
-	while(1){
-	    if(IsDeviceBusy())
-	        return 0;
-	    switch(state){
-	        case BEGIN:     
-	        
+            if(octant & 0x20)
+            {
+                Bar(xL - x2Cur, yB + y2Cur, xL - x1Cur, yB + y1New);    // 6th octant
+            }
 
-				temp.Val = SIN45*r1;
-				y1Limit  = temp.w[1];
-				temp.Val = SIN45*r2;
-				y2Limit  = temp.w[1];
+            if(octant & 0x40)
+            {
+                Bar(xL - x2Cur, yT - y2New, xL - x1Cur, yT - y1Cur);    // 7th octant
+            }
 
-				temp.Val = (DWORD)(ONEP25 -((LONG)r1<<16));
-				err1  = (SHORT)(temp.w[1]); 
+            if(octant & 0x80)
+            {
+                Bar(xL - y2New, yT - x2Cur, xL - y1Cur, yT - x1Cur);    // 8th octant
+            }
 
-				temp.Val = (DWORD)(ONEP25 -((LONG)r2<<16));
-				err2  = (SHORT)(temp.w[1]); 
+            // update current values
+            x1Cur = x1;
+            y1Cur = y1;
+            x2Cur = x2;
+            y2Cur = y2;
+        }
+    }                           // end of while loop
 
-				x1 = r1; x2 = r2; y1 = 0; y2 = 0;
+    // draw the width and height
+    if((xR - xL) || (yB - yT))
+    {
 
-				x1Cur = x1; y1Cur = y1; y1New = y1;
-				x2Cur = x2; y2Cur = y2; y2New = y2;
-	            state = CHECK;
+        // draw right
+        if(octant & 0x02)
+        {
+            Bar(xR + r1, yT, xR + r2, (yB + yT) >> 1);
+        }
 
-	        case CHECK:
-arc_check_state:	        
-				if (y2 > y2Limit) {
-	                state = BARRIGHT1;
-	                goto arc_draw_width_height_state;
-	            }
-				// y1New & y2New records the last y positions
-				y1New = y1;	y2New = y2;		
+        if(octant & 0x04)
+        {
+            Bar(xR + r1, ((yB + yT) >> 1), xR + r2, yB);
+        }
 
-				if (y1 <= y1Limit) {
-			 		if(err1 > 0) {
-		    			x1--;
-		    			err1 += 5;
-		    			err1 += (y1-x1)<<1;
-		   			} else {
-		    			err1 += 3;
-		    			err1 += y1<<1;
-		    		}
-		    		y1++;
-				} else {
-					y1++;
-					if (x1 < y1)	
-						x1 = y1;
-				}
+        // draw bottom
+        if(octant & 0x10)
+        {
+            Bar(xL, yB + r1, ((xR + xL) >> 1), yB + r2);
+        }
 
-			 	if(err2 > 0) {
-		    		x2--;
-		    		err2 += 5;
-		    		err2 += (y2-x2)<<1;
-		   		} else {
-		    		err2 += 3;
-		    		err2 += y2<<1;
-		    	}
-				y2++;	
+        if(octant & 0x08)
+        {
+            Bar(((xR + xL) >> 1), yB + r1, xR, yB + r2);
+        }
 
-				state = QUAD11;
-				break;
+        if(xR - xL)
+        {
 
-	        case QUAD11:
-				if ((x1Cur != x1) || (x2Cur != x2)) {
-					// 1st octant
-					if (octant&0x01) {
-						if(Bar(xR+y2Cur, yT-x2Cur, xR+y1New, yT-x1Cur) == 0) return 0;
-					}
-				}
-				else {
-					state = CHECK;
-		            goto arc_check_state;
-		        }
-				state = QUAD12;
-	            break;
+            // draw top
+            if(octant & 0x80)
+            {
+                Bar(xL, yT - r2, ((xR + xL) >> 1), yT - r1);
+            }
 
-	        case QUAD12:
-				// 2nd octant
-				if (octant&0x02) {
-					if(Bar(xR+x1Cur, yT-y1New, xR+x2Cur, yT-y2Cur) == 0) return 0;
-				}
-				state = QUAD21;
-	            break;
+            if(octant & 0x01)
+            {
+                Bar(((xR + xL) >> 1), yT - r2, xR, yT - r1);
+            }
+        }
 
-	        case QUAD21:
-				// 3rd octant
-				if (octant&0x04) {
-					if(Bar(xR+x1Cur, yB+y1Cur, xR+x2Cur, yB+y2New) == 0) return 0;
-				}
-				state = QUAD22;
-	            break;
+        if(yT - yB)
+        {
 
-	        case QUAD22:
-				// 4th octant
-				if (octant&0x08) {
-					if(Bar(xR+y1Cur, yB+x1Cur, xR+y2New, yB+x2Cur) == 0) return 0;
-				}
-				state = QUAD31;
-	            break;
+            // draw left
+            if(octant & 0x40)
+            {
+                Bar(xL - r2, yT, xL - r1, ((yB + yT) >> 1));
+            }
 
-	        case QUAD31:
-				// 5th octant
-				if (octant&0x10) {
-					if(Bar(xL-y1New, yB+x1Cur, xL-y2Cur, yB+x2Cur) == 0) return 0;
-				}
-				state = QUAD32;
-	            break;
+            if(octant & 0x20)
+            {
+                Bar(xL - r2, ((yB + yT) >> 1), xL - r1, yB);
+            }
+        }
+    }
 
-	        case QUAD32:
-				// 6th octant
-				if (octant&0x20) {
-					if(Bar(xL-x2Cur, yB+y2Cur, xL-x1Cur, yB+y1New) == 0) return 0;
-				}
-				state = QUAD41;
-	            break;
+    return (1);
+    #else
 
-	        case QUAD41:
-				// 7th octant
-				if (octant&0x40) {
-					if(Bar(xL-x2Cur, yT-y2New, xL-x1Cur, yT-y1Cur) == 0) return 0;
-				}
-				state = QUAD42;
-	            break;
+    typedef enum
+    {
+        BEGIN,
+        QUAD11,
+        BARRIGHT1,
+        QUAD12,
+        BARRIGHT2,
+        QUAD21,
+        BARLEFT1,
+        QUAD22,
+        BARLEFT2,
+        QUAD31,
+        BARTOP1,
+        QUAD32,
+        BARTOP2,
+        QUAD41,
+        BARBOTTOM1,
+        QUAD42,
+        BARBOTTOM2,
+        CHECK,
+    } OCTANTARC_STATES;
 
-	        case QUAD42:
-				// 8th octant
-				if (octant&0x80) {
-					if(Bar(xL-y2New, yT-x2Cur, xL-y1Cur, yT-x1Cur) == 0) return 0;
-				}
+    DWORD_VAL temp;
 
-				// update current values
-				x1Cur = x1;	y1Cur = y1; x2Cur = x2;	y2Cur = y2;
-				state = CHECK;
-	            break;
+    //	LONG temp1;
+    static SHORT y1Limit, y2Limit;
+    static SHORT x1, x2, y1, y2;
+    static SHORT err1, err2;
+    static SHORT x1Cur, y1Cur, y1New;
+    static SHORT x2Cur, y2Cur, y2New;
+    static OCTANTARC_STATES state = BEGIN;
 
-	        case BARRIGHT1:   			// draw upper right
-arc_draw_width_height_state:
-			   	if ((xR-xL) || (yB-yT)) {
-					// draw right
-					if (octant&0x02) {
-						if(Bar(xR+r1,yT,xR+r2,(yB+yT)>>1) == 0) return 0; 
-					}
-				}
-				else {
-					state = BEGIN;
-					return 1;		
-				}
-				state = BARRIGHT2;
-				break;
+    while(1)
+    {
+        if(IsDeviceBusy())
+            return (0);
+        switch(state)
+        {
+            case BEGIN:
+                temp.Val = SIN45 * r1;
+                y1Limit = temp.w[1];
+                temp.Val = SIN45 * r2;
+                y2Limit = temp.w[1];
 
-	        case BARRIGHT2:   			// draw lower right
-				if (octant&0x04) {
-					if(Bar(xR+r1,((yB+yT)>>1), xR+r2, yB) == 0) return 0; 
-				}
-				state = BARBOTTOM1;
-				break;
+                temp.Val = (DWORD) (ONEP25 - ((LONG) r1 << 16));
+                err1 = (SHORT) (temp.w[1]);
 
-	        case BARBOTTOM1:   			// draw left bottom
-				// draw bottom
-				if (octant&0x10) {
-					if(Bar(xL, yB+r1, ((xR+xL)>>1),yB+r2) == 0) return 0;
-				}
-				state = BARBOTTOM2;
-				break;
+                temp.Val = (DWORD) (ONEP25 - ((LONG) r2 << 16));
+                err2 = (SHORT) (temp.w[1]);
 
-	        case BARBOTTOM2:   			// draw right bottom
-				if (octant&0x08) {
-					if(Bar(((xR+xL)>>1),yB+r1,xR,yB+r2) == 0) return 0;
-				}
-				state = BARTOP1;
-				break;
+                x1 = r1;
+                x2 = r2;
+                y1 = 0;
+                y2 = 0;
 
-	        case BARTOP1:   			// draw left top
-				if(xR-xL) {
-		   			// draw top
-					if (octant&0x80) {
-						if(Bar(xL, yT-r2, ((xR+xL)>>1),yT-r1) == 0) return 0;
-					}
-					state = BARTOP2;
-				} else
-					state = BARLEFT1;	// no width go directly to height bar
-				break;
+                x1Cur = x1;
+                y1Cur = y1;
+                y1New = y1;
+                x2Cur = x2;
+                y2Cur = y2;
+                y2New = y2;
+                state = CHECK;
 
-	        case BARTOP2:   			// draw right top
-				if (octant&0x01) {
-					if(Bar(((xR+xL)>>1),yT-r2,xR,yT-r1) == 0) return 0;
-				}
-				state = BARLEFT1;
-				break;
+            case CHECK:
+                arc_check_state : if(y2 > y2Limit)
+                {
+                    state = BARRIGHT1;
+                    goto arc_draw_width_height_state;
+                }
 
-	        case BARLEFT1:   			// draw upper left
-			   	if (yT-yB) {
-			   		// draw left
-					if (octant&0x40) {
-						if(Bar(xL-r2,yT,xL-r1,((yB+yT)>>1)) == 0) return 0; 			
-					}
-					state = BARLEFT2;
-				} else {
-					state = BEGIN;		// no height go back to BEGIN
-					return 1;
-				}
-				break;
+                // y1New & y2New records the last y positions
+                y1New = y1;
+                y2New = y2;
 
-	        case BARLEFT2:   			// draw lower left
-				if (octant&0x20) {
-					if(Bar(xL-r2,((yB+yT)>>1),xL-r1,yB) == 0) return 0; 			
-				}
-				state = BEGIN;
-				return 1;
-	    }// end of switch
-	}// end of while
-#endif // USE_NONBLOCKING_CONFIG    
+                if(y1 <= y1Limit)
+                {
+                    if(err1 > 0)
+                    {
+                        x1--;
+                        err1 += 5;
+                        err1 += (y1 - x1) << 1;
+                    }
+                    else
+                    {
+                        err1 += 3;
+                        err1 += y1 << 1;
+                    }
+
+                    y1++;
+                }
+                else
+                {
+                    y1++;
+                    if(x1 < y1)
+                        x1 = y1;
+                }
+
+                if(err2 > 0)
+                {
+                    x2--;
+                    err2 += 5;
+                    err2 += (y2 - x2) << 1;
+                }
+                else
+                {
+                    err2 += 3;
+                    err2 += y2 << 1;
+                }
+
+                y2++;
+
+                state = QUAD11;
+                break;
+
+            case QUAD11:
+                if((x1Cur != x1) || (x2Cur != x2))
+                {
+
+                    // 1st octant
+                    if(octant & 0x01)
+                    {
+                        if(Bar(xR + y2Cur, yT - x2Cur, xR + y1New, yT - x1Cur) == 0)
+                            return (0);
+                    }
+                }
+                else
+                {
+                    state = CHECK;
+                    goto arc_check_state;
+                }
+
+                state = QUAD12;
+                break;
+
+            case QUAD12:
+
+                // 2nd octant
+                if(octant & 0x02)
+                {
+                    if(Bar(xR + x1Cur, yT - y1New, xR + x2Cur, yT - y2Cur) == 0)
+                        return (0);
+                }
+
+                state = QUAD21;
+                break;
+
+            case QUAD21:
+
+                // 3rd octant
+                if(octant & 0x04)
+                {
+                    if(Bar(xR + x1Cur, yB + y1Cur, xR + x2Cur, yB + y2New) == 0)
+                        return (0);
+                }
+
+                state = QUAD22;
+                break;
+
+            case QUAD22:
+
+                // 4th octant
+                if(octant & 0x08)
+                {
+                    if(Bar(xR + y1Cur, yB + x1Cur, xR + y2New, yB + x2Cur) == 0)
+                        return (0);
+                }
+
+                state = QUAD31;
+                break;
+
+            case QUAD31:
+
+                // 5th octant
+                if(octant & 0x10)
+                {
+                    if(Bar(xL - y1New, yB + x1Cur, xL - y2Cur, yB + x2Cur) == 0)
+                        return (0);
+                }
+
+                state = QUAD32;
+                break;
+
+            case QUAD32:
+
+                // 6th octant
+                if(octant & 0x20)
+                {
+                    if(Bar(xL - x2Cur, yB + y2Cur, xL - x1Cur, yB + y1New) == 0)
+                        return (0);
+                }
+
+                state = QUAD41;
+                break;
+
+            case QUAD41:
+
+                // 7th octant
+                if(octant & 0x40)
+                {
+                    if(Bar(xL - x2Cur, yT - y2New, xL - x1Cur, yT - y1Cur) == 0)
+                        return (0);
+                }
+
+                state = QUAD42;
+                break;
+
+            case QUAD42:
+
+                // 8th octant
+                if(octant & 0x80)
+                {
+                    if(Bar(xL - y2New, yT - x2Cur, xL - y1Cur, yT - x1Cur) == 0)
+                        return (0);
+                }
+
+                // update current values
+                x1Cur = x1;
+                y1Cur = y1;
+                x2Cur = x2;
+                y2Cur = y2;
+                state = CHECK;
+                break;
+
+            case BARRIGHT1:     // draw upper right
+                arc_draw_width_height_state : if((xR - xL) || (yB - yT))
+                {
+
+                    // draw right
+                    if(octant & 0x02)
+                    {
+                        if(Bar(xR + r1, yT, xR + r2, (yB + yT) >> 1) == 0)
+                            return (0);
+                    }
+                }
+                else
+                {
+                    state = BEGIN;
+                    return (1);
+                }
+
+                state = BARRIGHT2;
+                break;
+
+            case BARRIGHT2:     // draw lower right
+                if(octant & 0x04)
+                {
+                    if(Bar(xR + r1, ((yB + yT) >> 1), xR + r2, yB) == 0)
+                        return (0);
+                }
+
+                state = BARBOTTOM1;
+                break;
+
+            case BARBOTTOM1:    // draw left bottom
+                // draw bottom
+                if(octant & 0x10)
+                {
+                    if(Bar(xL, yB + r1, ((xR + xL) >> 1), yB + r2) == 0)
+                        return (0);
+                }
+
+                state = BARBOTTOM2;
+                break;
+
+            case BARBOTTOM2:    // draw right bottom
+                if(octant & 0x08)
+                {
+                    if(Bar(((xR + xL) >> 1), yB + r1, xR, yB + r2) == 0)
+                        return (0);
+                }
+
+                state = BARTOP1;
+                break;
+
+            case BARTOP1:       // draw left top
+                if(xR - xL)
+                {
+
+                    // draw top
+                    if(octant & 0x80)
+                    {
+                        if(Bar(xL, yT - r2, ((xR + xL) >> 1), yT - r1) == 0)
+                            return (0);
+                    }
+
+                    state = BARTOP2;
+                }
+                else
+                    state = BARLEFT1;   // no width go directly to height bar
+                break;
+
+            case BARTOP2:               // draw right top
+                if(octant & 0x01)
+                {
+                    if(Bar(((xR + xL) >> 1), yT - r2, xR, yT - r1) == 0)
+                        return (0);
+                }
+
+                state = BARLEFT1;
+                break;
+
+            case BARLEFT1:              // draw upper left
+                if(yT - yB)
+                {
+
+                    // draw left
+                    if(octant & 0x40)
+                    {
+                        if(Bar(xL - r2, yT, xL - r1, ((yB + yT) >> 1)) == 0)
+                            return (0);
+                    }
+
+                    state = BARLEFT2;
+                }
+                else
+                {
+                    state = BEGIN;      // no height go back to BEGIN
+                    return (1);
+                }
+
+                break;
+
+            case BARLEFT2:              // draw lower left
+                if(octant & 0x20)
+                {
+                    if(Bar(xL - r2, ((yB + yT) >> 1), xL - r1, yB) == 0)
+                        return (0);
+                }
+
+                state = BEGIN;
+                return (1);
+        }                               // end of switch
+    }   // end of while
+    #endif // USE_NONBLOCKING_CONFIG
 }
 
 /*********************************************************************
@@ -561,134 +727,194 @@ arc_draw_width_height_state:
 *
 ********************************************************************/
 #ifndef USE_DRV_LINE
-WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2){
-    SHORT deltaX, deltaY;
-    SHORT error, stepErrorLT, stepErrorGE;
-    SHORT stepX, stepY;
-    SHORT steep;
-    SHORT temp;
-    SHORT style, type;
 
-    #ifndef USE_NONBLOCKING_CONFIG
-        while(IsDeviceBusy() != 0); /* Ready */
-    #else
-        if(IsDeviceBusy() != 0) return 0;
-    #endif
+/* */
+WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+{
+    SHORT   deltaX, deltaY;
+    SHORT   error, stepErrorLT, stepErrorGE;
+    SHORT   stepX, stepY;
+    SHORT   steep;
+    SHORT   temp;
+    SHORT   style, type;
 
-     // Move cursor   
-     MoveTo(x2,y2);
+        #ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
 
-     if(x1==x2){
-        if(y1>y2){
-            temp = y1; y1 = y2; y2 = temp;
+    /* Ready */
+        #else
+    if(IsDeviceBusy() != 0)
+        return (0);
+        #endif
+
+    // Move cursor
+    MoveTo(x2, y2);
+
+    if(x1 == x2)
+    {
+        if(y1 > y2)
+        {
+            temp = y1;
+            y1 = y2;
+            y2 = temp;
         }
-        style = 0; type =1;
-        for(temp=y1; temp<y2+1; temp++){
-            if((++style)==_lineType){
-                type ^=1;
+
+        style = 0;
+        type = 1;
+        for(temp = y1; temp < y2 + 1; temp++)
+        {
+            if((++style) == _lineType)
+            {
+                type ^= 1;
                 style = 0;
             }
-            if(type){
-                PutPixel(x1,temp);
-                if(_lineThickness){
-                    PutPixel (x1+1,temp);
-                    PutPixel (x1-1,temp);
-                }
-            }
-       }
-       return 1;
-    }
 
-    if(y1==y2){
-        if(x1>x2){
-            temp = x1; x1 = x2; x2 = temp;
-        }
-        style = 0; type =1;
-        for(temp=x1; temp<x2+1; temp++){
-            if((++style)==_lineType){
-                type ^=1;
-                style = 0;
-            }
-            if(type){
-                PutPixel(temp,y1);
-                if(_lineThickness){
-                    PutPixel (temp,y1+1);
-                    PutPixel (temp,y1-1);
+            if(type)
+            {
+                PutPixel(x1, temp);
+                if(_lineThickness)
+                {
+                    PutPixel(x1 + 1, temp);
+                    PutPixel(x1 - 1, temp);
                 }
             }
         }
-        return 1;
+
+        return (1);
     }
 
-    stepX= 0;
-    deltaX = x2-x1;
-    if(deltaX < 0){
-        deltaX= -deltaX;
+    if(y1 == y2)
+    {
+        if(x1 > x2)
+        {
+            temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+
+        style = 0;
+        type = 1;
+        for(temp = x1; temp < x2 + 1; temp++)
+        {
+            if((++style) == _lineType)
+            {
+                type ^= 1;
+                style = 0;
+            }
+
+            if(type)
+            {
+                PutPixel(temp, y1);
+                if(_lineThickness)
+                {
+                    PutPixel(temp, y1 + 1);
+                    PutPixel(temp, y1 - 1);
+                }
+            }
+        }
+
+        return (1);
+    }
+
+    stepX = 0;
+    deltaX = x2 - x1;
+    if(deltaX < 0)
+    {
+        deltaX = -deltaX;
         --stepX;
-    }else{
+    }
+    else
+    {
         ++stepX;
     }
 
-    stepY= 0;
-    deltaY = y2-y1;
-    if(deltaY < 0){
-        deltaY= -deltaY;
+    stepY = 0;
+    deltaY = y2 - y1;
+    if(deltaY < 0)
+    {
+        deltaY = -deltaY;
         --stepY;
-    }else{
+    }
+    else
+    {
         ++stepY;
     }
 
-    steep= 0;
-    if(deltaX < deltaY){
+    steep = 0;
+    if(deltaX < deltaY)
+    {
         ++steep;
-        temp = deltaX;  deltaX = deltaY;  deltaY = temp;
-        temp = x1;  x1 = y1;  y1 = temp;
-        temp = stepX;  stepX = stepY;  stepY = temp;
-        PutPixel(y1,x1);
-    }else{
-        PutPixel(x1,y1);
+        temp = deltaX;
+        deltaX = deltaY;
+        deltaY = temp;
+        temp = x1;
+        x1 = y1;
+        y1 = temp;
+        temp = stepX;
+        stepX = stepY;
+        stepY = temp;
+        PutPixel(y1, x1);
+    }
+    else
+    {
+        PutPixel(x1, y1);
     }
 
     // If the current error greater or equal zero
-    stepErrorGE= deltaX<<1;
+    stepErrorGE = deltaX << 1;
+
     // If the current error less than zero
-    stepErrorLT= deltaY<<1;
+    stepErrorLT = deltaY << 1;
+
     // Error for the first pixel
-    error= stepErrorLT-deltaX;
+    error = stepErrorLT - deltaX;
 
-    style = 0; type =1;
+    style = 0;
+    type = 1;
 
-    while(--deltaX >= 0){
-        if(error >= 0){
-            y1+= stepY;
-            error-= stepErrorGE;
+    while(--deltaX >= 0)
+    {
+        if(error >= 0)
+        {
+            y1 += stepY;
+            error -= stepErrorGE;
         }
-        x1+= stepX;
-        error+= stepErrorLT;
 
-        if((++style)==_lineType){
-            type ^=1;
+        x1 += stepX;
+        error += stepErrorLT;
+
+        if((++style) == _lineType)
+        {
+            type ^= 1;
             style = 0;
         }
-        if(type){
-            if(steep){
-                PutPixel (y1,x1);
-                if(_lineThickness){
-                    PutPixel (y1+1,x1);
-                    PutPixel (y1-1,x1);
+
+        if(type)
+        {
+            if(steep)
+            {
+                PutPixel(y1, x1);
+                if(_lineThickness)
+                {
+                    PutPixel(y1 + 1, x1);
+                    PutPixel(y1 - 1, x1);
                 }
-            }else{
-                PutPixel (x1,y1);
-                if(_lineThickness){
-                    PutPixel (x1,y1+1);
-                    PutPixel (x1,y1-1);
+            }
+            else
+            {
+                PutPixel(x1, y1);
+                if(_lineThickness)
+                {
+                    PutPixel(x1, y1 + 1);
+                    PutPixel(x1, y1 - 1);
                 }
             }
         }
-   }// end of while
+    }   // end of while
 
-   return 1;
+    return (1);
 }
+
 #endif
 
 /*********************************************************************
@@ -717,82 +943,103 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2){
 ********************************************************************/
 WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 {
-	SHORT  style, type, xLimit, xPos, yPos, error;
-	DWORD_VAL  temp;	
+    SHORT       style, type, xLimit, xPos, yPos, error;
+    DWORD_VAL   temp;
 
     #ifndef USE_NONBLOCKING_CONFIG
-        while(IsDeviceBusy() != 0); /* Ready */
+    while(IsDeviceBusy() != 0) Nop();
+
+    /* Ready */
     #else
-        if(IsDeviceBusy() != 0) return 0;
+    if(IsDeviceBusy() != 0)
+        return (0);
     #endif
+    temp.Val = SIN45 * rad;
+    xLimit = temp.w[1] + 1;
+    temp.Val = (DWORD) (ONEP25 - ((LONG) rad << 16));
+    error = (SHORT) (temp.w[1]);
+    yPos = rad;
 
-	temp.Val = SIN45*rad;
-	xLimit   = temp.w[1]+1;
-	temp.Val = (DWORD)(ONEP25 -((LONG)rad<<16));
-	error    = (SHORT)(temp.w[1]); 
-	yPos     = rad;
+    style = 0;
+    type = 1;
 
-    style = 0; type =1;
+    if(rad)
+    {
+        for(xPos = 0; xPos <= xLimit; xPos++)
+        {
+            if((++style) == _lineType)
+            {
+                type ^= 1;
+                style = 0;
+            }
 
-	if (rad) {
-	  	for (xPos=0; xPos <=xLimit; xPos++) {
-		  	
-		  	if((++style)==_lineType){
-	            type ^=1;
-	            style = 0;
-	        }
-		  	
-		  	if(type){
-		   		PutPixel(x2+xPos, y1-yPos);		// 1st quadrant
-		   		PutPixel(x2+yPos, y1-xPos);
-		   		PutPixel(x2+xPos, y2+yPos);		// 2nd quadrant
-		  		PutPixel(x2+yPos, y2+xPos);				
-		   		PutPixel(x1-xPos, y2+yPos);		// 3rd quadrant
-		   		PutPixel(x1-yPos, y2+xPos);
-		   		PutPixel(x1-yPos, y1-xPos);		// 4th quadrant
-		   		PutPixel(x1-xPos, y1-yPos);
+            if(type)
+            {
+                PutPixel(x2 + xPos, y1 - yPos);         // 1st quadrant
+                PutPixel(x2 + yPos, y1 - xPos);
+                PutPixel(x2 + xPos, y2 + yPos);         // 2nd quadrant
+                PutPixel(x2 + yPos, y2 + xPos);
+                PutPixel(x1 - xPos, y2 + yPos);         // 3rd quadrant
+                PutPixel(x1 - yPos, y2 + xPos);
+                PutPixel(x1 - yPos, y1 - xPos);         // 4th quadrant
+                PutPixel(x1 - xPos, y1 - yPos);
 
-	            if(_lineThickness){
-			   		PutPixel(x2+xPos,   y1-yPos-1);		// 1st quadrant
-			   		PutPixel(x2+xPos,   y1-yPos+1);		
-			   		PutPixel(x2+yPos+1, y1-xPos);
-			   		PutPixel(x2+yPos-1, y1-xPos);
-			   		PutPixel(x2+xPos,   y2+yPos-1);		// 2nd quadrant
-			   		PutPixel(x2+xPos,   y2+yPos+1);		
-		  			PutPixel(x2+yPos+1, y2+xPos);				
-		  			PutPixel(x2+yPos-1, y2+xPos);				
-		   			PutPixel(x1-xPos,   y2+yPos-1);		// 3rd quadrant
-		   			PutPixel(x1-xPos,   y2+yPos+1);		
-			   		PutPixel(x1-yPos+1, y2+xPos);
-			   		PutPixel(x1-yPos-1, y2+xPos);
-			   		PutPixel(x1-yPos+1, y1-xPos);		// 4th quadrant
-			   		PutPixel(x1-yPos-1, y1-xPos);		
-			   		PutPixel(x1-xPos,   y1-yPos+1);
-			   		PutPixel(x1-xPos,   y1-yPos-1);
+                if(_lineThickness)
+                {
+                    PutPixel(x2 + xPos, y1 - yPos - 1); // 1st quadrant
+                    PutPixel(x2 + xPos, y1 - yPos + 1);
+                    PutPixel(x2 + yPos + 1, y1 - xPos);
+                    PutPixel(x2 + yPos - 1, y1 - xPos);
+                    PutPixel(x2 + xPos, y2 + yPos - 1); // 2nd quadrant
+                    PutPixel(x2 + xPos, y2 + yPos + 1);
+                    PutPixel(x2 + yPos + 1, y2 + xPos);
+                    PutPixel(x2 + yPos - 1, y2 + xPos);
+                    PutPixel(x1 - xPos, y2 + yPos - 1); // 3rd quadrant
+                    PutPixel(x1 - xPos, y2 + yPos + 1);
+                    PutPixel(x1 - yPos + 1, y2 + xPos);
+                    PutPixel(x1 - yPos - 1, y2 + xPos);
+                    PutPixel(x1 - yPos + 1, y1 - xPos); // 4th quadrant
+                    PutPixel(x1 - yPos - 1, y1 - xPos);
+                    PutPixel(x1 - xPos, y1 - yPos + 1);
+                    PutPixel(x1 - xPos, y1 - yPos - 1);
                 }
-		   	}
-		 	if(error > 0) {
-	    		yPos--;
-	    		error += 5+((xPos-yPos)<<1);
-	   		}
-	   		else
-	    		error += 3+(xPos<<1);
-	    }
-	} 
+            }
 
-   	// Must use lines here since this can also be used to draw focus of round buttons
-   	if (x2-x1) {
-   		while(!Line(x1,y1-rad,x2,y1-rad));				// draw top
-   	}
-   	if (y2-y1) {
-   		while(!Line(x1-rad,y1,x1-rad,y2)); 				// draw left
-   	}
-   	if ((x2-x1) || (y2-y1)) {
-		while(!Line(x2+rad,y1,x2+rad,y2)); 				// draw right
-		while(!Line(x1,y2+rad,x2,y2+rad));				// draw bottom
-	}
+            if(error > 0)
+            {
+                yPos--;
+                error += 5 + ((xPos - yPos) << 1);
+            }
+            else
+                error += 3 + (xPos << 1);
+        }
+    }
+    // Must use lines here since this can also be used to draw focus of round buttons
+    if(x2 - x1)
+    {
+        while(!Line(x1, y1 - rad, x2, y1 - rad));
 
-	return 1;
+        // draw top
+    }
+
+    if(y2 - y1)
+    {
+        while(!Line(x1 - rad, y1, x1 - rad, y2));
+
+        // draw left
+    }
+
+    if((x2 - x1) || (y2 - y1))
+    {
+        while(!Line(x2 + rad, y1, x2 + rad, y2));
+
+        // draw right
+        while(!Line(x1, y2 + rad, x2, y2 + rad));
+
+        // draw bottom
+    }
+
+    return (1);
 }
 
 /*********************************************************************
@@ -821,172 +1068,204 @@ WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 ********************************************************************/
 WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 {
+    #ifndef USE_NONBLOCKING_CONFIG
 
-#ifndef USE_NONBLOCKING_CONFIG
+    SHORT       yLimit, xPos, yPos, err;
+    SHORT       xCur, yCur, yNew;
+    DWORD_VAL   temp;
 
-	SHORT yLimit, xPos, yPos, err;
-	SHORT xCur, yCur, yNew;
-	DWORD_VAL  temp;	
+    // note that octants here is defined as:
+    // from yPos=-radius, xPos=0 in the clockwise direction octant 1 to 8 are labeled
+    // assumes an origin at 0,0. Quadrants are defined in the same manner
+    if(rad)
+    {
+        temp.Val = SIN45 * rad;
+        yLimit = temp.w[1];
+        temp.Val = (DWORD) (ONEP25 - ((LONG) rad << 16));
+        err = (SHORT) (temp.w[1]);
+        xPos = rad;
+        yPos = 0;
 
-	// note that octants here is defined as:
-	// from yPos=-radius, xPos=0 in the clockwise direction octant 1 to 8 are labeled
-	// assumes an origin at 0,0. Quadrants are defined in the same manner
+        xCur = xPos;
+        yCur = yPos;
+        yNew = yPos;
 
-	if (rad) {
-		temp.Val = SIN45*rad;
-		yLimit   = temp.w[1];
-		temp.Val = (DWORD)(ONEP25 -((LONG)rad<<16));
-		err      = (SHORT)(temp.w[1]); 
-		xPos     = rad;
-		yPos     = 0;
+        while(yPos <= yLimit)
+        {
 
-		xCur = xPos; yCur = yPos; yNew = yPos;
+            // Drawing of the rounded panel is done only when there is a change in the
+            // x direction. Bars are drawn to be efficient.
+            // detect changes in the x position. Every change will mean a bar will be drawn
+            // to cover the previous area. y1New records the last position of y before the
+            // change in x position.
+            // y1New records the last y position
+            yNew = yPos;
 
-		
-		while(yPos<=yLimit) {
-	
-			// Drawing of the rounded panel is done only when there is a change in the
-			// x direction. Bars are drawn to be efficient.
-			
-			// detect changes in the x position. Every change will mean a bar will be drawn 
-			// to cover the previous area. y1New records the last position of y before the 
-			// change in x position.
-
-			// y1New records the last y position
-			yNew = yPos;			
-
-		 	if(err > 0) {
-	    		xPos--;
-	    		err += 5+((yPos-xPos)<<1);
-	   		} else
-	    		err += 3+(yPos<<1);
-			yPos++;	
-
-			if (xCur != xPos) {
-				// 6th octant to 3rd octant
-	   			Bar(x1-xCur, y2+yCur, x2+xCur, y2+yNew);
-				// 5th octant to 4th octant
-	   			Bar(x1-yNew, y2+xPos, x2+yNew, y2+xCur);
-				// 8th octant to 1st octant
-	   			Bar(x1-yNew, y1-xCur, x2+yNew, y1-xPos);
-				// 7th octant to 2nd octant
-	   			Bar(x1-xCur, y1-yNew, x2+xCur, y1-yCur);
-
-				// update current values
-				xCur = xPos; yCur = yPos;
-			} 
-
-	    }
-	}
-	// this covers both filled rounded object and filled rectangle.
-    if ((x2-x1) || (y2-y1))
-    	Bar(x1-rad, y1, x2+rad, y2);
-	return 1; 
-#else
-
-typedef enum {
-BEGIN,
-CHECK,
-Q8TOQ1,
-Q7TOQ2,
-Q6TOQ3,
-Q5TOQ4,
-WAITFORDONE,
-FACE
-} FILLCIRCLE_STATES;
-
-
-	DWORD_VAL  temp;	
-	static LONG err;
-	static SHORT yLimit, xPos, yPos;
-	static SHORT xCur, yCur, yNew;
-
-	static FILLCIRCLE_STATES state = BEGIN;
-
-while(1){
-    if(IsDeviceBusy())
-        return 0;
-    switch(state){
-        case BEGIN:  
-        	if (!rad) {									// no radius object is a filled rectangle
-	        	state = FACE;
-	        	break;
-	        }
-	        // compute variables
-			temp.Val = SIN45*rad;
-			yLimit   = temp.w[1];
-			temp.Val = (DWORD)(ONEP25 -((LONG)rad<<16));
-			err      = (SHORT)(temp.w[1]); 
-			xPos 	 = rad; yPos = 0;
-			xCur     = xPos; yCur = yPos; yNew = yPos;
-            state    = CHECK;
-
-        case CHECK:
-bevel_fill_check:
-            if (yPos>yLimit) {
-                state = FACE;
-                break;
+            if(err > 0)
+            {
+                xPos--;
+                err += 5 + ((yPos - xPos) << 1);
             }
-			// y1New records the last y position
-			yNew = yPos;			
+            else
+                err += 3 + (yPos << 1);
+            yPos++;
 
-			// calculate the next value of x and y
-		 	if(err > 0) {
-	    		xPos--;
-	    		err += 5+((yPos-xPos)<<1);
-	   		} else
-	    		err += 3+(yPos<<1);
-			yPos++;	
-			state = Q6TOQ3;
+            if(xCur != xPos)
+            {
 
-        case Q6TOQ3:
-			if (xCur != xPos) {
-				// 6th octant to 3rd octant
-	   			if(Bar(x1-xCur, y2+yCur, x2+xCur, y2+yNew) == 0) return 0;
-	   			state = Q5TOQ4;
-	   			break;
-	   		}
-	   		state = CHECK;
-	   		goto bevel_fill_check;
+                // 6th octant to 3rd octant
+                Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew);
 
-        case Q5TOQ4:
-			// 5th octant to 4th octant
-   			if(Bar(x1-yNew, y2+xPos, x2+yNew, y2+xCur) == 0) return 0;
-            state = Q8TOQ1;
-            break;
+                // 5th octant to 4th octant
+                Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur);
 
-        case Q8TOQ1:
-			// 8th octant to 1st octant
-   			if(Bar(x1-yNew, y1-xCur, x2+yNew, y1-xPos) == 0) return 0;				
-            state = Q7TOQ2;
-            break;
+                // 8th octant to 1st octant
+                Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos);
 
-        case Q7TOQ2:
-			// 7th octant to 2nd octant
-   			if(Bar(x1-xCur, y1-yNew, x2+xCur, y1-yCur) == 0) return 0;				
-			// update current values
-			xCur = xPos;
-			yCur = yPos;
-            state = CHECK;
-            break;
-		case FACE:
-			if ((x2-x1)||(y2-y1)) {
-		    	if(Bar(x1-rad, y1, x2+rad, y2) == 0) return 0;
-		    	state = WAITFORDONE;
-		    }
-		    else {
-			    state = BEGIN;
-		    	return 1;
-		    }
-		case WAITFORDONE:
-			if (IsDeviceBusy())
-				return 0;
-		    state = BEGIN;
-		    return 1;	
-    }// end of switch
-}// end of while
+                // 7th octant to 2nd octant
+                Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur);
 
-#endif // end of USE_NONBLOCKING_CONFIG
+                // update current values
+                xCur = xPos;
+                yCur = yPos;
+            }
+        }
+    }
+
+    // this covers both filled rounded object and filled rectangle.
+    if((x2 - x1) || (y2 - y1))
+        Bar(x1 - rad, y1, x2 + rad, y2);
+    return (1);
+    #else
+
+    typedef enum
+    {
+        BEGIN,
+        CHECK,
+        Q8TOQ1,
+        Q7TOQ2,
+        Q6TOQ3,
+        Q5TOQ4,
+        WAITFORDONE,
+        FACE
+    } FILLCIRCLE_STATES;
+
+    DWORD_VAL temp;
+    static LONG err;
+    static SHORT yLimit, xPos, yPos;
+    static SHORT xCur, yCur, yNew;
+
+    static FILLCIRCLE_STATES state = BEGIN;
+
+    while(1)
+    {
+        if(IsDeviceBusy())
+            return (0);
+        switch(state)
+        {
+            case BEGIN:
+                if(!rad)
+                {   // no radius object is a filled rectangle
+                    state = FACE;
+                    break;
+                }
+
+                // compute variables
+                temp.Val = SIN45 * rad;
+                yLimit = temp.w[1];
+                temp.Val = (DWORD) (ONEP25 - ((LONG) rad << 16));
+                err = (SHORT) (temp.w[1]);
+                xPos = rad;
+                yPos = 0;
+                xCur = xPos;
+                yCur = yPos;
+                yNew = yPos;
+                state = CHECK;
+
+            case CHECK:
+                bevel_fill_check : if(yPos > yLimit)
+                {
+                    state = FACE;
+                    break;
+                }
+
+                // y1New records the last y position
+                yNew = yPos;
+
+                // calculate the next value of x and y
+                if(err > 0)
+                {
+                    xPos--;
+                    err += 5 + ((yPos - xPos) << 1);
+                }
+                else
+                    err += 3 + (yPos << 1);
+                yPos++;
+                state = Q6TOQ3;
+
+            case Q6TOQ3:
+                if(xCur != xPos)
+                {
+
+                    // 6th octant to 3rd octant
+                    if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0)
+                        return (0);
+                    state = Q5TOQ4;
+                    break;
+                }
+
+                state = CHECK;
+                goto bevel_fill_check;
+
+            case Q5TOQ4:
+
+                // 5th octant to 4th octant
+                if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0)
+                    return (0);
+                state = Q8TOQ1;
+                break;
+
+            case Q8TOQ1:
+
+                // 8th octant to 1st octant
+                if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0)
+                    return (0);
+                state = Q7TOQ2;
+                break;
+
+            case Q7TOQ2:
+
+                // 7th octant to 2nd octant
+                if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0)
+                    return (0);
+
+                // update current values
+                xCur = xPos;
+                yCur = yPos;
+                state = CHECK;
+                break;
+
+            case FACE:
+                if((x2 - x1) || (y2 - y1))
+                {
+                    if(Bar(x1 - rad, y1, x2 + rad, y2) == 0)
+                        return (0);
+                    state = WAITFORDONE;
+                }
+                else
+                {
+                    state = BEGIN;
+                    return (1);
+                }
+
+            case WAITFORDONE:
+                if(IsDeviceBusy())
+                    return (0);
+                state = BEGIN;
+                return (1);
+        }           // end of switch
+    }               // end of while
+    #endif // end of USE_NONBLOCKING_CONFIG
 }
 
 /*********************************************************************
@@ -1009,67 +1288,81 @@ bevel_fill_check:
 * Note: none
 *
 ********************************************************************/
-WORD DrawPoly(SHORT numPoints, SHORT* polyPoints){
-
-#ifndef USE_NONBLOCKING_CONFIG
-
-    SHORT counter;
-    SHORT sx,sy,ex,ey;
-
+WORD DrawPoly(SHORT numPoints, SHORT *polyPoints)
+{
     #ifndef USE_NONBLOCKING_CONFIG
-        while(IsDeviceBusy() != 0); /* Ready */
-    #else
-        if(IsDeviceBusy() != 0) return 0;
-    #endif
 
-    sx = *polyPoints++; sy = *polyPoints++;
-    for(counter = 0; counter < numPoints - 1; counter++){
-        ex = *polyPoints++; ey = *polyPoints++;
-        while(Line(sx,sy,ex,ey) == 0);
-        sx = ex; sy = ey;
+    SHORT   counter;
+    SHORT   sx, sy, ex, ey;
+
+        #ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
+
+    /* Ready */
+        #else
+    if(IsDeviceBusy() != 0)
+        return (0);
+        #endif
+    sx = *polyPoints++;
+    sy = *polyPoints++;
+    for(counter = 0; counter < numPoints - 1; counter++)
+    {
+        ex = *polyPoints++;
+        ey = *polyPoints++;
+        while(Line(sx, sy, ex, ey) == 0);
+        sx = ex;
+        sy = ey;
     }
 
-#else
-    typedef enum {
-    POLY_BEGIN,
-    POLY_DRAWING,
+    #else
+
+    typedef enum
+    {
+        POLY_BEGIN,
+        POLY_DRAWING,
     } DRAWPOLY_STATES;
 
     static DRAWPOLY_STATES state = POLY_BEGIN;
     static SHORT counter;
-    SHORT sx,sy,ex,ey;
-    while(1){
+    SHORT sx, sy, ex, ey;
+    while(1)
+    {
         if(IsDeviceBusy())
-            return 0;
-        switch(state)   {
-            case POLY_BEGIN:    counter = 1;
-                                state = POLY_DRAWING;
+            return (0);
+        switch(state)
+        {
+            case POLY_BEGIN:
+                counter = 1;
+                state = POLY_DRAWING;
 
-            case POLY_DRAWING:  if(counter == 0 || counter >= numPoints)
-                                {
-                                    state = POLY_BEGIN;
-                                    break;
-                                }
-                                while(counter < numPoints)
-                                {
-                                    sx = polyPoints[(counter - 1) * 2];
-                                    sy = polyPoints[(counter * 2) - 1];
-                                    ex = polyPoints[counter * 2];
-                                    ey = polyPoints[counter * 2 + 1];
-                                    if(Line(sx,sy,ex,ey) == 0)
-                                    {
-                                        return 0;
-                                    }
-                                    counter++;
-                                }
-                                state = POLY_BEGIN;
-                                return 1;
+            case POLY_DRAWING:
+                if(counter == 0 || counter >= numPoints)
+                {
+                    state = POLY_BEGIN;
+                    break;
+                }
+
+                while(counter < numPoints)
+                {
+                    sx = polyPoints[(counter - 1) * 2];
+                    sy = polyPoints[(counter * 2) - 1];
+                    ex = polyPoints[counter * 2];
+                    ey = polyPoints[counter * 2 + 1];
+                    if(Line(sx, sy, ex, ey) == 0)
+                    {
+                        return (0);
+                    }
+
+                    counter++;
+                }
+
+                state = POLY_BEGIN;
+                return (1);
         }
     }
 
-#endif
-
-    return 1;
+    #endif
+    return (1);
 }
 
 /*********************************************************************
@@ -1094,21 +1387,27 @@ WORD DrawPoly(SHORT numPoints, SHORT* polyPoints){
 *
 ********************************************************************/
 #ifndef USE_DRV_BAR
-WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom){
-    SHORT x,y;
 
-    #ifndef USE_NONBLOCKING_CONFIG
-        while(IsDeviceBusy() != 0); /* Ready */
-    #else
-        if(IsDeviceBusy() != 0) return 0;
-    #endif
+/* */
+WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    SHORT   x, y;
 
+        #ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
+
+    /* Ready */
+        #else
+    if(IsDeviceBusy() != 0)
+        return (0);
+        #endif
     for(y = top; y < bottom + 1; y++)
         for(x = left; x < right + 1; x++)
-            PutPixel(x,y);
+            PutPixel(x, y);
 
-    return 1;
+    return (1);
 }
+
 #endif
 
 /*********************************************************************
@@ -1128,12 +1427,17 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom){
 *
 ********************************************************************/
 #ifndef USE_DRV_CLEARDEVICE
-void ClearDevice(void){
-    while(Bar(0,0,GetMaxX(),GetMaxY()) == 0);
-    MoveTo(0,0);
+
+/* */
+void ClearDevice(void)
+{
+    while(Bar(0, 0, GetMaxX(), GetMaxY()) == 0);
+    MoveTo(0, 0);
 }
+
 #endif
 
+#ifndef USE_DRV_FONT
 /*********************************************************************
 * Function: void SetFont(void* font)
 *
@@ -1150,34 +1454,39 @@ void ClearDevice(void){
 * Note: none
 *
 ********************************************************************/
-#ifndef USE_DRV_FONT
-void SetFont(void* font){
-FONT_HEADER* pHeader;
+void SetFont(void *font)
+{
+    FONT_HEADER *pHeader;
 
-#ifdef USE_FONT_EXTERNAL
-FONT_HEADER  header;
-#endif
-
+        #ifdef USE_FONT_EXTERNAL
+    FONT_HEADER header;
+        #endif
     _font = font;
-    switch(*((SHORT*)font)){
-#ifdef USE_FONT_FLASH
+    switch(*((SHORT *)font))
+    {
+                #ifdef USE_FONT_FLASH
+
         case FLASH:
-            pHeader = (FONT_HEADER*)((FONT_FLASH*)font)->address;
+            pHeader = (FONT_HEADER *) ((FONT_FLASH *)font)->address;
             break;
-#endif
-#ifdef USE_FONT_EXTERNAL
+                #endif
+                #ifdef USE_FONT_EXTERNAL
+
         case EXTERNAL:
             pHeader = &header;
-            ExternalMemoryCallback(font,0,sizeof(FONT_HEADER),pHeader);
+            ExternalMemoryCallback(font, 0, sizeof(FONT_HEADER), pHeader);
             break;
-#endif
+                #endif
+
         default:
             return;
     }
+
     _fontFirstChar = pHeader->firstChar;
-    _fontLastChar =  pHeader->lastChar;
-    _fontHeight =    pHeader->height;
+    _fontLastChar = pHeader->lastChar;
+    _fontHeight = pHeader->height;
 }
+
 #endif
 
 /*********************************************************************
@@ -1196,28 +1505,30 @@ FONT_HEADER  header;
 * Note: none
 *
 ********************************************************************/
-WORD OutText(XCHAR* textString){
-#ifndef USE_NONBLOCKING_CONFIG
+WORD OutText(XCHAR *textString)
+{
+    #ifndef USE_NONBLOCKING_CONFIG
 
-XCHAR ch;
+    XCHAR   ch;
     while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
         while(OutChar(ch) == 0);
-    return 1;
+    return (1);
 
-#else
+    #else
 
-XCHAR ch;
-static WORD counter = 0;
-    
-    while((unsigned XCHAR)(ch = *(textString+counter)) > (unsigned XCHAR)15){
+    XCHAR       ch;
+    static WORD counter = 0;
+
+    while((unsigned XCHAR)(ch = *(textString + counter)) > (unsigned XCHAR)15)
+    {
         if(OutChar(ch) == 0)
-            return 0;
+            return (0);
         counter++;
     }
-    counter = 0;
-    return 1;
 
-#endif
+    counter = 0;
+    return (1);
+    #endif
 }
 
 /*********************************************************************
@@ -1236,32 +1547,37 @@ static WORD counter = 0;
 * Note: none
 *
 ********************************************************************/
-WORD OutTextXY(SHORT x, SHORT y, XCHAR* textString){
-
-#ifndef USE_NONBLOCKING_CONFIG
-
-    MoveTo(x,y);
+WORD OutTextXY(SHORT x, SHORT y, XCHAR *textString)
+{
+    #ifndef USE_NONBLOCKING_CONFIG
+    MoveTo(x, y);
     OutText(textString);
-    return 1;
+    return (1);
 
-#else
+    #else
 
-static BYTE start = 1;
+    static BYTE start = 1;
 
-    if(start){
-        MoveTo(x,y);
+    if(start)
+    {
+        MoveTo(x, y);
         start = 0;
     }
 
-    if(OutText(textString) == 0){
-        return 0;
-    }else{
-        start = 1;
-        return 1;
+    if(OutText(textString) == 0)
+    {
+        return (0);
     }
-#endif
+    else
+    {
+        start = 1;
+        return (1);
+    }
+
+    #endif
 }
 
+#ifndef USE_DRV_FONT
 /*********************************************************************
 * Function: WORD OutChar(XCHAR ch)
 *
@@ -1282,123 +1598,149 @@ static BYTE start = 1;
 * Note: none
 *
 ********************************************************************/
-#ifndef USE_DRV_FONT
-WORD OutChar(XCHAR ch){
+WORD OutChar(XCHAR ch)
+{
+    GLYPH_ENTRY *pChTable = NULL;
+    BYTE        *pChImage = NULL;
 
-    GLYPH_ENTRY* pChTable;
-    BYTE*        pChImage;
-    
-    #ifdef USE_FONT_EXTERNAL
-    GLYPH_ENTRY  chTable;
-    BYTE         chImage[EXTERNAL_FONT_BUFFER_SIZE];
-    WORD         imageSize;
-    DWORD_VAL    glyphOffset;
-    #endif
-    
-    SHORT        chWidth;
-    SHORT        xCnt, yCnt, x, y;
-    BYTE         temp, mask;
+        #ifdef USE_FONT_EXTERNAL
+    GLYPH_ENTRY chTable;
+    BYTE        chImage[EXTERNAL_FONT_BUFFER_SIZE];
+    WORD        imageSize;
+    DWORD_VAL   glyphOffset;
+        #endif
+    SHORT       chWidth = 0;
+    SHORT       xCnt, yCnt, x = 0, y;
+    BYTE        temp = 0, mask;
 
-    #ifndef USE_NONBLOCKING_CONFIG
-        while(IsDeviceBusy() != 0); /* Ready */
-    #else
-        if(IsDeviceBusy() != 0) return 0;
-    #endif
+        #ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
 
-    if((unsigned XCHAR)ch<(unsigned XCHAR)_fontFirstChar)
-        return -1;
-    if((unsigned XCHAR)ch>(unsigned XCHAR)_fontLastChar)
-        return -1;
+    /* Ready */
+        #else
+    if(IsDeviceBusy() != 0)
+        return (0);
+        #endif
+    if((unsigned XCHAR)ch < (unsigned XCHAR)_fontFirstChar)
+        return (-1);
+    if((unsigned XCHAR)ch > (unsigned XCHAR)_fontLastChar)
+        return (-1);
 
-    switch(*((SHORT*)_font)){
-#ifdef USE_FONT_FLASH
+    switch(*((SHORT *)_font))
+    {
+                #ifdef USE_FONT_FLASH
+
         case FLASH:
+            pChTable = (GLYPH_ENTRY *) (((FONT_FLASH *)_font)->address + sizeof(FONT_HEADER)) + ((unsigned XCHAR)ch - (unsigned XCHAR)_fontFirstChar);
 
-            pChTable = (GLYPH_ENTRY*)( ((FONT_FLASH*)_font)->address+sizeof(FONT_HEADER) ) + ((unsigned XCHAR)ch-(unsigned XCHAR)_fontFirstChar);
-
-            pChImage = (BYTE*)( ((FONT_FLASH*)_font)->address + pChTable->offsetLSB );
+            pChImage = (BYTE *) (((FONT_FLASH *)_font)->address + ((DWORD)(pChTable->offsetMSB) << 8) + pChTable->offsetLSB);
 
             chWidth = pChTable->width;
 
             break;
-#endif
-#ifdef USE_FONT_EXTERNAL
-        case EXTERNAL:          
+                #endif
+                #ifdef USE_FONT_EXTERNAL
+
+        case EXTERNAL:
+
             // get glyph entry
-            ExternalMemoryCallback(_font,
-                                   sizeof(FONT_HEADER)+((unsigned XCHAR)ch-(unsigned XCHAR)_fontFirstChar)*sizeof(GLYPH_ENTRY),
-                                   sizeof(GLYPH_ENTRY),
-                                   &chTable);
+            ExternalMemoryCallback
+            (
+                _font,
+                sizeof(FONT_HEADER) + ((unsigned XCHAR)ch - (unsigned XCHAR)_fontFirstChar) * sizeof(GLYPH_ENTRY),
+                sizeof(GLYPH_ENTRY),
+                &chTable
+            );
 
             chWidth = chTable.width;
 
             // width of glyph in bytes
             imageSize = 0;
-            if(chWidth&0x0007)
+            if(chWidth & 0x0007)
                 imageSize = 1;
-            imageSize += (chWidth>>3);
+            imageSize += (chWidth >> 3);
 
             // glyph image size
-            imageSize *= _fontHeight;    
+            imageSize *= _fontHeight;
 
             // get glyph image
-			glyphOffset.w[1] = chTable.offsetMSB;
-			glyphOffset.w[0] = chTable.offsetLSB;
+            glyphOffset.w[1] = (chTable.offsetMSB >> 8);
+            glyphOffset.w[0] = (chTable.offsetMSB << 8) + (chTable.offsetLSB);
 
-            ExternalMemoryCallback(_font,
-                                   glyphOffset.Val,
-                                   imageSize,
-                                   &chImage);
-            pChImage = (BYTE*)&chImage;
+            ExternalMemoryCallback(_font, glyphOffset.Val, imageSize, &chImage);
+            pChImage = (BYTE *) &chImage;
 
             break;
-#endif
+                #endif
+
         default:
             break;
     }
-    if(_fontOrientation == ORIENT_HOR){
-        y = GetY(); 
-        for(yCnt=0; yCnt<_fontHeight; yCnt++){        
-            x = GetX(); 
+
+    if(_fontOrientation == ORIENT_HOR)
+    {
+        y = GetY();
+        for(yCnt = 0; yCnt < _fontHeight; yCnt++)
+        {
+            x = GetX();
             mask = 0;
-            for(xCnt=0; xCnt<chWidth; xCnt++){
-                if(mask == 0){
+            for(xCnt = 0; xCnt < chWidth; xCnt++)
+            {
+                if(mask == 0)
+                {
                     temp = *pChImage++;
-                    mask = 0x80;
+                    mask = 0x01;
                 }
-                if(temp&mask){
-                    PutPixel(x,y);
+
+                if(temp & mask)
+                {
+                    PutPixel(x, y);
                 }
+
                 x++;
-                mask >>= 1;
+                mask <<= 1;
             }
+
             y++;
         }
+
         // move cursor
         _cursorX = x;
-    }else{
-        y = GetX(); 
-        for(yCnt=0; yCnt<_fontHeight; yCnt++){        
-            x = GetY(); 
-            mask = 0;
-            for(xCnt=0; xCnt<chWidth; xCnt++){
-                if(mask == 0){
+    }
+    else
+    {
+        y = GetX();
+        for(yCnt = 0; yCnt < _fontHeight; yCnt++)
+        {
+            x = GetY();
+            mask = 0; 
+            for(xCnt = 0; xCnt < chWidth; xCnt++)
+            {
+                if(mask == 0)
+                {
                     temp = *pChImage++;
-                    mask = 0x80;
+                    mask = 0x01; 
                 }
-                if(temp&mask){
-                    PutPixel(y,x);
+
+                if(temp & mask)
+                {
+                    PutPixel(y, x);
                 }
+
                 x--;
-                mask >>= 1;
+                mask <<= 1;
             }
+
             y++;
         }
+
         // move cursor
         _cursorY = x;
     }
-    return 1;
+
+    return (1);
 }
+
 #endif
 
 /*********************************************************************
@@ -1418,61 +1760,92 @@ WORD OutChar(XCHAR ch){
 * Note: none
 *
 ********************************************************************/
-#ifndef USE_DRV_FONT
-SHORT GetTextWidth(XCHAR* textString, void* font){
-GLYPH_ENTRY* pChTable;
-FONT_HEADER* pHeader;
-#ifdef USE_FONT_EXTERNAL
-GLYPH_ENTRY  chTable;
-FONT_HEADER  header;
-#endif
-SHORT        textWidth;
-//SHORT        temp;
-XCHAR        ch;
-XCHAR        fontFirstChar;
-XCHAR        fontLastChar;
+SHORT GetTextWidth(XCHAR *textString, void *font)
+{
+    GLYPH_ENTRY *pChTable;
+    FONT_HEADER *pHeader;
+        #ifdef USE_FONT_EXTERNAL
+    GLYPH_ENTRY chTable;
+    FONT_HEADER header;
+        #endif
+    SHORT       textWidth;
 
-    switch(*((SHORT*)font)){
-#ifdef USE_FONT_FLASH
-        case FLASH:
-            pHeader = (FONT_HEADER*)((FONT_FLASH*)font)->address;
+    //SHORT        temp;
+    XCHAR       ch;
+    XCHAR       fontFirstChar;
+    XCHAR       fontLastChar;
+
+    switch(*((SHORT *)font))
+    {
+                #ifdef USE_FONT_RAM
+
+        case RAM:
+            pHeader = (FONT_HEADER *) ((FONT_RAM *)font)->address;
             fontFirstChar = pHeader->firstChar;
-            fontLastChar  = pHeader->lastChar;
-            pChTable = (GLYPH_ENTRY*)(pHeader + 1);
+            fontLastChar = pHeader->lastChar;
+            pChTable = (GLYPH_ENTRY *) (pHeader + 1);
             textWidth = 0;
-            while((unsigned XCHAR)15<(unsigned XCHAR)(ch = *textString++)){
-                if((unsigned XCHAR)ch<(unsigned XCHAR)fontFirstChar)
+            while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
+            {
+                if((unsigned XCHAR)ch < (unsigned XCHAR)fontFirstChar)
                     continue;
-                if((unsigned XCHAR)ch>(unsigned XCHAR)fontLastChar)
+                if((unsigned XCHAR)ch > (unsigned XCHAR)fontLastChar)
                     continue;
-                textWidth += (pChTable+((unsigned XCHAR)ch-(unsigned XCHAR)fontFirstChar))->width;
+                textWidth += (pChTable + ((unsigned XCHAR)ch - (unsigned XCHAR)fontFirstChar))->width;
             }
-            return textWidth;
-#endif
-#ifdef USE_FONT_EXTERNAL
-        case EXTERNAL:
-            ExternalMemoryCallback(font,0,sizeof(FONT_HEADER),&header);
-            fontFirstChar = header.firstChar;
-            fontLastChar =  header.lastChar;
+
+            return (textWidth);
+                #endif
+                	    
+                #ifdef USE_FONT_FLASH
+
+        case FLASH:
+            pHeader = (FONT_HEADER *) ((FONT_FLASH *)font)->address;
+            fontFirstChar = pHeader->firstChar;
+            fontLastChar = pHeader->lastChar;
+            pChTable = (GLYPH_ENTRY *) (pHeader + 1);
             textWidth = 0;
-            while((unsigned XCHAR)15<(unsigned XCHAR)(ch = *textString++)){
-                if((unsigned XCHAR)ch<(unsigned XCHAR)fontFirstChar)
+            while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
+            {
+                if((unsigned XCHAR)ch < (unsigned XCHAR)fontFirstChar)
                     continue;
-                if((unsigned XCHAR)ch>(unsigned XCHAR)fontLastChar)
+                if((unsigned XCHAR)ch > (unsigned XCHAR)fontLastChar)
                     continue;
-                ExternalMemoryCallback(font,
-                                       sizeof(FONT_HEADER)+sizeof(GLYPH_ENTRY)*((unsigned XCHAR)ch-(unsigned XCHAR)fontFirstChar),
-                                       sizeof(GLYPH_ENTRY),
-                                       &chTable);
+                textWidth += (pChTable + ((unsigned XCHAR)ch - (unsigned XCHAR)fontFirstChar))->width;
+            }
+
+            return (textWidth);
+                #endif
+                #ifdef USE_FONT_EXTERNAL
+
+        case EXTERNAL:
+            ExternalMemoryCallback(font, 0, sizeof(FONT_HEADER), &header);
+            fontFirstChar = header.firstChar;
+            fontLastChar = header.lastChar;
+            textWidth = 0;
+            while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
+            {
+                if((unsigned XCHAR)ch < (unsigned XCHAR)fontFirstChar)
+                    continue;
+                if((unsigned XCHAR)ch > (unsigned XCHAR)fontLastChar)
+                    continue;
+                ExternalMemoryCallback
+                (
+                    font,
+                    sizeof(FONT_HEADER) + sizeof(GLYPH_ENTRY) * ((unsigned XCHAR)ch - (unsigned XCHAR)fontFirstChar),
+                    sizeof(GLYPH_ENTRY),
+                    &chTable
+                );
                 textWidth += chTable.width;
             }
-            return textWidth;
-#endif
+
+            return (textWidth);
+                #endif
+
         default:
-            return 0;
+            return (0);
     }
 }
-#endif
 
 /*********************************************************************
 * Function: SHORT GetTextHeight(void* font)
@@ -1490,28 +1863,34 @@ XCHAR        fontLastChar;
 * Note: none
 *
 ********************************************************************/
-#ifndef USE_DRV_FONT
-SHORT   GetTextHeight(void* font){
-#ifdef USE_FONT_EXTERNAL
-char height;
-#endif
+SHORT GetTextHeight(void *font)
+{
+        #ifdef USE_FONT_EXTERNAL
 
-    switch(*((SHORT*)font)){
-#ifdef USE_FONT_FLASH
+    char    height;
+        #endif
+    switch(*((SHORT *)font))
+    {
+                #ifdef USE_FONT_RAM
+        case RAM:
+            return ((FONT_HEADER *) ((FONT_RAM *)font)->address)->height;
+                #endif
+                
+                #ifdef USE_FONT_FLASH
         case FLASH:
-            return ((FONT_HEADER*)((FONT_FLASH*)font)->address)->height;
-#endif
-#ifdef USE_FONT_EXTERNAL
+            return ((FONT_HEADER *) ((FONT_FLASH *)font)->address)->height;
+                #endif
+                
+                #ifdef USE_FONT_EXTERNAL
         case EXTERNAL:
-            ExternalMemoryCallback(font,sizeof(FONT_HEADER)-1,1,&height);
-            return height;
-#endif
-        default:
-            return 0;
+            ExternalMemoryCallback(font, sizeof(FONT_HEADER) - 1, 1, &height);
+            return (height);
+                #endif
 
+        default:
+            return (0);
     }
 }
-#endif
 
 /*********************************************************************
 * Function: SHORT GetImageWidth(void* bitmap)
@@ -1529,24 +1908,28 @@ char height;
 * Note: none
 *
 ********************************************************************/
-SHORT GetImageWidth(void* bitmap){
-#ifdef USE_BITMAP_EXTERNAL
-SHORT width;
-#endif
+SHORT GetImageWidth(void *bitmap)
+{
+    #ifdef USE_BITMAP_EXTERNAL
 
-    switch(*((SHORT*)bitmap))
+    SHORT   width;
+    #endif
+    switch(*((SHORT *)bitmap))
     {
-#ifdef USE_BITMAP_FLASH
+            #ifdef USE_BITMAP_FLASH
+
         case FLASH:
-            return *( (FLASH_WORD*)((BITMAP_FLASH*)bitmap)->address+2 );
-#endif
-#ifdef USE_BITMAP_EXTERNAL
+            return (*((FLASH_WORD *) ((BITMAP_FLASH *)bitmap)->address + 2));
+            #endif
+            #ifdef USE_BITMAP_EXTERNAL
+
         case EXTERNAL:
             ExternalMemoryCallback(bitmap, 4, 2, &width);
-            return width;
-#endif
+            return (width);
+            #endif
+
         default:
-            return 0;
+            return (0);
     }
 }
 
@@ -1566,28 +1949,33 @@ SHORT width;
 * Note: none
 *
 ********************************************************************/
-SHORT GetImageHeight(void* bitmap){
-#ifdef USE_BITMAP_EXTERNAL
-SHORT height;
-#endif
+SHORT GetImageHeight(void *bitmap)
+{
+    #ifdef USE_BITMAP_EXTERNAL
 
-    switch(*((SHORT*)bitmap))
+    SHORT   height;
+    #endif
+    switch(*((SHORT *)bitmap))
     {
-#ifdef USE_BITMAP_FLASH
+            #ifdef USE_BITMAP_FLASH
+
         case FLASH:
-            return *( (FLASH_WORD*)((BITMAP_FLASH*)bitmap)->address+1 );
-#endif
-#ifdef USE_BITMAP_EXTERNAL
+            return (*((FLASH_WORD *) ((BITMAP_FLASH *)bitmap)->address + 1));
+            #endif
+            #ifdef USE_BITMAP_EXTERNAL
+
         case EXTERNAL:
             ExternalMemoryCallback(bitmap, 2, 2, &height);
-            return height;
-#endif
+            return (height);
+            #endif
+
         default:
-            return 0;
+            return (0);
     }
 }
 
 #ifndef USE_DRV_PUTIMAGE
+
 /*********************************************************************
 * Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
@@ -1610,92 +1998,100 @@ SHORT height;
 * Note: image must be located in flash
 *
 ********************************************************************/
-WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-    FLASH_BYTE* flashAddress;
-    BYTE colorDepth;
-    WORD colorTemp;
+WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    FLASH_BYTE  *flashAddress;
+    BYTE        colorDepth;
+    WORD        colorTemp;
 
-    #ifndef USE_NONBLOCKING_CONFIG
-        while(IsDeviceBusy() != 0); /* Ready */
-    #else
-        if(IsDeviceBusy() != 0) return 0;
-    #endif
+        #ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
+
+    /* Ready */
+        #else
+    if(IsDeviceBusy() != 0)
+        return (0);
+        #endif
 
     // Save current color
     colorTemp = GetColor();
 
-    switch(*((SHORT*)bitmap))
+    switch(*((SHORT *)bitmap))
     {
-#ifdef USE_BITMAP_FLASH
+                #ifdef USE_BITMAP_FLASH
+
         case FLASH:
+
             // Image address
-            flashAddress = ((BITMAP_FLASH*)bitmap)->address;
+            flashAddress = ((BITMAP_FLASH *)bitmap)->address;
+
             // Read color depth
-            colorDepth = *(flashAddress+1);
+            colorDepth = *(flashAddress + 1);
+
             // Draw picture
-            switch(colorDepth){
-                case 1:
-                    PutImage1BPP(left, top, flashAddress, stretch);
-                    break;
-#if	(COLOR_DEPTH >= 4)
-                case 4:
-                    PutImage4BPP(left, top, flashAddress, stretch);
-                    break;
-#endif
-#if	(COLOR_DEPTH >= 8)
-                case 8:
-                    PutImage8BPP(left, top, flashAddress, stretch);
-                    break;
-#endif
-#if	(COLOR_DEPTH == 16)
-                case 16:
-                    PutImage16BPP(left, top, flashAddress, stretch);
-                    break;
-#endif			
-				default:
-					break;
+            switch(colorDepth)
+            {
+                case 1:     PutImage1BPP(left, top, flashAddress, stretch); break; 
+                
+                    #if (COLOR_DEPTH >= 4)
+                case 4:     PutImage4BPP(left, top, flashAddress, stretch); break; 
+                    #endif
+                    
+                    #if (COLOR_DEPTH >= 8)
+                case 8:     PutImage8BPP(left, top, flashAddress, stretch); break;
+                    #endif
+                    
+                    #if (COLOR_DEPTH == 16)
+                case 16:    PutImage16BPP(left, top, flashAddress, stretch); break;
+                    #endif
+                    
+                default:    break;
             }
+
             break;
-#endif
-#ifdef USE_BITMAP_EXTERNAL
+                #endif
+                
+                #ifdef USE_BITMAP_EXTERNAL
+
         case EXTERNAL:
+
             // Get color depth
             ExternalMemoryCallback(bitmap, 1, 1, &colorDepth);
+
             // Draw picture
-            switch(colorDepth){
-                case 1:
-                    PutImage1BPPExt(left, top, bitmap, stretch);
-                    break;
-#ifdef	(COLOR_DEPTH >= 4)
-                case 4:
-                    PutImage4BPPExt(left, top, bitmap, stretch);
-                    break;
-#endif
-#ifdef	(COLOR_DEPTH >= 8)
-                case 8:
-                    PutImage8BPPExt(left, top, bitmap, stretch);
-                    break;
-#endif
-#ifdef	(COLOR_DEPTH == 16)
-                case 16:
-                    PutImage16BPPExt(left, top, bitmap, stretch);
-                    break;
-#endif
-                default:
-                    break;
+            switch(colorDepth)
+            {
+                case 1:     PutImage1BPPExt(left, top, bitmap, stretch); break;
+                
+                    #if (COLOR_DEPTH >= 4)
+                case 4:     PutImage4BPPExt(left, top, bitmap, stretch); break;
+                    #endif
+                    
+                    #if (COLOR_DEPTH >= 8)
+                case 8:     PutImage8BPPExt(left, top, bitmap, stretch); break;
+                    #endif
+                    
+                    #if (COLOR_DEPTH == 16)
+                case 16:    PutImage16BPPExt(left, top, bitmap, stretch); break;
+                    #endif
+                    
+                default:    break;
             }
+
             break;
-#endif
+                #endif
+
         default:
             break;
     }
 
     // Restore current color
     SetColor(colorTemp);
-    return 1;
+    return (1);
 }
 
-#ifdef USE_BITMAP_FLASH
+    #ifdef USE_BITMAP_FLASH
+
 /*********************************************************************
 * Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
 *
@@ -1714,61 +2110,72 @@ WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch){
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch){
-register FLASH_BYTE* flashAddress;
-register FLASH_BYTE* tempFlashAddress;
-BYTE temp;
-WORD sizeX, sizeY;
-WORD x,y;
-WORD xc,yc;
-BYTE stretchX,stretchY;
-WORD pallete[2];
-BYTE mask;
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    BYTE                temp = 0;
+    WORD                sizeX, sizeY;
+    WORD                x, y;
+    WORD                xc, yc;
+    BYTE                stretchX, stretchY;
+    WORD                pallete[2];
+    BYTE                mask;
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
 
     // Read image size
-    sizeY = *((FLASH_WORD*)flashAddress);
+    sizeY = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    sizeX = *((FLASH_WORD*)flashAddress);
+    sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    pallete[0] = *((FLASH_WORD*)flashAddress);
+    pallete[0] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    pallete[1] = *((FLASH_WORD*)flashAddress);
+    pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
     yc = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
         tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             flashAddress = tempFlashAddress;
             mask = 0;
             xc = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
 
                 // Read 8 pixels from flash
-                if(mask == 0){
+                if(mask == 0)
+                {
                     temp = *flashAddress;
                     flashAddress++;
                     mask = 0x80;
                 }
-                
+
                 // Set color
-                if(mask&temp){
+                if(mask & temp)
+                {
                     SetColor(pallete[1]);
-                }else{
+                }
+                else
+                {
                     SetColor(pallete[0]);
                 }
 
                 // Write pixel to screen
-                for(stretchX=0; stretchX<stretch; stretchX++){
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
                     PutPixel(xc++, yc);
                 }
+
                 // Shift to the next pixel
                 mask >>= 1;
-           }
-           yc++;
+            }
+
+            yc++;
         }
     }
 }
@@ -1790,63 +2197,77 @@ BYTE mask;
 * Note: image must be located in flash
 *
 ********************************************************************/
-#if	(COLOR_DEPTH >= 4)
+        #if (COLOR_DEPTH >= 4)
 
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch){
-register FLASH_BYTE* flashAddress;
-register FLASH_BYTE* tempFlashAddress;
-WORD sizeX, sizeY;
-register WORD x,y;
-WORD xc,yc;
-BYTE temp;
-register BYTE stretchX,stretchY;
-WORD pallete[16];
-WORD counter;
+/* */
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    WORD                sizeX, sizeY;
+    register WORD       x, y;
+    WORD                xc, yc;
+    BYTE                temp = 0;
+    register BYTE       stretchX, stretchY;
+    WORD                pallete[16];
+    WORD                counter;
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
 
     // Read image size
-    sizeY = *((FLASH_WORD*)flashAddress);
+    sizeY = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    sizeX = *((FLASH_WORD*)flashAddress);
+    sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
     // Read pallete
-    for(counter=0;counter<16;counter++){
-        pallete[counter] = *((FLASH_WORD*)flashAddress);
+    for(counter = 0; counter < 16; counter++)
+    {
+        pallete[counter] = *((FLASH_WORD *)flashAddress);
         flashAddress += 2;
     }
 
     yc = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
         tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             flashAddress = tempFlashAddress;
             xc = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
+
                 // Read 2 pixels from flash
-                if(x&0x0001){
+                if(x & 0x0001)
+                {
+
                     // second pixel in byte
-                    SetColor(pallete[temp>>4]);
-                }else{
+                    SetColor(pallete[temp >> 4]);
+                }
+                else
+                {
                     temp = *flashAddress;
                     flashAddress++;
+
                     // first pixel in byte
-                    SetColor(pallete[temp&0x0f]);
+                    SetColor(pallete[temp & 0x0f]);
                 }
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-					PutPixel(xc++, yc);
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(xc++, yc);
                 }
             }
+
             yc++;
         }
     }
 }
 
-#endif
+        #endif
 
 /*********************************************************************
 * Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
@@ -1865,41 +2286,48 @@ WORD counter;
 * Note: image must be located in flash
 *
 ********************************************************************/
-#if	(COLOR_DEPTH >= 8)
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch){
-register DWORD_VAL address;
-register FLASH_BYTE* flashAddress;
-register FLASH_BYTE* tempFlashAddress;
-WORD sizeX, sizeY;
-WORD x,y;
-WORD xc,yc;
-BYTE temp;
-BYTE stretchX, stretchY;
-WORD pallete[256];
-WORD counter;
+        #if (COLOR_DEPTH >= 8)
+
+/* */
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    WORD                sizeX, sizeY;
+    WORD                x, y;
+    WORD                xc, yc;
+    BYTE                temp;
+    BYTE                stretchX, stretchY;
+    WORD                pallete[256];
+    WORD                counter;
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
 
     // Read image size
-    sizeY = *((FLASH_WORD*)flashAddress);
+    sizeY = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-    sizeX = *((FLASH_WORD*)flashAddress);
+    sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
     // Read pallete
-    for(counter=0;counter<256;counter++){
-        pallete[counter] = *((FLASH_WORD*)flashAddress);
+    for(counter = 0; counter < 256; counter++)
+    {
+        pallete[counter] = *((FLASH_WORD *)flashAddress);
         flashAddress += 2;
     }
 
     yc = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
         tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             flashAddress = tempFlashAddress;
             xc = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
+
                 // Read pixels from flash
                 temp = *flashAddress;
                 flashAddress++;
@@ -1907,17 +2335,20 @@ WORD counter;
                 // Set color
                 SetColor(pallete[temp]);
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-					PutPixel(xc++, yc);
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(xc++, yc);
                 }
             }
+
             yc++;
         }
     }
 }
 
-#endif
+        #endif
+
 /*********************************************************************
 * Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
 *
@@ -1935,18 +2366,21 @@ WORD counter;
 * Note: image must be located in flash
 *
 ********************************************************************/
-#if	(COLOR_DEPTH == 16)
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch){
-register FLASH_WORD* flashAddress;
-register FLASH_WORD* tempFlashAddress;
-WORD sizeX, sizeY;
-register WORD x,y;
-WORD xc,yc;
-WORD temp;
-register BYTE stretchX,stretchY;
+        #if (COLOR_DEPTH == 16)
+
+/* */
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+{
+    register FLASH_WORD *flashAddress;
+    register FLASH_WORD *tempFlashAddress;
+    WORD                sizeX, sizeY;
+    register WORD       x, y;
+    WORD                xc, yc;
+    WORD                temp;
+    register BYTE       stretchX, stretchY;
 
     // Move pointer to size information
-    flashAddress = (FLASH_WORD*)bitmap + 1;
+    flashAddress = (FLASH_WORD *)bitmap + 1;
 
     // Read image size
     sizeY = *flashAddress;
@@ -1955,12 +2389,16 @@ register BYTE stretchX,stretchY;
     flashAddress++;
 
     yc = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
         tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             flashAddress = tempFlashAddress;
             xc = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
+
                 // Read pixels from flash
                 temp = *flashAddress;
                 flashAddress++;
@@ -1968,21 +2406,22 @@ register BYTE stretchX,stretchY;
                 // Set color
                 SetColor(temp);
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-					PutPixel(xc++, yc);
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(xc++, yc);
                 }
             }
+
             yc++;
         }
     }
 }
 
-#endif
+        #endif
+    #endif
+    #ifdef USE_BITMAP_EXTERNAL
 
-#endif
-
-#ifdef USE_BITMAP_EXTERNAL
 /*********************************************************************
 * Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
@@ -2000,33 +2439,34 @@ register BYTE stretchX,stretchY;
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-register DWORD      memOffset;
-BITMAP_HEADER       bmp;
-WORD                pallete[2];
-BYTE                lineBuffer[((GetMaxX()+1)/8)+1];
-BYTE*               pData; 
-SHORT               byteWidth;
+void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            pallete[2];
+    BYTE            lineBuffer[((GetMaxX() + 1) / 8) + 1];
+    BYTE            *pData;
+    SHORT           byteWidth;
 
-BYTE                temp;
-BYTE                mask;
-WORD                sizeX, sizeY;
-WORD                x,y;
-WORD xc,yc;
-BYTE                stretchX, stretchY;
+    BYTE            temp;
+    BYTE            mask;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            xc, yc;
+    BYTE            stretchX, stretchY;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (2 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2*sizeof(WORD), pallete);
+    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
 
     // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 2*sizeof(WORD);
+    memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
 
     // Line width in bytes
-    byteWidth = bmp.width>>3;
-    if(bmp.width&0x0007)
+    byteWidth = bmp.width >> 3;
+    if(bmp.width & 0x0007)
         byteWidth++;
 
     // Get size
@@ -2034,39 +2474,48 @@ BYTE                stretchX, stretchY;
     sizeY = bmp.height;
 
     yc = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             pData = lineBuffer;
             mask = 0;
             xc = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
 
                 // Read 8 pixels from flash
-                if(mask == 0){
+                if(mask == 0)
+                {
                     temp = *pData++;
                     mask = 0x80;
                 }
-                
+
                 // Set color
-                if(mask&temp){
+                if(mask & temp)
+                {
                     SetColor(pallete[1]);
-                }else{
+                }
+                else
+                {
                     SetColor(pallete[0]);
                 }
 
                 // Write pixel to screen
-                for(stretchX=0; stretchX<stretch; stretchX++){
-					PutPixel(xc++, yc);
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(xc++, yc);
                 }
 
                 // Shift to the next pixel
                 mask >>= 1;
-           }
-           yc++;
+            }
+
+            yc++;
         }
     }
 }
@@ -2088,33 +2537,36 @@ BYTE                stretchX, stretchY;
 * Note: image must be located in external memory
 *
 ********************************************************************/
-#ifdef	(COLOR_DEPTH >= 4)
-void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-register DWORD      memOffset;
-BITMAP_HEADER       bmp;
-WORD                pallete[16];
-BYTE                lineBuffer[((GetMaxX()+1)/2)+1];
-BYTE*               pData; 
-SHORT               byteWidth;
+        #if (COLOR_DEPTH >= 4)
 
-BYTE                temp;
-WORD                sizeX, sizeY;
-WORD                x,y;
-WORD xc,yc;
-BYTE                stretchX, stretchY;
+/* */
+void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            pallete[16];
+    BYTE            lineBuffer[((GetMaxX() + 1) / 2) + 1];
+    BYTE            *pData;
+    SHORT           byteWidth;
+
+    BYTE            temp = 0;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            xc, yc;
+    BYTE            stretchX, stretchY;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (16 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16*sizeof(WORD), pallete);
+    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
 
     // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 16*sizeof(WORD);
+    memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
 
     // Line width in bytes
-    byteWidth = bmp.width>>1;
-    if(bmp.width&0x0001)
+    byteWidth = bmp.width >> 1;
+    if(bmp.width & 0x0001)
         byteWidth++;
 
     // Get size
@@ -2122,37 +2574,48 @@ BYTE                stretchX, stretchY;
     sizeY = bmp.height;
 
     yc = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
-
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             pData = lineBuffer;
             xc = left;
-            for(x=0; x<sizeX; x++){
+            for(x = 0; x < sizeX; x++)
+            {
 
                 // Read 2 pixels from flash
-                if(x&0x0001){
+                if(x & 0x0001)
+                {
+
                     // second pixel in byte
-                    SetColor(pallete[temp>>4]);
-                }else{
+                    SetColor(pallete[temp >> 4]);
+                }
+                else
+                {
                     temp = *pData++;
+
                     // first pixel in byte
-                    SetColor(pallete[temp&0x0f]);
+                    SetColor(pallete[temp & 0x0f]);
                 }
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-					PutPixel(xc++, yc);
-				}
-           }
-           yc++;
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(xc++, yc);
+                }
+            }
+
+            yc++;
         }
     }
 }
-#endif
+
+        #endif
+
 /*********************************************************************
 * Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
@@ -2170,58 +2633,66 @@ BYTE                stretchX, stretchY;
 * Note: image must be located in external memory
 *
 ********************************************************************/
-#ifdef	(COLOR_DEPTH >= 8)
-void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-register DWORD      memOffset;
-BITMAP_HEADER       bmp;
-WORD                pallete[256];
-BYTE                lineBuffer[(GetMaxX()+1)];
-BYTE*               pData; 
+        #if (COLOR_DEPTH >= 8)
 
-BYTE                temp;
-WORD                sizeX, sizeY;
-WORD                x,y;
-WORD xc,yc;
-BYTE                stretchX, stretchY;
+/* */
+void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            pallete[256];
+    BYTE            lineBuffer[(GetMaxX() + 1)];
+    BYTE            *pData;
+
+    BYTE            temp;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            xc, yc;
+    BYTE            stretchX, stretchY;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (256 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256*sizeof(WORD), pallete);
+    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
 
     // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 256*sizeof(WORD);
+    memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
 
     // Get size
     sizeX = bmp.width;
     sizeY = bmp.height;
 
     yc = top;
-    for(y=0; y<sizeY; y++){
+    for(y = 0; y < sizeY; y++)
+    {
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
-
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             pData = lineBuffer;
             xc = left;
-            for(x=0; x<sizeX; x++){
-
+            for(x = 0; x < sizeX; x++)
+            {
                 temp = *pData++;
-                SetColor(pallete[temp]);                    
+                SetColor(pallete[temp]);
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-					PutPixel(xc++, yc);
-				}
-           }
-           yc++;
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(xc++, yc);
+                }
+            }
+
+            yc++;
         }
     }
 }
-#endif
+
+        #endif
+
 /*********************************************************************
 * Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
@@ -2239,19 +2710,22 @@ BYTE                stretchX, stretchY;
 * Note: image must be located in external memory
 *
 ********************************************************************/
-#ifdef	(COLOR_DEPTH == 16)
-void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch){
-register DWORD      memOffset;
-BITMAP_HEADER       bmp;
-WORD                lineBuffer[(GetMaxX()+1)];
-WORD*               pData; 
-WORD                byteWidth;
+        #if (COLOR_DEPTH == 16)
 
-WORD                temp;
-WORD                sizeX, sizeY;
-WORD                x,y;
-WORD xc,yc;
-BYTE                stretchX, stretchY;
+/* */
+void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            lineBuffer[(GetMaxX() + 1)];
+    WORD            *pData;
+    WORD            byteWidth;
+
+    WORD            temp;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            xc, yc;
+    BYTE            stretchX, stretchY;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
@@ -2263,35 +2737,37 @@ BYTE                stretchX, stretchY;
     sizeX = bmp.width;
     sizeY = bmp.height;
 
-    byteWidth = sizeX<<1;
+    byteWidth = sizeX << 1;
 
-    yc = top; 
-    for(y=0; y<sizeY; y++){
+    yc = top;
+    for(y = 0; y < sizeY; y++)
+    {
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        for(stretchY = 0; stretchY<stretch; stretchY++){
-
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
             pData = lineBuffer;
 
             xc = left;
-            for(x=0; x<sizeX; x++){
-
+            for(x = 0; x < sizeX; x++)
+            {
                 temp = *pData++;
-                SetColor(temp);                    
+                SetColor(temp);
 
-                // Write pixel to screen       
-                for(stretchX=0; stretchX<stretch; stretchX++){
-					PutPixel(xc++, yc);
-				}
-           }
-           yc++;
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    PutPixel(xc++, yc);
+                }
+            }
+
+            yc++;
         }
     }
 }
-#endif
 
-#endif
-
+        #endif
+    #endif
 #endif // USE_DRV_PUTIMAGE

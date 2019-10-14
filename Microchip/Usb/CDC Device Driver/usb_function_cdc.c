@@ -83,13 +83,9 @@
   ********************************************************************************/
 
 /** I N C L U D E S **********************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "USB\usb_device.h"
 #include "USB\usb.h"
 #include "USB\usb_function_cdc.h"
-#include "HardwareProfile.h"
+//#include "HardwareProfile.h"
 
 #ifdef USB_USE_CDC
 
@@ -174,12 +170,12 @@ void USBCheckCDCRequest(void)
     /*
      * If request recipient is not an interface then return
      */
-    if(SetupPkt.Recipient != RCPT_INTF) return;
+    if(SetupPkt.Recipient != USB_SETUP_RECIPIENT_INTERFACE_BITFIELD) return;
 
     /*
      * If request type is not class-specific then return
      */
-    if(SetupPkt.RequestType != CLASS) return;
+    if(SetupPkt.RequestType != USB_SETUP_TYPE_CLASS_BITFIELD) return;
 
     /*
      * Interface ID must match interface numbers associated with
@@ -195,7 +191,7 @@ void USBCheckCDCRequest(void)
          //send the packet
             inPipes[0].pSrc.bRam = (BYTE*)&dummy_encapsulated_cmd_response;
             inPipes[0].wCount.Val = dummy_length;
-            inPipes[0].info.bits.ctrl_trf_mem = USB_INPIPES_RAM;
+            inPipes[0].info.bits.ctrl_trf_mem = USB_EP0_RAM;
             inPipes[0].info.bits.busy = 1;
             break;
         case GET_ENCAPSULATED_RESPONSE:
@@ -754,7 +750,7 @@ void CDCTxService(void)
         pCDCDst.bRam = (BYTE*)&cdc_data_tx; // Set destination pointer
         
         i = byte_to_send;
-        if(cdc_mem_type == _ROM)            // Determine type of memory source
+        if(cdc_mem_type == USB_EP0_ROM)            // Determine type of memory source
         {
             while(i)
             {

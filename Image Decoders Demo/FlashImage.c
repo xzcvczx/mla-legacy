@@ -1,4 +1,9 @@
+/*$6*/
+
+
+
 #define _FLASHIMAGE_C
+
 /******************************************************************************
 
 * FileName:        FlashImage.c
@@ -35,12 +40,11 @@ Author                 Date           Comments
 --------------------------------------------------------------------------------
 Pradeep Budagutta    25-Jun-2008    First release
 *******************************************************************************/
-
 #include "FlashImage.h"
 #include "FlashImageData.h"
 
-long FlashImageIndex;
-long FlashImageSize;
+long    FlashImageIndex;
+long    FlashImageSize;
 
 /*******************************************************************************
 Function:       size_t FlashImage_fread(void *ptr, size_t size, size_t n, void* file)
@@ -54,17 +58,18 @@ Input:          Data buffer, size of data chunk, size of data type, file pointer
 
 Output:         Number of bytes copied
 *******************************************************************************/
-size_t FlashImage_fread(void *ptr, size_t size, size_t n, void* file)
+size_t FlashImage_fread(void *ptr, size_t size, size_t n, void *file)
 {
-       size_t index;
-       for(index = 0; index < size*n && FlashImageIndex < FlashImageSize; index++)
-       {
-                 BYTE *bptr = (BYTE*)ptr;
-                 BYTE *pFile = (BYTE*)file;
-                 bptr[index] = pFile[FlashImageIndex];
-                 FlashImageIndex++;
-       }
-       return index;
+    size_t  index;
+    for(index = 0; index < size * n && FlashImageIndex < FlashImageSize; index++)
+    {
+        BYTE    *bptr = (BYTE *)ptr;
+        BYTE    *pFile = (BYTE *)file;
+        bptr[index] = pFile[FlashImageIndex];
+        FlashImageIndex++;
+    }
+
+    return (index);
 }
 
 /*******************************************************************************
@@ -79,21 +84,22 @@ Input:          File pointer, offset and the referance position
 
 Output:         TRUE if success
 *******************************************************************************/
-int FlashImage_fseek(void* stream, long offset, int whence)
+int FlashImage_fseek(void *stream, long offset, int whence)
 {
     if(whence == 0)
     {
-              FlashImageIndex = offset;
+        FlashImageIndex = offset;
     }
     else if(whence == 1)
     {
-              FlashImageIndex += offset;
+        FlashImageIndex += offset;
     }
     else if(whence == 2)
     {
-              FlashImageIndex = FlashImageSize - offset;
+        FlashImageIndex = FlashImageSize - offset;
     }
-    return TRUE;              
+
+    return (TRUE);
 }
 
 /*******************************************************************************
@@ -110,7 +116,7 @@ Output:         Pointer position
 *******************************************************************************/
 long FlashImage_ftell(void *fo)
 {
-     return FlashImageIndex;
+    return (FlashImageIndex);
 }
 
 /*******************************************************************************
@@ -129,9 +135,10 @@ int FlashImage_feof(void *stream)
 {
     if(FlashImageIndex < FlashImageSize)
     {
-              return FALSE;
+        return (FALSE);
     }
-    return TRUE;
+
+    return (TRUE);
 }
 
 /*******************************************************************************
@@ -146,11 +153,11 @@ Input:          An enum representing the image
 
 Output:         File pointer
 *******************************************************************************/
-void* FlashImage_fopen(IMAGE_NAME eImageName)
+void *FlashImage_fopen(IMAGE_NAME eImageName)
 {
-  FlashImageIndex = 0;
-  FlashImageSize = aImageLength[eImageName];
-  return (void*)ImageList[eImageName];
+    FlashImageIndex = 0;
+    FlashImageSize = aImageLength[eImageName];
+    return (void *)ImageList[eImageName];
 }
 
 #undef _FLASHIMAGE_C

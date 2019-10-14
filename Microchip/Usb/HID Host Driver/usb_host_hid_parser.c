@@ -148,7 +148,7 @@ USB_HID_RPT_DESC_ERROR _USBHostHID_Parse_Report(BYTE* hidReportDescriptor , WORD
 
    /* Global Item Vars */
    HID_REPORT *lreport = NULL;
-   BYTE lreportIndex = NULL;
+   BYTE lreportIndex = (BYTE)NULL;
 
    /* Local Item Vars */
    HID_DESIGITEM *ldesignatorItem = NULL;

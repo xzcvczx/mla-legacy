@@ -37,74 +37,68 @@
  * Paolo Tamayo         01/29/09    ...
  ********************************************************************/
 #ifndef GRAPHSHOW_H
-#define GRAPHSHOW_H
+    #define GRAPHSHOW_H
 
-
-#include "Graphics\Graphics.h"
+    #include "Graphics\Graphics.h"
 
 ////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED
 /////////////////////////////////////////////////////////////////////////////
-extern const FONT_FLASH GOLFontDefault; 	// default GOL font
-extern const FONT_FLASH GOLMediumFont; 		// medium font
-extern const FONT_FLASH GOLSmallFont; 		// small font
+extern const FONT_FLASH GOLFontDefault;         // default GOL font
+extern const FONT_FLASH GOLMediumFont;          // medium font
+extern const FONT_FLASH GOLSmallFont;           // small font
 
 /////////////////////////////////////////////////////////////////////////////
+
 //                            COLORS USED
 /////////////////////////////////////////////////////////////////////////////
-#define GRAY20             RGB565CONVERT( 51,  51,  51)
-#define GRAY40             RGB565CONVERT(102, 102, 102)
-#define GRAY80             RGB565CONVERT(204, 204, 204)
-#define GRAY90             RGB565CONVERT(229, 229, 229)
-#define GRAY95             RGB565CONVERT(242, 242, 242)
-
-#define RED4 			   RGB565CONVERT(139,   0,   0)
-#define FIREBRICK1 		   RGB565CONVERT(255,  48,  48)
-#define DARKGREEN          RGB565CONVERT(  0, 100,   0)
-#define PALEGREEN          RGB565CONVERT(152, 251, 152)
-#define LIGHTYELLOW        RGB565CONVERT(238, 221, 130)
-#define GOLD               RGB565CONVERT(255, 215,   0)
-#define DARKORANGE		   RGB565CONVERT(255, 140,   0)
-
-#define UPDATECHARTINTERVAL (1000)
-#define CHARTTITLESTRLENGTH (30)
+    #define GRAY20              RGB565CONVERT(51, 51, 51)
+    #define GRAY40              RGB565CONVERT(102, 102, 102)
+    #define GRAY80              RGB565CONVERT(204, 204, 204)
+    #define GRAY90              RGB565CONVERT(229, 229, 229)
+    #define GRAY95              RGB565CONVERT(242, 242, 242)
+    #define RED4                RGB565CONVERT(139, 0, 0)
+    #define FIREBRICK1          RGB565CONVERT(255, 48, 48)
+    #define DARKGREEN           RGB565CONVERT(0, 100, 0)
+    #define PALEGREEN           RGB565CONVERT(152, 251, 152)
+    #define LIGHTYELLOW         RGB565CONVERT(238, 221, 130)
+    #define GOLD                RGB565CONVERT(255, 215, 0)
+    #define DARKORANGE          RGB565CONVERT(255, 140, 0)
+    #define UPDATECHARTINTERVAL (1000)
+    #define CHARTTITLESTRLENGTH (30)
 
 /////////////////////////////////////////////////////////////////////////////
-//                            DEMO TYPES      
+//                            DEMO TYPES
 /////////////////////////////////////////////////////////////////////////////
-typedef enum {
-
-	BAR_LEGEND_PERCENT_VERTICAL       = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT ),
-	BAR_LEGEND_NPERCENT_VERTICAL      = (CH_BAR | CH_LEGEND | CH_VALUE              ),
-	BAR_NLEGEND_PERCENT_VERTICAL      = (CH_BAR |             CH_VALUE | CH_PERCENT ),
-
-	BAR_LEGEND_PERCENT_HORIZONTAL     = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT | CH_BAR_HOR),
-	BAR_LEGEND_NPERCENT_HORIZONTAL    = (CH_BAR | CH_LEGEND | CH_VALUE |              CH_BAR_HOR),
-	BAR_NLEGEND_PERCENT_HORIZONTAL    = (CH_BAR |             CH_VALUE | CH_PERCENT | CH_BAR_HOR),
-
-	BAR_3D_LEGEND_PERCENT_VERTICAL    = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT |              CH_3D_ENABLE),
-	BAR_3D_LEGEND_NPERCENT_VERTICAL   = (CH_BAR | CH_LEGEND | CH_VALUE |                           CH_3D_ENABLE),
-	BAR_3D_NLEGEND_PERCENT_VERTICAL   = (CH_BAR |             CH_VALUE | CH_PERCENT |              CH_3D_ENABLE),
-
-	BAR_3D_LEGEND_PERCENT_HORIZONTAL  = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT | CH_BAR_HOR | CH_3D_ENABLE),
-	BAR_3D_LEGEND_NPERCENT_HORIZONTAL = (CH_BAR | CH_LEGEND | CH_VALUE |              CH_BAR_HOR | CH_3D_ENABLE),
-	BAR_3D_NLEGEND_PERCENT_HORIZONTAL = (CH_BAR |             CH_VALUE | CH_PERCENT | CH_BAR_HOR | CH_3D_ENABLE),
-
-	PIE_NLEGEND_PERCENT				  = (CH_PIE |             CH_VALUE | CH_PERCENT ),
-	PIE_LEGEND_PERCENT				  = (CH_PIE | CH_LEGEND | CH_VALUE | CH_PERCENT | CH_DONUT),
-	PIE_LEGEND_NPERCENT				  = (CH_PIE | CH_LEGEND | CH_VALUE              ),
-	PIE_NLEGEND_NPERCENT			  = (CH_PIE |             CH_VALUE |              CH_DONUT),
-
-} CHART_DEMO_TYPES;	 
+typedef enum
+{
+    BAR_LEGEND_PERCENT_VERTICAL         = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT),
+    BAR_LEGEND_NPERCENT_VERTICAL        = (CH_BAR | CH_LEGEND | CH_VALUE),
+    BAR_NLEGEND_PERCENT_VERTICAL        = (CH_BAR | CH_VALUE | CH_PERCENT),
+    BAR_LEGEND_PERCENT_HORIZONTAL       = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT | CH_BAR_HOR),
+    BAR_LEGEND_NPERCENT_HORIZONTAL      = (CH_BAR | CH_LEGEND | CH_VALUE | CH_BAR_HOR),
+    BAR_NLEGEND_PERCENT_HORIZONTAL      = (CH_BAR | CH_VALUE | CH_PERCENT | CH_BAR_HOR),
+    BAR_3D_LEGEND_PERCENT_VERTICAL      = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT | CH_3D_ENABLE),
+    BAR_3D_LEGEND_NPERCENT_VERTICAL     = (CH_BAR | CH_LEGEND | CH_VALUE | CH_3D_ENABLE),
+    BAR_3D_NLEGEND_PERCENT_VERTICAL     = (CH_BAR | CH_VALUE | CH_PERCENT | CH_3D_ENABLE),
+    BAR_3D_LEGEND_PERCENT_HORIZONTAL    = (CH_BAR | CH_LEGEND | CH_VALUE | CH_PERCENT | CH_BAR_HOR | CH_3D_ENABLE),
+    BAR_3D_LEGEND_NPERCENT_HORIZONTAL   = (CH_BAR | CH_LEGEND | CH_VALUE | CH_BAR_HOR | CH_3D_ENABLE),
+    BAR_3D_NLEGEND_PERCENT_HORIZONTAL   = (CH_BAR | CH_VALUE | CH_PERCENT | CH_BAR_HOR | CH_3D_ENABLE),
+    PIE_NLEGEND_PERCENT                 = (CH_PIE | CH_VALUE | CH_PERCENT),
+    PIE_LEGEND_PERCENT                  = (CH_PIE | CH_LEGEND | CH_VALUE | CH_PERCENT | CH_DONUT),
+    PIE_LEGEND_NPERCENT                 = (CH_PIE | CH_LEGEND | CH_VALUE),
+    PIE_NLEGEND_NPERCENT                = (CH_PIE | CH_VALUE | CH_DONUT),
+} CHART_DEMO_TYPES;
 
 /*///////////////////////////////////////////////////////////////////////////
 //                            CHART TYPES      
 ///////////////////////////////////////////////////////////////////////////*/
-typedef enum {
-	SHOW_SINGLE_BAR = 0x50,				// Bar Chart with single variable
-	SHOW_MULTIPLE_BAR,					// Bar Chart with multiple variables
-	SHOW_SINGLE_PIE,					// Pie Chart with single variable
-	SHOW_MULTIPLE_PIE,					// Pie Chart with multiple variables
+typedef enum
+{
+    SHOW_SINGLE_BAR                     = 0x50, // Bar Chart with single variable
+    SHOW_MULTIPLE_BAR,                          // Bar Chart with multiple variables
+    SHOW_SINGLE_PIE,                            // Pie Chart with single variable
+    SHOW_MULTIPLE_PIE,                          // Pie Chart with multiple variables
 } CHART_TYPES;
 
 /************************************************************************
@@ -117,7 +111,7 @@ typedef enum {
                                                                        
  Output: none
 ************************************************************************/
-void InitGraphDemoStyleScheme(GOL_SCHEME *pScheme);
+void    InitGraphDemoStyleScheme(GOL_SCHEME *pScheme);
 
 /************************************************************************
  Function: WORD GraphMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
@@ -135,7 +129,7 @@ void InitGraphDemoStyleScheme(GOL_SCHEME *pScheme);
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD GraphMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg); 
+WORD    GraphMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 
 /************************************************************************
  Function: void UpdateGraphDemo(DWORD tick)
@@ -148,7 +142,7 @@ WORD GraphMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
                                                                        
  Output: none
 ************************************************************************/
-void UpdateGraphDemo(DWORD tick);
+void    UpdateGraphDemo(DWORD tick);
 
 /************************************************************************
  Function: WORD CreateGraphDemo(void)
@@ -161,7 +155,5 @@ void UpdateGraphDemo(DWORD tick);
          demo was successful. If not successful, the calling function
          can recover and not continue the demo. 
 ************************************************************************/
-WORD CreateGraphDemo(void);
-
-
+WORD    CreateGraphDemo(void);
 #endif // GRAPHSHOW_H

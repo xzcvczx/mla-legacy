@@ -45,22 +45,12 @@
 #define USBMOUSE_C
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
 #include "./USB/usb.h"
-
 #include "HardwareProfile.h"
-
 #include "./USB/usb_function_hid.h"
-
 #include "mtouch.h"
-
 #include "BMA150.h"
-
 #include "oled.h"
-
 #include "soft_start.h"
 
 /** CONFIGURATION **************************************************/

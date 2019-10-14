@@ -32,11 +32,6 @@
     IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
     CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-     Change History:
-     Rev         Description
-     v2.3        Decricated the mUSBUSARTIsTxTrfReady() macro.  It is 
-                 replaced by the USBUSARTIsTxTrfReady() function.
-
   Summary:
     This file contains all of functions, macros, definitions, variables,
     datatypes, etc. that are required for usage with the CDC function
@@ -73,15 +68,9 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
+    .
     
-    ..\\..\\Include
-    
-    ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
+    ..\\..\\Microchip\\Include
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -93,6 +82,16 @@
 
 ********************************************************************/
 
+/********************************************************************
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.3    Decricated the mUSBUSARTIsTxTrfReady() macro.  It is 
+         replaced by the USBUSARTIsTxTrfReady() function.
+
+  2.6    Minor defintion changes
+
+********************************************************************/
 
 #ifndef CDC_H
 #define CDC_H
@@ -504,7 +503,7 @@
 {                                   \
     pCDCSrc.bRam = pData;           \
     cdc_tx_len = len;               \
-    cdc_mem_type = _RAM;            \
+    cdc_mem_type = USB_EP0_RAM;     \
     cdc_trf_state = CDC_TX_BUSY;    \
 }
 
@@ -543,7 +542,7 @@
 {                                   \
     pCDCSrc.bRom = pData;           \
     cdc_tx_len = len;               \
-    cdc_mem_type = _ROM;            \
+    cdc_mem_type = USB_EP0_ROM;     \
     cdc_trf_state = CDC_TX_BUSY;    \
 }
 
@@ -636,6 +635,9 @@ extern BYTE cdc_mem_type;
 
 extern volatile FAR CDC_NOTICE cdc_notice;
 extern LINE_CODING line_coding;
+
+extern volatile CTRL_TRF_SETUP SetupPkt;
+extern ROM BYTE configDescriptor1[];
 
 /** Public Prototypes *************************************************/
 void USBCheckCDCRequest(void);

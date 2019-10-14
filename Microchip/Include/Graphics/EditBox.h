@@ -38,36 +38,35 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _EDITBOX_H
-#define _EDITBOX_H
+    #define _EDITBOX_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define EB_FOCUSED      0x0001  // Bit for focused state.
-#define EB_DISABLED   	0x0002  // Bit for disabled state.
-#define EB_RIGHT_ALIGN 	0x0004  // Bit to indicate text is left aligned.
-#define EB_CENTER_ALIGN	0x0008  // Bit to indicate text is center aligned.
-#define EB_CARET        0x0010  // Bit to indicate the cursor will be shown when focused.
-#define EB_DRAW_CARET   0x2000  // Bit to indicate the cursor must be redrawn.
-#define EB_DRAW     	0x4000  // Bit to indicate whole edit box must be redrawn.
-#define EB_HIDE     	0x8000  // Bit to remove object from screen.
-
-#define EB_INDENT       0x02    // Indent for the text from the frame.
-#define EB_CARET_WIDTH  0x02    // Caret line width.
+    #define EB_FOCUSED      0x0001  // Bit for focused state.
+    #define EB_DISABLED     0x0002  // Bit for disabled state.
+    #define EB_RIGHT_ALIGN  0x0004  // Bit to indicate text is left aligned.
+    #define EB_CENTER_ALIGN 0x0008  // Bit to indicate text is center aligned.
+    #define EB_CARET        0x0010  // Bit to indicate the cursor will be shown when focused.
+    #define EB_DRAW_CARET   0x2000  // Bit to indicate the cursor must be redrawn.
+    #define EB_DRAW         0x4000  // Bit to indicate whole edit box must be redrawn.
+    #define EB_HIDE         0x8000  // Bit to remove object from screen.
+    #define EB_INDENT       0x02    // Indent for the text from the frame.
+    #define EB_CARET_WIDTH  0x02    // Caret line width.
 
 /*********************************************************************
 * Overview: Defines the parameters required for a Edit Box Object.
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).   
-	SHORT     		textHeight;     // Pre-computed text height.
-	XCHAR  			*pBuffer;       // Pointer to text buffer.
-    WORD            charMax;        // Maximum number of characters in the edit box.
-    WORD            length;         // Current text length.
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    SHORT       textHeight; // Pre-computed text height.
+    XCHAR       *pBuffer;   // Pointer to text buffer.
+    WORD        charMax;    // Maximum number of characters in the edit box.
+    WORD        length;     // Current text length.
 } EDITBOX;
 
 /*********************************************************************
@@ -118,8 +117,18 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-				   WORD state , XCHAR *pText, WORD charMax, GOL_SCHEME *pScheme);
+EDITBOX *EbCreate
+        (
+            WORD        ID,
+            SHORT       left,
+            SHORT       top,
+            SHORT       right,
+            SHORT       bottom,
+            WORD        state,
+            XCHAR       *pText,
+            WORD        charMax,
+            GOL_SCHEME  *pScheme
+        );
 
 /*********************************************************************
 * Function: EbSetText(EDITBOX *pEb, XCHAR *pText)
@@ -136,7 +145,7 @@ EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-void EbSetText(EDITBOX *pEb, XCHAR *pText);
+void    EbSetText(EDITBOX *pEb, XCHAR *pText);
 
 /*********************************************************************
 * Macros:  EbGetText(pEb)
@@ -153,7 +162,7 @@ void EbSetText(EDITBOX *pEb, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-#define EbGetText(pEb)                (pEb->pBuffer)
+    #define EbGetText(pEb)  (pEb->pBuffer)
 
 /*********************************************************************
 * Function: void  EbAddChar(EDITBOX* pEb, XCHAR ch)
@@ -171,7 +180,7 @@ void EbSetText(EDITBOX *pEb, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-void EbAddChar(EDITBOX* pEb, XCHAR ch);
+void    EbAddChar(EDITBOX *pEb, XCHAR ch);
 
 /*********************************************************************
 * Function: void  EbDeleteChar(EDITBOX* pEb)
@@ -188,7 +197,7 @@ void EbAddChar(EDITBOX* pEb, XCHAR ch);
 * Side Effects: none
 *
 ********************************************************************/
-void EbDeleteChar(EDITBOX* pEb);
+void    EbDeleteChar(EDITBOX *pEb);
 
 /*********************************************************************
 * Function: WORD EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg)
@@ -223,7 +232,7 @@ void EbDeleteChar(EDITBOX* pEb);
 * Side Effects: none
 *
 ********************************************************************/
-WORD EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg);
+WORD    EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: void EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg)
@@ -252,7 +261,7 @@ WORD EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg);
+void    EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD EbDraw(EDITBOX *pEb)
@@ -282,6 +291,5 @@ void EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD EbDraw(EDITBOX *pEb);
-
+WORD    EbDraw(EDITBOX *pEb);
 #endif // _EDITBOX_H

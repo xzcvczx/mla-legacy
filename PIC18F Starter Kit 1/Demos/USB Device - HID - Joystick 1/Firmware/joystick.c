@@ -44,23 +44,13 @@
 #define USBJOYSTICK_C
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
 #include "./USB/usb.h"
-
 #include "HardwareProfile.h"
-
 #include "./USB/usb_function_hid.h"
 #include "mtouch.h"
-
 #include "BMA150.h"
-
 #include "oled.h"
-
 #include "soft_start.h"
-
 #include "Slider2Ch.h"
 
 /** CONFIGURATION **************************************************/
@@ -304,23 +294,22 @@ typedef union _PS3_INTPUT_CONTROLS_TYPEDEF
             BYTE Z;
             BYTE Rz;
         } analog_stick;
-        struct
-        {
-            BYTE right;
-            BYTE left;
-            BYTE up;
-            BYTE down;
-            BYTE triangle;
-            BYTE o;
-            BYTE x;
-            BYTE square;
-            BYTE L1;
-            BYTE R1;
-            BYTE L2;
-            BYTE R2;
-        }button_preasure;
+//        struct
+//        {
+//            BYTE right;
+//            BYTE left;
+//            BYTE up;
+//            BYTE down;
+//            BYTE triangle;
+//            BYTE o;
+//            BYTE x;
+//            BYTE square;
+//            BYTE L1;
+//            BYTE R1;
+//            BYTE L2;
+//            BYTE R2;
+//        }button_preasure;
     } members;
-    BYTE val[27];
 } PS3_INPUT_CONTROLS;
 PS3_INPUT_CONTROLS PS3_input;
 BYTE hid_report[8];

@@ -42,7 +42,6 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     06/18/07    Beta release
  *****************************************************************************/
-
 #include "MainDemo.h"
 
 #ifdef USE_CUSTOM
@@ -54,35 +53,34 @@
 * Overview: creates the object
 *
 ********************************************************************/
-CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-			       WORD state, GOL_SCHEME *pScheme)
+CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME *pScheme)
 {
-	CUSTOM *pCc = NULL;
-	
-	pCc = (CUSTOM*)malloc(sizeof(CUSTOM));
-	if (pCc == NULL)
-		return pCc;
+    CUSTOM  *pCc = NULL;
 
-	pCc->ID      	= ID;
-	pCc->pNxtObj 	= NULL;
-	pCc->type    	= OBJ_CUSTOM;
-	pCc->left    	= left;
-	pCc->top     	= top;
-	pCc->right   	= right;
-	pCc->bottom  	= bottom;
-	pCc->pos     	= (pCc->top+pCc->bottom)>>1; // position
-	pCc->prevPos   	= pCc->bottom-GOL_EMBOSS_SIZE;  // previos position
-	pCc->state   	= state;                // set state
+    pCc = (CUSTOM *)malloc(sizeof(CUSTOM));
+    if(pCc == NULL)
+        return (pCc);
 
-	// Set the style scheme to be used
-	if (pScheme == NULL)
-		pCc->pGolScheme = _pDefaultGolScheme; 
-	else 	
-		pCc->pGolScheme = (GOL_SCHEME *)pScheme; 	
+    pCc->ID = ID;
+    pCc->pNxtObj = NULL;
+    pCc->type = OBJ_CUSTOM;
+    pCc->left = left;
+    pCc->top = top;
+    pCc->right = right;
+    pCc->bottom = bottom;
+    pCc->pos = (pCc->top + pCc->bottom) >> 1;       // position
+    pCc->prevPos = pCc->bottom - GOL_EMBOSS_SIZE;   // previos position
+    pCc->state = state;                             // set state
 
-    GOLAddObject((OBJ_HEADER*) pCc);
-	
-	return pCc;
+    // Set the style scheme to be used
+    if(pScheme == NULL)
+        pCc->pGolScheme = _pDefaultGolScheme;
+    else
+        pCc->pGolScheme = (GOL_SCHEME *)pScheme;
+
+    GOLAddObject((OBJ_HEADER *)pCc);
+
+    return (pCc);
 }
 
 /*********************************************************************
@@ -93,24 +91,30 @@ CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 ********************************************************************/
 WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
 {
+
     // Check if disabled first
-	if ( GetState(pCc,CC_DISABLED) )
-		return OBJ_MSG_INVALID;
+    if(GetState(pCc, CC_DISABLED))
+        return (OBJ_MSG_INVALID);
 
-#ifdef USE_TOUCHSCREEN
-    if(pMsg->type == TYPE_TOUCHSCREEN){
-    	// Check if it falls in the control area
-	    if( (pCc->left+GOL_EMBOSS_SIZE < pMsg->param1) &&
-   	        (pCc->right-GOL_EMBOSS_SIZE  > pMsg->param1) &&
-            (pCc->top+GOL_EMBOSS_SIZE < pMsg->param2) &&
-            (pCc->bottom-GOL_EMBOSS_SIZE > pMsg->param2) ){
+        #ifdef USE_TOUCHSCREEN
+    if(pMsg->type == TYPE_TOUCHSCREEN)
+    {
 
-            return CC_MSG_SELECTED;
+        // Check if it falls in the control area
+        if
+        (
+            (pCc->left + GOL_EMBOSS_SIZE < pMsg->param1) &&
+            (pCc->right - GOL_EMBOSS_SIZE > pMsg->param1) &&
+            (pCc->top + GOL_EMBOSS_SIZE < pMsg->param2) &&
+            (pCc->bottom - GOL_EMBOSS_SIZE > pMsg->param2)
+        )
+        {
+            return (CC_MSG_SELECTED);
         }
     }
-#endif
 
-	return OBJ_MSG_INVALID;	
+        #endif
+    return (OBJ_MSG_INVALID);
 }
 
 /*********************************************************************
@@ -119,11 +123,10 @@ WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
 * Overview: changes the state of the object by default
 *
 ********************************************************************/
-void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg){
-  
+void CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg)
+{
     pCc->pos = pMsg->param2;
-    SetState(pCc,CC_DRAW_BAR);
-
+    SetState(pCc, CC_DRAW_BAR);
 }
 
 /*********************************************************************
@@ -138,89 +141,99 @@ void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg){
 ********************************************************************/
 WORD CcDraw(CUSTOM *pCc)
 {
-typedef enum {
-	REMOVE,
-	BOX_DRAW,
-	RUN_DRAW,
-    BAR_DRAW,
-	GRID_DRAW
-} CC_DRAW_STATES;
+    typedef enum
+    {
+        REMOVE,
+        BOX_DRAW,
+        RUN_DRAW,
+        BAR_DRAW,
+        GRID_DRAW
+    } CC_DRAW_STATES;
 
+    static CC_DRAW_STATES state = REMOVE;
+    static SHORT counter;
+    static SHORT delta;
 
-static CC_DRAW_STATES state = REMOVE;
-static SHORT counter;
-static SHORT delta;
-
-    switch(state){
-
+    switch(state)
+    {
         case REMOVE:
-            if(GetState(pCc,CC_HIDE)){
-
+            if(GetState(pCc, CC_HIDE))
+            {
                 SetColor(pCc->pGolScheme->CommonBkColor);
-                if(!Bar(pCc->left,pCc->top,pCc->right,pCc->bottom))
-			return 0;
-                return 1;
+                if(!Bar(pCc->left, pCc->top, pCc->right, pCc->bottom))
+                    return (0);
+                return (1);
             }
+
             state = BOX_DRAW;
 
         case BOX_DRAW:
-
-            if(GetState(pCc,CC_DRAW)){
-
-                GOLPanelDraw(pCc->left,pCc->top,
-                             pCc->right,pCc->bottom,0,
-                             pCc->pGolScheme->Color0,
-                             pCc->pGolScheme->EmbossDkColor,
-                             pCc->pGolScheme->EmbossLtColor,
-                             NULL, GOL_EMBOSS_SIZE);
+            if(GetState(pCc, CC_DRAW))
+            {
+                GOLPanelDraw
+                (
+                    pCc->left,
+                    pCc->top,
+                    pCc->right,
+                    pCc->bottom,
+                    0,
+                    pCc->pGolScheme->Color0,
+                    pCc->pGolScheme->EmbossDkColor,
+                    pCc->pGolScheme->EmbossLtColor,
+                    NULL,
+                    GOL_EMBOSS_SIZE
+                );
 
                 state = RUN_DRAW;
 
-                case RUN_DRAW:
-
-                    if(!GOLPanelDrawTsk())
-                        return 0;
+            case RUN_DRAW:
+                if(!GOLPanelDrawTsk())
+                    return (0);
             }
 
             state = BAR_DRAW;
 
         case BAR_DRAW:
-
-            if(pCc->prevPos > pCc->pos){
- 
-               SetColor(pCc->pGolScheme->Color1);
-               if(!Bar(pCc->left+GOL_EMBOSS_SIZE,
-                   pCc->pos,pCc->right-GOL_EMBOSS_SIZE,pCc->prevPos))
-                   return 0;
-
-            }else{
-
-               SetColor(pCc->pGolScheme->Color0);
-               if(!Bar(pCc->left+GOL_EMBOSS_SIZE,
-                   pCc->prevPos,pCc->right-GOL_EMBOSS_SIZE,pCc->pos))
-                   return 0;
+            if(pCc->prevPos > pCc->pos)
+            {
+                SetColor(pCc->pGolScheme->Color1);
+                if(!Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->pos, pCc->right - GOL_EMBOSS_SIZE, pCc->prevPos))
+                    return (0);
+            }
+            else
+            {
+                SetColor(pCc->pGolScheme->Color0);
+                if(!Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->prevPos, pCc->right - GOL_EMBOSS_SIZE, pCc->pos))
+                    return (0);
             }
 
             SetColor(pCc->pGolScheme->TextColor0);
             counter = 1;
-            delta = (pCc->bottom-pCc->top-(2*GOL_EMBOSS_SIZE))>>3;
+            delta = (pCc->bottom - pCc->top - (2 * GOL_EMBOSS_SIZE)) >> 3;
             state = GRID_DRAW;
 
         case GRID_DRAW:
-            while(counter<8){
-
-                if(!Bar(pCc->left+GOL_EMBOSS_SIZE,
-                     pCc->top+GOL_EMBOSS_SIZE+counter*delta,
-                     pCc->right-GOL_EMBOSS_SIZE,
-                     pCc->top+GOL_EMBOSS_SIZE+counter*delta))
-                     return 0;
+            while(counter < 8)
+            {
+                if
+                (
+                    !Bar
+                        (
+                            pCc->left + GOL_EMBOSS_SIZE,
+                            pCc->top + GOL_EMBOSS_SIZE + counter * delta,
+                            pCc->right - GOL_EMBOSS_SIZE,
+                            pCc->top + GOL_EMBOSS_SIZE + counter * delta
+                        )
+                ) return (0);
                 counter++;
-            }          
+            }
+
             pCc->prevPos = pCc->pos;
             state = REMOVE;
-            return 1;
+            return (1);
     }
-    return 1;
+
+    return (1);
 }
 
 #endif // USE_CUSTOM

@@ -39,8 +39,14 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		07/20/07	...
  *****************************************************************************/
-
 #include "MainDemo.h"
+
+#if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #define BTN_S4 BTN_S3
+    #define BTN_S5 BTN_S2
+    #define BTN_S6 BTN_S1
+
+#endif
 
 /************************************************************************
 * Function: void SideButtonsMsg(GOL_MSG* msg)
@@ -55,80 +61,104 @@
 * Output: none
 *                                                                       
 ************************************************************************/
-void SideButtonsMsg(GOL_MSG* msg){
-// Previous states of the buttons
-static char S3 = 1;
-static char S4 = 1;
-static char S5 = 1;
-static char S6 = 1;
-char state;
-OBJ_HEADER* obj;
-    
-    msg->uiEvent  = EVENT_INVALID;
+void SideButtonsMsg(GOL_MSG *msg)
+{
+
+    // Previous states of the buttons
+    static char S3 = 1;
+    static char S4 = 1;
+    static char S5 = 1;
+    static char S6 = 1;
+    char        state;
+    OBJ_HEADER  *obj;
+
+    msg->uiEvent = EVENT_INVALID;
 
     state = BTN_S6;
-    if(S6 != state){
-        if(S6){
+    if(S6 != state)
+    {
+        if(S6)
+        {
+
             // Get pointer to the next object should be focused
             obj = GOLGetFocusNext();
-            if(obj != NULL){
+            if(obj != NULL)
+            {
                 GOLSetFocus(obj);
                 Beep();
             }
         }
+
         S6 = state;
         return;
     }
 
     state = BTN_S5;
-    if(S5 != state){
+    if(S5 != state)
+    {
+
         // Get pointer to the focused object
         obj = GOLGetFocus();
-        if(obj != NULL){
-            if(S5){
-                    msg->type    = TYPE_KEYBOARD;
-                    msg->uiEvent = EVENT_KEYSCAN;           
-                    msg->param1  = obj->ID;
-                    msg->param2  = SCAN_CR_PRESSED;
-            }else{
-                    msg->type    = TYPE_KEYBOARD;
-                    msg->uiEvent = EVENT_KEYSCAN;           
-                    msg->param1  = obj->ID;
-                    msg->param2  = SCAN_CR_RELEASED;
+        if(obj != NULL)
+        {
+            if(S5)
+            {
+                msg->type = TYPE_KEYBOARD;
+                msg->uiEvent = EVENT_KEYSCAN;
+                msg->param1 = obj->ID;
+                msg->param2 = SCAN_CR_PRESSED;
+            }
+            else
+            {
+                msg->type = TYPE_KEYBOARD;
+                msg->uiEvent = EVENT_KEYSCAN;
+                msg->param1 = obj->ID;
+                msg->param2 = SCAN_CR_RELEASED;
             }
         }
+
         S5 = state;
         return;
     }
 
     state = BTN_S3;
-    if(S3 != state){
+    if(S3 != state)
+    {
+
         // Get pointer to the focused object
         obj = GOLGetFocus();
-        if(obj != NULL){
-            if(S3){
-                    msg->type    = TYPE_KEYBOARD;
-                    msg->uiEvent = EVENT_KEYSCAN;           
-                    msg->param1  = obj->ID;
-                    msg->param2  = SCAN_DOWN_PRESSED;
+        if(obj != NULL)
+        {
+            if(S3)
+            {
+                msg->type = TYPE_KEYBOARD;
+                msg->uiEvent = EVENT_KEYSCAN;
+                msg->param1 = obj->ID;
+                msg->param2 = SCAN_DOWN_PRESSED;
             }
         }
+
         S3 = state;
         return;
     }
 
     state = BTN_S4;
-    if(S4 != state){
+    if(S4 != state)
+    {
+
         // Get pointer to the focused object
         obj = GOLGetFocus();
-        if(obj != NULL){
-            if(S4){
-                    msg->type    = TYPE_KEYBOARD;
-                    msg->uiEvent = EVENT_KEYSCAN;           
-                    msg->param1  = obj->ID;
-                    msg->param2  = SCAN_UP_PRESSED;
+        if(obj != NULL)
+        {
+            if(S4)
+            {
+                msg->type = TYPE_KEYBOARD;
+                msg->uiEvent = EVENT_KEYSCAN;
+                msg->param1 = obj->ID;
+                msg->param2 = SCAN_UP_PRESSED;
             }
         }
+
         S4 = state;
         return;
     }

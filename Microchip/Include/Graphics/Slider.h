@@ -38,23 +38,22 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _SLIDER_H
-#define _SLIDER_H
+    #define _SLIDER_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define SLD_FOCUSED    	0x0001  // Bit for focus state
-#define SLD_DISABLED	0x0002  // Bit for disabled state
-#define SLD_VERTICAL   	0x0004  // Bit for orientation  (0 - horizontal, 1 - vertical)
-#define SLD_SCROLLBAR  	0x0010  // Bit for type usage (0 - Slider, 1 - ScrollBar)
-#define SLD_DRAW_THUMB  0x1000  // Bit to indicate that only thumb area must be redrawn
-#define SLD_DRAW_FOCUS  0x2000  // Bit to indicate that only the focus will be redrawn
-#define SLD_DRAW        0x4000  // Bit to indicate whole slider must be redrawn
-#define SLD_HIDE        0x8000  // Bit to remove object from screen
+    #define SLD_FOCUSED     0x0001  // Bit for focus state
+    #define SLD_DISABLED    0x0002  // Bit for disabled state
+    #define SLD_VERTICAL    0x0004  // Bit for orientation  (0 - horizontal, 1 - vertical)
+    #define SLD_SCROLLBAR   0x0010  // Bit for type usage (0 - Slider, 1 - ScrollBar)
+    #define SLD_DRAW_THUMB  0x1000  // Bit to indicate that only thumb area must be redrawn
+    #define SLD_DRAW_FOCUS  0x2000  // Bit to indicate that only the focus will be redrawn
+    #define SLD_DRAW        0x4000  // Bit to indicate whole slider must be redrawn
+    #define SLD_HIDE        0x8000  // Bit to remove object from screen
 
 /*********************************************************************
 * Overview: Defines the parameters required for a slider/scrollbar Object.
@@ -63,18 +62,21 @@
 *			mode is slider. For scrollbar mode, focus rectangle is not drawn.
 *
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-	WORD            currPos;    	// Position of the slider relative to minimum.
-	WORD            prevPos;    	// Previous position of the slider relative to minimum.
-	WORD            range;      	// User defined range of the slider. Minimum value at 0 and maximum at 0x7FFF.
-	WORD            pos;    		// Position of the slider in range domain.
-	WORD            page;       	// User specified resolution to incrementally change the position
-									// in range domain.
-	WORD 			thWidth;		// Thumb width. This is computed internally. 
-									// User must not change this value.
-	WORD 			thHeight;		// Thumb width. This is computed internally. 
-									// User must not change this value.
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    WORD        currPos;    // Position of the slider relative to minimum.
+    WORD        prevPos;    // Previous position of the slider relative to minimum.
+    WORD        range;      // User defined range of the slider. Minimum value at 0 and maximum at 0x7FFF.
+    WORD        pos;        // Position of the slider in range domain.
+    WORD        page;       // User specified resolution to incrementally change the position
+
+    // in range domain.
+    WORD        thWidth;    // Thumb width. This is computed internally.
+
+    // User must not change this value.
+    WORD        thHeight;   // Thumb width. This is computed internally.
+    // User must not change this value.
 } SLIDER;
 
 /*********************************************************************
@@ -103,7 +105,7 @@ typedef struct {
 * Side Effects: Position of the thumb may change when redrawn.
 *
 ********************************************************************/
-void SldSetRange(SLIDER *pSld, SHORT newRange);
+void    SldSetRange(SLIDER *pSld, SHORT newRange);
 
 /*********************************************************************
 * Function: void SldSetPage(SLIDER *pSld, WORD newPage) 
@@ -126,7 +128,7 @@ void SldSetRange(SLIDER *pSld, SHORT newRange);
 * Side Effects: Position of the thumb may change when redrawn.
 *
 ********************************************************************/
-void SldSetPage(SLIDER *pSld, WORD newPage); 
+void    SldSetPage(SLIDER *pSld, WORD newPage);
 
 /*********************************************************************
 * Macros:  SldGetRange(pSld)
@@ -152,7 +154,7 @@ void SldSetPage(SLIDER *pSld, WORD newPage);
 * Side Effects: none
 *
 ********************************************************************/
-#define SldGetRange(pSld)	(pSld->range)
+    #define SldGetRange(pSld)   (pSld->range)
 
 /*********************************************************************
 * Macros:  SldGetPage(pSld)
@@ -177,7 +179,7 @@ void SldSetPage(SLIDER *pSld, WORD newPage);
 * Side Effects: none
 *
 ********************************************************************/
-#define SldGetPage(pSld)	(pSld->page)
+    #define SldGetPage(pSld)    (pSld->page)
 
 /*********************************************************************
 * Macros:  SldGetPos(pSld)
@@ -218,7 +220,7 @@ void SldSetPage(SLIDER *pSld, WORD newPage);
 * Side Effects: none
 *
 ********************************************************************/
-#define SldGetPos(pSld)  	(pSld)->pos
+    #define SldGetPos(pSld) (pSld)->pos
 
 /*********************************************************************
 * Function:  SldSetPos(SLIDER *pSld, SHORT newPos)
@@ -255,7 +257,7 @@ void SldSetPage(SLIDER *pSld, WORD newPage);
 * Side Effects: none
 *
 ********************************************************************/
-void SldSetPos(SLIDER *pSld, SHORT newPos);
+void    SldSetPos(SLIDER *pSld, SHORT newPos);
 
 /*********************************************************************
 * Macros:  SldIncPos(pSld)
@@ -289,7 +291,12 @@ void SldSetPos(SLIDER *pSld, SHORT newPos);
 * Side Effects: none
 *
 ********************************************************************/
-#define SldIncPos(pSld)		SldSetPos(pSld, (((DWORD)pSld->pos + (DWORD)pSld->page) <= (DWORD)pSld->range) ? (pSld->pos + pSld->page):pSld->range)			
+    #define SldIncPos(pSld)                                                                                        \
+    SldSetPos                                                                                                      \
+    (                                                                                                              \
+        pSld,                                                                                                      \
+        (((DWORD) pSld->pos + (DWORD) pSld->page) <= (DWORD) pSld->range) ? (pSld->pos + pSld->page) : pSld->range \
+    )
 
 /*********************************************************************
 * Macros:  SldDecPos(pSld)
@@ -310,7 +317,7 @@ void SldSetPos(SLIDER *pSld, SHORT newPos);
 * Side Effects: none
 *
 ********************************************************************/
-#define SldDecPos(pSld)		SldSetPos(pSld, (((LONG)pSld->pos - (LONG)pSld->page) >= 0) ? (pSld->pos - pSld->page):0)			
+    #define SldDecPos(pSld) SldSetPos(pSld, (((LONG) pSld->pos - (LONG) pSld->page) >= 0) ? (pSld->pos - pSld->page) : 0)
 
 /*********************************************************************
 * Function: SLIDER *SldCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -403,8 +410,19 @@ void SldSetPos(SLIDER *pSld, SHORT newPos);
 * Side Effects: none
 *
 ********************************************************************/
-SLIDER *SldCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,  
-			      WORD state, WORD range, WORD page, WORD pos, GOL_SCHEME *pScheme);
+SLIDER  *SldCreate
+        (
+            WORD        ID,
+            SHORT       left,
+            SHORT       top,
+            SHORT       right,
+            SHORT       bottom,
+            WORD        state,
+            WORD        range,
+            WORD        page,
+            WORD        pos,
+            GOL_SCHEME  *pScheme
+        );
 
 /*********************************************************************
 * Function: void SldMsgDefault(WORD translatedMsg, SLIDER* pSld, GOL_MSG* pMsg)
@@ -435,7 +453,7 @@ SLIDER *SldCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-void SldMsgDefault(WORD translatedMsg, SLIDER* pSld, GOL_MSG* pMsg);
+void    SldMsgDefault(WORD translatedMsg, SLIDER *pSld, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg)
@@ -473,7 +491,7 @@ void SldMsgDefault(WORD translatedMsg, SLIDER* pSld, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg);
+WORD    SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD SldDraw(SLIDER *pSld)
@@ -504,6 +522,5 @@ WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD SldDraw(SLIDER *pSld);
-
+WORD    SldDraw(SLIDER *pSld);
 #endif //_SLIDER_H

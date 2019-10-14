@@ -37,22 +37,23 @@ Pradeep Budagutta    25-Jun-2008    First release
 Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external memory
 *******************************************************************************/
 #ifndef _JPEGIMAGE_H
-#define _JPEGIMAGE_H
- 
-#include "Graphics\Graphics.h"
-#include "Image Decoders\ImageDecoder.h"
+    #define _JPEGIMAGE_H
 
+    #include "Graphics\Graphics.h"
+    #include "Image Decoders\ImageDecoder.h"
 
 // The module uses an external memory driver to get an JPEG image from the external memory.
 // The header file for the driver must be provided HERE:
-#if (GRAPHICS_PICTAIL_VERSION == 2)
-#include "SST39VF040.h"  // driver for SST39 parallel flash with JPEG files
-#elif (GRAPHICS_PICTAIL_VERSION == 3)
-#include "SST25VF016.h"  // driver for SST25 SPI flash with JPEG files
-#else
-#error Only Graphics PICtails 2 and 3 are supported
-#endif
+    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
+        #include "SST39VF040.h"     // driver for SST39 parallel flash with JPEG files
+    #elif (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+        #include "SST25VF016.h"     // driver for SST25 SPI flash with JPEG files
+    #else
+        #error Only Graphics PICtails 2 and 3 are supported
+    #endif
+
 // One function must be implemented in the driver:
+
 /************************************************************************
 * Function: void FunctionToReadArrayFromMemory(DWORD address, BYTE* pData, nCount)                                                                     
 *
@@ -61,39 +62,77 @@ Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external m
 * Input: memory address, pointer to the data buffer, data count
 *                                                                       
 ************************************************************************/
-// Definition for the function implemented in the external memory driver must be HERE:
-#if (GRAPHICS_PICTAIL_VERSION == 2)
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-#define SST39PMPInit()  {while(PMMODEbits.BUSY); PMMODE = 0x0a49; PMAEN = 0x0003; PMCON = 0x9320;}
-#elif defined(__PIC32MX__)    
-#define SST39PMPInit()  {while(PMMODEbits.BUSY); PMMODE = 0x0a1a; PMAEN = 0x0003; PMCON = 0x9320;}
-#else
-#define SST39PMPInit()  {while(PMMODEbits.BUSY); PMMODE = 0x0a09; PMAEN = 0x0003; PMCON = 0x9320;}
-#endif
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-#define LCDPMPInit()  {while(PMMODEbits.BUSY); PMMODE = 0x0208; PMAEN = 0x0000; PMCON = 0x8300;}
-#else
-#define LCDPMPInit()  {while(PMMODEbits.BUSY); PMMODE = 0x0204; PMAEN = 0x0000; PMCON = 0x8300;}
-#endif
-#define ReadArray(address,pData,nCount) SST39PMPInit();SST39ReadArray(address,pData,nCount);LCDPMPInit();
-#else // GRAPHICS_PICTAIL_VERSION == 3
-#define ReadArray(address,pData,nCount) SST25ReadArray(address,pData,nCount);
-#endif
 
-#define USE_JPEG_FLASH     // uncomment this line if JPEG images are in internal flash
-#define USE_JPEG_EXTERNAL  // uncomment this line if JPEG images are in external memory
+// Definition for the function implemented in the external memory driver must be HERE:
+    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
+        #if defined(__dsPIC33F__) || defined(__PIC24H__)
+            #define SST39PMPInit() \
+    {                              \
+        while(PMMODEbits.BUSY);    \
+        PMMODE = 0x0a49;           \
+        PMAEN = 0x0003;            \
+        PMCON = 0x9320;            \
+    }
+
+        #elif defined(__PIC32MX__)
+            #define SST39PMPInit() \
+    {                              \
+        while(PMMODEbits.BUSY);    \
+        PMMODE = 0x0a1a;           \
+        PMAEN = 0x0003;            \
+        PMCON = 0x9320;            \
+    }
+
+        #else
+            #define SST39PMPInit() \
+    {                              \
+        while(PMMODEbits.BUSY);    \
+        PMMODE = 0x0a09;           \
+        PMAEN = 0x0003;            \
+        PMCON = 0x9320;            \
+    }
+
+        #endif
+        #if defined(__dsPIC33F__) || defined(__PIC24H__)
+            #define LCDPMPInit() \
+    {                            \
+        while(PMMODEbits.BUSY);  \
+        PMMODE = 0x0208;         \
+        PMAEN = 0x0000;          \
+        PMCON = 0x8300;          \
+    }
+
+        #else
+            #define LCDPMPInit() \
+    {                            \
+        while(PMMODEbits.BUSY);  \
+        PMMODE = 0x0204;         \
+        PMAEN = 0x0000;          \
+        PMCON = 0x8300;          \
+    }
+
+        #endif
+        #define ReadArray(address, pData, nCount) \
+    SST39PMPInit();                               \
+    SST39ReadArray(address, pData, nCount);       \
+    LCDPMPInit();
+    #else // GRAPHICS_HARDWARE_PLATFORM_VERSION == 3
+        #define ReadArray(address, pData, nCount)   SST25ReadArray(address, pData, nCount);
+    #endif
+    #define USE_JPEG_FLASH          // uncomment this line if JPEG images are in internal flash
+    #define USE_JPEG_EXTERNAL       // uncomment this line if JPEG images are in external memory
 
 // JPEG file image structure for external and interanal memories
 // See Primitive.h for BITMAP_FLASH and BITMAP_EXTERNAL info
-#define JPEG_FLASH      BITMAP_FLASH
-#define JPEG_EXTERNAL   BITMAP_EXTERNAL
+    #define JPEG_FLASH      BITMAP_FLASH
+    #define JPEG_EXTERNAL   BITMAP_EXTERNAL
 
 // Valid values of the first field for JPEG_FLASH and JPEG_EXTERNAL structures
-#define FILE_JPEG_FLASH      2   // the JPEG file is located in internal flash
-#define FILE_JPEG_EXTERNAL   3   // the JPEG file is located in external memory
+    #define FILE_JPEG_FLASH     2   // the JPEG file is located in internal flash
+    #define FILE_JPEG_EXTERNAL  3   // the JPEG file is located in external memory
 
-// Structure with data access functions pointers 
-extern  IMG_FILE_SYSTEM_API _jpegFileApi;
+// Structure with data access functions pointers
+extern IMG_FILE_SYSTEM_API  _jpegFileApi;
 
 /*******************************************************************************
 Function:       void* JPEGfopen(void* jpegImage)
@@ -107,7 +146,7 @@ Input:          pointer to JPEG file image
 
 Output:         pointer to JPEG file image
 *******************************************************************************/
-void* JPEGfopen(void* jpegImage);
+void                        *JPEGfopen(void *jpegImage);
 
 /*******************************************************************************
 Function:       void JPEGInit()
@@ -120,7 +159,7 @@ Input:          None
 
 Output:         None
 *******************************************************************************/
-void JPEGInit();
+void                        JPEGInit(void);
 
 /*******************************************************************************
 Macro:          JPEGPutImage(left,top,pImage)
@@ -133,6 +172,17 @@ Input:          left,top corner of the picture on the display, pImage - pointer 
 
 Output:         None
 *******************************************************************************/
-#define JPEGPutImage(left,top,pImage) ImageDecode(JPEGfopen((void*)pImage), IMG_JPEG, left, top, (GetMaxX()+1), (GetMaxY()+1), 0, &_jpegFileApi, NULL);
-
+    #define JPEGPutImage(left, top, pImage) \
+    ImageDecode                             \
+    (                                       \
+        JPEGfopen((void *)pImage),          \
+        IMG_JPEG,                           \
+        left,                               \
+        top,                                \
+        (GetMaxX() + 1),                    \
+        (GetMaxY() + 1),                    \
+        0,                                  \
+        &_jpegFileApi,                      \
+        NULL                                \
+    );
 #endif // _JPEGIMAGE

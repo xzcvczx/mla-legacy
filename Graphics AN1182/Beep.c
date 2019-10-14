@@ -39,10 +39,9 @@
  * Anton Alkhimenok		07/10/07	...
  * Anton Alkhimenok     02/07/08    PIC32 support
  *****************************************************************************/
-
 #include "Beep.h"
 
-volatile WORD pulseCounter;
+volatile WORD   pulseCounter;
 
 /*********************************************************************
 * Function: Timer2 ISR
@@ -61,31 +60,38 @@ volatile WORD pulseCounter;
 *
 ********************************************************************/
 #ifdef __PIC32MX__
-#define __T2_ISR    __ISR(_TIMER_2_VECTOR, ipl1)
+    #define __T2_ISR    __ISR(_TIMER_2_VECTOR, ipl1)
 #else
-#define __T2_ISR    __attribute__((interrupt, shadow, auto_psv))
+    #define __T2_ISR    __attribute__((interrupt, shadow, auto_psv))
 #endif
 
-void  __T2_ISR _T2Interrupt(void)
+/* */
+void __T2_ISR _T2Interrupt(void)
 {
     BEEP_LAT_BIT ^= 1;
-    if(BEEP_TIME < pulseCounter++){
+    if(BEEP_TIME < pulseCounter++)
+    {
+
         // clear pulse counter
         pulseCounter = 0;
-    	// stop counter
+
+        // stop counter
         T2CONbits.TON = 0;
+
         // clear timer
         TMR2 = 0;
-        PR2 =  TIMER_BASE;
+        PR2 = TIMER_BASE;
         BEEP_LAT_BIT = 0;
     }
+
     PR2 += 1;
+
     //clear flag
-#ifdef __PIC32MX
+    #ifdef __PIC32MX
     mT2ClearIntFlag();
-#else
-    IFS0bits.T2IF = 0;    
-#endif
+    #else
+    IFS0bits.T2IF = 0;
+    #endif
 }
 
 /*********************************************************************
@@ -104,28 +110,28 @@ void  __T2_ISR _T2Interrupt(void)
 * Note: none
 *
 ********************************************************************/
-void BeepInit(){
+void BeepInit(void)
+{
+    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+    RPOR2 = 0b0000000000010010;
+    #endif
 
     // clear pulse counter
     pulseCounter = 0;
 
     // init Timer2
     TMR2 = 0;
-    PR2 =  TIMER_BASE;
+    PR2 = TIMER_BASE;
+
     //set prescale to 1:8
     T2CONbits.TCKPS = 1;
 
-#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-	RPOR2 = 0b0000000000010010;	
-#endif
-
-#ifdef __PIC32MX__
+    #ifdef __PIC32MX__
     ConfigIntTimer2(T2_INT_ON | T2_INT_PRIOR_2);
-#else
-    IFS0bits.T2IF = 0; //clear flag
-    IEC0bits.T2IE = 1; //enable interrupt
-#endif
-    BEEP_LAT_BIT = 0;     
-    BEEP_TRIS_BIT = 0;     
+    #else
+    IFS0bits.T2IF = 0;  //clear flag
+    IEC0bits.T2IE = 1;  //enable interrupt
+    #endif
+    BEEP_LAT_BIT = 0;
+    BEEP_TRIS_BIT = 0;
 }
-

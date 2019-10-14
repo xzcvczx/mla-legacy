@@ -42,17 +42,13 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-
-#include "Compiler.h"
-#include "GenericTypeDefs.h"
-#include "HardwareProfile.h"
-#include "usb_config.h"
-#include "USB/usb_device.h"
 #include "USB/usb.h"
 #include "USB/usb_function_generic.h"
 
 #include "user.h"
 #include "temperature.h"
+
+#include "HardwareProfile.h"
 
 /** V A R I A B L E S ********************************************************/
 #pragma udata

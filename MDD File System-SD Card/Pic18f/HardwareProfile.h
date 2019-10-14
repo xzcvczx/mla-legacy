@@ -40,9 +40,12 @@
 // Sample clock speed for PIC18
 #if defined (__18CXX)
 
-    #define GetSystemClock()        40000000                        // System clock frequency (Hz)
+    #define DEMO_BOARD PIC18F87J50_PIM
+    #define PIC18F87J50_PIM
+
+    #define GetSystemClock()        48000000                        // System clock frequency (Hz)
     #define GetPeripheralClock()    GetSystemClock()                // Peripheral clock freq.
-    #define GetInstructionClock()   (GetSystemClock() / 4)          // Instruction clock freq.
+    #define GetInstructionClock()   GetSystemClock()                // Instruction clock freq.
 
 // Sample clock speed for a 16-bit processor
 #elif defined (__C30__)
@@ -92,9 +95,6 @@
 #endif
     
 
-
-
-
 // Select your interface type
 // This library currently only supports a single physical interface layer at a time
 
@@ -122,85 +122,50 @@
 #ifdef USE_SD_INTERFACE_WITH_SPI
     #ifdef __18CXX
     
-        // Sample definition for PIC18 (modify to fit your own project)
-
-        // Description: SD-SPI Chip Select Output bit
-        #define SD_CS               LATBbits.LATB3
-        // Description: SD-SPI Chip Select TRIS bit
+        #define USE_PIC18
+        #define USE_SD_INTERFACE_WITH_SPI
+    
+        #define INPUT_PIN           1
+        #define OUTPUT_PIN          0
+    
+        // Chip Select Signal
+        #define SD_CS               PORTBbits.RB3
         #define SD_CS_TRIS          TRISBbits.TRISB3
         
-        // Description: SD-SPI Card Detect Input bit
+        // Card detect signal
         #define SD_CD               PORTBbits.RB4
-        // Description: SD-SPI Card Detect TRIS bit
         #define SD_CD_TRIS          TRISBbits.TRISB4
         
-        // Description: SD-SPI Write Protect Check Input bit
+        // Write protect signal
         #define SD_WE               PORTAbits.RA4
-        // Description: SD-SPI Write Protect Check TRIS bit
         #define SD_WE_TRIS          TRISAbits.TRISA4
         
         // Registers for the SPI module you want to use
-
-        // Description: The main SPI control register
         #define SPICON1             SSP1CON1
-        // Description: The SPI status register
         #define SPISTAT             SSP1STAT
-        // Description: The SPI buffer
         #define SPIBUF              SSP1BUF
-        // Description: The receive buffer full bit in the SPI status register
         #define SPISTAT_RBF         SSP1STATbits.BF
-        // Description: The bitwise define for the SPI control register (i.e. _____bits)
         #define SPICON1bits         SSP1CON1bits
-        // Description: The bitwise define for the SPI status register (i.e. _____bits)
         #define SPISTATbits         SSP1STATbits
-
-        // Description: The interrupt flag for the SPI module
+    
         #define SPI_INTERRUPT_FLAG  PIR1bits.SSPIF   
-        // Description: The enable bit for the SPI module
-        #define SPIENABLE           SPICON1bits.SSPEN
-
-/*
-        // Defines for the FS-USB demo board
-
-        // Tris pins for SCK/SDI/SDO lines
-        #define SPICLOCK            TRISBbits.TRISB1
-        #define SPIIN               TRISBbits.TRISB0
-        #define SPIOUT              TRISCbits.TRISC7
-
-        // Latch pins for SCK/SDI/SDO lines
-        #define SPICLOCKLAT         LATBbits.LATB1
-        #define SPIINLAT            LATBbits.LATB0
-        #define SPIOUTLAT           LATCbits.LATC7
-
-        // Port pins for SCK/SDI/SDO lines
-        #define SPICLOCKPORT        PORTBbits.RB1
-        #define SPIINPORT           PORTBbits.RB0
-        #define SPIOUTPORT          PORTCbits.RC7
-*/
-
+    
         // Defines for the HPC Explorer board
-
-        // Description: The TRIS bit for the SCK pin
         #define SPICLOCK            TRISCbits.TRISC3
-        // Description: The TRIS bit for the SDI pin
         #define SPIIN               TRISCbits.TRISC4
-        // Description: The TRIS bit for the SDO pin
         #define SPIOUT              TRISCbits.TRISC5
-
-        // Description: The output latch for the SCK pin
+    
+        // Latch pins for SCK/SDI/SDO lines
         #define SPICLOCKLAT         LATCbits.LATC3
-        // Description: The output latch for the SDI pin
         #define SPIINLAT            LATCbits.LATC4
-        // Description: The output latch for the SDO pin
         #define SPIOUTLAT           LATCbits.LATC5
-
-        // Description: The port for the SCK pin
+    
+        // Port pins for SCK/SDI/SDO lines
         #define SPICLOCKPORT        PORTCbits.RC3
-        // Description: The port for the SDI pin
         #define SPIINPORT           PORTCbits.RC4
-        // Description: The port for the SDO pin
         #define SPIOUTPORT          PORTCbits.RC5
-
+    
+        #define SPIENABLE           SSPCON1bits.SSPEN
 
         // Will generate an error if the clock speed is too low to interface to the card
         #if (GetSystemClock() < 400000)

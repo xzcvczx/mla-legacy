@@ -60,15 +60,8 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
+    .
     ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -78,10 +71,15 @@
     
     C:\\Microchip Solutions\\My Demo Application 
 
+********************************************************************
+ File Description:
+
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.6    Added USBCancelIO() function.  Moved and some stack
+         defintions to be more consistant with the host stack.
 ********************************************************************/
-#ifndef USB_DEVICE_C
-#define USB_DEVICE_C
-#endif
 
 /** INCLUDES *******************************************************/
 #include "GenericTypeDefs.h"
@@ -93,9 +91,6 @@
 #if defined(USB_USE_MSD)
     #include "./USB/usb_function_msd.h"
 #endif
-
-
-BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
 
 #if defined(__C32__)
     #if (USB_PING_PONG_MODE != USB_PING_PONG__FULL_PING_PONG)
@@ -109,10 +104,329 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
     #include "uart2.h"
 #endif
 
+/** Definitions ****************************************************/
+/* v2.1 fix - Short Packet States - Used by Control Transfer Read  - CTRL_TRF_TX */
+#define SHORT_PKT_NOT_USED  0
+#define SHORT_PKT_PENDING   1
+#define SHORT_PKT_SENT      2
+
+/* Control Transfer States */
+#define WAIT_SETUP          0
+#define CTRL_TRF_TX         1
+#define CTRL_TRF_RX         2
+
+#if (USB_PING_PONG_MODE == USB_PING_PONG__NO_PING_PONG)
+    #define USB_NEXT_EP0_OUT_PING_PONG 0x0000   // Used in USB Device Mode only
+    #define USB_NEXT_EP0_IN_PING_PONG 0x0000    // Used in USB Device Mode only
+    #define USB_NEXT_PING_PONG 0x0000           // Used in USB Device Mode only
+    #define EP0_OUT_EVEN    0                   // Used in USB Device Mode only
+    #define EP0_OUT_ODD     0                   // Used in USB Device Mode only
+    #define EP0_IN_EVEN     1                   // Used in USB Device Mode only
+    #define EP0_IN_ODD      1                   // Used in USB Device Mode only
+    #define EP1_OUT_EVEN    2                   // Used in USB Device Mode only
+    #define EP1_OUT_ODD     2                   // Used in USB Device Mode only
+    #define EP1_IN_EVEN     3                   // Used in USB Device Mode only
+    #define EP1_IN_ODD      3                   // Used in USB Device Mode only
+    #define EP2_OUT_EVEN    4                   // Used in USB Device Mode only
+    #define EP2_OUT_ODD     4                   // Used in USB Device Mode only
+    #define EP2_IN_EVEN     5                   // Used in USB Device Mode only
+    #define EP2_IN_ODD      5                   // Used in USB Device Mode only
+    #define EP3_OUT_EVEN    6                   // Used in USB Device Mode only
+    #define EP3_OUT_ODD     6                   // Used in USB Device Mode only
+    #define EP3_IN_EVEN     7                   // Used in USB Device Mode only
+    #define EP3_IN_ODD      7                   // Used in USB Device Mode only
+    #define EP4_OUT_EVEN    8                   // Used in USB Device Mode only
+    #define EP4_OUT_ODD     8                   // Used in USB Device Mode only
+    #define EP4_IN_EVEN     9                   // Used in USB Device Mode only
+    #define EP4_IN_ODD      9                   // Used in USB Device Mode only
+    #define EP5_OUT_EVEN    10                  // Used in USB Device Mode only
+    #define EP5_OUT_ODD     10                  // Used in USB Device Mode only
+    #define EP5_IN_EVEN     11                  // Used in USB Device Mode only
+    #define EP5_IN_ODD      11                  // Used in USB Device Mode only
+    #define EP6_OUT_EVEN    12                  // Used in USB Device Mode only
+    #define EP6_OUT_ODD     12                  // Used in USB Device Mode only
+    #define EP6_IN_EVEN     13                  // Used in USB Device Mode only
+    #define EP6_IN_ODD      13                  // Used in USB Device Mode only
+    #define EP7_OUT_EVEN    14                  // Used in USB Device Mode only
+    #define EP7_OUT_ODD     14                  // Used in USB Device Mode only
+    #define EP7_IN_EVEN     15                  // Used in USB Device Mode only
+    #define EP7_IN_ODD      15                  // Used in USB Device Mode only
+    #define EP8_OUT_EVEN    16                  // Used in USB Device Mode only
+    #define EP8_OUT_ODD     16                  // Used in USB Device Mode only
+    #define EP8_IN_EVEN     17                  // Used in USB Device Mode only
+    #define EP8_IN_ODD      17                  // Used in USB Device Mode only
+    #define EP9_OUT_EVEN    18                  // Used in USB Device Mode only
+    #define EP9_OUT_ODD     18                  // Used in USB Device Mode only
+    #define EP9_IN_EVEN     19                  // Used in USB Device Mode only
+    #define EP9_IN_ODD      19                  // Used in USB Device Mode only
+    #define EP10_OUT_EVEN   20                  // Used in USB Device Mode only
+    #define EP10_OUT_ODD    20                  // Used in USB Device Mode only
+    #define EP10_IN_EVEN    21                  // Used in USB Device Mode only
+    #define EP10_IN_ODD     21                  // Used in USB Device Mode only
+    #define EP11_OUT_EVEN   22                  // Used in USB Device Mode only
+    #define EP11_OUT_ODD    22                  // Used in USB Device Mode only
+    #define EP11_IN_EVEN    23                  // Used in USB Device Mode only
+    #define EP11_IN_ODD     23                  // Used in USB Device Mode only
+    #define EP12_OUT_EVEN   24                  // Used in USB Device Mode only
+    #define EP12_OUT_ODD    24                  // Used in USB Device Mode only
+    #define EP12_IN_EVEN    25                  // Used in USB Device Mode only
+    #define EP12_IN_ODD     25                  // Used in USB Device Mode only
+    #define EP13_OUT_EVEN   26                  // Used in USB Device Mode only
+    #define EP13_OUT_ODD    26                  // Used in USB Device Mode only
+    #define EP13_IN_EVEN    27                  // Used in USB Device Mode only
+    #define EP13_IN_ODD     27                  // Used in USB Device Mode only
+    #define EP14_OUT_EVEN   28                  // Used in USB Device Mode only
+    #define EP14_OUT_ODD    28                  // Used in USB Device Mode only
+    #define EP14_IN_EVEN    29                  // Used in USB Device Mode only
+    #define EP14_IN_ODD     29                  // Used in USB Device Mode only
+    #define EP15_OUT_EVEN   30                  // Used in USB Device Mode only
+    #define EP15_OUT_ODD    30                  // Used in USB Device Mode only
+    #define EP15_IN_EVEN    31                  // Used in USB Device Mode only
+    #define EP15_IN_ODD     31                  // Used in USB Device Mode only
+
+    #define EP(ep,dir,pp) (2*ep+dir)            // Used in USB Device Mode only
+
+    #define BD(ep,dir,pp)   ((8 * ep) + (4 * dir))      // Used in USB Device Mode only
+
+#elif (USB_PING_PONG_MODE == USB_PING_PONG__EP0_OUT_ONLY)
+    #define USB_NEXT_EP0_OUT_PING_PONG 0x0004
+    #define USB_NEXT_EP0_IN_PING_PONG 0x0000
+    #define USB_NEXT_PING_PONG 0x0000
+    #define EP0_OUT_EVEN    0
+    #define EP0_OUT_ODD     1
+    #define EP0_IN_EVEN     2
+    #define EP0_IN_ODD      2
+    #define EP1_OUT_EVEN    3
+    #define EP1_OUT_ODD     3
+    #define EP1_IN_EVEN     4
+    #define EP1_IN_ODD      4
+    #define EP2_OUT_EVEN    5
+    #define EP2_OUT_ODD     5
+    #define EP2_IN_EVEN     6
+    #define EP2_IN_ODD      6
+    #define EP3_OUT_EVEN    7
+    #define EP3_OUT_ODD     7
+    #define EP3_IN_EVEN     8
+    #define EP3_IN_ODD      8
+    #define EP4_OUT_EVEN    9
+    #define EP4_OUT_ODD     9
+    #define EP4_IN_EVEN     10
+    #define EP4_IN_ODD      10
+    #define EP5_OUT_EVEN    11
+    #define EP5_OUT_ODD     11
+    #define EP5_IN_EVEN     12
+    #define EP5_IN_ODD      12
+    #define EP6_OUT_EVEN    13
+    #define EP6_OUT_ODD     13
+    #define EP6_IN_EVEN     14
+    #define EP6_IN_ODD      14
+    #define EP7_OUT_EVEN    15
+    #define EP7_OUT_ODD     15
+    #define EP7_IN_EVEN     16
+    #define EP7_IN_ODD      16
+    #define EP8_OUT_EVEN    17
+    #define EP8_OUT_ODD     17
+    #define EP8_IN_EVEN     18
+    #define EP8_IN_ODD      18
+    #define EP9_OUT_EVEN    19
+    #define EP9_OUT_ODD     19
+    #define EP9_IN_EVEN     20
+    #define EP9_IN_ODD      20
+    #define EP10_OUT_EVEN   21
+    #define EP10_OUT_ODD    21
+    #define EP10_IN_EVEN    22
+    #define EP10_IN_ODD     22
+    #define EP11_OUT_EVEN   23
+    #define EP11_OUT_ODD    23
+    #define EP11_IN_EVEN    24
+    #define EP11_IN_ODD     24
+    #define EP12_OUT_EVEN   25
+    #define EP12_OUT_ODD    25
+    #define EP12_IN_EVEN    26
+    #define EP12_IN_ODD     26
+    #define EP13_OUT_EVEN   27
+    #define EP13_OUT_ODD    27
+    #define EP13_IN_EVEN    28
+    #define EP13_IN_ODD     28
+    #define EP14_OUT_EVEN   29
+    #define EP14_OUT_ODD    29
+    #define EP14_IN_EVEN    30
+    #define EP14_IN_ODD     30
+    #define EP15_OUT_EVEN   31
+    #define EP15_OUT_ODD    31
+    #define EP15_IN_EVEN    32
+    #define EP15_IN_ODD     32
+
+    #define EP(ep,dir,pp) (2*ep+dir+(((ep==0)&&(dir==0))?pp:2))
+    #define BD(ep,dir,pp) (4*(ep+dir+(((ep==0)&&(dir==0))?pp:2)))
+
+#elif (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG)
+    #if defined (__18CXX) || defined(__C30__)
+        #define USB_NEXT_EP0_OUT_PING_PONG 0x0004
+        #define USB_NEXT_EP0_IN_PING_PONG 0x0004
+        #define USB_NEXT_PING_PONG 0x0004
+    #elif defined(__C32__)
+        #define USB_NEXT_EP0_OUT_PING_PONG 0x0008
+        #define USB_NEXT_EP0_IN_PING_PONG 0x0008
+        #define USB_NEXT_PING_PONG 0x0008
+    #else
+        #error "Not defined for this compiler"
+    #endif
+    #define EP0_OUT_EVEN    0
+    #define EP0_OUT_ODD     1
+    #define EP0_IN_EVEN     2
+    #define EP0_IN_ODD      3
+    #define EP1_OUT_EVEN    4
+    #define EP1_OUT_ODD     5
+    #define EP1_IN_EVEN     6
+    #define EP1_IN_ODD      7
+    #define EP2_OUT_EVEN    8
+    #define EP2_OUT_ODD     9
+    #define EP2_IN_EVEN     10
+    #define EP2_IN_ODD      11
+    #define EP3_OUT_EVEN    12
+    #define EP3_OUT_ODD     13
+    #define EP3_IN_EVEN     14
+    #define EP3_IN_ODD      15
+    #define EP4_OUT_EVEN    16
+    #define EP4_OUT_ODD     17
+    #define EP4_IN_EVEN     18
+    #define EP4_IN_ODD      19
+    #define EP5_OUT_EVEN    20
+    #define EP5_OUT_ODD     21
+    #define EP5_IN_EVEN     22
+    #define EP5_IN_ODD      23
+    #define EP6_OUT_EVEN    24
+    #define EP6_OUT_ODD     25
+    #define EP6_IN_EVEN     26
+    #define EP6_IN_ODD      27
+    #define EP7_OUT_EVEN    28
+    #define EP7_OUT_ODD     29
+    #define EP7_IN_EVEN     30
+    #define EP7_IN_ODD      31
+    #define EP8_OUT_EVEN    32
+    #define EP8_OUT_ODD     33
+    #define EP8_IN_EVEN     34
+    #define EP8_IN_ODD      35
+    #define EP9_OUT_EVEN    36
+    #define EP9_OUT_ODD     37
+    #define EP9_IN_EVEN     38
+    #define EP9_IN_ODD      39
+    #define EP10_OUT_EVEN   40
+    #define EP10_OUT_ODD    41
+    #define EP10_IN_EVEN    42
+    #define EP10_IN_ODD     43
+    #define EP11_OUT_EVEN   44
+    #define EP11_OUT_ODD    45
+    #define EP11_IN_EVEN    46
+    #define EP11_IN_ODD     47
+    #define EP12_OUT_EVEN   48
+    #define EP12_OUT_ODD    49
+    #define EP12_IN_EVEN    50
+    #define EP12_IN_ODD     51
+    #define EP13_OUT_EVEN   52
+    #define EP13_OUT_ODD    53
+    #define EP13_IN_EVEN    54
+    #define EP13_IN_ODD     55
+    #define EP14_OUT_EVEN   56
+    #define EP14_OUT_ODD    57
+    #define EP14_IN_EVEN    58
+    #define EP14_IN_ODD     59
+    #define EP15_OUT_EVEN   60
+    #define EP15_OUT_ODD    61
+    #define EP15_IN_EVEN    62
+    #define EP15_IN_ODD     63
+
+    #define EP(ep,dir,pp) (4*ep+2*dir+pp)
+
+    #if defined (__18CXX) || defined(__C30__)
+        #define BD(ep,dir,pp) (4*(4*ep+2*dir+pp))
+    #elif defined(__C32__)
+        #define BD(ep,dir,pp) (8*(4*ep+2*dir+pp))
+    #else
+        #error "Not defined for this compiler"
+    #endif
+
+#elif (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0)
+    #define USB_NEXT_EP0_OUT_PING_PONG 0x0000
+    #define USB_NEXT_EP0_IN_PING_PONG 0x0000
+    #define USB_NEXT_PING_PONG 0x0004
+    #define EP0_OUT_EVEN    0
+    #define EP0_OUT_ODD     0
+    #define EP0_IN_EVEN     1
+    #define EP0_IN_ODD      1
+    #define EP1_OUT_EVEN    2
+    #define EP1_OUT_ODD     3
+    #define EP1_IN_EVEN     4
+    #define EP1_IN_ODD      5
+    #define EP2_OUT_EVEN    6
+    #define EP2_OUT_ODD     7
+    #define EP2_IN_EVEN     8
+    #define EP2_IN_ODD      9
+    #define EP3_OUT_EVEN    10
+    #define EP3_OUT_ODD     11
+    #define EP3_IN_EVEN     12
+    #define EP3_IN_ODD      13
+    #define EP4_OUT_EVEN    14
+    #define EP4_OUT_ODD     15
+    #define EP4_IN_EVEN     16
+    #define EP4_IN_ODD      17
+    #define EP5_OUT_EVEN    18
+    #define EP5_OUT_ODD     19
+    #define EP5_IN_EVEN     20
+    #define EP5_IN_ODD      21
+    #define EP6_OUT_EVEN    22
+    #define EP6_OUT_ODD     23
+    #define EP6_IN_EVEN     24
+    #define EP6_IN_ODD      25
+    #define EP7_OUT_EVEN    26
+    #define EP7_OUT_ODD     27
+    #define EP7_IN_EVEN     28
+    #define EP7_IN_ODD      29
+    #define EP8_OUT_EVEN    30
+    #define EP8_OUT_ODD     31
+    #define EP8_IN_EVEN     32
+    #define EP8_IN_ODD      33
+    #define EP9_OUT_EVEN    34
+    #define EP9_OUT_ODD     35
+    #define EP9_IN_EVEN     36
+    #define EP9_IN_ODD      37
+    #define EP10_OUT_EVEN   38
+    #define EP10_OUT_ODD    39
+    #define EP10_IN_EVEN    40
+    #define EP10_IN_ODD     41
+    #define EP11_OUT_EVEN   42
+    #define EP11_OUT_ODD    43
+    #define EP11_IN_EVEN    44
+    #define EP11_IN_ODD     45
+    #define EP12_OUT_EVEN   46
+    #define EP12_OUT_ODD    47
+    #define EP12_IN_EVEN    48
+    #define EP12_IN_ODD     49
+    #define EP13_OUT_EVEN   50
+    #define EP13_OUT_ODD    51
+    #define EP13_IN_EVEN    52
+    #define EP13_IN_ODD     53
+    #define EP14_OUT_EVEN   54
+    #define EP14_OUT_ODD    55
+    #define EP14_IN_EVEN    56
+    #define EP14_IN_ODD     57
+    #define EP15_OUT_EVEN   58
+    #define EP15_OUT_ODD    59
+    #define EP15_IN_EVEN    60
+    #define EP15_IN_ODD     61
+
+    #define EP(ep,dir,pp) (4*ep+2*dir+((ep==0)?0:(pp-2)))
+    #define BD(ep,dir,pp) (4*(4*ep+2*dir+((ep==0)?0:(pp-2))))
+
+#else
+    #error "No ping pong mode defined."
+#endif
+
 /** VARIABLES ******************************************************/
 #pragma udata
 
-USB_VOLATILE BYTE USBDeviceState;
+USB_VOLATILE USB_DEVICE_STATE USBDeviceState;
 USB_VOLATILE BYTE USBActiveConfiguration;
 USB_VOLATILE BYTE USBAlternateInterface[USB_MAX_NUM_INT];
 volatile BDT_ENTRY *pBDTEntryEP0OutCurrent;
@@ -191,8 +505,115 @@ volatile BYTE CtrlTrfData[USB_EP0_BUFF_SIZE];
 #pragma udata
 #endif
 
+//Depricated in v2.2 - will be removed in a future revision
+#if !defined(USB_USER_DEVICE_DESCRIPTOR)
+    //Device descriptor
+    extern ROM USB_DEVICE_DESCRIPTOR device_dsc;
+#else
+    USB_USER_DEVICE_DESCRIPTOR_INCLUDE;
+#endif
+
+#if !defined(USB_USER_CONFIG_DESCRIPTOR)
+    //Array of configuration descriptors
+    extern ROM BYTE *ROM USB_CD_Ptr[];
+#else
+    USB_USER_CONFIG_DESCRIPTOR_INCLUDE;
+#endif
+
+extern ROM BYTE *ROM USB_SD_Ptr[];
+
 /** DECLARATIONS ***************************************************/
 #pragma code
+
+/** Macros *********************************************************/
+
+/****** Event callback enabling/disabling macros ********************
+    This section of code is used to disable specific USB events that may not be
+    desired by the user.  This can save code size and increase throughput and
+    decrease CPU utiliazation.
+********************************************************************/
+#if defined USB_DISABLE_SUSPEND_HANDLER
+    #define USB_SUSPEND_HANDLER(event,pointer,size) 
+    
+    #warning "Disabling the suspend handler is not recommended.  Proper suspend handling is required to create a compilant USB device."                
+#else
+    #define USB_SUSPEND_HANDLER(event,pointer,size)             USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
+#endif
+
+#if defined USB_DISABLE_WAKEUP_FROM_SUSPEND_HANDLER
+    #define USB_WAKEUP_FROM_SUSPEND_HANDLER(event,pointer,size) 
+
+    #warning "Disabling the wake from suspend handler is not recommended.  Proper suspend handling is required to create a compilant USB device."                
+#else
+    #define USB_WAKEUP_FROM_SUSPEND_HANDLER(event,pointer,size) USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)   
+#endif
+
+#if defined USB_DISABLE_SOF_HANDLER
+    #define USB_SOF_HANDLER(event,pointer,size)                
+#else
+    #define USB_SOF_HANDLER(event,pointer,size)                 USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
+#endif
+
+#if defined USB_DISABLE_ERROR_HANDLER 
+    #define USB_ERROR_HANDLER(event,pointer,size)             
+#else
+    #define USB_ERROR_HANDLER(event,pointer,size)               USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
+#endif
+
+#if defined USB_DISABLE_NONSTANDARD_EP0_REQUEST_HANDLER 
+    #define USB_DISABLE_NONSTANDARD_EP0_REQUEST_HANDLER(event,pointer,size)                 
+#else
+    #define USB_DISABLE_NONSTANDARD_EP0_REQUEST_HANDLER(event,pointer,size)       USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
+#endif
+
+#if defined USB_DISABLE_SET_DESCRIPTOR_HANDLER 
+    #define USB_SET_DESCRIPTOR_HANDLER(event,pointer,size)                
+#else
+    #define USB_SET_DESCRIPTOR_HANDLER(event,pointer,size)      USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size) 
+#endif
+
+#if defined USB_DISABLE_SET_CONFIGURATION_HANDLER
+    #define USB_SET_CONFIGURATION_HANDLER(event,pointer,size)                
+#else
+    #define USB_SET_CONFIGURATION_HANDLER(event,pointer,size)             USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
+#endif
+
+#if defined USB_DISABLE_TRANSFER_COMPLETE_HANDLER 
+    #define USB_TRASFER_COMPLETE_HANDLER(event,pointer,size)               
+#else
+    #define USB_TRASFER_COMPLETE_HANDLER(event,pointer,size)    USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
+#endif
+
+/** Function Prototypes ********************************************/
+//External
+//This is the prototype for the required user event handler
+BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size);
+
+//Internal
+void USBCtrlEPService(void);
+void USBCtrlTrfSetupHandler(void);
+void USBCtrlTrfInHandler(void);
+void USBCheckStdRequest(void);
+void USBStdGetDscHandler(void);
+void USBCtrlEPServiceComplete(void);
+void USBCtrlTrfTxService(void);
+void USBPrepareForNextSetupTrf(void);
+void USBCtrlTrfRxService(void);
+void USBStdSetCfgHandler(void);
+void USBStdGetStatusHandler(void);
+void USBStdFeatureReqHandler(void);
+void USBCtrlTrfOutHandler(void);
+BOOL USBIsTxBusy(BYTE EPNumber);
+void USBPut(BYTE EPNum, BYTE Data);
+void USBEPService(void);
+void USBConfigureEndpoint(BYTE EPNum, BYTE direction);
+
+void USBProtocolResetHandler(void);
+void USBWakeFromSuspend(void);
+void USBSuspend(void);
+void USBStallHandler(void);
+USB_HANDLE USBTransferOnePacket(BYTE ep, BYTE dir, BYTE* data, BYTE len);
+void USBEnableEndpoint(BYTE ep,BYTE options);
 
 //DOM-IGNORE-BEGIN
 /****************************************************************************
@@ -817,7 +1238,7 @@ void USBCtrlEPService(void)
         ((BYTE_VAL*)&pBDTEntryEP0OutNext)->Val ^= USB_NEXT_EP0_OUT_PING_PONG;
 
 		//If the current EP0 OUT buffer has a SETUP packet
-        if(pBDTEntryEP0OutCurrent->STAT.PID == SETUP_TOKEN)
+        if(pBDTEntryEP0OutCurrent->STAT.PID == PID_SETUP)
         {
 	        //Check if the SETUP transaction data went into the CtrlTrfData buffer.
 	        //If so, need to copy it to the SetupPkt buffer so that it can be 
@@ -912,7 +1333,7 @@ void USBCtrlTrfSetupHandler(void)
 
     /* Stage 2 */
     USBCheckStdRequest();
-    USB_OTHER_REQUEST_HANDLER(EVENT_EP0_REQUEST,0,0);
+    USB_DISABLE_NONSTANDARD_EP0_REQUEST_HANDLER(EVENT_EP0_REQUEST,0,0);
 
     /* Stage 3 */
     USBCtrlEPServiceComplete();
@@ -1108,48 +1529,48 @@ void USBPrepareForNextSetupTrf(void)
  *******************************************************************/
 void USBCheckStdRequest(void)
 {
-    if(SetupPkt.RequestType != STANDARD) return;
+    if(SetupPkt.RequestType != USB_SETUP_TYPE_STANDARD_BITFIELD) return;
 
     switch(SetupPkt.bRequest)
     {
-        case SET_ADR:
+        case USB_REQUEST_SET_ADDRESS:
             inPipes[0].info.bits.busy = 1;            // This will generate a zero length packet
             USBDeviceState = ADR_PENDING_STATE;       // Update state only
             /* See USBCtrlTrfInHandler() for the next step */
             break;
-        case GET_DSC:
+        case USB_REQUEST_GET_DESCRIPTOR:
             USBStdGetDscHandler();
             break;
-        case SET_CFG:
+        case USB_REQUEST_SET_CONFIGURATION:
             USBStdSetCfgHandler();
             break;
-        case GET_CFG:
+        case USB_REQUEST_GET_CONFIGURATION:
             inPipes[0].pSrc.bRam = (BYTE*)&USBActiveConfiguration;         // Set Source
-            inPipes[0].info.bits.ctrl_trf_mem = _RAM;               // Set memory type
+            inPipes[0].info.bits.ctrl_trf_mem = USB_EP0_RAM;               // Set memory type
             inPipes[0].wCount.v[0] = 1;                         // Set data count
             inPipes[0].info.bits.busy = 1;
             break;
-        case GET_STATUS:
+        case USB_REQUEST_GET_STATUS:
             USBStdGetStatusHandler();
             break;
-        case CLR_FEATURE:
-        case SET_FEATURE:
+        case USB_REQUEST_CLEAR_FEATURE:
+        case USB_REQUEST_SET_FEATURE:
             USBStdFeatureReqHandler();
             break;
-        case GET_INTF:
+        case USB_REQUEST_GET_INTERFACE:
             inPipes[0].pSrc.bRam = (BYTE*)&USBAlternateInterface[SetupPkt.bIntfID];  // Set source
-            inPipes[0].info.bits.ctrl_trf_mem = _RAM;               // Set memory type
+            inPipes[0].info.bits.ctrl_trf_mem = USB_EP0_RAM;               // Set memory type
             inPipes[0].wCount.v[0] = 1;                         // Set data count
             inPipes[0].info.bits.busy = 1;
             break;
-        case SET_INTF:
+        case USB_REQUEST_SET_INTERFACE:
             inPipes[0].info.bits.busy = 1;
             USBAlternateInterface[SetupPkt.bIntfID] = SetupPkt.bAltID;
             break;
-        case SET_DSC:
+        case USB_REQUEST_SET_DESCRIPTOR:
             USB_SET_DESCRIPTOR_HANDLER(EVENT_SET_DESCRIPTOR,0,0);
             break;
-        case SYNCH_FRAME:
+        case USB_REQUEST_SYNCH_FRAME:
         default:
             break;
     }//end switch
@@ -1181,20 +1602,20 @@ void USBStdFeatureReqHandler(void)
     #endif
 #ifdef	USB_SUPPORT_OTG
     if ((SetupPkt.bFeature == OTG_FEATURE_B_HNP_ENABLE)&&
-        (SetupPkt.Recipient == RCPT_DEV))
+        (SetupPkt.Recipient == USB_SETUP_RECIPIENT_DEVICE_BITFIELD))
     {  
         inPipes[0].info.bits.busy = 1;
-        if(SetupPkt.bRequest == SET_FEATURE)
+        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
             USBOTGEnableHnp();
         else
             USBOTGDisableHnp();
     }
 
     if ((SetupPkt.bFeature == OTG_FEATURE_A_HNP_SUPPORT)&&
-        (SetupPkt.Recipient == RCPT_DEV))
+        (SetupPkt.Recipient == USB_SETUP_RECIPIENT_DEVICE_BITFIELD))
     {
         inPipes[0].info.bits.busy = 1;
-        if(SetupPkt.bRequest == SET_FEATURE)
+        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
             USBOTGEnableSupportHnp();
         else
             USBOTGDisableSupportHnp();
@@ -1202,27 +1623,27 @@ void USBStdFeatureReqHandler(void)
 
 
     if ((SetupPkt.bFeature == OTG_FEATURE_A_ALT_HNP_SUPPORT)&&
-        (SetupPkt.Recipient == RCPT_DEV))
+        (SetupPkt.Recipient == USB_SETUP_RECIPIENT_DEVICE_BITFIELD))
     {
         inPipes[0].info.bits.busy = 1;
-        if(SetupPkt.bRequest == SET_FEATURE)
+        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
             USBOTGEnableAltHnp();
         else
             USBOTGDisableAltHnp();
     }
 #endif    
-    if((SetupPkt.bFeature == DEVICE_REMOTE_WAKEUP)&&
-       (SetupPkt.Recipient == RCPT_DEV))
+    if((SetupPkt.bFeature == USB_FEATURE_DEVICE_REMOTE_WAKEUP)&&
+       (SetupPkt.Recipient == USB_SETUP_RECIPIENT_DEVICE_BITFIELD))
     {
         inPipes[0].info.bits.busy = 1;
-        if(SetupPkt.bRequest == SET_FEATURE)
+        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
             RemoteWakeup = TRUE;
         else
             RemoteWakeup = FALSE;
     }//end if
 
-    if((SetupPkt.bFeature == ENDPOINT_HALT)&&
-       (SetupPkt.Recipient == RCPT_EP)&&
+    if((SetupPkt.bFeature == USB_FEATURE_ENDPOINT_HALT)&&
+       (SetupPkt.Recipient == USB_SETUP_RECIPIENT_ENDPOINT_BITFIELD)&&
        (SetupPkt.EPNum != 0))
     {
         inPipes[0].info.bits.busy = 1;
@@ -1238,7 +1659,7 @@ void USBStdFeatureReqHandler(void)
         }
 
 		//if it was a SET_FEATURE request
-        if(SetupPkt.bRequest == SET_FEATURE)
+        if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
         {
 			//Then STALL the endpoint
             p->STAT.Val = _USIE|_BSTALL;
@@ -1314,7 +1735,7 @@ void USBStdGetDscHandler(void)
 {
     if(SetupPkt.bmRequestType == 0x80)
     {
-        inPipes[0].info.Val = USB_INPIPES_ROM | USB_INPIPES_BUSY | USB_INPIPES_INCLUDE_ZERO;
+        inPipes[0].info.Val = USB_EP0_ROM | USB_EP0_BUSY | USB_EP0_INCLUDE_ZERO;
 
         switch(SetupPkt.bDescriptorType)
         {
@@ -1379,7 +1800,7 @@ void USBStdGetStatusHandler(void)
 
     switch(SetupPkt.Recipient)
     {
-        case RCPT_DEV:
+        case USB_SETUP_RECIPIENT_DEVICE_BITFIELD:
             inPipes[0].info.bits.busy = 1;
             /*
              * [0]: bit0: Self-Powered Status [0] Bus-Powered [1] Self-Powered
@@ -1395,10 +1816,10 @@ void USBStdGetStatusHandler(void)
                 CtrlTrfData[0]|=0x02;
             }
             break;
-        case RCPT_INTF:
+        case USB_SETUP_RECIPIENT_INTERFACE_BITFIELD:
             inPipes[0].info.bits.busy = 1;     // No data to update
             break;
-        case RCPT_EP:
+        case USB_SETUP_RECIPIENT_ENDPOINT_BITFIELD:
             inPipes[0].info.bits.busy = 1;
             /*
              * [0]: bit0: Halt Status [0] Not Halted [1] Halted
@@ -1424,7 +1845,7 @@ void USBStdGetStatusHandler(void)
     if(inPipes[0].info.bits.busy == 1)
     {
         inPipes[0].pSrc.bRam = (BYTE*)&CtrlTrfData;            // Set Source
-        inPipes[0].info.bits.ctrl_trf_mem = _RAM;               // Set memory type
+        inPipes[0].info.bits.ctrl_trf_mem = USB_EP0_RAM;               // Set memory type
         inPipes[0].wCount.v[0] = 2;                         // Set data count
     }//end if(...)
 }//end USBStdGetStatusHandler
@@ -1505,7 +1926,7 @@ void USBCtrlEPServiceComplete(void)
     {
         if(outPipes[0].info.bits.busy == 0)
         {
-			if(SetupPkt.DataDir == DEV_TO_HOST)
+			if(SetupPkt.DataDir == USB_SETUP_DEVICE_TO_HOST_BITFIELD)
 			{
 				if(SetupPkt.wLength < inPipes[0].wCount.Val)
 				{
@@ -1553,7 +1974,7 @@ void USBCtrlEPServiceComplete(void)
 				pBDTEntryIn[0]->ADR = (BYTE*)ConvertToPhysicalAddress(&CtrlTrfData);
 				pBDTEntryIn[0]->STAT.Val = _USIE|_DAT1|_DTSEN;
 			}
-			else   // (SetupPkt.DataDir == HOST_TO_DEVICE)
+			else   // (SetupPkt.DataDir == USB_SETUP_DIRECTION_HOST_TO_DEVICE)
 			{
 				controlTransferState = CTRL_TRF_RX;
 				/*
@@ -1655,7 +2076,7 @@ void USBCtrlTrfTxService(void)
 
     pDst = (USB_VOLATILE BYTE*)CtrlTrfData;        // Set destination pointer
 
-    if(inPipes[0].info.bits.ctrl_trf_mem == USB_INPIPES_ROM)       // Determine type of memory source
+    if(inPipes[0].info.bits.ctrl_trf_mem == USB_EP0_ROM)       // Determine type of memory source
     {
         while(byteToSend.Val)
         {
@@ -1679,7 +2100,7 @@ void USBCtrlTrfTxService(void)
  *
  * PreCondition:    pDst and wCount are setup properly.
  *                  pSrc is always &CtrlTrfData
- *                  usb_stat.ctrl_trf_mem is always _RAM.
+ *                  usb_stat.ctrl_trf_mem is always USB_EP0_RAM.
  *                  wCount should be set to 0 at the start of each control
  *                  transfer.
  *
@@ -1792,7 +2213,7 @@ void USBStdSetCfgHandler(void)
     USBActiveConfiguration = SetupPkt.bConfigurationValue;
 
     //if the configuration value == 0
-    if(SetupPkt.bConfigurationValue == 0)
+    if(USBActiveConfiguration == 0)
     {
         //Go back to the addressed state
         USBDeviceState = ADDRESS_STATE;
@@ -1802,8 +2223,7 @@ void USBStdSetCfgHandler(void)
         //Otherwise go to the configured state
         USBDeviceState = CONFIGURED_STATE;
         //initialize the required endpoints
-        USBInitEP((BYTE ROM*)(USB_CD_Ptr[USBActiveConfiguration-1]));
-        USB_INIT_EP_HANDLER(EVENT_CONFIGURED,0,0);
+        USB_SET_CONFIGURATION_HANDLER(EVENT_CONFIGURED,(void*)&USBActiveConfiguration,1);
 
     }//end if(SetupPkt.bConfigurationValue == 0)
 }//end USBStdSetCfgHandler
@@ -2059,32 +2479,49 @@ USB_HANDLE USBTransferOnePacket(BYTE ep,BYTE dir,BYTE* data,BYTE len)
     return (USB_HANDLE)handle;
 }
 
-/********************************************************************
- * Function:        void USBClearInterruptFlag(BYTE* reg, BYTE flag)
- *
- * PreCondition:    None
- *
- * Input:           
- *   BYTE* reg - the register address holding the interrupt flag
- *   BYTE flag - the bit number needing to be cleared
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        clears the specified interrupt flag.
- *
- * Note:            
- *******************************************************************/
-void USBClearInterruptFlag(BYTE* reg, BYTE flag)
+/**************************************************************************
+    Function:
+        void USBCancelIO(BYTE endpoint)
+    
+    Description:
+        This function cancels the transfers pending on the specified endpoint.
+        This function can only be used after a SETUP packet is received and 
+        before that setup packet is handled.  This is the time period in which
+        the EVENT_EP0_REQUEST is thrown, before the event handler function
+        returns to the stack.
+
+    Precondition:
+  
+    Parameters:
+        BYTE endpoint - the endpoint number you wish to cancel the transfers for
+     
+    Return Values:
+        None
+        
+    Remarks:
+        None
+                                                          
+  **************************************************************************/
+void USBCancelIO(BYTE endpoint)
 {
-    #if defined(__18CXX)
-        *reg &= ~(0x01<<flag);
-    #elif defined(__C30__) || defined(__C32__)
-        *reg = (0x01<<flag); 
-    #else
-        #error "Function not defined for this compiler       
-    #endif
+    if(USBPacketDisable == 1)
+    {
+    	//The PKTDIS bit is currently set right now.  It is therefore "safe"
+    	//to mess with the BDT right now.
+    	pBDTEntryIn[endpoint]->Val &= _DTSMASK;	//Makes UOWN = 0 (_UCPU mode).  Deactivates endpoint.  Only sends NAKs.
+    	pBDTEntryIn[endpoint]->Val ^= _DTSMASK;	//Toggle the DTS bit.  This packet didn't get sent yet, and the next call to USBTransferOnePacket() will re-toggle the DTS bit back to the original (correct) value.
+    	
+    	//Need to do additional handling if ping-pong buffering is being used
+        #if ((USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG) || (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0))
+        //Point to the next buffer for ping pong purposes.  UOWN getting cleared
+        //(either due to SIE clearing it after a transaction, or the firmware
+        //clearing it) makes hardware ping pong pointer advance.
+        ((BYTE_VAL*)&pBDTEntryIn[endpoint])->Val ^= USB_NEXT_PING_PONG;
+    
+    	pBDTEntryIn[endpoint]->STAT.Val &= _DTSMASK;
+    	pBDTEntryIn[endpoint]->STAT.Val ^= _DTSMASK;
+        #endif
+    }
 }
 
 /**************************************************************************
@@ -2170,6 +2607,7 @@ void USBDeviceDetach(void)
     }
 #endif
 }
+#endif  //#if defined(USB_INTERRUPT)
 /**************************************************************************
     Function:
         void USBDeviceAttach(void)
@@ -2177,14 +2615,14 @@ void USBDeviceDetach(void)
     Description:
                 
     Precondition:
-  			//For normal USB devices:
-  			//Make sure that if the module was previously on, that it has been turned off 
-  			//for a long time (ex: 100ms+) before calling this function to re-enable the module.
-			//If the device turns off the D+ (for full speed) or D- (for low speed) ~1.5k ohm
-			//pull up resistor, and then turns it back on very quickly, common hosts will sometimes 
-			//reject this event, since no human could ever unplug and reattach a USB device in a 
-			//microseconds (or nanoseconds) timescale.  The host could simply treat this as some kind 
-			//of glitch and ignore the event altogether.  
+  		For normal USB devices:
+  		Make sure that if the module was previously on, that it has been turned off 
+  		for a long time (ex: 100ms+) before calling this function to re-enable the module.
+		If the device turns off the D+ (for full speed) or D- (for low speed) ~1.5k ohm
+		pull up resistor, and then turns it back on very quickly, common hosts will sometimes 
+		reject this event, since no human could ever unplug and reattach a USB device in a 
+		microseconds (or nanoseconds) timescale.  The host could simply treat this as some kind 
+		of glitch and ignore the event altogether.  
     Parameters:
         None
      
@@ -2195,6 +2633,7 @@ void USBDeviceDetach(void)
         None
                                                           
   **************************************************************************/
+#if defined(USB_INTERRUPT)
 void USBDeviceAttach(void)
 {
     //if we are in the detached state

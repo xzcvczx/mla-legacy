@@ -42,15 +42,10 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-
-#include "Compiler.h"
-#include "GenericTypeDefs.h"
-#include "HardwareProfile.h"
-#include "usb_config.h"
-#include "USB/usb_device.h"
 #include "USB/usb.h"
 #include "USB/usb_function_generic.h"
 
+#include "HardwareProfile.h"
 #include "user.h"
 #include "temperature.h"
 
@@ -244,7 +239,7 @@ WORD_VAL ReadPOT(void)
         w.v[1] = ADRESH;
 
     #elif defined(__C30__) || defined(__C32__)
-        #if defined(PIC24FJ256GB110_PIM)
+        #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
             AD1CHS = 0x5;           //MUXA uses AN5
 
             // Get an ADC sample
@@ -274,7 +269,7 @@ WORD_VAL ReadPOT(void)
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
-        #elif defined(PIC32MX460F512L_PIM)
+        #elif defined(PIC32MX460F512L_PIM) || defined(PIC32MX795F512L_PIM) || defined(PIC32_USB_STARTER_KIT)
             AD1PCFG = 0xFFFB; // PORTB = Digital; RB2 = analog
             AD1CON1 = 0x0000; // SAMP bit = 0 ends sampling ...
             // and starts converting
@@ -289,6 +284,8 @@ WORD_VAL ReadPOT(void)
             for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
             AD1CON1CLR = 0x0002; // start Converting
             while (!(AD1CON1 & 0x0001));// conversion done?
+        #else
+            #error "Please implement this for the target hardware platform"
         #endif
 
         w.Val = ADC1BUF0;

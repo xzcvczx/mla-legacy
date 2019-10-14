@@ -38,29 +38,29 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _BUTTON_H
-#define _BUTTON_H
+    #define _BUTTON_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define BTN_FOCUSED		0x0001  	// Bit for focus state.
-#define BTN_DISABLED    0x0002  	// Bit for disabled state.
-#define BTN_PRESSED     0x0004  	// Bit for press state.
-#define BTN_TOGGLE     	0x0008  	// Bit to indicate button will have a toggle behavior.
-#define BTN_TEXTRIGHT   0x0010  	// Bit to indicate text is right aligned.
-#define BTN_TEXTLEFT    0x0020  	// Bit to indicate text is left aligned.
-#define BTN_TEXTBOTTOM  0x0040  	// Bit to indicate text is top aligned.
-#define BTN_TEXTTOP     0x0080  	// Bit to indicate text is bottom aligned.
-									// Note that if bits[7:4] are all zero text is centered.
-#define BTN_DRAW_FOCUS  0x2000  	// Bit to indicate focus must be redrawn.
-#define BTN_DRAW        0x4000  	// Bit to indicate button must be redrawn.
-#define BTN_HIDE        0x8000  	// Bit to indicate button must be removed from screen.
+    #define BTN_FOCUSED     0x0001  // Bit for focus state.
+    #define BTN_DISABLED    0x0002  // Bit for disabled state.
+    #define BTN_PRESSED     0x0004  // Bit for press state.
+    #define BTN_TOGGLE      0x0008  // Bit to indicate button will have a toggle behavior.
+    #define BTN_TEXTRIGHT   0x0010  // Bit to indicate text is right aligned.
+    #define BTN_TEXTLEFT    0x0020  // Bit to indicate text is left aligned.
+    #define BTN_TEXTBOTTOM  0x0040  // Bit to indicate text is top aligned.
+    #define BTN_TEXTTOP     0x0080  // Bit to indicate text is bottom aligned.
 
-#define BTN_REMOVE      0x8000
+// Note that if bits[7:4] are all zero text is centered.
+    #define BTN_DRAW_FOCUS  0x2000  // Bit to indicate focus must be redrawn.
+    #define BTN_DRAW        0x4000  // Bit to indicate button must be redrawn.
+    #define BTN_HIDE        0x8000  // Bit to indicate button must be removed from screen.
+    #define BTN_REMOVE      0x8000
+
 /*********************************************************************
 * Overview: Defines the parameters required for a button Object.
 * 			The following relationships of the parameters determines
@@ -73,13 +73,14 @@
 *			4. If 2*radius = height = width, the button is a circular button.
 *
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).   
-	SHORT     		radius;       	// Radius for rounded buttons.
-	SHORT     		textWidth;      // Computed text width, done at creation.
-	SHORT     		textHeight;     // Computed text height, done at creation.
-	XCHAR  		   *pText;         	// Pointer to the text used.
-	void           *pBitmap;     	// Pointer to bitmap used.
+typedef struct
+{
+    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    SHORT       radius;     // Radius for rounded buttons.
+    SHORT       textWidth;  // Computed text width, done at creation.
+    SHORT       textHeight; // Computed text height, done at creation.
+    XCHAR       *pText;     // Pointer to the text used.
+    void        *pBitmap;   // Pointer to bitmap used.
 } BUTTON;
 
 /*********************************************************************
@@ -106,7 +107,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define BtnSetBitmap(pB, pBtmap)      ((BUTTON*)pB)->pBitmap = pBtmap
+    #define BtnSetBitmap(pB, pBtmap)    ((BUTTON *)pB)->pBitmap = pBtmap
 
 /*********************************************************************
 * Macros:  BtnGetBitmap(pB)
@@ -131,7 +132,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define BtnGetBitmap(pB)               ((BUTTON*)pB)->pBitmap
+    #define BtnGetBitmap(pB)    ((BUTTON *)pB)->pBitmap
 
 /*********************************************************************
 * Macros:  BtnGetText(pB)
@@ -156,7 +157,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define BtnGetText(pB)                ((BUTTON*)pB)->pText
+    #define BtnGetText(pB)  ((BUTTON *)pB)->pText
 
 /*********************************************************************
 * Function: BtnSetText(BUTTON *pB, XCHAR *pText)
@@ -183,7 +184,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-void BtnSetText(BUTTON *pB, XCHAR *pText);
+void BtnSetText(BUTTON * pB, XCHAR * pText);
 
 /*********************************************************************
 * Function: BUTTON *BtnCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -241,8 +242,19 @@ void BtnSetText(BUTTON *pB, XCHAR *pText);
 * Side Effects: none
 *
 ********************************************************************/
-BUTTON *BtnCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT radius,  
-			      WORD state, void *pBitmap, XCHAR *pText, GOL_SCHEME *pScheme);		         
+BUTTON  *BtnCreate
+        (
+            WORD        ID,
+            SHORT       left,
+            SHORT       top,
+            SHORT       right,
+            SHORT       bottom,
+            SHORT       radius,
+            WORD        state,
+            void        *pBitmap,
+            XCHAR       *pText,
+            GOL_SCHEME  *pScheme
+        );
 
 /*********************************************************************
 * Function: BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg)
@@ -317,7 +329,7 @@ BUTTON *BtnCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, SHO
 * Side Effects: none
 *
 ********************************************************************/
-WORD BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg);
+WORD    BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG* pMsg)
@@ -350,7 +362,7 @@ WORD BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void  BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG* pMsg);
+void    BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD BtnDraw(BUTTON *pB)
@@ -428,6 +440,5 @@ void  BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD BtnDraw(BUTTON *pB);
-
+WORD    BtnDraw(BUTTON *pB);
 #endif // _BUTTON_H

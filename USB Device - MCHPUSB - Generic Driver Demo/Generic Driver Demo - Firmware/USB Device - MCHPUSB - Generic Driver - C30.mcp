@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ256GB110
+device=PIC24FJ256DA210
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -47,6 +47,7 @@ file_019=USB Stack
 file_020=HardwareProfiles
 file_021=HardwareProfiles
 file_022=HardwareProfiles
+file_023=HardwareProfiles
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -71,6 +72,7 @@ file_019=no
 file_020=no
 file_021=no
 file_022=no
+file_023=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -95,6 +97,7 @@ file_019=no
 file_020=no
 file_021=no
 file_022=no
+file_023=no
 [FILE_INFO]
 file_000=user.c
 file_001=main.c
@@ -119,6 +122,7 @@ file_019=..\..\Microchip\Include\USB\usb_hal.h
 file_020=HardwareProfile - PIC24F Starter Kit.h
 file_021=HardwareProfile - PIC24FJ256GB110 PIM.h
 file_022=HardwareProfile - PIC24FJ64GB004 PIM.h
+file_023=HardwareProfile - PIC24FJ256DA210 Development Board.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

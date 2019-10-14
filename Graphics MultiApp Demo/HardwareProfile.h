@@ -5,7 +5,7 @@
  *********************************************************************
  * FileName:        HardwareProfile.h
  * Dependencies:    None
- * Processor:       PIC24F, PIC24H, PIC32MX
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:        Microchip C32 v1.00 or higher
  *					Microchip C30 v3.01 or higher
  * Company:         Microchip Technology, Inc.
@@ -45,77 +45,65 @@
  * Author               Date		Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Howard Schlunder		10/03/06	Original, copied from Compiler.h
- * Paolo  Tamayo		02/13/09    Modified for GMAP demo
+ * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
+ * Pradeep Budagutta	15 Sep 2009 Added PIC24FJ256DA210 Development Board Support
  ********************************************************************/
-#ifndef __HARDWARE_PROFILE_H
-#define __HARDWARE_PROFILE_H
+#if defined(__dsPIC33F__) || defined(__PIC24H__)
+	#error "This Demo is not supporting dsPIC or PIC24H devices!"
+#endif	
 
-#include "GraphicsConfig.h"
-#include "usb_config.h"
+#if defined (__PIC24F__)  
 
-/*********************************************************************
-* FOR THE INTERFACE TYPE
-*********************************************************************/
-// Select your interface type
-// This library currently only supports a single physical interface layer
-// Here is the selection matrix:
-// PIC Device 		Demo Combo
-// PIC24FJ256GB110 	USE_SD_INTERFACE_WITH_SPI or USE_USB_INTERFACE
-// PIC24FJ256GA110  USE_SD_INTERFACE_WITH_SPI only
-// PIC24FJ128GA010  SPI SD is not enabled because of space and USB is not enabled because it is not a USB device
+	#if defined (__PIC24FJ256DA210__)
+		#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_USBMSD_HID_PH480272T_005_I11Q.h"
 
-#if defined(__PIC24FJ256GA110__)
-	#define USE_SD_INTERFACE_WITH_SPI       // SD-SPI MSD Library(SD-SPI.c and .h)
+	#elif defined (__PIC24FJ256GB110__)
 
-#elif defined (__PIC24FJ256GB110__)
-	// Use one of the two
-	//#define USE_SD_INTERFACE_WITH_SPI     	// SD-SPI MSD Library(SD-SPI.c and .h)
-	#define USE_USB_INTERFACE               // USB host MSD library
+		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_PH480272T_005_I11Q.h"
+		
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_HID_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_HID_PH480272T_005_I11Q.h"
 
-#elif defined (__32MX360F512L__)	
-	#define USE_SD_INTERFACE_WITH_SPI     	// SD-SPI MSD Library(SD-SPI.c and .h)
+	#elif defined (__PIC24FJ256GA110__) 
 
-#elif defined (__32MX460F512L__)	
-	#define USE_USB_INTERFACE               // USB host MSD library
+		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_PH480272T_005_I11Q.h"
 
-	/*********************************************************************
-	* SELECT THE HARDWARE USED (PIM or Starter Kits)
-	*********************************************************************/
-	//#define PIC32USB_STARTERKIT
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531_SDMSD.h"
+
+	#else // (for __PIC24FJ128GA010__)
+
+		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
+		
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
+		
+	#endif
+
+#elif defined (__PIC32MX__) 
+
+	#if defined (__32MX460F512L__)
+
+		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_PH480272T_005_I11Q.h"
+		
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_USBMSD_HID_PH480272T_005_I11Q.h"
+		
+	#else 
 	
+		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_PH480272T_005_I11Q.h"
+
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_SDMSD_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_SDMSD_PH480272T_005_I11Q.h"
+
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531_SDMSD.h"
+	
+	#endif
+
 #endif
 
-/*********************************************************************
-* RTCC DEFAULT INITIALIZATION
-*********************************************************************/
-#define RTCC_DEFAULT_DAY        4       	// 4
-#define RTCC_DEFAULT_MONTH      7       	// July
-#define RTCC_DEFAULT_YEAR       9       	// 2009
-#define RTCC_DEFAULT_WEEKDAY    06       	// Saturday
-#define RTCC_DEFAULT_HOUR       10        	// 10:10:01
-#define RTCC_DEFAULT_MINUTE     10
-#define RTCC_DEFAULT_SECOND     01
-
-
-/*********************************************************************
-* SELECT THE HARDPROFILE FOR THE APPROPRIATE MICRO
-*********************************************************************/
-    #if defined(__PIC32MX__)
-        #if defined(__32MX460F512L__)
-            #include "HardwareProfile - GMAP PIC32MX460F512L PIM.h"
-        #elif defined(__32MX360F512L__)
-            #include "HardwareProfile - GMAP PIC32MX360F512L PIM.h"
-        #endif
-    #endif
-
-    #if defined(__C30__)
-        #if defined(__PIC24FJ256GB110__)
-            #include "HardwareProfile - GMAP PIC24FJ256GB110 PIM.h"
-        #elif defined(__PIC24FJ256GA110__)
-            #include "HardwareProfile - GMAP PIC24FJ256GA110 PIM.h"
-        #elif defined(__PIC24FJ128GA010__)
-            #include "HardwareProfile - GMAP PIC24FJ128GA010 PIM.h"
-        #endif
-    #endif
-
-#endif // __HARDWARE_PROFILE_H
+    

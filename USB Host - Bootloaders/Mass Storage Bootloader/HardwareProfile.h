@@ -56,17 +56,23 @@
 #if !defined(DEMO_BOARD)
     #if defined(__C32__)
         #if defined(__32MX460F512L__)
-            #include "HardwareProfile - PIC32MX460F512L PIM.h"
+            #if defined(PIC32MX460F512L_PIM)
+                #include "HardwareProfile - PIC32MX460F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
         #endif
     #endif
 
     #if defined(__C30__)
         #if defined(__PIC24FJ256GB110__)
             #include "HardwareProfile - PIC24FJ256GB110 PIM.h"
-        #endif
-
-        #if defined(__PIC24FJ256GB106__)
+        #elif defined(__PIC24FJ256GB106__)
             #include "HardwareProfile - PIC24F Starter Kit.h"
+        #elif defined(__PIC24FJ64GB004__)
+            #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+        #elif defined(__PIC24FJ256DA210__)
+            #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
         #endif
     #endif
 #endif

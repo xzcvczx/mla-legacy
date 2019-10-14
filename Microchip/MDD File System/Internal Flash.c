@@ -11,7 +11,7 @@
  * Processor:       None
  * Compiler:        None
  * Company:         Microchip Technology, Inc.
- * Version:         1.0.0
+ * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -201,11 +201,26 @@ MEDIA_INFORMATION * MDD_IntFlash_MediaInitialize(void)
 BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
 {
     #if defined(__C30__)
-        WORD PSVPageSave;
+        #if defined(__PIC24FJ256DA210__)    \
+            || defined(__PIC24FJ128DA210__) \
+            || defined(__PIC24FJ256DA206__) \
+            || defined(__PIC24FJ128DA206__) \
+            || defined(__PIC24FJ256DA110__) \
+            || defined(__PIC24FJ128DA110__) \
+            || defined(__PIC24FJ256DA106__) \
+            || defined(__PIC24FJ128DA106__)
+            WORD DSRPageSave;
+            DSRPageSave = DSRPAG;
+    
+            DSRPAG = (FILES_ADDRESS + sector_addr)/0x8000 + 0x0200;
 
-        PSVPageSave = PSVPAG;
-
-        PSVPAG = (FILES_ADDRESS + sector_addr)/0x8000;
+        #else
+            WORD PSVPageSave;
+    
+            PSVPageSave = PSVPAG;
+    
+            PSVPAG = (FILES_ADDRESS + sector_addr)/0x8000;
+        #endif
     #endif
 
     memcpypgm2ram
@@ -216,7 +231,18 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
     );
 
     #if defined(__C30__)
-        PSVPAG = PSVPageSave;
+        #if defined(__PIC24FJ256DA210__)    \
+            || defined(__PIC24FJ128DA210__) \
+            || defined(__PIC24FJ256DA206__) \
+            || defined(__PIC24FJ128DA206__) \
+            || defined(__PIC24FJ256DA110__) \
+            || defined(__PIC24FJ128DA110__) \
+            || defined(__PIC24FJ256DA106__) \
+            || defined(__PIC24FJ128DA106__)
+            DSRPAG = DSRPageSave;
+        #else
+            PSVPAG = PSVPageSave;
+        #endif
     #endif
 
 	return TRUE;
@@ -278,11 +304,26 @@ BYTE MDD_IntFlash_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteTo
         #endif
 
         #if defined(__C30__)
-        WORD PSVPageSave;
-
-        PSVPageSave = PSVPAG;
-        //TODO: make this not a hardcoded value
-        PSVPAG = 0x01;
+            #if defined(__PIC24FJ256DA210__)    \
+                || defined(__PIC24FJ128DA210__) \
+                || defined(__PIC24FJ256DA206__) \
+                || defined(__PIC24FJ128DA206__) \
+                || defined(__PIC24FJ256DA110__) \
+                || defined(__PIC24FJ128DA110__) \
+                || defined(__PIC24FJ256DA106__) \
+                || defined(__PIC24FJ128DA106__)
+                WORD DSRPageSave;
+                DSRPageSave = DSRPAG;
+        
+                DSRPAG = (FILES_ADDRESS + sector_addr)/0x8000 + 0x0200;
+    
+            #else
+                WORD PSVPageSave;
+        
+                PSVPageSave = PSVPAG;
+        
+                PSVPAG = (FILES_ADDRESS + sector_addr)/0x8000;
+            #endif
         #endif
 
         dest = (ROM BYTE*)(MASTER_BOOT_RECORD_ADDRESS + (sector_addr * MEDIA_SECTOR_SIZE));
@@ -411,7 +452,18 @@ BYTE MDD_IntFlash_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteTo
         }
 
         #if defined(__C30__)
-        PSVPAG = PSVPageSave;
+            #if defined(__PIC24FJ256DA210__)    \
+                || defined(__PIC24FJ128DA210__) \
+                || defined(__PIC24FJ256DA206__) \
+                || defined(__PIC24FJ128DA206__) \
+                || defined(__PIC24FJ256DA110__) \
+                || defined(__PIC24FJ128DA110__) \
+                || defined(__PIC24FJ256DA106__) \
+                || defined(__PIC24FJ128DA106__)
+                DSRPAG = DSRPageSave;
+            #else
+                PSVPAG = PSVPageSave;
+            #endif
         #endif
 
     	return TRUE;

@@ -55,106 +55,90 @@ Author                 Date           Comments
 Sean Justice        15_Sept-2008      First release
 Anton Alkhimenok    06_Jun-2009       Ported to PIC24
 *******************************************************************************/
-#if defined(__dsPIC33F__) 
-#include <p33Fxxxx.h>
-#elif  defined(__PIC24H__)
-#include <p24Hxxxx.h>
-#elif defined(__PIC32MX__)
-#include <plib.h>
-#else
-#include <p24Fxxxx.h>
-#endif
+#include "MainDemo.h"
 
-#include "GenericTypedefs.h"
-#include "MDD File System\FSIO.h"
-#include "Graphics\Graphics.h"
-#include "SSD1926_JPEG.h"
+#if (GRAPHICS_HARDWARE_PLATFORM != GFX_PICTAIL_V3)
+    #error  Error: This demo works only along with Graphics PicTail 3
+#endif
 
 // Configuration bits
 #if defined(__dsPIC33F__) || defined(__PIC24H__)
-_FOSCSEL(FNOSC_PRI);			
-_FOSC(FCKSM_CSECMD & OSCIOFNC_OFF  & POSCMD_XT);  
-_FWDT(FWDTEN_OFF);              
+_FOSCSEL(FNOSC_PRI);
+_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
+_FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-#pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
-#pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
-#pragma config CP = OFF, BWP = OFF, PWP = OFF
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
+    #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
-	#if defined (__PIC24FJ256GB110__)
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
-    #endif	
-	#if defined (__PIC24FJ256GA110__)
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
-    #endif	
-	#if defined (__PIC24FJ128GA010__)
-		_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
-		_CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
-	#endif	
+    #if defined(__PIC24FJ256GB110__)
+_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
+_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+    #endif
+    #if defined(__PIC24FJ256GA110__)
+_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
+_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
+    #endif
+    #if defined(__PIC24FJ128GA010__)
+_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
+_CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
+    #endif
 #endif
-
-
-int main(void)
+int main (void)
 {
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-// Configure Oscillator to operate the device at 40Mhz
-// Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-	PLLFBD=38;					// M=40
-	CLKDIVbits.PLLPOST=0;		// N1=2
-	CLKDIVbits.PLLPRE=0;		// N2=2
-	OSCTUN=0;					// Tune FRC oscillator, if FRC is used
+    #if defined(__dsPIC33F__) || defined(__PIC24H__)
 
-// Disable Watch Dog Timer
-	RCONbits.SWDTEN=0;
+    // Configure Oscillator to operate the device at 40Mhz
+    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+    PLLFBD = 38;                    // M=40
+    CLKDIVbits.PLLPOST = 0;         // N1=2
+    CLKDIVbits.PLLPRE = 0;          // N2=2
+    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
 
+    // Disable Watch Dog Timer
+    RCONbits.SWDTEN = 0;
 
-// Clock switching to incorporate PLL
-	__builtin_write_OSCCONH(0x03);		// Initiate Clock Switch to Primary
-													// Oscillator with PLL (NOSC=0b011)
-	__builtin_write_OSCCONL(0x01);		// Start clock switching
-	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
+    // Clock switching to incorporate PLL
+    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
 
-// Wait for PLL to lock
-	while(OSCCONbits.LOCK!=1) {};
-#elif defined(__PIC32MX__)
+    // Oscillator with PLL (NOSC=0b011)
+    __builtin_write_OSCCONL(0x01);  // Start clock switching
+    while(OSCCONbits.COSC != 0b011);
+
+    // Wait for Clock switch to occur	
+    // Wait for PLL to lock
+    while(OSCCONbits.LOCK != 1)
+    { };
+    #elif defined(__PIC32MX__)
     SYSTEMConfig(GetSystemClock(), SYS_CFG_ALL);
-#endif
-    
+    #endif
+    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+    AD1PCFGL = 0xffff;
+    #endif
+    InitGraph();                    // Graphics
 
-#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-	AD1PCFGL = 0xffff;
-#endif
-
-    InitGraph(); // Graphics
-     
     // Set YUV mode to display JPEG
     JPEGSetYUV();
 
     while(1)
     {
-        FSInit(); // File system
-
+        FSInit();                   // File system
         SearchRec nextFile;
-        if(-1 != FindFirst("*.*", ATTR_ARCHIVE, &nextFile)){
+        if(-1 != FindFirst("*.*", ATTR_ARCHIVE, &nextFile))
+        {
             do
             {
-
                 if(!JPEGPutImage(nextFile.filename))
-                {
-                    
-                }
+                { }
 
                 DelayMs(2000);
-            }while(-1 != FindNext(&nextFile));
-
-        }//end of if
-
-    }//end of while
+            } while(-1 != FindNext(&nextFile));
+        }                           //end of if
+    }                               //end of while
 
     // Restore RGB mode
     JPEGSetRGB();
 
-    return -1;
+    return (-1);
 }

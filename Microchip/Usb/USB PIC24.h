@@ -160,10 +160,10 @@ typedef union __BDT
 #define USBPowerModule() U1PWRCbits.USBPWR = 1;
 #define USBPingPongBufferReset U1CONbits.PPBRST
 
-#define USBTransactionCompleteIE U1IEbits.TRNIE
-#define USBTransactionCompleteIF U1IRbits.TRNIF
-#define USBTransactionCompleteIFReg (BYTE*)&U1IR
-#define USBTransactionCompleteIFBitNum 3
+//#define USBTransactionCompleteIE U1IEbits.TRNIE
+//#define USBTransactionCompleteIF U1IRbits.TRNIF
+//#define USBTransactionCompleteIFReg (BYTE*)&U1IR
+//#define USBTransactionCompleteIFBitNum 3
 
 #define USBResetIE  U1IEbits.URSTIE
 #define USBResetIF  U1IRbits.URSTIF

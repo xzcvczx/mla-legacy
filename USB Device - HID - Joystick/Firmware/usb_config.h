@@ -82,8 +82,8 @@
 #define USB_EP0_OUT_ONLY
 
 
-//#define USB_POLLING
-#define USB_INTERRUPT
+#define USB_POLLING
+//#define USB_INTERRUPT
 
 /* Parameter definitions are defined in usb_device.h */
 #define USB_PULLUP_OPTION USB_PULLUP_ENABLE

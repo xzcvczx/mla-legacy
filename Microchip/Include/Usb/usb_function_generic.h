@@ -70,15 +70,8 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
+    .
     ..\\..\\Microchip\\Include
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -88,6 +81,16 @@
     
     C:\\Microchip Solutions\\My Demo Application                               
   ******************************************************************************/
+
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.6    No Change
+********************************************************************/
+//DOM-IGNORE-END
+
 #ifndef USBGEN_H
 #define USBGEN_H
 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                Microchip USB HID Bootloader Version 2.3
+ *                Microchip USB HID Bootloader Version 2.6
  *
  *********************************************************************
  * FileName:        Form1.h
@@ -29,13 +29,15 @@
  ********************************************************************
 
  Change History:
-  Rev   Date         Description
+  Rev   Date(M/D/Y)  Description
   1.0   05/21/2008   Initial release: PIC18 devices supported
   2.2	06/10/2008	 Update to add PIC24F USB device support
   2.3	08/11/2008	 Update to add PIC32MX USB device support.  
 					 Minor TryToFindHIDDeviceFromVIDPID() update
 					 for improved error handling.  Updated to fix
 				     error programming non-J flash PIC18 devices.
+  2.6	10/08/2009	 Added additional error checking and handling code 
+					 for greater application robustness.
  ********************************************************************/
 
 #pragma once
@@ -393,7 +395,6 @@ namespace HIDBootLoader {
 	//Globally Unique Identifier (GUID) for HID class devices.  Windows uses GUIDs to identify things.
 	GUID InterfaceClassGuid = {0x4d1e55b2, 0xf16f, 0x11cf, 0x88, 0xcb, 0x00, 0x11, 0x11, 0x00, 0x00, 0x30}; 
 
-	HANDLE HandleToMyDevice = INVALID_HANDLE_VALUE;			//Variable we use to hold the handle
 	PSP_DEVICE_INTERFACE_DETAIL_DATA MyStructureWithDetailedInterfaceDataInIt = new SP_DEVICE_INTERFACE_DETAIL_DATA;	//Make this global, so we can pass the device path to various CreateFile() calls all over the program
 	BOOL MyDeviceAttachedStatus = false;	//False = disconnected, true = connected.
 	DWORD ErrorStatusWrite = ERROR_SUCCESS;
@@ -530,7 +531,8 @@ namespace HIDBootLoader {
 				btn_Query->Enabled = true;
 			#endif
 
-			//Register for WM_DEVICECHANGE notifications:
+			//Register for WM_DEVICECHANGE notifications.  We want windows messages for
+			//plug and play events, that could signal attachment or detachment of our USB device.
 			DEV_BROADCAST_DEVICEINTERFACE MyDeviceBroadcastHeader;// = new DEV_BROADCAST_HDR;
 			MyDeviceBroadcastHeader.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
 			MyDeviceBroadcastHeader.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
@@ -553,12 +555,19 @@ namespace HIDBootLoader {
 				ErrorStatusWrite = GetLastError();
 				ReadHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 				ErrorStatusRead = GetLastError();
+				if(ErrorStatusRead != ERROR_SUCCESS)
+				{
+					CloseHandle(WriteHandleToMyDevice);
+				}
 
 				if((ErrorStatusRead == ERROR_SUCCESS) & (ErrorStatusWrite == ERROR_SUCCESS))
 				{
 					MyDeviceAttachedStatus = true;
 					DeviceAttached();
 					DEBUG_OUT("Successfully got read/write handles to device: " + MY_DEVICE_ID);
+					//Don't really need these handles, we just opened them temporarily to verify the rest of the application will work.
+					CloseHandle(WriteHandleToMyDevice);	
+					CloseHandle(ReadHandleToMyDevice);
 				}
 				else
 				{
@@ -810,7 +819,7 @@ namespace HIDBootLoader {
 			this->Controls->Add(this->btn_ProgramVerify);
 			this->Controls->Add(this->listBox1);
 			this->Name = L"Form1";
-			this->Text = L"Microchip USB HID Bootloader v2.3";
+			this->Text = L"Microchip USB HID Bootloader v2.6";
 			this->SizeChanged += gcnew System::EventHandler(this, &Form1::Form1_SizeChanged);
 			this->ResumeLayout(false);
 			this->PerformLayout();
@@ -865,8 +874,21 @@ namespace HIDBootLoader {
 			//  that we want to talk to
 			WriteHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 			ErrorStatusWrite = GetLastError();
+			if(ErrorStatusWrite != ERROR_SUCCESS)
+			{
+				QueryThreadResults = QUERY_WRITE_FILE_FAILED;
+				progressStatus = 100;
+				return;
+			}
 			ReadHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 			ErrorStatusRead = GetLastError();
+			if(ErrorStatusRead != ERROR_SUCCESS)
+			{
+				QueryThreadResults = QUERY_READ_FILE_FAILED;
+				CloseHandle(WriteHandleToMyDevice);
+				progressStatus = 100;
+				return;
+			}
 
 			//Set the progress bar to 10%
 			progressStatus = 10;
@@ -958,7 +980,6 @@ namespace HIDBootLoader {
 
 			//Send the command that we prepared
 			WriteFile(WriteHandleToMyDevice,myCommand.RawData, 65, &BytesWritten, 0);	//Shouldn't really do this.  Becomes infinite blocking function if it can't successfully write, for example, because the USB firmware on the microcontroller never sets the UOWN bit for the OUT endpoint.
-			
 			//Get the error status of the last transmission
 			ErrorStatus = GetLastError();
 			if(ErrorStatus == ERROR_SUCCESS)
@@ -969,7 +990,6 @@ namespace HIDBootLoader {
 
 				//Try to read a packet from the device
 				ReadFile(ReadHandleToMyDevice, myResponse.RawData, 65, &BytesReceived, 0);	//Shouldn't really do this.  Becomes infinite blocking function if it can't successfully write, for example, because the USB firmware on the microcontroller never sets the UOWN bit for the OUT endpoint.
-				
 				//Get the status of the read request
 				ErrorStatus = GetLastError();
 				if(ErrorStatus == ERROR_SUCCESS)
@@ -1183,6 +1203,11 @@ namespace HIDBootLoader {
 			//Create a new write handle to the device
 			WriteHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 			ErrorStatusWrite = GetLastError();
+			if(ErrorStatusWrite != ERROR_SUCCESS)
+			{
+				EraseThreadResults = ERASE_WRITE_FILE_FAILED;
+				return;
+			}
 
 			//Create the command packet that we want to send to the device.  The
 			//  Command should be erase and the WindowsReserved byte should be
@@ -1203,6 +1228,8 @@ namespace HIDBootLoader {
 			{
 				EraseThreadResults = ERASE_WRITE_FILE_FAILED;
 			}
+
+			CloseHandle(WriteHandleToMyDevice);
 		}
 		#pragma endregion
 
@@ -1327,6 +1354,11 @@ namespace HIDBootLoader {
 			//  packets to the device
 			WriteHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 			ErrorStatusWrite = GetLastError();
+			if(ErrorStatusWrite != ERROR_SUCCESS)
+			{
+				UnlockConfigThreadResults = UNLOCK_CONFIG_FAILURE;
+				return;
+			}
 
 			//Set up the command that needs to be sent to the device
 			myCommand.UnlockConfig.WindowsReserved = 0;
@@ -1353,6 +1385,8 @@ namespace HIDBootLoader {
 			{
 				UnlockConfigThreadResults = UNLOCK_CONFIG_FAILURE;
 			}
+
+			CloseHandle(WriteHandleToMyDevice);
 		}
 		#pragma endregion
 
@@ -1465,6 +1499,10 @@ namespace HIDBootLoader {
 			BOOTLOADER_COMMAND myCommand2 = {0};
 			BOOTLOADER_COMMAND myResponse = {0};
 
+			DWORD OldSystemTime = GetTickCount();
+			BOOL NoProgressSinceLastCheck = FALSE;
+			DWORD NewSystemTime;
+
 			DWORD BytesWritten = 0;
 			DWORD BytesWritten2 = 0;
 			DWORD ErrorStatus = ERROR_SUCCESS; 
@@ -1526,10 +1564,26 @@ namespace HIDBootLoader {
 			SetEvent(WriteCompleteEvent2);
 			SetEvent(WriteCompleteEvent);
 
+			//Open Read and Write Handles to the USB device.  Open them with FILE_FLAG_OVERLAPPED attribute, so they can be used for asynchronous I/O requests.
 			AsyncWriteHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
 			ErrorStatus = GetLastError();
+			if(ErrorStatus != ERROR_SUCCESS)	//Check if there was an unknown error opening the handle.  If so, bug out.
+			{
+				ENABLE_PRINT();
+				ReadThreadResults = READ_WRITE_FILE_FAILED;
+				progressStatus = 100;
+				return;
+			}
 			AsyncReadHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
 			ErrorStatus = GetLastError();
+			if(ErrorStatus != ERROR_SUCCESS)	//Check if there was an unknown error opening the handle.  If so, bug out.
+			{
+				ENABLE_PRINT();
+				ReadThreadResults = READ_READ_FILE_FAILED;
+				progressStatus = 100;
+				CloseHandle(AsyncWriteHandleToMyDevice);
+				return;
+			}
 
 			//Read
 			for(currentMemoryRegion=0;currentMemoryRegion<memoryRegionsDetected;currentMemoryRegion++)
@@ -1553,7 +1607,8 @@ namespace HIDBootLoader {
 				{
 					myCommand.GetData.BytesPerPacket++;
 				}
-
+	
+				//Queue up our first OUT packet, requesting read data.
 				if((AddressToRequest < (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size)))
 				{
 					OverlappedWriteStructure.Internal = 0;
@@ -1608,35 +1663,81 @@ namespace HIDBootLoader {
 
 					if(ReadFile(AsyncReadHandleToMyDevice, myResponse.RawData, 65, &BytesReceived, &OverlappedReadStructure))
 					{
+						//Operation completed synchronously.  No problem.
 					}
 					else //probably because I/O pending, but need to make certain
 					{
 						ErrorStatusSave = GetLastError();
+
+						if(ErrorStatusSave != ERROR_IO_PENDING)	//Check if there was an unknown error.  If so, bug out.
+						{
+							ENABLE_PRINT();
+							ReadThreadResults = READ_READ_FILE_FAILED;
+							progressStatus = 100;
+							CloseHandle(AsyncWriteHandleToMyDevice);
+							CloseHandle(AsyncReadHandleToMyDevice);
+							return;
+						}
 					}	
 				}
 
-
+				//Main loop that sends out WriteFile requests to GET_DATA packets in return.  This loop also
+				//receives the data from the GET_DATA return packets and stores them.  Loop finishes when all bytes
+				//of the entire memory region has been read successfully.
 				while((PendingPackets != 0) || (AddressToRequest < (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size)))
 				{
 					progressStatus = (unsigned char)(((100*AddressToRequest) / (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size)));
 
-					if((HasOverlappedIoCompleted(&OverlappedWriteStructure)) && (PendingPackets < 15))
+					Sleep(0);	//Relinquish current CPU time slice to provide fair CPU sharing, 
+								//but don't actually sleep the thread to avoid losing potential performance.
+
+					//Add a timeout to this while() loop.  If for some reason no progress is occuring for a very long 
+					//time, perhaps because USB communication was lost (ex: unplugged cable, firmware broken, etc.),
+					//we don't want this to become an infinite blocking loop that consumes 100% CPU forever.
+					NewSystemTime = GetTickCount();	//Returns current system time in milliseconds (DWORD)
+					if((NewSystemTime - OldSystemTime) > 10000)	//If > 10 seconds has elapsed since the last check
 					{
+						if(NoProgressSinceLastCheck == TRUE)
+						{
+							//Unexpected error occurred.  Maybe the user unplugged the cable during the operation.  Bug out.
+							ENABLE_PRINT();
+							ReadThreadResults = READ_READ_FILE_FAILED;
+							progressStatus = 100;
+							CloseHandle(AsyncWriteHandleToMyDevice);
+							CloseHandle(AsyncReadHandleToMyDevice);
+							return;
+						}
+
+						OldSystemTime = NewSystemTime;
+						NoProgressSinceLastCheck = TRUE;
+					}
+
+					//Check if we should queue up another WriteFile request for another read data packet.
+					//If less than 10 packets already pending, and our overlapped structure is ready for re-use,
+					//go ahead and queue up another one.
+					if((HasOverlappedIoCompleted(&OverlappedWriteStructure)) && (PendingPackets < 10))
+					{
+						NoProgressSinceLastCheck = FALSE;	//Progress in completing the operation is being made.  Prevents timeout.
+
+						//Prepare a command packet to read data from the device.
 						myCommand.GetData.Command = GET_DATA;
 						myCommand.GetData.Address = AddressToRequest;
 						myCommand.GetData.BytesPerPacket = bytesPerPacket;
 						myCommand.GetData.WindowsReserved = 0;
 
+						//Check if we should request a full read data packet, or only a parial one (because we are at the end of a memory segment, and less than one full packet of data remains).
 						if((AddressToRequest + (bytesPerPacket/bytesPerAddress)) > (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size))
 						{
 							myCommand.GetData.BytesPerPacket = (unsigned char)(bytesPerPacket - (((AddressToRequest + (bytesPerPacket/bytesPerAddress)) - (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size))*bytesPerAddress));
 						}
 
+						//Correction for PIC24 devices
 						while((myCommand.GetData.BytesPerPacket % bytesPerAddress) != 0)
 						{
 							myCommand.GetData.BytesPerPacket++;
 						}
 
+						//Prepare an overlapped structure for asynchronous I/O.
 						OverlappedWriteStructure.Internal = 0;
 						OverlappedWriteStructure.InternalHigh = 0;
 						OverlappedWriteStructure.Offset = 0;
@@ -1648,6 +1749,7 @@ namespace HIDBootLoader {
 						{
 							if(WriteFile(AsyncWriteHandleToMyDevice, &myCommand, 65, &BytesWritten, &OverlappedWriteStructure))
 							{
+								//Operation completed synchronously.
 								PendingPackets++;
 								packetsWritten++;
 								AddressToRequest+=(bytesPerPacket/bytesPerAddress);
@@ -1673,12 +1775,24 @@ namespace HIDBootLoader {
 										DEBUG_OUT("");
 									#endif
 								}
+								else
+								{
+									//Unexpected error occurred.  Maybe the user unplugged the cable during the operation.  Bug out.
+									ENABLE_PRINT();
+									ReadThreadResults = READ_READ_FILE_FAILED;
+									progressStatus = 100;
+									CloseHandle(AsyncWriteHandleToMyDevice);
+									CloseHandle(AsyncReadHandleToMyDevice);
+									return;
+								}
 							}
-						}//address requested is still in rage
+						}//address requested is still in range
 					}//Overlapped write complete
 
-					if((HasOverlappedIoCompleted(&OverlappedWriteStructure2)) && (PendingPackets < 15))
+					if((HasOverlappedIoCompleted(&OverlappedWriteStructure2)) && (PendingPackets < 10))
 					{
+						NoProgressSinceLastCheck = FALSE;	//Progress in completing the operation is being made.  Prevents timeout.
+
 						myCommand2.GetData.Command = GET_DATA;
 						myCommand2.GetData.Address = AddressToRequest;
 						myCommand2.GetData.BytesPerPacket = bytesPerPacket;
@@ -1705,6 +1819,7 @@ namespace HIDBootLoader {
 						{
 							if(WriteFile(AsyncWriteHandleToMyDevice, &myCommand2, 65, &BytesWritten2, &OverlappedWriteStructure2))
 							{
+								//Operation completed synchronously.
 								PendingPackets++;
 								packetsWritten++;
 								AddressToRequest+=(bytesPerPacket/bytesPerAddress);
@@ -1715,7 +1830,7 @@ namespace HIDBootLoader {
 									DEBUG_OUT("");
 								#endif
 							}
-							else //probably because I/O pending, but need to make certain
+							else //probably because asynchronous I/O pending, but need to make certain
 							{
 								ErrorStatusSave = GetLastError();
 								if(ErrorStatusSave == ERROR_IO_PENDING)
@@ -1730,12 +1845,24 @@ namespace HIDBootLoader {
 										DEBUG_OUT("");
 									#endif
 								}
+								else
+								{
+									//Unexpected error occurred.  Maybe the user unplugged the cable during the operation.  Bug out.
+									ENABLE_PRINT();
+									ReadThreadResults = READ_READ_FILE_FAILED;
+									progressStatus = 100;
+									CloseHandle(AsyncWriteHandleToMyDevice);
+									CloseHandle(AsyncReadHandleToMyDevice);
+									return;
+								}
 							}
 						}
 					}
 
 					if(HasOverlappedIoCompleted(&OverlappedReadStructure))
 					{
+						NoProgressSinceLastCheck = FALSE;	//Progress in completing the operation is being made.  Prevents timeout.
+
 						//We have successfully received a packet so decrease the number
 						//  of transmissions that we are waiting to complete and increase
 						//  the total number of packets successfully read
@@ -1778,9 +1905,18 @@ namespace HIDBootLoader {
 							}
 							else //probably because I/O pending, but need to make certain
 							{
-								//If the read resulted in an error then save the last error that
-								//  we received
 								ErrorStatusSave = GetLastError();
+								if(ErrorStatusSave != ERROR_IO_PENDING)
+								{
+									//Unexpected error occurred.  Maybe the user unplugged the cable during the operation.  Bug out.
+									ENABLE_PRINT();
+									ReadThreadResults = READ_READ_FILE_FAILED;
+									progressStatus = 100;
+									CloseHandle(AsyncWriteHandleToMyDevice);
+									CloseHandle(AsyncReadHandleToMyDevice);
+									return;
+								}
+
 							}	
 						}
 					}//has overlapped completed
@@ -1834,6 +1970,10 @@ namespace HIDBootLoader {
 			BOOTLOADER_COMMAND myCommand = {0};
 			BOOTLOADER_COMMAND myCommand2 = {0};
 			BOOTLOADER_COMMAND myResponse = {0};
+
+			DWORD OldSystemTime = GetTickCount();
+			BOOL NoProgressSinceLastCheck = FALSE;
+			DWORD NewSystemTime;
 
 			DWORD BytesWritten = 0;
 			DWORD BytesWritten2 = 0;
@@ -1898,10 +2038,26 @@ namespace HIDBootLoader {
 			SetEvent(WriteCompleteEvent2);
 			SetEvent(WriteCompleteEvent);
 
+			//Open Read and Write Handles to the USB device.  Open them with FILE_FLAG_OVERLAPPED attribute, so they can be used for asynchronous I/O requests.
 			AsyncWriteHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
 			ErrorStatus = GetLastError();
+			if(ErrorStatus != ERROR_SUCCESS)	//Check if there was an unknown error opening the handle.  If so, bug out.
+			{
+				ENABLE_PRINT();
+				ReadThreadResults = VERIFY_WRITE_FILE_FAILED;
+				progressStatus = 100;
+				return;
+			}
 			AsyncReadHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
 			ErrorStatus = GetLastError();
+			if(ErrorStatus != ERROR_SUCCESS)	//Check if there was an unknown error opening the handle.  If so, bug out.
+			{
+				ENABLE_PRINT();
+				ReadThreadResults = VERIFY_READ_FILE_FAILED;
+				progressStatus = 100;
+				CloseHandle(AsyncWriteHandleToMyDevice);
+				return;
+			}
 
 			//Verify
 			for(currentMemoryRegion=0;currentMemoryRegion<memoryRegionsDetected;currentMemoryRegion++)
@@ -1928,11 +2084,13 @@ namespace HIDBootLoader {
 				myCommand.GetData.BytesPerPacket = bytesPerPacket;
 				myCommand.GetData.WindowsReserved = 0;
 
+				//Check if we should request a full GET_DATA packet, or only partial one, since the number of bytes remaining is already less than the size of a full data packet.
 				if((AddressToRequest + (bytesPerPacket/bytesPerAddress)) > (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size))
 				{
 					myCommand.GetData.BytesPerPacket = (unsigned char)(bytesPerPacket - (((AddressToRequest + (bytesPerPacket/bytesPerAddress)) - (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size))*bytesPerAddress));
 				}
 
+				//Correction factor for PIC24 flash memory addressing scheme.
 				while((myCommand.GetData.BytesPerPacket % bytesPerAddress) != 0)
 				{
 					myCommand.GetData.BytesPerPacket++;
@@ -1974,6 +2132,16 @@ namespace HIDBootLoader {
 								DEBUG_OUT("");
 							#endif
 						}
+						else
+						{	
+							//Unknown error occurred.  Maybe user unplugged USB cable.  Bug out.
+							ENABLE_PRINT();
+							ReadThreadResults = VERIFY_WRITE_FILE_FAILED;
+							progressStatus = 100;
+							CloseHandle(AsyncWriteHandleToMyDevice);
+							CloseHandle(AsyncReadHandleToMyDevice);
+							return;
+						}
 					}
 				}
 
@@ -1992,10 +2160,21 @@ namespace HIDBootLoader {
 
 					if(ReadFile(AsyncReadHandleToMyDevice, myResponse.RawData, 65, &BytesReceived, &OverlappedReadStructure))
 					{
+						//Operation completed synchronously.
 					}
 					else //probably because I/O pending, but need to make certain
 					{
 						ErrorStatusSave = GetLastError();
+						if(ErrorStatusSave != ERROR_IO_PENDING)
+						{	
+							//Unknown error occurred.  Maybe user unplugged USB cable.  Bug out.
+							ENABLE_PRINT();
+							ReadThreadResults = VERIFY_WRITE_FILE_FAILED;
+							progressStatus = 100;
+							CloseHandle(AsyncWriteHandleToMyDevice);
+							CloseHandle(AsyncReadHandleToMyDevice);
+							return;
+						}					
 					}	
 				}
 
@@ -2003,9 +2182,34 @@ namespace HIDBootLoader {
 				while((PendingPackets != 0) || (AddressToRequest < (memoryRegions[currentMemoryRegion].Address + memoryRegions[currentMemoryRegion].Size)))
 				{
 					progressStatus = (unsigned char)(((100*(AddressToRequest-memoryRegions[currentMemoryRegion].Address)) /memoryRegions[currentMemoryRegion].Size));
+					Sleep(0);	//Relinquish current CPU time slice to provide fair CPU sharing, 
+								//but don't actually sleep the thread to avoid losing potential performance.
 
-					if((HasOverlappedIoCompleted(&OverlappedWriteStructure)) && (PendingPackets < 15))
+					//Add a timeout to this while() loop.  If for some reason no progress is occuring for a very long 
+					//time, perhaps because USB communication was lost (ex: unplugged cable, firmware broken, etc.),
+					//we don't want this to become an infinite blocking loop that consumes 100% CPU forever.
+					NewSystemTime = GetTickCount();	//Returns current system time in milliseconds (DWORD)
+					if((NewSystemTime - OldSystemTime) > 10000)	//If > 10 seconds has elapsed since the last check
 					{
+						if(NoProgressSinceLastCheck == TRUE)
+						{
+							//Unexpected error occurred.  Maybe the user unplugged the cable during the operation.  Bug out.
+							ENABLE_PRINT();
+							ReadThreadResults = VERIFY_WRITE_FILE_FAILED;
+							progressStatus = 100;
+							CloseHandle(AsyncWriteHandleToMyDevice);
+							CloseHandle(AsyncReadHandleToMyDevice);
+							return;
+						}
+
+						OldSystemTime = NewSystemTime;
+						NoProgressSinceLastCheck = TRUE;
+					}
+
+					if((HasOverlappedIoCompleted(&OverlappedWriteStructure)) && (PendingPackets < 10))
+					{
+						NoProgressSinceLastCheck = FALSE;	//Progress in completing the operation is being made.  Prevents timeout.
+						
 						myCommand.GetData.Command = GET_DATA;
 						myCommand.GetData.Address = AddressToRequest;
 						myCommand.GetData.BytesPerPacket = bytesPerPacket;
@@ -2124,13 +2328,25 @@ namespace HIDBootLoader {
 										DEBUG_OUT("");
 									#endif
 								}
+								else
+								{	
+									//Unknown error occurred.  Maybe user unplugged USB cable.  Bug out.
+									ENABLE_PRINT();
+									ReadThreadResults = VERIFY_WRITE_FILE_FAILED;
+									progressStatus = 100;
+									CloseHandle(AsyncWriteHandleToMyDevice);
+									CloseHandle(AsyncReadHandleToMyDevice);
+									return;
+								}	
 							}
 						}//address requested is still in range
 #endif
 					}//Overlapped write complete
 
-					if((HasOverlappedIoCompleted(&OverlappedWriteStructure2)) && (PendingPackets < 15))
+					if((HasOverlappedIoCompleted(&OverlappedWriteStructure2)) && (PendingPackets < 10))
 					{
+						NoProgressSinceLastCheck = FALSE;	//Progress in completing the operation is being made.  Prevents timeout.
+
 						myCommand2.GetData.Command = GET_DATA;
 						myCommand2.GetData.Address = AddressToRequest;
 						myCommand2.GetData.BytesPerPacket = bytesPerPacket;
@@ -2219,6 +2435,7 @@ namespace HIDBootLoader {
 						{
 							if(WriteFile(AsyncWriteHandleToMyDevice, &myCommand2, 65, &BytesWritten2, &OverlappedWriteStructure2))
 							{
+								//operation completed synchronously
 								PendingPackets++;
 								packetsWritten++;
 								AddressToRequest+=(bytesPerPacket/bytesPerAddress);
@@ -2229,7 +2446,7 @@ namespace HIDBootLoader {
 									DEBUG_OUT("");
 								#endif
 							}
-							else //probably because I/O pending, but need to make certain
+							else //probably because async I/O pending, but need to make certain
 							{
 								ErrorStatusSave = GetLastError();
 								if(ErrorStatusSave == ERROR_IO_PENDING)
@@ -2238,6 +2455,16 @@ namespace HIDBootLoader {
 									packetsWritten++;
 									AddressToRequest+=(bytesPerPacket/bytesPerAddress);
 								}
+								else
+								{	
+									//Unknown error occurred.  Maybe user unplugged USB cable.  Bug out.
+									ENABLE_PRINT();
+									ReadThreadResults = VERIFY_WRITE_FILE_FAILED;
+									progressStatus = 100;
+									CloseHandle(AsyncWriteHandleToMyDevice);
+									CloseHandle(AsyncReadHandleToMyDevice);
+									return;
+								}	
 							}
 						}
 #endif
@@ -2245,6 +2472,8 @@ namespace HIDBootLoader {
 
 					if(HasOverlappedIoCompleted(&OverlappedReadStructure))
 					{
+						NoProgressSinceLastCheck = FALSE;	//Progress in completing the operation is being made.  Prevents timeout.
+
 						//We have successfully received a packet so decrease the number
 						//  of transmissions that we are waiting to complete and increase
 						//  the total number of packets successfully read
@@ -2340,6 +2569,8 @@ namespace HIDBootLoader {
 											VerifyThreadResults = VERIFY_MISMATCH_FAILURE;
 											foundError = true;
 											progressStatus = 100;
+											CloseHandle(AsyncWriteHandleToMyDevice);
+											CloseHandle(AsyncReadHandleToMyDevice);
 											return;
 											break;
 									}
@@ -2402,6 +2633,8 @@ namespace HIDBootLoader {
 											VerifyThreadResults = VERIFY_MISMATCH_FAILURE;
 											foundError = true;
 											progressStatus = 100;
+											CloseHandle(AsyncWriteHandleToMyDevice);
+											CloseHandle(AsyncReadHandleToMyDevice);
 											return;
 											break;
 									}
@@ -2425,6 +2658,8 @@ namespace HIDBootLoader {
 									VerifyThreadResults = VERIFY_MISMATCH_FAILURE;
 									foundError = true;
 									progressStatus = 100;
+									CloseHandle(AsyncWriteHandleToMyDevice);
+									CloseHandle(AsyncReadHandleToMyDevice);
 									return;
 								}
 							}
@@ -2444,20 +2679,26 @@ namespace HIDBootLoader {
 
 							myResponse.GetDataResults.WindowsReserved = 0;
 
-							//initiate a read from the device
+							//Queue an asynchronous read from the device
 							if(ReadFile(AsyncReadHandleToMyDevice, myResponse.RawData, 65, &BytesReceived, &OverlappedReadStructure))
 							{
-								//If the read was successful, do nothing.  We need to wait for the 
-								//  read to complete
+								//If the read was completed synchronously, do nothing for now.  We will check the overlapped structure later in the next loop iteration.
 							}
-							else //probably because I/O pending, but need to make certain
+							else //probably because asynchronous I/O pending, but need to make certain
 							{
-								//If the read resulted in an error then save the last error that
-								//  we received
 								ErrorStatusSave = GetLastError();
+								if(ErrorStatusSave != ERROR_IO_PENDING)
+								{
+									//Unknown error occurred.  Maybe user unplugged USB cable.  Bug out.
+									ENABLE_PRINT();
+									ReadThreadResults = VERIFY_WRITE_FILE_FAILED;
+									progressStatus = 100;
+									CloseHandle(AsyncWriteHandleToMyDevice);
+									CloseHandle(AsyncReadHandleToMyDevice);
+									return;
+								}
 							}	
-
-						}
+						}//if(PendingPackets > 0)
 					}//has overlapped completed
 				}	//while
 			}//for loop verify
@@ -2864,7 +3105,10 @@ namespace HIDBootLoader {
 					//If the hex file completed successfully, then enable any buttons
 					//  that are valid now that we have loaded data.
 					btn_ProgramVerify_restore = true;
-					btn_EraseDevice_restore = true;
+					if(ckbox_ConfigWordProgramming->Checked == FALSE)
+					{
+						btn_EraseDevice_restore = true;
+					}
 					btn_ExportHex_restore = true;
 					btn_Verify_restore = true;
 				}
@@ -3874,7 +4118,12 @@ namespace HIDBootLoader {
 
 				//Initialize an appropriate SP_DEVINFO_DATA structure.  We need this structure for SetupDiGetDeviceRegistryProperty().
 				DevInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
-				SetupDiEnumDeviceInfoUM(DeviceInfoTable, InterfaceIndex, &DevInfoData);
+				if(!SetupDiEnumDeviceInfoUM(DeviceInfoTable, InterfaceIndex, &DevInfoData))
+				{
+					//Some unknown error occurred.  Don't know how to recover, so just exit.
+					SetupDiDestroyDeviceInfoListUM(DeviceInfoTable);	//Clean up the old structure we no longer need.
+					return false;
+				}
 
 				//First query for the size of the hardware ID, so we can know how big a buffer to allocate for the data.
 				SetupDiGetDeviceRegistryPropertyUM(DeviceInfoTable, &DevInfoData, SPDRP_HARDWAREID, &dwRegType, NULL, 0, &dwRegSize);
@@ -3891,7 +4140,12 @@ namespace HIDBootLoader {
 				//REG_MULTI_SZ (array of null terminated strings).  To find a device, we only care about the very first string in the
 				//buffer, which will be the "device ID".  The device ID is a string which contains the VID and PID, in the example 
 				//format "Vid_04d8&Pid_003f".
-				SetupDiGetDeviceRegistryPropertyUM(DeviceInfoTable, &DevInfoData, SPDRP_HARDWAREID, &dwRegType, PropertyValueBuffer, dwRegSize, NULL);
+				if(!SetupDiGetDeviceRegistryPropertyUM(DeviceInfoTable, &DevInfoData, SPDRP_HARDWAREID, &dwRegType, PropertyValueBuffer, dwRegSize, NULL))
+				{
+					//Some unknown error occurred.  Don't know how to recover, so just exit.
+					SetupDiDestroyDeviceInfoListUM(DeviceInfoTable);	//Clean up the old structure we no longer need.
+					return false;
+				}
 
 				//Now check if the first string in the hardware ID matches the device ID of my USB device.
 				#ifdef UNICODE
@@ -3915,16 +4169,22 @@ namespace HIDBootLoader {
 					//get the structure (after we have allocated enough memory for the structure.)
 					MyStructureWithDetailedInterfaceDataInIt->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 					//First call populates "StructureSize" with the correct value
-					SetupDiGetDeviceInterfaceDetailUM(DeviceInfoTable, InterfaceDataStructure, NULL, NULL, &StructureSize, NULL);	
-					MyStructureWithDetailedInterfaceDataInIt = (PSP_DEVICE_INTERFACE_DETAIL_DATA)(malloc(StructureSize));		//Allocate enough memory
+					SetupDiGetDeviceInterfaceDetailUM(DeviceInfoTable, InterfaceDataStructure, NULL, NULL, &StructureSize, NULL);
+					//Now allocate enough memory for the structure.
+					MyStructureWithDetailedInterfaceDataInIt = (PSP_DEVICE_INTERFACE_DETAIL_DATA)(malloc(StructureSize));		
 					if(MyStructureWithDetailedInterfaceDataInIt == NULL)	//if null, error, couldn't allocate enough memory
 					{	//Can't really recover from this situation, just exit instead.
 						SetupDiDestroyDeviceInfoListUM(DeviceInfoTable);	//Clean up the old structure we no longer need.
 						return false;		
 					}
 					MyStructureWithDetailedInterfaceDataInIt->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-					 //Now call SetupDiGetDeviceInterfaceDetail() a second time to receive the goods.  
-					SetupDiGetDeviceInterfaceDetailUM(DeviceInfoTable, InterfaceDataStructure, MyStructureWithDetailedInterfaceDataInIt, StructureSize, NULL, NULL); 
+					//Now call SetupDiGetDeviceInterfaceDetail() a second time to receive the goods.  
+					if(!SetupDiGetDeviceInterfaceDetailUM(DeviceInfoTable, InterfaceDataStructure, MyStructureWithDetailedInterfaceDataInIt, StructureSize, NULL, NULL))
+					{
+						//Some unknown error occurred.  Don't know how to recover, so just exit.
+						SetupDiDestroyDeviceInfoListUM(DeviceInfoTable);	//Clean up the old structure we no longer need.
+						return false;
+					}
 
 					//We now have the proper device path, and we can finally open read and write handles to the device.
 					SetupDiDestroyDeviceInfoListUM(DeviceInfoTable);	//Clean up the old structure we no longer need.
@@ -3932,8 +4192,15 @@ namespace HIDBootLoader {
 										//We will use the path when we later call CreateFile() to get handles to the device.
 				}
 
-				InterfaceIndex++;	
-				//Keep looping until we either find a device with matching VID and PID, or until we run out of items.
+				InterfaceIndex++;
+				if(InterfaceIndex == 10000000)	//Surely there aren't more than 10 million interfaces attached to a single PC.
+				{
+					//If execution gets to here, it is probably safe to assume some kind of unanticipated problem occurred.
+					//In this case, bug out, to avoid infinite blocking while(true) loop.
+					SetupDiDestroyDeviceInfoListUM(DeviceInfoTable);	//Clean up the old structure we no longer need.
+					return false;
+				}
+				//Keep looping until we either find a device with matching VID and PID, or until we run out of items, or some error is encountered.
 			}//end of while(true)	
 		}//end of TryToFindHIDDeviceFromVIDPID()	 
 				 
@@ -4192,6 +4459,12 @@ namespace HIDBootLoader {
 			//Create a new write handle to the device
 			WriteHandleToMyDevice = CreateFile(MyStructureWithDetailedInterfaceDataInIt->DevicePath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 			ErrorStatusWrite = GetLastError();
+			if(ErrorStatusWrite != ERROR_SUCCESS)
+			{
+				ResetThreadResults = RESET_WRITE_FILE_FAILED;
+				progressStatus = 100;
+				return;
+			}
 
 			//Create the command packet that we want to send to the device.  The
 			//  Command should be erase and the WindowsReserved byte should be
@@ -4419,7 +4692,7 @@ namespace HIDBootLoader {
 					switch(ReadThreadResults)
 					{
 						case READ_RUNNING:
-							//if was are running, the notify the user that
+							//if read thread is running, then notify the user that
 							//  we are currently reading the device
 							PRINT_STATUS("Reading Device");
 							break;
@@ -4444,7 +4717,7 @@ namespace HIDBootLoader {
 							bootloaderState = BOOTLOADER_IDLE;
 							ReadThreadResults = READ_IDLE;
 							ENABLE_PRINT();
-							PRINT_STATUS("Unabled to complete read operation");
+							PRINT_STATUS("Error: Unable to complete read operation.");
 							progressBar_Status->Value = 100;
 							delete ReadThread;
 							break;
@@ -4895,7 +5168,7 @@ namespace HIDBootLoader {
 						case QUERY_READ_FILE_FAILED:
 							//if the query failed, then notify the user
 							ENABLE_PRINT();
-							PRINT_STATUS("Application unable to communicate to the device");
+							PRINT_STATUS("Application unable to communicate with the device");
 
 							//and return the bootloader and query threads to the idle state
 							bootloaderState = BOOTLOADER_IDLE;

@@ -38,13 +38,12 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok		01/14/08	...
  *****************************************************************************/
-
 #ifndef _SST39_H
-#define _SST39_H
+    #define _SST39_H
 
-#ifdef __PIC32MX
-#define PMDIN1  PMDIN
-#endif
+    #ifdef __PIC32MX
+        #define PMDIN1  PMDIN
+    #endif
 
 /************************************************************************
 * Structure SST39STATREG and union SST39STATUS                            
@@ -52,21 +51,17 @@
 * Overview: provide bits and byte access to erase/write status value      
 *                                                                       
 ************************************************************************/
-typedef struct  _SST39STATREG_
+typedef struct _SST39STATREG_
 {
-
-BYTE    RESERVED:5;
-BYTE    FAILED:1;
-BYTE    TOGGLE:1;
-
+    BYTE    RESERVED : 5;
+    BYTE    FAILED : 1;
+    BYTE    TOGGLE : 1;
 } SST39STATREG;
 
 typedef union _SST39STATUS_
 {
-
-SST39STATREG Bits;
-BYTE        Val;
-
+    SST39STATREG    Bits;
+    BYTE            Val;
 } SST39STATUS;
 
 /************************************************************************
@@ -79,7 +74,7 @@ BYTE        Val;
 * Output: none  
 *                                                                       
 ************************************************************************/
-void SST39Init();
+void    SST39Init(void);
 
 /************************************************************************
 * Function: void SST39WaitProgram()                                          
@@ -91,7 +86,7 @@ void SST39Init();
 * Output: 1 if it was successfull 0 - if not
 *                                                                       
 ************************************************************************/
-void SST39WaitProgram();
+void    SST39WaitProgram(void);
 
 /************************************************************************
 * Function: BYTE SST39WriteByte(DWORD address, BYTE data)
@@ -105,7 +100,7 @@ void SST39WaitProgram();
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39WriteByte(DWORD address, BYTE data);
+BYTE    SST39WriteByte(DWORD address, BYTE data);
 
 /************************************************************************
 * Function: BYTE SST39WriteArray(DWORD address, BYTE* pData, nCount)
@@ -117,7 +112,7 @@ BYTE SST39WriteByte(DWORD address, BYTE data);
 * Output: return 1 if the operation was successfull
 *                                                                       
 ************************************************************************/
-BYTE SST39WriteArray(DWORD address, BYTE* pData, WORD nCount);
+BYTE    SST39WriteArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
 * Function: void SST39ReadArray(DWORD address, BYTE* pData, nCount)
@@ -129,7 +124,7 @@ BYTE SST39WriteArray(DWORD address, BYTE* pData, WORD nCount);
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39ReadArray(DWORD address, BYTE* pData, WORD nCount);
+void    SST39ReadArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
 * Function: BYTE SST39ReadByte(DWORD address)       
@@ -141,7 +136,7 @@ void SST39ReadArray(DWORD address, BYTE* pData, WORD nCount);
 * Output: data read
 *                                                                       
 ************************************************************************/
-BYTE SST39ReadByte(DWORD address);
+BYTE    SST39ReadByte(DWORD address);
 
 /************************************************************************
 * Function: WORD SST39ReadWord(DWORD address)             
@@ -153,7 +148,7 @@ BYTE SST39ReadByte(DWORD address);
 * Output: data read
 *                                                                       
 ************************************************************************/
-WORD SST39ReadWord(DWORD address);
+WORD    SST39ReadWord(DWORD address);
 
 /************************************************************************
 * Function: void SST39ChipErase(void)                                 
@@ -165,7 +160,5 @@ WORD SST39ReadWord(DWORD address);
 * Output: none
 *
 ************************************************************************/
-void SST39ChipErase(void);
-
+void    SST39ChipErase(void);
 #endif //_SST39_H
-

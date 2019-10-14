@@ -54,9 +54,9 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
+Version          Date    Comments
 --------------------------------------------------------------------------------
-ADG         14-Apr-2008 First release
+?            14-Apr-2008 First release
 
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -164,14 +164,6 @@ ADG         14-Apr-2008 First release
 
 #endif
 
-//<<<<<<< .mine
-//_CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
-//_CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
-//_CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
-
-
-//=======
-//>>>>>>> .r4115
 // *****************************************************************************
 // *****************************************************************************
 // Data Structures
@@ -578,18 +570,22 @@ void App_ProcessInputReport(void)
     LCDDisplayString((BYTE*)LCD_DATA_LINE_TWO, LCD_LINE_TWO);
 
     #ifdef DEBUG_MODE
-    UART2PrintString( "\n\rHID: Raw Report  " );
-    for(i=0;i<(Appl_raw_report_buffer.ReportSize);i++)
     {
-    UART2PutHex( Appl_raw_report_buffer.ReportData[i]);
-    UART2PrintString( "-" );
+        unsigned int i;
+
+        UART2PrintString( "\n\rHID: Raw Report  " );
+        for(i=0;i<(Appl_raw_report_buffer.ReportSize);i++)
+        {
+            UART2PutHex( Appl_raw_report_buffer.ReportData[i]);
+            UART2PrintString( "-" );
+        }
+        UART2PrintString( "\n\r  Left Bt :  " ); UART2PutHex( Appl_Button_report_buffer[0]);
+        UART2PrintString( "\n\r  Right Bt :  " ); UART2PutHex( Appl_Button_report_buffer[1]);
+    
+        UART2PrintString( "\n\r  X-Axis :  " ); UART2PutHex( Appl_XY_report_buffer[0]);
+        UART2PrintString( "\n\r  Y-Axis :  " ); UART2PutHex( Appl_XY_report_buffer[1]);
+
     }
-    UART2PrintString( "\n\r  Left Bt :  " ); UART2PutHex( Appl_Button_report_buffer[0]);
-    UART2PrintString( "\n\r  Right Bt :  " ); UART2PutHex( Appl_Button_report_buffer[1]);
-
-    UART2PrintString( "\n\r  X-Axis :  " ); UART2PutHex( Appl_XY_report_buffer[0]);
-    UART2PrintString( "\n\r  Y-Axis :  " ); UART2PutHex( Appl_XY_report_buffer[1]);
-
     #endif
 
 }
@@ -615,7 +611,7 @@ void App_ProcessInputReport(void)
 ***************************************************************************/
 BYTE App_DATA2ASCII(BYTE a) //convert USB HID code (buffer[2 to 7]) to ASCII code
 {
-   if((a>=0)&&(a<=0x9))
+   if(a<=0x9)
     {
        return(a+0x30);
     }

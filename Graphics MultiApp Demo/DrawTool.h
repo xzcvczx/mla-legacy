@@ -37,7 +37,7 @@
  * Anton Alkhimenok		03/10/08    ...
  ********************************************************************/
 #ifndef DRAWTOOL_H
-#define DRAWTOOL_H
+    #define DRAWTOOL_H
 
 /************************************************************************
  Function: void CreateDrawTool()
@@ -48,7 +48,7 @@
  
  Output: none
 ************************************************************************/
-void CreateDrawTool();                    	
+void    CreateDrawTool(void);
 
 /************************************************************************
  Function: WORD MsgDrawTool(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
@@ -66,6 +66,5 @@ void CreateDrawTool();
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD MsgDrawTool(WORD objMsg, OBJ_HEADER* pObj,  GOL_MSG* pMsg); 
-
+WORD    MsgDrawTool(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 #endif

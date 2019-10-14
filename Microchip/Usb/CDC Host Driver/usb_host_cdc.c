@@ -62,7 +62,16 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 Author          Date    Comments
 --------------------------------------------------------------------------------
 ADG          15-Sep-2008 First release
-*******************************************************************************/
+********************************************************************************
+ Change History:
+ Revision     Description
+ v2.6         Removed state machine 'SUBSTATE_SET_CONTROL_LINE_STATE' from normal
+              enumeration process.
+              Modified code to accommodate CDC devices that do not have distinct
+              Communication and Data interfaces.
+********************************************************************************/
+
+
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypeDefs.h"
@@ -574,7 +583,8 @@ void USBHostCDCTasks( void )
                                 if(0 == memcmp(&CDC_DEV_LINE_CODING_Buffer, PTR_HOST_LINE_CODING_BUFFER, USB_CDC_LINE_CODING_LENGTH))
                                 {
                                     // if fine goto set  Control line state
-                                    deviceInfoCDC[i].state = STATE_INITIALIZE_DEVICE | SUBSTATE_SET_CONTROL_LINE_STATE;
+ //                                   deviceInfoCDC[i].state = STATE_INITIALIZE_DEVICE | SUBSTATE_SET_CONTROL_LINE_STATE;
+                                      deviceInfoCDC[i].state = STATE_RUNNING;
                                 }
                                 else
                                 {
@@ -1518,56 +1528,68 @@ BOOL USBHostCDCInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                         // communication interface normaly has one endpoint. 
                         // Notification element is optional - currently not supported.
                     }
+
+                    if (((descriptor[i+1] == USB_DESCRIPTOR_INTERFACE) && (descriptor[i+5] == USB_CDC_DATA_INTF)) ||
+                        (descriptor[i+1] == USB_DESCRIPTOR_ENDPOINT))
+
+                    {
+                           if(descriptor[i+5] == USB_CDC_DATA_INTF)
+                           {
+                              validDataInterface = 1;
+                              deviceInfoCDC[device].dataInterface.interfaceNum  = descriptor[i+2];
+                              deviceInfoCDC[device].dataInterface.noOfEndpoints = descriptor[i+4];
+                              
+                              i += descriptor[i]; // goto endpoint descriptors
+                           }
+                           else
+                           {
+                              // Some CDC devices do not list DATA interface descriptor seperately
+                              // DATA endpoints are mentioned along with Communicaton interface
+                              validDataInterface = 1;
+                              deviceInfoCDC[device].dataInterface.interfaceNum  = deviceInfoCDC[device].commInterface.interfaceNum;
+                              deviceInfoCDC[device].dataInterface.noOfEndpoints = deviceInfoCDC[device].commInterface.noOfEndpoints - 1;
+                           }
+                           // Look for bulk or isochronous , IN and OUT endpoints.
+                           endpointIN  = 0;
+                           endpointOUT = 0;
+                           
+                           while(descriptor[i+1] == USB_DESCRIPTOR_ENDPOINT)
+                           {   // Data Interface uses Bulk or Iscochronous endpoint
+                               deviceInfoCDC[device].dataInterface.endpointType = descriptor[i+3];
+                               if((descriptor[i+3] == 0x01)||(descriptor[i+3] == 0x02))
+                               {
+                                   if (((descriptor[i+2] & 0x80) == 0x80) && (endpointIN == 0))
+                                   {
+                                       endpointIN     = descriptor[i+2];
+                                       endpointINsize = ((descriptor[i+4])|(descriptor[i+5] << 8));
+                                   }
+                                   if (((descriptor[i+2] & 0x80) == 0x00) && (endpointOUT == 0))
+                                   {
+                                       endpointOUT     = descriptor[i+2];
+                                       endpointOUTsize = ((descriptor[i+4])|(descriptor[i+5] << 8));
+                                   }
+                           
+                               }
+                               i += descriptor[i];
+                           }
+                           
+                           if ((endpointIN != 0) || (endpointOUT != 0)) // normally endpoint should be in pair of same type
+                           {
+                               deviceInfoCDC[device].dataInterface.endpointIN           = endpointIN;
+                               deviceInfoCDC[device].dataInterface.endpointInDataSize   = endpointINsize;
+                           
+                               deviceInfoCDC[device].dataInterface.endpointOUT          = endpointOUT;
+                               deviceInfoCDC[device].dataInterface.endpointOutDataSize  = endpointOUTsize;
+                           
+                               USBHostSetNAKTimeout( address, endpointIN,  1, USB_NUM_BULK_NAKS );
+                               USBHostSetNAKTimeout( address, endpointOUT, 1, USB_NUM_BULK_NAKS );
+                           }
+                           else
+                           {
+                               validDataInterface = 0;
+                           }
+                    } // if data interface
                 } // communication interface loop
-
-                // See if the interface is a CDC - Data Interface.
-                if (descriptor[i+5] == USB_CDC_DATA_INTF)
-                {
-                    validDataInterface = 1;
-                    deviceInfoCDC[device].dataInterface.interfaceNum  = descriptor[i+2];
-                    deviceInfoCDC[device].dataInterface.noOfEndpoints = descriptor[i+4];
-
-                    i += descriptor[i]; // goto endpoint descriptors
-                    // Look for bulk or isochronous , IN and OUT endpoints.
-                    endpointIN  = 0;
-                    endpointOUT = 0;
-
-                    while(descriptor[i+1] == USB_DESCRIPTOR_ENDPOINT)
-                    {   // Data Interface uses Bulk or Iscochronous endpoint
-                        deviceInfoCDC[device].dataInterface.endpointType = descriptor[i+3];
-                        if((descriptor[i+3] == 0x01)||(descriptor[i+3] == 0x02))
-                        {
-                            if (((descriptor[i+2] & 0x80) == 0x80) && (endpointIN == 0))
-                            {
-                                endpointIN     = descriptor[i+2];
-                                endpointINsize = ((descriptor[i+4])|(descriptor[i+5] << 8));
-                            }
-                            if (((descriptor[i+2] & 0x80) == 0x00) && (endpointOUT == 0))
-                            {
-                                endpointOUT     = descriptor[i+2];
-                                endpointOUTsize = ((descriptor[i+4])|(descriptor[i+5] << 8));
-                            }
-
-                        }
-                        i += descriptor[i];
-                    }
-
-                    if ((endpointIN != 0) || (endpointOUT != 0)) // normally endpoint should be in pair of same type
-                    {
-                        deviceInfoCDC[device].dataInterface.endpointIN           = endpointIN;
-                        deviceInfoCDC[device].dataInterface.endpointInDataSize   = endpointINsize;
-
-                        deviceInfoCDC[device].dataInterface.endpointOUT          = endpointOUT;
-                        deviceInfoCDC[device].dataInterface.endpointOutDataSize  = endpointOUTsize;
-
-                        USBHostSetNAKTimeout( address, endpointIN,  1, USB_NUM_BULK_NAKS );
-                        USBHostSetNAKTimeout( address, endpointOUT, 1, USB_NUM_BULK_NAKS );
-                    }
-                    else
-                    {
-                        validDataInterface = 0;
-                    }
-                } // if data interface
 
             } // if interface descriptor
 

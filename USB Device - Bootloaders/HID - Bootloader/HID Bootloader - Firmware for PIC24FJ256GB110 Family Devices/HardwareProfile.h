@@ -49,7 +49,7 @@
 
 #if !defined(DEMO_BOARD)
     #if defined(__C30__)
-        #if defined(__PIC24FJ256GB110__)
+        #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ64GB108__) || defined(__PIC24FJ64GB106__)
             #define DEMO_BOARD PIC24FJ256GB110_PIM
             #define EXPLORER_16
 			#define PIC24FJ256GB110_PIM

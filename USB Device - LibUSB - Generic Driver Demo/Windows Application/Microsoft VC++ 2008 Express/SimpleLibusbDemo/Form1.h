@@ -3,7 +3,7 @@
 //-------------------------------------------------------BEGIN CUT AND PASTE BLOCK-----------------------------------------------------------------------------------
 /********************************************************************
  FileName:		Form1.h
- Dependencies:	
+ Dependencies:
  Hardware:		Need a free USB port to connect USB peripheral device
 				programming with appropriate Libusb firmware.  VID and
 				PID in firmware must match the VID and PID in this
@@ -36,8 +36,8 @@
 
  Change History:
   Rev   Date         Description
-  1.0   
- 
+  1.0
+
 ********************************************************************
 NOTE:	All user made code contained in this project is in the Form1.h file.
 		All other code and files were generated automatically by either the
@@ -50,7 +50,7 @@ NOTE:	All user made code contained in this project is in the Form1.h file.
 //Includes
 #include <windows.h>
 #include <errno.h>
-#include <usb.h>
+#include "usb.h"
 
 //Modify this value to match the VID and PID in your USB device descriptor.
 #define MY_VID	0x04D8 //0x04D8
@@ -110,9 +110,9 @@ namespace SimpleLibusbDemo {
 	private: System::Windows::Forms::Button^  ToggleLED_btn;
 	private: System::Windows::Forms::Button^  GetPushbuttonState_btn;
 	private: System::Windows::Forms::Label^  StateLabel;
-	protected: 
+	protected:
 
-	protected: 
+	protected:
 
 
 
@@ -135,9 +135,9 @@ namespace SimpleLibusbDemo {
 			this->GetPushbuttonState_btn = (gcnew System::Windows::Forms::Button());
 			this->StateLabel = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
-			// 
+			//
 			// Connect_btn
-			// 
+			//
 			this->Connect_btn->Location = System::Drawing::Point(12, 14);
 			this->Connect_btn->Name = L"Connect_btn";
 			this->Connect_btn->Size = System::Drawing::Size(66, 27);
@@ -145,9 +145,9 @@ namespace SimpleLibusbDemo {
 			this->Connect_btn->Text = L"Connect";
 			this->Connect_btn->UseVisualStyleBackColor = true;
 			this->Connect_btn->Click += gcnew System::EventHandler(this, &Form1::Connect_btn_Click);
-			// 
+			//
 			// ToggleLED_btn
-			// 
+			//
 			this->ToggleLED_btn->Enabled = false;
 			this->ToggleLED_btn->Location = System::Drawing::Point(106, 15);
 			this->ToggleLED_btn->Name = L"ToggleLED_btn";
@@ -156,9 +156,9 @@ namespace SimpleLibusbDemo {
 			this->ToggleLED_btn->Text = L"Toggle LED(s)";
 			this->ToggleLED_btn->UseVisualStyleBackColor = true;
 			this->ToggleLED_btn->Click += gcnew System::EventHandler(this, &Form1::ToggleLED_btn_Click);
-			// 
+			//
 			// GetPushbuttonState_btn
-			// 
+			//
 			this->GetPushbuttonState_btn->Enabled = false;
 			this->GetPushbuttonState_btn->Location = System::Drawing::Point(106, 53);
 			this->GetPushbuttonState_btn->Name = L"GetPushbuttonState_btn";
@@ -167,9 +167,9 @@ namespace SimpleLibusbDemo {
 			this->GetPushbuttonState_btn->Text = L"Get Pushbutton State";
 			this->GetPushbuttonState_btn->UseVisualStyleBackColor = true;
 			this->GetPushbuttonState_btn->Click += gcnew System::EventHandler(this, &Form1::GetPushbuttonState_btn_Click);
-			// 
+			//
 			// StateLabel
-			// 
+			//
 			this->StateLabel->AutoSize = true;
 			this->StateLabel->Enabled = false;
 			this->StateLabel->Location = System::Drawing::Point(247, 67);
@@ -177,9 +177,9 @@ namespace SimpleLibusbDemo {
 			this->StateLabel->Size = System::Drawing::Size(84, 13);
 			this->StateLabel->TabIndex = 3;
 			this->StateLabel->Text = L"State: Unknown";
-			// 
+			//
 			// Form1
-			// 
+			//
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(343, 101);
@@ -196,41 +196,41 @@ namespace SimpleLibusbDemo {
 		}
 #pragma endregion
 
-private: System::Void Connect_btn_Click(System::Object^  sender, System::EventArgs^  e) 
+private: System::Void Connect_btn_Click(System::Object^  sender, System::EventArgs^  e)
 		 {
 
 		//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		//-------------------------------------------------------BEGIN CUT AND PASTE BLOCK-----------------------------------------------------------------------------------
-		/* 
+		/*
 		Before we can "connect" our application to our USB embedded device, we must first find the device.
 		A USB bus can have many devices simultaneously connected, so somehow we have to find our device, and only
 		our device.  This is done with the Vendor ID (VID) and Product ID (PID).  Each USB product line should have
-		a unique combination of VID and PID. */ 
+		a unique combination of VID and PID. */
 
 			 if ( Connection_Status != CONNECTED)  // if not connected already
 			 {
 				 usb_init(); /* initialize the library */
 				 usb_find_busses(); /* find all busses */
 				 usb_find_devices(); /* find all connected devices */
-				 
-				 //Now look through the list that we just populated.  We are trying to see if any of them match our device. 
+
+				 //Now look through the list that we just populated.  We are trying to see if any of them match our device.
 				 struct usb_bus *bus;
 				 struct usb_device *dev;
-				 for(bus = usb_get_busses(); bus; bus = bus->next) 
+				 for(bus = usb_get_busses(); bus; bus = bus->next)
 				 {
-					for(dev = bus->devices; dev; dev = dev->next) 
+					for(dev = bus->devices; dev; dev = dev->next)
 					{
 							if(dev->descriptor.idVendor == MY_VID
 								&& dev->descriptor.idProduct == MY_PID)
 							{
 								MyLibusbDeviceHandle = usb_open(dev); //Opens a USB device
-								break; 
+								break;
 							}
 					 }
 				  }
 				 if(!MyLibusbDeviceHandle)
 				 {
-					 return; 
+					 return;
 				 }
 				 if(usb_set_configuration(MyLibusbDeviceHandle, 1) < 0) // Sets the Active configuration of the device
 				 {
@@ -240,13 +240,13 @@ private: System::Void Connect_btn_Click(System::Object^  sender, System::EventAr
 
 				 if(usb_claim_interface(MyLibusbDeviceHandle, 0) < 0)  //claims the interface with the Operating System
 				 {
-					 //Closes a device opened since the claim interface is failed. 
-					 usb_close(MyLibusbDeviceHandle); 
+					 //Closes a device opened since the claim interface is failed.
+					 usb_close(MyLibusbDeviceHandle);
 					 return ;
-				 }	
+				 }
 				 ToggleLED_btn->Enabled = true;				//Make button no longer greyed out
 				 GetPushbuttonState_btn->Enabled = true;	//Make button no longer greyed out
-				 StateLabel->Enabled = true;	            //Make label no longer greyed out 
+				 StateLabel->Enabled = true;	            //Make label no longer greyed out
 				 Connection_Status = CONNECTED;	            //Now status is connected
 			 }
 	     //-------------------------------------------------------END CUT AND PASTE BLOCK-------------------------------------------------------------------------------------
@@ -255,7 +255,7 @@ private: System::Void Connect_btn_Click(System::Object^  sender, System::EventAr
 		}
 
 
-private: System::Void ToggleLED_btn_Click(System::Object^  sender, System::EventArgs^  e) 
+private: System::Void ToggleLED_btn_Click(System::Object^  sender, System::EventArgs^  e)
 		 {
 		 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		 //-------------------------------------------------------BEGIN CUT AND PASTE BLOCK-----------------------------------------------------------------------------------
@@ -264,7 +264,7 @@ private: System::Void ToggleLED_btn_Click(System::Object^  sender, System::Event
 			 OutputPacketBuffer[0] = 0x80;		   //0x80 is the "Toggle LED(s)" command in the firmware
 											       //For simplicity, we will leave the rest of the buffer uninitialized, but you could put real
 											       //data in it if you like.
-			 //Writes data to a bulk endpoint. The Function call will send out 64 bytes to the USB Device. 
+			 //Writes data to a bulk endpoint. The Function call will send out 64 bytes to the USB Device.
 			 if(usb_bulk_write(MyLibusbDeviceHandle, 0x01, &OutputPacketBuffer[0], 64, 5000) != 64)
 			 {
 				 return;
@@ -274,9 +274,9 @@ private: System::Void ToggleLED_btn_Click(System::Object^  sender, System::Event
 		 }
 
 
-private: System::Void GetPushbuttonState_btn_Click(System::Object^  sender, System::EventArgs^  e) 
+private: System::Void GetPushbuttonState_btn_Click(System::Object^  sender, System::EventArgs^  e)
 		 {
-			
+
 		 //-------------------------------------------------------BEGIN CUT AND PASTE BLOCK-------------------------------------------------------------------------------------
 		 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			 char OutputPacketBuffer[64]; //Allocate a memory buffer which will contain data to send to the USB device
@@ -291,7 +291,7 @@ private: System::Void GetPushbuttonState_btn_Click(System::Object^  sender, Syst
 			 {
 				 return;
 			 }
-			
+
 			 //Now get the response packet from the firmware.
 			 //The following call to usb_bulk_read() retrieves 64 bytes of data from the USB device.
 			 if(usb_bulk_read(MyLibusbDeviceHandle, 0x81, &InputPacketBuffer[0], 64, 5000) != 64)
@@ -303,9 +303,9 @@ private: System::Void GetPushbuttonState_btn_Click(System::Object^  sender, Syst
 			 //InputPacketBuffer[1] contains the I/O port pin value for the pushbutton.
 			 if (InputPacketBuffer[1] == 0x01)
 			 {
-				 StateLabel->Text = "State: Not Pressed"; 
+				 StateLabel->Text = "State: Not Pressed";
 			 }
-			 else 
+			 else
 			 {
 				 StateLabel->Text = "State: Pressed";
 			 }
@@ -335,19 +335,19 @@ private: System::Void Form1_FormClosed(System::Object^  sender, System::Windows:
 
 //-------------------------------------------------------BEGIN CUT AND PASTE BLOCK-------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		/* The below portion of the code is used link dynamically to the libusb0.dll. The run time linking 
-	    is done only to the functions which are used by the demo. If the user wants to use all the 
-		functinalties of the liusb, then delete the below portion of the code and add "libusb_dyn.c" 
-		file (distributed along with libusb-win32 project) to this application. Also change the file name 
-		to "libusb_dyn.cpp" before building.*/ 
+		/* The below portion of the code is used link dynamically to the libusb0.dll. The run time linking
+	    is done only to the functions which are used by the demo. If the user wants to use all the
+		functinalties of the liusb, then delete the below portion of the code and add "libusb_dyn.c"
+		file (distributed along with libusb-win32 project) to this application. Also change the file name
+		to "libusb_dyn.cpp" before building.*/
 
 
 
 typedef usb_dev_handle * (*usb_open_t)(struct usb_device *dev);
 typedef int (*usb_close_t)(usb_dev_handle *dev);
-typedef int (*usb_bulk_write_t)(usb_dev_handle *dev, int ep, char *bytes, 
+typedef int (*usb_bulk_write_t)(usb_dev_handle *dev, int ep, char *bytes,
                                 int size, int timeout);
-typedef int (*usb_bulk_read_t)(usb_dev_handle *dev, int ep, char *bytes, 
+typedef int (*usb_bulk_read_t)(usb_dev_handle *dev, int ep, char *bytes,
                                int size, int timeout);
 typedef int (*usb_set_configuration_t)(usb_dev_handle *dev, int configuration);
 typedef int (*usb_claim_interface_t)(usb_dev_handle *dev, int interface);
@@ -379,7 +379,7 @@ void usb_init(void)
 {
 
   HINSTANCE libusb_dll  = LoadLibrary("libusb0.dll");
-  
+
   if(!libusb_dll)
     return;
 
@@ -407,7 +407,7 @@ void usb_init(void)
     GetProcAddress(libusb_dll, "usb_device");
   _usb_get_busses = (usb_get_busses_t)
     GetProcAddress(libusb_dll, "usb_get_busses");
-  
+
 
   if(_usb_init)
     _usb_init();

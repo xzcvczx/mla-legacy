@@ -42,16 +42,11 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-
-#include "Compiler.h"
-#include "GenericTypeDefs.h"                        // Required
-#include "usb_config.h"
-#include "USB/usb_device.h"                         // Required
 #include "USB/USB.h"
+#include "./USB/usb_function_msd.h"
+
 #include "HardwareProfile.h"
 #include "MDD File System\SD-SPI.h"
-
-#include "./USB/usb_function_msd.h"
 
 /** CONFIGURATION **************************************************/
 #if defined(PICDEM_FS_USB)      // Configuration bits for PICDEM FS USB Demo Board (based on PIC18F4550)
@@ -180,6 +175,26 @@
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__32MX460F512L__)
+        #pragma config UPLLEN   = ON        // USB PLL Enabled
+        #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
+        #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
+        #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
+        #pragma config FPLLODIV = DIV_1         // PLL Output Divider
+        #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
+        #pragma config FWDTEN   = OFF           // Watchdog Timer
+        #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
+        #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
+        #pragma config OSCIOFNC = OFF           // CLKO Enable
+        #pragma config POSCMOD  = HS            // Primary Oscillator
+        #pragma config IESO     = OFF           // Internal/External Switch-over
+        #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
+        #pragma config FNOSC    = PRIPLL        // Oscillator Selection
+        #pragma config CP       = OFF           // Code Protect
+        #pragma config BWP      = OFF           // Boot Flash Write Protect
+        #pragma config PWP      = OFF           // Program Flash Write Protect
+        #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
+        #pragma config DEBUG    = ON            // Background Debugger Enable
+     #elif defined(__32MX795F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
         #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider

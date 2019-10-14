@@ -64,6 +64,13 @@
                 #include "HardwareProfile - PIC32 USB Starter Kit.h"
             #endif
         #endif
+         #if defined(__32MX795F512L__)
+            #if defined(PIC32MX460F512L_PIM)
+                #include "HardwareProfile - PIC32MX460F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
+        #endif
     #endif
 
     #if defined(__C30__)

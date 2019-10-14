@@ -42,15 +42,9 @@ Description:
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
-    ..\\..\\MicrochipInclude
-    
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
+    .    
+
+    ..\\..\\Microchip\\Include
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -88,16 +82,20 @@ Description:
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
-
-********************************************************************
-
- Change History:
- Date         Description
- 02/20/2008   Initial version
 ********************************************************************/
 //DOM-IGNORE-END
 
 //DOM-IGNORE-BEGIN
+/********************************************************************
+ File Description:
+
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.6    Changed MCHPFSUSB stack revision number
+********************************************************************/
+//DOM-IGNORE-END
+
 #ifndef _USB_H_
 #define _USB_H_
 //DOM-IGNORE-END
@@ -108,6 +106,9 @@ Description:
 // Section: All necessary USB Library headers
 // *****************************************************************************
 // *****************************************************************************
+
+#include "GenericTypeDefs.h"
+#include "Compiler.h"
 
 #include "usb_config.h"             // Must be defined by the application
 
@@ -130,14 +131,13 @@ Description:
 
 // *****************************************************************************
 // *****************************************************************************
-// Section: Host Firmware Version
+// Section: MCHPFSUSB Firmware Version
 // *****************************************************************************
 // *****************************************************************************
 
-#define USB_MAJOR_VER   1       // Firmware version, major release number.
-#define USB_MINOR_VER   0       // Firmware version, minor release number.
+#define USB_MAJOR_VER   2       // Firmware version, major release number.
+#define USB_MINOR_VER   6       // Firmware version, minor release number.
 #define USB_DOT_VER     0       // Firmware version, dot release number.
-
 
 #endif // _USB_H_
 /*************************************************************************

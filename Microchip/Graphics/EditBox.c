@@ -247,8 +247,10 @@ typedef enum {
 } EB_DRAW_STATES;
 
 static EB_DRAW_STATES state = EB_STATE_START;
+static XCHAR* pText;
 SHORT temp;
-SHORT width;
+SHORT width = 0;
+
 
     if(IsDeviceBusy())
         return 0;
@@ -308,12 +310,24 @@ SHORT width;
                 SetColor(pEb->hdr.pGolScheme->TextColorDisabled);
             }else{
                 SetColor(pEb->hdr.pGolScheme->TextColor0);
-            }  
+            }
+  
 
-            MoveTo(GetX(),(pEb->hdr.top+pEb->hdr.bottom-pEb->textHeight)>>1);
+            pText = pEb->pBuffer;
+            temp = 1;
+
+            while((unsigned XCHAR)*pText != (unsigned XCHAR)0){
+                if((unsigned XCHAR)*pText == (unsigned XCHAR)'\n')
+                    temp++;
+                pText++;
+            }
+            
+            pText = pEb->pBuffer;
+            MoveTo(GetX(),(pEb->hdr.top+pEb->hdr.bottom-temp*pEb->textHeight)>>1);
 
 
-            width = GetTextWidth(pEb->pBuffer,pEb->hdr.pGolScheme->pFont);
+do{
+            width = GetTextWidth(pText,pEb->hdr.pGolScheme->pFont);
 
             if (!GetState(pEb, EB_CENTER_ALIGN|EB_RIGHT_ALIGN)) {
                 MoveTo(pEb->hdr.left+GOL_EMBOSS_SIZE+EB_INDENT, GetY());
@@ -325,18 +339,24 @@ SHORT width;
                 }
             }
 
-    if(GetState(pEb,EB_DRAW)){
-
 		    state = EB_STATE_TEXT;
 			
         case EB_STATE_TEXT:
-            if(!OutText(pEb->pBuffer))
-                return 0;
-    }else{
+            if(GetState(pEb,EB_DRAW)){
+                if(!OutText(pText))
+                    return 0;
+            }else{
+                MoveRel(width, 0);
+            }
+            while((unsigned XCHAR)*pText>(unsigned XCHAR)15)
+                pText++;
+            
+            if((unsigned XCHAR)*pText == (unsigned XCHAR)'\n')
+            {
+                MoveRel(0, pEb->textHeight);
+            }
 
-        MoveRel(width, 0);
-
-    }
+}while(*pText++ != 0);
 
 			state = EB_STATE_CARET;
 
@@ -349,8 +369,11 @@ SHORT width;
                 }
                 if(!Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight)) return 0;
             }
+
             SetClip(CLIP_DISABLE);
+
 			state = EB_STATE_START;
+
 			return 1;
     }
     return 1;

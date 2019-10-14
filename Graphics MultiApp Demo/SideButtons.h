@@ -6,14 +6,14 @@
  *****************************************************************************
  * FileName:        SideButtons.h
  * Dependencies:    MainDemo.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2007 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -40,12 +40,7 @@
  * Anton Alkhimenok		07/20/07	...
  *****************************************************************************/
 #ifndef _SIDEBUTTONS_H
-#define _SIDEBUTTONS_H
-
-#define BTN_S3 PORTDbits.RD6
-#define BTN_S4 PORTDbits.RD13
-#define BTN_S5 PORTAbits.RA7
-#define BTN_S6 PORTDbits.RD7
+    #define _SIDEBUTTONS_H
 
 /************************************************************************
 * Function: void SideButtonsMsg(GOL_MSG* msg)
@@ -60,6 +55,5 @@
 * Output: none
 *                                                                       
 ************************************************************************/
-void SideButtonsMsg(GOL_MSG* msg);
-
+void    SideButtonsMsg(GOL_MSG *msg);
 #endif

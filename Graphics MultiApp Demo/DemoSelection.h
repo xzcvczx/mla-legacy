@@ -37,26 +37,23 @@
  * Anton Alkhimenok
  * Paolo Tamayo         03/10/08    ...
  ********************************************************************/
-
 #ifndef DEMOSELECTION_H
-#define DEMOSELECTION_H
+    #define DEMOSELECTION_H
 
 /////////////////////////////////////////////////////////////////////////////
 //                            MACROS
 /////////////////////////////////////////////////////////////////////////////
 //// macroses for icons positions
-#define ICON_WIDTH          (74+GOL_EMBOSS_SIZE)
-#define ICON_HEIGHT         (100) //(72+GOL_EMBOSS_SIZE)
-#define ICON_COLUMNSNUM     3
-#define ICON_ROWSNUM        2
-#define ICON_XINDENT        ((GetMaxX()-ICON_COLUMNSNUM*ICON_WIDTH)/(ICON_COLUMNSNUM+1))
-#define ICON_YINDENT        ((GetMaxY()-CTRLBTN_HEIGHT-(ICON_ROWSNUM*ICON_HEIGHT))/(ICON_ROWSNUM+1))
-
-#define IconTop(row)        (((row+1)*ICON_YINDENT)+(row*ICON_HEIGHT))
-#define IconBottom(row)     ((row+1)*(ICON_YINDENT+ICON_HEIGHT))
-#define IconLeft(column)    (((column+1)*ICON_XINDENT)+(column*ICON_WIDTH))
-#define IconRight(column)   ((column+1)*(ICON_XINDENT+ICON_WIDTH))
-
+    #define ICON_WIDTH          (74 + GOL_EMBOSS_SIZE)
+    #define ICON_HEIGHT         (100)   //(72+GOL_EMBOSS_SIZE)
+    #define ICON_COLUMNSNUM     3
+    #define ICON_ROWSNUM        2
+    #define ICON_XINDENT        ((GetMaxX() - ICON_COLUMNSNUM * ICON_WIDTH) / (ICON_COLUMNSNUM + 1))
+    #define ICON_YINDENT        ((GetMaxY() - CTRLBTN_HEIGHT - (ICON_ROWSNUM * ICON_HEIGHT)) / (ICON_ROWSNUM + 1))
+    #define IconTop(row)        (((row + 1) * ICON_YINDENT) + (row * ICON_HEIGHT))
+    #define IconBottom(row)     ((row + 1) * (ICON_YINDENT + ICON_HEIGHT))
+    #define IconLeft(column)    (((column + 1) * ICON_XINDENT) + (column * ICON_WIDTH))
+    #define IconRight(column)   ((column + 1) * (ICON_XINDENT + ICON_WIDTH))
 
 /************************************************************************
  Function: WORD CreateDemoSelection(void)
@@ -67,7 +64,7 @@
                                                                        
  Output: none
 ************************************************************************/
-void CreateDemoSelection(void);
+void    CreateDemoSelection(void);
 
 /************************************************************************
  Function: WORD MsgDemoSelection(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
@@ -85,7 +82,7 @@ void CreateDemoSelection(void);
  		 Default action on the object based on the message will be 
  		 performed.
 ************************************************************************/
-WORD MsgDemoSelection(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
+WORD    MsgDemoSelection(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg);
 
 /************************************************************************
  Function: CheckDemoStatus()
@@ -97,7 +94,7 @@ WORD MsgDemoSelection(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg);
                                                                        
  Output: none
 ************************************************************************/
-void CheckDemoStatus(void);
+void    CheckDemoStatus(void);
 
 /************************************************************************
  Function: void InitDemoSelectStyleScheme(GOL_SCHEME *pScheme)
@@ -109,7 +106,5 @@ void CheckDemoStatus(void);
                                                                        
  Output: none
 ************************************************************************/
-void InitDemoSelectStyleScheme(GOL_SCHEME *pScheme);
-
+void    InitDemoSelectStyleScheme(GOL_SCHEME *pScheme);
 #endif
-

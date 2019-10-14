@@ -47,20 +47,15 @@
 #define USBMOUSE_C
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_device.h"
 #include "./USB/usb.h"
-
 #include "HardwareProfile.h"
-
 #include "./USB/usb_function_hid.h"
 
 /** CONFIGURATION **************************************************/
 
 #if defined(EXPLORER_16)
-    #ifdef __PIC24FJ256GB110__ //Defined by MPLAB when using 24FJ256GB110 device
+    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ64GB108__) || defined(__PIC24FJ64GB106__) 
+        //Defined by MPLAB when using 24FJ256GB110 device
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
         _CONFIG3( WPCFG_WPCFGDIS & WPDIS_WPDIS)		//Disable erase/write protect of all memory regions.
@@ -81,16 +76,49 @@
 //Bootloader resides in memory range 0x400-0x17FF
 #define ProgramMemStart					0x00001400 //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
 
+#if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ256GB106__)
 	#define	BeginPageToErase			5		 //Bootloader and vectors occupy first six 1024 word (1536 bytes due to 25% unimplemented bytes) pages
 	#define MaxPageToEraseNoConfigs		169		 //Last full page of flash on the PIC24FJ256GB110, which does not contain the flash configuration words.
 	#define MaxPageToEraseWithConfigs	170		 //Page 170 contains the flash configurations words on the PIC24FJ256GB110.  Page 170 is also smaller than the rest of the (1536 byte) pages.
 	#define ProgramMemStopNoConfigs		0x0002A800 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: 
                                                         //IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
-    //#define ProgramMemStopNoConfigs		0x0002000 
 
 	#define ProgramMemStopWithConfigs	0x0002ABF8 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
 	#define ConfigWordsStartAddress		0x0002ABF8 //0x2ABFA is start of CW3 on PIC24FJ256GB110 Family devices
     #define ConfigWordsStopAddress		0x0002AC00
+#elif defined(__PIC24FJ192GB110__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ192GB106__)
+	#define	BeginPageToErase			5		 //Bootloader and vectors occupy first six 1024 word (1536 bytes due to 25% unimplemented bytes) pages
+	#define MaxPageToEraseNoConfigs		129		 //Last full page of flash on the PIC24FJ192GB110, which does not contain the flash configuration words.
+	#define MaxPageToEraseWithConfigs	130		 //Page 130 contains the flash configurations words on the PIC24FJ192GB110.  Page 130 is also smaller than the rest of the (1536 byte) pages.
+	#define ProgramMemStopNoConfigs		0x00020800 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: 
+                                                        //IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
+
+	#define ProgramMemStopWithConfigs	0x00020BF8 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
+	#define ConfigWordsStartAddress		0x00020BF8 //0x20BFA is start of CW3 on PIC24FJ192GB110 Family devices
+    #define ConfigWordsStopAddress		0x00020C00
+#elif defined(__PIC24FJ128GB110__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ128GB106__)
+	#define	BeginPageToErase			5		 //Bootloader and vectors occupy first six 1024 word (1536 bytes due to 25% unimplemented bytes) pages
+	#define MaxPageToEraseNoConfigs		84		 //Last full page of flash on the PIC24FJ128GB110, which does not contain the flash configuration words.
+	#define MaxPageToEraseWithConfigs	85       //Page 85 contains the flash configurations words on the PIC24FJ128GB110.  Page 85 is also smaller than the rest of the (1536 byte) pages.
+	#define ProgramMemStopNoConfigs		0x00015400 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: 
+                                                        //IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
+
+	#define ProgramMemStopWithConfigs	0x000157F8 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
+	#define ConfigWordsStartAddress		0x000157F8 //0x157FA is start of CW3 on PIC24FJ128GB110 Family devices
+    #define ConfigWordsStopAddress		0x00015800
+#elif defined(__PIC24FJ64GB110__) || defined(__PIC24FJ64GB108__) || defined(__PIC24FJ64GB106__)
+	#define	BeginPageToErase			5		 //Bootloader and vectors occupy first six 1024 word (1536 bytes due to 25% unimplemented bytes) pages
+	#define MaxPageToEraseNoConfigs		41		 //Last full page of flash on the PIC24FJ64GB110, which does not contain the flash configuration words.
+	#define MaxPageToEraseWithConfigs	42		 //Page 42 contains the flash configurations words on the PIC24FJ64GB110.  Page 42 is also smaller than the rest of the (1536 byte) pages.
+	#define ProgramMemStopNoConfigs		0x0000A800 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: 
+                                                        //IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
+
+	#define ProgramMemStopWithConfigs	0x0000ABF8 //Must be instruction word aligned address.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)	
+	#define ConfigWordsStartAddress		0x0000ABF8 //0x0ABFA is start of CW3 on PIC24FJ64GB110 Family devices
+    #define ConfigWordsStopAddress		0x0000AC00
+#else
+    #error "This bootloader only covers the PIC24FJ256GB110 family devices.  Please see another folder for the bootloader appropriate for the selected device."
+#endif
 
 //Switch State Variable Choices
 #define	QUERY_DEVICE				0x02	//Command that the host uses to learn about the device (what regions can be programmed, and what type of memory is the region)

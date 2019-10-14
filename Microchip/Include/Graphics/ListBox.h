@@ -38,61 +38,61 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _LISTBOX_H
-#define _LISTBOX_H
+    #define _LISTBOX_H
 
-#include <Graphics\GOL.h>
+    #include <Graphics\GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define LB_FOCUSED      0x0001  	// Bit for focused state
-#define LB_DISABLED   	0x0002  	// Bit for disabled state
-#define LB_RIGHT_ALIGN 	0x0004  	// Bit to indicate text is left aligned
-#define LB_CENTER_ALIGN	0x0008  	// Bit to indicate text is center aligned
-#define LB_SINGLE_SEL  	0x0010  	// Bit to indicate the only item can be selected
-#define LB_DRAW_ITEMS  	0x1000  	// Bit to indicate whole edit box must be redrawn
-#define LB_DRAW_FOCUS  	0x2000  	// Bit to indicate whole edit box must be redrawn
-#define LB_DRAW     	0x4000  	// Bit to indicate whole edit box must be redrawn
-#define LB_HIDE     	0x8000  	// Bit to remove object from screen
-
-#define LB_INDENT       0x02    	// Indentation constant for the text from the frame
+    #define LB_FOCUSED      0x0001  // Bit for focused state
+    #define LB_DISABLED     0x0002  // Bit for disabled state
+    #define LB_RIGHT_ALIGN  0x0004  // Bit to indicate text is left aligned
+    #define LB_CENTER_ALIGN 0x0008  // Bit to indicate text is center aligned
+    #define LB_SINGLE_SEL   0x0010  // Bit to indicate the only item can be selected
+    #define LB_DRAW_ITEMS   0x1000  // Bit to indicate whole edit box must be redrawn
+    #define LB_DRAW_FOCUS   0x2000  // Bit to indicate whole edit box must be redrawn
+    #define LB_DRAW         0x4000  // Bit to indicate whole edit box must be redrawn
+    #define LB_HIDE         0x8000  // Bit to remove object from screen
+    #define LB_INDENT       0x02    // Indentation constant for the text from the frame
 
 /*********************************************************************
 * Overview: Defines the parameters required for a list item used in  
 *			list box.
 *
 *********************************************************************/
-typedef struct {
-	void*     pPrevItem; 			// Pointer to the next item
-	void*     pNextItem; 			// Pointer to the next item
-	WORD      status;    			// Specifies the status of the item. 
-									// The following values are defined for 
-									// the status: LB_STS_SELECTED, LB_STS_REDRAW.
-	XCHAR*    pText;     			// Pointer to the text for the item
-    void*     pBitmap;              // Pointer to the bitmap
-	WORD      data;      			// Some data associated with the item   
+typedef struct
+{
+    void    *pPrevItem;             // Pointer to the next item
+    void    *pNextItem;             // Pointer to the next item
+    WORD    status;                 // Specifies the status of the item.
+
+    // The following values are defined for
+    // the status: LB_STS_SELECTED, LB_STS_REDRAW.
+    XCHAR   *pText;                 // Pointer to the text for the item
+    void    *pBitmap;               // Pointer to the bitmap
+    WORD    data;                   // Some data associated with the item
 } LISTITEM;
 
 /*********************************************************************
 * Bit definitions for the status of an item 
 *********************************************************************/
-#define LB_STS_SELECTED 0x0001		// Item is selected.
-#define LB_STS_REDRAW   0x0002		// Item is to be redrawn.
-
+    #define LB_STS_SELECTED 0x0001  // Item is selected.
+    #define LB_STS_REDRAW   0x0002  // Item is to be redrawn.
 
 /*********************************************************************
 * Overview: Defines the parameters required for a list box Object.
 *
 *********************************************************************/
-typedef struct {
-	OBJ_HEADER      hdr;			// Generic header for all Objects (see OBJ_HEADER).
-	LISTITEM		*pItemList;     // Pointer to the list of items.
-    LISTITEM        *pFocusItem;    // Pointer to the focused item.
-    WORD            itemsNumber;    // Number of items in the list box.
-    SHORT           scrollY;        // Scroll displacement for the list.
-	SHORT     		textHeight;     // Pre-computed text height.
+typedef struct
+{
+    OBJ_HEADER  hdr;            // Generic header for all Objects (see OBJ_HEADER).
+    LISTITEM    *pItemList;     // Pointer to the list of items.
+    LISTITEM    *pFocusItem;    // Pointer to the focused item.
+    WORD        itemsNumber;    // Number of items in the list box.
+    SHORT       scrollY;        // Scroll displacement for the list.
+    SHORT       textHeight;     // Pre-computed text height.
 } LISTBOX;
 
 /*********************************************************************
@@ -113,7 +113,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define LbSetBitmap(pItem, pBtmap)      ((LISTITEM*)pItem)->pBitmap = pBtmap
+    #define LbSetBitmap(pItem, pBtmap)  ((LISTITEM *)pItem)->pBitmap = pBtmap
 
 /*********************************************************************
 * Macros:  LbGetBitmap(pItem)
@@ -140,7 +140,7 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-#define LbGetBitmap(pItem)               ((LISTITEM*)pItem)->pBitmap
+    #define LbGetBitmap(pItem)  ((LISTITEM *)pItem)->pBitmap
 
 /*********************************************************************
 * Function: LISTBOX  *LbCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -207,8 +207,8 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-LISTBOX *LbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
-		   	      WORD state , XCHAR* pText, GOL_SCHEME *pScheme);
+LISTBOX * LbCreate
+    (WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, XCHAR * pText, GOL_SCHEME * pScheme);
 
 /*********************************************************************
 * Function: LISTITEM* LbAddItem(LISTBOX *pLb, LISTITEM *pPrevItem, 
@@ -288,7 +288,7 @@ LISTBOX *LbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 * Side Effects: none
 *
 ********************************************************************/
-LISTITEM* LbAddItem(LISTBOX *pLb, LISTITEM *pPrevItem, XCHAR *pText, void* pBitmap, WORD status, WORD data);
+LISTITEM    *LbAddItem(LISTBOX *pLb, LISTITEM *pPrevItem, XCHAR *pText, void *pBitmap, WORD status, WORD data);
 
 /*********************************************************************
 * Function: void LbDelItem(LISTBOX *pLb, LISTITEM *pItem)
@@ -306,7 +306,7 @@ LISTITEM* LbAddItem(LISTBOX *pLb, LISTITEM *pPrevItem, XCHAR *pText, void* pBitm
 * Side Effects: none
 *
 ********************************************************************/
-void LbDelItem(LISTBOX *pLb, LISTITEM *pItem);
+void        LbDelItem(LISTBOX *pLb, LISTITEM *pItem);
 
 /*********************************************************************
 * Function: void LbDelItemsList(LISTBOX *pLb)
@@ -323,7 +323,7 @@ void LbDelItem(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none
 *
 ********************************************************************/
-void LbDelItemsList(LISTBOX *pLb);
+void        LbDelItemsList(LISTBOX *pLb);
 
 /*********************************************************************
 * Function: LISTITEM* LbGetSel(LISTBOX *pLb, LISTITEM *pFromItem)
@@ -346,7 +346,7 @@ void LbDelItemsList(LISTBOX *pLb);
 * Side Effects: none
 *
 ********************************************************************/
-LISTITEM* LbGetSel(LISTBOX *pLb, LISTITEM *pFromItem);
+LISTITEM    *LbGetSel(LISTBOX *pLb, LISTITEM *pFromItem);
 
 /*********************************************************************
 * Function: void LbChangeSel(LISTBOX *pLb, LISTITEM *pItem)
@@ -367,7 +367,7 @@ LISTITEM* LbGetSel(LISTBOX *pLb, LISTITEM *pFromItem);
 * Side Effects: none
 *
 ********************************************************************/
-void LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
+void        LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
 
 /*********************************************************************
 * Macro: LbSetSel(pLb, pItem)
@@ -386,7 +386,9 @@ void LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none
 *
 ********************************************************************/
-#define LbSetSel(pLb, pItem) if(!(pItem->status&LB_STS_SELECTED)) LbChangeSel((LISTBOX*)pLb,pItem);
+    #define LbSetSel(pLb, pItem)           \
+    if(!(pItem->status & LB_STS_SELECTED)) \
+        LbChangeSel((LISTBOX *)pLb, pItem);
 
 /*********************************************************************
 * Macro: LbClrSel(pLb, pItem)
@@ -403,7 +405,9 @@ void LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none 
 *
 ********************************************************************/
-#define LbClrtSel(pLb, pItem) if(pItem->status&LB_STS_SELECTED) LbChangeSel((LISTBOX*)pLb,pItem);
+    #define LbClrtSel(pLb, pItem)       \
+    if(pItem->status & LB_STS_SELECTED) \
+        LbChangeSel((LISTBOX *)pLb, pItem);
 
 /*********************************************************************
 * Macro: LbGetCount(pLb)
@@ -419,7 +423,7 @@ void LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none
 *
 ********************************************************************/
-#define LbGetCount(pLb) ((LISTBOX*)pLb)->itemsNumber
+    #define LbGetCount(pLb) ((LISTBOX *)pLb)->itemsNumber
 
 /*********************************************************************
 * Macro: LbGetVisibleCount(pLb)
@@ -436,8 +440,11 @@ void LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none
 *
 ********************************************************************/
-#define LbGetVisibleCount(pLb)	\
-(( ((LISTBOX*)pLb)->hdr.bottom-((LISTBOX*)pLb)->hdr.top - 2*(GOL_EMBOSS_SIZE+LB_INDENT) )/((LISTBOX*)pLb)->textHeight)
+    #define LbGetVisibleCount(pLb)                                                                           \
+        (                                                                                                    \
+            (((LISTBOX *)pLb)->hdr.bottom - ((LISTBOX *)pLb)->hdr.top - 2 * (GOL_EMBOSS_SIZE + LB_INDENT)) / \
+                ((LISTBOX *)pLb)->textHeight                                                                 \
+        )
 
 /*********************************************************************
 * Function: void LbSetFocusedItem(LISTBOX* pLb, SHORT index)
@@ -456,7 +463,7 @@ void LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none
 *
 ********************************************************************/
-void LbSetFocusedItem(LISTBOX* pLb, SHORT index);
+void    LbSetFocusedItem(LISTBOX *pLb, SHORT index);
 
 /*********************************************************************
 * Function: SHORT LbGetFocusedItem(LISTBOX* pLb)
@@ -473,7 +480,7 @@ void LbSetFocusedItem(LISTBOX* pLb, SHORT index);
 * Side Effects: none
 *
 ********************************************************************/
-SHORT LbGetFocusedItem(LISTBOX* pLb); 
+SHORT   LbGetFocusedItem(LISTBOX *pLb);
 
 /*********************************************************************
 * Macro: LISTITEM LbGetItemList(LISTBOX* pLb)
@@ -493,7 +500,7 @@ SHORT LbGetFocusedItem(LISTBOX* pLb);
 * Side Effects: none
 *
 ********************************************************************/
-#define LbGetItemList(pLb) 		((LISTITEM*)pLb->pItemList)
+    #define LbGetItemList(pLb)  ((LISTITEM *)pLb->pItemList)
 
 /*********************************************************************
 * Function: WORD LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg)
@@ -526,7 +533,7 @@ SHORT LbGetFocusedItem(LISTBOX* pLb);
 * Side Effects: none
 *
 ********************************************************************/
-WORD LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg);
+WORD    LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg)
@@ -555,7 +562,7 @@ WORD LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg);
+void    LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD LbDraw(LISTBOX *pLb)
@@ -587,7 +594,5 @@ void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD LbDraw(LISTBOX *pLb);
-
-
+WORD    LbDraw(LISTBOX *pLb);
 #endif // _LISTBOX_H

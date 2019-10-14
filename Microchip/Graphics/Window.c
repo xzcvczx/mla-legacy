@@ -50,41 +50,51 @@
 * Overview: creates the window
 *
 ********************************************************************/
-WINDOW *WndCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
-			      WORD state, void *pBitmap, XCHAR *pText, GOL_SCHEME *pScheme)
+WINDOW *WndCreate
+(
+    WORD        ID,
+    SHORT       left,
+    SHORT       top,
+    SHORT       right,
+    SHORT       bottom,
+    WORD        state,
+    void        *pBitmap,
+    XCHAR       *pText,
+    GOL_SCHEME  *pScheme
+)
 {
-	WINDOW *pW;
-	
-	pW = (WINDOW*)malloc(sizeof(WINDOW));
-	if (pW == NULL)
-		return pW;
+    WINDOW  *pW;
 
-	pW->hdr.ID      	= ID;
-	pW->hdr.pNxtObj 	= NULL;
-	pW->hdr.type    	= OBJ_WINDOW;
-	pW->hdr.left    	= left;
-	pW->hdr.top     	= top;
-	pW->hdr.right   	= right;
-	pW->hdr.bottom  	= bottom;
-	pW->pBitmap  		= pBitmap;
-	pW->pText   		= pText;
-	pW->hdr.state       = state;
+    pW = (WINDOW *)malloc(sizeof(WINDOW));
+    if(pW == NULL)
+        return (pW);
 
-	// Set the style scheme to be used
-	if (pScheme == NULL)
-		pW->hdr.pGolScheme = _pDefaultGolScheme; 
+    pW->hdr.ID = ID;
+    pW->hdr.pNxtObj = NULL;
+    pW->hdr.type = OBJ_WINDOW;
+    pW->hdr.left = left;
+    pW->hdr.top = top;
+    pW->hdr.right = right;
+    pW->hdr.bottom = bottom;
+    pW->pBitmap = pBitmap;
+    pW->pText = pText;
+    pW->hdr.state = state;
+
+    // Set the style scheme to be used
+    if(pScheme == NULL)
+        pW->hdr.pGolScheme = _pDefaultGolScheme;
     else
-		pW->hdr.pGolScheme = pScheme;
-    
+        pW->hdr.pGolScheme = pScheme;
 
-    pW->textHeight  = 0;
-    if(pText != NULL){
+    pW->textHeight = 0;
+    if(pText != NULL)
+    {
         pW->textHeight = GetTextHeight(pW->hdr.pGolScheme->pFont);
     }
 
-    GOLAddObject((OBJ_HEADER*) pW);
-	
-	return pW;
+    GOLAddObject((OBJ_HEADER *)pW);
+
+    return (pW);
 }
 
 /*********************************************************************
@@ -95,8 +105,8 @@ WINDOW *WndCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 ********************************************************************/
 void WndSetText(WINDOW *pW, XCHAR *pText)
 {
-	pW->pText = pText;
-	pW->textHeight = GetTextHeight(pW->hdr.pGolScheme->pFont);
+    pW->pText = pText;
+    pW->textHeight = GetTextHeight(pW->hdr.pGolScheme->pFont);
 }
 
 /*********************************************************************
@@ -107,37 +117,43 @@ void WndSetText(WINDOW *pW, XCHAR *pText)
 ********************************************************************/
 WORD WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg)
 {
-	// Evaluate if the message is for the window
+
+    // Evaluate if the message is for the window
     // Check if disabled first
-	if ( GetState(pW,WND_DISABLED) )
-		return OBJ_MSG_INVALID;
+    if(GetState(pW, WND_DISABLED))
+        return (OBJ_MSG_INVALID);
 
-#ifdef USE_TOUCHSCREEN
-    if( pMsg->type == TYPE_TOUCHSCREEN ){
+        #ifdef USE_TOUCHSCREEN
+    if(pMsg->type == TYPE_TOUCHSCREEN)
+    {
 
-    	// Check if it falls in the title bar area
-	    if( (pW->hdr.left   < pMsg->param1) &&
-   	        (pW->hdr.right  > pMsg->param1) &&
-            (pW->hdr.top    < pMsg->param2) &&
-            (pW->hdr.top+WND_TITLE_HEIGHT+GOL_EMBOSS_SIZE > pMsg->param2) ){
-
-            return WND_MSG_TITLE;
-
+        // Check if it falls in the title bar area
+        if
+        (
+            (pW->hdr.left < pMsg->param1) &&
+            (pW->hdr.right > pMsg->param1) &&
+            (pW->hdr.top < pMsg->param2) &&
+            (pW->hdr.top + WND_TITLE_HEIGHT + GOL_EMBOSS_SIZE > pMsg->param2)
+        )
+        {
+            return (WND_MSG_TITLE);
         }
 
         // Check if it falls in the client area
-   	    if( (pW->hdr.left+GOL_EMBOSS_SIZE < pMsg->param1) &&
-            (pW->hdr.right-GOL_EMBOSS_SIZE > pMsg->param1) &&
-            (pW->hdr.top+WND_TITLE_HEIGHT+GOL_EMBOSS_SIZE < pMsg->param2) &&
-            (pW->hdr.bottom-GOL_EMBOSS_SIZE > pMsg->param2) ){
-
-            return WND_MSG_CLIENT;    
-
+        if
+        (
+            (pW->hdr.left + GOL_EMBOSS_SIZE < pMsg->param1) &&
+            (pW->hdr.right - GOL_EMBOSS_SIZE > pMsg->param1) &&
+            (pW->hdr.top + WND_TITLE_HEIGHT + GOL_EMBOSS_SIZE < pMsg->param2) &&
+            (pW->hdr.bottom - GOL_EMBOSS_SIZE > pMsg->param2)
+        )
+        {
+            return (WND_MSG_CLIENT);
         }
     }
-#endif
 
-	return OBJ_MSG_INVALID;	
+        #endif
+    return (OBJ_MSG_INVALID);
 }
 
 /*********************************************************************
@@ -146,143 +162,175 @@ WORD WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg)
 * Overview: draws window
 *
 ********************************************************************/
-WORD WndDraw(WINDOW *pW){
+WORD WndDraw(WINDOW *pW)
+{
+    typedef enum
+    {
+        WND_REMOVE,
+        WND_TITLE_BAR_DRAW,
+        WND_TITLE_BAR_BITMAP,
+        WND_TITLE_BAR_TEXT,
+        WND_TITLE_BAR_TEXT_DRAW,
+        WND_CLIENT,
+        WND_CLIENT_DRAW
+    } WND_DRAW_STATES;
 
-typedef enum {
-    WND_REMOVE,
-	WND_TITLE_BAR_DRAW,
-	WND_TITLE_BAR_BITMAP,
-	WND_TITLE_BAR_TEXT,
-	WND_TITLE_BAR_TEXT_DRAW,
-    WND_CLIENT,
-    WND_CLIENT_DRAW
-} WND_DRAW_STATES;
+    SHORT temp;
+    static WND_DRAW_STATES state = WND_REMOVE;
 
-SHORT temp;
-static WND_DRAW_STATES state = WND_REMOVE;
-
-    while(1){
-
+    while(1)
+    {
         if(IsDeviceBusy())
-            return 0;
+            return (0);
 
-        switch(state){
-
+        switch(state)
+        {
             case WND_REMOVE:
-                if(GetState(pW,WND_HIDE)){
+                if(GetState(pW, WND_HIDE))
+                {
                     SetColor(pW->hdr.pGolScheme->CommonBkColor);
-                    if(!Bar(pW->hdr.left,pW->hdr.top,pW->hdr.right,pW->hdr.bottom))
+                    if(!Bar(pW->hdr.left, pW->hdr.top, pW->hdr.right, pW->hdr.bottom))
                     {
-                        return 0;
+                        return (0);
                     }
-                    return 1;                  
+
+                    return (1);
                 }
-                
-if(GetState(pW,WND_DRAW_CLIENT)){
 
-                state = WND_CLIENT;
-                break;
+                if(GetState(pW, WND_DRAW_CLIENT))
+                {
+                    state = WND_CLIENT;
+                    break;
 
-            case WND_CLIENT:
-	   			SetLineThickness(NORMAL_LINE);
-				SetLineType(SOLID_LINE);			
-		        GOLPanelDraw(pW->hdr.left,pW->hdr.top,pW->hdr.right,pW->hdr.bottom, 0,
-                         pW->hdr.pGolScheme->CommonBkColor,
-                         pW->hdr.pGolScheme->EmbossLtColor,
-                         pW->hdr.pGolScheme->EmbossDkColor,
-                         NULL,
-                         GOL_EMBOSS_SIZE);
+                case WND_CLIENT:
+                    SetLineThickness(NORMAL_LINE);
+                    SetLineType(SOLID_LINE);
+                    GOLPanelDraw
+                    (
+                        pW->hdr.left,
+                        pW->hdr.top,
+                        pW->hdr.right,
+                        pW->hdr.bottom,
+                        0,
+                        pW->hdr.pGolScheme->CommonBkColor,
+                        pW->hdr.pGolScheme->EmbossLtColor,
+                        pW->hdr.pGolScheme->EmbossDkColor,
+                        NULL,
+                        GOL_EMBOSS_SIZE
+                    );
 
-                state = WND_CLIENT_DRAW;
+                    state = WND_CLIENT_DRAW;
 
-            case WND_CLIENT_DRAW:
+                case WND_CLIENT_DRAW:
+                    if(!GOLPanelDrawTsk())
+                        return (0);
+                }
 
-                if(!GOLPanelDrawTsk())
-                    return 0;
-
-}
                 state = WND_TITLE_BAR_DRAW;
                 break;
 
             case WND_TITLE_BAR_DRAW:
-
-                if(!GetState(pW,WND_DISABLED)){
-    	            if(GetState(pW,WND_FOCUSED)){
+                if(!GetState(pW, WND_DISABLED))
+                {
+                    if(GetState(pW, WND_FOCUSED))
+                    {
                         SetColor(pW->hdr.pGolScheme->Color1);
-	                }else{
-
+                    }
+                    else
+                    {
                         SetColor(pW->hdr.pGolScheme->Color0);
                     }
-                }else{
-                        SetColor(pW->hdr.pGolScheme->ColorDisabled);
+                }
+                else
+                {
+                    SetColor(pW->hdr.pGolScheme->ColorDisabled);
                 }
 
-                if(!Bar(pW->hdr.left+GOL_EMBOSS_SIZE, pW->hdr.top+GOL_EMBOSS_SIZE,
-                    pW->hdr.right-GOL_EMBOSS_SIZE, pW->hdr.top+GOL_EMBOSS_SIZE+WND_TITLE_HEIGHT))
+                if
+                (
+                    !Bar
+                        (
+                            pW->hdr.left + GOL_EMBOSS_SIZE,
+                            pW->hdr.top + GOL_EMBOSS_SIZE,
+                            pW->hdr.right - GOL_EMBOSS_SIZE,
+                            pW->hdr.top + GOL_EMBOSS_SIZE + WND_TITLE_HEIGHT
+                        )
+                )
                 {
-                    return 0;
+                    return (0);
                 }
 
                 state = WND_TITLE_BAR_BITMAP;
-                
-                break;
-              
-            case WND_TITLE_BAR_BITMAP:
 
-        	    if (pW->pBitmap != NULL){
-                    if(!PutImage(pW->hdr.left+GOL_EMBOSS_SIZE,
-                             pW->hdr.top+GOL_EMBOSS_SIZE+((WND_TITLE_HEIGHT-GetImageHeight(pW->pBitmap))>>1),
-                             pW->pBitmap,IMAGE_NORMAL))
-                             {
-                                 return 0;
-                             }
+                break;
+
+            case WND_TITLE_BAR_BITMAP:
+                if(pW->pBitmap != NULL)
+                {
+                    if
+                    (
+                        !PutImage
+                            (
+                                pW->hdr.left + GOL_EMBOSS_SIZE,
+                                pW->hdr.top + GOL_EMBOSS_SIZE + ((WND_TITLE_HEIGHT - GetImageHeight(pW->pBitmap)) >> 1),
+                                pW->pBitmap,
+                                IMAGE_NORMAL
+                            )
+                    )
+                    {
+                        return (0);
+                    }
                 }
 
-if (pW->pText != NULL){
+                if(pW->pText != NULL)
+                {
+                    state = WND_TITLE_BAR_TEXT;
+                    break;
 
-                state = WND_TITLE_BAR_TEXT;
-                break;
+                case WND_TITLE_BAR_TEXT:
+                    SetFont(pW->hdr.pGolScheme->pFont);
 
-            case WND_TITLE_BAR_TEXT:
-
-                SetFont(pW->hdr.pGolScheme->pFont);
-
-                if(!GetState(pW,WND_DISABLED)){
-
-        	        if (GetState(pW,WND_FOCUSED)){
-	        	        SetColor(pW->hdr.pGolScheme->TextColor1);
-	                }else{
-		                SetColor(pW->hdr.pGolScheme->TextColor0);
+                    if(!GetState(pW, WND_DISABLED))
+                    {
+                        if(GetState(pW, WND_FOCUSED))
+                        {
+                            SetColor(pW->hdr.pGolScheme->TextColor1);
+                        }
+                        else
+                        {
+                            SetColor(pW->hdr.pGolScheme->TextColor0);
+                        }
+                    }
+                    else
+                    {
+                        SetColor(pW->hdr.pGolScheme->TextColorDisabled);
                     }
 
-                }else{
-		            SetColor(pW->hdr.pGolScheme->TextColorDisabled);
+                    temp = pW->hdr.left + GOL_EMBOSS_SIZE + WND_INDENT;
+
+                    if(pW->pBitmap != NULL)
+                    {
+                        temp += GetImageWidth(pW->pBitmap);
+                    }
+
+                    if(GetState(pW, WND_TITLECENTER))
+                    {
+                        temp = (temp + (pW->hdr.right - GetTextWidth(pW->pText, pW->hdr.pGolScheme->pFont))) >> 1;
+                    }
+
+                    MoveTo(temp, pW->hdr.top + GOL_EMBOSS_SIZE + ((WND_TITLE_HEIGHT - pW->textHeight) >> 1));
+
+                    state = WND_TITLE_BAR_TEXT_DRAW;
+
+                case WND_TITLE_BAR_TEXT_DRAW:
+                    if(!OutText(pW->pText))
+                        return (0);
                 }
-                    
-                temp = pW->hdr.left+GOL_EMBOSS_SIZE+WND_INDENT;
 
-                if(pW->pBitmap != NULL){
-                    temp += GetImageWidth(pW->pBitmap);
-                }
-
-				if (GetState(pW, WND_TITLECENTER)) {
-					temp = (temp + (pW->hdr.right-GetTextWidth(pW->pText, pW->hdr.pGolScheme->pFont)))>>1;  
-				}	
-                MoveTo(temp, pW->hdr.top+GOL_EMBOSS_SIZE+((WND_TITLE_HEIGHT-pW->textHeight)>>1));
-
-                state = WND_TITLE_BAR_TEXT_DRAW;
-
-            case WND_TITLE_BAR_TEXT_DRAW:
-                if(!OutText(pW->pText))
-                    return 0;	
-}
                 state = WND_REMOVE;
-                return 1;
-
-        }//end of switch
-
-    }//end of while
+                return (1);
+        }   //end of switch
+    }       //end of while
 }
 
 #endif // USE_WINDOW
-

@@ -38,26 +38,23 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		11/12/07	Version 1.0 release
  *****************************************************************************/
-
 #ifndef _ROUNDDIAL_H
-#define _ROUNDDIAL_H
-
+    #define _ROUNDDIAL_H
 
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-#define RDIA_DISABLED    	0x0002  // Bit for disabled state.
-#define RDIA_ROT_CW     	0x0004  // Bit for rotate clockwise state.
-#define RDIA_ROT_CCW    	0x0008  // Bit for rotate counter clockwise state.
-#define RDIA_DRAW        	0x4000  // Bit to indicate object must be redrawn.
-#define RDIA_HIDE        	0x8000  // Bit to indicate object must be removed from screen.
-
-#ifdef USE_KEYBOARD
-    #define RDIA_QUADRANT_POSITIONS 6
-    extern SHORT                    _cosine[RDIA_QUADRANT_POSITIONS];
-    SHORT RdiaCosine( SHORT v );
-    SHORT RdiaSine( SHORT v );
-#endif
+    #define RDIA_DISABLED   0x0002  // Bit for disabled state.
+    #define RDIA_ROT_CW     0x0004  // Bit for rotate clockwise state.
+    #define RDIA_ROT_CCW    0x0008  // Bit for rotate counter clockwise state.
+    #define RDIA_DRAW       0x4000  // Bit to indicate object must be redrawn.
+    #define RDIA_HIDE       0x8000  // Bit to indicate object must be removed from screen.
+    #ifdef USE_KEYBOARD
+        #define RDIA_QUADRANT_POSITIONS 6
+extern SHORT    _cosine[RDIA_QUADRANT_POSITIONS];
+SHORT           RdiaCosine(SHORT v);
+SHORT           RdiaSine(SHORT v);
+    #endif
 
 /*********************************************************************
 * Overview: Defines the parameters required for a dial Object.
@@ -66,23 +63,25 @@
 * 			dial. User must avoid modifying these values. 
 *
 *********************************************************************/
-typedef struct {
-	WORD			ID;				// A Unique id assigned for referencing.
-	void           *pNxtObj;        // A pointer to the next object.
-	GOL_OBJ_TYPE 	type;	        // Identifies the type of GOL object.
-	WORD 	 		state;          // Dial states.
-	SHORT           xCenter;		// x coordinate center position.
-	SHORT           yCenter;		// y coordinate center position.
-	SHORT           radius;			// Radius of the dial.
-	SHORT           value;        	// Initial value of the dial.
-	GOL_SCHEME     *pGolScheme;     // Style scheme used.
-	WORD            max;    		// Maximum value of variable value (maximum = 65535).
-    								// Minimum is always zero.
-	WORD 			res;			// Resolution of movement.
-	SHORT			curr_xPos;		// Current x position.
-	SHORT			curr_yPos;		// Current y position.
-	SHORT			new_xPos;		// New x position.
-	SHORT			new_yPos;		// New y position.
+typedef struct
+{
+    WORD            ID;             // A Unique id assigned for referencing.
+    void            *pNxtObj;       // A pointer to the next object.
+    GOL_OBJ_TYPE    type;           // Identifies the type of GOL object.
+    WORD            state;          // Dial states.
+    SHORT           xCenter;        // x coordinate center position.
+    SHORT           yCenter;        // y coordinate center position.
+    SHORT           radius;         // Radius of the dial.
+    SHORT           value;          // Initial value of the dial.
+    GOL_SCHEME      *pGolScheme;    // Style scheme used.
+    WORD            max;            // Maximum value of variable value (maximum = 65535).
+
+    // Minimum is always zero.
+    WORD            res;            // Resolution of movement.
+    SHORT           curr_xPos;      // Current x position.
+    SHORT           curr_yPos;      // Current y position.
+    SHORT           new_xPos;       // New x position.
+    SHORT           new_yPos;       // New y position.
 } ROUNDDIAL;
 
 /*********************************************************************
@@ -131,9 +130,18 @@ typedef struct {
 * Side Effects: none
 *
 ********************************************************************/
-ROUNDDIAL  *RdiaCreate(	WORD ID, SHORT x, SHORT y, SHORT radius, 
-						WORD state, SHORT res, SHORT value, SHORT max, 
-						GOL_SCHEME *pScheme);				 
+ROUNDDIAL   *RdiaCreate
+            (
+                WORD        ID,
+                SHORT       x,
+                SHORT       y,
+                SHORT       radius,
+                WORD        state,
+                SHORT       res,
+                SHORT       value,
+                SHORT       max,
+                GOL_SCHEME  *pScheme
+            );
 
 /*********************************************************************
 * Function: RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
@@ -195,7 +203,7 @@ ROUNDDIAL  *RdiaCreate(	WORD ID, SHORT x, SHORT y, SHORT radius,
 * Side Effects: none
 *
 ********************************************************************/
-WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg);
+WORD        RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg)
@@ -226,7 +234,7 @@ WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void  RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg);
+void        RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Macros:  RdiaGetVal(pDia)
@@ -252,7 +260,7 @@ void  RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-#define RdiaGetVal(pDia)  	(pDia)->value
+    #define RdiaGetVal(pDia)    (pDia)->value
 
 /*********************************************************************
 * Macros:  RdiaSetVal(pDia, newVal)	
@@ -281,7 +289,7 @@ void  RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-#define RdiaSetVal(pDia, newVal)	(pDia)->value = newVal
+    #define RdiaSetVal(pDia, newVal)    (pDia)->value = newVal
 
 /*********************************************************************
 * Macros:  RdiaIncVal(pDia)
@@ -313,7 +321,7 @@ void  RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-#define RdiaIncVal(pDia)		RdiaSetVal(pDia, (pDia->val + pDia->res))
+    #define RdiaIncVal(pDia)    RdiaSetVal(pDia, (pDia->val + pDia->res))
 
 /*********************************************************************
 * Macros:  RdiaDecVal(pDia)
@@ -333,7 +341,7 @@ void  RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-#define RdiaDecVal(pDia)		RdiaSetVal(pDia, (pDia->pos - pDia->res))
+    #define RdiaDecVal(pDia)    RdiaSetVal(pDia, (pDia->pos - pDia->res))
 
 /*********************************************************************
 * Function: RdiaDraw(ROUNDDIAL *pDia)
@@ -359,6 +367,5 @@ void  RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD RdiaDraw(ROUNDDIAL *pDia);
-
+WORD RdiaDraw(ROUNDDIAL * pDia);
 #endif // _ROUNDDIAL_H

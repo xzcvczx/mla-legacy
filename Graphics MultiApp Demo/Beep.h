@@ -4,15 +4,15 @@
  *
  *****************************************************************************
  * FileName:        Beep.h
- * Dependencies:    None
- * Processor:       PIC24, PIC32
+ * Dependencies:    Graphics.h
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2007 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -39,19 +39,21 @@
  * Anton Alkhimenok		07/10/07	...
  * Anton Alkhimenok     02/07/08    PIC32 support
  *****************************************************************************/
-
 #ifndef _BEEP_H
-#define _BEEP_H
+    #define _BEEP_H
 
-#include "Graphics\Graphics.h"
+    #include "Graphics\Graphics.h"
 
-#define BEEP_TIME       500
-
-#ifdef __PIC32MX
-#define TIMER_BASE      4400
-#else
-#define TIMER_BASE      500
-#endif
+    #if defined(__dsPIC33F__) || defined(__PIC24H__)
+        #define BEEP_TIME   10
+    #else
+        #define BEEP_TIME   500
+    #endif
+    #ifdef __PIC32MX
+        #define TIMER_BASE  4400
+    #else
+        #define TIMER_BASE  500
+    #endif
 
 /*********************************************************************
 * Function:  void BeepInit(void)
@@ -69,7 +71,7 @@
 * Note: none
 *
 ********************************************************************/
-void BeepInit();
+void    BeepInit(void);
 
 /*********************************************************************
 * Macro:  Beep()
@@ -87,15 +89,13 @@ void BeepInit();
 * Note: none
 *
 ********************************************************************/
-#if ((GRAPHICS_PICTAIL_VERSION == 2) || (GRAPHICS_PICTAIL_VERSION == 250))
-	#if defined (__32MX460F512L__)
-		#define 	Beep() 
-	#else
-		#define     Beep() T2CONbits.TON = 1
-	#endif	
-#else
-	#define     Beep()
-#endif
-
-
+    #if ((GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2) || (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V250))
+        #if defined(__32MX460F512L__)
+            #define Beep()
+        #else
+            #define Beep()  T2CONbits.TON = 1
+        #endif
+    #else
+       	#define Beep()
+    #endif
 #endif // _BEEP_H

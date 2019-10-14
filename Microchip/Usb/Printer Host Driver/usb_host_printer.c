@@ -89,6 +89,7 @@ KO         ??-???-2008 First release
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "GenericTypeDefs.h"
 #include "usb_config.h"
 #include "struct_queue.h"
@@ -268,7 +269,7 @@ BYTE _USBHostPrinter_WriteFromQueue( BYTE deviceAddress );
     BYTE address    - Device's address on the bus
     DWORD flags     - Initialization flags
     BYTE clientDriverID - Client driver identification for device requests
-    
+
   Return Values:
     TRUE    - Initialization was successful
     FALSE   - Initialization failed
@@ -335,7 +336,7 @@ BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
     usbPrinters[currentPrinterRecord].ID.pid                    =  (WORD)*pDesc;        pDesc++;
     usbPrinters[currentPrinterRecord].ID.pid                    |= ((WORD)*pDesc) << 8; pDesc++;
     usbPrinters[currentPrinterRecord].clientDriverID            = clientDriverID;
-    
+
     #ifdef DEBUG_MODE
         UART2PrintString( "PRN: USB Printer Client Initalized: flags=0x" );
         UART2PutHex(      flags );
@@ -1032,11 +1033,11 @@ BYTE USBHostPrinterGetStatus( BYTE deviceAddress, BYTE *status )
     {
         return USB_UNKNOWN_DEVICE;
     }
-    
-   return USBHostIssueDeviceRequest( deviceAddress,                                                            
-        USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,    
-        PRINTER_DEVICE_REQUEST_GET_PORT_STATUS,                                             
-        0, 0x0000, 1,                                                                       
+
+   return USBHostIssueDeviceRequest( deviceAddress,
+        USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+        PRINTER_DEVICE_REQUEST_GET_PORT_STATUS,
+        0, 0x0000, 1,
         status, USB_DEVICE_REQUEST_GET, usbPrinters[currentPrinterRecord].clientDriverID );
 }
 
@@ -1140,10 +1141,10 @@ BYTE USBHostPrinterReset( BYTE deviceAddress )
         return USB_UNKNOWN_DEVICE;
     }
 
-    return USBHostIssueDeviceRequest( deviceAddress,                                                            
-        USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,    
-        PRINTER_DEVICE_REQUEST_SOFT_RESET,                                                  
-        0, 0x0000, 0,                                                                       
+    return USBHostIssueDeviceRequest( deviceAddress,
+        USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
+        PRINTER_DEVICE_REQUEST_SOFT_RESET,
+        0, 0x0000, 0,
         NULL, USB_DEVICE_REQUEST_SET, usbPrinters[currentPrinterRecord].clientDriverID );
 }
 
@@ -1499,6 +1500,12 @@ BOOL _USBHostPrinter_GetDeviceIDString( void )
         else
         {
             commandSet[semicolonLocation] = 0;
+        }
+
+        // Convert the command set to all upper case.
+        for (i=0; i<semicolonLocation; i++)
+        {
+            commandSet[i] = toupper( commandSet[i] );
         }
 
         // Look for a supported printer language in the array of available languages.

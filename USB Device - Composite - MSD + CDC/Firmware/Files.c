@@ -36,7 +36,7 @@
 #include "MDD File System\Internal Flash.h"
 
 #if defined(__18CXX)
-#pragma romdata Files=FILES_ADDRESS
+    #pragma romdata Files=FILES_ADDRESS
 #endif
 
 #if (ERASE_BLOCK_SIZE > WRITE_BLOCK_SIZE)
@@ -45,7 +45,22 @@
     #define BLOCK_ALIGNMENT WRITE_BLOCK_SIZE
 #endif
 
-ROM BYTE __attribute__ ((aligned (ERASE_BLOCK_SIZE),address(FILES_ADDRESS),section("MDD_FILES"),space(psv))) MasterBootRecord[MEDIA_SECTOR_SIZE] =
+
+#if defined(__PIC32MX__)
+    #define MBR_ATTRIBUTES __attribute__ ((aligned (ERASE_BLOCK_SIZE),section(".MDD_FILES")))
+    #define PARTITION_ATTRIBUTES __attribute__ ((section(".MDD_FILES")))
+#elif defined(__C30__)
+    #define MBR_ATTRIBUTES __attribute__ ((aligned (ERASE_BLOCK_SIZE),section(".MDD_FILES"),address(FILES_ADDRESS),space(psv)))
+    #define PARTITION_ATTRIBUTES __attribute__((section(".MDD_FILES"),space(psv)))
+#elif defined(__18CXX)
+    #define MBR_ATTRIBUTES
+    #define PARTITION_ATTRIBUTES
+#else
+    #error "Compiler not supported."
+#endif
+
+
+ROM BYTE MBR_ATTRIBUTES MasterBootRecord[MEDIA_SECTOR_SIZE] =
 {
 //Code Area
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	//0x0000
@@ -109,7 +124,7 @@ ROM BYTE __attribute__ ((aligned (ERASE_BLOCK_SIZE),address(FILES_ADDRESS),secti
 };
 
 //Physical Sector - 1, Logical Sector - 0
-ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) BootSector[MEDIA_SECTOR_SIZE]  =
+ROM BYTE PARTITION_ATTRIBUTES BootSector[MEDIA_SECTOR_SIZE]  =
 {
 0xEB, 0x3C, 0x90,			//Jump instruction
 'M', 'S', 'D', 'O', 'S', '5', '.', '0',	//OEM Name "MSDOS5.0"
@@ -164,14 +179,14 @@ MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE, 0x00, 0x00, 0x00,		//Total sectors
 0x55, 0xAA			//End of sector (0x55AA)
 };
 
-ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) FAT0[MEDIA_SECTOR_SIZE] =
+ROM BYTE PARTITION_ATTRIBUTES FAT0[MEDIA_SECTOR_SIZE] =
 {
     0xF8,0x0F,   //Copy of the media descriptor 0xFF8
     0x00,
     0xFF,0x0F    //FAT entry #2
 };
 
-ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) RootDirectory0[MEDIA_SECTOR_SIZE] =
+ROM BYTE PARTITION_ATTRIBUTES RootDirectory0[MEDIA_SECTOR_SIZE] =
 {
     //Root
     'D','r','i','v','e',' ','N','a','m','e',' ',   //Drive Name (11 characters, padded with spaces)
@@ -197,15 +212,18 @@ ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) RootDirectory0[MEDIA_S
 };
 
 #if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>16)
-    ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) RootDirectory1[MEDIA_SECTOR_SIZE] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES RootDirectory1[MEDIA_SECTOR_SIZE] = 
+        {0};
 #endif
 
 #if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>32)
-    ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) RootDirectory2[MEDIA_SECTOR_SIZE] = {0};
+    ROM BYTE PARTITION_ATTRIBUTES RootDirectory2[MEDIA_SECTOR_SIZE] = 
+    {0};
 #endif
 
 #if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>48)
-    ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) RootDirectory3[MEDIA_SECTOR_SIZE] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES RootDirectory3[MEDIA_SECTOR_SIZE] = 
+    {0};
 #endif
 
 //********************* Data Sectors ************************
@@ -213,187 +231,206 @@ ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) RootDirectory0[MEDIA_S
 //Create a place holder in flash for each of sector of data defined by 
 //  the MDD_INTERNAL_FLASH_DRIVE_CAPACITY defintion up 32,000 bytes.
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>0)
-ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack0[MEDIA_SECTOR_SIZE] =
+ROM BYTE PARTITION_ATTRIBUTES slack0[MEDIA_SECTOR_SIZE] =
 {
     'D','a','t','a'
 };
+
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>1)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack1[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack1[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>2)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack2[MEDIA_SECTOR_SIZE] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES slack2[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>3)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack3[MEDIA_SECTOR_SIZE] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES slack3[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>4)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack4[MEDIA_SECTOR_SIZE] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES slack4[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>5)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack5[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack5[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>6)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack6[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack6[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>7)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack7[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack7[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>8)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack8[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack8[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
+
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>9)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack9[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack9[MEDIA_SECTOR_SIZE] = 
+     {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>10)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack10[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack10[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>11)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack11[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack11[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>12)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack12[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack12[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>13)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack13[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack13[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>14)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack14[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack14[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>15)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack15[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack15[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>16)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack16[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack16[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>17)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack17[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack17[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>18)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack18[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack18[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>19)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack19[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack19[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>20)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack20[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack20[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>21)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack21[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack21[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>22)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack22[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack22[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>23)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack23[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack23[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>24)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack24[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack24[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>25)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack25[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack25[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>26)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack26[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack26[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>27)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack27[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack27[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>28)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack28[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack28[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>29)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack29[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack29[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>30)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack30[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack30[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>31)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack31[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack31[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>32)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack32[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack32[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>33)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack33[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack33[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>34)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack34[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack34[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>35)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack35[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack35[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>36)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack36[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack36[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>37)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack37[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack37[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>38)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack38[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack38[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>39)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack39[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack39[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>40)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack40[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack40[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>41)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack41[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack41[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>42)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack42[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack42[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>43)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack43[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack43[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>44)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack44[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack44[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>45)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack45[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack45[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>46)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack46[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack46[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>47)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack47[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack47[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>48)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack48[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack48[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>49)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack49[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack49[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>50)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack50[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack50[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>51)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack51[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack51[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>52)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack52[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack52[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>53)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack53[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack53[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>54)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack54[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack54[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>55)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack55[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack55[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>56)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack56[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack56[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>57)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack57[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack57[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>58)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack58[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack58[MEDIA_SECTOR_SIZE] = {0};
 #endif
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>59)
-     ROM BYTE __attribute__((section("MDD_FILES"),space(psv))) slack59[MEDIA_SECTOR_SIZE] = {0};
+     ROM BYTE PARTITION_ATTRIBUTES slack59[MEDIA_SECTOR_SIZE] = {0};
 #endif
 
 

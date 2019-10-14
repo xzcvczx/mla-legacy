@@ -155,7 +155,7 @@ BOOL AcquireTemperature(void)
     		AD1CON1bits.SAMP = 0;           //Start sampling
     		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
     		while(!AD1CON1bits.DONE);       //Wait for conversion to complete
-	    #elif defined(PIC24F_STARTER_KIT)
+	    #elif defined(PIC24F_STARTER_KIT) || defined(PIC24FJ256DA210_DEV_BOARD)
 	        temperature.Val = 0x0000;
 	        return TRUE;
 

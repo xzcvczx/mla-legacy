@@ -67,7 +67,7 @@ KO         ??-???-2008 First release
         // This is the string that the printer language support determination
         // routine will look for to determine if the printer supports this
         // printer language.  This string is case sensive.
-#define LANGUAGE_ID_STRING_POSTSCRIPT  "PostScript"
+#define LANGUAGE_ID_STRING_POSTSCRIPT  "POSTSCRIPT"
         // These are the support flags that are set for this language.
 #define LANGUAGE_SUPPORT_FLAGS_POSTSCRIPT   USB_PRINTER_FUNCTION_SUPPORT_VECTOR_GRAPHICS
 
