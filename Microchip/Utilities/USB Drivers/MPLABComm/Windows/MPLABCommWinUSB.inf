@@ -8,9 +8,10 @@ Signature = "$Windows NT$"
 Class = CustomUSBDevices
 ClassGuid= {a503e2d3-a031-49dc-b684-c99085dbfe92}
 Provider = %MFGNAME%
-DriverVer=08/02/2011,1.0.0.6
-CatalogFile=MPLABCommWinUSB.cat		;CAT file used when obtaining a WHQL signature on the driver package
-					;Otherwise isn't needed.
+DriverVer=01/11/2013,1.0.0.7
+CatalogFile=mplabcommwinusb.cat		;CAT file needs to be present, valid, and contain 
+					;correct signature for installation on some OSes
+
 ;------------------------------------------------------------------------------
 ; ========== Manufacturer/Models sections ===========
 ;------------------------------------------------------------------------------

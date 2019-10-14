@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouchCVD_macroLibrary_PIC16F1.h
  *  Dependencies:    mTouch.h
  *                   mTouch_macroLibrary_common.h
@@ -81,13 +81,13 @@
 // do {                                \
     // asm("movwf  _int_w");           \
     // asm("swapf  _int_w, F");        \
-    // asm("movf   _STATUS, W");       \
-    // asm("clrf   _STATUS");          \
+    // asm("movf   STATUS, W");        \
+    // asm("clrf   STATUS");           \
     // asm("movwf  _int_status");      \
-    // asm("movf   _PCLATH, W");       \
-    // asm("clrf   _PCLATH");          \
+    // asm("movf   PCLATH, W");        \
+    // asm("clrf   PCLATH");           \
     // asm("movwf  _int_pclath");      \
-    // asm("movf   _FSR, W");          \
+    // asm("movf   FSR, W");           \
     // asm("movwf  _int_fsr");         \
 // } while (0)
 
@@ -100,54 +100,54 @@
 // #define RESTORE_STATE()             \
 // do {                                \
     // asm("movf   _int_fsr,W");       \
-    // asm("movwf  _FSR");             \
+    // asm("movwf  FSR");              \
     // asm("movf   _int_pclath,W");    \
-    // asm("movwf  _PCLATH");          \
+    // asm("movwf  PCLATH");           \
     // asm("movf   _int_status,W");    \
-    // asm("movwf  _STATUS");          \
+    // asm("movwf  STATUS");           \
     // asm("swapf  _int_w, W");        \
 // } while (0)
 
 #define CVD_RS_SET_GODONE()                                                         \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)               );  /*                  */  \
-    asm("bsf        "   ___mkstr(NOBANK(_ADCON0))   ",1");  /* GO_nDONE = 1;    */ 
+    asm("BANKSEL    "   ___mkstr(ADCON0)               );  /*                  */  \
+    asm("bsf        "   ___mkstr(NOBANK(ADCON0))   ",1");  /* GO_nDONE = 1;    */ 
 
 
     
 // Sensor tris set using FSR
 // ADCON0 loaded directly
 #define CVD_RSC_FSR(current_channel, pin)                                                               \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                       );  /*                              */  \
+    asm("BANKSEL    "   ___mkstr(ADCON0)                       );  /*                              */  \
     asm("movlw      "   ___mkstr(current_channel)               );  /*                              */  \
-    asm("bsf        "   ___mkstr(_INDF)     "," ___mkstr(pin)   );  /* Set the sensor to an input   */  \
+    asm("bsf        "   ___mkstr(INDF)     "," ___mkstr(pin)   );  /* Set the sensor to an input   */  \
     _NOP_DELAY(CVD_SWITCH_DELAY);                                                                       \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))               );  /* ADC Mux --> Sensor           */  
+    asm("movwf      "   ___mkstr(NOBANK(ADCON0))               );  /* ADC Mux --> Sensor           */  
     
 // GUARD SENSOR - IO
 #if defined(CVD_GUARD_IO_ENABLED)
 
     #define CVD_RSCa_FSR_gSET(current_channel, pin)                                                                     \
-        asm("BANKSEL    "   ___mkstr(_ADCON0)                                   );  /*                              */  \
+        asm("BANKSEL    "   ___mkstr(ADCON0)                                   );  /*                              */  \
         asm("movlw      "   ___mkstr(current_channel)                           );  /*                              */  \
-        asm("bsf        "   ___mkstr(__paste(_,CVD_GUARD_PORT)) "," ___mkstr(CVD_GUARD_PIN));  /*                              */  \
-        asm("bsf        "   ___mkstr(_INDF)          "," ___mkstr(pin)          );  /* Set the sensor to an input   */  \
+        asm("bsf        "   ___mkstr(CVD_GUARD_PORT) "," ___mkstr(CVD_GUARD_PIN));  /*                              */  \
+        asm("bsf        "   ___mkstr(INDF)          "," ___mkstr(pin)          );  /* Set the sensor to an input   */  \
         _NOP_DELAY(CVD_SWITCH_DELAY);                                                                                   \
-        asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                           );  /* ADC Mux --> Sensor           */     
+        asm("movwf      "   ___mkstr(NOBANK(ADCON0))                           );  /* ADC Mux --> Sensor           */     
         
     #define CVD_RSCb_FSR_gCLR(current_channel, pin)                                                                     \
-        asm("BANKSEL    "   ___mkstr(_ADCON0)                                   );  /*                              */  \
+        asm("BANKSEL    "   ___mkstr(ADCON0)                                   );  /*                              */  \
         asm("movlw      "   ___mkstr(current_channel)                           );  /*                              */  \
-        asm("bcf        "   ___mkstr(__paste(_,CVD_GUARD_PORT)) "," ___mkstr(CVD_GUARD_PIN));  /*                              */  \
-        asm("bsf        "   ___mkstr(_INDF)          "," ___mkstr(pin)          );  /* Set the sensor to an input   */  \
+        asm("bcf        "   ___mkstr(CVD_GUARD_PORT) "," ___mkstr(CVD_GUARD_PIN));  /*                              */  \
+        asm("bsf        "   ___mkstr(INDF)          "," ___mkstr(pin)          );  /* Set the sensor to an input   */  \
         _NOP_DELAY(CVD_SWITCH_DELAY);                                                                                   \
-        asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                           );  /* ADC Mux --> Sensor           */   
+        asm("movwf      "   ___mkstr(NOBANK(ADCON0))                           );  /* ADC Mux --> Sensor           */   
            
 #endif     
 
     
     
 // EXCLUSIVELY MUTUAL SENSING
-#define CVD_RSC_FSR_Input_Only(current_channel, pin)    asm("bsf" ___mkstr(_INDF) "," ___mkstr(pin));  /* Set the sensor to an input   */
+#define CVD_RSC_FSR_Input_Only(current_channel, pin)    asm("bsf" ___mkstr(INDF) "," ___mkstr(pin));  /* Set the sensor to an input   */
 
 
 // REFERENCE SOURCE - IO
@@ -160,14 +160,14 @@
     asm("bsf        "   ___mkstr(ref_port) "," ___mkstr(ref_pin)    );  /* Set the reference port bit   */
     
 #define CVD_RS_MUX_REF(ref_channel)                                                 \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)               );  /*                  */  \
+    asm("BANKSEL    "   ___mkstr(ADCON0)               );  /*                  */  \
     asm("movlw      "   ___mkstr(ref_channel)           );  /*                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))       );  /* ADC Mux --> Ref  */ 
+    asm("movwf      "   ___mkstr(NOBANK(ADCON0))       );  /* ADC Mux --> Ref  */ 
 
 #define CVD_RS_MUX_SENSOR(current_channel)                                              \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)               );  /*                      */  \
+    asm("BANKSEL    "   ___mkstr(ADCON0)               );  /*                      */  \
     asm("movlw      "   ___mkstr(current_channel)       );  /*                      */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))       );  /* ADC Mux --> Sensor   */    
+    asm("movwf      "   ___mkstr(NOBANK(ADCON0))       );  /* ADC Mux --> Sensor   */    
    
 // GENERIC EXITING OPTIONS
 
@@ -177,12 +177,12 @@
 #define CVD_RSEa_FSR_CLR_mPORTSET(sensorLat, pin)                                                                \
     asm("BANKSEL    "   ___mkstr(sensorLat)                              );  /*                              */  \
     asm("bsf        "   ___mkstr(NOBANK(sensorLat))  "," ___mkstr(pin)   );  /* Set sensor LAT high          */  \
-    asm("bcf        "   ___mkstr(_INDF)        "," ___mkstr(pin)    );  /* Set the sensor to an output  */
+    asm("bcf        "   ___mkstr(INDF)        "," ___mkstr(pin)    );  /* Set the sensor to an output  */
     
 #define CVD_RSEb_FSR_CLR_mPORTCLR(sensorLat, pin)                                                                \
     asm("BANKSEL    "   ___mkstr(sensorLat)                              );  /*                              */  \
     asm("bcf        "   ___mkstr(NOBANK(sensorLat))  "," ___mkstr(pin)   );  /* Set sensor LAT low           */  \
-    asm("bcf        "   ___mkstr(_INDF)        "," ___mkstr(pin)    );  /* Set the sensor to an output  */
+    asm("bcf        "   ___mkstr(INDF)        "," ___mkstr(pin)    );  /* Set the sensor to an output  */
     
     
 
@@ -191,31 +191,31 @@
 //  FSR = Sensor TRIS
 #define CVD_RSP_FSR_sTRIS(port)                                         \
     asm("movlw      "   ___mkstr(port)  );  /*                      */  \
-    asm("movwf      "   ___mkstr(_FSR)  );  /* FSR = Sensor TRIS    */ 
+    asm("movwf      "   ___mkstr(FSR)  );  /* FSR = Sensor TRIS    */ 
     
     
 #define CVD_RSIa_VRCON_MAX()                                                                        \
-    asm("BANKSEL    "   ___mkstr(_VRCON)            );  /*                                      */  \
+    asm("BANKSEL    "   ___mkstr(VRCON)            );  /*                                      */  \
     asm("movlw      "   ___mkstr(PIC_VRCON_MAX)     );  /*                                      */  \
-    asm("movwf      "   ___mkstr(NOBANK(_VRCON))    );  /* VRCON = PIC_VRCON_MAX (75% of VDD)   */  
+    asm("movwf      "   ___mkstr(NOBANK(VRCON))    );  /* VRCON = PIC_VRCON_MAX (75% of VDD)   */  
     
 #define CVD_RSIb_VRCON_MIN()                                                                \
-    asm("BANKSEL    "   ___mkstr(_VRCON)            );  /*                              */  \
+    asm("BANKSEL    "   ___mkstr(VRCON)            );  /*                              */  \
     asm("movlw      "   ___mkstr(PIC_VRCON_MIN)     );  /*                              */  \
-    asm("movwf      "   ___mkstr(NOBANK(_VRCON))    );  /* VRCON = PIC_VRCON_MAX (VSS)  */   
+    asm("movwf      "   ___mkstr(NOBANK(VRCON))    );  /* VRCON = PIC_VRCON_MAX (VSS)  */   
     
 #define CVD_RS_MUX_VRCON()                                                                  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                   );  /*                      */  \
+    asm("BANKSEL    "   ___mkstr(ADCON0)                   );  /*                      */  \
     asm("movlw      "   ___mkstr(MTOUCH_AD_DAC_NOGO)        );  /*                      */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))           );  /* ADC Mux --> CVref    */
+    asm("movwf      "   ___mkstr(NOBANK(ADCON0))           );  /* ADC Mux --> CVref    */
     
     
 #define CVD_RS_EXIT_FSR_CLR_mPORTSET(port, pin)                                                                                             \
-    asm("bcf        "   ___mkstr(_INDF)  ","      ___mkstr(pin)     );  /* Set the sensor to an output                                  */  \
+    asm("bcf        "   ___mkstr(INDF)  ","      ___mkstr(pin)     );  /* Set the sensor to an output                                  */  \
     asm("BANKSEL    "   ___mkstr(port)                              );  /*                                                              */  \
     asm("bsf        "   ___mkstr(port)   ","      ___mkstr(pin)     );  /* Set the sensor to output high in preparation for next scan   */
 #define CVD_RS_EXIT_FSR_CLR_mPORTCLR(port, pin)                                                                                             \
-    asm("bcf        "   ___mkstr(_INDF)  ","      ___mkstr(pin)     );  /* Set the sensor to an output                                  */  \
+    asm("bcf        "   ___mkstr(INDF)  ","      ___mkstr(pin)     );  /* Set the sensor to an output                                  */  \
     asm("BANKSEL    "   ___mkstr(port)                              );  /*                                                              */  \
     asm("bcf        "   ___mkstr(port)   ","      ___mkstr(pin)     );  /* Set the sensor to output low now that the scan is complete   */
 

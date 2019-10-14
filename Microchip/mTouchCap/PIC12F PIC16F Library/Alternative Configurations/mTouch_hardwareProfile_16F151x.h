@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch_HardwareProfile_16F151x.h
  *  Dependencies:    mTouchCVD.h
  *  Processor:       See documentation for supported PIC® microcontrollers 

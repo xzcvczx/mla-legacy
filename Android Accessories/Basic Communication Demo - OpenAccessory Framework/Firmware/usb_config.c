@@ -3,7 +3,7 @@
                                                                                 
 Software License Agreement                                                      
                                                                                 
-Copyright © 2007-2008 Microchip Technology Inc. and its licensors.  All         
+Copyright (c) 2007-2008 Microchip Technology Inc. and its licensors.  All         
 rights reserved.                                                                
                                                                                 
 Microchip licenses to you the right to: (1) install Software on a single        

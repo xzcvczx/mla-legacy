@@ -63,8 +63,6 @@
 // *****************************************************************************
 // *****************************************************************************
 
-#warning "Due to export controls in the United States, the AES library file you are using is only a place holder and does not actually perform any encryption operations.  Please purchase SW300052 from www.microchipdirect.com to get the complete version.  Running these functions may result in system lock ups or crashes."
-
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 

@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch_HardwareProfile_16F151x.h
  *  Dependencies:    mTouchCVD.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -104,7 +104,11 @@
 //===========================================================
 //  Communications Configuration
 //===========================================================
-// NO UART AVAILABLE
+
+#if defined(_16F1508) || defined(_16LF1508) || defined(_16F1509) || defined(_16LF1509)
+    #define PIC_UART_AVAILABLE      
+    #define PIC_UART_BAUD_BITS          16
+#endif
 
 #define PIC_TIMER0_AVAILABLE
 #define PIC_TIMER1_AVAILABLE

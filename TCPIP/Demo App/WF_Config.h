@@ -59,7 +59,22 @@
 
 #define WF_TCPIP_DEMO
 
-
+//
+// MRF24WB0MA/B  (supports only 1/2 Mbps)
+//      Client in infrastructure network                     (ALL security)
+//      Adhoc network                                            (OPEN, WEP security)
+//
+// MRF24WG0MA/B
+//      Client in infrastructure network                      (ALL security)
+//      Adhoc network                                              (OPEN, WEP security)
+//      Group client (GC) in WFii direct (P2P) network  (WPS security connection)
+//      SoftAP                                                          (OPEN, WEP security)
+//      Supports WPS security connection
+//      Supports WPA2-EAP (PEAP/TTLS)  (special approval needed)
+//
+// Available documentation
+// DS52108A  Microchip MRF24W Getting started Guide for MRF24WB0MAB, MRF24WG0MA/B for MLA v5
+//
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -81,6 +96,8 @@
 //   WF_SECURITY_WPS_PUSH_BUTTON		   : WPS push button method
 //   WF_SECURITY_WPS_PIN		   		   : WPS PIN method
 
+
+// Comments: CFG_WF_SOFT_AP is only avail in EZ Config  
 #define CFG_WF_INFRASTRUCTURE 1
 #define CFG_WF_ADHOC          2
 #define CFG_WF_P2P            3 	
@@ -168,21 +185,28 @@
 //#define ENABLE_SOFTWARE_MULTICAST_FILTER
 #endif
 
+//-----------------------------------------------------------------------------------
+// WPS-PIN 
 // For WPS Push-Button demo, press the button of AP (Registrar) first before running this demo.
 // Input this pin number on AP (Registrar), and activate Registrar first before connection attempt
 // Also note that this 8 digit is not randomly generated. Last digit is the checksum of first 7 digits.
 // The checksum must be correct, otherwise MRF24WG module wil reject the pin code
+//-----------------------------------------------------------------------------------
 #define MY_DEFAULT_WPS_PIN	                    "12390212"    /* only used when security is WF_SECURITY_WPS_PIN */
 
-#define MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE  WF_SECURITY_WEP_OPENKEY /* WF_SECURITY_WEP_OPENKEY (default) or	  */
-																		 /*  WF_SECURITY_WEP_SHAREDKEY. 			 */ 
 
 //-----------------------------------------------------------------------------------
+// WEP
 // Default WEP keys used in WF_SECURITY_WEP_40  and WF_SECURITY_WEP_104 security mode
+// Only WEP key index 0 is valid
 //-----------------------------------------------------------------------------------
+#define MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE  WF_SECURITY_WEP_OPENKEY /* WF_SECURITY_WEP_OPENKEY (default) or     */
+                                                                      /* WF_SECURITY_WEP_SHAREDKEY - to be used only */ 
+                                                                      /* with MRF24WG or 0x1209 and later version of  WRF24WB */ 
+
 #define MY_DEFAULT_WEP_PHRASE           "WEP Phrase"
 
-// string 4 40-bit WEP keys -- corresponding to passphraseof "WEP Phrase"
+// string 4 40-bit WEP keys -- corresponding to passphrase of "WEP Phrase"
 #define MY_DEFAULT_WEP_KEYS_40 "\
 \x5a\xfb\x6c\x8e\x77\
 \xc1\x04\x49\xfd\x4e\
@@ -190,7 +214,7 @@
 \xb0\x73\x69\xf4\x78"
 // Do not indent above string as it will inject spaces 
 
-// string containing 4 104-bit WEP keys -- corresponding to passphraseof "WEP Phrase"
+// string containing 4 104-bit WEP keys -- corresponding to passphrase of "WEP Phrase"
 #define MY_DEFAULT_WEP_KEYS_104 "\
 \x90\xe9\x67\x80\xc7\x39\x40\x9d\xa5\x00\x34\xfc\xaa\
 \x77\x4a\x69\x45\xa4\x3d\x66\x63\xfe\x5b\x1d\xb9\xfd\
@@ -198,11 +222,13 @@
 \xcc\xd7\x62\xde\x92\xad\xba\x3b\x62\x2f\x7f\xbe\xfb"
 // Do not indent above string as it will inject spaces 
 
-#define MY_DEFAULT_WEP_KEY_INDEX        (0)     /* Valid Key Index: 0, 1, 2, 3  */
+#define MY_DEFAULT_WEP_KEY_INDEX        (0)     /* Valid Key Index: 0      Valid Key Index: 1, 2, 3 (depreciated) */
 
-
+//-----------------------------------------------------------------------------------
+// WPA/WPA2
 // Default pass phrase used for WF_SECURITY_WPA_WITH_PASS_PHRASE and 
 // WF_SECURITY_WPA2_WITH_PASS_PHRASE security modes
+//-----------------------------------------------------------------------------------
 #define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
 
 // If using security mode of WF_SECURITY_WPA_WITH_KEY or WF_SECURITY_WPA2_WITH_KEY, then this section 

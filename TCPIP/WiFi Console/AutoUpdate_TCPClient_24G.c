@@ -118,9 +118,9 @@ void AutoUpdate_TCPClient(void)
 	{
 		case SM_UPDATE_HOME:
 			// Connect a socket to the remote TCP server
-			MySocket = TCPOpen((DWORD)((unsigned int)&ServerName[0]), TCP_OPEN_RAM_HOST, ServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT);
+			MySocket = TCPOpen((DWORD)((unsigned int)&ServerName[0]), TCP_OPEN_RAM_HOST, ServerPort, TCP_PURPOSE_AUTOUPDATE_TCP_CLIENT);
 			
-			// Abort operation if no TCP socket of type TCP_PURPOSE_GENERIC_TCP_CLIENT is available
+			// Abort operation if no TCP socket of type TCP_PURPOSE_AUTOUPDATE_TCP_CLIENT is available
 			// If this ever happens, you need to go add one to TCPIPConfig.h
 			if(MySocket == INVALID_SOCKET)
 				break;

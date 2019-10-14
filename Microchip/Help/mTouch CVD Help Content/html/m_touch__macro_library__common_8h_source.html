@@ -31,7 +31,7 @@
 <a href="m_touch__macro_library__common_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*************************************************************************</span>
 <a name="l00002"></a>00002 <span class="comment"> *  © 2012 Microchip Technology Inc.                                       </span>
 <a name="l00003"></a>00003 <span class="comment"> *  </span>
-<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.1</span>
+<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.3</span>
 <a name="l00005"></a>00005 <span class="comment"> *  FileName:        mTouch_macroLibrary_common.h</span>
 <a name="l00006"></a>00006 <span class="comment"> *  Dependencies:    mTouch.h</span>
 <a name="l00007"></a>00007 <span class="comment"> *  Processor:       See documentation for supported PIC® microcontrollers </span>
@@ -113,13 +113,13 @@
 <a name="l00113"></a>00113 <span class="preprocessor">    do {                                \</span>
 <a name="l00114"></a>00114 <span class="preprocessor">        asm(&quot;movwf  _int_w&quot;);           \</span>
 <a name="l00115"></a>00115 <span class="preprocessor">        asm(&quot;swapf  _int_w, F&quot;);        \</span>
-<a name="l00116"></a>00116 <span class="preprocessor">        asm(&quot;movf   _STATUS, W&quot;);       \</span>
-<a name="l00117"></a>00117 <span class="preprocessor">        asm(&quot;clrf   _STATUS&quot;);          \</span>
+<a name="l00116"></a>00116 <span class="preprocessor">        asm(&quot;movf   STATUS, W&quot;);        \</span>
+<a name="l00117"></a>00117 <span class="preprocessor">        asm(&quot;clrf   STATUS&quot;);           \</span>
 <a name="l00118"></a>00118 <span class="preprocessor">        asm(&quot;movwf  _int_status&quot;);      \</span>
-<a name="l00119"></a>00119 <span class="preprocessor">        asm(&quot;movf   _PCLATH, W&quot;);       \</span>
-<a name="l00120"></a>00120 <span class="preprocessor">        asm(&quot;clrf   _PCLATH&quot;);          \</span>
+<a name="l00119"></a>00119 <span class="preprocessor">        asm(&quot;movf   PCLATH, W&quot;);        \</span>
+<a name="l00120"></a>00120 <span class="preprocessor">        asm(&quot;clrf   PCLATH&quot;);           \</span>
 <a name="l00121"></a>00121 <span class="preprocessor">        asm(&quot;movwf  _int_pclath&quot;);      \</span>
-<a name="l00122"></a>00122 <span class="preprocessor">        asm(&quot;movf   _FSR, W&quot;);          \</span>
+<a name="l00122"></a>00122 <span class="preprocessor">        asm(&quot;movf   FSR, W&quot;);           \</span>
 <a name="l00123"></a>00123 <span class="preprocessor">        asm(&quot;movwf  _int_fsr&quot;);         \</span>
 <a name="l00124"></a>00124 <span class="preprocessor">    } while (0)</span>
 <a name="l00125"></a>00125 <span class="preprocessor"></span><span class="comment">// The Enhanced Midrange Core does not require saving/restoring state on entering</span>
@@ -129,11 +129,11 @@
 <a name="l00134"></a><a class="code" href="m_touch__macro_library__common_8h.html#af536d4c7b772add24840d3bf8546ea77">00134</a> <span class="preprocessor">#define RESTORE_STATE()                 \</span>
 <a name="l00135"></a>00135 <span class="preprocessor">    do {                                \</span>
 <a name="l00136"></a>00136 <span class="preprocessor">        asm(&quot;movf   _int_fsr,W&quot;);       \</span>
-<a name="l00137"></a>00137 <span class="preprocessor">        asm(&quot;movwf  _FSR&quot;);             \</span>
+<a name="l00137"></a>00137 <span class="preprocessor">        asm(&quot;movwf  FSR&quot;);              \</span>
 <a name="l00138"></a>00138 <span class="preprocessor">        asm(&quot;movf   _int_pclath,W&quot;);    \</span>
-<a name="l00139"></a>00139 <span class="preprocessor">        asm(&quot;movwf  _PCLATH&quot;);          \</span>
+<a name="l00139"></a>00139 <span class="preprocessor">        asm(&quot;movwf  PCLATH&quot;);           \</span>
 <a name="l00140"></a>00140 <span class="preprocessor">        asm(&quot;movf   _int_status,W&quot;);    \</span>
-<a name="l00141"></a>00141 <span class="preprocessor">        asm(&quot;movwf  _STATUS&quot;);          \</span>
+<a name="l00141"></a>00141 <span class="preprocessor">        asm(&quot;movwf  STATUS&quot;);           \</span>
 <a name="l00142"></a>00142 <span class="preprocessor">        asm(&quot;swapf  _int_w, W&quot;);        \</span>
 <a name="l00143"></a>00143 <span class="preprocessor">    } while (0)</span>
 <a name="l00144"></a>00144 <span class="preprocessor"></span><span class="comment">// The Enhanced Midrange Core does not require saving/restoring state on entering</span>
@@ -153,9 +153,9 @@
 <a name="l00171"></a><a class="code" href="m_touch__macro_library__common_8h.html#a4b903b3d0d213c7764d8f9662993c0e6">00171</a> <span class="preprocessor">        #define JITTER_START_TIME()                                                                                             \</span>
 <a name="l00172"></a>00172 <span class="preprocessor">            do {                                                                                                                \</span>
 <a name="l00173"></a>00173 <span class="preprocessor">                asm(&quot;BANKSEL    _mTouch_jitter&quot;                     );  </span><span class="comment">/* Make sure we&#39;re starting in the correct bank     */</span>  \
-<a name="l00174"></a>00174                 asm(&quot;bcf    &quot;   ___mkstr(_STATUS)           &quot;,0&quot;    );  <span class="comment">/* Clear the carry bit                              */</span>  \
+<a name="l00174"></a>00174                 asm(&quot;bcf    &quot;   ___mkstr(STATUS)            &quot;,0&quot;    );  <span class="comment">/* Clear the carry bit                              */</span>  \
 <a name="l00175"></a>00175                 asm(&quot;rrf    &quot;   ___mkstr(_mTouch_jitter)    &quot;,W&quot;    );  <span class="comment">/* Right shift the current jitter seed value        */</span>  \
-<a name="l00176"></a>00176                 asm(&quot;btfsc  &quot;   ___mkstr(_STATUS)           &quot;,0&quot;    );  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
+<a name="l00176"></a>00176                 asm(&quot;btfsc  &quot;   ___mkstr(STATUS)            &quot;,0&quot;    );  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
 <a name="l00177"></a>00177                 asm(&quot;xorlw      0xB4&quot;                               );  <span class="comment">/* (cond) XOR the jitter seed with 0xB4             */</span>  \
 <a name="l00178"></a>00178                 asm(&quot;movwf  &quot;   ___mkstr(_mTouch_jitter)            );  <span class="comment">/* Store the result as the new jitter seed value    */</span>  \
 <a name="l00179"></a>00179                 asm(&quot;andlw  &quot;   ___mkstr(MTOUCH_JITTER_MASK)        );  <span class="comment">/* Mask the seed value to limit the number of bits  */</span>  \
@@ -168,9 +168,9 @@
 <a name="l00196"></a><a class="code" href="m_touch__macro_library__common_8h.html#afe1c3a88366e92a6e22af7d8325a85fb">00196</a> <span class="preprocessor">        #define JITTER_MAIN_LOOP()                                                                                          \</span>
 <a name="l00197"></a>00197 <span class="preprocessor">            do {                                                                                                            \</span>
 <a name="l00198"></a>00198 <span class="preprocessor">                asm(&quot;BANKSEL    _mTouch_jitter&quot;                 );  </span><span class="comment">/* Make sure we&#39;re starting in the correct bank     */</span>  \
-<a name="l00199"></a>00199                 asm(&quot;bcf    &quot;   ___mkstr(_STATUS)           &quot;,0&quot;);  <span class="comment">/* Clear the carry bit                              */</span>  \
+<a name="l00199"></a>00199                 asm(&quot;bcf    &quot;   ___mkstr(STATUS)            &quot;,0&quot;);  <span class="comment">/* Clear the carry bit                              */</span>  \
 <a name="l00200"></a>00200                 asm(&quot;rrf    &quot;   ___mkstr(_mTouch_jitter)    &quot;,W&quot;);  <span class="comment">/* Right shift the current jitter seed value        */</span>  \
-<a name="l00201"></a>00201                 asm(&quot;btfsc  &quot;   ___mkstr(_STATUS)           &quot;,0&quot;);  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
+<a name="l00201"></a>00201                 asm(&quot;btfsc  &quot;   ___mkstr(STATUS)            &quot;,0&quot;);  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
 <a name="l00202"></a>00202                 asm(&quot;xorlw      0xB4&quot;                           );  <span class="comment">/* (cond) XOR the jitter seed with 0xB4             */</span>  \
 <a name="l00203"></a>00203                 asm(&quot;movwf  &quot;   ___mkstr(_mTouch_jitter)        );  <span class="comment">/* Store the result as the new jitter seed value    */</span>  \
 <a name="l00204"></a>00204                 for (uint8_t i = (mTouch_jitter &amp; MTOUCH_JITTER_MASK); i &gt; 0; i--); <span class="comment">/* Delay loop                       */</span>  \
@@ -759,7 +759,7 @@
 <a name="l00889"></a>00889 <span class="preprocessor"></span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.3 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

@@ -169,7 +169,7 @@ void PingDemo(void)
 
 BYTE PING_Console_Host[32]="192.168.1.1";
 INT32 Count_PingConsole = 0;
-#if defined(STACK_USE_CERTIFATE_DEBUG)
+#if defined(STACK_USE_CERTIFICATE_DEBUG)
 BOOL b_PingFroever = FALSE;
 #endif
 void PingConsole(void)
@@ -183,7 +183,7 @@ void PingConsole(void)
 	LONG ret;
 	static INT32 statistics_send=0, statistics_Recv=0, statistics_lost=0;
 	static INT32 statistics_TimeMax=0, statistics_TimeMin=0, statistics_TimeTotal=0;
-#if defined(STACK_USE_CERTIFATE_DEBUG)	
+#if defined(STACK_USE_CERTIFICATE_DEBUG)	
 	if(b_PingFroever == TRUE) Count_PingConsole = 4;
 #endif
 	switch(PingState)

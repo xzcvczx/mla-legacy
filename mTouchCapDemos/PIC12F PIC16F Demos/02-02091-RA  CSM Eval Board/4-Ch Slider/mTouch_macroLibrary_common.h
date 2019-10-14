@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch_macroLibrary_common.h
  *  Dependencies:    mTouch.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -113,13 +113,13 @@
     do {                                \
         asm("movwf  _int_w");           \
         asm("swapf  _int_w, F");        \
-        asm("movf   _STATUS, W");       \
-        asm("clrf   _STATUS");          \
+        asm("movf   STATUS, W");        \
+        asm("clrf   STATUS");           \
         asm("movwf  _int_status");      \
-        asm("movf   _PCLATH, W");       \
-        asm("clrf   _PCLATH");          \
+        asm("movf   PCLATH, W");        \
+        asm("clrf   PCLATH");           \
         asm("movwf  _int_pclath");      \
-        asm("movf   _FSR, W");          \
+        asm("movf   FSR, W");           \
         asm("movwf  _int_fsr");         \
     } while (0)
 // The Enhanced Midrange Core does not require saving/restoring state on entering
@@ -134,11 +134,11 @@
 #define RESTORE_STATE()                 \
     do {                                \
         asm("movf   _int_fsr,W");       \
-        asm("movwf  _FSR");             \
+        asm("movwf  FSR");              \
         asm("movf   _int_pclath,W");    \
-        asm("movwf  _PCLATH");          \
+        asm("movwf  PCLATH");           \
         asm("movf   _int_status,W");    \
-        asm("movwf  _STATUS");          \
+        asm("movwf  STATUS");           \
         asm("swapf  _int_w, W");        \
     } while (0)
 // The Enhanced Midrange Core does not require saving/restoring state on entering
@@ -171,9 +171,9 @@
         #define JITTER_START_TIME()                                                                                             \
             do {                                                                                                                \
                 asm("BANKSEL    _mTouch_jitter"                     );  /* Make sure we're starting in the correct bank     */  \
-                asm("bcf    "   ___mkstr(_STATUS)           ",0"    );  /* Clear the carry bit                              */  \
+                asm("bcf    "   ___mkstr(STATUS)            ",0"    );  /* Clear the carry bit                              */  \
                 asm("rrf    "   ___mkstr(_mTouch_jitter)    ",W"    );  /* Right shift the current jitter seed value        */  \
-                asm("btfsc  "   ___mkstr(_STATUS)           ",0"    );  /* Check the carry bit - if set, perform XOR        */  \
+                asm("btfsc  "   ___mkstr(STATUS)            ",0"    );  /* Check the carry bit - if set, perform XOR        */  \
                 asm("xorlw      0xB4"                               );  /* (cond) XOR the jitter seed with 0xB4             */  \
                 asm("movwf  "   ___mkstr(_mTouch_jitter)            );  /* Store the result as the new jitter seed value    */  \
                 asm("andlw  "   ___mkstr(MTOUCH_JITTER_MASK)        );  /* Mask the seed value to limit the number of bits  */  \
@@ -196,9 +196,9 @@
         #define JITTER_MAIN_LOOP()                                                                                          \
             do {                                                                                                            \
                 asm("BANKSEL    _mTouch_jitter"                 );  /* Make sure we're starting in the correct bank     */  \
-                asm("bcf    "   ___mkstr(_STATUS)           ",0");  /* Clear the carry bit                              */  \
+                asm("bcf    "   ___mkstr(STATUS)            ",0");  /* Clear the carry bit                              */  \
                 asm("rrf    "   ___mkstr(_mTouch_jitter)    ",W");  /* Right shift the current jitter seed value        */  \
-                asm("btfsc  "   ___mkstr(_STATUS)           ",0");  /* Check the carry bit - if set, perform XOR        */  \
+                asm("btfsc  "   ___mkstr(STATUS)            ",0");  /* Check the carry bit - if set, perform XOR        */  \
                 asm("xorlw      0xB4"                           );  /* (cond) XOR the jitter seed with 0xB4             */  \
                 asm("movwf  "   ___mkstr(_mTouch_jitter)        );  /* Store the result as the new jitter seed value    */  \
                 for (uint8_t i = (mTouch_jitter & MTOUCH_JITTER_MASK); i > 0; i--); /* Delay loop                       */  \
@@ -517,7 +517,7 @@
 
 /** @name   Timing Critical CVD Scanning Routine Macros
 *
-*   These macros implement the CVD scanning routine and basic acquistion-level filtering 
+*   These macros implement the CVD scanning routine and basic acquisition-level filtering 
 *   techniques. Editting these macros could reduce the noise immunity of the system.
 */
 //@{

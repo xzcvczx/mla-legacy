@@ -98,6 +98,16 @@
 
 #define FAMILY_PIC18XXK90
 
+#elif defined(__18F65J94)|| defined(__18F66J94)|| defined(__18F67J94) || defined(__18F85J94) || defined(__18F86J94)\
+|| defined(__18F87J94) || defined(__18F95J94) || defined(__18F96J94)|| defined(__18F97J94)|| defined(__18F96J99) || defined(__18F86J99)|| defined(__18F66J99)
+
+#define FAMILY_PIC18XXJ94
+
+#elif defined(__18F24K50)|| defined(__18F25K50)|| defined(__18F45K50)\
+|| defined(__18LF24K50)|| defined(__18LF25K50)|| defined(__18LF45K50)
+
+#define FAMILY_PIC18XXK50
+
 #elif defined(__PIC24F04KA200__) || defined(__PIC24F04KA201__) 
 
 #define FAMILY_PIC24F04KA20X

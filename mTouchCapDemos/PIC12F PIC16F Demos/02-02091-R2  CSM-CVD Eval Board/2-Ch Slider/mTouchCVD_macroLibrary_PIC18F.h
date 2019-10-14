@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouchCVD_macroLibrary_PIC18F.h
  *  Dependencies:    mTouch.h
  *                   mTouch_macroLibrary_common.h

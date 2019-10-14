@@ -73,6 +73,12 @@
 // Include functions specific to this stack application
 #include "MainDemo.h"
 
+#if defined(CONFIG_WPA_ENTERPRISE)
+#include "wpa_eap/utils/eloop.h"
+extern void MACPutGeneralHeader(MAC_ADDR *remote, UINT16 type, WORD dataLen);
+extern void RenewDhcp(void);
+#endif
+
 // Used for Wi-Fi assertions
 #define WF_MODULE_NUMBER   WF_MODULE_MAIN_DEMO
 
@@ -102,12 +108,21 @@ static void InitAppConfig(void);
 #if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
 tPassphraseReady g_WpsPassphrase;
 #endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
+#if defined(CONFIG_WPA_ENTERPRISE)
+enum WpaEapStatus g_WpaEapStatus = EAP_NONE;
+enum WpaEapConnEvt g_EapConnEvent = EAP_EVT_NONE;
+int g_SetPMK = 0;
+char g_PMK[32];
+#endif	/* defined(CONFIG_WPA_ENTERPRISE) */
 #endif	/* defined(WF_CS_TRIS) */
 
 #if !defined(STACK_USE_UART)
 #error "Must have STACK_USE_UART defined for the console demo"
 #endif
 
+#if defined(STACK_USE_CLOUD_TCPCLIENT)
+BOOL g_CloudConnLost = FALSE;
+#endif
 
 //
 // PIC18 Interrupt Service Routines
@@ -303,9 +318,20 @@ int main(void)
 		#endif
     }
 
+#if defined(STACK_USE_AUTOUPDATE_UART) 
+ 	#if defined (MRF24WG)
+		AutoUpdate_UartXMODEM_24G();  
+ 	#else
+            #if !defined( MRF24WG) && defined( __PIC32MX__ )
+                AutoUpdate_UartXMODEM_Roadrunner();
+            #endif
+	#endif
+#endif
+
 	// Initialize core stack layers (MAC, ARP, TCP, UDP) and
 	// application modules (HTTP, SNMP, etc.)
     StackInit();
+	
 
     #if defined(WF_CS_TRIS)
 	#if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
@@ -352,13 +378,8 @@ int main(void)
     // job.
     // If a task needs very long time to do its job, it must be broken
     // down into smaller pieces so that other tasks can have CPU time.
-    #if !defined( MRF24WG)  && defined( __PIC32MX__ )
-    AutoUpdate_UartXMODEM_Roadrunner();
-	#endif
+
 	
-	#if defined(STACK_USE_AUTOUPDATE_UART) && defined (MRF24WG)
-	AutoUpdate_UartXMODEM_24G();
-	#endif
 	
     while(1)
     {
@@ -407,7 +428,14 @@ int main(void)
 		AutoUpdate_TCPClient();
 		#endif
 
-		
+		#if defined(STACK_USE_CLOUD_TCPCLIENT)
+		if (g_CloudConnLost) {
+			WF_CMConnect(ConnectionProfileID);
+			g_CloudConnLost = FALSE;
+		} else {
+			CloudTCPClient();
+		}
+		#endif
 
 		#if defined(STACK_USE_FTP_CLIENT)
 		FTPClient();
@@ -487,6 +515,30 @@ int main(void)
 				g_WpsPassphrase.valid = FALSE;
 			}
 		#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
+
+		#if defined(CONFIG_WPA_ENTERPRISE)
+			if (g_EapConnEvent == EAP_EVT_SUCCESS) {
+				if (g_WpaEapStatus == EAP_NONE) {
+					tWFConnectContext ConnCtx;
+					WF_CMGetConnectContext(&ConnCtx);
+					eap_supp_init(ConnCtx.bssid);
+					g_WpaEapStatus = EAP_ASSOC_DONE;
+				} else if (g_WpaEapStatus == EAP_ASSOC_DONE) {
+					g_WpaEapStatus = EAP_CONNECTED;
+					RenewDhcp();
+				}
+				g_EapConnEvent = EAP_EVT_NONE;
+			} else if (g_EapConnEvent == EAP_EVT_FAILURE){
+				g_EapConnEvent = EAP_EVT_NONE;
+				g_WpaEapStatus = EAP_NONE;
+				eap_supp_deinit();
+			}
+			if (g_SetPMK) {
+				WF_CPUpdatePMK(ConnectionProfileID, (UINT8 *)g_PMK);
+				g_SetPMK = 0;
+			}
+			eloop_run();
+		#endif
 	}
 }
 
@@ -581,13 +633,15 @@ void WF_Connect(void)
 		}
 	#endif	/* defined (MRF24WG) */
 	#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
-
+	#if !defined(MRF24WG)	
+	Delay10us(10);  //give time to Roadrunner to clean message buffer, because Security message is a big data package
+	#endif
     WF_CPSetSecurity(ConnectionProfileID,
                      AppConfig.SecurityMode,
                      AppConfig.WepKeyIndex,   /* only used if WEP enabled */
                      AppConfig.SecurityKey,
                      AppConfig.SecurityKeyLength);
-    
+
     #if MY_DEFAULT_PS_POLL == WF_ENABLED
 		WF_PsPollEnable(TRUE);
     #if !defined(MRF24WG)
@@ -618,6 +672,30 @@ void WF_Connect(void)
     
     WF_CMConnect(ConnectionProfileID);
 }   
+
+#ifdef CONFIG_WPA_ENTERPRISE
+int
+eapol_send(void *dst_addr, void *packet_buf, unsigned long packet_len, unsigned short proto)
+{
+	while(!MACIsTxReady());
+	MACSetWritePtr(BASE_TX_ADDR);
+	
+	MACPutGeneralHeader((MAC_ADDR *)dst_addr, proto, packet_len);
+    MACPutArray((BYTE*)packet_buf, packet_len);
+    MACFlush();
+	
+	return 0;
+}
+
+void
+eap_puts(char *s)
+{	
+#if defined(STACK_USE_UART)
+	putsUART(s);
+	putsUART("\r\n");
+#endif
+}
+#endif	/* CONFIG_WPA_ENTERPRISE */
 #endif /* WF_CS_TRIS */
 
 // Writes an IP address to the LCD display and the UART as available
@@ -1269,7 +1347,7 @@ static void InitAppConfig(void)
 			#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN)
 				memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_WPS_PIN, sizeof(MY_DEFAULT_WPS_PIN) - 1);
 			    AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_WPS_PIN) - 1;
-			#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_EAP)
+			#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA2_ENTERPRISE)
 	            memset(AppConfig.SecurityKey, 0x00, sizeof(AppConfig.SecurityKey));
 	            AppConfig.SecurityKeyLength = 0;
 	        #else 
@@ -1370,5 +1448,3 @@ void SaveAppConfig(const APP_CONFIG *ptrAppConfig)
     #endif
 }
 #endif
-
-

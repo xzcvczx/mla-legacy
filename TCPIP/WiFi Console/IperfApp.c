@@ -749,7 +749,7 @@ StateMachineRxStart(void)
             /* TCP Server sockets are allocated for entire runtime duration, a call to disconnect does not free them */
             /* therefore a subsequent N+1 open will fail */
             if ( (APPCTX.tcpServerSock == INVALID_SOCKET) &&
-                 (APPCTX.tcpServerSock = TCPOpen(0, TCP_OPEN_SERVER,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_SERVER)) == INVALID_SOCKET )
+                 (APPCTX.tcpServerSock = TCPOpen(0, TCP_OPEN_SERVER,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_SERVER/*TCP_PURPOSE_IPERF_TCP_SERVER*/)) == INVALID_SOCKET )
             {
                /* error case */
                WFConsolePrintRomStr("Create TCP socket failed", TRUE);
@@ -1295,7 +1295,7 @@ static void
 StateMachineTCPTxOpen(void)
 {
 
-   if  ( (APPCTX.tcpClientSock = TCPOpen( (DWORD) ((unsigned int)&APPCTX.remoteSide.remote), TCP_OPEN_NODE_INFO,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT)) == INVALID_SOCKET )
+   if  ( (APPCTX.tcpClientSock = TCPOpen( (DWORD) ((unsigned int)&APPCTX.remoteSide.remote), TCP_OPEN_NODE_INFO,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT/*TCP_PURPOSE_IPERF_TCP_CLIENT*/)) == INVALID_SOCKET )
    {
        /* error case */
         WFConsolePrintRomStr("Create TCP socket failed", TRUE);

@@ -1,4 +1,56 @@
-
+/*************************************************************************
+ *  © 2012 Microchip Technology Inc.                                       
+ *  
+ *  Project Name:    mTouch Framework v2.3
+ *  FileName:        mComm_config.h
+ *  Dependencies:    mComm_optionsForConfig.h
+ *  Processor:       See documentation for supported PIC® microcontrollers 
+ *  Compiler:        HI-TECH Ver. 9.81 or later
+ *  IDE:             MPLAB® IDE v8.50 (or later) or MPLAB® X                        
+ *  Hardware:         
+ *  Company:         
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *  Description:     
+ *************************************************************************/
+/**************************************************************************
+ * MICROCHIP SOFTWARE NOTICE AND DISCLAIMER: You may use this software, and 
+ * any derivatives created by any person or entity by or on your behalf, 
+ * exclusively with Microchip's products in accordance with applicable
+ * software license terms and conditions, a copy of which is provided for
+ * your referencein accompanying documentation. Microchip and its licensors 
+ * retain all ownership and intellectual property rights in the 
+ * accompanying software and in all derivatives hereto. 
+ * 
+ * This software and any accompanying information is for suggestion only. 
+ * It does not modify Microchip's standard warranty for its products. You 
+ * agree that you are solely responsible for testing the software and 
+ * determining its suitability. Microchip has no obligation to modify, 
+ * test, certify, or support the software. 
+ * 
+ * THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
+ * EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED 
+ * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A 
+ * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE, ITS INTERACTION WITH 
+ * MICROCHIP'S PRODUCTS, COMBINATION WITH ANY OTHER PRODUCTS, OR USE IN ANY 
+ * APPLICATION. 
+ * 
+ * IN NO EVENT, WILL MICROCHIP BE LIABLE, WHETHER IN CONTRACT, WARRANTY, 
+ * TORT (INCLUDING NEGLIGENCE OR BREACH OF STATUTORY DUTY), STRICT 
+ * LIABILITY, INDEMNITY, CONTRIBUTION, OR OTHERWISE, FOR ANY INDIRECT, 
+ * SPECIAL, PUNITIVE, EXEMPLARY, INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, 
+ * FOR COST OR EXPENSE OF ANY KIND WHATSOEVER RELATED TO THE SOFTWARE, 
+ * HOWSOEVER CAUSED, EVEN IF MICROCHIP HAS BEEN ADVISED OF THE POSSIBILITY 
+ * OR THE DAMAGES ARE FORESEEABLE. TO THE FULLEST EXTENT ALLOWABLE BY LAW, 
+ * MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN ANY WAY RELATED TO THIS 
+ * SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY, THAT YOU HAVE PAID 
+ * DIRECTLY TO MICROCHIP FOR THIS SOFTWARE. 
+ * 
+ * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF 
+ * THESE TERMS. 
+ *************************************************************************/
+/** @file   mComm_config.h
+*   @brief  mComm Configuration! Main configuration file for the mComm module.
+*/
 #ifndef __MCOMM_CONFIG_H
 #define __MCOMM_CONFIG_H
 
@@ -259,21 +311,21 @@
     #define     MCOMM_I2C_ADDRESS               0xA0            // Address of I2C module when available for a new packet
     #define     MCOMM_I2C_ADDRESS_BUSY          0xA2            // Address of I2C module when not able to receive new packets
     #define     MCOMM_I2C_SSPSTAT               SSPSTAT         // aka SSP1STAT
+    #define     MCOMM_I2C_RnW                   SSPSTATbits.R_nW
+    #define     MCOMM_I2C_DnA                   SSPSTATbits.D_nA
+    #define     MCOMM_I2C_STOP                  SSPSTATbits.P
     #define     MCOMM_I2C_SSPCON1               SSPCON1         // aka SSP1CON1
+    #define     MCOMM_I2C_CKP                   SSPCON1bits.CKP
+    #define     MCOMM_I2C_SSPOV                 SSPCON1bits.SSPOV
+    #define     MCOMM_I2C_WCOL                  SSPCON1bits.WCOL
     #define     MCOMM_I2C_SSPCON2               SSPCON2         // aka SSP1CON2
     #define     MCOMM_I2C_SSPCON3               SSPCON3
     #define     MCOMM_I2C_SSPMSK                SSPMSK
     #define     MCOMM_I2C_SSPADD                SSPADD
     #define     MCOMM_I2C_SSPBUF                SSPBUF
-    #define     MCOMM_I2C_CKP                   SSPCON1bits.CKP
-    #define     MCOMM_I2C_RnW                   SSPSTATbits.R_nW
-    #define     MCOMM_I2C_DnA                   SSPSTATbits.D_nA
-    #define     MCOMM_I2C_STOP                  SSPSTATbits.P
-    #define     MCOMM_I2C_SSPOV                 SSPCON1bits.SSPOV
-    #define     MCOMM_I2C_WCOL                  SSPCON1bits.WCOL
+    #define     MCOMM_I2C_PEIE                  INTCONbits.PEIE
     #define     MCOMM_I2C_SSPIE                 PIE1bits.SSPIE
     #define     MCOMM_I2C_SSPIF                 PIR1bits.SSPIF
-    #define     MCOMM_I2C_PEIE                  INTCONbits.PEIE
 
     #define     MCOMM_SPI_SS_PIN                RB5             // Must be a pin with Interrupt-On-Change functionality
     #define     MCOMM_SPI_ADDRESS               0xA0            // The address is the first byte sent for SPI and must match with this value
@@ -288,21 +340,22 @@
     #define     MCOMM_SPI_PEIE                  INTCONbits.PEIE
     #define     MCOMM_SPI_IOCIF                 INTCONbits.IOCIF
     
-    #define     MCOMM_UART_RCREG                RCREG
     #define     MCOMM_UART_TXREG                TXREG
+    #define     MCOMM_UART_RCREG                RCREG
     #define     MCOMM_UART_TXSTA                TXSTA
+    #define     MCOMM_UART_BRGH                 TXSTAbits.BRGH
+    #define     MCOMM_UART_SENDB                TXSTAbits.SENDB
+    #define     MCOMM_UART_TXEN                 TXSTAbits.TXEN
     #define     MCOMM_UART_RCSTA                RCSTA
-    #define     MCOMM_UART_BAUDCON              BAUDCON
-    #define     MCOMM_UART_SPBRGL               SPBRGL
-    #define     MCOMM_UART_SPBRGH               SPBRGH
-    #define     MCOMM_UART_TXIF                 PIR1bits.TXIF
     #define     MCOMM_UART_OERR                 RCSTAbits.OERR
     #define     MCOMM_UART_CREN                 RCSTAbits.CREN
-    #define     MCOMM_UART_BRGH                 TXSTAbits.BRGH
-    #define     MCOMM_UART_BRG16                BAUDCONbits.BRG16
     #define     MCOMM_UART_SPEN                 RCSTAbits.SPEN
-    #define     MCOMM_UART_TXEN                 TXSTAbits.TXEN
+    #define     MCOMM_UART_BAUDCON              BAUDCON
+    #define     MCOMM_UART_BRG16                BAUDCONbits.BRG16
+    #define     MCOMM_UART_SPBRGL               SPBRGL
+    #define     MCOMM_UART_SPBRGH               SPBRGH
     #define     MCOMM_UART_PEIE                 INTCONbits.PEIE
+    #define     MCOMM_UART_TXIF                 PIR1bits.TXIF
     #define     MCOMM_UART_RCIF                 PIR1bits.RCIF
     #define     MCOMM_UART_RCIE                 PIE1bits.RCIE
     

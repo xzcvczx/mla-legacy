@@ -77,7 +77,6 @@
                    displayName="Library Files"
                    projectFiles="true">
       <logicalFolder name="TCPIP Stack" displayName="TCPIP Stack" projectFiles="true">
-        <itemPath>../../../Microchip/TCPIP Stack/BigInt_helper_coff.a</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/BigInt_helper_elf.a</itemPath>
       </logicalFolder>
     </logicalFolder>
@@ -176,9 +175,10 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ128GA010</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>Simulator</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -443,9 +443,10 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>Simulator</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>

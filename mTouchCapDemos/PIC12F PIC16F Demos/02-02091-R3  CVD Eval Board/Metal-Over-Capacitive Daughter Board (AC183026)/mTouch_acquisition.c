@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch_acquisition.c
  *  Dependencies:    mTouch.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -56,12 +56,14 @@
  *************************************************************************/
  
 /** 
-* @file     mTouch_acquistion.c
+* @file     mTouch_acquisition.c
 * @brief    Implements scanning procedure for the framework which performs the 
 *           mTouch acquisition and provides an oversampled, scaled integer
 *           value representing the relative capacitance of the sensor.
 */
 #include "mTouch.h"
+
+#if !defined(PIC_ADC_HCVD_AVAILABLE)
 
 #asm
     #ifndef MTOUCH_ACQ_CAS_INCLUDE
@@ -84,7 +86,7 @@
 */
 //@{
   mTouch_AcquisitionData        mTouch_acqData      [MTOUCH_NUMBER_SENSORS];  
-  mTouch_AcquisitionData*       mTouch_previousSensor;  
+  mTouch_AcquisitionData*       mTouch_currentAcqData;  
                 uint16_t        mTouch_sensorData   [MTOUCH_NUMBER_SENSORS];    
                 uint16_t        mTouch_lastResult;                                      ///< Stores the last active-mode ADC result for differential calculation        @ingroup Acquisition
                 uint8_t         mTouch_delayCount;                                      ///< Delay counter variable used in CVD scan sequence                           @ingroup Acquisition
@@ -104,23 +106,6 @@
     
 #if defined(MTOUCH_JITTER_ENABLE)
                 uint8_t         mTouch_jitter = 0x55;                                   ///< Stores the current random seed value for jittering                         @ingroup Acquisition
-#endif
-
-#if defined(_PIC14)
-    // These state-saving variables are only required in non-enhanced core PIC microcontrollers. 
-    // They are automatically omitted if not needed.
-        near    uint8_t         int_w;              
-        near    uint8_t         int_status;         
-        near    uint8_t         int_fsr;            
-        near    uint8_t         int_pclath;         
-    // TIP: The 'near' qualifier tells the compiler to place these variables in 'common' memory so 
-    //      they may be accessed from any bank. On the enhanced core products, this typically 
-    //      refers to the registers: 0x70 to 0x7F.
-#elif defined(_PIC18)
-                uint8_t         int_w;
-                uint8_t         int_status;
-                uint8_t         int_bsr;
-    // TIP: The 'near' qualifier is not needed in this case due to the PIC18's bank access features.
 #endif
 //@}
 
@@ -144,7 +129,6 @@ void mTouch_ChangeMode          (uint8_t);
 #else
 void mTouch_ChangeMode          (void);
 #endif
-void mTouch_UpdateAccumulator2  (void);
 MTOUCH_SCAN_PROTOTYPES();
     
     
@@ -233,6 +217,8 @@ mTouch_Scan:
         {
         #endif
     
+            mTouch_currentAcqData   = &mTouch_acqData[MTOUCH_CURRENTSCAN_VALUE];
+            
             #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
             do
             {
@@ -248,20 +234,6 @@ mTouch_Scan:
                 mTouch_ScanA_0();
                 #endif
                 
-                //
-                //  Math on Previous Sensor
-                //
-                #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
-                if (!mTouch_state.isRepeatScan)
-                {
-                #endif
-                    if (mTouch_previousSensor != 0)
-                    {
-                        mTouch_DecimationFilter();
-                    }
-                #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
-                }
-                #endif
                 
                 mTouch_WaitForGoDone();
                 mTouch_StoreScanA();
@@ -275,34 +247,26 @@ mTouch_Scan:
                 mTouch_ScanB_0();
                 #endif
                 
-                //
-                //  Update accumulator
-                //
-                #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
-                if (!mTouch_state.isRepeatScan)                           
-                {   
-                #endif
-                    if (mTouch_previousSensor != 0)
-                    {
-                        mTouch_UpdateAccumulator2();    // Take the result from the decimation filter and update the
-                                                        // accumulator value for the previous sensor.
-                    }
-                #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
-                }
-                #endif
                 
                 mTouch_WaitForGoDone();
                 mTouch_StoreScanB();
+                
+                //
+                //  Math
+                //
+                #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
+                if (!mTouch_state.isRepeatScan)
+                {
+                #endif
+                    mTouch_DecimationFilter();
+                #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
+                }
+                #endif
                 
             #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
                 mTouch_state.isRepeatScan = mTouch_state.isrServiced;
             } while (mTouch_state.isRepeatScan);
             #endif
-        
-            //
-            //  Increment sensor index and sample counter
-            //
-            mTouch_previousSensor   = &mTouch_acqData[MTOUCH_CURRENTSCAN_VALUE];
         
         #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
             mTouch_oversample[MTOUCH_CURRENTSCAN_VALUE]--;
@@ -348,16 +312,13 @@ mTouch_Scan:
         {
             mTouch_stateVars.sampleCounter   = MTOUCH_SpS_VALUE; 
         #endif
-         
-            mTouch_DecimationFilter();      // Store the final ADC result from the last sensor before
-            mTouch_UpdateAccumulator2();    // continuing with the output dump.
-        
+
             #if (MTOUCH_NUMBER_SENSORS > 1)
             do 
             {
-                mTouch_previousSensor = &mTouch_acqData[MTOUCH_CURRENTSCAN_VALUE];
-                mTouch_sensorData[MTOUCH_CURRENTSCAN_VALUE] = (uint16_t)(((uint24_t)((*mTouch_previousSensor).accumulator.v) & 0xFFFFF) >> MTOUCH_SCALING_VALUE);
-                (*mTouch_previousSensor).accumulator.v &= 0xF00000;
+                mTouch_currentAcqData = &mTouch_acqData[MTOUCH_CURRENTSCAN_VALUE];
+                mTouch_sensorData[MTOUCH_CURRENTSCAN_VALUE] = (uint16_t)(((uint24_t)((*mTouch_currentAcqData).accumulator.v) & 0xFFFFF) >> MTOUCH_SCALING_VALUE);
+                (*mTouch_currentAcqData).accumulator.v &= 0xF00000;
                 
                 mTouch_currentScan++;    
             } while (MTOUCH_CURRENTSCAN_VALUE != MTOUCH_NUMBER_SENSORS);
@@ -412,7 +373,7 @@ void mTouch_DecimationFilter(void)
 {
     // Get the current decimated filter value for the sensor.
     #if MTOUCH_NUMBER_SENSORS > 1
-    uint16_t    result  = (uint16_t)((*mTouch_previousSensor).result.v >> 4);
+    uint16_t    result  = (uint16_t)((*mTouch_currentAcqData).result.v >> 4);
     #else
     uint16_t    result  = (uint16_t)(mTouch_acqData[0].result.v >> 4);
     #endif
@@ -455,11 +416,17 @@ void mTouch_DecimationFilter(void)
     #endif
  
     #if MTOUCH_NUMBER_SENSORS > 1
-    (*mTouch_previousSensor).result.v &= 0x000F;            // Store the new decimated value into memory for later use.
-    (*mTouch_previousSensor).result.v |= (uint16_t)(result << 4);     
+    (*mTouch_currentAcqData).result.v &= 0x000F;            // Store the new decimated value into memory for later use.
+    (*mTouch_currentAcqData).result.v |= (uint16_t)(result << 4);     
     #else
     mTouch_acqData[0].result.v &= 0x000F;            // Store the new decimated value into memory for later use.
     mTouch_acqData[0].result.v |= (uint16_t)(result << 4);     
+    #endif
+    
+    #if MTOUCH_NUMBER_SENSORS > 1
+    (*mTouch_currentAcqData).accumulator.v += (uint16_t)((*mTouch_currentAcqData).result.v >> 4);
+    #else
+    mTouch_acqData[0].accumulator.v += (uint16_t)(mTouch_acqData[0].result.v >> 4);
     #endif
 }
 
@@ -502,17 +469,24 @@ void mTouch_ChangeMode(uint8_t newModeIndex)
 void mTouch_ChangeMode(void)
 {
 #endif
-    mTouch_previousSensor   = 0;
+    mTouch_currentAcqData   = 0;
     
     #if MTOUCH_NUMBER_SENSORS > 1
     #if MTOUCH_NUM_MODES > 1
-    mTouch_currentScan      = mTouch_mode[mTouch_modeIndex];
-    
     if (mTouch_modeIndex != newModeIndex)
     {
         mTouch_modeIndex            = newModeIndex; 
         mTouch_state.justChanged    = 1;
+
+        newModeIndex = 0;
+        do
+        {
+            mTouch_acqData[newModeIndex].accumulator.v &= 0xF00000;
+            newModeIndex++;
+        } while (newModeIndex != MTOUCH_NUMBER_SENSORS);
     }
+
+    mTouch_currentScan      = mTouch_mode[mTouch_modeIndex];
     #else   
     mTouch_currentScan      = 0;
     #endif
@@ -533,15 +507,6 @@ void mTouch_ChangeMode(void)
         
     #else
     mTouch_stateVars.sampleCounter   = MTOUCH_SpS_VALUE;
-    #endif
-}
-
-void mTouch_UpdateAccumulator2(void)
-{
-    #if MTOUCH_NUMBER_SENSORS > 1
-    (*mTouch_previousSensor).accumulator.v += (uint16_t)((*mTouch_previousSensor).result.v >> 4);
-    #else
-    mTouch_acqData[0].accumulator.v += (uint16_t)(mTouch_acqData[0].result.v >> 4);
     #endif
 }
 
@@ -634,4 +599,6 @@ MTOUCH_SCAN_FUNCTION(28);
 #endif
 #if MTOUCH_NUMBER_SENSORS > 29   
 MTOUCH_SCAN_FUNCTION(29);  
+#endif
+
 #endif

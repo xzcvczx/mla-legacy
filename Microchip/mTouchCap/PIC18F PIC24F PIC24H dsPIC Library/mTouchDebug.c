@@ -60,11 +60,12 @@
 void LogUINT16(UINT16 value)
 {
 UINT8 ctr = 0;
+UINT8 flg = 0;
 
- 	while (value >= 10000)  { value -= 10000; ctr++; } if(ctr != 0) {LogChar(ctr+0x30);} ctr=0;
- 	while (value >=  1000)  { value -=  1000; ctr++; } if(ctr != 0) {LogChar(ctr+0x30);} ctr=0;
-	while (value >=   100)  { value -=   100; ctr++; } if(ctr != 0) {LogChar(ctr+0x30);} ctr=0;
-	while (value >=    10)  { value -=    10; ctr++; } if(ctr != 0) {LogChar(ctr+0x30);} ctr=0;
+ 	while (value >= 10000)  { value -= 10000; ctr++; } if(ctr) {flg=1;} if(flg) {LogChar(ctr+0x30);} ctr=0;
+ 	while (value >=  1000)  { value -=  1000; ctr++; } if(ctr) {flg=1;} if(flg) {LogChar(ctr+0x30);} ctr=0;
+	while (value >=   100)  { value -=   100; ctr++; } if(ctr) {flg=1;} if(flg) {LogChar(ctr+0x30);} ctr=0;
+	while (value >=    10)  { value -=    10; ctr++; } if(ctr) {flg=1;} if(flg) {LogChar(ctr+0x30);} ctr=0;
 	while (value >=     1)  { value -=     1; ctr++; } LogChar(ctr+0x30);	
     LogChar(LOG_DELIMITER);
 }

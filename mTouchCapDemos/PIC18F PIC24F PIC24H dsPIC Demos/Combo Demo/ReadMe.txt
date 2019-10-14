@@ -12,7 +12,7 @@ Software Library used for Combo Demo.
 *******************************************************************************
                             Release Information
 **********************************************************************************
-mTouch Cap Library v1.41:         July-2012
+mTouch Cap Library v1.43:         February-2013
 MPLAB version:                    8.83 or Later
 MPLAB-X Version:                  1.00 or Later 
 Compiler Version:                 C18 3.40 or Later, HI-TECH 9.66 or Later, XC8, C30 3.31 or Later, XC16

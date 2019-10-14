@@ -270,7 +270,7 @@ ROM BYTE *ROM USB_SD_Ptr[]=
     //Implementing this special descriptor allows WinUSB driver package installation
     //to be automatic on Windows 8.  For additional details, see:
     //http://msdn.microsoft.com/en-us/library/windows/hardware/hh450799(v=vs.85).aspx
-    MS_OS_DESCRIPTOR MSOSDescriptor =
+    ROM MS_OS_DESCRIPTOR MSOSDescriptor =
     {   
         sizeof(MSOSDescriptor),         //bLength - lenght of this descriptor in bytes
         USB_DESCRIPTOR_STRING,          //bDescriptorType - "string"
@@ -281,7 +281,7 @@ ROM BYTE *ROM USB_SD_Ptr[]=
     
     
     //Extended Compat ID OS Feature Descriptor
-    MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor =
+    ROM MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor =
     {
         //----------Header Section--------------
         sizeof(CompatIDFeatureDescriptor),  //dwLength
@@ -299,7 +299,7 @@ ROM BYTE *ROM USB_SD_Ptr[]=
     
     
     //Extended Properties OS Feature Descriptor
-    MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor =
+    ROM MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor =
     {
         //----------Header Section--------------
         sizeof(ExtPropertyFeatureDescriptor),   //dwLength

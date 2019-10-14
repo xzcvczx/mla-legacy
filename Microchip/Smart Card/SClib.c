@@ -61,7 +61,12 @@
   1.02.8   1) "SC_TransactT0" function is modified to handle a 256 bytes read from smart card as
               per the "Case 2S" requirement of ISO 7816 specification.
            2) The assignment of "apduResponse->SW1" & "apduResponse->SW2" is modified in 
-		      "SC_TransactT1" function
+             "SC_TransactT1" function
+  1.03     1) Changed the data type of variable "cgtETU" from "BYTE" to "unsigned short int".
+           2) Modified "SC_DoPPS" function, so as to add the guard time between transmission of
+              bytes to smart card.
+           3) Modified "SC_CalculateWaitTime" function, so as to calculate correct guard & wait
+              time values.
 ********************************************************************/
 
 #include <string.h>
@@ -145,7 +150,7 @@ static void SC_CalculateWaitTime(void);
 #endif
 
 // Character Guard Time for T=0 & T=1 Protocol
-BYTE cgtETU;
+unsigned short int cgtETU;
 unsigned int cgtInMicroSeconds;
 
 // CLA set to '00' = no command chaining, 
@@ -410,6 +415,10 @@ BOOL SC_DoPPS(BYTE *ppsPtr)
 {
 	BYTE ppsn[3] = {0,0,0};
 	BYTE index1,index2 = 0x10,index3 = 2,ppsStrLength = 3,pckByte = 0x00;
+	unsigned int ppsCGTinMicroSeconds;
+
+	// For PPS exchange GT = 12 ETUs
+	ppsCGTinMicroSeconds = (12 * 1000000UL)/baudRate;
 
 	// Calculate the length of PPS request and store PPS1, PPS2 and PPS3
 	// in local variables for future calculations
@@ -432,7 +441,10 @@ BOOL SC_DoPPS(BYTE *ppsPtr)
 	// Send PPS request to the card
 	index1 = 0;
 	while(ppsStrLength--)
+	{
+		WaitMicroSec(ppsCGTinMicroSeconds);
 		SCdrv_SendTxData( ppsPtr[index1++] );
+	}
 
 	// Recieve PPS response from the smart card
 	index1 = 0;
@@ -753,7 +765,7 @@ static void SC_CalculateWaitTime()
 	// Calculate Character Guard Time ETU
 	if(scTC1 != 0xFF)
 	{
-		cgtETU = 12 + (BYTE)((unsigned long)((unsigned long)(factorF * (unsigned long)factorDdenominator * scTC1)/factorDNumerator)/scReferenceClock);
+		cgtETU = 12 + scTC1;
 	}
 
 	// Check whether T=0 or T=1 protocol ?
@@ -795,7 +807,7 @@ static void SC_CalculateWaitTime()
 							tempVariable2 = tempVariable2 * 2;
 
 						// Calculate Block Wait Time in ETU's for T=1 Protocol as set in the card						
-						t1BWTetu = 11 + (unsigned int)((unsigned long)(tempVariable2 * (unsigned long)(357120UL/(scReferenceClock/1000000UL)))/(unsigned long)(1000000UL/baudRate));
+						t1BWTetu = 11 + (unsigned int)((unsigned long)tempVariable2 * (((357120UL * factorDNumerator)/factorF)/factorDdenominator));
 					
 					#endif
 
@@ -823,7 +835,7 @@ static void SC_CalculateWaitTime()
 					}
 
 					// Calculate Wait Time used for T = 0 protocol
-					t0WWTetu = (unsigned long)((unsigned long)(tempVariable1 * baudRate * 960)/scReferenceClock) * factorF;
+					t0WWTetu = (unsigned long)((unsigned long)(tempVariable1 * 960UL * factorDNumerator)/factorDdenominator);
 
 					break;
 	}

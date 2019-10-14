@@ -71,31 +71,32 @@ Memory/Processing Requirements</h2>
 <tr valign="top">
 <td><table class="doxtable">
 <tr>
-<td>&#160;</td><td colspan="2" align="center"><b>Standard Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange</b> </td></tr>
+<td>&#160;</td><td colspan="2" align="center"><b>Standard Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange<br/>
+w/Hardware CVD</b> </td></tr>
 <tr>
-<td># Sensors</td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b> </td></tr>
+<td># Sensors</td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b> </td></tr>
 <tr>
-<td align="center">1</td><td align="center">653</td><td align="center">885</td><td align="center">648</td><td align="center">884 </td></tr>
+<td align="center">1</td><td align="center">653</td><td align="center">885</td><td align="center">648</td><td align="center">884</td><td align="center">587</td><td align="center">813 </td></tr>
 <tr>
-<td align="center">2</td><td align="center">961</td><td align="center">1367</td><td align="center">937</td><td align="center">1387 </td></tr>
+<td align="center">2</td><td align="center">961</td><td align="center">1367</td><td align="center">937</td><td align="center">1387</td><td align="center">814</td><td align="center">1291 </td></tr>
 <tr>
-<td align="center">3</td><td align="center">1025</td><td align="center">1432</td><td align="center">1032</td><td align="center">1483 </td></tr>
+<td align="center">3</td><td align="center">1025</td><td align="center">1432</td><td align="center">1032</td><td align="center">1483</td><td align="center">819</td><td align="center">1297 </td></tr>
 <tr>
-<td align="center">4</td><td align="center">1089</td><td align="center">1496</td><td align="center">1112</td><td align="center">1563 </td></tr>
+<td align="center">4</td><td align="center">1089</td><td align="center">1496</td><td align="center">1112</td><td align="center">1563</td><td align="center">824</td><td align="center">1302 </td></tr>
 <tr>
-<td align="center">5</td><td align="center">1153</td><td align="center">1563</td><td align="center">1192</td><td align="center">1643 </td></tr>
+<td align="center">5</td><td align="center">1153</td><td align="center">1563</td><td align="center">1192</td><td align="center">1643</td><td align="center">829</td><td align="center">1307 </td></tr>
 <tr>
-<td align="center">6</td><td align="center">1221</td><td align="center">1628</td><td align="center">1272</td><td align="center">1731 </td></tr>
+<td align="center">6</td><td align="center">1221</td><td align="center">1628</td><td align="center">1272</td><td align="center">1731</td><td align="center">842</td><td align="center">1320 </td></tr>
 <tr>
-<td align="center"><b>+1</b></td><td align="center"><b>+68</b></td><td align="center"><b>+65</b></td><td align="center"><b>+80</b></td><td align="center"><b>+88</b> </td></tr>
+<td align="center"><b>+1</b></td><td align="center"><b>+68</b></td><td align="center"><b>+65</b></td><td align="center"><b>+80</b></td><td align="center"><b>+88</b></td><td align="center"><b>+5</b></td><td align="center"><b>+5</b> </td></tr>
 <tr>
-<td align="left">Most Pressed</td><td align="center">+250</td><td align="center">+350</td><td align="center">+240</td><td align="center">+340 </td></tr>
+<td align="left">Most Pressed</td><td align="center">+250</td><td align="center">+350</td><td align="center">+240</td><td align="center">+340</td><td align="center">+240</td><td align="center">+340 </td></tr>
 <tr>
-<td align="left">Matrix</td><td align="center">+450</td><td align="center">+730</td><td align="center">+430</td><td align="center">+640 </td></tr>
+<td align="left">Matrix</td><td align="center">+450</td><td align="center">+730</td><td align="center">+430</td><td align="center">+640</td><td align="center">+430</td><td align="center">+640 </td></tr>
 <tr>
-<td align="left">Slider</td><td align="center">+480</td><td align="center">+750</td><td align="center">+460</td><td align="center">+680 </td></tr>
+<td align="left">Slider</td><td align="center">+480</td><td align="center">+750</td><td align="center">+460</td><td align="center">+680</td><td align="center">+460</td><td align="center">+680 </td></tr>
 <tr>
-<td align="left">Proximity</td><td align="center">+450</td><td align="center">+1100</td><td align="center">+420</td><td align="center">+740 </td></tr>
+<td align="left">Proximity</td><td align="center">+450</td><td align="center">+1100</td><td align="center">+420</td><td align="center">+740</td><td align="center">+420</td><td align="center">+740 </td></tr>
 </table>
 </td><td><table class="doxtable">
 <tr>
@@ -158,23 +159,6 @@ PIC16F689 :: All 12 sensors supported </li>
 PIC16F690 :: All 12 sensors supported </li>
 </ul>
 </li>
-<li><b>PIC16F72x Family</b> <ul>
-<li>
-PIC16F/LF722 :: 7 sensor limit </li>
-<li>
-PIC16F/LF722A :: 8 sensor limit </li>
-<li>
-PIC16F/LF723 :: All 11 sensors supported </li>
-<li>
-PIC16F/LF723A :: All 11 sensors supported </li>
-<li>
-PIC16F/LF724 :: All 11 sensors supported </li>
-<li>
-PIC16F/LF726 :: All 11 sensors supported </li>
-<li>
-PIC16F/LF727 :: All 11 sensors supported </li>
-</ul>
-</li>
 <li><b>PIC16F78x Family</b> <ul>
 <li>
 PIC16F/HV785 :: 9 sensor limit </li>
@@ -182,12 +166,20 @@ PIC16F/HV785 :: 9 sensor limit </li>
 </li>
 <li><b>PIC16F150x Family</b> <ul>
 <li>
+PIC12(L)F1501 :: 2 sensor limit (Lite: 1 sensor limit) </li>
+<li>
+PIC16(L)F1503 :: All 8 sensors supported </li>
+<li>
 PIC16F/LF1507 :: All 12 sensors supported </li>
 <li>
 PIC16F/LF1509 :: All 12 sensors supported </li>
 </ul>
 </li>
 <li><b>PIC16F151x Family</b> <ul>
+<li>
+PIC16F/LF1512 (w/HCVD) :: 7 sensor limit </li>
+<li>
+PIC16F/LF1513 (w/HCVD) :: 15 sensor limit </li>
 <li>
 PIC16F/LF1516 :: All 17 sensors supported </li>
 <li>
@@ -205,6 +197,11 @@ PIC16F/LF1526 :: All 30 sensors supported </li>
 PIC16F/LF1527 :: All 30 sensors supported </li>
 <li>
 <em>This family does not support single-sensor applications.</em> </li>
+</ul>
+</li>
+<li><b>PIC12LF155x Family</b> <ul>
+<li>
+PIC12LF1552 (w/HCVD) :: All 4 sensors supported </li>
 </ul>
 </li>
 <li><b>PIC16F182x Family</b> <ul>
@@ -297,7 +294,7 @@ PIC18F87J50 :: All 12 sensors supported </li>
 </li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.3 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

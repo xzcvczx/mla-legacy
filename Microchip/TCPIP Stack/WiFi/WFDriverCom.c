@@ -602,7 +602,7 @@ static void ChipReset(void)
     startTickCount = (UINT32)TickGet();
     do
     {
-        value = Read16BitWFRegister(WF_HOST_WFIFO_BCNT0_REG);
+        value = Read16BitWFRegister(WF_HOST_WFIFO_BCNT0_REG) & 0x0fff;
         if (TickGet() - startTickCount >= timeoutPeriod)
         {
             WF_ASSERT(FALSE);

@@ -12,7 +12,7 @@
 * @mainpage
 *
 * @section Intro Introduction
-* Thank you for downloading the mTouch Framework v2.1, part of the mTouch Library v1.40.02 package in the MLA.
+* Thank you for downloading the mTouch Framework v2.3, part of the mTouch Library v1.40.02 package in the MLA.
 *
 * The mTouch Framework is a software package enabling designers to easily integrate touch technologies
 * to their application. It combines high sensitivity with conducted and radiated noise immunity.
@@ -86,7 +86,7 @@
 *               <ul>
 *               <li> main.c contains an example application implementation.
 *               <li> mTouch.c implements the basic initialization, filtering, and decoding functions for the framework.
-*               <li> mTouch_acquistion.c implements a custom mTouch Acquisition method specific to the PIC and configuration.
+*               <li> mTouch_acquisition.c implements a custom mTouch Acquisition method specific to the PIC and configuration.
 *               <li> mTouch_slider.c implements the slider and wheel decoding, if enabled.
 *               <li> mTouch_proximity.c implements the proximity sensor decoding and state machine, if enabled.
 *               <li> mTouch_eeprom.c implements the mTouch EEPROM mapping and read/write functions, if enabled.
@@ -220,12 +220,29 @@
 /**
 * @page Changelog Version Change Log
 *
+* @section cl020101 Version 2.2
+* @li   Bug Fixes:
+*   <ul>
+*   <li>Sensors' oversampling counter variable now only updates if a scan occurred.
+*   <li>Unique oversampling values enabled for only one sensor is now gracefully handled without throwing errors.
+*   <li>I2C slave no longer occasionally fails to execute write operations.
+*   </ul>
+* @li   Added support for hardware CVD handling
+* @li   Demo main.c files now have a few additional #if blocks to reduce compile-time errors when minor configuration changes are made.
+* @li   Solved a compile-time-error bug with PIC16F72x devices when running at 16MHz
+* @li   Added device support:
+*   <ul>
+*   <li>PIC16(L)F1501/3
+*   <li>PIC16(L)F1512/3
+*   <li>PIC12(L)F1552
+*   </ul>
+*
 * @section cl0201 Version 2.1
 * @li   Enabling a non-TMR0 timer will now also automatically enable the PEIE bit for automatic interrupt use (mTouch.c)
 * @li   Default one-way communications now supports the updated Profilab GUI supplied with this framework package (mComm_config.h / mComm.c)
 * @li   Configuration values can now be stored in RAM (mTouch_configOptions) instead of EEPROM for use in the two-way communications. See MTOUCH_EEPROM_STORED_AS_RAM in mTouch_config.h
-* @li   Individual the oversampling array initialization has been changed to automatically adjust its size based on MTOUCH_NUMBER_SENSORS (mTouch_acquistion.c)
-* @li   When mTouch controls the ISR, it will now correctly exit from the function if the mTouch timer was not responsible for the interrupt (mTouch_acquistion.c)
+* @li   Individual the oversampling array initialization has been changed to automatically adjust its size based on MTOUCH_NUMBER_SENSORS (mTouch_acquisition.c)
+* @li   When mTouch controls the ISR, it will now correctly exit from the function if the mTouch timer was not responsible for the interrupt (mTouch_acquisition.c)
 * @li   Fixed an issue with the DAC configuration in the hardware profiles of the 182x and 184x families
 * @li   Fixed a bug with the initial EEPROM byte check - previously the EEPROM would revert to factory settings on reset. (mTouch_eeprom.c)
 * @li   Fixed the mTouch_ClearToggle(i) API macro: Logical 'not' (<b>!</b>) changed to bit-wise 'not' (<b>~</b>).
@@ -366,19 +383,19 @@
 * <tr valign="top">
 * <td>
 *     <table>
-*         <tr><td>&nbsp;</td><td colspan="2" align="center"><b>Standard Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange</b></td></tr>
-*         <tr><td># Sensors</td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td></tr>
-*         <tr><td align="center">1</td><td align="center">653</td><td align="center">885</td><td align="center">648</td><td align="center">884</td></tr>
-*         <tr><td align="center">2</td><td align="center">961</td><td align="center">1367</td><td align="center">937</td><td align="center">1387</td></tr>
-*         <tr><td align="center">3</td><td align="center">1025</td><td align="center">1432</td><td align="center">1032</td><td align="center">1483</td></tr>
-*         <tr><td align="center">4</td><td align="center">1089</td><td align="center">1496</td><td align="center">1112</td><td align="center">1563</td></tr>
-*         <tr><td align="center">5</td><td align="center">1153</td><td align="center">1563</td><td align="center">1192</td><td align="center">1643</td></tr>
-*         <tr><td align="center">6</td><td align="center">1221</td><td align="center">1628</td><td align="center">1272</td><td align="center">1731</td></tr>
-*         <tr><td align="center"><b>+1</b></td><td align="center"><b>+68</b></td><td align="center"><b>+65</b></td><td align="center"><b>+80</b></td><td align="center"><b>+88</b></td></tr>
-*         <tr><td align="left">Most Pressed</td><td align="center">+250</td><td align="center">+350</td><td align="center">+240</td><td align="center">+340</td></tr>
-*         <tr><td align="left">Matrix</td><td align="center">+450</td><td align="center">+730</td><td align="center">+430</td><td align="center">+640</td></tr>
-*         <tr><td align="left">Slider</td><td align="center">+480</td><td align="center">+750</td><td align="center">+460</td><td align="center">+680</td></tr>
-*         <tr><td align="left">Proximity</td><td align="center">+450</td><td align="center">+1100</td><td align="center">+420</td><td align="center">+740</td></tr>
+*         <tr><td>&nbsp;</td><td colspan="2" align="center"><b>Standard Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange<br>w/Hardware CVD</b></td></tr>
+*         <tr><td># Sensors</td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td></tr>
+*         <tr><td align="center">1</td><td align="center">653</td><td align="center">885</td><td align="center">648</td><td align="center">884</td><td align="center">587</td><td align="center">813</td></tr>
+*         <tr><td align="center">2</td><td align="center">961</td><td align="center">1367</td><td align="center">937</td><td align="center">1387</td><td align="center">814</td><td align="center">1291</td></tr>
+*         <tr><td align="center">3</td><td align="center">1025</td><td align="center">1432</td><td align="center">1032</td><td align="center">1483</td><td align="center">819</td><td align="center">1297</td></tr>
+*         <tr><td align="center">4</td><td align="center">1089</td><td align="center">1496</td><td align="center">1112</td><td align="center">1563</td><td align="center">824</td><td align="center">1302</td></tr>
+*         <tr><td align="center">5</td><td align="center">1153</td><td align="center">1563</td><td align="center">1192</td><td align="center">1643</td><td align="center">829</td><td align="center">1307</td></tr>
+*         <tr><td align="center">6</td><td align="center">1221</td><td align="center">1628</td><td align="center">1272</td><td align="center">1731</td><td align="center">842</td><td align="center">1320</td></tr>
+*         <tr><td align="center"><b>+1</b></td><td align="center"><b>+68</b></td><td align="center"><b>+65</b></td><td align="center"><b>+80</b></td><td align="center"><b>+88</b></td><td align="center"><b>+5</b></td><td align="center"><b>+5</b></td></tr>
+*         <tr><td align="left">Most Pressed</td><td align="center">+250</td><td align="center">+350</td><td align="center">+240</td><td align="center">+340</td><td align="center">+240</td><td align="center">+340</td></tr>
+*         <tr><td align="left">Matrix</td><td align="center">+450</td><td align="center">+730</td><td align="center">+430</td><td align="center">+640</td><td align="center">+430</td><td align="center">+640</td></tr>
+*         <tr><td align="left">Slider</td><td align="center">+480</td><td align="center">+750</td><td align="center">+460</td><td align="center">+680</td><td align="center">+460</td><td align="center">+680</td></tr>
+*         <tr><td align="left">Proximity</td><td align="center">+450</td><td align="center">+1100</td><td align="center">+420</td><td align="center">+740</td><td align="center">+420</td><td align="center">+740</td></tr>
 *     </table>
 * </td>
 * <td>
@@ -437,21 +454,29 @@
 * </ul>
 * @li <b>PIC16F150x Family</b>
 * <ul>
+* <li>PIC12(L)F1501     :: 2 sensor limit (Lite: 1 sensor limit)
+* <li>PIC16(L)F1503     :: All 8 sensors supported
 * <li>PIC16F/LF1507     :: All 12 sensors supported
 * <li>PIC16F/LF1509     :: All 12 sensors supported
 * </ul>
 * @li <b>PIC16F151x Family</b>
 * <ul>
-* <li>PIC16F/LF1516     :: All 17 sensors supported
-* <li>PIC16F/LF1518     :: All 17 sensors supported
-* <li>PIC16F/LF1517     :: All 28 sensors supported
-* <li>PIC16F/LF1519     :: All 28 sensors supported
+* <li>PIC16F/LF1512 (w/HCVD)    :: 7 sensor limit
+* <li>PIC16F/LF1513 (w/HCVD)    :: 15 sensor limit
+* <li>PIC16F/LF1516             :: All 17 sensors supported
+* <li>PIC16F/LF1518             :: All 17 sensors supported
+* <li>PIC16F/LF1517             :: All 28 sensors supported
+* <li>PIC16F/LF1519             :: All 28 sensors supported
 * </ul>
 * @li <b>PIC16F152x Family</b>
 * <ul>
 * <li>PIC16F/LF1526     :: All 30 sensors supported
 * <li>PIC16F/LF1527     :: All 30 sensors supported
 * <li><i>This family does not support single-sensor applications.</i>
+* </ul>
+* @li <b>PIC12LF155x Family</b>
+* <ul>
+* <li>PIC12LF1552 (w/HCVD)      :: All 4 sensors supported
 * </ul>
 * @li <b>PIC16F182x Family</b>
 * <ul>

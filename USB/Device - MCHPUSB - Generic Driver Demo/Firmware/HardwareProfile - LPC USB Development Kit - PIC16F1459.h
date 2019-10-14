@@ -172,7 +172,7 @@
     #define OUTPUT_PIN 0
 
 
-#define  UART_PIN   LATBbits.LATB7
-#define  TRIS_UART  TRISBbits.TRISB7
-#define _XTAL_FREQ   48000000
+    #define  UART_PIN   LATBbits.LATB7
+    #define  TRIS_UART  TRISBbits.TRISB7
+    #define _XTAL_FREQ   48000000
 #endif  //HARDWARE_PROFILE_LOW_PIN_COUNT_USB_DEVELOPMENT_KIT_H

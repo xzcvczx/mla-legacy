@@ -69,6 +69,7 @@
         <itemPath>../mTouch_eeprom.c</itemPath>
         <itemPath>../mTouch_proximity.c</itemPath>
         <itemPath>../mTouch_acquisition.c</itemPath>
+        <itemPath>../mTouch_acquisition_HCVD.c</itemPath>
       </logicalFolder>
       <itemPath>../main.c</itemPath>
     </logicalFolder>
@@ -88,7 +89,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>Simulator</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.10</languageToolchainVersion>
+        <languageToolchainVersion>1.12</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -183,6 +184,8 @@
           <property key="unused-interrupt-vectors" value="-vec_reset,-vec_func"/>
           <property key="warn-on-stack-overflow" value="true"/>
         </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <HI-TECH-COMP>
         <property key="define-macros" value=""/>
@@ -258,6 +261,8 @@
       </HI-TECH-LINK>
       <Simulator>
       </Simulator>
+      <XC8-config-global>
+      </XC8-config-global>
     </conf>
   </confs>
 </configurationDescriptor>

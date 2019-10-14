@@ -150,9 +150,9 @@
     typedef struct __attribute__ ((packed)) _MS_OS_DESCRIPTOR{BYTE bLength;BYTE bDscType;WORD string[7];BYTE vendorCode;BYTE bPad;}MS_OS_DESCRIPTOR;
     typedef struct __attribute__ ((packed)) _MS_COMPAT_ID_FEATURE_DESC{DWORD dwLength;WORD bcdVersion;WORD wIndex;BYTE bCount;BYTE Reserved[7];BYTE bFirstInterfaceNumber;BYTE Reserved1;BYTE compatID[8];BYTE subCompatID[8];BYTE Reserved2[6];}MS_COMPAT_ID_FEATURE_DESC;
     typedef struct __attribute__ ((packed)) _MS_EXT_PROPERTY_FEATURE_DESC{DWORD dwLength;WORD bcdVersion;WORD wIndex;WORD wCount;DWORD dwSize;DWORD dwPropertyDataType;WORD wPropertyNameLength;WORD bPropertyName[20];DWORD dwPropertyDataLength;WORD bPropertyData[39];}MS_EXT_PROPERTY_FEATURE_DESC;
-    extern MS_OS_DESCRIPTOR MSOSDescriptor;
-    extern MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor;
-    extern MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor;
+    extern ROM MS_OS_DESCRIPTOR MSOSDescriptor;
+    extern ROM MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor;
+    extern ROM MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor;
 #endif
 
 

@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch_config.h
  *  Dependencies:    mTouch_optionsForConfig.h  
  *                              :: Defines labels for easier configuration
@@ -390,7 +390,7 @@
                                                     //     this number of times.
                                                     //     Allowable Range :: [ 1 to 65535 ]
 
-    #define	MTOUCH_BUTTON_TIMEOUT       0           // <-- Number of consecutive 'pressed' decode decisions
+    #define	MTOUCH_BUTTON_TIMEOUT       0       // <-- Number of consecutive 'pressed' decode decisions
                                                     //     before the sensor's state is reset. 
                                                     //     See the note, below, for more information about
                                                     //     how the baseline's behavior changes when a timeout
@@ -398,11 +398,11 @@
                                                     //     
                                                     //     Allowable Range :: [ 0 to 65535 ], '0' is off.
                                                 
-    #define	MTOUCH_DEBOUNCE_RELEASE     0           // <-- Number of consecutive scans a button must be seen
+    #define	MTOUCH_DEBOUNCE_RELEASE     0       // <-- Number of consecutive scans a button must be seen
                                                     //     as released before a 'released state' is declared
                                                     //     Allowable Range :: [ 0 to 65535 ], '0' is off.
  
-    #define	MTOUCH_DEBOUNCE_PRESS    	0           // <-- Number of consecutive scans a button must be seen 
+    #define	MTOUCH_DEBOUNCE_PRESS    	0   // <-- Number of consecutive scans a button must be seen 
                                                     //     as pressed before a 'pressed state' is declared
                                                     //     Allowable Range :: [ 0 to 65535 ], '0' is off.
                                                 

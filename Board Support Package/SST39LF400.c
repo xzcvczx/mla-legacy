@@ -48,6 +48,7 @@
  *              for the file.
  ********************************************************************/
 #include "SST39LF400.h"
+#include <stdint.h>
 
 #if defined (USE_SST39LF400)
 
@@ -55,6 +56,17 @@
 
 #define  	CS2_BASE_ADDRESS   		GFX_EPMP_CS2_BASE_ADDRESS  
 #define 	SST39LF400_FLASH_SIZE	0x00400000ul
+
+// union for data 
+typedef union
+{
+    struct
+    {
+        uint8_t uint16Byte[2];
+    };
+
+    uint16_t uint16Word;
+} SST39_UINT16;
 
 // dummy declaration for EPMP CS2 start address 
 __eds__ WORD __attribute__((eds, noload, address(CS2_BASE_ADDRESS))) EPMPCS2Start;
@@ -147,31 +159,40 @@ WORD temp;
 ************************************************************************/
 BYTE SST39LF400WriteArray(DWORD address, BYTE *pData, WORD nCount)
 {
-    WORD    counter;
-    WORD    *pD;
-    DWORD   addr;
+    WORD            counter, maxCount;
+    SST39_UINT16    writeData;
+    BYTE            *pD;
+    DWORD           addr;
 
     // Note that shifting of the address and count is performed
     // here since the incoming data is addressed on a byte location 
     // and the length (nCount) is the number of bytes
-    pD = (WORD*)pData;
+    pD = pData;
     addr = address >> 1;
+    maxCount = nCount >> 1;
 
     // write
-    for(counter = 0; counter < (nCount>>1); counter++)
+    for(counter = 0; counter < maxCount; counter++)
     {
-        while(0 ==SST39LF400WriteWord(*pD, addr));
+        // this takes care of cases when the incoming data is 
+        // not aligned to 16 bit words
+        writeData.uint16Byte[0] = *pD++;
+        writeData.uint16Byte[1] = *pD++;
+
+        while(0 == SST39LF400WriteWord(writeData.uint16Word, addr));
         addr++;
-        pD++;
     }
 
-    pD = (WORD*)pData;
+    pD = pData;
     addr = address >> 1;
 
     // verify
-    for(counter = 0; counter < (nCount>>1); counter++)
-    {
-        if(*pD++ !=SST39LF400ReadWord(addr++))
+    for(counter = 0; counter < maxCount; counter++)
+    {   
+        writeData.uint16Byte[0] = *pD++;
+        writeData.uint16Byte[1] = *pD++;
+        
+        if(writeData.uint16Word != SST39LF400ReadWord(addr++))
             return (0);
     }
 
@@ -190,20 +211,27 @@ BYTE SST39LF400WriteArray(DWORD address, BYTE *pData, WORD nCount)
 ************************************************************************/
 void SST39LF400ReadArray(DWORD address, BYTE *pData, WORD nCount)
 {
-    WORD    counter;
-    WORD    *pD;
-    DWORD   addr;
+    WORD            counter, maxCount;
+    BYTE            *pD;
+    DWORD           addr;
+    SST39_UINT16    writeData;
 
     // Note that shifting of the address and count is performed
     // here since the incoming data is addressed on a byte location 
     // and the length (nCount) is the number of bytes
 
     addr = address >> 1;
-    pD = (WORD*)pData;
+    pD   = pData;
+    maxCount = nCount >> 1;
 
-    for(counter = 0; counter < (nCount>>1); counter++)
+    for(counter = 0; counter < maxCount; counter++)
     {
-		*pD++ = lRead16(addr);
+		writeData.uint16Word = lRead16(addr);
+
+        // this takes care of cases where the pData is not 16-bit aligned
+        *pD++ = writeData.uint16Byte[0]; 
+        *pD++ = writeData.uint16Byte[1];
+
         addr++;
     }
 

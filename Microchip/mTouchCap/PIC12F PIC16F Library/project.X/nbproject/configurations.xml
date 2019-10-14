@@ -69,6 +69,7 @@
         <itemPath>../mTouch_eeprom.c</itemPath>
         <itemPath>../mTouch_proximity.c</itemPath>
         <itemPath>../mTouch_acquisition.c</itemPath>
+        <itemPath>../mTouch_acquisition_HCVD.c</itemPath>
       </logicalFolder>
       <itemPath>../main.c</itemPath>
     </logicalFolder>
@@ -83,12 +84,12 @@
     <conf name="default" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC16F1937</targetDevice>
+        <targetDevice>PIC16F1513</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>Simulator</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.10</languageToolchainVersion>
+        <languageToolchainVersion>1.12</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>

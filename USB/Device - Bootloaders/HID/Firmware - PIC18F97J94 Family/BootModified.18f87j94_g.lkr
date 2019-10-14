@@ -1,6 +1,7 @@
-// File: rm18f87j94_g.lkr
-// Modified linker script for the PIC18F87J94 processor for use with firmware 
-// projects that can be programmed with the USB HID bootloader.
+// File: BootModified.18f87j94_g.lkr
+// Modified linker script for the PIC18F87J94 processor for use with the
+// HID bootloader firmware project.  Please see other directory for linkers
+// for the application projects meant to be programmed by the bootloader.
 
 #DEFINE _CODEEND _DEBUGCODESTART - 1
 #DEFINE _CEND _CODEEND + _DEBUGCODELEN
@@ -61,8 +62,8 @@ DATABANK   NAME=gpr11      START=0xB00             END=0xBFF
   DATABANK   NAME=gpr12      START=0xC00             END=0xCFF
 #FI
 
-DATABANK   NAME=gpr13      START=0xD00             END=0xDFE
-DATABANK   NAME=sfr13      START=0xDFF             END=0xDFF          PROTECTED
+DATABANK   NAME=gpr13      START=0xD00             END=0xDF9
+DATABANK   NAME=sfr13      START=0xDFA             END=0xDFF          PROTECTED
 DATABANK   NAME=sfr14      START=0xE00             END=0xEFF          PROTECTED
 DATABANK   NAME=sfr15      START=0xF00             END=0xF5F          PROTECTED
 ACCESSBANK NAME=accesssfr  START=0xF60             END=0xFFF          PROTECTED

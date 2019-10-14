@@ -75,6 +75,10 @@
 extern tPassphraseReady g_WpsPassphrase;
 #endif    /* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
 
+#if defined(STACK_USE_CLOUD_TCPCLIENT)
+extern BOOL g_CloudConnLost;
+#endif
+
 /*****************************************************************************
  * FUNCTION: WF_ProcessEvent
  *
@@ -127,12 +131,15 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo, UINT8 *extraInfo)
         
         /*--------------------------------------*/            
         case WF_EVENT_CONNECTION_FAILED:
+			#if defined(STACK_USE_CLOUD_TCPCLIENT)
+			g_CloudConnLost = TRUE;
+			#endif
         case WF_EVENT_CONNECTION_TEMPORARILY_LOST:
         case WF_EVENT_CONNECTION_PERMANENTLY_LOST:
         /*--------------------------------------*/
             #if defined(STACK_USE_UART)
             WF_OutputConnectionDebugMsg(event, eventInfo);
-            #endif
+            #endif			
             break; 
 
         /*--------------------------------------*/    

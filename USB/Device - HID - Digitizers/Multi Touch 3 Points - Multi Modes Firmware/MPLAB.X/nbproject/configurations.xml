@@ -26,6 +26,7 @@
         <itemPath>../HardwareProfile - PIC18F87J94 PIM.h</itemPath>
         <itemPath>../HardwareProfile - PIC18F97J94 PIM.h</itemPath>
         <itemPath>../HardwareProfile - PICDEM FSUSB K50.h</itemPath>
+        <itemPath>../HardwareProfile - LPC USB Development Kit - PIC16F1459.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="USB" projectFiles="true">
         <itemPath>../../../../Microchip/Include/USB/usb.h</itemPath>
@@ -82,7 +83,7 @@
         <targetDevice>PIC16F1459</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>ICD3PlatformTool</platformTool>
+        <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>

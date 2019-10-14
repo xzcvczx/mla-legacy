@@ -108,6 +108,7 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo, UINT8 *extraInfo)
     #if defined(STACK_USE_UART)
     char buf[8];
     #endif
+    tMgmtIndicateSoftAPEvent *softAPEvent;
 
     /* this function tells the WF driver that we are in this function */
     WFSetFuncState(WF_PROCESS_EVENT_FUNC, WF_ENTERING_FUNCTION);
@@ -189,8 +190,34 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo, UINT8 *extraInfo)
             #endif 
 			
             break;
+
+        case WF_EVENT_SOFT_AP_EVENT:
+            softAPEvent = (tMgmtIndicateSoftAPEvent *)extraInfo;
+            #if defined(STACK_USE_UART) 
+            {
+                char str[96];
+                char *result = "None";
+                char *reason = "None";
+                UINT8 *addr = softAPEvent->address;
+                putrsUART("Event: SoftAP, ");
+                if (softAPEvent->event == SOFTAP_EVENT_CONNECTED) {
+                    result = "Connected";
+                } else if (softAPEvent->event == SOFTAP_EVENT_DISCONNECTED) {
+                    result = "Disconnected";
+                    if (softAPEvent->reason == SOFTAP_EVENT_LINK_LOST)
+                        reason = "LinkLost";
+                    else if (softAPEvent->reason == SOFTAP_EVENT_RECEIVED_DEAUTH)
+                        reason = "ReceivedDeauth";
+                }
+                sprintf(str, "%s, %s, %x:%x:%x:%x:%x:%x", result, reason, addr[0], addr[1], addr[2],
+                    addr[3], addr[4], addr[5]);
+                putsUART(str);
+                putrsUART("\r\n");
+            }
+            #endif /* STACK_USE_UART */
+            break;
             
-        default:
+        default: 
             WF_ASSERT(FALSE);  /* unknown event */
             break;
     }        

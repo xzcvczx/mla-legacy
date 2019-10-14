@@ -556,7 +556,9 @@ void WF_Connect(void)
         }
     #endif    /* defined (MRF24WG) */
     #endif    /* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
-
+		#if !defined(MRF24WG)	
+		Delay10us(10);  //give time to Roadrunner to clean message buffer, because Security message is a big data package
+		#endif
     WF_CPSetSecurity(ConnectionProfileID,
                      AppConfig.SecurityMode,
                      AppConfig.WepKeyIndex,   /* only used if WEP enabled */
@@ -1237,9 +1239,6 @@ static void InitAppConfig(void)
             #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN)
                 memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_WPS_PIN, sizeof(MY_DEFAULT_WPS_PIN) - 1);
                 AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_WPS_PIN) - 1;
-            #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_EAP)
-                memset(AppConfig.SecurityKey, 0x00, sizeof(AppConfig.SecurityKey));
-                AppConfig.SecurityKeyLength = 0;
             #else 
                 #error "No security defined"
             #endif /* MY_DEFAULT_WIFI_SECURITY_MODE */
@@ -1338,4 +1337,3 @@ void SaveAppConfig(const APP_CONFIG *ptrAppConfig)
     #endif
 }
 #endif
-

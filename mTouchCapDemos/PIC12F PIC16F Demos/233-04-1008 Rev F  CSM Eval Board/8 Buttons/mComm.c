@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mComm.c
  *  Dependencies:    mComm.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -154,11 +154,11 @@
                 // Software UART Initialization
                 //==============================
             
-            asm("BANKSEL    "   ___mkstr(       __paste(_,MCOMM_UART_SOFT_TXPORT)));
-            asm("bsf        "   ___mkstr(NOBANK(__paste(_,MCOMM_UART_SOFT_TXPORT))) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
+            asm("BANKSEL    "   ___mkstr(       MCOMM_UART_SOFT_TXPORT));
+            asm("bsf        "   ___mkstr(NOBANK(MCOMM_UART_SOFT_TXPORT)) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
             
-            asm("BANKSEL    "   ___mkstr(       __paste(_,MCOMM_UART_SOFT_TXTRIS)));
-            asm("bcf        "   ___mkstr(NOBANK(__paste(_,MCOMM_UART_SOFT_TXTRIS))) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
+            asm("BANKSEL    "   ___mkstr(       MCOMM_UART_SOFT_TXTRIS));
+            asm("bcf        "   ___mkstr(NOBANK(MCOMM_UART_SOFT_TXTRIS)) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
             
             #else
             
@@ -285,7 +285,7 @@
             /**************************************************************
             * 1. 'Break' character received. Start of new packet.
             **************************************************************/
-            mComm_input.state     = MCOMM_START;
+            mComm_input.state = MCOMM_START;
             return;
         }       
        
@@ -299,7 +299,7 @@
             asm("NOP");
             asm("NOP");
             MCOMM_UART_CREN = 1;
-            mComm_input.state     = MCOMM_IDLE;
+            mComm_input.state = MCOMM_IDLE;
             return;
         }
         else if (mComm_input.state == MCOMM_START)
@@ -324,7 +324,7 @@
 
             if (--mComm_input.counter == 0)
             {
-                mComm_input.state       = MCOMM_PROCESS_DATA;
+                mComm_input.state = MCOMM_PROCESS_DATA;
             } 
             else
             {  
@@ -337,7 +337,7 @@
             /**************************************************************
             * Invalid packet received. Reset the state machine.
             **************************************************************/
-            mComm_input.state         = MCOMM_IDLE;
+            mComm_input.state = MCOMM_IDLE;
             return;
         }
 
@@ -734,9 +734,9 @@
             
                 if (mComm_output.flags.bits.hasNext)        // Send BREAK character
                 {
-                    TXSTAbits.SENDB = 1;
-                    TXREG           = 0x00;
-                    while(TXSTAbits.SENDB);
+                    MCOMM_UART_SENDB = 1;
+                    MCOMM_UART_TXREG = 0x00;
+                    while(MCOMM_UART_SENDB);
                 }
                 
                 while (mComm_output.flags.bits.hasNext)     // Execute reads. Send data.
@@ -904,9 +904,9 @@
         void mComm_UART_SendACKorNACK(uint8_t opcode)
         {
             while(MCOMM_UART_TXIF == 0);  
-            TXSTAbits.SENDB = 1;
-            TXREG           = 0x00;
-            while(TXSTAbits.SENDB);         // BREAK
+            MCOMM_UART_SENDB = 1;
+            MCOMM_UART_TXREG = 0x00;
+            while(MCOMM_UART_SENDB);        // BREAK
             mComm_UART_PutChar(0x02);       // Packet Length
             mComm_UART_PutChar(opcode);     // Acknowledge
             mComm_UART_PutChar(opcode);     // Checksum
@@ -931,30 +931,30 @@
                 mComm_shiftReg = data;   
                 
                 #if defined(_PIC14E)        // Implementation if using an enhanced-core PIC16F1 device
-                asm("   movlw LOW  " ___mkstr(NOBANK(__paste(_,MCOMM_UART_SOFT_TXPORT))));
-                asm("   movwf      " ___mkstr(_FSR0L)                );
-                asm("   movlw HIGH " ___mkstr(NOBANK(__paste(_,MCOMM_UART_SOFT_TXPORT))));
-                asm("   movwf      " ___mkstr(_FSR0H)                ); 
+                asm("   movlw LOW  " ___mkstr(NOBANK(MCOMM_UART_SOFT_TXPORT)));
+                asm("   movwf      " ___mkstr(FSR0L)                 );
+                asm("   movlw HIGH " ___mkstr(NOBANK(MCOMM_UART_SOFT_TXPORT)));
+                asm("   movwf      " ___mkstr(FSR0H)                 ); 
                 asm("   BANKSEL    _mComm_bitCount                  "); 
                 asm("   movlw      0x08                             "); 
                 asm("   movwf      _mComm_bitCount                  "); 
-                asm("   bcf        " ___mkstr(_INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                                 
+                asm("   bcf        " ___mkstr(INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                                 
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   ljmp       $+1                              "); 
                 asm("   nop                                         "); 
                 asm("MCOMM_UART_TXNEXTBIT:                          "); 
                 asm("   rrf        _mComm_shiftReg, F               "); 
-                asm("   btfss      " ___mkstr(NOBANK(_STATUS))  ", 0"); 
+                asm("   btfss      " ___mkstr(NOBANK(STATUS))   ", 0"); 
                 asm("   ljmp       MCOMM_UART_TXZERO                "); 
                 asm("MCOMM_UART_TXONE:                              "); 
                 asm("   nop                                         "); 
-                asm("   bsf        " ___mkstr(_INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
+                asm("   bsf        " ___mkstr(INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   decfsz     _mComm_bitCount, F               "); 
                 asm("   ljmp       MCOMM_UART_TXNEXTBIT             "); 
                 asm("   ljmp       MCOMM_UART_TXSTOP                "); 
                 asm("MCOMM_UART_TXZERO:                             "); 
-                asm("   bcf        " ___mkstr(_INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                    
+                asm("   bcf        " ___mkstr(INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                    
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   decfsz     _mComm_bitCount, F               "); 
                 asm("   ljmp       MCOMM_UART_TXNEXTBIT             "); 
@@ -962,7 +962,7 @@
                 asm("MCOMM_UART_TXSTOP:                             "); 
                 asm("   ljmp       $+1                              "); 
                 asm("   nop                                         "); 
-                asm("   bsf        " ___mkstr(_INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
+                asm("   bsf        " ___mkstr(INDF0) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   return                                      "); 
                 asm("MCOMM_UART_BITDELAY:                           "); 
@@ -977,28 +977,28 @@
                 asm("   ljmp       $+1                              "); 
                 asm("   return                                      "); 
                 #elif defined(_PIC14)       // Implementation if using a non-enhanced core PIC12/16F device                                          
-                asm("   movlw LOW  "   ___mkstr(NOBANK(__paste(_,MCOMM_UART_SOFT_TXPORT)))); 
-                asm("   movwf      "   ___mkstr(_FSR)                ); 
+                asm("   movlw LOW  "   ___mkstr(NOBANK(MCOMM_UART_SOFT_TXPORT))); 
+                asm("   movwf      "   ___mkstr(FSR)                 ); 
                 asm("   BANKSEL    _mComm_shiftReg                  "); 
                 asm("   movlw      8                                "); 
                 asm("   movwf      _mComm_bitCount                  "); 
-                asm("   bcf " ___mkstr(_INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                                          
+                asm("   bcf " ___mkstr(INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                                          
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   ljmp       $+1                              "); 
                 asm("   nop                                         "); 
                 asm("MCOMM_UART_TXNEXTBIT:                          "); 
                 asm("   rrf    _mComm_shiftReg, F                   "); 
-                asm("   btfss  "   ___mkstr(NOBANK(_STATUS))    ", 0"); 
+                asm("   btfss  "   ___mkstr(NOBANK(STATUS))    ", 0"); 
                 asm("   ljmp       MCOMM_UART_TXZERO                "); 
                 asm("MCOMM_UART_TXONE:                              "); 
                 asm("   nop                                         "); 
-                asm("   bsf " ___mkstr(_INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                      
+                asm("   bsf " ___mkstr(INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                      
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   decfsz     _mComm_bitCount, F        "); 
                 asm("   ljmp       MCOMM_UART_TXNEXTBIT             "); 
                 asm("   ljmp       MCOMM_UART_TXSTOP                "); 
                 asm("MCOMM_UART_TXZERO:                             "); 
-                asm("   bcf " ___mkstr(_INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                          
+                asm("   bcf " ___mkstr(INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                          
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   decfsz     _mComm_bitCount, F        "); 
                 asm("   ljmp       MCOMM_UART_TXNEXTBIT             "); 
@@ -1006,7 +1006,7 @@
                 asm("MCOMM_UART_TXSTOP:                             "); 
                 asm("   ljmp       $+1                              "); 
                 asm("   nop                                         "); 
-                asm("   bsf " ___mkstr(_INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                            
+                asm("   bsf " ___mkstr(INDF) ", " ___mkstr(MCOMM_UART_SOFT_TXPIN));                            
                 asm("   fcall      MCOMM_UART_BITDELAY              "); 
                 asm("   return                                      "); 
                 asm("MCOMM_UART_BITDELAY:                           "); 

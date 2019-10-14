@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch_config_modes.h
  *  Dependencies:    
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -50,7 +50,7 @@
  * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF 
  * THESE TERMS. 
  *************************************************************************/
-/** @file   mTouch_config_modes.c
+/** @file   mTouch_config_modes.h
 *   @brief  Framework Configuration! Scanning mode options.
 */
  

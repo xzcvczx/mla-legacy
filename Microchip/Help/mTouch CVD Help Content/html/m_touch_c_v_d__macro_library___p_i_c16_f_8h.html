@@ -50,7 +50,7 @@ Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#ab4075a9c8250eb2a503a4305eec9cdb6">MTOUCH_SLEEP_STABILIZE_OSC</a>()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#ad4e5463ea70786f3633c1dcb488ee763">CVD_RS_SET_GODONE</a>()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#a85db4b3b684ed65d883d895e4242e3cf">CVD_RSC_FSR</a>(current_channel, pin)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#a7766ba5232ef3ce86e3b100495e1225b">CVD_RSC_FSR_Input_Only</a>(current_channel, pin)&#160;&#160;&#160;asm(&quot;bsf&quot; ___mkstr(_INDF) &quot;,&quot; ___mkstr(pin));</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#a7766ba5232ef3ce86e3b100495e1225b">CVD_RSC_FSR_Input_Only</a>(current_channel, pin)&#160;&#160;&#160;asm(&quot;bsf&quot; ___mkstr(INDF) &quot;,&quot; ___mkstr(pin));</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#a788c0b0b986f7859119e867798a7507f">CVD_RSIb_rLAT_CLR</a>(ref_port, ref_pin)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#a6f359e5c729b360694fc4d1f780b91c6">CVD_RSIa_rLAT_SET</a>(ref_port, ref_pin)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#a41b01c40a179b28149c5d34e65a9ffa9">CVD_RS_MUX_REF</a>(ref_channel)</td></tr>
@@ -182,7 +182,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(_INDF)  <span class="stringliteral">&quot;,&quot;</span>      ___mkstr(pin)     );  <span class="comment">/* Set the sensor to an output                                  */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(INDF)  <span class="stringliteral">&quot;,&quot;</span>      ___mkstr(pin)     );  <span class="comment">/* Set the sensor to an output                                  */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(port)                              );  <span class="comment">/*                                                              */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(port)   <span class="stringliteral">&quot;,&quot;</span>      ___mkstr(pin)     );
 </pre></div>
@@ -214,7 +214,7 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(_INDF)  <span class="stringliteral">&quot;,&quot;</span>      ___mkstr(pin)     );  <span class="comment">/* Set the sensor to an output                                  */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(INDF)  <span class="stringliteral">&quot;,&quot;</span>      ___mkstr(pin)     );  <span class="comment">/* Set the sensor to an output                                  */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(port)                              );  <span class="comment">/*                                                              */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;bsf        &quot;</span>   ___mkstr(port)   <span class="stringliteral">&quot;,&quot;</span>      ___mkstr(pin)     );
 </pre></div>
@@ -312,9 +312,9 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(_ADCON0)               );  <span class="comment">/*                  */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(ADCON0)               );  <span class="comment">/*                  */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;movlw      &quot;</span>   ___mkstr(ref_channel)           );  <span class="comment">/*                  */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(_ADCON0))       );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(ADCON0))       );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00162">162</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -334,9 +334,9 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(_ADCON0)               );  <span class="comment">/*                      */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(ADCON0)               );  <span class="comment">/*                      */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;movlw      &quot;</span>   ___mkstr(current_channel)       );  <span class="comment">/*                      */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(_ADCON0))       );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(ADCON0))       );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00167">167</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -355,9 +355,9 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(_ADCON0)                   );  <span class="comment">/*                      */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(ADCON0)                   );  <span class="comment">/*                      */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;movlw      &quot;</span>   ___mkstr(MTOUCH_AD_DAC_NOGO)        );  <span class="comment">/*                      */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(_ADCON0))           );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(ADCON0))           );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00207">207</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -460,8 +460,8 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(_ADCON0)               );  <span class="comment">/*                  */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bsf        &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(_ADCON0))   <span class="stringliteral">&quot;,1&quot;</span>);
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(ADCON0)               );  <span class="comment">/*                  */</span>  \
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bsf        &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(ADCON0))   <span class="stringliteral">&quot;,1&quot;</span>);
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00111">111</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -491,11 +491,11 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(_ADCON0)                       );  <span class="comment">/*                              */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(ADCON0)                       );  <span class="comment">/*                              */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;movlw      &quot;</span>   ___mkstr(current_channel)               );  <span class="comment">/*                              */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bsf        &quot;</span>   ___mkstr(_INDF)     <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)   );  <span class="comment">/* Set the sensor to an input   */</span>  \
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bsf        &quot;</span>   ___mkstr(INDF)     <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)   );  <span class="comment">/* Set the sensor to an input   */</span>  \
     _NOP_DELAY(<a class="code" href="group___configuration.html#ga732d05039d3f04c453506fa1252774f0" title="Determines the amount of added NOPs between when the sensor is set to an input and the ADC mux is poi...">CVD_SWITCH_DELAY</a>);                                                                       \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(_ADCON0))               );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(ADCON0))               );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00119">119</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -520,7 +520,7 @@ Defines</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;asm(&quot;bsf&quot; ___mkstr(_INDF) &quot;,&quot; ___mkstr(pin));</td>
+          <td></td><td>&#160;&#160;&#160;asm(&quot;bsf&quot; ___mkstr(INDF) &quot;,&quot; ___mkstr(pin));</td>
         </tr>
       </table>
 </div>
@@ -556,7 +556,7 @@ Defines</h2></td></tr>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(sensorLat)                              );  <span class="comment">/*                              */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;bsf        &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(sensorLat))  <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)   );  <span class="comment">/* Set sensor LAT high          */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(_INDF)        <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)    );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(INDF)        <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)    );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00177">177</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -588,7 +588,7 @@ Defines</h2></td></tr>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(sensorLat)                              );  <span class="comment">/*                              */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(sensorLat))  <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)   );  <span class="comment">/* Set sensor LAT low           */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(_INDF)        <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)    );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf        &quot;</span>   ___mkstr(INDF)        <span class="stringliteral">&quot;,&quot;</span> ___mkstr(pin)    );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00182">182</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -638,9 +638,9 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(_VRCON)            );  <span class="comment">/*                                      */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(VRCON)            );  <span class="comment">/*                                      */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;movlw      &quot;</span>   ___mkstr(PIC_VRCON_MAX)     );  <span class="comment">/*                                      */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(_VRCON))    );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(VRCON))    );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00197">197</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -690,9 +690,9 @@ Defines</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(_VRCON)            );  <span class="comment">/*                              */</span>  \
+<b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    &quot;</span>   ___mkstr(VRCON)            );  <span class="comment">/*                              */</span>  \
     <span class="keyword">asm</span>(<span class="stringliteral">&quot;movlw      &quot;</span>   ___mkstr(PIC_VRCON_MIN)     );  <span class="comment">/*                              */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(_VRCON))    );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(<a class="code" href="m_touch__macro_library__common_8h.html#a1e8fa15ed7b125e1f3071bea5c755381" title="Masks the bank out of the variable address for ASM code usage.">NOBANK</a>(VRCON))    );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00202">202</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -713,7 +713,7 @@ Defines</h2></td></tr>
 </div>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><span class="keyword">asm</span>(<span class="stringliteral">&quot;movlw      &quot;</span>   ___mkstr(port)  );  <span class="comment">/*                      */</span>  \
-    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(_FSR)  );
+    <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf      &quot;</span>   ___mkstr(FSR)  );
 </pre></div>
 <p>Definition at line <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html#l00192">192</a> of file <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h_source.html">mTouchCVD_macroLibrary_PIC16F.h</a>.</p>
 
@@ -738,7 +738,7 @@ Defines</h2></td></tr>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.3 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

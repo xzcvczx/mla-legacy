@@ -53,12 +53,29 @@
 
 #define WF_EASY_CONFIG_DEMO
 
+//
+// MRF24WB0MA/B  (supports only 1/2 Mbps)
+//      Client in infrastructure network                     (ALL security)
+//      Adhoc network                                            (OPEN, WEP security)
+//
+// MRF24WG0MA/B
+//      Client in infrastructure network                      (ALL security)
+//      Adhoc network                                              (OPEN, WEP security)
+//      Group client (GC) in WFii direct (P2P) network  (WPS security connection)
+//      SoftAP                                                          (OPEN, WEP security)
+//      Supports WPS security connection
+//      Supports WPA2-EAP (PEAP/TTLS)  (special approval needed)
+//
+// Available documentation
+// DS52108A  Microchip MRF24W Getting started Guide for MRF24WB0MAB, MRF24WG0MA/B for MLA v5
+//
+
+
 /*
 *********************************************************************************************************
 *                                           DEFINES                               
 *********************************************************************************************************
 */
-
 
 /*= WF_CONSOLE =======================================================================*/
 /* Customize whether the WiFi Driver supports a serial console application            */
@@ -74,7 +91,7 @@
 #define CFG_WF_SOFT_AP        4 
 
 #define MY_DEFAULT_DOMAIN                   WF_DOMAIN_FCC
-#define MY_DEFAULT_NETWORK_TYPE             CFG_WF_ADHOC   /*  CFG_WF_ADHOC, CFG_WF_SOFT_AP  */    
+#define MY_DEFAULT_NETWORK_TYPE             CFG_WF_ADHOC   /*  CFG_WF_ADHOC, CFG_WF_SOFT_AP  */
 #define MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE  WF_RETRY_FOREVER
 
 /*--------------------------------------------*/
@@ -115,13 +132,19 @@
 * i.e all channels MY_DEFAULT_CHANNEL_LIST_POSTSCAN. This means AP will scan MY_DEFAULT_CHANNEL_LIST_POSTSCAN
 * channel list. 
 *
-* Also note that this is a very simplified SoftAP. So its function is limited as , A) no routing supported; B) only 1 client allowed
-* at a time.  And security wise currently it supports both open mode and WEP security.
+* Also note that this is a very simplified SoftAP. So its function is limited as , 
+* A) no routing supported; 
+* B) - only 1 client allowed  + no active scan (RF module FW version 0x3107)
+*     - max 4 clients allowed + active scan     (RF module FW version 0x3108 and future)
+* C) supports both open mode and WEP security.
 *
 * SoftAP's default IP is 192.168.1.3 and its Network Mask is 255.255.0.0
 * SoftAP on certain setups with IP adress 192.168.1.1 has problem with DHCP client assigning new IP address on redirection.
 * 192.168.1.1 is a common IP address with most APs. This is still under investigation.
 * For now, assign this as 192.168.1.3
+*
+* SoftAP has support for ZeroConf/mDNS. Seach for keyword SOFTAP_ZEROCONF_SUPPORT.
+*
 */
 #if defined (MRF24WG)
     #define MY_DEFAULT_WIFI_SECURITY_MODE       WF_SECURITY_OPEN        /* Open & WEP security supported.     
@@ -198,9 +221,6 @@
 //   WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE : WPA-PSK Personal or WPA2-PSK Personal where passphrase is given to MRF24W and it 
 //                                             calculates the binary key and connects at highest level AP supports (WPA or WPA2)
 
-// Default pass phrase used for WF_SECURITY_WPA_WITH_PASS_PHRASE and 
-// WF_SECURITY_WPA2_WITH_PASS_PHRASE security modes
-#define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
 
 #if defined(__C32__)
 /* This option allows host to convert the passphrase to the key by itself instead of relying on RF module FW.
@@ -223,41 +243,47 @@
 //#define ENABLE_SOFTWARE_MULTICAST_FILTER
 #endif
 
+//-----------------------------------------------------------------------------------
+// WPA/WPA2
 // If using security mode of WF_SECURITY_WPA_WITH_KEY or WF_SECURITY_WPA2_WITH_KEY, then this section 
 // must be set to  match the key for MY_DEFAULT_SSID_NAME and MY_DEFAULT_PSK_PHRASE
 // combination.  The values below are derived from the SSID "MicrochipDemoAP" and the pass phrase
 // "Microchip 802.11 Secret PSK Password".
 // The tool at http://www.wireshark.org/tools/wpa-psk.html can be used to generate this field. 
+//-----------------------------------------------------------------------------------
 #define MY_DEFAULT_PSK "\
 \x86\xC5\x1D\x71\xD9\x1A\xAA\x49\
 \x40\xC8\x88\xC6\xE9\x7A\x4A\xD5\
 \xE5\x6D\xDA\x44\x8E\xFB\x9C\x0A\
 \xE1\x47\x81\x52\x31\x1C\x13\x7C"
 
+// Default pass phrase used for WF_SECURITY_WPA_WITH_PASS_PHRASE and 
+// WF_SECURITY_WPA2_WITH_PASS_PHRASE security modes
+#define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
+
 
 //-----------------------------------------------------------------------------------
+// WEP
 // Default WEP keys used in WF_SECURITY_WEP_40  and WF_SECURITY_WEP_104 security mode
+// Only WEP key index 0 is valid
 //-----------------------------------------------------------------------------------
 #define MY_DEFAULT_WEP_PHRASE           "WEP Phrase"
 
-// string 4 40-bit WEP keys -- corresponding to passphraseof "WEP Phrase"
+// string 4 40-bit WEP keys -- corresponding to passphrase of "WEP Phrase"
 #define MY_DEFAULT_WEP_KEYS_40 "\
 \x5a\xfb\x6c\x8e\x77\
 \xc1\x04\x49\xfd\x4e\
 \x43\x18\x2b\x33\x88\
 \xb0\x73\x69\xf4\x78"
 
-// string containing 4 104-bit WEP keys -- corresponding to passphraseof "WEP Phrase"
+// string containing 4 104-bit WEP keys -- corresponding to passphrase of "WEP Phrase"
 #define MY_DEFAULT_WEP_KEYS_104 "\
 \x90\xe9\x67\x80\xc7\x39\x40\x9d\xa5\x00\x34\xfc\xaa\
 \x77\x4a\x69\x45\xa4\x3d\x66\x63\xfe\x5b\x1d\xb9\xfd\
 \x82\x29\x87\x4c\x9b\xdc\x6d\xdf\x87\xd1\xcf\x17\x41\
 \xcc\xd7\x62\xde\x92\xad\xba\x3b\x62\x2f\x7f\xbe\xfb"
 
-
-/* Valid Key Index: 0, 1, 2, 3  */
-#define MY_DEFAULT_WEP_KEY_INDEX        (0)
-
+#define MY_DEFAULT_WEP_KEY_INDEX        (0)     /* Valid Key Index: 0      Valid Key Index: 1, 2, 3 (depreciated) */
 
 #endif /* __WF_CONFIG_H_ */
 

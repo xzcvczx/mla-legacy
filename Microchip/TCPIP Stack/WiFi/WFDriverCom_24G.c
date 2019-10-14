@@ -650,7 +650,7 @@ static void ChipReset(void)
     startTickCount = (UINT32)TickGet();
     do
     {
-        value = Read16BitWFRegister(WF_HOST_WFIFO_BCNT0_REG);
+        value = Read16BitWFRegister(WF_HOST_WFIFO_BCNT0_REG) & 0x0fff;
         if (TickGet() - startTickCount >= timeoutPeriod)
         {
             WF_ASSERT(FALSE);
@@ -903,7 +903,7 @@ void WFHardwareInit(void)
 
     /* Soft reset the MRF24W (using SPI bus to write/read MRF24W registers */
     ChipReset();
-    
+
     /* disable the interrupts gated by the 16-bit host int register */
     HostInterrupt2RegInit(WF_HOST_2_INT_MASK_ALL_INT, (UINT16)WF_INT_DISABLE);
     

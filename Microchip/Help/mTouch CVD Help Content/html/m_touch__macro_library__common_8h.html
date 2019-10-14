@@ -239,9 +239,9 @@ Defines</h2></td></tr>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><span class="keywordflow">do</span> {                                                                                                            \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    _mTouch_jitter&quot;</span>                 );  <span class="comment">/* Make sure we&#39;re starting in the correct bank     */</span>  \
-                <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf    &quot;</span>   ___mkstr(_STATUS)           <span class="stringliteral">&quot;,0&quot;</span>);  <span class="comment">/* Clear the carry bit                              */</span>  \
+                <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf    &quot;</span>   ___mkstr(STATUS)            <span class="stringliteral">&quot;,0&quot;</span>);  <span class="comment">/* Clear the carry bit                              */</span>  \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;rrf    &quot;</span>   ___mkstr(_mTouch_jitter)    <span class="stringliteral">&quot;,W&quot;</span>);  <span class="comment">/* Right shift the current jitter seed value        */</span>  \
-                <span class="keyword">asm</span>(<span class="stringliteral">&quot;btfsc  &quot;</span>   ___mkstr(_STATUS)           <span class="stringliteral">&quot;,0&quot;</span>);  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
+                <span class="keyword">asm</span>(<span class="stringliteral">&quot;btfsc  &quot;</span>   ___mkstr(STATUS)            <span class="stringliteral">&quot;,0&quot;</span>);  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;xorlw      0xB4&quot;</span>                           );  <span class="comment">/* (cond) XOR the jitter seed with 0xB4             */</span>  \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  &quot;</span>   ___mkstr(_mTouch_jitter)        );  <span class="comment">/* Store the result as the new jitter seed value    */</span>  \
                 <span class="keywordflow">for</span> (uint8_t i = (<a class="code" href="group___acquisition.html#ga800eae7ce7292a55c5d60975179ea26a" title="Stores the current random seed value for jittering.">mTouch_jitter</a> &amp; MTOUCH_JITTER_MASK); i &gt; 0; i--); <span class="comment">/* Delay loop                       */</span>  \
@@ -269,9 +269,9 @@ Defines</h2></td></tr>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><span class="keywordflow">do</span> {                                                                                                                \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;BANKSEL    _mTouch_jitter&quot;</span>                     );  <span class="comment">/* Make sure we&#39;re starting in the correct bank     */</span>  \
-                <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf    &quot;</span>   ___mkstr(_STATUS)           <span class="stringliteral">&quot;,0&quot;</span>    );  <span class="comment">/* Clear the carry bit                              */</span>  \
+                <span class="keyword">asm</span>(<span class="stringliteral">&quot;bcf    &quot;</span>   ___mkstr(STATUS)            <span class="stringliteral">&quot;,0&quot;</span>    );  <span class="comment">/* Clear the carry bit                              */</span>  \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;rrf    &quot;</span>   ___mkstr(_mTouch_jitter)    <span class="stringliteral">&quot;,W&quot;</span>    );  <span class="comment">/* Right shift the current jitter seed value        */</span>  \
-                <span class="keyword">asm</span>(<span class="stringliteral">&quot;btfsc  &quot;</span>   ___mkstr(_STATUS)           <span class="stringliteral">&quot;,0&quot;</span>    );  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
+                <span class="keyword">asm</span>(<span class="stringliteral">&quot;btfsc  &quot;</span>   ___mkstr(STATUS)            <span class="stringliteral">&quot;,0&quot;</span>    );  <span class="comment">/* Check the carry bit - if set, perform XOR        */</span>  \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;xorlw      0xB4&quot;</span>                               );  <span class="comment">/* (cond) XOR the jitter seed with 0xB4             */</span>  \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  &quot;</span>   ___mkstr(_mTouch_jitter)            );  <span class="comment">/* Store the result as the new jitter seed value    */</span>  \
                 <span class="keyword">asm</span>(<span class="stringliteral">&quot;andlw  &quot;</span>   ___mkstr(MTOUCH_JITTER_MASK)        );  <span class="comment">/* Mask the seed value to limit the number of bits  */</span>  \
@@ -526,11 +526,11 @@ Defines</h2></td></tr>
 <div class="memdoc">
 <b>Value:</b><div class="fragment"><pre class="fragment"><span class="keywordflow">do</span> {                                \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   _int_fsr,W&quot;</span>);       \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  _FSR&quot;</span>);             \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  FSR&quot;</span>);              \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   _int_pclath,W&quot;</span>);    \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  _PCLATH&quot;</span>);          \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  PCLATH&quot;</span>);           \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   _int_status,W&quot;</span>);    \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  _STATUS&quot;</span>);          \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  STATUS&quot;</span>);           \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;swapf  _int_w, W&quot;</span>);        \
     } <span class="keywordflow">while</span> (0)
 </pre></div>
@@ -556,13 +556,13 @@ Defines</h2></td></tr>
 <b>Value:</b><div class="fragment"><pre class="fragment"><span class="keywordflow">do</span> {                                \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  _int_w&quot;</span>);           \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;swapf  _int_w, F&quot;</span>);        \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   _STATUS, W&quot;</span>);       \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;clrf   _STATUS&quot;</span>);          \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   STATUS, W&quot;</span>);        \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;clrf   STATUS&quot;</span>);           \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  _int_status&quot;</span>);      \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   _PCLATH, W&quot;</span>);       \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;clrf   _PCLATH&quot;</span>);          \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   PCLATH, W&quot;</span>);        \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;clrf   PCLATH&quot;</span>);           \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  _int_pclath&quot;</span>);      \
-        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   _FSR, W&quot;</span>);          \
+        <span class="keyword">asm</span>(<span class="stringliteral">&quot;movf   FSR, W&quot;</span>);           \
         <span class="keyword">asm</span>(<span class="stringliteral">&quot;movwf  _int_fsr&quot;</span>);         \
     } <span class="keywordflow">while</span> (0)
 </pre></div>
@@ -687,7 +687,7 @@ Defines</h2></td></tr>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.3 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

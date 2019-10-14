@@ -92,6 +92,7 @@ typedef enum _ANDROID_ACCESSORY_STRINGS
 #define USB_ENDPOINT_DESC_WMAXPACKETSIZE_OFFSET         4 
 #define USB_ENDPOINT_DESC_BINTERVAL_OFFSET              5
 
+#define ANDROID_ACCESSORY_GET_PROTOCOL              51
 #define ANDROID_ACCESSORY_SEND_STRING               52
 #define ANDROID_ACCESSORY_START                     53
 #define ANDROID_ACCESSORY_REGISTER_HID              54
@@ -106,6 +107,8 @@ typedef enum
     //  clears this to the right value
     NO_DEVICE = 0,
     DEVICE_ATTACHED,
+    SEND_GET_PROTOCOL,
+    WAIT_FOR_PROTOCOL,
     SEND_MANUFACTUER_STRING,
     SEND_MODEL_STRING,
     SEND_DESCRIPTION_STRING,
@@ -125,7 +128,7 @@ typedef enum
     SENDING_HID_REPORT_DESCRIPTOR,
     HID_REPORT_DESCRIPTORS_COMPLETE,
 
-} ANDROID_DEVICE_STATUS_PV1;
+} ANDROID_DEVICE_STATUS;
 
 typedef struct
 {
@@ -135,8 +138,9 @@ typedef struct
     WORD OUTEndpointSize;
     BYTE INEndpointNum;
     WORD INEndpointSize;
-    ANDROID_DEVICE_STATUS_PV1 state;
+    ANDROID_DEVICE_STATUS state;
     WORD countDown;
+    WORD protocol;
 
     struct
     {
@@ -169,7 +173,7 @@ static ANDROID_DEVICE_DATA devices[NUM_ANDROID_DEVICES_SUPPORTED];
 static BYTE AndroidCommandSendString(void *handle, ANDROID_ACCESSORY_STRINGS stringType, const char *string, WORD stringLength);
 static BYTE AndroidCommandStart(void *handle);
 static BOOL AndroidIsLastCommandComplete(BYTE address, BYTE *errorCode, DWORD *byteCount);
-
+static BYTE AndroidCommandGetProtocol(ANDROID_DEVICE_DATA* device, WORD *protocol);
 //************************************************************
 // Internal macro helper functions
 //************************************************************
@@ -573,7 +577,30 @@ void AndroidTasks(void)
         switch(device->state)
         {
             case DEVICE_ATTACHED:
-                //Fall through
+                if(device->countDown == 0)
+                {
+                    device->state = SEND_GET_PROTOCOL;
+                }
+                break;
+            case SEND_GET_PROTOCOL:
+                //Check to see if something else is going on with EP0
+                //MCHP: should switch this to use the transfer events instead.  It is safer.
+                if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
+                {
+                    //If not, then let's send the manufacturer's string
+                    AndroidCommandGetProtocol(device, &device->protocol);
+                    
+                    device->status.EP0TransferPending = 1;
+                    device->state = WAIT_FOR_PROTOCOL;
+                }
+                break;
+            case WAIT_FOR_PROTOCOL:
+                if(device->status.EP0TransferPending == 0)
+                {
+                    device->state = SEND_MANUFACTUER_STRING;
+                }
+                break;
+                
             case SEND_MANUFACTUER_STRING:
                 if(accessoryInfo->manufacturer == NULL)
                 {
@@ -599,7 +626,7 @@ void AndroidTasks(void)
                     device->state = SEND_DESCRIPTION_STRING;
                     break;
                 }
-
+                
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
@@ -704,7 +731,8 @@ void AndroidTasks(void)
                 break;
 
             case SEND_AUDIO_MODE:
-                if(accessoryInfo->audio_mode == ANDROID_AUDIO_MODE__NONE)
+                if( (device->protocol < 2) ||
+                    (accessoryInfo->audio_mode == ANDROID_AUDIO_MODE__NONE) )
                 {
                     device->state = START_ACCESSORY;
                     break;
@@ -758,6 +786,10 @@ void AndroidTasks(void)
             case ACCESSORY_STARTING:
                 if(device->status.EP0TransferPending == 0)
                 {
+                    //Set up a timer to remove the device if it hasn't returned to us as an
+                    //  accessory mode device in a specified time, we kill the device
+                    device->countDown = ANDROID_DEVICE_ATTACH_TIMEOUT;
+
                     device->state = WAITING_FOR_ACCESSORY_RETURN;
                 }   
                 break;
@@ -887,32 +919,14 @@ BOOL AndroidAppInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
 
     ReadWORD(&tempWord, &device_descriptor[USB_DEV_DESC_VID_OFFSET]);
 
-    if(tempWord == 0x18D1)
+    for(i=0;i<NUM_ANDROID_DEVICES_SUPPORTED;i++)
     {
-        ReadWORD(&tempWord, &device_descriptor[USB_DEV_DESC_PID_OFFSET]);
-        switch(tempWord)
+        if( (devices[i].state == WAITING_FOR_ACCESSORY_RETURN) || ( (flags & ANDROID_INIT_FLAG_BYPASS_PROTOCOL) ==  ANDROID_INIT_FLAG_BYPASS_PROTOCOL) )
         {
-            case 0x2D00:
-            case 0x2D01:
-            case 0x2D02:
-            case 0x2D03:
-            case 0x2D04:
-            case 0x2D05:
-                for(i=0;i<NUM_ANDROID_DEVICES_SUPPORTED;i++)
-                {
-                    if(devices[i].state == WAITING_FOR_ACCESSORY_RETURN)
-                    {
-                        device = &devices[i];
-                        device->state = RETURN_OF_THE_ACCESSORY;
-                        break;
-                    }
-                }
-                break;
+            device = &devices[i];
+            device->state = RETURN_OF_THE_ACCESSORY;
+            break;
         }
-    }
-    else
-    {
-        flags = flags & ~ANDROID_INIT_FLAG_BYPASS_PROTOCOL;
     }
 
     //if this isn't an old accessory, then it must be a new one
@@ -931,6 +945,7 @@ BOOL AndroidAppInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
                 else
                 {
                     device->state = DEVICE_ATTACHED;
+                    device->countDown = 1000;
                 }
                 break;
             }
@@ -1059,24 +1074,26 @@ BOOL AndroidAppDataEventHandler( BYTE address, USB_EVENT event, void *data, DWOR
         case EVENT_1MS:              // 1ms timer
             for(i=0;i<NUM_ANDROID_DEVICES_SUPPORTED;i++)
             {
-                if(devices[i].state == WAITING_FOR_ACCESSORY_RETURN)
+                switch(devices[i].countDown)
                 {
-                    switch(devices[i].countDown)
-                    {
-                        case 0:
-                            //do nothing
-                            break;
-                        case 1:
+                    case 0:
+                        //do nothing
+                        break;
+                    case 1:
+                        if(devices[i].state == WAITING_FOR_ACCESSORY_RETURN)
+                        {
                             USB_HOST_APP_EVENT_HANDLER(devices[i].address,EVENT_ANDROID_DETACH,&devices[i],sizeof(ANDROID_DEVICE_DATA*));
 
                             //Device has timed out.  Destroy its info.
                             memset(&devices[i],0x00,sizeof(ANDROID_DEVICE_DATA));
-                            break;
-                        default:
-                            //for every other number, decrement the count
-                            devices[i].countDown--;
-                            break;
-                    }
+                        }
+                        
+                        devices[i].countDown--;
+                        break;
+                    default:
+                        //for every other number, decrement the count
+                        devices[i].countDown--;
+                        break;
                 }
             }
             return TRUE;
@@ -1429,6 +1446,51 @@ static BOOL AndroidIsLastCommandComplete(BYTE address, BYTE *errorCode, DWORD *b
                                         errorCode,              //BYTE *errorCode,
                                         byteCount               //DWORD *byteCount 
                                     );
+}
+
+/****************************************************************************
+  Function:
+    BYTE AndroidCommandGetProtocol(ANDROID_DEVICE_DATA* device, WORD *protocol)
+
+  Summary:
+    Requests the protocol version from the specified Android device.
+
+  Description:
+    Requests the protocol version from the specified Android device.
+
+  Precondition:
+    None
+
+  Parameters:
+    ANDROID_DEVICE_DATA* device - pointer to the Android device to query
+    WORD *protocol - pointer to where to store the resulting protocol version
+
+  Return Values:
+    USB_SUCCESS                 - Request processing started
+    USB_UNKNOWN_DEVICE          - Device not found
+    USB_INVALID_STATE           - The host must be in a normal running state
+                                    to do this request
+    USB_ENDPOINT_BUSY           - A read or write is already in progress
+    USB_ILLEGAL_REQUEST         - SET CONFIGURATION cannot be performed with
+                                    this function.
+
+  Remarks:
+    Internal API only.  Should not be called by a user.
+  ***************************************************************************/
+static BYTE AndroidCommandGetProtocol(ANDROID_DEVICE_DATA* device, WORD *protocol)
+{
+    return USBHostIssueDeviceRequest (  device->address,                    //BYTE deviceAddress,
+                                        USB_SETUP_DEVICE_TO_HOST            //BYTE bmRequestType,
+                                            | USB_SETUP_TYPE_VENDOR
+                                            | USB_SETUP_RECIPIENT_DEVICE,
+                                        ANDROID_ACCESSORY_GET_PROTOCOL,     //BYTE bRequest,
+                                        0,                                  //WORD wValue,
+                                        0,                                  //WORD wIndex,
+                                        2,                                  //WORD wLength,
+                                        (BYTE*)protocol,                    //BYTE *data,
+                                        USB_DEVICE_REQUEST_GET,             //BYTE dataDirection,
+                                        device->clientDriverID              //BYTE clientDriverID
+                                      );
 }
 
 //DOM-IGNORE-END

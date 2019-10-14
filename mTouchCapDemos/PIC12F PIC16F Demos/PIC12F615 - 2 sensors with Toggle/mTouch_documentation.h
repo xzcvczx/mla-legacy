@@ -12,7 +12,7 @@
 * @mainpage
 *
 * @section Intro Introduction
-* Thank you for downloading the mTouch Framework.
+* Thank you for downloading the mTouch Framework v2.3, part of the mTouch Library v1.40.02 package in the MLA.
 *
 * The mTouch Framework is a software package enabling designers to easily integrate touch technologies
 * to their application. It combines high sensitivity with conducted and radiated noise immunity.
@@ -24,37 +24,41 @@
 * <table border="0">
 * <tr valign="top">
 * <td align="left">@subpage GettingStarted
-*     @li @ref featBasic
-*     @li Quick Start Guides
+*     @li @ref featBasic            "Basic mTouch Sensor Configuration"
+*     @li @ref GSGuides             "Quick Start Guides"
 *     @li New mTouch Project: @ref GettingStartedNewP8 "MPLAB 8" or @ref GettingStartedNewPX "MPLAB X"
-*     @li Pre-configured Demo Projects</td>
+*     @li @ref GettingStartedEval   "mTouch Evaluation Board Projects"
+*     @li @ref GettingStartedCustom "Integrating with Custom Hardware"</td>
 * <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 * <td align="left">@subpage FrameworkFeatures "mTouch Framework Features"
-*     @li @ref featSliders
-*     @li @ref featMode
-*     @li @ref featGuard "Guard Ring / Shield Configuration"
-*     @li @ref featMutual
-*     @li @ref featProximity "Proximity Sensor Configuration"
-*     @li @ref featMatrix "Matrix Configuration"
-*     @li @ref featMostPressed</td>
+*     @li @ref featBasic            "Keys / Buttons"
+*     @li @ref featSliders          "Sliders and Wheels"
+*     @li @ref featProximity        "Proximity Sensors"
+*     @li @ref featMatrix           "Matrix Keypad Layouts"
+*     @li @ref featMostPressed      "Most-Pressed Algorithm"
+*     @li @ref featGuard            "Guard Rings / Shields"
+*     @li @ref featMutual           "Mutual Capacitance"
+*     @li @ref featMode             "Scanning Modes"</td>
 * </tr>
 * <tr valign="top">
-* <td align="left">@subpage Troubleshoot
-*     @li @ref ts-Sensitivity   "Increasing Sensitivity"
-*     @li @ref ts-ResponseTime  "Faster Response Times"
-*     @li @ref ts-Waveform      "Tuning the mTouch Waveform"
-*     @li @ref ts-Comms         "Establishing PC Communications"</td>
+* <td align="left">@subpage optimizing "Optimizing Performance"
+*     @li @ref ts-Sensitivity       "Increasing Sensitivity"
+*     @li @ref ts-ResponseTime      "Faster Response Times"
+*     @li @ref ts-Waveform          "mTouch CVD Waveform Tuning"</td>
 * <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 * <td align="left">@subpage ResourceRequirements "Resource Requirements"
-*     @li Supported PIC&reg; microcontrollers
-*     @li Hardware module usage
-*     @li ROM, RAM, and processing requirements
+*     @li @ref PICSupport           "Supported PIC&reg; Microcontrollers"
+*     @li @ref rrModules            "Hardware Module Usage"
+*     @li @ref rrMemory             "ROM, RAM, and Processing Requirements"
 *     @li @subpage RequiredIncludes</td>
 * </tr>
 * <tr valign="top">
-* <td align="left">@subpage Changelog "Version Change Log"</td>
+* <td align="left">@subpage troubleshoot "Troubleshooting"
+*     @li @ref ts-Comms   "PC Communications"
+*     @li @ref BCPGUI     "Backwards-compatible UART for prev. Profilab GUI"</td>
 * <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-* <td align="left">@subpage SoftwareLicense</td>
+* <td align="left">@subpage SoftwareLicense<br><br>
+* @subpage Changelog "Version Change Log"</td>
 * </tr>
 * </table></center>
 *
@@ -69,35 +73,74 @@
 *   <li> <b>/Help</b><br>
 *       Contains documentation for all the Microchip Application Libraries.
 *       <ul>
-*       <li> <b>/mTouch Framework Help Content</b><br>
+*       <li> <b>/mTouch CVD Help Content</b><br>
 *       Contains the documentation for the mTouch Framework.
 *       </ul>
 *   <li> <b>/mTouchCap</b>
 *       <ul>
-*       <li> <b>/PIC16F CVD FW Library</b><br>
-*       Contains the C source (.c) files for the mTouch Framework.<br>
-*       IMPORTANT: The files in this directory should never be directly editted.
+*       <li> <b>/PIC12F PIC16F Library</b><br>
+*       Contains the C source (.c) and C header (.h) files for the mTouch Framework.<br>
+*       <b>IMPORTANT</b>: The files in this directory should never be directly editted. Copy to a local application folder.
 *           <ul>
-*           <li> mTouch.c implements the initialization, filtering, and decoding functions for the framework.
-*           <li> mTouch_Acquistion.c implements a custom mTouch Acquisition method specific to the PIC and configuration.
-*           <li> mTouch_Comm.c performs the required actions to communicate with the mTouch GUI.
-*           <li> main_example.c contains an example application implementation.<br><br>
-*           <li> <b>/includes</b><br>
-*           Contains the C header (.h) files for the mTouch Framework. <br>
-*           IMPORTANT: The files in this directory should never be directly editted.<br><br>
-*           This header files should be copied to the local application source directory and placed in a folder named 'includes'.
+*           <li> mTouch Source Files
+*               <ul>
+*               <li> main.c contains an example application implementation.
+*               <li> mTouch.c implements the basic initialization, filtering, and decoding functions for the framework.
+*               <li> mTouch_acquisition.c implements a custom mTouch Acquisition method specific to the PIC and configuration.
+*               <li> mTouch_slider.c implements the slider and wheel decoding, if enabled.
+*               <li> mTouch_proximity.c implements the proximity sensor decoding and state machine, if enabled.
+*               <li> mTouch_eeprom.c implements the mTouch EEPROM mapping and read/write functions, if enabled.
+*               </ul>
+*           <li> mTouch Configuration Files<br>
+*               These are the files that should be tweaked for every application.
 *               <ul>
 *               <li> mTouch_config.h stores the configuration options for the framework.
 *               <li> mTouch_config_modes.h stores the configuration options for scanning modes.
 *               <li> mTouch_config_slider.h stores the configuration options for sliders and wheels.
 *               <li> mTouch_config_cvdAdvanced.h stores the advanced CVD acquisition options.
-*               </ul><br>
-*           These header files should only be copied to the local directory if application-specific modifications are being made. The compiler will prioritize including local files over library files if the names match.
+*               </ul>
+*           <li> mTouch Header Files<br>
 *               <ul>
-*               <li> mTouch.h the master header file for the mTouch Framework that defines global variables and includes other files based on the current configuration. This is the only file you need to #include to use the API in your project.<br>
-*               <li> mTouch_HardwareProfile_12F61x.h is one of many PIC-family-specific header files that contains information such available hardware modules, analog channel-to-port mapping, and default register configurations.
-*               <li> mTouchCVD_macroLibrary_PIC16F1.h is one of several PIC-core-specific header files that contains macros for generating the acquisition module of the mTouch Framework.
-*               <li> mTouch_processConfiguration.h performs much of the pre-compiling work to confirm a valid configuration and then set up the flags and variables to aid the compiler in generating a custom mTouch application.
+*               <li> mTouch.h <b>is the only mTouch file you need to \#include to use the API in your project.</b> 
+*                           This is the master header file for the mTouch Framework that defines global variables and 
+*                           includes other files based on the current configuration. 
+*               <li> mTouch_slider.h is the internal mTouch header file for generating the mTouch Framework's slider and wheel logic
+*               <li> mTouch_proximity.h is the internal mTouch header file for generating the mTouch Framework's proximity sensor logic
+*               <li> mTouch_eeprom.h is the internal mTouch header file for generating the mTouch Framework's EEPROM logic
+*               <li> mTouch_modes.h is the internal mTouch header file for generating the mTouch Framework's scanning mode logic
+*               <li> mTouch_optionsForConfig.h contains pre-defined labels for easier user configuration. Do not edit.
+*               <li> mTouch_macroLibrary_common.h contains many of the core-non-specific macros for the mTouch Framework.
+*               <li> mTouch_processConfiguration.h performs much of the pre-compiling work to confirm a valid configuration 
+*                           and then set up the flags and variables to aid the compiler in generating a custom mTouch application.
+*               <li> mTouchCVD_macroLibrary_PIC16F.h is one of several PIC-core-specific header files that contains macros 
+*                           for generating the acquisition module of the mTouch Framework.
+*               <li> mTouchCVD_macroLibrary_PIC16F1.h is one of several PIC-core-specific header files that contains macros 
+*                           for generating the acquisition module of the mTouch Framework.
+*               <li> mTouchCVD_macroLibrary_PIC18F.h is one of several PIC-core-specific header files that contains macros 
+*                           for generating the acquisition module of the mTouch Framework.
+*               <li> generic_processorConfigBits.h contains predefined config fuse statements for faster development.
+*               </ul><br>
+*           <li> mComm Source Files<br>
+*               These files implement the mTouch communications module called 'mComm'.
+*               <ul>
+*               <li> mComm.c contains the basic logic for all supported communication types
+*               <li> mComm_opcodes.c implements the read/write actions for each opcode
+*               <li> mComm_custom.c implements a custom opcode and should be referenced when creating your own custom behavior.
+*               </ul>
+*           <li> mComm Header Files<br>
+*               <ul>
+*               <li> mComm.h is the main header file for the module. Automatically included by mTouch.h.
+*               <li> mComm_config.h stores all the configuration options for the mComm module.
+*               <li> mComm_optionsForConfig.h contains pre-defined labels for easier user configuration. Do not edit.
+*               <li> mComm_processConfiguration.h performs much of the pre-compiling work to confirm a valid configuration and 
+*                           then set up the flags and variables to aid the compiler in generating a custom mComm application.
+*               </ul>
+*           <li> <b>Alternative Configurations/</b>
+*               <ul>
+*               <li>mTouch_HardwareProfile_12F61x.h is one of many PIC-family-specific header files that contains information 
+*                           such available hardware modules, analog channel-to-port mapping, and default register configurations.
+*               <li>See <tt>Your MLA Directory/Microchip/mTouchCap/PIC12F PIC16F CVD Library/Alternative Configurations/</tt> 
+*                           for all available processor configuration files.
 *               </ul>
 *           </ul>
 *       </ul>
@@ -107,33 +150,68 @@
 *   <li> <b>/PIC16F_CVD_Demos</b><br>
 *       Provides some example, pre-configured projects for various PIC microcontrollers and setups.
 *       <ul>
-*       <li> <b>/Cap Touch CSM-CVD Eval Board 04-02091 Rev D1</b><br>
-*           Example project implementing CVD on the mTouch evaluation board.
+*       <li> <b>/02-02091-R2  CSM-CVD Eval Board</b><br>
+*           Example project implementing CVD on the mTouch CSM-CVD evaluation board.
 *           <ul>
-*           <li> <b>/code - no cover</b><br>
-*               The thresholds in this project have been raised due to the higher level of sensitivity.
-*           <li> <b>/code - with cover</b><br>
-*               The thresholds in this project are lower than in the other due to the lower level of sensitivity.
-*               <ul>
-*               <li> <b>/MPLAB.8</b><br>
-*                   Pre-built MPLAB 8 project file with the correct configuration
-*               <li> <b>/MPLAB.X</b><br>
-*                   Pre-built MPLAB X project file with the correct configuration
-*               </ul>
+*           <li> <b>/2-Ch Slider</b><br>
+*               Implements a 2-channel slider connected to daughter board pin 0 and 1
+*           <li> <b>/4-Ch Slider</b><br>
+*               Implements a 4-channel slider connected to daughter board pin 0-3
+*           <li> <b>/8 Buttons</b><br>
+*               Implements an 8-button daughter board connected to pins 0-7
+*           <li> <b>/12-Key Matrix</b><br>
+*               Implements a 12-key 3x4 matrix daughter board on pins 0-6
+*           <li> <b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br>
+*               Implements the 4-sensor MoC daught board connected to pins 2-5
 *           </ul>
-*       <li> <b>/Cap Touch CVD Eval Board 233-04-2028 Rev B</b><br>
-*           Example project implementing CVD on the mTouch evaluation board.
-*       <li> <b>/PIC12F1822 Example - 4 sensors</b><br>
-*       <li> <b>/PIC16F617 Example - 4 sensors</b><br>
-*       <li> <b>/PIC16F1936 Example - 4 sensors</b><br>
-*       <li> <b>/Utilities</b><br>
-*           Contains useful tools and reference materials that are not strictly related to the mTouch Framework.
+*       <li> <b>/02-02091-R3  CVD Eval Board</b><br>
+*           Example project implementing CVD on the mTouch CVD evaluation board.
 *           <ul>
-*           <li> <b>/mTouch GUI</b><br>
-*               Allows the designer to see live data from the mTouch sensors
-*           <li> <b>/Pickit Serial Loader</b><br>
-*               Easy reflashing tool for the PKSA to have it behave as a UART-to-USB converter.
+*           <li> <b>/2-Ch Slider</b><br>
+*               Implements a 2-channel slider connected to daughter board pin 0 and 1
+*           <li> <b>/4-Ch Slider</b><br>
+*               Implements a 4-channel slider connected to daughter board pin 0-3
+*           <li> <b>/8 Buttons</b><br>
+*               Implements an 8-button daughter board connected to pins 0-7
+*           <li> <b>/12-Key Matrix</b><br>
+*               Implements a 12-key 3x4 matrix daughter board on pins 0-6
+*           <li> <b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br>
+*               Implements the 4-sensor MoC daught board connected to pins 2-5
 *           </ul>
+*       <li> <b>/02-02091-RA  CSM Eval Board</b><br>
+*           Example project implementing CVD on the mTouch CSM evaluation board.
+*           <ul>
+*           <li> <b>/2-Ch Slider</b><br>
+*               Implements a 2-channel slider connected to daughter board pin 0 and 1
+*           <li> <b>/4-Ch Slider</b><br>
+*               Implements a 4-channel slider connected to daughter board pin 0-3
+*           <li> <b>/8 Buttons</b><br>
+*               Implements an 8-button daughter board connected to pins 0-7
+*           <li> <b>/12-Key Matrix</b><br>
+*               Implements a 12-key 3x4 matrix daughter board on pins 0-6
+*           <li> <b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br>
+*               Implements the 4-sensor MoC daught board connected to pins 2-5
+*           </ul>
+*       <li> <b>/233-04-1008 Rev F  CSM Eval Board</b><br>
+*           Example project implementing CVD on the mTouch CSM evaluation board.
+*           <ul>
+*           <li> <b>/2-Ch Slider</b><br>
+*               Implements a 2-channel slider connected to daughter board pin 0 and 1
+*           <li> <b>/4-Ch Slider</b><br>
+*               Implements a 4-channel slider connected to daughter board pin 0-3
+*           <li> <b>/8 Buttons</b><br>
+*               Implements an 8-button daughter board connected to pins 0-7
+*           <li> <b>/12-Key Matrix</b><br>
+*               Implements a 12-key 3x4 matrix daughter board on pins 0-6
+*           <li> <b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br>
+*               Implements the 4-sensor MoC daught board connected to pins 2-5
+*           </ul>
+*       <li> <b>/PIC16F615 - 1 sensor with UART</b><br>
+*           Example project implementing oen CVD sensor on PIC12F615 with one-way UART communications out
+*       <li> <b>/PIC16F615 - 2 sensors</b><br>
+*           Example project implementing two CVD sensors on PIC12F615
+*       <li> <b>/PIC16F1527 - 30 sensors</b><br>
+*           Example project implementing the maximum number of supported sensors (30) on the PIC16F1527
 *       </ul>
 *   </ul>
 * </ul>
@@ -142,41 +220,108 @@
 /**
 * @page Changelog Version Change Log
 *
+* @section cl020101 Version 2.2
+* @li   Bug Fixes:
+*   <ul>
+*   <li>Sensors' oversampling counter variable now only updates if a scan occurred.
+*   <li>Unique oversampling values enabled for only one sensor is now gracefully handled without throwing errors.
+*   <li>I2C slave no longer occasionally fails to execute write operations.
+*   </ul>
+* @li   Added support for hardware CVD handling
+* @li   Demo main.c files now have a few additional #if blocks to reduce compile-time errors when minor configuration changes are made.
+* @li   Solved a compile-time-error bug with PIC16F72x devices when running at 16MHz
+* @li   Added device support:
+*   <ul>
+*   <li>PIC16(L)F1501/3
+*   <li>PIC16(L)F1512/3
+*   <li>PIC12(L)F1552
+*   </ul>
+*
+* @section cl0201 Version 2.1
+* @li   Enabling a non-TMR0 timer will now also automatically enable the PEIE bit for automatic interrupt use (mTouch.c)
+* @li   Default one-way communications now supports the updated Profilab GUI supplied with this framework package (mComm_config.h / mComm.c)
+* @li   Configuration values can now be stored in RAM (mTouch_configOptions) instead of EEPROM for use in the two-way communications. See MTOUCH_EEPROM_STORED_AS_RAM in mTouch_config.h
+* @li   Individual the oversampling array initialization has been changed to automatically adjust its size based on MTOUCH_NUMBER_SENSORS (mTouch_acquisition.c)
+* @li   When mTouch controls the ISR, it will now correctly exit from the function if the mTouch timer was not responsible for the interrupt (mTouch_acquisition.c)
+* @li   Fixed an issue with the DAC configuration in the hardware profiles of the 182x and 184x families
+* @li   Fixed a bug with the initial EEPROM byte check - previously the EEPROM would revert to factory settings on reset. (mTouch_eeprom.c)
+* @li   Fixed the mTouch_ClearToggle(i) API macro: Logical 'not' (<b>!</b>) changed to bit-wise 'not' (<b>~</b>).
+*
 * @section cl0200 Version 2.0
-* @li Added support for a large number of processors. Refer to this documentations 'Resource Requirements' page for a full listing.
-* @li Structures have been implemented for a large number of mTouch variables to maximize the efficiency of RAM resources. Several previously supported processors are now able to implement more sensors due to this change.
-* @li New feature: Sleep-mode sensors can be used to send the framework into a low power state after it detects no change on the active-mode after a configurable amount of time. For more information about this feature, refer to the mTouch Framework flow chart.
-* @li New feature: Sliders and wheels can be implemented by editing the mTouch_config_slider.h options. Supports up to 10 sliders with 8 sensors per slider.
-* @li New feature: A most-pressed algorithm can be implemented by uncommenting #MTOUCH_MOST_PRESSED_ONLY. (mTouch_config.h)
-* @li New feature: Toggle mode is now available by uncommenting #MTOUCH_TOGGLE_ENABLED. (mTouch_config.h) It will toggle the output's value only when it detects a new press - not when it sees a release. Example API available in main.c. 
-* @li New feature: Guard sensors can be implemented using any general IO pin or through the DACOUT pin. (mTouch_config_cvdAdvanced.h)
-* @li New feature: Mutual sensors can be implemented to detect increased coupling between two interconnected sensors. (mTouch_config_cvdAdvanced.h)
-* @li New feature: "V2" communications allow users to update configuration options without reprogramming the processor. Not yet compatible with sleep mode. Configuration options and thresholds are stored in EEPROM when this is implemented.
-* @li New configuration option #MTOUCH_INTEGRATION_TYPE adjusts the way the framework integrates with the application (mTouch_config.h)
-* @li New configuration option #MTOUCH_ISR_TIMER changes which 8-bit timer is used for the mTouch interrupt (mTouch_config.h)
-* @li New configuration option #MTOUCH_SCAN_FUNCTIONALITY alternates between scanning one sensor per interrupt or scanning all sensors once per interrupt (mTouch_config.h)
-* @li New configuration option #MTOUCH_ADC_CONTROL determines whether the framework releases the ADC after performing its scan (mTouch_config.h)
-* @li New configuration option #APFCON_INITIALIZED can be used to disable "make sure you initialize" warnings on parts with APFCON registers (mTouch_config.h)
-* @li New configuration option #MTOUCH_DECIMATION_MAX_STEP adjusts the maximum step size for sensors while going through the decimation filter (mTouch_config.h)
-* @li New configuration option #MTOUCH_JITTER_BITS adjusts the number of bits used to implement the random seed value for jittering (mTouch_config.h)
-* @li New configuration option #CVD_FORCE_REF_DAC can be defined to force the CVD acquisition to use the DAC as the reference for the ADC's hold capacitor (mTouch_config_cvdAdvanced.h)
+* @li   Added support for a large number of processors. Refer to this documentations '@ref PICSupport "Resource Requirements"' 
+*       page for a full listing.
+* @li   The acquisition module has been reworked for added efficiency. 
+*   <ul>
+*   <li>The assembly-coded jump table has been replaced with a compiler-generated look-up table.
+*   <li>The 'scan a' and 'scan b' portions of each sensor's mTouch waveform are dedicated functions that are dynamically 
+*       generated at compile-time by the preprocessor macros. This eliminates the previous limitation on the number of sensors 
+*       due to the rising length of the single mTouch acquisition function.
+*   <li>Individual oversampling values can be enabled from the mTouch_config_cvdAdvanced.h file.
+*   </ul>
+* @li   Structures have been implemented for a large number of mTouch variables to maximize the efficiency of RAM resources. 
+*       Several previously supported processors are now able to implement more sensors due to this change.
+* @li   New features:
+*   <ul>
+*   <li>@ref featMode "Scanning modes" allow different sensor configurations to be scanned based on the application's state.
+*   <li>Built-in @ref featProximity "proximity sensor" support with median filter. (mTouch_config.h)
+*   <li>@ref featSliders "Sliders and wheels" can be implemented by editing the mTouch_config_slider.h options. Supports up 
+*       to 10 sliders with 8 sensors per slider.
+*   <li>A @ref featMostPressed "most-pressed algorithm" can be implemented by uncommenting #MTOUCH_MOST_PRESSED_ONLY. 
+*       (mTouch_config.h)
+*   <li>Toggle mode is now available by uncommenting #MTOUCH_TOGGLE_ENABLED. (mTouch_config.h) It will toggle the output's 
+*       value only when it detects a new press - not when it sees a release. Example API available in main.c. 
+*   <li>@ref featGuard "Guard rings/shields" can be implemented using any general IO pin or through the DACOUT pin. 
+*       (mTouch_config_cvdAdvanced.h)
+*   <li>Support for @ref featMatrix "matrix configurations" can be implemented to automatically decode the rows and columns 
+*       with debouncing and a dedicated most-pressed algorithm to ensure quality coordinate results. (mTouch_config.h)
+*   <li>@ref featMutual "Mutual coupling drives" can be implemented to detect increased coupling between two interconnected 
+*       sensors. (mTouch_config_cvdAdvanced.h)
+*   <li>mComm communications module added. See mComm_config.h
+*       <ul>
+*       <li>Implements I2C, SPI, and UART two-way communications to allow changing of configuration values at run-time. 
+*       <li>Configuration options and thresholds are stored in EEPROM when this is implemented by defining 
+*           #MTOUCH_EEPROM_ENABLED in mTouch_config.h
+*       <li>Implements 1-way UART communications in hardware or by using a software-implementation.
+*       </ul>
+*   </ul>
+* @li New configuration options:
+*   <ul>
+*   <li>#MTOUCH_INTEGRATION_TYPE adjusts the way the framework integrates with the application (mTouch_config.h)
+*   <li>#MTOUCH_ISR_TIMER changes which 8-bit timer is used for the mTouch interrupt (mTouch_config.h)
+*   <li>#MTOUCH_SCAN_FUNCTIONALITY alternates between scanning one sensor per interrupt or scanning all sensors once per 
+*       interrupt (mTouch_config.h)
+*   <li>#MTOUCH_ADC_CONTROL determines whether the framework releases the ADC after performing its scan (mTouch_config.h)
+*   <li>#APFCON_INITIALIZED can be used to disable "make sure you initialize" warnings on parts with APFCON registers (mTouch_config.h)
+*   <li>#MTOUCH_DECIMATION_MAX_STEP adjusts the maximum step size for sensors while going through the decimation filter 
+*       (mTouch_config.h)
+*   <li>#MTOUCH_JITTER_BITS adjusts the number of bits used to implement the random seed value for jittering (mTouch_config.h)
+*   <li>#CVD_FORCE_REF_DAC can be defined to force the CVD acquisition to use the DAC as the reference for the ADC's hold 
+*       capacitor (mTouch_config_cvdAdvanced.h)
+*   </ul>
 * @li Configuration option #CVD_JITTER_ENABLE has been removed. To disable jittering, set the #MTOUCH_JITTER_BITS value to 0.
 * @li #MTOUCH_SCALING has been adjusted to allow a larger number of scaling options. (mTouch_config.h)
-* @li New configuration option #MTOUCH_COMM_ASCII_SOFT_ENABLED can be enabled to force the communications module to perform the UART communications through software only. The bit-banged code has been changed to assembly for more precise timing.
 *
 * @section cl0101 Version 1.1
-* @li Non-enhanced Core Device Support
-* @li HI-TECH 9.81 Lite and Standard Compiler Support
-* @li Acquisition variable array #sensor_data is now initialized to 0x47F to reduce the required initialization time
-* @li New configuration option #CVD_SETTLING_DELAY adjusts the amount of time the CVD acquisition will wait for the voltages on the external sensor and internal ADC hold capacitor to settle. See @ref ts-Waveform "this guide" for more information.
-* @li New configuration option #CVD_CHOLD_CHARGE_DELAY adjusts the amount of time the CVD acquisition will wait for the voltage on the internal ADC hold capacitor to reach steady state (VDD or VSS) before connecting the two capacitors and allowing their voltages to settle. See @ref ts-Waveform "this guide" for more information.
-* @li The scan order of the CVD acquisition has been reversed to ensure maximum sensitivity for larger external sensor capacitances. This means the waveform will change when viewed on a scope. See @ref ts-Waveform "this guide" for more information.
-* @li #GENERATE_STORAGE_FUNCTION() and #GENERATE_JUMP_TABLE() macros have been redesigned with a more elegant implementation.
-* @li The mTouch.h file has been split-in-two in order to accomodate the Microchip Application Libraries' directory structure. A local copy of mTouch.h should be included in your application's includes directory. mTouch_processConfiguration.h, the other half of the original mTouch.h file, only needs to be available in the library folders and does not require a local copy.
-* @li Sensor 0's reference is now defined in the process configuration header file to help de-clutter the acquisition.c file.
-* @li Many documentation updates including:
+* @li   Non-enhanced Core Device Support
+* @li   HI-TECH 9.81 Lite and Standard Compiler Support
+* @li   Acquisition variable array #sensor_data is now initialized to 0x47F to reduce the required initialization time
+* @li   New configuration option #CVD_SETTLING_DELAY adjusts the amount of time the CVD acquisition will wait for the voltages on 
+*       the external sensor and internal ADC hold capacitor to settle. See @ref ts-Waveform "this guide" for more information.
+* @li   New configuration option #CVD_CHOLD_CHARGE_DELAY adjusts the amount of time the CVD acquisition will wait for the voltage 
+*       on the internal ADC hold capacitor to reach steady state (V<sub>DD</sub> or V<sub>SS</sub>) before connecting the two capacitors and allowing 
+*       their voltages to settle. See @ref ts-Waveform "this guide" for more information.
+* @li   The scan order of the CVD acquisition has been reversed to ensure maximum sensitivity for larger external sensor 
+*       capacitances. This means the waveform will change when viewed on a scope. See @ref ts-Waveform "this guide" for more 
+*       information.
+* @li   #GENERATE_STORAGE_FUNCTION() and #GENERATE_JUMP_TABLE() macros have been redesigned with a more elegant implementation.
+* @li   The mTouch.h file has been split-in-two in order to accomodate the Microchip Application Libraries' directory structure. 
+*       A local copy of mTouch.h should be included in your application's includes directory. mTouch_processConfiguration.h, the 
+*       other half of the original mTouch.h file, only needs to be available in the library folders and does not require a local 
+*       copy.
+* @li   Sensor 0's reference is now defined in the process configuration header file to help de-clutter the acquisition.c file.
+* @li   Many documentation updates including:
 *   <ul>
-*   <li> New 'Troubleshooting' sections designed to make it easier to solve common problems:
+*   <li> New 'Optimizing Performance' sections designed to make it easier to solve common problems:
 *       <ul>
 *       <li> @ref ts-Sensitivity    "Increasing Sensitivity"
 *       <li> @ref ts-ResponseTime   "Adjusting the Response Time"
@@ -207,7 +352,7 @@
 * This module is used to schedule regular ADC scans on the sensors. 8-bit timers normally interrupt after 256 counts; however, the mTouch
 * framework pre-loads the timer's register with a pseudo-random seed value to slightly jitter the sampling rate. This means that the
 * average number of counts before it interrupts is 224.<br>
-* You control the TMR0 prescaler. The framework does not touch the OPTION register.<br>
+* You control the timer's prescaler and period registers.<br>
 * NOTE: No timer is required if #MTOUCH_INTEGRATION_TYPE is defined as MTOUCH_CALLED_FROM_MAINLOOP.
 *
 * @li <b>Analog/Digital Converter</b><br>
@@ -238,28 +383,36 @@
 * <tr valign="top">
 * <td>
 *     <table>
-*         <tr><td>&nbsp;</td><td colspan="2" align="center"><b>Standard Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange</b></td></tr>
-*         <tr><td># Sensors</td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td></tr>
-*         <tr><td align="center">1</td><td align="center">643</td><td align="center">865</td><td align="center">624</td><td align="center">849</td></tr>
-*         <tr><td align="center">2</td><td align="center">924</td><td align="center">1171</td><td align="center">782</td><td align="center">1141</td></tr>
-*         <tr><td align="center">3</td><td align="center">1030</td><td align="center">1322</td><td align="center">875</td><td align="center">1301</td></tr>
-*         <tr><td align="center">4</td><td align="center">1130</td><td align="center">1471</td><td align="center">968</td><td align="center">1459</td></tr>
-*         <tr><td align="center">5</td><td align="center">1229</td><td align="center">1837</td><td align="center">1061</td><td align="center">1616</td></tr>
-*         <tr><td align="center">6</td><td align="center">1343</td><td align="center">1945</td><td align="center">1157</td><td align="center">1773</td></tr>
-*         <tr><td align="center"><b>+1</b></td><td align="center"><b>+100</b></td><td align="center"><b>+150</b></td><td align="center"><b>+110</b></td><td align="center"><b>+150</b></td></tr>
+*         <tr><td>&nbsp;</td><td colspan="2" align="center"><b>Standard Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange<br>w/Hardware CVD</b></td></tr>
+*         <tr><td># Sensors</td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td></tr>
+*         <tr><td align="center">1</td><td align="center">653</td><td align="center">885</td><td align="center">648</td><td align="center">884</td><td align="center">587</td><td align="center">813</td></tr>
+*         <tr><td align="center">2</td><td align="center">961</td><td align="center">1367</td><td align="center">937</td><td align="center">1387</td><td align="center">814</td><td align="center">1291</td></tr>
+*         <tr><td align="center">3</td><td align="center">1025</td><td align="center">1432</td><td align="center">1032</td><td align="center">1483</td><td align="center">819</td><td align="center">1297</td></tr>
+*         <tr><td align="center">4</td><td align="center">1089</td><td align="center">1496</td><td align="center">1112</td><td align="center">1563</td><td align="center">824</td><td align="center">1302</td></tr>
+*         <tr><td align="center">5</td><td align="center">1153</td><td align="center">1563</td><td align="center">1192</td><td align="center">1643</td><td align="center">829</td><td align="center">1307</td></tr>
+*         <tr><td align="center">6</td><td align="center">1221</td><td align="center">1628</td><td align="center">1272</td><td align="center">1731</td><td align="center">842</td><td align="center">1320</td></tr>
+*         <tr><td align="center"><b>+1</b></td><td align="center"><b>+68</b></td><td align="center"><b>+65</b></td><td align="center"><b>+80</b></td><td align="center"><b>+88</b></td><td align="center"><b>+5</b></td><td align="center"><b>+5</b></td></tr>
+*         <tr><td align="left">Most Pressed</td><td align="center">+250</td><td align="center">+350</td><td align="center">+240</td><td align="center">+340</td><td align="center">+240</td><td align="center">+340</td></tr>
+*         <tr><td align="left">Matrix</td><td align="center">+450</td><td align="center">+730</td><td align="center">+430</td><td align="center">+640</td><td align="center">+430</td><td align="center">+640</td></tr>
+*         <tr><td align="left">Slider</td><td align="center">+480</td><td align="center">+750</td><td align="center">+460</td><td align="center">+680</td><td align="center">+460</td><td align="center">+680</td></tr>
+*         <tr><td align="left">Proximity</td><td align="center">+450</td><td align="center">+1100</td><td align="center">+420</td><td align="center">+740</td><td align="center">+420</td><td align="center">+740</td></tr>
 *     </table>
 * </td>
 * <td>
 *     <table>
 *         <tr><td>&nbsp;</td><td colspan="2" align="center"><b>Standard Midrange</b></td><td colspan="2" align="center"><b>Enhanced Midrange</b></td></tr>
 *         <tr><td># Sensors</td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td><td align="center"><b>PRO</b></td><td align="center"><b>LITE</b></td></tr>
-*         <tr><td align="center">1</td><td align="center">45</td><td align="center">51</td><td align="center">36</td><td align="center">44</td></tr>
-*         <tr><td align="center">2</td><td align="center">58</td><td align="center">66</td><td align="center">48</td><td align="center">56</td></tr>
-*         <tr><td align="center">3</td><td align="center">68</td><td align="center">76</td><td align="center">58</td><td align="center">66</td></tr>
-*         <tr><td align="center">4</td><td align="center">78</td><td align="center">86</td><td align="center">68</td><td align="center">76</td></tr>
-*         <tr><td align="center">5</td><td align="center">88</td><td align="center">96</td><td align="center">78</td><td align="center">86</td></tr>
-*         <tr><td align="center">6</td><td align="center">98</td><td align="center">106</td><td align="center">88</td><td align="center">96</td></tr>
-*         <tr><td align="center"><b>+1</b></td><td align="center"><b>+10</b></td><td align="center"><b>+10</b></td><td align="center"><b>+10</b></td><td align="center"><b>+10</b></td></tr>
+*         <tr><td align="center">1</td><td align="center">44</td><td align="center">49</td><td align="center">36</td><td align="center">43</td></tr>
+*         <tr><td align="center">2</td><td align="center">57</td><td align="center">70</td><td align="center">50</td><td align="center">60</td></tr>
+*         <tr><td align="center">3</td><td align="center">68</td><td align="center">81</td><td align="center">61</td><td align="center">71</td></tr>
+*         <tr><td align="center">4</td><td align="center">79</td><td align="center">92</td><td align="center">72</td><td align="center">82</td></tr>
+*         <tr><td align="center">5</td><td align="center">90</td><td align="center">103</td><td align="center">83</td><td align="center">93</td></tr>
+*         <tr><td align="center">6</td><td align="center">101</td><td align="center">114</td><td align="center">94</td><td align="center">104</td></tr>
+*         <tr><td align="center"><b>+1</b></td><td align="center"><b>+11</b></td><td align="center"><b>+11</b></td><td align="center"><b>+11</b></td><td align="center"><b>+11</b></td></tr>
+*         <tr><td align="left">Most Pressed</td><td align="center">+17</td><td align="center">+15</td><td align="center">+10</td><td align="center">+11</td></tr>
+*         <tr><td align="left">Matrix</td><td align="center">+31</td><td align="center">+30</td><td align="center">+24</td><td align="center">+25</td></tr>
+*         <tr><td align="left">Slider</td><td align="center">+29</td><td align="center">+24</td><td align="center">+24</td><td align="center">+22</td></tr>
+*         <tr><td align="left">Proximity</td><td align="center">+28</td><td align="center">+33</td><td align="center">+26</td><td align="center">+27</td></tr>
 *     </table>
 * </td>
 * </tr>
@@ -299,30 +452,31 @@
 * <ul>
 * <li>PIC16F/HV785      :: 9 sensor limit
 * </ul>
-* @li <b>PIC16F8xx Family</b>
-* <ul>
-* <li>(Under development)
-* </ul>
-* @li <b>PIC16F9xx Family</b>
-* <ul>
-* <li>(Under development)
-* </ul>
 * @li <b>PIC16F150x Family</b>
 * <ul>
-* <li>PIC16F/LF1507     :: 12 sensors supported
+* <li>PIC12(L)F1501     :: 2 sensor limit (Lite: 1 sensor limit)
+* <li>PIC16(L)F1503     :: All 8 sensors supported
+* <li>PIC16F/LF1507     :: All 12 sensors supported
+* <li>PIC16F/LF1509     :: All 12 sensors supported
 * </ul>
 * @li <b>PIC16F151x Family</b>
 * <ul>
-* <li>PIC16F/LF1516     :: All 17 sensors supported
-* <li>PIC16F/LF1518     :: All 17 sensors supported
-* <li>PIC16F/LF1517     :: 22 sensor limit
-* <li>PIC16F/LF1519     :: 22 sensor limit
+* <li>PIC16F/LF1512 (w/HCVD)    :: 7 sensor limit
+* <li>PIC16F/LF1513 (w/HCVD)    :: 15 sensor limit
+* <li>PIC16F/LF1516             :: All 17 sensors supported
+* <li>PIC16F/LF1518             :: All 17 sensors supported
+* <li>PIC16F/LF1517             :: All 28 sensors supported
+* <li>PIC16F/LF1519             :: All 28 sensors supported
 * </ul>
 * @li <b>PIC16F152x Family</b>
 * <ul>
-* <li>PIC16F/LF1526     :: 22 sensor limit
-* <li>PIC16F/LF1527     :: 22 sensor limit
+* <li>PIC16F/LF1526     :: All 30 sensors supported
+* <li>PIC16F/LF1527     :: All 30 sensors supported
 * <li><i>This family does not support single-sensor applications.</i>
+* </ul>
+* @li <b>PIC12LF155x Family</b>
+* <ul>
+* <li>PIC12LF1552 (w/HCVD)      :: All 4 sensors supported
 * </ul>
 * @li <b>PIC16F182x Family</b>
 * <ul>
@@ -364,7 +518,18 @@
 * </ul>
 * @li <b>PIC18FxxJ50 Family</b>
 * <ul>
-* <li>(Under development)
+* <li>PIC18F/LF24J50    :: All 10 sensors supported
+* <li>PIC18F/LF25J50    :: All 10 sensors supported
+* <li>PIC18F/LF26J50    :: All 10 sensors supported
+* <li>PIC18F/LF44J50    :: All 13 sensors supported
+* <li>PIC18F/LF45J50    :: All 13 sensors supported
+* <li>PIC18F/LF46J50    :: All 13 sensors supported
+* <li>PIC18F65J50       :: All 8 sensors supported
+* <li>PIC18F66J50       :: All 8 sensors supported
+* <li>PIC18F67J50       :: All 8 sensors supported
+* <li>PIC18F85J50       :: All 12 sensors supported
+* <li>PIC18F86J50       :: All 12 sensors supported
+* <li>PIC18F87J50       :: All 12 sensors supported
 * </ul>
 *
 */
@@ -466,11 +631,13 @@
 * @section featSlider-Out Slider/Wheel Output
 * The framework provides one output for sliders (position) and three outputs for wheels (position, speed, direction).
 * <ul>
-* <li> The slider/wheel position output is stored in the mTouch_slider array.
-* <li> The wheel's extra outputs are stored in a struct called wheelStatus. It contains speed in wheelStatus.speed and direction in wheelStatus.direction.
+* <li>  The slider/wheel position output is stored in the mTouch_slider array.
+* <li>  The wheel's extra outputs are stored in a struct called wheelStatus. It contains speed in wheelStatus.speed and direction in 
+*       wheelStatus.direction.
 *   <ul>
 *   <li>The speed range is from 0 to 31, with 0 being no movement and 31 being the fastest.
-*   <li>The direction has three states: 0x00 for no-scrolling, 0x01 for scrolling in the positive index direction, 0x02 for scrolling in the negative index direction.
+*   <li>The direction has three states: 0x00 for no-scrolling, 0x01 for scrolling in the positive index direction, 0x02 for scrolling 
+*       in the negative index direction.
 *   </ul>
 * </ul>
 *
@@ -485,6 +652,7 @@
 * Example:
 * @code
 * // Light a line of LEDs based on the slider output value
+* // 8 LEDs, 9 total "slider output values" for this application. 0 (all off) to 8 (all on).
 * if (mTouch_GetSlider(0) >= 28)  { LED0 = LED_ON; } else { LED0 = LED_OFF; }
 * if (mTouch_GetSlider(0) >= 57)  { LED1 = LED_ON; } else { LED1 = LED_OFF; }
 * if (mTouch_GetSlider(0) >= 85)  { LED2 = LED_ON; } else { LED2 = LED_OFF; }
@@ -497,6 +665,7 @@
 *
 * @code
 * // Same as above, but with slider scaling disabled.
+* // 8 LEDs, 9 total "slider output values" for this application. 0 (all off) to 8 (all on).
 * #define MTOUCH_SLIDER0_MAX_VALUE     ((MTOUCH_NUMBER_SLIDER0_SENSORS - 1) * 256)
 * if (mTouch_GetSlider(0) >= (uint16_t)( 1/9 * MTOUCH_SLIDER0_MAX_VALUE)) { LED0 = LED_ON; } else { LED0 = LED_OFF; }
 * if (mTouch_GetSlider(0) >= (uint16_t)( 2/9 * MTOUCH_SLIDER0_MAX_VALUE)) { LED1 = LED_ON; } else { LED1 = LED_OFF; }
@@ -507,6 +676,34 @@
 * if (mTouch_GetSlider(0) >= (uint16_t)( 7/9 * MTOUCH_SLIDER0_MAX_VALUE)) { LED6 = LED_ON; } else { LED6 = LED_OFF; }
 * if (mTouch_GetSlider(0) >= (uint16_t)( 8/9 * MTOUCH_SLIDER0_MAX_VALUE)) { LED7 = LED_ON; } else { LED7 = LED_OFF; }
 * @endcode
+*
+* @section featSlider-FAQ Frequently Asked Questions
+* <ul>
+* <li>  <b>Is it possible to make a slider using only one sensor? It could be a single long triangle that gets
+*          thinner/thicker as the finger moves along it.</b><br><br>
+*       No. 
+*       <ul>
+*       <li>With only one sensor, there is no way to distinguish between a finger moving side-to-side on the
+*           slider and a finger moving up-and-down over the largest part of the slider. The shift magnitude in
+*           both cases will change from 0 to 255.
+*       <li>If the slider's current value is 255 (max) and the user presses on position 0 of the slider (the
+*           thinnest part) how will the slider know to update its value? The finger's effect on the sensor
+*           will be minimal, so the shift will be close to 0. With a 2-channel slider, the shifts on the two
+*           sensors will be opposites. So we won't see a shift on the first sensor, but the second one will
+*           have a large shift.
+*       <li>What if the slider's value is 255 when the user releases in the 'up' direction? How will the 
+*           slider know that the user is going up instead of side-to-side? With a 2-channel slider, we compare
+*           the relationship between the two sensors to see if their ratio changes. Up-down press directions
+*           cause only small changes in the ratio while side-to-side directions cause large changes in the
+*           ratio.
+*       <li>The only output value of a sensor is its magnitude, but the maximum magnitude will depend on the
+*           user of the application. A middle-aged man with large hands will cause a larger maximum shift than 
+*           a 50 lb child. So the ratio between two sensors must be used to eliminate this difference.
+*       </ul>
+*       @note Regular capacitive buttons require only one sensors because we're looking for a step-response in
+*           the signal - the transition between pressed and released. We are not attempting to use the magnitude 
+*           to further extrapolate information such as a position.
+* </ul>
 */
 
 /**
@@ -535,7 +732,8 @@
 *      differences are that you may need to set a larger oversampling value and a lower threshold value to
 *      make the sensor more sensitive. The threshold, unlike for button sensors, should not be set by
 *      evaluating the maximum touch shift. Instead, set it by observing the maximum noise level. Using the
-*      two-way communications with the mTouch GUI is an easy way to adjust these values.
+*      two-way communications with the mTouch Two-Way GUI is an easy way to adjust these values.<br>
+*      You can find the mTouch Two-Way GUI in <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/mTouch Two-Way GUI</tt>
 * <li> At the bottom of mTouch_config.h is the 'Proximity' configuration section.
 *   <ol type="a">
 *   <li>Set #MTOUCH_NUMBER_PROXIMITY to the total number of proximity sensors in your system.
@@ -1181,40 +1379,44 @@
 * @page FrameworkFeatures Features
 *
 * @section Features mTouch Framework Implementation Features
-* We focused on creating a system that exhibits high signal sensitivity and noise immunity. To achieve these goals, we implemented the following features:
-* @li @subpage featBasic is fast and simple
-* @li Built-in support for:
-* <ul>
-* <li> @subpage featProximity provide a higher level of signal-to-noise ratio by implementing an additional median filter
-* <li> @subpage featSliders decoding based on the relationship between sensor shift percentages
-* <li> @subpage featMatrix support to help guarantee the reliability of 'node' press decisions
-* <li> @subpage featMostPressed to limit the number of simultaneous 'pressed' sensors in high-crosstalk systems
-* <li> @subpage featMode to support applications with multiple states and a desire to scan different sensors in each state
-* <li> @subpage featGuard traces to <b>actively reduce parasitic capacitance</b> and increase sensitivity
-* <li> @subpage featMutual to scan for changes in the relative permitivity, or coupling, near the sensor
-* </ul> 
-* @li <b>Detailed warning and error messages</b> guide the user in case of an incorrect configuration value
+* We focused on creating a system that exhibits high signal sensitivity and noise immunity. To achieve these goals, we 
+* implemented the following features:
+* @li   @subpage featBasic is fast and simple
+* @li   Built-in support for:
+*   <ul>
+*   <li>    @subpage featProximity provide a higher level of signal-to-noise ratio by implementing an additional median filter
+*   <li>    @subpage featSliders decoding based on the relationship between sensor shift percentages
+*   <li>    @subpage featMatrix support to help guarantee the reliability of 'node' press decisions
+*   <li>    @subpage featMostPressed to limit the number of simultaneous 'pressed' sensors in high-crosstalk systems
+*   <li>    @subpage featMode to support applications with multiple states and a desire to scan different sensors in each state
+*   <li>    @subpage featGuard traces to <b>actively reduce parasitic capacitance</b> and increase sensitivity
+*   <li>    @subpage featMutual to scan for changes in the relative permitivity, or coupling, near the sensor
+*   </ul> 
+* @li   <b>Detailed warning and error messages</b> guide the user in case of an incorrect configuration value
 * @subsection AcquisitionFeatures - Acquisition Module 
-* @li Differential CVD scanning method drastically <b>attenuates low frequency noise</b> (Including 50/60Hz, up to low KHz)
-* @li <b>Sample rate jittering</b> algorithm eliminates issues with resonant noise frequencies
-* @li Generated assembly implementation <b>maximizes noise immunity</b> and <b>minimizes execution time</b>
-* @li Ability to force the scan sequence to use the <b>DAC as the reference voltage</b> to the ADC's hold capacitor.
+* @li   Differential CVD scanning method drastically <b>attenuates low frequency noise</b> (Including 50/60Hz, up to low KHz)
+* @li   <b>Sample rate jittering</b> algorithm eliminates issues with resonant noise frequencies
+* @li   Generated assembly implementation <b>maximizes noise immunity</b> and <b>minimizes execution time</b>
+* @li   Ability to force the scan sequence to use the <b>DAC as the reference voltage</b> to the ADC's hold capacitor.
 * @subsection FilteringFeatures - Filtering Module 
-* @li Decimate-filtered result register seeding an accumulator array provides <b>impulse noise rejection</b> and an increase in signal through <b>oversampling</b>
-* @li Baseline average <b>tracks environmental changes</b> to maximize response time
-* @li Enhanced filtering options allow for <b>customizable filter behavior</b> and update speed based on the application's requirements
-* @li <b>Median filter</b> implemented for proximity sensors to further increase the SNR
+* @li   Decimate-filtered result register seeding an accumulator array provides <b>impulse noise rejection</b> and an increase 
+*       in signal through <b>oversampling</b>
+* @li   Baseline average <b>tracks environmental changes</b> to maximize response time
+* @li   Enhanced filtering options allow for <b>customizable filter behavior</b> and update speed based on the 
+*       application's requirements
+* @li   <b>Median filter</b> implemented for proximity sensors to further increase the SNR
 * @subsection DecodingFeatures - Decoding Module 
-* @li <b>Individual thresholds</b> provide the ability to adjust for different sensor sizes and types
-* @li <b>Threshold hysteresis</b> reduces sensor flickering in noisy conditions as well as increasing the reliability of sensor state transitions
-* @li Configurable <b>press timer</b> to implement a <b>maximum press duration</b> for the application
-* @li <b>Debounce counters</b> provided to further increase reliability, if desired.
-* @li <b>Most Pressed Algorithm</b> is implemented automatically for matrix applications on the rows and columns, separately.
-* @li <b>Toggle mode</b> provided to quickly and efficiently implement a change-on-press-only button output behavior.
+* @li   <b>Individual thresholds</b> provide the ability to adjust for different sensor sizes and types
+* @li   <b>Threshold hysteresis</b> reduces sensor flickering in noisy conditions as well as increasing the reliability of 
+*       sensor state transitions
+* @li   Configurable <b>press timer</b> to implement a <b>maximum press duration</b> for the application
+* @li   <b>Debounce counters</b> provided to further increase reliability, if desired.
+* @li   <b>Most Pressed Algorithm</b> is implemented automatically for matrix applications on the rows and columns, separately.
+* @li   <b>Toggle mode</b> provided to quickly and efficiently implement a change-on-press-only button output behavior.
 * @subsection CommunicationFeatures - Communication 
-* @li Preconfigured <b>software or hardware UART</b> implementation to report ASCII data one-way to a COM port
-* @li <b>UART, I2C, and SPI two-way communication</b> protocol to read/write configuration and RAM values at run-time
-* @li <b>Store configuration values in EEPROM</b> for run-time editing capability
+* @li   Preconfigured <b>software or hardware UART</b> implementation to report ASCII data one-way to a COM port
+* @li   <b>UART, I2C, and SPI two-way communication</b> protocol to read/write configuration and RAM values at run-time
+* @li   <b>Store configuration values in EEPROM</b> for run-time editing capability
 *
 */
 
@@ -1253,21 +1455,26 @@
 * @li @subpage GettingStartedCustom "Custom Hardware"
 * @li @subpage GettingStartedNewP8  "Creating a New MPLAB 8 Framework Project"
 * @li @subpage GettingStartedNewPX  "Creating a New MPLAB X Framework Project"
-* @li @subpage PKSARS232            "Using the PICKit Serial Analyzer as an RS232-to-USB converter"
+* @li @subpage PKSARS232            
 */
 /**
-* @page Troubleshoot Troubleshooting
+* @page optimizing Optimizing Performance
 * @li @subpage ts-Sensitivity   "Increasing Sensitivity"
 * @li @subpage ts-ResponseTime  "Adjusting the Response Time"
 * @li @subpage ts-Waveform      "Tuning the CVD Waveform"
-* @li @subpage ts-Comms         "Establishing PC Communications"
 * @li @subpage digCom
 */
 /**
-* @page ts-Sensitivity Increasing Sensitivity - Troubleshooting
+* @page troubleshoot Troubleshooting
+* @li @subpage ts-Comms         "Establishing PC Communications"
+* @li @subpage digCom
+* @li @subpage BCPGUI           "Backwards-compatible UART for previous Profilab GUI version"
+*/
+/**
+* @page ts-Sensitivity Increasing Sensitivity - Optimizing Performance
 *
 * @li <b>1. Make sure your application's CVD waveform is correct.</b><br><br>
-*        See the @ref ts-Waveform "Waveform Troubleshooting guide" for help with this process. 
+*        See the @ref ts-Waveform "Waveform Optimization guide" for help with this process. 
 * 
 * <br>
 *
@@ -1318,7 +1525,7 @@
 *        sensors and normal touch sensors with long traces.
 */
 /**
-* @page ts-ResponseTime Faster Response Time - Troubleshooting
+* @page ts-ResponseTime Faster Response Time - Optimizing Performance
 *
 * The response time of your system is going to be determined by the equation:
 * @code
@@ -1367,8 +1574,70 @@
 *        #MTOUCH_DEBOUNCE_RELEASE is for the PRESS-to-RELEASE transition.
 */
 /**
-* @page ts-Waveform Tuning the CVD Waveform - Troubleshooting
+* @page ts-Waveform Tuning the CVD Waveform - Optimizing Performance
 *
+* @section mTouch CVD Waveform Steps
+*
+* <tt>CVD :: Capacitive Voltage Divider</tt><br>
+* <tt>DAC :: Digital-to-Analog Converter</tt><br>
+* <tt>ADC :: Analog-to-Digital Converter</tt><br>
+* <tt>T<sub>AD</sub> :: Time required for the ADC to complete one bit conversion.</tt><br><br>
+*
+* <ul>
+* <li>  Stage 1 (a) :: Pre-charge
+*       <ul>
+*       <li>The sensor is set to <b>output low</b>.
+*       <li>Either:
+*           <ul>
+*           <li>The DAC is set to <b>V<sub>DD</sub></b> and the ADC mux is pointed to the DAC.
+*           <li>Another analog channel is set as <b>output high</b> and the ADC mux is pointed to that channel.
+*           </ul>
+*       <li>(Delay, based on #CVD_CHOLD_CHARGE_DELAY)
+*       </ul><br><br>
+* <li>  Stage 2 (a) :: Acquisition / Settling
+*       <ul>
+*       <li>The sensor is set to an <b>input</b>.
+*       <li>The ADC mux is updated to point to the sensor.
+*       <li>(Delay, based on #CVD_SETTLING_DELAY)
+*       </ul><br><br>
+* <li>  Stage 3 (a) :: Sampling
+*       <ul>
+*       <li>The ADC's GO/nDONE bit is set.
+*       <li>The ADC mux waits 1/2 T<sub>AD</sub> then disconnects from the sensor.
+*       <li>(The mTouch framework automatically delays the necessary time for the mux to disconnect.)
+*       <li>The sensor is set to an <b>output</b>.
+*       </ul>
+* </ul>
+* The ADC conversion completes while math is being performed on the previous mTouch scan result.
+* <ul>
+* <li>  Stage 1 (b) :: Pre-charge
+*       <ul>
+*       <li>The sensor is set to <b>output high</b>.
+*       <li>Either:
+*           <ul>
+*           <li>The DAC (digital-to-analog converter) is set to <b>V<sub>SS</sub></b> and the ADC (analog-to-digital converter) mux is pointed to the DAC.
+*           <li>Another analog channel is set as <b>output low</b> and the ADC mux is pointed to that channel.
+*           </ul>
+*       <li>(Delay, based on #CVD_CHOLD_CHARGE_DELAY)
+*       </ul><br><br>
+* <li>  Stage 2 (b) :: Acquisition / Settling
+*       <ul>
+*       <li>The sensor is set to an <b>input</b>.
+*       <li>The ADC mux is updated to point to the sensor.
+*       <li>(Delay, based on #CVD_SETTLING_DELAY)
+*       </ul><br><br>
+* <li>  Stage 3 (b) :: Sampling
+*       <ul>
+*       <li>The ADC's GO/nDONE bit is set.
+*       <li>The ADC mux waits 1/2 T<sub>AD</sub> then disconnects from the sensor.
+*       <li>(The mTouch framework automatically delays the necessary time for the mux to disconnect.)
+*       <li>The sensor is set to an <b>output</b>.
+*       </ul>
+* </ul>
+* The ADC conversion completes. When finished, the first scan is subtracted from the second. The second
+* scan is offset by 1024 to make sure this subtract never goes negative.
+*
+* @section mTouch CVD Waveform Delays
 *
 * Below is a picture of what the CVD waveform should look like on a scope. Note that sensor lines are
 * used both for scanning themselves and the other sensors. You may notice the sensor being pulled high
@@ -1378,7 +1647,7 @@
 *
 * The mTouch framework provides the ability to tune the timing of CVD waveform for specific hardware
 * designs. The amount of parasitic capacitance, the size of the sensor, the size of the sensor's series
-* resistor, and VDD all play a role in determining the amount of time required to charge/discharge
+* resistor, and V<sub>DD</sub> all play a role in determining the amount of time required to charge/discharge
 * during each step of the scan.
 *
 * @image html cvdWaveformDelay.jpg "CVD Waveform Delay Configuration Options"
@@ -1395,7 +1664,8 @@
 * <b>To correctly set this value:</b>
 * <ol>
 * <li>Set this value to 0, compile and program.
-* <li>Look at the raw values on the mTouch GUI or through a terminal program.
+* <li>Look at the raw values on the mTouch One-Way GUI or through a terminal program.<br>
+*     You can find the mTouch One-Way GUI in <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/mTouch One-Way GUI</tt>
 * <li>Produce the largest shift possible on the sensor with the highest amount of capacitance by pressing
 * on it. ("Highest Capacitance" usually corresponds to the sensor with the highest unpressed raw value.)
 * <ul>
@@ -1412,17 +1682,18 @@
 * @li <b>CVD_SETTLING_DELAY</b><br><br>
 * This value determines the amount of time provided for the external sensor and internal hold capacitor
 * to charge-average their voltages.<br><br>
-* If this value is <b>too small</b>: The sensors will not be as sensitive as they could be and your sensor's readings will be VDD dependant.<br>
+* If this value is <b>too small</b>: The sensors will not be as sensitive as they could be and your sensor's readings will be V<sub>DD</sub> dependant.<br>
 * If this value is <b>too large</b>: The noise immunity of the system will not be as robust as it could be.<br><br>
 * <b>To correctly set this value:</b>
 * <ol>
 * <li>Set this value to 0, compile and program.
-* <li>Look at the raw values on the mTouch GUI or through a terminal program while powering the system at the desired VDD level.
-* <li>Adjust VDD by plus and minus 0.5V 
+* <li>Look at the raw values on the mTouch One-Way GUI or through a terminal program while powering the system at the desired V<sub>DD</sub> level.<br>
+*     You can find the mTouch One-Way GUI in <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/mTouch One-Way GUI</tt>
+* <li>Adjust V<sub>DD</sub> by plus and minus 0.5V 
 * <ul>
-* <li>Do you notice any change in the unpressed value as VDD is changing? If no, leave this value alone. If yes...
+* <li>Do you notice any change in the unpressed value as V<sub>DD</sub> is changing? If no, leave this value alone. If yes...
 * </ul>
-* <li>Increase the delay until the sensor's reading no longer changes as VDD changes.
+* <li>Increase the delay until the sensor's reading no longer changes as V<sub>DD</sub> changes.
 * </ol>
 * <br>
 * Once this has occurred, the settling time has been correctly tuned to provide the maximum amount of sensitivity
@@ -1432,33 +1703,239 @@
 /**
 * @page ts-Comms PC Communications - Troubleshooting
 *
-* <b>Step-by-Step Guide to Troubleshooting the Framework's PC Communications</b><br>
+* <center>
+* <table border="2">
+* <tr valign="top"><td align="left">
+*       <center><b>IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT</b></center>
 *
-* <br>
+*       The default PICKit Serial (PKSA) is not loaded with the correct hex file. To use the PKSA to communicate with the PC, one of two
+*       hex files must be programmed into the PKSA. A utility program has been provided to help with this step.
 *
-* @li <b>1. Make sure #MCOMM_ENABLED is defined in the mComm_config.h file.</b>
+*       The two hex files you must choose from:
+*       @li <b>UART_USB_PICKitSerial_V1.40.hex</b> :: When prompted, choose this hex file if you are implementing <b>one-way communication</b>.
+*           This hex file will make your PKSA enumerate on the PC as a COM port. The PKSA will now function as a UART-to-USB converter. You
+*           can then view ASCII data in a terminal window or use the mTouch One-Way GUI to graph the data in real-time.
+*       @li <b>PKS-0307-WITHBOOT-0103.HEX</b> :: When prompted, choose this hex file if you are implementing <b>two-way communication</b>. This
+*           hex file is an updated version of the factory default firmware. Your PKSA will behave exactly as before, but with additional
+*           support for RS-232 break characters. You can then use the mTouch Two-Way GUI to change configuration values at run-time and
+*           view the effect on the sensors in real-time.
+*
+*       The PICKit Serial Loader Utility is located in <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/PICKit Serial Loader</tt>
+*
+*       The @ref PKSARS232 "PICKit Serial Loader Guide" provides more information.
+*
+*       <center><b>IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT</b></center>
+* </td></tr>
+* </table>
+* </center>
+*
+* <br><br>
+*
+* There are two main types of communication built in to the mTouch Framework's mComm module: 
+* @li   @subpage ts-Comms-1way "One-way communication" is handled through UART only. It outputs ASCII data to be read from a terminal window
+*       or from a GUI that reads COM ports, such as the mTouch One-Way GUI. You can find the mTouch One-Way GUI in 
+*       <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/mTouch One-Way GUI</tt><br><br>
+*       If you wish to use the PICKit Serial with this communication type, it must be loaded with the UART-to-USB
+*       firmware. See @ref PKSARS232 "this guide" for information on loading this hex file to your PKSA.<br>
+*       @note For backward compatibility with previous versions of the Profilab GUI, please follow @ref BCPGUI "this guide".<br><br>
+* @li   <b>Two-way communication</b> can be implemented with UART, I2C, and SPI. <br><br>
+*       <a href="../mComm Users Guide.pdf"><b>User's Configuration Guide - (PDF)</b></a><br>
+*       <a href="../mComm Programmers Guide.pdf"><b>Programmer's Guide - (PDF)</b></a><br>
+*       <a href="../mTouch 2-Way GUI User Guide.pdf"><b>mTouch 2-Way GUI User Guide - (PDF)</b></a><br><br>
+*       The protocol allows for efficient, direct access to EEPROM and RAM for both reading and writing.
+*       The data is binary, so must be interpretted by a master instead of a terminal window. This mode allows changing values 
+*       at run-time and execution of user commands. This option is used for communicating to the mTouch Two-Way GUI and for implementing 
+*       custom board-level communications.<br><br>
+*       If you wish to use the PICKit Serial with the UART two-way communication type, the PKSA firmware must be 
+*       updated to the latest PKSA version to support break characters. See @ref PKSARS232 "this guide" for information
+*       on updating the PKSA hex file.<br><br>
+*/
+
+/**
+* @page BCPGUI   PC Communications :: Backward Compatibility :: One-way UART Profilab GUI v1.0
+* 
+* The new version of the one-way UART GUI uses a different ASCII protocol to support the larger feature 
+* set of the mTouch Framework. The old packet structure was:
+*   @li Semi-colon delimited
+*   @li First byte: Button state mask
+*   @li Graph data of all other integers until CR/LF
+*   @code 
+*   Example: 00001;00100;01000;10000;
+*   @endcode
+*
+* <ol>
+* <li>How to adjust mComm_config.h file configuration.
+*   @code
+*   #define MCOMM_ENABLED                                             // Must be defined
+*   #define MCOMM_TYPE                    MCOMM_UART_ONE_WAY          // Must be defined to this value
+*   #define MCOMM_UART_BAUDRATE           38400                       // (or) other valid baud rate option
+*   @endcode
+*   @code
+*   #define MCOMM_UART_1WAY_MODULE        MCOMM_UART_HARDWARE_MODULE  // (or) MCOMM_UART_SOFTWARE_IMPLEMENTATION
+* 
+*     // If MCOMM_UART_SOFTWARE_IMPLEMENTATION is chosen:
+*     #define MCOMM_UART_SOFT_TXPORT        PORTA
+*     #define MCOMM_UART_SOFT_TXTRIS        TRISA   
+*     #define MCOMM_UART_SOFT_TXPIN         5       // <-- The bit of the PORT/TRIS register
+*                                                   //     NOT the hardware pin on the device
+*   @endcode
+*   @code
+*   #define MCOMM_UART_1WAY_OUTPUT        MCOMM_UART_1WAY_DECIMAL     // (or) MCOMM_UART_1WAY_HEX        
+*   #define MCOMM_UART_1WAY_DELIMITER     ';'                         // <-- IMPORTANT                  
+*   @endcode
+*
+* <li>Modify the bottom half of the mComm.c function: mComm_Service()<br><br>
+* <b>Replace this code:</b>
+* @code
+*         #if defined(MCOMM_ONE_WAY_ENABLED)
+*             // OUTPUT LOGIC FOR ONE-WAY COMMUNICATIONS.
+* 
+*             #if defined(MCOMM_UART_1WAY_OUT_STATE)
+*             mComm_UART_Int2ASCII((uint16_t)mTouch_stateMask);
+*             #else
+*             mComm_UART_Int2ASCII(0);
+*             #endif
+*             
+*             #if defined(MCOMM_UART_1WAY_OUT_TOGGLE) && defined(MTOUCH_TOGGLE_ENABLED)
+*             mComm_UART_Int2ASCII((uint16_t)mTouch_toggle);
+*             #else
+*             mComm_UART_Int2ASCII(0);
+*             #endif
+*             
+*             #if defined(MCOMM_UART_1WAY_OUT_SLIDER) && defined(MTOUCH_NUMBER_OF_SLIDERS) && (MTOUCH_NUMBER_OF_SLIDERS > 0)
+*             mComm_UART_Char2ASCII(mTouch_slider[0]);            
+*             #else
+*             mComm_UART_Char2ASCII(0);
+*             #endif
+* 
+*             #if defined(MCOMM_UART_1WAY_OUT_MATRIX) && defined(MTOUCH_MATRIX_ENABLED)
+*             mComm_UART_PutChar('(');
+*             if (mTouch_Matrix_isPressed())
+*             {
+*                 mComm_UART_PutChar((uint8_t)(mTouch_Matrix_getColumn()) + 0x30);
+*                 mComm_UART_PutChar(':');
+*                 mComm_UART_PutChar((uint8_t)(mTouch_Matrix_getRow())    + 0x30);
+*             }
+*             else
+*             {
+*                 mComm_UART_PutChar('x');
+*                 mComm_UART_PutChar(':');
+*                 mComm_UART_PutChar('x');
+*             }
+*             mComm_UART_PutChar(')');
+*             mComm_UART_PutChar(MCOMM_UART_1WAY_DELIMITER);
+*             #endif
+*             
+*             #if defined(MCOMM_UART_1WAY_OUT_READING) || defined(MCOMM_UART_1WAY_OUT_BASELINE)
+*             for (uint8_t i = 0; i < MTOUCH_NUMBER_SENSORS; i++)
+*             {
+*                 #if defined(MCOMM_UART_1WAY_OUT_READING)
+*                 mComm_UART_Int2ASCII(mTouch_GetSensor(i));      
+*                 #endif                                          
+*                 #if defined(MCOMM_UART_1WAY_OUT_BASELINE)
+*                 mComm_UART_Int2ASCII(mTouch_GetAverage(i));     
+*                 #endif
+*             }
+*             #endif
+*             
+*             mComm_UART_PutChar(0x0D);   // CR                   
+*             mComm_UART_PutChar(0x0A);   // LF
+*         
+*         #endif
+* @endcode
+* 
+* <b>With this code:</b>
+* @code
+*         #if defined(MCOMM_ONE_WAY_ENABLED)
+*             // OUTPUT LOGIC FOR ONE-WAY COMMUNICATIONS.
+* 
+*             mComm_UART_Int2ASCII((uint16_t)mTouch_stateMask);
+*             
+*             #if defined(MCOMM_UART_1WAY_OUT_READING) || defined(MCOMM_UART_1WAY_OUT_BASELINE)
+*             for (uint8_t i = 0; i < MTOUCH_NUMBER_SENSORS; i++)
+*             {
+*                 #if defined(MCOMM_UART_1WAY_OUT_READING)
+*                 mComm_UART_Int2ASCII(mTouch_GetSensor(i));      
+*                 #endif                                          
+*                 #if defined(MCOMM_UART_1WAY_OUT_BASELINE)
+*                 mComm_UART_Int2ASCII(mTouch_GetAverage(i));     
+*                 #endif
+*             }
+*             #endif
+*             
+*             mComm_UART_PutChar(0x0D);   // CR                   
+*             mComm_UART_PutChar(0x0A);   // LF
+*         
+*         #endif
+* @endcode
+* </ol>
+*/
+
+/**
+* @page ts-Comms-1way   PC Communications :: One-way UART ASCII output
+* 
+* <ol>
+* <li>Make sure the mComm_config.h file is properly configured.
 * @code
 * #define MCOMM_ENABLED
+* #define MCOMM_TYPE                    MCOMM_UART_ONE_WAY
+* #define MCOMM_UART_BAUDRATE           38400                       // (or) other valid baud rate option
+* @endcode
+* @code
+* #define MCOMM_UART_1WAY_MODULE        MCOMM_UART_HARDWARE_MODULE  // (or) MCOMM_UART_SOFTWARE_IMPLEMENTATION
+* 
+*     // If MCOMM_UART_SOFTWARE_IMPLEMENTATION is chosen:
+*     #define MCOMM_UART_SOFT_TXPORT        PORTA
+*     #define MCOMM_UART_SOFT_TXTRIS        TRISA   
+*     #define MCOMM_UART_SOFT_TXPIN         5       // <-- The bit of the PORT/TRIS register
+*                                                   //     NOT the hardware pin on the device
+* @endcode
+* @code
+* #define MCOMM_UART_1WAY_OUTPUT        MCOMM_UART_1WAY_DECIMAL     // (or) MCOMM_UART_1WAY_HEX        
+* #define MCOMM_UART_1WAY_DELIMITER     ';'                         
+* @endcode
+* If you wish to use the PIC18F PIC24F One-Way GUI, force the mComm module to follow the GUI's packet structure by defining this value:
+* @code
+* #define MCOMM_UART_1WAY_OUT_GUIv1_1
+* @endcode
+* The following options will determine what values are output by the UART. Matrix output is not supported by the GUI but may be seen from a terminal window.
+* @code
+* #define MCOMM_UART_1WAY_OUT_STATE             // <-- If defined, outputs the state mask
+* #define MCOMM_UART_1WAY_OUT_TOGGLE            // <-- If defined, outputs the toggle state mask
+* #define MCOMM_UART_1WAY_OUT_SLIDER            // <-- If defined, outputs the slider output value
+* #define MCOMM_UART_1WAY_OUT_MATRIX            // <-- If defined, outputs the matrix press coordinate
+* #define MCOMM_UART_1WAY_OUT_READING           // <-- If defined, outputs the raw reading values
+* #define MCOMM_UART_1WAY_OUT_BASELINE          // <-- If defined, outputs the sensor baseline values
 * @endcode
 *
-* <br>
+* If you are using a processor with an APFCON register that allows for multiple pins to be used as 'TX', your
+* application is responsible for initializing APFCON to the correct value for your hardware layout. The mTouch
+* framework will warn you about this when compiling. To remove this warning, uncomment the #define at the bottom
+* of mTouch_config.h:
+* @code
+* #define APFCON_INITIALIZED    // For processors with an APFCON register(s), this 
+*                               // #define can be uncommented to stop the mTouch 
+*                               // Framework from producing a "remember to set 
+*                               // APFCON" warning.
+*                               //
+*                               // RULE OF PROGRAMMING #4: Register bits initialize, 
+*                               //      by law, to the value you don't want. Always 
+*                               //      explicitly initialize.
+* @endcode
 *
-* @li <b>2. Program the board normally (not in debug mode) and connect the PKSA to both the PC and the board.</b><br>
+* <li>Program the board normally (not in debug mode) and connect the PKSA to both the PC and the board.<br>
 *
-* <br>
-*
-* @li <b>3. Make sure both the PIC and the PKSA are being supplied with power.</b><br><br>
-*       Either:
+* <li>Make sure both the PIC and the PKSA are being supplied with power. Either:
 *       <ul>
 *       <li>Supply power to the PIC from an external source that is also supplying power to the PKSA's PWR and GND pins.
-*       <li>Supply power to the PIC from the PKSA by pressing and holding the black button for 3 seconds until the green power LED turns on.
-*       <li>Supply power to the PIC from an external source that is NOT connected to the PWR/GND pins of the PKSA and then supply power to the PKSA by pressing on its black button for 3 seconds until the green power LED turns on.
+*       <li>Supply power to the PIC from the PKSA by pressing and holding the black button for 3 seconds until the green 
+*           power LED turns on.
+*       <li>Supply power to the PIC from an external source that is NOT connected to the PWR/GND pins of the PKSA and then 
+*           supply power to the PKSA by pressing on its black button for 3 seconds until the green power LED turns on.
 *       </ul>
-*       Be careful not to supply power to the PIC from two different sources as you may destroy the board.
+*       @note Be careful not to supply power to the PIC from two different sources as you may destroy the board.
 *
-* <br>
-*
-* @li <b>4. Is the PKSA's red LED on?</b><br><br>
+* <li>Is the PKSA's red LED on?<br>
 *       If no -
 *       <ul>
 *       <li> Use a scope to verify the TX pin of the PKSA is receiving data from the PIC.
@@ -1466,11 +1943,9 @@
 *            See @ref PKSARS232 "this guide" on using the PKSA loader utility to reflash the PICKit 
 *            Serial Analyzer's firmware.
 *       </ul>
-*       If yes -
+*       If yes - continue to 5.
 *
-* <br>
-*
-* @li <b>5. Determine which COM port has been assigned to the PKSA.</b><br><br>
+* <li>Determine which COM port has been assigned to the PKSA.<br>
 *       In Windows - 
 *       <ul>
 *       <li> Right click 'My Computer' --> Properties --> Hardware --> Device Manager
@@ -1481,19 +1956,20 @@
 *       version of Windows you are using, but can be accomplished by right clicking the file and selecting
 *       'Install' in most cases.
 *
-* <br>
-*
-* @li <b>5. Open the mTouch GUI and make sure the communication settings are set to:</b><br><br>
+* <li>Open the mTouch One-Way GUI and make sure the communication settings are set to:<br><br>
 *       <ul>
-*       <li> 115.2 kbps
+*       <li> The baud rate you have chosen for #MTOUCH_UART_BAUDRATE in mComm_config.h.
 *       <li> COM Port dependant on current assignment in Device Manager.
 *       </ul>
+* </ol>
 */
 
 /**
 * @page digCom Communication Implementation
 *
-* The communication module of the mTouch Framework has been designed to talk to the included mTouch
+* <b>This is for one-way communications and only describes the packet structure for the mTouch One-Way GUI</b>.
+*
+* The communication module of the mTouch Framework has been designed to talk to the included mTouch One-Way
 * GUI by default but can easily be adapted to meet your needs. The framework handles all initialization
 * requirements once it knows the PIC's oscillator speed and desired baud rate. 
 *
@@ -1503,34 +1979,41 @@
 * @endcode
 * which looks like this when populated:
 * @code
-* 65525;02301;02354;02332;02296;02318
+* 00000;02301;02354;02332;02296;02318
 * @endcode
-* @note A @c 1 in the bit mask means the sensor is not pressed (either initializing or released). A @c 0 
-* means that it is pressed.
+* @note A @c 1 in the bit mask means the sensor is pressed. A @c 0 means that it is released.
 *
 * The data is sent in decimal format with a maximum of 5 digits by default.
 */
 
 /**
-* @page PKSARS232 Using the PICKit Serial Analyzer as an RS232-to-USB converter
+* @page PKSARS232 Loading new firmware on the PICKit Serial Analyzer
 *
 * @section Intro Introduction
 *   The PICKit Serial Analyzer (PKSA) is an easy way to connect the UART of your PIC&reg; microcontroller to your PC. 
-*   All of the required steps are handled by the PICKit Serial Loader Utility provided with the framework.
+*   All of the required steps are handled by the PICKit Serial Loader Utility provided with the framework in the
+*   'Utilities' folder of the demos.
 *
-*   <b>Maximum Speed</b>: 115.2 kbps<br>
-*   <b>Voltage Level</b>: Depends on the voltage applied to pin #2. Valid range is from 3-5V.<br>
-*   Optional 5V (<20mA) power supply from the PICKit Serial Analyzer.<br>
+*   <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/PICKit Serial Loader</tt>
 *
-* @section Convert Changing Your PICKit Serial Analyzer into an RS-232 Converter
+*   There are two different ways the PKSA can be used:
+*   @li <b>UART-to-USB converter</b> :: UART_USB_PICKitSerial_V1.40.hex :: PKSA behaves as a COM port when connected to the PC.
+*   @li <b>Default PKSA Behavior</b> :: PKS-0307-WITHBOOT-0103.HEX :: PKSA behaves as an HID device that is manipulated through a DLL.
+*
+*   An update to the default PKSA hex file is provided to add support for the RS-232 'break' character. This is required
+*   for communicating with the mTouch two-way GUI.
+*
+* @section Convert Changing the PICKit Serial Analyzer's Hex File
 *   <ol>
-*   <li>Press the button on the PICKit Serial Analyzer when connecting to PC's USB to enter @c Bootloader @c Mode.<br>
+*   <li>Press the button on the PICKit Serial Analyzer when connecting to PC's USB to enter <tt>Bootloader Mode</tt>.<br>
 *     (The 'Target' and 'Busy' LEDs should be flashing quickly.)
-*   <li>Open the PICKit Serial Loader Utility provided by the framework
-*   <li>Follow the on-screen instructions
+*   <li>Open the PICKit Serial Loader Utility provided by the framework in the Utilities folder of the demos.
+*   <li>Follow the on-screen instructions to load the new hex file. Hex files and drivers are provided in the same folder 
+*       as the loader utility. Make sure to select correct hex file depending on the desired behavior (UART-to-USB COM 
+*       port / Updated Default PKSA).
 *   </ol>
 *
-* @section Use Using your RS-232 Converter
+* @section Use Using your PICKit Serial as a UART-to-USB Converter
 *   <ol>
 *   <li>Unplug and replug the PKSA. Press and hold the black PKSA button to toggle the on-board 5V power supply.
 *       <ul>
@@ -1543,9 +2026,19 @@
 *       </ul>
 *   </ol>
 *
+* @section UseNormal Using your PICKit Serial with the default PKSA firmware
+*   <ol>
+*   <li>Power your mTouch board and connect the PKSA.
+*   <li>Open the mTouch Two-Way GUI. The program will begin communicating or will provide error messages with suggestions for resolve any issues.
+*   </ol>
+*
 * @image html pksaExtVdd.JPG "Example schematic connecting the PKSA with an external power supply"
 * @image html pksaVdd.JPG "Example schematic of PKSA supplying power to the board"
-* @image html pksaExt5Vdd.JPG "Example schematic of connecting PKSA with an external 5V power supply. Notice - no V<sub>DD</sub> connection required."
+* @image html pksaExt5Vdd.JPG "Example schematic of connecting PKSA with an external 5V power supply. Notice - no VDD connection required."
+*
+*   <b>Maximum Speed</b>: 115.2 kbps<br>
+*   <b>Voltage Level</b>: Depends on the voltage applied to pin #2. Valid range is from 3-5V.<br>
+*   Optional 5V (<20mA) power supply from the PICKit Serial Analyzer.<br>
 *
 * @section Pinout PICKit Serial Analyzer Pin Configuration
 *   <ol>
@@ -1574,33 +2067,34 @@
 * The kit comes pre-programmed and set to operate in the configuration listed below. If
 * you need to alter any of the parameters, then a new hex file will need to be generated
 * and the main board will need to be reprogrammed with the new firmware. MPLAB IDE will
-* then be required as well as a C compiler.
+* then be required as well as a compatible C compiler.
 *
-* @section GSE_DSC Default Software Configuration:
-* @li Target MCU: <b>PIC16F1937</b>. Possible Values: @ref PICSupport "See here" for supported PIC microcontrollers.
-* @li #MTOUCH_NUMBER_SENSORS: <b>7</b>. Possible Values: 1-15
-* @li Sensor/Pin Assignment:
-* @code
-*   #define MTOUCH_SENSOR0             AN12 
-*   #define MTOUCH_SENSOR1             AN10 
-*   #define MTOUCH_SENSOR2             AN8  s
-*   #define MTOUCH_SENSOR3             AN9  
-*   #define MTOUCH_SENSOR4             AN11 
-*   #define MTOUCH_SENSOR5             AN13 
-*   #define MTOUCH_SENSOR6             AN4  
-* @endcode
-* @li #MTOUCH_SAMPLES_PER_SCAN: <b>50</b>. Valid range: 1-65535
-* @li Press Threshold Values:
-* @code
-*   #define THRESHOLD_PRESS_SENSOR0         1245
-*   #define THRESHOLD_PRESS_SENSOR1         1566
-*   #define THRESHOLD_PRESS_SENSOR2         2021
-*   #define THRESHOLD_PRESS_SENSOR3         1688
-*   #define THRESHOLD_PRESS_SENSOR4         2154
-*   #define THRESHOLD_PRESS_SENSOR5         1466
-*   #define THRESHOLD_PRESS_SENSOR6         1783
-* @endcode
+* @section GSE_LAYOUTS Hardware Layouts / Configurations:
+* Each of the board versions listed below has a matching demo project provided in:
+*   <b><tt>Your MLA Directory/mTouchCapDemos/PIC16F_CVD_Demos</tt></b>
+*
+* @li @subpage  GSE_R3   "02-02091-R3"          :: CVD Eval Board
+* @li @ref      GSE_R3   "233-04-2028 Rev A"    :: CVD Eval Board       (Use 02-02091-R3 project)
+* @li @subpage  GSE_R2   "02-02091-R2"          :: CSM-CVD Eval Board
+* @li @ref      GSE_R2   "02-02091-R1"          :: CSM-CVD Eval Board   (Use 02-02091-R2 project)
+* @li @subpage  GSE_RF   "233-04-1008 Rev F"    :: CSM Eval Board
+* @li @subpage  GSE_RA   "02-02091-RA"          :: CSM Eval Board
 * 
+* @image html evalNumber.jpg "Look on the sticker on the back of the evaluation board to match the project's folder name."
+*
+*
+* @section GSE_GUI Communicating with the mTouch GUI:
+* The demo hex files and projects  for the evaluation boards are preconfigured to work with 
+* the mTouch Two-Way GUI out-of-the box. The default PICKit Serial Analyzer firmware will need 
+* to be updated to the latest version. The PICKit Serial Loader utility has been provided to make 
+* this easy. You can find it here: <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/PICKit Serial Loader</tt>
+*
+* You must load the <b>PKS-0307-WITHBOOT-0103.HEX</b> when requested by the loader utility. See 
+* @ref PKSARS232 "this guide".
+* 
+* Once this is done, power the mTouch evaluation board externally (through any source
+* other than the PKSA header), connect the PKSA to the board, and start the mTouch GUI.
+*
 * @section GSE_CNS Changing the Number of Sensors:
 * If you need the stack to manage more or less than the default number, all you need to 
 * do is update the constant #MTOUCH_NUMBER_SENSORS to any other value from 1 to 15. This
@@ -1656,13 +2150,219 @@
 *   #define THRESHOLD_PRESS_SENSOR6         65
 * @endcode
 *
+* @section Framework Configuration and Application API Hooks
+* See the @ref featBasic "basic sensor configuration" guide and the @ref FrameworkFeatures "feature-specific help" section.
 */
+
+/**
+* @page GSE_R3  Quick Start Guide :: CVD Eval Board
+*
+* @li 02-02091-R3
+* @li 233-04-2028 Rev A
+*
+* @code
+* #define MTOUCH_SENSOR0              AN0         
+* #define MTOUCH_SENSOR1              AN1         
+* #define MTOUCH_SENSOR2              AN2    
+* #define MTOUCH_SENSOR3              AN3   
+* #define MTOUCH_SENSOR4              AN4
+* #define MTOUCH_SENSOR5              AN5
+* #define MTOUCH_SENSOR6              AN6
+* #define MTOUCH_SENSOR7              AN7
+* #define MTOUCH_SENSOR8              AN8 
+* #define MTOUCH_SENSOR9              AN9
+* #define MTOUCH_SENSOR10             AN10    
+* #define MTOUCH_SENSOR11             AN11    
+* #define MTOUCH_SENSOR12             AN12    
+* #define MTOUCH_SENSOR13             AN13  
+* 
+* #define LED0  LATC2
+* #define LED1  LATC1
+* #define LED2  LATC0
+* #define LED3  LATA7
+* #define LED4  LATA6
+* #define LED5  LATA4
+* #define LED6  LATD7
+* #define LED7  LATD6
+* #define LED8  LATD5
+* #define LED9  LATD4
+* #define LED10 LATD3
+* #define LED11 LATD2
+* #define LED12 LATD1
+* #define LED13 LATD0
+* 
+* ANSELA  = 0b00000000;
+* ANSELB  = 0b00000000;
+* ANSELD  = 0b00000000;
+* ANSELE  = 0b00000000;
+* LATA    = 0b11010000;
+* LATB    = 0b00000000;
+* LATC    = 0b00000111;
+* LATD    = 0b11111111;
+* LATE    = 0b00000000;
+* TRISA   = 0b00000000;
+* TRISB   = 0b00000000;
+* TRISC   = 0b00000000;
+* TRISD   = 0b00000000;
+* TRISE   = 0b00000000;
+* @endcode
+*/
+
+/**
+* @page GSE_R2  Quick Start Guide :: CSM-CVD Eval Board
+*
+* @li 02-02091-R1
+* @li 02-02091-R2
+*
+* @code
+* #define MTOUCH_SENSOR0              AN12    
+* #define MTOUCH_SENSOR1              AN10         
+* #define MTOUCH_SENSOR2              AN8    
+* #define MTOUCH_SENSOR3              AN9  
+* #define MTOUCH_SENSOR4              AN11
+* #define MTOUCH_SENSOR5              AN13
+* #define MTOUCH_SENSOR6              AN4     // Labeled '7' on the board
+* 
+* #define LED0  LATC0
+* #define LED1  LATA6
+* #define LED2  LATA7
+* #define LED3  LATE2
+* #define LED4  LATE1
+* #define LED5  LATE0
+* #define LED6  LATA3
+* #define LED7  LATA2
+* #define LED8  LATA1
+* #define LED9  LATB7     // ICSPDAT
+* #define LED10 LATB6     // ICSPCLK
+* #define LED11 LATC7     // RX
+* #define LED12 LATC6     // TX
+* #define LED13 LATC5
+* #define LED14 LATC2
+* #define LED15 LATC1
+* 
+* ANSELA  = 0b00000000;
+* ANSELB  = 0b00000000;
+* ANSELD  = 0b00000000;
+* ANSELE  = 0b00000000;
+* LATA    = 0b11001110;
+* LATB    = 0b11000000;
+* LATC    = 0b11100111;
+* LATD    = 0b00000000;
+* LATE    = 0b00000111;
+* TRISA   = 0b00000000;
+* TRISB   = 0b00000000;
+* TRISC   = 0b00000000;
+* TRISD   = 0b00000000;
+* TRISE   = 0b00000000;
+* @endcode
+*/
+
+/**
+* @page GSE_RA  Quick Start Guide :: CSM Eval Board
+*
+* @li 02-02091-RA
+*
+* @code
+* #define MTOUCH_SENSOR0              AN12         
+* #define MTOUCH_SENSOR1              AN10         
+* #define MTOUCH_SENSOR2              AN8    
+* #define MTOUCH_SENSOR3              AN9  
+* #define MTOUCH_SENSOR4              AN11
+* #define MTOUCH_SENSOR5              AN13
+* #define MTOUCH_SENSOR6              AN4     // Labeled '7' on the board
+* 
+* #define LED0  LATC0
+* #define LED1  LATA6
+* #define LED2  LATA7
+* #define LED3  LATE2
+* #define LED4  LATE1
+* #define LED5  LATE0
+* #define LED6  LATA3
+* #define LED7  LATA2
+* #define LED8  LATA1
+* #define LED9  LATB7     // ICSPDAT
+* #define LED10 LATB6     // ICSPCLK
+* #define LED11 LATC7     // RX not connected to PKSA header
+* #define LED12 LATC6     // TX not connected to PKSA header
+* #define LED13 LATC5
+* #define LED14 LATC2
+* #define LED15 LATC1
+* 
+* ANSELA  = 0b00000000;
+* ANSELB  = 0b00000000;
+* ANSELD  = 0b00000000;
+* ANSELE  = 0b00000000;
+* LATA    = 0b11001110;
+* LATB    = 0b11000000;
+* LATC    = 0b11100111;
+* LATD    = 0b00000000;
+* LATE    = 0b00000111;
+* TRISA   = 0b00000000;
+* TRISB   = 0b00000000;
+* TRISC   = 0b00000000;
+* TRISD   = 0b00000000;
+* TRISE   = 0b00000000;
+* @endcode
+*/
+
+/**
+* @page GSE_RF  Quick Start Guide :: CSM Eval Board
+*
+* @li 233-04-1008 Rev F
+*
+* @code
+* #define MTOUCH_SENSOR0              AN12         
+* #define MTOUCH_SENSOR1              AN10         
+* #define MTOUCH_SENSOR2              AN8    
+* #define MTOUCH_SENSOR3              AN9  
+* #define MTOUCH_SENSOR4              AN11
+* #define MTOUCH_SENSOR5              AN13
+* #define MTOUCH_SENSOR6              AN4     // Labeled '7' on the board
+* 
+* #define LED0  LATC0
+* #define LED1  LATA6
+* #define LED2  LATA7
+* #define LED3  LATE2
+* #define LED4  LATE1
+* #define LED5  LATE0
+* #define LED6  LATA3
+* #define LED7  LATA2
+* #define LED8  LATA1
+* #define LED9  LATB7     // ICSPDAT
+* #define LED10 LATB6     // ICSPCLK
+* #define LED11 LATC7     // RX
+* #define LED12 LATC6     // TX
+* #define LED13 LATC5
+* #define LED14 LATC2
+* #define LED15 LATC1
+* 
+* ANSELA  = 0b00000000;
+* ANSELB  = 0b00000000;
+* ANSELD  = 0b00000000;
+* ANSELE  = 0b00000000;
+* LATA    = 0b11001110;
+* LATB    = 0b11000000;
+* LATC    = 0b11100111;
+* LATD    = 0b00000000;
+* LATE    = 0b00000111;
+* TRISA   = 0b00000000;
+* TRISB   = 0b00000000;
+* TRISC   = 0b00000000;
+* TRISD   = 0b00000000;
+* TRISE   = 0b00000000;
+* @endcode
+*/
+
+
 /**
 * @page GettingStartedCustom Custom Hardware Quick Start Guide
 *
 * @note This guide assumes you are using custom hardware. For details on where to begin 
 * when implementing the mTouch framework on the mTouch CVD Evaluation Kit, use 
 * @ref GettingStartedEval "this guide".
+*
+* @section GS_C_NewProject  Create a new MPLAB Project
+* First, create a new @ref GettingStartedNewP8 "MPLAB 8" or @ref GettingStartedNewPX "MPLAB X" project for your new application.
 *
 * @section GS_SysConfig System Configuration
 * The mTouch_Init() function will automatically configure the ADC, communications module (if enabled),
@@ -1675,7 +2375,7 @@
 * <br>
 * <li>  Set the prescaler for the timer you are using for the mTouch scan interrupt. (Weak pull-up 
 *       resistors should be disabled.)<br>
-*       For more information about the implications of this setting, see @ref ResourceRequirements.
+*       For more information about the implications of this setting, see @ref rrMemory "Processing Requirements".
 * @code
 * OPTION_REG = 0b10000000;   // TMR0 Prescaler = 1:2 (~40% processor usage)
 * @endcode
@@ -1689,14 +2389,15 @@
 * </ol>
 * <br>
 * @section GS_InitConfig Framework Configuration and Application API Hooks
-* Follow the guidance provided here: @ref featBasic "Basic mTouch Sensor Configuration"
+* See the @ref featBasic "basic sensor configuration" guide and the @ref FrameworkFeatures "feature-specific help" section.
 */
 /**
 * @page GettingStartedNewP8 Creating a new MPLAB 8 mTouch Framework Project
 *
-* <b>The easiest way to start a new project</b> is to copy a fresh version of the source directory to your project
+* <b>The easiest way</b> to start a new project is to copy a fresh version of the source directory to your project
 * folder. The source directory contains an MPLAB 8 project which can then be used to start your application.
-*
+* @li <tt>[Your MLA Directory]/Microchip/mTouchCap/PIC12F PIC16F CVD Library/</tt>
+* 
 * <b>If you already have an application project</b> and wish to integrate the mTouch Framework with it:
 * <ol>
 * <li>  Copy the files in <tt>Your MLA Directory/Microchip/mTouchCap/mTouch Framework/</tt> to your local project directory.
@@ -1720,6 +2421,7 @@
 *
 * <b>The easiest way to start a new project</b> is to copy a fresh version of the source directory to your project
 * folder. The source directory contains an MPLAB X project which can then be used to start your application.
+* @li <tt>[Your MLA Directory]/Microchip/mTouchCap/PIC12F PIC16F CVD Library/</tt>
 *
 * <b>If you already have an application project</b> and wish to integrate the mTouch Framework with it:
 * <ol>
@@ -1728,7 +2430,7 @@
 *   <li>Including the <tt>Alternative Configurations/</tt> directory!
 *   </ul>
 *
-* <li>  Add all <tt>.c</tt> files to your MPLAB 8 project.
+* <li>  Add all <tt>.c</tt> files to your MPLAB X project.
 *
 * <li>  Use the following line of code to include the mTouch framework in your project:<br>
 * @code
@@ -1767,13 +2469,14 @@
 * <i>Only the hardware profile that is associated with your microcontroller's family is required.</i>
 *
 * Hardware Profile Options:
-* @li includes/mTouch_hardwareProfile_12F61x.h  :: PIC12F615, PIC12F617, PIC12HV615
-* @li includes/mTouch_hardwareProfile_16F151x.h :: PIC16F1516, PIC16F1517, PIC16F1518, PIC16F1519
-* @li includes/mTouch_hardwareProfile_16F152x.h :: PIC16F1526, PIC16F1527
-* @li includes/mTouch_hardwareProfile_16F182x.h :: PIC12F1822, PIC16F1823, PIC16F1824, PIC16F1825, PIC16F1826, PIC16F1827, PIC16F1828, PIC16F1829
-* @li includes/mTouch_hardwareProfile_16F193x.h :: PIC16F1933, PIC16F1934, PIC16F1936, PIC16F1937, PIC16F1938, PIC16F1939
-* @li includes/mTouch_hardwareProfile_16F194x.h :: PIC16F1946, PIC16F1947
-* @li (and others... see Files list or Resource Requirements for full details)
+* @li Alternative Configurations/mTouch_hardwareProfile_12F61x.h  :: PIC12F615, PIC12F617, PIC12HV615
+* @li Alternative Configurations/mTouch_hardwareProfile_16F151x.h :: PIC16F1516, PIC16F1517, PIC16F1518, PIC16F1519
+* @li Alternative Configurations/mTouch_hardwareProfile_16F152x.h :: PIC16F1526, PIC16F1527
+* @li Alternative Configurations/mTouch_hardwareProfile_16F182x.h :: PIC12F1822, PIC16F1823, PIC16F1824, PIC16F1825, PIC16F1826, PIC16F1827, PIC16F1828, PIC16F1829
+* @li Alternative Configurations/mTouch_hardwareProfile_16F193x.h :: PIC16F1933, PIC16F1934, PIC16F1936, PIC16F1937, PIC16F1938, PIC16F1939
+* @li Alternative Configurations/mTouch_hardwareProfile_16F194x.h :: PIC16F1946, PIC16F1947
+* @li and others... see <tt>C:/Your MLA Directory/Microchip/mTouchCap/PIC12F PIC16F CVD Library/Alternative Configurations</tt> for a full listing
+* 
 *
 * @section RI_MacroLibrary Macro Library
 * The mTouch acquisition function is implemented using a combination of C and assembly. To support 
@@ -2175,7 +2878,7 @@
 //@}
 
 
-/** @name UART-PC Communications Setup (mTouch_config.h)
+/** @name UART-PC Communications Setup (mComm_config.h)
 *
 *   These configuration options define if and how the mTouch framework is to 
 *   communicate with a PC.
@@ -2192,70 +2895,68 @@
     * @hideinitializer
     */
     /**
-    * @def      MTOUCH_COMM_ASCII_SPEED
+    * @def      MCOMM_TYPE
     * @ingroup  Configuration
-    * @brief    If V1 comms are enabled, defines the output baud rate.
+    * @brief    Defines one of four available communication options: #MCOMM_UART_ONE_WAY, 
+    *           #MCOMM_UART_TWO_WAY, #MCOMM_I2C_TWO_WAY, and #MCOMM_SPI_TWO_WAY.
+    *
+    * @li #MCOMM_UART_ONE_WAY :: Transmit-only <b>ASCII</b> UART communications - Hardware/Software UART
+    *   @note   To use the PICKit Serial with this option, the UART-to-USB hex file must be loaded into 
+    *           the PKSA. This option should be selected to view data from a terminal window or to 
+    *           communicate with any of the Profilab GUIs.
+    * @li #MCOMM_UART_TWO_WAY :: Bidirectional <b>Binary</b> UART communications - UART module required.
+    *   @note   To use the PICKit Serial with this option, the default PKSA's firmware must be updated to 
+    *           support RS-232 break characters. This option should be selected to use the two-way mTouch 
+    *           GUI to edit configuration values while plotting the sensors' data.
+    * @li #MCOMM_I2C_TWO_WAY :: Bidirectional <b>Binary</b> I2C communications - SSP module required  
+    *   @note   None of the provided mTouch GUIs use this method of communication.
+    * @li #MCOMM_SPI_TWO_WAY :: Bidirectional <b>Binary</b> SPI communications - SSP module required
+    *   @note   None of the provided mTouch GUIs use this method of communication.
     * @hideinitializer
     */
     /**
-    * @def      MTOUCH_COMM_ASCII_READING
-    * @ingroup  Configuration
-    * @brief    If V1 comms are enabled, enables output of raw sensor values.
+    * @def      MCOMM_UART_ONE_WAY
+    * @brief    Option for #MCOMM_TYPE :: Transmit-only ASCII UART communications - Hardware/Software UART
     * @hideinitializer
     */
     /**
-    * @def      MTOUCH_COMM_ASCII_BASELINE
-    * @ingroup  Configuration
-    * @brief    If V1 comms are enabled, enables output of baseline sensor values.
+    * @def      MCOMM_UART_TWO_WAY
+    * @brief    Option for #MCOMM_TYPE :: Bidirectional Binary UART communications - UART module required.
     * @hideinitializer
     */
     /**
-    * @def      MTOUCH_COMM_ASCII_SLIDER
-    * @ingroup  Configuration
-    * @brief    If V1 comms are enabled, enables output of slider decoding values.
+    * @def      MCOMM_I2C_TWO_WAY
+    * @brief    Option for #MCOMM_TYPE :: Bidirectional Binary I2C communications - SSP module required   
     * @hideinitializer
     */
     /**
-    * @def      MTOUCH_COMM_ASCII_DELIM
-    * @ingroup  Configuration
-    * @brief    If V1 comms are enabled, defines which character is used as the 
-    *           delimiter of bytes of data.
+    * @def      MCOMM_SPI_TWO_WAY
+    * @brief    Option for #MCOMM_TYPE :: Bidirectional Binary SPI communications - SSP module required
+    * @hideinitializer
     */
     /**
-    * @def      MTOUCH_COMM_ASCII_PIC18TXREG
+    * @def      MCOMM_UART_BAUDRATE
     * @ingroup  Configuration
-    * @brief    If V1 comms are enabled and using a PIC18 device, defines the name 
-    *           of the register that the framework should load the 'TX' value into.
-    */
-    /**
-    * @def      MTOUCH_COMM_ASCII_SOFT_ENABLED
-    * @ingroup  Configuration
-    * @brief    If V1 comms are enabled, this forces the framework to implement the
-    *           UART communications using a software routine.
-    */
-    /**
-    * @def      MTOUCH_COMM_ASCII_SOFT_TXPORT
-    * @ingroup  Configuration
-    * @brief    If bit-banged V1 comms are enabled, defines which port to use for
-    *           output.
-    */
-    /**
-    * @def      MTOUCH_COMM_ASCII_SOFT_TXTRIS
-    * @ingroup  Configuration
-    * @brief    If bit-banged V1 comms are enabled, defines which tris to use for
-    *           output.
-    */
-    /**
-    * @def      MTOUCH_COMM_ASCII_SOFT_TXPIN
-    * @ingroup  Configuration
-    * @brief    If bit-banged V1 comms are enabled, defines which pin to use for 
-    *           output.
-    */
-    /**
-    * @def      MTOUCH_EEPROM_START_ADR
-    * @ingroup  Configuration
-    * @brief    If V2 comms are enabled, defines the starting address for the
-    *           mTouch EEPROM data storage.
+    * @brief    If UART is being used, this defines the communication baud rate.
+    *
+    * Valid UART baudrate options depend on whether the UART communications will be implemented 
+    * in hardware or software.
+    *
+    * Choose one of the listed speeds and compile. If the mComm module is unable to support the
+    * requested speed given your current Fosc value, error messages will guide you to choosing a
+    * better alternative.
+    *
+    * (bps)
+    * @li 1200 
+    * @li 2400 
+    * @li @b 9600 *
+    * @li @b 19200 *
+    * @li @b 38400 *
+    * @li 57600
+    * @li 115200
+    *
+    * <b>* Bolded options</b> are compatible with the software-implementation of the UART in most
+    * Fosc configurations.
     * @hideinitializer
     */
 //@}
@@ -2440,38 +3141,6 @@
     * @hideinitializer
     */
     /**
-    * @def      MTOUCH_NEGATIVE_CAPACITANCE
-    * @ingroup  Configuration
-    * @brief    Determines the method used to handle a negative capacitance shift on the 
-    *           sensor's readings
-    *
-    *   This option determines the method used to handle a negative capacitance shift. 
-    *   In other words, how the system will respond to a reading value shift in the 
-    *   opposite direction of a normal shift caused by a finger.
-    *
-    *   These shifts occur for a variety of reasons and you may want to adjust this 
-    *   behavior based on your system.
-    *
-    *   <b>Options:</b>
-    *   @li <b>0</b> - Normal Baseline Behavior<br>
-    *       (DEFAULT) No special behavior. The baseline will update at the normal rate, as 
-    *       always. For Metal-over-Capacitive systems, a negative shift usually means a 
-    *       neighboring sensor is being pressed, so this is the best option to keep the 
-    *       current state of the sensor and allow it to be pressed quickly after a neighbor 
-    *       has been pressed.
-    *   @li <b>1</b> - Increase Baseline Speed<br>
-    *       The baseline will ignore the MTOUCH_BASELINE_RATE counter and update itself after 
-    *       each new reading value. This has the effect of speeding up the baseline until it 
-    *       catches up with the negative shift. 
-    *   @li <b>2</b> - Baseline Directly Follows Reading<br>
-    *       The baseline will instantly follow a negative shift. This behavior is best for 
-    *       a system that needs a very fast response time. It will help prevent quick, 
-    *       repeated presses  from being missed due to the baseline not updating quickly 
-    *       enough.
-    *
-    * @hideinitializer
-    */
-    /**
     * @def      MTOUCH_MOST_PRESSED_ONLY
     * @ingroup  Configuration
     * @brief    If enabled, only one active-mode sensor will be able to be pressed at
@@ -2492,6 +3161,39 @@
     *   presses again, the toggle bit is set low. When the user releases, nothing happens.
     *   Etc.
     *
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_MOST_PRESSED_THRESHOLD
+    * @brief    This configuration option determines how much more pressed the most-pressed 
+    *           sensor must be above all other sensors in order to allow activation.
+    *
+    *   If the value is '10', the most pressed sensor's shift value must be at 
+    *   least 10 counts higher than the second-most-pressed sensor's shift.
+    *
+    *   For example, if Sensor0's shift is 400 counts, all other sensor's shifts must be
+    *   390 or lower to activate this sensor. 
+    *
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_MATRIX_ROW_START
+    * @brief    Defines which MTOUCH_SENSORx sensor is the start-index of the 'row' sensors
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_MATRIX_ROW_END
+    * @brief    Defines which MTOUCH_SENSORx sensor is the final-index of the 'row' sensors
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_MATRIX_COLUMN_START
+    * @brief    Defines which MTOUCH_SENSORx sensor is the start-index of the 'column' sensors
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_MATRIX_COLUMN_END
+    * @brief    Defines which MTOUCH_SENSORx sensor is the final-index of the 'column' sensors
     * @hideinitializer
     */
 //@}
@@ -2562,6 +3264,79 @@
     */
 //@}
 
+/** @name Proximity Sensor Configuration
+*
+*   These options define which sensors are proximity sensors and how the framework is
+*   to implement the median filter. Read @ref featProximity "this guide" for more 
+*   information about proximity sensors and configuration.
+*
+*/
+//@{
+    /**
+    * @def      MTOUCH_NUMBER_PROXIMITY
+    * @ingroup  Configuration
+    * @brief    Defines how many proximity sensors are activated.
+    *
+    *   There must be one #MTOUCH_SENSORx_IS_PROX definition per enabled proximity sensor.
+    *   The value of the definition must be it's "proximity-id" value.
+    *
+    *   "Proximity-ID" is used as an index to the proximity variables. In total, the IDs
+    *   should start at 0 and end with #MTOUCH_NUMBER_PROXIMITY-1. 
+    *
+    *   The order is arbitrary.
+    *
+    * @code
+    * #define MTOUCH_NUMBER_PROXIMITY     2
+    *
+    * #define MTOUCH_SENSOR5_IS_PROX      0     // MTOUCH_SENSOR5 is a proximity sensor with index 0
+    * #define MTOUCH_SENSOR2_IS_PROX      1     // MTOUCH_SENSOR2 is a proximity sensor with index 1
+    * @endcode
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_SENSORx_IS_PROX
+    * @ingroup  Configuration
+    * @brief    Sets MTOUCH_SENSORx as a proximity sensor. Sensor value will be run through a
+    *           median filter to increase the signal-to-noise ratio.
+    *
+    *   The value of the definition should be the proximity index value. Index values should
+    *   start at 0 and end with #MTOUCH_NUMBER_PROXIMITY-1.
+    *
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_PROX_BUFFER_SIZE
+    * @ingroup  Configuration
+    * @brief    Determines the size of the buffer used in the proximity median filter
+    *
+    *   This number determines the history length of the median filter. Each value
+    *   is an integer, so '5' requires 10-bytes per proximity sensor.
+    *
+    *   Options -
+    *   @li 5   :: Least filtering, fastest response time
+    *   @li 9   ::
+    *   @li 15  :: Most filtering, longest response time
+    *
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_PROX_REMOVE_EXTREME
+    * @ingroup  Configuration
+    * @brief    The median filter's N largest and N smallest values are not included
+    *           in the filter's output value. Must be less than half the buffer size.
+    *               
+    * @hideinitializer
+    */
+    /**
+    * @def      MTOUCH_PROX_USE_32BIT_ACCUM
+    * @ingroup  Configuration
+    * @brief    If defined, the accumulator used during the decoding process of the 
+    *           proximity sensor will be implemented as a 32-bit value. 
+    *
+    * This solves overflow problems - at the cost of additional temporary RAM requirements.
+    * @hideinitializer
+    */
+//@}
 
 /** @name Advanced CVD Scan Controls (mTouch_config_cvdAdvanced.h)
 *
@@ -2579,7 +3354,7 @@
     *           scanning process.
     *
     *   If this value is <b>too small</b>: The sensors will not be as sensitive as they 
-    *   could be and your sensor's readings will be VDD dependant.
+    *   could be and your sensor's readings will be V<sub>DD</sub> dependant.
     *
     *   If this value is <b>too large</b>: The noise immunity of the system will not be 
     *   as robust as it could be.<br>
@@ -2587,14 +3362,15 @@
     *   To correctly set this value:
     *   <ol>
     *    <li>Set this value to 0, compile and program.
-    *    <li>Look at the raw values on the mTouch GUI or through a terminal program while
-    *        powering the system at the desired VDD level.
-    *    <li>Adjust VDD by plus and minus 0.5V 
+    *    <li>Look at the raw values on the mTouch One-Way GUI or through a terminal program while
+    *        powering the system at the desired V<sub>DD</sub> level.<br>
+    *        You can find the mTouch One-Way GUI in <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/mTouch One-Way GUI</tt>
+    *    <li>Adjust V<sub>DD</sub> by plus and minus 0.5V 
     *       <ul>
-    *       <li>Do you notice any change in the unpressed value as VDD is changing? If no, 
+    *       <li>Do you notice any change in the unpressed value as V<sub>DD</sub> is changing? If no, 
     *           leave this value alone. If yes...
     *       </ul>
-    *    <li>Increase the delay until the sensor's reading no longer changes as VDD changes.
+    *    <li>Increase the delay until the sensor's reading no longer changes as V<sub>DD</sub> changes.
     *    </ol>
     *   Once this has occurred, the settling time has been correctly tuned to provide the 
     *   maximum amount of sensitivity while minimizing the framework's susceptibility to 
@@ -2617,7 +3393,8 @@
     *   To correctly set this value:
     *   <ol>
     *    <li>Set this value to 0, compile and program.
-    *    <li>Look at the raw values on the mTouch GUI or through a terminal program.
+    *    <li>Look at the raw values on the mTouch One-Way GUI or through a terminal program.<br>
+    *        You can find the mTouch One-Way GUI in <tt>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/mTouch One-Way GUI</tt>
     *    <li>Press as hard as you can on the sensor with the highest amount of capacitance. 
     *       (This usuallycorresponds to the sensor with the highest unpressed raw value.)
     *       <ul>
@@ -2627,6 +3404,33 @@
     *    <li>Increase the delay until the crosstalk behavior is eliminated. 
     *   </ol>
     * 
+    * @hideinitializer
+    */
+    /**
+    * @def      CVD_SWITCH_DELAY   
+    * @ingroup  Configuration
+    * @brief    Determines the amount of added NOPs between when the sensor is set to
+    *           an input and the ADC mux is pointed to the sensor.
+    *
+    * This option was created due to a rare behavior that can appear in some devices.
+    *
+    * The ideal value of this option for noise immunity is 0. This will minimize the 
+    * amount of time the sensor is set as an input.
+    *    
+    * #CVD_SWITCH_DELAY should <b>only</b> be increased if the output driver is not disabling 
+    * itself quickly enough, causing the sensor's output driver to affect the internal ADC's
+    * hold voltage as soon as the mux is connected. The effect will be noticeable on the second
+    * sample of the waveform: the settling point will be slightly unstable and will be visibly 
+    * coupling to V<sub>DD</sub>.
+    *
+    * The behavior is most-noticeable on the second scan due to P-type transistors being less 
+    * ideal than N-type transistors. The behavior is most-common when Fosc is a high value 
+    * (16MHz or greater).
+    *
+    * If you are seeing the behavior, the correct value for this option will vary based on 
+    * Fosc and the microcontroller in question; but, in general, 1-3 NOPs for 16MHz, 3-5 
+    * for 32MHz.
+    *
     * @hideinitializer
     */
     /**
@@ -2732,9 +3536,17 @@
 //@}
 
 
-/** @name Unimplemented
-*
-*   These options will be used in later versions of the V2 communications.
+/**
+* @def      APFCON_INITIALIZED
+* @brief    If defined, disables the reminder-warning to initialize the APFCON register.
+* @hideinitializer
+*/
+
+/** @name   Non-critical Values
+*   @brief  These values are used for tracking version numbers when communicating with a
+*           master. They have been provided for use by the EEPROM storage function so its
+*           easy to implement version tracking in your application. They are not required
+*           and do not have an impact on the generation of the firmware.
 */
 //@{
 /**

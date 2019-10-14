@@ -50,7 +50,7 @@
 #define __TCPIPCONFIG_H
 
 #include "GenericTypeDefs.h"
-#include "Compiler.h"
+#include "../../Microchip/Include/Compiler.h"
 #define GENERATED_BY_TCPIPCONFIG "Version 1.0.3383.23374"
 
 // =======================================================================
@@ -83,11 +83,14 @@
 //#define STACK_USE_SNMPV3_SERVER			// Simple Network Management Protocol v3 Agent
 //#define STACK_USE_TFTP_CLIENT			// Trivial File Transfer Protocol client
 //#define STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE	// HTTP Client example in GenericTCPClient.c
-#define STACK_USE_AUTOUPDATE_TCPCLIENT 
-#define STACK_USE_AUTOUPDATE_UART
+//#define STACK_USE_AUTOUPDATE_TCPCLIENT 
+#if defined(CFG_INCLUDE_EX16_MRF24WG) && defined(__C32__)
+//#define STACK_USE_CLOUD_TCPCLIENT	// This is valid only with Explorer16 eval board and MRF24WG Wi-Fi module
+#endif
+//#define STACK_USE_AUTOUPDATE_UART
 
-#define STACK_USE_FTP_CLIENT 
-#define STACK_USE_CERTIFATE_DEBUG
+//#define STACK_USE_FTP_CLIENT
+#define STACK_USE_CERTIFICATE_DEBUG
 //#define STACK_USE_GENERIC_TCP_SERVER_EXAMPLE	// ToUpper server example in GenericTCPServer.c
 //#define STACK_USE_TELNET_SERVER			// Telnet server
 //#define STACK_USE_ANNOUNCE				// Microchip Embedded Ethernet Device Discoverer server/client
@@ -262,6 +265,8 @@
 		#define TCP_PURPOSE_DEFAULT 9
 		#define TCP_PURPOSE_BERKELEY_SERVER 10
 		#define TCP_PURPOSE_BERKELEY_CLIENT 11
+		#define TCP_PURPOSE_AUTOUPDATE_TCP_CLIENT 12
+		#define TCP_PURPOSE_CLOUD_TCP_CLIENT 13
 	#define END_OF_TCP_SOCKET_TYPES
 
 	#if defined(__TCP_C)
@@ -286,8 +291,14 @@
 			WORD wRXBufferSize;
 		} TCPSocketInitializer[] =
 		{
-			{TCP_PURPOSE_GENERIC_TCP_CLIENT, TCP_ETH_RAM, 3002/*4026*/, 1024/*20*/},
+			{TCP_PURPOSE_GENERIC_TCP_CLIENT, TCP_ETH_RAM, 125, 100},
 			{TCP_PURPOSE_GENERIC_TCP_SERVER, TCP_ETH_RAM, 20, 4026},
+#ifdef STACK_USE_AUTOUPDATE_TCPCLIENT
+			{TCP_PURPOSE_AUTOUPDATE_TCP_CLIENT, TCP_ETH_RAM, 3002/*4026*/, 1024/*20*/},
+#endif
+#ifdef STACK_USE_CLOUD_TCPCLIENT
+			{TCP_PURPOSE_CLOUD_TCP_CLIENT, TCP_ETH_RAM, 1024, 1024},
+#endif
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},

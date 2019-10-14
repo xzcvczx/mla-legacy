@@ -69,6 +69,7 @@
         <itemPath>../mTouch_eeprom.c</itemPath>
         <itemPath>../mTouch_proximity.c</itemPath>
         <itemPath>../mTouch_acquisition.c</itemPath>
+        <itemPath>../mTouch_acquisition_HCVD.c</itemPath>
       </logicalFolder>
       <itemPath>../main.c</itemPath>
     </logicalFolder>
@@ -88,7 +89,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>Simulator</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.01</languageToolchainVersion>
+        <languageToolchainVersion>1.12</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>

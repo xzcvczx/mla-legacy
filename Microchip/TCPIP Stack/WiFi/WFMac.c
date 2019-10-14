@@ -499,7 +499,7 @@ void MACProcess(void)
             {
                 SetLogicalConnectionState(FALSE);
                 #if defined(WF_USE_POWER_SAVE_FUNCTIONS)
-                    WF_HibernateEnable();
+                    WF_HibernateEnable();   // Set HIBERNATE pin on MRF24W to HIGH
                 #endif
                 WF_hibernate.state = WF_HB_WAIT_WAKEUP;
             }

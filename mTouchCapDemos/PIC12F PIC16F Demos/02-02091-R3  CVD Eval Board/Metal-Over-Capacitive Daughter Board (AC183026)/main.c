@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        main.c
  *  Dependencies:    mTouch.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -72,7 +72,7 @@
     //      C:\Program Files\HI-TECH Software\<COMPILER NAME>\<VERSION NUMBER>\include
     //      Open the 'pic' header file that corresponds to your microcontroller.
     //      Ex: 'pic16f1937.h'  --  NOT 'as16f1937.h' or 'cas16f1937.h'
-        
+
 // PROTOTYPES
     void            Example_System_Init (void);
     void interrupt  ISR                 (void);
@@ -206,6 +206,19 @@ void Example_System_Init()
 void interrupt ISR(void)
 {
     // EXAMPLE INTERRUPT SERVICE ROUTINE
+    //
+    // If MTOUCH_INTEGRATION_TYPE is defined as MTOUCH_CONTROLS_ISR, the framework will implement 
+    // a dedicated ISR for the mTouch scans' use. If it is not defined, the application may implement 
+    // its own ISR. 
+    //
+    // A few rules must be followed by custom ISR functions:
+    //
+    // 1. If MTOUCH_INTEGRATION_TYPE is defined as MTOUCH_CALLED_FROM_MAINLOOP, you must set 
+    //    mTouch_state.isrServiced each time you enter the ISR. This tells the framework that the scan 
+    //    was interrupted and needs to be repeated.
+    //
+    // 2. If MTOUCH_INTEGRATION_TYPE is defined as MTOUCH_CALLED_FROM_ISR, the example API usage below 
+    //    is required to service mTouch scanning.
 
     #if defined(MCOMM_ENABLED) && defined(MCOMM_TWO_WAY_ENABLED)  
         // If the V2 comms have been enabled, we need to receive incoming requests.
@@ -219,13 +232,21 @@ void interrupt ISR(void)
         {
             mComm_Receive();            // Two-way Communication Receive Service Function
         }        
+    #endif  
+    
+    
+    #if (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_ISR)
+        if (mTouch_checkInterrupt())    // Checks if the TMRxIE and TMRxIF flags are both equal to 1.
+        {
+            mTouch_Scan();              // Required if running as ISR slave. The mTouch timer interrupt 
+                                        // flag is cleared inside the mTouch_Scan() function.
+        }
+    #elif (MTOUCH_INTEGRATION_TYPE == MTOUCH_CALLED_FROM_MAINLOOP)
+        mTouch_state.isrServiced = 1;   // Alerts the mTouch scanning routine that an interrupt may 
+                                        // have disrupted a scan. This is cleared at the start of a
+                                        // new scan and is checked at the end of the scan.
+                                        // Bad data can affect the readings if this flag is not set.
     #endif
-        
-    if (mTouch_checkInterrupt())    // Checks if the TMRxIE and TMRxIF flags are both equal to 1.
-    {
-        mTouch_Scan();              // Required if running as ISR slave. The mTouch timer interrupt 
-                                    // flag is cleared inside the mTouch_Scan() function.
-    }
 
 }
 

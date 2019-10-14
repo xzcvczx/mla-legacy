@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        main.c
  *  Dependencies:    mTouch.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -72,9 +72,7 @@
     //      C:\Program Files\HI-TECH Software\<COMPILER NAME>\<VERSION NUMBER>\include
     //      Open the 'pic' header file that corresponds to your microcontroller.
     //      Ex: 'pic16f1937.h'  --  NOT 'as16f1937.h' or 'cas16f1937.h'
-    
-    //uint8_t     matrixOutput[2];
-    
+
 // PROTOTYPES
     void            Example_System_Init (void);
     void interrupt  ISR                 (void);

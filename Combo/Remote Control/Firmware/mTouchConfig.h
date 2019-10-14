@@ -112,7 +112,7 @@
   CTMU charge delay settings.
   This value is used when "chargeDelay" is set to -1 in MTouchSetSensor(...) call.
   ***************************************************************************/
-#define MTOUCH_DEFAULT_CHARGE_DELAY   3
+#define MTOUCH_DEFAULT_CHARGE_DELAY   15
 
 /****************************************************************************
   Default threshold for press event detection.

@@ -92,7 +92,7 @@
         <targetDevice>PIC16F1459</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>ICD3PlatformTool</platformTool>
+        <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
@@ -125,6 +125,12 @@
         </XC8-config-global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <HI-TECH-COMP>
@@ -151,8 +157,20 @@
         </XC8-config-global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <HI-TECH-COMP>
         <property key="define-macros" value=""/>
@@ -223,6 +241,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
@@ -255,8 +281,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -345,6 +387,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f47j53_g.lkr" ex="true" overriding="false">
         <C18>
@@ -367,8 +417,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -462,6 +528,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
@@ -484,8 +558,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -615,6 +705,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
@@ -637,8 +735,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -727,6 +841,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
@@ -749,8 +871,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j50.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -839,6 +977,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
@@ -861,8 +1007,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j50.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -941,6 +1103,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
@@ -973,8 +1143,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -1063,6 +1249,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f4550 - HID Bootload.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
@@ -1095,8 +1289,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -1195,6 +1405,14 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f47j53_g.lkr" ex="true" overriding="false">
         <C18>
@@ -1217,8 +1435,24 @@
         </C18LanguageToolchain>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <C18>
         <property key="code-model" value="ms"/>
@@ -1307,6 +1541,14 @@
         </C30Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C30>
@@ -1339,8 +1581,24 @@
         </C30Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <C30>
         <property key="code-model" value="default"/>
@@ -1445,6 +1703,14 @@
         </C30Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C30>
@@ -1477,8 +1743,24 @@
         </C30Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <C30>
         <property key="code-model" value="default"/>
@@ -1583,6 +1865,14 @@
         </C30Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C30>
@@ -1615,8 +1905,24 @@
         </C30Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <C30>
         <property key="code-model" value="default"/>
@@ -1721,6 +2027,14 @@
         </C30Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C30>
@@ -1753,8 +2067,24 @@
         </C30Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <C30>
         <property key="code-model" value="default"/>
@@ -1859,6 +2189,14 @@
         </C30Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C30>
@@ -1891,8 +2229,24 @@
         </C30Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <C30>
         <property key="code-model" value="default"/>
@@ -1997,6 +2351,14 @@
         </C30Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C30>
@@ -2029,8 +2391,24 @@
         </C30Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <C30>
         <property key="code-model" value="default"/>
@@ -2139,6 +2517,16 @@
         </C32Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C32>
@@ -2177,8 +2565,28 @@
         </C32Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <C32>
         <property key="additional-warnings" value="false"/>
@@ -2265,6 +2673,16 @@
         </C32Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C32>
@@ -2303,8 +2721,28 @@
         </C32Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <C32>
         <property key="additional-warnings" value="false"/>
@@ -2391,6 +2829,16 @@
         </C32Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C32>
@@ -2429,8 +2877,28 @@
         </C32Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <C32>
         <property key="additional-warnings" value="false"/>
@@ -2517,6 +2985,16 @@
         </C32Global>
       </item>
       <item path="../rm18f45k50_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
         <C32>
@@ -2555,8 +3033,28 @@
         </C32Global>
       </item>
       <item path="../rm18f87j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../rm18f97j94_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
       </item>
       <C32>
         <property key="additional-warnings" value="false"/>

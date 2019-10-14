@@ -3,7 +3,7 @@
                                                                                 
 Software License Agreement                                                      
                                                                                 
-Copyright © 2007-2008 Microchip Technology Inc. and its licensors.  All         
+Copyright (c) 2007-2008 Microchip Technology Inc. and its licensors.  All         
 rights reserved.                                                                
                                                                                 
 Microchip licenses to you the right to: (1) install Software on a single        
@@ -54,6 +54,8 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 #define USB_HOST_APP_DATA_EVENT_HANDLER USB_ApplicationDataEventHandler
 //#define USB_ENABLE_SOF_EVENT
 #define USB_ENABLE_1MS_EVENT
+
+#define ANDROID_DEVICE_ATTACH_TIMEOUT 3000
 
 #define USB_MAX_GENERIC_DEVICES 1
 #define USB_NUM_CONTROL_NAKS 20

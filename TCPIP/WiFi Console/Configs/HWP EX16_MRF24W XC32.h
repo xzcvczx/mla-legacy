@@ -51,7 +51,7 @@
 #ifndef HARDWARE_PROFILE_H
 #define HARDWARE_PROFILE_H
 
-#include "Compiler.h"
+#include "../../Microchip/Include/Compiler.h"
 
 // Define a macro describing this hardware set up (used in other files)
 #define EXPLORER_16

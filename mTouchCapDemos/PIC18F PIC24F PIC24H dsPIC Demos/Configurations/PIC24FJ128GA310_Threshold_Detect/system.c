@@ -55,9 +55,6 @@
 
 void LogChar(char ch)
 {
-    while(U2STAbits.TRMT == 0);
-    Nop(); Nop();
-    U2TXREG = ch;
 }
 
 #endif

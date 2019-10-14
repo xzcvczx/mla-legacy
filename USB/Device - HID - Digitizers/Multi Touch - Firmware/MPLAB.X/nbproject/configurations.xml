@@ -82,7 +82,7 @@
         <targetDevice>PIC16F1459</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>ICD3PlatformTool</platformTool>
+        <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>null</languageToolchainVersion>
         <platform>3</platform>
@@ -110,7 +110,7 @@
         <property key="define-macros" value=""/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="identifier-length" value="31"/>
+        <property key="identifier-length" value="150"/>
         <property key="operation-mode" value="pro"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
         <property key="optimization-assembler" value="true"/>
@@ -122,6 +122,7 @@
         <property key="optimization-speed" value="true"/>
         <property key="preprocess-assembler" value="false"/>
         <property key="undefine-macros" value=""/>
+        <property key="use-cci" value="false"/>
         <property key="verbose" value="false"/>
         <property key="warning-level" value="0"/>
         <property key="what-to-do" value="ignore"/>

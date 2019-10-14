@@ -60,6 +60,8 @@
 ///////////////////////////////
 #if defined(MTOUCH_USE_CTMU)
 
+volatile INT8 chargeDelay;
+
 INT16 MTouchAcquisitionCTMU(SENSOR* pSensor)
 {
 SFR      tris;
@@ -67,14 +69,13 @@ SFR      lat;
 IOMASK   ioMask;
 UINT8    channelNumber;
 INT16    result;
-volatile register INT8  chargeDelay;
 
     // Read sensor info
     tris          = pSensor->trisReg;
     lat           = pSensor->latReg;
     ioMask        = pSensor->ioMask;
     channelNumber = pSensor->channelNumber;
-    chargeDelay   = pSensor->chargeDelay;
+    chargeDelay   = (UINT16)pSensor->chargeDelay;
 
  	// Rearm the CTMU (clear CTMUCON.EDGE1STAT and CTMUCON.EDGE2STAT bits simultaneously)
     MTouchCTMURearm();

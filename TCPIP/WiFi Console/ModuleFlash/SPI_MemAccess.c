@@ -598,7 +598,7 @@ void WFChipReset(void)
     /* complete.                                                                 */
     do
     {
-        value = Read16BitWFRegister(WF_HOST_WFIFO_BCNT0_REG);
+        value = Read16BitWFRegister(WF_HOST_WFIFO_BCNT0_REG) & 0x0fff;
     } while (value == 0);
 }
 

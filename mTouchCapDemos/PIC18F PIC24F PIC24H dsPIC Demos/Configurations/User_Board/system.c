@@ -72,7 +72,15 @@ void SysDelayMs(UINT16 delay)
 void SysBoardInit(void)
 {
 #if !defined (__C30__)
+
+#if defined(FAMILY_PIC18XXK50)
+    OSCCON2bits.PLLEN = 1;
+#elif  defined(FAMILY_PIC18XXJ94)
+    OSCCON4bits.PLLEN = 1;
+#else
     OSCTUNEbits.PLLEN = 1;
+#endif
+
     INTCONbits.PEIE = 1; INTCONbits.GIE = 1;
 #endif
 }

@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch.h
  *  Dependencies:    mTouch_config.h
  *                   includes/mTouch_HardwareProfile_*******.h

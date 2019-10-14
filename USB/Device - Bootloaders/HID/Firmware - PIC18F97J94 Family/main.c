@@ -1,12 +1,12 @@
 /*********************************************************************
  *
- *   Microchip USB HID Bootloader v1.01 for PIC18F97J95 Family Devices
+ *   Microchip USB HID Bootloader v1.01 for PIC18F97J94 Family Devices
  *
  *********************************************************************
  * FileName:        main.c
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.42+
+ * Compiler:        C18 3.44+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -235,22 +235,6 @@ BootAppStart:					//Address: 0x1C		//If executing the main application firmware,
  *****************************************************************************/
 void Main(void)
 {   
-    // TODO: remove this code when PIC18F97J94 A3 silicon is available
-	//Check for failed state (A1 silicon errata)
-	unsigned char a = 0xA9;
-	unsigned char b = 0x56;
-	
-	if(a == 0x56)
-	{
-		mInitAllLEDs();
-
-		mLED_1_On();
-		mLED_2_On();
-		Reset();
-		while(1);
-	}	
-    // TODO: end of errata code to remove
-	
 	//NOTE: The c018.o file is not included in the linker script for this project.
 	//The C initialization code in the c018.c (comes with C18 compiler in the src directory)
 	//file is instead modified and included here manually.  This is done so as to provide

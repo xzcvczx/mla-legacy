@@ -167,6 +167,26 @@ __CONFIG(3, BOREN_OFF & WDTEN_OFF);
 #pragma config WDTEN = OFF, MCLRE = ON
 #endif
 
+#elif defined(FAMILY_PIC18XXJ94)																
+
+#if defined(__PICC18__)		
+__CONFIG(1, RETEN_OFF & XINST_OFF & POSCMD_HS & PLLDIV_PLL4X);		
+__CONFIG(2, BOREN_OFF & WDTEN_OFF);		
+#else	
+#pragma config XINST = OFF,POSCMD = HS,BOREN = OFF
+#pragma config FWDTEN = OFF
+#endif	
+
+#elif defined(FAMILY_PIC18XXK50)									
+
+#if defined(__PICC18__)		
+__CONFIG(1, XINST_OFF & FOSC_XT & CFGPLLEN_OFF);
+__CONFIG(2, BOREN_OFF & WDTEN_OFF);		
+#else	
+#pragma config XINST = OFF, BOREN = OFF
+#pragma config WDTEN = OFF, MCLRE = ON
+#endif	
+
 #elif defined(FAMILY_PIC24F04KA20X)
 
 _FICD( ICS_PGx2)
@@ -1083,6 +1103,270 @@ _FWDT(FWDTEN_OFF)
 #define CH22_IO_BIT  1
 #define CH22_AN_NUM  22
 	 
+#define CH23_TRIS   &TRISH
+#define CH23_LAT    &LATH
+#define CH23_IO_BIT 0
+#define CH23_AN_NUM 23
+
+#elif defined(FAMILY_PIC18XXK50) 
+
+#define CH0_TRIS    &TRISA
+#define CH0_LAT     &LATA
+#define CH0_IO_BIT  0
+#define CH0_AN_NUM  0
+
+#define CH1_TRIS    &TRISA
+#define CH1_LAT     &LATA
+#define CH1_IO_BIT  1
+#define CH1_AN_NUM  1
+		 
+#define CH2_TRIS    &TRISA
+#define CH2_LAT     &LATA
+#define CH2_IO_BIT  2
+#define CH2_AN_NUM  2
+	 
+#define CH3_TRIS    &TRISA
+#define CH3_LAT     &LATA
+#define CH3_IO_BIT  3
+#define CH3_AN_NUM  3
+		
+#define CH4_TRIS    &TRISA
+#define CH4_LAT     &LATA
+#define CH4_IO_BIT  5
+#define CH4_AN_NUM  4
+
+#define CH5_TRIS    &TRISE
+#define CH5_LAT     &LATE
+#define CH5_IO_BIT  0
+#define CH5_AN_NUM  5
+	
+#define CH6_TRIS    &TRISE
+#define CH6_LAT     &LATE
+#define CH6_IO_BIT  1
+#define CH6_AN_NUM  6
+		 
+#define CH7_TRIS    &TRISE
+#define CH7_LAT     &LATE
+#define CH7_IO_BIT  2
+#define CH7_AN_NUM  7
+		 
+#define CH8_TRIS    &TRISB
+#define CH8_LAT     &LATB
+#define CH8_IO_BIT  2
+#define CH8_AN_NUM  8
+		 
+#define CH9_TRIS    &TRISB
+#define CH9_LAT     &LATB
+#define CH9_IO_BIT  3
+#define CH9_AN_NUM  9
+		
+#define CH10_TRIS   &TRISB
+#define CH10_LAT    &LATB
+#define CH10_IO_BIT 1
+#define CH10_AN_NUM 10
+		
+#define CH11_TRIS   &TRISB
+#define CH11_LAT    &LATB
+#define CH11_IO_BIT 4
+#define CH11_AN_NUM 11
+	 
+#define CH12_TRIS   &TRISB
+#define CH12_LAT    &LATB
+#define CH12_IO_BIT 0
+#define CH12_AN_NUM 12
+	 
+#define CH13_TRIS    &TRISB
+#define CH13_LAT     &LATB
+#define CH13_IO_BIT  5
+#define CH13_AN_NUM  13
+	
+#define CH14_TRIS    &TRISC
+#define CH14_LAT     &LATC
+#define CH14_IO_BIT  2
+#define CH14_AN_NUM  14
+	 
+#define CH15_TRIS    &TRISH // NOT THERE IN DATASHEET
+#define CH15_LAT     &LATH
+#define CH15_IO_BIT  7
+#define CH15_AN_NUM  15
+		 
+#define CH16_TRIS    &TRISG // NOT THERE IN DATASHEET
+#define CH16_LAT     &LATG
+#define CH16_IO_BIT  4
+#define CH16_AN_NUM  16
+	 
+#define CH17_TRIS    &TRISG // NOT THERE IN DATASHEET
+#define CH17_LAT     &LATG
+#define CH17_IO_BIT  3
+#define CH17_AN_NUM  17
+	 
+#define CH18_TRIS    &TRISC
+#define CH18_LAT     &LATC
+#define CH18_IO_BIT  6
+#define CH18_AN_NUM  18
+	 
+#define CH19_TRIS    &TRISC
+#define CH19_LAT     &LATC
+#define CH19_IO_BIT  7
+#define CH19_AN_NUM  19
+		 
+#define CH20_TRIS    &TRISD
+#define CH20_LAT     &LATD
+#define CH20_IO_BIT  0
+#define CH20_AN_NUM  20
+	 
+#define CH21_TRIS    &TRISD
+#define CH21_LAT     &LATD
+#define CH21_IO_BIT  1
+#define CH21_AN_NUM  21
+		
+#define CH22_TRIS    &TRISD
+#define CH22_LAT     &LATD
+#define CH22_IO_BIT  2
+#define CH22_AN_NUM  22
+	 
+#define CH23_TRIS   &TRISD
+#define CH23_LAT    &LATD
+#define CH23_IO_BIT 3
+#define CH23_AN_NUM 23
+
+#define CH24_TRIS    &TRISD
+#define CH24_LAT     &LATD
+#define CH24_IO_BIT  4
+#define CH24_AN_NUM  24
+	 
+#define CH25_TRIS    &TRISD
+#define CH25_LAT     &LATD
+#define CH25_IO_BIT  5
+#define CH25_AN_NUM  25
+		
+#define CH26_TRIS    &TRISD
+#define CH26_LAT     &LATD
+#define CH26_IO_BIT  6
+#define CH26_AN_NUM  26
+	 
+#define CH27_TRIS   &TRISD
+#define CH27_LAT    &LATD
+#define CH27_IO_BIT 7
+#define CH27_AN_NUM 27
+
+#elif defined(FAMILY_PIC18XXJ94) 
+
+#define CH0_TRIS    &TRISA
+#define CH0_LAT     &LATA
+#define CH0_IO_BIT  0
+#define CH0_AN_NUM  0
+			
+#define CH1_TRIS    &TRISA
+#define CH1_LAT     &LATA
+#define CH1_IO_BIT  1
+#define CH1_AN_NUM  1
+		 
+#define CH2_TRIS    &TRISA
+#define CH2_LAT     &LATA
+#define CH2_IO_BIT  2
+#define CH2_AN_NUM  2
+	 
+#define CH3_TRIS    &TRISA
+#define CH3_LAT     &LATA
+#define CH3_IO_BIT  3
+#define CH3_AN_NUM  3
+		
+#define CH4_TRIS    &TRISA
+#define CH4_LAT     &LATA
+#define CH4_IO_BIT  5
+#define CH4_AN_NUM  4
+
+#define CH5_TRIS    &TRISF
+#define CH5_LAT     &LATF
+#define CH5_IO_BIT  7
+#define CH5_AN_NUM  5
+	
+#define CH6_TRIS    &TRISA
+#define CH6_LAT     &LATA
+#define CH6_IO_BIT  4
+#define CH6_AN_NUM  6
+		 
+#define CH7_TRIS    &TRISF
+#define CH7_LAT     &LATF
+#define CH7_IO_BIT  2
+#define CH7_AN_NUM  7
+		 
+#define CH8_TRIS    &TRISG
+#define CH8_LAT     &LATG
+#define CH8_IO_BIT  0
+#define CH8_AN_NUM  8
+		 
+#define CH9_TRIS    &TRISC
+#define CH9_LAT     &LATC
+#define CH9_IO_BIT  2
+#define CH9_AN_NUM  9
+		
+#define CH10_TRIS   &TRISF
+#define CH10_LAT    &LATF
+#define CH10_IO_BIT 5
+#define CH10_AN_NUM 10
+		
+#define CH11_TRIS   &TRISF
+#define CH11_LAT    &LATF
+#define CH11_IO_BIT 6
+#define CH11_AN_NUM 11
+	 
+#define CH12_TRIS   &TRISH
+#define CH12_LAT    &LATH
+#define CH12_IO_BIT 4
+#define CH12_AN_NUM 12
+	 
+#define CH13_TRIS    &TRISH
+#define CH13_LAT     &LATH
+#define CH13_IO_BIT  5
+#define CH13_AN_NUM  13
+	
+#define CH14_TRIS    &TRISH
+#define CH14_LAT     &LATH
+#define CH14_IO_BIT  6
+#define CH14_AN_NUM  14
+	 
+#define CH15_TRIS    &TRISH
+#define CH15_LAT     &LATH
+#define CH15_IO_BIT  7
+#define CH15_AN_NUM  15
+ 
+#define CH16_TRIS    &TRISG
+#define CH16_LAT     &LATG
+#define CH16_IO_BIT  4
+#define CH16_AN_NUM  16
+ 
+#define CH17_TRIS    &TRISG
+#define CH17_LAT     &LATG
+#define CH17_IO_BIT  3
+#define CH17_AN_NUM  17
+ 
+#define CH18_TRIS    &TRISG
+#define CH18_LAT     &LATG
+#define CH18_IO_BIT  2
+#define CH18_AN_NUM  18
+ 
+#define CH19_TRIS    &TRISG
+#define CH19_LAT     &LATG
+#define CH19_IO_BIT  1
+#define CH19_AN_NUM  19
+ 
+#define CH20_TRIS    &TRISH
+#define CH20_LAT     &LATH
+#define CH20_IO_BIT  3
+#define CH20_AN_NUM  20
+ 
+#define CH21_TRIS    &TRISH
+#define CH21_LAT     &LATH
+#define CH21_IO_BIT  2
+#define CH21_AN_NUM  21
+
+#define CH22_TRIS    &TRISH
+#define CH22_LAT     &LATH
+#define CH22_IO_BIT  1
+#define CH22_AN_NUM  22
+ 
 #define CH23_TRIS   &TRISH
 #define CH23_LAT    &LATH
 #define CH23_IO_BIT 0

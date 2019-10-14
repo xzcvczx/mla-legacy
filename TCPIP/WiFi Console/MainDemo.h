@@ -74,6 +74,7 @@ void GenericTCPClient(void);
 void FTPClient(void);
 BOOL	AutoUpdate_UartXMODEM_24G(void);
 void AutoUpdate_TCPClient(void);
+void CloudTCPClient(void);
 int AutoUpdate_UartXMODEM_Roadrunner(void);
 void GenericTCPServer(void);
 void BerkeleyTCPClientDemo(void);

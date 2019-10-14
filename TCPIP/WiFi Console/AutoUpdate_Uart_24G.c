@@ -91,9 +91,11 @@ BOOL	AutoUpdate_UartXMODEM_24G(void)
 	if( BUTTON3_IO == 1u) return FALSE;	
 	putsUART("\n\rPress S2 (on Explorer16) to start the update.\n\r");
 	while(BUTTON2_IO == 1u);
-
+	MACInit();
+	DelayMs(100);
     AutoUpdate_Initialize();
-	putsUART("I am ready, Please transfer firmware patch by XMODEM\r\n"); 
+	putsUART("I am ready, Please transfer firmware patch by XMODEM.\r\n"); 
+	putsUART("If you press S3(On Explorwe16), I will stop update, and restore back to previous firmware.\r\n"); 
     lastTick = TickGet();
     do
     {
@@ -110,6 +112,13 @@ BOOL	AutoUpdate_UartXMODEM_24G(void)
 	
     while(!lbDone)
     {
+    	if (BUTTON3_IO == 0u)   // If you want to cancel AutoUpdate, please press S3
+    	{
+    		putsUART("You press S3 button, revert begin...\r\n");
+			AutoUpdate_Restore();
+			putsUART("revert done\r\n");
+			return FALSE;
+    	}
         if(DataRdyUART())
         {
             c = ReadUART();

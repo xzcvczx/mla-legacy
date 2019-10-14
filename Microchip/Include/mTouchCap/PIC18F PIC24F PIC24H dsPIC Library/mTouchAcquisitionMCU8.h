@@ -103,7 +103,18 @@
   Remarks:
     None.
  ***************************************************************************/
+#if defined(__18CXX) && !defined(__PICC18__)
+
 #define MTouchChargeDelay(chargeDelay)   {while(chargeDelay--);}
+
+#else
+
+#define MTouchChargeDelay(chargeDelay)\
+asm ("BANKSEL(_" ___mkstr(chargeDelay) ")");\
+asm ("decfsz _"___mkstr(chargeDelay) ", f");\
+asm ("goto  $-1");
+
+#endif
 
 /****************************************************************************
   Macro:
@@ -157,7 +168,15 @@
   Remarks:
     None.
 ***************************************************************************/
-#define MTouchSetCTMUCurrent(current)   {CTMUICON = (current);}         
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchSetCTMUCurrent(current)   {CTMUCON2 = (current);}
+
+#else
+
+#define MTouchSetCTMUCurrent(current)   {CTMUICON = (current);} 
+
+#endif        
 
 /****************************************************************************
   Macro:
@@ -181,7 +200,15 @@
   Remarks:
     None.
 ***************************************************************************/
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchCTMUInit()                {CTMUCON1 = 0; CTMUCON2 = 0; CTMUCON3 = 0; CTMUCON4 = 0; MTouchSetCTMUCurrent(MTOUCH_CTMU_CURRENT); CTMUCON1bits.CTMUEN = 1;}
+
+#else
+
 #define MTouchCTMUInit()                {CTMUCONL = 0; CTMUCONH = 0; MTouchSetCTMUCurrent(MTOUCH_CTMU_CURRENT); CTMUCONHbits.CTMUEN = 1;}
+
+#endif
 	
 
 /****************************************************************************
@@ -206,7 +233,15 @@
   Remarks:
     None.
 ***************************************************************************/
-#define MTouchCTMURearm()               {CTMUCONL = CTMUCONL&0xFFFC;}
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchCTMURearm()               {CTMUCON3 = CTMUCON3&0xFC;}
+
+#else
+
+#define MTouchCTMURearm()               {CTMUCONL = CTMUCONL&0xFC;}
+
+#endif
 
 /****************************************************************************
   Macro:
@@ -230,7 +265,15 @@
   Remarks:
     None.
 ***************************************************************************/
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchCTMUStart()               {CTMUCON4bits.EDG1STAT = 1;}
+
+#else
+
 #define MTouchCTMUStart()               {CTMUCONLbits.EDG1STAT = 1;}
+
+#endif
 
 /****************************************************************************
   Macro:
@@ -254,7 +297,15 @@
   Remarks:
     None.
 ***************************************************************************/
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchCTMUStop()                {CTMUCON4bits.EDG1STAT = 0;}
+
+#else
+
 #define MTouchCTMUStop()                {CTMUCONLbits.EDG1STAT = 0;}
+
+#endif
 
 /****************************************************************************
   Macro:
@@ -280,7 +331,9 @@
 ***************************************************************************/
 #if defined(MTOUCH_USE_10_BITS_ADC)
 
-#if defined(__18F66J90) || defined(__18F67J90) || defined(__18F86J90) || defined(__18F87J90)
+#if defined(__18F66J90) || defined(__18F67J90) || defined(__18F86J90) || defined(__18F87J90)\
+ || defined(__18F24K50) || defined(__18F25K50) || defined(__18F45K50)\
+ || defined(__18LF24K50)|| defined(__18LF25K50)|| defined(__18LF45K50)
 
 #define MTouchADCInit()                 {ADCON0=0; ADCON1=0; ADCON2=0; ADCON2bits.ADFM=1; ADCON2bits.ACQT=0;\
                                          ADCON2bits.ADCS = 1; ADCON0bits.ADON = 1;}
@@ -289,14 +342,21 @@
 
 #define MTouchADCInit()                 {ADCON0=0; ADCON1=0; ADCON1bits.ADFM=1; ADCON1bits.ACQT=0;\
                                          ADCON1bits.ADCS = 1; ADCON0bits.ADON = 1;}
-
 #endif
 
 #endif
 
 #if defined(MTOUCH_USE_12_BITS_ADC)
+
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchADCInit() 				{ADCON1H=0; ADCON1L=0; ADCON2H=0; ADCON2L=0; ADCON3H=0; ADCON3L=0; ADCON5L=0; ADCON5H=0;\
+										 ADCON1Hbits.FORM=1;ADCON1Hbits.MODE12=1; ADCON3Hbits.SAMC=0;ADCON3Lbits.ADCS=1; ADCON1Hbits.ADON=1;}
+#else
+
 #define MTouchADCInit()                 {ADCON0=0; ADCON1=0; ADCON2=0; ADCON2bits.ADFM=1; ADCON2bits.ACQT=0;\
                                          ADCON2bits.ADCS = 1; ADCON0bits.ADON = 1;}
+#endif
 #endif
 
 /****************************************************************************
@@ -321,7 +381,15 @@
   Remarks:
     None.
 ***************************************************************************/
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchADCSetChannel(channel)    {ADCHS0L = channel;} 
+
+#else
+
 #define MTouchADCSetChannel(channel)    {ADCON0bits.CHS = channel;} 
+
+#endif
 
 /****************************************************************************
   Macro:
@@ -345,7 +413,15 @@
   Remarks:
     None.
 ***************************************************************************/
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchADCStart()                {ADCON1Lbits.SAMP = 0;while(!ADCON1Lbits.DONE);}
+
+#else
+
 #define MTouchADCStart()                {ADCON0bits.DONE = 1;while(ADCON0bits.DONE);}
+
+#endif
 
 /****************************************************************************
   Macro:
@@ -369,7 +445,15 @@
   Remarks:
     None.
 ***************************************************************************/
+#if defined(MTOUCH_CTMU_HAS_CTMUCON2_REG)
+
+#define MTouchADCGetResult() 			((INT16)ADCBUF0)
+
+#else
+
 #define MTouchADCGetResult()             (((INT16)ADRESH << 8)+ADRESL)
+
+#endif
 
 
 #endif

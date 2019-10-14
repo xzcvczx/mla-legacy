@@ -72,6 +72,23 @@
 #define DISPLAY_FILENAME
 #endif
 
+//
+// MRF24WB0MA/B  (supports only 1/2 Mbps)
+//      Client in infrastructure network                     (ALL security)
+//      Adhoc network                                            (OPEN, WEP security)
+//
+// MRF24WG0MA/B
+//      Client in infrastructure network                      (ALL security)
+//      Adhoc network                                              (OPEN, WEP security)
+//      Group client (GC) in WFii direct (P2P) network  (WPS security connection)
+//      SoftAP                                                          (OPEN, WEP security)
+//      Supports WPS security connection
+//      Supports WPA2-EAP (PEAP/TTLS)  (special approval needed)
+//
+// Available documentation
+// DS52108A  Microchip MRF24W Getting started Guide for MRF24WB0MAB, MRF24WG0MA/B for MLA v5
+//
+
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -92,9 +109,9 @@
 //                                             calculates the binary key and connects at highest level AP supports (WPA or WPA2)
 //   WF_SECURITY_WPS_PUSH_BUTTON           : WPS push button method
 //   WF_SECURITY_WPS_PIN                   : WPS PIN method
+// 	WF_SECURITY_WPA2_ENTERPRISE    : WPA2 Enterprise 
 
-/*** Selecting Security Mode ***/
-
+// Comments: CFG_WF_SOFT_AP is only avail in EZ Config  
 #define CFG_WF_INFRASTRUCTURE 1
 #define CFG_WF_ADHOC          2
 #define CFG_WF_P2P            3 	
@@ -110,8 +127,54 @@
 /*----------------------------------------------*/
 #if MY_DEFAULT_NETWORK_TYPE == CFG_WF_INFRASTRUCTURE
     #define MY_DEFAULT_WIFI_SECURITY_MODE              	WF_SECURITY_OPEN
-    #define MY_DEFAULT_SCAN_TYPE                       	WF_ACTIVE_SCAN   
-    #define MY_DEFAULT_SSID_NAME                       	"MicrochipDemoAP"           /* for WPS Push button set to "" */
+#if ENABLE_WPA_ENTERPRISE == 1
+	/* This function requires module FW version 3108 or the later */
+#if defined (MRF24WG) && defined(__C32__)
+	/* Security mode must be WF_SECURITY_EAP */
+	#undef MY_DEFAULT_WIFI_SECURITY_MODE    
+	#define MY_DEFAULT_WIFI_SECURITY_MODE              	WF_SECURITY_WPA2_ENTERPRISE
+	#define CONFIG_WPA_ENTERPRISE
+
+	/* 
+	* EAP method is validated with FreeRadius server.
+	* Currently 2 major methods are validated :
+	* A) EAP-TTLS/MSCHAPv2
+	* B) EAP-TTLS/MSCHAPv2
+	* Enable only 1 method among these by uncommenting the macro.
+	* Also note that for PEAP, the reason v0 being used is FreeRadius server
+	* does not support v1.
+	*/
+	//#define EAP_TTLS_MSCHAPv2
+	#define EAP_PEAP_MSCHAPv2
+
+        #define FREERADIUS
+        //#define WINIAS
+
+        #if defined (FREERADIUS)
+            #define EAP_USER_ID "testuser"
+            #define EAP_USER_PASSWORD "whatever"
+            #define EAP_PHASE2 "auth=MSCHAPV2"
+        #endif
+
+        #if defined (WINIAS)
+            #define EAP_USER_ID "Administrator"
+            #define EAP_USER_PASSWORD "whatever123!"
+            #define EAP_PHASE2 "auth=MSCHAPV2"
+        #endif
+
+        #if (defined(FREERADIUS) || defined(WINIAS)) && defined(EAP_PEAP_MSCHAPv2)
+            #define EAP_PHASE1 "peapver=0"      // Freeradius and Windows IAS only support PEAPv0
+	#endif
+
+	#define EAP_USE_CA_CERT	/* use CA pem cert */
+#else
+    #error "MRF24WB does not support WPA-Enterprise. And this is verified with only PIC32"
+#endif	/* defined (MRF24WG) */
+
+#endif /* #if ENABLE_WPA_ENTERPRISE == 1 */
+
+    #define MY_DEFAULT_SCAN_TYPE                       	WF_ACTIVE_SCAN
+    #define MY_DEFAULT_SSID_NAME                        "MicrochipDemoAP"           /* for WPS Push button set to "" */
     #define MY_DEFAULT_LIST_RETRY_COUNT             	INFRASTRUCTURE_RETRY_COUNT  /* Number of times to try to connect to the SSID when using Infrastructure network type */
     #define MY_DEFAULT_CHANNEL_LIST                     {1,2,3,4,5,6,7,8,9,10,11}   /* Default channel list for FCC (cannot be empty for PIC18) */
     #define MY_DEFAULT_BEACON_TIMEOUT                  	(40)   /* Number of beacon periods */
@@ -137,7 +200,11 @@
 	* we strongly recommend to disable the module connection manager, and this
 	* #define is make that thing possible. Just un-comment it to do so !
 	*/
-	//#define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE	
+#ifdef CONFIG_WPA_ENTERPRISE
+	#define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE		/* Mandatory. Must be defined */
+#else
+	//#define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE	/* Optional */
+#endif
 /*------------------------------------------------------*/
 /* else if starting this demo in P2P(Wi-Fi Direct) mode */
 /*------------------------------------------------------*/
@@ -185,7 +252,11 @@
 * But this is not hard requirement, so we will let our customers decide whether to use this option or not.
 * In order to save memory space in a host application side, we disable this option by default
 */
-//  #define SAVE_WPS_CONFIDENTIALS
+#if ((MY_DEFAULT_NETWORK_TYPE == CFG_WF_INFRASTRUCTURE) && \
+    (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PUSH_BUTTON) || \
+    (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN))
+  //#define SAVE_WPS_CONFIDENTIALS
+#endif
 #endif	/* !defined (MRF24WG) */
 
 #if defined(__C32__)
@@ -199,10 +270,6 @@
 #define DERIVE_KEY_FROM_PASSPHRASE_IN_HOST
 #endif
 
-#define MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE  WF_SECURITY_WEP_OPENKEY 	/* WF_SECURITY_WEP_OPENKEY (default) or     */
-									/* WF_SECURITY_WEP_SHAREDKEY - to be used only with WRF24WG 
-									* or 0x1209 and later version of  WRF24WB */   
-
 #define WF_CONSOLE              /* needed for console demo */
 #define WF_CONSOLE_IFCFGUTIL    /* needed for console demo */
 
@@ -212,6 +279,7 @@
 /*** Select IP mode ***/
 #define ENABLE_DHCP_IP                    // enable DHCP
 //#define ENABLE_STATIC_IP                // use default static IP 169.254.1.1
+//#define WF_MAC_ADDRESS_FIX  
 
 #if defined (MRF24WG)
 /* The module HW has 2 hardware multicast filters. If that is not enough on your application, 
@@ -230,11 +298,17 @@
 
 
 //-----------------------------------------------------------------------------------
+// WEP
 // Default WEP keys used in WF_SECURITY_WEP_40  and WF_SECURITY_WEP_104 security mode
+// Only WEP key index 0 is valid
 //-----------------------------------------------------------------------------------
+#define MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE  WF_SECURITY_WEP_OPENKEY 	/* WF_SECURITY_WEP_OPENKEY (default) or     */
+                                                                        /* WF_SECURITY_WEP_SHAREDKEY - to be used only */ 
+                                                                        /* with MRF24WG or 0x1209 and later version of  WRF24WB */ 
+
 #define MY_DEFAULT_WEP_PHRASE           "WEP Phrase"
 
-// string 4 40-bit WEP keys -- corresponding to passphraseof "WEP Phrase"
+// string 4 40-bit WEP keys -- corresponding to passphrase of "WEP Phrase"
 #define MY_DEFAULT_WEP_KEYS_40 "\
 \x5a\xfb\x6c\x8e\x77\
 \xc1\x04\x49\xfd\x4e\
@@ -242,7 +316,7 @@
 \xb0\x73\x69\xf4\x78"
 // Do not indent above string as it will inject spaces 
 
-// string containing 4 104-bit WEP keys -- corresponding to passphraseof "WEP Phrase"
+// string containing 4 104-bit WEP keys -- corresponding to passphrase of "WEP Phrase"
 #define MY_DEFAULT_WEP_KEYS_104 "\
 \x90\xe9\x67\x80\xc7\x39\x40\x9d\xa5\x00\x34\xfc\xaa\
 \x77\x4a\x69\x45\xa4\x3d\x66\x63\xfe\x5b\x1d\xb9\xfd\
@@ -250,14 +324,14 @@
 \xcc\xd7\x62\xde\x92\xad\xba\x3b\x62\x2f\x7f\xbe\xfb"
 // Do not indent above string as it will inject spaces 
 
-/* Valid Key Index: 0, 1, 2, 3  */
-#define MY_DEFAULT_WEP_KEY_INDEX        (0)
+#define MY_DEFAULT_WEP_KEY_INDEX        (0)     /* Valid Key Index: 0      Valid Key Index: 1, 2, 3 (depreciated) */
 
-
+//-----------------------------------------------------------------------------------
+// WPA/WPA2
 // Default pass phrase used for WF_SECURITY_WPA_WITH_PASS_PHRASE and 
 // WF_SECURITY_WPA2_WITH_PASS_PHRASE security modes
+//-----------------------------------------------------------------------------------
 #define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
-
 
 // If using security mode of WF_SECURITY_WPA_WITH_KEY or WF_SECURITY_WPA2_WITH_KEY, then this section 
 // must be set to  match the key for MY_DEFAULT_SSID_NAME and MY_DEFAULT_PSK_PHRASE

@@ -52,7 +52,12 @@
     #define RB_FOCUSED      0x0001  // Bit for focused state.
     #define RB_DISABLED     0x0002  // Bit for disabled state.
     #define RB_CHECKED      0x0004  // Bit to indicate Radio Button is checked.
-    #define RB_GROUP        0x0008  // Bit to indicate the first Radio Button in the group.
+    #define RB_GROUP        0x0008  // Bit to indicate the first Radio Button in the group. 
+                                    // Each group MUST have this bit set for its first member
+                                    // even for a single member group. This means that any 
+                                    // independent or stand alone Radio Button, the RB_GROUP bit
+                                    // must be always set.
+                                    // or alone in the group.
     #define RB_HIDE         0x8000  // Bit to indicate that button must be removed from screen.
     #define RB_DRAW_FOCUS   0x2000  // Bit to indicate focus must be redrawn.
     #define RB_DRAW_CHECK   0x1000  // Bit to indicate check mark should be redrawn.
@@ -195,7 +200,9 @@ WORD        RbGetCheck(RADIOBUTTON *pRb);
 *
 * Overview: This function creates a RADIOBUTTON object with the parameters given. 
 *			It automatically attaches the new object into a global linked list of 
-*			objects and returns the address of the object.
+*			objects and returns the address of the object. A group of Radio Buttons
+*           MUST have the first member of the group set it's RB_GROUP bit set.
+*           Any standalone Radio Button must also have it's RB_GROUP bit set.
 *
 * PreCondition: none
 *

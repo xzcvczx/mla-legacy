@@ -44,6 +44,7 @@
   1.3.6   Modified "FSConfig.h" to "FSconfig.h" in '#include' directive.
   1.3.8   Modified "MDD_IntFlash_SectorRead" to write the correct word data
           in 'buffer' pointer
+  1.4.4   Variable "file_buffer" attributed as (far,aligned).
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -323,7 +324,7 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
 #if defined (__dsPIC33E__) || defined (__PIC24E__)
 volatile unsigned int file_buffer[ERASE_BLOCK_SIZE] __attribute__((far));
 #else
-volatile unsigned char file_buffer[ERASE_BLOCK_SIZE] __attribute__((far));
+volatile unsigned char file_buffer[ERASE_BLOCK_SIZE] __attribute__((far,aligned));
 #endif
 #if defined(__18CXX)
 #pragma udata

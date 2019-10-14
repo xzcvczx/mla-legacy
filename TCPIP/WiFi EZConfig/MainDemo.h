@@ -83,6 +83,7 @@ void GenericTCPServer(void);
 void BerkeleyTCPClientDemo(void);
 void BerkeleyTCPServerDemo(void);
 void BerkeleyUDPClientDemo(void);
+void MobileTCPServer(void);
 
 
 // Define a header structure for validating the AppConfig data structure in EEPROM/Flash

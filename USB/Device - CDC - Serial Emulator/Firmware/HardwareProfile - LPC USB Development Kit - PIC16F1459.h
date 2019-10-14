@@ -165,11 +165,21 @@
     #define mInitAllSwitches()  mInitSwitch2();
 
 	/** RS 232 lines ****************************************************/
-    #define UART_TRISTx   TRISBbits.TRISB7
-    #define UART_TRISRx   TRISBbits.TRISB5
-    #define UART_Tx       PORTBbits.RB7
-    #define UART_Rx       PORTBbits.RB5
     #define UART_ENABLE   RCSTAbits.SPEN
+    #if defined(_16F1459) || defined(_16LF1459)
+        #define UART_TRISTx   TRISBbits.TRISB7
+        #define UART_TRISRx   TRISBbits.TRISB5
+        #define UART_Tx       PORTBbits.RB7
+        #define UART_Rx       PORTBbits.RB5
+    #else
+        //This section is for the PIC16F1454 or PIC16F1455 devices (or LF variants)
+        #define UART_TRISTx   TRISCbits.TRISC4
+        #define UART_TRISRx   TRISCbits.TRISC5
+        #define UART_Tx       PORTCbits.RC4
+        #define UART_Rx       PORTCbits.RC5
+        #warning "To use the PIC16F1454 or PIC16F1455 devices with this demo, you need to externally short RC5 to RB5, and RC4 to RB7 on the Low Pin Count Dev Kit demo board"
+    #endif
+
 
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1

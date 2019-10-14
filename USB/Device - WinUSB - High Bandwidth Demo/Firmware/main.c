@@ -227,14 +227,12 @@
 
 #elif	defined(PIC16F1_LPC_USB_DEVELOPMENT_KIT)
     // PIC 16F1459 fuse configuration:
-    // Config word 1 (Oscillator configuration)
-    // 20Mhz crystal input scaled to 48Mhz and configured for USB operation
-    #if defined (USE_INTERNAL_OSC)
-        __CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_OFF & MCLRE_OFF & CP_OFF & BOREN_OFF & CLKOUTEN_ON & IESO_OFF & FCMEN_OFF);
-        __CONFIG(WRT_OFF & CPUDIV_NOCLKDIV & USBLSCLK_48MHz & PLLMULT_3x & PLLEN_ENABLED & STVREN_ON &  BORV_LO & LPBOR_OFF & LVP_OFF);
+    #if defined (USE_INTERNAL_OSC)  //Definition in the hardware profile
+        __CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_ON & CP_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
+        __CONFIG(WRT_OFF & CPUDIV_NOCLKDIV & USBLSCLK_48MHz & PLLMULT_3x & PLLEN_ENABLED & STVREN_ON &  BORV_LO & LPBOR_OFF & LVP_ON);
     #else
-        __CONFIG(FOSC_HS & WDTE_OFF & PWRTE_OFF & MCLRE_OFF & CP_OFF & BOREN_OFF & CLKOUTEN_ON & IESO_OFF & FCMEN_OFF);
-        __CONFIG(WRT_OFF & CPUDIV_NOCLKDIV & USBLSCLK_48MHz & PLLMULT_4x & PLLEN_ENABLED & STVREN_ON &  BORV_LO & LPBOR_OFF & LVP_OFF);
+        __CONFIG(FOSC_HS & WDTE_OFF & PWRTE_ON & MCLRE_ON & CP_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
+        __CONFIG(WRT_OFF & CPUDIV_NOCLKDIV & USBLSCLK_48MHz & PLLMULT_4x & PLLEN_ENABLED & STVREN_ON &  BORV_LO & LPBOR_OFF & LVP_ON);
     #endif
 
 #elif defined(EXPLORER_16)
@@ -605,21 +603,16 @@ int main(void)
 static void InitializeSystem(void)
 {
     #if defined(_PIC14E)
+        //Configure all pins for digital mode, except RB4, which has a POT on it
         ANSELA = 0x00;
-        ANSELB = 0x00;
+        #if defined(_16F1459) || defined(_16LF1459)
+            ANSELB = 0x10;  //RB4 has a POT on it, on the Low Pin Count USB Dev Kit board
+        #endif
         ANSELC = 0x00;
-        TRISA  = 0x00;
-        TRISB  = 0x00;
-        TRISC  = 0x00;
-        OSCTUNE = 0;
         #if defined (USE_INTERNAL_OSC)
-            OSCCON = 0x7C;   // PLL enabled, 3x, 16MHz internal osc, SCS external
-            OSCCONbits.SPLLMULT = 1;   // 1=3x, 0=4x
-            ACTCON = 0x90;   // Enable active clock tuning with USB
-        #else
-            OSCCON = 0x3C;   // PLL enabled, 3x, 16MHz internal osc, SCS external
-            OSCCONbits.SPLLMULT = 0;   // 1=3x, 0=4x
-            ACTCON = 0x00;   // Active clock tuning disabled
+            OSCTUNE = 0;
+            OSCCON = 0xFC;          //16MHz HFINTOSC with 3x PLL enabled (48MHz operation)
+            ACTCON = 0x90;          //Enable active clock tuning with USB
         #endif
     #endif
     

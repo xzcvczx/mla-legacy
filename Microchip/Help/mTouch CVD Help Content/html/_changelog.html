@@ -28,14 +28,57 @@
 <h1>Version Change Log </h1>  </div>
 </div>
 <div class="contents">
+<h2><a class="anchor" id="cl0203"></a>
+Version 2.3</h2>
+<ul>
+<li>Bug Fixes: <ul>
+<li>
+Additional mComm register labels have been implemented that were previously missed. The labels can still be editted from the <a class="el" href="m_comm__config_8h.html" title="mComm Configuration! Main configuration file for the mComm module.">mComm_config.h</a> file. There are now no known issues with using the 2nd or 3rd UART or I2C module. </li>
+<li>
+The Hardware CVD acquisition file now correctly reloads the AADCAP value for each sensor regardless of the whether it is called out of the main loop or the ISR. </li>
+<li>
+The Hardware CVD acquisition file now correctly calibrates the AADCAP value for the amount of capacitance seen on the pin. </li>
+</ul>
+</li>
+<li>Reordered aquisition scanning to resolve issues with multiple scanning modes and unique oversampling values. The scan for one sensor is now always performed in one single interrupt. Previously the framework would interleave the scans of one sensor with the math of the previous - now the math and the scans are performed at the same time. </li>
+<li>Removed support for PIC16F72x family due to reduced sensitivity of the 8-bit ADC. </li>
+<li>Several unnecessary interrupt variables have been removed to save space. </li>
+<li>PIC12LF1552 32MHz Fosc support added. </li>
+<li>PIC16F1508/9 UART support added.</li>
+</ul>
+<h2><a class="anchor" id="cl0202"></a>
+Version 2.2</h2>
+<ul>
+<li>Bug Fixes: <ul>
+<li>
+Sensors' oversampling counter variable now only updates if a scan occurred. </li>
+<li>
+Unique oversampling values enabled for only one sensor is now gracefully handled without throwing errors. </li>
+<li>
+I2C slave no longer occasionally fails to execute write operations. </li>
+</ul>
+</li>
+<li>Added support for hardware CVD handling </li>
+<li>Demo <a class="el" href="main_8c.html" title="Example implementation of the mTouch Framework&#39;s API calls.">main.c</a> files now have a few additional if blocks to reduce compile-time errors when minor configuration changes are made. </li>
+<li>Solved a compile-time-error bug with PIC16F72x devices when running at 16MHz </li>
+<li>Added device support: <ul>
+<li>
+PIC16(L)F1501/3 </li>
+<li>
+PIC16(L)F1512/3 </li>
+<li>
+PIC12(L)F1552 </li>
+</ul>
+</li>
+</ul>
 <h2><a class="anchor" id="cl0201"></a>
 Version 2.1</h2>
 <ul>
 <li>Enabling a non-TMR0 timer will now also automatically enable the PEIE bit for automatic interrupt use (<a class="el" href="m_touch_8c.html" title="Implements the post-acquisition filtering and decoding of the mTouch sensors.">mTouch.c</a>) </li>
 <li>Default one-way communications now supports the updated Profilab GUI supplied with this framework package (<a class="el" href="m_comm__config_8h.html" title="mComm Configuration! Main configuration file for the mComm module.">mComm_config.h</a> / <a class="el" href="m_comm_8c.html">mComm.c</a>) </li>
 <li>Configuration values can now be stored in RAM (mTouch_configOptions) instead of EEPROM for use in the two-way communications. See MTOUCH_EEPROM_STORED_AS_RAM in <a class="el" href="m_touch__config_8h.html" title="Framework Configuration! Main configuration file for the mTouch Framework.">mTouch_config.h</a> </li>
-<li>Individual the oversampling array initialization has been changed to automatically adjust its size based on MTOUCH_NUMBER_SENSORS (<a class="el" href="m_touch__acquistion_8c.html" title="Implements scanning procedure for the framework which performs the mTouch acquisition and provides an...">mTouch_acquistion.c</a>) </li>
-<li>When mTouch controls the ISR, it will now correctly exit from the function if the mTouch timer was not responsible for the interrupt (<a class="el" href="m_touch__acquistion_8c.html" title="Implements scanning procedure for the framework which performs the mTouch acquisition and provides an...">mTouch_acquistion.c</a>) </li>
+<li>Individual the oversampling array initialization has been changed to automatically adjust its size based on MTOUCH_NUMBER_SENSORS (<a class="el" href="m_touch__acquisition_8c.html" title="Implements scanning procedure for the framework which performs the mTouch acquisition and provides an...">mTouch_acquisition.c</a>) </li>
+<li>When mTouch controls the ISR, it will now correctly exit from the function if the mTouch timer was not responsible for the interrupt (<a class="el" href="m_touch__acquisition_8c.html" title="Implements scanning procedure for the framework which performs the mTouch acquisition and provides an...">mTouch_acquisition.c</a>) </li>
 <li>Fixed an issue with the DAC configuration in the hardware profiles of the 182x and 184x families </li>
 <li>Fixed a bug with the initial EEPROM byte check - previously the EEPROM would revert to factory settings on reset. (<a class="el" href="m_touch__eeprom_8c.html">mTouch_eeprom.c</a>) </li>
 <li>Fixed the mTouch_ClearToggle(i) API macro: Logical 'not' (<b>!</b>) changed to bit-wise 'not' (<b>~</b>).</li>
@@ -146,7 +189,7 @@ Version 1.0 - First Public Release</h2>
 <li>New MTOUCH_COMM_ASCII_READING and MTOUCH_COMM_ASCII_BASELINE configuration options to quickly adjust comm output </li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.3 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

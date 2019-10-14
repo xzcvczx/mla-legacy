@@ -101,7 +101,7 @@
   Remarks:
     None.
 ***************************************************************************/
-#define MTouchChargeDelay(chargeDelay)       {delayL: chargeDelay--; if(chargeDelay>0) goto delayL;}
+#define MTouchChargeDelay(chargeDelay) {asm volatile ("repeat %0" : : "r"((unsigned short)chargeDelay)); asm volatile ("nop");}
 
 
 /****************************************************************************

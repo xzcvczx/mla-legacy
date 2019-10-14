@@ -169,7 +169,12 @@ void PingDemo(void)
 
 BYTE PING_Console_Host[32]="192.168.1.1";
 INT32 Count_PingConsole = 0;
+INT32 PINGINT_Console_Host=0x0100A8C0;  //192.168.0.1
+BOOL pingUseDNS = TRUE;
 
+#if defined(STACK_USE_CERTIFATE_DEBUG)
+BOOL b_PingFroever = FALSE;
+#endif
 void PingConsole(void)
 {
 	static enum
@@ -181,6 +186,9 @@ void PingConsole(void)
 	LONG ret;
 	static INT32 statistics_send=0, statistics_Recv=0, statistics_lost=0;
 	static INT32 statistics_TimeMax=0, statistics_TimeMin=0, statistics_TimeTotal=0;
+#if defined(STACK_USE_CERTIFATE_DEBUG)	
+	if(b_PingFroever == TRUE) Count_PingConsole = 4;
+#endif
 	switch(PingState)
 	{
 		case SM_HOME:
@@ -191,12 +199,19 @@ void PingConsole(void)
 					if(!ICMPBeginUsage())   break;
 					Timer = TickGet();
 					// Send ICMP echo request
+					if(TRUE==pingUseDNS)
+					{
 					#if defined(STACK_USE_DNS)
 						ICMPSendPingToHostROM((ROM BYTE*)PING_Console_Host);
-						statistics_send ++;
 					#else
 						putsUART("DNS assert ...");while(1);
 					#endif
+					}
+					else
+					{
+						ICMPSendPing(PINGINT_Console_Host);
+					}
+					statistics_send ++;
 					Count_PingConsole --;
 					PingState = SM_GET_ICMP_RESPONSE;
 				}
@@ -213,7 +228,8 @@ void PingConsole(void)
 			{
 				// Request timed out
 				statistics_lost ++; 
-				putsUART("Ping timed out\r\n");
+				putsUART("Ping timed out ");
+				{ char buf_t[20]; sprintf(buf_t,":Lost %d times\r\n",(int)statistics_lost);putsUART(buf_t);}
 				PingState = SM_HOME;
 				if(Count_PingConsole ==0) goto _DonePingConsole;
 			}
@@ -260,13 +276,14 @@ _DonePingConsole:
 			sprintf(buf_t, "Sent = %d, ",(int)statistics_send);		putsUART(buf_t);
 			sprintf(buf_t, "Received = %d, ",(int)statistics_Recv);	putsUART(buf_t);
 			sprintf(buf_t, "Lost = %d ", (int)statistics_lost);		putsUART(buf_t);
-			sprintf(buf_t, "(%d%c loss)", (int)(statistics_lost/statistics_send), '%'); putsUART(buf_t);
+			sprintf(buf_t, "(%d%c loss)", (int)((100*statistics_lost)/statistics_send), '%'); putsUART(buf_t);
 	
 			putsUART("\r\nApproximate round trip times in milli-seconds:\r\n");
 			sprintf(buf_t, "  Minimum = %dms, ", (int)statistics_TimeMin);putsUART(buf_t);
 			sprintf(buf_t, "Maximum = %dms, ", (int)statistics_TimeMax);putsUART(buf_t);
-			sprintf(buf_t, "Average = %dms\r\n>", (int)(statistics_TimeTotal/statistics_Recv) );putsUART(buf_t);
-	
+			if(statistics_Recv != 0)
+				sprintf(buf_t, "Average = %dms\r\n>", (int)(statistics_TimeTotal/statistics_Recv) );putsUART(buf_t);
+			putsUART("\r\n>");
 			statistics_send=0; statistics_Recv=0; statistics_lost=0;
 			statistics_TimeMax=0; statistics_TimeMin=0; statistics_TimeTotal=0;
 			return;

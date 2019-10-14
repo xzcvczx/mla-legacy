@@ -1,7 +1,7 @@
 /*************************************************************************
  *  © 2012 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch Framework v2.1
+ *  Project Name:    mTouch Framework v2.3
  *  FileName:        mTouch_HardwareProfile_16F151x.h
  *  Dependencies:    mTouchCVD.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
@@ -107,7 +107,8 @@
 #define PIC_ADC_ADFM_LEFT           0
 
 #if     _XTAL_FREQ == 32000000 
-    #error This processor does not support 32 MHz internal Fosc. Please change _XTAL_FREQ in mTouch_config.h to the the actual Fosc value as set by the OSCCON register.
+    #define PIC_ADC_SETCLK()    PIC_ADC_ADCS = PIC_ADC_ADCS_FOSC32
+    #define PIC_ADC_TAD         1 
 #elif   _XTAL_FREQ == 16000000 
     #define PIC_ADC_SETCLK()    PIC_ADC_ADCS = PIC_ADC_ADCS_FOSC16
     #define PIC_ADC_TAD         1 

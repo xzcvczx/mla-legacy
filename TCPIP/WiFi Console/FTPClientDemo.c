@@ -129,7 +129,7 @@ void FTPClient(void)
 				break;
 
 			#if defined(STACK_USE_UART)
-			putrsUART((ROM char*)"\r\n\r\nUpdate using Microchip TCP API...\r\n");
+			putrsUART((ROM char*)"\r\n\r\nFTP Client...\r\n");
 			#endif
 
 			FtpClientCmdState++;
