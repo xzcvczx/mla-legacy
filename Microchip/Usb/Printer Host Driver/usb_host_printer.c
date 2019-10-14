@@ -84,12 +84,16 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev           Description
   ----------    -----------
   2.6 - 2.6a    No chance except stack revision number
+
   2.7           Minor updates to USBHostPrinterGetStatus() header
                 to better describe the function requirements and
                 operation.
 
                 Changed how transfer queues are handled to do a peek
                 now before removing the item from the queue.
+
+  2.7a          Provided macro wrapped versions of malloc() and free()
+                so that a user can override these functions easily.
 ********************************************************************/
 
 //DOM-IGNORE-END
@@ -111,6 +115,15 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
     #include "USB\usb_host_printer_postscript.h"
 #endif
 
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
+
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
 
 //#define DEBUG_MODE
 //#define DEBUG_PRINT_COMMANDS
@@ -318,7 +331,7 @@ BOOL USBHostPrinterInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
     pDesc  = USBHostGetDeviceDescriptor(address);
 
     #ifdef USB_PRINTER_ALLOW_DYNAMIC_LANGUAGE_DETERMINATION
-        usbPrinters[currentPrinterRecord].deviceIDString = (char *)malloc( ((USB_DEVICE_DESCRIPTOR*)pDesc)->bMaxPacketSize0 );
+        usbPrinters[currentPrinterRecord].deviceIDString = (char *)USB_MALLOC( ((USB_DEVICE_DESCRIPTOR*)pDesc)->bMaxPacketSize0 );
         if (usbPrinters[currentPrinterRecord].deviceIDString == NULL)
         {
             #ifdef DEBUG_MODE
@@ -585,7 +598,7 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                 transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                 if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                 {
-                    free( transfer->data );
+                    USB_FREE( transfer->data );
                 }
             }
 
@@ -595,7 +608,7 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
             USB_HOST_APP_EVENT_HANDLER(usbPrinters[currentPrinterRecord].ID.deviceAddress, EVENT_PRINTER_DETACH,
                     &usbPrinters[currentPrinterRecord].ID.deviceAddress, sizeof(BYTE) );
             #ifdef USB_PRINTER_ALLOW_DYNAMIC_LANGUAGE_DETERMINATION
-                free( usbPrinters[currentPrinterRecord].deviceIDString );
+                USB_FREE( usbPrinters[currentPrinterRecord].deviceIDString );
             #endif
             usbPrinters[currentPrinterRecord].flags.value = 0;
             #ifdef DEBUG_MODE
@@ -622,7 +635,7 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                     transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
-                        free( transfer->data );
+                        USB_FREE( transfer->data );
                     }
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
@@ -642,7 +655,7 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                     transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
-                        free( transfer->data );
+                        USB_FREE( transfer->data );
                     }
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
@@ -707,7 +720,7 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                     transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
-                        free( transfer->data );
+                        USB_FREE( transfer->data );
                     }
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
@@ -727,7 +740,7 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                     transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
-                        free( transfer->data );
+                        USB_FREE( transfer->data );
                     }
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
@@ -1263,7 +1276,7 @@ BYTE USBHostPrinterWrite( BYTE deviceAddress, void *buffer, DWORD length,
         // deallocate the memory.
         if (transferFlags & USB_PRINTER_TRANSFER_COPY_DATA)
         {
-            free( buffer );
+            USB_FREE( buffer );
         }
         return USB_PRINTER_BUSY;
     }
@@ -1422,8 +1435,8 @@ BOOL _USBHostPrinter_GetDeviceIDString( void )
             UART2PrintString( "\r\n" );
         #endif
 
-        free( usbPrinters[currentPrinterRecord].deviceIDString );
-        usbPrinters[currentPrinterRecord].deviceIDString = (char *)malloc( usbPrinters[currentPrinterRecord].deviceIDStringLength + 3 );
+        USB_FREE( usbPrinters[currentPrinterRecord].deviceIDString );
+        usbPrinters[currentPrinterRecord].deviceIDString = (char *)USB_MALLOC( usbPrinters[currentPrinterRecord].deviceIDStringLength + 3 );
         if (usbPrinters[currentPrinterRecord].deviceIDString == NULL)
         {
             #ifdef DEBUG_MODE

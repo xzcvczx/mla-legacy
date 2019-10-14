@@ -35,12 +35,12 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
+  1.01  Modified to Support T=1 protocol
 ********************************************************************/
 
 #include "string.h"
 #include "sc_config.h"
 #include "./Smart Card/SClib.h"
-
 
 #include "stdio.h"
 
@@ -49,6 +49,11 @@
 		_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & BKBUG_OFF & COE_OFF & ICS_PGx2 & FWDTEN_OFF & WINDIS_OFF & FWPSA_PR32 & WDTPS_PS1);
 		_CONFIG2(IESO_OFF & PLLDIV_DIV2 & FNOSC_PRIPLL & POSCMOD_HS & FCKSM_CSDCMD & OSCIOFNC_OFF & IOL1WAY_OFF & 0xF7FF) 
 		_CONFIG3(WPCFG_WPCFGDIS & WPDIS_WPDIS) 
+	#elif defined(__dsPIC33F__) || defined(__PIC24H__)
+		_FOSCSEL(FNOSC_PRI);
+		_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
+		_FWDT(FWDTEN_OFF);
+		_FICD(ICS_PGD1 & JTAGEN_OFF);
 	#endif
 #elif defined(HPC_EXPLORER)
     #ifdef __18F46J50 //Defined by MPLAB when using PIC18F46J50 device
@@ -180,19 +185,58 @@
 #endif
 
 // APDU Command to the Card
-SC_APDU_Cmd CardCmd;
+SC_APDU_COMMAND cardCommand;
 
 // APDU Response from the Card
-SC_APDU_Resp CardResp;
+SC_APDU_RESPONSE cardResponse;
+
+#ifdef SC_PROTO_T1
+	// T=1, Prologue Field
+	SC_T1_PROLOGUE_FIELD prologueField;
+#endif
 
 // Store the APDU Command/Response Data in a 256 bytes register bank(RAM)
 #if defined(__18CXX)
 	#pragma udata apdu_data
-		BYTE APDUData[256];
+		BYTE apduData[SC_APDU_BUFF_SIZE];
 	#pragma udata
 #else
-	BYTE APDUData[256];
+	BYTE apduData[SC_APDU_BUFF_SIZE];
 #endif
+
+#if defined(__18CXX)
+void LowISR();
+#pragma code lowhVector=0x18
+void LowVector (void)
+{
+    _asm goto LowISR _endasm
+}
+#pragma code
+#endif
+
+#if defined(__18CXX)
+    #pragma interruptlow LowISR
+    void LowISR(void)
+#elif defined(__dsPIC30F__) || defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24H__)
+	    void _ISRFAST __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
+#endif
+{
+    #if defined(__18CXX)
+		if (INTCONbits.TMR0IF)
+	  	{                                   //check for TMR0 overflow
+	      	INTCONbits.TMR0IF = 0;           //clear interrupt flag
+			SCdrv_DisableDelayTimer();
+	      	delayLapsedFlag = 1;            //indicate timeout
+	  	}
+	#else
+		if(IFS0bits.T1IF)
+		{
+			IFS0bits.T1IF = 0;
+			SCdrv_DisableDelayTimer();
+			delayLapsedFlag = 1;
+		}
+	#endif
+}
 
 ///////////////////////////////////////////////////
 //////////////////////////////////////////////////
@@ -202,7 +246,7 @@ void main(void)
 int main(void)
 #endif
 {
-	int BrkPt = 0;	
+	int breakPoint = 0;	
 	
     #if defined(__18F46J50) || defined(__18F87J50)
 	//On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
@@ -235,165 +279,193 @@ int main(void)
 	SC_Initialize();
 
 	// Proceed further only after detecting the card
-	while( !SC_CardPresent() )
-		;
-		
-	WaitMilliSec(10);
+	while( !SC_CardPresent() );
 		
 	//Turn on power to Card and recieve and process Answer-to-Reset
 	if( !SC_PowerOnATR() )
 		while(1)
 		{
-			BrkPt++;
+			breakPoint++;
 		}
 
 	//configure protocol type selection and select configured baud rate
 	if( !SC_DoPPS() )
 		while(1)
 		{
-			BrkPt++;
+			breakPoint++;
 		}
 
-	//Execute Card Commands ///////////////////////
-	// ACOS3 Smart Card from Advanced Card Systems Ltd. is used for testing the
-	// Smart Card library.
-	
-	// Submit Code
-	CardCmd.CLA = 0x80;
-	CardCmd.INS = SC_SUBMIT_CODE;
-	CardCmd.P1 	= 7;
-	CardCmd.P2  = 0;
-	CardCmd.LC  = 8;	//tx 8 bytes of auth code
-	#if defined(__PIC24F__)
-		memcpy( APDUData, "ACOSTEST", 8 );
-	#elif defined(__18F46J50) || defined(__18F87J50) || defined(__18F14K50) || defined(__18F4550)
-		APDUData[0] = 'A';
-		APDUData[1] = 'C';
-		APDUData[2] = 'O';
-		APDUData[3] = 'S';
-		APDUData[4] = 'T';
-		APDUData[5] = 'E';
-		APDUData[6] = 'S';
-		APDUData[7] = 'T';
-	#else
-		// Do Nothing
-	#endif
-	CardCmd.LE  = 0;
-	
-	if( !SC_Transact( &CardCmd, &CardResp, APDUData ) )
-		while(1)
-		{
-			BrkPt++;
-		}
+	WaitMilliSec(20);
 
-	//make sure Submit-Code was success		
-	if( !(CardResp.SW1 == 0x90 && CardResp.SW2 == 0x00) ) //90 and 00 are success codes
-		while(1)
-		{
-			BrkPt++;
-		}
-		
-	WaitMilliSec(10);
+	if(SC_T1ProtocolType())
+	{
+		// If T=1 is defined
+		#ifdef SC_PROTO_T1
 
-	// Select File ///////////////
-	CardCmd.CLA = 0x80;
-	CardCmd.INS = SC_SELECT_FILE;
-	CardCmd.P1 	= 0;
-	CardCmd.P2  = 0;
-	CardCmd.LC  = 2;	//tx 2 bytes of file id
-	APDUData[0] = 0xFF;
-	APDUData[1] = 0x01;	//manufac File ID
-	CardCmd.LE  = 0;
+			// Write Node Address, Protocol Control Byte & I-Field Length respectively
+			prologueField.NAD = 0;
+			prologueField.PCB = 0;
+			prologueField.LENGTH = 5;
 
-	if( !SC_Transact( &CardCmd, &CardResp, APDUData ) )
-		while(1)
-		{
-			BrkPt++;
-		}
-
-	//make sure Select-File was success		
-	if( !(CardResp.SW1 == 0x90 && CardResp.SW2 == 0x00) ) //90 and 00 are success codes
-		while(1)
-		{
-			BrkPt++;
-		}
-	
-	WaitMilliSec(10);
-
-	//Write record to selected file
-	CardCmd.CLA = 0x80;
-	CardCmd.INS = SC_WRITE_RECORD;
-	CardCmd.P1 	= 0; 				//rec index
-	CardCmd.P2  = 0;
-	CardCmd.LC  = 8;				//tx 8 bytes
-	APDUData[0] = 0;
-	APDUData[1] = 10;
-	APDUData[2] = 20;
-	APDUData[3] = 35;
-	APDUData[4] = 45;
-	APDUData[5] = 58;
-	APDUData[6] = 68;
-	APDUData[7] = 0;
-	CardCmd.LE  = 0;
-
-	if( !SC_Transact( &CardCmd, &CardResp, APDUData ) )
-		while(1)
-		{
-			BrkPt++;
-		}
-
-	//make sure operation was success		
-	if( !(CardResp.SW1 == 0x90 && CardResp.SW2 == 0x00) ) //90 and 00 are success codes
-		while(1)
-		{
-			BrkPt++;
-		}
-	
-	WaitMilliSec(10);
-	
-	//Readback the contents to verify write data
-	CardCmd.CLA = 0x80;
-	CardCmd.INS = SC_READ_RECORD;
-	CardCmd.P1 	= 0; 				//rec index
-	CardCmd.P2  = 0;
-	CardCmd.LC  = 0;				
-	CardCmd.LE  = 8;				//expect 8 bytes from card
-
-	if( !SC_Transact( &CardCmd, &CardResp, APDUData ) )
-		while(1)
-		{
-			BrkPt++;
-		}
-
-	//make sure operation was success		
-	if( !(CardResp.SW1 == 0x90 && CardResp.SW2 == 0x00) ) //90 and 00 are success codes
-		while(1)
-		{
-			BrkPt++;
-		}
-	
-	//verify record write
-	if( !(	APDUData[0] == 0 &&
-			APDUData[1] == 10 &&
-			APDUData[2] == 20 &&
-			APDUData[3] == 35 &&
-			APDUData[4] == 45 &&
-			APDUData[5] == 58 &&
-			APDUData[6] == 68 &&
-			APDUData[7] == 0 ) )
+			// Write the APDU command in I field array
+			apduData[0] = 0x80;
+			apduData[1] = 0xCA;
+			apduData[2] = 0x9F;
+			apduData[3] = 0x7F;
+			apduData[4] = 0x00;
 			
-		while(1)
-		{
-			BrkPt++;
-		}
-			 
- 		
+			// Transact using T=1 protocol
+			if(!SC_TransactT1(&prologueField,apduData,&cardResponse))
+				while(1)
+				{
+					breakPoint++;
+				}
+
+		#endif
+	}
+
+	if(SC_T0ProtocolType())
+	{
+		//Execute Card Commands ///////////////////////
+		// ACOS3 Smart Card from Advanced Card Systems Ltd. is used for testing the
+		// Smart Card library.
+		
+		// Submit Code
+		cardCommand.CLA = 0x80;
+		cardCommand.INS = SC_SUBMIT_CODE;
+		cardCommand.P1 	= 7;
+		cardCommand.P2  = 0;
+		cardCommand.LC  = 8;	//tx 8 bytes of auth code
+		#if defined(__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
+			memcpy( apduData, "ACOSTEST", 8 );
+		#elif defined(__18F46J50) || defined(__18F87J50) || defined(__18F14K50) || defined(__18F4550)
+			apduData[0] = 'A';
+			apduData[1] = 'C';
+			apduData[2] = 'O';
+			apduData[3] = 'S';
+			apduData[4] = 'T';
+			apduData[5] = 'E';
+			apduData[6] = 'S';
+			apduData[7] = 'T';
+		#else
+			// Do Nothing
+		#endif
+		cardCommand.LE  = 0;
+		
+		if( !SC_TransactT0( &cardCommand, &cardResponse, apduData ) )
+			while(1)
+			{
+				breakPoint++;
+			}
+
+		//make sure Submit-Code was success		
+		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
+			while(1)
+			{
+				breakPoint++;
+			}
+			
+		WaitMilliSec(10);
+
+		// Select File ///////////////
+		cardCommand.CLA = 0x80;
+		cardCommand.INS = SC_SELECT_FILE;
+		cardCommand.P1 	= 0;
+		cardCommand.P2  = 0;
+		cardCommand.LC  = 2;	//tx 2 bytes of file id
+		apduData[0] = 0xFF;
+		apduData[1] = 0x01;	//manufac File ID
+		cardCommand.LE  = 0;
+
+		if( !SC_TransactT0( &cardCommand, &cardResponse, apduData ) )
+			while(1)
+			{
+				breakPoint++;
+			}
+
+		//make sure Select-File was success		
+		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
+			while(1)
+			{
+				breakPoint++;
+			}
+		
+		WaitMilliSec(10);
+
+		//Write record to selected file
+		cardCommand.CLA = 0x80;
+		cardCommand.INS = SC_WRITE_RECORD;
+		cardCommand.P1 	= 0; 				//rec index
+		cardCommand.P2  = 0;
+		cardCommand.LC  = 8;				//tx 8 bytes
+		apduData[0] = 0;
+		apduData[1] = 10;
+		apduData[2] = 20;
+		apduData[3] = 35;
+		apduData[4] = 45;
+		apduData[5] = 58;
+		apduData[6] = 68;
+		apduData[7] = 0;
+		cardCommand.LE  = 0;
+
+		if( !SC_TransactT0( &cardCommand, &cardResponse, apduData ) )
+			while(1)
+			{
+				breakPoint++;
+			}
+
+		//make sure operation was success		
+		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
+			while(1)
+			{
+				breakPoint++;
+			}
+		
+		WaitMilliSec(10);
+		
+		//Readback the contents to verify write data
+		cardCommand.CLA = 0x80;
+		cardCommand.INS = SC_READ_RECORD;
+		cardCommand.P1 	= 0; 				//rec index
+		cardCommand.P2  = 0;
+		cardCommand.LC  = 0;				
+		cardCommand.LE  = 8;				//expect 8 bytes from card
+
+		if( !SC_TransactT0( &cardCommand, &cardResponse, apduData ) )
+			while(1)
+			{
+				breakPoint++;
+			}
+
+		//make sure operation was success		
+		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
+			while(1)
+			{
+				breakPoint++;
+			}
+		
+		//verify record write
+		if( !(	apduData[0] == 0 &&
+				apduData[1] == 10 &&
+				apduData[2] == 20 &&
+				apduData[3] == 35 &&
+				apduData[4] == 45 &&
+				apduData[5] == 58 &&
+				apduData[6] == 68 &&
+				apduData[7] == 0 ) )
+				
+			while(1)
+			{
+				breakPoint++;
+			}
+ 	}
+
 	// Shut Down the Card when dont need anything to do with it
 	SC_Shutdown();
 
 	while(1)
 	{
-		BrkPt++;
+		breakPoint++;
 	}
 
     #if !defined(__18CXX)

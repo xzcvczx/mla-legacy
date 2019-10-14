@@ -8,9 +8,9 @@ dir_src=
 dir_bin=
 dir_tmp=
 dir_sin=
-dir_inc=.;..\..\Microchip\Include\Smart Card;..\..\Microchip\Smart Card;..\..\Microchip\Include
-dir_lib=C:\MCC18\lib
-dir_lkr=C:\MCC18\lkr
+dir_inc=.;../../Microchip/Include/Smart Card;../../Microchip/Smart Card;../../Microchip/Include
+dir_lib=C:/MCC18/lib
+dir_lkr=C:/MCC18/lkr
 [CAT_FILTERS]
 filter_src=*.asm;*.c
 filter_inc=*.h;*.inc

@@ -93,6 +93,10 @@ Description:
            the PIC24F device in the correct state before issuing the sleep
            instruction and returning the device to the correct state after
            exiting sleep. 
+
+  2.7a   Fixed issue where the USBSleepOnSuspend() function would cause
+           the USB communication to fail after being called when _IPL
+           is equal to 0.
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -123,17 +127,6 @@ BOOL USBSleepOnSuspend(void)
     unsigned int U1EIE_save, U1IE_save, U1OTGIE_save;
     unsigned char USB1IE_save;
 
-    //Save the old interrupt and CPU settings
-    U1EIE_save = U1EIE;
-    U1IE_save = U1IE;
-    U1OTGIE_save = U1OTGIE;
-    USB1IE_save = IEC5bits.USB1IE;
-
-    //Disable all USB interrupts
-    U1EIE = 0;
-    U1IE = 0;
-    U1OTGIE = 0;
-
     #if defined(USB_POLLING)
         //If IPL is equal to 0 then there is no way for the USB module to
         //  generate an interrupt to wake up the device.  
@@ -145,7 +138,18 @@ BOOL USBSleepOnSuspend(void)
         //Set the interrupt priority to a level that will wake up the part (>0)
         //  but will not cause a interrupt vector jump (USB1IP<=IPL)
         _USB1IP = 1;
-    #endif  
+    #endif 
+
+    //Save the old interrupt and CPU settings
+    U1EIE_save = U1EIE;
+    U1IE_save = U1IE;
+    U1OTGIE_save = U1OTGIE;
+    USB1IE_save = IEC5bits.USB1IE;
+
+    //Disable all USB interrupts
+    U1EIE = 0;
+    U1IE = 0;
+    U1OTGIE = 0; 
 
     //Enable the interrupt
     IFS5bits.USB1IF = 0;

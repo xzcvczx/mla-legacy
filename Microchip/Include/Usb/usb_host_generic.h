@@ -57,7 +57,7 @@ Change History:
   Rev   Description
   ----  -----------------------------------------
   2.6a- No change
-   2.7
+   2.7a
 *******************************************************************************/
 #ifndef __USBHOSTGENERIC_H__
 #define __USBHOSTGENERIC_H__

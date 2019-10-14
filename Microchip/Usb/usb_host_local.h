@@ -36,6 +36,7 @@ Change History:
   ----------  ----------------------------------------------------------
   2.6a        Removed extraneous definition
   2.7         No change
+  2.7a        Removed freez() macro
 *******************************************************************************/
 
 #ifndef _USB_HOST_LOCAL_
@@ -632,7 +633,6 @@ USB_EVENT_DATA, above).  See "struct_queue.h" for usage and operations.
 #define _USB_SetNextTransferState()     { pCurrentEndpoint->transferState ++; }
 #define _USB_SetPreviousSubSubState()   { usbHostState =  usbHostState - NEXT_SUBSUBSTATE; }
 #define _USB_SetTransferErrorState(x)   { x->transferState = (x->transferState & TSTATE_MASK) | TSUBSTATE_ERROR; }
-#define freez(x)                        { free(x); x = NULL; }
 
 
 //******************************************************************************

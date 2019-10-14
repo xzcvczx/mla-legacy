@@ -69,8 +69,11 @@ Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
   2.6 - 2.6a  No change
+
   2.7         Fixed issue where a transfer event is incorrectly sent when
               transfer events are enabled.
+
+  2.7a        No change
 
 *******************************************************************************/
 

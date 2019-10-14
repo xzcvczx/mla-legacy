@@ -107,11 +107,12 @@ ROM BYTE MBR_ATTRIBUTES MasterBootRecord[MEDIA_SECTOR_SIZE] =
 //Table of Primary Partitions (16 bytes/entry x 4 entries)
 //Entry 1                                                                                       //0x01BE
 0x80,                   //Status - 0x80 (bootable), 0x00 (not bootable), other (error)
-0x01, 0x01, 0x00,       //Cylinder-head-sector address of first sector in partition
-0x06,                   //Partition type - 0x06 = FAT16 32MB+
-0x07, 0xFF, 0xE6,       //Cylinder-head-sector address of last sector in partition
+0x00, 0x01, 0x00,       //Cylinder-head-sector address of first sector in partition
+0x01,                   //Partition type - 0x06 = FAT16 32MB+
+0xFF, 0xFF, 0xFF,       //Cylinder-head-sector address of last sector in partition
 0x01, 0x00, 0x00, 0x00, //Logical block address of first sector in partition
-MDD_INTERNAL_FLASH_DRIVE_CAPACITY, 0x00, 0x00, 0x00, //Length of partition in sectors
+(BYTE)MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE, 0x00, 0x00, 0x00, //Length of partition in sectors (MBR sits at LBA = 0, and is not in the partition)
+
 //Entry 2
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //0x01CE
 //Entry 3
@@ -133,7 +134,8 @@ ROM BYTE PARTITION_ATTRIBUTES BootSector[MEDIA_SECTOR_SIZE]  =
 MDD_INTERNAL_FLASH_NUM_RESERVED_SECTORS, 0x00,			//Reserved sector count
 0x01,			    //number of FATs
 MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT, 0x00,			//Max number of root directory entries - 16 files allowed
-0x00, 0x00,			//total sectors
+//0x00, 0x00,			//total sectors (0x0000 means: use the 4 byte field at offset 0x20 instead)
+MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE, 0x00,	//total sectors (0x0000 means: use the 4 byte field at offset 0x20 instead)
 0xF8,			    //Media Descriptor
 MDD_INTERNAL_FLASH_NUM_FAT_SECTORS, 0x00,         //Sectors per FAT
 0x3F, 0x00,	        //Sectors per track
@@ -146,7 +148,7 @@ MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE, 0x00, 0x00, 0x00,		//Total sectors
 0x29,			//Signature
 0x32, 0x67, 0x94, 0xC4,		//ID(serial number)
 'N', 'O', ' ', 'N', 'A', 'M', 'E', ' ', ' ', ' ', ' ',	//Volume Label - "NO NAME    "
-'F', 'A', 'T', '1', '6', ' ', ' ', ' ',	//FAT system "FAT16   "
+'F', 'A', 'T', '1', '2', ' ', ' ', ' ',	//FAT system "FAT12   "
 //Operating system boot code
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

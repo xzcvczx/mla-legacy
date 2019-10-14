@@ -74,6 +74,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   2.6    Moved many of the USB events
   2.6a   Changed the limit of USB_EVENT from UINT_MAX to INT_MAX
   2.7    No change
+  2.7a   Minor changes to include isochronous events
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -328,6 +329,18 @@ typedef enum
     // Device-mode bus reset received.  This event is not used by the Host 
     // stack.                  
     EVENT_RESET,  
+    
+    // In Host mode, an isochronous data read has completed.  This event will only
+    // be passed to the DataEventHandler, which is only utilized if it is defined.
+    // Note that the DataEventHandler is called from within the USB interrupt, so 
+    // it is critical that it return in time for the next isochronous data packet.
+    EVENT_DATA_ISOC_READ,
+    
+    // In Host mode, an isochronous data write has completed.  This event will only
+    // be passed to the DataEventHandler, which is only utilized if it is defined.  
+    // Note that the DataEventHandler is called from within the USB interrupt, so 
+    // it is critical that it return in time for the next isochronous data packet.
+    EVENT_DATA_ISOC_WRITE,
 
     // Class-defined event offsets start here:
     EVENT_GENERIC_BASE  = 400,      // Offset for Generic class events

@@ -45,6 +45,7 @@ file_017=Common
 file_018=Common
 file_019=Common
 file_020=Common
+file_021=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -67,6 +68,7 @@ file_017=no
 file_018=no
 file_019=no
 file_020=no
+file_021=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -89,6 +91,7 @@ file_017=no
 file_018=no
 file_019=no
 file_020=no
+file_021=yes
 [FILE_INFO]
 file_000=usb_config.c
 file_001=cdc_demo.c
@@ -111,6 +114,7 @@ file_017=..\..\Microchip\Include\uart2.h
 file_018=..\..\Microchip\Include\GenericTypeDefs.h
 file_019=..\..\Microchip\Include\LCDBlocking.h
 file_020=..\..\Microchip\Include\Compiler.h
+file_021=..\Getting Started - Running the Host - CDC - Serial Demo.htm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

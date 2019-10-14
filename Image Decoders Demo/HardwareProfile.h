@@ -57,14 +57,14 @@
 	     * PIC24FJ256DA210 Development Board
 	     * Display TFT-G240320LTSW-118W-E
 	     ********************************************************************/
-		#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
+		#include "Alternative Configurations\HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
 		
 		/*********************************************************************
 	     * Hardware Configuration for 
 	     * PIC24FJ256DA210 Development Board
 	     * Display PH480272T-005-I11Q
 	     ********************************************************************/
-		//#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_PH480272T_005_I11Q.h"
+		//#include "Alternative Configurations\HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_PH480272T_005_I11Q.h"
 
 	#else
 		/*********************************************************************

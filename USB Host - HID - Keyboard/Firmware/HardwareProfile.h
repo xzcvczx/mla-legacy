@@ -7,7 +7,7 @@
 
     // Various clock values
     #define GetSystemClock()            32000000UL
-    #define GetPeripheralClock()        (GetSystemClock())
+    #define GetPeripheralClock()        (GetSystemClock() / 2)
     #define GetInstructionClock()       (GetSystemClock() / 2)
 
     // Clock values

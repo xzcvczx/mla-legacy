@@ -92,7 +92,7 @@ Description:
  Change History:
   Rev           Description
   ----------    -----------
-  2.6 - 2.7     No change except stack revision number
+  2.6 - 2.7a    No change except stack revision number
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -136,7 +136,7 @@ Description:
 // *****************************************************************************
 
 #define USB_MAJOR_VER   2       // Firmware version, major release number.
-#define USB_MINOR_VER   6       // Firmware version, minor release number.
+#define USB_MINOR_VER   7       // Firmware version, minor release number.
 #define USB_DOT_VER     1       // Firmware version, dot release number.
 
 #endif // _USB_H_

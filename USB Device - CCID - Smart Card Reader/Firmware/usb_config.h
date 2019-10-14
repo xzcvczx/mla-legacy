@@ -119,13 +119,13 @@
 /** ENDPOINTS ALLOCATION *******************************************/
 
 /* CCID*/
-#define USB_EP_SIZE         64
+#define USB_EP_SIZE         8
 
 #define USB_EP_BULK_IN      2
 #define USB_EP_BULK_OUT     2
 #define USB_EP_INT_IN  		1
 
-#define CCID_INTERFACE_ID   0x00
+#define USB_CCID_INTERFACE_ID   0x00
 
 /********** CCID CLASS SPECIFIC REQUEST HANDLERS ************************/ 
 /** Uncomment appropriate Control request handler if your device supports them ************/

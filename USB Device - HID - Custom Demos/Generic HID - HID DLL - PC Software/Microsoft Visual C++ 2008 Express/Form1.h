@@ -34,8 +34,38 @@
  Change History:
   Rev   Date         Description
   1.0   06/11/2009   Initial release
+  2.7a  08/29/2010	 No code changes.  Only the following comment is added:
 
-This demonstrates the HID USB DLL interface.
+  //-------------------v2.7a 08/29/2010 comment----------------
+  If trying to build this project with Visual Studio 2010, you will likely
+  encounter the following error message:
+
+  "An unhandled exception of type 'System.IO.FileLoadException' occurred in GenericHIDDLLSimpleDemo.exe
+   Additional information: Mixed mode assembly is built against version 'v2.0.50727' of the runtime and 
+   cannot be loaded in the 4.0 runtime without additional configuration information."
+
+   This error is due to trying to use a DLL based on an eariler .NET framework (in this case HID class.dll),
+   in the PC application executable that is based on the newer .NET framework (4.0).
+
+   To fix this, you need to supply a "[executable name].exe.config" file that supplies the requested additional info.
+   This config file should be placed in the same directory that the executable runs from (including when you
+   launch it from within the Visual C++ IDE, ex: the debug and release directories).  The contents of this 
+   file should be as follows:
+
+	<configuration>
+	  <startup useLegacyV2RuntimeActivationPolicy="true">
+	    <supportedRuntime version="v4.0"/>
+	  </startup>
+	</configuration>
+
+	An example of this file has been provided in the project directory.  Please copy it to your executable directories.
+	//-------------------v2.7a 08/29/2010 comment----------------
+
+
+//---------------------------------------------------------------------------------------
+//Project Overview
+//---------------------------------------------------------------------------------------
+This project demonstrates the HID USB DLL interface.
 
 The DLL has four functions:
 void USBHIDClassInit (VID, PID, Size) - Sets the Vendor and Product Id used in the class.
@@ -88,6 +118,7 @@ namespace GenericHIDDLLSimpleDemo {
 		Form1(void)
 		{
 			InitializeComponent();
+			MCHPHIDClass::USBHIDClassInit (0x4D8, 0x003F, 64);
 			//
 			//TODO: Add the constructor code here
 			//
@@ -205,7 +236,6 @@ namespace GenericHIDDLLSimpleDemo {
 			this->Controls->Add(this->ToggleLED_btn);
 			this->Name = L"Form1";
 			this->Text = L"Generic HID Class DLL Simple Demo";
-			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
 			this->groupBox1->ResumeLayout(false);
 			this->groupBox1->PerformLayout();
 			this->ResumeLayout(false);
@@ -213,11 +243,6 @@ namespace GenericHIDDLLSimpleDemo {
 
 		}
 #pragma endregion
-
-private: System::Void Form1_Load(System::Object^  sender, System::EventArgs^  e) {
-			 // Initialize class with Vendor ID, Product ID, and report size)
-			 MCHPHIDClass::USBHIDClassInit (0x4D8, 0x003F, 64);
-		 }
 
 private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
 			 // OS Inquiry to see if the device is connected
@@ -227,7 +252,7 @@ private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e
 			 }
 			 else
 			 {
-				 lblDeviceState->Text = "Disonnected";	
+				 lblDeviceState->Text = "Disconnected";	
 			 }
 		 }
 
@@ -241,7 +266,7 @@ private: System::Void ToggleLED_btn_Click(System::Object^  sender, System::Event
 		 }
 		 else
 		 {
-			 lblDeviceState->Text = "Disonnected";	
+			 lblDeviceState->Text = "Disconnected";	
 		 }
 		 }
 
@@ -269,7 +294,7 @@ private: System::Void GetPushbuttonState_btn_Click(System::Object^  sender, Syst
 		 }
 		 else
 		 {
-			 lblDeviceState->Text = "Disonnected";	
+			 lblDeviceState->Text = "Disconnected";	
 		 }
 
 		 }

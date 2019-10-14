@@ -74,12 +74,19 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev       Description
   ----      -----------
   2.2       Initial Release
+
   2.3-2.5a  No changes
+
   2.5b      Corrected heap allocation issue
+
   2.6-2.6a  No changes
+
   2.7       Fixed issue where deviceInfoHID[i].rptDescriptor was freed
             twice.  The second free results in possible issues in future
             malloc() calls in the C32 compiler.
+
+  2.7a      Provided macro wrapped versions of malloc() and free()
+            so that a user can override these functions easily.
 ********************************************************************/
 
 #include <stdlib.h>
@@ -272,8 +279,15 @@ void _USBHostHID_ResetStateJump( BYTE i );
 // Macros
 //******************************************************************************
 //******************************************************************************
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
 
-#define freezHID(x)                                 { free(x); x = NULL; }
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
 
 #define _USBHostHID_LockDevice(x)                   {                                                   \
                                                         deviceInfoHID[i].errorCode  = x;                \
@@ -681,7 +695,7 @@ void USBHostHIDTasks( void )
                         {
                             if(pCurrInterfaceDetails->sizeOfRptDescriptor !=0) // interface must have a Report Descriptor
                             {
-                                if((deviceInfoHID[i].rptDescriptor = (BYTE *)malloc(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
+                                if((deviceInfoHID[i].rptDescriptor = (BYTE *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
                                 {
                                     _USBHostHID_LockDevice( USB_MEMORY_ALLOCATION_ERROR );
                                     break;
@@ -695,8 +709,7 @@ void USBHostHIDTasks( void )
                                 }
                                 else
                                 {
-                                    free(deviceInfoHID[i].rptDescriptor);
-                                    deviceInfoHID[i].rptDescriptor = NULL;
+                                    USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
                                 }
                             }
                         }
@@ -766,8 +779,7 @@ void USBHostHIDTasks( void )
                             }
                         }
                         // free the previous allocated memory, reallocate for new interface if needed
-                        free(deviceInfoHID[i].rptDescriptor);
-                        deviceInfoHID[i].rptDescriptor = NULL;
+                        USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
                         pCurrInterfaceDetails = pCurrInterfaceDetails->next;
                         if(pCurrInterfaceDetails != NULL)
                         {
@@ -1632,14 +1644,14 @@ BOOL USBHostHIDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                         USB_HOST_APP_EVENT_HANDLER( deviceInfoHID[i].ID.deviceAddress, EVENT_HID_BAD_REPORT_DESCRIPTOR, NULL, 0 );
                                     }
                                 }
-                                free(deviceInfoHID[i].rptDescriptor);
+                                USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
                                 pCurrInterfaceDetails = pCurrInterfaceDetails->next;
 
                                 if(pCurrInterfaceDetails != NULL)
                                 {
                                     if(pCurrInterfaceDetails->sizeOfRptDescriptor !=0)
                                     {
-                                        if((deviceInfoHID[i].rptDescriptor = (BYTE *)malloc(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
+                                        if((deviceInfoHID[i].rptDescriptor = (BYTE *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
                                         {
                                             #ifdef DEBUG_MODE
                                                 UART2PrintString( "HID: Out of memory\r\n" );
@@ -1655,7 +1667,7 @@ BOOL USBHostHIDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                         #ifdef DEBUG_MODE
                                             UART2PrintString( "HID: Error getting descriptor\r\n" );
                                         #endif
-                                        free(deviceInfoHID[i].rptDescriptor);
+                                        USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
                                         break;
                                     }
                                     deviceInfoHID[i].state = STATE_WAIT_FOR_REPORT_DSC;
@@ -1949,7 +1961,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                 deviceInfoHID[device].driverSupported = 1;
                 if (deviceInfoHID[device].driverSupported)
                 {
-                    if ((pNewInterfaceDetails = (USB_HID_INTERFACE_DETAILS*)malloc(sizeof(USB_HID_INTERFACE_DETAILS))) == NULL)
+                    if ((pNewInterfaceDetails = (USB_HID_INTERFACE_DETAILS*)USB_MALLOC(sizeof(USB_HID_INTERFACE_DETAILS))) == NULL)
                     {
                         #ifdef DEBUG_MODE
                             UART2PrintString("HID: Out of memory for interface details\r\n" );
@@ -1972,7 +1984,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                         pCurrInterfaceDetails->next             = NULL;
                     }
 
-//                       freezHID( pNewInterfaceDetails );
+//                       USB_FREE_AND_CLEAR( pNewInterfaceDetails );
                     pCurrInterfaceDetails->interfaceNumber   = descriptor[i+2];
 
                     // Scan for hid descriptors.
@@ -2077,10 +2089,10 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
             {
                 if (deviceInfoHID[device].rptDescriptor != NULL)
                 {
-                    freezHID( deviceInfoHID[device].rptDescriptor );
+                    USB_FREE_AND_CLEAR( deviceInfoHID[device].rptDescriptor );
                 }
 
-                if((deviceInfoHID[device].rptDescriptor = (BYTE *)malloc(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
+                if((deviceInfoHID[device].rptDescriptor = (BYTE *)USB_MALLOC(pCurrInterfaceDetails->sizeOfRptDescriptor)) == NULL)
                 {
                     #ifdef DEBUG_MODE
                         UART2PrintString("HID: Out of memory for report descriptor\r\n" );
@@ -2095,7 +2107,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                 #ifdef DEBUG_MODE
                     UART2PrintString("HID: Error getting report descriptor\r\n" );
                 #endif
-                free(deviceInfoHID[device].rptDescriptor);
+                USB_FREE_AND_CLEAR(deviceInfoHID[device].rptDescriptor);
                 return FALSE;
             }
             #ifdef DEBUG_MODE
@@ -2163,24 +2175,19 @@ void _USBHostHID_FreeRptDecriptorDataMem(BYTE deviceAddress)
     /* free memory allocated to HID parser */
         if(parsedDataMem != NULL)
         {
-            free(parsedDataMem); /* will be indexed once multiple  device support is added */
-            parsedDataMem = NULL;
+            USB_FREE_AND_CLEAR(parsedDataMem); /* will be indexed once multiple  device support is added */
         }
         if(deviceInfoHID[i].rptDescriptor != NULL)
         {
-            free(deviceInfoHID[i].rptDescriptor);
-            deviceInfoHID[i].rptDescriptor = NULL;
+            USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);
         }
 
     /* free memory allocated to report descriptor in deviceInfoHID */
        while(pInterfaceDetails != NULL)
         {
             ptempInterface = pInterfaceDetails->next;
-//            pCurrInterfaceDetails = pInterfaceDetails;
-            freezHID(pInterfaceDetails);
-//            freezHID(pCurrInterfaceDetails);
+            USB_FREE_AND_CLEAR(pInterfaceDetails);
             pInterfaceDetails = ptempInterface;
-//            pCurrInterfaceDetails = pInterfaceDetails;
         }
     }
 }

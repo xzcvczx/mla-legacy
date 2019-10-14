@@ -108,6 +108,13 @@
          In the USBStdSetCfgHandler(), modified the code so the USBDeviceState
          variable only gets updated to the CONFIGURED_STATE at the end of the 
          function.  
+
+  2.7a   Update to support the PIC18F47J53 A1 and later revision
+         devices.
+
+         Fixed an error on 16-bit and 32-bit processors where a word access
+         could be performed on a byte pointer resulting in possible address
+         errors with odd aligned pointers.
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -482,8 +489,8 @@ USB_VOLATILE BYTE *USBInData[USB_MAX_EP_NUMBER];
 #if defined(__18CXX)
     #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
         #pragma udata USB_BDT=0x200     //See Linker Script, BDT in bank 2 on these devices - usb2:0x200-0x2FF(256-byte)
-//    #elif defined(__18F47J53) || defined(__18F46J53) || defined(__18F27J53) || defined(__18F26J53) || defined(__18LF47J53) || defined(__18LF46J53) || defined(__18LF27J53) || defined(__18LF26J53)
-//		#pragma udata USB_BDT=0xD00		//BDT in Bank 13 on these devices
+    #elif defined(__18F47J53) || defined(__18F46J53) || defined(__18F27J53) || defined(__18F26J53) || defined(__18LF47J53) || defined(__18LF46J53) || defined(__18LF27J53) || defined(__18LF26J53)
+		#pragma udata USB_BDT=0xD00		//BDT in Bank 13 on these devices
     #else
         #pragma udata USB_BDT=0x400     //All other PIC18 devices place the BDT in usb4:0x400-0x4FF(256-byte)
 	#endif
@@ -1808,7 +1815,12 @@ void USBStdGetDscHandler(void)
                 #else
                     inPipes[0].pSrc.bRom = *(USB_USER_CONFIG_DESCRIPTOR+SetupPkt.bDscIndex);
                 #endif
-                inPipes[0].wCount.Val = *(inPipes[0].pSrc.wRom+1);                // Set data count
+
+                //This must be loaded using byte addressing.  The source pointer
+                //  may not be word aligned for the 16 or 32 bit machines resulting
+                //  in an address error on the dereference.
+                inPipes[0].wCount.byte.LB = *(inPipes[0].pSrc.bRom+2);
+                inPipes[0].wCount.byte.HB = *(inPipes[0].pSrc.bRom+3);
                 break;
             case USB_DESCRIPTOR_STRING:
                 //USB_NUM_STRING_DESCRIPTORS was introduced as optional in release v2.3.  In v2.4 and

@@ -44,6 +44,8 @@ file_016=Hardware Profiles
 file_017=Hardware Profiles
 file_018=Hardware Profiles
 file_019=Hardware Profiles
+file_020=.
+file_021=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -65,6 +67,8 @@ file_016=no
 file_017=no
 file_018=no
 file_019=no
+file_020=no
+file_021=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -86,6 +90,8 @@ file_016=no
 file_017=no
 file_018=no
 file_019=no
+file_020=yes
+file_021=yes
 [FILE_INFO]
 file_000=main.c
 file_001=usb_descriptors.c
@@ -107,6 +113,8 @@ file_016=HardwareProfile - PIC24FJ256GB110 PIM.h
 file_017=HardwareProfile - PIC24FJ64GB004 PIM.h
 file_018=HardwareProfile - PIC24FJ256DA210 Development Board.h
 file_019=HardwareProfile - PIC24FJ256GB210 PIM.h
+file_020=..\Getting Started - Running the Device - WinUSB - Generic Driver Demo.htm
+file_021=..\IMPORTANT README.txt
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

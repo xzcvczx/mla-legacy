@@ -41,6 +41,12 @@
  Change History:
   Rev   Date         Description
   2.5   05/29/2009   Initial release
+  2.7a	08/29/2010	 Adding explicit calling conventions to the DllImports.
+					 This is needed for Visual Studio 2010 compatibility.
+					 No functional changes to the code.  Backwards compatibility
+					 should be retained.  Also modified the #include <Winusb.h>
+					 inline comment, as it also contains information relevant
+					 when building this project with Visual Studio 2010.
 ********************************************************************
 NOTE:	All user made code contained in this project is in the Form1.h file.
 		All other code and files were generated automatically by either the
@@ -79,7 +85,8 @@ NOTE:	All user made code contained in this project is in the Form1.h file.
 						//the include path directories from the WDK to your VC++ IDE.  This can be done by clicking
 						//Tools-->Options-->+Projects and Solutions-->VC++ Directories-->Show Directories for: "Include files"
 						//Then click the Folder icon (new line) and then the "..." button and add these directories (to the 
-						//bottom of the list):
+						//bottom of the list!  The order of the list is important, and the project will not build correctly
+						//if the order is wrong.):
 						//C:\WINDDK\6001.18002\inc\ddk		
 						//C:\WINDDK\6001.18002\inc\api		
 						//The above directory locations assume the default location for the WDK, build 6001.18002.
@@ -87,6 +94,21 @@ NOTE:	All user made code contained in this project is in the Form1.h file.
 						//was used.
 						//If the above procedure is not followed correctly, a variety of build errors looking for various
 						//files such as winusbio.h, usb200.h, usb100.h, usb.h, etc. will occur.
+
+						//Special note for Microsoft Visual C++ 2010: The "Tools-->Options-->+Projects and Solutions-->VC++ Directories"
+						//menu area is deprecated in MS VC++ 2010.  The included paths can instead be added to the project by
+						//Clicking: Project-->[project name] Properties...-->+Configuration Properties-->VC++ Directories.			
+							//NOTE: if the "Project" menu only shows "Properties", this means you have a file (ex: Form1.h) selected 
+							//in the solution explorer, and you are trying to edit the properties specific to that file.  Therefore, 
+							//make sure you deselect the file before clicking "Project" (you can do this by clicking somewhere else, 
+							//ex: in this editor text area).  Only then will the Project --> "[project name] Properties..." option 
+							//appear in the menu.
+						//In the "Configuration" drop down box, select "All Configurations".
+						//Then in the "Include Directories" entry, add the [wdk install dir]\inc\ddk and [wdk install dir]\inc\api path 
+						//entries at the END OF THE EXISTING LIST (must be the end of the list, the order is important).
+						//If using the WDK 7600, the Include Directories list would look something (or maybe exactly) like this:
+						//$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;C:\WinDDK\7600.16385.0\inc\ddk;C:\WinDDK\7600.16385.0\inc\api						
+
 
 #include <Dbt.h>		//Need this for definitions of WM_DEVICECHANGE messages
 
@@ -334,7 +356,7 @@ namespace HighBandwidthWinUSB {
 	//Returns a HDEVINFO type for a device information set (WinUSB devices in
 	//our case).  We will need the HDEVINFO as in input parameter for calling many of
 	//the other SetupDixxx() functions.
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetClassDevs")]		
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetClassDevs", CallingConvention=CallingConvention::Winapi)]		
 	extern "C" HDEVINFO  SetupDiGetClassDevsUM(
 		LPGUID  ClassGuid,					//Input: Supply the class GUID here. 
 		PCTSTR  Enumerator,					//Input: Use NULL here, not important for our purposes
@@ -343,7 +365,7 @@ namespace HighBandwidthWinUSB {
 
 	//Gives us "PSP_DEVICE_INTERFACE_DATA" which contains the Interface specific GUID (different
 	//from class GUID).  We need the interface GUID to get the device path.
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInterfaces")]				
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInterfaces", CallingConvention=CallingConvention::Winapi)]				
 	extern "C" WINSETUPAPI BOOL WINAPI  SetupDiEnumDeviceInterfacesUM(
 		HDEVINFO  DeviceInfoSet,			//Input: Give it the HDEVINFO we got from SetupDiGetClassDevs()
 		PSP_DEVINFO_DATA  DeviceInfoData,	//Input (optional)
@@ -352,19 +374,19 @@ namespace HighBandwidthWinUSB {
 		PSP_DEVICE_INTERFACE_DATA  DeviceInterfaceData);//Output: This function fills in an "SP_DEVICE_INTERFACE_DATA" structure.
 
 	//SetupDiDestroyDeviceInfoList() frees up memory by destroying a DeviceInfoList
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiDestroyDeviceInfoList")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiDestroyDeviceInfoList", CallingConvention=CallingConvention::Winapi)]
 	extern "C" WINSETUPAPI BOOL WINAPI  SetupDiDestroyDeviceInfoListUM(			
 		HDEVINFO  DeviceInfoSet);			//Input: Give it a handle to a device info list to deallocate from RAM.
 
 	//SetupDiEnumDeviceInfo() fills in an "SP_DEVINFO_DATA" structure, which we need for SetupDiGetDeviceRegistryProperty()
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInfo")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInfo", CallingConvention=CallingConvention::Winapi)]
 	extern "C" WINSETUPAPI BOOL WINAPI  SetupDiEnumDeviceInfoUM(
 		HDEVINFO  DeviceInfoSet,
 		DWORD  MemberIndex,
 		PSP_DEVINFO_DATA  DeviceInfoData);
 
 	//SetupDiGetDeviceRegistryProperty() gives us the hardware ID, which we use to check to see if it has matching VID/PID
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceRegistryProperty")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceRegistryProperty", CallingConvention=CallingConvention::Winapi)]
 	extern "C"	WINSETUPAPI BOOL WINAPI  SetupDiGetDeviceRegistryPropertyUM(
 		HDEVINFO  DeviceInfoSet,
 		PSP_DEVINFO_DATA  DeviceInfoData,
@@ -375,7 +397,7 @@ namespace HighBandwidthWinUSB {
 		PDWORD  RequiredSize);
 
 	//SetupDiGetDeviceInterfaceDetail() gives us a device path, which is needed before CreateFile() can be used.
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceInterfaceDetail")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceInterfaceDetail", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL SetupDiGetDeviceInterfaceDetailUM(
 		HDEVINFO DeviceInfoSet,										//Input: Wants HDEVINFO which can be obtained from SetupDiGetClassDevs()
 		PSP_DEVICE_INTERFACE_DATA DeviceInterfaceData,				//Input: Pointer to an structure which defines the device interface.  
@@ -385,13 +407,13 @@ namespace HighBandwidthWinUSB {
 		PSP_DEVINFO_DATA DeviceInfoData);							//Output
 
 	//WinUsb_Initialize() needs to be called before the application can begin sending/receiving data with the USB device.
-	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_Initialize")]
+	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_Initialize", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL WinUsb_Initialize(
 		HANDLE	DeviceHandle,
 		PWINUSB_INTERFACE_HANDLE InterfaceHandle);
 
 	//WinUsb_WritePipe() is the basic function used to write data to the USB device (sends data to OUT endpoints on the device)
-	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_WritePipe")]
+	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_WritePipe", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL WinUsb_WritePipe(
 		WINUSB_INTERFACE_HANDLE InterfaceHandle,
 		UCHAR PipeID,
@@ -402,7 +424,7 @@ namespace HighBandwidthWinUSB {
 
 	//WinUsb_ReadPipe() is the basic function used to read data from the USB device (polls for and obtains data from
 	//IN endpoints on the device)
-	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_ReadPipe")]
+	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_ReadPipe", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL WinUsb_ReadPipe(
 		WINUSB_INTERFACE_HANDLE InterfaceHandle,
 		UCHAR PipeID,
@@ -412,7 +434,7 @@ namespace HighBandwidthWinUSB {
 		LPOVERLAPPED Overlapped);
 
 	//WinUsb_SetPipePolicy() can be used to configure the behavior of the WinUSB use of the specified endpoint
-	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_SetPipePolicy")]
+	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_SetPipePolicy", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL WinUsb_SetPipePolicy(
 		WINUSB_INTERFACE_HANDLE  InterfaceHandle,
 		UCHAR  PipeID,
@@ -421,11 +443,11 @@ namespace HighBandwidthWinUSB {
 		PVOID  Value);
 
 	//WinUsb_Free() is used to free up resources/close the handle that was returned when calling WinUsb_Initialize()
-	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_Free")]
+	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_Free", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL WinUsb_Free(WINUSB_INTERFACE_HANDLE InterfaceHandle);
 
 	//WinUsb_FlushPipe() is used to discard any data that may be "cached in a pipe".
-	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_Free")]
+	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_Free", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL WinUsb_FlushPipe(WINUSB_INTERFACE_HANDLE  InterfaceHandle, UCHAR  PipeID);
 
 	//Note: WinUSB supports quite a few more functions that aren't being used in this application, and aren't
@@ -435,7 +457,7 @@ namespace HighBandwidthWinUSB {
 	//Need this function for receiving all of the WM_DEVICECHANGE messages.  See MSDN documentation for
 	//description of what this function does/how to use it. Note: name is remapped "RegisterDeviceNotificationUM" to
 	//avoid possible build error conflicts.
-	[DllImport("user32.dll" , CharSet = CharSet::Seeifdef, EntryPoint="RegisterDeviceNotification")]					
+	[DllImport("user32.dll" , CharSet = CharSet::Seeifdef, EntryPoint="RegisterDeviceNotification", CallingConvention=CallingConvention::Winapi)]					
 	extern "C" HDEVNOTIFY WINAPI RegisterDeviceNotificationUM(
 		HANDLE hRecipient,
 		LPVOID NotificationFilter,

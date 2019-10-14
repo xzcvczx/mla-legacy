@@ -34,27 +34,23 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
+  1.01  Cleaned up unnecessary variables
 ********************************************************************/
 
 #include 	<p18cxxx.h>
 #include	"stdio.h"
-#include 	"Smart Card\pps18.h"
+#include 	"Smart Card/pps18.h"
 #include 	"string.h"
 #include	"GenericTypeDefs.h"
-#include	"Smart Card\SCpic18.h"
+#include	"Smart Card/SCpic18.h"
 #include    "sc_config.h"
-
-BOOL GenTxError 		= FALSE; 	//Force an Error on Transmit, and recover automatically
-BOOL GenRxError 		= FALSE;	//Flag to create error on Data Receive
-BOOL SysErrorDetected 	= FALSE; 	//I/O data line is permanently low
-BYTE TxRetryCounter 	= 0;
 
 unsigned int gBitTimeDelay;
 unsigned int bitTime;
 unsigned int initialBaudReg;
-unsigned char refconVal;
+unsigned long scReferenceClock;
 
-unsigned long long baudRate;
+unsigned long baudRate;
 
 ////////////////////////////////////////
 // Generate delay in microsec resolution
@@ -63,12 +59,12 @@ unsigned long long baudRate;
 // 10 - 12 us
 // ...
 ////////////////////////////////////////
-void WaitMicroSec( WORD MicroSec )
+void WaitMicroSec( WORD microSec )
 {
-	while( MicroSec )
+	while( microSec )
 	{
 		Nop();
-		MicroSec--;
+		microSec--;
 	}
 }	
 
@@ -84,14 +80,15 @@ void WaitMilliSec( WORD ms )
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
-void SCdrv_SendTxData( BYTE dat )
+void SCdrv_SendTxData( BYTE data )
 {
-	BOOL NoErr = TRUE;
-	
+	BYTE txRetryCounter = 0;
+	BOOL noError = TRUE;
+
 	//calculate parity
 	_asm
-     swapf    dat,0,0  //reducing byte to nibble
-     xorwf    dat,0,0
+     swapf    data,0,0  //reducing byte to nibble
+     xorwf    data,0,0
      addlw    0x41    // bit 1 becomes B0^B1 and bit 7 becomes B6^B7
      iorlw    0x7C    // for carry propagation from bit 1 to bit 7
      addlw    2       // Done! the parity bit is bit 7 of W
@@ -99,13 +96,7 @@ void SCdrv_SendTxData( BYTE dat )
 	
 	TXSTAbits.TX9D = WREG >> 7; //copy calc parity bit to the transmitter
 	
-	if( GenTxError )
-	{
-		GenTxError = 0;
-		TXSTAbits.TX9D = !TXSTAbits.TX9D; //cause a parity error for testing
-	}	
-		
-	TXREG = dat;		
+	TXREG = data;
 	TXSTAbits.TXEN = 1;
 
 	while( !TXSTAbits.TRMT ) //wait for Tx Complete
@@ -118,33 +109,24 @@ void SCdrv_SendTxData( BYTE dat )
 	//turn off uart
 	RCSTAbits.SPEN = 0;
 
-//	LATBbits.LATB5 = 1;		
-	
 	if( !SCdrv_GetRxPinData() )  // The Receiver did not like our data. it is pulling line low 
 	{					  // to indicate PE or FR errors
-		NoErr = FALSE;
-		WaitMicroSec( (WORD)gBitTimeDelay );  //wait two etu before repeating
+		noError = FALSE;
 	
 		RCSTAbits.SPEN = 1;
-//		LATBbits.LATB5 = 0;		
 						
 		//now retransmit the data
-		if( TxRetryCounter < 5 )
+		if( txRetryCounter < 5 )
 		{
-			TxRetryCounter++;
-			SCdrv_SendTxData(dat);
+			txRetryCounter++;
+			SCdrv_SendTxData(data);
 		}
-		else
-			SysErrorDetected = TRUE;		//Line permanent collision (or held Low) detected
 	}
-	else
-		WaitMicroSec(gBitTimeDelay );
 	
-	if( NoErr ) //no error detected
-		TxRetryCounter = 0;
+	if( noError ) //no error detected
+		txRetryCounter = 0;
 
 	RCSTAbits.SPEN = 1;
-//	LATBbits.LATB5 = 0;		
 	
 	if( RCSTA & 0x6 )	//FERR or OERR occured
 	{
@@ -168,15 +150,6 @@ void SCdrv_SendTxData( BYTE dat )
 /////////////////////////////////////////////
 BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 {
-	BYTE dat=0;
-	BOOL RxStart = FALSE;
-
-	if( GenRxError )
-	{
-		GenRxError = 0;	
-		goto __RcvWithError;
-	}
-	
 	//wait for data byte
 	while( !(PIR1 & 0x20) )
 	{
@@ -199,55 +172,15 @@ BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 	{
 		RCSTAbits.SPEN = 0;
 		SCdrv_TxPin_Direction(0);  //pull it low to tell the card that there was error receiving data
-		//?LATBbits.LATB5 = 1; // Logic analyzer sync signal 
 		
 		WaitMicroSec(gBitTimeDelay );
 				
 		SCdrv_TxPin_Direction(1); //release line. Card should retransmit now.
-		//?LATBbits.LATB5 = 0;
 				
 		RCSTAbits.SPEN = 1;
 		return SCdrv_GetRxData( pDat, nTrys );	//Read the data from retransmission 
 	}
-	goto __Done;
-///////////////////////////////
-__RcvWithError:  //the code below is used to recv data with an error so it can tell the card to retry transmission.  for testing only
 
-	//wait for data byte
-	while( !(PIR1 & 0x20) )
-	{
-		if( nTrys-- == 0 )
-			return FALSE;
-	}
-	
-//	LATBbits.LATB5 = 1; // Logic analyzer sync signal 
-		
-	//calculate parity
-	_asm
-     swapf    RCREG,0,0  //reducing byte to nibble
-     xorwf    RCREG,0,0
-     addlw    0x41    // bit 1 becomes B0^B1 and bit 7 becomes B6^B7
-     iorlw    0x7C    // for carry propagation from bit 1 to bit 7
-     addlw    2       // Done! the parity bit is bit 7 of W
-     RLNCF    WREG,0,0		//rotate left W reg
-     xorwf    RCSTA,0,0
-	_endasm
-
-	if( !(WREG & 1) )	//Parity Error detected 
-	{
-		RCSTAbits.SPEN = 0;
-		SCdrv_TxPin_Direction(0);  //pull it low to tell the card that there was error receiving data
-
-		WaitMicroSec(gBitTimeDelay );
-				
-		SCdrv_TxPin_Direction(1); //release line. Card should retransmit now.
-//		LATBbits.LATB5 = 0;
-		
-		RCSTAbits.SPEN = 1;
-		return SCdrv_GetRxData( pDat, nTrys );	//Read the data from retransmission 
-	}
-
-__Done:	
 	*pDat = RCREG;
 	return TRUE;
 }
@@ -255,14 +188,14 @@ __Done:
 
 ///////////////////////////////////////////////////
 //////////////////////////////////////////////////
-void SCdrv_SetBRG( BYTE SpeedCode )
+void SCdrv_SetBRG( BYTE speedCode )
 {
 	float factorD = 1;
 	unsigned int factorF = 372;
 	BYTE tempCode;
 	unsigned int baudReg;
 
-	tempCode = SpeedCode & 0x0F;
+	tempCode = speedCode & 0x0F;
 	
 	// Calculate Factor 'D' from TA1 value
 	switch(tempCode)
@@ -330,7 +263,7 @@ void SCdrv_SetBRG( BYTE SpeedCode )
 	// factor 'F' from TA1 value
 	#ifdef ENABLE_SC_EXTERNAL_CLOCK
 
-		tempCode = (SpeedCode & 0xF0) >> 4;
+		tempCode = (speedCode & 0xF0) >> 4;
 		
 	// Calculate Factor 'F' from TA1 value
 		switch(tempCode)
@@ -395,7 +328,7 @@ void SCdrv_SetBRG( BYTE SpeedCode )
 		}
 		else	// If externa; clock used to drive Smart Card
 		{
-			baudRate = (REF_CLOCK_TO_SMART_CARD * factorD)/factorF;
+			baudRate = (scReferenceClock * factorD)/factorF;
 			baudReg = (unsigned int)((FCY/baudRate) - 1);
 			SPBRG = (unsigned char)baudReg;
 			SPBRGH = (unsigned char)(baudReg >> 8);
@@ -429,14 +362,14 @@ void SCdrv_CloseUART(void)
 //////////////////////////////////////////////////
 void SCdrv_InitUART(void)
 {
+	unsigned int power2Value = 1;
+	BYTE power2temp;
+
 	SCdrv_PowerPin_Direction(0);	//set RB0 as output to power the Smart Card
 	SCdrv_ResetPin_Direction(0);	//set RB4 as output for Smart Card Reset Pin
 	SCdrv_CardPresent_Direction(1);  //RB3 Input Card Present
 	SCdrv_SimPresent_Direction(1);   //RB1 Input Card Present
 	
-//	LATBbits.LATB5 	 = 0;
-//	TRISBbits.TRISB5 = 0;   //RB5 Logic Analyzer
-
 	SCdrv_SetTxPinData(0);
 	SCdrv_TxPin_Direction(1);	// TX1 also act as gpio to pull the line low
 	SCdrv_RxPin_Direction(1);	
@@ -450,7 +383,16 @@ void SCdrv_InitUART(void)
 	// Dont enable the clock,only set it.
 	Scdrv_ClockSet();
 
-	baudRate = REF_CLOCK_TO_SMART_CARD/(unsigned int)372;
+	power2temp = REF_CLOCK_POWER2_VALUE;
+
+	while(power2temp--)
+	{
+		power2Value = power2Value * (BYTE)2;
+	}
+
+	scReferenceClock = REF_CLOCK_CIRCUIT_INPUT_CLK/(power2Value + REF_CLOCK_DIVISOR_VALUE);
+
+	baudRate = scReferenceClock/(unsigned int)372;
 
 	initialBaudReg = ((FCY/baudRate) - 1);
 	SPBRG = (unsigned char)initialBaudReg;
@@ -461,7 +403,6 @@ void SCdrv_InitUART(void)
 	gBitTimeDelay *= bitTime;	//micro sec for 9.6k baud
 	gBitTimeDelay /= initialBaudReg;  
 
-	
 	TXSTAbits.TX9  = 1; //select 9 bit transmission
 	TXSTAbits.SYNC = 0; //Async mode	
 	TXSTAbits.BRGH = 1;

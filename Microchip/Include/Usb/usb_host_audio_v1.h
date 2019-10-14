@@ -77,7 +77,9 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev    Description
   ----   -----------
   2.7    Initial Release
-
+  
+  2.7a   added USBHostAudioV1DataEventHandler()
+         renamed EVENT_AUDIO_RECEIVE_STREAM to EVENT_AUDIO_STREAM_RECEIVED
 *******************************************************************************/
 //DOM-IGNORE-END
 
@@ -162,7 +164,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
     // so the application will know how much data was actually received in
     // each transfer.  If there was a bus error, both the returned data pointer
     // and the size will be zero.
-#define EVENT_AUDIO_RECEIVE_STREAM  EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 3
+#define EVENT_AUDIO_STREAM_RECEIVED EVENT_AUDIO_BASE + EVENT_AUDIO_OFFSET + 3
     // This event is returned after the sampling frequency is set via
     // USBHostAudioV1SetSamplingFrequency().  The returned data pointer points
     // to a HOST_TRANSFER_DATA structure, with the error code for this request.
@@ -527,6 +529,39 @@ void    USBHostAudioV1TerminateTransfer( BYTE deviceAddress );
 // Section: Host Stack Interface Functions
 // *****************************************************************************
 // *****************************************************************************
+
+/****************************************************************************
+  Function:
+    BOOL USBHostAudioV1DataEventHandler( BYTE address, USB_EVENT event,
+                            void *data, DWORD size )
+
+  Summary:
+    This function is the data event handler for this client driver.
+
+  Description:
+    This function is the data event handler for this client driver.  It is called
+    by the host layer when isochronous data events occur.
+
+  Precondition:
+    The device has been initialized.
+
+  Parameters:
+    BYTE address    - Address of the device
+    USB_EVENT event - Event that has occurred
+    void *data      - Pointer to data pertinent to the event
+    WORD size       - Size of the data
+
+  Return Values:
+    TRUE   - Event was handled
+    FALSE  - Event was not handled
+
+  Remarks:
+    The client driver does not need to process the data.  Just pass the event 
+    up to the application layer.
+  ***************************************************************************/
+
+BOOL USBHostAudioV1DataEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size );
+
 
 /****************************************************************************
   Function:

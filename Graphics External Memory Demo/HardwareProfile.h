@@ -51,20 +51,20 @@
 
 #if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
 
-		#if defined (__PIC24FJ256DA210__)
+	#if defined (__PIC24FJ256DA210__)
 		/*********************************************************************
 	     * Hardware Configuration for 
 	     * PIC24FJ256DA210 Development Board
 	     * Display TFT-G240320LTSW-118W-E
 	     ********************************************************************/
-		#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
+		#include "Alternative Configurations\HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
 		
 		/*********************************************************************
 	     * Hardware Configuration for 
 	     * PIC24FJ256DA210 Development Board
 	     * Display PH480272T-005-I11Q
 	     ********************************************************************/
-		//#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_PH480272T_005_I11Q.h"
+		//#include "Alternative Configurations\HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_PH480272T_005_I11Q.h"
 
 	#else
 		/*********************************************************************
@@ -94,10 +94,10 @@
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
 		
 	#endif
-	
+
 #elif defined (__PIC32MX__) 
 
-	    /*********************************************************************
+    /*********************************************************************
      * Hardware Configuration for 
      * Explorer 16
      * Graphics PicTail v3

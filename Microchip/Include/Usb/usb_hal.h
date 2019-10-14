@@ -82,6 +82,8 @@ Description:
 
   2.7    Minor changes changes to the structure of the conditional
          compilation statement ordering.
+
+  2.7a   No Change
 ********************************************************************/
 
 #ifndef _USB_HAL_H_

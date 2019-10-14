@@ -81,6 +81,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
          Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
          more than 256 bytes
+
+  2.7a   removed freezCDC() function
 ********************************************************************************/
 //DOM-IGNORE-END
 
@@ -208,7 +210,6 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #define EVENT_CDC_DATA_WRITE_DONE      EVENT_CDC_BASE + EVENT_CDC_OFFSET + 5   // A CDC Data Write transfer has completed
 #define EVENT_CDC_RESET                EVENT_CDC_BASE + EVENT_CDC_OFFSET + 6   // CDC reset complete
 #define EVENT_CDC_NAK_TIMEOUT          EVENT_CDC_BASE + EVENT_CDC_OFFSET + 7   // CDC device NAK timeout has occurred
-#define freezCDC(x)                        { free(x); x = NULL; }
 
 
 #define USB_CDC_LINE_CODING_LENGTH          0x07   // Number of bytes Line Coding transfer

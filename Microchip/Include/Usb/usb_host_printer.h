@@ -95,6 +95,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   2.7           Minor updates to USBHostPrinterGetStatus() header
                 to better describe the function requirements and
                 operation.
+
+  2.7a          No change
 ********************************************************************/
 //DOM-IGNORE-END
 

@@ -76,6 +76,16 @@ Change History:
 #include "HardwareProfile.h"
 //#include "USB\usb_hal.h"
 
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
+
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
+
 #if defined( USB_ENABLE_TRANSFER_EVENT )
     #include "struct_queue.h"
 #endif
@@ -393,7 +403,7 @@ BOOL USBHostInit(  unsigned long flags  )
     // node already exists, free all other allocated memory.
     if (usbDeviceInfo.pEndpoint0 == NULL)
     {
-        if ((usbDeviceInfo.pEndpoint0 = (USB_ENDPOINT_INFO*)malloc( sizeof(USB_ENDPOINT_INFO) )) == NULL)
+        if ((usbDeviceInfo.pEndpoint0 = (USB_ENDPOINT_INFO*)USB_MALLOC( sizeof(USB_ENDPOINT_INFO) )) == NULL)
         {
             #ifdef DEBUG_MODE
                 UART2PrintString( "HOST: Cannot allocate for endpoint 0.\r\n" );
@@ -432,7 +442,8 @@ BOOL USBHostInit(  unsigned long flags  )
 
   Description:
     This function initializes the isochronous data buffer information and
-    allocates memory for each buffer.
+    allocates memory for each buffer.  This function will not allocate memory
+    if the buffer pointer is not NULL.
 
   Precondition:
     None
@@ -459,20 +470,23 @@ BOOL USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, BYTE numberOf
     USBHostIsochronousBuffersReset( isocData, numberOfBuffers );
     for (i=0; i<numberOfBuffers; i++)
     {
-        isocData->buffers[i].pBuffer = malloc( bufferSize );
         if (isocData->buffers[i].pBuffer == NULL)
         {
-            #ifdef DEBUG_MODE
-                UART2PrintString( "HOST:  Not enough memory for isoc buffers.\r\n" );
-            #endif
-
-            // Release all previous buffers.
-            for (j=0; j<i; j++)
+            isocData->buffers[i].pBuffer = USB_MALLOC( bufferSize );
+            if (isocData->buffers[i].pBuffer == NULL)
             {
-                free( isocData->buffers[j].pBuffer );
-                isocData->buffers[j].pBuffer = NULL;
+                #ifdef DEBUG_MODE
+                    UART2PrintString( "HOST:  Not enough memory for isoc buffers.\r\n" );
+                #endif
+    
+                // Release all previous buffers.
+                for (j=0; j<i; j++)
+                {
+                    USB_FREE_AND_CLEAR( isocData->buffers[j].pBuffer );
+                    isocData->buffers[j].pBuffer = NULL;
+                }
+                return FALSE;
             }
-            return FALSE;
         }
     }
     return TRUE;
@@ -511,7 +525,7 @@ void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, BYTE numberO
     {
         if (isocData->buffers[i].pBuffer != NULL)
         {
-            free( isocData->buffers[i].pBuffer );
+            USB_FREE_AND_CLEAR( isocData->buffers[i].pBuffer );
             isocData->buffers[i].pBuffer = NULL;
         }
     }
@@ -661,7 +675,7 @@ BYTE USBHostIssueDeviceRequest( BYTE deviceAddress, BYTE bmRequestType, BYTE bRe
         {
             pInterface = pInterface->next;
         }
-        if (pInterface == NULL)
+        if ((pInterface == NULL) || (pInterface->pCurrentSetting == NULL))
         {
             // The specified interface was not found.
             return USB_ILLEGAL_REQUEST;
@@ -1404,7 +1418,7 @@ void USBHostTasks( void )
                         U1OTGCON |= USB_VBUS_ON;
                     #endif
 
-                    U1CNFG1             = USB_STOP_IN_IDLE_MODE | USB_PING_PONG_MODE;
+                    U1CNFG1             = USB_PING_PONG_MODE;
                     #if defined(__C30__)
                         U1CNFG2         = USB_VBUS_BOOST_ENABLE | USB_VBUS_COMPARE_ENABLE | USB_ONCHIP_ENABLE;
                     #endif
@@ -1524,9 +1538,9 @@ void USBHostTasks( void )
                             // which is the minimum wMaxPacketSize for EP0.
                             if (pEP0Data != NULL)
                             {
-                                freez( pEP0Data );
+                                USB_FREE_AND_CLEAR( pEP0Data );
                             }
-                            if ((pEP0Data = (BYTE *)malloc( 8 )) == NULL)
+                            if ((pEP0Data = (BYTE *)USB_MALLOC( 8 )) == NULL)
                             {
                                 #ifdef DEBUG_MODE
                                     UART2PrintString( "HOST: Error alloc-ing pEP0Data\r\n" );
@@ -1655,7 +1669,7 @@ void USBHostTasks( void )
                             // Set up and send GET DEVICE DESCRIPTOR
                             if (pDeviceDescriptor != NULL)
                             {
-                                freez( pDeviceDescriptor );
+                                USB_FREE_AND_CLEAR( pDeviceDescriptor );
                             }
 
                             pEP0Data[0] = USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_STANDARD | USB_SETUP_RECIPIENT_DEVICE;
@@ -1703,7 +1717,7 @@ void USBHostTasks( void )
 
                         case SUBSUBSTATE_GET_DEVICE_DESCRIPTOR_SIZE_COMPLETE:
                             // Allocate a buffer for the entire Device Descriptor
-                            if ((pDeviceDescriptor = (BYTE *)malloc( *pEP0Data )) == NULL)
+                            if ((pDeviceDescriptor = (BYTE *)USB_MALLOC( *pEP0Data )) == NULL)
                             {
                                 // We cannot continue.  Freeze until the device is removed.
                                 _USB_SetErrorCode( USB_HOLDING_OUT_OF_MEMORY );
@@ -1717,8 +1731,8 @@ void USBHostTasks( void )
                             usbDeviceInfo.pEndpoint0->wMaxPacketSize = ((USB_DEVICE_DESCRIPTOR *)pEP0Data)->bMaxPacketSize0;
 
                             // Make our pEP0Data buffer the size of the max packet.
-                            freez( pEP0Data );
-                            if ((pEP0Data = (BYTE *)malloc( usbDeviceInfo.pEndpoint0->wMaxPacketSize )) == NULL)
+                            USB_FREE_AND_CLEAR( pEP0Data );
+                            if ((pEP0Data = (BYTE *)USB_MALLOC( usbDeviceInfo.pEndpoint0->wMaxPacketSize )) == NULL)
                             {
                                 // We cannot continue.  Freeze until the device is removed.
                                 #ifdef DEBUG_MODE
@@ -1889,8 +1903,8 @@ void USBHostTasks( void )
                     while (usbDeviceInfo.pConfigurationDescriptorList != NULL)
                     {
                         pTemp = (BYTE *)usbDeviceInfo.pConfigurationDescriptorList->next;
-                        free( usbDeviceInfo.pConfigurationDescriptorList->descriptor );
-                        free( usbDeviceInfo.pConfigurationDescriptorList );
+                        USB_FREE_AND_CLEAR( usbDeviceInfo.pConfigurationDescriptorList->descriptor );
+                        USB_FREE_AND_CLEAR( usbDeviceInfo.pConfigurationDescriptorList );
                         usbDeviceInfo.pConfigurationDescriptorList = (USB_CONFIGURATION *)pTemp;
                     }
                     _USB_SetNextSubState();
@@ -1937,7 +1951,7 @@ void USBHostTasks( void )
 
                         case SUBSUBSTATE_GET_CONFIG_DESCRIPTOR_SIZECOMPLETE:
                             // Allocate a buffer for an entry in the configuration descriptor list.
-                            if ((pTemp = (BYTE *)malloc( sizeof (USB_CONFIGURATION) )) == NULL)
+                            if ((pTemp = (BYTE *)USB_MALLOC( sizeof (USB_CONFIGURATION) )) == NULL)
                             {
                                 // We cannot continue.  Freeze until the device is removed.
                                 _USB_SetErrorCode( USB_HOLDING_OUT_OF_MEMORY );
@@ -1946,10 +1960,10 @@ void USBHostTasks( void )
                             }
 
                             // Allocate a buffer for the entire Configuration Descriptor
-                            if ((((USB_CONFIGURATION *)pTemp)->descriptor = (BYTE *)malloc( ((WORD)pEP0Data[3] << 8) + (WORD)pEP0Data[2] )) == NULL)
+                            if ((((USB_CONFIGURATION *)pTemp)->descriptor = (BYTE *)USB_MALLOC( ((WORD)pEP0Data[3] << 8) + (WORD)pEP0Data[2] )) == NULL)
                             {
                                 // Not enough memory for the descriptor!
-                                freez( pTemp );
+                                USB_FREE_AND_CLEAR( pTemp );
 
                                 // We cannot continue.  Freeze until the device is removed.
                                 _USB_SetErrorCode( USB_HOLDING_OUT_OF_MEMORY );
@@ -3009,17 +3023,20 @@ USB_ENDPOINT_INFO * _USB_FindEndpoint( BYTE endpoint )
     while (pInterface)
     {
         // Look for the endpoint in the currently active setting.
-        pEndpoint = pInterface->pCurrentSetting->pEndpointList;
-        while (pEndpoint)
+        if (pInterface->pCurrentSetting)
         {
-            if (pEndpoint->bEndpointAddress == endpoint)
+            pEndpoint = pInterface->pCurrentSetting->pEndpointList;
+            while (pEndpoint)
             {
-                // We have found the endpoint.
-                return pEndpoint;
+                if (pEndpoint->bEndpointAddress == endpoint)
+                {
+                    // We have found the endpoint.
+                    return pEndpoint;
+                }
+                pEndpoint = pEndpoint->next;
             }
-            pEndpoint = pEndpoint->next;
         }
-
+        
         // Go to the next interface.
         pInterface = pInterface->next;
     }
@@ -3471,6 +3488,14 @@ void _USB_FindNextToken( void )
                                         pCurrentEndpoint->bmAttributes.val = USB_EVENT_QUEUE_FULL;
                                     }
                                 #endif
+                                
+                                // If the user wants an event from the interrupt handler to handle the data as quickly as
+                                // possible, send up the event.  Then mark the packet as used.
+                                #ifdef USB_HOST_APP_DATA_EVENT_HANDLER
+                                    usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler( usbDeviceInfo.deviceAddress, EVENT_DATA_ISOC_READ, ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer, pCurrentEndpoint->dataCount );
+                                    ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 0;
+                                #endif
+                                
                                 // Move to the next data buffer.
                                 ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB++;
                                 if (((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB >= ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->totalBuffers)
@@ -3562,6 +3587,13 @@ void _USB_FindNextToken( void )
                                         pCurrentEndpoint->bmAttributes.val = USB_EVENT_QUEUE_FULL;
                                     }
                                 #endif
+
+                                // If the user wants an event from the interrupt handler to handle the data as quickly as
+                                // possible, send up the event.
+                                #ifdef USB_HOST_APP_DATA_EVENT_HANDLER
+                                    usbClientDrvTable[pCurrentEndpoint->clientDriver].DataEventHandler( usbDeviceInfo.deviceAddress, EVENT_DATA_ISOC_WRITE, ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer, pCurrentEndpoint->dataCount );
+                                #endif
+                                                                
                                 // Move to the next data buffer.
                                 ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB++;
                                 if (((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB >= ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->totalBuffers)
@@ -4006,8 +4038,9 @@ BOOL _USB_FindServiceEndpoint( BYTE transferType )
     }
 
     usbBusInfo.countBulkTransactions = 0;
+    pEndpoint = NULL;
     pInterface = usbDeviceInfo.pInterfaceList;
-    if (pInterface)
+    if (pInterface && pInterface->pCurrentSetting)
     {
         pEndpoint = pInterface->pCurrentSetting->pEndpointList;
     }
@@ -4084,7 +4117,7 @@ BOOL _USB_FindServiceEndpoint( BYTE transferType )
         {
             // Go to the next interface.
             pInterface = pInterface->next;
-            if (pInterface)
+            if (pInterface && pInterface->pCurrentSetting)
             {
                 pEndpoint = pInterface->pCurrentSetting->pEndpointList;
             }
@@ -4134,13 +4167,13 @@ void _USB_FreeConfigMemory( void )
             while (usbDeviceInfo.pInterfaceList->pInterfaceSettings->pEndpointList != NULL)
             {
                 pTempEndpoint = usbDeviceInfo.pInterfaceList->pInterfaceSettings->pEndpointList->next;
-                free( (BYTE *)usbDeviceInfo.pInterfaceList->pInterfaceSettings->pEndpointList );
+                USB_FREE_AND_CLEAR( usbDeviceInfo.pInterfaceList->pInterfaceSettings->pEndpointList );
                 usbDeviceInfo.pInterfaceList->pInterfaceSettings->pEndpointList = pTempEndpoint;
             }
-            free( (BYTE *)usbDeviceInfo.pInterfaceList->pInterfaceSettings );
+            USB_FREE_AND_CLEAR( usbDeviceInfo.pInterfaceList->pInterfaceSettings );
             usbDeviceInfo.pInterfaceList->pInterfaceSettings = pTempSetting;
         }
-        free( (BYTE *)usbDeviceInfo.pInterfaceList );
+        USB_FREE_AND_CLEAR( usbDeviceInfo.pInterfaceList );
         usbDeviceInfo.pInterfaceList = pTempInterface;
     }
 
@@ -4177,17 +4210,17 @@ void _USB_FreeMemory( void )
     while (usbDeviceInfo.pConfigurationDescriptorList != NULL)
     {
         pTemp = (BYTE *)usbDeviceInfo.pConfigurationDescriptorList->next;
-        free( usbDeviceInfo.pConfigurationDescriptorList->descriptor );
-        free( usbDeviceInfo.pConfigurationDescriptorList );
+        USB_FREE_AND_CLEAR( usbDeviceInfo.pConfigurationDescriptorList->descriptor );
+        USB_FREE_AND_CLEAR( usbDeviceInfo.pConfigurationDescriptorList );
         usbDeviceInfo.pConfigurationDescriptorList = (USB_CONFIGURATION *)pTemp;
     }
     if (pDeviceDescriptor != NULL)
     {
-        freez( pDeviceDescriptor );
+        USB_FREE_AND_CLEAR( pDeviceDescriptor );
     }
     if (pEP0Data != NULL)
     {
-        freez( pEP0Data );
+        USB_FREE_AND_CLEAR( pEP0Data );
     }
 
     _USB_FreeConfigMemory();
@@ -4549,6 +4582,7 @@ BOOL _USB_ParseConfigurationDescriptor( void )
     BYTE                        bNumEndpoints;
     BYTE                        bNumInterfaces;
     BYTE                        bMaxPower;
+    BOOL                        error;
     BYTE                        Class;
     BYTE                        SubClass;
     BYTE                        Protocol;
@@ -4564,13 +4598,17 @@ BOOL _USB_ParseConfigurationDescriptor( void )
     USB_INTERFACE_INFO          *newInterfaceInfo;
     USB_INTERFACE_SETTING_INFO  *newSettingInfo;
     USB_VBUS_POWER_EVENT_DATA   powerRequest;
+    USB_INTERFACE_INFO          *pTempInterfaceList;
     BYTE                        *ptr;
 
     // Prime the loops.
+    currentEndpoint         = 0;
+    error                   = FALSE;
     index                   = 0;
     ptr                     = pCurrentConfigurationDescriptor;
     currentInterface        = 0;
     currentAlternateSetting = 0;
+    pTempInterfaceList      = usbDeviceInfo.pInterfaceList; // Don't set until everything is in place.
 
     // Assume no OTG support (determine otherwise, below).
     usbDeviceInfo.flags.bfSupportsOTG   = 0;
@@ -4598,14 +4636,14 @@ BOOL _USB_ParseConfigurationDescriptor( void )
             &powerRequest, sizeof(USB_VBUS_POWER_EVENT_DATA) ))
     {
         usbDeviceInfo.errorCode = USB_ERROR_INSUFFICIENT_POWER;
-        return FALSE;
+        error = TRUE;
     }
 
     // Skip over the rest of the Configuration Descriptor
     index += bLength;
     ptr    = &pCurrentConfigurationDescriptor[index];
 
-    while (index < wTotalLength)
+    while (!error && (index < wTotalLength))
     {
         // Check the descriptor length and type
         bLength         = *ptr++;
@@ -4664,36 +4702,44 @@ BOOL _USB_ParseConfigurationDescriptor( void )
                 }
             }
 
+            // We can support this interface.  See if we already have a USB_INTERFACE_INFO node for it.
+            newInterfaceInfo = pTempInterfaceList;
+            while ((newInterfaceInfo != NULL) && (newInterfaceInfo->interface != bInterfaceNumber))
             {
-                // We can support this interface.  See if we already have a USB_INTERFACE_INFO node for it.
-                newInterfaceInfo = usbDeviceInfo.pInterfaceList;
-                while ((newInterfaceInfo != NULL) && (newInterfaceInfo->interface != bInterfaceNumber))
+                newInterfaceInfo = newInterfaceInfo->next;
+            }
+            if (newInterfaceInfo == NULL)
+            {
+                // This is the first instance of this interface, so create a new node for it.
+                if ((newInterfaceInfo = (USB_INTERFACE_INFO *)USB_MALLOC( sizeof(USB_INTERFACE_INFO) )) == NULL)
                 {
-                    newInterfaceInfo = newInterfaceInfo->next;
-                }
-                if (newInterfaceInfo == NULL)
-                {
-                    // This is the first instance of this interface, so create a new node for it.
-                    if ((newInterfaceInfo = (USB_INTERFACE_INFO *)malloc( sizeof(USB_INTERFACE_INFO) )) == NULL)
-                    {
-                        return FALSE;   // Out of memory
-                    }
-
-                    // Initialize the interface node
-                    newInterfaceInfo->interface             = bInterfaceNumber;
-                    newInterfaceInfo->clientDriver          = ClientDriver;
-                    newInterfaceInfo->pInterfaceSettings    = NULL;
-
-                    // Insert it into the list.
-                    newInterfaceInfo->next                  = usbDeviceInfo.pInterfaceList;
-                    usbDeviceInfo.pInterfaceList            = newInterfaceInfo;
+                    // Out of memory
+                    error = TRUE;   
                 }
 
+                // Initialize the interface node
+                newInterfaceInfo->interface             = bInterfaceNumber;
+                newInterfaceInfo->clientDriver          = ClientDriver;
+                newInterfaceInfo->pInterfaceSettings    = NULL;
+                newInterfaceInfo->pCurrentSetting       = NULL;
+
+                // Insert it into the list.
+                newInterfaceInfo->next                  = pTempInterfaceList;
+                pTempInterfaceList                      = newInterfaceInfo;
+            }
+
+            if (!error)
+            {
                 // Create a new setting for this interface, and add it to the list.
-                if ((newSettingInfo = (USB_INTERFACE_SETTING_INFO *)malloc( sizeof(USB_INTERFACE_SETTING_INFO) )) == NULL)
+                if ((newSettingInfo = (USB_INTERFACE_SETTING_INFO *)USB_MALLOC( sizeof(USB_INTERFACE_SETTING_INFO) )) == NULL)
                 {
-                    return FALSE;   // Out of memory
+                    // Out of memory
+                    error = TRUE;   
                 }
+            }    
+             
+            if (!error)   
+            {
                 newSettingInfo->next                    = newInterfaceInfo->pInterfaceSettings;
                 newSettingInfo->interfaceAltSetting     = bAlternateSetting;
                 newSettingInfo->pEndpointList           = NULL;
@@ -4709,7 +4755,7 @@ BOOL _USB_ParseConfigurationDescriptor( void )
 
                 // Find the Endpoint Descriptors.  There might be Class and Vendor descriptors in here
                 currentEndpoint = 0;
-                while ((index < wTotalLength) && (currentEndpoint < bNumEndpoints))
+                while (!error && (index < wTotalLength) && (currentEndpoint < bNumEndpoints))
                 {
                     bLength = *ptr++;
                     bDescriptorType = *ptr++;
@@ -4723,9 +4769,10 @@ BOOL _USB_ParseConfigurationDescriptor( void )
                     else
                     {
                         // Create an entry for the new endpoint.
-                        if ((newEndpointInfo = (USB_ENDPOINT_INFO *)malloc( sizeof(USB_ENDPOINT_INFO) )) == NULL)
+                        if ((newEndpointInfo = (USB_ENDPOINT_INFO *)USB_MALLOC( sizeof(USB_ENDPOINT_INFO) )) == NULL)
                         {
-                            return FALSE;   // Out of memory
+                            // Out of memory
+                            error = TRUE;   
                         }
                         newEndpointInfo->bEndpointAddress           = *ptr++;
                         newEndpointInfo->bmAttributes.val           = *ptr++;
@@ -4769,12 +4816,12 @@ BOOL _USB_ParseConfigurationDescriptor( void )
                         ptr = &pCurrentConfigurationDescriptor[index];
                     }
                 }
+            }    
 
-                // Ensure that we found all the endpoints for this interface.
-                if (currentEndpoint != bNumEndpoints)
-                {
-                    return FALSE;
-                }
+            // Ensure that we found all the endpoints for this interface.
+            if (currentEndpoint != bNumEndpoints)
+            {
+                error = TRUE;
             }
         }
     }
@@ -4784,28 +4831,61 @@ BOOL _USB_ParseConfigurationDescriptor( void )
     // different number of interfaces than they report they have!
 //    if (currentInterface != bNumInterfaces)
 //    {
-//        return FALSE;
+//        error = TRUE;
 //    }
 
-    if (usbDeviceInfo.pInterfaceList == NULL)
+    if (pTempInterfaceList == NULL)
     {
         // We could find no supported interfaces.
         #ifdef DEBUG_MODE
             UART2PrintString( "HOST: No supported interfaces.\r\n" );
         #endif
 
-        return FALSE;
+        error = TRUE;
     }
 
-    // Set configuration.
-    usbDeviceInfo.currentConfiguration      = currentConfiguration;
-    usbDeviceInfo.currentConfigurationPower = bMaxPower;
-
-    // Success!
-    #ifdef DEBUG_MODE
-        UART2PrintString( "HOST: Parse Descriptor success\r\n" );
-    #endif
-    return TRUE;
+    if (error)
+    {
+        // Destroy whatever list of interfaces, settings, and endpoints we created.
+        // The "new" variables point to the current node we are trying to remove.
+        while (pTempInterfaceList != NULL)
+        {
+            newInterfaceInfo = pTempInterfaceList;
+            pTempInterfaceList = pTempInterfaceList->next;
+            
+            while (newInterfaceInfo->pInterfaceSettings != NULL)
+            {
+                newSettingInfo = newInterfaceInfo->pInterfaceSettings;
+                newInterfaceInfo->pInterfaceSettings = newInterfaceInfo->pInterfaceSettings->next;
+                
+                while (newSettingInfo->pEndpointList != NULL)
+                {
+                    newEndpointInfo = newSettingInfo->pEndpointList;
+                    newSettingInfo->pEndpointList = newSettingInfo->pEndpointList->next;
+                    
+                    USB_FREE_AND_CLEAR( newEndpointInfo );
+                }    
+    
+                USB_FREE_AND_CLEAR( newSettingInfo );
+            }
+    
+            USB_FREE_AND_CLEAR( newInterfaceInfo );
+        }    
+        return FALSE;
+    }
+    else
+    {    
+        // Set configuration.
+        usbDeviceInfo.currentConfiguration      = currentConfiguration;
+        usbDeviceInfo.currentConfigurationPower = bMaxPower;
+    
+        // Success!
+        #ifdef DEBUG_MODE
+            UART2PrintString( "HOST: Parse Descriptor success\r\n" );
+        #endif
+        usbDeviceInfo.pInterfaceList = pTempInterfaceList;
+        return TRUE;
+    }    
 }
 
 
@@ -5679,26 +5759,29 @@ void _USB1Interrupt( void )
         pInterface = usbDeviceInfo.pInterfaceList;
         while (pInterface)
         {
-            pEndpoint = pInterface->pCurrentSetting->pEndpointList;
-            while (pEndpoint)
+            if (pInterface->pCurrentSetting)
             {
-                // Decrement the interval count of all active interrupt and isochronous endpoints.
-                if ((pEndpoint->bmAttributes.bfTransferType == USB_TRANSFER_TYPE_INTERRUPT) ||
-                    (pEndpoint->bmAttributes.bfTransferType == USB_TRANSFER_TYPE_ISOCHRONOUS))
+                pEndpoint = pInterface->pCurrentSetting->pEndpointList;
+                while (pEndpoint)
                 {
-                    if (pEndpoint->wIntervalCount != 0)
+                    // Decrement the interval count of all active interrupt and isochronous endpoints.
+                    if ((pEndpoint->bmAttributes.bfTransferType == USB_TRANSFER_TYPE_INTERRUPT) ||
+                        (pEndpoint->bmAttributes.bfTransferType == USB_TRANSFER_TYPE_ISOCHRONOUS))
                     {
-                        pEndpoint->wIntervalCount--;
+                        if (pEndpoint->wIntervalCount != 0)
+                        {
+                            pEndpoint->wIntervalCount--;
+                        }
                     }
+    
+                    #ifndef ALLOW_MULTIPLE_NAKS_PER_FRAME
+                        pEndpoint->status.bfLastTransferNAKd = 0;
+                    #endif
+    
+                    pEndpoint = pEndpoint->next;
                 }
-
-                #ifndef ALLOW_MULTIPLE_NAKS_PER_FRAME
-                    pEndpoint->status.bfLastTransferNAKd = 0;
-                #endif
-
-                pEndpoint = pEndpoint->next;
             }
-
+            
             pInterface = pInterface->next;
         }
 

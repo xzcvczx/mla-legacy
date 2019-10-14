@@ -51,7 +51,7 @@ Change History:
   Rev    Description
   -----  ----------------------------------
   2.6a-  No change
-   2.7
+   2.7a
 *******************************************************************************/
 #ifndef __USBHOSTCHARGER_H__
 #define __USBHOSTCHARGER_H__

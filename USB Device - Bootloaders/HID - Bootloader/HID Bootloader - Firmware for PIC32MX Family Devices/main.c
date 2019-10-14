@@ -88,8 +88,8 @@
 /**** configurations settings *************************************************/
 #define FLASH_PAGE_SIZE 4096
 
-#define ProgramMemStart					0x1D005000 //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
-#define BootMemStart					0x9D006000 //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
+#define ProgramMemStart					0x1D003000 //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
+#define BootMemStart					0x9D004000 //The entry point for the application.
 
 #define MaxPageToEraseNoConfigs		    BMXPFMSZ/FLASH_PAGE_SIZE		 //Last full page of flash on the PIC24FJ256GB110, which does not contain the flash configuration words.
 #define MaxPageToEraseWithConfigs	    BMXPFMSZ/FLASH_PAGE_SIZE		 //Page 170 contains the flash configurations words on the PIC24FJ256GB110.  Page 170 is also smaller than the rest of the (1536 byte) pages.

@@ -12,9 +12,9 @@
 				programmed with appropriate MCHPUSB demo firmware.  VID and
 				PID in firmware must match the VID and PID in this
 				program.
- Compiler:  	Microsoft Visual C++ 2005 Express Edition (or better)
-				(Microsoft Visual C++ 2008 Express Edition is believed
-				to work, but is currently untested)
+ Compiler:  	Microsoft Visual C++ 2005 Express Edition (or newer: 2008 
+				and 2010 versions will also work, simply upgrade the 
+				solution files using the automatic conversion wizard)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -43,6 +43,10 @@
  Change History:
   Rev   Date         Description
   1.0   06/15/2008   Initial release
+  2.7a	08/29/2010	 Adding explicit calling conventions to the DllImports.
+					 This is needed for Visual Studio 2010 compatibility.
+					 No functional changes to the code.  Backwards compatibility
+					 should be retained.
 ********************************************************************
 NOTE:	All user made code contained in this project is in the Form1.h file.
 		All other code and files were generated automatically by either the
@@ -118,33 +122,33 @@ namespace MCHPUSBPnPDemo {
 
 	//See the mpusbapi.dll source code (_mpusbapi.cpp) for API related documentation for these functions.
 	//The source code is in the MCHPFSUSB vX.X distributions.
-	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBGetDLLVersion")] 
+	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBGetDLLVersion", CallingConvention=CallingConvention::Cdecl)] 
 	extern "C" DWORD MPUSBGetDLLVersion(void);
-	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBGetDeviceCount")] 
+	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBGetDeviceCount", CallingConvention=CallingConvention::Cdecl)] 
 	extern "C" DWORD MPUSBGetDeviceCount(PCHAR pVID_PID);
-	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBOpen")]
+	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBOpen", CallingConvention=CallingConvention::Cdecl)]
 	extern "C" HANDLE MPUSBOpen(DWORD instance,	//  Input
 										PCHAR pVID_PID,	// Input
 										PCHAR pEP,		// Input
 										DWORD dwDir,	// Input
 										DWORD dwReserved);// Input
 
-	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBClose")] 
+	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBClose", CallingConvention=CallingConvention::Cdecl)] 
 	extern "C" BOOL MPUSBClose(HANDLE handle);	//Input
-	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBRead")] 
+	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBRead", CallingConvention=CallingConvention::Cdecl)] 
 	extern "C" DWORD MPUSBRead(HANDLE handle,	// Input
 										PVOID pData,	// Output
 										DWORD dwLen,	// Input
 										PDWORD pLength,	// Output
 										DWORD dwMilliseconds);// Input
 
-	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBWrite")] 
+	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBWrite", CallingConvention=CallingConvention::Cdecl)] 
 	extern "C" DWORD MPUSBWrite(HANDLE handle,	// Input
 										PVOID pData,	// Output
 										DWORD dwLen,	// Input
 										PDWORD pLength,	// Output
 										DWORD dwMilliseconds);// Input
-	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBReadInt")] 
+	[DllImport("MPUSBAPI.dll" , EntryPoint="_MPUSBReadInt", CallingConvention=CallingConvention::Cdecl)] 
 	extern "C" DWORD MPUSBReadInt(HANDLE handle,	// Input
 										PVOID pData,	// Output
 										DWORD dwLen,	// Input
@@ -154,7 +158,7 @@ namespace MCHPUSBPnPDemo {
 	//Need this function for receiving all of the WM_DEVICECHANGE messages.  See MSDN documentation for
 	//description of what this function does/how to use it. Note: name is remapped "RegisterDeviceNotificationUM" to
 	//avoid possible build error conflicts.
-	[DllImport("user32.dll" , CharSet = CharSet::Seeifdef, EntryPoint="RegisterDeviceNotification")]					
+	[DllImport("user32.dll" , CharSet = CharSet::Seeifdef, EntryPoint="RegisterDeviceNotification", CallingConvention=CallingConvention::Winapi)]					
 	extern "C" HDEVNOTIFY WINAPI RegisterDeviceNotificationUM(
 		HANDLE hRecipient,
 		LPVOID NotificationFilter,

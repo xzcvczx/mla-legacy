@@ -83,7 +83,7 @@
     2.1       Updated for simplicity and to use common coding style
     2.1-2.6   No change
     2.6a      Updated the handling of the physical descriptor
-    2.7       No change
+    2.7-2.7a  No change
 *******************************************************************/
 
 #ifndef USB_FUNCTION_HID_C

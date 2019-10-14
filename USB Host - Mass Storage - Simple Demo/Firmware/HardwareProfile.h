@@ -3,17 +3,18 @@
 #ifndef _HARDWARE_PROFILE_H_
 #define _HARDWARE_PROFILE_H_
 
+
+// ******************* CPU Speed defintions ************************************
+//  This section is required by some of the peripheral libraries and software
+//  libraries in order to know what the speed of the processor is to properly
+//  configure the hardware modules to run at the proper speeds
+// *****************************************************************************
 #if defined( __C30__ )
 
     // Various clock values
     #define GetSystemClock()            32000000UL
     #define GetPeripheralClock()        (GetSystemClock())
     #define GetInstructionClock()       (GetSystemClock() / 2)
-
-    // Clock values
-    #define MILLISECONDS_PER_TICK       10
-    #define TIMER_PRESCALER             TIMER_PRESCALER_8   // 8MHz: TIMER_PRESCALER_1
-    #define TIMER_PERIOD                20000                // 10ms=20000, 1ms=2000
 
 #elif defined( __PIC32MX__)
 
@@ -39,20 +40,20 @@
         #error Choose a speed
     #endif        
 
-    // Clock values
-    #define MILLISECONDS_PER_TICK       10                  // -0.000% error
-    #define TIMER_PRESCALER             TIMER_PRESCALER_8   // At 60MHz
-    #define TIMER_PERIOD                37500               // At 60MHz
-
 #endif
 
+// ******************* MDD File System Required Definitions ********************
+// Select your MDD File System interface type
+// This library currently only supports a single physical interface layer
+// In this example we are going to use the USB so we only need the USB definition
+// *****************************************************************************
+#define USE_USB_INTERFACE               // USB host MSD library
 
-//#define USE_USB_PLL
 
-#if defined(__PIC32MX__)
-#endif
-
-
+// ******************* Debugging interface hardware settings *******************
+//  This section is not required by any of the libraries.  This is a
+//  demo specific implmentation to assist in debugging.  
+// *****************************************************************************
 // Define the baud rate constants
 #if defined(__C30__)
     #define BAUDRATE2       57600UL
@@ -75,21 +76,6 @@
     #include <plib.h>
     #include <uart2.h>
 #endif
-
-
-// Select your MDD File System interface type
-// This library currently only supports a single physical interface layer
-
-//#define USE_SD_INTERFACE_WITH_SPI       // SD-SPI.c and .h
-//#define USE_CF_INTERFACE_WITH_PMP       // CF-PMP.c and .h
-//#define USE_MANUAL_CF_INTERFACE         // CF-Bit transaction.c and .h
-#define USE_USB_INTERFACE               // USB host MSD library
-
-
-
-/** TRIS ***********************************************************/
-#define INPUT_PIN           1
-#define OUTPUT_PIN          0
 
 #endif  
 

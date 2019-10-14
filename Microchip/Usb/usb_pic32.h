@@ -32,4 +32,6 @@ Change History:
 
   2.7         All functionality moved to other header files (mostly 
               usb_hal_pic32.h)
+
+  2.7a        No change
 *******************************************************************************/

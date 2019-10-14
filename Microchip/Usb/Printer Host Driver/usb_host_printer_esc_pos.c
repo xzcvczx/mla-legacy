@@ -83,7 +83,10 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
-  2.6 - 2.7   No change
+  2.6 - 2.7    No change
+
+  2.7a         Provided macro wrapped versions of malloc() and free()
+               so that a user can override these functions easily.     
 
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -265,6 +268,15 @@ PRINTER_STATUS_ESC_POS          printerListESCPOS[USB_MAX_PRINTER_DEVICES];
         printerListESCPOS[printer].currentY = y;    \
     }
 
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
+
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -402,7 +414,7 @@ BYTE USBHostPrinterLanguageESCPOS( BYTE address,
         case USB_PRINTER_JOB_START:
             _SetCurrentPosition( 0, 0 );
 
-            buffer = (char *)malloc( 2 );
+            buffer = (char *)USB_MALLOC( 2 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -490,7 +502,7 @@ BYTE USBHostPrinterLanguageESCPOS( BYTE address,
         //---------------------------------------------------------------------
         case USB_PRINTER_EJECT_PAGE:
 EjectPage:
-            buffer = (char *)malloc( 1 );
+            buffer = (char *)USB_MALLOC( 1 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -519,7 +531,7 @@ EjectPage:
             }
             if (transferFlags & USB_PRINTER_TRANSFER_COPY_DATA)
             {
-                buffer = (char *)malloc( size );
+                buffer = (char *)USB_MALLOC( size );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -562,7 +574,7 @@ EjectPage:
 
         //---------------------------------------------------------------------
         case USB_PRINTER_TEXT_STOP:
-            buffer = (char *)malloc( 3 );
+            buffer = (char *)USB_MALLOC( 3 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -625,7 +637,7 @@ EjectPage:
 
             printerListESCPOS[printer].imageWidth       = ((USB_PRINTER_IMAGE_INFO *)(data.pointerRAM))->width;
 
-            buffer = (char *)malloc( 3 );
+            buffer = (char *)USB_MALLOC( 3 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -644,7 +656,7 @@ EjectPage:
 
         //---------------------------------------------------------------------
         case USB_PRINTER_IMAGE_DATA_HEADER:
-            buffer = (char *)malloc( 6 );
+            buffer = (char *)USB_MALLOC( 6 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -685,7 +697,7 @@ EjectPage:
             }
             if (transferFlags & USB_PRINTER_TRANSFER_COPY_DATA)
             {
-                buffer = (char *)malloc( size );
+                buffer = (char *)USB_MALLOC( size );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -730,7 +742,7 @@ EjectPage:
         case USB_PRINTER_IMAGE_STOP:
             // No termination required.
             //return USB_PRINTER_SUCCESS;
-            buffer = (char *)malloc( 3 );
+            buffer = (char *)USB_MALLOC( 3 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -778,7 +790,7 @@ EjectPage:
                 {
                     length = strlen( ptr );
                 }
-                buffer  = (char *)malloc( length + 3 );
+                buffer  = (char *)USB_MALLOC( length + 3 );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -802,7 +814,7 @@ EjectPage:
         case USB_PRINTER_POS_CUT:
         case USB_PRINTER_POS_CUT_PARTIAL:
             // Using Function B
-            buffer = (char *)malloc( 4 );
+            buffer = (char *)USB_MALLOC( 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -965,7 +977,7 @@ EjectPage:
                         break;
                 }
 
-                buffer = (char *)malloc( 21 + dataLength );
+                buffer = (char *)USB_MALLOC( 21 + dataLength );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -1278,7 +1290,7 @@ BOOL USBHostPrinterLanguageESCPOSIsSupported( char *deviceID,
         imageInfo.height   = ((WORD)ptr[3] << 8) + ptr[2];
 
         depthBytes         = imageInfo.densityVertical / 8;
-        imageDataPOS       = (BYTE *)malloc( imageInfo.width *
+        imageDataPOS       = (BYTE *)USB_MALLOC( imageInfo.width *
                                        depthBytes );
 
         if (imageDataPOS == NULL)
@@ -1314,7 +1326,7 @@ BOOL USBHostPrinterLanguageESCPOSIsSupported( char *deviceID,
               USB_PRINTER_TRANSFER_COPY_DATA);
         }
 
-        free( imageDataPOS );
+        USB_FREE( imageDataPOS );
 
         USBHostPrinterCommandWithReadyWait( &returnCode,
               printerInfo.deviceAddress, USB_PRINTER_IMAGE_STOP,
@@ -1686,7 +1698,7 @@ static BYTE _PrintFontCommand( BYTE printer, BYTE transferFlags )
 {
     char    *buffer;
 
-    buffer = (char *)malloc( 3 );
+    buffer = (char *)USB_MALLOC( 3 );
     if (buffer == NULL)
     {
         return USB_PRINTER_OUT_OF_MEMORY;
@@ -1745,7 +1757,7 @@ static BYTE _PrintStaticCommand( BYTE printer, char *command, BYTE transferFlags
 
     USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
 
-    buffer = (char *)malloc( strlen(command) + 1 );
+    buffer = (char *)USB_MALLOC( strlen(command) + 1 );
     if (buffer == NULL)
     {
         return USB_PRINTER_OUT_OF_MEMORY;

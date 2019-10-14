@@ -111,6 +111,11 @@ Description:
          Modified the SetConfigurationOptions() function to explicitly 
          reconfigure the pull-up/pull-down settings for the D+/D- pins
          in case the host leaves the pull-downs enabled.
+         
+  2.7a   Fixed USBSetBDTAddress() macro, so that it correctly loads the entire
+         U1BDTPx register set, enabling the BDT to be anywhere in RAM.  Previous
+         implementation wouldn't work on a large RAM device if the linker 
+         decided to place the BDT[] array at an address > 64kB
 
  *************************************************************************/
 
@@ -119,7 +124,7 @@ Description:
 
 #define USB_HAL_PIC32_H
 
-#define USBSetBDTAddress(addr)         U1BDTP1 = (((unsigned int)addr)/256);
+#define USBSetBDTAddress(addr)         {U1BDTP3 = (((DWORD)KVA_TO_PA(addr)) >> 24); U1BDTP2 = (((DWORD)KVA_TO_PA(addr)) >> 16); U1BDTP1 = (((DWORD)KVA_TO_PA(addr)) >> 8);}
 #define USBPowerModule() U1PWRCbits.USBPWR = 1;
 #define USBPingPongBufferReset U1CONbits.PPBRST
 

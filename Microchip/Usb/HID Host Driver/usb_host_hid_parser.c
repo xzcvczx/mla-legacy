@@ -50,6 +50,12 @@ Change History:
   ----------  ----------------------------------------------------------
   2.6 - 2.7   No change
 
+  2.7a        Provided macro wrapped versions of malloc() and free()
+              so that a user can override these functions easily.
+
+              Fixed initialization issue where HID parse result information
+              wasn't cleared before loading with new parse result data.
+
 *******************************************************************************/
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
@@ -84,8 +90,15 @@ Change History:
 // Section: Macros
 //******************************************************************************
 //******************************************************************************
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
 
-#define freezHID(x)                        { free(x); x = NULL; }
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
 
 //******************************************************************************
 //******************************************************************************
@@ -172,6 +185,7 @@ USB_HID_RPT_DESC_ERROR _USBHostHID_Parse_Report(BYTE* hidReportDescriptor , WORD
        return(HID_ERR_NullPointer);
     }
 
+    memset( &deviceRptInfo, 0x00, sizeof( USB_HID_DEVICE_RPT_INFO ) );
     _USBHostHID_InitDeviceRptInfo();
    
     deviceRptInfo.interfaceNumber = interfaceNum;  // update interface number for the report
@@ -305,10 +319,10 @@ USB_HID_RPT_DESC_ERROR _USBHostHID_Parse_Report(BYTE* hidReportDescriptor , WORD
 
     if (parsedDataMem != NULL)
     {
-		freezHID( parsedDataMem );
+		USB_FREE_AND_CLEAR( parsedDataMem );
     }
 
-    parsedDataMem = (BYTE*) malloc(sizeRequired);
+    parsedDataMem = (BYTE*) USB_MALLOC(sizeRequired);
     
 #ifdef DEBUG_MODE
     UART2PrintString( "HID: Memory for Report Descriptor: " );
@@ -724,7 +738,8 @@ USB_HID_RPT_DESC_ERROR _USBHostHID_Parse_Report(BYTE* hidReportDescriptor , WORD
 
   Description:
     This function is called by _USBHostHID_Parse_Report() to Initialize
-    report information to default value before every parse.
+    report information to default value before every parse.  Note that not
+    all values are reset.
 
   Precondition:
     None

@@ -58,6 +58,7 @@ file_030=Common
 file_031=Common
 file_032=Common
 file_033=Common
+file_034=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -93,6 +94,7 @@ file_030=no
 file_031=no
 file_032=no
 file_033=no
+file_034=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -128,6 +130,7 @@ file_030=no
 file_031=no
 file_032=no
 file_033=no
+file_034=yes
 [FILE_INFO]
 file_000=main.c
 file_001=temperature.c
@@ -163,6 +166,7 @@ file_030=..\..\Microchip\Include\Compiler.h
 file_031=..\..\Microchip\Include\GenericTypeDefs.h
 file_032=..\..\Microchip\Include\struct_queue.h
 file_033=..\..\Microchip\Include\timer.h
+file_034=..\Getting Started - Running the OTG - MCHPUSB - Generic driver demo.htm
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

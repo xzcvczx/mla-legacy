@@ -49,6 +49,7 @@ file_021=Common
 file_022=Common
 file_023=Common
 file_024=USB Stack
+file_025=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -75,6 +76,7 @@ file_021=no
 file_022=no
 file_023=no
 file_024=no
+file_025=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -101,6 +103,7 @@ file_021=no
 file_022=no
 file_023=no
 file_024=no
+file_025=yes
 [FILE_INFO]
 file_000=usb_config.c
 file_001=keyboard_demo.c
@@ -127,6 +130,7 @@ file_021=..\..\Microchip\Include\uart2.h
 file_022=..\..\Microchip\Include\GenericTypeDefs.h
 file_023=..\..\Microchip\Include\Compiler.h
 file_024=..\..\Microchip\Include\USB\usb_hal_pic32.h
+file_025=..\Getting Started - Running the Host - HID - Keyboard.htm
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

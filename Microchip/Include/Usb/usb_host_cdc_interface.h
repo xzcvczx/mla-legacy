@@ -60,6 +60,8 @@ Change History:
 
         Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
         more than 256 bytes
+
+  2.7a  No change
 *******************************************************************************/
 //DOM-IGNORE-END
 

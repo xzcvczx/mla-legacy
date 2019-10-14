@@ -88,6 +88,9 @@ Change History:
 
   2.7         Changed the interface to _SetCurrentPosition to be able to
               take in the printer number as a parameter.
+
+  2.7a        Provided macro wrapped versions of malloc() and free()
+              so that a user can override these functions easily.
 *******************************************************************************/
 //DOM-IGNORE-END
 
@@ -305,6 +308,15 @@ PRINTER_STATUS_PCL  printerListPCL[USB_MAX_PRINTER_DEVICES];
         printerListPCL[(p)].currentY = (y);     \
     }
 
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
+
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -583,7 +595,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             }
             if (transferFlags & USB_PRINTER_TRANSFER_COPY_DATA)
             {
-                buffer = (char *)malloc( size );
+                buffer = (char *)USB_MALLOC( size );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -642,7 +654,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             // Used only when not doing vector graphics.
             // This command sets the cursor to the specified position.  Note
             // that we must convert the specification to use decipoints.
-            buffer = (char *)malloc( 10 + 10 );
+            buffer = (char *)USB_MALLOC( 10 + 10 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -657,7 +669,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
         //---------------------------------------------------------------------
         case USB_PRINTER_IMAGE_START:
             // This command sets up the printer for printing raster data.
-            buffer = (char *)malloc( 4 + 8 + 8 + 6 + 11 + 11 + 11 );
+            buffer = (char *)USB_MALLOC( 4 + 8 + 8 + 6 + 11 + 11 + 11 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -733,7 +745,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
         case USB_PRINTER_IMAGE_DATA_HEADER:
             // This command sends the command for the raster data.  Therefore, the
             // command USB_PRINTER_IMAGE_DATA must follow this command.
-            buffer = (char *)malloc( 20 );
+            buffer = (char *)USB_MALLOC( 20 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -770,7 +782,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             {
                 DWORD   i;
 
-                buffer = (char *)malloc( size );
+                buffer = (char *)USB_MALLOC( size );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -879,7 +891,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 (((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sFillType.fillType == PRINTER_FILL_HATCHED) ||
                 (((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sFillType.fillType == PRINTER_FILL_CROSS_HATCHED))
             {
-                buffer = (char *)malloc( 14 );
+                buffer = (char *)USB_MALLOC( 14 );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -930,7 +942,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 14 );
+            buffer = (char *)USB_MALLOC( 14 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -951,7 +963,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 16 );
+            buffer = (char *)USB_MALLOC( 16 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -973,7 +985,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 28 );
+            buffer = (char *)USB_MALLOC( 28 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -995,7 +1007,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                     return USB_PRINTER_BAD_PARAMETER;
                 }
             #endif
-            buffer = (char *)malloc( 18 );
+            buffer = (char *)USB_MALLOC( 18 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1015,7 +1027,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                     return USB_PRINTER_BAD_PARAMETER;
                 }
             #endif
-            buffer = (char *)malloc( 22 );
+            buffer = (char *)USB_MALLOC( 22 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1037,7 +1049,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( (30 + 3)* 2 + 4 );
+            buffer = (char *)USB_MALLOC( (30 + 3)* 2 + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1157,7 +1169,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 12 + 8 + 4 );
+            buffer = (char *)USB_MALLOC( 12 + 8 + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1191,7 +1203,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 12 + 12+ 14 + 4 );
+            buffer = (char *)USB_MALLOC( 12 + 12+ 14 + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1216,7 +1228,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 12 + (24 + 18) * 4 + 4 );
+            buffer = (char *)USB_MALLOC( 12 + (24 + 18) * 4 + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1283,7 +1295,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 12 + 2 * (12 + 12) + 4 * (12 + 13) + 4 );
+            buffer = (char *)USB_MALLOC( 12 + 2 * (12 + 12) + 4 * (12 + 13) + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1344,7 +1356,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 12 + 12 + 4 );
+            buffer = (char *)USB_MALLOC( 12 + 12 + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1370,7 +1382,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 12 + 12 + 12 + 4 );
+            buffer = (char *)USB_MALLOC( 12 + 12 + 12 + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1404,7 +1416,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             }
             #endif
 
-            buffer = (char *)malloc( 12 + (10 * (((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.numPoints + 1)) + 4 );
+            buffer = (char *)USB_MALLOC( 12 + (10 * (((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.numPoints + 1)) + 4 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1547,7 +1559,7 @@ static BYTE _PrintFontCommand( BYTE printer, BYTE transferFlags )
     char    *buffer;
     BYTE    font;
 
-    buffer = (char *)malloc( 40 );
+    buffer = (char *)USB_MALLOC( 40 );
     if (buffer == NULL)
     {
         return USB_PRINTER_OUT_OF_MEMORY;
@@ -1675,7 +1687,7 @@ static BYTE _PrintFontCommand( BYTE printer, BYTE transferFlags )
 
     USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
 
-    buffer = (char *)malloc( strlen(command) + 1 );
+    buffer = (char *)USB_MALLOC( strlen(command) + 1 );
     if (buffer == NULL)
     {
         return USB_PRINTER_OUT_OF_MEMORY;

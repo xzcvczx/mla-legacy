@@ -34,77 +34,66 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
+  1.01  Cleaned up unnecessary variables
 ********************************************************************/
 
 #include 	"string.h"
 #include	"GenericTypeDefs.h"
 #include 	"sc_config.h"
-#include    "./Smart Card/pps-macro.h"
 #include    "./Smart Card/SCpic24.h"
+#if defined(__PIC24F__)
+	#include	"./Smart Card/pps-macro.h"
+#endif
 
-BOOL GenTxError 		= FALSE; 	//Force an Error on Transmit, and recover automatically
-BOOL GenRxError 		= FALSE;	//Flag to create error on Data Receive
-BOOL SysErrorDetected 	= FALSE; 	//I/O data line is permanently low
-BYTE TxRetryCounter 	= 0;
-
-unsigned long long baudRate;
+unsigned long baudRate;
+unsigned long scReferenceClock; // Smart Card Reference Clock
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
-void SCdrv_SendTxData( BYTE dat )
+void SCdrv_SendTxData( BYTE data )
 {
-	if( GenTxError )
-		U1MODEbits.PDSEL = 2;	//odd parity to generate transmit error
-	
+	BYTE txRetryCounter = 0;
+	BOOL noError = TRUE;
+
 	U1STAbits.UTXEN = 1;
-	U1TXREG = dat;		
+	U1TXREG = data;		
+
 	while( !U1STAbits.TRMT )
 	{
 		Nop();
 		Nop();
-	}	
-	U1STAbits.UTXEN = 0;
-
-	U1MODEbits.UARTEN = 0;
-
-	if( GenTxError )
-	{
-		U1MODEbits.PDSEL = 1;	//switch back to normal even parity.
-		GenTxError = FALSE;   //we have already caused the error, so clear this flag for correct transmission
 	}
 	
-	BOOL NoErr = TRUE;
+	U1STAbits.UTXEN = 0;
+
+	U1MODEbits.UARTEN = 0;	// Disable UART Module
+
 	WaitMicroSec( 1 );
 	
 	if( !SCdrv_GetRxPinData() )  // The Receiver did not like our data. it is pulling line low 
 	{					  // to indicate PE or FR errors
-		NoErr = FALSE;
-//		LATAbits.LATA7 = 1;
+		noError = FALSE;
 
-		WaitMicroSec((U1BRG * 170)/371);  //wait two etu before repeating
-		
-//		LATAbits.LATA7 = 0;
+//		WaitMicroSec((U1BRG * 170)/371);  //wait two etu before repeating
 		
 		U1MODEbits.UARTEN = 1;
 						
 		//now retransmit the data
-		if( TxRetryCounter < 5 )
+		if( txRetryCounter < 5 )
 		{
-			TxRetryCounter++;
-			SCdrv_SendTxData(dat);
+			txRetryCounter++;
+			SCdrv_SendTxData(data);
 		}
-		else
-			SysErrorDetected = TRUE;		//Line permanent collision (or held Low) detected
 	}
 	else
 	{	
-		WaitMicroSec((U1BRG * 140)/371);  //wait 1.5 etu
+//		WaitMicroSec((U1BRG * 140)/371);  //wait 1.5 etu
 	}
 
-	if( NoErr ) //no error detected
-		TxRetryCounter = 0;
+	if( noError ) //no error detected
+		txRetryCounter = 0;
 
-	U1MODEbits.UARTEN = 1;
+	U1MODEbits.UARTEN = 1;	// Enable UART Module
 	
 	U1STAbits.OERR = 0;	//clear any overflow error that we caused
 	
@@ -122,30 +111,11 @@ void SCdrv_SendTxData( BYTE dat )
 /////////////////////////////////////////////
 BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 {
-	BOOL RxStart = FALSE;
-
 	//wait for data byte
-	while( !U1STAbits.URXDA && nTrys-- )
-	{
-		if( (SCdrv_GetRxPinData() == 0) && !RxStart )
-		{
-			RxStart = TRUE;
-			//TIMER_4_off();	//Rx Reception has started. Turn off interrupts so we can scan the line at max speed
-			
-			if( GenRxError )  // Cause an error on Reception 
-			{
-				SCdrv_TxPin_Direction(0);	//pull line low to cause parity error
-				WaitMicroSec(4*5);    //wait 5 etu @ 250kpbs
-				SCdrv_TxPin_Direction(1);
-				GenRxError = FALSE;
-			}	
-		}	
-	}
+	while( !U1STAbits.URXDA && nTrys-- );
 	
 	if( !U1STAbits.URXDA )
 		return FALSE;
-	
-//	LATAbits.LATA7 = 1; // Logic analyzer sync signal 
 	
 	if( U1STAbits.PERR )	//Parity Error detected
 	{
@@ -155,15 +125,13 @@ BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 		//Read the data from UART to clear the error flag
 		*pDat = U1RXREG;		
 	
-		//TIMER_4_on(); // restart timer interrupts
-		
 		WaitMicroSec((U1BRG * 116)/371);  //for 9600 baud, 116 us. for 250kbps, 5us
 
 		SCdrv_TxPin_Direction(1); //release RD10. Card should retransmit now.
-//		LATAbits.LATA7   = 0;
+
 		U1MODEbits.RXINV = 0;
 
-		return SCdrv_GetRxData(pDat, 1000);	//Read the data from retransmission
+		return SCdrv_GetRxData(pDat, 10000);	//Read the data from retransmission
 	}
 	else
 	{
@@ -171,22 +139,18 @@ BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 		*pDat = U1RXREG;
 	}
 
-//	LATAbits.LATA7 = 0;  // Logic analyzer sync signal 
-
-	//TIMER_4_on();  // restart timer interrupts
-
 	return TRUE;
 }
 
 ///////////////////////////////////////////////////
 //////////////////////////////////////////////////
-void SCdrv_SetBRG( BYTE SpeedCode )
+void SCdrv_SetBRG( BYTE speedCode )
 {
 	float factorD = 1;
 	unsigned int factorF = 372;
 	BYTE tempCode;
 
-	tempCode = SpeedCode & 0x0F;
+	tempCode = speedCode & 0x0F;
 	
 	// Calculate Factor 'D' from TA1 value
 	switch(tempCode)
@@ -254,7 +218,7 @@ void SCdrv_SetBRG( BYTE SpeedCode )
 	// factor 'F' from TA1 value
 	#ifdef ENABLE_SC_EXTERNAL_CLOCK
 
-		tempCode = (SpeedCode & 0xF0) >> 4;
+		tempCode = (speedCode & 0xF0) >> 4;
 		
 		// Calculate Factor 'F' from TA1 value
 		switch(tempCode)
@@ -317,7 +281,7 @@ void SCdrv_SetBRG( BYTE SpeedCode )
 		}
 		else	// If externa; clock used to drive Smart Card
 		{
-			baudRate = (unsigned long long)((unsigned long long)((unsigned long long)REF_CLOCK_TO_SMART_CARD * factorD)/factorF);
+			baudRate = (unsigned long long)((unsigned long long)((unsigned long long)scReferenceClock * factorD)/factorF);
 
 			U1BRG = (unsigned int)((unsigned long)((unsigned long)FCY/(4 * baudRate)) - 1);   //10752bps with 4Mhz clk to card
 		}
@@ -337,8 +301,8 @@ void SCdrv_CloseUART(void)
 	U1MODEbits.UARTEN = 0;  // Turn off UART
 	U1STAbits.OERR = 0;;
 
+	// Disable Pull-ups at Tx & Rx pins
 	SCdrv_DisableTxPinPullUp();
-
 	SCdrv_DisableRxPinPullUp();	
 }
 
@@ -346,6 +310,9 @@ void SCdrv_CloseUART(void)
 //////////////////////////////////////////////////
 void SCdrv_InitUART(void)
 {
+	unsigned int power2Value = 1;
+	BYTE power2temp;
+
 	#ifdef ENABLE_SC_POWER_THROUGH_PORT_PIN
 		SCdrv_PowerPin_Direction(0);	//set RG8 as output to power the Smart Card
 	#endif
@@ -360,6 +327,8 @@ void SCdrv_InitUART(void)
 	//Turn on the pull-up on both RX and TX line for faster transitions.
 	SCdrv_EnableTxPinPullUp();
 	SCdrv_EnableRxPinPullUp();
+
+	// Enable Pull-ups for card present/sim present pins
 	SCdrv_EnableCardPresentPinPullUp();
 	SCdrv_EnableSimPresentPinPullUp();
 
@@ -376,8 +345,17 @@ void SCdrv_InitUART(void)
 
 	// Initial Baud Rate of Smart Card for external Clock
 	#ifdef ENABLE_SC_EXTERNAL_CLOCK
+
+		power2temp = REF_CLOCK_POWER2_VALUE;
+
+		while(power2temp--)
+		{
+			power2Value = power2Value * (BYTE)2;
+		}
+
+		scReferenceClock = REF_CLOCK_CIRCUIT_INPUT_CLK/(power2Value + REF_CLOCK_DIVISOR_VALUE);
 	
-		baudRate = (unsigned long long)REF_CLOCK_TO_SMART_CARD/372;
+		baudRate = scReferenceClock/372;
 
 		U1BRG = (unsigned int)((unsigned long)((unsigned long)FCY/(4 * baudRate)) - 1);   //10752bps with 4Mhz clk to card
 	

@@ -106,6 +106,8 @@ Description:
          function shows how to put the PIC24F to sleep while the USB
          module is in suspend and have the USB module wake up the device
          on activity on the bus.
+
+  2.7a   No change
 ********************************************************************/
 //DOM-IGNORE-END
 

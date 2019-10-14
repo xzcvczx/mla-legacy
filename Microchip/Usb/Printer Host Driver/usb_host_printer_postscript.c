@@ -57,6 +57,9 @@ Change History:
 
   2.7         Changed the interface to _SetCurrentPosition to be able to
               take in the printer number as a parameter.
+
+  2.7a        Provided macro wrapped versions of malloc() and free()
+              so that a user can override these functions easily.
 *******************************************************************************/
 //DOM-IGNORE-END
 
@@ -213,6 +216,15 @@ PRINTER_STATUS_POSTSCRIPT   printerListPostScript[USB_MAX_PRINTER_DEVICES];
         printerListPostScript[(p)].currentY = (y);      \
     }
 
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
+
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -440,7 +452,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
             }
             if (transferFlags & USB_PRINTER_TRANSFER_COPY_DATA)
             {
-                buffer = (char *)malloc( size );
+                buffer = (char *)USB_MALLOC( size );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -498,7 +510,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
             // This command sets the cursor to the specified position.  Note
             // that we must convert the specification to use PostScript's
             // orientation of the Y-axis.
-            buffer = (char *)malloc( 16 );
+            buffer = (char *)USB_MALLOC( 16 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -512,7 +524,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
 
         //---------------------------------------------------------------------
         case USB_PRINTER_IMAGE_START:
-            buffer = (char *)malloc( 146 );
+            buffer = (char *)USB_MALLOC( 146 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -556,7 +568,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
             size += 3;
             size /= 4;
 
-            buffer = (char *)malloc( size + 1 ); // Add one for possible truncation error.
+            buffer = (char *)USB_MALLOC( size + 1 ); // Add one for possible truncation error.
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -722,7 +734,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                     }
                 #endif
 
-                buffer = (char *)malloc( 16 );
+                buffer = (char *)USB_MALLOC( 16 );
                 if (buffer == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -748,7 +760,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 73 );
+            buffer = (char *)USB_MALLOC( 73 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -774,7 +786,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 46 );
+            buffer = (char *)USB_MALLOC( 46 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -800,7 +812,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 46 );
+            buffer = (char *)USB_MALLOC( 46 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -829,7 +841,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 15 + (56 + 11)* 2 );
+            buffer = (char *)USB_MALLOC( 15 + (56 + 11)* 2 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -947,7 +959,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 50 );
+            buffer = (char *)USB_MALLOC( 50 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -987,7 +999,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 155 );
+            buffer = (char *)USB_MALLOC( 155 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1059,7 +1071,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 }
             #endif
 
-            buffer = (char *)malloc( 80 );
+            buffer = (char *)USB_MALLOC( 80 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1119,7 +1131,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
             }
             #endif
 
-            buffer = (char *)malloc( 15 + ( 15 * ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.numPoints) + 18 );
+            buffer = (char *)USB_MALLOC( 15 + ( 15 * ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.numPoints) + 18 );
             if (buffer == NULL)
             {
                 return USB_PRINTER_OUT_OF_MEMORY;
@@ -1242,7 +1254,7 @@ static BYTE _PrintFontCommand( BYTE printer, BYTE transferFlags )
     char    *buffer;
 //    char    temp[6];
 
-    buffer = (char *)malloc( 1 + 30 + 10 + 5 + 20 );
+    buffer = (char *)USB_MALLOC( 1 + 30 + 10 + 5 + 20 );
     if (buffer == NULL)
     {
         return USB_PRINTER_OUT_OF_MEMORY;
@@ -1297,7 +1309,7 @@ static BYTE _PrintStaticCommand( BYTE address, char *command, BYTE transferFlags
 
     USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
 
-    buffer = (char *)malloc( strlen(command) + 1 );
+    buffer = (char *)USB_MALLOC( strlen(command) + 1 );
     if (buffer == NULL)
     {
         return USB_PRINTER_OUT_OF_MEMORY;

@@ -51,6 +51,9 @@ Change History:
   ----------  ----------------------------------------------------------
   2.6 - 2.6a  No change
 
+  2.7a        Provided macro wrapped versions of malloc() and free()
+              so that a user can override these functions easily.
+
 *******************************************************************************/
 //DOM-IGNORE-END
 
@@ -65,6 +68,16 @@ Change History:
 #ifdef DEBUG_MODE
     #include "uart2.h"
 #endif
+
+#ifndef USB_MALLOC
+    #define USB_MALLOC(size) malloc(size)
+#endif
+
+#ifndef USB_FREE
+    #define USB_FREE(ptr) free(ptr)
+#endif
+
+#define USB_FREE_AND_CLEAR(ptr) {USB_FREE(ptr); ptr = NULL;}
 
 #ifdef USE_GRAPHICS_LIBRARY_PRINTER_INTERFACE
 
@@ -174,7 +187,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
                 imageLine  = 0;
                 if (oneRow != NULL)
                 {
-                    free( oneRow );
+                    USB_FREE( oneRow );
                 }
 
                 if (printScreenInfo->printerType.supportFlags.supportsPOS)
@@ -186,7 +199,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
                     size = (printScreenInfo->printerInfo.width + 7) / 8 ;
                 }
 
-                oneRow = (BYTE *)malloc( size );
+                oneRow = (BYTE *)USB_MALLOC( size );
                 if (oneRow == NULL)
                 {
                     return USB_PRINTER_OUT_OF_MEMORY;
@@ -200,7 +213,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
                             USB_DATA_POINTER_RAM(&(printScreenInfo->printerInfo)), sizeof(printScreenInfo->printerInfo), 0 );
                 if (returnCode)
                 {
-                    free( oneRow );
+                    USB_FREE( oneRow );
                     state = PRINT_SCREEN_STATE_BEGIN;
                     return returnCode;
                 }
@@ -267,7 +280,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
                 returnCode = USBHostPrinterCommand( address, USB_PRINTER_IMAGE_DATA_HEADER, USB_NULL, printScreenInfo->printerInfo.width, 0 );
                 if (returnCode)
                 {
-                    free( oneRow );
+                    USB_FREE( oneRow );
                     state = PRINT_SCREEN_STATE_BEGIN;
                     return returnCode;
                 }
@@ -277,7 +290,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
                 returnCode = USBHostPrinterCommand( address, USB_PRINTER_IMAGE_DATA, USB_DATA_POINTER_RAM(oneRow), printScreenInfo->printerInfo.width, USB_PRINTER_TRANSFER_COPY_DATA);
                 if (returnCode)
                 {
-                    free( oneRow );
+                    USB_FREE( oneRow );
                     state = PRINT_SCREEN_STATE_BEGIN;
                     return returnCode;
                 }
@@ -315,7 +328,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
                     returnCode = -1;
                 }
 
-                free( oneRow );
+                USB_FREE( oneRow );
                 state = PRINT_SCREEN_STATE_BEGIN;
                 return returnCode;
                 break;
@@ -359,7 +372,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
             size = (printScreenInfo->printerInfo.width + 7) / 8 ;
         }
 
-        oneRow = (BYTE *)malloc( size );
+        oneRow = (BYTE *)USB_MALLOC( size );
         if (oneRow == NULL)
         {
             return USB_PRINTER_OUT_OF_MEMORY;
@@ -444,7 +457,7 @@ SHORT PrintScreen( BYTE address, USB_PRINT_SCREEN_INFO *printScreenInfo )
             }
         }
 
-        free( oneRow );
+        USB_FREE( oneRow );
         if (!returnCode)
         {
             returnCode = -1;    // The image completed successfully.

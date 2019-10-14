@@ -176,7 +176,7 @@ ROM USB_DEVICE_DESCRIPTOR device_dsc=
     0x0000,                 // Device release number in BCD format
     0x01,                   // Manufacturer string index
     0x02,                   // Product string index
-    0x00,                   // Device serial number string index
+    0x03,                   // Device serial number string index
     0x01                    // Number of possible configurations
 };
 
@@ -237,6 +237,10 @@ sizeof(sd002),USB_DESCRIPTOR_STRING,
 {'M','i','c','r','o','c','h','i','p',' ','W','i','n','U','S','B',
 ' ','E','x','a','m','p','l','e',' ','D','e','v','i','c','e'}};
 
+ROM struct{BYTE bLength;BYTE bDscType;WORD string[4];}sd003={
+sizeof(sd003),USB_DESCRIPTOR_STRING,
+{'0','1','2','3'}};
+
 //Array of configuration descriptors
 ROM BYTE *ROM USB_CD_Ptr[]=
 {
@@ -247,7 +251,8 @@ ROM BYTE *ROM USB_SD_Ptr[]=
 {
     (ROM BYTE *ROM)&sd000,
     (ROM BYTE *ROM)&sd001,
-    (ROM BYTE *ROM)&sd002
+    (ROM BYTE *ROM)&sd002,
+    (ROM BYTE *ROM)&sd003
 };
 
 /** EOF usb_descriptors.c ***************************************************/

@@ -39,6 +39,10 @@
  Change History:
   Rev   Date         Description
   2.3	08/28/2008	 Initial Release
+  2.7a	08/29/2010	 Adding explicit calling conventions to the DllImports.
+					 This is needed for Visual Studio 2010 compatibility.
+					 No functional changes to the code.  Backwards compatibility
+					 should be retained.
 ********************************************************************
 NOTE:	All user made code contained in this project is in the Form1.h file.
 		All other code and files were generated automatically by either the
@@ -113,7 +117,7 @@ namespace HIDPnPDemo {
 	//Returns a HDEVINFO type for a device information set (WinUSB devices in
 	//our case).  We will need the HDEVINFO as in input parameter for calling many of
 	//the other SetupDixxx() functions.
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetClassDevs")]		
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetClassDevs", CallingConvention=CallingConvention::Winapi)]		
 	extern "C" HDEVINFO  SetupDiGetClassDevsUM(
 		LPGUID  ClassGuid,					//Input: Supply the class GUID here. 
 		PCTSTR  Enumerator,					//Input: Use NULL here, not important for our purposes
@@ -122,7 +126,7 @@ namespace HIDPnPDemo {
 
 	//Gives us "PSP_DEVICE_INTERFACE_DATA" which contains the Interface specific GUID (different
 	//from class GUID).  We need the interface GUID to get the device path.
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInterfaces")]				
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInterfaces", CallingConvention=CallingConvention::Winapi)]				
 	extern "C" WINSETUPAPI BOOL WINAPI  SetupDiEnumDeviceInterfacesUM(
 		HDEVINFO  DeviceInfoSet,			//Input: Give it the HDEVINFO we got from SetupDiGetClassDevs()
 		PSP_DEVINFO_DATA  DeviceInfoData,	//Input (optional)
@@ -131,19 +135,19 @@ namespace HIDPnPDemo {
 		PSP_DEVICE_INTERFACE_DATA  DeviceInterfaceData);//Output: This function fills in an "SP_DEVICE_INTERFACE_DATA" structure.
 
 	//SetupDiDestroyDeviceInfoList() frees up memory by destroying a DeviceInfoList
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiDestroyDeviceInfoList")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiDestroyDeviceInfoList", CallingConvention=CallingConvention::Winapi)]
 	extern "C" WINSETUPAPI BOOL WINAPI  SetupDiDestroyDeviceInfoListUM(			
 		HDEVINFO  DeviceInfoSet);			//Input: Give it a handle to a device info list to deallocate from RAM.
 
 	//SetupDiEnumDeviceInfo() fills in an "SP_DEVINFO_DATA" structure, which we need for SetupDiGetDeviceRegistryProperty()
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInfo")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiEnumDeviceInfo", CallingConvention=CallingConvention::Winapi)]
 	extern "C" WINSETUPAPI BOOL WINAPI  SetupDiEnumDeviceInfoUM(
 		HDEVINFO  DeviceInfoSet,
 		DWORD  MemberIndex,
 		PSP_DEVINFO_DATA  DeviceInfoData);
 
 	//SetupDiGetDeviceRegistryProperty() gives us the hardware ID, which we use to check to see if it has matching VID/PID
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceRegistryProperty")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceRegistryProperty", CallingConvention=CallingConvention::Winapi)]
 	extern "C"	WINSETUPAPI BOOL WINAPI  SetupDiGetDeviceRegistryPropertyUM(
 		HDEVINFO  DeviceInfoSet,
 		PSP_DEVINFO_DATA  DeviceInfoData,
@@ -154,7 +158,7 @@ namespace HIDPnPDemo {
 		PDWORD  RequiredSize);
 
 	//SetupDiGetDeviceInterfaceDetail() gives us a device path, which is needed before CreateFile() can be used.
-	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceInterfaceDetail")]
+	[DllImport("setupapi.dll" , CharSet = CharSet::Seeifdef, EntryPoint="SetupDiGetDeviceInterfaceDetail", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL SetupDiGetDeviceInterfaceDetailUM(
 		HDEVINFO DeviceInfoSet,										//Input: Wants HDEVINFO which can be obtained from SetupDiGetClassDevs()
 		PSP_DEVICE_INTERFACE_DATA DeviceInterfaceData,				//Input: Pointer to an structure which defines the device interface.  
@@ -166,7 +170,7 @@ namespace HIDPnPDemo {
 	//Need this function for receiving all of the WM_DEVICECHANGE messages.  See MSDN documentation for
 	//description of what this function does/how to use it. Note: name is remapped "RegisterDeviceNotificationUM" to
 	//avoid possible build error conflicts.
-	[DllImport("user32.dll" , CharSet = CharSet::Seeifdef, EntryPoint="RegisterDeviceNotification")]					
+	[DllImport("user32.dll" , CharSet = CharSet::Seeifdef, EntryPoint="RegisterDeviceNotification", CallingConvention=CallingConvention::Winapi)]					
 	extern "C" HDEVNOTIFY WINAPI RegisterDeviceNotificationUM(
 		HANDLE hRecipient,
 		LPVOID NotificationFilter,

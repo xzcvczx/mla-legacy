@@ -290,9 +290,12 @@ sizeof(sd001),USB_DESCRIPTOR_STRING,
 }};
 
 //Product string descriptor
-ROM struct{BYTE bLength;BYTE bDscType;WORD string[28];}sd002={
+ROM struct{BYTE bLength;BYTE bDscType;WORD string[32];}sd002={
 sizeof(sd002),USB_DESCRIPTOR_STRING,
-{'M','i','c','r','o','c','h','i','p',' ','M','a','s','s',' ','S','t','o','r','a','g','e',' ','D','r','i','v','e'
+{'M','i','c','r','o','c','h','i','p',' ',
+'C','o','m','p','o','s','i','t','e',' ',
+'H','I','D','+','M','S','D',' ',
+'D','e','m','o'
 }};
 
 //Array of configuration descriptors

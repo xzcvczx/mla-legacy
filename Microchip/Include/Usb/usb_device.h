@@ -96,6 +96,8 @@ Description:
          Added macro versions of USBDeviceAttach() and USBDeviceDetach()
          so they will compile without error when using polling mode.
 
+  2.7a   No Change
+
 ********************************************************************/
 
 #ifndef USBDEVICE_H

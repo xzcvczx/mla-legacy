@@ -56,6 +56,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
          Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
          more than 256 bytes
+
+  2.7a   No change
 ********************************************************************************/
 #include <stdlib.h>
 #include <string.h>

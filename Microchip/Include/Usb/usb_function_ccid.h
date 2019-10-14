@@ -91,6 +91,8 @@
   ----   -----------
   2.6    Initial Release
 
+  2.6a-  No Change
+   2.7a 
 ********************************************************************/
 
 #ifndef CCID_H
@@ -100,61 +102,118 @@
 
 
 /** DEFINITIONS ****************************************************/
+/* CCID Bulk OUT transfer states */
+#define USB_CCID_BULK_OUT_FIRST_PACKET 		 0
+#define USB_CCID_BULK_OUT_SUBSEQUENT_PACKET  1
+
+/* CCID Bulk IN transfer states */
+#define USB_CCID_BULK_IN_READY                0
+#define USB_CCID_BULK_IN_BUSY                 1
+#define USB_CCID_BULK_IN_BUSY_ZLP             2       // ZLP: Zero Length Packet
+#define USB_CCID_BULK_IN_COMPLETING           3
 
 /****** CCID Class-Specific Request Codes ************/
-#define ABORT  					0x01
-#define GET_CLOCK_FREQUENCIES   0x02
-#define GET_DATA_RATES  		0x03
+#define USB_CCID_ABORT  					0x01
+#define USB_CCID_GET_CLOCK_FREQUENCIES      0x02
+#define USB_CCID_GET_DATA_RATES  		    0x03
 
 // CCID Commands/response
-#define PC_to_RDR_IccPowerOn	        0x62
-#define PC_to_RDR_IccPowerOff	        0x63
-#define PC_to_RDR_GetSlotStatus         0x65
-#define PC_to_RDR_XfrBlock		        0x6F
-#define PC_to_RDR_GetParameters	        0x6C
-#define PC_to_RDR_ResetParameters	    0x6D
-#define PC_to_RDR_SetParameters	        0x61
-#define PC_to_RDR_Escape                0x6B
-#define PC_to_RDR_IccClock              0x6E
-#define PC_to_RDR_T0APDU                0x6A
-#define PC_to_RDR_Secure                0x69
-#define PC_to_RDR_Mechanical            0x71
-#define PC_to_RDR_Abort                 0x72
-#define PC_to_RDR_SetDataRateAndClockFrequency  0x73
+#define USB_CCID_PC_TO_RDR_ICC_POWER_ON	        0x62
+#define USB_CCID_PC_TO_RDR_ICC_POWER_OFF        0x63
+#define USB_CCID_PC_TO_RDR_GET_SLOT_STATUS      0x65
+#define USB_CCID_PC_TO_RDR_XFR_BLOCK            0x6F
+#define USB_CCID_PC_TO_RDR_GET_PARAMETERS       0x6C
+#define USB_CCID_PC_TO_RDR_RESET_PARAMETERS	    0x6D
+#define USB_CCID_PC_TO_RDR_SET_PARAMETERS	    0x61
+#define USB_CCID_PC_TO_RDR_ESCAPE               0x6B
+#define USB_CCID_PC_TO_RDR_ICC_CLOCK            0x6E
+#define USB_CCID_PC_TO_RDR_T0APDU               0x6A
+#define USB_CCID_PC_TO_RDR_SECURE               0x69
+#define USB_CCID_PC_TO_RDR_MECHANICAL           0x71
+#define USB_CCID_PC_TO_RDR_ABORT                0x72
+#define USB_CCID_PC_TO_RDR_SET_DATA_RATE_AND_CLOCK_FREQUENCY  0x73
 
-#define RDR_to_PC_DataBlock		    0x80
-#define RDR_to_PC_SlotStatus        0x81
-#define RDR_to_PC_Parameters	    0x82
-#define RDR_to_PC_Escape            0x83
-#define RDR_to_PC_DataRateAndClockFrequency 0x84
+#define USB_CCID_RDR_TO_PC_DATA_BLOCK		    0x80
+#define USB_CCID_RDR_TO_PC_SLOT_STATUS          0x81
+#define USB_CCID_RDR_TO_PC_PARAMETERS   	    0x82
+#define USB_CCID_RDR_TO_PC_ESCAPE               0x83
+#define USB_CCID_RDR_TO_PC_DATA_RATE_AND_CLOCK_FREQUENCY 0x84
 
 //CCID Errors
-#define CMD_ABORTED                 0xFF
-#define ICC_MUTE                    0xFE
-#define XFR_PARITY_ERROR            0xFD
-#define XFR_OVERRUN                 0xFC
-#define HW_ERROR                    0xFB
-#define BAD_ATR_TS                  0xF8
-#define BAD_ATR_TCK                 0xF7
-#define ICC_PROTOCOL_NOT_SUPPORTED  0xF6
-#define ICC_CLASS_NOT_SUPPORTED     0xF5
-#define PROCEDURE_BYTE_CONFLICT     0xF4
-#define DEACTIVATED_PROTOCOL        0xF3
-#define BUSY_WITH_AUTO_SEQUENCE     0xF2
-#define PIN_TIMEOUT                 0xF0
-#define PIN_CANCELLED               0xEF
-#define CMD_SLOT_BUSY               0xE0
-#define CMD_NOT_SUPPORTED           0x00
+#define USB_CCID_CMD_ABORTED                 0xFF
+#define USB_CCID_ICC_MUTE                    0xFE
+#define USB_CCID_XFR_PARITY_ERROR            0xFD
+#define USB_CCID_XFR_OVERRUN                 0xFC
+#define USB_CCID_HW_ERROR                    0xFB
+#define USB_CCID_BAD_ATR_TS                  0xF8
+#define USB_CCID_BAD_ATR_TCK                 0xF7
+#define USB_CCID_ICC_PROTOCOL_NOT_SUPPORTED  0xF6
+#define USB_CCID_ICC_CLASS_NOT_SUPPORTED     0xF5
+#define USB_CCID_PROCEDURE_BYTE_CONFLICT     0xF4
+#define USB_CCID_DEACTIVATED_PROTOCOL        0xF3
+#define USB_CCID_BUSY_WITH_AUTO_SEQUENCE     0xF2
+#define USB_CCID_PIN_TIMEOUT                 0xF0
+#define USB_CCID_PIN_CANCELLED               0xEF
+#define USB_CCID_CMD_SLOT_BUSY               0xE0
+#define USB_CCID_CMD_NOT_SUPPORTED           0x00
+
+    
+/******************************************************************************
+    Function:
+        void mUSBCCIDBulkInRam(BYTE *pData, BYTE len)
+        
+    Description:
+        Use this macro to transfer data located in data memory.
+        Use this macro when:
+            1. Data stream is not null-terminated
+            2. Transfer length is known
+        Remember: usbCcidBulkInTrfState must == USB_CCID_BULK_IN_READY
+   		Unexpected behavior will occur if this function is called when 
+		usbCcidBulkInTrfState != USB_CCID_BULK_IN_READY
+        
+    PreCondition:
+        usbCcidBulkInTrfState must be in the USB_CCID_BULK_IN_READY state.
+        
+    Paramters:
+        pDdata  : Pointer to the starting location of data bytes
+        len     : Number of bytes to be transferred
+        
+    Return Values:
+        None
+        
+    Remarks:
+        This macro only handles the setup of the transfer. The
+        actual transfer is handled by USBCCIDBulkInService().
+  
+ *****************************************************************************/
+#define mUSBCCIDBulkInRam(pData,len)   \
+{                                      \
+    pCCIDSrc.bRam = pData;               \
+    usbCcidBulkInLen = len;             \
+    usbCcidBulkInTrfState = USB_CCID_BULK_IN_BUSY;    \
+}
 
 
 /** E X T E R N S ************************************************************/
-extern USB_HANDLE lastTransmission;
 extern volatile CTRL_TRF_SETUP SetupPkt;
-extern ROM BYTE configDescriptor1[];
-extern volatile BYTE CtrlTrfData[USB_EP0_BUFF_SIZE];
 
 
+extern USB_HANDLE usbCcidBulkOutHandle;
+extern USB_HANDLE usbCcidBulkInHandle;
+extern USB_HANDLE usbCcidInterruptInHandle;
+extern unsigned char usbCcidBulkOutEndpoint[USB_EP_SIZE];	//User application buffer for receiving and holding OUT packets sent from the host
+extern unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];		//User application buffer for sending IN packets to the host
 
 /** Section: PUBLIC PROTOTYPES **********************************************/
 void USBCheckCCIDRequest(void);
+void USBCCIDInitEP(void);
+void USBCCIDBulkInService(void);
+void USBCCIDSendDataToHost(BYTE *pData, WORD len);
+
+/** Section: STRUCTURES **********************************************/
+typedef union {
+    BYTE CCID_BulkOutBuffer[271];
+    BYTE CCID_BulkInBuffer[267]; 
+} USB_CCID_BUFFER;  
+
 #endif //CCID_H

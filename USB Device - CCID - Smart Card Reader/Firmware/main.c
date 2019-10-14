@@ -45,6 +45,10 @@
 #include "USB/usb.h"
 #include "USB/usb_function_ccid.h"
 #include "HardwareProfile.h"
+#include "./Smart Card/SClib.h"
+#include "sc_config.h"
+
+
 /** CONFIGURATION **************************************************/
 #if defined(PICDEM_FS_USB)      // Configuration bits for PICDEM FS USB Demo Board (based on PIC18F4550)
         #pragma config PLLDIV   = 5         // (20 MHz crystal on PICDEM FS USB board)
@@ -234,13 +238,13 @@
     #pragma udata
 #endif
 
-unsigned char OUTPacket[USB_EP_SIZE];	//User application buffer for receiving and holding OUT packets sent from the host
-unsigned char INPacket[USB_EP_SIZE];		//User application buffer for sending IN packets to the host
+unsigned char usbCcidBulkOutEndpoint[USB_EP_SIZE];	//User application buffer for receiving and holding OUT packets sent from the host
+unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];		//User application buffer for sending IN packets to the host
 #pragma udata
 BOOL blinkStatusValid;
-USB_HANDLE USBBulkOutHandle;
-USB_HANDLE USBBulkInHandle;
-USB_HANDLE USBInterruptInHandle;
+USB_HANDLE usbCcidBulkOutHandle;
+USB_HANDLE usbCcidBulkInHandle;
+USB_HANDLE usbCcidInterruptInHandle;
 #pragma udata
 
 ///////// CCID proto ////////////////////
@@ -249,7 +253,7 @@ extern void ProcessCCID(void);
 
 /** PRIVATE PROTOTYPES *********************************************/
 static void InitializeSystem(void);
-void USBDeviceTasks(void);
+//void USBDeviceTasks(void);
 void YourHighPriorityISRCode(void);
 void YourLowPriorityISRCode(void);
 void UserInit(void);
@@ -357,7 +361,12 @@ void BlinkUSBStatus(void);
 		//Service the interrupt
 		//Clear the interrupt flag
 		//Etc.
-
+		if (INTCONbits.TMR0IF)
+	  	{                                   //check for TMR0 overflow
+	      	INTCONbits.TMR0IF = 0;           //clear interrupt flag
+			SCdrv_DisableDelayTimer();
+	      	delayLapsedFlag = 1;            //indicate timeout
+	  	}
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section
 
 #elif defined(__C30__)
@@ -381,6 +390,15 @@ void BlinkUSBStatus(void);
 //        	asm("goto %0"::"i"(&_T2Interrupt));  //T2Interrupt's address
 //        }
     #endif
+	void _ISRFAST __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
+	{
+		if(IFS0bits.T1IF)
+		{
+			IFS0bits.T1IF = 0;
+			SCdrv_DisableDelayTimer();
+			delayLapsedFlag = 1;
+		}
+	}
 #endif
 
 
@@ -575,10 +593,6 @@ static void InitializeSystem(void)
     tris_self_power = INPUT_PIN;	// See HardwareProfile.h
     #endif
 
-	USBBulkOutHandle = 0;
-	USBBulkInHandle = 0;
-	USBInterruptInHandle = 0;
-
     UserInit();			//Application related initialization.  See user.c
 
     USBDeviceInit();	//usb_device.c.  Initializes USB module SFRs and firmware
@@ -588,10 +602,12 @@ static void InitializeSystem(void)
 
 void UserInit(void)
 {
-    mInitAllLEDs();
+//    mInitAllLEDs();
     //mInitAllSwitches();
 
-	blinkStatusValid = TRUE;	//Blink the normal USB state on the LEDs.
+    #ifndef LOW_PIN_COUNT_USB_DEVELOPMENT_KIT // In this demo board the Smart Card VCC is conflicting with status LED. 
+		blinkStatusValid = TRUE;	//Blink the normal USB state on the LEDs.
+	#endif
 	CCID_Init();
 
 }//end UserInit
@@ -625,6 +641,8 @@ void ProcessIO(void)
     if((USBDeviceState < CONFIGURED_STATE)||(USBSuspendControl==1)) return;
 
     ProcessCCID();
+    
+    USBCCIDBulkInService();
 
 }//end ProcessIO
 
@@ -647,6 +665,7 @@ void ProcessIO(void)
  *                  USBDeviceState is declared and updated in
  *                  usb_device.c.
  *******************************************************************/
+#ifndef LOW_PIN_COUNT_USB_DEVELOPMENT_KIT // In this demo board the Smart Card VCC is conflicting with status LED. 
 void BlinkUSBStatus(void)
 {
     static WORD led_count=0;
@@ -718,7 +737,7 @@ void BlinkUSBStatus(void)
     }//end if(UCONbits.SUSPND...)
 
 }//end BlinkUSBStatus
-
+#endif
 
 
 
@@ -949,49 +968,9 @@ void USBCBErrorHandler(void)
  *
  * Note:            None
  *****************************************************************************/
-DWORD ep0Bfr[10];
 void USBCBCheckOtherReq(void)
 {
     USBCheckCCIDRequest();
-
-#if 0
-
-    if(SetupPkt.Recipient != RCPT_INTF) return;
-    if(SetupPkt.bIntfID != 0) return;
-    if(SetupPkt.bmRequestType != 0xA1 ) return;
-
-    if(SetupPkt.bRequest == 2)	//GET Clock Freqs supported
-    {
-	    bkpt++;
-	    bkpt++;
-		ep0Bfr[0] = 4000;	//4Mhz
-
-		USBEP0SendRAMPtr(
-		    (BYTE*)ep0Bfr,
-		    4*1,
-		    USB_EP0_NO_OPTIONS);
-
-	}
-	else if(SetupPkt.bRequest == 3)	//GET Data rates supported
- 	{
-	    bkpt++;
-	    bkpt++;
-
-		ep0Bfr[0] = 9600;
-		ep0Bfr[1] = 14400;
-		ep0Bfr[2] = 28800;
-		ep0Bfr[3] = 57600;
-		ep0Bfr[4] = 115200;
-		ep0Bfr[5] = 230400;
-
-		USBEP0SendRAMPtr(
-		    (BYTE*)&ep0Bfr,
-		    4*6,
-		    USB_EP0_NO_OPTIONS);
-
-	}
-#endif
-
 }//end
 
 
@@ -1042,12 +1021,7 @@ void USBCBStdSetDscHandler(void)
  *****************************************************************************/
 void USBCBInitEP(void)
 {
-    USBEnableEndpoint(USB_EP_INT_IN,USB_IN_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
-    USBEnableEndpoint(USB_EP_BULK_IN,USB_IN_ENABLED|USB_OUT_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
-
-    USBBulkInHandle = 0;
-	USBInterruptInHandle = 0;
-    USBBulkOutHandle = USBRxOnePacket(USB_EP_BULK_OUT,(BYTE*)&OUTPacket,USB_EP_SIZE);
+   USBCCIDInitEP();
 }
 
 /********************************************************************

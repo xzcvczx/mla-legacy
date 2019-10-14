@@ -49,6 +49,11 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   -----   -----------
   2.7     Initial release
 
+  2.7a    Fixed casting issue that could result in incorrect behavior on
+          PIC32 parts.
+
+          Added USBHostAudioV1DataEventHandler() function.
+
 *******************************************************************************/
 
 
@@ -679,7 +684,11 @@ BYTE * USBHostAudioV1SupportedFrequencies( BYTE deviceAddress )
         return NULL;
     }
 
-    return (BYTE *)((WORD)deviceInfoAudioV1[i].pFormatTypeDescriptor + (WORD)7);
+    #if defined( __PIC32MX__)
+        return (BYTE *)((UINT32)deviceInfoAudioV1[i].pFormatTypeDescriptor + (UINT32)7);
+    #else
+        return (BYTE *)((WORD)deviceInfoAudioV1[i].pFormatTypeDescriptor + (WORD)7);
+    #endif
 }
 
 
@@ -737,6 +746,49 @@ void USBHostAudioV1TerminateTransfer( BYTE deviceAddress )
 // *****************************************************************************
 // *****************************************************************************
 
+/****************************************************************************
+  Function:
+    BOOL USBHostAudioV1DataEventHandler( BYTE address, USB_EVENT event,
+                            void *data, DWORD size )
+
+  Summary:
+    This function is the data event handler for this client driver.
+
+  Description:
+    This function is the data event handler for this client driver.  It is called
+    by the host layer when isochronous data events occur.
+
+  Precondition:
+    The device has been initialized.
+
+  Parameters:
+    BYTE address    - Address of the device
+    USB_EVENT event - Event that has occurred
+    void *data      - Pointer to data pertinent to the event
+    WORD size       - Size of the data
+
+  Return Values:
+    TRUE   - Event was handled
+    FALSE  - Event was not handled
+
+  Remarks:
+    The client driver does not need to process the data.  Just pass the 
+    translated event up to the application layer.
+  ***************************************************************************/
+
+BOOL USBHostAudioV1DataEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
+{
+    if (event == EVENT_DATA_ISOC_READ)
+    {
+        return USB_HOST_APP_DATA_EVENT_HANDLER( address, EVENT_AUDIO_STREAM_RECEIVED, data, size );
+    }
+    else
+    {
+        return FALSE;
+    }        
+}
+
+    
 /****************************************************************************
   Function:
     BOOL USBHostAudioV1Initialize( BYTE address, DWORD flags, BYTE clientDriverID )
@@ -1071,7 +1123,7 @@ BOOL USBHostAudioV1EventHandler( BYTE address, USB_EVENT event, void *data, DWOR
             else if (((HOST_TRANSFER_DATA *)data)->bEndpointAddress == deviceInfoAudioV1[i].endpointAudioStream)
             {
                 // Bus error on data stream.
-                USB_HOST_APP_EVENT_HANDLER( i, EVENT_AUDIO_RECEIVE_STREAM, NULL, 0 );
+                USB_HOST_APP_EVENT_HANDLER( i, EVENT_AUDIO_STREAM_RECEIVED, NULL, 0 );
             }    
             break;
         

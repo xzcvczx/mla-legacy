@@ -78,7 +78,7 @@
   ----   -----------
   2.6    Minor changes in include file structure.
   2.6a-  No change
-   2.7
+   2.7a
 ********************************************************************
 //DOM-IGNORE-END
 

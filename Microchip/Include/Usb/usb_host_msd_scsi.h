@@ -68,13 +68,14 @@ Change History:
   ----  --------------------------------------
   2.6a- No change
    2.7
+
+  2.7a  Removed improper include of "usb_config.h"
 *******************************************************************************/
 
 #ifndef __USBHOSTMSDSCSI_H__
 #define __USBHOSTMSDSCSI_H__
 //DOM-IGNORE-END
 
-#include "usb_config.h"
 #include "USB\usb.h"
 #include "FSConfig.h"
 #include "MDD File System\FSDefs.h"

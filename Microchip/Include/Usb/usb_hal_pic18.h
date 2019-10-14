@@ -101,6 +101,8 @@ Description:
          example where a device in polling mode can still have interrupts
          enabled from the host mode causing an incorrect vectoring to the
          host interrupt controller while in device mode.
+
+  2.7a   No change
 ********************************************************************/
 //DOM-IGNORE-END
 

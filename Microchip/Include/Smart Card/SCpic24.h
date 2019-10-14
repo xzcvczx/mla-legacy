@@ -34,24 +34,28 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
+  1.01  Cleaned up unnecessary variables
 ********************************************************************/
 
 #ifndef __SC_DRV24_LIB__
 #define __SC_DRV24_LIB__
 
 #include "GenericTypeDefs.h"
-#include "p24Fxxxx.h"
 
-extern BOOL GenTxError;         //For Testing Only: Force an Error on Transmit, and recover automatically using 7816-3 protocol
-extern BOOL GenRxError;			//For Testing Only: Flag to create error on Data Receive, and recover automatically using 7816-3 protocol
-extern BOOL SysErrorDetected;   //I/O data line is permanently stuck low
-extern unsigned long long baudRate;	// Baud Rate of Smart Card Transmission/Reception Data
+#if defined(__PIC24F__)
+	#include "p24Fxxxx.h"
+#elif	defined(__PIC24H__)
+	#include "p24Hxxxx.h"
+#endif
 
-void SCdrv_InitUART(void);
-void SCdrv_CloseUART(void);
-void SCdrv_SetBRG( BYTE SpeedCode );
-BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys );
-void SCdrv_SendTxData( BYTE dat );
+extern unsigned long baudRate;	// Baud Rate of Smart Card Transmission/Reception Data
+extern unsigned long scReferenceClock; // Smart Card Reference Clock
+
+extern void SCdrv_InitUART(void);
+extern void SCdrv_CloseUART(void);
+extern void SCdrv_SetBRG( BYTE speedCode );
+extern BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys );
+extern void SCdrv_SendTxData( BYTE data );
 
 #endif
 

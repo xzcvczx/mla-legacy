@@ -285,7 +285,6 @@ extern inline void __attribute__ ((always_inline)) DeviceInit(void)
 	PMCS1MDbits.DWAITB = 0;      
 	PMCS1MDbits.DWAITM = 2;
 	PMCS1MDbits.DWAITE = 0;
-	PMCS1MDbits.AMWAIT = 0;
 	
 	PMCON3bits.PTWREN = 1;      // enable write strobe port
 	PMCON3bits.PTRDEN = 1;      // enable read strobe port

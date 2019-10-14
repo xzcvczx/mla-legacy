@@ -72,6 +72,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
               not fully comply with CDC specifications
               Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
               more than 256 bytes
+
+ v2.7a        No change
 ********************************************************************************/
 
 
