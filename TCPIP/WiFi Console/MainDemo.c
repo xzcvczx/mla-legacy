@@ -61,6 +61,7 @@
 
 // Include all headers for any enabled TCPIP Stack functions
 #include "TCPIP Stack/TCPIP.h"
+#include "TCPIP Stack/WFEasyConfig.h"
 
 
 #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
@@ -241,6 +242,10 @@ BOOL g_CloudConnLost = FALSE;
 UINT8 ConnectionProfileID;
 #endif	/* WF_CS_TRIS */
 
+#if defined(HOST_CM_TEST)
+extern UINT8 g_event;
+#endif
+
 //
 // Main application entry point.
 //
@@ -250,8 +255,15 @@ void main(void)
 int main(void)
 #endif
 {
-	static DWORD t = 0;
+        static DWORD t = 0;
 	static DWORD dwLastIP = 0;
+
+#if defined(HOST_CM_TEST)
+        DWORD t1 = 0;
+        char st[80];
+        BOOL host_scan = FALSE;
+        UINT16 scan_count = 0;
+#endif
 
 	// Initialize application specific hardware
 	InitializeBoard();
@@ -383,6 +395,64 @@ int main(void)
 	
     while(1)
     {
+
+#if defined(HOST_CM_TEST)
+       switch (g_event)
+        {
+            case WF_EVENT_CONNECTION_PERMANENTLY_LOST:
+            case WF_EVENT_CONNECTION_FAILED:
+                g_event = 0xff;             // clear current event
+                // if host scan is active, it can be forced inactive by connection/re-connection process
+                // so just reset host scan state to inactive.
+                host_scan = FALSE;          // host scan inactive
+                putrsUART("Reconnecting....\r\n");
+                WF_CMConnect(ConnectionProfileID);
+                break;
+            case WF_EVENT_CONNECTION_SUCCESSFUL:
+                g_event = 0xff;             // clear current event
+                // if host scan is active, it can be forced inactive by connection/re-connection process
+                // so just reset host scan state to inactive.
+                host_scan = FALSE;          // host scan inactive
+                break;
+            case WF_EVENT_SCAN_RESULTS_READY:
+                g_event = 0xff;             // clear current event
+                host_scan = FALSE;          // host scan inactive
+                // Scan results are valid - OK to retrieve
+                if (SCANCXT.numScanResults > 0)
+                {
+                    SCAN_SET_DISPLAY(SCANCXT.scanState);
+                    SCANCXT.displayIdx = 0;
+                    while (IS_SCAN_STATE_DISPLAY(SCANCXT.scanState))
+                         WFDisplayScanMgr();
+                }
+                break;
+           case WF_EVENT_CONNECTION_TEMPORARILY_LOST:
+                // This event can happened when CM in module is enabled.
+                g_event = 0xff;         // clear current event
+                // if host scan is active, it can be forced inactive by connection/re-connection process
+                // so just reset host scan state to inactive.
+                host_scan = FALSE;      // host scan inactive
+                break;
+            default:
+                //sprintf(st,"skip event = %d\r\n",g_event);
+                // putrsUART(st);
+                break;
+        }
+
+        // Do host scan
+        if(TickGet() - t1 >= TICK_SECOND*20)
+        {
+            t1 = TickGet();
+            if (!host_scan)             // allow host scan if currently inactive
+            {
+                sprintf(st,"%d Scanning ..... event = %d\r\n",++scan_count, g_event);
+                putrsUART(st);
+                host_scan = TRUE;       // host scan active
+                WF_Scan(0xff);          // scan on all channels
+            }
+        }
+#endif  //HOST_CM_TEST
+
         // Blink LED0 (right most one) every second.
         if(TickGet() - t >= TICK_SECOND/2ul)
         {
@@ -1310,7 +1380,7 @@ static void InitAppConfig(void)
 	
 		#if defined(WF_CS_TRIS)
 			// Load the default SSID Name
-			WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME) <= sizeof(AppConfig.MySSID));
+			WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME)-1 <= sizeof(AppConfig.MySSID));
 			memcpypgm2ram(AppConfig.MySSID, (ROM void*)MY_DEFAULT_SSID_NAME, sizeof(MY_DEFAULT_SSID_NAME));
 			AppConfig.SsidLength = sizeof(MY_DEFAULT_SSID_NAME) - 1;
 	

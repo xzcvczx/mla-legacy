@@ -164,9 +164,9 @@ static DWORD SNMPGetTimeStamp(void);
 
 static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val,UINT8 targetIndex);
 
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 UINT8 	gSendTrapSMstate=0;
-#endif
+static BOOL gtrapSMStateUpdate=FALSE;
+
 #endif
 /****************************************************************************
   ===========================================================================
@@ -219,13 +219,17 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val,UINT8
     IPAddress.v[1] = trapInfo.table[receiverIndex].IPAddress.v[2];
     IPAddress.v[2] = trapInfo.table[receiverIndex].IPAddress.v[1];
     IPAddress.v[3] = trapInfo.table[receiverIndex].IPAddress.v[0];
+    
+	if(gtrapSMStateUpdate == TRUE)
+	{
+		smState = SM_PREPARE;
+		gtrapSMStateUpdate = FALSE;
+	}
 
     switch(smState)
     {
 	    case SM_PREPARE:
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 			gSendTrapSMstate = smState;
-#endif
 			tempRxIndex=receiverIndex;			
 			// Convert local to network order.
 			tempIpAddress.v[0] = trapInfo.table[receiverIndex].IPAddress.v[3];
@@ -243,9 +247,7 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val,UINT8
 	        break;
 	
 	    case SM_NOTIFY_WAIT:
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 			gSendTrapSMstate = smState;
-#endif
 	        if ( SNMPIsNotifyReady(&IPAddress) )
 	        {
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
@@ -336,7 +338,6 @@ void SNMPV2TrapDemo(void)
 	static SNMP_VAL		analogPotVal;
 	static BYTE potReadLock = FALSE;
 	static BYTE timeLock = FALSE;
-	static BYTE maxTryToSendTrap=0;
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 	static BYTE userIndex=0;
 #endif
@@ -405,30 +406,27 @@ void SNMPV2TrapDemo(void)
 				gGenericTrapNotification = ENTERPRISE_SPECIFIC;
 				gSetTrapSendFlag = TRUE;
 				retVal =SendNotification(trapIndex,ANALOG_POT0,analogPotVal,targetIndex);
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 				if((gSendTrapSMstate == 0x0) && (retVal == FALSE)) // gSendTrapSMstate == SM_PREPARE
 				{
 					retVal = SendNotification(trapIndex, ANALOG_POT0, analogPotVal,targetIndex);
 				}
-				if((retVal==TRUE)&& (targetIndex == (SNMPV3_USM_MAX_USER-1)))
-					trapIndex++;
-				else if(retVal == FALSE)
-#else				
 				if(retVal == FALSE)
-#endif					
 				{
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) // to keep tarck of the usr index for SNMPv3
-					userIndex = targetIndex;
+                    userIndex = targetIndex;
 #endif
-				
-					if(maxTryToSendTrap >= MAX_TRY_TO_SEND_TRAP)
-					{
-						trapIndex++;
-						maxTryToSendTrap = 0;
-						return;
-					}
-					maxTryToSendTrap++;
-					return ;
+                    if((TickGet()- SNMPGetTrapTime())> 2*TICK_SECOND)
+                    {
+                        trapIndex++;
+                        gtrapSMStateUpdate = TRUE;
+                        if(SNMPNotifyInfo.socket != INVALID_UDP_SOCKET)
+                        {
+                                UDPClose(SNMPNotifyInfo.socket);
+                                SNMPNotifyInfo.socket = INVALID_UDP_SOCKET;
+                        }
+                        return;
+                    }
+                    return ;
 				}
 				//prepare PUSH_BUTTON trap .for the next trap varbind we need to use snmp_notify instead of 
 				// SendNotification(), because we have already prepared SNMP v2 trap header 
@@ -512,15 +510,16 @@ void SNMPV2TrapDemo(void)
 	//Try for max 5 seconds to send TRAP, do not get block in while()
 	if((TickGet()-tempTimerRead)>(5*TICK_SECOND))
 	{
-		UDPDiscard();
-		potReadLock = FALSE;
-		timeLock = FALSE;
-		trapIndex = 0;
-		analogPotVal.word = 0;
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
-		gSendTrapSMstate = 0;
-#endif
-		return;
+            UDPDiscard();
+            potReadLock = FALSE;
+            timeLock = FALSE;
+            analogPotVal.word = 0;
+            if(trapIndex>=TRAP_TABLE_SIZE)
+            {
+                trapIndex = 0;
+            }
+            gSendTrapSMstate = 0;
+            return;
 	}
 }
 
@@ -564,7 +563,6 @@ void SNMPTrapDemo(void)
 	static SNMP_VAL buttonPushval,analogPotVal;
 	static BYTE potReadLock=FALSE,buttonLock=FALSE;
 	static BYTE timeLock=FALSE;
-	static BYTE maxTryToSendTrap=0,maxTryToSendTrap1=0;
 	UINT8		targetIndex;
 	BOOL		retVal=TRUE;
 	static BYTE	trapIndex=0;
@@ -573,14 +571,14 @@ void SNMPTrapDemo(void)
 #endif
 
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) || defined(SNMP_STACK_USE_V2_TRAP)
-		/*
-			Specify SNMPV2 specific trap ID Here. Which will help Ireasoning and other SNMP manager tools to 
-			recognise the trap information and it will help the SNMP manager tool to decrypt the 
-			trap information. 
-		
-			This ID is only related to trap ID. and this implementaion is only for TRAPv2 specific.
-		*/
-		SNMPNotifyInfo.trapIDVar = SNMP_DEMO_TRAP;
+	/*
+		Specify SNMPV2 specific trap ID Here. Which will help Ireasoning and other SNMP manager tools to 
+		recognise the trap information and it will help the SNMP manager tool to decrypt the 
+		trap information. 
+	
+		This ID is only related to trap ID. and this implementaion is only for TRAPv2 specific.
+	*/
+	SNMPNotifyInfo.trapIDVar = SNMP_DEMO_TRAP;
 #endif
 
 
@@ -591,7 +589,6 @@ void SNMPTrapDemo(void)
 		timeLock=TRUE;
 	}
 
-	#if 1
 	if(anaPotNotfyCntr >= trapInfo.Size)
 	{
 		anaPotNotfyCntr = 0;
@@ -599,23 +596,22 @@ void SNMPTrapDemo(void)
 		//analogPotNotify = FALSE;
 		analogPotNotify = TRUE;
 	}
-	#endif
 	
 	if(!analogPotNotify)
 	{
 		//Read POT reading once and send trap to all configured recipient
 		if(potReadLock ==(BYTE)FALSE)
 		{
-			#if defined(__18CXX)
-				// Wait until A/D conversion is done
-				ADCON0bits.GO = 1;
-				while(ADCON0bits.GO);
+#if defined(__18CXX)
+            // Wait until A/D conversion is done
+            ADCON0bits.GO = 1;
+            while(ADCON0bits.GO);
 
-				// Convert 10-bit value into ASCII string
-				analogPotVal.word= (WORD)ADRES;
-			#else
-				analogPotVal.word= (WORD)ADC1BUF0;
-			#endif
+            // Convert 10-bit value into ASCII string
+            analogPotVal.word= (WORD)ADRES;
+#else
+            analogPotVal.word= (WORD)ADC1BUF0;
+#endif
 			
 			//Avoids Reading POT for every iteration unless trap sent to each configured recipients 
 			potReadLock=TRUE; 
@@ -632,60 +628,66 @@ void SNMPTrapDemo(void)
 					gGenericTrapNotification=ENTERPRISE_SPECIFIC;
 					gSetTrapSendFlag = FALSE;
 					retVal = SendNotification(anaPotNotfyCntr, ANALOG_POT0, analogPotVal,targetIndex);
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 					if((gSendTrapSMstate == 0x0) && (retVal == FALSE)) // gSendTrapSMstate == SM_PREPARE
 					{
 						retVal = SendNotification(anaPotNotfyCntr, ANALOG_POT0, analogPotVal,targetIndex);
 					}
-					if((retVal == TRUE) && (targetIndex == (SNMPV3_USM_MAX_USER-1)))
-						anaPotNotfyCntr++;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)                    
+                    if((retVal == TRUE) && (targetIndex == (SNMPV3_USM_MAX_USER-1)))
+                    {
+                        anaPotNotfyCntr++;
+                    }
 					else if(retVal == FALSE)
 #else
 					if(retVal == TRUE)
 						anaPotNotfyCntr++;
 					else 
 #endif						
-					{	
+                    {
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) // to keep tarck of the usr index for SNMPv3
-						userIndex = targetIndex;
+			            userIndex = targetIndex;
 #endif
-						if(maxTryToSendTrap>=MAX_TRY_TO_SEND_TRAP)
-						{
-							anaPotNotfyCntr++;
-							maxTryToSendTrap = 0;
-							return;
-						}
-						maxTryToSendTrap++;
-						return ;
-					}
+                        if((TickGet()- SNMPGetTrapTime())> 2*TICK_SECOND)
+                        {
+                            anaPotNotfyCntr++;
+                            gtrapSMStateUpdate = TRUE;
+                            if(SNMPNotifyInfo.socket != INVALID_UDP_SOCKET)
+                            {
+                                UDPClose(SNMPNotifyInfo.socket);
+                                SNMPNotifyInfo.socket = INVALID_UDP_SOCKET;
+                            }
+                            return;
+                        }
+			            return ;
+                    }
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
-					if(userIndex == SNMPV3_USM_MAX_USER-1)
-						userIndex = 0;					
-				}
+                    if(userIndex == SNMPV3_USM_MAX_USER-1)
+                            userIndex = 0;
+                }
 #endif			
-			}
+		}
 		}
 		else
-			anaPotNotfyCntr++;
+           anaPotNotfyCntr++;
 			
 	}
 
 
 	if(buttonPushNotfyCntr==trapInfo.Size)
 	{
-		buttonPushNotfyCntr = 0;
-		buttonLock=FALSE;
-		buttonPushNotify = FALSE;
+        buttonPushNotfyCntr = 0;
+        buttonLock=FALSE;
+        buttonPushNotify = FALSE;
 	}
 
 
 	if(buttonLock == (BYTE)FALSE)
 	{
-		if(BUTTON2_IO == 0u)
-		{
-			buttonPushNotify = TRUE;
-			buttonLock =TRUE;
-		}
+        if(BUTTON2_IO == 0u)
+        {
+            buttonPushNotify = TRUE;
+            buttonLock =TRUE;
+        }
 	}
 
 	if(buttonPushNotify)
@@ -701,11 +703,11 @@ void SNMPTrapDemo(void)
 				gGenericTrapNotification=ENTERPRISE_SPECIFIC;
 				gSetTrapSendFlag = FALSE;
 				retVal =  SendNotification(buttonPushNotfyCntr, PUSH_BUTTON, buttonPushval,targetIndex);
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 				if((gSendTrapSMstate == 0x0) && (retVal == FALSE)) // gSendTrapSMstate == SM_PREPARE
 				{
 					retVal = SendNotification(buttonPushNotfyCntr, PUSH_BUTTON, buttonPushval,targetIndex);
 				}
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 				if((retVal==TRUE)&& (targetIndex == (SNMPV3_USM_MAX_USER-1)))
 #else
 				if(retVal==TRUE)
@@ -756,28 +758,26 @@ void SNMPTrapDemo(void)
 				gGenericTrapNotification=ENTERPRISE_SPECIFIC;
 				gSetTrapSendFlag = FALSE;
 				retVal =  SendNotification(trapIndex, TRAP_COMMUNITY, asciistrVal,targetIndex);
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 				if((gSendTrapSMstate == 0x0) && (retVal == FALSE)) // gSendTrapSMstate == SM_PREPARE
 				{
 					retVal = SendNotification(trapIndex, TRAP_COMMUNITY, asciistrVal,targetIndex);
 				}
-				if((retVal==TRUE)&& (targetIndex == (SNMPV3_USM_MAX_USER-1)))					
-					trapIndex++;
-				else if(retVal == FALSE)
-#else				
 				if(retVal == FALSE)
-#endif					
 				{
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) // to keep tarck of the usr index for SNMPv3
 					userIndex2 = targetIndex;
 #endif				
-					if(maxTryToSendTrap1 >= MAX_TRY_TO_SEND_TRAP)
-					{
-						trapIndex++;
-						maxTryToSendTrap1 = 0;
-						return;
-					}
-					maxTryToSendTrap1++;
+                    if((TickGet()- SNMPGetTrapTime())> 5*TICK_SECOND)
+                    {
+                        trapIndex++;
+                        gtrapSMStateUpdate = TRUE;
+                        if(SNMPNotifyInfo.socket != INVALID_UDP_SOCKET)
+                        {
+                            UDPClose(SNMPNotifyInfo.socket);
+                            SNMPNotifyInfo.socket = INVALID_UDP_SOCKET;
+                        }
+                        return;
+                    }
 					return ;
 				}
 					
@@ -803,12 +803,11 @@ void SNMPTrapDemo(void)
 		timeLock=FALSE;
 		gSpecificTrapNotification=VENDOR_TRAP_DEFAULT;
 		gGenericTrapNotification=ENTERPRISE_SPECIFIC;
-		trapIndex = 0;
-		maxTryToSendTrap = 0;
-		maxTryToSendTrap1 = 0;
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+                if(trapIndex>=TRAP_TABLE_SIZE)
+                {
+                    trapIndex = 0;
+                }
 		gSendTrapSMstate = 0;	
-#endif
 		return;
 	}
 

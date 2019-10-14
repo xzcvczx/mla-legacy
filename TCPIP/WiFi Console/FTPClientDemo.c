@@ -1,16 +1,47 @@
-/*********************************************************************
+/******************************************************************************
 
- *********************************************************************
- * FileName:        AutoUpdate_TCPClient.c
- * 
- ********************************************************************/
+ FileName:        FTPClientDemo.c
+ Company:       Microchip Technology, Inc.
+
+ Software License Agreement
+
+ Copyright (C) 2002-2012 Microchip Technology Inc.  All rights reserved.
+
+ Microchip licenses to you the right to use, modify, copy, and distribute:
+ (i)  the Software when embedded on a Microchip microcontroller or digital 
+      signal controller product ("Device") which is integrated into 
+      Licensee's product; or
+ (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+      ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
+
+ You should refer to the license agreement accompanying this Software for 
+ additional information regarding your rights and obligations.
+
+ THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+ NON-INFRINGEMENT. IN NO EVENT SHALL MICROCHIP BE LIABLE FOR ANY INCIDENTAL,
+ SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST
+ OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS BY
+ THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), ANY CLAIMS
+ FOR INDEMNITY OR CONTRIBUTION, OR OTHER SIMILAR COSTS, WHETHER ASSERTED ON
+ THE BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR
+ OTHERWISE.
+
+******************************************************************************/
 
 #include "TCPIPConfig.h"
-
-
 #include "TCPIP Stack/TCPIP.h"
-#ifdef STACK_USE_FTP_CLIENT
 
+//
+// This file is used in FTP Client MRF24WG RF transceiver firmware update.
+// MRF24WG0M RTP RF Transceiver FW is 0x3107  ( a2patch_3107_1029.bin)
+//
+
+#ifdef STACK_USE_FTP_CLIENT
+// Defines the server to be accessed for this application
 static BYTE ServerName[] =	"ftp.microchip.com";
 
 // Defines the port to be accessed for this application
@@ -19,7 +50,9 @@ static WORD Port_FtpCltData = 59136;
 
 static BYTE UserName[]="mrfadmin";
 static BYTE PassWord[]="mchp!0918";
-static BYTE FileName[]="1.txt";
+
+// Enter RF transceiver FW file name here. Case-sensitive.
+static BYTE FileName[]="a2patch_3107_1029.bin";
 
 static void AU_print_string(UINT8 *buf,UINT8 length)
 {

@@ -3,7 +3,8 @@
  *  Main Application Entry Point and TCP/IP Stack Demo
  *  Module for Microchip TCP/IP Stack
  *   -Demonstrates how to call and use the Microchip TCP/IP stack
- *   -Reference: Microchip TCP/IP Stack Help (TCPIP Stack Help.chm)
+ *   -Reference: Microchip TCP/IP Stack Help (TCPIP Stack Help.chm)1150
+
  *
  *********************************************************************
  * FileName:        MainDemo.c
@@ -1202,7 +1203,7 @@ static void InitAppConfig(void)
     
         #if defined(WF_CS_TRIS)
             // Load the default SSID Name
-            WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME) <= sizeof(AppConfig.MySSID));
+            WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME)-1 <= sizeof(AppConfig.MySSID));
             memcpypgm2ram(AppConfig.MySSID, (ROM void*)MY_DEFAULT_SSID_NAME, sizeof(MY_DEFAULT_SSID_NAME));
             AppConfig.SsidLength = sizeof(MY_DEFAULT_SSID_NAME) - 1;
     

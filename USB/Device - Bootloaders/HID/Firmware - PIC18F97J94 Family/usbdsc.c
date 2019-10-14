@@ -188,7 +188,7 @@ rom USB_DEV_DSC device_dsc=
     EP0_BUFF_SIZE,          // Max packet size for EP0, see usbcfg.h
     0x04D8,                 // Vendor ID: Microchip
     0x003C,                 // Product ID: HID Bootloader
-    0x0100,                 // Device release number in BCD format
+    0x0101,                 // Device release number in BCD format
     0x01,                   // Manufacturer string index
     0x02,                   // Product string index
     0x00,                   // Device serial number string index
@@ -250,7 +250,6 @@ rom struct{byte report[HID_RPT01_SIZE];}hid_rpt01={
 //  follow, but encoded (0=0, 1=1, 2=2, 3=4 bytes).
 //  bSize should match number of bytes that follow, or REPORT descriptor parser won't work.  The bytes
 //  that follow in each item line are data bytes
-
 {
     0x06, 0x00, 0xFF,       // Usage Page = 0xFF00 (Vendor Defined Page 1)
     0x09, 0x01,             // Usage (Vendor Usage 1)

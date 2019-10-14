@@ -24,13 +24,13 @@ LIBPATH .
 
 #FI
 
+CODEPAGE   NAME=bootloader START=0x0               END=0xFFF          PROTECTED
+CODEPAGE   NAME=bootloadvectors  START=0x1000      END=0x101D	      PROTECTED
 #IFDEF _DEBUGCODESTART
-  CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED		   
-  CODEPAGE   NAME=page       START=0x1000         END=_CODEEND
+  CODEPAGE   NAME=page       START=0x101E            END=_CODEEND
   CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND        PROTECTED
 #ELSE
-  CODEPAGE   NAME=bootloader START=0x0               END=0xFFF        PROTECTED		   
-  CODEPAGE   NAME=page       START=0x1000            END=0x7FFF
+  CODEPAGE   NAME=page       START=0x101E            END=0x7FFF
 #FI
 
 CODEPAGE   NAME=idlocs     START=0x200000          END=0x200007       PROTECTED
@@ -70,3 +70,6 @@ ACCESSBANK NAME=accesssfr  START=0xF60             END=0xFFF          PROTECTED
     STACK SIZE=0x100 RAM=gpr3
   #FI
 #FI
+
+
+SECTION    NAME=USB_VARS   RAM=gpr4

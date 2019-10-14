@@ -6,13 +6,13 @@
  * FileName:        main.c
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.42+
+ * Compiler:        C18 3.45+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the "Company") for its PIC® Microcontroller is intended and
+ * (the "Company") for its PIC(R) Microcontroller is intended and
  * supplied to you, the Company's customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
@@ -31,17 +31,21 @@
  *
  * File Version  Date		Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 1.0			 06/19/2008	Original Version.  Adapted from 
- *							MCHPFSUSB v2.1 HID Bootloader
- *							for PIC18F87J50 Family devices.
+ * 1.0           06/19/2008 Original Version.  Adapted from
+ *                          MCHPFSUSB v2.1 HID Bootloader
+ *                          for PIC18F87J50 Family devices.
  * 2.9f          06/26/2012 Added PIC18F45K50 Family support.
+ * 2.9j          06/10/2013 Added software entry point into bootloader
+ *                          at 0x001C.  Some other enhancements.
+ *                          Changed LED blink pattern to use only 1 LED and
+ *                          consume less code space.  Added #define option to
+ *                          disable LED blinking and I/O pushbutton entry
+ *                          altogether.  See usbcfg.h settings.
  ********************************************************************/
 
 /*********************************************************************
-IMPORTANT NOTES: This code is currently configured to work with the
-PIC18F4550 using the PICDEM FS USB Demo Board.  However, this code
-can be readily adapted for use with the both the F and LF versions of
-the following devices:
+IMPORTANT NOTES: This code can be readily adapted for use with the 
+both the F and LF versions of the following devices:
 
 PIC18F4553/4458/2553/2458
 PIC18F4550/4455/2550/2455
@@ -49,34 +53,109 @@ PIC18F4450/2450
 PIC18F14K50/13K50
 PIC18F45K50/25K50/24K50
 
+However, the default device that is currently selected in the project
+may not be the device you are interested.  To change the device:
 
-To do so, replace the linker script with an appropriate version, and
+Replace the linker script with an appropriate version, and
 click "Configure --> Select Device" and select the proper
 microcontroller.  Also double check to verify that the io_cfg.h and
 usbcfg.h are properly configured to match your desired application
 platform.
 
-Verify that the coniguration bits are set correctly for the intended
+Verify that the configuration bits are set correctly for the intended
 target application, and fix any build errors that result from either
 the #error directives, or due to I/O pin count mismatch issues (such
 as when using a 28-pin device, but without making sufficient changes
 to the io_cfg.h file)
 
 This project needs to be built with the C18 compiler optimizations
-enabled, or the total code size will be too large to fit within the
-program memory range 0x000-0xFFF.  The default linker script included
+enabled, and using the Default storage class "Static" or the total
+code size will be too large to fit within the program memory
+range 0x000-0xFFF.  The default linker script included
 in the project has this range reserved for the use by the bootloader,
 but marks the rest of program memory as "PROTECTED".  If you try to
 build this project with the compiler optimizations turned off, or
 you try to modify some of this code, but add too much code to fit
 within the 0x000-0xFFF region, a linker error like that below may occur:
 
-Error - section '.code_main.o' can not fit the section. Section '.code_main.o' length=0x00000082
+Error - section '.code' can not fit the section. Section '.code' length=0x00000020
 To fix this error, either optimize the program to fit within 0x000-0xFFF
-(such as by turning on compiler optimizations), or modify the linker
+(such as by turning on all compiler optimizations, and making sure the
+"default storage class" is set to "Static"), or modify the linker
 and vector remapping (as well as the application projects) to allow this
 bootloader to use more program memory.
-*********************************************************************/
+
+
+
+----------------------Bootloader Entry------------------------------------------
+Entry into this bootloader firmware can be done by either of two possible
+ways:
+
+1.  I/O pin check at power up/after any reset.  and/or:
+2.  Software entry via absolute jump to address 0x001C.
+
+The I/O pin check method is the most rugged, since it does not require the 
+application firmware image to be intact (at all) to get into the bootloader
+mode.  However, software entry is also possible and may be more convenient
+in applications that do not have user exposed pushbuttons available.
+
+When the "application" image is executing, it may optionally jump into
+bootloader mode, by executing a _asm goto 0x001C _endasm instruction.  
+Before doing so however, the firwmare should configure the current
+clock settings to be compatible with USB module operation, in they
+are not already.  Once the goto 0x001C has been executed the USB device 
+will detach from the USB bus (if it was previously attached), and will 
+re-enumerate as a HID class device with a new VID/PID (adjustable via 
+usb_dsc.c settings), which can communicate with the associated
+USB host software that loads and programs the new .hex file.
+
+
+--------------------------------------------------------------------------------
+Anytime that an application implements flash self erase/write capability, 
+special care should be taken to make sure that the microcontroller is operated 
+within all datasheet ratings, especially those associated with voltage versus 
+frequency.
+
+Operating the device at too high of a frequency (for a given voltage, ex: by
+operating at 48MHz at 2.1V, while the device datasheet indicates some higher
+value such as 2.35V+ is requred) can cause unexpected code operation.  This
+could potentially allow inadvertent execution of bootloader or other self
+erase/write routines, causing corruption of the flash memory of the application.
+
+To avoid this, all applications that implement self erase/write capability 
+should make sure to prevent execution during overclocked/undervolted conditions.
+
+For this reason, enabling and using the microcontroller hardware Brown-out-Reset 
+feature is particularly recommended for applications using a bootloader.  If 
+BOR is not used, or the trip threshold is too low for the intended application 
+frequency, it is suggested to add extra code in the application to detect low 
+voltage conditions, and to intentionally clock switch to a lower frequency 
+(or put the device to sleep) during the low voltage condition.  Hardware
+modules such as the ADC, comparators, or the HLVD (high/low voltage detect)
+can often be used for this purpose.
+
+
+--------------------------------------------------------------------------------
+This bootloader supports reprogramming of the microcontroller configuration bits,
+however, it is strongly recommended never to do so, unless absolutely necessary.
+Reprogramming the config bits is potentially risky, since it requires that the
+new configuration bits be 100% compatible with USB operation (ex: oscillator
+settings, etc.).  If a .hex file with incorrect config bits is programmed
+into this device, it can render the bootloader inoperable.  Additionally,
+unexpected power failure or device detachment during the reprogramming of the
+config bits could result in unknown values getting stored in the config bits,
+which could "brick" the application.
+
+Normally, the application firmware project and this bootloader project should
+be configured to use/set the exact same configuration bit values.  Only one set
+of configuration bits actually exists in the microcontroller, and these values
+must be shared between the bootloader and application firmware.
+*******************************************************************************/
+
+
+
+
+
 
 
 /** I N C L U D E S **********************************************************/
@@ -167,7 +246,6 @@ bootloader to use more program memory.
 		//Add the configuration pragmas here for your hardware platform
 		//#pragma config ... 		= ...
 #elif defined(LOW_PIN_COUNT_USB_DEVELOPMENT_KIT)
-        //14K50
         #if !defined(__18F14K50) && !defined(__18F13K50) && !defined(__18LF14K50) && !defined(__18LF13K50)
             #error Wrong processor selected for the selected demo board.
         #endif
@@ -178,7 +256,7 @@ bootloader to use more program memory.
         #pragma config FCMEN  = OFF
         #pragma config IESO   = OFF
         #pragma config PWRTEN = OFF
-        #pragma config BOREN  = OFF
+        #pragma config BOREN  = ON
         #pragma config BORV   = 30
         #pragma config WDTEN  = OFF
         #pragma config WDTPS  = 32768
@@ -203,35 +281,89 @@ bootloader to use more program memory.
 #endif
 
 /** V A R I A B L E S ********************************************************/
+//NOTE: You must not use initalized variables in this bootloader project.  This
+//firmware project does not rely on the standard C initializer, which is 
+//responsible for setting up initialized variables in RAM.  Therefore, all
+//variables will be non-initialized/random at start up.
 #pragma udata
+unsigned int uint_delay_counter;
+
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
+void UninitializedMain(void);
+void BootMain(void);
 static void InitializeSystem(void);
-void USBTasks(void);
-#if !defined(__18F14K50) && !defined(__18F13K50) && !defined(__18LF14K50) && !defined(__18LF13K50)
+//void USBTasks(void);
+#define USBTasks()  {USBCheckBusStatus(); USBDriverService();}
+void ClearWatchdog(void);
+void DisableUSBandExecuteLongDelay(void);
+void LowVoltageCheck(void);
+
+#ifdef ENABLE_USB_LED_BLINK_STATUS
     void BlinkUSBStatus(void);
 #else
     #define BlinkUSBStatus()
 #endif
 
-/** V E C T O R  R E M A P P I N G *******************************************/
+
+
+//Constants
+#define REMAPPED_APPLICATION_RESET_VECTOR       0x1000
+#define REMAPPED_APPLICATION_HIGH_ISR_VECTOR    0x1008
+#define REMAPPED_APPLICATION_LOW_ISR_VECTOR     0x1018
+#define BOOTLOADER_ABSOLUTE_ENTRY_ADDRESS       0x001C  //Execute a "_asm goto 0x001C _endasm" instruction, if you want to enter the bootloader mode from the application via software
+
+
+//Never comment this out.  If you do, you won't be able to recover if the user
+//unplugs the USB cable (or power is lost) during an erase/program sequence, 
+//unless you rely on the I/O pin check entry method.  The only reason ever to
+//comment this out, is if you are trying to use this bootloader firmware with
+//an old bootloader PC application that does not have knowledge of the v1.01
+//and newer command set (with QUERY_EXTENDED_INFO and SIGN_FLASH commands).
+//However, a better solution in such a case, is to upgrade to use a newer PC
+//application to do the bootloading.
+#define ENABLE_FLASH_SIGNATURE_VERIFICATION     
+
+
+/****** Program memory vectors, constants, and application remapping*********************/
+//Be careful if modifying the below code.  The below code is absolute address sensitive.
+#pragma code _entry_scn=0x000000		//Reset vector is at 0x00.  Device begins executing code from 0x00 after a reset or POR event
+void _entry (void)
+{
+    _asm goto UninitializedMain _endasm
+}
+
+//The hardware high priority interrupt vector.  This bootloader firmware does
+//not use interrupts at all.  If an interrupt occurs, it is due to application
+//mode operation.  Therefore, if an interrupt occurs, we should just jump to 
+//the remapped address (that resides inside hte application image firmware space).
 #pragma code high_vector=0x08
 void interrupt_at_high_vector(void)
 {
-    _asm goto 0x1008 _endasm
+    _asm goto REMAPPED_APPLICATION_HIGH_ISR_VECTOR _endasm
 }
+
+//The hardware high priority interrupt vector
 #pragma code low_vector=0x18
 void interrupt_at_low_vector(void)
 {
-    _asm goto 0x1018 _endasm
+    //Do not change the code in this function.  Doing so will shift the
+    //addresses of things around, which will prevent proper operation.
+    _asm goto REMAPPED_APPLICATION_LOW_ISR_VECTOR _endasm    //This goto is located at 0x0018.  This "goto" instruction takes 4 bytes of prog memory.
+    _asm goto BootMain _endasm  //This goto is located at address 0x001C.  This is the absolute 
+                                //entry vector value for jumping from the app into the bootloader 
+                                //mode via software.  This goto is normally unreachable, 
+                                //unless the application firmware executes an 
+                                //intentional _asm goto 0x001C _endasm ("#asm goto 0x001C #endasm" if using XC8 compiler).
 }
+
 
 
 
 /** D E C L A R A T I O N S **************************************************/
 #pragma code
 /******************************************************************************
- * Function:        void main(void)
+ * Function:        void UninitializedMain(void)
  *
  * PreCondition:    None
  *
@@ -241,58 +373,169 @@ void interrupt_at_low_vector(void)
  *
  * Side Effects:    None
  *
- * Overview:        Main program entry point.
+ * Overview:        This is the first code that executes during boot up of
+ *                  the microcontroller.  This code checks to see if execution
+ *                  should stay in the "bootloader" mode, or if it should jump
+ *                  into the "application" (non-bootloder) execution mode.
+ *                  No other unrelated code should be added to this function.
  *
- * Note:            None
+ * Note:            THIS FUNCTION EXECUTES PRIOR TO INITIALIZATION OF THE C
+ *                  STACK.  NO C INITIALIZATION OF STATIC VARIABLES OR RESOURCES
+ *                  WILL OCCUR, PRIOR TO EXECUTING THIS FUNCTION.  THEREFORE, 
+ *                  THE CODE IN THIS FUNCTION MUST NOT CALL OTHER FUNCTIONS OR
+ *                  PERFORM ANY OPERATIONS THAT WILL REQUIRE C INITIALIZED
+ *                  BEHAVIOR.
  *****************************************************************************/
-void main(void)
+void UninitializedMain(void)
 {   
-    //Need to make sure RB4 can be used as a digital input pin.
-    #if defined(PIC18F4550_PICDEM_FS_USB_K50)
-        unsigned char ANSELBSave;
-        ANSELBSave = ANSELB;
-        ANSELBbits.ANSB4 = 0;   //Configure RB4/AN11 for digital input capability
-    #else
-        ADCON1 = 0x0F;			//Need to make sure RB4 can be used as a digital input pin
-    #endif
-
- 	//	TRISBbits.TRISB4 = 1;	//No need to explicitly do this since reset state is = 1 already.
+    //Assuming the I/O pin check entry method is enabled, check the I/O pin value
+    //to see if we should stay in bootloader mode, or jump to normal applicaiton 
+    //execution mode.
+	#ifdef ENABLE_IO_PIN_CHECK_BOOTLOADER_ENTRY
+        //Need to make sure the I/O pin is configured for digital mode so we
+        //can sense the digital level on the input pin.
+        mInitSwitch2();
+        
+        //Check Bootload Mode Entry Condition from the I/O pin (ex: place a  
+        //pushbutton and pull up resistor on the pin)
+    	if(sw2 == 1)	
+    	{
+        	//If we get to here, the user is not pressing the pushbutton.  We
+        	//should default to jumping into application run mode in this case.
+        	//Restore default "reset" value of registers we may have modified temporarily.
+        	mDeInitSwitch2();
     
-    //Check Bootload Mode Entry Condition
-	if(sw2 == 1)	//This example uses the sw2 I/O pin to determine if the device should enter the bootloader, or the main application code
-	{
-    	//Restore default "reset" value of registers we may have modified temporarily.
-        #if defined(PIC18F4550_PICDEM_FS_USB_K50)
-            ANSELB = ANSELBSave;
-        #else
-            ADCON1 = 0x07;		//Restore "reset value" of the ADCON1 register
-		#endif
-		_asm
-		goto 0x1000			//If the user is not trying to enter the bootloader, go straight to the main application remapped "reset" vector.
-		_endasm
-	}
+            //Before going to application image however, make sure the image
+            //is properly signed and is intact.
+    		goto DoFlashSignatureCheck;
+    	}
+    	else
+    	{
+        	//User is pressing the pushbutton.  We should stay in bootloader mode
+            _asm goto BootMain _endasm            	
+        }   	
+	#endif //#ifdef ENABLE_IO_PIN_CHECK_BOOTLOADER_ENTRY    
 
-    //We have decided to stay in this bootloader firwmare project.  Initialize
-    //this firmware and the USB module.
-    InitializeSystem();
+DoFlashSignatureCheck:    
+    //Check if the application region flash signature is valid
+    #ifdef ENABLE_FLASH_SIGNATURE_VERIFICATION
+        if(*(rom unsigned int*)APP_SIGNATURE_ADDRESS == APP_SIGNATURE_VALUE)
+        {
+            //The flash signature was valid, implying the previous 
+            //erase/program/verify operation was a success.
+    
+            //Go ahead and jump out of bootloader mode into the application run mode
+    		_asm goto REMAPPED_APPLICATION_RESET_VECTOR _endasm	
+        }    
+        //else the application image is missing or corrupt.  In this case, we
+        //need to stay in the bootloader mode, so the user has the ability to 
+        //try (again) to re-program a valid application image into the device.
+    
+    	//We should stay in bootloader mode
+        _asm goto BootMain _endasm
+    #else
+    
+        //Ideally we shouldn't get here.  It is not recommended for the user to 
+        //disable both the I/O pin check and flash signature checking 
+        //simultaneously.  Doing so would make the application non-recoverable
+        //in the event of a failed bootload attempt (ex: due to power loss).
+        _asm goto REMAPPED_APPLICATION_RESET_VECTOR _endasm	
+
+    #endif
+}//end UninitializedMain
+
+
+
+/******************************************************************************
+ * Function:        void UninitializedMain(void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        This is the main function for this bootloader mode firmware.
+ *                  if execution gets to this function, it is assumed that we
+ *                  want to stay in bootloader mode for now.
+ *
+ * Note:            If adding code to this function, make sure to add it only
+ *                  after the C initializer like code at the top of this function.
+ *****************************************************************************/
+void BootMain(void)
+{
+	//NOTE: The c018.o file is not included in the linker script for this project.
+	//The C initialization code in the c018.c (comes with C18 compiler in the src directory)
+	//file is instead modified and included here manually.  This is done so as to provide
+	//a more convenient entry method into the bootloader firmware.  Ordinarily the _entry_scn
+	//program code section starts at 0x00 and is created by the code of c018.o.  However,
+	//the linker will not work if there is more than one section of code trying to occupy 0x00.
+	//Therefore, must not use the c018.o code, must instead manually include the useful code
+	//here instead.
+
+    //Make sure interrupts are disabled for this code (could still be on,
+    //if the application firmware jumped into the bootloader via software methods)
+    INTCON = 0x00;  
+
+    // Initialize the C stack pointer, and other compiler managed items as normally done in the c018.c file.
+	_asm
+    lfsr 1, _stack
+    lfsr 2, _stack
+    clrf TBLPTRU, 0 
+	_endasm
+
+    //Clear the stack pointer, in case the user application jumped into 
+    //bootloader mode with excessive junk on the call stack
+    STKPTR = 0x00;  
+
+	// End of the important parts of the C initializer.  This bootloader firmware does not use
+	// any C initialized user variables (idata memory sections).  Therefore, the above is all
+	// the initialization that is required.
+
+
+    //Check if the USB module is already enabled.  If so, disable it and wait 
+    //~100ms+ (>1 second recommended if CDC application firmware on XP), to 
+    //ensure that the host has a chance to see and process the USB device detach 
+    //event.
+    if(UCONbits.USBEN == 1)
+    {
+        //USB module was already on.  This is likely because the user applicaiton
+        //firmware jumped into this bootloader firmware using the absolute
+        //software entry method, without first turning off the USB module
+        DisableUSBandExecuteLongDelay(); 
+    }    
+
+
+    //Call other initialization code and (re)enable the USB module
+    InitializeSystem();		//Some USB, I/O pins, and other initialization
     
     //Execute main loop
     while(1)
     {
-		ClrWdt();	
-	    USBTasks();         					// Need to call USBTasks() periodically
-	    										// it handles SETUP packets needed for enumeration
-
-		BlinkUSBStatus();
+		ClrWdt();
 		
+		//Need to call USBTasks() periodically.  This function takes care of 
+		//processing non-USB application related USB packets (ex: "Chapter 9" 
+		//packets associated with USB enumeration)
+		USBTasks();             	    
+
+		BlinkUSBStatus();   //When enabled, blinks LEDs on the board, based on USB bus state
+		
+		LowVoltageCheck();  //Regularly monitor voltage to make sure it is sufficient
+		                    //for safe operation at full frequency and for erase/write
+		                    //operations.		
+		
+		//Checks for and processes application related USB packets (assuming the
+		//USB bus is in the CONFIGURED_STATE, which is the only state where
+		//the host is allowed to send application related USB packets to the device.
 	    if((usb_device_state == CONFIGURED_STATE) && (UCONbits.SUSPND != 1))
 	    {
  	       ProcessIO();   // This is where all the actual bootloader related data transfer/self programming takes place
- 	    }				  // see ProcessIO() function in the Boot87J50Family.c file.
-    }//end while
-
-}//end main
-
+ 	    }				  // see ProcessIO() function in the BootPIC[xxxx].c file.
+    }//end while    
+}    
 
 
 /******************************************************************************
@@ -335,7 +578,7 @@ static void InitializeSystem(void)
 //	sense feature by making sure "USE_USB_BUS_SENSE_IO" has been defined in the
 //	usbcfg.h file.    
     #if defined(USE_USB_BUS_SENSE_IO)
-    tris_usb_bus_sense = INPUT_PIN; // See io_cfg.h
+        tris_usb_bus_sense = INPUT_PIN; // See io_cfg.h
     #endif
 
 //	If the host PC sends a GetStatus (device) request, the firmware must respond
@@ -351,7 +594,7 @@ static void InitializeSystem(void)
 //	has been defined in usbcfg.h, and that an appropriate I/O pin has been mapped
 //	to it in io_cfg.h.    
     #if defined(USE_SELF_POWER_SENSE_IO)
-    tris_self_power = INPUT_PIN;
+        tris_self_power = INPUT_PIN;
     #endif
     
     //Initialize oscillator settings compatible with USB operation.  Note,
@@ -361,7 +604,8 @@ static void InitializeSystem(void)
         OSCCON = 0x70;  //Switch to 16MHz HFINTOSC
         OSCCON2 = 0x10; //Enable PLL, SOSC, PRI OSC drivers turned off
         while(OSCCON2bits.PLLRDY != 1);   //Wait for PLL lock
-        *((unsigned char*)0xFB5) = 0x90;  //Enable active clock tuning for USB operation
+        ACTCON = 0x90;  //Enable active clock tuning for USB operation
+        //*((unsigned char*)0xFB5) = 0x90;  //Enable active clock tuning for USB operation
     #endif
     
     
@@ -369,32 +613,25 @@ static void InitializeSystem(void)
     
     UserInit();                     // See user.c & .h
 
+    mInitAllLEDs();			//Init them off.
+
 }//end InitializeSystem
 
-/******************************************************************************
- * Function:        void USBTasks(void)
- *
- * PreCondition:    InitializeSystem has been called.
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        Service loop for USB tasks.
- *
- * Note:            None
- *****************************************************************************/
-void USBTasks(void)
-{
-    /*
-     * Servicing Hardware
-     */
-    USBCheckBusStatus();                    // Must use polling method
-    USBDriverService();              	    // Interrupt or polling method
 
-}// end USBTasks
+//Check to make sure the VDD is sufficient for safe bootloader operation.
+//If the voltage is insufficient, code should be added to the below
+//function that clock switches to a low frequency internal oscillator and
+//puts the device to sleep, so as to avoid accidental operation under
+//"overclocked" (for a given voltage) conditions.  If BOR is enabled and is
+//set at a high enough level to trip before reaching a level insufficient for
+//maximum frequency operation, it may not be necessary to add additional checks
+//and the below warning can simply be commented out.
+void LowVoltageCheck(void)
+{
+    #warning "Recommended to implement code here to check VDD.  Voltage detection can be done using ADC, HVLD, comparators, or other means."
+}    
+
+    
 
 
 /******************************************************************************
@@ -415,37 +652,38 @@ void USBTasks(void)
  *                  usb_device_state is declared in usbmmap.c and is modified
  *                  in usbdrv.c, usbctrltrf.c, and usb9.c
  *****************************************************************************/
-#if !defined(__18F14K50) && !defined(__18F13K50) && !defined(__18LF14K50) && !defined(__18LF13K50)
+#ifdef ENABLE_USB_LED_BLINK_STATUS
 void BlinkUSBStatus(void)
 {
-    static word led_count=0;
+    static unsigned int led_count = 0;
 
-    if(led_count == 0)led_count = 10000U;
     led_count--;
-
-    #define mLED_Both_Off()         {mLED_1_Off();mLED_2_Off();}
-    #define mLED_Both_On()          {mLED_1_On();mLED_2_On();}
-    #define mLED_Only_1_On()        {mLED_1_On();mLED_2_Off();}
-    #define mLED_Only_2_On()        {mLED_1_Off();mLED_2_On();}
-
-	 if(usb_device_state < CONFIGURED_STATE)
-	 {
-		 mLED_Only_1_On();
-	 } 
-	 else
-     {
-         if(led_count==0)
-         {
-             mLED_1_Toggle();
-             mLED_2 = !mLED_1;       // Alternate blink
-         }//end if
-     }//end if(...)
+    if(led_count == 0)
+    {
+        led_count = 19968U;  //Chosen instead of 20000, so that LSB is = 0x00 (more efficient to initialize)
+        if(usb_device_state < CONFIGURED_STATE)
+        {
+            mLED_1_On();
+        } 
+        else
+        {
+            mLED_1_Toggle();
+        }    
+    }    
 }//end BlinkUSBStatus
-#endif
+#endif //#ifdef ENABLE_USB_LED_BLINK_STATUS
 
 
 
 
-
-
+//Placeholder code at address 0x1000 (the start of the non-bootloader firmware space)
+//This gets overwritten when a real hex file gets programmed by the bootloader.
+//If however no hex file has been programmed (yet), might as well stay in the 
+//bootloader firmware, even if the pushbutton or software entry attempt has not 
+//been made yet, since the device is still blank.
+#pragma code user_app_vector = REMAPPED_APPLICATION_RESET_VECTOR	
+void userApp(void)
+{
+	_asm goto BOOTLOADER_ABSOLUTE_ENTRY_ADDRESS _endasm 	//Goes into the BootMain() section which force bootloader mode operation
+}
 /** EOF main.c ***************************************************************/

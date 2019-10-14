@@ -97,6 +97,10 @@ UINT8 g_scan_done = 0;        // WF_PRESCAN   This will be set wheneven event sc
 UINT8 g_prescan_waiting = 1;  // WF_PRESCAN   This is used only to allow POR prescan once.
 #endif
 
+#if defined(WF_PRE_SCAN_IN_ADHOC)
+extern void WFGetScanResults(void);
+extern UINT8 g_prescan_adhoc_done;
+#endif
 // Private helper functions.
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
@@ -378,9 +382,6 @@ int main(void)
 
     #if defined(WF_CONSOLE)
     WFConsoleInit();
-        #if !defined(STACK_USE_EZ_CONFIG)
-        IperfAppCall();
-        #endif
     #endif
 
     // Now that all items are initialized, begin the co-operative
@@ -414,6 +415,14 @@ int main(void)
            }
         }
         #endif // (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)   
+
+        #if defined(WF_PRE_SCAN_IN_ADHOC)
+        if(g_prescan_adhoc_done)
+        {
+            WFGetScanResults();
+            g_prescan_adhoc_done = 0;
+        }
+        #endif
 
         #if defined (EZ_CONFIG_STORE)
         // Hold button3 for 4 seconds to reset to defaults.
@@ -495,9 +504,6 @@ int main(void)
 
         #if defined(WF_CONSOLE)
         WFConsoleProcess();
-            #if !defined(STACK_USE_EZ_CONFIG)
-            IperfAppCall();
-            #endif
         WFConsoleProcessEpilogue();
         #endif
 
@@ -1123,8 +1129,10 @@ static void InitAppConfig(void)
 
 #if MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP
         // SoftAP on certain setups with IP 192.168.1.1 has problem with DHCP client assigning new IP address on redirection.
-        // 192.168.1.1 is a common IP address with most APs. This is still under investigation.
-        // For now, assign this as 192.168.1.3
+        // 192.168.1.1 is a common IP address with most APs. For now, assign this as 192.168.1.3
+        // Conflict arises when there are 2 active DHCP servers in the same network (i.e. AP DHCP server and MRF24W EasyConfig DHCP Server).
+        // When network redirection is executed, the TCPIP SW may still have the device DHCP server still active. 
+        // This may require change in TCPIP SW to be able to disable the local DHCP server after network redirection.
         AppConfig.MyIPAddr.Val = 192ul | 168ul<<8ul | 1ul<<16ul | 3ul<<24ul;
         AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
         AppConfig.MyMask.Val = 255ul | 255ul<<8ul | 0ul<<16ul | 0ul<<24ul;
@@ -1191,7 +1199,8 @@ static void InitAppConfig(void)
 
         #if defined(WF_CS_TRIS)
             // Load the default SSID Name
-            WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME) <= sizeof(AppConfig.MySSID));
+
+            WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME)-1 <= sizeof(AppConfig.MySSID)); 
             memcpypgm2ram(AppConfig.MySSID, (ROM void*)MY_DEFAULT_SSID_NAME, sizeof(MY_DEFAULT_SSID_NAME));
             AppConfig.SsidLength = sizeof(MY_DEFAULT_SSID_NAME) - 1;
             AppConfig.SecurityMode = MY_DEFAULT_WIFI_SECURITY_MODE;

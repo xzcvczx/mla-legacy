@@ -140,8 +140,11 @@
 *
 * SoftAP's default IP is 192.168.1.3 and its Network Mask is 255.255.0.0
 * SoftAP on certain setups with IP adress 192.168.1.1 has problem with DHCP client assigning new IP address on redirection.
-* 192.168.1.1 is a common IP address with most APs. This is still under investigation.
-* For now, assign this as 192.168.1.3
+* 192.168.1.1 is a common IP address with most APs. For now, assign this as 192.168.1.3
+* Reason:
+*    Conflict arises when there are 2 active DHCP servers in the same network (i.e. AP DHCP server and MRF24W EasyConfig DHCP Server).
+*    When network redirection is executed, the TCPIP SW may still have the device DHCP server still active. 
+*    This may require change in TCPIP SW to be able to disable the local DHCP server after network redirection.
 *
 * SoftAP has support for ZeroConf/mDNS. Seach for keyword SOFTAP_ZEROCONF_SUPPORT.
 *
@@ -184,7 +187,9 @@
 #define EZ_CONFIG_SCAN
 #define EZ_CONFIG_STALL
 #define EZ_CONFIG_STORE
-
+#if MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC
+#define WF_PRE_SCAN_IN_ADHOC
+#endif
 
 /* Warning !!! Please note that :
 * RF Module FW has a built-in connection manager, and it is enabled by default.

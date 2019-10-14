@@ -1,1 +1,0 @@
-The application in this folder was build with QT, an open source cross-platform enviornment.  The license information for QT and its components can be found at http://qt.nokia.com/products/licensing.

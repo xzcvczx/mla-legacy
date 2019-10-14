@@ -62,8 +62,9 @@
 #include "TCPIP Stack/TCPIP.h"
 
 /*
-* The mobile application, named "OpenWiFiFog", is available for Android devices (version 4.0 or the later) in Google Play Store, 
-* and iOS devices (iPhone/iPod-touch for version 6.0 or the later) in Apple App store. The functionality is basically access I/Os of
+* The mobile application is available for Android devices (version 4.0 or the later) in Google Play Store, 
+* and iOS devices (iPhone/iPod-touch for version 6.0 or the later) in Apple App store. 
+* For the app names, please refer to the release note. The functionality is basically access I/Os of
 * Explorer16 evalution board. Those I/Os are specifically :
 * A) read temperature 
 * B) read potentiometer

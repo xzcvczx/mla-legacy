@@ -107,8 +107,8 @@
     #define mLED_4_Toggle()     
     
     /** SWITCH *********************************************************/
-    #define mInitSwitch2()      TRISDbits.TRISD6=1;
-    #define mInitSwitch3()      TRISDbits.TRISD7=1;
+    #define mInitSwitch2()      {TRISDbits.TRISD6=1;CNPUEbits.CNPUE15=1;}
+    #define mInitSwitch3()      {TRISDbits.TRISD7=1;CNPUEbits.CNPUE16=1;}
     #define mInitAllSwitches()  mInitSwitch2();mInitSwitch3();
     #define sw2                 PORTDbits.RD6
     #define sw3                 PORTDbits.RD7

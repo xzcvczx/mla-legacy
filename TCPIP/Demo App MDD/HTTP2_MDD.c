@@ -411,7 +411,7 @@ static void HTTPProcess(void)
 	BYTE * dummyPtr=NULL;
 	BYTE * ptr = NULL;
 	BYTE * tempPtr=NULL;
-	BYTE dummyCntr;
+	BYTE dummyCntr=0;
 	signed char chdirRetVal;
 #endif
 

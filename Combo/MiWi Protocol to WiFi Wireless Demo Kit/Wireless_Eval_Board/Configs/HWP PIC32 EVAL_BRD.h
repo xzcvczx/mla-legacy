@@ -292,7 +292,7 @@
 #define putsUART(a)			    Nop()
 #define getcUART()				getcUART2()
 #define putcUART(a)				do{while(BusyUART()); WriteUART(a); while(BusyUART()); }while(0)
-#define putrsUART(a)			putrsUART2(a)
+#define putrsUART(a)			Nop()
 
 //#define UARTTX_TRIS			(TRISFbits.TRISF5)
 //#define UARTTX_IO			(PORTFbits.RF5)

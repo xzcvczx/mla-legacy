@@ -792,7 +792,17 @@ void HTTPPrint_name(void)
 {
     if (bssDescIsValid)
     {
-        TCPPutString(sktHTTP, bssDesc.ssid);
+        //TCPPutString(sktHTTP, bssDesc.ssid);
+        if(strlen((const char*)bssDesc.ssid)<32)
+            TCPPutString(sktHTTP, bssDesc.ssid);
+        else
+        {
+            unsigned char buf_tmp[33];
+            int i;
+            for(i=0;i<32;i++) buf_tmp[i] = bssDesc.ssid[i];
+            buf_tmp[32] = 0;
+            TCPPutString(sktHTTP, buf_tmp);
+        }
     }
     else
     {

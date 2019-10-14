@@ -1,5 +1,8 @@
 // File: BootModified.18f13k50_g.lkr
-// Modified linker script for the PIC18F13K50 processor to be used with the USB HID Bootloader firmware.
+// Modified linker script for the PIC18F13K50 processor to be used with the USB 
+// HID Bootloader firmware.  This linker script should NOT be used with application
+// projects that are intended to be programmed by the bootloader.  For application
+// project linker scripts, see the "Linker files for applications" directory.
 
 #DEFINE _CODEEND _DEBUGCODESTART - 1
 #DEFINE _CEND _CODEEND + _DEBUGCODELEN
@@ -10,20 +13,19 @@ LIBPATH .
 
 #IFDEF _CRUNTIME
   #IFDEF _EXTENDEDMODE
-    FILES c018i_e.o
+    //FILES c018_e.o   //Not using default C initializer.  Use manual initialization code.
     FILES clib_e.lib
     FILES p18F13K50_e.lib
 
   #ELSE
-    FILES c018i.o
+    //FILES c018.o	//Not using default C initializer.  Use manual initialization code.
     FILES clib.lib
     FILES p18F13K50.lib
   #FI
 
 #FI
 
-  CODEPAGE   NAME=vectors    START=0x0               END=0x1F           PROTECTED
-  CODEPAGE   NAME=BootPage   START=0x20              END=0xFFF
+  CODEPAGE   NAME=BootPage   START=0x0000            END=0xFFF
 #IFDEF _DEBUGCODESTART
   CODEPAGE   NAME=page       START=0x1000            END=_CODEEND     PROTECTED
   CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND        PROTECTED

@@ -1,25 +1,54 @@
-/*********************************************************************
+/******************************************************************************
 
- *********************************************************************
- * FileName:        AutoUpdate_TCPClient.c
- * 
- ********************************************************************/
+ FileName:        AutoUpdate_TCPClient.c
+ Company:       Microchip Technology, Inc.
+
+ Software License Agreement
+
+ Copyright (C) 2002-2012 Microchip Technology Inc.  All rights reserved.
+
+ Microchip licenses to you the right to use, modify, copy, and distribute:
+ (i)  the Software when embedded on a Microchip microcontroller or digital 
+      signal controller product ("Device") which is integrated into 
+      Licensee's product; or
+ (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+      ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
+
+ You should refer to the license agreement accompanying this Software for 
+ additional information regarding your rights and obligations.
+
+ THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+ NON-INFRINGEMENT. IN NO EVENT SHALL MICROCHIP BE LIABLE FOR ANY INCIDENTAL,
+ SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST
+ OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS BY
+ THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), ANY CLAIMS
+ FOR INDEMNITY OR CONTRIBUTION, OR OTHER SIMILAR COSTS, WHETHER ASSERTED ON
+ THE BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR
+ OTHERWISE.
+
+******************************************************************************/
 
 #include "TCPIPConfig.h"
-
-
-
 #include "TCPIP Stack/TCPIP.h"
+
+//
+// This file is used in OTA (over-the-air) web client MRF24WG RF transceiver firmware update.
+// Applicable to MRF24WG only.
+// MRF24WG0M RTP RF Transceiver FW is 0x3107  ( a2patch_3107_1029.bin)
+//
 
 #if defined(STACK_USE_AUTOUPDATE_TCPCLIENT) && defined(MRF24WG)
 // Defines the server to be accessed for this application
-static BYTE ServerName[] =	"www.microchip.com"; 
-static BYTE PatchName[]="/mrfupdates/A2Patch_3104.bin";
-static BYTE Key_authorization[]="bXJmdXBkYXRlczptY2hwMTIzNA==" ; //Username is mrfupdates , password is mchp1234
+// Username is mrfupdates , password is mchp1234
+static BYTE ServerName[] = "www.microchip.com"; 
 
-
-
-
+// Enter RF transceiver FW file name here. Case-sensitive.
+static BYTE PatchName[]  = "/mrfupdates/a2patch_3107_1029.bin";
+static BYTE Key_authorization[]="bXJmdXBkYXRlczptY2hwMTIzNA==" ; 
 
 // Defines the port to be accessed for this application
 static WORD ServerPort = 80;
@@ -147,7 +176,7 @@ void AutoUpdate_TCPClient(void)
 				}
 				break;
 			}
-
+            AutoUpdate_Initialize();
 			Timer = TickGet();
 
 			// Make certain the socket can be written to
@@ -325,7 +354,7 @@ void AutoUpdate_TCPClient(void)
 			if(BUTTON2_IO == 0u)
 			{
 				AutoUpdateTCPExampleState = SM_UPDATE_HOME;
-				AutoUpdate_Initialize();				
+				//AutoUpdate_Initialize();				
 			}
 			break;
 	}

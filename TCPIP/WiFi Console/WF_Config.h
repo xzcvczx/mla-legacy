@@ -177,7 +177,7 @@
     #define MY_DEFAULT_SSID_NAME                        "MicrochipDemoAP"           /* for WPS Push button set to "" */
     #define MY_DEFAULT_LIST_RETRY_COUNT             	INFRASTRUCTURE_RETRY_COUNT  /* Number of times to try to connect to the SSID when using Infrastructure network type */
     #define MY_DEFAULT_CHANNEL_LIST                     {1,2,3,4,5,6,7,8,9,10,11}   /* Default channel list for FCC (cannot be empty for PIC18) */
-    #define MY_DEFAULT_BEACON_TIMEOUT                  	(40)   /* Number of beacon periods */
+    #define MY_DEFAULT_BEACON_TIMEOUT                  	(10)   /* Number of beacon periods */
     #define MY_DEFAULT_PS_POLL                         	WF_DISABLED
 	#if !defined(MRF24WG)
 	/* #define WF_AGGRESSIVE_PS */ 	/* WARNING !!! : This only can work with 1209 module FW version or later.
@@ -203,8 +203,10 @@
 #ifdef CONFIG_WPA_ENTERPRISE
 	#define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE		/* Mandatory. Must be defined */
 #else
-	//#define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE	/* Optional */
+	//#define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE             /* Optional */
+    //#define HOST_CM_TEST                                                    /* this enables test demo to exercise host connection and host scan */
 #endif
+
 /*------------------------------------------------------*/
 /* else if starting this demo in P2P(Wi-Fi Direct) mode */
 /*------------------------------------------------------*/

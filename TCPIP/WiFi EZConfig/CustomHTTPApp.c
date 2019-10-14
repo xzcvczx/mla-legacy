@@ -116,8 +116,8 @@ static BOOL lastSuccess = FALSE;
 // Stick status message variable.  See lastSuccess for details.
 static BOOL lastFailure = FALSE;
 
-#if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)			
-extern tWFScanResult preScanResult[50]; // WF_PRESCAN
+#if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP) || defined(WF_PRE_SCAN_IN_ADHOC)			
+extern tWFScanResult preScanResult[]; // WF_PRESCAN
 #endif
 
 /****************************************************************************
@@ -313,19 +313,24 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
             bssIdxStr.v[0] = *(ptr1+1);    
             bssIdx = hexatob(bssIdxStr);
 
-            #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)			
-            if (AppConfig.networkType == CFG_WF_SOFT_AP)
-            {   // SoftAP: display pre-scan results before starting as SoftAP. SoftAP does not scan.
+            #if defined(WF_PRE_SCAN_IN_ADHOC)
                 bssDesc = preScanResult[bssIdx];
-                //putsUART("HTTPExecuteGet: SoftAP ... display pre-scan  ................. \r\n");
-            }
-            else
-            {
-            WFRetrieveScanResult(bssIdx, &bssDesc);
-            }
-            #else 
-            WFRetrieveScanResult(bssIdx, &bssDesc);			
-            #endif 			
+            #else /* !defined(WF_PRE_SCAN_IN_ADHOC) */
+                #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)			
+                if (AppConfig.networkType == CFG_WF_SOFT_AP)
+                {   // SoftAP: display pre-scan results before starting as SoftAP. SoftAP does not scan.
+                    bssDesc = preScanResult[bssIdx];
+                    //putsUART("HTTPExecuteGet: SoftAP ... display pre-scan  ................. \r\n");
+                }
+                else
+                {
+                    WFRetrieveScanResult(bssIdx, &bssDesc);
+                }
+                #else 
+                WFRetrieveScanResult(bssIdx, &bssDesc);			
+                #endif 
+            #endif /* defined(WF_PRE_SCAN_IN_ADHOC) */
+            			
             bssDescIsValid = TRUE;
         }
         else
@@ -2325,7 +2330,17 @@ void HTTPPrint_name(void)
 {
     if (bssDescIsValid)
     {
-        TCPPutString(sktHTTP, bssDesc.ssid);
+        //TCPPutString(sktHTTP, bssDesc.ssid);
+        if(strlen((const char*)bssDesc.ssid)<32)
+            TCPPutString(sktHTTP, bssDesc.ssid);
+        else
+        {
+            unsigned char buf_tmp[33];
+            int i;
+            for(i=0;i<32;i++) buf_tmp[i] = bssDesc.ssid[i];
+            buf_tmp[32] = 0;
+            TCPPutString(sktHTTP, buf_tmp);
+        }
     }
     else
     {

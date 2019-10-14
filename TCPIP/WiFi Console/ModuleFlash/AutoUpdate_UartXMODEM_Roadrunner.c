@@ -146,7 +146,7 @@ static BOOL	PatchImage_UartXMODEM(void)
     BYTE c;
     BOOL lbDone;
     BYTE blockLen=0;
-    BOOL lResult;
+    BOOL lResult=FALSE;
 	BYTE BlockNumber=0, preBlockNum=0;
 	BYTE checksum=0;
     static BYTE tempData[XMODEM_BLOCK_LEN];

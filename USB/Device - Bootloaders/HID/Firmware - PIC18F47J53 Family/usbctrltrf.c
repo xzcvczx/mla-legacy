@@ -190,24 +190,24 @@ void USBCtrlTrfSetupHandler(void)
 {
     byte i;
 
-/********************************************************************
-Bug Fix: May 14, 2007 (#F7 - Partial 1/4)
-*********************************************************************
-For a control transfer read, if the host tries to read more data
-than what it has requested, the peripheral device should stall the
-extra IN transactions and the status stage. Typically, a host does
-not try to read more data than what it has requested. The original
-firmware did not handle this situation. Instead of stalling extra
-IN transactions, the device kept sending out zero length packets.
-
-This work around forces the IN endpoint back to be owned by the
-CPU after if it was stalled previously. The short_pkt_status flag
-is also re-initialized.
-********************************************************************/
+    /********************************************************************
+    Bug Fix: May 14, 2007 (#F7 - Partial 1/4)
+    *********************************************************************
+    For a control transfer read, if the host tries to read more data
+    than what it has requested, the peripheral device should stall the
+    extra IN transactions and the status stage. Typically, a host does
+    not try to read more data than what it has requested. The original
+    firmware did not handle this situation. Instead of stalling extra
+    IN transactions, the device kept sending out zero length packets.
+    
+    This work around forces the IN endpoint back to be owned by the
+    CPU after if it was stalled previously. The short_pkt_status flag
+    is also re-initialized.
+    ********************************************************************/
     if(ep0Bi.Stat.UOWN != 0)
         ep0Bi.Stat._byte = _UCPU;           // Compensate for after a STALL
     short_pkt_status = SHORT_PKT_NOT_USED;
-/*******************************************************************/
+    /*******************************************************************/
 
     /* Stage 1 */
     ctrl_trf_state = WAIT_SETUP;
@@ -311,27 +311,27 @@ void USBCtrlTrfInHandler(void)
     {
         USBCtrlTrfTxService();
 
-/********************************************************************
-Bug Fix: May 14, 2007 (#F7 - Partial 2/4)
-*********************************************************************
-For a control transfer read, if the host tries to read more data
-than what it has requested, the peripheral device should stall the
-extra IN transactions and the status stage. Typically, a host does
-not try to read more data than what it has requested. The original
-firmware did not handle this situation. Instead of stalling extra
-IN transactions, the device kept sending out zero length packets.
-
-This work around checks if a short IN packet has been sent or not.
-If it has, the IN endpoint will be set to install the next IN token.
-If not, then the original endpoint setup code will be executed.
-********************************************************************/
+        /********************************************************************
+        Bug Fix: May 14, 2007 (#F7 - Partial 2/4)
+        *********************************************************************
+        For a control transfer read, if the host tries to read more data
+        than what it has requested, the peripheral device should stall the
+        extra IN transactions and the status stage. Typically, a host does
+        not try to read more data than what it has requested. The original
+        firmware did not handle this situation. Instead of stalling extra
+        IN transactions, the device kept sending out zero length packets.
+        
+        This work around checks if a short IN packet has been sent or not.
+        If it has, the IN endpoint will be set to install the next IN token.
+        If not, then the original endpoint setup code will be executed.
+        ********************************************************************/
         if(short_pkt_status == SHORT_PKT_SENT)
         {
             // If a short packet has been sent, don't want to send any more,
             // stall next time if host is still trying to read.
             ep0Bi.Stat._byte = _USIE|_BSTALL;
         }
-/*******************************************************************/
+        /*******************************************************************/
         else
         {
             if(ep0Bi.Stat.DTS == 0)
@@ -377,19 +377,19 @@ void USBCtrlTrfTxService(void)
     {
         byte_to_send._word = wCount._word;
 
-/********************************************************************
-Bug Fix: May 14, 2007 (#F7 - Partial 3/4)
-*********************************************************************
-For a control transfer read, if the host tries to read more data
-than what it has requested, the peripheral device should stall the
-extra IN transactions and the status stage. Typically, a host does
-not try to read more data than what it has requested. The original
-firmware did not handle this situation. Instead of stalling extra
-IN transactions, the device kept sending out zero length packets.
-
-This work around updates the short_pkt_status flag to indicate
-if a short packet has been sent or not.
-********************************************************************/
+        /********************************************************************
+        Bug Fix: May 14, 2007 (#F7 - Partial 3/4)
+        *********************************************************************
+        For a control transfer read, if the host tries to read more data
+        than what it has requested, the peripheral device should stall the
+        extra IN transactions and the status stage. Typically, a host does
+        not try to read more data than what it has requested. The original
+        firmware did not handle this situation. Instead of stalling extra
+        IN transactions, the device kept sending out zero length packets.
+        
+        This work around updates the short_pkt_status flag to indicate
+        if a short packet has been sent or not.
+        ********************************************************************/
         if(short_pkt_status == SHORT_PKT_NOT_USED)
         {
             short_pkt_status = SHORT_PKT_PENDING;
@@ -398,7 +398,7 @@ if a short packet has been sent or not.
         {
             short_pkt_status = SHORT_PKT_SENT;
         }//end if
-/*******************************************************************/
+        /*******************************************************************/
     }
     else
         byte_to_send._word = EP0_BUFF_SIZE;
@@ -515,18 +515,18 @@ void USBCtrlTrfRxService(void)
  *****************************************************************************/
 void USBCtrlEPServiceComplete(void)
 {
-/********************************************************************
-Bug Fix: May 14, 2007 (#AF1)
-*********************************************************************
-See silicon errata for 4550 A3. Now clearing PKTDIS before re-arming
-any EP0 endpoints.
-********************************************************************/
+    /********************************************************************
+    Bug Fix: May 14, 2007 (#AF1)
+    *********************************************************************
+    See silicon errata for 4550 A3. Now clearing PKTDIS before re-arming
+    any EP0 endpoints.
+    ********************************************************************/
     /*
      * PKTDIS bit is set when a Setup Transaction is received.
      * Clear to resume packet processing.
      */
     UCONbits.PKTDIS = 0;
-/*******************************************************************/
+    /*******************************************************************/
 
     if(ctrl_trf_session_owner == MUID_NULL)
     {
@@ -632,20 +632,20 @@ void USBPrepareForNextSetupTrf(void)
 {
     ctrl_trf_state = WAIT_SETUP;            // See usbctrltrf.h
 
-/********************************************************************
-Bug Fix: May 14, 2007 (#F3)
-*********************************************************************
-In the original firmware, if an IN token is sent by the host
-before a SETUP token is sent, the firmware would respond with an ACK.
-This is not a correct response, the firmware should have sent a STALL.
-This is a minor non-compliance since a compliant host should not
-send an IN before sending a SETUP token. The fix allows a SETUP
-transaction to be accepted while stalling IN transactions.
-
-Although this fix is known, it is not implemented because it
-breaks the #AF1 fix in USBCtrlEPServiceComplete().
-Since #AF1 fix is more important, this fix, #F3 is commented out.
-********************************************************************/
+    /********************************************************************
+    Bug Fix: May 14, 2007 (#F3)
+    *********************************************************************
+    In the original firmware, if an IN token is sent by the host
+    before a SETUP token is sent, the firmware would respond with an ACK.
+    This is not a correct response, the firmware should have sent a STALL.
+    This is a minor non-compliance since a compliant host should not
+    send an IN before sending a SETUP token. The fix allows a SETUP
+    transaction to be accepted while stalling IN transactions.
+    
+    Although this fix is known, it is not implemented because it
+    breaks the #AF1 fix in USBCtrlEPServiceComplete().
+    Since #AF1 fix is more important, this fix, #F3 is commented out.
+    ********************************************************************/
     ep0Bi.Stat._byte = _UCPU;               // Should be removed
     //ep0Bi.Stat._byte = _USIE|_BSTALL;     // Should be added #F3
 

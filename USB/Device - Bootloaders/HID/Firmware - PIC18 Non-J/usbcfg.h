@@ -1,18 +1,14 @@
 /*********************************************************************
- *
- *                Microchip USB C18 Firmware Version 1.2
- *
- *********************************************************************
  * FileName:        usbcfg.h
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.42+
+ * Compiler:        C18 3.45+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the "Company") for its PICmicro® Microcontroller is intended and
+ * (the "Company") for its PICmicro(R) Microcontroller is intended and
  * supplied to you, the Company's customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
@@ -34,7 +30,34 @@
 #ifndef USBCFG_H
 #define USBCFG_H
 
-/** D E F I N I T I O N S *******************************************/
+//------------------------------------------------------------------------------
+//Configurable Options
+//------------------------------------------------------------------------------
+#define ENABLE_IO_PIN_CHECK_BOOTLOADER_ENTRY  //Uncomment if you wish to enable I/O pin entry method into bootloader mode
+                                              //Make sure proper sw2() macro definition is provided in io_cfg.h                                
+//------------------------------------------------------------------------------
+//If you don't uncomment the above, the only entry method into bootloader mode,
+//is by software, ex:
+//1.  Booting up initially into application run mode.
+//2.  From the application run mode, execute a "goto 0x001C" instruction
+//    in order to jump into bootloader mode.
+//------------------------------------------------------------------------------
+
+//Option to allow blinking of LEDs to show USB bus state.  May be optionally
+//commented out to save code space.
+#define ENABLE_USB_LED_BLINK_STATUS     //Comment out to save code space
+
+//USB VBUS sensing and USB Bus/Self power sensing options.
+//---------------------------------------------------------
+//#define USE_SELF_POWER_SENSE_IO   //Leave commented if device is bus powered only (or self powered only, uncomment for some types of dual powered devices)
+//#define USE_USB_BUS_SENSE_IO      //If the device is self powered, this needs to uncommented if making a fully compliant USB design
+
+
+
+
+//------------------------------------------------------------------------------
+//Usually constants, no modification typically needed
+//------------------------------------------------------------------------------
 #define MAX_NUM_INT             1   // For tracking Alternate Setting
 #define EP0_BUFF_SIZE           8   // Valid Options: 8, 16, 32, or 64 bytes.
 									// There is little advantage in using 
@@ -48,40 +71,16 @@
 /* Make sure the proper hardware platform is being used*/
 #if defined(__18F4550) || defined(__18F4455) || defined(__18F4450) || defined(__18F2550) || defined(__18F2455) || defined(__18F2450) || defined(__18F2458) || defined(__18F2553) || defined(__18F4458) || defined(__18F4553)
 	#define PIC18F4550_PICDEM_FS_USB
-#endif
-#if defined(__18F45K50) || defined(__18LF45K50) || defined(__18F25K50) || defined(__18LF25K50) || defined(__18F24K50) || defined(__18LF24K50)
+#elif defined(__18F45K50) || defined(__18LF45K50) || defined(__18F25K50) || defined(__18LF25K50) || defined(__18F24K50) || defined(__18LF24K50)
 	#define PIC18F4550_PICDEM_FS_USB_K50
-#endif
-
-#if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
+#elif defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
 	#define LOW_PIN_COUNT_USB_DEVELOPMENT_KIT
-#endif
-//#define YOUR_BOARD
-
-
-#if defined(PIC18F4550_PICDEM_FS_USB)
-//    #define USE_SELF_POWER_SENSE_IO
-//    #define USE_USB_BUS_SENSE_IO
-
-#elif defined(PIC18F4550_PICDEM_FS_USB_K50)
-//    #define USE_SELF_POWER_SENSE_IO
-//    #define USE_USB_BUS_SENSE_IO
-
-#elif defined(PIC18F87J50_FS_USB_PIM)
-    //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board		
-
-#elif defined(LOW_PIN_COUNT_USB_DEVELOPMENT_KIT)
-
-
-/*If using the YOUR_BOARD selection, uncomment below section as appropriate for your hardware*/
-//#elif defined(YOUR_BOARD)
-	//#define USE_SELF_POWER_SENSE_IO	//See MCHPFSUSB Firmware User's Guide
-   	//#define USE_USB_BUS_SENSE_IO		//(DS51679) for more details about these features.
-
 #else
-    #error Not a supported board (yet), See __FILE__, line __LINE__, or double click on this text.
-//See above commented section.  You need to select the features your hardware will be using.
+    #error Unsupported processor type for this firmware.  See other firmware projects.
 #endif
+
+
+
 
 /** D E V I C E  C L A S S  U S A G E *******************************/
 #define USB_USE_HID

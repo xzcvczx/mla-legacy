@@ -81,6 +81,9 @@
         so as to enable and demonstrate	USB remote wakeup capability.
         
   2.9f  Adding new part support
+
+  2.9j  Updates to support new bootloader features (ex: app version 
+        fetching).
 ********************************************************************/
 
 /********************************************************************
@@ -332,7 +335,7 @@ contact data is sent to the host for each HID report.
         #pragma config FCMEN  = OFF
         #pragma config IESO   = OFF
         #pragma config PWRTEN = OFF
-        #pragma config BOREN  = OFF
+        #pragma config BOREN  = ON
         #pragma config BORV   = 30
         #pragma config WDTEN  = OFF
         #pragma config WDTPS  = 32768
@@ -354,7 +357,7 @@ contact data is sent to the host for each HID report.
         #pragma config EBTRB  = OFF        
 
 #elif	defined(PIC16F1_LPC_USB_DEVELOPMENT_KIT)
-    // PIC 16F1459 fuse configuration:
+    // PIC16F1459 configuration bit settings:
     #if defined (USE_INTERNAL_OSC)  //Definition in the hardware profile
         __CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
         __CONFIG(WRT_OFF & CPUDIV_NOCLKDIV & USBLSCLK_48MHz & PLLMULT_3x & PLLEN_ENABLED & STVREN_ON &  BORV_LO & LPBOR_OFF & LVP_OFF);
@@ -558,25 +561,43 @@ void USBHIDCBSetReportComplete(void);
 	//0x1000, 0x1008, 0x1018 respectively.  This remapping is only necessary 
 	//if you wish to program the hex file generated from this project with
 	//the USB bootloader. 
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x1000
-		extern void _startup (void);        // See c018i.c in your C18 compiler dir
-		#pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS
-		void _reset (void)
-		{
-		    _asm goto _startup _endasm
-		}
+	#define REMAPPED_RESET_VECTOR_ADDRESS			0x1000
+	#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x1008
+	#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x1018
+	#define APP_VERSION_ADDRESS                     0x1016 //Fixed location, so the App FW image version can be read by the bootloader.
+	#define APP_SIGNATURE_ADDRESS                   0x1006 //Signature location that must be kept at blaknk value (0xFFFF) in this project (has special purpose for bootloader).
 
-		//--------------------------------------------------------------------
-		//NOTE: See PIC18InterruptVectors.asm for important code and details
-		//relating to the interrupt vectors and interrupt vector remapping.
-		//Special considerations apply if clock switching to the 31kHz INTRC 
-		//during USB suspend.
-		//--------------------------------------------------------------------
-	#endif
+    //--------------------------------------------------------------------------
+    //Application firmware image version values, as reported to the bootloader
+    //firmware.  These are useful so the bootloader can potentially know if the
+    //user is trying to program an older firmware image onto a device that
+    //has already been programmed with a with a newer firmware image.
+    //Format is APP_FIRMWARE_VERSION_MAJOR.APP_FIRMWARE_VERSION_MINOR.
+    //The valid minor version is from 00 to 99.  Example:
+    //if APP_FIRMWARE_VERSION_MAJOR == 1, APP_FIRMWARE_VERSION_MINOR == 1,
+    //then the version is "1.01"
+    #define APP_FIRMWARE_VERSION_MAJOR  1   //valid values 0-255
+    #define APP_FIRMWARE_VERSION_MINOR  0   //valid values 0-99
+    //--------------------------------------------------------------------------
+	
+	#pragma romdata AppVersionAndSignatureSection = APP_VERSION_ADDRESS
+	ROM unsigned char AppVersion[2] = {APP_FIRMWARE_VERSION_MINOR, APP_FIRMWARE_VERSION_MAJOR};
+	#pragma romdata AppSignatureSection = APP_SIGNATURE_ADDRESS
+	ROM unsigned short int SignaturePlaceholder = 0xFFFF;
+	extern void _startup (void);        // See c018i.c in your C18 compiler dir
+	#pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS
+	void _reset (void)
+	{
+	    _asm goto _startup _endasm
+	}
 
 
-
+	//--------------------------------------------------------------------
+	//NOTE: See PIC18InterruptVectors.asm for important code and details
+	//relating to the interrupt vectors and interrupt vector remapping.
+	//Special considerations apply if clock switching to the 31kHz INTRC 
+	//during USB suspend.
+	//--------------------------------------------------------------------	
 
 
 	#pragma code

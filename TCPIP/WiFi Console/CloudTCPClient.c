@@ -57,7 +57,7 @@
 #if defined(STACK_USE_CLOUD_TCPCLIENT)
 
 #include "TCPIP Stack/TCPIP.h"
-static BYTE ServerName[] =	"www.openwificloud.com";
+static BYTE ServerName[] =	""; /* Please refer to the release note */
 
 /*
 * Open WiFi Cloud™ aims to demo how to access and control the embedded devices

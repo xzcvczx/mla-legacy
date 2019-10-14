@@ -181,7 +181,7 @@ void USBStdGetDscHandler(void)
 void USBStdSetCfgHandler(void)
 {
     ctrl_trf_session_owner = MUID_USB9;
-    mDisableEP1to15();                          // See usbdrv.h
+    mDisableEP1to7();                          // See usbdrv.h
     ClearArray((byte*)&usb_alt_intf,MAX_NUM_INT);
     usb_active_cfg = SetupPkt.bCfgValue;
     if(SetupPkt.bCfgValue == 0)

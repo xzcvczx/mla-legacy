@@ -102,7 +102,7 @@
 // least amount of energy (or noise).
 /*************************************************************************/
 
-// MiWi Possible channel numbers are from 0 to 31
+// MiWi Possible channel numbers are from 11 to 26 for MRF24J40
 BYTE myChannel = 11;
 
 #define MiWi_CHANNEL        MiWi_CHANNEL_11
@@ -211,112 +211,8 @@ void WF_Connect(void);
 
 void SpiInitDevice(SpiChannel chn, int isMaster, int frmEn, int frmMaster);
 
-//
-// PIC18 Interrupt Service Routines
-// 
-// NOTE: Several PICs, including the PIC18F4620 revision A3 have a RETFIE FAST/MOVFF bug
-// The interruptlow keyword is used to work around the bug when using C18
-#if defined(__18CXX)
-#if defined(HI_TECH_C)
-void interrupt low_priority LowISR(void)
-#else
-#pragma interruptlow LowISR
 
-void LowISR(void)
-#endif
-{
-    TickUpdate();
-}
-
-#if defined(HI_TECH_C)
-void interrupt HighISR(void)
-#else
-#pragma interruptlow HighISR
-
-void HighISR(void)
-#endif
-{
-#if defined(STACK_USE_UART2TCP_BRIDGE)
-    UART2TCPBridgeISR();
-#endif
-
-#if defined(WF_CS_TRIS)
-    WFEintISR();
-#endif // WF_CS_TRIS
-}
-
-#if !defined(HI_TECH_C)
-#pragma code lowVector=0x18
-
-void LowVector(void) {
-    _asm goto LowISR _endasm
-}
-#pragma code highVector=0x8
-
-void HighVector(void) {
-    _asm goto HighISR _endasm
-}
-#pragma code // Return to default code section
-#endif
-
-// C30 and C32 Exception Handlers
-// If your code gets here, you either tried to read or write
-// a NULL pointer, or your application overflowed the stack
-// by having too many local variables or parameters declared.
-#elif defined(__C30__)
-
-#if defined(STACK_USE_UART)
-#define UART2PrintString    putrsUART
-#else
-#define UART2PrintString(x)
-#endif
-
-void __attribute__((interrupt, auto_psv)) _DefaultInterrupt(void) {
-    UART2PrintString("!!! Default interrupt handler !!!\r\n");
-    while (1) {
-        Nop();
-        Nop();
-        Nop();
-    }
-}
-
-void __attribute__((interrupt, auto_psv)) _OscillatorFail(void) {
-    UART2PrintString("!!! Oscillator Fail interrupt handler !!!\r\n");
-    while (1) {
-        Nop();
-        Nop();
-        Nop();
-    }
-}
-
-void __attribute__((interrupt, auto_psv)) _AddressError(void) {
-    UART2PrintString("!!! Address Error interrupt handler !!!\r\n");
-    while (1) {
-        Nop();
-        Nop();
-        Nop();
-    }
-}
-
-void __attribute__((interrupt, auto_psv)) _StackError(void) {
-    UART2PrintString("!!! Stack Error interrupt handler !!!\r\n");
-    while (1) {
-        Nop();
-        Nop();
-        Nop();
-    }
-}
-
-void __attribute__((interrupt, auto_psv)) _MathError(void) {
-    UART2PrintString("!!! Math Error interrupt handler !!!\r\n");
-    while (1) {
-        Nop();
-        Nop();
-        Nop();
-    }
-}
-
-#elif defined(__C32__)
+#if defined(__C32__)
 
 void _general_exception_handler(unsigned cause, unsigned status) {
     Nop();
@@ -330,9 +226,25 @@ void _general_exception_handler(unsigned cause, unsigned status) {
 UINT8 ConnectionProfileID;
 #endif
 
-//
-// Main application entry point.
-//
+/*********************************************************************
+* Function:         void main(void)
+*
+* PreCondition:     none
+*
+* Input:            none
+*
+* Output:	    none
+*
+* Side Effects:	    none
+*
+* Overview:         This is the main function that runs the Wireless Gateway
+*                   example demo. The purpose of this example is to
+*                   demonstrate bridge functionality between MiWi and WiFi
+*
+*
+*
+* Note:
+**********************************************************************/
 #if defined(__18CXX)
 void main(void)
 #else
@@ -556,10 +468,7 @@ int main(void)
     while (1) {
 
         /*******************************************************************/
-        // Function MiApp_MessageAvailable returns a boolean to indicate if
-        // a packet has been received by the transceiver. If a packet has
-        // been received, all information will be stored in the rxFrame,
-        // structure of RECEIVED_MESSAGE.
+        // Check Button Events
         /*******************************************************************/
         if (BUTTON1_IO == 0u) {
             while (BUTTON1_IO == 0);
@@ -594,67 +503,24 @@ int main(void)
         if(CFGCXT.isWifiNeedToConfigure) updateDisplay = 1;
         
 
-#if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)    
-        if (g_scan_done) {
-            if (g_prescan_waiting) {
-//#if defined (WF_CONSOLE)
-     //           putrsUART((ROM char*) "\n SoftAP prescan results ........ \r\n\n");
+        #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
+                if (g_scan_done) {
+                    if (g_prescan_waiting) {
+                        SCANCXT.displayIdx = 0;
+                        while (IS_SCAN_STATE_DISPLAY(SCANCXT.scanState)) {
+                            WFDisplayScanMgr();
+                        }
 
 
-                SCANCXT.displayIdx = 0;
-                while (IS_SCAN_STATE_DISPLAY(SCANCXT.scanState)) {
-                    WFDisplayScanMgr();
+        #if defined(WF_CS_TRIS)
+                        WF_Connect();
+        #endif
+                        DisplaySSID();
+                        g_scan_done = 0;
+                        g_prescan_waiting = 0;
+                    }
                 }
-
-   //             putrsUART((ROM char*) "\r\n ");
-//#endif
-
-#if defined(WF_CS_TRIS)
-                WF_Connect();
-#endif
-                DisplaySSID();
-                g_scan_done = 0;
-                g_prescan_waiting = 0;
-            }
-        }
-#endif // (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)   
-
-#if defined (EZ_CONFIG_STORE)
-        // Hold button3 for 4 seconds to reset to defaults.
-        if (BUTTON3_IO == 0u) { // Button is pressed
-            if (ButtonPushStart == 0) //Just pressed
-                ButtonPushStart = TickGet();
-            else
-                if (TickGet() - ButtonPushStart > 4 * TICK_SECOND)
-                RestoreWifiConfig();
-        }
-        else {
-            ButtonPushStart = 0; //Button release reset the clock
-        }
-
-        if (AppConfig.saveSecurityInfo) {
-            // set true by WF_ProcessEvent after connecting to a new network
-            // get the security info, and if required, push the PSK to EEPROM
-            if ((AppConfig.SecurityMode == WF_SECURITY_WPA_WITH_PASS_PHRASE) ||
-                    (AppConfig.SecurityMode == WF_SECURITY_WPA2_WITH_PASS_PHRASE) ||
-                    (AppConfig.SecurityMode == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE)) {
-                // only need to save when doing passphrase
-                tWFCPElements profile;
-                UINT8 connState;
-                UINT8 connID;
-                WF_CMGetConnectionState(&connState, &connID);
-                WF_CPGetElements(connID, &profile);
-
-                memcpy((char*) AppConfig.SecurityKey, (char*) profile.securityKey, 32);
-                AppConfig.SecurityMode--; // the calc psk is exactly one below for each passphrase option
-                AppConfig.SecurityKeyLength = 32;
-
-                SaveAppConfig(&AppConfig);
-            }
-
-            AppConfig.saveSecurityInfo = FALSE;
-        }
-#endif // EZ_CONFIG_STORE
+        #endif // (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
 
 
         // This task performs normal stack task including checking
@@ -666,15 +532,15 @@ int main(void)
         // This tasks invokes each of the core stack application tasks
         StackApplications();
 
-#if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
-        ZeroconfLLProcess();
-#endif
+        #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
+                ZeroconfLLProcess();
+        #endif
 
-#if defined(STACK_USE_ZEROCONF_MDNS_SD)
-        mDNSProcess();
-        // Use this function to exercise service update function
-        // HTTPUpdateRecord();
-#endif
+        #if defined(STACK_USE_ZEROCONF_MDNS_SD)
+                mDNSProcess();
+                // Use this function to exercise service update function
+                // HTTPUpdateRecord();
+        #endif
 
         // Process application specific tasks here.
         // For this demo app, this will include the Generic TCP
@@ -684,55 +550,55 @@ int main(void)
         // Any custom modules or processing you need to do should
         // go here.
 
-#if defined(WF_CONSOLE)
-        //WFConsoleProcess();
-        //    #if !defined(STACK_USE_EZ_CONFIG)
-        //	IperfAppCall();
-        //      #endif
-        //WFConsoleProcessEpilogue();
-wait_console_input:
-#endif
+        #if defined(WF_CONSOLE)
+                //WFConsoleProcess();
+                //    #if !defined(STACK_USE_EZ_CONFIG)
+                //	IperfAppCall();
+                //      #endif
+                //WFConsoleProcessEpilogue();
+        wait_console_input:
+        #endif
 
-#if defined(STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE)
-        GenericTCPClient();
-#endif
+        #if defined(STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE)
+                GenericTCPClient();
+        #endif
 
-#if defined(STACK_USE_GENERIC_TCP_SERVER_EXAMPLE)
-        GenericTCPServer();
-#endif
+        #if defined(STACK_USE_GENERIC_TCP_SERVER_EXAMPLE)
+                GenericTCPServer();
+        #endif
 
-#if defined(STACK_USE_SMTP_CLIENT)
-        SMTPDemo();
-#endif
+        #if defined(STACK_USE_SMTP_CLIENT)
+                SMTPDemo();
+        #endif
 
-#if defined(STACK_USE_ICMP_CLIENT)
-        PingDemo();
-        //PingConsole();
-#endif
+        #if defined(STACK_USE_ICMP_CLIENT)
+                PingDemo();
+                //PingConsole();
+        #endif
 
-#if defined(STACK_USE_SNMP_SERVER) && !defined(SNMP_TRAP_DISABLED)
-        //User should use one of the following SNMP demo
-        // This routine demonstrates V1 or V2 trap formats with one variable binding.
-        SNMPTrapDemo();
+        #if defined(STACK_USE_SNMP_SERVER) && !defined(SNMP_TRAP_DISABLED)
+                //User should use one of the following SNMP demo
+                // This routine demonstrates V1 or V2 trap formats with one variable binding.
+                SNMPTrapDemo();
 
-#if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
-        //This routine provides V2 format notifications with multiple (3) variable bindings
-        //User should modify this routine to send v2 trap format notifications with the required varbinds.
-        //SNMPV2TrapDemo();
-#endif
-        if (gSendTrapFlag)
-            SNMPSendTrap();
-#endif
+        #if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+                //This routine provides V2 format notifications with multiple (3) variable bindings
+                //User should modify this routine to send v2 trap format notifications with the required varbinds.
+                //SNMPV2TrapDemo();
+        #endif
+                if (gSendTrapFlag)
+                    SNMPSendTrap();
+        #endif
 
-#if defined ( WF_CONSOLE ) && defined ( EZ_CONFIG_SCAN )
-        WFDisplayScanMgr();
-#endif
+        #if defined ( WF_CONSOLE ) && defined ( EZ_CONFIG_SCAN )
+                WFDisplayScanMgr();
+        #endif
 
-#if defined(STACK_USE_BERKELEY_API)
-        BerkeleyTCPClientDemo();
-        BerkeleyTCPServerDemo();
-        BerkeleyUDPClientDemo();
-#endif
+        #if defined(STACK_USE_BERKELEY_API)
+                BerkeleyTCPClientDemo();
+                BerkeleyTCPServerDemo();
+                BerkeleyUDPClientDemo();
+        #endif
 
         if((updateDisplay && CFGCXT.isWifiDoneConfigure) || (dwLastIP != AppConfig.MyIPAddr.Val))
         {
@@ -755,6 +621,23 @@ wait_console_input:
     }
 }
 
+/*********************************************************************
+* Function:         void SpiInitDevice(SpiChannel, int, int, int)
+*
+* PreCondition:     none
+*
+* Input:            none
+*
+* Output:	    none
+*
+* Side Effects:	    none
+*
+* Overview:         Initializes SPI Channels
+*
+*
+*
+* Note:
+**********************************************************************/
 void SpiInitDevice(SpiChannel chn, int isMaster, int frmEn, int frmMaster) {
     SpiOpenFlags oFlags = SPI_OPEN_MODE16 | SPI_OPEN_SMP_END; // SPI open mode
     if (isMaster) {
@@ -775,7 +658,24 @@ void SpiInitDevice(SpiChannel chn, int isMaster, int frmEn, int frmMaster) {
 
 
 
-// Writes an IP address to the LCD display and the UART as available
+/*********************************************************************
+* Function:         void DisplaySSID(void)
+*
+* PreCondition:     none
+*
+* Input:            none
+*
+* Output:	    none
+*
+* Side Effects:	    none
+*
+* Overview:         Updates the current SSID on line1 of the LCD and IPAddress
+*                   on line2
+*
+*
+*
+* Note:
+**********************************************************************/
 
 void DisplaySSID(void)
 {
@@ -817,7 +717,23 @@ void DisplaySSID(void)
         LCDText[LCDPos] = 0;
     LCDUpdate();
 }
-
+/*********************************************************************
+* Function:         void DisplayIPValue(IP_ADDR)
+*
+* PreCondition:     none
+*
+* Input:            none
+*
+* Output:	    none
+*
+* Side Effects:	    none
+*
+* Overview:         Updates only the IP Address value on Line 2 of the LCD
+*
+*
+*
+* Note:
+**********************************************************************/
 void DisplayIPValue(IP_ADDR IPVal) {
     //	printf("%u.%u.%u.%u", IPVal.v[0], IPVal.v[1], IPVal.v[2], IPVal.v[3]);
     BYTE IPDigit[4];
@@ -1072,180 +988,6 @@ static void InitializeBoard(void) {
 }
 
 
-/*********************************************************************
- * Function:        void InitAppConfig(void)
- *
- * PreCondition:    MPFSInit() is already called.
- *
- * Input:           None
- *
- * Output:          Write/Read non-volatile config variables.
- *
- * Side Effects:    None
- *
- * Overview:        None
- *
- * Note:            None
- ********************************************************************/
-// MAC Address Serialization using a MPLAB PM3 Programmer and 
-// Serialized Quick Turn Programming (SQTP). 
-// The advantage of using SQTP for programming the MAC Address is it
-// allows you to auto-increment the MAC address without recompiling 
-// the code for each unit.  To use SQTP, the MAC address must be fixed
-// at a specific location in program memory.  Uncomment these two pragmas
-// that locate the MAC address at 0x1FFF0.  Syntax below is for MPLAB C 
-// Compiler for PIC18 MCUs. Syntax will vary for other compilers.
-//#pragma romdata MACROM=0x1FFF0
-#if 0
-static ROM BYTE SerializedMACAddress[6] = {MY_DEFAULT_MAC_BYTE1, MY_DEFAULT_MAC_BYTE2, MY_DEFAULT_MAC_BYTE3, MY_DEFAULT_MAC_BYTE4, MY_DEFAULT_MAC_BYTE5, MY_DEFAULT_MAC_BYTE6};
-//#pragma romdata
-
-static void InitAppConfig1(void) {
-    // Start out zeroing all AppConfig bytes to ensure all fields are
-    // deterministic for checksum generation
-    memset((void*) &AppConfig, 0x00, sizeof (AppConfig));
-
-#if defined ENABLE_STATIC_IP
-    AppConfig.Flags.bIsDHCPEnabled = FALSE;
-
-    AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2 << 8ul | MY_DEFAULT_IP_ADDR_BYTE3 << 16ul | MY_DEFAULT_IP_ADDR_BYTE4 << 24ul;
-    AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
-    AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | MY_DEFAULT_MASK_BYTE2 << 8ul | MY_DEFAULT_MASK_BYTE3 << 16ul | MY_DEFAULT_MASK_BYTE4 << 24ul;
-    AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
-    AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | MY_DEFAULT_GATE_BYTE2 << 8ul | MY_DEFAULT_GATE_BYTE3 << 16ul | MY_DEFAULT_GATE_BYTE4 << 24ul;
-    AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | MY_DEFAULT_PRIMARY_DNS_BYTE2 << 8ul | MY_DEFAULT_PRIMARY_DNS_BYTE3 << 16ul | MY_DEFAULT_PRIMARY_DNS_BYTE4 << 24ul;
-    AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2 << 8ul | MY_DEFAULT_SECONDARY_DNS_BYTE3 << 16ul | MY_DEFAULT_SECONDARY_DNS_BYTE4 << 24ul;
-#elif defined ENABLE_DHCP_IP
-    AppConfig.Flags.bIsDHCPEnabled = TRUE;
-
-    AppConfig.MyIPAddr.Val = 0;
-    AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
-    AppConfig.MyMask.Val = 0;
-    AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
-    AppConfig.MyGateway.Val = 0;
-    AppConfig.PrimaryDNSServer.Val = 0;
-    AppConfig.SecondaryDNSServer.Val = 0;
-#endif
-
-    AppConfig.Flags.bInConfigMode = TRUE;
-
-#if	defined MY_DEFAULT_MAC_ADDRESS
-    // Use application MAC address
-    AppConfig.MyMACAddr.v[0] = 0x00;
-    AppConfig.MyMACAddr.v[1] = 0x1e;
-    AppConfig.MyMACAddr.v[2] = 0xc0;
-    AppConfig.MyMACAddr.v[3] = 0x11;
-    AppConfig.MyMACAddr.v[4] = 0x22;
-    AppConfig.MyMACAddr.v[5] = 0x33;
-#else
-    // Use default MAC address of the module
-    memcpypgm2ram((void*) &AppConfig.MyMACAddr, (ROM void*) SerializedMACAddress, sizeof (AppConfig.MyMACAddr));
-    //  {
-    //      _prog_addressT MACAddressAddress;
-    //      MACAddressAddress.next = 0x157F8;
-    //      _memcpy_p2d24((char*)&AppConfig.MyMACAddr, MACAddressAddress, sizeof(AppConfig.MyMACAddr));
-    //  }
-#endif
-
-    /*******************************/
-    // SNMP Community String configuration
-    /*******************************/
-#if defined(STACK_USE_SNMP_SERVER)
-    {
-        BYTE i;
-        static ROM char * ROM cReadCommunities[] = SNMP_READ_COMMUNITIES;
-        static ROM char * ROM cWriteCommunities[] = SNMP_WRITE_COMMUNITIES;
-        ROM char * strCommunity;
-
-        for (i = 0; i < SNMP_MAX_COMMUNITY_SUPPORT; i++) {
-            // Get a pointer to the next community string
-            strCommunity = cReadCommunities[i];
-            if (i >= sizeof (cReadCommunities) / sizeof (cReadCommunities[0]))
-                strCommunity = "";
-
-            // Ensure we don't buffer overflow.  If your code gets stuck here,
-            // it means your SNMP_COMMUNITY_MAX_LEN definition in TCPIPConfig.h
-            // is either too small or one of your community string lengths
-            // (SNMP_READ_COMMUNITIES) are too large.  Fix either.
-            if (strlenpgm(strCommunity) >= sizeof (AppConfig.readCommunity[0]))
-                while (1);
-
-            // Copy string into AppConfig
-            strcpypgm2ram((char*) AppConfig.readCommunity[i], strCommunity);
-
-            // Get a pointer to the next community string
-            strCommunity = cWriteCommunities[i];
-            if (i >= sizeof (cWriteCommunities) / sizeof (cWriteCommunities[0]))
-                strCommunity = "";
-
-            // Ensure we don't buffer overflow.  If your code gets stuck here,
-            // it means your SNMP_COMMUNITY_MAX_LEN definition in TCPIPConfig.h
-            // is either too small or one of your community string lengths
-            // (SNMP_WRITE_COMMUNITIES) are too large.  Fix either.
-            if (strlenpgm(strCommunity) >= sizeof (AppConfig.writeCommunity[0]))
-                while (1);
-
-            // Copy string into AppConfig
-            strcpypgm2ram((char*) AppConfig.writeCommunity[i], strCommunity);
-        }
-    }
-#endif
-
-    /*******************************/
-    // Load the default NetBIOS Host Name
-    /*******************************/
-    memcpypgm2ram(AppConfig.NetBIOSName, (ROM void*) MY_DEFAULT_HOST_NAME, 16);
-    FormatNetBIOSName(AppConfig.NetBIOSName);
-
-    /*******************************/
-    // Load the default SSID Name
-    /*******************************/
-    WF_ASSERT(sizeof (MY_DEFAULT_SSID_NAME) <= sizeof (AppConfig.MySSID));
-    memcpypgm2ram(AppConfig.MySSID, (ROM void*) MY_DEFAULT_SSID_NAME, sizeof (MY_DEFAULT_SSID_NAME));
-    AppConfig.SsidLength = sizeof (MY_DEFAULT_SSID_NAME) - 1;
-
-    /*******************************/
-    // Load Security Mode
-    /*******************************/
-    AppConfig.SecurityMode = MY_DEFAULT_WIFI_SECURITY_MODE;
-#if (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_OPEN)
-    memset(AppConfig.SecurityKey, 0x00, sizeof (AppConfig.SecurityKey));
-    AppConfig.SecurityKeyLength = 0;
-
-#elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WEP_40
-    AppConfig.WepKeyIndex = MY_DEFAULT_WEP_KEY_INDEX;
-    memcpypgm2ram(AppConfig.SecurityKey, (ROM void*) MY_DEFAULT_WEP_KEYS_40, sizeof (MY_DEFAULT_WEP_KEYS_40) - 1);
-    AppConfig.SecurityKeyLength = sizeof (MY_DEFAULT_WEP_KEYS_40) - 1;
-
-#elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WEP_104
-    AppConfig.WepKeyIndex = MY_DEFAULT_WEP_KEY_INDEX;
-    memcpypgm2ram(AppConfig.SecurityKey, (ROM void*) MY_DEFAULT_WEP_KEYS_104, sizeof (MY_DEFAULT_WEP_KEYS_104) - 1);
-    AppConfig.SecurityKeyLength = sizeof (MY_DEFAULT_WEP_KEYS_104) - 1;
-
-#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_WITH_KEY) || \
-            (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA2_WITH_KEY) || \
-            (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_AUTO_WITH_KEY)
-    memcpypgm2ram(AppConfig.SecurityKey, (ROM void*) MY_DEFAULT_PSK, sizeof (MY_DEFAULT_PSK) - 1);
-    AppConfig.SecurityKeyLength = sizeof (MY_DEFAULT_PSK) - 1;
-
-#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_WITH_PASS_PHRASE) || \
-            (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA2_WITH_PASS_PHRASE) || \
-            (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE)
-    memcpypgm2ram(AppConfig.SecurityKey, (ROM void*) MY_DEFAULT_PSK_PHRASE, sizeof (MY_DEFAULT_PSK_PHRASE) - 1);
-    AppConfig.SecurityKeyLength = sizeof (MY_DEFAULT_PSK_PHRASE) - 1;
-
-#else
-#error "No security defined"
-#endif
-
-    /*******************************/
-    // Compute the checksum of the AppConfig defaults as loaded from ROM
-    /*******************************/
-    wOriginalAppConfigChecksum = CalcIPChecksum((BYTE*) & AppConfig, sizeof (AppConfig));
-
-
-}
-#endif
 
 #if 1 // debug soft AP
 static ROM BYTE SerializedMACAddress[6] = {MY_DEFAULT_MAC_BYTE1, MY_DEFAULT_MAC_BYTE2, MY_DEFAULT_MAC_BYTE3, MY_DEFAULT_MAC_BYTE4, MY_DEFAULT_MAC_BYTE5, MY_DEFAULT_MAC_BYTE6};
@@ -1396,6 +1138,23 @@ static void InitAppConfig(void) {
 #endif
 
 
+
+
+
+void ConfigureLCD_SPI() {
+    LCD_SPI_BRG = (GetPeripheralClock() - 1ul) / 2ul / LCD_MAX_SPI_FREQ;
+    LCD_SPICON1 = 0x00000260; // sample at end, data change idle to active, clock idle high, master
+    LCD_SPICON1bits.ON = 1;
+}
+
+void ConfigureFlash_SPI() {
+    SPIFLASH_SPIBRG = (GetPeripheralClock() - 1ul) / 2ul / FLASH_MAX_SPI_FREQ;
+    SPIFLASH_SPICON1 = 0x00008120; // sample in the middle, data change idle to active,  master
+    SPIFLASH_SPICON1bits.ON = 1;
+}
+
+
+
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS)
 
 void SaveAppConfig(const APP_CONFIG *ptrAppConfig) {
@@ -1454,20 +1213,3 @@ void RestoreWifiConfig(void) {
 
 
 #endif // EZ_CONFIG_STORE
-
-
-
-
-void ConfigureLCD_SPI() {
-    LCD_SPI_BRG = (GetPeripheralClock() - 1ul) / 2ul / LCD_MAX_SPI_FREQ;
-    LCD_SPICON1 = 0x00000260; // sample at end, data change idle to active, clock idle high, master
-    LCD_SPICON1bits.ON = 1;
-}
-
-void ConfigureFlash_SPI() {
-    SPIFLASH_SPIBRG = (GetPeripheralClock() - 1ul) / 2ul / FLASH_MAX_SPI_FREQ;
-    SPIFLASH_SPICON1 = 0x00008120; // sample in the middle, data change idle to active,  master
-    SPIFLASH_SPICON1bits.ON = 1;
-}
-
-

@@ -1,6 +1,7 @@
 /*********************************************************************
  *
- *                Microchip USB C18 Firmware Version 1.2+
+ *                Microchip USB C18 HID Bootloader usbdrv.c
+ *			(modified from usbdrv.c included in MCHPFSUSB v1.2/v1.3)
  *
  *********************************************************************
  * FileName:        usbdrv.c
@@ -12,8 +13,8 @@
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PICmicro® Microcontroller is intended and
- * supplied to you, the Company’s customer, for use solely and
+ * (the "Company") for its PICmicro(R) Microcontroller is intended and
+ * supplied to you, the Company's customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
  * protected under applicable copyright laws. All rights are reserved.
@@ -22,19 +23,23 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
  * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
- * Author               Date        Comment
+ * File version         Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Rawin Rojvanit       11/19/04    Original.
- * Rawin Rojvanit       08/14/07    Bug fixes.
- * Fritz Schlunder		05/07/09	Small update to work with the
- *									new usbctrltrf.c file. 
+ * 1.0                  11/19/04    Original.
+ * 1.2                  08/14/07    Bug fixes.
+ * 1.4          		05/31/07	A few non-critical changes made to
+ *									decrease code size for use in
+ *									bootloader application.
+ * 1.5                  05/07/09	Small update to work with the
+ *									new usbctrltrf.c file.
+ * 1.6                  06/10/13    Minor cleanup and optimization.
  ********************************************************************/
 
 /** I N C L U D E S **********************************************************/
@@ -48,7 +53,9 @@
 byte bTRNIFCount;               // Bug fix - Work around.
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
-void USBModuleEnable(void);
+//void USBModuleEnable(void);   //Using below macro instead for space savings.
+#define USBModuleEnable()   {UCON = 0; UIE = 0; UCONbits.USBEN = 1; usb_device_state = ATTACHED_STATE;}
+
 void USBModuleDisable(void);
 
 void USBSuspend(void);
@@ -58,6 +65,8 @@ void USBProtocolResetHandler(void);
 void USB_SOF_Handler(void);
 void USBStallHandler(void);
 void USBErrorHandler(void);
+
+void ClearWatchdog(void);
 
 /** D E C L A R A T I O N S **************************************************/
 #pragma code
@@ -86,16 +95,26 @@ void USBCheckBusStatus(void)
     #define USB_BUS_ATTACHED    1
     #define USB_BUS_DETACHED    0
 
-    if(usb_bus_sense == USB_BUS_ATTACHED)       // Is USB bus attached?
-    {
+    #ifdef USE_USB_BUS_SENSE_IO
+        if(usb_bus_sense == USB_BUS_ATTACHED)       // Is USB bus attached?
+        {
+            if(UCONbits.USBEN == 0)                 // Is the module off?
+                USBModuleEnable();                  // Is off, enable it
+        }
+        else
+        {
+            if(UCONbits.USBEN == 1)                 // Is the module on?
+            {
+                UCON = 0;                               // Disable module & detach from bus
+                UIE = 0;                                // Mask all USB interrupts
+                usb_device_state = DETACHED_STATE;      // Defined in usbmmap.c & .h
+            }
+        }//end if(usb_bus_sense...)
+    #else
         if(UCONbits.USBEN == 0)                 // Is the module off?
             USBModuleEnable();                  // Is off, enable it
-    }
-    else
-    {
-        if(UCONbits.USBEN == 1)                 // Is the module on?
-            USBModuleDisable();                 // Is on, disable it
-    }//end if(usb_bus_sense...)
+    #endif
+
 
     /*
      * After enabling the USB module, it takes some time for the voltage
@@ -136,13 +155,14 @@ void USBCheckBusStatus(void)
  *
  * Note:            See USBCheckBusStatus() for more information.
  *****************************************************************************/
-void USBModuleEnable(void)
-{
-    UCON = 0;
-    UIE = 0;                                // Mask all USB interrupts
-    UCONbits.USBEN = 1;                     // Enable module & attach to bus
-    usb_device_state = ATTACHED_STATE;      // Defined in usbmmap.c & .h
-}//end USBModuleEnable
+//void USBModuleEnable(void)
+//{
+//    UCON = 0;
+//    UIE = 0;                                // Mask all USB interrupts
+//    UCONbits.USBEN = 1;                     // Enable module & attach to bus
+//    usb_device_state = ATTACHED_STATE;      // Defined in usbmmap.c & .h
+//}//end USBModuleEnable
+
 
 /******************************************************************************
  * Function:        void USBModuleDisable(void)
@@ -162,41 +182,41 @@ void USBModuleEnable(void)
  *
  * Note:            See USBCheckBusStatus() for more information.
  *****************************************************************************/
-void USBModuleDisable(void)
-{
-    UCON = 0;                               // Disable module & detach from bus
-    UIE = 0;                                // Mask all USB interrupts
-    usb_device_state = DETACHED_STATE;      // Defined in usbmmap.c & .h
-}//end USBModuleDisable
+//void USBModuleDisable(void)
+//{
+//    UCON = 0;                               // Disable module & detach from bus
+//    UIE = 0;                                // Mask all USB interrupts
+//    usb_device_state = DETACHED_STATE;      // Defined in usbmmap.c & .h
+//}//end USBModuleDisable
 
-/******************************************************************************
- * Function:        void USBSoftDetach(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    The device will have to be re-enumerated to function again.
- *
- * Overview:        USBSoftDetach electrically disconnects the device from
- *                  the bus. This is done by stop supplying Vusb voltage to
- *                  pull-up resistor. The pull-down resistors on the host
- *                  side will pull both differential signal lines low and
- *                  the host registers the event as a disconnect.
- *
- *                  Since the USB cable is not physically disconnected, the
- *                  power supply through the cable can still be sensed by
- *                  the device. The next time USBCheckBusStatus() function
- *                  is called, it will reconnect the device back to the bus.
- *
- * Note:            None
- *****************************************************************************/
-void USBSoftDetach(void)
-{
-    USBModuleDisable();
-}//end USBSoftDetach
+///******************************************************************************
+// * Function:        void USBSoftDetach(void)
+// *
+// * PreCondition:    None
+// *
+// * Input:           None
+// *
+// * Output:          None
+// *
+// * Side Effects:    The device will have to be re-enumerated to function again.
+// *
+// * Overview:        USBSoftDetach electrically disconnects the device from
+// *                  the bus. This is done by stop supplying Vusb voltage to
+// *                  pull-up resistor. The pull-down resistors on the host
+// *                  side will pull both differential signal lines low and
+// *                  the host registers the event as a disconnect.
+// *
+// *                  Since the USB cable is not physically disconnected, the
+// *                  power supply through the cable can still be sensed by
+// *                  the device. The next time USBCheckBusStatus() function
+// *                  is called, it will reconnect the device back to the bus.
+// *
+// * Note:            None
+// *****************************************************************************/
+//void USBSoftDetach(void)
+//{
+//    USBModuleDisable();
+//}//end USBSoftDetach
 
 /******************************************************************************
  * Function:        void USBDriverService(void)
@@ -227,7 +247,8 @@ void USBDriverService(void)
      * Task A: Service USB Activity Interrupt
      */
 
-    if(UIRbits.ACTVIF && UIEbits.ACTVIE)    USBWakeFromSuspend();
+//    if(UIRbits.ACTVIF && UIEbits.ACTVIE)    USBWakeFromSuspend();
+    if(UIRbits.ACTVIF)    USBWakeFromSuspend();
 
     /*
      * Pointless to continue servicing if the device is in suspend mode.
@@ -240,14 +261,20 @@ void USBDriverService(void)
      * once the UCONbits.SUSPND is clear, then the URSTIF bit will be asserted.
      * This is why URSTIF is checked after ACTVIF.
      */
-    if(UIRbits.URSTIF && UIEbits.URSTIE)    USBProtocolResetHandler();
+//    if(UIRbits.URSTIF && UIEbits.URSTIE)    USBProtocolResetHandler();
+    if(UIRbits.URSTIF)    USBProtocolResetHandler();
 
     /*
      * Task C: Service other USB interrupts
      */
-    if(UIRbits.IDLEIF && UIEbits.IDLEIE)    USBSuspend();
+//    if(UIRbits.IDLEIF && UIEbits.IDLEIE)    USBSuspend();
+    if(UIRbits.IDLEIF)    USBSuspend();
+
 //    if(UIRbits.SOFIF && UIEbits.SOFIE)      USB_SOF_Handler();
-    if(UIRbits.STALLIF && UIEbits.STALLIE)  USBStallHandler();
+//    if(UIRbits.STALLIF && UIEbits.STALLIE)  USBStallHandler();
+    if(UIRbits.STALLIF)  USBStallHandler();
+
+
 //    if(UIRbits.UERRIF && UIEbits.UERRIE)    USBErrorHandler();
 
     /*
@@ -262,7 +289,8 @@ void USBDriverService(void)
      */
     for(bTRNIFCount = 0; bTRNIFCount < 4; bTRNIFCount++)
     {
-        if(UIRbits.TRNIF && UIEbits.TRNIE)
+//        if(UIRbits.TRNIF && UIEbits.TRNIE)
+        if(UIRbits.TRNIF)
         {
             /*
              * USBCtrlEPService only services transactions over EP0.
@@ -282,7 +310,7 @@ void USBDriverService(void)
 		         */
 		        UIRbits.TRNIF = 0;
 		        /*
-		         * At least six Tcy are needed in between clearing UIR<TRNIF>
+		         * At least five Tcy are needed in between clearing UIR<TRNIF>
 		         * and when it becomes reasserted when the USTAT FIFO has more
 		         * than one entry in it.
 		         *
@@ -325,8 +353,7 @@ void USBDriverService(void)
  *****************************************************************************/
 void USBSuspend(void)
 {
-	unsigned char UIESave;
-	unsigned char LEDSave;
+	static unsigned char UIESave;
 	
     /*
      * NOTE: Do not clear UIRbits.ACTVIF here!
@@ -370,9 +397,9 @@ void USBSuspend(void)
 
 
 	//Configure I/O pins for lowest power.  This will be application specific.
-	LEDSave = mLED_1 | mLED_2;
-	mLED_1_Off();
-	mLED_2_Off();
+	#ifdef ENABLE_USB_LED_BLINK_STATUS
+    	mLED_1_Off();
+	#endif
 
 	//Disable all microcontroller wake up sources, except for the one(s) which will
 	//be used to wake up the microcontroller.  At the very least, the USB activity
@@ -396,9 +423,8 @@ void USBSuspend(void)
     					//state information inside either the USB device firmware, or 
     					//in the USB host software.
 
-	//Now restore states of I/O pins if desired/if it was changed prior to entering sleep
-	mLED_1 = LEDSave;
-	mLED_2 = LEDSave;
+	//Now insert code to restore states of I/O pins if desired/if it was changed prior to entering sleep
+
 
 	//Note: If using the two-speed startup feature, wakeup and execution will occur before the main oscillator + PLL
 	//has had a chance to start.  Device will run from INTOSC (no PLL).  However, USB module cannot be clocked
@@ -409,8 +435,8 @@ void USBSuspend(void)
 	//with the device (other than SOFs, which will be ignored since UCONbits.SUSPND = 1)
 
 	//This code delays ~5ms @ 8MHz to execute (using C18 3.21 with full optimizations enabled), but takes much less time at 48MHz.
-    pll_startup_counter = 725;
-    while(pll_startup_counter--)	//Device will switch clocks (if using two-speed startup) while executing this loop
+    uint_delay_counter = 725;
+    while(uint_delay_counter--)	//Device will switch clocks (if using two-speed startup) while executing this loop
     {
 	    ClrWdt();
 	} 
@@ -444,19 +470,19 @@ void USBWakeFromSuspend(void)
     UCONbits.SUSPND = 0;
     UIEbits.ACTVIE = 0;
 
-/********************************************************************
-Bug Fix: August 14, 2007
-*********************************************************************
-The ACTVIF bit cannot be cleared immediately after the USB module wakes
-up from Suspend or while the USB module is suspended. A few clock cycles
-are required to synchronize the internal hardware state machine before
-the ACTIVIF bit can be cleared by firmware. Clearing the ACTVIF bit
-before the internal hardware is synchronized may not have an effect on
-the value of ACTVIF. Additonally, if the USB module uses the clock from
-the 96 MHz PLL source, then after clearing the SUSPND bit, the USB
-module may not be immediately operational while waiting for the 96 MHz
-PLL to lock.
-********************************************************************/
+    /********************************************************************
+    Bug Fix: August 14, 2007
+    *********************************************************************
+    The ACTVIF bit cannot be cleared immediately after the USB module wakes
+    up from Suspend or while the USB module is suspended. A few clock cycles
+    are required to synchronize the internal hardware state machine before
+    the ACTIVIF bit can be cleared by firmware. Clearing the ACTVIF bit
+    before the internal hardware is synchronized may not have an effect on
+    the value of ACTVIF. Additonally, if the USB module uses the clock from
+    the 96 MHz PLL source, then after clearing the SUSPND bit, the USB
+    module may not be immediately operational while waiting for the 96 MHz
+    PLL to lock.
+    ********************************************************************/
     // UIRbits.ACTVIF = 0;                      // Removed
     while(UIRbits.ACTVIF){UIRbits.ACTVIF = 0;}  // Added
 
@@ -613,48 +639,48 @@ void USBStallHandler(void)
      * When the Setup Transaction is serviced, the ownership
      * for EP0_IN will then be forced back to CPU by firmware.
      */
-    if(U1EP0bits.EPSTALL == 1)
+    if(UEP0bits.EPSTALL == 1)
     {
-/********************************************************************
-Bug Fix: August 14, 2007 (#F4)
-*********************************************************************
-In a control transfer, when a request is not supported, all
-subsequent transactions should be stalled until a new SETUP
-transaction is received. The original firmware only stalls the
-first subsequent transaction, then ACKs others. Typically, a
-compliance USB host will stop sending subsequent transactions
-once the first stall is received. In the original firmware,
-function USBStallHandler() in usbdrv.c calls
-USBPrepareForNextSetupTrf() when a STALL event occurred on EP0.
-In turn, USBPrepareForNextSetupTrf() reconfigures EP0 IN and OUT
-to prepare for the next SETUP transaction. The work around is not
-to call USBPrepareForNextSetupTrf() in USBStallHandler().
-********************************************************************/
+        /********************************************************************
+        Bug Fix: August 14, 2007 (#F4)
+        *********************************************************************
+        In a control transfer, when a request is not supported, all
+        subsequent transactions should be stalled until a new SETUP
+        transaction is received. The original firmware only stalls the
+        first subsequent transaction, then ACKs others. Typically, a
+        compliance USB host will stop sending subsequent transactions
+        once the first stall is received. In the original firmware,
+        function USBStallHandler() in usbdrv.c calls
+        USBPrepareForNextSetupTrf() when a STALL event occurred on EP0.
+        In turn, USBPrepareForNextSetupTrf() reconfigures EP0 IN and OUT
+        to prepare for the next SETUP transaction. The work around is not
+        to call USBPrepareForNextSetupTrf() in USBStallHandler().
+        ********************************************************************/
         //USBPrepareForNextSetupTrf();      // Removed
-/*******************************************************************/
-
-/********************************************************************
-Bug Fix: August 14, 2007 (#F7 - Partial 4/4)
-*********************************************************************
-For a control transfer read, if the host tries to read more data
-than what it has requested, the peripheral device should stall the
-extra IN transactions and the status stage. Typically, a host does
-not try to read more data than what it has requested. The original
-firmware did not handle this situation. Instead of stalling extra
-IN transactions, the device kept sending out zero length packets.
-
-This work around checks to make sure that at least one extra IN
-transaction is stalled before setting the OUT endpoint to stall the
-status stage.
-********************************************************************/
+        /*******************************************************************/
+        
+        /********************************************************************
+        Bug Fix: August 14, 2007 (#F7 - Partial 4/4)
+        *********************************************************************
+        For a control transfer read, if the host tries to read more data
+        than what it has requested, the peripheral device should stall the
+        extra IN transactions and the status stage. Typically, a host does
+        not try to read more data than what it has requested. The original
+        firmware did not handle this situation. Instead of stalling extra
+        IN transactions, the device kept sending out zero length packets.
+        
+        This work around checks to make sure that at least one extra IN
+        transaction is stalled before setting the OUT endpoint to stall the
+        status stage.
+        ********************************************************************/
         if((ep0Bo.Stat._byte == _USIE) && (ep0Bi.Stat._byte == (_USIE|_BSTALL)))
         {
             // Set ep0Bo to stall also
             ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;
         }//end if
-/*******************************************************************/
+        /*******************************************************************/
 
-        U1EP0bits.EPSTALL = 0;         	    // Clear STALL status
+        UEP0bits.EPSTALL = 0;         	    // Clear STALL status
     }
     UIRbits.STALLIF = 0;
 }//end USBStallHandler
@@ -720,27 +746,13 @@ void USBProtocolResetHandler(void)
     UIE = 0b01111011;               // Enable all interrupts except ACTVIE
 
     UADDR = 0x00;                   // Reset to default address
-    mDisableEP1to15();              // Reset all non-EP0 UEPn registers
-    U1EP0 = EP_CTRL|HSHK_EN;        // Init EP0 as a Ctrl EP, see usbdrv.h
+    mDisableEP1to7();              // Reset all non-EP0 UEPn registers
+    UEP0 = EP_CTRL|HSHK_EN;         // Init EP0 as a Ctrl EP, see usbdrv.h
 
     while(UIRbits.TRNIF == 1)       // Flush any pending transactions
     {
         UIRbits.TRNIF = 0;
-/********************************************************************
-Bug Fix: August 14, 2007
-*********************************************************************
-Clearing the transfer complete flag bit, TRNIF, causes the SIE to
-advance the FIFO. If the next data in the FIFO holding register is
-valid, the SIE will reassert the interrupt within 6Tcy of clearing
-TRNIF. If no additional data is preset, TRNIF will remain clear.
-Additional nops were added in this fix to guarantee that TRNIF is
-properly updated before being checked again.
-********************************************************************/
-		_asm
-		bra	0	//Equivalent to bra $+2, which takes half as much code as 2 nop instructions
-		bra	0	//Equivalent to bra $+2, which takes half as much code as 2 nop instructions
-		_endasm		
-		Nop();
+		ClearWatchdog();    //5 Tcy minimum (2 for call, 2 for return, 1 for clearing) to allow TRNIF to (potentially) reassert
     }
 
     UCONbits.PKTDIS = 0;            // Make sure packet processing is enabled
@@ -749,7 +761,7 @@ properly updated before being checked again.
     ep0Bo.Cnt = EP0_BUFF_SIZE;
     ep0Bo.ADR = (byte*)(&SetupPkt);
     ep0Bo.Stat._byte = _USIE|_DAT0|_DTSEN|_BSTALL;	
-
+    
     usb_stat.RemoteWakeup = 0;      // Default status flag to disable
     usb_active_cfg = 0;             // Clear active configuration
     usb_device_state = DEFAULT_STATE;

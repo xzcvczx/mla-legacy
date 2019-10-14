@@ -80,6 +80,16 @@ extern void WF_OutputConnectionContext(void);
 extern void ValidateConfig(void);
 #endif
 
+
+#if defined(SAVE_WPS_CONFIDENTIALS)
+static void ConfigWep(tWFWpsCred *cred, UINT8 *secType, union sec_key *key);
+static void WF_SaveWPSCredentials(UINT8 CpId);
+#endif
+
+#if defined(WF_USE_POWER_SAVE_FUNCTIONS)
+static void CheckHibernate(void);
+#endif
+
 /*
 *********************************************************************************************************
 *                                           DEFINES                               
@@ -514,7 +524,7 @@ static void ConvAsciiKey2Hex(UINT8 *key, UINT8 keyLen, UINT8 *hexKey)
 
   Description:
     Configures WEP security mode from WPS credentials data. Based on key length,
-    determne whether it is WF_SECURITY_WEP_40 or WF_SECURITY_WEP_104. Perform
+    determine whether it is WF_SECURITY_WEP_40 or WF_SECURITY_WEP_104. Perform
     a key conversion to hex key values.
 
   Precondition:
@@ -583,7 +593,7 @@ static void ConfigWep(tWFWpsCred *cred, UINT8 *secType, union sec_key *key)
     MACInit must be called first.
 
   Parameters:
-    CpId - Connection Profileï ID 
+    CpId - Connection Profileï¿½ ID 
     
   Returns:
     None.
@@ -737,7 +747,7 @@ static void CheckHibernate(void)
     
             WF_hibernate.state = WF_HB_NO_SLEEP;
             StackInit();
-            #if defined(WF_CONSOLE_DEMO)
+            #if defined(WF_CONSOLE_DEMO) || (defined(WF_EASY_CONFIG_DEMO) && defined(__C32__))
             IperfAppInit();
             #endif
     
@@ -775,7 +785,7 @@ static void CheckHibernate(void)
         
     #if defined(WF_CONSOLE) 
         WFConsoleProcess();
-        #if defined( WF_CONSOLE_DEMO )
+        #if defined( WF_CONSOLE_DEMO ) || (defined(WF_EASY_CONFIG_DEMO) && defined(__C32__))
             if (WF_hibernate.state == WF_HB_NO_SLEEP)
             {
                 IperfAppCall();

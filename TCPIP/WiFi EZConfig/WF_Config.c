@@ -74,6 +74,10 @@
 extern UINT8 g_scan_done;
 #endif
 
+#if defined(WF_PRE_SCAN_IN_ADHOC)
+UINT8 g_prescan_adhoc_done = 0;
+#endif
+
 /*****************************************************************************
  * FUNCTION: WF_ProcessEvent
  *
@@ -189,6 +193,9 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo, UINT8 *extraInfo)
             g_scan_done = 1;    // WF_PRESCAN          
             #endif 
 			
+            #if defined(WF_PRE_SCAN_IN_ADHOC)
+            g_prescan_adhoc_done = 1;
+            #endif
             break;
 
         case WF_EVENT_SOFT_AP_EVENT:

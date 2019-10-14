@@ -1,15 +1,13 @@
 /********************************************************************
- FileName:     	usb_descriptors.c
- Dependencies:	See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing the
- 				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
- Company:		Microchip Technology, Inc.
+ FileName:      usb_descriptors.c
+ Dependencies:  See INCLUDES section
+ Processor:     PIC18, PIC24, dsPIC33, and PIC32 USB Microcontrollers
+ Hardware:      This demo is natively intended to be used on Microchip USB demo
+                boards supported by the MCHPFSUSB stack.  See release notes for
+                support matrix.  This demo can be modified for use on other hardware
+                platforms.
+ Complier:      Microchip C18 (for PIC18), XC16 (for PIC24/dsPIC33), XC32 (for PIC32)
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
@@ -191,7 +189,7 @@ ROM BYTE configDescriptor1[]={
     0,                      // Configuration string index
     _DEFAULT | _SELF,               // Attributes, see usb_device.h
     50,                     // Max power consumption (2X mA)
-							
+
     /* Interface Descriptor */
     0x09,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
     USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type
@@ -259,7 +257,7 @@ ROM BYTE *ROM USB_SD_Ptr[]=
     (ROM BYTE *ROM)&sd000,
     (ROM BYTE *ROM)&sd001,
     (ROM BYTE *ROM)&sd002,
-    //(ROM BYTE *ROM)&sd003
+    //(ROM BYTE *ROM)&sd003  //uncomment if implementing a serial number string descriptor named sd003
 };
 
 

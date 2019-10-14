@@ -86,7 +86,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>null</languageToolchainVersion>
+        <languageToolchainVersion>1.20</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -112,7 +112,7 @@
         <property key="define-macros" value=""/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="identifier-length" value="31"/>
+        <property key="identifier-length" value="200"/>
         <property key="operation-mode" value="pro"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
         <property key="optimization-assembler" value="true"/>
@@ -124,14 +124,15 @@
         <property key="optimization-speed" value="true"/>
         <property key="preprocess-assembler" value="false"/>
         <property key="undefine-macros" value=""/>
+        <property key="use-cci" value="false"/>
         <property key="verbose" value="false"/>
         <property key="warning-level" value="0"/>
         <property key="what-to-do" value="ignore"/>
       </HI-TECH-COMP>
       <HI-TECH-LINK>
       </HI-TECH-LINK>
-      <ICD3PlatformTool>
-      </ICD3PlatformTool>
+      <PICkit3PlatformTool>
+      </PICkit3PlatformTool>
       <XC8-config-global>
       </XC8-config-global>
     </conf>
@@ -143,7 +144,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -209,7 +210,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -280,7 +281,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -346,7 +347,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -412,7 +413,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -478,7 +479,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -544,7 +545,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -620,7 +621,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -696,7 +697,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -762,7 +763,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -860,7 +861,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -942,7 +943,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1024,7 +1025,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1106,7 +1107,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1188,7 +1189,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1270,7 +1271,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.21</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1330,7 +1331,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.21</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1390,7 +1391,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.21</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1450,7 +1451,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.21</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>

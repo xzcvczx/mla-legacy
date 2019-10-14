@@ -10,20 +10,19 @@ LIBPATH .
 
 #IFDEF _CRUNTIME
   #IFDEF _EXTENDEDMODE
-    FILES c018i_e.o
+    //FILES c018i_e.o   //Not using default C initializer.  Use manual initialization code.
     FILES clib_e.lib
     FILES p18F2455_e.lib
 
   #ELSE
-    FILES c018i.o
+    //FILES c018i.o	//Not using default C initializer.  Use manual initialization code.
     FILES clib.lib
     FILES p18F2455.lib
   #FI
 
 #FI
 
-  CODEPAGE   NAME=vectors    START=0x0               END=0x1F           PROTECTED
-  CODEPAGE   NAME=BootPage   START=0x20              END=0xFFF
+  CODEPAGE   NAME=BootPage   START=0x0000            END=0xFFF
 #IFDEF _DEBUGCODESTART
   CODEPAGE   NAME=page       START=0x1000            END=_CODEEND     PROTECTED
   CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND        PROTECTED

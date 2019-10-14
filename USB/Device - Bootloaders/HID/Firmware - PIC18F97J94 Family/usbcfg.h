@@ -6,14 +6,14 @@
  * FileName:        usbcfg.h
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.11+
+ * Compiler:        C18 3.42+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PICmicro® Microcontroller is intended and
- * supplied to you, the Company’s customer, for use solely and
+ * (the "Company") for its PICmicro(R) Microcontroller is intended and
+ * supplied to you, the Company's customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
  * protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -61,22 +61,27 @@
 //#define YOUR_BOARD
 
 
-#if defined(PIC18F4550_PICDEM_FS_USB)
-    #define USE_SELF_POWER_SENSE_IO
-    #define USE_USB_BUS_SENSE_IO
+//------------------------------------------------------------------------------
+#define ENABLE_IO_PIN_CHECK_BOOTLOADER_ENTRY  //Uncomment if you wish to enable I/O pin entry method into bootloader mode
+                                              //Make sure proper sw2() macro definition is provided in io_cfg.h                                
+//------------------------------------------------------------------------------
+//If you don't uncomment the above, the only entry method into bootloader mode,
+//is by software, ex:
+//1.  Booting up initially into application run mode.
+//2.  From the application run mode, execute a "goto 0x001C" instruction
+//    in order to jump into bootloader mode.
+//------------------------------------------------------------------------------
+    
+//Option to allow blinking of LEDs to show USB bus state.  May be optionally
+//commented out to save code space.
+#define ENABLE_USB_LED_BLINK_STATUS     //Comment out to save code space
 
-#elif defined(PIC18F97J94_FS_USB_PIM) || defined(PIC18F87J94_FS_USB_PIM)
-    //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board		
+//USB VBUS sensing and USB Bus/Self power sensing options.
+//---------------------------------------------------------
+//#define USE_SELF_POWER_SENSE_IO   //Leave commented if device is bus powered only (or self powered only, uncomment for some types of dual powered devices)
+//#define USE_USB_BUS_SENSE_IO      //If the device is self powered, this needs to uncommented if making a fully compliant USB design
 
-    /*If using the YOUR_BOARD selection, uncomment below section as appropriate for your hardware*/
-    //#elif defined(YOUR_BOARD)
-	//#define USE_SELF_POWER_SENSE_IO	//See MCHPFSUSB Firmware User's Guide
-   	//#define USE_USB_BUS_SENSE_IO		//(DS51679) for more details about these features.
 
-#else
-    #error Not a supported board (yet), See __FILE__, line __LINE__, or double click on this text.
-//See above commented section.  You need to select the features your hardware will be using.
-#endif
 
 /** D E V I C E  C L A S S  U S A G E *******************************/
 #define USB_USE_HID
@@ -91,12 +96,6 @@
 #define MUID_HID                2
 #define MUID_CDC                3
 
-
-//Register name aliases
-#define U1EP0       UEP0
-#define U1EP1       UEP1
-#define U1EP0bits   UEP0bits
-
 /** E N D P O I N T S  A L L O C A T I O N **************************/
 /*
  * See usbmmap.c for an explanation of how the endpoint allocation works
@@ -104,7 +103,7 @@
 
 /* HID */
 #define HID_INTF_ID             0x00
-#define HID_UEP                 U1EP1
+#define HID_UEP                 UEP1
 #define HID_BD_OUT              ep1Bo
 #define HID_INT_OUT_EP_SIZE     64
 #define HID_BD_IN               ep1Bi

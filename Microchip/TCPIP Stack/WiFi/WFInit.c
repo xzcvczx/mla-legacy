@@ -162,7 +162,7 @@ void WF_Init(void)
     
     #if defined(WF_CONSOLE)
         WFConsoleInit();
-        #if defined(WF_CONSOLE_DEMO)
+        #if defined(WF_CONSOLE_DEMO) || (defined(WF_EASY_CONFIG_DEMO) && defined(__C32__))
             IperfAppInit();
         #endif
     #endif

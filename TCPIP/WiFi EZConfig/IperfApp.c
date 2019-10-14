@@ -51,7 +51,8 @@
 
 #include "TCPIP Stack/TCPIP.h"
 
-#if defined (WF_CONSOLE) && !defined (STACK_USE_EZ_CONFIG)
+#if defined (WF_CONSOLE)
+#if defined(__C32__)
 #include "IperfApp.h"
 #include "TCPIP Stack/WFConsole.h"
 
@@ -276,8 +277,7 @@ ResetIperfCounters(void)
 
 }
 
-static void
-ascii_to_u32s(INT8 *ptr, UINT32 *values, UINT8 count)
+static void ascii_to_u32s(INT8 *ptr, UINT32 *values, UINT8 count)
 {
     UINT8 i;
     UINT32 tmp;
@@ -324,8 +324,7 @@ ascii_to_u32s(INT8 *ptr, UINT32 *values, UINT8 count)
 // Todo: implement the jitter report.
 //
 
-static void
-ReportBW_Jitter_Loss(tIperfReport reportType)
+static void ReportBW_Jitter_Loss(tIperfReport reportType)
 {
     UINT32 nAttempted;
     UINT32 nDropped;
@@ -370,11 +369,10 @@ ReportBW_Jitter_Loss(tIperfReport reportType)
             sprintf( (char *) g_ConsoleContext.txBuf, "    - [0.0- %lu.%lu sec] %3lu/ %3lu (%2lu%%)    %4lu Kbps",
                              (unsigned long)(msec/1000),
                              (unsigned long)((msec%1000)/100),
-                             (unsigned long)nDropped,
-                             (unsigned long)nAttempted,
+                      (unsigned long)nDropped,
+                      (unsigned long)nAttempted,
                              (nAttempted == 0u) ? 0 : ((unsigned long)nDropped*100/(unsigned long)nAttempted),
-                             (unsigned long) (kbps + ((double) 0.5)));
-
+                      (unsigned long) (kbps + ((double) 0.5)));
             WFConsolePrintRamStr( (char *) g_ConsoleContext.txBuf , TRUE);
 
             break;
@@ -1262,7 +1260,7 @@ StateMachineTxArpResolve(void)
 static void
 StateMachineUDPTxOpen(void)
 {
-    if ( (APPCTX.udpSock = UDPOpenEx((DWORD)APPCTX.remoteSide.remote.IPAddr.v,UDP_OPEN_NODE_INFO, 0, APPCTX.mServerPort)) == INVALID_UDP_SOCKET )
+    if ( (APPCTX.udpSock = UDPOpenEx((DWORD)((unsigned int)APPCTX.remoteSide.remote.IPAddr.v),UDP_OPEN_NODE_INFO, 0, APPCTX.mServerPort)) == INVALID_UDP_SOCKET )
     {
         /* error case */
         WFConsolePrintRomStr("Create UDP socket failed", TRUE);
@@ -1459,6 +1457,7 @@ static BOOL
 GenericTxStart(void)
 {
     UINT32 currentTime;
+    BOOL iperfKilled;
 
     currentTime = IPERF_GET_MSEC_TICK_COUNT();
 
@@ -1468,7 +1467,9 @@ GenericTxStart(void)
         return FALSE;
     }
 
-    if ((IperfAppKillRequested() == TRUE) ||
+    iperfKilled = IperfAppKillRequested();
+
+    if ((iperfKilled == TRUE) ||
         ((APPCTX.mDuration != 0u) &&
          (currentTime > (APPCTX.startTime + APPCTX.mDuration))) ||
         ((APPCTX.mAmount != 0u) &&
@@ -1511,10 +1512,10 @@ GenericTxStart(void)
        {
          // We don't close the socket. We wait for user to "kill iperf" explicitly.
          WFConsolePrintRomStr("", TRUE);
-         WFConsolePrintRomStr("    Warning, TCP client detected diconnect", TRUE);
+         WFConsolePrintRomStr("    Warning, TCP server disconnect detected", TRUE);
        }
 
-       if  ( TCPIsPutReady(APPCTX.tcpClientSock) <= APPCTX.mMSS )
+       if  (( TCPIsPutReady(APPCTX.tcpClientSock) <= APPCTX.mMSS ) && (!iperfKilled))
           return FALSE;
 
     }
@@ -1558,7 +1559,7 @@ GenericTxStart(void)
 
         APPCTX.remainingTxData = (APPCTX.mMSS - MAX_BUFFER);
 
-        if ( TCPPutArray(APPCTX.tcpClientSock, (BYTE*) g_bfr, MAX_BUFFER) != MAX_BUFFER )
+        if (( TCPPutArray(APPCTX.tcpClientSock, (BYTE*) g_bfr, MAX_BUFFER) != MAX_BUFFER ) && (!iperfKilled))
         {
             WFConsolePrintRomStr("Socket send failed", TRUE);
             APPCTX.errorCount++;
@@ -1955,5 +1956,5 @@ void IperfAppCall(void)
 
         }
 }
-
+#endif /* defined(__C32__) */
 #endif /* WF_CONSOLE */

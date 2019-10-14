@@ -343,7 +343,7 @@ WORD TeDraw(void *pObj)
 
 #ifdef USE_GRADIENT
                     // set the gradient parameters
-                    GOLGradientPanelDraw(pTe->hdr.pGolScheme);                
+                    SetGOLPanelGradient(pTe->hdr.pGolScheme);                
 #endif
 
 					// set up the panel

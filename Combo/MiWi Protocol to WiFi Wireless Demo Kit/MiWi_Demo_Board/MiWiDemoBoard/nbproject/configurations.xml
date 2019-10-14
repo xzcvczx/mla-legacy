@@ -19,7 +19,6 @@
       </logicalFolder>
       <logicalFolder name="Protocols" displayName="Protocols" projectFiles="true">
         <itemPath>../../../../Microchip/Include/WirelessProtocols/MCHP_API.h</itemPath>
-        <itemPath>../../../../Microchip/Include/WirelessProtocols/NVM.h</itemPath>
         <itemPath>../../../../Microchip/Include/WirelessProtocols/SymbolTime.h</itemPath>
         <itemPath>../../../../Microchip/Include/WirelessProtocols/MiWiPRO/ConfigMiWiPRO.h</itemPath>
         <itemPath>../../../../Microchip/Include/WirelessProtocols/MiWiPRO/MiWiPRO.h</itemPath>
@@ -27,6 +26,7 @@
         <itemPath>../../../../Microchip/Include/WirelessProtocols/MiWi/MiWi.h</itemPath>
         <itemPath>../../../../Microchip/Include/WirelessProtocols/P2P/ConfigP2P.h</itemPath>
         <itemPath>../../../../Microchip/Include/WirelessProtocols/P2P/P2P.h</itemPath>
+        <itemPath>../LocalFiles/NVM.h</itemPath>
       </logicalFolder>
       <logicalFolder name="Transceivers"
                      displayName="Transceivers"
@@ -65,7 +65,7 @@
         <itemPath>../../../../Microchip/WirelessProtocols/MiWi/MiWi.c</itemPath>
         <itemPath>../../../../Microchip/WirelessProtocols/MiWiPRO/MiWiPRO.c</itemPath>
         <itemPath>../../../../Microchip/WirelessProtocols/P2P/P2P.c</itemPath>
-        <itemPath>../../../../Microchip/WirelessProtocols/NVM.c</itemPath>
+        <itemPath>../LocalFiles/NVM.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Transceivers"
                      displayName="Transceivers"
@@ -137,7 +137,7 @@
         <property key="enable-ou" value="true"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
-                  value="..;../../../../Microchip/Include;../../../../Microchip/Include/Transceivers;../../../../Microchip/Include/WirelessProtocols/P2P;../../../../Microchip/Include/Transceivers/MRF24J40;../../../../Microchip/Include/WirelessProtocols;../../../../Microchip/Include/Transceivers/MRF49XA;../../../../Microchip/Include/WirelessProtocols/MiWi;../../../../Microchip/Include/Transceivers/MRF89XA;../../../../Microchip/Include/WirelessProtocols"/>
+                  value="..;../../../;../../../../Microchip/Include;../../../../Microchip/Include/Transceivers;../../../../Microchip/Include/WirelessProtocols/P2P;../../../../Microchip/Include/Transceivers/MRF24J40;../../../../Microchip/Include/WirelessProtocols;../../../../Microchip/Include/Transceivers/MRF49XA;../../../../Microchip/Include/WirelessProtocols/MiWi;../../../../Microchip/Include/Transceivers/MRF89XA;../../../../Microchip/Include/WirelessProtocols"/>
         <property key="optimization-master" value="Custom"/>
         <property key="preprocessor-macros" value="CFG_INCLUDE_MIWI_DEMOBRD"/>
         <property key="procedural-abstraction-passes" value="0"/>
@@ -169,6 +169,8 @@
         <property key="stack-analysis-mcc18" value="false"/>
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
     </conf>
   </confs>
 </configurationDescriptor>

@@ -105,12 +105,10 @@ namespace WinUSBDemo {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
-
-	#pragma region DLL Imports
-
 	using namespace System::Threading;	
 	using namespace System::Runtime::InteropServices;  //Need this to support "unmanaged" code.
 
+	#pragma region DLL Imports
 	/*
 	In order to use these unmanaged functions from within the managed .NET environment, we need
 	to explicitly import the functions which we will be using from other .DLL file(s).  Simply
@@ -229,7 +227,7 @@ namespace WinUSBDemo {
 	extern "C" BOOL WinUsb_Free(WINUSB_INTERFACE_HANDLE InterfaceHandle);
 
 	//WinUsb_FlushPipe() is used to discard any data that may be "cached in a pipe".
-	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_Free", CallingConvention=CallingConvention::Winapi)]
+	[DllImport("winusb.dll" , CharSet = CharSet::Seeifdef, EntryPoint="WinUsb_FlushPipe", CallingConvention=CallingConvention::Winapi)]
 	extern "C" BOOL WinUsb_FlushPipe(WINUSB_INTERFACE_HANDLE  InterfaceHandle, UCHAR  PipeID);
 
 	//Note: WinUSB supports quite a few more functions that aren't being used in this application, and aren't

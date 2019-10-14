@@ -155,18 +155,18 @@
  *
  * Note:            None
  *****************************************************************************/
-#if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
-	#define mDisableEP1to15()       ClearArray((byte*)&UEP1,7);
-#else
-	#define mDisableEP1to15()       ClearArray((byte*)&UEP1,15);
-#endif
+//#if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
+//	#define mDisableEP1to15()       ClearArray((byte*)&UEP1,7);
+//#else
+//	#define mDisableEP1to15()       ClearArray((byte*)&UEP1,15);
+//#endif
 
-/*
-#define mDisableEP1to15()       UEP1=0x00;UEP2=0x00;UEP3=0x00;\
-                                UEP4=0x00;UEP5=0x00;UEP6=0x00;UEP7=0x00;\
-                                UEP8=0x00;UEP9=0x00;UEP10=0x00;UEP11=0x00;\
-                                UEP12=0x00;UEP13=0x00;UEP14=0x00;UEP15=0x00;
-*/
+//Using below instead to save code space.  Dedicated bootloader project,
+//will never use UEP3+, therefore no need to really mess with those registers
+#define mDisableEP1to7()       UEP1=0x00;UEP2=0x00;UEP3=0x00;\
+                                UEP4=0x00;UEP5=0x00;UEP6=0x00;UEP7=0x00;
+//                                UEP8=0x00;UEP9=0x00;UEP10=0x00;UEP11=0x00;\
+//                                UEP12=0x00;UEP13=0x00;UEP14=0x00;UEP15=0x00;
 
 /******************************************************************************
  * Macro:           void mUSBBufferReady(buffer_dsc)
@@ -201,6 +201,7 @@
 /** T Y P E S ****************************************************************/
 
 /** E X T E R N S ************************************************************/
+extern unsigned int uint_delay_counter;
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void USBCheckBusStatus(void);
