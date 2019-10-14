@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="f1" displayName="PIC18F" projectFiles="true">
+        <itemPath>../PIC18F/FSconfig.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="PIC24F" projectFiles="true">
+        <itemPath>../PIC24F/FSconfig.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="PIC32" projectFiles="true">
+        <itemPath>../PIC32/FSconfig.h</itemPath>
+      </logicalFolder>
+      <itemPath>../../Microchip/Include/Compiler.h</itemPath>
+      <itemPath>../../Microchip/Include/MDD File System/FSDefs.h</itemPath>
+      <itemPath>../../Microchip/Include/MDD File System/FSIO.h</itemPath>
+      <itemPath>../../Microchip/Include/GenericTypeDefs.h</itemPath>
+      <itemPath>../HardwareProfile.h</itemPath>
+      <itemPath>../../Microchip/Include/MDD File System/SD-SPI.h</itemPath>
+      <itemPath>../../Microchip/Include/PIC18 salloc/salloc.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="LibraryFiles"
+                   displayName="Library Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="LinkerScript"
+                   displayName="Linker Files"
+                   projectFiles="true">
+      <itemPath>../PIC18F/18f46j50.lkr</itemPath>
+      <itemPath>../PIC18F/18f87j50.lkr</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ObjectFiles"
+                   displayName="Object Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="f1" displayName="PIC18F" projectFiles="true">
+        <itemPath>../PIC18F/Demonstration.c</itemPath>
+        <itemPath>../../Microchip/PIC18 salloc/salloc.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="PIC24F" projectFiles="true">
+        <itemPath>../PIC24F/Demonstration2.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="PIC32" projectFiles="true">
+        <itemPath>../PIC32/Demonstration3.c</itemPath>
+      </logicalFolder>
+      <itemPath>../../Microchip/MDD File System/FSIO.c</itemPath>
+      <itemPath>../../Microchip/MDD File System/SD-SPI.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="PIC24FJ128GA010_PIM" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC24FJ128GA010</targetDevice>
+        <targetHeader>AC162065/AC244022</targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../Microchip/Include/PIC18 salloc/salloc.h"
+            ex="false"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../Microchip/PIC18 salloc/salloc.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../PIC18F/18f46j50.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../PIC18F/18f87j50.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../PIC18F/Demonstration.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../PIC18F/FSconfig.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../PIC32/Demonstration3.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../PIC32/FSconfig.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="scalar-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="..;../PIC24F;../../Include;../../Include/MDD File System;../../Microchip/Include;../../Microchip/Include/MDD File System;../../../Microchip/Include/MDD File System;../../../MDD File System-SD Card;../../../MDD File System-SD Card/PIC24F"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="data-model" value="default"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="0"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="const-model" value="default"/>
+        <property key="code-model" value="default"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=".."/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value=""/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories" value=".."/>
+      </C30-LD>
+      <C30Global>
+      </C30Global>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC18F87J50_PIM" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F87J50</targetDevice>
+        <targetHeader>AC162087</targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.38</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../PIC18F/18f46j50.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../PIC24F/Demonstration2.c" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../PIC24F/FSconfig.h" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../PIC32/Demonstration3.c" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../PIC32/FSconfig.h" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="storage-class" value="sca"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-all-optimizations" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="optimization-master" value="Disable all"/>
+        <property key="code-model" value="ml"/>
+        <property key="warning-level" value="2"/>
+        <property key="extra-include-directories"
+                  value=".;.\PIC18F;..\..\MDD File System-SD Card\PIC18F;..\..\MDD File System-SD Card;..\..\Microchip\Include\MDD File System;..\..\Microchip\Include;..\..\Microchip\Include\PIC18 salloc"/>
+        <property key="enable-ow" value="true"/>
+        <property key="verbose" value="false"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="data-model" value="oa-"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-ob" value="true"/>
+      </C18>
+      <C18-AS>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="false"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+        <property key="cross.reference.file" value=""/>
+      </C18-AS>
+      <C18-LD>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
+        <property key="extra-lib-directories" value=""/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="stack-analysis-mplink" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <RealICEPlatformTool>
+        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
+        <property key="memories.id" value="false"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="tracecontrol.spiselect" value="0"/>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.programmemory.end" value="0x1fff7"/>
+        <property key="tracecontrol.portselect" value="0"/>
+        <property key="memories.aux" value="false"/>
+        <property key="tracecontrol.medium" value="0"/>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC32MX460F512L_PIM" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../Microchip/Include/PIC18 salloc/salloc.h"
+            ex="false"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Microchip/PIC18 salloc/salloc.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/18f46j50.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/18f87j50.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/Demonstration.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/FSconfig.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC24F/Demonstration2.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC24F/FSconfig.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="extra-include-directories"
+                  value=".;.\PIC32;..\..\MDD File System-SD Card;..\..\MDD File System-SD Card\PIC32;..\..\Microchip\Include;..\..\Microchip\Include\MDD File System"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="make-warnings-into-errors" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
+      </C32>
+      <C32-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+      </C32-LD>
+      <C32Global>
+        <property key="legacy-libc" value="false"/>
+        <property key="no-start-files" value="false"/>
+      </C32Global>
+      <RealICEPlatformTool>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.id" value="false"/>
+        <property key="CHANGE NOTICE" value="true"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="COMPARATOR" value="true"/>
+        <property key="INPUT CAPTURE @" value="true"/>
+        <property key="ADC @" value="true"/>
+        <property key="REAL TIME CLOCK" value="true"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="DMA" value="true"/>
+        <property key="OUTPUT COMPARE @" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="memories.programmemory.start" value="0x1d000000"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x1d000000"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="TIMER@" value="true"/>
+        <property key="I2C@" value="true"/>
+        <property key="memories.programmemory.end" value="0x1d07ffff"/>
+        <property key="TIMER1" value="true"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="memories.aux" value="false"/>
+        <property key="UART@" value="true"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="INTERRUPT CONTROL" value="true"/>
+        <property key="programoptions.preserveprogramrange.end" value="0x1d0001ff"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC32MX360F512L_PIM" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX360F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../Microchip/Include/PIC18 salloc/salloc.h"
+            ex="false"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Microchip/PIC18 salloc/salloc.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/18f46j50.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/18f87j50.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/Demonstration.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC18F/FSconfig.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC24F/Demonstration2.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../PIC24F/FSconfig.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="extra-include-directories"
+                  value=".;.\PIC32;..\..\MDD File System-SD Card;..\..\MDD File System-SD Card\PIC32;..\..\Microchip\Include;..\..\Microchip\Include\MDD File System"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="make-warnings-into-errors" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
+      </C32>
+      <C32-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+      </C32-LD>
+      <C32Global>
+        <property key="legacy-libc" value="false"/>
+        <property key="no-start-files" value="false"/>
+      </C32Global>
+      <RealICEPlatformTool>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.id" value="false"/>
+        <property key="CHANGE NOTICE" value="true"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="COMPARATOR" value="true"/>
+        <property key="INPUT CAPTURE @" value="true"/>
+        <property key="ADC @" value="true"/>
+        <property key="REAL TIME CLOCK" value="true"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="DMA" value="true"/>
+        <property key="OUTPUT COMPARE @" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="memories.programmemory.start" value="0x1d000000"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x1d000000"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="TIMER@" value="true"/>
+        <property key="I2C@" value="true"/>
+        <property key="memories.programmemory.end" value="0x1d07ffff"/>
+        <property key="TIMER1" value="true"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="memories.aux" value="false"/>
+        <property key="UART@" value="true"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="INTERRUPT CONTROL" value="true"/>
+        <property key="programoptions.preserveprogramrange.end" value="0x1d0001ff"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
+      </RealICEPlatformTool>
+    </conf>
+  </confs>
+</configurationDescriptor>

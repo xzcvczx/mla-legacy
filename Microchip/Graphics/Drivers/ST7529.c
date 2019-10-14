@@ -33,14 +33,33 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     03/20/08	
+ * 03/20/08	    ...
+ * 04/12/11     Graphics Library Version 3.00 Support
  *****************************************************************************/
-#include "Graphics/Graphics.h"
+#include "HardwareProfile.h"
+
+#if defined (GFX_USE_DISPLAY_CONTROLLER_ST7529) 
+
+#include "Compiler.h"
+#include "TimeDelay.h"
+#include "Graphics/DisplayDriver.h"
+#include "Graphics/ST7529.h"
+#include "Graphics/Primitive.h"
+
+#if defined (USE_GFX_PMP)
+    #include "Graphics/gfxpmp.h"
+#elif defined (USE_GFX_EPMP)
+    #include "Graphics/gfxepmp.h"
+#endif    
 
 // Color
-BYTE    _color;
+GFX_COLOR   _color;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
 
 // Clipping region control
 SHORT   _clipRgn;
@@ -52,12 +71,14 @@ SHORT   _clipRight;
 SHORT   _clipBottom;
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
+#ifndef USE_TRANSPARENT_COLOR
 void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void    PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void    PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+#endif
 
 /*********************************************************************
 * Function:  void ResetDevice()
@@ -78,7 +99,7 @@ void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void ResetDevice(void)
 {
 	// Initialize device
-	DeviceInit();
+	DriverInterfaceInit();
 
     DelayMs(20);
     DisplayEnable();
@@ -325,6 +346,29 @@ void WakeUp(void)
 	DisplaySetData();
 }
 
+#ifdef USE_TRANSPARENT_COLOR
+/*********************************************************************
+* Function:  void TransparentColorEnable(GFX_COLOR color)
+*
+* Overview: Sets current transparent color.
+*
+* PreCondition: none
+*
+* Input: color - Color value chosen.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void TransparentColorEnable(GFX_COLOR color)
+{
+    _colorTransparent = color;    
+    _colorTransparentEnable = TRANSPARENT_COLOR_ENABLE;
+
+}
+#endif
+
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)
 *
@@ -409,7 +453,7 @@ void PutPixel(SHORT x, SHORT y)
 * Note: none
 *
 ********************************************************************/
-WORD GetPixel(SHORT x, SHORT y)
+GFX_COLOR GetPixel(SHORT x, SHORT y)
 {
     BYTE    columnPixel[3];         // 3 Pixels in each column
     DisplayEnable();
@@ -440,6 +484,73 @@ WORD GetPixel(SHORT x, SHORT y)
 	DisplaySetData();
 
     return (columnPixel[x % 3]);
+}
+
+/*********************************************************************
+* Function: SetClipRgn(left, top, right, bottom)
+*
+* Overview: Sets clipping region.
+*
+* PreCondition: none
+*
+* Input: left - Defines the left clipping region border.
+*		 top - Defines the top clipping region border.
+*		 right - Defines the right clipping region border.
+*	     bottom - Defines the bottom clipping region border.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    _clipLeft=left;
+    _clipTop=top;
+    _clipRight=right;
+    _clipBottom=bottom;
+
+}
+
+/*********************************************************************
+* Function: SetClip(control)
+*
+* Overview: Enables/disables clipping.
+*
+* PreCondition: none
+*
+* Input: control - Enables or disables the clipping.
+*			- 0: Disable clipping
+*			- 1: Enable clipping
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClip(BYTE control)
+{
+    _clipRgn=control;
+}
+
+/*********************************************************************
+* Function: IsDeviceBusy()
+*
+* Overview: Returns non-zero if LCD controller is busy 
+*           (previous drawing operation is not completed).
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: Busy status.
+*
+* Side Effects: none
+*
+********************************************************************/
+WORD IsDeviceBusy(void)
+{  
+    return (0);
 }
 
 /*********************************************************************
@@ -485,3 +596,6 @@ void ClearDevice(void)
 
     DisplayDisable();
 }
+
+#endif //(GFX_USE_DISPLAY_CONTROLLER_ST7529) 
+

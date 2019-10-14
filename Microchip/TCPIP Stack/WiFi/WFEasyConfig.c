@@ -269,7 +269,10 @@ WFDisplayScanMgr()
 {
     tWFScanResult   bssDesc;
     char ssid[32];
+	char rssiChan[48];
 
+    if (SCANCXT.numScanResults == 0)
+       return;
     if (!IS_SCAN_STATE_DISPLAY(SCANCXT.scanState))
        return;
 
@@ -284,6 +287,11 @@ WFDisplayScanMgr()
     /* Display SSID */
     sprintf(ssid, "%s\r\n", bssDesc.ssid);
     putsUART(ssid);
+
+	/* Display SSID  & Channel */
+    /* RSSI_MAX : 200, RSSI_MIN : 106 */
+    sprintf(rssiChan, "  => RSSI: %u, Channel: %u\r\n", bssDesc.rssi, bssDesc.channel);
+    putsUART(rssiChan);
 
     if (++SCANCXT.displayIdx == SCANCXT.numScanResults)  {
         SCAN_CLEAR_DISPLAY(SCANCXT.scanState);

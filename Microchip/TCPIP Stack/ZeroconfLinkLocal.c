@@ -1042,6 +1042,7 @@ void ZeroconfLLProcess(void)
 			// Claim it. Goto DEFEND state
 
 			AppConfig.MyIPAddr = temp_IP_addr;
+			AppConfig.MyMask.Val = 0x0000FFFF;
 			zcll_state = SM_ADDR_DEFEND;
 			DisplayIPValue(AppConfig.MyIPAddr);
 			INFO_ZCLL_MESG(zeroconf_dbg_msg,"\r\n******** Taken IP-Addr: " \

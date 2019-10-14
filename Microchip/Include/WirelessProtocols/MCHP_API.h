@@ -38,10 +38,11 @@
 *   This file defines MiApp interfaces 
 *
 * Change History:
-*  Rev   Date         Description
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  2.1   06/20/2009   Add LCD support
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  2.1   06/20/2009   yfy       Add LCD support
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #ifndef __MCHP_API
@@ -59,7 +60,9 @@
         #include "WirelessProtocols/MiWi/MiWi.h"
     #endif
     
-    
+    #if defined(PROTOCOL_MIWI_PRO)
+        #include "WirelessProtocols/MiWiPRO/MiWiPRO.h"
+    #endif
     
     #define INPUT
     #define OUTPUT
@@ -269,7 +272,7 @@
     typedef struct
     {
         BYTE		Channel;                        // Operating Channel of the PAN
-        BYTE        Address[MY_ADDRESS_LENGTH]; // Responding device address
+        BYTE        Address[MY_ADDRESS_LENGTH];     // Responding device address
         WORD_VAL    PANID;                          // PAN Identifier
         BYTE        RSSIValue;                      // RSSI value for the response  
         BYTE        LQIValue;                       // LQI value for the response
@@ -654,6 +657,9 @@
     BOOL MiApp_UnicastAddress(BYTE *DestinationAddress, BOOL PermanentAddr, BOOL SecEn);
 
 
+    #define BROADCAST_TO_ALL            0x01
+    #define MULTICAST_TO_COORDINATORS   0x02
+    #define MULTICAST_TO_FFDS           0x03
     /***************************************************************************
      * Received Message information
      *  
@@ -667,7 +673,7 @@
             BYTE Val;
             struct
             {
-                BYTE		broadcast:  1;      // 1: broadcast message
+                BYTE		broadcast:  2;      // 1: broadcast message
                 BYTE		ackReq:     1;      // 1: sender request acknowledgement in MAC.
                 BYTE		secEn:      1;      // 1: application payload has been secured
                 BYTE		repeat:     1;      // 1: message received through a repeater
@@ -962,8 +968,11 @@
 
 
     // Callback functions
-    #define MiApp_CB_AllowConnection(x) TRUE
-
+    #define MiApp_CB_AllowConnection(handleInConnectionTable) TRUE
+    //BOOL MiApp_CB_AllowConnection(BYTE handleInConnectionTable);
+    #define MiApp_CB_RFDAcknowledgement(SourceShortAddress, AcknowledgementSeqNum)
+    //void MiApp_CB_RFDAcknowledgement(WORD sourceAddr, BYTE Seq);
+    
     extern RECEIVED_MESSAGE rxMessage;
     #if defined(ENABLE_TIME_SYNC)
         extern WORD_VAL CounterValue;

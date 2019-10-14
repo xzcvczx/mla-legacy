@@ -8,13 +8,13 @@
  * Dependencies:    None
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.0
+ * Version:         1.3.0
  *
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PICmicro® Microcontroller is intended and
- * supplied to you, the Company’s customer, for use solely and
+ * (the ï¿½Companyï¿½) for its PICmicroï¿½ Microcontroller is intended and
+ * supplied to you, the Companyï¿½s customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
  * protected under applicable copyright laws. All rights are reserved.
@@ -23,7 +23,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN ï¿½AS ISï¿½ CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -38,14 +38,26 @@
 #include "Compiler.h"
 #include "HardwareProfile.h"
 
+// Summary: A macro indicating whether Long File Name is supported
+// Description: If this macro is disabled then only 8.3 format file name is enabled.
+//              If this macro is enabled then long file names upto 256 characters are
+//              supported.
+#define	SUPPORT_LFN
 
 // Summary: A macro indicating the maximum number of concurrently open files
 // Description: The FS_MAX_FILES_OPEN #define is only applicable when dynamic memory allocation is not used (FS_DYNAMIC_MEM is not defined).
 //              This macro defines the maximum number of open files at any given time.  The amount of RAM used by FSFILE objects will
 //              be equal to the size of an FSFILE object multipled by this macro value.  This value should be kept as small as possible
 //              as dictated by the application.  This will reduce memory usage.
-#define FS_MAX_FILES_OPEN 	3
-
+#if defined(__PIC24F__)
+	#if defined(SUPPORT_LFN)
+		#define FS_MAX_FILES_OPEN 	1
+	#else
+		#define FS_MAX_FILES_OPEN 	3
+	#endif
+#else
+	#define FS_MAX_FILES_OPEN 	3
+#endif
 
 // Summary: A macro defining the size of a sector
 // Description: The MEDIA_SECTOR_SIZE macro will define the size of a sector on the FAT file system.  This value must equal 512 bytes,

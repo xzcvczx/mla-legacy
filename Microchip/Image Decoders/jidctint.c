@@ -3,7 +3,7 @@
  *
  * Copyright (C) 1991-1998, Thomas G. Lane.
  * This file is part of the Independent JPEG Group's software.
- * For conditions of distribution and use, see the accompanying README file.
+ * For conditions of distribution and use, see the accompanying 'IJG License.pdf' file.
  *
  * This file contains a slow-but-accurate integer implementation of the
  * inverse DCT (Discrete Cosine Transform).  In the IJG code, this routine

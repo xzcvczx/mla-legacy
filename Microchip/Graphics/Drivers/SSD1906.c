@@ -65,15 +65,15 @@ void SetAddress(DWORD address);
 void    SetReg(WORD index, BYTE value);
 BYTE    GetReg(WORD index);
 
-void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
 
-void    PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+void    PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void    PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void    PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void    PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
 
 #if (DISPLAY_PANEL == TFT_G240320LTSW_118W_E)
     #include "TCON_SSD1289.c"
@@ -610,107 +610,15 @@ void ClearDevice(void)
     DisplayDisable();
 }
 
-/*********************************************************************
-* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
-*
-* PreCondition: none
-*
-* Input: left,top - left top image corner,
-*        bitmap - image pointer,
-*        stretch - image stretch factor
-*
-* Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the image is not yet completely drawn.
-*         - Returns 1 when the image is completely drawn.
-*         For Blocking configuration:
-*         - Always return 1.
-*
-* Side Effects: none
-*
-* Overview: outputs image starting from left,top coordinates
-*
-* Note: image must be located in flash
-*
-********************************************************************/
-WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
-{
-    FLASH_BYTE  *flashAddress;
-    BYTE        colorDepth;
-    WORD        colorTemp;
-
-    #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0);
-
-    /* Ready */
-    #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-    #endif
-
-    // Save current color
-    colorTemp = _color;
-
-    switch(*((SHORT *)bitmap))
-    {
-            #ifdef USE_BITMAP_FLASH
-
-        case FLASH:
-
-            // Image address
-            flashAddress = ((BITMAP_FLASH *)bitmap)->address;
-
-            // Read color depth
-            colorDepth = *(flashAddress + 1);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPP(left, top, flashAddress, stretch); break;
-                case 4:     PutImage4BPP(left, top, flashAddress, stretch); break;
-                case 8:     PutImage8BPP(left, top, flashAddress, stretch); break;
-                case 16:    PutImage16BPP(left, top, flashAddress, stretch); break;
-            }
-
-            break;
-            #endif
-            #ifdef USE_BITMAP_EXTERNAL
-
-        case EXTERNAL:
-
-            // Get color depth
-            ExternalMemoryCallback(bitmap, 1, 1, &colorDepth);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPPExt(left, top, bitmap, stretch); break;
-                case 4:     PutImage4BPPExt(left, top, bitmap, stretch); break;
-                case 8:     PutImage8BPPExt(left, top, bitmap, stretch); break;
-                case 16:    PutImage16BPPExt(left, top, bitmap, stretch); break;
-                default:    break;
-            }
-
-            break;
-            #endif
-
-        default:
-            break;
-    }
-
-    // Restore current color
-    _color = colorTemp;
-    return (1);
-}
-
 #ifdef USE_BITMAP_FLASH
 
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
-*        bitmap - image pointer,
+*        image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -722,7 +630,7 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -735,7 +643,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     BYTE                mask;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
@@ -798,11 +706,11 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -814,7 +722,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -827,7 +735,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
@@ -890,11 +798,11 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -906,7 +814,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -919,7 +827,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
@@ -970,11 +878,11 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -986,7 +894,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_WORD *flashAddress;
@@ -997,7 +905,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     register BYTE       stretchX, stretchY;
 
     // Move pointer to size information
-    flashAddress = (FLASH_WORD *)bitmap + 1;
+    flashAddress = (FLASH_WORD *)image + 1;
 
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
@@ -1044,11 +952,11 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1060,7 +968,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1079,11 +987,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (2 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
@@ -1101,7 +1009,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
 
         DisplayEnable();
@@ -1148,11 +1056,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1164,7 +1072,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1182,11 +1090,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (16 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
@@ -1204,7 +1112,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
         DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
@@ -1245,11 +1153,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1261,7 +1169,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1278,11 +1186,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (256 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
@@ -1295,7 +1203,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
         DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
@@ -1323,11 +1231,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1339,7 +1247,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1356,8 +1264,8 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     // Set start address
     address = (long)(GetMaxX() + 1) * top + left;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
@@ -1372,7 +1280,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
         DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)

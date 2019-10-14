@@ -3,10 +3,8 @@
  *  GOL Layer 
  *****************************************************************************
  * FileName:        GOL.c
- * Dependencies:    Graphics.h 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -37,17 +35,29 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07              Version 1.0 release
  * 06/29/09				Added multi-line support for Buttons.
- * 03 Dec 2009			Added Double Buffering Support
+ * 03/12/09             Added Double Buffering Support
  * 04/29/10				Fixed GOLGetFocusNext() issue.
  * 06/07/10				To save drawing time, add check on panel to skip 
  * 						drawing the panel face and frame if the bitmap
  * 						used is greater than area of the panel.
  * 09/08/10				Removed redundant code in GOLRedrawRec().
  *                      Added EditBox in GOLCanBeFocused().
+ * 03/30/11             In 1 BPP mode: Removed all references to WHITE and 
+ *                      BLACK color. Replaced them to use the emboss light 
+ *                      and dark color instead.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
 #ifdef USE_GOL
+
+#include <string.h>
+
+#ifdef USE_TRANSITION_EFFECTS
+    
+    #include "Graphics/Transitions.h"
+    
+    static BYTE TransitionPendingStatus;
+#endif
 
 // Pointer to the current linked list of objects displayed and receiving messages
 OBJ_HEADER  *_pGolObjects = NULL;
@@ -57,6 +67,10 @@ GOL_SCHEME  *_pDefaultGolScheme = NULL;
 
 // Pointer to the object receiving keyboard input
 OBJ_HEADER  *_pObjectFocused = NULL;
+
+#ifdef USE_GRADIENT
+GFX_GRADIENT_STYLE _gradientScheme;
+#endif
 
     #ifdef USE_FOCUS
 
@@ -263,19 +277,12 @@ WORD GOLCanBeFocused(OBJ_HEADER *object)
 GOL_SCHEME *GOLCreateScheme(void)
 {
     GOL_SCHEME  *pTemp;
+
     pTemp = (GOL_SCHEME *)GFX_malloc(sizeof(GOL_SCHEME));
+
     if(pTemp != NULL)
     {
-        pTemp->EmbossDkColor = EMBOSSDKCOLORDEFAULT;
-        pTemp->EmbossLtColor = EMBOSSLTCOLORDEFAULT;
-        pTemp->TextColor0 = TEXTCOLOR0DEFAULT;
-        pTemp->TextColor1 = TEXTCOLOR1DEFAULT;
-        pTemp->TextColorDisabled = TEXTCOLORDISABLEDDEFAULT;
-        pTemp->Color0 = COLOR0DEFAULT;
-        pTemp->Color1 = COLOR1DEFAULT;
-        pTemp->ColorDisabled = COLORDISABLEDDEFAULT;
-        pTemp->CommonBkColor = COMMONBACKGROUNDCOLORDEFAULT;
-        pTemp->pFont = (void *) &FONTDEFAULT;
+        memcpy(pTemp, &GFX_SCHEMEDEFAULT, sizeof(GOL_SCHEME));
     }
 
     return (pTemp);
@@ -305,6 +312,12 @@ void GOLInit(void)
 
     // Initialize the default GOL scheme
     _pDefaultGolScheme = GOLCreateScheme();
+
+    #ifdef USE_TRANSITION_EFFECTS
+
+        TransitionPendingStatus = 0;
+
+    #endif
 }
 
 /*********************************************************************
@@ -336,7 +349,8 @@ void GOLFree(void)
     while(pCurrentObj != NULL)
     {
         pNextObj = (OBJ_HEADER *)pCurrentObj->pNxtObj;
-
+		
+		// check if there are additional items to free
         if(pCurrentObj->FreeObj)
             pCurrentObj->FreeObj(pCurrentObj);
 
@@ -345,6 +359,12 @@ void GOLFree(void)
     }
 
     GOLNewList();
+
+	#ifdef USE_DOUBLE_BUFFERING
+	
+	    InvalidateAll();
+
+	#endif
 }
 
 /*********************************************************************
@@ -539,6 +559,17 @@ WORD GOLDraw(void)
     {
         if(GOLDrawCallback())
         {
+        	#ifdef USE_TRANSITION_EFFECTS
+                if(TransitionPendingStatus)
+                {
+                    #ifdef PIC24FJ256DA210_DEV_BOARD
+                    TransitionPendingStatus = 0;
+	                while(IsDisplayUpdatePending());
+                   	GFXExecutePendingTransition(_drawbuffer, (_drawbuffer == GFX_BUFFER1)? GFX_BUFFER2: GFX_BUFFER1);
+                    #endif
+                }
+            #endif
+            
             // It's last object jump to head
             pCurrentObj = _pGolObjects;
 
@@ -585,6 +616,13 @@ WORD GOLDraw(void)
 
         pCurrentObj = (OBJ_HEADER *)pCurrentObj->pNxtObj;
     }
+
+	#if defined(USE_TRANSITION_EFFECTS) && defined(USE_DOUBLE_BUFFERING)
+
+        TransitionPendingStatus = GFXIsTransitionPending();
+	    InvalidateAll(); //If needed, invalidate only the transition rectangle instead
+
+	#endif
 
     return (1);             // drawing is completed
 }
@@ -763,9 +801,9 @@ WORD GOLPanelDrawTsk(void)
 	        Bar(_rpnlX1 + _rpnlEmbossSize, _rpnlY1 + _rpnlEmbossSize, _rpnlX2 - _rpnlEmbossSize, _rpnlY2 - _rpnlEmbossSize);
 	
 	            #if (COLOR_DEPTH == 1)
-	    if(_rpnlFaceColor == BLACK)
+	    if(_rpnlFaceColor == _rpnlEmbossDkColor)
 	    {
-	        SetColor(WHITE);
+	        SetColor(_rpnlEmbossLtColor);
 	        if(_rpnlR)
 	            Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1));
 	        else
@@ -955,6 +993,18 @@ WORD GOLPanelDrawTsk(void)
                 rnd_panel_draw_facecolor : SetColor(_rpnlFaceColor);
                 if(_rpnlR)
                 {
+                    #ifdef USE_GRADIENT
+                    if(_gradientScheme.gradientType != GRAD_NONE)
+                    {
+                       BevelGradient(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize,
+                                     _gradientScheme.gradientStartColor,_gradientScheme.gradientEndColor,
+                                    _gradientScheme.gradientLength,_gradientScheme.gradientType);
+                    }
+                   else
+                   #endif
+
+
+
                     if(!FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize))
                         return (0);
                 }
@@ -1008,9 +1058,9 @@ WORD GOLPanelDrawTsk(void)
                         #if (COLOR_DEPTH == 1)
 
             case DRAW_INNERFRAME:
-                if(_rpnlFaceColor == BLACK)
+                if(_rpnlFaceColor == _rpnlEmbossDkColor)
                 {
-                    SetColor(WHITE);
+                    SetColor(_rpnlEmbossLtColor); 
 					if(_rpnlR)
 					{
                         if(!Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1)))
@@ -1050,7 +1100,12 @@ WORD GOLPanelDrawTsk(void)
 
                     // draw the outline frame
                             #if (COLOR_DEPTH == 1)
-                    SetColor(WHITE);
+                    // When in 1BPP mode, the outline should always be the light color 
+                    // Ideally WHITE.   
+                    if (_rpnlEmbossLtColor > _rpnlEmbossDkColor)
+                        SetColor(_rpnlEmbossLtColor);     
+                    else
+                        SetColor(_rpnlEmbossDkColor);     
                             #else
                     SetColor(_rpnlEmbossDkColor);
                             #endif
@@ -1144,10 +1199,9 @@ WORD GOLTwoTonePanelDrawTsk(void)
 
 
             #if (COLOR_DEPTH == 1)
-           
-    if(_rpnlFaceColor == BLACK)
+    if(_rpnlFaceColor == _rpnlEmbossDkColor)
     {
-        SetColor(WHITE);
+        SetColor(_rpnlEmbossLtColor);
         if(_rpnlR)
             Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1));
         else
@@ -1379,9 +1433,9 @@ WORD GOLTwoTonePanelDrawTsk(void)
                         #if (COLOR_DEPTH == 1)
 
             case DRAW_INNERFRAME:
-                if(_rpnlFaceColor == BLACK)
+                if(_rpnlFaceColor == _rpnlEmbossDkColor)
                 {
-                    SetColor(WHITE);
+                    SetColor(_rpnlEmbossLtColor);
 					if(_rpnlR)
 					{
                         if(!Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1)))

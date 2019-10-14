@@ -43,6 +43,7 @@
 *  Rev   Date         Author    Description
 *  2.0   4/15/2009    yfy       MiMAC and MiApp revision
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #if !defined(__MRF49XA_H)
@@ -54,9 +55,9 @@
         #include "GenericTypeDefs.h"
         #include "Compiler.h"
         #include "WirelessProtocols/SymbolTime.h"
+        #include "Transceivers/MCHP_MAC.h"
         #include "Transceivers/MRF49XA/ConfigMRF49XA.h"
         #include "Transceivers/Security.h"
-        #include "Transceivers/MCHP_MAC.h"
         #include "TimeDelay.h"
 
         // following should be in the def file
@@ -113,7 +114,7 @@
                 #define         FREQ_START              1332
                 #define         FREQ_STEP               132
                 #define         CHANNEL_NUM             5
-                #define         FULL_CHANNLE_MAP        0x0000001F
+                #define         FULL_CHANNEL_MAP        0x0000001F
            
            #elif defined(DATA_RATE_9600)
                 
@@ -125,7 +126,7 @@
                 #define         FREQ_START              1332
                 #define         FREQ_STEP               132
                 #define         CHANNEL_NUM             5
-                #define         FULL_CHANNLE_MAP        0x0000001F
+                #define         FULL_CHANNEL_MAP        0x0000001F
                 
            #elif defined(DATA_RATE_19200)
            
@@ -350,16 +351,20 @@
             #define PROTOCOL_HEADER_SIZE 11
         #endif
         
+        #if defined(PROTOCOL_MIWI_PRO)
+            #define PROTOCOL_HEADER_SIZE 11
+        #endif
+        
         #if defined(PROTOCOL_P2P)
             #define PROTOCOL_HEADER_SIZE 0
         #endif
     
         #if defined(ENABLE_SECURITY)
-            #define TX_PACKET_SIZE (TX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+BLOCK_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+9)
-            #define RX_PACKET_SIZE (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+BLOCK_SIZE+9)
+            #define TX_PACKET_SIZE (TX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+BLOCK_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+10)
+            #define RX_PACKET_SIZE (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+BLOCK_SIZE+10)
         #else
-            #define TX_PACKET_SIZE  (TX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+4)
-            #define RX_PACKET_SIZE  (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+4)
+            #define TX_PACKET_SIZE  (TX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+5)
+            #define RX_PACKET_SIZE  (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+5)
         #endif
     
     

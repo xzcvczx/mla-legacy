@@ -82,6 +82,8 @@
          file, so as to make the usb_device.c file less cluttered.
          Fixed BD() and EP() macro computation error, when running in
          USB_PING_PONG__EP0_OUT_ONLY mode.
+  2.9    No functional change.  Fixed spelling typo in the name of 
+         "USB_TRANSFER_COMPLETE_HANDLER()"
 ********************************************************************/
 #include "usb_config.h"
 
@@ -481,8 +483,8 @@ typedef union
 #endif
 
 #if defined USB_DISABLE_TRANSFER_COMPLETE_HANDLER 
-    #define USB_TRASFER_COMPLETE_HANDLER(event,pointer,size)               
+    #define USB_TRANSFER_COMPLETE_HANDLER(event,pointer,size)               
 #else
-    #define USB_TRASFER_COMPLETE_HANDLER(event,pointer,size)    USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
+    #define USB_TRANSFER_COMPLETE_HANDLER(event,pointer,size)    USER_USB_CALLBACK_EVENT_HANDLER(event,pointer,size)
 #endif
 

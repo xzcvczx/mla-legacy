@@ -1,65 +1,65 @@
 /*********************************************************************
- *
- *           Helper Functions for Microchip TCP/IP Stack
- *
- *********************************************************************
- * FileName:		Helpers.C
- * Dependencies:	None
- * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- * Compiler:        Microchip C32 v1.05 or higher
- *					Microchip C30 v3.12 or higher
- *					Microchip C18 v3.30 or higher
- *					HI-TECH PICC-18 PRO 9.63PL2 or higher
- * Company:         Microchip Technology, Inc.
- *
- * Software License Agreement
- *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
- * reserved.
- *
- * Microchip licenses to you the right to use, modify, copy, and
- * distribute:
- * (i)  the Software when embedded on a Microchip microcontroller or
- *      digital signal controller product ("Device") which is
- *      integrated into Licensee's product; or
- * (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
- *		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device
- *		used in conjunction with a Microchip ethernet controller for
- *		the sole purpose of interfacing with the ethernet controller.
- *
- * You should refer to the license agreement accompanying this
- * Software for additional information regarding your rights and
- * obligations.
- *
- * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
- * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
- * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
- * MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
- * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
- * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
- * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
- * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
- * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
- * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
- *
- *
- * Author               Date    Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Nilesh Rajbharti     5/17/01 Original        (Rev 1.0)
- * Nilesh Rajbharti     2/9/02  Cleanup
- * Nilesh Rajbharti     6/25/02 Rewritten CalcIPChecksum() to avoid
- *                              multi-byte shift operation.
- * Howard Schlunder		2/9/05  Added hexatob(), btohexa_high(), and
- *							    btohexa_low()
- * Howard Schlunder    10/10/06 Optimized swapl()
- * Elliott Wood		   11/20/07	Added leftRotateDWORD()
+ 
+ Helper Functions for Microchip TCPIP Stack
+ 
+ FileName:      Helpers.c
+ Dependencies:  See INCLUDES section
+ Processor:     PIC18, PIC24, dsPIC, PIC32
+ Compiler:      Microchip C18, C30, C32
+ Company:       Microchip Technology, Inc.
+
+ Software License Agreement
+
+ Copyright (C) 2002-2011 Microchip Technology Inc.  All rights
+ reserved.
+
+ Microchip licenses to you the right to use, modify, copy, and
+ distribute:
+ (i)  the Software when embedded on a Microchip microcontroller or
+      digital signal controller product ("Device") which is
+      integrated into Licensee's product; or
+ (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device
+		used in conjunction with a Microchip ethernet controller for
+		the sole purpose of interfacing with the ethernet controller.
+
+ You should refer to the license agreement accompanying this
+ Software for additional information regarding your rights and
+ obligations.
+
+ THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+ WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+ LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+ PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+ MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+ CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+ PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+ BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+ THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+ SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+ (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
+
+ ********************************************************************
+ File Description:
+ 
+ Change History:
+ 
+  Rev         Description
+  ----------  -------------------------------------------------------
+  1.0 - 5.31  Initial release; Rewritten CalcIPChecksum() to avoid
+              multi-byte shift operation; Added hexatob(),
+              btohexa_high(), and btohexa_low(); Optimized swapl();
+              Added leftRotateDWORD()
+  5.36        Updated compile time check for ultoa();
+
  ********************************************************************/
 #define __HELPERS_C
 
 #include "TCPIP Stack/TCPIP.h"
 
+
+// Default Random Number Generator seed. 0x41FE9F9E corresponds to calling LFSRSeedRand(1)
+static DWORD dwLFSRRandSeed = 0x41FE9F9E;
 
 /*****************************************************************************
   Function:
@@ -96,7 +96,6 @@
 	dwSeed value of 0x0 will return the same sequence of random numbers as 
 	using the seed of 0x1.
   ***************************************************************************/
-static DWORD dwLFSRRandSeed = 0x41FE9F9E;	// 0x41FE9F9E corresponds to calling LFSRSeedRand(1)
 DWORD LFSRSeedRand(DWORD dwSeed)
 {
 	DWORD dwOldSeed;
@@ -874,10 +873,10 @@ void uitoa(WORD Value, BYTE* Buffer)
   Returns:
   	None
   ***************************************************************************/
-// HI-TECH PICC-18 PRO 9.63 and C30 v3.25 already have a ultoa() library function
+// HI-TECH PICC-18 PRO 9.63, C30 v3.25, and C32 v1.12 already have a ultoa() library function
 // C18 already has a ultoa() function that more-or-less matches this one
-// C32 and C30 < v3.25 need this function
-#if defined(__PIC32MX__) || (defined (__C30__) && (__C30_VERSION__ < 325)) || defined(__C30_LEGACY_LIBC__)
+// C32 < 1.12 and C30 < v3.25 need this function
+#if (defined(__PIC32MX__) && (__C32_VERSION__ < 112)) || (defined (__C30__) && (__C30_VERSION__ < 325)) || defined(__C30_LEGACY_LIBC__) || defined(__C32_LEGACY_LIBC__)
 void ultoa(DWORD Value, BYTE* Buffer)
 {
 	BYTE i;
@@ -1178,7 +1177,7 @@ WORD CalcIPChecksum(BYTE* buffer, WORD count)
 		sum.dw += (DWORD)*(BYTE*)val;
 
 	// Do an end-around carry (one's complement arrithmatic)
-	sum.dw = sum.w[0] + sum.w[1];
+	sum.dw = (DWORD)sum.w[0] + (DWORD)sum.w[1];
 
 	// Do another end-around carry in case if the prior add 
 	// caused a carry out

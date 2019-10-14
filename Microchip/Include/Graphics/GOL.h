@@ -3,10 +3,8 @@
  *  GOL Layer 
  *****************************************************************************
  * FileName:        GOL.h
- * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -46,11 +44,18 @@
  *				file) user must add this line in the GraphicsConfig.h file:
  *					#define FONTDEFAULT	userFont where "userFont" is the
  *				user supplied font.
+ * 02/24/11     Replace color data type to GFX_COLOR
  *****************************************************************************/
 #ifndef _GOL_H
     #define _GOL_H
 
-    #include "Graphics/Graphics.h"
+/*********************************************************************
+ * Section: Includes
+ *********************************************************************/
+#include "Graphics/Primitive.h"
+#include "GenericTypeDefs.h"
+#include "Graphics/gfxcolors.h"
+#include "GraphicsConfig.h"
 
 /*********************************************************************
 * Overview: GOL scheme defines the style scheme to be used by an object. 
@@ -58,17 +63,30 @@
 *********************************************************************/
 typedef struct
 {
-    WORD    EmbossDkColor;      	// Emboss dark color used for 3d effect.
-    WORD    EmbossLtColor;      	// Emboss light color used for 3d effect.
-    WORD    TextColor0;         	// Character color 0 used for objects that supports text.
-    WORD    TextColor1;         	// Character color 1 used for objects that supports text.
-    WORD    TextColorDisabled;  	// Character color used when object is in a disabled state.
-    WORD    Color0;             	// Color 0 usually assigned to an Object state.
-    WORD    Color1;             	// Color 1 usually assigned to an Object state.
-    WORD    ColorDisabled;      	// Color used when an Object is in a disabled state.
-    WORD    CommonBkColor;      	// Background color used to hide Objects.
-    void    *pFont;             	// Font selected for the scheme.
+    GFX_COLOR    EmbossDkColor;     // Emboss dark color used for 3d effect.
+    GFX_COLOR    EmbossLtColor;     // Emboss light color used for 3d effect.
+    GFX_COLOR    TextColor0;        // Character color 0 used for objects that supports text.
+    GFX_COLOR    TextColor1;        // Character color 1 used for objects that supports text.
+    GFX_COLOR    TextColorDisabled; // Character color used when object is in a disabled state.
+    GFX_COLOR    Color0;            // Color 0 usually assigned to an Object state.
+    GFX_COLOR    Color1;            // Color 1 usually assigned to an Object state.
+    GFX_COLOR    ColorDisabled;     // Color used when an Object is in a disabled state.
+    GFX_COLOR    CommonBkColor;     // Background color used to hide Objects.
+    void        *pFont;             // Font selected for the scheme.
+
+    #ifdef USE_ALPHABLEND
+    BYTE 	AlphaValue;				// Alpha value used for alpha blending.	
+    #endif
+     
+    #ifdef USE_GRADIENT
+    GFX_GRADIENT_STYLE gradientScheme;   //Gradient Scheme for widgets
+    #endif
 } GOL_SCHEME;
+
+#ifdef USE_GRADIENT
+extern GFX_GRADIENT_STYLE _gradientScheme;
+#endif
+
 
 /*********************************************************************
 * Overview: Pointer to the GOL default scheme (GOL_SCHEME). This  
@@ -103,6 +121,7 @@ typedef enum
     OBJ_CHART,                  	// Type defined for Chart Object.
     OBJ_TEXTENTRY,              	// Type defined for Text-Entry Object.
     OBJ_DIGITALMETER,           	// Type defined for DIGITALMETER Object.
+    OBJ_ANALOGCLOCK,                // Type defined for ANALOGCLOCK Object.
     OBJ_UNKNOWN                 	// Type is undefined and not supported by the library.
 } GOL_OBJ_TYPE;
 
@@ -220,8 +239,15 @@ typedef enum
     TE_MSG_DELETE,                  // TextEntry delete character action ID
     TE_MSG_SPACE,                   // TextEntry add space character action ID
     TE_MSG_ENTER,                   // TextEntry enter action ID
+    AC_MSG_PRESSED,                 // Analog Clock Pressed Action
+    AC_MSG_RELEASED,                // Analog Clock Released Action
     OBJ_MSG_PASSIVE             	// Passive message response. No change in object needed.
 } TRANS_MSG;
+
+typedef WORD(*DRAW_FUNC)(void *);                   		// object draw function pointer typedef
+typedef void(*FREE_FUNC)(void *);                   		// object free function pointer typedef
+typedef WORD(*MSG_FUNC)(void *, GOL_MSG *);         		// object message function pointer typedef
+typedef void(*MSG_DEFAULT_FUNC)(WORD, void *, GOL_MSG *);	// object default message function pointer typedef
 
 /*********************************************************************
 * Overview: This structure defines the first nine fields of the 
@@ -229,11 +255,6 @@ typedef enum
 *			library Objects. 
 *
 *********************************************************************/
-typedef WORD(*DRAW_FUNC)(void *);                   		// object draw function pointer typedef
-typedef void(*FREE_FUNC)(void *);                   		// object free function pointer typedef
-typedef WORD(*MSG_FUNC)(void *, GOL_MSG *);         		// object message function pointer typedef
-typedef void(*MSG_DEFAULT_FUNC)(WORD, void *, GOL_MSG *);	// object default message function pointer typedef
-
 typedef struct
 {
     WORD                ID;                             	// Unique id assigned for referencing.
@@ -336,120 +357,12 @@ extern OBJ_HEADER   *_pObjectFocused;
 * Overview: The following are the style scheme default settings.
 *
 *********************************************************************/
-
-#ifdef USE_PALETTE
-
-    #include "PaletteColorDefines.h"
-
-#else
-    
-// Brown color scheme
-    #define SADDLEBROWN RGB565CONVERT(139, 69, 19)  	// Saddle Color
-    #define SIENNA      RGB565CONVERT(160, 82, 45)  	// Sienna Color
-    #define PERU        RGB565CONVERT(205, 133, 63) 	// Peru Color
-    #define BURLYWOOD   RGB565CONVERT(222, 184, 135)    // Burly wood Color
-    #define WHEAT       RGB565CONVERT(245, 245, 220)    // Wheat Color
-    #define TAN         RGB565CONVERT(210, 180, 140)    // Tan Color
-    #define GRAY80      RGB565CONVERT(204, 204, 204)    // Gray80 Color
-    #define GRAY90      RGB565CONVERT(229, 229, 229)    // Gray90 Color
-    #define GRAY95      RGB565CONVERT(242, 242, 242)    // Gray95 Color
-    #if (COLOR_DEPTH == 1)
-
-/* default settings for a monochrome display */
-
-// Emboss dark color default value.
-        #define EMBOSSDKCOLORDEFAULT    0x00
-
-// Emboss light color default value.	
-        #define EMBOSSLTCOLORDEFAULT    0xFF
-
-// Text color 0 default value.	
-        #define TEXTCOLOR0DEFAULT   0xFF
-
-// Text color 1 default value.		
-        #define TEXTCOLOR1DEFAULT   0x00
-
-// Text color disabled default value.							
-        #define TEXTCOLORDISABLEDDEFAULT    0xFF
-
-// Color 0 default value.								
-        #define COLOR0DEFAULT   0x00
-
-// Color 1 default value.	
-        #define COLOR1DEFAULT   0xFF
-
-// Disabled color default value.	
-        #define COLORDISABLEDDEFAULT    0x00
-
-// Common background color default value.	
-        #define COMMONBACKGROUNDCOLORDEFAULT    0x00
-
-    #else
-        #if defined (GFX_PICTAIL_V1)
-
-/* default settings for Microtips display */
-
-// Emboss dark color default value.
-            #define EMBOSSDKCOLORDEFAULT    RGB565CONVERT(0x2B, 0x55, 0x87)
-
-// Emboss light color default value.	
-            #define EMBOSSLTCOLORDEFAULT    RGB565CONVERT(0xD4, 0xE4, 0xF7)
-
-// Text color 0 default value.	
-            #define TEXTCOLOR0DEFAULT   RGB565CONVERT(0x07, 0x1E, 0x48)
-
-// Text color 1 default value.		
-            #define TEXTCOLOR1DEFAULT   WHITE
-
-// Text color disabled default value.							
-            #define TEXTCOLORDISABLEDDEFAULT    WHEAT
-
-// Color 0 default value.								
-            #define COLOR0DEFAULT   RGB565CONVERT(0x93, 0xEF, 0xFF)
-
-// Color 1 default value.	
-            #define COLOR1DEFAULT   RGB565CONVERT(0x26, 0xC7, 0xF2)
-
-// Disabled color default value.	
-            #define COLORDISABLEDDEFAULT    RGB565CONVERT(0xB6, 0xD2, 0xFB)
-
-// Common background color default value.	
-            #define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xEF, 0xFE, 0xFF)
-
-        #else
-
-/* default settings for TRULY display */
-
-// Emboss dark color default value.
-            #define EMBOSSDKCOLORDEFAULT    RGB565CONVERT(0x2B, 0x55, 0x87)
-
-// Emboss light color default value.
-            #define EMBOSSLTCOLORDEFAULT    RGB565CONVERT(0xD4, 0xE4, 0xF7)
-
-// Text color 0 default value.
-            #define TEXTCOLOR0DEFAULT   RGB565CONVERT(0x07, 0x1E, 0x48)
-
-// Text color 1 default value.
-            #define TEXTCOLOR1DEFAULT   WHITE
-
-// Text color disabled default value.
-            #define TEXTCOLORDISABLEDDEFAULT    WHEAT
-
-// Color 0 default value.								
-            #define COLOR0DEFAULT   RGB565CONVERT(0xA9, 0xDB, 0xEF)
-
-// Color 1 default value.
-            #define COLOR1DEFAULT   RGB565CONVERT(0x26, 0xC7, 0xF2)
-
-// Disabled color default value.
-            #define COLORDISABLEDDEFAULT    RGB565CONVERT(0xB6, 0xD2, 0xFB)
-
-// Common background color default value.
-            #define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xD4, 0xED, 0xF7)
-
-        #endif //  #if defined (GFX_PICTAIL_V1)
-    #endif // USE_MONOCHROME
+#ifndef GFX_SCHEMEDEFAULT
+#define GFX_SCHEMEDEFAULT GOLSchemeDefault
 #endif
+
+    extern const GOL_SCHEME GFX_SCHEMEDEFAULT;
+
 
 /*********************************************************************
 * Function: WORD GOLCanBeFocused(OBJ_HEADER* object)
@@ -1619,6 +1532,16 @@ extern void     *_pRpnlBitmap;      // Bitmap used in the panel
     _rpnlEmbossDkColor = embossDkClr;                                                              \
     _pRpnlBitmap = pBitmap;                                                                        \
     _rpnlEmbossSize = embossSize;
+
+
+     #ifdef USE_GRADIENT
+
+     #define GOLGradientPanelDraw(pGolScheme)                                                      \
+         _gradientScheme.gradientStartColor = pGolScheme->gradientScheme.gradientStartColor;       \
+         _gradientScheme.gradientEndColor = pGolScheme->gradientScheme.gradientEndColor;           \
+         _gradientScheme.gradientType  = pGolScheme->gradientScheme.gradientType;                  \
+         _gradientScheme.gradientLength = pGolScheme->gradientScheme.gradientLength;                                                                                                                                
+     #endif
 
 /*********************************************************************
 * Function: WORD GOLPanelDrawTsk()

@@ -6,7 +6,7 @@
  * FileName:        CheckBox.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30, MPLAB C32
+ * Compiler:       	MPLAB C30 V3.00, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -42,7 +42,7 @@
     #define _CHECKBOX_H
 
     #include <Graphics/GOL.h>
-
+    #include "GenericTypeDefs.h"
 // This is indent from outside borders
     #define CB_INDENT   2
 

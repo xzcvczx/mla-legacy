@@ -8,7 +8,7 @@
  * Dependencies:    None
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.0
+ * Version:         1.3.0
  *
  * Software License Agreement
  *
@@ -37,7 +37,6 @@
 
 #include "Compiler.h"
 #include "HardwareProfile.h"
-
 
 // Summary: A macro indicating the maximum number of concurrently open files
 // Description: The FS_MAX_FILES_OPEN #define is only applicable when dynamic memory allocation is not used (FS_DYNAMIC_MEM is not defined).

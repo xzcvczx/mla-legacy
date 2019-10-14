@@ -1,59 +1,59 @@
 /*********************************************************************
- *
- *	Medium Access Control (MAC) Layer for Microchip PIC18F97J60 family
- *  Module for Microchip TCP/IP Stack
- *	 -Provides access to PIC18F97J60 family Ethernet controller
- *	 -Reference: PIC18F97J60 Family data sheet, IEEE 802.3 Standard
- *
- *********************************************************************
- * FileName:        ETH97J60.c
- * Dependencies:    ETH97J60.h
- *					MAC.h
- *					string.h
- *                  StackTsk.h
- *                  Helpers.h
- *					Delay.h
- * Processor:       PIC18F97J60 Family
- * Compiler:        Microchip C18 v3.30 or higher
- *					HI-TECH PICC-18 PRO 9.63PL2 or higher
- * Company:         Microchip Technology, Inc.
- *
- * Software License Agreement
- *
- * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
- * reserved.
- *
- * Microchip licenses to you the right to use, modify, copy, and
- * distribute:
- * (i)  the Software when embedded on a Microchip microcontroller or
- *      digital signal controller product ("Device") which is
- *      integrated into Licensee's product; or
- * (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
- *		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device
- *		used in conjunction with a Microchip ethernet controller for
- *		the sole purpose of interfacing with the ethernet controller.
- *
- * You should refer to the license agreement accompanying this
- * Software for additional information regarding your rights and
- * obligations.
- *
- * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
- * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
- * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
- * MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
- * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
- * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
- * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
- * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
- * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
- * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE. *
- * Author               Date   	 Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Rawin Rojvanit       07/26/05 Stuff
- * Howard Schlunder     11/17/05 Ported to PIC18F97J60
- * Howard Schlunder		06/16/06 Synchronized with ENC28J60 code
- * Howard Schlunder		05/21/07 Fixed a TX lockup problem
+ PIC18F97J60 Family Ethernet Driver
+  - This is a driver module for Microchip TCPIP stack
+  - PIC18F97J60 family data sheet
+  - IEEE 802.3 standard
+ 
+ FileName:      ETH97J60.c
+ Dependencies:	See INCLUDES section
+ Processor:		PIC18F97J60 Family
+ Complier:  	Microchip C18 (for PIC18)
+ Company:		Microchip Technology, Inc.
+ Misc:          Medium Access Control (MAC) Layer for Microchip 
+                PIC18F97J60 family
+ 
+  Software License Agreement
+ 
+  Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
+  reserved.
+ 
+  Microchip licenses to you the right to use, modify, copy, and
+  distribute:
+  (i)  the Software when embedded on a Microchip microcontroller or
+       digital signal controller product ("Device") which is
+       integrated into Licensee's product; or
+  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+ 		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device
+ 		used in conjunction with a Microchip ethernet controller for
+ 		the sole purpose of interfacing with the ethernet controller.
+ 
+  You should refer to the license agreement accompanying this
+  Software for additional information regarding your rights and
+  obligations.
+ 
+  THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+  WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+  LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+  MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+  CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+  PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+  BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+  THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+  SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+  (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
+ 
+********************************************************************
+ File Description:
+
+ Change History:
+  Rev   Description
+  ----  -----------------------------------------
+  1.0   Initial release
+
+  5.31  Added support for external auto-parity detection/correction
+  
+  5.36  Fixed a run-time bug in MACPut() when using extended instruction set
 ********************************************************************/
 #define __ETH97J60_C
 
@@ -1168,7 +1168,7 @@ void MACPut(BYTE val)
 		asm("movff	_errataTempL, 0xF61");	// movff errataTempL, EDATA
 	#else
 		PRODL = val;
-		_asm movff	val, EDATA _endasm
+		_asm movff	PRODL, EDATA _endasm
 	#endif
 }//end MACPut
 

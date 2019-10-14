@@ -330,6 +330,50 @@ void CDCInitEP(void)
 
 /**********************************************************************************
   Function:
+    BOOL USBCDCEventHandler(USB_EVENT event, void *pdata, WORD size)
+    
+  Summary:
+    Handles events from the USB stack.
+
+  Description:
+    Handles events from the USB stack.  This function should be called when there
+    is a USB event that needs to be processed by the CDC driver.
+    
+  Conditions:
+    Value of input argument 'len' should be smaller than the maximum
+    endpoint size responsible for receiving bulk data from USB host for CDC
+    class. Input argument 'buffer' should point to a buffer area that is
+    bigger or equal to the size specified by 'len'.
+  Input:
+    event - the type of event that occured
+    pdata - pointer to the data that caused the event
+    size - the size of the data that is pointed to by pdata
+                                                                                   
+  **********************************************************************************/
+BOOL USBCDCEventHandler(USB_EVENT event, void *pdata, WORD size)
+{
+    switch(event)
+    {  
+        case EVENT_TRANSFER_TERMINATED:
+            if(pdata == CDCDataOutHandle)
+            {
+                CDCDataOutHandle = USBRxOnePacket(CDC_DATA_EP,(BYTE*)&cdc_data_rx,sizeof(cdc_data_rx));  
+            }
+            if(pdata == CDCDataInHandle)
+            {
+                //flush all of the data in the CDC buffer
+                cdc_trf_state = CDC_TX_READY;
+                cdc_tx_len = 0;
+            }
+            break;
+        default:
+            return FALSE;
+    }      
+    return TRUE; 
+}
+
+/**********************************************************************************
+  Function:
         BYTE getsUSBUSART(char *buffer, BYTE len)
     
   Summary:

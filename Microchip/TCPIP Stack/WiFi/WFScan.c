@@ -94,12 +94,12 @@
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile to use.  
+    CpId - Connection Profile to use.  
             If the CpId is valid then the values from that Connection Profile 
             will be used for filtering scan results.  If the CpId is set to 
             WF_SCAN_ALL (0xFF) then a default filter will be used.
 
-            Valid CpId :
+            Valid CpId
             * If CP has a defined SSID only scan results with that SSID are 
                retained.  
             * If CP does not have a defined SSID then all scanned SSID’s will be 
@@ -110,7 +110,7 @@
                channelList in the Connection Algorithm (which must be defined 
                before calling this function).
 
-            CpId is equal to WF_SCAN_ALL:
+            CpId is equal to WF_SCAN_ALL
             * All scan results are retained (both Infrastructure and Ad Hoc 
                networks).
             * All channels within the MRF24WB0M’s regional domain will be 
@@ -162,8 +162,11 @@ void WF_Scan(UINT8 CpId)
     already occurrerd.
 
   Parameters:
-    listIndex -- index (0-based list) of the scan entry to retrieve.
-    p_scanResult -- pointer to location to store the scan result structure
+    listIndex - Index (0-based list) of the scan entry to retrieve.
+    p_scanResult - Pointer to location to store the scan result structure
+
+  Retrieve RSSI: RSSI_MAX (200) , RSSI_MIN (106)
+    p_scanResult->rssi
 
   Returns:
   	None.
@@ -176,6 +179,7 @@ void WF_ScanGetResult(UINT8          listIndex,
 {
     
     UINT8   hdr[4];
+	/* char rssiChan[48]; */ /* reference for how to retrieve RSSI */
     
     hdr[0] = WF_MGMT_REQUEST_TYPE;
     hdr[1] = WF_SCAN_GET_RESULTS_SUBTYPE; 
@@ -197,6 +201,11 @@ void WF_ScanGetResult(UINT8          listIndex,
     /* fix up endianness on the two 16-bit values in the scan results */
     p_scanResult->beaconPeriod = WFSTOHS(p_scanResult->beaconPeriod);
     p_scanResult->atimWindow   = WFSTOHS(p_scanResult->atimWindow);
+
+	/* reference for how to retrieve RSSI */
+	/* Display SSID  & Channel */ 
+	/* sprintf(rssiChan, "  => RSSI: %u, Channel: %u\r\n",  p_scanResult->rssi, p_scanResult->channel);  */
+    /* putsUART(rssiChan); */
 }                        
 
 

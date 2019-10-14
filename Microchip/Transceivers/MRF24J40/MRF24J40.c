@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright ¬© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -48,6 +48,7 @@
 *  2.0   4/15/2009    yfy       MiMAC and MiApp revision
 *  2.1   6/20/2009    yfy       Add LCD support
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 #include "SystemProfile.h"
 
@@ -104,12 +105,17 @@
     #endif	
     
     #if defined(__18CXX)
-        #pragma udata MAC_RX_BUFF = 0x400
+        #pragma udata MAC_RX_BUFF
     #endif
-    BYTE RxBuffer[RX_PACKET_SIZE]; 
+	    struct
+	    {
+	        BYTE PayloadLen;
+	        BYTE Payload[RX_PACKET_SIZE];
+	    } RxBuffer[BANK_SIZE]; 
     #if defined(__18CXX)
         #pragma udata
     #endif
+    BYTE BankIndex = 0xFF;
     
     BYTE IEEESeqNum;
     volatile WORD failureCounter = 0;
@@ -117,7 +123,6 @@
     
     WORD_VAL MAC_PANID;
     WORD_VAL myNetworkAddress;
-    MIWI_TICK t1, t2;
 
     volatile MRF24J40_STATUS MRF24J40Status;
     
@@ -292,24 +297,33 @@
         }
         
         /* select the correct channel */
-        PHYSetLongRAMAddr(RFCTRL0,0x03);
-        PHYSetLongRAMAddr(RFCTRL1,0x02);    
+        //PHYSetLongRAMAddr(RFCTRL0,0x03);
+        //PHYSetLongRAMAddr(RFCTRL1,0x02);    
         
         /* setup */
         PHYSetLongRAMAddr(RFCTRL2,0x80);
         
-        #if defined(ENABLE_PA_LNA) && defined(MRF24J40MB)
-            // There are special MRF24J40 transceiver output power
-            // setting for Microchip MRF24J40MB module.
-            #if APPLICATION_SITE == EUROPE
-                // MRF24J40 output power set to be -14.9dB
-                PHYSetLongRAMAddr(RFCTRL3, 0x70);
+        #if defined(ENABLE_PA_LNA)
+            #if defined(MRF24J40MB)
+                // There are special MRF24J40 transceiver output power
+                // setting for Microchip MRF24J40MB module.
+                #if APPLICATION_SITE == EUROPE
+                    // MRF24J40 output power set to be -14.9dB
+                    PHYSetLongRAMAddr(RFCTRL3, 0x70);
+                #else
+                    // MRF24J40 output power set to be -1.9dB
+                    PHYSetLongRAMAddr(RFCTRL3, 0x18);
+                #endif
+            #elif defined(MRF24J40MC)
+                // MRF24J40 output power set to be -3.7dB for MRF24J40MB
+                PHYSetLongRAMAddr(RFCTRL3, 0x28);
             #else
-                // MRF24J40 output power set to be -1.9dB
-                PHYSetLongRAMAddr(RFCTRL3, 0x18);
+                // power level set to be 0dBm, must adjust according to
+                // FCC/IC/ETSI requirement
+                PHYSetLongRAMAddr(RFCTRL3,0x00);
             #endif
         #else
-            // power level to be 0dBms
+            // power level to be 0dBm
             PHYSetLongRAMAddr(RFCTRL3,0x00);
         #endif
         
@@ -320,7 +334,7 @@
         
         PHYSetLongRAMAddr(RFCTRL8,0x10); 
         
-        PHYSetLongRAMAddr(SCLKDIV, 0x01);
+        PHYSetLongRAMAddr(SCLKDIV, 0x21);
     
         /* Program CCA mode using RSSI */
         PHYSetShortRAMAddr(WRITE_BBREG2,0x80);
@@ -374,9 +388,47 @@
     }
         
     
-     
+    /************************************************************************************
+     * Function:
+     *      BOOL MiMAC_ReceivedPacket(void)
+     *
+     * Summary:
+     *      This function check if a new packet has been received by the RF transceiver
+     *
+     * Description:        
+     *      This is the primary MiMAC interface for the protocol layer to 
+     *      check if a packet has been received by the RF transceiver. When a packet has
+     *      been received, all information will be stored in the global variable 
+     *      MACRxPacket in the format of MAC_RECEIVED_PACKET;
+     *
+     * PreCondition:    
+     *      MiMAC initialization has been done. 
+     *
+     * Parameters: 
+     *      None
+     *
+     * Returns: 
+     *      A boolean to indicate if a packet has been received by the RF transceiver.
+     *
+     * Example:
+     *      <code>
+     *      if( TRUE == MiMAC_ReceivedPacket() )
+     *      {
+     *          // handle the raw data from RF transceiver
+     * 
+     *          // discard the current packet
+     *          MiMAC_DiscardPacket();
+     *      }
+     *      </code>
+     *
+     * Remarks:    
+     *      None
+     *
+     *****************************************************************************************/ 
     BOOL MiMAC_ReceivedPacket(void)
     {   
+        BYTE i;
+        
         //set the interrupt flag just in case the interrupt was missed
         if(RF_INT_PIN == 0)
         {
@@ -399,13 +451,24 @@
             }
         }
   
-        if(MRF24J40Status.bits.RX_BUFFERED == 1)
+        BankIndex = 0xFF;
+        for(i = 0; i < BANK_SIZE; i++)
+        {
+            if( RxBuffer[i].PayloadLen > 0 )
+            {
+                BankIndex = i;
+                break;
+            }
+        }        
+  
+        //if(MRF24J40Status.bits.RX_BUFFERED == 1)
+        if( BankIndex < BANK_SIZE )
         {
             BYTE addrMode;
             #ifndef TARGET_SMALL
                 BOOL bIntraPAN = TRUE;
             
-                if( (RxBuffer[1] & 0x40) == 0 )
+                if( (RxBuffer[BankIndex].Payload[0] & 0x40) == 0 )
                 {
                     bIntraPAN = FALSE;   
                 }
@@ -414,12 +477,12 @@
             MACRxPacket.altSourceAddress = FALSE;
 
             //Determine the start of the MAC payload
-            addrMode = RxBuffer[2] & 0xCC;
+            addrMode = RxBuffer[BankIndex].Payload[1] & 0xCC;
             switch(addrMode)
             {
                 case 0xC8: //short dest, long source
                     // for P2P only broadcast allows short destination address
-                    if( RxBuffer[6] == 0xFF && RxBuffer[7] == 0xFF )
+                    if( RxBuffer[BankIndex].Payload[5] == 0xFF && RxBuffer[BankIndex].Payload[6] == 0xFF )
                     {
                         MACRxPacket.flags.bits.broadcast = 1;
                     }
@@ -430,22 +493,22 @@
                     #endif
                     {
                         #ifndef TARGET_SMALL
-                            MACRxPacket.SourcePANID.v[0] = RxBuffer[4];
-                            MACRxPacket.SourcePANID.v[1] = RxBuffer[5];
+                            MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[3];
+                            MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[4];
                         #endif
-                        MACRxPacket.SourceAddress = &(RxBuffer[8]);
+                        MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[7]);
                         
-                        MACRxPacket.PayloadLen = RxBuffer[0] - 19;
-                        MACRxPacket.Payload = &(RxBuffer[16]);   
+                        MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 19;
+                        MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[15]);   
                     }
                     #ifndef TARGET_SMALL
                         else
                         {
-                            MACRxPacket.SourcePANID.v[0] = RxBuffer[8];
-                            MACRxPacket.SourcePANID.v[1] = RxBuffer[9];
-                            MACRxPacket.SourceAddress = &(RxBuffer[10]);
-                            MACRxPacket.PayloadLen = RxBuffer[0] - 21;
-                            MACRxPacket.Payload = &(RxBuffer[18]);
+                            MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[7];
+                            MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[8];
+                            MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[9]);
+                            MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 21;
+                            MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[17]);
                         }
                     #endif
 
@@ -459,21 +522,21 @@
                     {
                         //rxFrame.flags.bits.intraPAN = 1;
                         #ifndef TARGET_SMALL
-                            MACRxPacket.SourcePANID.v[0] = RxBuffer[4];
-                            MACRxPacket.SourcePANID.v[1] = RxBuffer[5];
+                            MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[3];
+                            MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[4];
                         #endif
-                        MACRxPacket.SourceAddress = &(RxBuffer[14]);
-                        MACRxPacket.PayloadLen = RxBuffer[0] - 25;
-                        MACRxPacket.Payload = &(RxBuffer[22]);    
+                        MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[13]);
+                        MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 25;
+                        MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[21]);    
                     } 
                     #ifndef TARGET_SMALL
                         else
                         {
-                            MACRxPacket.SourcePANID.v[0] = RxBuffer[14];
-                            MACRxPacket.SourcePANID.v[1] = RxBuffer[15];
-                            MACRxPacket.SourceAddress = &(RxBuffer[16]);
-                            MACRxPacket.PayloadLen = RxBuffer[0] - 27;
-                            MACRxPacket.Payload = &(RxBuffer[24]);
+                            MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[13];
+                            MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[14];
+                            MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[15]);
+                            MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 27;
+                            MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[23]);
                         }
                     #endif
                     break;
@@ -483,17 +546,17 @@
                         MACRxPacket.flags.bits.broadcast = 1;
                         MACRxPacket.flags.bits.sourcePrsnt = 1;
                         MACRxPacket.altSourceAddress = TRUE;
-                        MACRxPacket.SourcePANID.v[0] = RxBuffer[4];
-                        MACRxPacket.SourcePANID.v[1] = RxBuffer[5];
-                        MACRxPacket.SourceAddress = &(RxBuffer[6]);
-                        MACRxPacket.PayloadLen = RxBuffer[0] - 11;
-                        MACRxPacket.Payload = &(RxBuffer[8]);
+                        MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[3];
+                        MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[4];
+                        MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[5]);
+                        MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 11;
+                        MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[7]);
                     }
                     break;
                         
                 case 0x88: // short dest, short source
                     {
-                        if( RxBuffer[6] == 0xFF && RxBuffer[7] == 0xFF )
+                        if( RxBuffer[BankIndex].Payload[5] == 0xFF && RxBuffer[BankIndex].Payload[6] == 0xFF )
                         {
                             MACRxPacket.flags.bits.broadcast = 1;
                         }
@@ -502,20 +565,20 @@
                         #ifndef TARGET_SMALL
                             if( bIntraPAN == FALSE )
                             {
-                                MACRxPacket.SourcePANID.v[0] = RxBuffer[8];
-                                MACRxPacket.SourcePANID.v[1] = RxBuffer[9];
-                                MACRxPacket.SourceAddress = &(RxBuffer[10]);
-                                MACRxPacket.PayloadLen = RxBuffer[0] - 15;
-                                MACRxPacket.Payload = &(RxBuffer[12]);
+                                MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[7];
+                                MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[8];
+                                MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[9]);
+                                MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 15;
+                                MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[11]);
                             }
                             else
                         #endif
                         {
-                            MACRxPacket.SourcePANID.v[0] = RxBuffer[4];
-                            MACRxPacket.SourcePANID.v[1] = RxBuffer[5];
-                            MACRxPacket.SourceAddress = &(RxBuffer[8]);
-                            MACRxPacket.PayloadLen = RxBuffer[0] - 13;
-                            MACRxPacket.Payload = &(RxBuffer[10]);
+                            MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[3];
+                            MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[4];
+                            MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[7]);
+                            MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 13;
+                            MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[9]);
                         }     
                     }
                     break;
@@ -529,22 +592,22 @@
                         #endif
                         {
                             #ifndef TARGET_SMALL
-                                MACRxPacket.SourcePANID.v[0] = RxBuffer[4];
-                                MACRxPacket.SourcePANID.v[1] = RxBuffer[5];
+                                MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[3];
+                                MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[4];
                             #endif
-                            MACRxPacket.SourceAddress = &(RxBuffer[13]);
+                            MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[12]);
                             
-                            MACRxPacket.PayloadLen = RxBuffer[0] - 19;
-                            MACRxPacket.Payload = &(RxBuffer[16]);   
+                            MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 19;
+                            MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[15]);   
                         }
                         #ifndef TARGET_SMALL
                             else
                             {
-                                MACRxPacket.SourcePANID.v[0] = RxBuffer[13];
-                                MACRxPacket.SourcePANID.v[1] = RxBuffer[14];
-                                MACRxPacket.SourceAddress = &(RxBuffer[15]);
-                                MACRxPacket.PayloadLen = RxBuffer[0] - 21;
-                                MACRxPacket.Payload = &(RxBuffer[18]);
+                                MACRxPacket.SourcePANID.v[0] = RxBuffer[BankIndex].Payload[12];
+                                MACRxPacket.SourcePANID.v[1] = RxBuffer[BankIndex].Payload[13];
+                                MACRxPacket.SourceAddress = &(RxBuffer[BankIndex].Payload[14]);
+                                MACRxPacket.PayloadLen = RxBuffer[BankIndex].PayloadLen - 21;
+                                MACRxPacket.Payload = &(RxBuffer[BankIndex].Payload[17]);
                             }
                         #endif
                     }
@@ -560,7 +623,7 @@
             }  
             
             #ifdef ENABLE_SECURITY
-                if( RxBuffer[1] & 0x08 )
+                if( RxBuffer[BankIndex].Payload[0] & 0x08 )
                 {
                     // if security is used, remove the security header and MIC from
                     // the payload size
@@ -589,7 +652,7 @@
                     MACRxPacket.flags.bits.secEn = 1;
                 }
             #else
-                if( RxBuffer[1] & 0x08 )
+                if( RxBuffer[BankIndex].Payload[0] & 0x08 )
                 {
                     MiMAC_DiscardPacket();
                     return FALSE;
@@ -599,7 +662,7 @@
             // check the frame type. Only the data and command frame type
             // are supported. Acknowledgement frame type is handled in 
             // MRF24J40 transceiver hardware.
-            switch( RxBuffer[1] & 0x07 ) // check frame type
+            switch( RxBuffer[BankIndex].Payload[0] & 0x07 ) // check frame type
             {
                 case 0x01:  // data frame
                     MACRxPacket.flags.bits.packetType = PACKET_TYPE_DATA;
@@ -616,10 +679,10 @@
                     return FALSE;
             }
             #ifndef TARGET_SMALL
-                MACRxPacket.LQIValue = RxBuffer[RxBuffer[0]-1];
-                MACRxPacket.RSSIValue = RxBuffer[RxBuffer[0]];
+                MACRxPacket.LQIValue = RxBuffer[BankIndex].Payload[RxBuffer[BankIndex].PayloadLen-2];
+                MACRxPacket.RSSIValue = RxBuffer[BankIndex].Payload[RxBuffer[BankIndex].PayloadLen-1];
             #endif
-      
+            
             return TRUE;
         }
         return FALSE;
@@ -664,7 +727,11 @@
     void MiMAC_DiscardPacket(void)
     {
         //re-enable the ACKS
-        MRF24J40Status.bits.RX_BUFFERED = 0;
+
+        if( BankIndex < BANK_SIZE )
+        {
+            RxBuffer[BankIndex].PayloadLen = 0;
+        }    
     }
     
     
@@ -727,7 +794,7 @@
     
         // wait for the previous transmission finish
         #if !defined(VERIFY_TRANSMIT)
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while( MRF24J40Status.bits.TX_BUSY ) 
             {
                 if(RF_INT_PIN == 0)
@@ -735,8 +802,8 @@
                     RFIF = 1;
                 }
 
-                t2 = TickGet();
-                t2.Val = TickGetDiff(t2, t1);
+                t2 = MiWi_TickGet();
+                t2.Val = MiWi_TickGetDiff(t2, t1);
                 if( t2.Val > TWENTY_MILI_SECOND ) // 20 ms
                 {
                     InitMRF24J40();    
@@ -980,7 +1047,7 @@
         PHYSetShortRAMAddr(WRITE_TXNMTRIG, i); 
         
         #ifdef VERIFY_TRANSMIT
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while(1)
             {   
                 if( RF_INT_PIN == 0 )
@@ -996,11 +1063,10 @@
                     }
                     break;   
                 }
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > FORTY_MILI_SECOND )
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > FORTY_MILI_SECOND )
                 {
                     InitMRF24J40();
-                    //MiMAC_SetChannel(MACCurrentChannel, 0);
                     MiMAC_SetAltAddress(myNetworkAddress.v, MAC_PANID.v);
                     MRF24J40Status.bits.TX_BUSY = 0;
                     return FALSE;
@@ -1154,58 +1220,72 @@
                     
                 case POWER_STATE_OPERATE:
                     {
-                        BYTE results;
+                        #if 1
+                            // use wake pin to wake up the radio 
+                            // enable the radio to wake up quicker
+                            
+                            BYTE results;
+                            MIWI_TICK t1, t2;
+                            
+                            //wake up the device
+                            PHY_WAKE = 1;
                         
-                        //wake up the device
-                        PHY_WAKE = 1;
+                            t1 = MiWi_TickGet();
+                            
+                            while(1)
+                            {
+                                t2 = MiWi_TickGet();
+                                t2.Val = MiWi_TickGetDiff(t2, t1);
+                                
+                                // if timeout, assume the device has waken up
+                                if( t2.Val > HUNDRED_MILI_SECOND)
+                                {
+                                    InitMRF24J40();
+                                    //MiMAC_SetChannel(MACCurrentChannel);
+                                    MiMAC_SetAltAddress(myNetworkAddress.v, MAC_PANID.v);
+                                    break;
+                                }
+                            
+                                results = PHYGetShortRAMAddr(READ_ISRSTS);
+                                if((results & 0x40) != 0x00)
+                                {
+                                    break;
+                                }
+                            }
                     
-                        t1 = TickGet();
+                            while(1)
+                            {
+                                t2 = MiWi_TickGet();
+                                t2.Val = MiWi_TickGetDiff(t2, t1);
+                                
+                                // if timeout, assume the device has waken up
+                                if( t2.Val > HUNDRED_MILI_SECOND )
+                                {
+                                    InitMRF24J40();
+                                    //MiMAC_SetChannel(MACCurrentChannel);
+                                    MiMAC_SetAltAddress(myNetworkAddress.v, MAC_PANID.v);
+                                    break;
+                                }
+                                
+                                results = PHYGetLongRAMAddr(RFSTATE);
+                                if( (results & 0xE0) == 0xA0 )
+                                {
+                                    break;
+                                }
+                                
+                            }
+                            
+                            PHYSetShortRAMAddr(WRITE_RFCTL, 0x04);  
+                            PHYSetShortRAMAddr(WRITE_RFCTL, 0x00);              
                         
-                        while(1)
-                        {
-                            t2 = TickGet();
-                            t2.Val = TickGetDiff(t2, t1);
-                            
-                            // if timeout, assume the device has waken up
-                            if( t2.Val > HUNDRED_MILI_SECOND)
-                            {
-                                InitMRF24J40();
-                                //MiMAC_SetChannel(MACCurrentChannel);
-                                MiMAC_SetAltAddress(myNetworkAddress.v, MAC_PANID.v);
-                                break;
-                            }
+                        #else
                         
-                            results = PHYGetShortRAMAddr(READ_ISRSTS);
-                            if((results & 0x40) != 0x00)
-                            {
-                                break;
-                            }
-                        }
-                
-                        while(1)
-                        {
-                            t2 = TickGet();
-                            t2.Val = TickGetDiff(t2, t1);
+                            // use reset to wake up the radio is more
+                            // reliable
+                            InitMRF24J40();
+                            MiMAC_SetAltAddress(myNetworkAddress.v, MAC_PANID.v);
                             
-                            // if timeout, assume the device has waken up
-                            if( t2.Val > HUNDRED_MILI_SECOND )
-                            {
-                                InitMRF24J40();
-                                //MiMAC_SetChannel(MACCurrentChannel);
-                                MiMAC_SetAltAddress(myNetworkAddress.v, MAC_PANID.v);
-                                break;
-                            }
-                            
-                            results = PHYGetLongRAMAddr(RFSTATE);
-                            if( (results & 0xE0) == 0xA0 )
-                            {
-                                break;
-                            }
-                            
-                        }
-                        
-                        PHYSetShortRAMAddr(WRITE_RFCTL, 0x04);  
-                        PHYSetShortRAMAddr(WRITE_RFCTL, 0x00);              
+                        #endif
                         
                         #if defined(ENABLE_PA_LNA)
                             PHYSetShortRAMAddr(WRITE_GPIO, 0);
@@ -1269,7 +1349,7 @@
             return FALSE;
         }
         
-        #if defined(ENABLE_PA_LNA) && defined(MRF24J40MB)
+        #if defined(ENABLE_PA_LNA) && (defined(MRF24J40MB) || defined(MRF24J40MC))
             if( channel == 26 )
             {
                 return FALSE;
@@ -1435,6 +1515,8 @@
      *****************************************************************************************/ 
     BOOL MiMAC_Init(INPUT MACINIT_PARAM initValue)
     {   
+        BYTE i;
+        
         MACInitParams = initValue;
 
         IEEESeqNum = TMRL;
@@ -1444,7 +1526,11 @@
         InitMRF24J40();
         
         MRF24J40Status.Val = 0;
-            
+        
+        for(i = 0; i < BANK_SIZE; i++)
+        {
+            RxBuffer[i].PayloadLen = 0;
+        }        
         #ifdef ENABLE_SECURITY
             #if defined(ENABLE_NETWORK_FREEZER)
                 if( initValue.actionFlags.bits.NetworkFreezer )
@@ -1544,8 +1630,19 @@
                 
                 if(flags.bits.RF_RXIF)
                 {  
+                    BYTE RxBank = 0xFF;
+                    
+                    for(i = 0; i < BANK_SIZE; i++)
+                    {
+                        if( RxBuffer[i].PayloadLen == 0 )
+                        {
+                            RxBank = i;
+                            break;
+                        }
+                    }        
+                          
                     //if the RX interrupt was triggered
-                    if(MRF24J40Status.bits.RX_BUFFERED == 0)
+                    if( RxBank < BANK_SIZE )
                     {
                         #ifdef ENABLE_SECURITY
                             if( MRF24J40Status.bits.RX_SECURITY )
@@ -1638,16 +1735,16 @@
 
                         //get the size of the packet
                         //2 more bytes for RSSI and LQI reading 
-                        RxBuffer[0] = PHYGetLongRAMAddr(0x300) + 2;
-                        if(RxBuffer[0]<RX_PACKET_SIZE)
+                        RxBuffer[RxBank].PayloadLen = PHYGetLongRAMAddr(0x300) + 2;
+                        if(RxBuffer[RxBank].PayloadLen<RX_PACKET_SIZE)
                         {   
                             //indicate that data is now stored in the buffer
                             MRF24J40Status.bits.RX_BUFFERED = 1;
                             
                             //copy all of the data from the FIFO into the TxBuffer, plus RSSI and LQI
-                            for(i=1;i<=RxBuffer[0]+2;i++)
+                            for(i=1;i<=RxBuffer[RxBank].PayloadLen+2;i++)
                             {
-                                RxBuffer[i] = PHYGetLongRAMAddr(0x300+i);
+                                RxBuffer[RxBank].Payload[i-1] = PHYGetLongRAMAddr(0x300+i);
                             }
                             PHYSetShortRAMAddr(WRITE_RXFLUSH, 0x01);
                         }
@@ -1750,12 +1847,12 @@ START_OF_SEC_INT:
 END_OF_RF_INT:        
         #if defined(__18CXX)
             //check to see if the symbol timer overflowed
-            if(INTCONbits.TMR0IF)
+            if(TMR_IF)
             {
-                if(INTCONbits.TMR0IE)
+                if(TMR_IE)
                 {
                     /* there was a timer overflow */
-                    INTCONbits.TMR0IF = 0;
+                    TMR_IF = 0;
                     timerExtension1++;
                     if(timerExtension1 == 0)
                     {
@@ -1767,7 +1864,6 @@ END_OF_RF_INT:
             UserInterruptHandler(); 
         #endif
 
-        
         
         return;
         

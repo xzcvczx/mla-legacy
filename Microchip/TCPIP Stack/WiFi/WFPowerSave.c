@@ -199,8 +199,8 @@ void WFConfigureLowPowerMode(UINT8 action)
   	MACInit must be called first.
 
   Parameters:
-    rxDtim -- TRUE if MRF24WB0M should wake up periodically and check for
-              buffered broadcast messages, else FALSE
+    rxDtim - TRUE if MRF24WB0M should wake up periodically and check for
+             buffered broadcast messages, else FALSE
 
   Returns:
   	None.
@@ -288,7 +288,7 @@ void WF_PsPollDisable(void)
   	MACInit must be called first.
 
   Parameters:
-    p_powerSaveState -- pointer to where power state is written
+    p_powerSaveState - Pointer to where power state is written
 
   Returns:
   	None.
@@ -440,7 +440,7 @@ void WF_HibernateEnable()
 {
     WF_SetCE_N(WF_HIGH);   /* set XCEN33 pin high, which puts MRF24WB0M in hibernate mode */
 
-    SetPowerSaveState(WF_PS_HIBERNATE);
+    /* SetPowerSaveState(WF_PS_HIBERNATE);	*/
 }
 
 /*******************************************************************************
@@ -456,7 +456,7 @@ void WF_HibernateEnable()
   	MACInit must be called first.
 
   Parameters:
-    p_powerMode -- pointer to tWFPwrModeReq structure to send to MRF24WB0M.
+    p_powerMode - Pointer to tWFPwrModeReq structure to send to MRF24WB0M.
 
   Returns:
   	None.
@@ -494,7 +494,7 @@ static void SendPowerModeMsg(tWFPwrModeReq *p_powerMode)
   	MACInit must be called first.
 
   Parameters:
-    powerSaveState -- value of the power save state desired.
+    powerSaveState - Value of the power save state desired.
 
     <table>
     Value                       Definition

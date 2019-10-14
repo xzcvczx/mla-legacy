@@ -32,9 +32,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date          Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		10/28/2007
+ * 10/28/2007    ...
+ * 03/31/2011    Added COLOR_DEPTH definition as required by
+ *               Graphics Library Version 3.00
  ********************************************************************/
 
 #ifndef _GRAPHICSCONFIG_H
@@ -135,5 +137,11 @@
 *********************************************************************/
 	#define GFX_malloc(size)    	malloc(size)
 	#define GFX_free(pObj)    	    free(pObj)
+
+/*********************************************************************
+* Overview: Defines color depth. 
+********************************************************************/
+#define COLOR_DEPTH						1
+
 
 #endif // _GRAPHICSCONFIG_H

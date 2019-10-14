@@ -181,7 +181,6 @@ volatile WORD                 usbOverrideHostState;                       // Nex
     static WORD prevHostState;
 #endif
 
-
 static USB_BUS_INFO                  usbBusInfo;                                 // Information about the USB bus.
 static USB_DEVICE_INFO               usbDeviceInfo;                              // A collection of information about the attached device.
 #if defined( USB_ENABLE_TRANSFER_EVENT )
@@ -189,7 +188,7 @@ static USB_DEVICE_INFO               usbDeviceInfo;                             
 #endif
 static USB_ROOT_HUB_INFO             usbRootHubInfo;                             // Information about a specific port.
 
-
+static volatile WORD msec_count = 0;                                             // The current millisecond count.
 
 // *****************************************************************************
 // *****************************************************************************
@@ -1470,6 +1469,11 @@ void USBHostTasks( void )
 
                         // Enable the ATTACH interrupt.
                         U1IEbits.ATTACHIE = 1;
+
+                        #if defined(USB_ENABLE_1MS_EVENT)
+                            U1OTGIR                 = USB_INTERRUPT_T1MSECIF; // The interrupt is cleared by writing a '1' to the flag.
+                            U1OTGIEbits.T1MSECIE    = 1;
+                        #endif
                     }
                     else
                     {
@@ -2390,6 +2394,11 @@ void USBHostTasks( void )
                     U1EIR               = 0xFF;
                     U1IEbits.DETACHIE   = 1;
 
+                    #if defined(USB_ENABLE_1MS_EVENT)
+                        U1OTGIR                 = USB_INTERRUPT_T1MSECIF; // The interrupt is cleared by writing a '1' to the flag.
+                        U1OTGIEbits.T1MSECIE    = 1;
+                    #endif
+
                     switch (usbDeviceInfo.errorCode )
                     {
                         case USB_HOLDING_UNSUPPORTED_HUB:
@@ -2868,7 +2877,9 @@ void _USB_CheckCommandAndEnumerationAttempts( void )
 
 BOOL _USB_FindClassDriver( BYTE bClass, BYTE bSubClass, BYTE bProtocol, BYTE *pbClientDrv )
 {
-    int i;
+    USB_OVERRIDE_CLIENT_DRIVER_EVENT_DATA   eventData;
+    int                                     i;
+    USB_DEVICE_DESCRIPTOR                   *pDesc = (USB_DEVICE_DESCRIPTOR *)pDeviceDescriptor;
 
     i = 0;
     while (i < NUM_TPL_ENTRIES)
@@ -2878,11 +2889,24 @@ BOOL _USB_FindClassDriver( BYTE bClass, BYTE bSubClass, BYTE bProtocol, BYTE *pb
             (usbTPL[i].device.bSubClass      == bSubClass) &&
             (usbTPL[i].device.bProtocol      == bProtocol)   )
         {
-            *pbClientDrv = usbTPL[i].ClientDriver;
-            #ifdef DEBUG_MODE
-                UART2PrintString( "HOST: Client driver found.\r\n" );
-            #endif
-            return TRUE;
+            // Make sure the application layer does not have a problem with the selection.
+            // If the application layer returns FALSE, which it should if the event is not
+            // defined, then accept the selection.
+            eventData.idVendor          = pDesc->idVendor;              
+            eventData.idProduct         = pDesc->idProduct;             
+            eventData.bDeviceClass      = bClass;          
+            eventData.bDeviceSubClass   = bSubClass;       
+            eventData.bDeviceProtocol   = bProtocol;       
+
+            if (!USB_HOST_APP_EVENT_HANDLER( USB_ROOT_HUB, EVENT_OVERRIDE_CLIENT_DRIVER_SELECTION,
+                            &eventData, sizeof(USB_OVERRIDE_CLIENT_DRIVER_EVENT_DATA) ))
+            {
+                *pbClientDrv = usbTPL[i].ClientDriver;
+                #ifdef DEBUG_MODE
+                    UART2PrintString( "HOST: Client driver found.\r\n" );
+                #endif
+                return TRUE;
+            }    
         }
         i++;
     }
@@ -4528,6 +4552,92 @@ void _USB_NotifyClients( BYTE address, USB_EVENT event, void *data, unsigned int
     }
 } // _USB_NotifyClients
 
+/****************************************************************************
+  Function:
+    void _USB_NotifyClients( BYTE address, USB_EVENT event, void *data,
+                unsigned int size )
+
+  Description:
+    This routine notifies all active client drivers for the given device of
+    the given event.
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE address        - Address of the device generating the event
+    USB_EVENT event     - Event ID
+    void *data          - Pointer to event data
+    unsigned int size   - Size of data pointed to by data
+
+  Returns:
+    None
+
+  Remarks:
+    When this driver is modified to support multiple devices, this function
+    will require modification.
+  ***************************************************************************/
+
+void _USB_NotifyDataClients( BYTE address, USB_EVENT event, void *data, unsigned int size )
+{
+    USB_INTERFACE_INFO  *pInterface;
+
+    // Some events go to all drivers, some only to specific drivers.
+    switch(event)
+    {
+        default:
+            pInterface = usbDeviceInfo.pInterfaceList;
+            while (pInterface != NULL)  // Scan the interface list for all active drivers.
+            {
+                usbClientDrvTable[pInterface->clientDriver].DataEventHandler(address, event, data, size);
+                pInterface = pInterface->next;
+            }
+            break;
+    }
+} // _USB_NotifyClients
+
+/****************************************************************************
+  Function:
+    void _USB_NotifyAllDataClients( BYTE address, USB_EVENT event, void *data,
+                unsigned int size )
+
+  Description:
+    This routine notifies all client drivers (active or not) for the given device of
+    the given event.
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE address        - Address of the device generating the event
+    USB_EVENT event     - Event ID
+    void *data          - Pointer to event data
+    unsigned int size   - Size of data pointed to by data
+
+  Returns:
+    None
+
+  Remarks:
+    When this driver is modified to support multiple devices, this function
+    will require modification.
+  ***************************************************************************/
+#if defined(USB_ENABLE_1MS_EVENT) && defined(USB_HOST_APP_DATA_EVENT_HANDLER)
+void _USB_NotifyAllDataClients( BYTE address, USB_EVENT event, void *data, unsigned int size )
+{
+    WORD i;
+
+    // Some events go to all drivers, some only to specific drivers.
+    switch(event)
+    {
+        default:
+            for(i=0;i<NUM_CLIENT_DRIVER_ENTRIES;i++)
+            {
+                usbClientDrvTable[i].DataEventHandler(address, event, data, size);
+            }
+            break;
+    }
+} // _USB_NotifyClients
+#endif
 
 /****************************************************************************
   Function:
@@ -5304,6 +5414,13 @@ void _USB1Interrupt( void )
         // The interrupt is cleared by writing a '1' to it.
         U1OTGIR = USB_INTERRUPT_T1MSECIF;
 
+        #if defined(USB_ENABLE_1MS_EVENT) && defined(USB_HOST_APP_DATA_EVENT_HANDLER)
+            msec_count++;
+
+            //Notify ping all client drivers of 1MSEC event (address, event, data, sizeof_data)
+            _USB_NotifyAllDataClients(0, EVENT_1MS, (void*)&msec_count, 0);
+        #endif
+
         #ifdef DEBUG_MODE
             UART2PutChar('~');
         #endif
@@ -5329,28 +5446,44 @@ void _USB1Interrupt( void )
 
             else
             {
+                if(numTimerInterrupts != 0)
+                {
+                    numTimerInterrupts--;
+
+                    if (numTimerInterrupts == 0)
+                    {
+                        //If we aren't using the 1ms events, then turn of the interrupt to
+                        // save CPU time
+                        #if !defined(USB_ENABLE_1MS_EVENT)
+                            // Turn off the timer interrupt.
+                            U1OTGIEbits.T1MSECIE = 0;
+                        #endif
+    
+                        // Advance to the next state.  We can do this here, because the only time
+                        // we'll get a timer interrupt is while we are in one of the holding states.
+                        _USB_SetNextSubSubState();
+                    }
+                }
+            }
+         #else
+
+            if(numTimerInterrupts != 0)
+            {
                 numTimerInterrupts--;
+
                 if (numTimerInterrupts == 0)
                 {
-                    // Turn off the timer interrupt.
-                    U1OTGIEbits.T1MSECIE = 0;
+                    //If we aren't using the 1ms events, then turn of the interrupt to
+                    // save CPU time
+                    #if !defined(USB_ENABLE_1MS_EVENT)
+                        // Turn off the timer interrupt.
+                        U1OTGIEbits.T1MSECIE = 0;
+                    #endif
 
                     // Advance to the next state.  We can do this here, because the only time
                     // we'll get a timer interrupt is while we are in one of the holding states.
                     _USB_SetNextSubSubState();
                 }
-            }
-         #else
-
-            numTimerInterrupts--;
-            if (numTimerInterrupts == 0)
-            {
-                // Turn off the timer interrupt.
-                U1OTGIEbits.T1MSECIE = 0;
-
-                // Advance to the next state.  We can do this here, because the only time
-                // we'll get a timer interrupt is while we are in one of the holding states.
-                _USB_SetNextSubSubState();
             }
          #endif
     }
@@ -5750,6 +5883,11 @@ void _USB1Interrupt( void )
     {
         USB_ENDPOINT_INFO           *pEndpoint;
         USB_INTERFACE_INFO          *pInterface;
+
+        #if defined(USB_ENABLE_SOF_EVENT) && defined(USB_HOST_APP_DATA_EVENT_HANDLER)
+            //Notify ping all client drivers of SOF event (address, event, data, sizeof_data)
+            _USB_NotifyDataClients(0, EVENT_SOF, NULL, 0);
+        #endif
 
         #ifdef DEBUG_MODE
 //            UART2PutChar( '$' );

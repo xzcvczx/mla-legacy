@@ -87,7 +87,7 @@ file_002=..\mTouchCap_AppCommonFiles\Display.c
 file_003=..\..\..\Microchip\mTouchCap\PIC32MX CVD Library\mTouchCap_Adc.c
 file_004=..\..\..\Microchip\mTouchCap\PIC32MX CVD Library\mTouchCap_CvdAPI.c
 file_005=..\..\..\Microchip\mTouchCap\PIC32MX CVD Library\mTouchCap_PIC32MX_CVD_Physical.c
-file_006=..\..\..\Microchip\mTouchCap\PIC32MX CVD Library\mTouchCap_Timers.c
+file_006=..\..\..\Microchip\mTouchCap\PIC32MX CVD Library\mTouchCap_Timers_Rev3.c
 file_007=..\..\..\Microchip\Include\Compiler.h
 file_008=..\..\..\Microchip\Include\GenericTypeDefs.h
 file_009=HardwareProfile.h
@@ -104,7 +104,8 @@ suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=
 [TOOL_SETTINGS]
 TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}=-gdwarf-2
-TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}=-g
+TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}=-g -WALL
+TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}_alt=yes
 TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map"
 TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}=
 [INSTRUMENTED_TRACE]

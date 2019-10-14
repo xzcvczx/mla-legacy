@@ -1,4 +1,5 @@
 #include "SystemProfile.h"
+#include "WirelessProtocols/MSPI.h"
 
 #if defined(ENABLE_EEPROM)
 

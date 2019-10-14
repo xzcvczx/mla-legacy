@@ -43,6 +43,7 @@
 *  Rev   Date         Author        Description
 *  2.0   4/15/2009    yfy           MiMAC and MiApp revision
 *  3.1   5/28/2010    yfy           MiWi DE 3.1
+*  4.1   6/3/2011     yfy           MAL v2011-06
 ********************************************************************/
 
 #ifndef __CONFIG_MRF49XA_H

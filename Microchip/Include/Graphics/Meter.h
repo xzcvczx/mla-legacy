@@ -45,6 +45,7 @@
     #define _METER_H
 
     #include <Graphics/GOL.h>
+    #include "GenericTypeDefs.h"
 
 // Compile time Options for Meter
     #define METER_DISPLAY_VALUES_ENABLE // This enables the display of the values.

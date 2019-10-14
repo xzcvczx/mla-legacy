@@ -46,6 +46,7 @@
  * 10/04/10     Added BTN_NOPANEL property state bit to make the buttons with
  *              bitmaps that is of the same size or larger than the button
  *              dimension to skip drawing of the panel. 
+ * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -109,6 +110,15 @@ BUTTON *BtnCreate
     {
 	    BtnSetText(pB, pText);
     }
+
+	#ifdef USE_ALPHABLEND
+	if(pB->hdr.pGolScheme->AlphaValue > 0) 						     
+			CopyPageWindow(_GFXDestinationPage, 
+					   _GFXBackgroundPage, 
+                       pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top,
+					   pB->hdr.right - pB->hdr.left, 
+					   pB->hdr.bottom - pB->hdr.top);
+	#endif
 
     GOLAddObject((OBJ_HEADER *)pB);
 
@@ -294,7 +304,7 @@ WORD BtnTranslateMsg(void *pObj, GOL_MSG *pMsg)
         #ifdef USE_KEYBOARD
     if(pMsg->type == TYPE_KEYBOARD)
     {
-        if(pMsg->param1 == pB->hdr.ID)
+        if((WORD)pMsg->param1 == pB->hdr.ID)
         {
             if(pMsg->uiEvent == EVENT_KEYSCAN)
             {
@@ -339,7 +349,148 @@ WORD BtnTranslateMsg(void *pObj, GOL_MSG *pMsg)
         #endif
     return (OBJ_MSG_INVALID);
 }
+/*********************************************************************
+* Button draw states
+********************************************************************/
+typedef enum
+{
+    REMOVE,
+    RNDBUTTON_DRAW,
+    #ifdef USE_BUTTON_MULTI_LINE
+    CHECK_TEXT_DRAW,
+    #else
+    TEXT_DRAW,
+    #endif
+    TEXT_DRAW_RUN,
+    FOCUS_DRAW,
+} BTN_DRAW_STATES;
+/*********************************************************************
+* Function: inline WORD __attribute__((always_inline)) DrawButtonFocus(BUTTON *button, SHORT radius, BTN_DRAW_STATES *current_state)
+********************************************************************/
+inline WORD __attribute__((always_inline)) DrawButtonFocus(BUTTON *button, SHORT radius, BTN_DRAW_STATES *current_state)
+{
+    
+    *current_state = FOCUS_DRAW;
 
+    if(IsDeviceBusy()) 
+        return (0);
+
+    if(GetState(button, BTN_FOCUSED))
+    {
+        SetLineType(FOCUS_LINE);
+        if(GetState(button, BTN_PRESSED))
+        {
+            SetColor(button->hdr.pGolScheme->TextColor1);
+        }
+        else
+        {
+            SetColor(button->hdr.pGolScheme->TextColor0);
+        }
+
+        // check if the object has rounded corners or not
+        if(!button->radius)
+        {
+            if
+            (
+                !Rectangle
+                    (
+                        button->hdr.left + GOL_EMBOSS_SIZE + 2,
+                        button->hdr.top + GOL_EMBOSS_SIZE + 2,
+                        button->hdr.right - GOL_EMBOSS_SIZE - 2,
+                        button->hdr.bottom - GOL_EMBOSS_SIZE - 2
+                    )
+            )
+            {
+                return (0);
+            }
+        }
+        else
+        {
+
+            // original center is still the same, but radius is reduced
+            if
+            (
+                !Bevel
+                    (
+                        button->hdr.left + radius,
+                        button->hdr.top + radius,
+                        button->hdr.right - radius,
+                        button->hdr.bottom - radius,
+                        radius - 2 - GOL_EMBOSS_SIZE
+                    )
+            )
+            {
+                return (0);
+            }
+        }
+
+        SetLineType(SOLID_LINE);
+    }
+
+	#ifdef USE_ALPHABLEND
+    if(button->hdr.pGolScheme->AlphaValue > 0) 
+    {
+		AlphaBlendWindow(GFXGetPageXYAddress(_GFXForegroundPage, button->hdr.left, button->hdr.top),
+						 GFXGetPageXYAddress(_GFXBackgroundPage, button->hdr.left, button->hdr.top),
+						 GFXGetPageXYAddress(_GFXDestinationPage, button->hdr.left, button->hdr.top),
+					     button->hdr.right - button->hdr.left, 
+					     button->hdr.bottom - button->hdr.top,  	
+					     button->hdr.pGolScheme->AlphaValue);
+		SetActivePage(_GFXDestinationPage);	
+	    			
+	}  
+	#endif
+
+    *current_state = REMOVE;
+    return 1;
+}
+/*********************************************************************
+* Function: WORD BtnDraw(void *pObj)
+********************************************************************/
+#ifdef USE_BUTTON_MULTI_LINE
+inline void __attribute__((always_inline)) SetButtonTextPosition(BUTTON *button, XCHAR *pCurLine, SHORT lineCtr)
+{
+    WORD xText, yText;
+    SHORT textWidth;
+
+    SetFont(button->hdr.pGolScheme->pFont);
+    textWidth = GetTextWidth(pCurLine, button->hdr.pGolScheme->pFont);
+
+    // check text alignment
+    if(GetState(button, BTN_TEXTRIGHT))
+    {
+        xText = button->hdr.right - (textWidth + GOL_EMBOSS_SIZE + 2);
+    }
+    else if(GetState(button, BTN_TEXTLEFT))
+    {
+        xText = button->hdr.left + GOL_EMBOSS_SIZE + 2;
+    }
+    else
+    {
+
+        // centered	text in x direction
+        xText = (button->hdr.left + button->hdr.right - textWidth) >> 1;
+    }
+
+    if(GetState(button, BTN_TEXTTOP))
+    {
+        yText = button->hdr.top + GOL_EMBOSS_SIZE + (lineCtr * GetTextHeight(button->hdr.pGolScheme->pFont));
+    }
+    else if(GetState(button, BTN_TEXTBOTTOM))
+    {
+        yText = button->hdr.bottom - (GOL_EMBOSS_SIZE + button->textHeight) + (lineCtr * GetTextHeight(button->hdr.pGolScheme->pFont));
+    }
+    else
+    {
+
+        // centered	text in y direction
+        yText = ((button->hdr.bottom + button->hdr.top - button->textHeight) >> 1) + (lineCtr * GetTextHeight(button->hdr.pGolScheme->pFont));
+    }
+
+    MoveTo(xText, yText);
+
+}
+#endif
 /*********************************************************************
 * Function: WORD BtnDraw(void *pObj)
 *
@@ -349,29 +500,18 @@ WORD BtnTranslateMsg(void *pObj, GOL_MSG *pMsg)
 ********************************************************************/
 WORD BtnDraw(void *pObj)
 {
-    typedef enum
-    {
-        REMOVE,
-        BEVEL_DRAW,
-        RNDBUTTON_DRAW,
-        TEXT_DRAW,
-            #ifdef USE_BUTTON_MULTI_LINE
-        CHECK_TEXT_DRAW,
-            #endif
-        TEXT_DRAW_RUN,
-        FOCUS_DRAW,
-    } BTN_DRAW_STATES;
 
     static BTN_DRAW_STATES state = REMOVE;
     static SHORT width, height, radius;
 
-        #ifdef USE_BUTTON_MULTI_LINE
+    #ifdef USE_BUTTON_MULTI_LINE
     static SHORT charCtr = 0, lineCtr = 0;
     static XCHAR *pCurLine = NULL;
-    SHORT textWidth;
     XCHAR ch = 0;
-        #endif
-    WORD faceClr, embossLtClr, embossDkClr, xText, yText;
+    #else
+    WORD xText, yText;
+    #endif
+    WORD faceClr, embossLtClr, embossDkClr;
     BUTTON *pB;
     
     pB = (BUTTON *)pObj;
@@ -387,6 +527,20 @@ WORD BtnDraw(void *pObj)
 
             if(GetState(pB, BTN_HIDE))
             {                       // Hide the button (remove from screen)
+
+				#ifdef USE_ALPHABLEND
+				if(pB->hdr.pGolScheme->AlphaValue > 0)
+           		{
+					  
+					CopyPageWindow(_GFXBackgroundPage, 
+							   _GFXDestinationPage,
+                               pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top, 
+							   pB->hdr.right - pB->hdr.left, 
+							   pB->hdr.bottom - pB->hdr.top);
+	           	}	           	
+	           	else
+				#endif
+
                 SetColor(pB->hdr.pGolScheme->CommonBkColor);
                 if(!Bar(pB->hdr.left, pB->hdr.top, pB->hdr.right, pB->hdr.bottom))
                 {
@@ -408,56 +562,69 @@ WORD BtnDraw(void *pObj)
             width = (pB->hdr.right - pB->hdr.left) - (radius * 2);  // get width
             height = (pB->hdr.bottom - pB->hdr.top) - (radius * 2); // get height
 
-			if (GetState(pB, BTN_NOPANEL))
+			if(!GetState(pB, BTN_NOPANEL))
 			{
-	           	state = RNDBUTTON_DRAW;
-                goto rnd_button_draw;
-	  		}         	
-	        else   	
-	           	state = BEVEL_DRAW;
-
-        case BEVEL_DRAW:
-            if(!GetState(pB, BTN_DISABLED))
-            {
-                if(GetState(pB, BTN_PRESSED))
+                if(!GetState(pB, BTN_DISABLED))
                 {
-                    embossDkClr = pB->hdr.pGolScheme->EmbossLtColor;
-                    embossLtClr = pB->hdr.pGolScheme->EmbossDkColor;
-                    faceClr = pB->hdr.pGolScheme->Color1;
+                    if(GetState(pB, BTN_PRESSED))
+                    {
+                        embossDkClr = pB->hdr.pGolScheme->EmbossLtColor;
+                        embossLtClr = pB->hdr.pGolScheme->EmbossDkColor;
+                        faceClr = pB->hdr.pGolScheme->Color1;
+                    }
+                    else
+                    {
+                        embossLtClr = pB->hdr.pGolScheme->EmbossLtColor;
+                        embossDkClr = pB->hdr.pGolScheme->EmbossDkColor;
+                        faceClr = pB->hdr.pGolScheme->Color0;
+                    }
                 }
                 else
                 {
                     embossLtClr = pB->hdr.pGolScheme->EmbossLtColor;
                     embossDkClr = pB->hdr.pGolScheme->EmbossDkColor;
-                    faceClr = pB->hdr.pGolScheme->Color0;
+                    faceClr = pB->hdr.pGolScheme->ColorDisabled;
                 }
-            }
-            else
-            {
-                embossLtClr = pB->hdr.pGolScheme->EmbossLtColor;
-                embossDkClr = pB->hdr.pGolScheme->EmbossDkColor;
-                faceClr = pB->hdr.pGolScheme->ColorDisabled;
-            }
 
-            SetLineThickness(NORMAL_LINE);
-            SetLineType(SOLID_LINE);
-            GOLPanelDraw
-            (
-                pB->hdr.left + radius,
-                pB->hdr.top + radius,
-                pB->hdr.right - radius,
-                pB->hdr.bottom - radius,
-                radius,
-                faceClr,
-                embossLtClr,
-                embossDkClr,
-                pB->pBitmap,
-                GOL_EMBOSS_SIZE
-            );
+			    #ifdef USE_ALPHABLEND
+			    if(pB->hdr.pGolScheme->AlphaValue > 0) 
+                {
+                      
+
+				    CopyPageWindow(_GFXBackgroundPage, 
+						       _GFXForegroundPage, 
+                               pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top,
+						       pB->hdr.right - pB->hdr.left, 
+						       pB->hdr.bottom - pB->hdr.top);	             
+        							
+				    SetActivePage(_GFXForegroundPage);			            
+			    }
+			    #endif
+
+                SetLineThickness(NORMAL_LINE);
+                SetLineType(SOLID_LINE);
+
+                #ifdef USE_GRADIENT
+                GOLGradientPanelDraw(pB->hdr.pGolScheme);                
+                #endif
+
+                GOLPanelDraw
+                (
+                    pB->hdr.left + radius,
+                    pB->hdr.top + radius,
+                    pB->hdr.right - radius,
+                    pB->hdr.bottom - radius,
+                    radius,
+                    faceClr,
+                    embossLtClr,
+                    embossDkClr,
+                    pB->pBitmap,
+                    GOL_EMBOSS_SIZE
+                );
+	  		}         	
             state = RNDBUTTON_DRAW;
 
         case RNDBUTTON_DRAW:
-			rnd_button_draw : 
 			if (GetState(pB, BTN_NOPANEL))
             {
 	        	// check if there is an image to be drawn
@@ -495,13 +662,13 @@ WORD BtnDraw(void *pObj)
 				}
 			}
 
-                #ifdef USE_BUTTON_MULTI_LINE
+            #ifdef USE_BUTTON_MULTI_LINE
             state = CHECK_TEXT_DRAW;
-                #else
+            #else
             state = TEXT_DRAW;
-                #endif
-                #ifdef USE_BUTTON_MULTI_LINE
+            #endif
 
+        #ifdef USE_BUTTON_MULTI_LINE
         case CHECK_TEXT_DRAW:
             if(pB->pText != NULL)
             {
@@ -524,81 +691,40 @@ WORD BtnDraw(void *pObj)
                 pCurLine = pB->pText;
                 lineCtr = 0;
                 charCtr = 0;
-                state = TEXT_DRAW;
+                SetButtonTextPosition(pB, pCurLine, lineCtr);
+                state = TEXT_DRAW_RUN;
             }
             else
             {
-                state = FOCUS_DRAW;
-                goto rnd_button_draw_focus;
+                return DrawButtonFocus(pB, radius, &state);
             }
-
-        case TEXT_DRAW:
-            button_draw_set_text_position : SetFont(pB->hdr.pGolScheme->pFont);
-            textWidth = GetTextWidth(pCurLine, pB->hdr.pGolScheme->pFont);
-
-            // check text alignment
-            if(GetState(pB, BTN_TEXTRIGHT))
-            {
-                xText = pB->hdr.right - (textWidth + GOL_EMBOSS_SIZE + 2);
-            }
-            else if(GetState(pB, BTN_TEXTLEFT))
-            {
-                xText = pB->hdr.left + GOL_EMBOSS_SIZE + 2;
-            }
-            else
-            {
-
-                // centered	text in x direction
-                xText = (pB->hdr.left + pB->hdr.right - textWidth) >> 1;
-            }
-
-            if(GetState(pB, BTN_TEXTTOP))
-            {
-                yText = pB->hdr.top + GOL_EMBOSS_SIZE + (lineCtr * GetTextHeight(pB->hdr.pGolScheme->pFont));
-            }
-            else if(GetState(pB, BTN_TEXTBOTTOM))
-            {
-                yText = pB->hdr.bottom - (GOL_EMBOSS_SIZE + pB->textHeight) + (lineCtr * GetTextHeight(pB->hdr.pGolScheme->pFont));
-            }
-            else
-            {
-
-                // centered	text in y direction
-                yText = ((pB->hdr.bottom + pB->hdr.top - pB->textHeight) >> 1) + (lineCtr * GetTextHeight(pB->hdr.pGolScheme->pFont));
-            }
-
-            MoveTo(xText, yText);
-            state = TEXT_DRAW_RUN;
 
         case TEXT_DRAW_RUN:
             ch = *(pCurLine + charCtr);
 
             // output one character at time until a newline character or a NULL character is sampled
-            while((0x0000 != ch) && (0x000A != ch))
+            while(0x0000 != ch)
             {
                 if(!OutChar(ch))
-                    return (0);                     // render the character
+                    return (0);
+                // render the character
                 charCtr++;                          // update to next character
                 ch = *(pCurLine + charCtr);
+
+                if(ch == 0x000A)
+                {                                       // new line character
+                    pCurLine = pCurLine + charCtr + 1;  // go to first char of next line
+                    lineCtr++;                          // update line counter
+                    charCtr = 0;                        // reset char counter
+                    SetButtonTextPosition(pB, pCurLine, lineCtr);
+                    ch = *(pCurLine + charCtr);
+                }
             }
 
-            // pCurText is updated for the next line
-            if(ch == 0x000A)
-            {                                       // new line character
-                pCurLine = pCurLine + charCtr + 1;  // go to first char of next line
-                lineCtr++;                          // update line counter
-                charCtr = 0;                        // reset char counter
-                goto button_draw_set_text_position; // continue to next line
-            }
+            SetClip(CLIP_DISABLE);              // remove clipping
+            state = FOCUS_DRAW;                 // go back to IDLE state
 
-            // end of text string is reached no more lines to display
-            else
-            {
-                SetClip(CLIP_DISABLE);              // remove clipping
-                state = FOCUS_DRAW;                 // go back to IDLE state
-            }
-
-                #else
+        #else
 
         case TEXT_DRAW:
             if(pB->pText != NULL)
@@ -657,8 +783,7 @@ WORD BtnDraw(void *pObj)
             }
             else
             {
-                state = FOCUS_DRAW;
-                goto rnd_button_draw_focus;
+                return DrawButtonFocus(pB, radius, &state);
             }
 
         case TEXT_DRAW_RUN:
@@ -668,62 +793,7 @@ WORD BtnDraw(void *pObj)
                 #endif // #ifdef USE_BUTTON_MULTI_LINE
 
         case FOCUS_DRAW:
-            rnd_button_draw_focus : if(IsDeviceBusy()) return (0);
-
-            if(GetState(pB, BTN_FOCUSED))
-            {
-                SetLineType(FOCUS_LINE);
-                if(GetState(pB, BTN_PRESSED))
-                {
-                    SetColor(pB->hdr.pGolScheme->TextColor1);
-                }
-                else
-                {
-                    SetColor(pB->hdr.pGolScheme->TextColor0);
-                }
-
-                // check if the object has rounded corners or not
-                if(!pB->radius)
-                {
-                    if
-                    (
-                        !Rectangle
-                            (
-                                pB->hdr.left + GOL_EMBOSS_SIZE + 2,
-                                pB->hdr.top + GOL_EMBOSS_SIZE + 2,
-                                pB->hdr.right - GOL_EMBOSS_SIZE - 2,
-                                pB->hdr.bottom - GOL_EMBOSS_SIZE - 2
-                            )
-                    )
-                    {
-                        return (0);
-                    }
-                }
-                else
-                {
-
-                    // original center is still the same, but radius is reduced
-                    if
-                    (
-                        !Bevel
-                            (
-                                pB->hdr.left + radius,
-                                pB->hdr.top + radius,
-                                pB->hdr.right - radius,
-                                pB->hdr.bottom - radius,
-                                radius - 2 - GOL_EMBOSS_SIZE
-                            )
-                    )
-                    {
-                        return (0);
-                    }
-                }
-
-                SetLineType(SOLID_LINE);
-            }
-
-            state = REMOVE;
-            return (1);
+            return DrawButtonFocus(pB, radius, &state);
     }
 
     return (1);

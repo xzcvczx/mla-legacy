@@ -283,14 +283,12 @@ typedef union _BD_STAT
     struct{
         //if the USB module owns the buffer then these are
         // the values
-        unsigned BC8:1;         //bit 8 of the byte count
-        unsigned BC9:1;         //bit 9 of the byte count
+        unsigned :2;
         unsigned PID0:1;        //Packet Identifier
         unsigned PID1:1;
         unsigned PID2:1;
         unsigned PID3:1;
         unsigned :1;
-        unsigned UOWN:1;        //USB Ownership
     };
     struct{
         unsigned :2;
@@ -377,6 +375,8 @@ typedef union _POINTER
     #define USBMaskInterrupts() 
     #define USBUnmaskInterrupts() 
 #endif
+
+#define USBInterruptFlag PIR2bits.USBIF
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
 #if defined(USB_INTERRUPT)
@@ -540,7 +540,9 @@ typedef union _POINTER
     extern USB_VOLATILE BYTE USBActiveConfiguration;
     extern USB_VOLATILE IN_PIPE inPipes[1];
     extern USB_VOLATILE OUT_PIPE outPipes[1];
-    extern volatile BDT_ENTRY *pBDTEntryIn[USB_MAX_EP_NUMBER+1];
 #endif
+
+extern volatile BDT_ENTRY* pBDTEntryOut[USB_MAX_EP_NUMBER+1];
+extern volatile BDT_ENTRY* pBDTEntryIn[USB_MAX_EP_NUMBER+1];
 
 #endif //#ifndef USB_HAL_PIC18_H

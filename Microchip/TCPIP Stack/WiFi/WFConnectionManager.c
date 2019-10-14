@@ -64,6 +64,7 @@
     #define WF_MODULE_NUMBER    WF_MODULE_WF_CONNECTION_MANAGER
 #endif
 
+extern void IgnoreNextMgmtResult();
 
 /*
 *********************************************************************************************************
@@ -96,7 +97,7 @@ static BOOL g_LogicalConnection = FALSE;
     MACInit must be called first.
 
   Parameters:
-    CpId -- If this value is equal to an existing Connection Profile’s ID than 
+    CpId - If this value is equal to an existing Connection Profile’s ID than 
             only that Connection Profile will be used to attempt a connection to 
             a WiFi network.  
             If this value is set to WF_CM_CONNECT_USING_LIST then the 
@@ -119,11 +120,13 @@ void WF_CMConnect(UINT8 CpId)
     hdrBuf[2] = CpId;
     hdrBuf[3] = 0;   
 
+
+
     SendMgmtMsg(hdrBuf,
                 sizeof(hdrBuf),
                 NULL,
                 0);
-   
+
     /* wait for mgmt response, free after it comes in, don't need data bytes */
     WaitForMgmtResponse(WF_CM_CONNECT_SUBYTPE, FREE_MGMT_BUFFER);
 }
@@ -167,6 +170,11 @@ void WF_CMDisconnect(void)
                 NULL,
                 0);
  
+    // See Jira MRF24WBOM-29. The chip will return a non-successful result that we normally assert on.  For this
+    // management message, there are conditions where it returns a non-success, but we do not want to assert.
+    // This function informs the WaitForMgmtResponse() function to ignore the success code for this message. 
+    IgnoreNextMgmtResult();
+ 
     /* wait for mgmt response, free after it comes in, don't need data bytes */
     WaitForMgmtResponse(WF_CM_DISCONNECT_SUBYTPE, FREE_MGMT_BUFFER);
 
@@ -187,8 +195,8 @@ void WF_CMDisconnect(void)
     MACInit must be called first.
 
   Parameters:
-    p_state -- Pointer to location where connection state will be written
-    p_currentCpId -- Pointer to location of current connection profile ID that
+    p_state - Pointer to location where connection state will be written
+    p_currentCpId - Pointer to location of current connection profile ID that
                      is being queried.
 
   Returns:
@@ -209,7 +217,7 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
                 sizeof(hdrBuf),
                 NULL,
                 0);
- 
+
     /* wait for mgmt response, read data, free after read */
 	WaitForMgmtResponseAndReadData(WF_CM_GET_CONNECTION_STATUS_SUBYTPE, 
                                    sizeof(msgData),                  /* num data bytes to read          */
@@ -219,13 +227,13 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
     *p_state       = msgData[0];        /* connection state */
     *p_currentCpId = msgData[1];        /* current CpId     */
     
-    if ((*p_state == WF_CSTATE_NOT_CONNECTED) || (*p_state == WF_CSTATE_CONNECTION_PERMANENTLY_LOST))
+    if ((*p_state == WF_CSTATE_CONNECTED_INFRASTRUCTURE) || (*p_state == WF_CSTATE_CONNECTED_ADHOC))
     {
-        SetLogicalConnectionState(FALSE);
+        SetLogicalConnectionState(TRUE);
     }
     else
     {
-        SetLogicalConnectionState(TRUE);
+        SetLogicalConnectionState(FALSE);
     }        
 }  
 
@@ -274,7 +282,7 @@ BOOL WFisConnected()
     MACInit must be called first.
 
   Parameters:
-    state -- Current logical connection state of the MRF24WB0M.
+    state - Current logical connection state of the MRF24WB0M.
 
   Returns:
     None.

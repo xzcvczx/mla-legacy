@@ -1,3 +1,13 @@
+MiWi DE 4.2
+MiWi DE 4.2 is latest release with Microchip Applicaiton Libraries. There is no difference between version 4.2 and version 4.1.2Beta release directly from Microchip MiWi docking page, except some minor bug fixes.
+
+MiWi DE 4.1.2Beta
+MiWi DE 4.1.2Beta is a major release after MiWi DE 3.x. The major changes are:
+	1. Add support for MiWi PRO protocol that supports large networks up to 65 hops
+	2. Add initial support for MPLAB X Beta 6
+	3. Provide demo source code for Microchip Wireless Development Kit 
+	4. Provide testing interface for MiWi PRO protocol 
+	5. Bug fixes.
 
 MiWi DE 3.1
 MiWi DE v3.1 is latest update to P2P stack v2.1.1 with MiMAC and MiApp interfaces. The major changes are:

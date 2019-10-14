@@ -74,6 +74,9 @@ Change History:
               transfer events are enabled.
 
   2.7a        No change
+  
+  2.9         Small change to allow certain types of subclass 0x05 flash drives
+              to work (in addition to normal 0x06 drives).
 
 *******************************************************************************/
 
@@ -1346,7 +1349,7 @@ BOOL USBHostMSDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
             if (descriptor[i+5] == DEVICE_CLASS_MASS_STORAGE)
             {
                 // See if the interface subclass and protocol are correct.
-                if ((descriptor[i+6] == DEVICE_SUBCLASS_SCSI) &&
+                if (((descriptor[i+6] == DEVICE_SUBCLASS_SCSI) || (descriptor[i+6] == DEVICE_SUBCLASS_REMOVABLE)) &&
                     (descriptor[i+7] == DEVICE_INTERFACE_PROTOCOL_BULK_ONLY))
                 {
                     deviceInfoMSD[device].interface = descriptor[i+2];

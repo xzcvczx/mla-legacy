@@ -106,18 +106,15 @@ static void LowLevel_CPGetElement(UINT8 CpId,
 
   Description:
     Requests the MRF24WB0M to create a Connection Profile (CP), assign it an ID, 
-    and set all the elements to default values.  A maximum of 8 Connection 
-    Profiles can exist on the MRF24WB0M (stored in FLASH).  Two CP’s can be 
-    active in MRF24WB0M memory at any one time.
-
-    NOTE: First release of this code will not support FLASH, only the two CP’s 
-    in memory.
+    and set all the elements to default values.  The ID returned by this function
+	is used in other connection profile functions.  A maximum of 2 Connection 
+    Profiles can exist on the MRF24WB0M.
 
   Precondition:
     MACInit must be called first.
 
   Parameters:
-    p_CpId -- pointer to where Connection Profile ID will be written.  If 
+    p_CpId - Pointer to where Connection Profile ID will be written.  If 
               function fails, the CP ID will be set to 0xff.
 
   Returns:
@@ -165,7 +162,7 @@ void WF_CPCreate(UINT8 *p_CpId)
     MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile to delete.
+    CpId - Connection Profile to delete test case.
 
   Returns:
     None.
@@ -211,10 +208,10 @@ void WF_CPDelete(UINT8 CpId)
     MACInit must be called first.
 
   Parameters:
-    p_cpIdList -- pointer to value representing the bit mask where each bit 
+    p_cpIdList - Pointer to value representing the bit mask where each bit 
                   index (plus 1) corresponds to a Connection Profile ID that has 
-                  been created.  For example, if this value is 0x41, then 
-                  Connection Profile ID’s 1 and and 4 have been created.
+                  been created.  For example, if this value is 0x03, then 
+                  Connection Profile ID’s 1 and and 2 have been created.
 
   Returns:
     None.
@@ -258,8 +255,8 @@ void WF_CPGetIds(UINT8 *p_cpIdList)
     MACInit must be called.
 
   Parameters:
-    CpId -- Connectino Profile ID.
-    p_elements -- Pointer to Connection Profile elements structure.
+    CpId - Connectino Profile ID.
+    p_elements - Pointer to Connection Profile elements structure.
 
   Returns:
     None.
@@ -293,8 +290,8 @@ void WF_CPSetElements(UINT8 CpId, tWFCPElements *p_elements)
     MACInit must be called first.
 
   Parameters:
-    CpId -- Connectino Profile ID.
-    p_elements -- Pointer to Connection Profile elements structure.
+    CpId - Connectino Profile ID.
+    p_elements - Pointer to Connection Profile elements structure.
 
   Returns:
     None.
@@ -321,15 +318,18 @@ void WF_CPGetElements(UINT8 CpId, tWFCPElements *p_elements)
     Sets the SSID for the specified Connection Profile ID.    
 
   Description:
-    Sets the SSID and SSID Length elements in the Connection Profile.
+    Sets the SSID and SSID Length elements in the Connection Profile.  Note that
+	if an Access Point can have either a visible or hidden SSID.  If an Access Point
+	uses a hidden SSID then an active scan must be used (see scanType field in the 
+	Connection Algorithm).
 
   Precondition:
     MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    p_ssid -- pointer to the SSID string
-    ssidLength -- number of bytes in the SSID
+    CpId - Connection Profile ID
+    p_ssid - Pointer to the SSID string
+    ssidLength - Number of bytes in the SSID
 
   Returns:
     None.
@@ -361,9 +361,9 @@ void WF_CPSetSsid(UINT8 CpId, UINT8 *p_ssid,  UINT8 ssidLength)
     MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    p_ssid -- pointer to the SSID string
-    ssidLength -- number of bytes in the SSID
+    CpId - Connection Profile ID
+    p_ssid - Pointer to the SSID string
+    ssidLength - Pumber of bytes in the SSID
 
   Returns:
     None.
@@ -413,8 +413,8 @@ void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength)
     MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    p_bssid -- pointer to the BSSID 
+    CpId - Connection Profile ID
+    p_bssid - Pointer to the BSSID 
 
   Returns:
     None.
@@ -444,8 +444,8 @@ void WF_CPSetBssid(UINT8 CpId, UINT8 *p_bssid)
     MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    p_bssid -- pointer to the BSSID 
+    CpId - Connection Profile ID
+    p_bssid - Pointer to the BSSID 
 
   Returns:
     None.
@@ -478,8 +478,8 @@ void WF_CPGetBssid(UINT8 CpId, UINT8 *p_bssid)
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    networkType -- type of network to create (infrastructure or adhoc)
+    CpId - Connection Profile ID
+    networkType - Type of network to create (infrastructure or adhoc)
 
   Returns:
   	None.
@@ -511,8 +511,8 @@ void WF_CPSetNetworkType(UINT8 CpId, UINT8 networkType)
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    networkType -- type of network to create (infrastructure or adhoc)
+    CpId - Connection Profile ID
+    networkType - Type of network to create (infrastructure or adhoc)
 
   Returns:
   	None.
@@ -561,13 +561,13 @@ void WF_CPGetNetworkType(UINT8 CpId, UINT8 *p_networkType)
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    securityType -- value corresponding to the security type desired.
-    wepKeyIndex -- 0 thru 3 (only used if security type is WF_SECURITY_WEP_40 or
+    CpId - Connection Profile ID
+    securityType - Value corresponding to the security type desired.
+    wepKeyIndex - 0 thru 3 (only used if security type is WF_SECURITY_WEP_40 or
                    WF_SECURITY_WEP_104)
-    p_securityKey -- binary key or passphrase (not used if security is 
+    p_securityKey - Binary key or passphrase (not used if security is 
                      WF_SECURITY_OPEN)
-    securityKeyLength -- number of bytes in p_securityKey (not used if security
+    securityKeyLength - Number of bytes in p_securityKey (not used if security
                          is WF_SECURITY_OPEN)
 
   Returns:
@@ -652,13 +652,13 @@ void WF_CPSetSecurity(UINT8 CpId,
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    securityType -- value corresponding to the security type desired.
-    wepKeyIndex -- 0 thru 3 (only used if security type is WF_SECURITY_WEP_40 or
+    CpId - Connection Profile ID
+    securityType - Value corresponding to the security type desired.
+    wepKeyIndex - 0 thru 3 (only used if security type is WF_SECURITY_WEP_40 or
                    WF_SECURITY_WEP_104)
-    p_securityKey -- binary key or passphrase (not used if security is 
+    p_securityKey - Binary key or passphrase (not used if security is 
                      WF_SECURITY_OPEN)
-    securityKeyLength -- number of bytes in p_securityKey (not used if security
+    securityKeyLength - Number of bytes in p_securityKey (not used if security
                          is WF_SECURITY_OPEN)
 
   Returns:
@@ -741,8 +741,8 @@ void WF_CPGetSecurity(UINT8 CpId,
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    defaultWepKeyIndex -- index of WEP key to use (0 - 3)
+    CpId - Connection Profile ID
+    defaultWepKeyIndex - Index of WEP key to use (0 - 3)
 
   Returns:
   	None.
@@ -775,8 +775,8 @@ void WF_CPSetDefaultWepKeyIndex(UINT8 CpId, UINT8 defaultWepKeyIndex)
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    p_defaultWepKeyIndex -- pointer to index of WEP key to use (0 - 3)
+    CpId - Connection Profile ID
+    p_defaultWepKeyIndex - Pointer to index of WEP key to use (0 - 3)
 
   Returns:
   	None.
@@ -811,8 +811,8 @@ void WF_CPGetDefaultWepKeyIndex(UINT8 CpId, UINT8 *p_defaultWepKeyIndex)
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    adHocBehavior -- value of the adhoc behavior for this connection profile.
+    CpId - Connection Profile ID
+    adHocBehavior - Value of the adhoc behavior for this connection profile.
 
   Returns:
   	None.
@@ -845,8 +845,8 @@ void WF_CPSetAdHocBehavior(UINT8 CpId, UINT8 adHocBehavior)
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    adHocBehavior -- pointer to location of the adhoc behavior value for this 
+    CpId - Connection Profile ID
+    adHocBehavior - Pointer to location of the adhoc behavior value for this 
                      connection profile.
 
   Returns:
@@ -884,10 +884,10 @@ void WF_CPGetAdHocBehavior(UINT8 CpId, UINT8 *p_adHocBehavior)
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    elementId -- element that is being set
-    p_elementData -- pointer to element data
-    elementDataLength -- number of bytes pointed to by p_elementData
+    CpId - Connection Profile ID
+    elementId - Element that is being set
+    p_elementData - Pointer to element data
+    elementDataLength - Number of bytes pointed to by p_elementData
 
   Returns:
   	None.
@@ -939,11 +939,11 @@ static void LowLevel_CPSetElement(UINT8 CpId,
   	MACInit must be called first.
 
   Parameters:
-    CpId -- Connection Profile ID
-    elementId -- element that is being read
-    p_elementData -- pointer to where element data will be written
-    elementDataLength -- number of element data bytes that will be read
-    dataReadAction -- if TRUE then read data per paramters and free mgmt 
+    CpId - Connection Profile ID
+    elementId - Element that is being read
+    p_elementData - Pointer to where element data will be written
+    elementDataLength - Number of element data bytes that will be read
+    dataReadAction - If TRUE then read data per paramters and free mgmt 
                       response buffer. If FALSE then return after response 
                       received, do not read any data as the caller will do that, 
                       and don't free buffer, as caller will do that as well.

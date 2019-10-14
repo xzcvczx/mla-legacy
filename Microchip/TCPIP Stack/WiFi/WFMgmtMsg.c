@@ -80,6 +80,7 @@
 
 static volatile BOOL gMgmtConfirmMsgReceived  = FALSE;
 static BOOL RestoreRxData = FALSE;
+static BOOL g_IgnoreNextMgmtResult = FALSE;
 
 UINT8 g_MgmtResponseInProgress = FALSE;
 
@@ -110,7 +111,7 @@ void SendMgmtMsg(UINT8 *p_header,
     UINT32  maxAllowedTicks;
 
     /* cannot send management messages while in WF_ProcessEvent() */
-    WF_ASSERT(!isInWFProcessEvent())
+    WF_ASSERT(!isInWFProcessEvent());
     
     EnsureWFisAwake();
     
@@ -168,6 +169,12 @@ void SignalMgmtConfirmReceivedEvent(void)
     gMgmtConfirmMsgReceived = TRUE;        
 }    
 
+
+void IgnoreNextMgmtResult()
+{
+    g_IgnoreNextMgmtResult = TRUE;
+}    
+
 /*****************************************************************************
  * FUNCTION: WaitForMgmtResponse
  *
@@ -218,7 +225,14 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
                
         /* Mgmt response 'result' field should always indicate success.  If this assert is hit the error codes are located */
         /* WFApi.h.  Search for WF_SUCCESS for the list of error codes.                                                    */
-        WF_ASSERT(hdr.result == WF_SUCCESS);
+        if (g_IgnoreNextMgmtResult)
+        {    
+            g_IgnoreNextMgmtResult = FALSE;
+        }    
+        else
+        {
+            WF_ASSERT(hdr.result == WF_SUCCESS);
+        }    
 
         /* mgmt response subtype had better match subtype we were expecting */
         WF_ASSERT(hdr.subtype == expectedSubtype);

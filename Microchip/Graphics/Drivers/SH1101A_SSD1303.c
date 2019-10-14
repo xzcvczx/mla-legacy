@@ -4,10 +4,8 @@
  *  Solomon Systech SSD1303 LCD controller driver
   *****************************************************************************
  * FileName:        SH1101A_SSD1303.c
- * Dependencies:    Graphics.h
  * Processor:       PIC24
  * Compiler:       	MPLAB C30
- * Linker:          MPLAB LINK30
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -34,16 +32,38 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Rodger Richey		03/10/07	Original
- * Paolo Tamayo			12/20/07	Ported to PIC24 Kit
- * PAT					3/26/10		Fixed error on PutPixel() timing (PMP timing).
+ * 03/10/07	    Original
+ * 12/20/07	    Ported to PIC24 Kit
+ * 03/26/10		Fixed error on PutPixel() timing (PMP timing).
+ * 03/22/11     - Modified for Graphics Library Version 3.00
+ *              - Replace color data type from WORD_VAL to GFX_COLOR
+ *              - Replace DeviceInit() to DriverInterfaceInit()
  *****************************************************************************/
-#include "Graphics/Graphics.h"
+#include "HardwareProfile.h"
+
+#if defined(USE_GFX_DISPLAY_CONTROLLER_SH1101A)
+
+#include "Compiler.h"
+#include "TimeDelay.h"
+#include "Graphics/DisplayDriver.h"
+#include "Graphics/SH1101A_SSD1303.h"
+#include "Graphics/gfxtcon.h"
+#include "Graphics/Primitive.h"
+
+#if defined (USE_GFX_PMP)
+    #include "Graphics/gfxpmp.h"
+#elif defined (USE_GFX_PMP)
+    #include "Graphics/gfxepmp.h"
+#endif
 
 // Color
-BYTE    _color;
+GFX_COLOR   _color;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
 
 // Clipping region control
 SHORT   _clipRgn;
@@ -99,7 +119,7 @@ SHORT   _clipBottom;
 void ResetDevice(void)
 {
 	// Initialize the device
-	DeviceInit();
+	DriverInterfaceInit();
 
     DisplayEnable();
 	DisplaySetCommand();
@@ -231,6 +251,29 @@ void ResetDevice(void)
     DisplayDisable();
 	DisplaySetData();
 }
+
+#ifdef USE_TRANSPARENT_COLOR
+/*********************************************************************
+* Function:  void TransparentColorEnable(GFX_COLOR color)
+*
+* Overview: Sets current transparent color.
+*
+* PreCondition: none
+*
+* Input: color - Color value chosen.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void TransparentColorEnable(GFX_COLOR color)
+{
+    _colorTransparent = color;    
+    _colorTransparentEnable = TRANSPARENT_COLOR_ENABLE;
+
+}
+#endif
 
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)
@@ -391,6 +434,73 @@ BYTE GetPixel(SHORT x, SHORT y)
 }
 
 /*********************************************************************
+* Function: SetClipRgn(left, top, right, bottom)
+*
+* Overview: Sets clipping region.
+*
+* PreCondition: none
+*
+* Input: left - Defines the left clipping region border.
+*		 top - Defines the top clipping region border.
+*		 right - Defines the right clipping region border.
+*	     bottom - Defines the bottom clipping region border.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    _clipLeft=left;
+    _clipTop=top;
+    _clipRight=right;
+    _clipBottom=bottom;
+
+}
+
+/*********************************************************************
+* Function: SetClip(control)
+*
+* Overview: Enables/disables clipping.
+*
+* PreCondition: none
+*
+* Input: control - Enables or disables the clipping.
+*			- 0: Disable clipping
+*			- 1: Enable clipping
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClip(BYTE control)
+{
+    _clipRgn=control;
+}
+
+/*********************************************************************
+* Function: IsDeviceBusy()
+*
+* Overview: Returns non-zero if LCD controller is busy 
+*           (previous drawing operation is not completed).
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: Busy status.
+*
+* Side Effects: none
+*
+********************************************************************/
+WORD IsDeviceBusy(void)
+{  
+    return (0);
+}
+
+/*********************************************************************
 * Function: void ClearDevice(void)
 *
 * PreCondition: none
@@ -421,3 +531,7 @@ void ClearDevice(void)
 
     DisplayDisable();
 }
+
+
+#endif // #if defined(USE_GFX_DISPLAY_CONTROLLER_SH1101A)
+

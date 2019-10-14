@@ -95,6 +95,7 @@ static struct
 	UINT8 securityKeyLength;
 } iwprivCb;
 
+extern UINT8 g_hibernate_state;
 //============================================================================
 //                                  Local Function Prototypes
 //============================================================================
@@ -119,7 +120,7 @@ static BOOL iwprivSetCb(void)
 		iwprivCbInitialized = TRUE;
 	}
 
-	if ( !iwconfigSetCb() ) // first set iwconfigCb
+	if (!g_hibernate_state && !iwconfigSetCb() ) // first set iwconfigCb
 		return FALSE;
 
     if ( iwprivCb.cpId != iwconfigCb.cpId)
@@ -507,8 +508,14 @@ static BOOL iwprivSetPhrase(void)
 *****************************************************************************/
 void do_iwpriv_cmd(void)
 {
-	if ( !iwprivSetCb() )
+	if (g_hibernate_state)
+	{
+		WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
 		return;
+	}
+
+	if ( !iwprivSetCb() )
+			return;
 
     // if user only typed in iwpriv with no other parameters
     if (ARGC == 1u)

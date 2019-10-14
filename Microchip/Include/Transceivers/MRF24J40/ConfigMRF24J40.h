@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright ¬© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -42,6 +42,7 @@
 *  Rev   Date         Author        Description
 *  2.0   4/15/2009    yfy           MiMAC and MiApp revision
 *  3.1   5/28/2010    yfy           MiWi DE 3.1
+*  4.1   6/3/2011     yfy           MAL v2011-06
 ********************************************************************/
 
 #ifndef __CONFIG_MRF24J40_H
@@ -111,29 +112,49 @@
     /*********************************************************************/ 
     #define FRAME_COUNTER_UPDATE_INTERVAL 1024
     
+	
+	#define BANK_SIZE           2
+	
     /*********************************************************************/
     // If MRF24J40MB module with external power amplifier and low noise
     // amplifier has been used, the stack needs to do output power adjustment
     // according to MRF24J40MB data sheet.
     // Comment this part if used other design of MRF24J40 with external PA
-    // and/or LNA
+    // and/or LNA. This definition cannot be used with definition of
+    // MRF24J40MC
     /*********************************************************************/
-    #define MRF24J40MB 
-    
-    #if defined(MRF24J40MB)
+    #define MRF24J40MB
+
+    /*********************************************************************/
+    // If MRF24J40MC module with external power amplifier, low noise
+    // amplifier and external antenna has been used, the stack needs to 
+    // do output power adjustment according to MRF24J40MC data sheet.
+    // Comment this part if used other design of MRF24J40 with external PA
+    // and/or LNA. This definition cannot be used with definition of 
+    // MRF24J40MB
+    /*********************************************************************/
+    //#define MRF24J40MC
+
+
+    #if defined(MRF24J40MB) && defined(MRF24J40MC)
+        #error "MRF24J40MB and MRF24J40MC cannot be defined at the same time"
+    #endif
+
+    #if defined(MRF24J40MB) || defined(MRF24J40MC)
         #define UNDEFINED_LOCATION  0x00
         #define UNITED_STATES       0x01
         #define CANADA              0x02
         #define EUROPE              0x03
         /*********************************************************************/
-        // If MRF24J40MB module is used, the output power setting depends on 
+        // If MRF24J40MB/C module is used, the output power setting depends on
         // the country where the application is used. Define one of the 
         // locations that this appliation will be applied. If none of the location
-        // is set, US FCC setting for MRF24J40MB module will be used in the stack.
-        // Check MRF24J40MB data sheet for details.
+        // is set, US FCC setting for MRF24J40MB/C module will be used in the stack.
+        // Check MRF24J40MB/C data sheet for details.
         /*********************************************************************/
         #define APPLICATION_SITE    UNITED_STATES
     #endif
+	
     
 #endif
 

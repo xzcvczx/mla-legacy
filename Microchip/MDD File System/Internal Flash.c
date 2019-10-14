@@ -39,6 +39,8 @@
   1.2.7  Re-implemented sector read/write functions for PIC24
          devices.  This removes the 32kB PSV size restriction.
          Also added some additional error checking.
+  1.3.0  Expanded flash memory pointer size on PIC18 to 24-bits.  This
+         allows the MSD volume to exceed 64kB on large flash memory devices.
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -190,6 +192,9 @@ BYTE MDD_IntFlash_InitIO (void)
  *****************************************************************************/
 MEDIA_INFORMATION * MDD_IntFlash_MediaInitialize(void)
 {
+    mediaInformation.validityFlags.bits.sectorSize = TRUE;
+    mediaInformation.sectorSize = MEDIA_SECTOR_SIZE;
+    
 	mediaInformation.errorCode = MEDIA_NO_ERROR;
 	return &mediaInformation;
 }//end MediaInitialize
@@ -310,7 +315,11 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
 #if defined(__18CXX)
 #pragma udata myFileBuffer
 #endif
+#if defined (__dsPIC33E__) || defined (__PIC24E__)
+volatile unsigned int file_buffer[ERASE_BLOCK_SIZE] __attribute__((far));
+#else
 volatile unsigned char file_buffer[ERASE_BLOCK_SIZE] __attribute__((far));
+#endif
 #if defined(__18CXX)
 #pragma udata
 #endif
@@ -322,6 +331,8 @@ volatile unsigned char file_buffer[ERASE_BLOCK_SIZE] __attribute__((far));
 
 #if defined(__C32__)
     #define PTR_SIZE DWORD
+#elif defined(__18CXX)
+    #define PTR_SIZE UINT24
 #else
     #define PTR_SIZE WORD
 #endif
@@ -331,95 +342,178 @@ ROM BYTE *FileAddress = 0;
 #if defined(__C30__)
 BYTE MDD_IntFlash_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero)
 {
-    #if !defined(INTERNAL_FLASH_WRITE_PROTECT)
-        WORD i;
-        BYTE j;
-        WORD offset;
-        DWORD flashAddress;
-        WORD TBLPAGSave;
-        
+#if !defined(INTERNAL_FLASH_WRITE_PROTECT)
+    WORD i;
+    BYTE j;
+    WORD offset;
+    DWORD flashAddress;
+    WORD TBLPAGSave;
+
+
+    //First, error check the resulting address, to make sure the MSD host isn't trying 
+    //to erase/program illegal LBAs that are not part of the designated MSD volume space.
+    if(sector_addr >= MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE)
+    {
+        return FALSE;
+    }  
+
+    TBLPAGSave = TBLPAG;
     
-        //First, error check the resulting address, to make sure the MSD host isn't trying 
-        //to erase/program illegal LBAs that are not part of the designated MSD volume space.
-        if(sector_addr >= MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE)
+#if defined (__dsPIC33E__) || defined (__PIC24E__)
+    
+
+    // First, save the contents of the entire erase page.  
+    // To do this, we need to get a pointer to the start of the erase page.
+    // AND mask 0xFFFFF800 is to clear the lower bits, 
+    // so we go back to the start of the erase page.
+    
+    flashAddress = ((DWORD)FILES_ADDRESS + (DWORD)(sector_addr*MEDIA_SECTOR_SIZE)) 
+                & (DWORD)0xFFFFF800;  
+    
+    //Now save all of the contents of the erase page.
+    TBLPAG = (BYTE)(flashAddress >> 16);
+    for(i = 0; i < ERASE_BLOCK_SIZE;i++)
+    {
+        file_buffer[i] = __builtin_tblrdl((WORD)flashAddress + (2 * i));
+    }    
+
+    // Now we want to overwrite the file_buffer[] contents 
+    // for the sector that we are trying to write to.
+    // The lower 2 bits of the helps to determine this.
+   
+    offset = 0x200 * (BYTE)(sector_addr & 0x3);   
+
+    //Overwrite the file_buffer[] RAM contents for the sector that we are trying to write to.
+    for(i = 0; i < MEDIA_SECTOR_SIZE; i++)
+    {
+        *((unsigned char *)file_buffer + offset + i) = *buffer++;
+    }
+#else
+
+     //First, save the contents of the entire erase page.  To do this, we need to get a pointer to the start of the erase page.
+    flashAddress = ((DWORD)FILES_ADDRESS + (DWORD)(sector_addr*MEDIA_SECTOR_SIZE)) & (DWORD)0xFFFFFC00;  //AND mask 0xFFFFFC00 is to clear the lower bits, so we go back to the start of the erase page.
+    //Now save all of the contents of the erase page.
+    for(i = 0; i < ERASE_BLOCK_SIZE;)
+    {
+        TBLPAG = (BYTE)(flashAddress >> 16);
+        *(WORD*)&file_buffer[i] = __builtin_tblrdl((WORD)flashAddress);
+        flashAddress += 2u;    //Skipping upper word.  Don't care about the implemented byte/don't use it when programming or reading from the sector.
+        i += 2u;
+    }    
+
+    //Now we want to overwrite the file_buffer[] contents for the sector that we are trying to write to.
+    //Need to figure out if the buffer[] data goes in the upper sector or the lower sector of the file_buffer[]
+    if(sector_addr & 0x00000001)
+    {
+        //Odd sector address, must be the high file_buffer[] sector
+        offset = MEDIA_SECTOR_SIZE;
+    }
+    else
+    {
+        offset = 0;
+    }        
+
+    //Overwrite the file_buffer[] RAM contents for the sector that we are trying to write to.
+    for(i = 0; i < MEDIA_SECTOR_SIZE; i++)
+    {
+        file_buffer[offset + i] = *buffer++;
+    }
+    #endif
+    
+
+#if defined(__dsPIC33E__) || defined (__PIC24E__)
+
+    INT gieBkUp;
+
+    //Now erase the entire erase page of flash memory.  
+    //First we need to calculate the actual flash memory 
+    //address of the erase page. 
+    
+    gieBkUp = INTCON2bits.GIE;
+    INTCON2bits.GIE = 0; // Disable interrupts
+    NVMADRU = (WORD)(flashAddress >> 16);
+    NVMADR = (WORD)(flashAddress & 0xFFFF);
+    NVMCON = 0x4003;    // This value will erase a page.
+    __builtin_write_NVM();
+    INTCON2bits.GIE = gieBkUp; // Enable interrupts
+
+    //Now reprogram the erase page with previously obtained contents of the file_buffer[]
+    //We only write to the even flash word addresses, the odd word addresses are left blank.  
+    //Therefore, we only store 2 bytes of application data for every 2 flash memory word addresses.
+    //This "wastes" 1/3 of the flash memory, but it provides extra protection from accidentally executing
+    //the data.  It also allows quick/convenient PSV access when reading back the flash contents.
+
+    TBLPAG = 0xFA;
+    j = 0;
+    for(i = 0; i < ERASE_BLOCK_SIZE;i++)
+    {
+
+       //
+        __builtin_tblwtl((j * 2), file_buffer[i]);
+        __builtin_tblwth((j * 2), 0);
+           
+        j ++;
+
+        //Check if we have reached a program block size boundary.  If so, program the last 128 
+        //useful bytes (192 bytes total, but 64 of those are filled with '0' filler bytes).
+        if(j >= 128u)
         {
-            return FALSE;
-        }  
-    
-        TBLPAGSave = TBLPAG;
-    
-        //First, save the contents of the entire erase page.  To do this, we need to get a pointer to the start of the erase page.
-        flashAddress = ((DWORD)FILES_ADDRESS + (DWORD)(sector_addr*MEDIA_SECTOR_SIZE)) & (DWORD)0xFFFFFC00;  //AND mask 0xFFFFFC00 is to clear the lower bits, so we go back to the start of the erase page.
-        //Now save all of the contents of the erase page.
-        for(i = 0; i < ERASE_BLOCK_SIZE;)
-        {
-            TBLPAG = (BYTE)(flashAddress >> 16);
-            *(WORD*)&file_buffer[i] = __builtin_tblrdl((WORD)flashAddress);
-            flashAddress += 2u;    //Skipping upper word.  Don't care about the implemented byte/don't use it when programming or reading from the sector.
-            i += 2u;
+            j = j - 128u;
+            NVMADRU = (WORD)(flashAddress >> 16);
+            NVMADR = (WORD)(flashAddress & 0xFFFF);
+            NVMCON = 0x4002;
+            gieBkUp = INTCON2bits.GIE;
+            INTCON2bits.GIE = 0; // Disable interrupts
+            __builtin_write_NVM();
+            INTCON2bits.GIE = gieBkUp; // Enable interrupts
+            flashAddress += 256;
         }    
-        
-        //Now we want to overwrite the file_buffer[] contents for the sector that we are trying to write to.
-        //Need to figure out if the buffer[] data goes in the upper sector or the lower sector of the file_buffer[]
-        if(sector_addr & 0x00000001)
+    } 
+#else 
+    //Now erase the entire erase page of flash memory.  
+    //First we need to calculate the actual flash memory address of the erase page.  The starting address of the erase page is as follows:
+    flashAddress = ((DWORD)FILES_ADDRESS + (DWORD)(sector_addr*MEDIA_SECTOR_SIZE)) & (DWORD)0xFFFFFC00;
+
+    //Peform NVM erase operation.
+    NVMCON = INTERNAL_FLASH_ERASE;				    //Page erase on next WR
+    __builtin_tblwtl((WORD)flashAddress, 0xFFFF);   //Perform dummy write to load address of erase page
+    UnlockAndActivate(NVM_UNLOCK_KEY);
+
+    //Now reprogram the erase page with previously obtained contents of the file_buffer[]
+    //We only write to the even flash word addresses, the odd word addresses are left blank.  
+    //Therefore, we only store 2 bytes of application data for every 2 flash memory word addresses.
+    //This "wastes" 1/3 of the flash memory, but it provides extra protection from accidentally executing
+    //the data.  It also allows quick/convenient PSV access when reading back the flash contents.
+    NVMCON = INTERNAL_FLASH_PROGRAM_PAGE;
+    j = 0;
+    for(i = 0; i < ERASE_BLOCK_SIZE;)
+    {
+        TBLPAG = (BYTE)(flashAddress >> 16);
+        __builtin_tblwtl((WORD)flashAddress, *((WORD*)&file_buffer[i]));
+        flashAddress++;       
+        __builtin_tblwth((WORD)flashAddress, 0);
+        flashAddress++;       
+
+        i += 2;
+        j += 2;
+
+        //Check if we have reached a program block size boundary.  If so, program the last 128 
+        //useful bytes (192 bytes total, but 64 of those are filled with '0' filler bytes).
+        if(j >= 128u)
         {
-            //Odd sector address, must be the high file_buffer[] sector
-            offset = MEDIA_SECTOR_SIZE;
-        }
-        else
-        {
-            offset = 0;
-        }        
-        
-        //Overwrite the file_buffer[] RAM contents for the sector that we are trying to write to.
-        for(i = 0; i < MEDIA_SECTOR_SIZE; i++)
-        {
-            file_buffer[offset + i] = *buffer++;
-        } 
-        
-        //Now erase the entire erase page of flash memory.  
-        //First we need to calculate the actual flash memory address of the erase page.  The starting address of the erase page is as follows:
-        flashAddress = ((DWORD)FILES_ADDRESS + (DWORD)(sector_addr*MEDIA_SECTOR_SIZE)) & (DWORD)0xFFFFFC00;
-    
-        //Peform NVM erase operation.
-    	NVMCON = INTERNAL_FLASH_ERASE;				    //Page erase on next WR
-       	__builtin_tblwtl((WORD)flashAddress, 0xFFFF);   //Perform dummy write to load address of erase page
-        UnlockAndActivate(NVM_UNLOCK_KEY);
-    	
-        //Now reprogram the erase page with previously obtained contents of the file_buffer[]
-        //We only write to the even flash word addresses, the odd word addresses are left blank.  
-        //Therefore, we only store 2 bytes of application data for every 2 flash memory word addresses.
-        //This "wastes" 1/3 of the flash memory, but it provides extra protection from accidentally executing
-        //the data.  It also allows quick/convenient PSV access when reading back the flash contents.
-        NVMCON = INTERNAL_FLASH_PROGRAM_PAGE;
-        j = 0;
-        for(i = 0; i < ERASE_BLOCK_SIZE;)
-        {
-            TBLPAG = (BYTE)(flashAddress >> 16);
-            __builtin_tblwtl((WORD)flashAddress, *((WORD*)&file_buffer[i]));
-            flashAddress++;       
-            __builtin_tblwth((WORD)flashAddress, 0);
-            flashAddress++;       
-            
-            i += 2;
-            j += 2;
-         
-            //Check if we have reached a program block size boundary.  If so, program the last 128 
-            //useful bytes (192 bytes total, but 64 of those are filled with '0' filler bytes).
-            if(j >= 128u)
-            {
-                j = j - 128u;
-                asm("DISI #16");					//Disable interrupts for next few instructions for unlock sequence
-                __builtin_write_NVM();                        
-            }    
+            j = j - 128u;
+            asm("DISI #16");					//Disable interrupts for next few instructions for unlock sequence
+            __builtin_write_NVM();                        
         }    
-    
-        TBLPAG = TBLPAGSave;   
-        return TRUE;
-    #else //else of #if !defined(INTERNAL_FLASH_WRITE_PROTECT)
-        return TRUE;
-    #endif  //endif of #if !defined(INTERNAL_FLASH_WRITE_PROTECT)
-    
+    }    
+#endif
+
+    TBLPAG = TBLPAGSave;   
+    return TRUE;
+#else //else of #if !defined(INTERNAL_FLASH_WRITE_PROTECT)
+    return TRUE;
+#endif  //endif of #if !defined(INTERNAL_FLASH_WRITE_PROTECT)
+
 }    
 #else   //else must be PIC18 or PIC32 device
 BYTE MDD_IntFlash_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero)
@@ -608,7 +702,7 @@ void UnlockAndActivate(BYTE UnlockKey)
     //1.  HLVD module
     //2.  WDTCON<LVDSTAT> indicator bit
     //3.  Perform ADC operation, with the VBG channel selected, using Vdd/Vss as 
-    //      references to the ADC.  Then perform math operations to valculate the Vdd.
+    //      references to the ADC.  Then perform math operations to calculate the Vdd.
     //      On some micros, the ADC can also measure the Vddcore voltage, allowing
     //      the firmware to calculate the absolute Vddcore voltage, if it has already
     //      calculated and knows the ADC reference voltage.

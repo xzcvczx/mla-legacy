@@ -33,10 +33,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Kim Otten            02/29/08    ...
- * PAT					04/16/10	Added Grid Item as text.
+ * 02/29/08    ...
+ * 04/16/10	   Added Grid Item as text.
+ * 04/20/11    Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
  *****************************************************************************/
 
 /*
@@ -495,7 +496,7 @@ WORD GridTranslateMsg(void *pObj, GOL_MSG *pMsg)
 
         #endif
         #ifdef USE_KEYBOARD
-    if((pMsg->uiEvent == EVENT_KEYSCAN) && (pMsg->type == TYPE_KEYBOARD) && (pMsg->param1 == pGrid->hdr.ID))
+    if((pMsg->uiEvent == EVENT_KEYSCAN) && (pMsg->type == TYPE_KEYBOARD) && ((WORD)pMsg->param1 == pGrid->hdr.ID))
     {
         if((pMsg->param2 == SCAN_SPACE_PRESSED) || (pMsg->param2 == SCAN_CR_PRESSED))
         {

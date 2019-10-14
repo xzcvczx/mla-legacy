@@ -39,11 +39,12 @@
 *   Configures and enables usage of the SPI ports
 *
 * Change History:
-*  Rev   Date         Description
-*  0.1   11/09/2006   Initial revision
-*  1.0   01/09/2007   Initial release
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  0.1   11/09/2006   yfy       Initial revision
+*  1.0   01/09/2007   yfy       Initial release
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 /************************ HEADERS **********************************/
@@ -370,19 +371,26 @@ BYTE SPIGet(void)
             #else
 
                 //Reset the Global interrupt pin
-                SPISSPIF = 0;
+                //SPI2SSPIF = 0;
+                PIR3bits.SSP2IF = 0;
                 do
                 {
-                    SPIWCOL = 0;
+                    //SPI2WCOL = 0;
+                    SSP2CON1bits.WCOL = 0;
             		//Reset write collision bit
-                    SPISSPBUF = v;
+                    //SPI2SSPBUF = v;
+                    SSP2BUF = v;
             		//load the buffer
-                } while( SPIWCOL );
+                //} while( SPI2WCOL );
+                } while( SSP2CON1bits.WCOL );
             	
             	//perform write again if write collision occurs
-                while( SPISSPIF == 0 );
+                //while( SPI2SSPIF == 0 );
+                while( PIR3bits.SSP2IF == 0 );
+                
             	//Wait until interrupt is received from the MSSP module
-            	SPISSPIF = 0;
+            	//SPI2SSPIF = 0;
+            	PIR3bits.SSP2IF = 0;
             	//Reset the interrupt
             	
             #endif
@@ -403,7 +411,6 @@ BYTE SPIGet(void)
         *
         * Note:			    None
         ********************************************************************/
-        /*
         BYTE SPIGet2(void)
         {
             #if !defined(HARDWARE_SPI)
@@ -411,14 +418,14 @@ BYTE SPIGet(void)
                 BYTE spidata = 0;
         
                 
-                SPI_SDO = 0;
-                SPI_SCK = 0;
+                SPI_SDO2 = 0;
+                SPI_SCK2 = 0;
                 
                 for(i = 0; i < 8; i++)
                 {
-                    spidata = (spidata << 1) | SPI_SDI;  
-                    SPI_SCK = 1;
-                    SPI_SCK = 0;     
+                    spidata = (spidata << 1) | SPI_SDI2;  
+                    SPI_SCK2 = 1;
+                    SPI_SCK2 = 0;     
                 }
                 
                 return spidata;
@@ -428,7 +435,6 @@ BYTE SPIGet(void)
                 return SSP2BUF;
             #endif
         }
-        */
     #endif
 
 #else

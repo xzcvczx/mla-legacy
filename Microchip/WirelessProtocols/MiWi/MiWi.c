@@ -1,8 +1,4 @@
 /********************************************************************
-* GUID=E25BE8D4-3281-4d98-867A-9160A7FD7A31
-* GUIInterfaceVersion=1.00
-* LibraryVersion=1.00
-*
 * FileName:		MiWi.c
 * Dependencies:    
 * Processor:	PIC18, PIC24, PIC32, dsPIC30, dsPIC33
@@ -14,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice for MiWi Software:
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright Â© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -25,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED â€œAS ISâ€ WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -47,6 +43,7 @@
 *  0.1   11/09/2006   df        Initial revision
 *  1.0   01/09/2007   yfy       Initial release
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 /************************ HEADERS **********************************/
@@ -64,10 +61,11 @@
     #include "Transceivers/MCHP_MAC.h"
     #include "Transceivers/Transceivers.h"
     #include "WirelessProtocols/MCHP_API.h"
+    #include "WirelessProtocols/EEPROM.h"
 
     /************************ VARIABLES ********************************/
 
-    // Scan Duration formula for P2P Connection:
+    // Scan Duration formula 
     //  60 * (2 ^ n + 1) symbols, where one symbol equals 16us
     #define SCAN_DURATION_0 SYMBOLS_TO_TICKS(120)
     #define SCAN_DURATION_1 SYMBOLS_TO_TICKS(180)
@@ -143,7 +141,7 @@
     
     BYTE            TxData;    
     #if defined(__18CXX)
-    #pragma udata TRX_BUFFER=0x100
+    #pragma udata TRX_BUFFER
     #endif
         #if (TX_BUFFER_SIZE+MIWI_HEADER_LEN) > 110
             BYTE TxBuffer[110];
@@ -159,6 +157,7 @@
     WORD_VAL myShortAddress;
     WORD_VAL myPANID;
     BYTE myParent;
+    BYTE defaultHops = MAX_HOPS;
     
     MIWI_STATE_MACHINE MiWiStateMachine;
     BYTE AcknowledgementSeq = 0xFF;
@@ -173,7 +172,7 @@
     #ifdef NWK_ROLE_COORDINATOR
         #if defined(ENABLE_INDIRECT_MESSAGE)
             #if defined(__18CXX)
-                #pragma udata INDIRECT_BUFFER=0x200
+                #pragma udata INDIRECT_BUFFER
             #endif
             INDIRECT_MESSAGE indirectMessages[INDIRECT_MESSAGE_SIZE];
             #if defined(__18CXX)
@@ -192,7 +191,7 @@
     MAC_RECEIVED_PACKET MACRxPacket;
  
     #if defined(__18CXX)
-        #pragma udata BIGvariables1 = 0x300
+        #pragma udata BIGvariables1
     #endif
     CONNECTION_ENTRY    ConnectionTable[CONNECTION_SIZE]; 
     #if defined(__18CXX)
@@ -271,7 +270,7 @@
         //                  second
         //
         // Overview:        This function introduce a random delay between
-        //                  0 to range in milli=-second. This delay helps
+        //                  0 to range in millisecond. This delay helps
         //                  multiple devices to rebroadcast the message 
         //                  at different time, thus lower the possibility
         //                  of packet collision in rebroadcast.
@@ -284,11 +283,11 @@
             while( jitter > 0 )
             {
                 jitter--;
-                t1 = TickGet();
+                t1 = MiWi_TickGet();
                 while(1)
                 {
-                    t2 = TickGet();
-                    if( TickGetDiff(t2, t1) > ONE_MILI_SECOND )
+                    t2 = MiWi_TickGet();
+                    if( MiWi_TickGetDiff(t2, t1) > ONE_MILI_SECOND )
                     {
                         break;
                     }
@@ -372,9 +371,15 @@ HANDLE_DATA_PACKET:
                             // If it is just an empty packet, ignore here.
                             if( MACRxPacket.PayloadLen == 0 )
                             {
-                                MiWiStateMachine.bits.DataRequesting = 0;                                break;
+                                MiWiStateMachine.bits.DataRequesting = 0;
+                                break;
                             }
                         #endif
+                        
+                        if( MACRxPacket.PayloadLen < 10 )
+                        {
+                            break;
+                        }
                         
                         // Load the source and destination address information.
                         destPANID.v[0] = MACRxPacket.Payload[2];
@@ -400,7 +405,7 @@ HANDLE_DATA_PACKET:
    
                             #ifdef NWK_ROLE_COORDINATOR
                                 // Consider to rebroadcast the message
-                                if(MACRxPacket.Payload[0]>0)
+                                if(MACRxPacket.Payload[0]>1)
                                 {
                                     MACRxPacket.Payload[0]--;
                                     MAC_FlushTx();
@@ -478,7 +483,7 @@ HANDLE_DATA_PACKET:
                                 BroadcastRecords[i].MiWiSeq = MACRxPacket.Payload[10];
                                 BroadcastRecords[i].RxCounter = INDIRECT_MESSAGE_TIMEOUT_CYCLE + 1;
                                 #if !defined(ENABLE_SLEEP)
-                                    BroadcastRecords[i].StartTick = TickGet();
+                                    BroadcastRecords[i].StartTick = MiWi_TickGet();
                                 #endif
                             }
                                                         
@@ -492,7 +497,7 @@ HANDLE_DATA_PACKET:
                             //need to check to see if the MiWi Ack is set
                             if(MACRxPacket.Payload[1] & MIWI_ACK_REQ)
                             { 
-                                TxBuffer[0] = MAX_HOPS;				//number of hops
+                                TxBuffer[0] = defaultHops;				//number of hops
                                 TxBuffer[1] = 0x02;		            //Frame Control
                                 TxBuffer[2] = sourcePANID.v[0];		
                                 TxBuffer[3] = sourcePANID.v[1];
@@ -620,8 +625,8 @@ ThisPacketIsForMe:
                                                             //I know the device in question so I will send back a response
                                                             MiApp_WriteData(networkTable[handle].PANID.v[0]);
                                                             MiApp_WriteData(networkTable[handle].PANID.v[1]);
-                                                            MiApp_WriteData(networkTable[handle].ShortAddress.v[0]);
-                                                            MiApp_WriteData(networkTable[handle].ShortAddress.v[1]);
+                                                            MiApp_WriteData(networkTable[handle].AltAddress.v[0]);
+                                                            MiApp_WriteData(networkTable[handle].AltAddress.v[1]);
                                                              
                                                             //if everything is cool then send the response back
                                                             RouteMessage(sourcePANID, sourceShortAddress, FALSE);   
@@ -654,7 +659,6 @@ ThisPacketIsForMe:
                                                        
                                                     //send a response back with my own information
                                                     RouteMessage(sourcePANID, sourceShortAddress, FALSE);
-                                                    //SendReportByShortAddress(sourcePANID,sourceShortAddress,FALSE);
                                                 }
                                             }
                                             break;
@@ -719,7 +723,7 @@ ThisPacketIsForMe:
                                                 {
                                                     //if there isn't a request already open
                                                     //get the current time and the source address
-                                                    openSocketInfo.socketStart = TickGet();
+                                                    openSocketInfo.socketStart = MiWi_TickGet();
                                                     openSocketInfo.ShortAddress1.v[0] = MACRxPacket.Payload[MIWI_HEADER_LEN-3];
                                                     openSocketInfo.ShortAddress1.v[1] = MACRxPacket.Payload[MIWI_HEADER_LEN-2];
         
@@ -920,20 +924,20 @@ ThisPacketIsForMe:
 
 
                                         #if defined(ENABLE_FREQUENCY_AGILITY)
-                                        
-                                            #if defined(NWK_ROLE_COORDINATOR)
+                                       
                                                 case CHANNEL_HOPPING_REQUEST:
                                                     {
                                                         if( MACRxPacket.Payload[MIWI_HEADER_LEN+2] != currentChannel )
                                                         {
                                                             break;
                                                         }
-                                                        StartChannelHopping(MACRxPacket.Payload[MIWI_HEADER_LEN+3]);
+                                                        MiApp_SetChannel(MACRxPacket.Payload[MIWI_HEADER_LEN+3]);
                                                         Printf("\r\nHopping Channel to ");
                                                         PrintDec(currentChannel);
                                                     }
                                                     break;
-                                                    
+                                                
+                                           #if defined(NWK_ROLE_COORDINATOR)
                                                 case RESYNCHRONIZATION_REQUEST:
                                                     {
                                                         if( MACRxPacket.Payload[MIWI_HEADER_LEN+2] != currentChannel )
@@ -941,7 +945,7 @@ ThisPacketIsForMe:
                                                             break;
                                                         }
                                                         MAC_FlushTx();
-                                                        TxBuffer[0] = MAX_HOPS;
+                                                        TxBuffer[0] = defaultHops;
                                                         TxBuffer[1] = 0x02;
                                                         TxBuffer[2] = myPANID.v[0];
                                                         TxBuffer[3] = myPANID.v[1];
@@ -1053,8 +1057,7 @@ ThisPacketIsForMe:
                                     {
                                         MTP.flags.Val = 0;
                                         MTP.flags.bits.ackReq = 1;
-                                        
- 
+                                            
                                         #if defined(IEEE_802_15_4)
                                             MTP.altDestAddr = TRUE;
                                             MTP.altSrcAddr = TRUE;
@@ -1093,9 +1096,14 @@ ThisPacketIsForMe:
                         #endif
 
 
-                        if(MACRxPacket.Payload[rxIndex+4] != MIWI_PROTOCOL_ID)
+                        if(MACRxPacket.Payload[rxIndex+4] != MIWI_PROTOCOL_ID ) 
                         {
-                            break;
+                            #if defined(NWK_ROLE_END_DEVICE)
+                                if(MACRxPacket.Payload[rxIndex+4] != MIWI_PRO_PROTOCOL_ID)
+                            #endif
+                            {
+                                break;
+                            }    
                         }
                         
                         #ifdef NWK_ROLE_COORDINATOR
@@ -1186,7 +1194,7 @@ ThisPacketIsForMe:
                         #if defined(ENABLE_NETWORK_FREEZER)
                             if( MiWiStateMachine.bits.saveConnection == 1 )
                             {
-                                nvmDelayTick = TickGet();
+                                nvmDelayTick = MiWi_TickGet();
                             }    
                         #endif     
                                       
@@ -1219,15 +1227,21 @@ ThisPacketIsForMe:
                                     
                                     ActiveScanResults[ActiveScanResultIndex].Capability.Val = 0;
                                     ActiveScanResults[ActiveScanResultIndex].Capability.bits.Direct = 1;
+                                    ActiveScanResults[ActiveScanResultIndex].Capability.bits.Role = CapacityByte.bits.Role;
                                     if( CapacityByte.bits.Security )
                                     {
                                         ActiveScanResults[ActiveScanResultIndex].Capability.bits.SecurityEn = 1;
                                     }
-                                    ActiveScanResults[ActiveScanResultIndex].Capability.bits.AllowJoin = 1;
+                                    if( CapacityByte.bits.ConnMode <= ENABLE_PREV_CONN )
+                                    {
+                                        ActiveScanResults[ActiveScanResultIndex].Capability.bits.AllowJoin = 1;
+                                    }
+                                        
 
                                     #if defined(IEEE_802_15_4)
                                         ActiveScanResults[ActiveScanResultIndex].Address[0] = rxMessage.SourceAddress[0];
                                         ActiveScanResults[ActiveScanResultIndex].Address[1] = rxMessage.SourceAddress[1];
+                                        ActiveScanResults[ActiveScanResultIndex].Capability.bits.altSrcAddr = 1;
                                     #else
                                         for(i = 0; i < MY_ADDRESS_LENGTH; i++)
                                         {
@@ -1434,6 +1448,9 @@ START_ASSOCIATION_RESPONSE:
                                             role = ROLE_FFD_END_DEVICE;
                                             MiWiCapacityInfo.bits.Role = role;
                                         }
+                                        #if defined(ENABLE_NVM)
+                                            nvmPutRole(&role);
+                                        #endif
                                     #endif
                                     
                                     //set the short address of the device
@@ -1678,7 +1695,7 @@ START_ASSOCIATION_RESPONSE:
                                         //currently acting as an FFD end device
                                         if(role != ROLE_FFD_END_DEVICE)
                                         {
-                                            #if defined(TARGET_SMALL)
+                                            #if !defined(TARGET_SMALL)
                                                 BroadcastJitter(20);
                                             #endif
                                             SendBeacon();
@@ -1739,13 +1756,13 @@ START_ASSOCIATION_RESPONSE:
 
             }
             
-            if(MiWiStateMachine.bits.RxHasUserData == 0)
+            if( MiWiStateMachine.bits.RxHasUserData == 0 )
             {
                 MiMAC_DiscardPacket();
             }
         }   
 
-        t1 = TickGet();
+        t1 = MiWi_TickGet();
         
         //if there really isn't anything going on 
         #if defined(NWK_ROLE_COORDINATOR) && defined(ENABLE_INDIRECT_MESSAGE)
@@ -1755,7 +1772,7 @@ START_ASSOCIATION_RESPONSE:
             {
                 if( indirectMessages[i].flags.bits.isValid )
                 {
-                    if( TickGetDiff(t1, indirectMessages[i].TickStart) > INDIRECT_MESSAGE_TIMEOUT )
+                    if( MiWi_TickGetDiff(t1, indirectMessages[i].TickStart) > INDIRECT_MESSAGE_TIMEOUT )
                     {
                         indirectMessages[i].flags.Val = 0x00;   
                     }    
@@ -1770,7 +1787,7 @@ START_ASSOCIATION_RESPONSE:
             {
                 if(MiWiStateMachine.bits.DataRequesting)
                 {
-                    t2.Val = TickGetDiff(t1, DataRequestTimer);
+                    t2.Val = MiWi_TickGetDiff(t1, DataRequestTimer);
                     if(t2.Val > RFD_DATA_WAIT)
                     {
                         MiWiStateMachine.bits.DataRequesting = 0;
@@ -1784,12 +1801,11 @@ START_ASSOCIATION_RESPONSE:
         #endif
         
         #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-            if( TickGetDiff(t1, TimeSyncTick) > ((ONE_SECOND) * RFD_WAKEUP_INTERVAL) )
+            if( MiWi_TickGetDiff(t1, TimeSyncTick) > ((ONE_SECOND) * RFD_WAKEUP_INTERVAL) )
             {
                 TimeSyncTick.Val += ((DWORD)(ONE_SECOND) * RFD_WAKEUP_INTERVAL);
                 if( TimeSyncTick.Val > t1.Val )
                 {
-                    //Printf("   avoid waterfall");
                     TimeSyncTick.Val = t1.Val;
                 }    
                 TimeSyncSlot = 0;
@@ -1800,7 +1816,7 @@ START_ASSOCIATION_RESPONSE:
         #if defined(ENABLE_NETWORK_FREEZER) && defined(NWK_ROLE_COORDINATOR)
             if( MiWiStateMachine.bits.saveConnection )
             {
-                if(  TickGetDiff(t1, nvmDelayTick) > (ONE_SECOND) )
+                if(  MiWi_TickGetDiff(t1, nvmDelayTick) > (ONE_SECOND) )
                 {
                     MiWiStateMachine.bits.saveConnection = 0;
                     nvmPutKnownCoordinators(&knownCoordinators);
@@ -1817,7 +1833,7 @@ START_ASSOCIATION_RESPONSE:
             {
                 if( BroadcastRecords[i].RxCounter > 0 )
                 {
-                    if( TickGetDiff(t1, BroadcastRecords[i].StartTick) > BROADCAST_RECORD_TIMEOUT )
+                    if( MiWi_TickGetDiff(t1, BroadcastRecords[i].StartTick) > BROADCAST_RECORD_TIMEOUT )
                     {
                         BroadcastRecords[i].RxCounter = 0;
                     }    
@@ -1864,7 +1880,7 @@ START_ASSOCIATION_RESPONSE:
             }
             else
             {
-                t2.Val = TickGetDiff(t1, openSocketInfo.socketStart);
+                t2.Val = MiWi_TickGetDiff(t1, openSocketInfo.socketStart);
                 
                 if(t2.Val > OPEN_SOCKET_TIMEOUT)
                 {
@@ -1907,7 +1923,7 @@ START_ASSOCIATION_RESPONSE:
             if( parentNode == myShortAddress.v[1] )
             {
                 // destination is my child
-                if( (ShortAddress.v[0] & 0x80) )
+                if( ShortAddress.v[0] > 0x80 )
                 {
                     #if defined(ENABLE_INDIRECT_MESSAGE)
                         // this is a sleeping device, need indirect message
@@ -1975,7 +1991,6 @@ START_ASSOCIATION_RESPONSE:
                     MTP.flags.Val = 0;
                     MTP.flags.bits.ackReq = 1;
                     MTP.flags.bits.secEn = SecEn;
-                    //Printf("Route 1");
                     tempShortAddress.v[0] = 0;
                     tempShortAddress.v[1] = parentNode;
                     
@@ -2048,7 +2063,6 @@ ROUTE_THROUGH_NEIGHBOR:
                         MTP.flags.Val = 0;
                         MTP.flags.bits.ackReq = 1;
                         MTP.flags.bits.secEn = SecEn;
-                        //Printf("Route 2");
                         tempShortAddress.v[0] = 0;
                         tempShortAddress.v[1] = i;
                         
@@ -2087,7 +2101,6 @@ ROUTE_THROUGH_TREE:
                 MTP.flags.bits.ackReq = 1;
                 MTP.flags.bits.secEn = SecEn;
                 
-                //Printf("Route 3");
                 if( role == ROLE_COORDINATOR)
                 {
                     #if defined(IEEE_802_15_4)
@@ -2162,7 +2175,6 @@ ROUTE_THROUGH_TREE:
         
             // Highly unlikely to get here, a PAN Coordinator should have all Coordinator on its 
             // neighbor table, here just as the backup plan for extreme case
-            //Printf("Route 4");
             MTP.flags.Val = 0;
             MTP.flags.bits.ackReq = 1;
             MTP.flags.bits.secEn = SecEn;
@@ -2296,7 +2308,7 @@ ROUTE_THROUGH_TREE:
             #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP)
                 MiApp_WriteData(MAC_COMMAND_TIME_SYNC_DATA_PACKET);
                 packetType = PACKET_TYPE_COMMAND;
-                tmpTick = TickGet();
+                tmpTick = MiWi_TickGet();
                 if( (tmpTick.Val - TimeSyncTick.Val) < ((ONE_SECOND) * RFD_WAKEUP_INTERVAL) )
                 {
                     //tmpW.Val = (((ONE_SECOND) * RFD_WAKEUP_INTERVAL) - (tmpTick.Val - TimeSyncTick.Val) + ( TimeSlotTick.Val * TimeSyncSlot ) ) / (ONE_SECOND * 16);
@@ -2591,6 +2603,22 @@ NO_INDIRECT_MESSAGE:
     {
         BYTE i, j;
         
+        if( index == 0xFF )
+        {
+            Printf("\r\n\r\nAddress: 0x");
+            for(i = 0; i < MY_ADDRESS_LENGTH; i++)
+            {
+                PrintChar(myLongAddress[MY_ADDRESS_LENGTH-1-i]);
+            }
+            Printf("  Short Addr: ");
+            PrintChar(myShortAddress.v[1]);
+            PrintChar(myShortAddress.v[0]);
+            Printf("  PANID: ");
+            PrintChar(myPANID.v[1]);
+            PrintChar(myPANID.v[0]);
+            Printf("  Channel: ");
+            PrintDec(currentChannel);
+        }    
         ConsolePutROMString((ROM char*)"\r\nAvailable nodes\r\nHandle RX DC PANID ADDR LONG_ADDR        PEER_INFO\r\n");
         if( index == 0xFF )
         {
@@ -2814,7 +2842,7 @@ NO_INDIRECT_MESSAGE:
             {
                 MAC_FlushTx();
     
-                TxBuffer[TxData++] = MAX_HOPS;
+                TxBuffer[TxData++] = defaultHops;
                 TxBuffer[TxData++] = 0x06;                          //Frame Control
                 TxBuffer[TxData++] = 0xFF;                          //dest PANID LSB
                 TxBuffer[TxData++] = 0xFF;                          //dest PANID MSB
@@ -2837,7 +2865,7 @@ NO_INDIRECT_MESSAGE:
                 MTP.flags.bits.sourcePrsnt = 1;
                 
                 #if defined(IEEE_802_15_4)
-                    MTP.DestAddress = ConnectionTable[myParent].ShortAddress.v;
+                    MTP.DestAddress = ConnectionTable[myParent].AltAddress.v;
                     MTP.DestPANID.Val = ConnectionTable[myParent].PANID.Val;
                     MTP.altDestAddr = TRUE;
                     MTP.altSrcAddr = TRUE;
@@ -2852,7 +2880,7 @@ NO_INDIRECT_MESSAGE:
             if(MiWiStateMachine.bits.memberOfNetwork == 1)
             {
                 MAC_FlushTx();
-                TxBuffer[TxData++] = MAX_HOPS;      
+                TxBuffer[TxData++] = defaultHops;      
                 TxBuffer[TxData++] = 0x06;      //Frame Control
                 TxBuffer[TxData++] = 0xFF;      //dest PANID LSB
                 TxBuffer[TxData++] = 0xFF;      //dest PANID MSB
@@ -2926,7 +2954,7 @@ NO_INDIRECT_MESSAGE:
             if(openSocketInfo.status.bits.requestIsOpen == 0)
             {
                 //I am the PAN coordinator, there is no reason to send a request out
-                openSocketInfo.socketStart = TickGet();
+                openSocketInfo.socketStart = MiWi_TickGet();
                 openSocketInfo.ShortAddress1.Val = 0x0000;
                 for(i=0;i<MY_ADDRESS_LENGTH;i++)
                 {
@@ -3017,11 +3045,11 @@ NO_INDIRECT_MESSAGE:
         {
             //take a record of when you started to send the socket request
             //and send it to the PAN coordinator
-            openSocketInfo.socketStart = TickGet();
+            openSocketInfo.socketStart = MiWi_TickGet();
         }
         
         #else
-            openSocketInfo.socketStart = TickGet();
+            openSocketInfo.socketStart = MiWi_TickGet();
         #endif
            
         tempShortAddress.Val = 0x0000;
@@ -3166,7 +3194,7 @@ NO_INDIRECT_MESSAGE:
                 {
                     indirectMessages[i].PayLoad[j] = TxBuffer[j];
                 }
-                indirectMessages[i].TickStart = TickGet();
+                indirectMessages[i].TickStart = MiWi_TickGet();
                 return TRUE;
             }
         }
@@ -3473,7 +3501,7 @@ EndOfSearchLoop:
                 if( MiMAC_SendPacket(MTP, TxBuffer, TxData) )
                 {
                     MiWiStateMachine.bits.DataRequesting = 1;
-                    DataRequestTimer = TickGet();  
+                    DataRequestTimer = MiWi_TickGet();
                     return TRUE;
                 }
                 return FALSE;    
@@ -3490,7 +3518,7 @@ EndOfSearchLoop:
         #endif           
         {
             MiWiStateMachine.bits.DataRequesting = 1;
-            DataRequestTimer = TickGet();  
+            DataRequestTimer = MiWi_TickGet();
             TxData = tmpTxData;
             #if defined(ENABLE_TIME_SYNC)
                 #if defined(__18CXX)
@@ -3604,16 +3632,20 @@ EndOfSearchLoop:
                 
         #if defined(ENABLE_NETWORK_FREEZER)
 
-            nvmGetMyShortAddress(myShortAddress.v);
-            
-            if( myShortAddress.Val == 0xFFFF )
-            {
-                bNetworkFreezer = FALSE;
-            }
-
             if( bNetworkFreezer )
             {
                 nvmGetCurrentChannel(&currentChannel);
+                if( currentChannel >= 32 )
+                {
+                    return FALSE;
+                }
+                
+                nvmGetMyShortAddress(myShortAddress.v);
+                if( myShortAddress.Val == 0xFFFF )
+                {
+                    return FALSE;
+                }
+                
                 nvmGetMyPANID(myPANID.v);
                 nvmGetConnMode(&ConnMode);
                 MiWiCapacityInfo.bits.ConnMode = ConnMode;
@@ -3691,12 +3723,65 @@ EndOfSearchLoop:
         
         RFIF = 0;
         RFIE = 1;
+        
         return TRUE;        
     
     }
     
     #if defined(ENABLE_SLEEP)
-    
+    /************************************************************************************
+     * Function:
+     *      BYTE    MiApp_TransceiverPowerState(BYTE Mode)
+     *
+     * Summary:
+     *      This function put the RF transceiver into different power state. i.e. Put the 
+     *      RF transceiver into sleep or wake it up.
+     *
+     * Description:        
+     *      This is the primary user interface functions for the application layer to 
+     *      put RF transceiver into sleep or wake it up. This function is only available
+     *      to those wireless nodes that may have to disable the transceiver to save 
+     *      battery power.
+     *
+     * PreCondition:    
+     *      Protocol initialization has been done. 
+     *
+     * Parameters: 
+     *      BYTE Mode - The mode of power state for the RF transceiver to be set. The possible
+     *                  power states are following
+     *                  * POWER_STATE_SLEEP     The deep sleep mode for RF transceiver
+     *                  * POWER_STATE_WAKEUP    Wake up state, or operating state for RF transceiver
+     *                  * POWER_STATE_WAKEUP_DR Put device into wakeup mode and then transmit a 
+     *                                          data request to the device's associated device
+     *
+     * Returns: 
+     *      The status of the operation. The following are the possible status
+     *      * SUCCESS           Operation successful
+     *      * ERR_TRX_FAIL      Transceiver fails to go to sleep or wake up
+     *      * ERR_TX_FAIL       Transmission of Data Request command failed. Only available if the
+     *                          input mode is POWER_STATE_WAKEUP_DR.
+     *      * ERR_RX_FAIL       Failed to receive any response to Data Request command. Only available
+     *                          if input mode is POWER_STATE_WAKEUP_DR.
+     *      * ERR_INVLAID_INPUT Invalid input mode. 
+     *
+     * Example:
+     *      <code>
+     *      // put RF transceiver into sleep
+     *      MiApp_TransceiverPowerState(POWER_STATE_SLEEP;
+     *
+     *      // Put the MCU into sleep
+     *      Sleep();    
+     *
+     *      // wakes up the MCU by WDT, external interrupt or any other means
+     *      
+     *      // make sure that RF transceiver to wake up and send out Data Request
+     *      MiApp_TransceiverPowerState(POWER_STATE_WAKEUP_DR);
+     *      </code>
+     *
+     * Remarks:    
+     *      None
+     *
+     *****************************************************************************************/
     BYTE MiApp_TransceiverPowerState(BYTE Mode)
     {
         BYTE status;
@@ -3737,11 +3822,11 @@ EndOfSearchLoop:
                         return ERR_TRX_FAIL;
                     } 
                     
+                    MiWiStateMachine.bits.Sleeping = 0;
                     if( CheckForData() == FALSE )
                     {
                         return ERR_TX_FAIL;
                     }
-                    MiWiStateMachine.bits.Sleeping = 0;
                     while( MiWiStateMachine.bits.DataRequesting ) 
                     {
                         MiWiTasks();
@@ -3904,12 +3989,16 @@ BYTE MiApp_SearchConnection(INPUT BYTE ScanDuration, INPUT DWORD ChannelMap)
                 SendMACPacket(NULL, PACKET_TYPE_COMMAND);
             #endif
             
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while(1)
             {
-                MiWiTasks();
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > ((DWORD)(ScanTime[ScanDuration])) )
+                if( MiApp_MessageAvailable() )
+                {
+                    MiApp_DiscardMessage();
+                }
+                //MiWiTasks();
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > ((DWORD)(ScanTime[ScanDuration])) )
                 {
                     // if scan time exceed scan duration, prepare to scan the next channel
                     break;
@@ -3991,15 +4080,19 @@ BYTE    MiApp_EstablishConnection(INPUT BYTE ActiveScanIndex, INPUT BYTE Mode)
     if( Mode == CONN_MODE_INDIRECT )
     {
         #if defined(ENABLE_SLEEP)
-            t1 = TickGet();;
+            t1 = MiWi_TickGet();;
         #endif
         OpenSocket();
         while(openSocketInfo.status.bits.requestIsOpen)
         {
-            MiWiTasks();
+            if( MiApp_MessageAvailable())
+            {
+                MiApp_DiscardMessage();
+            }
+            //MiWiTasks();
             #if defined(ENABLE_SLEEP) && defined(NWK_ROLE_END_DEVICE)
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > OPEN_SOCKET_POLL_INTERVAL )
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > OPEN_SOCKET_POLL_INTERVAL )
                 {
                     CheckForData();
                     t1.Val = t2.Val;
@@ -4096,19 +4189,23 @@ BYTE    MiApp_EstablishConnection(INPUT BYTE ActiveScanIndex, INPUT BYTE Mode)
             SendMACPacket(ConnectionTable[myParent].Address, PACKET_TYPE_COMMAND);
         #endif
         
-        t1 = TickGet();
+        t1 = MiWi_TickGet();
         while(ConnectionTable[myParent].status.bits.FinishJoin == 0 )
         {
-            MiWiTasks();
-            t2 = TickGet();
-            if( TickGetDiff(t2, t1) > ONE_SECOND )
+            if( MiApp_MessageAvailable())
+            {
+                MiApp_DiscardMessage();
+            }
+            //MiWiTasks();
+            t2 = MiWi_TickGet();
+            if( MiWi_TickGetDiff(t2, t1) > ONE_SECOND )
             {
                 return 0xFF;
             }
         }
         
         #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-            TimeSyncTick = TickGet();
+            TimeSyncTick = MiWi_TickGet();
         #endif
         return myParent;
     }
@@ -4165,7 +4262,7 @@ void MiApp_DiscardMessage(void)
 BOOL MiApp_BroadcastPacket( INPUT BOOL SecEn )   
 {
 
-    TxBuffer[0] = MAX_HOPS;
+    TxBuffer[0] = defaultHops;
     TxBuffer[1] = 0x02;
     TxBuffer[2] = myPANID.v[0];
     TxBuffer[3] = myPANID.v[1];
@@ -4284,7 +4381,7 @@ BOOL MiApp_UnicastConnection( INPUT BYTE ConnectionIndex,
         MiWiStateMachine.bits.MiWiAckInProgress = 0;
     }
         
-    TxBuffer[0] = MAX_HOPS;				//number of hops
+    TxBuffer[0] = defaultHops;				//number of hops
     TxBuffer[1] = MiWiFrameControl;		//Frame Control
     TxBuffer[2] = ConnectionTable[ConnectionIndex].PANID.v[0];			
     TxBuffer[3] = ConnectionTable[ConnectionIndex].PANID.v[1];
@@ -4299,21 +4396,26 @@ BOOL MiApp_UnicastConnection( INPUT BYTE ConnectionIndex,
     #if defined(NWK_ROLE_COORDINATOR)
         if( FALSE == RouteMessage(ConnectionTable[ConnectionIndex].PANID, ConnectionTable[ConnectionIndex].AltAddress, SecEn) )
         {
+            MiWiStateMachine.bits.MiWiAckInProgress = 0;
             return FALSE;
         }
         else if( MiWiStateMachine.bits.MiWiAckInProgress )
         {
             MIWI_TICK t1, t2;
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while(1)
             {
-                MiWiTasks();
+                if( MiApp_MessageAvailable())
+                {
+                    MiApp_DiscardMessage();
+                }
+                //MiWiTasks();
                 if( MiWiStateMachine.bits.MiWiAckInProgress == 0 )
                 {
                     return TRUE;
                 }    
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
                 {
                     MiWiStateMachine.bits.MiWiAckInProgress = 0;
                     return FALSE;
@@ -4349,21 +4451,26 @@ BOOL MiApp_UnicastConnection( INPUT BYTE ConnectionIndex,
         
         if( MiMAC_SendPacket(MTP, TxBuffer, TxData) == FALSE )
         {
+            MiWiStateMachine.bits.MiWiAckInProgress = 0;
             return FALSE;
         }    
         else if( MiWiStateMachine.bits.MiWiAckInProgress )
         {
             MIWI_TICK t1, t2;
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while(1)
             {
-                MiWiTasks();
+                if( MiApp_MessageAvailable())
+                {
+                    MiApp_DiscardMessage();
+                }
+                //MiWiTasks();
                 if( MiWiStateMachine.bits.MiWiAckInProgress == 0 )
                 {
                     return TRUE;
                 }    
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
                 {
                     MiWiStateMachine.bits.MiWiAckInProgress = 0;
                     return FALSE;
@@ -4407,7 +4514,7 @@ BOOL MiApp_UnicastAddress(BYTE *DestAddress, BOOL PermanentAddr, BOOL SecEn)
         {
 DIRECT_LONG_ADDRESS:
 
-            TxBuffer[0] = MAX_HOPS;				//number of hops
+            TxBuffer[0] = defaultHops;				//number of hops
             TxBuffer[1] = 0x02;		            //Frame Control
             TxBuffer[2] = 0xFF;			
             TxBuffer[3] = 0xFF;
@@ -4435,7 +4542,7 @@ DIRECT_LONG_ADDRESS:
             MTP.flags.bits.secEn = SecEn;   
             MTP.DestAddress = DestAddress;
             #if defined(IEEE_802_15_4)
-			    MTP.altDestAddr = FALSE;
+                MTP.altDestAddr = FALSE;
                 MTP.altSrcAddr = TRUE;
                 MTP.DestPANID.Val = myPANID.Val;
             #endif
@@ -4469,21 +4576,26 @@ DIRECT_LONG_ADDRESS:
             #if defined(NWK_ROLE_COORDINATOR)
                 if( FALSE == RouteMessage(ConnectionTable[handle].PANID, ConnectionTable[handle].AltAddress, SecEn) )
                 {
+                    MiWiStateMachine.bits.MiWiAckInProgress = 0;
                     return FALSE;
                 }
                 else if( MiWiStateMachine.bits.MiWiAckInProgress )
                 {
                     MIWI_TICK t1, t2;
-                    t1 = TickGet();
+                    t1 = MiWi_TickGet();
                     while(1)
                     {
-                        MiWiTasks();
+                        if( MiApp_MessageAvailable())
+                        {
+                            MiApp_DiscardMessage();
+                        }                        
+                        //MiWiTasks();
                         if( MiWiStateMachine.bits.MiWiAckInProgress == 0 )
                         {
                             return TRUE;
                         }    
-                        t2 = TickGet();
-                        if( TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
+                        t2 = MiWi_TickGet();
+                        if( MiWi_TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
                         {
                             MiWiStateMachine.bits.MiWiAckInProgress = 0;
                             return FALSE;
@@ -4520,21 +4632,26 @@ DIRECT_LONG_ADDRESS:
 
                 if( MiMAC_SendPacket(MTP, TxBuffer, TxData) == FALSE )
                 {
+                    MiWiStateMachine.bits.MiWiAckInProgress = 0;
                     return FALSE;
                 }    
                 else if( MiWiStateMachine.bits.MiWiAckInProgress )
                 {
                     MIWI_TICK t1, t2;
-                    t1 = TickGet();
+                    t1 = MiWi_TickGet();
                     while(1)
                     {
-                        MiWiTasks();
+                        if( MiApp_MessageAvailable())
+                        {
+                            MiApp_DiscardMessage();
+                        }                        
+                        //MiWiTasks();
                         if( MiWiStateMachine.bits.MiWiAckInProgress == 0 )
                         {
                             return TRUE;
                         }    
-                        t2 = TickGet();
-                        if( TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
+                        t2 = MiWi_TickGet();
+                        if( MiWi_TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
                         {
                             MiWiStateMachine.bits.MiWiAckInProgress = 0;
                             return FALSE;
@@ -4566,21 +4683,25 @@ DIRECT_LONG_ADDRESS:
         tempShortAddress.v[1] = DestAddress[1];
         if( FALSE == RouteMessage(myPANID, tempShortAddress, SecEn) )
         {
+            MiWiStateMachine.bits.MiWiAckInProgress = 0;
             return FALSE;
         }
         else if( MiWiStateMachine.bits.MiWiAckInProgress )
         {
             MIWI_TICK t1, t2;
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while(1)
             {
-                MiWiTasks();
+                if( MiApp_MessageAvailable())
+                {
+                    MiApp_DiscardMessage();
+                }
                 if( MiWiStateMachine.bits.MiWiAckInProgress == 0 )
                 {
                     return TRUE;
                 }    
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
                 {
                     MiWiStateMachine.bits.MiWiAckInProgress = 0;
                     return FALSE;
@@ -4619,21 +4740,26 @@ DIRECT_LONG_ADDRESS:
         
         if( MiMAC_SendPacket(MTP, TxBuffer, TxData) == FALSE )
         {
+            MiWiStateMachine.bits.MiWiAckInProgress = 0;
             return FALSE;
         }    
         else if( MiWiStateMachine.bits.MiWiAckInProgress )
         {
             MIWI_TICK t1, t2;
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while(1)
             {
-                MiWiTasks();
+                if( MiApp_MessageAvailable())
+                {
+                    MiApp_DiscardMessage();
+                }
+                //MiWiTasks();
                 if( MiWiStateMachine.bits.MiWiAckInProgress == 0 )
                 {
                     return TRUE;
                 }    
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > MIWI_ACK_TIMEOUT )
                 {
                     MiWiStateMachine.bits.MiWiAckInProgress = 0;
                     return FALSE;
@@ -4673,7 +4799,7 @@ BOOL MiApp_StartConnection(BYTE Mode, BYTE ScanDuration, DWORD ChannelMap)
                     nvmPutKnownCoordinators(&knownCoordinators);
                 #endif
                 #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-                    TimeSyncTick = TickGet();
+                    TimeSyncTick = MiWi_TickGet();
                 #endif
                 return TRUE;
         #endif
@@ -4709,7 +4835,7 @@ BOOL MiApp_StartConnection(BYTE Mode, BYTE ScanDuration, DWORD ChannelMap)
                     nvmPutKnownCoordinators(&knownCoordinators);
                 #endif
                 #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-                    TimeSyncTick = TickGet();
+                    TimeSyncTick = MiWi_TickGet();
                 #endif
                 return TRUE;
             }
@@ -4800,12 +4926,11 @@ BOOL MiApp_StartConnection(BYTE Mode, BYTE ScanDuration, DWORD ChannelMap)
                     /* choose appropriate channel */
                     MiApp_SetChannel(i);
                     
-                    t2 = TickGet();
+                    t2 = MiWi_TickGet();
                     
                     while(1)
                     {
                         RSSIcheck = MiMAC_ChannelAssessment(CHANNEL_ASSESSMENT_ENERGY_DETECT);
-                        //PrintChar(RSSIcheck);
                         if( RSSIcheck > maxRSSI )
                         {
                             maxRSSI = RSSIcheck;
@@ -4813,8 +4938,8 @@ BOOL MiApp_StartConnection(BYTE Mode, BYTE ScanDuration, DWORD ChannelMap)
                         
                         
                         
-                        t1 = TickGet();
-                        if( TickGetDiff(t1, t2) > ((DWORD)(ScanTime[ScanDuration])) )
+                        t1 = MiWi_TickGet();
+                        if( MiWi_TickGetDiff(t1, t2) > ((DWORD)(ScanTime[ScanDuration])) )
                         {
                             // if scan time exceed scan duration, prepare to scan the next channel
                             break;
@@ -4899,7 +5024,7 @@ BOOL MiApp_StartConnection(BYTE Mode, BYTE ScanDuration, DWORD ChannelMap)
             BYTE backupChannel = currentChannel;
             MIWI_TICK t1, t2;
             
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             MiWiStateMachine.bits.Resynning = 1;
             for(i = 0; i < RESYNC_TIMES; i++)
             {
@@ -4908,9 +5033,9 @@ BOOL MiApp_StartConnection(BYTE Mode, BYTE ScanDuration, DWORD ChannelMap)
                 j = 0;
                 while(MiWiStateMachine.bits.Resynning)
                 {
-                    t2 = TickGet();
+                    t2 = MiWi_TickGet();
                     
-                    if( TickGetDiff(t2, t1) > SCAN_DURATION_9 )
+                    if( MiWi_TickGetDiff(t2, t1) > SCAN_DURATION_9 )
                     {
                         t1.Val = t2.Val;
                         
@@ -4939,7 +5064,12 @@ BOOL MiApp_StartConnection(BYTE Mode, BYTE ScanDuration, DWORD ChannelMap)
                         MiApp_WriteData(currentChannel);
                         MiApp_UnicastConnection(ConnectionIndex, FALSE);
                     }
-                    MiWiTasks();
+                    
+                    if( MiApp_MessageAvailable())
+                    {
+                        MiApp_DiscardMessage();
+                    }
+                    //MiWiTasks();
                 }
                 if( MiWiStateMachine.bits.Resynning == 0 )
                 {
@@ -4983,13 +5113,13 @@ GetOutOfLoop:
                 
                 for( i = 0; i < FA_BROADCAST_TIME; i++)
                 {
-                    t1 = TickGet();
+                    t1 = MiWi_TickGet();
                     while(1)
                     {
-                        t2 = TickGet();
-                        if( TickGetDiff(t2, t1) > SCAN_DURATION_9 )
+                        t2 = MiWi_TickGet();
+                        if( MiWi_TickGetDiff(t2, t1) > SCAN_DURATION_9 )
                         {
-                            TxBuffer[0] = MAX_HOPS;
+                            TxBuffer[0] = defaultHops;
                             TxBuffer[1] = 0x02;
                             TxBuffer[2] = myPANID.v[0];
                             TxBuffer[3] = myPANID.v[1];

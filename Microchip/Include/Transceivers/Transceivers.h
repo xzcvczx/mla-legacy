@@ -39,9 +39,10 @@
 *  Defines choice of Microchip RF transceivers
 *
 * Change History:
-*  Rev   Date         Description
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 #ifndef __TRANSCEIVERS_H
     #define __TRANSCEIVERS_H
@@ -50,7 +51,6 @@
 
     #if defined(MRF24J40)
         #define IEEE_802_15_4
-        #define FULL_CHANNEL_MAP        0x07FFF800
 
         #include "Transceivers/MRF24J40/MRF24J40.h"
     #endif

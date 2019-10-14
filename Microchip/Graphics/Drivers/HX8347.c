@@ -33,14 +33,38 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     05/26/09
+ * 05/26/09     ...
+ * 04/12/11     Graphics Library Version 3.00 Support
  *****************************************************************************/
-#include "Graphics/Graphics.h"
+#include "HardwareProfile.h"
+
+#if defined (GFX_USE_DISPLAY_CONTROLLER_HX8347A) || defined (GFX_USE_DISPLAY_CONTROLLER_HX8347D)
+
+#include "Compiler.h"
+#include "TimeDelay.h"
+#include "Graphics/DisplayDriver.h"
+#include "Graphics/HX8347.h"
+#include "Graphics/Primitive.h"
+
+#if defined (USE_GFX_PMP)
+    #include "Graphics/gfxpmp.h"
+#elif defined (USE_GFX_EPMP)
+    #include "Graphics/gfxepmp.h"
+#endif    
+
+// Unsupported Graphics Library Features
+#ifdef USE_TRANSPARENT_COLOR
+    #warning "This driver does not support the transparent feature on PutImage(). Build will use the PutImage() functions defind in the Primitive.c"
+#endif    
 
 // Color
-WORD    _color;
+GFX_COLOR   _color;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
 
 // Clipping region control
 SHORT   _clipRgn;
@@ -53,17 +77,17 @@ SHORT   _clipBottom;
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
 void    SetReg(BYTE index, BYTE value);
-void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+#ifndef USE_TRANSPARENT_COLOR
+void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
 
-void    PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-
-
+void    PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void    PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void    PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void    PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+#endif
 
 /*********************************************************************
 * Macros:  WritePixel(data)
@@ -84,9 +108,9 @@ void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 #define WritePixel(data)  DeviceWrite(data)
 #else
 #define WritePixel(data) \
-    DeviceWrite( ((WORD_VAL) data).v[1] & 0xF8 );        \
-    DeviceWrite( ((data >> 3) & 0xFC) );                 \
-    DeviceWrite( (((WORD_VAL) data).v[0] << 3) & 0xF8 );
+    DisplaySetData(); \
+    DeviceWrite(((WORD_VAL)data).v[1]);\
+    DeviceWrite(((WORD_VAL)data).v[0]);
 #endif
 
 /*********************************************************************
@@ -172,9 +196,10 @@ void SetReg(BYTE index, BYTE value)
 void ResetDevice(void)
 {
 	// Initialize the device
-	DeviceInit();
-
-#if (DISPLAY_CONTROLLER == HX8347A)	
+	DriverInterfaceInit();
+	DelayMs(1);				// Delay to let controller ready for next SetReg command
+	
+#if defined (GFX_USE_DISPLAY_CONTROLLER_HX8347A)	
     // Gamma for CMO 2.8
     SetReg(0x46, 0x95);     //
     SetReg(0x47, 0x51);     //
@@ -268,7 +293,7 @@ void ResetDevice(void)
     #endif
     DelayMs(20);
 
-#elif (DISPLAY_CONTROLLER == HX8347D)	
+#elif defined (GFX_USE_DISPLAY_CONTROLLER_HX8347D)	
 
     // Driving ability setting
 	SetReg(0xEA,0x00);   // PTBA[15:8]
@@ -370,6 +395,29 @@ void ResetDevice(void)
 
 }
 
+#ifdef USE_TRANSPARENT_COLOR
+/*********************************************************************
+* Function:  void TransparentColorEnable(GFX_COLOR color)
+*
+* Overview: Sets current transparent color.
+*
+* PreCondition: none
+*
+* Input: color - Color value chosen.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void TransparentColorEnable(GFX_COLOR color)
+{
+    _colorTransparent = color;    
+    _colorTransparentEnable = TRANSPARENT_COLOR_ENABLE;
+
+}
+#endif
+
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)
 *
@@ -400,10 +448,77 @@ void PutPixel(SHORT x, SHORT y)
             return;
     }
 
-    DisplayEnable;
+    DisplayEnable();
     SetAddress(x, y);
     WritePixel(_color);
     DisplayDisable();
+}
+
+/*********************************************************************
+* Function: SetClipRgn(left, top, right, bottom)
+*
+* Overview: Sets clipping region.
+*
+* PreCondition: none
+*
+* Input: left - Defines the left clipping region border.
+*		 top - Defines the top clipping region border.
+*		 right - Defines the right clipping region border.
+*	     bottom - Defines the bottom clipping region border.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    _clipLeft=left;
+    _clipTop=top;
+    _clipRight=right;
+    _clipBottom=bottom;
+
+}
+
+/*********************************************************************
+* Function: SetClip(control)
+*
+* Overview: Enables/disables clipping.
+*
+* PreCondition: none
+*
+* Input: control - Enables or disables the clipping.
+*			- 0: Disable clipping
+*			- 1: Enable clipping
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClip(BYTE control)
+{
+    _clipRgn=control;
+}
+
+/*********************************************************************
+* Function: IsDeviceBusy()
+*
+* Overview: Returns non-zero if LCD controller is busy 
+*           (previous drawing operation is not completed).
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: Busy status.
+*
+* Side Effects: none
+*
+********************************************************************/
+WORD IsDeviceBusy(void)
+{  
+    return (0);
 }
 
 /*********************************************************************
@@ -447,7 +562,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
             bottom = _clipBottom;
     }
 
-    DisplayEnable;
+    DisplayEnable();
     for(y = top; y < bottom + 1; y++)
     {
         SetAddress(left, y);
@@ -481,7 +596,7 @@ void ClearDevice(void)
 {
     DWORD   counter;
 
-    DisplayEnable;
+    DisplayEnable();
     SetAddress(0, 0);
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
@@ -491,106 +606,17 @@ void ClearDevice(void)
     DisplayDisable();
 }
 
-/*********************************************************************
-* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
-*
-* PreCondition: none
-*
-* Input: left,top - left top image corner,
-*        bitmap - image pointer,
-*        stretch - image stretch factor
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: outputs image starting from left,top coordinates
-*
-* Note: image must be located in flash
-*
-********************************************************************/
-#ifdef USE_DRV_PUTIMAGE
-
-/* */
-WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
-{
-    FLASH_BYTE  *flashAddress;
-    BYTE        colorDepth;
-    WORD        colorTemp;
-
-        #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0);
-
-    /* Ready */
-        #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-        #endif
-
-    // Save current color
-    colorTemp = _color;
-
-    switch(*((SHORT *)bitmap))
-    {
-                #ifdef USE_BITMAP_FLASH
-
-        case FLASH:
-
-            // Image address
-            flashAddress = ((BITMAP_FLASH *)bitmap)->address;
-
-            // Read color depth
-            colorDepth = *(flashAddress + 1);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPP(left, top, flashAddress, stretch); break;
-                case 4:     PutImage4BPP(left, top, flashAddress, stretch); break;
-                case 8:     PutImage8BPP(left, top, flashAddress, stretch); break;
-                case 16:    PutImage16BPP(left, top, flashAddress, stretch); break;
-            }
-
-            break;
-                #endif
-                #ifdef USE_BITMAP_EXTERNAL
-
-        case EXTERNAL:
-
-            // Get color depth
-            ExternalMemoryCallback(bitmap, 1, 1, &colorDepth);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPPExt(left, top, bitmap, stretch); break;
-                case 4:     PutImage4BPPExt(left, top, bitmap, stretch); break;
-                case 8:     PutImage8BPPExt(left, top, bitmap, stretch); break;
-                case 16:    PutImage16BPPExt(left, top, bitmap, stretch); break;
-                default:    break;
-            }
-
-            break;
-                #endif
-
-        default:
-            break;
-    }
-
-    // Restore current color
-    _color = colorTemp;
-    return (1);
-}
+#ifndef USE_TRANSPARENT_COLOR
 
     #ifdef USE_BITMAP_FLASH
 
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
-*        bitmap - image pointer,
+*        image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -602,11 +628,11 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
-    BYTE                temp;
+    BYTE                temp = 0;
     WORD                sizeX, sizeY;
     WORD                x, y;
     BYTE                stretchX, stretchY;
@@ -614,7 +640,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     BYTE                mask;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -626,7 +652,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    DisplayEnable;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -674,11 +700,11 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -690,19 +716,19 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
     register WORD       x, y;
-    BYTE                temp;
+    BYTE                temp = 0;
     register BYTE       stretchX, stretchY;
     WORD                pallete[16];
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -717,7 +743,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    DisplayEnable;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -759,11 +785,11 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -775,7 +801,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
@@ -787,7 +813,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -802,7 +828,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    DisplayEnable;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -835,11 +861,11 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -851,7 +877,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_WORD *flashAddress;
     register FLASH_WORD *tempFlashAddress;
@@ -861,7 +887,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     register BYTE       stretchX, stretchY;
 
     // Move pointer to size information
-    flashAddress = (FLASH_WORD *)bitmap + 1;
+    flashAddress = (FLASH_WORD *)image + 1;
 
     // Read image size
     sizeY = *flashAddress;
@@ -869,7 +895,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *flashAddress;
     flashAddress++;
 
-    DisplayEnable;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -901,15 +927,15 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     DisplayDisable();
 }
 
-    #endif
+    #endif // USE_BITMAP_FLASH
     #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -921,7 +947,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -936,11 +962,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (2 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
@@ -958,9 +984,9 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DisplayEnable;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1004,11 +1030,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1020,7 +1046,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -1034,11 +1060,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (16 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
@@ -1056,9 +1082,9 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DisplayEnable;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1097,11 +1123,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1113,7 +1139,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -1126,11 +1152,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (256 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
@@ -1143,9 +1169,9 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        DisplayEnable;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1171,11 +1197,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1187,7 +1213,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -1200,8 +1226,8 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
@@ -1216,9 +1242,9 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DisplayEnable;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1243,5 +1269,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     }
 }
 
-    #endif
+    #endif //USE_BITMAP_EXTERNAL
+#endif //#ifndef USE_TRANSPARENT_COLOR
+
 #endif // USE_DRV_PUTIMAGE

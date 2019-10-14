@@ -11,7 +11,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.4
+ * Version:         1.3.0
  *
  * Software License Agreement
  *
@@ -199,9 +199,14 @@ typedef enum{
 
 
 // Summary: Macro indicating the length of a 8.3 file name
-// Description: The TOTAL_FILE_SIZE macro indicates the maximum number of characters in an 8.3 file name.  This value includes
+// Description: The TOTAL_FILE_SIZE_8P3 macro indicates the maximum number of characters in an 8.3 file name.  This value includes
 //              8 characters for the name, three for the extentsion, and 1 for the radix ('.')
-#define TOTAL_FILE_SIZE             8+3+1
+#define TOTAL_FILE_SIZE_8P3             (8+3+1)
+#define TOTAL_FILE_SIZE                 TOTAL_FILE_SIZE_8P3
+
+// Summary: Macro indicating the max length of a LFN file name
+// Description: The MAX_FILE_NAME_LENGTH_LFN macro indicates the maximum number of characters in an LFN file name.
+#define MAX_FILE_NAME_LENGTH_LFN             256
 
 // Summary: A mask that indicates the limit of directory entries in a sector
 // Description: The MASK_MAX_FILE_ENTRY_LIMIT_BITS is used to indicate to the Cache_File_Entry function that a new sector needs to
@@ -221,11 +226,11 @@ typedef enum{
 #define VALUE_DOTDOT_CLUSTER_VALUE_FOR_ROOT     0
 
 // Summary: MAcro indicating the length of an 8.3 file name in a directory entry
-// Description: The FILE_NAME_SIZE macro indicates the number of characters that an 8.3 file name will take up when packed in
+// Description: The FILE_NAME_SIZE_8P3 macro indicates the number of characters that an 8.3 file name will take up when packed in
 //              a directory entry.  This value includes 8 characters for the name and 3 for the extension.  Note that the radix is not
 //              stored in the directory entry.
-#define FILE_NAME_SIZE                          11
-
+#define FILE_NAME_SIZE_8P3           11
+#define FILE_NAME_SIZE               FILE_NAME_SIZE_8P3
 
 
 // Summary: Contains file information and is used to indicate which file to access.
@@ -243,7 +248,12 @@ typedef struct
     FILEFLAGS       flags;          // A structure containing file flags
     WORD            time;           // The file's last update time
     WORD            date;           // The file's last update date
-    char            name[FILE_NAME_SIZE];       // The name of the file
+    char            name[FILE_NAME_SIZE_8P3];       // The short name of the file
+	#ifdef SUPPORT_LFN
+    	BOOL			AsciiEncodingType;          // Ascii file name or Non-Ascii file name indicator
+		unsigned short int *utf16LFNptr;	        // Pointer to long file name in UTF16 format
+		unsigned short int utf16LFNlength;          // LFN length in terms of words including the NULL word at the last.
+	#endif
     WORD            entry;          // The position of the file's directory entry in it's directory
     WORD            chk;            // File structure checksum
     WORD            attributes;     // The file attributes
@@ -261,6 +271,7 @@ typedef enum
     FS_GET_PROPERTIES_CLUSTER_FAILURE,
     FS_GET_PROPERTIES_STILL_WORKING = 0xFF
 } FS_DISK_ERRORS;
+
 
 /* Summary: Contains the disk search information, intermediate values, and results
 ** Description: This structure is used in conjunction with the FSGetDiskProperties()
@@ -299,13 +310,17 @@ typedef struct
 //              searches to be perfomed in the same directory for additional files that meet the specified criteria.
 typedef struct
 {
-    char            filename[FILE_NAME_SIZE + 2];   // The name of the file that has been found
+    char            filename[FILE_NAME_SIZE_8P3 + 2];   // The name of the file that has been found
     unsigned char   attributes;                     // The attributes of the file that has been found
     unsigned long   filesize;                       // The size of the file that has been found
     unsigned long   timestamp;                      // The last modified time of the file that has been found (create time for directories)
-
+	#ifdef SUPPORT_LFN
+		BOOL			AsciiEncodingType;          // Ascii file name or Non-Ascii file name indicator
+		unsigned short int *utf16LFNfound;		    // Pointer to long file name found in UTF16 format
+		unsigned short int utf16LFNfoundLength;     // LFN Found length in terms of words including the NULL word at the last.
+	#endif
     unsigned int    entry;                          // The directory entry of the last file found that matches the specified attributes. (Internal use only)
-    char            searchname[FILE_NAME_SIZE + 2]; // The name specified when the user began the search. (Internal use only)
+    char            searchname[FILE_NAME_SIZE_8P3 + 2]; // The 8.3 format name specified when the user began the search. (Internal use only)
     unsigned char   searchattr;                     // The attributes specified when the user began the search. (Internal use only)
     unsigned long   cwdclus;                        // The directory that this search was performed in. (Internal use only)
     unsigned char   initialized;                    // Check to determine if the structure was initialized by FindFirst (Internal use only)
@@ -350,7 +365,7 @@ int FSInit(void);
   Function:
     FSFILE * FSfopen (const char * fileName, const char *mode)
   Summary:
-    Open a file
+    Open a Ascii file
   Conditions:
     For read modes, file exists; FSInit performed
   Input:
@@ -371,17 +386,17 @@ int FSInit(void);
     This function will open a file or directory.  First, RAM in the
     dynamic heap or static array will be allocated to a new FSFILE object.
     Then, the specified file name will be formatted to ensure that it's
-    in 8.3 format.  Next, the FILEfind function will be used to search
-    for the specified file name.  If the name is found, one of three
+    in 8.3 format or LFN format. Next, the FILEfind function will be used
+    to search for the specified file name. If the name is found, one of three
     things will happen: if the file was opened in read mode, its file
     info will be loaded using the FILEopen function; if it was opened in
     write mode, it will be erased, and a new file will be constructed in
     its place; if it was opened in append mode, its file info will be
     loaded with FILEopen and the current location will be moved to the
     end of the file using the FSfseek function.  If the file was not
-    found by FILEfind, it will be created if the mode was specified as
+    found by FILEfind, a new file will be created if the mode was specified as
     a write or append mode.  In these cases, a pointer to the heap or
-    static FSFILE object array will be returned.  If the file was not
+    static FSFILE object array will be returned. If the file was not
     found and the mode was specified as a read mode, the memory
     allocated to the file will be freed and the NULL pointer value
     will be returned.
@@ -391,7 +406,52 @@ int FSInit(void);
 
 FSFILE * FSfopen(const char * fileName, const char *mode);
 
+#ifdef SUPPORT_LFN
+/*********************************************************************
+  Function:
+    FSFILE * wFSfopen (const unsigned short int * fileName, const char *mode)
+  Summary:
+    Open a UTF16 file.
+  Conditions:
+    For read modes, file exists; FSInit performed
+  Input:
+    fileName -  The name of the file to open
+    mode -
+         - WRITE -      Create a new file or replace an existing file
+         - READ -       Read data from an existing file
+         - APPEND -     Append data to an existing file
+         - WRITEPLUS -  Create a new file or replace an existing file (reads also enabled)
+         - READPLUS -   Read data from an existing file (writes also enabled)
+         - APPENDPLUS - Append data to an existing file (reads also enabled)
+  Return Values:
+    FSFILE * - The pointer to the file object
+    NULL -     The file could not be opened
+  Side Effects:
+    The FSerrno variable will be changed.
+  Description:
+    This function will open a file or directory.  First, RAM in the
+    dynamic heap or static array will be allocated to a new FSFILE object.
+    Then, the specified file name will be formatted to ensure that it's
+    in 8.3 format or LFN format. Next, the FILEfind function will be used
+    to search for the specified file name. If the name is found, one of three
+    things will happen: if the file was opened in read mode, its file
+    info will be loaded using the FILEopen function; if it was opened in
+    write mode, it will be erased, and a new file will be constructed in
+    its place; if it was opened in append mode, its file info will be
+    loaded with FILEopen and the current location will be moved to the
+    end of the file using the FSfseek function.  If the file was not
+    found by FILEfind, a new file will be created if the mode was specified as
+    a write or append mode.  In these cases, a pointer to the heap or
+    static FSFILE object array will be returned. If the file was not
+    found and the mode was specified as a read mode, the memory
+    allocated to the file will be freed and the NULL pointer value
+    will be returned.
+  Remarks:
+    None.
+  *********************************************************************/
 
+FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
+#endif
 
 #ifdef ALLOW_PGMFUNCTIONS
 
@@ -399,7 +459,7 @@ FSFILE * FSfopen(const char * fileName, const char *mode);
   Function:
     FSFILE * FSfopenpgm(const rom char * fileName, const rom char *mode)
   Summary:
-    Open a file named with a ROM string on PIC18
+    Open a Ascii file named with a ROM string on PIC18
   Conditions:
     For read modes, file exists; FSInit performed
   Input:
@@ -435,8 +495,8 @@ FSFILE * FSfopen(const char * fileName, const char *mode);
     0 -  File was found
     -1 - No file matching the given parameters was found
   Side Effects:
-    Search criteria from previous FindFirst call on passed SearchRec object will be lost.
-    The FSerrno variable will be changed.
+    Search criteria from previous FindFirstpgm call on passed SearchRec object
+    will be lost.The FSerrno variable will be changed.
   Description:
     The FindFirstpgm function will copy a PIC18 ROM fileName argument
     into a RAM array, and then pass that array to the FindFirst function.
@@ -849,7 +909,7 @@ int FSattrib (FSFILE * file, unsigned char attributes);
   Function:
     int FSrename (const rom char * fileName, FSFILE * fo)
   Summary:
-    Change the name of a file or directory
+    Change the Ascii name of a file or directory
   Conditions:
     File opened.
   Input:
@@ -872,12 +932,40 @@ int FSattrib (FSFILE * file, unsigned char attributes);
 
 int FSrename (const char * fileName, FSFILE * fo);
 
+#ifdef SUPPORT_LFN
+/***************************************************************
+  Function:
+    int wFSrename (const rom unsigned short int * fileName, FSFILE * fo)
+  Summary:
+    Change the name of a file or directory to the UTF16 input fileName
+  Conditions:
+    File opened.
+  Input:
+    fileName -  The new name of the file
+    fo -        The file to rename
+  Return Values:
+    0 -   File was renamed successfully
+    EOF - File was not renamed
+  Side Effects:
+    The FSerrno variable will be changed.
+  Description:
+    The wFSrename function will rename a file.  First, it will
+    search through the current working directory to ensure the
+    specified new UTF16 filename is not already in use.  If it isn't,
+    the new filename will be written to the file entry of the
+    file pointed to by 'fo.'
+  Remarks:
+    None
+  ***************************************************************/
+
+int wFSrename (const unsigned short int * fileName, FSFILE * fo);
+#endif
 
 /*********************************************************************
   Function:
     int FSremove (const char * fileName)
   Summary:
-    Delete a file
+    Delete a Ascii file
   Conditions:
     File not opened, file exists
   Input:
@@ -890,13 +978,40 @@ int FSrename (const char * fileName, FSFILE * fo);
   Description:
     The FSremove function will attempt to find the specified file with
     the FILEfind function.  If the file is found, it will be erased
-    using the FILEerase function.
+    using the FILEerase function.The user can also provide ascii alias name
+    of the ascii long file name as the input to this function to get it erased
+    from the memory.
   Remarks:
     None                                       
   **********************************************************************/
 
 int FSremove (const char * fileName);
 
+#ifdef SUPPORT_LFN
+/*********************************************************************
+  Function:
+    int wFSremove (const unsigned short int * fileName)
+  Summary:
+    Delete a UTF16 file
+  Conditions:
+    File not opened, file exists
+  Input:
+    fileName -  Name of the file to erase
+  Return Values:
+    0 -   File removed
+    EOF - File was not removed
+  Side Effects:
+    The FSerrno variable will be changed.
+  Description:
+    The wFSremove function will attempt to find the specified UTF16 file
+    name with the FILEfind function. If the file is found, it will be erased
+    using the FILEerase function.
+  Remarks:
+    None
+  **********************************************************************/
+
+int wFSremove (const unsigned short int * fileName);
+#endif
 
 /*********************************************************************************
   Function:
@@ -941,7 +1056,7 @@ size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream);
   Function:
     int FSchdir (char * path)
   Summary:
-    Change the current working directory
+    Change the current working directory as per the path specified in Ascii format
   Conditions:
     None
   Input:
@@ -961,12 +1076,37 @@ size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream);
 
 int FSchdir (char * path);
 
+#ifdef SUPPORT_LFN
+/**************************************************************************
+  Function:
+    int wFSchdir (unsigned short int * path)
+  Summary:
+    Change the current working directory as per the path specified in UTF16 format
+  Conditions:
+    None
+  Input:
+    path - The path of the directory to change to.
+  Return Values:
+    0 -   The current working directory was changed successfully
+    EOF - The current working directory could not be changed
+  Side Effects:
+    The current working directory may be changed. The FSerrno variable will
+    be changed.
+  Description:
+    The FSchdir function passes a RAM pointer to the path to the
+    chdirhelper function.
+  Remarks:
+    None                                            
+  **************************************************************************/
+
+int wFSchdir (unsigned short int * path);
+#endif
 
 /**************************************************************
   Function:
     char * FSgetcwd (char * path, int numchars)
   Summary:
-    Get the current working directory name
+    Get the current working directory path in Ascii format
   Conditions:
     None
   Input:
@@ -1005,6 +1145,50 @@ int FSchdir (char * path);
 
 char * FSgetcwd (char * path, int numbchars);
 
+#ifdef SUPPORT_LFN
+/**************************************************************
+  Function:
+    char * wFSgetcwd (unsigned short int * path, int numchars)
+  Summary:
+    Get the current working directory path in UTF16 format
+  Conditions:
+    None
+  Input:
+    path -      Pointer to the array to return the cwd name in
+    numchars -  Number of chars in the path
+  Return Values:
+    char * - The cwd name string pointer (path or defaultArray)
+    NULL -   The current working directory name could not be loaded.
+  Side Effects:
+    The FSerrno variable will be changed
+  Description:
+    The FSgetcwd function will get the name of the current
+    working directory and return it to the user.  The name
+    will be copied into the buffer pointed to by 'path,'
+    starting at the root directory and copying as many chars
+    as possible before the end of the buffer.  The buffer
+    size is indicated by the 'numchars' argument.  The first
+    thing this function will do is load the name of the current
+    working directory, if it isn't already present.  This could
+    occur if the user switched to the dotdot entry of a
+    subdirectory immediately before calling this function.  The
+    function will then copy the current working directory name 
+    into the buffer backwards, and insert a backslash character.  
+    Next, the function will continuously switch to the previous 
+    directories and copy their names backwards into the buffer
+    until it reaches the root.  If the buffer overflows, it
+    will be treated as a circular buffer, and data will be
+    copied over existing characters, starting at the beginning.
+    Once the root directory is reached, the text in the buffer
+    will be swapped, so that the buffer contains as much of the
+    current working directory name as possible, starting at the 
+    root.
+  Remarks:
+    None                                                       
+  **************************************************************/
+
+char * wFSgetcwd (unsigned short int * path, int numbchars);
+#endif
 
 #ifdef ALLOW_WRITES
 
@@ -1012,7 +1196,7 @@ char * FSgetcwd (char * path, int numbchars);
   Function:
     int FSmkdir (char * path)
   Summary:
-    Create a directory
+    Create a directory as per the Ascii input path
   Conditions:
     None
   Input:
@@ -1032,12 +1216,37 @@ char * FSgetcwd (char * path, int numbchars);
 
 int FSmkdir (char * path);
 
+#ifdef SUPPORT_LFN
+/**************************************************************************
+  Function:
+    int wFSmkdir (unsigned short int * path)
+  Summary:
+    Create a directory as per the UTF16 input path
+  Conditions:
+    None
+  Input:
+    path - The path of directories to create.
+  Return Values:
+    0 -   The specified directory was created successfully
+    EOF - The specified directory could not be created
+  Side Effects:
+    Will create all non-existent directories in the path. The FSerrno 
+    variable will be changed.
+  Description:
+    The wFSmkdir function passes a RAM pointer to the path to the
+    mkdirhelper function.
+  Remarks:
+    None                                            
+  **************************************************************************/
+
+int wFSmkdir (unsigned short int * path);
+#endif
 
 /**************************************************************************
   Function:
     int FSrmdir (char * path)
   Summary:
-    Delete a directory
+    Delete a directory as per the Ascii input path
   Conditions:
     None
   Input:
@@ -1058,6 +1267,35 @@ int FSmkdir (char * path);
   **************************************************************************/
 
 int FSrmdir (char * path, unsigned char rmsubdirs);
+
+#ifdef SUPPORT_LFN
+/**************************************************************************
+  Function:
+    int wFSrmdir (unsigned short int * path, unsigned char rmsubdirs)
+  Summary:
+    Delete a directory as per the UTF16 input path
+  Conditions:
+    None
+  Input:
+    path -      The path of the directory to remove
+    rmsubdirs - 
+              - TRUE -  All sub-dirs and files in the target dir will be removed
+              - FALSE - FSrmdir will not remove non-empty directories
+  Return Values:
+    0 -   The specified directory was deleted successfully
+    EOF - The specified directory could not be deleted
+  Side Effects:
+    The FSerrno variable will be changed.
+  Description:
+    The wFSrmdir function passes a RAM pointer to the path to the
+    rmdirhelper function.
+  Remarks:
+    None.
+  **************************************************************************/
+
+int wFSrmdir (unsigned short int * path, unsigned char rmsubdirs);
+#endif
+
 #endif
 
 #endif
@@ -1101,7 +1339,7 @@ int SetClockVars (unsigned int year, unsigned char month, unsigned char day, uns
   Function:
     int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
   Summary:
-    Initial search function
+    Initial search function for the input Ascii fileName
   Conditions:
     None
   Input:
@@ -1123,20 +1361,73 @@ int SetClockVars (unsigned int year, unsigned char month, unsigned char day, uns
     -1 - No file matching the specified criteria was found
   Side Effects:
     Search criteria from previous FindFirst call on passed SearchRec object
-    will be lost.  The FSerrno variable will be changed.
+    will be lost. "utf16LFNfound" is overwritten after subsequent FindFirst/FindNext
+    operations.It is the responsibility of the application to read the "utf16LFNfound"
+    before it is lost.The FSerrno variable will be changed.
   Description:
     The FindFirst function will search for a file based on parameters passed in
     by the user.  This function will use the FILEfind function to parse through
-    the current working directory searching for entries that match the specified 
-    parameters.  If a file is found, its parameters are copied into the SearchRec 
-    structure, as are the initial parameters passed in by the user and the position 
-    of the file entry in the current working directory.
+    the current working directory searching for entries that match the specified
+    parameters.  If a file is found, its parameters are copied into the SearchRec
+    structure, as are the initial parameters passed in by the user and the position
+    of the file entry in the current working directory.If the return value of the 
+    function is 0 then "utf16LFNfoundLength" indicates whether the file found was 
+    long file name or short file name(8P3 format). The "utf16LFNfoundLength" is non-zero
+    for long file name and is zero for 8P3 format."utf16LFNfound" points to the
+    address of long file name if found during the operation.
   Remarks:
-    Call FindFirst or FindFirstpgm before calling FindNext                          
+    Call FindFirst or FindFirstpgm before calling FindNext
   ***********************************************************************************/
 
 int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec);
 
+#ifdef SUPPORT_LFN
+/***********************************************************************************
+  Function:
+    int wFindFirst (const unsigned short int * fileName, unsigned int attr, SearchRec * rec)
+  Summary:
+    Initial search function for the input UTF16 fileName
+  Conditions:
+    None
+  Input:
+    fileName - The name to search for
+             - Parital string search characters
+             - * - Indicates the rest of the filename or extension can vary (e.g. FILE.*)
+             - ? - Indicates that one character in a filename can vary (e.g. F?LE.T?T)
+    attr -            The attributes that a found file may have
+         - ATTR_READ_ONLY -  File may be read only
+         - ATTR_HIDDEN -     File may be a hidden file
+         - ATTR_SYSTEM -     File may be a system file
+         - ATTR_VOLUME -     Entry may be a volume label
+         - ATTR_DIRECTORY -  File may be a directory
+         - ATTR_ARCHIVE -    File may have archive attribute
+         - ATTR_MASK -       All attributes
+    rec -             pointer to a structure to put the file information in
+  Return Values:
+    0 -  File was found
+    -1 - No file matching the specified criteria was found
+  Side Effects:
+    Search criteria from previous wFindFirst call on passed SearchRec object
+    will be lost. "utf16LFNfound" is overwritten after subsequent wFindFirst/FindNext
+    operations.It is the responsibility of the application to read the "utf16LFNfound"
+    before it is lost.The FSerrno variable will be changed.
+  Description:
+    The wFindFirst function will search for a file based on parameters passed in
+    by the user.  This function will use the FILEfind function to parse through
+    the current working directory searching for entries that match the specified
+    parameters.  If a file is found, its parameters are copied into the SearchRec
+    structure, as are the initial parameters passed in by the user and the position
+    of the file entry in the current working directory.If the return value of the 
+    function is 0 then "utf16LFNfoundLength" indicates whether the file found was 
+    long file name or short file name(8P3 format). The "utf16LFNfoundLength" is non-zero
+    for long file name and is zero for 8P3 format."utf16LFNfound" points to the
+    address of long file name if found during the operation.
+  Remarks:
+    Call FindFirst or FindFirstpgm before calling FindNext
+  ***********************************************************************************/
+
+int wFindFirst (const unsigned short int * fileName, unsigned int attr, SearchRec * rec);
+#endif
 
 /**********************************************************************
   Function:
@@ -1151,16 +1442,23 @@ int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec);
     0 -  File was found
     -1 - No additional files matching the specified criteria were found
   Side Effects:
-    The FSerrno variable will be changed.
+    Search criteria from previous FindNext call on passed SearchRec object
+    will be lost. "utf16LFNfound" is overwritten after subsequent FindFirst/FindNext
+    operations.It is the responsibility of the application to read the "utf16LFNfound"
+    before it is lost.The FSerrno variable will be changed.
   Description:
     The FindNext function performs the same function as the FindFirst
     funciton, except it does not copy any search parameters into the
     SearchRec structure (only info about found files) and it begins
     searching at the last directory entry offset at which a file was
     found, rather than at the beginning of the current working
-    directory.
+    directory.If the return value of the function is 0 then "utf16LFNfoundLength"
+    indicates whether the file found was long file name or short file
+    name(8P3 format). The "utf16LFNfoundLength" is non-zero for long file name
+    and is zero for 8P3 format."utf16LFNfound" points to the address of long 
+    file name if found during the operation.
   Remarks:
-    Call FindFirst or FindFirstpgm before calling this function        
+    Call FindFirst or FindFirstpgm before calling this function
   **********************************************************************/
 
 int FindNext (SearchRec * rec); 

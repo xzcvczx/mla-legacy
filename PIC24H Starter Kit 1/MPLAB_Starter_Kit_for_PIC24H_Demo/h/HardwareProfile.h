@@ -47,21 +47,17 @@ This file defines all of the hardware-specific information for the project.
 #define _HARDWARE_PROFILE_H_
 
 #define USE_SH1101A
+
 #define USE_GFX_PMP
 #define USE_8BIT_PMP
 //#define USE_SSD1303
 #define GO_FAST
 
 /*********************************************************************
-* Overview: Defines color depth. 
-********************************************************************/
-#define COLOR_DEPTH						1
-
-/*********************************************************************
 * Overview: Display controller selection.
 *                                          
 ********************************************************************/
-#define DISPLAY_CONTROLLER				SH1101A
+#define USE_GFX_DISPLAY_CONTROLLER_SH1101A
 
 /*********************************************************************
 * Overview: Horizontal and vertical display resolution
@@ -166,6 +162,22 @@ This file defines all of the hardware-specific information for the project.
 /** TRIS ***********************************************************/
 #define INPUT_PIN           1
 #define OUTPUT_PIN          0
+
+/*********************************************************************
+* BACKLIGHT CONTROL (these are dummy macros to satisfy common file gfxpmp.h)
+*********************************************************************/
+#define DisplayBacklightConfig()      
+#define DisplayBacklightOn()        
+#define DisplayBacklightOff()          
+
+/*********************************************************************
+* EPMP TIMING PARAMETERS
+*********************************************************************/
+#define PMP_DATA_SETUP_TIME         (0)    
+#define PMP_DATA_WAIT_TIME          (45)  // minimum pulse width requirement of CS controlled RD/WR access in SH1101A is 100 ns
+                                          // but since we have one cycle in setup and one cycle hold (minimum) we can estimate
+                                          // the wait time. 
+#define PMP_DATA_HOLD_TIME          (15)  // based on SH1101A data hold requirement  
 
 /*********************************************************************
 * IOS FOR THE DISPLAY CONTROLLER

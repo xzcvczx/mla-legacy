@@ -559,9 +559,7 @@ WORD ChDraw(void *pObj)
             state = FRAME_DRAW_PREP;
 
         /*========================================================================*/
-
         //					  Draw the frame
-
         /*========================================================================*/
         case FRAME_DRAW_PREP:
 
@@ -594,9 +592,7 @@ WORD ChDraw(void *pObj)
             state = TITLE_LABEL_DRAW_SET;
 
         /*========================================================================*/
-
         //					  Draw the Chart Title
-
         /*========================================================================*/
         case TITLE_LABEL_DRAW_SET:
 
@@ -643,9 +639,7 @@ WORD ChDraw(void *pObj)
             }
 
             /*========================================================================*/
-
             //					  Draw the Legend
-
             /*========================================================================*/
     chrt_draw_legend:
 
@@ -731,15 +725,11 @@ WORD ChDraw(void *pObj)
             }
 
             /**************************************************************************/
-
             // 					BAR CHART states
-
             /**************************************************************************/
 
             /*========================================================================*/
-
             //					  Draw the grids
-
             /*========================================================================*/
     chrt_grid_prep:
 
@@ -1181,9 +1171,7 @@ WORD ChDraw(void *pObj)
             state = SAMPLE_LABEL_DRAW_SET;
 
             /*========================================================================*/
-
             //					  Draw the Sample Grid labels
-
             /*========================================================================*/
     chrt_sample_label_draw_set:
 
@@ -1266,9 +1254,7 @@ WORD ChDraw(void *pObj)
             }
 
             /*========================================================================*/
-
             //					  Draw the X - Axis labels
-
             /*========================================================================*/
     chrt_xaxis_label_draw_set:
 
@@ -1346,9 +1332,7 @@ WORD ChDraw(void *pObj)
             state = VALUE_LABEL_DRAW_SET;
 
             /*========================================================================*/
-
             //					  Draw the Value Grid labels
-
             /*========================================================================*/
     chrt_value_label_draw_set:
 
@@ -1415,9 +1399,7 @@ WORD ChDraw(void *pObj)
             }
 
             /*========================================================================*/
-
             //					  Draw the Y - Axis labels
-
             /*========================================================================*/
     chrt_yaxis_label_draw_set:
 
@@ -1481,9 +1463,7 @@ WORD ChDraw(void *pObj)
             }
 
             /*========================================================================*/
-
             //					  Draw the bars representing the data/samples
-
             /*========================================================================*/
     chrt_data_draw_init:
 
@@ -2035,15 +2015,11 @@ WORD ChDraw(void *pObj)
             return (1);
 
             /**************************************************************************/
-
             // 					PIE CHART states
-
             /**************************************************************************/
 
             /*========================================================================*/
-
             //					  Draw the pie
-
             /*========================================================================*/
     chrt_pie_prep:
 
@@ -2204,9 +2180,7 @@ WORD ChDraw(void *pObj)
             state = PIE_DRAW_SECTOR;
 
         /*========================================================================*/
-
         //					  Draw the sectors of the pie
-
         /*========================================================================*/
         case PIE_DRAW_SECTOR:
 
@@ -2936,112 +2910,13 @@ void ChSetPercentRange(CHART *pCh, WORD min, WORD max)
         pCh->prm.perMax = max;
 }
 
-///////////////////// SIN and COS Tables from 0 to 45 deg /////////////////////
-const WORD  sinTable[] __attribute__((aligned(2))) =
-{
-    0,
-    1143,
-    2287,
-    3429,
-    4571,
-    5711,
-    6850,
-    7986,
-    9120,
-    10251,
-    11380,
-    12504,
-    13625,
-    14742,
-    15854,
-    16961,
-    18063,
-    19160,
-    20251,
-    21336,
-    22414,
-    23485,
-    24549,
-    25606,
-    26655,
-    27696,
-    28728,
-    29752,
-    30766,
-    31771,
-    32767,
-    33753,
-    34728,
-    35692,
-    36646,
-    37589,
-    38520,
-    39439,
-    40347,
-    41242,
-    42125,
-    42994,
-    43851,
-    44694,
-    45524,
-    46340
-};
 
-const WORD  cosTable[] __attribute__((aligned(2))) =
-{
-    65535,
-    65525,
-    65495,
-    65445,
-    65375,
-    65285,
-    65175,
-    65046,
-    64897,
-    64728,
-    64539,
-    64330,
-    64102,
-    63855,
-    63588,
-    63301,
-    62996,
-    62671,
-    62327,
-    61964,
-    61582,
-    61182,
-    60762,
-    60325,
-    59869,
-    59394,
-    58902,
-    58392,
-    57863,
-    57318,
-    56754,
-    56174,
-    55576,
-    54962,
-    54330,
-    53683,
-    53018,
-    52338,
-    51642,
-    50930,
-    50202,
-    49459,
-    48701,
-    47929,
-    47141,
-    46340
-};
 
 /* */
 
-void FillSector(SHORT x, SHORT y, WORD outLineColor)
+void FillSector(SHORT x, SHORT y, GFX_COLOR outLineColor)
 {
-    WORD    pixel;
+    GFX_COLOR    pixel;
     SHORT   left, right;
     SHORT   top, bottom;
     SHORT   xc, yc;
@@ -3051,6 +2926,7 @@ void FillSector(SHORT x, SHORT y, WORD outLineColor)
     left = right = xc = x;
     while(1)
     {
+
         pixel = GetPixel(xc, yc);
         if(pixel == outLineColor)
         {
@@ -3136,52 +3012,10 @@ void FillSector(SHORT x, SHORT y, WORD outLineColor)
 }
 
 /* */
-void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y)
-{
-    DWORD   rad;
 
-    //DWORD_VAL ss;
-    SHORT   ang;
-    SHORT   temp;
-
-    ang = angle % 45;
-    if((angle / 45) & 0x01)
-        ang = 45 - ang;
-
-    rad = radius;
-    rad *= cosTable[ang];
-
-    *x = ((DWORD_VAL) rad).w[1];
-
-    //ss.Val = rad;
-    //*x = ss.w[1];
-    rad = radius;
-    rad *= sinTable[ang];
-
-    *y = ((DWORD_VAL) rad).w[1];
-
-    //ss.Val = rad;
-    //*y = ss.w[1];
-    if(((angle > 45) && (angle < 135)) || ((angle > 225) && (angle < 315)))
-    {
-        temp = *x;
-        *x = *y;
-        *y = temp;
-    }
-
-    if((angle > 90) && (angle < 270))
-    {
-        *x = -*x;
-    }
-
-    if((angle > 180) && (angle < 360))
-    {
-        *y = -*y;
-    }
-}
 
 /* */
-WORD DrawSector(SHORT cx, SHORT cy, SHORT outRadius, SHORT angleFrom, SHORT angleTo, WORD outLineColor)
+WORD DrawSector(SHORT cx, SHORT cy, SHORT outRadius, SHORT angleFrom, SHORT angleTo, GFX_COLOR outLineColor)
 {
     typedef enum
     {

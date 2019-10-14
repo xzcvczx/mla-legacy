@@ -1,7 +1,6 @@
 /*****************************************************************************
  *
- * Basic access to SPI Flash SST25VF016 located on 
- * Graphics LCD Controller PICtail Plus SSD1926 Board.
+ * Basic access to SPI Flash SST25VF016 and M25P80
  *
  *****************************************************************************
  * FileName:        SST25VF016.h
@@ -13,7 +12,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -35,130 +34,21 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Date        	Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 01/07/09	   	...
+ * 03/08/11     Modified header file dependencies
+ * 05/11/11     - Updated this file to support both SST25VF016 and M25P80 families
+ *              - Although the file name is still specific for SST25VF016
  *****************************************************************************/
 #ifndef _SST25VF016_H
-    #define _SST25VF016_H
-
-    #if defined(__dsPIC33F__)
-        #include <p33Fxxxx.h>
-    #elif defined(__PIC24H__)
-        #include <p24Hxxxx.h>
-    #elif defined(__PIC32MX__)
-        #include <plib.h>
-    #else
-        #include <p24Fxxxx.h>
-    #endif
-
-	#include "GenericTypeDefs.h"
-	#include "HardwareProfile.h"
-	#include "TimeDelay.h"
+#define _SST25VF016_H
 
 /************************************************************************
-* SST25 SPI Channel                                                       
-************************************************************************/
-#ifdef USE_SST25_SPI1
+ * Section:  Includes                                                       
+ ************************************************************************/
+    #include "drv_spi.h"
 
-#define SST25_SPISTAT     SPI1STAT
-#define SST25_SPISTATbits SPI1STATbits
-#ifdef __PIC32MX__
-#define SST25_SPICON      SPI1CON
-#define SST25_SPICONbits  SPI1CONbits
-#else
-#define SST25_SPICON1     SPI1CON1
-#define SST25_SPICON1bits SPI1CON1bits
-#define SST25_SPICON2     SPI1CON2
-#define SST25_SPICON2bits SPI1CON2bits
-#endif
-#define SST25_SPIBRG      SPI1BRG
-#define SST25_SPIBUF      SPI1BUF
-
-#elif defined (USE_SST25_SPI2)
-
-#define SST25_SPISTAT     SPI2STAT
-#define SST25_SPISTATbits SPI2STATbits
-#ifdef __PIC32MX__
-#define SST25_SPICON      SPI2CON
-#define SST25_SPICONbits  SPI2CONbits
-#else
-#define SST25_SPICON1     SPI2CON1
-#define SST25_SPICON1bits SPI2CON1bits
-#define SST25_SPICON2     SPI2CON2
-#define SST25_SPICON2bits SPI2CON2bits
-#endif
-#define SST25_SPIBRG      SPI2BRG
-#define SST25_SPIBUF      SPI2BUF
-
-#elif defined (USE_SST25_SPI1A)
-
-#define SST25_SPISTAT     SPI1ASTAT
-#define SST25_SPISTATbits SPI1ASTATbits
-#ifdef __PIC32MX__
-#define SST25_SPICON      SPI1ACON
-#define SST25_SPICONbits  SPI1ACONbits
-#else
-#define SST25_SPICON1     SPI1ACON1
-#define SST25_SPICON1bits SPI1ACON1bits
-#define SST25_SPICON2     SPI1ACON2
-#define SST25_SPICON2bits SPI1ACON2bits
-#endif
-#define SST25_SPIBRG      SPI1ABRG
-#define SST25_SPIBUF      SPI1ABUF
-
-#elif defined (USE_SST25_SPI2A)
-
-#define SST25_SPISTAT     SPI2ASTAT
-#define SST25_SPISTATbits SPI2ASTATbits
-#ifdef __PIC32MX__
-#define SST25_SPICON      SPI2ACON
-#define SST25_SPICONbits  SPI2ACONbits
-#else
-#define SST25_SPICON1     SPI2ACON1
-#define SST25_SPICON1bits SPI2ACON1bits
-#define SST25_SPICON2     SPI2ACON2
-#define SST25_SPICON2bits SPI2ACON2bits
-#endif
-#define SST25_SPIBRG      SPI2ABRG
-#define SST25_SPIBUF      SPI2ABUF
-
-#define SST25_SCK_TRIS  TRISGbits.TRISG6
-#define SST25_SDO_TRIS  TRISGbits.TRISG8
-#define SST25_SDI_TRIS  TRISGbits.TRISG7
-
-#elif defined (USE_SST25_SPI3A)
-
-#define SST25_SPISTAT     SPI3ASTAT
-#define SST25_SPISTATbits SPI3ASTATbits
-#ifdef __PIC32MX__
-#define SST25_SPICON      SPI3ACON
-#define SST25_SPICONbits  SPI3ACONbits
-#else
-#define SST25_SPICON1     SPI3ACON1
-#define SST25_SPICON1bits SPI3ACON1bits
-#define SST25_SPICON2     SPI3ACON2
-#define SST25_SPICON2bits SPI3ACON2bits
-#endif
-#define SST25_SPIBRG      SPI3ABRG
-#define SST25_SPIBUF      SPI3ABUF
-
-#else
-#error "Please define a SPI channel for SPI Flash"
-
-#endif
-
-/************************************************************************
-* SST25 Commands                                                       
-************************************************************************/
-    #define SST25_CMD_READ  (unsigned)0x03
-    #define SST25_CMD_WRITE (unsigned)0x02
-    #define SST25_CMD_WREN  (unsigned)0x06
-    #define SST25_CMD_RDSR  (unsigned)0x05
-    #define SST25_CMD_ERASE (unsigned)0x60
-    #define SST25_CMD_EWSR  (unsigned)0x50
-    #define SST25_CMD_WRSR  (unsigned)0x01
-    #define SST25_CMD_SER   (unsigned)0x20
 
 /************************************************************************
 * Macro: SST25CSLow()                                                   
@@ -198,7 +88,7 @@
 * Output: none  
 *                                                                       
 ************************************************************************/
-void    SST25Init(void);
+void    SST25Init(DRV_SPI_INIT_DATA *pInitData);
 
 /************************************************************************
 * Function: BYTE SST25IsWriteBusy(void)  

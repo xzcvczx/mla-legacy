@@ -441,15 +441,23 @@ BOOL ARPProcess(void)
 			ARPProcessRxPkt(&packet);
 #endif
 
+#ifdef STACK_USE_AUTO_IP
+            if (packet.SenderIPAddr.Val == AppConfig.MyIPAddr.Val)
+            {
+                AutoIPConflict(0);
+                return TRUE;                
+            }
+#endif
+
 			// Handle incoming ARP responses
 #ifdef STACK_CLIENT_MODE
 			if(packet.Operation == ARP_OPERATION_RESP)
 			{
-                #if defined(STACK_USE_AUTO_IP)
+/*                #if defined(STACK_USE_AUTO_IP)
                 for (i = 0; i < NETWORK_INTERFACES; i++)
                     if (AutoIPConfigIsInProgress(i))
                         AutoIPConflict(i);
-                #endif
+                #endif*/
 				Cache.MACAddr = packet.SenderMACAddr;
 				Cache.IPAddr = packet.SenderIPAddr;
 				return TRUE;
@@ -477,7 +485,7 @@ BOOL ARPProcess(void)
 #endif
                 #if defined(STACK_USE_AUTO_IP)
                 for (i = 0; i < NETWORK_INTERFACES; i++)
-                    if ((packet.SenderIPAddr.Val == AppConfig.MyIPAddr.Val) || AutoIPConfigIsInProgress(i))
+                    if (AutoIPConfigIsInProgress(i))
                     {
                         AutoIPConflict(i);
                         return TRUE;

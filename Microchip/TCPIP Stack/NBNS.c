@@ -117,7 +117,9 @@ void NBNSTask(void)
 			break;
 
 		case NBNS_OPEN_SOCKET:
-			MySocket = UDPOpen(NBNS_PORT, NULL, NBNS_PORT);
+			//MySocket = UDPOpen(NBNS_PORT, NULL, NBNS_PORT);
+			
+			MySocket = UDPOpenEx(0,UDP_OPEN_SERVER,NBNS_PORT,NBNS_PORT);
 			if(MySocket == INVALID_UDP_SOCKET)
 				break;
 
@@ -199,7 +201,7 @@ void NBNSTask(void)
 					UDPPut(AppConfig.MyIPAddr.v[3]);
 
 					// Change the destination address to the unicast address of the last received packet
-		        	memcpy((void*)&UDPSocketInfo[MySocket].remoteNode, (const void*)&remoteNode, sizeof(remoteNode));
+		        	memcpy((void*)&UDPSocketInfo[MySocket].remote.remoteNode, (const void*)&remoteNode, sizeof(remoteNode));
 					UDPFlush();				
 				}
 

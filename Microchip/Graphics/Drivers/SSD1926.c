@@ -4,15 +4,13 @@
  *  to be used with GFX 3 PICtail board
  *****************************************************************************
  * FileName:        SSD1926.c
- * Dependencies:    Graphics.h
  * Processor:       PIC24, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright ï¿½ 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -22,7 +20,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -34,30 +32,64 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     08/27/08
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
- * Pradeep Budagutta	07/30/09	Added Palette Support
- * PAT					02/05/10	Fixed GetPixel() bug
- * PAT					03/03/10	Fixed Circle() bug 
- * PAT					03/26/10	Fixed Line2D() bug 
- * PAT					07/28/10	Add USE_DRV_PUTIMAGE label to PutImage() related functions 
- *									to fix build error when driver PutImage() is not used.
+ * 08/27/08
+ * 06/25/09     dsPIC & PIC24H support 
+ * 07/30/09		Added Palette Support
+ * 02/05/10		Fixed GetPixel() bug
+ * 03/03/10		Fixed Circle() bug 
+ * 03/26/10		Fixed Line2D() bug 
+ * 07/28/10		Add USE_DRV_PUTIMAGE label to PutImage() related functions 
+ *				to fix build error when driver PutImage() is not used.
+ * 01/27/11     Fixed Bar() bug when clipping region is enabled. 
+ * 02/11/11     Added backlight enabling after display controller and 
+ *              Timing Controller (TCON) initialization. 
+ * 02/14/11     - Removed USE_DRV_xxxx switches. This is not needed anymore
+ *                since Primitive Layer implements weak attributes on 
+ *                Primitive Routines that can be implemented in hardware.
+ *              - Removed Circle Function implementation (SSD1926 bug)
+ *              - Replace color data type from WORD_VAL to GFX_COLOR
+ *              - Replace DeviceInit() to DriverInterfaceInit()
+ *              - Optimized PutImageXBPP() & PutImageXBPPExt() for performance.
+ *              - Added transparent color feature in PutImageXBPP() and
+ *                PutImageXBPPExt().
+ *              - Added DisplayBrightness() to control the backlight.
+ *              - Added GFX_LCD_TYPE to select type of display
  *****************************************************************************/
-#include "Graphics/Graphics.h"
+#include "HardwareProfile.h"
+
+#if defined(GFX_USE_DISPLAY_CONTROLLER_SSD1926)
+
+#include "Compiler.h"
+#include "TimeDelay.h"
+#include "Graphics/DisplayDriver.h"
+#include "Graphics/SSD1926.h"
+#include "Graphics/gfxtcon.h"
+#include "Graphics/Primitive.h"
+  
+
+#if defined (USE_GFX_PMP)
+    #include "Graphics/gfxpmp.h"
+#elif defined (USE_GFX_EPMP)
+    #include "Graphics/gfxepmp.h"
+#endif    
 
 // Color
-WORD    _color;
+GFX_COLOR   _color;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
 
 // Clipping region control
-SHORT   _clipRgn;
+SHORT       _clipRgn;
 
 // Clipping region borders
-SHORT   _clipLeft;
-SHORT   _clipTop;
-SHORT   _clipRight;
-SHORT   _clipBottom;
+SHORT       _clipLeft;
+SHORT       _clipTop;
+SHORT       _clipRight;
+SHORT       _clipBottom;
 
 #define RED8(color16)   (BYTE) ((color16 & 0xF800) >> 8)
 #define GREEN8(color16) (BYTE) ((color16 & 0x07E0) >> 3)
@@ -65,31 +97,17 @@ SHORT   _clipBottom;
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
 void        SetAddress(DWORD address);
-void        SetReg(WORD index, BYTE value);
 BYTE        GetReg(WORD index);
-#if defined (USE_DRV_PUTIMAGE)
+
 void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void        PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 
-void        PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-#endif
-#if (DISPLAY_PANEL == TFT_G240320LTSW_118W_E)
-    #include "TCON_SSD1289.c"
-
-#elif (DISPLAY_PANEL == TFT_G320240DTSW_69W_TP_E)
-    #include "TCON_HX8238.c"
-
-#elif (DISPLAY_PANEL == PH480272T_005_I06Q)
-    #include "TCON_HX8257.c"
-
-#else
-    #include "TCON_Custom.c"
-#endif
+void        PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void        PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void        PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void        PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
 
 #ifdef USE_PALETTE
 extern void *_palette;
@@ -285,6 +303,40 @@ BYTE GetReg(WORD index)
 }
 
 /*********************************************************************
+* Function:  void DisplayBrightness(WORD level)
+*
+* PreCondition: none
+*
+* Input: level - Brightness level. Valid values are 0 to 100.
+*			-   0: brightness level is zero or display is turned off
+*			- 100: brightness level is maximum 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Sets the brightness of the display.
+*
+* Note: none
+*
+********************************************************************/
+void DisplayBrightness(WORD level)
+{
+    // If the brightness can be controlled (for example through PWM)
+    // add code that will control the PWM here.
+
+    if (level > 0)
+    {
+        DisplayBacklightOn();           
+    }    
+    else if (level == 0)
+    {
+        DisplayBacklightOff();
+    }    
+        
+}    
+
+/*********************************************************************
 * Function:  void ResetDevice()
 *
 * PreCondition: none
@@ -302,10 +354,41 @@ BYTE GetReg(WORD index)
 ********************************************************************/
 void ResetDevice(void)
 {
+    /* 
+        This is the reset routine of the display controller. 
+        ResetDevice() recommended sequence:
+        1. Initialize the interface to the controller  - DriverInterfaceInit()
+        2. Initialize the registers of the controller make the enabling of 
+           the display control last. In other words, the sync signals 
+           are enabled only after all the registers that needs to be set 
+           for the synchronization control are initialized.
+        3. Before, the display is turned on, initialize the display buffer 
+           to a single color so you will not see a snowy image on the screen. 
+           This is done here using:
+              SetColor(0);    
+              ClearDevice();
+           where 0 is the black color.
+        4. Enable the display controller refresh of the screen
+           This is done here using:
+              SetReg(REG_POWER_SAVE_CONFIG, 0x00);    //  wake up      
+        5. Initialize the Timing Controller (TCON) if needed.      
+        6. Enable the Backlight 
+        
+        Most display panels will have the power-up sequence:
+        1. Enable Analog Power Supply
+        2. Enable Digital Power Supply - to start synchronization signals
+        3. Enable Backlight - to show the contents of the display buffer
+        For power-down, the reverse is followed.
+        
+    */
+
     /////////////////////////////////////////////////////////////////////
     // Initialize the device
     /////////////////////////////////////////////////////////////////////
-	DeviceInit();
+	DriverInterfaceInit();
+
+    // give time for the controller to power up
+    DelayMs(250);
 
     /////////////////////////////////////////////////////////////////////
     // PLL SETUP
@@ -336,11 +419,28 @@ void ResetDevice(void)
     // Panel Configuration (reg 10h)
     // TFT display with 18 bit or 24-bit RGB parallel interface.
     /////////////////////////////////////////////////////////////////////
+    BYTE panelType  = 0; 
+    BYTE panelWidth = 0; 
+    
     #if (DISP_DATA_WIDTH == 18)
-    SetReg(REG_PANEL_TYPE, 0x61);
+        panelWidth |= 0x20;
+    #elif (DISP_DATA_WIDTH == 24)
+        panelWidth |= 0x30;
     #else
-    SetReg(REG_PANEL_TYPE, 0x71);
+       #error "Define DISP_DATA_WIDTH in HardwareProfile.h (valid values: 18, 24)"
     #endif
+    
+    #if (GFX_LCD_TYPE == GFX_LCD_TFT)
+        panelType |= 0x41;
+    #elif (GFX_LCD_TYPE == GFX_LCD_CSTN)
+        panelType |= 0x40;
+    #elif (GFX_LCD_TYPE == GFX_LCD_MSTN)
+        panelType |= 0x00;
+    #else
+       #error "Define GFX_LCD_TYPE in HardwareProfile.h (valid values: GFX_LCD_TFT, GFX_LCD_CSTN, GFX_LCD_MSTN)"
+    #endif
+
+    SetReg(REG_PANEL_TYPE, panelType|panelWidth);
 
     /////////////////////////////////////////////////////////////////////
     // Horizontal total HT (reg 12h)
@@ -462,19 +562,11 @@ void ResetDevice(void)
     SetReg(REG_DISPLAY_MODE, 0x04);         // 16 BPP, enable RAM content to screen
     
     /////////////////////////////////////////////////////////////////////
-
     // RGB Settings Register (reg 1a4h)
     /////////////////////////////////////////////////////////////////////
     SetReg(REG_RGB_SETTING, 0xc0);          // RGB format
-    
-    /////////////////////////////////////////////////////////////////////
 
-    // Power Saving Configuration Register (reg a0h)
     /////////////////////////////////////////////////////////////////////
-    SetReg(REG_POWER_SAVE_CONFIG, 0x00);    //  wake up
-    
-    /////////////////////////////////////////////////////////////////////
-
     // LSHIFT Polarity Register (reg 38h)
     /////////////////////////////////////////////////////////////////////
     #ifdef DISP_INV_LSHIFT
@@ -482,15 +574,38 @@ void ResetDevice(void)
     #endif
 
     /////////////////////////////////////////////////////////////////////
+    // Clear the display buffer with all zeros so the display will not
+    // show garbage data when initially powered up
+    /////////////////////////////////////////////////////////////////////
+    SetColor(0);    
+    ClearDevice();
+    
+    /////////////////////////////////////////////////////////////////////
+    // Power Saving Configuration Register (reg a0h)
+    /////////////////////////////////////////////////////////////////////
+    SetReg(REG_POWER_SAVE_CONFIG, 0x00);    //  wake up
+    
+    // check until the controller is really awake
+    while(GetReg(REG_POWER_SAVE_CONFIG) == 0x00);
+    
+    /////////////////////////////////////////////////////////////////////
     // LCD Power Control Register (reg adh)
     // If LCD_POWER is connected to the glass DISPON or RESET
     /////////////////////////////////////////////////////////////////////
     SetReg(REG_GPIO_STATUS_CONTROL1, 0x80); // release the glass from reset
     
     /////////////////////////////////////////////////////////////////////
-    // Panel TCON Programming
+    // Panel TCON Programming - set up the TCON first before turning
+    // on the display. 
     /////////////////////////////////////////////////////////////////////
-    TCON_Init();
+#ifdef USE_TCON_MODULE
+    GfxTconInit();
+#endif
+    /////////////////////////////////////////////////////////////////////
+    // Turn on the backlight
+    /////////////////////////////////////////////////////////////////////
+    DisplayBacklightOn();
+    
 }
 
 /*********************************************************************
@@ -599,7 +714,31 @@ WORD GetPixel(SHORT x, SHORT y)
     #endif
 }
 
-#ifdef USE_DRV_LINE
+#ifdef USE_TRANSPARENT_COLOR
+/*********************************************************************
+* Function:  void TransparentColorEnable(GFX_COLOR color)
+*
+* Overview: Sets current transparent color.
+*
+* PreCondition: none
+*
+* Input: color - Color value chosen.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void TransparentColorEnable(GFX_COLOR color)
+{
+    _colorTransparent = color;    
+    _colorTransparentEnable = TRANSPARENT_COLOR_ENABLE;
+
+}
+#endif
+
+#ifndef USE_PALETTE
+    // "In SSD1926 2D-Acceleration is not supported in Palette mode. Use Line function of Primitive layer"
 
 /*********************************************************************
 * Function: WORD Line2D(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
@@ -702,9 +841,6 @@ static WORD Line2D(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 ********************************************************************/
 WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 {
-        #ifdef USE_PALETTE
-            #error "In SSD1926 2D-Acceleration is not supported in Palette mode. Use Line function of Primitive layer"
-        #endif
 
     SHORT   deltaX, deltaY;
     SHORT   error, stepErrorLT, stepErrorGE;
@@ -769,6 +905,8 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
             }
         }
 
+        // Move cursor
+        MoveTo(x2, y2);
         return (1);
     }
 
@@ -914,8 +1052,7 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
     return (1);
 }
 
-#endif
-#ifdef USE_DRV_BAR
+#endif // #ifndef USE_PALETTE
 
 /*********************************************************************
 * Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
@@ -947,14 +1084,10 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 
     if(_clipRgn)
     {
-        if(left < _clipLeft)
-            left = _clipLeft;
-        if(right > _clipRight)
-            right = _clipRight;
-        if(top < _clipTop)
-            top = _clipTop;
-        if(bottom > _clipBottom)
-            bottom = _clipBottom;
+		left   = (left   < _clipLeft)   ? _clipLeft   : ((left   > _clipRight)  ? _clipRight  : left);
+		right  = (right  > _clipRight)  ? _clipRight  : ((right  < _clipLeft)   ? _clipLeft   : right);
+		top    = (top    < _clipTop)    ? _clipTop    : ((top    > _clipBottom) ? _clipBottom : top);
+		bottom = (bottom > _clipBottom) ? _clipBottom : ((bottom < _clipTop)    ? _clipTop    : bottom);
     }
 
             #ifndef USE_PALETTE
@@ -979,6 +1112,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
     }
 
     DisplayDisable();
+    return (1);
 
         #else
 
@@ -1005,14 +1139,10 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 
     if(_clipRgn)
     {
-        if(left < _clipLeft)
-            left = _clipLeft;
-        if(right > _clipRight)
-            right = _clipRight;
-        if(top < _clipTop)
-            top = _clipTop;
-        if(bottom > _clipBottom)
-            bottom = _clipBottom;
+		left   = (left   < _clipLeft)   ? _clipLeft   : ((left   > _clipRight)  ? _clipRight  : left);
+		right  = (right  > _clipRight)  ? _clipRight  : ((right  < _clipLeft)   ? _clipLeft   : right);
+		top    = (top    < _clipTop)    ? _clipTop    : ((top    > _clipBottom) ? _clipBottom : top);
+		bottom = (bottom > _clipBottom) ? _clipBottom : ((bottom < _clipTop)    ? _clipTop    : bottom);
     }
 
     width = right - left + 1;
@@ -1082,98 +1212,6 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         #endif
 }
 
-#endif
-
-#ifdef USE_DRV_CIRCLE
-
-/***************************************************************************
-* Function: WORD Circle(SHORT x, SHORT y, SHORT radius)
-*
-* Overview: This macro draws a circle with the given center and radius.
-*
-* Input: x - Center x position. 
-*		 y - Center y position.
-*		 radius - the radius of the circle.
-*
-* Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the shape is not yet completely drawn.
-*         - Returns 1 when the shape is completely drawn.
-*         For Blocking configuration:
-*         - Always return 1.
-*
-* Side Effects: none
-*
-********************************************************************/
-WORD Circle(SHORT x, SHORT y, SHORT radius)
-{
-        #define Rx      (WORD) radius
-        #define Ry      (WORD) radius
-        #define Angle1  (WORD) 0
-        #define Angle2  (WORD) 0x0200
-
-        #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0);
-
-    /* Ready */
-        #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-        #endif
-
-    /* Ellipse Parameters & Y-Limit */
-    SetReg(REG_2D_1d4, x & 0xFF);
-    SetReg(REG_2D_1d5, ((((GetMaxY() + (WORD) 1) << 1) & 0xFE) + ((x >> 8) & 0x01)));
-    SetReg(REG_2D_1d6, ((GetMaxY() + (WORD) 1) >> 7) & 0x03);
-
-    SetReg(REG_2D_1e4, y & 0xFF);
-    SetReg(REG_2D_1e5, (y >> 8) & 0xFF);
-
-    SetReg(REG_2D_1e8, Rx & 0xFF);
-    SetReg(REG_2D_1e9, (Rx >> 8) & 0xFF);
-
-    SetReg(REG_2D_1d8, Ry & 0xFF);
-    SetReg(REG_2D_1d9, (Ry >> 8) & 0xFF);
-
-    SetReg(REG_2D_1ec, Angle1 & 0xFF);
-    SetReg(REG_2D_1ed, (Angle1 >> 8) & 0xFF);
-
-    SetReg(REG_2D_1f0, Angle2 & 0xFF);
-    SetReg(REG_2D_1f1, (Angle2 >> 8) & 0xFF);
-
-    /* Destination Window Start Addresses */
-    SetReg(REG_2D_1f4, 0);
-    SetReg(REG_2D_1f5, 0);
-    SetReg(REG_2D_1f6, 0);
-
-    /* Destination Window Width */
-    SetReg(REG_2D_1f8, (GetMaxX() + 1) & 0xFF);
-    SetReg(REG_2D_1f9, ((GetMaxX() + 1) >> 8) & 0xFF);
-
-    /* Set Color */
-    SetReg(REG_2D_1fe, RED8(_color));
-    SetReg(REG_2D_1fd, GREEN8(_color));
-    SetReg(REG_2D_1fc, BLUE8(_color));
-
-    /* 16bpp */
-    SetReg(REG_2D_1dd, 0x00);
-
-    /* Ellipse command */
-    SetReg(REG_2D_1d1, 0x03);
-
-    /* Draw2d command */
-    SetReg(REG_2D_1d2, 0x01);
-
-        #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0);
-
-    /* Ready */
-        #endif
-    return (1);
-}
-
-#endif
-#ifdef USE_DRV_CLEARDEVICE
-
 /*********************************************************************
 * Function: void ClearDevice(void)
 *
@@ -1215,112 +1253,15 @@ void ClearDevice(void)
         #endif
 }
 
-#endif
-
-#ifdef USE_DRV_PUTIMAGE
-/*********************************************************************
-* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
-*
-* PreCondition: none
-*
-* Input: left,top - left top image corner,
-*        bitmap - image pointer,
-*        stretch - image stretch factor
-*
-* Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the image is not yet completely drawn.
-*         - Returns 1 when the image is completely drawn.
-*         For Blocking configuration:
-*         - Always return 1.
-*
-* Side Effects: none
-*
-* Overview: outputs image starting from left,top coordinates
-*
-* Note: image must be located in flash
-*
-********************************************************************/
-WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
-{
-#if defined (USE_BITMAP_FLASH) || defined (USE_BITMAP_EXTERNAL)
-    FLASH_BYTE  *flashAddress;
-    BYTE        colorDepth;
-#endif
-    WORD        colorTemp;
-
-    #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0);
-
-    /* Ready */
-    #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-    #endif
-
-    // Save current color
-    colorTemp = _color;
-
-    switch(*((SHORT *)bitmap))
-    {
-            #ifdef USE_BITMAP_FLASH
-
-        case FLASH:
-
-            // Image address
-            flashAddress = ((IMAGE_FLASH *)bitmap)->address;
-
-            // Read color depth
-            colorDepth = *(flashAddress + 1);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPP(left, top, flashAddress, stretch); break;
-                case 4:     PutImage4BPP(left, top, flashAddress, stretch); break;
-                case 8:     PutImage8BPP(left, top, flashAddress, stretch); break;
-                case 16:    PutImage16BPP(left, top, flashAddress, stretch); break;
-            }
-
-            break;
-            #endif
-            #ifdef USE_BITMAP_EXTERNAL
-
-        case EXTERNAL:
-
-            // Get color depth
-            ExternalMemoryCallback(bitmap, 1, 1, &colorDepth);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPPExt(left, top, bitmap, stretch); break;
-                case 4:     PutImage4BPPExt(left, top, bitmap, stretch); break;
-                case 8:     PutImage8BPPExt(left, top, bitmap, stretch); break;
-                case 16:    PutImage16BPPExt(left, top, bitmap, stretch); break;
-                default:    break;
-            }
-
-            break;
-            #endif
-
-        default:
-            break;
-    }
-
-    // Restore current color
-    _color = colorTemp;
-    return (1);
-}
 
 #ifdef USE_BITMAP_FLASH
-
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
-*        bitmap - image pointer,
+*        image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1332,20 +1273,18 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
-    BYTE                temp = 0;
+    BYTE                temp = 0, stretchY, mask;
     WORD                sizeX, sizeY;
     WORD                x, y;
-    BYTE                stretchX, stretchY;
     WORD                pallete[2];
-    BYTE                mask;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -1365,17 +1304,18 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     flashAddress += 2;
 
     DisplayEnable();      // enable SSD1926
-    for(y = 0; y < sizeY; y++)
+
+   // Note: For speed the code for loops are repeated. A small code size increase for performance
+    
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
             SetAddress(address);
             mask = 0;
             for(x = 0; x < sizeX; x++)
             {
-
+                
                 // Read 8 pixels from flash
                 if(mask == 0)
                 {
@@ -1390,12 +1330,22 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(1);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == 1) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(1);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[1]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[1]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(pallete[1]);
                     }
                 }
                 else
@@ -1403,42 +1353,147 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(0);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == 0) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(0);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[0]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[0]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(pallete[0]);
                     }
                 }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
-                }
-
-                // Shift to the next pixel
-                mask >>= 1;
+                // shift to the next pixel
+                mask >>= 1; 
             }
-
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            
+            #ifndef USE_PALETTE
+                address += (GetMaxX() + 1) << 1;
+            #else
+                address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+            #endif
         }
-    }
+   } 
+   else
+   {    
+        for(y = 0; y < sizeY; y++)
+        {
+            tempFlashAddress = flashAddress;
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                flashAddress = tempFlashAddress;
+                SetAddress(address);
+                mask = 0;
+                for(x = 0; x < sizeX; x++)
+                {
+                    // Read 8 pixels from flash
+                    if(mask == 0)
+                    {
+                        temp = *flashAddress;
+                        flashAddress++;
+                        mask = 0x80;
+                    }
+    
+                    // Set color
+                    if(mask & temp)
+                    {
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == 1) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }   
+                            else 
+                            #endif
+                            {
+                                WritePixel(1);
+                                WritePixel(1);
+                            }    
 
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[1]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }   
+                            else 
+                            #endif
+                            {
+                                WritePixel(pallete[1]);
+                                WritePixel(pallete[1]);
+                            }    
+                        }
+                    }
+                    else
+                    {
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == 0) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }   
+                            else 
+                            #endif
+                            {
+                                WritePixel(0);
+                                WritePixel(0);
+                            }    
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[0]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }   
+                            else 
+                            #endif
+                            {
+                                WritePixel(pallete[0]);
+                                WritePixel(pallete[0]);
+                            }    
+                        }
+                    }
+                    // shift to the next pixel
+                    mask >>= 1; 
+                }
+                #ifndef USE_PALETTE
+                    address += (GetMaxX() + 1) << 1;
+                #else
+                    address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+                #endif
+            }
+        }
+   }    
     DisplayDisable();
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1450,20 +1505,19 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
+    BYTE                temp = 0, stretchY;
     WORD                sizeX, sizeY;
-    register WORD       x, y;
-    BYTE                temp = 0;
-    register BYTE       stretchX, stretchY;
+    WORD                x, y;
     WORD                pallete[16];
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -1486,16 +1540,16 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     }
 
     DisplayEnable();      // enable SSD1926
-    for(y = 0; y < sizeY; y++)
+
+   // Note: For speed the code for loops are repeated. A small code size increase for performance
+    
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
             SetAddress(address);
             for(x = 0; x < sizeX; x++)
             {
-
                 // Read 2 pixels from flash
                 if(x & 0x0001)
                 {
@@ -1504,59 +1558,173 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(temp >> 4);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == (temp >> 4)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                        }
+                        else
+                        #endif
+                            WritePixel(temp >> 4);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[temp >> 4]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[temp >> 4]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                        }        
+                        else
+                        #endif
+                            WritePixel(pallete[temp >> 4]);
                     }
                 }
                 else
                 {
-                    temp = *flashAddress;
-                    flashAddress++;
+                    temp = *flashAddress++;
 
                     // first pixel in byte
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(temp & 0x0f);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == (temp & 0x0f)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                        }
+                        else
+                        #endif    
+                            WritePixel(temp & 0x0f);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[temp & 0x0f]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[temp & 0x0f]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                        }                            
+                        else
+                        #endif
+                            WritePixel(pallete[temp & 0x0f]);
                     }
                 }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
-                }
-
-                // Shift to the next pixel
-                //temp >>= 4;
             }
-
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            #ifndef USE_PALETTE
+                address += (GetMaxX() + 1) << 1;
+            #else
+                address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+            #endif
         }
-    }
+   } 
+   else
+   {    
+        for(y = 0; y < sizeY; y++)
+        {
+            tempFlashAddress = flashAddress;
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                flashAddress = tempFlashAddress;
+                SetAddress(address);
+    
+                for(x = 0; x < sizeX; x++)
+                {
+                    // Read 2 pixels from flash
+                    if(x & 0x0001)
+                    {
+    
+                        // second pixel in byte
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == (temp >> 4)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }
+                            else
+                            #endif
+                            {
+                                WritePixel(temp >> 4);
+                                WritePixel(temp >> 4);
+                            }    
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[temp >> 4]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else
+                            #endif
+                            {
+                                WritePixel(pallete[temp >> 4]);
+                                WritePixel(pallete[temp >> 4]);
+                            }    
+                        }
+                    }
+                    else
+                    {
+                        temp = *flashAddress++;
+    
+                        // first pixel in byte
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == (temp & 0x0f)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else
+                            #endif
+                            {    
+                                WritePixel(temp & 0x0f);
+                                WritePixel(temp & 0x0f);
+                            }    
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[temp & 0x0f]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                           }    
+                            else
+                            #endif
+                            {
+                                WritePixel(pallete[temp & 0x0f]);
+                                WritePixel(pallete[temp & 0x0f]);
+                            }    
+                        }
+                    }
+                }
+                #ifndef USE_PALETTE
+                    address += (GetMaxX() + 1) << 1;
+                #else
+                    address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+                #endif
+            }
+        }
+   }    
 
     DisplayDisable();
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1568,20 +1736,19 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
+    BYTE                temp, stretchY;
     WORD                sizeX, sizeY;
     WORD                x, y;
-    BYTE                temp;
-    BYTE                stretchX, stretchY;
     WORD                pallete[256];
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -1604,56 +1771,121 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     }
 
     DisplayEnable();      // enable SSD1926
-    for(y = 0; y < sizeY; y++)
+
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
             SetAddress(address);
             for(x = 0; x < sizeX; x++)
             {
-
-                // Read pixels from flash
                 temp = *flashAddress;
                 flashAddress++;
 
-                // Set color
+                // Write pixel to screen
                 #ifdef USE_PALETTE
                 if(IsPaletteEnabled())
                 {
-                    SetColor(temp);
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                    {
+                        DeviceReadWord();
+                    }    
+                    else
+                    #endif
+                        WritePixel(temp); 
                 }
                 else
                 #endif
                 {
-                    SetColor(pallete[temp]);
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == pallete[temp]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                    {
+                        DeviceReadWord();
+                    }    
+                    else
+                    #endif
+                        WritePixel(pallete[temp]);
                 }
 
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
-                }
             }
-
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            #ifndef USE_PALETTE
+                address += (GetMaxX() + 1) << 1;
+            #else
+                address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+            #endif
         }
-    }
+   } 
+   else
+   {    
+        for(y = 0; y < sizeY; y++)
+        {
+            tempFlashAddress = flashAddress;
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                flashAddress = tempFlashAddress;
+                SetAddress(address);
+    
+                for(x = 0; x < sizeX; x++)
+                {
+                    temp = *flashAddress;
+                    flashAddress++;
 
-    DisplayDisable();
+                   // Write pixel to screen
+                    #ifdef USE_PALETTE
+                    if(IsPaletteEnabled())
+                    {
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                            DeviceReadWord();
+                        }    
+                        else
+                        #endif                        
+                        {
+                            WritePixel(temp); 
+                            WritePixel(temp); 
+                        }    
+                    }
+                    else
+                    #endif
+                    {
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[temp]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                            DeviceReadWord();
+                        }    
+                        else
+                        #endif                        
+                        {
+                            WritePixel(pallete[temp]);
+                            WritePixel(pallete[temp]);
+                        }    
+                    }
+
+                }
+                #ifndef USE_PALETTE
+                    address += (GetMaxX() + 1) << 1;
+                #else
+                    address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+                #endif
+            }
+        }
+   }    
+
+   DisplayDisable();
 }
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1665,18 +1897,17 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_WORD *flashAddress;
     register FLASH_WORD *tempFlashAddress;
+    WORD                temp, stretchY;
     WORD                sizeX, sizeY;
-    register WORD       x, y;
-    WORD                temp;
-    register BYTE       stretchX, stretchY;
+    WORD                x, y;
 
     // Move pointer to size information
-    flashAddress = (FLASH_WORD *)bitmap + 1;
+    flashAddress = (FLASH_WORD *)image + 1;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -1690,49 +1921,112 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     flashAddress++;
     sizeX = *flashAddress;
     flashAddress++;
-
+    
     DisplayEnable();      // enable SSD1926
-    for(y = 0; y < sizeY; y++)
+
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
             SetAddress(address);
             for(x = 0; x < sizeX; x++)
             {
-
-                // Read pixels from flash
                 temp = *flashAddress;
                 flashAddress++;
 
-                // Set color
+                // Write pixel to screen
                 #ifdef USE_PALETTE
                 if(IsPaletteEnabled())
                 {
-                    SetColor(0); /* Paint first value of Palette instead of junk */
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                    {
+                        DeviceReadWord();
+                    }    
+                    else                   
+                    #endif
+                        WritePixel(0); /* Paint first value of Palette instead of junk */
                 }
                 else
                 #endif
                 {
-                    SetColor(temp);
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                    {
+                        DeviceReadWord();
+                    }    
+                    else
+                    #endif
+                        WritePixel(temp);
                 }
 
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
-                }
             }
-
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            #ifndef USE_PALETTE
+                address += (GetMaxX() + 1) << 1;
+            #else
+                address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+            #endif
         }
-    }
+   } 
+   else
+   {    
+        for(y = 0; y < sizeY; y++)
+        {
+            tempFlashAddress = flashAddress;
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                flashAddress = tempFlashAddress;
+                SetAddress(address);
+    
+                for(x = 0; x < sizeX; x++)
+                {
+                    temp = *flashAddress;
+                    flashAddress++;
 
+                    #ifdef USE_PALETTE
+                    if(IsPaletteEnabled())
+                    {
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                            DeviceReadWord();
+                        }    
+                        else
+                        #endif
+                        {
+                            WritePixel(0); /* Paint first value of Palette instead of junk */
+                            WritePixel(0);
+                        }    
+                    }
+                    else
+                    #endif
+                    {
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                            DeviceReadWord();
+                        } 
+                        else   
+                        #endif
+                        {
+                            WritePixel(temp);
+                            WritePixel(temp);
+                        }    
+                    }    
+                }
+                #ifndef USE_PALETTE
+                    address += (GetMaxX() + 1) << 1;
+                #else
+                    address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
+                #endif
+            }
+        }
+   }    
+   
     DisplayDisable();
 }
 
@@ -1740,11 +2034,11 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1756,7 +2050,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1766,11 +2060,10 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     BYTE            *pData;
     SHORT           byteWidth;
 
-    BYTE            temp = 0;
+    BYTE            temp = 0, stretchY;
     BYTE            mask;
     WORD            sizeX, sizeY;
     WORD            x, y;
-    BYTE            stretchX, stretchY;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -1779,11 +2072,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
         #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (2 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
@@ -1797,16 +2090,18 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     sizeX = bmp.width;
     sizeY = bmp.height;
 
-    for(y = 0; y < sizeY; y++)
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+
+    if (stretch == IMAGE_NORMAL)
     {
-
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
-        memOffset += byteWidth;
-
-        DisplayEnable();      // enable SSD1926
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
+    
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            DisplayEnable();      // enable SSD1926
+
             pData = lineBuffer;
             SetAddress(address);
             mask = 0;
@@ -1826,12 +2121,22 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(1);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == 1) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else 
+                        #endif
+                            WritePixel(1);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[1]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[1]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else 
+                        #endif
+                            WritePixel(pallete[1]);
                     }
                 }
                 else
@@ -1839,42 +2144,144 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(0);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == 0) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else 
+                        #endif
+                            WritePixel(0);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[0]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[0]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else 
+                        #endif
+                            WritePixel(pallete[0]);
                     }
-                }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
                 }
 
                 // Shift to the next pixel
                 mask >>= 1;
             }
-
-                #ifndef USE_PALETTE
+    
             address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            DisplayDisable();
         }
+   } 
+   else
+   {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            DisplayEnable();      // enable SSD1926
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                pData = lineBuffer;
+                SetAddress(address);
+                mask = 0;
+                for(x = 0; x < sizeX; x++)
+                {
 
-        DisplayDisable();
-    }
+                    // Read 8 pixels from flash
+                    if(mask == 0)
+                    {
+                        temp = *pData++;
+                        mask = 0x80;
+                    }
+    
+                    // Set color
+                    if(mask & temp)
+                    {
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == 1) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else
+                            #endif
+                            {
+                                WritePixel(1);
+                                WritePixel(1);
+                            }    
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[1]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else
+                            #endif
+                            {
+                                WritePixel(pallete[1]);
+                                WritePixel(pallete[1]);
+                            }    
+                        }
+                    }
+                    else
+                    {
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == 0) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else
+                            #endif
+                            {
+                                WritePixel(0);
+                                WritePixel(0);
+                            }    
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[0]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else
+                            #endif
+                            {
+                                WritePixel(pallete[0]);
+                                WritePixel(pallete[0]);
+                            }    
+                        }
+                    }
+
+                    // Shift to the next pixel
+                    mask >>= 1;
+                }
+                address += (GetMaxX() + 1) << 1;
+            }
+            DisplayDisable();
+        }
+   }    
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1886,7 +2293,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1896,10 +2303,9 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     BYTE            *pData;
     SHORT           byteWidth;
 
-    BYTE            temp = 0;
+    BYTE            temp = 0, stretchY;
     WORD            sizeX, sizeY;
     WORD            x, y;
-    BYTE            stretchX, stretchY;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -1908,11 +2314,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
         #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (16 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
@@ -1926,21 +2332,23 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     sizeX = bmp.width;
     sizeY = bmp.height;
 
-    for(y = 0; y < sizeY; y++)
-    {
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
 
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
-        memOffset += byteWidth;
-        DisplayEnable();      // enable SSD1926
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+    if (stretch == IMAGE_NORMAL)
+    {
+        for(y = 0; y < sizeY; y++)
         {
+    
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            DisplayEnable();      // enable SSD1926
+
             pData = lineBuffer;
             SetAddress(address);
-
+    
             for(x = 0; x < sizeX; x++)
             {
-
                 // Read 2 pixels from flash
                 if(x & 0x0001)
                 {
@@ -1948,12 +2356,22 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(temp >> 4);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == (temp >> 4)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(temp >> 4);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[temp >> 4]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[temp >> 4]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(pallete[temp >> 4]);
                     }
                 }
                 else
@@ -1964,39 +2382,135 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #ifdef USE_PALETTE
                     if(IsPaletteEnabled())
                     {
-                        SetColor(temp & 0x0f);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == (temp & 0x0f)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(temp & 0x0f);
                     }
                     else
                     #endif
                     {
-                        SetColor(pallete[temp & 0x0f]);
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[temp & 0x0f]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            DeviceReadWord();
+                        else    
+                        #endif
+                            WritePixel(pallete[temp & 0x0f]);
                     }
                 }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
-                }
             }
-
-                #ifndef USE_PALETTE
+    
             address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            DisplayDisable();
         }
+   } 
+   else
+   {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            DisplayEnable();      // enable SSD1926
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                pData = lineBuffer;
+                SetAddress(address);
+    
+                for(x = 0; x < sizeX; x++)
+                {
 
-        DisplayDisable();
-    }
+                    // Read 2 pixels from flash
+                    if(x & 0x0001)
+                    {
+                        // second pixel in byte
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == (temp >> 4)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else    
+                            #endif
+                            {
+                                WritePixel(temp >> 4);
+                                WritePixel(temp >> 4);
+                            }    
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[temp >> 4]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else    
+                            #endif
+                            {
+                                WritePixel(pallete[temp >> 4]);
+                                WritePixel(pallete[temp >> 4]);
+                            }    
+                        }
+                    }
+                    else
+                    {
+                        temp = *pData++;
+    
+                        // first pixel in byte
+                        #ifdef USE_PALETTE
+                        if(IsPaletteEnabled())
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == (temp & 0x0f)) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else    
+                            #endif
+                            {
+                                WritePixel(temp & 0x0f);
+                                WritePixel(temp & 0x0f);
+                            }    
+                        }
+                        else
+                        #endif
+                        {
+                            #ifdef USE_TRANSPARENT_COLOR
+                            if ((GetTransparentColor() == pallete[temp & 0x0f]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                            {
+                                DeviceReadWord();
+                                DeviceReadWord();
+                            }    
+                            else    
+                            #endif
+                            {
+                                WritePixel(pallete[temp & 0x0f]);
+                                WritePixel(pallete[temp & 0x0f]);
+                            }    
+                        }
+                    }
+                }
+                address += (GetMaxX() + 1) << 1;
+            }
+            DisplayDisable();
+        }
+   }    
 }
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2008,7 +2522,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -2017,10 +2531,9 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     BYTE            lineBuffer[(GetMaxX() + 1)];
     BYTE            *pData;
 
-    BYTE            temp;
+    BYTE            temp, stretchY;
     WORD            sizeX, sizeY;
     WORD            x, y;
-    BYTE            stretchX, stretchY;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -2029,11 +2542,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
         #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (256 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
@@ -2042,57 +2555,115 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     sizeX = bmp.width;
     sizeY = bmp.height;
 
-    for(y = 0; y < sizeY; y++)
-    {
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
 
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
-        memOffset += sizeX;
-        DisplayEnable();      // enable SSD1926
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+    if (stretch == IMAGE_NORMAL)
+    {
+        for(y = 0; y < sizeY; y++)
         {
+    
+            // Get line
+            ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
+            memOffset += sizeX;
+            DisplayEnable();      // enable SSD1926
+
             pData = lineBuffer;
             SetAddress(address);
-
+    
             for(x = 0; x < sizeX; x++)
             {
                 temp = *pData++;
-
+                
                 #ifdef USE_PALETTE
                 if(IsPaletteEnabled())
                 {
-                    SetColor(temp);
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        DeviceReadWord();
+                    else    
+                    #endif
+                        WritePixel(temp);
                 }
                 else
                 #endif
                 {
-                    SetColor(pallete[temp]);
-                }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == pallete[temp]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        DeviceReadWord();
+                    else    
+                    #endif
+                        WritePixel(pallete[temp]);
                 }
             }
-
-                #ifndef USE_PALETTE
+    
             address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            DisplayDisable();
         }
+   } 
+   else
+   {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
+            memOffset += sizeX;
+            DisplayEnable();      // enable SSD1926
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                pData = lineBuffer;
+                SetAddress(address);
+    
+                for(x = 0; x < sizeX; x++)
+                {
+                    temp = *pData++;
 
-        DisplayDisable();
-    }
+                    #ifdef USE_PALETTE
+                    if(IsPaletteEnabled())
+                    {
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                            DeviceReadWord();
+                        }    
+                        else    
+                        #endif
+                        {
+                            WritePixel(temp);
+                            WritePixel(temp);
+                        }    
+                    }
+                    else
+                    #endif
+                    {
+                        #ifdef USE_TRANSPARENT_COLOR
+                        if ((GetTransparentColor() == pallete[temp]) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        {
+                            DeviceReadWord();
+                            DeviceReadWord();
+                        }    
+                        else    
+                        #endif
+                        {
+                            WritePixel(pallete[temp]);
+                            WritePixel(pallete[temp]);
+                        }    
+                    }
+        
+                }
+                address += (GetMaxX() + 1) << 1;
+            }
+            DisplayDisable();
+        }
+   }    
 }
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2104,7 +2675,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -2113,10 +2684,9 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            *pData;
     WORD            byteWidth;
 
-    WORD            temp;
+    WORD            temp, stretchY;
     WORD            sizeX, sizeY;
     WORD            x, y;
-    BYTE            stretchX, stretchY;
 
     // Set start address
         #ifndef USE_PALETTE
@@ -2125,8 +2695,8 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
         #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
@@ -2137,53 +2707,143 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 
     byteWidth = sizeX << 1;
 
-    for(y = 0; y < sizeY; y++)
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+  
+    if (stretch == IMAGE_NORMAL)
     {
-
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
-        memOffset += byteWidth;
-        DisplayEnable();      // enable SSD1926
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
+    
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            DisplayEnable();      // enable SSD1926
+
             pData = lineBuffer;
             SetAddress(address);
-
+    
             for(x = 0; x < sizeX; x++)
             {
                 temp = *pData++;
-
-                #ifdef USE_PALETTE
-                if(IsPaletteEnabled())
-                {
-                    SetColor(0); /* Paint first value of Palette instead of junk */
-                }
-                else
-                #endif
-                {
-                    SetColor(temp);
-                }
-
+    
                 // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    WritePixel(_color);
-                }
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                        DeviceReadWord();
+                    else
+                    #endif
+                        WritePixel(temp);
+                        
             }
-
-                #ifndef USE_PALETTE
+    
             address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            DisplayDisable();
         }
+   } 
+   else
+   {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            DisplayEnable();      // enable SSD1926
+            for(stretchY = 0; stretchY < stretch; stretchY++)
+            {
+                pData = lineBuffer;
+                SetAddress(address);
+    
+                for(x = 0; x < sizeX; x++)
+                {
+                    temp = *pData++;
+    
+                    #ifdef USE_TRANSPARENT_COLOR
+                    if ((GetTransparentColor() == temp) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE))
+                    {    
+                        DeviceReadWord();
+                        DeviceReadWord();
+                    }    
+                    else
+                    #endif
+                    {
+                        WritePixel(temp);
+                        WritePixel(temp);
+                    }    
+                }
+                address += (GetMaxX() + 1) << 1;
+            }
+            DisplayDisable();
+        }
+   }    
+}
+#endif
 
-        DisplayDisable();
-    }
+/*********************************************************************
+* Function: SetClipRgn(left, top, right, bottom)
+*
+* Overview: Sets clipping region.
+*
+* PreCondition: none
+*
+* Input: left - Defines the left clipping region border.
+*		 top - Defines the top clipping region border.
+*		 right - Defines the right clipping region border.
+*	     bottom - Defines the bottom clipping region border.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    _clipLeft=left;
+    _clipTop=top;
+    _clipRight=right;
+    _clipBottom=bottom;
+
 }
 
-#endif
-#endif //#ifdef USE_DRV_PUTIMAGE
+/*********************************************************************
+* Function: SetClip(control)
+*
+* Overview: Enables/disables clipping.
+*
+* PreCondition: none
+*
+* Input: control - Enables or disables the clipping.
+*			- 0: Disable clipping
+*			- 1: Enable clipping
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClip(BYTE control)
+{
+    _clipRgn=control;
+}
+
+/*********************************************************************
+* Function: IsDeviceBusy()
+*
+* Overview: Returns non-zero if LCD controller is busy 
+*           (previous drawing operation is not completed).
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: Busy status.
+*
+* Side Effects: none
+*
+********************************************************************/
+WORD IsDeviceBusy(void)
+{  
+    return ((GetReg(REG_2D_220) & 0x01) == 0);
+}
 
 #ifdef USE_PALETTE
 
@@ -2428,3 +3088,5 @@ BYTE SetPaletteFlash(PALETTE_ENTRY *pPaletteEntry, WORD startEntry, WORD length)
 }
 
 #endif
+
+#endif // #if (GFX_USE_DISPLAY_CONTROLLER_SSD1926) 

@@ -34,10 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     11/12/07	Version 1.0 release
-*****************************************************************************/
+ * 11/12/07		Version 1.0 release
+ * 11/18/10		Fixed bug on icons drawn after the bottom edge of the list box.
+ * 12/21/10     Fixed bug on the list count to rest back to zero when 
+ *              LbDelItemsList() is used to clear the list. 
+ * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
+ *****************************************************************************/
 #include "Graphics/Graphics.h"
 
 #ifdef USE_LISTBOX
@@ -247,6 +251,7 @@ void LbDelItemsList(void *pObj)
     }
 
     pLb->pItemList = NULL;
+	pLb->itemsNumber = 0;  
 }
 
 /*********************************************************************
@@ -423,7 +428,7 @@ WORD LbTranslateMsg(void *pObj, GOL_MSG *pMsg)
         #endif
         #ifdef USE_KEYBOARD
     if(pMsg->type == TYPE_KEYBOARD)
-        if(pMsg->param1 == pLb->hdr.ID)
+        if((WORD)pMsg->param1 == pLb->hdr.ID)
         {
             if(pMsg->uiEvent == EVENT_KEYSCAN)
             {
@@ -732,16 +737,20 @@ WORD LbDraw(void *pObj)
                 case LB_STATE_BITMAP:
                     if(pCurItem->pBitmap != NULL)
                     {
-                        if
-                        (
-                            !PutImage
-                                (
-                                    GetX(),
-                                    GetY() + ((pLb->textHeight - GetImageHeight(pCurItem->pBitmap)) >> 1),
-                                    pCurItem->pBitmap,
-                                    1
-                                )
-                        ) return (0);
+	                    // check if the image will go beyond the list box (bottom check only)
+	                    if ((GetY() + GetImageHeight(pCurItem->pBitmap)) < pLb->hdr.bottom)
+	                    {
+	                        if
+	                        (
+	                            !PutImage
+	                                (
+	                                    GetX(),
+	                                    GetY() + ((pLb->textHeight - GetImageHeight(pCurItem->pBitmap)) >> 1),
+	                                    pCurItem->pBitmap,
+	                                    1
+	                                )
+	                        ) return (0);
+                     	}   
 
                         MoveRel(GetImageWidth(pCurItem->pBitmap) + LB_INDENT, 0);
                     }

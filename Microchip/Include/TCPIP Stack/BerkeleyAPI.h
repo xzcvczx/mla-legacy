@@ -62,6 +62,7 @@ typedef BYTE SOCKET;   //Socket descriptor
 #define SOCK_STREAM 100  //Connection based byte streams. Use TCP for the internet address family.
 #define SOCK_DGRAM  110  //Connectionless datagram socket. Use UDP for the internet address family.
  
+#define IPPROTO_IP      0   // Indicates IP pseudo-protocol.
 #define IPPROTO_TCP     6   // Indicates TCP for the internet address family.
 #define IPPROTO_UDP     17  // Indicates UDP for the internet address family.
 

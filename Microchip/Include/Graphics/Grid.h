@@ -42,6 +42,7 @@
     #define _GRID_H_
 
     #include <Graphics/GOL.h>
+    #include "GenericTypeDefs.h"
 
 //******************************************************************************
 // Grid Object State Definitions

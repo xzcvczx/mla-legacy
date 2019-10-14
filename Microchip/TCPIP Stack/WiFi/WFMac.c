@@ -244,7 +244,7 @@ static void SyncENCPtrRAWState(UINT8 encPtrId)
             if ( !RawWindowReady[RAW_TX_ID] )
             {
                 /* Before we enter the while loop, get the tick timer count and save it */
-                maxAllowedTicks = TICKS_PER_SECOND * 2;  /* 2 second timeout, needed if data traffic and scanning occurring */
+                maxAllowedTicks = TICKS_PER_SECOND * 6;  /* 2 second timeout, needed if data traffic and scanning occurring */
                 startTickCount = (UINT32)TickGet();
                 
                 /* Retry until MRF24WB0M has drained it's prior TX pkts -  multiple sockets & flows can load the MRF24W10 */

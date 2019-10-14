@@ -3,10 +3,8 @@
  *  Graphic Primitives Layer
  *****************************************************************************
  * FileName:        Primitive.h
- * Dependencies:    
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -36,10 +34,10 @@
  * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07	   Version 1.0 release
- * 18/05/2009  Version 1.1 - All Primitive functions have
+ * 18/05/09    Version 1.1 - All Primitive functions have
  *                           return value(To support 2d-Acceleration)
- * 05/12/2010  Added sine and cosine functions.
- * 08/20/2010  Modified TYPE_MEMORY enum for more types
+ * 05/12/10    Added sine and cosine functions.
+ * 08/20/10    Modified TYPE_MEMORY enum for more types
  *			   and changed the enumeration to GFX_RESOURCE. Also removed 
  *             unused types. 
  *             Added new structure GFX_IMAGE_HEADER. 
@@ -49,10 +47,15 @@
  *                BITMAP_FLASH    
  *                BITMAP_RAM      
  *                BITMAP_EXTERNAL  
+ * 03/09/11    Removed USE_DRV_xxx.
+ * 04/01/11    Added GetSineCosine().
  *****************************************************************************/
 #ifndef _PRIMITIVE_H
     #define _PRIMITIVE_H
 
+#include "GenericTypeDefs.h"
+#include "GraphicsConfig.h"
+#include "gfxcolors.h"
 /*********************************************************************
 * Overview: Primitive lines are drawn using line type and line thickness.
 *			There are 3 line styles and 2 types of line thickness.
@@ -138,10 +141,12 @@ extern BYTE _bevelDrawType;
         // Flash data with 32bit pointers
         #define FLASH_BYTE  const BYTE
         #define FLASH_WORD  const WORD
+        #define FLASH_DWORD const DWORD
     #else
         // Flash data with 24bit pointers
         #define FLASH_BYTE  char __prog__
         #define FLASH_WORD  short int __prog__
+        #define FLASH_DWORD unsigned long __prog__
     #endif
 
 /*********************************************************************
@@ -164,6 +169,7 @@ typedef enum
 	IMAGE_JPEG    = 0x0100, // data resource is type JPEG
 
     COMP_NONE     = 0x0000, // no compression  
+	COMP_RLE      = 0x1000, // compressed with RLE
 	COMP_IPU      = 0x2000, // compressed with DEFLATE (for IPU)
 } GFX_RESOURCE;
 
@@ -331,10 +337,10 @@ typedef struct
 //                         DEPRECATED TYPES and VARIABLES
 /* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
 typedef GFX_RESOURCE TYPE_MEMORY     __attribute__ ((deprecated));
-typedef GFX_EXTDATA EXTDATA          __attribute__ ((deprecated));
-typedef IMAGE_FLASH BITMAP_FLASH     __attribute__ ((deprecated));
-typedef IMAGE_RAM BITMAP_RAM         __attribute__ ((deprecated));
-typedef GFX_EXTDATA BITMAP_EXTERNAL  __attribute__ ((deprecated));
+typedef GFX_EXTDATA  EXTDATA         __attribute__ ((deprecated));
+typedef IMAGE_FLASH  BITMAP_FLASH    __attribute__ ((deprecated));
+typedef IMAGE_RAM    BITMAP_RAM      __attribute__ ((deprecated));
+typedef GFX_EXTDATA  BITMAP_EXTERNAL __attribute__ ((deprecated));
 
 /*********************************************************************
 * Overview: This defines the size of the buffer used by font functions
@@ -739,7 +745,7 @@ void    SetFont(void *font);
 *				point of the line.
 *
 ********************************************************************/
-WORD    Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
+WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 
 /*********************************************************************
 * Macros: LineRel(dX, dY)
@@ -802,11 +808,7 @@ WORD    Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 * Side Effects: none
 *
 ********************************************************************/
-    #ifndef USE_DRV_CIRCLE
-        #define Circle(x, y, radius)    Bevel(x, y, x, y, radius)
-    #else
-WORD    Circle(SHORT x, SHORT y, SHORT radius);
-    #endif
+    #define Circle(x, y, radius)    Bevel(x, y, x, y, radius)
 
 /*********************************************************************
 * Macro: SetBevelDrawType(type)
@@ -900,9 +902,7 @@ WORD    FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 * Side Effects: none
 *
 ********************************************************************/
-    #ifndef USE_DRV_FILLCIRCLE
-        #define FillCircle(x1, y1, rad) FillBevel(x1, y1, x1, y1, rad)
-    #endif // end of USE_DRV_FILLCIRCLE
+    #define FillCircle(x1, y1, rad) FillBevel(x1, y1, x1, y1, rad)
 
 /*********************************************************************
 * Macro: Rectangle(left, top, right, bottom)
@@ -973,7 +973,7 @@ WORD    DrawPoly(SHORT numPoints, SHORT *polyPoints);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
+WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
 
 /*********************************************************************
 * Function: void ClearDevice(void)
@@ -1102,6 +1102,29 @@ SHORT   GetImageHeight(void *bitmap);
 WORD    ExternalMemoryCallback(GFX_EXTDATA *memory, LONG offset, WORD nCount, void *buffer);
 
 /*********************************************************************
+* Function:  SHORT GetSineCosine(SHORT v, WORD type)
+*
+* PreCondition: none
+*
+* Input: v - the angle used to retrieve the sine or cosine value. 
+*			 The angle must be in the range of -360 to 360 degrees.
+*		 type - sets if the angle calculation is for a sine or cosine
+*				- GETSINE (0) - get the value of sine(v).
+*				- GETCOSINE (1) - return the value of cosine(v).
+*
+* Output: Returns the sine or cosine of the angle given.
+*
+* Side Effects: none
+*
+* Overview: Using a lookup table, the sine or cosine values of the given angle
+*           is returned.
+*
+* Note: none
+*
+********************************************************************/
+SHORT GetSineCosine(SHORT v, WORD type);
+
+/*********************************************************************
 * Function:  SHORT Sine(SHORT v)
 *
 * PreCondition: none
@@ -1165,5 +1188,168 @@ WORD    ExternalMemoryCallback(GFX_EXTDATA *memory, LONG offset, WORD nCount, vo
 *
 ********************************************************************/
 WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle);
+
+void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
+
+#ifdef USE_GRADIENT
+
+/*********************************************************************
+* Function:  BarGradient(short left, short top, short right, short bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+*
+* PreCondition: none
+*
+* Input: left - x position of the left top corner.
+*		 top - y position of the left top corner.
+*		 right - x position of the right bottom corner.
+*		 bottom - y position of the right bottom corner.		 
+*	     color1 - start color for the gradient
+*        color2 - end color for the gradient
+*        length - From 0-100%. How much of a gradient is wanted
+*        direction - Gradient Direction	
+* Output: Returns 1 if the rendering is done, 0 if not yet done.
+*
+* Side Effects: none
+*
+* Overview: This renders a bar onto the screen, but instead of one color a gradient is drawn
+* depending on the direction, length, and colors chosen
+*
+* Note: none
+*
+********************************************************************/
+void        BarGradient(short left, short top, short right, short bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+
+/*********************************************************************
+* Function:  BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+*
+* PreCondition: none
+*
+* Input: x1 - x coordinate position of the upper left center of the circle that 
+*			  draws the rounded corners.
+*		 y1 - y coordinate position of the upper left center of the circle that 
+*			  draws the rounded corners.
+*		 x2 - x coordinate position of the lower right center of the circle that 
+*			  draws the rounded corners.
+*		 y2 - y coordinate position of the lower right center of the circle that 
+*			  draws the rounded corners.
+*        rad - defines the redius of the circle, that draws the rounded corners. 
+*	     color1 - start color for the gradient
+*        color2 - end color for the gradient
+*        length - From 0-100%. How much of a gradient is wanted
+*        direction - Gradient Direction		 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: This renders a gradient on the screen. It works the same as the fillbevel function, 
+* except a gradient out of color1 and color2 is drawn depending on the direction.
+*
+* Note: none
+*
+********************************************************************/
+WORD        BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+/*********************************************************************
+* Overview: Enumeration for gradient type
+*********************************************************************/
+typedef enum
+{
+       GRAD_NONE=0,                     // No Gradients to be drawn
+       GRAD_DOWN,                       // gradient changes in the vertical direction
+       GRAD_RIGHT,                      // gradient change in the horizontal direction
+       GRAD_UP,                         // gradient changes in the vertical direction
+       GRAD_LEFT,                       // gradient change in the horizontal direction
+       GRAD_DOUBLE_VER,                 // two gradient transitions in the vertical direction
+       GRAD_DOUBLE_HOR,                 // two gradient transitions in the horizontal direction
+
+} GFX_GRADIENT_TYPE;
+
+/*********************************************************************
+* Overview: This structure is used to describe the gradient style.
+*
+*********************************************************************/
+typedef struct
+{
+
+GFX_GRADIENT_TYPE  gradientType;        // selected the gradient type 
+DWORD              gradientStartColor;  // sets the starting color of gradient transition
+DWORD              gradientEndColor;    // sets the ending color of gradient transition
+DWORD              gradientLength;      // defines the length of the gradient transition in pixels
+
+} GFX_GRADIENT_STYLE;
+#endif
+
+#ifdef USE_ALPHABLEND
+extern SHORT _GFXForegroundPage;        // foreground page (or buffer) used in alpha blending
+extern SHORT _GFXBackgroundPage;        // background page (or buffer)  used in alpha blending
+extern SHORT _GFXDestinationPage;       // destination page (or buffer)  used in alpha blending
+
+
+/*********************************************************************
+* Function: void AlphaBlendWindow(DWORD foregroundWindowAddr, DWORD backgroundWindowAddr,
+*					  DWORD destinationWindowAddr,		            
+*					  WORD  width, WORD height,  	
+*					  BYTE  alphaPercentage)
+* PreCondition: none
+*
+* Input:  foregroundWindowAddr -  the starting address of the foreground window
+*	    backgroundWindowAddr -  the starting address of the background window
+*	    destinationWindowAddr - the starting address of the destination window
+*	    width - the width of the alpha blend window
+*         height - the height of the alpha blend window
+*         alphaPercentage - the amount of transparency to give the foreground Window
+*        		 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: This alphablends a foreground and a background stored in frames to a destination window. The function
+* uses windows insides frames. Each window shares the same width and height parameters.
+*
+* Note: none
+********************************************************************/
+extern void AlphaBlendWindow(DWORD foregroundWindowAddr, DWORD backgroundWindowAddr,
+					  DWORD destinationWindowAddr,		            
+					  WORD  width, WORD height,  	
+					  BYTE  alphaPercentage);
+
+/*********************************************************************
+* Function: DWORD GFXGetPageXYAddress(SHORT pageNumber, WORD x, WORD y)
+* PreCondition: none
+*
+* Input:  pageNumber - the page number 
+*         x - the x (horizontal) offset from 0,0 of the pagenumber
+*         y - the y (vertical) offset from the 0,0 of the pagenumber
+*
+* Output: The address of an XY position of a certain page in memory
+*
+* Side Effects: none
+*
+* Overview: This function calculates the address of a certain x,y location in 
+* memory
+*
+* Note: none
+********************************************************************/
+extern DWORD GFXGetPageXYAddress(SHORT pageNumber, WORD x, WORD y);
+
+/*********************************************************************
+* Function: DWORD GFXGetPageOriginAddress(SHORT pageNumber)
+* PreCondition: none
+*
+* Input:  pageNumber - the page number 
+*
+* Output: The address of the start of a certain page in memory
+*
+* Side Effects: none
+*
+* Overview: This function calculates the address of a certain 0,0 location of a 
+* page in memory
+*
+* Note: none
+********************************************************************/
+extern DWORD GFXGetPageOriginAddress(SHORT pageNumber);
+
+#endif
+
 
 #endif // _PRIMITIVE_H

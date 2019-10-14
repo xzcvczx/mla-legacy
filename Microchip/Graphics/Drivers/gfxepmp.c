@@ -3,10 +3,8 @@
  *  EPMP driver
  *****************************************************************************
  * FileName:        gfxepmp.c
- * Dependencies:    Graphics.h
  * Processor:       PIC24, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -33,20 +31,34 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     01/12/10
+ * 01/12/10     ...
+ * 03/09/11     Modified dependencies to just HardwareProfile.h
+ * 03/27/11     Added check if using PIC24FJ256DA210 to avoid overlaps 
+ *              on arrays declared in EPMP CS1.
  *****************************************************************************/
 
-#include "Graphics/Graphics.h"
-#include "Compiler.h"
+#include "HardwareProfile.h"
+#include "GenericTypeDefs.h"
 
 #ifdef USE_GFX_EPMP
 
+// this is just a dummy address to set up EDS access on epmp
+#if defined (GFX_EPMP_CS1_BASE_ADDRESS)
+    // we are adding a -2 here so we do not overlap the base address of CS1
+    // if CS1 base address is used. Since this address is dummy we do not 
+    // care the value. We just want the EDS access to be set up.
+    #define EPMP_REGION_START_ADDRESS (GFX_EPMP_CS1_BASE_ADDRESS-2)
+#else    
+    #define EPMP_REGION_START_ADDRESS (0x00020000ul)
+#endif
+
 #ifdef USE_16BIT_PMP
-volatile __eds__ WORD __attribute__((space(eds),address(0x00020000ul),noload)) pmp_data;
+volatile __eds__ WORD __attribute__((space(eds),address(EPMP_REGION_START_ADDRESS),noload,section("epmp_data_for_CPU_access"))) epmp_data;
+
 #else
-volatile __eds__ BYTE __attribute__((space(eds),address(0x00020000ul),noload)) pmp_data;
+volatile __eds__ BYTE __attribute__((space(eds),address(EPMP_REGION_START_ADDRESS),noload,section("epmp_data_for_CPU_access"))) epmp_data;
 #endif
 
 #endif // USE_GFX_EPMP

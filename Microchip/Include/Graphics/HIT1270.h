@@ -37,27 +37,17 @@
  * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07		Version 1.0 release
+ * 04/12/11     Support for Graphics Library Version 3.00
  *****************************************************************************/
 #ifndef _HIT1270L_H
     #define _HIT1270L_H
 
-    #include <p24Fxxxx.h>
+    #include "HardwareProfile.h"
     #include "GraphicsConfig.h"
     #include "GenericTypeDefs.h"
-
-// Additional hardware-accelerated functions implemented in the driver.
-// These definitions exclude the PutPixel()-based functions from compilation
-// in the primitives layer (Primitive.c file).
-//#define USE_DRV_FONT
-//#define USE_DRV_LINE
-//#define USE_DRV_CIRCLE
-//#define USE_DRV_FILLCIRCLE
-    #define USE_DRV_BAR
-    #define USE_DRV_CLEARDEVICE
-    #define USE_DRV_PUTIMAGE
-
+   
     #ifdef USE_16BIT_PMP
-        #error This driver doesn't support 16-bit PMP (remove USE_16BIT_PMP option from HardwareProfile.h)
+        #error This driver doesn't support 16-bit PMP (USE_8BIT_PMP instead in HardwareProfile.h)
     #endif
     #ifndef DISP_HOR_RESOLUTION
         #error DISP_HOR_RESOLUTION must be defined in HardwareProfile.h
@@ -66,7 +56,7 @@
         #error DISP_VER_RESOLUTION must be defined in HardwareProfile.h
     #endif
     #ifndef COLOR_DEPTH
-        #error COLOR_DEPTH must be defined in HardwareProfile.h
+        #error COLOR_DEPTH must be defined in GraphicsConfig.h
     #endif
     #ifndef DISP_ORIENTATION
         #error DISP_ORIENTATION must be defined in HardwareProfile.h
@@ -77,7 +67,7 @@
         #error This driver doesn't supports this resolution. Horisontal resolution must be 320 pixels.
     #endif
     #if (DISP_VER_RESOLUTION > 234)
-        #error This driver doesn't supports this resolution. Vertical resolution must be less than 234 pixels.
+        #error This driver doesn't supports this resolution. Vertical resolution must be 234 pixels or less.
     #endif
 
 // Display orientation
@@ -96,10 +86,6 @@
 // Video buffer offset
     #define BUF_MEM_OFFSET  (DWORD) 0x18000
 
-// Clipping region control codes
-    #define CLIP_DISABLE    0
-    #define CLIP_ENABLE     1
-
 // HIT1270 commands
     #define SET_DATA_POINTER    0x50
     #define SRAM_WRITE          0x51
@@ -109,345 +95,6 @@
     #define FLASH_WRITE         0x60
     #define FLASH_READ          0x61
 
-// Color codes
-    #define BLACK           (WORD) 0x0000
-    #define BRIGHTBLUE      (WORD) 0x001f
-    #define BRIGHTGREEN     (WORD) 0x07e0
-    #define BRIGHTCYAN      (WORD) 0x07ff
-    #define BRIGHTRED       (WORD) 0xf800
-    #define BRIGHTMAGENTA   (WORD) 0xf81f
-    #define BRIGHTYELLOW    (WORD) 0xffe0
-    #define BLUE            (WORD) 0x0010
-    #define GREEN           (WORD) 0x0400
-    #define CYAN            (WORD) 0x0410
-    #define RED             (WORD) 0x8000
-    #define MAGENTA         (WORD) 0x8010
-    #define BROWN           (WORD) 0xfc00
-    #define LIGHTGRAY       (WORD) 0x8410
-    #define DARKGRAY        (WORD) 0x4208
-    #define LIGHTBLUE       (WORD) 0x841f
-    #define LIGHTGREEN      (WORD) 0x87f0
-    #define LIGHTCYAN       (WORD) 0x87ff
-    #define LIGHTRED        (WORD) 0xfc10
-    #define LIGHTMAGENTA    (WORD) 0xfc1f
-    #define YELLOW          (WORD) 0xfff0
-    #define WHITE           (WORD) 0xffff
-
-    #define GRAY0           (WORD) 0xe71c
-    #define GRAY1           (WORD) 0xc618
-    #define GRAY2           (WORD) 0xa514
-    #define GRAY3           (WORD) 0x8410
-    #define GRAY4           (WORD) 0x630c
-    #define GRAY5           (WORD) 0x4208
-    #define GRAY6           (WORD) 0x2104
-
-// Color
-extern WORD_VAL _color;
-
-// Clipping region control
-extern SHORT    _clipRgn;
-
-// Clipping region borders
-extern SHORT    _clipLeft;
-extern SHORT    _clipTop;
-extern SHORT    _clipRight;
-extern SHORT    _clipBottom;
-
-/*********************************************************************
-* Function:  void ResetDevice()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: resets device, initialize PMP
-*
-* Note: none
-*
-********************************************************************/
-void    ResetDevice(void);
-
-/*********************************************************************
-* Macros:  GetMaxX()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: maximum horizontal coordinate
-*
-* Side Effects: none
-*
-* Overview: returns maximum horizontal coordinate
-*
-* Note: none
-*
-********************************************************************/
-    #define GetMaxX()   (DISP_HOR_RESOLUTION - 1)
-
-/*********************************************************************
-* Macros:  GetMaxY()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: maximum vertical coordinate
-*
-* Side Effects: none
-*
-* Overview: returns maximum vertical coordinate
-*
-* Note: none
-*
-********************************************************************/
-    #define GetMaxY()   (DISP_VER_RESOLUTION - 1)
-
-/*********************************************************************
-* Function:  void SetColor(WORD color)
-*
-* PreCondition: none
-*
-* Input: color coded in format:
-*           bits 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00 
-*          color  R  R  R  R  R  G  G  G  G  G  G  B  B  B  B  B
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: sets current color
-*
-* Note: none
-*
-********************************************************************/
-void    SetColor(WORD color);
-
-/*********************************************************************
-* Macros:  GetColor()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output:  color coded in format:
-*           bits 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00 
-*          color  R  R  R  R  R  G  G  G  G  G  G  B  B  B  B  B
-*
-* Side Effects: none
-*
-* Overview: returns current color
-*
-* Note: none
-*
-********************************************************************/
-    #define GetColor()  _color.Val
-
-/*********************************************************************
-* Macros:  SetActivePage(page)
-*
-* PreCondition: none
-*
-* Input: graphic page number
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: sets active graphic page 
-*
-* Note: the controller has only page
-*
-********************************************************************/
-    #define SetActivePage(page)
-
-/*********************************************************************
-* Macros: SetVisualPage(page)
-*
-* PreCondition: none
-*
-* Input: graphic page number
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: sets graphic page to display
-*
-* Note: the controller has only page
-*
-********************************************************************/
-    #define SetVisualPage(page)
-
-/*********************************************************************
-* Function: void PutPixel(SHORT x, SHORT y)
-*
-* PreCondition: none
-*
-* Input: x,y - pixel coordinates 
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: puts pixel
-*
-* Note: none
-*
-********************************************************************/
-void    PutPixel(SHORT x, SHORT y);
-
-/*********************************************************************
-* Macros: GetPixel(x, y)
-*
-* PreCondition: none
-*
-* Input: x,y - pixel coordinates 
-*
-* Output: pixel color
-*
-* Side Effects: none
-*
-* Overview: returns pixel color at x,y position
-*
-* Note: this glass doesn't support reading
-*
-********************************************************************/
-    #define GetPixel(x, y)  0
-
-/*********************************************************************
-* Macros: SetClipRgn(left, top, right, bottom)
-*
-* PreCondition: none
-*
-* Input: left,top,right,bottom - clipping region borders
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: sets clipping region 
-*
-* Note: none
-*
-********************************************************************/
-    #define SetClipRgn(left, top, right, bottom) \
-    _clipLeft = left;                            \
-    _clipTop = top;                              \
-    _clipRight = right;                          \
-    _clipBottom = bottom;
-
-/*********************************************************************
-* Macros: GetClipLeft()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: left clipping border
-*
-* Side Effects: none
-*
-* Overview: returns left clipping border
-*
-* Note: none
-*
-********************************************************************/
-    #define GetClipLeft()   _clipLeft
-
-/*********************************************************************
-* Macros: GetClipRight()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: right clipping border
-*
-* Side Effects: none
-*
-* Overview: returns right clipping border
-*
-* Note: none
-*
-********************************************************************/
-    #define GetClipRight()  _clipRight
-
-/*********************************************************************
-* Macros: GetClipTop()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: top clipping border
-*
-* Side Effects: none
-*
-* Overview: returns top clipping border
-*
-* Note: none
-*
-********************************************************************/
-    #define GetClipTop()    _clipTop
-
-/*********************************************************************
-* Macros: GetClipBottom()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: bottom clipping border
-*
-* Side Effects: none
-*
-* Overview: returns bottom clipping border
-*
-* Note: none
-*
-********************************************************************/
-    #define GetClipBottom() _clipBottom
-
-/*********************************************************************
-* Macros: SetClip(control)
-*
-* PreCondition: none
-*
-* Input: control - 0 disable/ 1 enable
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: enables/disables clipping 
-*
-* Note: none
-*
-********************************************************************/
-    #define SetClip(control)    _clipRgn = control;
-
-/*********************************************************************
-* Macros: IsDeviceBusy()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: busy status
-*
-* Side Effects: none
-*
-* Overview:  returns non-zero if LCD controller is busy 
-* (previous drawing operation is not complete).
-*
-*
-********************************************************************/
-    #define IsDeviceBusy()  (WAIT_PORT_BIT == 0)
 
 /*********************************************************************
 * Macros: SetPalette(colorNum, color)

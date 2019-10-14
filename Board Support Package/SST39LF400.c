@@ -38,14 +38,23 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 4/12/2010	Original, ported from SST39LF400A
  * 8/11/2010	Removed dependency on Graphics file. 
+ * 1/14/2011    Implemented read and write function using EDS access.
+ *              Swapped SST39LF400WriteWord() parameters for consistency
+ *              with other drivers.
+ * 5/25/2011    Modified WriteArray and ReadArray functions to match
+ *              common interface for other external flash drivers.
  ********************************************************************/
 #include "SST39LF400.h"
 
 #if defined (USE_SST39LF400)
 
+#include "Graphics/gfxepmp.h"
+
 #define  	CS2_BASE_ADDRESS   		GFX_EPMP_CS2_BASE_ADDRESS  
 #define 	SST39LF400_FLASH_SIZE	0x00400000ul
 
+// dummy declaration for EPMP CS2 start address 
+__eds__ WORD __attribute__((eds, noload, address(CS2_BASE_ADDRESS))) EPMPCS2Start;
 
 /************************************************************************
 *   LOCAL PROTOTYPES
@@ -55,13 +64,9 @@ WORD lRead16(DWORD address);
 
 
 /************************************************************************
-* Function:SST39LF400Init(WORD *pBuffer)                                                 
+* Function: SST39LF400Init()                                                 
 *                                                                       
-* Overview: This function initializes IOs and EPMP. Before it
-*           programs the EPMP port, it stores the current
-*			EPMP SFR registers and saves it to the supplied 
-*           array space.
-*           
+* Overview: This function initializes IOs and Parallel Master Port. 
 *                                                                       
 * Input: Address of the array for the current EPMP SFR register
 *		 contents. 
@@ -69,127 +74,12 @@ WORD lRead16(DWORD address);
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39LF400Init(WORD *pBuffer)
+void SST39LF400Init()
 {
-	// if using PIC24FJ256DA210 Development Board, save the EPMP registers to the  
-	// buffer so we can revert back when access to the parallel flash is done
-	if (pBuffer != NULL)
-	{
-		// before modifying the registers, save the contents of the SFR first
-		*pBuffer++ = PMCON2;
-		*pBuffer++ = PMCON3;
-		*pBuffer++ = PMCON4;
-		*pBuffer++ = PMCS1CF;
-		*pBuffer++ = PMCS1BS;
-		*pBuffer++ = PMCS1MD;
-		*pBuffer++ = PMCS2CF;
-		*pBuffer++ = PMCS2BS;
-		*pBuffer++ = PMCS2MD;
-		*pBuffer++ = IFS2;
-		*pBuffer++ = IEC2;
-		*pBuffer = PMCON1;
-	}
-	
-	// now that the SFR contents are saved, program the SFRs for the new values.
-	PMCON1bits.PMPEN = 0;
+    
+    DriverInterfaceInit();
 
-	PMCS1CFbits.CSDIS = 1;      // disable CS1 functionality  
-	PMCS2CFbits.CSDIS = 1;      // disable CS2 functionality  
-
-	ANSDbits.ANSD7 = 0;   		// PMD15
-	ANSDbits.ANSD6 = 0;   		// PMD14
-	ANSFbits.ANSF0 = 0;   		// PMD11
-
-	ANSBbits.ANSB15 = 0;  		// PMA0
-	ANSBbits.ANSB14 = 0;  		// PMA1
-	ANSGbits.ANSG9  = 0;  		// PMA2
-	ANSBbits.ANSB13 = 0;  		// PMA10
-	ANSBbits.ANSB12 = 0;  		// PMA11
-	ANSBbits.ANSB11 = 0;  		// PMA12
-	ANSBbits.ANSB10 = 0;  		// PMA13
-	ANSAbits.ANSA7 = 0;   		// PMA17
-	ANSGbits.ANSG6 = 0;   		// PMA18	
-
-	PMCON1bits.ADRMUX = 0;	    // address is not multiplexed
-	PMCON1bits.MODE = 3;        // master mode
-	PMCON1bits.CSF = 0;         // PMCS1 pin used for chip select 1, PMCS2 pin used for chip select 2
-	PMCON1bits.ALP = 1;         // set address latch strobes to high active level (for sn74lvc16373)
-	PMCON1bits.ALMODE = 0;      // "smart" address strobes are not used
-	PMCON1bits.BUSKEEP = 0;     // bus keeper is not used
-	
-	// CS1 is not used 
-	// set CS2 start Address (this is where the parallel flash is connected on 
-	// the PIC24FJ256DA210 Board
-	PMCS2BS = (CS2_BASE_ADDRESS >> 8);				
-
-	PMCON2bits.RADDR = 0xff;    // set CS2 end address
-
-	PMCON2bits.MSTSEL = 0;		// set CPU as Master
-
-	PMCON3bits.PTWREN = 1;      // enable write strobe port
-	PMCON3bits.PTRDEN = 1;      // enable read strobe port
-	PMCON3bits.PTBE0EN = 1;     // enable byte enable port
-	PMCON3bits.PTBE1EN = 1;     // enable byte enable port
-	PMCON3bits.AWAITM = 0;      // set address latch pulses width to 1/2 Tcy
-	PMCON3bits.AWAITE = 0;      // set address hold time to 1/4 Tcy
-
-	PMCON4 = 0xFFFF;            // PMA0 - PMA15 address lines are enabled
-	PMCON3bits.PTEN16 = 1;		// enable PMA16
-	PMCON3bits.PTEN17 = 1;		// enable PMA17
-
-	PMCS2CFbits.CSDIS = 0;      // enable CS
-	PMCS2CFbits.CSP = 0;        // CS active low (for SST39VF400A)
-	PMCS2CFbits.CSPTEN = 1;     // enable CS port
-	PMCS2CFbits.BEP = 0;        // byte enable active low (for SST39VF400A)
-	PMCS2CFbits.WRSP = 0;       // write strobe active low (for SST39VF400A)
-	PMCS2CFbits.RDSP = 0;       // read strobe active low (for SST39VF400A)
-	PMCS2CFbits.SM = 0;         // read and write strobes on separate lines 
-	PMCS2CFbits.PTSZ = 2;       // data bus width is 16-bit 
-
-	PMCS2MDbits.ACKM = 0;        // PMACK is not used
-	
-	PMCS2MDbits.DWAITB = EPMPCS2_DWAITB;      				
-	PMCS2MDbits.DWAITM = EPMPCS2_DWAITM;
-	PMCS2MDbits.DWAITE = EPMPCS2_DWAITE;
-	
-	// Note: adjust this delay for slower devices 
-	PMCS2MDbits.AMWAIT = EPMPCS2_AMWAIT;					
-
-	PMCON1bits.PMPEN = 1;
 }
-
-/************************************************************************
-* Function:SST39LF400DeInit(WORD *pBuffer)                                                 
-*                                                                       
-* Overview: This function de-initializes IOs and EPMP to recover from 
-*           from the previous state. The SFR programmed values are 
-*           supplied by the initialized array.
-*           
-*                                                                       
-* Input: Address of the array for the current EPMP SFR register
-*		 contents. 
-*                                                                       
-* Output: none
-*                                                                       
-************************************************************************/
-void SST39LF400DeInit(WORD *pBuffer)
-{
-	// before modifying the registers, save the contents of the SFR first
-	PMCON2 = *pBuffer++;
-	PMCON3 = *pBuffer++;
-	PMCON4 = *pBuffer++; 
-	PMCS1CF = *pBuffer++;
-	PMCS1BS = *pBuffer++;
-	PMCS1MD = *pBuffer++;
-	PMCS2CF = *pBuffer++;
-	PMCS2BS = *pBuffer++;
-	PMCS2MD = *pBuffer++;
-	IFS2    = *pBuffer++;
-	IEC2    = *pBuffer++;
-	PMCON1  = *pBuffer;
-	
-}
-
 
 /************************************************************************
 * Function: BYTE SST39LV400WriteWord(DWORD address, WORD data)
@@ -203,7 +93,7 @@ void SST39LF400DeInit(WORD *pBuffer)
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39LF400WriteWord(DWORD address, WORD data)
+BYTE SST39LF400WriteWord(WORD data, DWORD address)
 {
 	WORD temp;
 	
@@ -241,7 +131,7 @@ WORD temp;
 }
 
 /************************************************************************
-* Function: BYTE SST39LF400WriteArray(DWORD address, WORD* pData, nCount)
+* Function: BYTE SST39LF400WriteArray(DWORD address, BYTE *pData, WORD nCount)
 *                                                                       
 * Overview: this function writes data array at the address specified
 *                                                                       
@@ -252,28 +142,31 @@ WORD temp;
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39LF400WriteArray(DWORD address, WORD *pData, WORD nCount)
+BYTE SST39LF400WriteArray(DWORD address, BYTE *pData, WORD nCount)
 {
     WORD    counter;
     WORD    *pD;
     DWORD   addr;
 
-    pD = pData;
-    addr = address;
+    // Note that shifting of the address and count is performed
+    // here since the incoming data is addressed on a byte location 
+    // and the length (nCount) is the number of bytes
+    pD = (WORD*)pData;
+    addr = address >> 1;
 
     // write
-    for(counter = 0; counter < nCount; counter++)
+    for(counter = 0; counter < (nCount>>1); counter++)
     {
-        while(0 ==SST39LF400WriteWord(addr, *pD));
+        while(0 ==SST39LF400WriteWord(*pD, addr));
         addr++;
         pD++;
     }
 
-    pD = pData;
-    addr = address;
+    pD = (WORD*)pData;
+    addr = address >> 1;
 
     // verify
-    for(counter = 0; counter < nCount; counter++)
+    for(counter = 0; counter < (nCount>>1); counter++)
     {
         if(*pD++ !=SST39LF400ReadWord(addr++))
             return (0);
@@ -283,7 +176,7 @@ BYTE SST39LF400WriteArray(DWORD address, WORD *pData, WORD nCount)
 }
 
 /************************************************************************
-* Function: void SST39LF400ReadArray(DWORD address, WORD* pData, nCount)
+* Function: void SST39LF400ReadArray(DWORD address, BYTE* pData, nCount)
 *                                                                       
 * Overview: this function reads data array from the address specified
 *                                                                       
@@ -292,15 +185,23 @@ BYTE SST39LF400WriteArray(DWORD address, WORD *pData, WORD nCount)
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39LF400ReadArray(DWORD address, WORD *pData, WORD nCount)
+void SST39LF400ReadArray(DWORD address, BYTE *pData, WORD nCount)
 {
     WORD    counter;
-    WORD    temp;
+    WORD    *pD;
+    DWORD   addr;
 
-    for(counter = 0; counter < nCount; counter++)
+    // Note that shifting of the address and count is performed
+    // here since the incoming data is addressed on a byte location 
+    // and the length (nCount) is the number of bytes
+
+    addr = address >> 1;
+    pD = (WORD*)pData;
+
+    for(counter = 0; counter < (nCount>>1); counter++)
     {
-		temp = lRead16(address);
-		*pData++ = temp;
+		*pD++ = lRead16(addr);
+        addr++;
     }
 
 }
@@ -363,7 +264,7 @@ void SST39LF400ChipErase(void)
 * Overview: This function erases 2K Word section defined by address
 *
 * Input: address - The address location of the sector to be erased.
-*				   The address is decided by Address[30:11] address lines.
+*				   The address is decided by Address[17:11] address lines.
 *            
 * Output: none
 *
@@ -375,7 +276,7 @@ void SST39LF400SectorErase(DWORD address)
     lWrite16(0x000005555,0x0080);
     lWrite16(0x000005555,0x00aa);
     lWrite16(0x000002aaa,0x0055);
-    lWrite16((address>>11),0x0030);
+    lWrite16(address,0x0030);
 
     SST39LF400WaitProgram();
 }
@@ -395,7 +296,7 @@ WORD SST39LF400CheckID()
 {
 	WORD testArray[2] = {0,0};
 	
-    lWrite16(0x000005555,0x00aa);
+   	lWrite16(0x000005555,0x00aa);
     lWrite16(0x000002aaa,0x0055);
     lWrite16(0x000005555,0x0090);
     testArray[0] = lRead16 (0x000000000);
@@ -415,6 +316,18 @@ WORD SST39LF400CheckID()
 ************************************************************************/
 void lWrite16(DWORD address, WORD data)
 {
+
+	__eds__ WORD *pWord;
+
+	pWord = (__eds__ WORD *)(&EPMPCS2Start + address);
+
+	// do this sequence since the flash device is slow 
+	// See EPMP FRM (DS39730) Section on Read/Write Operation
+	while(PMCON2bits.BUSY);
+		*pWord = data;
+		
+// Example code to do the writes manually
+/*
 WORD pointer;
 WORD temp;
 		address <<= 1;
@@ -427,13 +340,26 @@ WORD temp;
 		*((WORD*)pointer) = data;
 		while(PMCON2bits.BUSY);
         DSWPAG = temp;
-
+*/
 }
 
 /************************************************************************
 ************************************************************************/
 WORD lRead16(DWORD address)
 {
+	__eds__ WORD *pWord;
+	WORD temp;
+
+	pWord = (__eds__ WORD *)(&EPMPCS2Start + address);
+	temp = *pWord;
+	
+	// do this sequence since the flash device is slow 
+	// See EPMP FRM (DS39730) Section on Read/Write Operation
+	while(PMCON2bits.BUSY);
+	return PMDIN1;
+
+// Example code to do the writes manually
+/*
 WORD pointer;
 volatile WORD data;
 WORD temp;
@@ -449,7 +375,7 @@ WORD temp;
 		data = PMDIN1;
 		DSRPAG = temp;
 		return data;
-
+*/
 }
 
 #endif //USE_SST39LF400

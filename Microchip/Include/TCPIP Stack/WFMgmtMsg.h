@@ -353,6 +353,7 @@ BOOL SendRAWManagementFrame(UINT16 bufLen);
 void WFEnableMRF24WB0MMode(void);
 void WFGetMRF24WB0MVersion(UINT8 *p_version);
 
+void IgnoreNextMgmtResult();
 
 /* When asserts are enabled, call this function.  When asserts are not enabled compile it out */
 #if defined(WF_DEBUG)

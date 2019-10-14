@@ -949,7 +949,7 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
             break;
     }
 
-    return TRUE;
+    return FALSE;
 }
 
 

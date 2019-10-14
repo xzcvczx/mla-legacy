@@ -49,20 +49,7 @@
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
  *
- * Author               Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Nilesh Rajbharti     8/14/01     Original (Rev. 1.0)
- * Nilesh Rajbharti     2/9/02      Cleanup
- * Nilesh Rajbharti     5/22/02     Rev 2.0 (See version.log for detail)
- * Nilesh Rajbharti     12/5/02     Modified UDPProcess() and TCPProcess()
- *                                  to include localIP as third param.
- *                                  This was done to allow these functions
- *                                  to calculate checksum correctly.
- * Nilesh Rajbharti     7/26/04     Added code in StackTask() to not
- *                                  clear statically IP address if link is
- *                                  removed and DHCP module is disabled
- *                                  at runtime.
- * Howard Schlunder		03/16/07	Rewrote stack manager to be linear
+ * V5.36 ---- STACK_USE_MPFS has been removed.
 ********************************************************************/
 #define __STACKTSK_C
 
@@ -127,7 +114,7 @@ void StackInit(void)
 
     MACInit();
 
-#if defined(WF_CS_TRIS) && defined(STACK_USE_EZ_CONFIG)
+#if defined(WF_CS_TRIS) && defined(STACK_USE_EZ_CONFIG) && !defined(__18CXX)
     WFEasyConfigInit();
 #endif    
 
@@ -145,7 +132,7 @@ void StackInit(void)
 	BerkeleySocketInit();
 #endif
 
-#if defined(STACK_USE_HTTP_SERVER) || defined(STACK_USE_HTTP2_SERVER)
+#if defined(STACK_USE_HTTP2_SERVER)
     HTTPInit();
 #endif
 
@@ -157,7 +144,7 @@ void StackInit(void)
     SSLInit();
 #endif
 
-#if defined(STACK_USE_FTP_SERVER) && defined(STACK_USE_MPFS)
+#if defined(STACK_USE_FTP_SERVER) && defined(STACK_USE_MPFS2)
     FTPInit();
 #endif
 
@@ -173,7 +160,7 @@ void StackInit(void)
     }
 #endif
 
-#if defined(STACK_USE_AUTOIP)
+#if defined(STACK_USE_AUTO_IP)
     AutoIPInit(0);
 #endif
 
@@ -217,7 +204,7 @@ void StackTask(void)
     #if defined( WF_CS_TRIS )
         // This task performs low-level MAC processing specific to the MRF24WB0M
         MACProcess();
-        #if defined( STACK_USE_EZ_CONFIG )
+        #if defined( STACK_USE_EZ_CONFIG ) && !defined(__18CXX)
             WFEasyConfigMgr();
         #endif
     #endif
@@ -385,11 +372,11 @@ void StackTask(void)
  ********************************************************************/
 void StackApplications(void)
 {
-	#if defined(STACK_USE_HTTP_SERVER) || defined(STACK_USE_HTTP2_SERVER)
+	#if defined(STACK_USE_HTTP2_SERVER)
 	HTTPServer();
 	#endif
 	
-	#if defined(STACK_USE_FTP_SERVER) && defined(STACK_USE_MPFS)
+	#if defined(STACK_USE_FTP_SERVER) && defined(STACK_USE_MPFS2)
 	FTPServer();
 	#endif
 	

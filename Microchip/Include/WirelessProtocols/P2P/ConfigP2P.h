@@ -43,6 +43,7 @@
 *  2.0   4/15/2009    yfy           MiMAC and MiApp revision
 *  2.1   06/20/2009   yfy           Add LCD support
 *  3.1   5/28/2010    yfy           MiWi DE 3.1
+*  4.1   6/3/2011     yfy           MAL v2011-06
 ********************************************************************/
 
 #ifndef __CONFIGURE_P2P_H

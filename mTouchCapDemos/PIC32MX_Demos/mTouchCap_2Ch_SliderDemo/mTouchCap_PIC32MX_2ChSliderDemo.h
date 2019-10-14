@@ -26,23 +26,25 @@
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
- 
- 
+
+
 Author          Date       Comments
 --------------------------------------------------------------------------------
 BDB         26-Jun-2008 Initial release
-SB			 22-Oct-2008
-NMS/NK		 10-Feb-2009 Folder/Files restructuring
+SB           22-Oct-2008
+NMS/NK       10-Feb-2009 Folder/Files restructuring
 MC          22-Ian-2010 Porting for PIC32MX795F512H
-Change History:
+
 
 *******************************************************************************/
-#ifndef __MTOUCHCAP_PIC32_2CHSLIDER_H     
-#define __MTOUCHCAP_PIC32_2CHSLIDER_H  
+
+#ifndef __MTOUCHCAP_PIC32_2CHSLIDER_H
+#define __MTOUCHCAP_PIC32_2CHSLIDER_H
+
 
 /** Part Definitions **/
 #include    "p32xxxx.h"
 /** Demo Board Configuration **/
-#include	"config.h"
+#include    "config.h"
 
-#endif //__MTOUCHCAP_PIC32_2CHSLIDER_H 
+#endif //__MTOUCHCAP_PIC32_2CHSLIDER_H

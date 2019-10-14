@@ -5,21 +5,20 @@
  *********************************************************************
  * FileName:        HardwareProfile.h
  * Dependencies:    None
- * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:        Microchip C32 v1.00 or higher
- *					Microchip C30 v3.01 or higher
+ * Processor:       PIC24, dsPIC, PIC32
+ * Compiler:        Microchip C30 and C32
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
  *
- * Copyright © 2002-2008 Microchip Technology Inc.  All rights 
+ * Copyright (c) 2011 Microchip Technology Inc.  All rights 
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and 
  * distribute: 
  * (i)  the Software when embedded on a Microchip microcontroller or 
- *      digital signal controller product (“Device”) which is 
- *      integrated into Licensee’s product; or
+ *      digital signal controller product ("Device") which is 
+ *      integrated into Licenseeï¿½s product; or
  * (ii) ONLY the Software driver source files ENC28J60.c and 
  *      ENC28J60.h ported to a non-Microchip device used in 
  *      conjunction with a Microchip ethernet controller for the 
@@ -29,7 +28,7 @@
  * Software for additional information regarding your rights and 
  * obligations.
  *
- * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT 
+ * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT 
  * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT 
  * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
  * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL 
@@ -42,11 +41,12 @@
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
  *
- * Author               Date		Comment
+ * Date	                Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Howard Schlunder		10/03/06	Original, copied from Compiler.h
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
- * Pradeep Budagutta	15 Sep 2009 Added PIC24FJ256DA210 Development Board Support
+ * 10/03/06             Original, copied from Compiler.h
+ * 06/25/09             dsPIC & PIC24H support 
+ * 09/15/09             Added PIC24FJ256DA210 Development Board Support
+ * 06/02/11             Added MPLAB X Support
  ********************************************************************/
 
 #if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
@@ -57,24 +57,36 @@
 	     * PIC24FJ256DA210 Development Board
 	     * Display TFT-G240320LTSW-118W-E
 	     ********************************************************************/
-		#include "Alternative Configurations/HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
+		#include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
 		
 		/*********************************************************************
 	     * Hardware Configuration for 
 	     * PIC24FJ256DA210 Development Board
 	     * Display PH480272T-005-I11Q
 	     ********************************************************************/
-		//#include "Alternative Configurations/HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_PH480272T_005_I11Q.h"
+		//#include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
 
 	#else
+	
+		#if defined (__PIC24FJ256GB110__)
+		
+			/*********************************************************************
+			 * Hardware Configuration for 
+			 * MIKRO MMB for PIC24
+			 * only selectable when using PIC24FJ256GB110
+			 ********************************************************************/
+			//#include "Configs/HWP_MIKRO.h"
+			
+		#endif	
+	
 		/*********************************************************************
 	     * Hardware Configuration for 
 	     * Explorer 16
     	 * Graphics PicTail v3
 	     * Display TFT-G240320LTSW-118W-E
 	     ********************************************************************/
-		#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
-		//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
+		#include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
+		//#include "Configs/HWP_GFXv3_EX16_16PMP_QVGAv1.h"
 
 		/*********************************************************************
 	     * Hardware Configuration for 
@@ -82,8 +94,8 @@
     	 * Graphics PicTail v3
 	     * Display PH480272T-005-I11Q
 	     ********************************************************************/
-		//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
-		//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_PH480272T_005_I11Q.h"
+		//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
+		//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
 
 		/*********************************************************************
 	     * Hardware Configuration for 
@@ -91,11 +103,36 @@
      	 * Graphics PicTail v2
          * Display LGDP4531
 	     ********************************************************************/
-		//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
-		
+		//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
+
+		/*********************************************************************
+		 * Hardware Configuration for
+		 * Exlporer 16 or PIC32 Starter kit   
+		 * Graphics PicTail v3e
+		 * Display VGA
+		 ********************************************************************/
+			//#include "Configs/HWP_GFXv3e_EX16_8PMP_VGAv1.h"
+			//#include "Configs/HWP_GFXv3e_EX16_16PMP_VGAv1.h"
+		/*********************************************************************
+		 * Hardware Configuration for
+		 * Exlporer 16 or PIC32 Starter kit   
+		 * Graphics PicTail v3e
+		 * Display VGA
+		 * AR1020 Touch Controller
+		 ********************************************************************/
+			  //#include "Configs/HWP_GFXv3e_EX16_16PMP_AR1020_VGAv1.h"
+
+		/*********************************************************************
+		 * Hardware Configuration for 
+		 * Explorer 16 or PIC32 Starter kit
+		 * Graphics PicTail v3e
+		 * Display WVGA
+		 ********************************************************************/
+			//#include "Configs/HWP_GFXv3e_EX16_8PMP_WVGAv1.h"
+			  //#include "Configs/HWP_GFXv3e_EX16_16PMP_WVGAv1.h"
 	#endif
 
-#elif defined (__PIC32MX__) 
+#elif defined (__PIC32MX__) || defined (__dsPIC33E__) || defined(__PIC24E__) 
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -103,8 +140,8 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-    #include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
+    #include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
+	//#include "Configs/HWP_GFXv3_EX16_16PMP_QVGAv1.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -112,8 +149,8 @@
      * Graphics PicTail v3
      * Display PH480272T-005-I11Q
      ********************************************************************/
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_PH480272T_005_I11Q.h"
+	//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
+	//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -121,7 +158,7 @@
      * Graphics PicTail v2
      * Display LGDP4531
      ********************************************************************/
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
+	//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -129,11 +166,8 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_16PMP_QVGAv1.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -141,11 +175,8 @@
      * Graphics PicTail v3
      * Display PH480272T-005-I11Q
      ********************************************************************/
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_PH480272T_005_I11Q.h"
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_STK_SSD1926_PH480272T_005_I11Q.h"
-	
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_PH480272T_005_I11Q.h"
-	//#include "Alternative Configurations/HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_USB_STK_SSD1926_PH480272T_005_I11Q.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_WQVGAv1.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_16PMP_WQVGAv1.h"
 	
     /*********************************************************************
      * Hardware Configuration for 
@@ -153,14 +184,61 @@
      * MultiMedia Development Board
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-    //#include "Alternative Configurations/HardwareProfile_MULTI_MEDIA_BOARD_DM00123_16PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-    //#include "Alternative Configurations/HardwareProfile_MULTI_MEDIA_BOARD_DM00123_16PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-    //#include "Alternative Configurations/HardwareProfile_MULTI_MEDIA_BOARD_DM00123_16PMP_PIC32_ENET_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+    //#include "Configs/HWP_MEB_PIC32_STK_8PMP.h"
+    //#include "Configs/HWP_MEB_PIC32_USB_SK_8PMP.h"
+    //#include "Configs/HWP_MEB_PIC32_ETH_SK_8PMP.h"
 
-    //#include "Alternative Configurations/HardwareProfile_MULTI_MEDIA_BOARD_DM00123_8PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-    //#include "Alternative Configurations/HardwareProfile_MULTI_MEDIA_BOARD_DM00123_8PMP_PIC32_ENET_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-    //#include "Alternative Configurations/HardwareProfile_MULTI_MEDIA_BOARD_DM00123_8PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+    //#include "Configs/HWP_MEB_PIC32_GP_SK_16PMP.h"
+    //#include "Configs/HWP_MEB_PIC32_USB_SK_16PMP.h"
+    //#include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP.h"
+    
+    //#include "Configs/HWP_MEB_dsPIC33E_SK_8PMP.h"
 
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Low Cost Controllerless (LCC) Daughter Board
+     * Display TFT-G240320LTSW-118W-E
+     ********************************************************************/
+     //#include "Configs/HWP_LCC_EX16_INT_QVGAv1.h"
+     //#include "Configs/HWP_LCC_EX16_EXT_QVGAv1.h"
+     //#include "Configs/HWP_LCC_EX16_EXT_WQVGAv1.h"
+
+    // #include "Configs/HWP_LCC_PIC_SK_INT_QVGAv1.h"
+    // #include "Configs/HWP_LCC_PIC_SK_EXT_QVGAv1.h"
+    // #include "Configs/HWP_LCC_PIC_SK_EXT_WQVGAv1.h"
+    // #include "Configs/HWP_LCC_PIC_SK_EXT_VGAv1.h"
+
+	/*********************************************************************
+     * Hardware Configuration for
+     * PIC32 Starter kit   
+     * Graphics PicTail v3e
+     * Display VGA
+     * AR1020 Touch Controller
+     ********************************************************************/
+     //#include "Configs/HWP_GFXv3e_PIC_SK_16PMP_AR1020_VGAv1.h"
+
+    /*********************************************************************
+     * Hardware Configuration for
+     * Exlporer 16 or PIC32 Starter kit   
+     * Graphics PicTail v3e
+     * Display VGA
+     ********************************************************************/
+	 //#include "Configs/HWP_GFXv3e_EX16_8PMP_VGAv1.h"
+     //#include "Configs/HWP_GFXv3e_EX16_16PMP_VGAv1.h"
+	 //#include "Configs/HWP_GFXv3e_PIC_SK_8PMP_VGAv1.h"
+     //#include "Configs/HWP_GFXv3e_PIC_SK_16PMP_VGAv1.h"
+
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Explorer 16 or PIC32 Starter kit
+     * Graphics PicTail v3e
+     * Display WVGA
+     ********************************************************************/
+	 //#include "Configs/HWP_GFXv3e_EX16_8PMP_WVGAv1.h"
+     //#include "Configs/HWP_GFXv3e_EX16_16PMP_WVGAv1.h"
+	 //#include "Configs/HWP_GFXv3e_PIC_SK_8PMP_WVGAv1.h"
+     //#include "Configs/HWP_GFXv3e_PIC_SK_16PMP_WVGAv1.h"
 #endif
+
 
     

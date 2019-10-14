@@ -42,6 +42,7 @@
     #define _CHART_H
 
     #include <Graphics/GOL.h>
+    #include "GenericTypeDefs.h"
 
 /* 
 		Chart Terminologies 
@@ -190,18 +191,18 @@ typedef struct
     #define CH_CLR1     BRIGHTRED       // Bright Red
     #define CH_CLR2     BRIGHTGREEN     // Bright Green
     #define CH_CLR3     BRIGHTYELLOW    // Bright Yellow
-    #define CH_CLR4     RGB565CONVERT(0xFF, 0xBB, 0x4C) // Orange
+    #define CH_CLR4     RGBConvert(0xFF, 0xBB, 0x4C) // Orange
     #define CH_CLR5     BLUE                            // Blue
     #define CH_CLR6     RED                             // Red
     #define CH_CLR7     GREEN                           // Green
     #define CH_CLR8     YELLOW                          // Yellow
-    #define CH_CLR9     RGB565CONVERT(255, 140, 0)      // Dark Orange
+    #define CH_CLR9     RGBConvert(255, 140, 0)      // Dark Orange
     #define CH_CLR10    LIGHTBLUE                       // Light Orange
     #define CH_CLR11    LIGHTRED                        // Light Red
     #define CH_CLR12    LIGHTGREEN                      // Light Green
-    #define CH_CLR13    RGB565CONVERT(255, 255, 150)    // Light Yellow
-    #define CH_CLR14    RGB565CONVERT(255, 200, 0)      // Light Orange
-    #define CH_CLR15    RGB565CONVERT(255, 215, 0)      // Gold
+    #define CH_CLR13    RGBConvert(255, 255, 150)    // Light Yellow
+    #define CH_CLR14    RGBConvert(255, 200, 0)      // Light Orange
+    #define CH_CLR15    RGBConvert(255, 215, 0)      // Gold
 
 #endif
 

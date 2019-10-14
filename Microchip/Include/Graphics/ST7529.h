@@ -33,47 +33,17 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Date			Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 03/20/08		...
+ * 04/12/11     Graphics Library Version 3.00 Support
  *****************************************************************************/
 #ifndef _ST7529_H
     #define _ST7529_H
 
-    #ifdef __PIC32MX
-        #include <plib.h>
-        #define PMDIN1  PMDIN
-    #else
-        #ifdef __PIC24F__
-            #include <p24Fxxxx.h>
-        #else
-            #error CONTROLLER IS NOT SUPPORTED
-        #endif
-    #endif
+    #include "HardwareProfile.h"
     #include "GraphicsConfig.h"
     #include "GenericTypeDefs.h"
-
-/*********************************************************************
-* Overview: Additional hardware-accelerated functions can be implemented
-*           in the driver. These definitions exclude the PutPixel()-based
-*           functions in the primitives layer (Primitive.c file) from compilation.
-*********************************************************************/
-
-// Define this to implement Font related functions in the driver.
-//#define USE_DRV_FONT
-// Define this to implement Line function in the driver.
-//#define USE_DRV_LINE
-// Define this to implement Circle function in the driver.
-//#define USE_DRV_CIRCLE
-// Define this to implement FillCircle function in the driver.
-//#define USE_DRV_FILLCIRCLE
-// Define this to implement Bar function in the driver.
-//#define USE_DRV_BAR
-// Define this to implement ClearDevice function in the driver.
-    #define USE_DRV_CLEARDEVICE
-
-// Define this to implement PutImage function in the driver.
-//    #define USE_DRV_PUTIMAGE
 
     #ifdef USE_16BIT_PMP
         #error This driver doesn't support 16-bit PMP (remove USE_16BIT_PMP option from GHardwareProfile.h)
@@ -85,7 +55,7 @@
         #error DISP_VER_RESOLUTION must be defined in HardwareProfile.h
     #endif
     #ifndef COLOR_DEPTH
-        #error COLOR_DEPTH must be defined in HardwareProfile.h
+        #error COLOR_DEPTH must be defined in GraphicsConfig.h
     #endif
     #ifndef DISP_ORIENTATION
         #error DISP_ORIENTATION must be defined in HardwareProfile.h
@@ -111,8 +81,8 @@
 /*********************************************************************
 * Overview: Color depth.
 *********************************************************************/
-    #if (COLOR_DEPTH != 5)
-        #error This driver doesn't support this color depth. It should be 5.
+    #if (COLOR_DEPTH != 8)
+        #error This driver doesn't support the selected color depth. It should be 8 but the device is actually using 5 bits. The 3 MSbits will be ignored.
     #endif
 
 // Norm commands
@@ -157,326 +127,6 @@
     #define EPCOUT      0xcc
     #define EPMWR       0xfc
     #define EPMRD       0xfd
-
-/*********************************************************************
-* Overview: Clipping region control codes to be used with SetClip(...)
-*           function. 
-*********************************************************************/
-    #define CLIP_DISABLE    0   // Disables clipping.
-    #define CLIP_ENABLE     1   // Enables clipping.
-
-/*********************************************************************
-* Overview: Some basic colors definitions.
-*********************************************************************/
-    #define BLACK   0
-    #define GRAY1   (2 << 3)
-    #define GRAY2   (4 << 3)
-    #define GRAY3   (6 << 3)
-    #define GRAY4   (8 << 3)
-    #define GRAY5   (10 << 3)
-    #define GRAY6   (12 << 3)
-    #define GRAY7   (14 << 3)
-    #define GRAY8   (16 << 3)
-    #define GRAY9   (18 << 3)
-    #define GRAY10  (20 << 3)
-    #define GRAY11  (22 << 3)
-    #define GRAY12  (24 << 3)
-    #define GRAY13  (26 << 3)
-    #define GRAY14  (28 << 3)
-    #define GRAY15  (30 << 3)
-    #define WHITE   (31 << 3)
-
-// Color
-extern BYTE     _color;
-
-/*********************************************************************
-* Overview: Clipping region control and border settings.
-*
-*********************************************************************/
-
-// Clipping region enable control
-extern SHORT    _clipRgn;
-
-// Left clipping region border
-extern SHORT    _clipLeft;
-
-// Top clipping region border
-extern SHORT    _clipTop;
-
-// Right clipping region border
-extern SHORT    _clipRight;
-
-// Bottom clipping region border
-extern SHORT    _clipBottom;
-
-/
-/*********************************************************************
-* Function:  void ResetDevice()
-*
-* Overview: Initializes LCD module.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void    ResetDevice(void);
-
-/*********************************************************************
-* Macros:  GetMaxX()
-*
-* Overview: Returns maximum horizontal coordinate.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Maximum horizontal coordinate.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define GetMaxX()   (DISP_HOR_RESOLUTION - 1)
-
-/*********************************************************************
-* Macros:  GetMaxY()
-*
-* Overview: Returns maximum vertical coordinate.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Maximum vertical coordinate.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define GetMaxY()   (DISP_VER_RESOLUTION - 1)
-
-/*********************************************************************
-* Macros:  SetColor(color)
-*
-* Overview: Sets current drawing color.
-*
-* PreCondition: none
-*
-* Input: color - Color coded in 5:6:5 RGB format.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define SetColor(color) _color = (BYTE) color;
-
-/*********************************************************************
-* Macros:  GetColor()
-*
-* Overview: Returns current drawing color.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Color coded in 5:6:5 RGB format.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define GetColor()  _color
-
-/*********************************************************************
-* Macros:  SetActivePage(page)
-*
-* Overview: Sets active graphic page.
-*
-* PreCondition: none
-*
-* Input: page - Graphic page number.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define SetActivePage(page)
-
-/*********************************************************************
-* Macros: SetVisualPage(page)
-*
-* Overview: Sets graphic page to display.
-*
-* PreCondition: none
-*
-* Input: page - Graphic page number
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define SetVisualPage(page)
-
-/*********************************************************************
-* Function: void PutPixel(SHORT x, SHORT y)
-*
-* Overview: Puts pixel with the given x,y coordinate position.
-*
-* PreCondition: none
-*
-* Input: x - x position of the pixel.
-*		 y - y position of the pixel.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void    PutPixel(SHORT x, SHORT y);
-
-/*********************************************************************
-* Function: WORD GetPixel(SHORT x, SHORT y)
-*
-* Overview: Returns pixel color at the given x,y coordinate position.
-*
-* PreCondition: none
-*
-* Input: x - x position of the pixel.
-*		 y - y position of the pixel.
-*
-* Output: pixel color
-*
-* Side Effects: none
-*
-********************************************************************/
-WORD    GetPixel(SHORT x, SHORT y);
-
-/*********************************************************************
-* Macros: SetClipRgn(left, top, right, bottom)
-*
-* Overview: Sets clipping region.
-*
-* PreCondition: none
-*
-* Input: left - Defines the left clipping region border.
-*		 top - Defines the top clipping region border.
-*		 right - Defines the right clipping region border.
-*	     bottom - Defines the bottom clipping region border.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define SetClipRgn(left, top, right, bottom) \
-    _clipLeft = left;                            \
-    _clipTop = top;                              \
-    _clipRight = right;                          \
-    _clipBottom = bottom;
-
-/*********************************************************************
-* Macros: GetClipLeft()
-*
-* Overview: Returns left clipping border.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Left clipping border.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define GetClipLeft()   _clipLeft
-
-/*********************************************************************
-* Macros: GetClipRight()
-*
-* Overview: Returns right clipping border.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Right clipping border.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define GetClipRight()  _clipRight
-
-/*********************************************************************
-* Macros: GetClipTop()
-*
-* Overview: Returns top clipping border.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Top clipping border.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define GetClipTop()    _clipTop
-
-/*********************************************************************
-* Macros: GetClipBottom()
-*
-* Overview: Returns bottom clipping border.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Bottom clipping border.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define GetClipBottom() _clipBottom
-
-/*********************************************************************
-* Macros: SetClip(control)
-*
-* Overview: Enables/disables clipping.
-*
-* PreCondition: none
-*
-* Input: control - Enables or disables the clipping.
-*			- 0: Disable clipping
-*			- 1: Enable clipping
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define SetClip(control)    _clipRgn = control;
-
-/*********************************************************************
-* Macros: IsDeviceBusy()
-*
-* Overview: Returns non-zero if LCD controller is busy 
-*           (previous drawing operation is not completed).
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Busy status.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define IsDeviceBusy()  0
 
 /*********************************************************************
 * Macros: SetPalette(colorNum, color)

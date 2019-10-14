@@ -4,10 +4,8 @@
  *  PMP driver
  *****************************************************************************
  * FileName:        pmp.c
- * Dependencies:    Graphics.h
  * Processor:       PIC24, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -37,39 +35,37 @@
  * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 01/12/10		...
+ * 02/24/11     Replace Device_Init() to DriverInterfaceInit()
+ * 03/14/11     Modified PMP timing macros to use PMP_DATA_SETUP_TIME, 
+ *              PMP_DATA_WAIT_TIME, and PMP_DATA_HOLD_TIME.
  *****************************************************************************/
 #ifndef _GFX_PMP_H_FILE
 #define _GFX_PMP_H_FILE
 
-#include "Graphics/Graphics.h"
+#include "HardwareProfile.h"
 #include "Compiler.h"
+#include "TimeDelay.h"
 
 #ifdef USE_GFX_PMP
 
-/*********************************************************************
- * Graphic Controller PMP wait states
- *
- * The setup time required when running the SSD1926 at 80MHz is
- * 50ns or (20 MHz).
- * 
- * To calculate the number of required wait states, we will use the 
- * following equation.
- *
- * wait states = Peripheral Clock (Hz) / setup time (Hz)
- *
- * For example if you peripheral clock is running at 80 MHz, the 
- * wait states required:
- * wait states = 80,000,000 / 20,000,000
- * wait states = 4
- *********************************************************************/
-#if (DISPLAY_CONTROLLER == LGDP4531)
-#define DISPLAY_CONTROLLER_SETUP_Hz    (20000000)
-#endif
-#if (DISPLAY_CONTROLLER == SSD1926)
-#define DISPLAY_CONTROLLER_SETUP_Hz    (20000000)
-#endif
+// Note:
+/*
+    All functions here are defined as inline functions for performance.
+    When debugging this portion it is best to look at the assembly output 
+    and debug from there.
+*/
 
-#define PMP_WAIT_STATES     (GetPeripheralClock() / DISPLAY_CONTROLLER_SETUP_Hz)
+    // error checking
+    #ifndef PMP_DATA_SETUP_TIME
+        #error "Define PMP_DATA_SETUP_TIME in HardwareProfile.h for data set up before read/write strobe timing"
+    #endif    
+    #ifndef PMP_DATA_WAIT_TIME
+        #error "Define PMP_DATA_WAIT_TIME in HardwareProfile.h for read/write strobe wait states"
+    #endif    
+    #ifndef PMP_DATA_HOLD_TIME
+        #error "Define PMP_DATA_HOLD_TIME in HardwareProfile.h for data hold after read/write strobe"
+    #endif    
+    
 #ifdef __PIC32MX__
 #define PMDIN1              PMDIN
 #endif
@@ -94,6 +90,8 @@
  ********************************************************************/
 #ifdef RS_LAT_BIT
 
+#warning "RS_LAT_BIT is being deprecated. Define DisplaySetCommand(), DisplaySetData() & DisplayCmdDataConfig() in HardwareProfile.h and use them instead."
+
 extern inline void __attribute__ ((always_inline)) DisplaySetCommand()
 {
 	RS_LAT_BIT = 0;
@@ -111,6 +109,8 @@ extern inline void __attribute__ ((always_inline)) DisplayCmdDataConfig()
 #endif
 
 #ifdef CS_LAT_BIT
+
+#warning "CS_LAT_BIT is being deprecated. Define DisplayEnable(), DisplayDisable() & DisplayConfig() in HardwareProfile.h and use them instead."
 
 extern inline void __attribute__ ((always_inline)) DisplayEnable()
 {
@@ -130,6 +130,8 @@ extern inline void __attribute__ ((always_inline)) DisplayConfig()
 #endif
 
 #ifdef RST_LAT_BIT
+
+#warning "RST_LAT_BIT is being deprecated. Define DisplayResetEnable(), DisplayResetDisable() & DisplayResetConfig() in HardwareProfile.h and use them instead."
 
 extern inline void __attribute__ ((always_inline)) DisplayResetEnable()
 {
@@ -163,7 +165,7 @@ extern inline void __attribute__ ((always_inline)) DisplayResetConfig()
 * Note: chip select should be enabled
 *
 ********************************************************************/
-#ifdef USE_16BIT_PMP
+#if defined (USE_16BIT_PMP)
 
 extern inline void __attribute__ ((always_inline)) DeviceWrite(WORD data) 
 { 
@@ -171,7 +173,7 @@ extern inline void __attribute__ ((always_inline)) DeviceWrite(WORD data)
 	PMPWaitBusy();
 }
 
-#else
+#elif defined (USE_8BIT_PMP)
 
 extern inline void __attribute__ ((always_inline)) DeviceWrite(BYTE data)
 {
@@ -197,7 +199,7 @@ extern inline void __attribute__ ((always_inline)) DeviceWrite(BYTE data)
 * Note: chip select should be enabled
 *
 ********************************************************************/
-#ifdef USE_16BIT_PMP
+#if defined (USE_16BIT_PMP)
 
 extern inline WORD __attribute__ ((always_inline)) DeviceRead()
 {
@@ -211,7 +213,7 @@ WORD value;
 	return value;
 }
 
-#else
+#elif defined (USE_8BIT_PMP)
 
 
 extern inline BYTE __attribute__ ((always_inline)) DeviceRead(){
@@ -244,7 +246,16 @@ BYTE value;
 * Note: chip select should be enabled
 *
 ********************************************************************/
-#ifdef USE_8BIT_PMP
+#if defined (USE_16BIT_PMP)
+extern inline WORD __attribute__ ((always_inline)) SingleDeviceRead()
+{
+WORD value;
+	value = PMDIN1;
+	PMPWaitBusy();
+	return value;
+}
+
+#elif defined (USE_8BIT_PMP)
 extern inline BYTE __attribute__ ((always_inline)) SingleDeviceRead()
 {
 BYTE value;
@@ -255,6 +266,49 @@ BYTE value;
 
 #endif
 
+/*********************************************************************
+* Macros:  DeviceReadWord()
+*
+* PreCondition:  none
+*
+* Input: none
+*
+* Output: data read
+*
+* Side Effects: none
+*
+* Overview: Reads a word from the device. Depending on the interface
+*			(byte or word) it will always return a word.
+*
+* Note: chip select should be enabled
+*
+********************************************************************/
+#if defined (USE_16BIT_PMP)
+extern inline WORD __attribute__ ((always_inline)) DeviceReadWord()
+{
+WORD value;
+	value = PMDIN1;
+	PMPWaitBusy();
+	return value;
+}
+
+#elif defined (USE_8BIT_PMP)
+extern inline WORD __attribute__ ((always_inline)) DeviceReadWord()
+{
+WORD value;
+BYTE temp;
+	value = PMDIN1;
+	value = value << 8;
+	PMPWaitBusy();
+	temp = PMDIN1;
+	value = value & temp;
+	PMPWaitBusy();
+	return value;
+}
+
+#endif
+
+  
 /*********************************************************************
 * Function:  DeviceInit()
 *
@@ -272,44 +326,69 @@ BYTE value;
 *
 ********************************************************************/
 
-extern inline void __attribute__ ((always_inline)) DeviceInit(void)
+extern inline void __attribute__ ((always_inline)) DriverInterfaceInit(void)
 { 
-	DisplayResetEnable();            // hold in reset by default
-    DisplayResetConfig();           // enable RESET line
-    DisplayCmdDataConfig();            // enable RS line
-    DisplayDisable();             // not selected by default
-    DisplayConfig();            // enable chip select line
+    // variable for PMP timing calculation
+	// GetPeripheralClock() is in Mhz. pClockPeriod will be in nanoseconds.
+    DWORD pClockPeriod = (1000000000ul) / GetPeripheralClock();
+
+	DisplayResetEnable();               // hold in reset by default
+    DisplayResetConfig();               // enable RESET line
+    DisplayCmdDataConfig();             // enable RS line
+    DisplayDisable();                   // not selected by default
+    DisplayConfig();                    // enable chip select line
+    DisplayBacklightOff();              // initially set the backlight to off
+    DisplayBacklightConfig();           // set the backlight control pin
 
     // PMP setup
     PMMODE = 0;
     PMAEN = 0;
     PMCON = 0;
-    PMMODEbits.MODE = 2;                    // Intel 80 master interface
-    #if defined(__PIC32MX__) 
-    PMMODEbits.WAITB = 0;
-    PMMODEbits.WAITM = PMP_WAIT_STATES;
-    #elif defined(__dsPIC33F__) || defined(__PIC24H__)
-    PMMODEbits.WAITB = 1; 
-    PMMODEbits.WAITM = 3; 
-    #else
-    PMMODEbits.WAITB = 0;
-    PMMODEbits.WAITM = 2;
-    #endif
-    PMMODEbits.WAITE = 0; 
+    PMMODEbits.MODE = 2;                // Intel 80 master interface
 
-    #ifdef USE_16BIT_PMP
-    PMMODEbits.MODE16 = 1;                  // 16 bit mode
-    #else
-    PMMODEbits.MODE16 = 0;                  // 8 bit mode
+    #if (PMP_DATA_SETUP_TIME == 0)
+        PMMODEbits.WAITB = 0;
+    #else    
+        if (PMP_DATA_SETUP_TIME <= pClockPeriod)
+            PMMODEbits.WAITB = 0;
+        else if (PMP_DATA_SETUP_TIME > pClockPeriod)
+            PMMODEbits.WAITB = (PMP_DATA_SETUP_TIME / pClockPeriod) + 1;
     #endif
     
-    PMCONbits.PTRDEN = 1;                   // enable RD line
-    PMCONbits.PTWREN = 1;                   // enable WR line
-    PMCONbits.PMPEN = 1;                    // enable PMP
+    #if (PMP_DATA_WAIT_TIME == 0)
+        PMMODEbits.WAITM = 0;
+    #else    
+        if (PMP_DATA_WAIT_TIME <= pClockPeriod)
+            PMMODEbits.WAITM = 1;
+        else if (PMP_DATA_WAIT_TIME > pClockPeriod)
+            PMMODEbits.WAITM = (PMP_DATA_WAIT_TIME / pClockPeriod) + 1;
+    #endif
+    
+    #if (PMP_DATA_HOLD_TIME == 0)
+        PMMODEbits.WAITE = 0;
+    #else
+        if (PMP_DATA_HOLD_TIME <= pClockPeriod)
+            PMMODEbits.WAITE = 0;
+        else if (PMP_DATA_HOLD_TIME > pClockPeriod)
+            PMMODEbits.WAITE = (PMP_DATA_HOLD_TIME / pClockPeriod) + 1;
+    #endif
 
-    DelayMs(40);
-    DisplayResetDisable();                         // release from reset
-    DelayMs(400);
+    #ifdef USE_16BIT_PMP
+    PMMODEbits.MODE16 = 1;              // 16 bit mode
+    #else
+    PMMODEbits.MODE16 = 0;              // 8 bit mode
+    #endif
+    
+    PMCONbits.PTRDEN = 1;               // enable RD line
+    PMCONbits.PTWREN = 1;               // enable WR line
+    PMCONbits.PMPEN = 1;                // enable PMP
+
+    DisplayResetDisable();              // release from reset
+	
+	// hard delay inserted here for devices that needs delays after reset.
+	// Value will vary from device to device, please refer to the specific 
+	// device data sheet for details.
+    Delay10us(20);
 }
-#endif
-#endif
+#endif //#ifdef USE_GFX_PMP
+#endif //#ifndef _GFX_PMP_H_FILE

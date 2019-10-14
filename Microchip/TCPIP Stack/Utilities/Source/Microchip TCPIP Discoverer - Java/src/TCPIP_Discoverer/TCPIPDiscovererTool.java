@@ -223,7 +223,7 @@ public class TCPIPDiscovererTool extends javax.swing.JFrame {
             }
         });
 
-        btnDiscover.setText("Dsicover Devices");
+        btnDiscover.setText("Discover Devices");
         btnDiscover.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnDiscover.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

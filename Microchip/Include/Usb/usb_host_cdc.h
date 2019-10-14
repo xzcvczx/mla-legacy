@@ -81,6 +81,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
          Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
          more than 256 bytes
+
+ 2.9     Fixed bug: changed USB_CDC_CONTROL_LINE_LENGTH to 0x00 (was 0x02).		 
 ********************************************************************************/
 //DOM-IGNORE-END
 
@@ -211,7 +213,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
 
 #define USB_CDC_LINE_CODING_LENGTH          0x07   // Number of bytes Line Coding transfer
-#define USB_CDC_CONTROL_LINE_LENGTH         0x02   // Number of bytes Control line transfer
+#define USB_CDC_CONTROL_LINE_LENGTH         0x00   // Number of bytes Control line transfer
 #define USB_CDC_MAX_PACKET_SIZE             0x200   // Max transfer size is 64 bytes for Full Speed USB
 //******************************************************************************
 //******************************************************************************

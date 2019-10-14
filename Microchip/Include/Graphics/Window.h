@@ -42,6 +42,7 @@
     #define _WINDOW_H
 
     #include <Graphics/GOL.h>
+    #include "GenericTypeDefs.h"
 
 // Indent for the title bar text from the left side of bitmap or title bar emboss
     #define WND_INDENT  2

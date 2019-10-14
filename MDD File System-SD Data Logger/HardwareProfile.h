@@ -312,12 +312,23 @@
 
             // Tris pins for SCK/SDI/SDO lines
 
-            // Description: The TRIS bit for the SCK pin
-            #define SPICLOCK            TRISFbits.TRISF6
-            // Description: The TRIS bit for the SDI pin
-            #define SPIIN               TRISFbits.TRISF7
-            // Description: The TRIS bit for the SDO pin
-            #define SPIOUT              TRISFbits.TRISF8
+            // Tris pins for SCK/SDI/SDO lines
+			#if defined(__32MX460F512L__)
+            	// Description: The TRIS bit for the SCK pin
+            	#define SPICLOCK            TRISDbits.TRISD10
+            	// Description: The TRIS bit for the SDI pin
+            	#define SPIIN               TRISCbits.TRISC4
+            	// Description: The TRIS bit for the SDO pin
+            	#define SPIOUT              TRISDbits.TRISD0
+			#else	// example: PIC32MX360F512L
+            	// Description: The TRIS bit for the SCK pin
+            	#define SPICLOCK            TRISFbits.TRISF6
+            	// Description: The TRIS bit for the SDI pin
+            	#define SPIIN               TRISFbits.TRISF7
+            	// Description: The TRIS bit for the SDO pin
+            	#define SPIOUT              TRISFbits.TRISF8
+			#endif
+
             //SPI library functions
             #define putcSPI             putcSPI1
             #define getcSPI             getcSPI1

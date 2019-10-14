@@ -39,12 +39,13 @@
 *   UART to transmit data over RS232 to the computer.
 *
 * Change History:
-*  Rev   Date         Description
-*  0.1   11/09/2006   Initial revision
-*  1.0   01/09/2007   Initial release
-*  2.0   4/24/2009    Modified for MiApp interface
-*  2.1   6/20/2009    Add LCD support
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  0.1   11/09/2006   yfy       Initial revision
+*  1.0   01/09/2007   yfy       Initial release
+*  2.0   4/24/2009    yfy       Modified for MiApp interface
+*  2.1   6/20/2009    yfy       Add LCD support
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 /************************ HEADERS **********************************/
@@ -368,6 +369,7 @@ BYTE ConsoleGet(void)
         }
 
         return RCREG2;
+
     #else
         // Clear overrun error if it has occured
         // New bytes cannot be received if the error occurs and isn't cleared

@@ -211,7 +211,7 @@ void MACInit(void)
     ENC_SPISTATbits.SMP = 0;// Input sampled at middle of data output time
 #elif defined(__C30__)
     ENC_SPISTAT = 0;        // clear SPI
-    #if defined(__PIC24H__) || defined(__dsPIC33F__)
+    #if defined(__PIC24H__) || defined(__dsPIC33F__) || defined(__dsPIC33E__)|| defined(__PIC24E__)
         ENC_SPICON1 = 0x0F;     // 1:1 primary prescale, 5:1 secondary prescale (8MHz  @ 40MIPS)
     //    ENC_SPICON1 = 0x1E;   // 4:1 primary prescale, 1:1 secondary prescale (10MHz @ 40MIPS, Doesn't work.  CLKRDY is incorrectly reported as being clear.  Problem caused by dsPIC33/PIC24H ES silicon bug.)
     #elif defined(__PIC24F__) || defined(__PIC24FK__)

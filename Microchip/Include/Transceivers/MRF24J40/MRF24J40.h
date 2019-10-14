@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright Â© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED â€œAS ISâ€ WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -40,16 +40,17 @@
 *   in the MRF24J40
 *
 * Change History:
-*  Rev   Date         Description
-*  0.1   11/09/2006   Initial revision
-*  1.0   01/09/2007   Initial release
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  0.1   11/09/2006   yfy       Initial revision
+*  1.0   01/09/2007   yfy       Initial release
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #if !defined(_ZMRF24J40_H_) && defined(MRF24J40)
     #define _ZMRF24J40_H_
-                        
+        
     #include "GenericTypeDefs.h"
     #include "SystemProfile.h"
     #include "Transceivers/Transceivers.h"
@@ -64,8 +65,12 @@
     #define SEC_LEVEL_CCM_64        5
     #define SEC_LEVEL_CCM_128       6
     
-    #if defined(PROTOCOL_MIWI)
+    #if defined(PROTOCOL_MIWI) 
         #define PROTOCOL_HEADER_SIZE MIWI_HEADER_LEN
+    #endif
+    
+    #if defined(PROTOCOL_MIWI_PRO)
+        #define PROTOCOL_HEADER_SIZE MIWI_PRO_HEADER_LEN
     #endif
     
     #if defined(PROTOCOL_P2P)
@@ -84,18 +89,18 @@
             #define MIC_SIZE 4
         #endif
 
-        #define RX_PACKET_SIZE (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+MIC_SIZE+14)
-        
+        #define RX_PACKET_SIZE (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+MIC_SIZE+17)
+
         #if (RX_PACKET_SIZE > 127) && !defined(__18CXX)
-            #warning  "Maximum application payload RX BUFFER SIZE is (113 - 2 * MY_ADDRESS_LENGTH)"
+            #warning  "Maximum application payload RX BUFFER SIZE is 94"
         #endif
 
     #else
 
-        #define RX_PACKET_SIZE (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+9)
+        #define RX_PACKET_SIZE (RX_BUFFER_SIZE+PROTOCOL_HEADER_SIZE+MY_ADDRESS_LENGTH+MY_ADDRESS_LENGTH+12)
         
         #if (RX_PACKET_SIZE > 127) && !defined(__18CXX)
-            #warning "Maximum application payload RX BUFFER SIZE is (118 - 2 * MY_ADDRESS_LENGTH)"
+            #warning "Maximum application payload RX BUFFER SIZE is 99"
         #endif
     
     #endif    
@@ -319,6 +324,14 @@
     #define CHANNEL_25 0xe0
     #define CHANNEL_26 0xf0
     
+    #if defined(ENABLE_PA_LNA) && (defined(MRF24J40MB) || defined(MRF24J40MC))
+        #define FULL_CHANNEL_MAP        0x03FFF800
+    #else
+        #define FULL_CHANNEL_MAP        0x07FFF800
+    #endif
+    
+    
+    
     typedef union 
     {
         BYTE Val;               // value of interrupts
@@ -341,10 +354,8 @@
             BYTE        TX_PENDING_ACK      : 1;
             BYTE        TX_FAIL             : 1;
             BYTE        RX_SECURITY         : 1;
-            //BYTE        RX_PENDING          : 1;
             BYTE        RX_IGNORE_SECURITY  : 1;
             BYTE        RX_BUFFERED         : 1;
-            //BYTE        RX_ENABLED          : 1;
         } bits;
     } MRF24J40_STATUS;
 

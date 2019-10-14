@@ -44,6 +44,7 @@
     #define _CUSTOM_H
 
     #include <Graphics/GOL.h>
+    #include "GenericTypeDefs.h"
 
 // Control states:
     #define CC_FOCUSED  0x0001  // bit  to indicate the control is focused

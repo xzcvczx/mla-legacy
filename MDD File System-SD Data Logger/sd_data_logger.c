@@ -4,8 +4,8 @@
 
 * FileName:        SD Data Logger.c
 * Dependencies:    project requires File System library
-* Processor:       PIC24F
-* Compiler:        C30 v2.01/C32 v0.00.18
+* Processor:       PIC24F/PIC32
+* Compiler:        C30 v3.25/C32 v1.11
 * Company:         Microchip Technology, Inc.
 
 Software License Agreement
@@ -63,7 +63,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #define MAX_COMMAND_LENGTH              50
 #define MAX_LOG_BUFFER_SIZE             512
 #define NUM_LOG_BUFFERS                 2
-#define VERSION                         "v1.2.4"
+#define VERSION                         "v1.3.0"
 
 // RTCC Format Correlation Constants
 // The 16-bit and 32-bit architectures use two different formats for the RTCC.
@@ -274,6 +274,7 @@ typedef struct _VOLUME_INFO
 BYTE    GetCommand( void );
 DWORD   GetCurrentTick( void );
 void    GetOneWord( char *buffer );
+void    GetOneString( char *buffer );
 DWORD   GetUserDate( void );
 DWORD   GetUserTime( void );
 void    InitializeAnalogMonitor( void );
@@ -548,7 +549,11 @@ int main (void)
                                     setAttribute = 0xFF;
                                     break;
                             }
-                            GetOneWord (param1);
+							#if defined(SUPPORT_LFN)
+								GetOneString(param1);
+							#else
+                            	GetOneWord (param1);
+							#endif
                         }
 
                         if (param1[0] == 0)
@@ -644,9 +649,14 @@ int main (void)
                             break;
                         }
 
-                        GetOneWord( param1 );
-                        GetOneWord( param2 );
-                        if ((param1[0] == 0) || (param2[0] == 0))
+						GetOneWord(param1);
+						#if defined(SUPPORT_LFN)
+							GetOneString(param2);
+						#else
+                        	GetOneWord (param2);
+						#endif
+ 
+                       if ((param1[0] == 0) || (param2[0] == 0))
                         {
                             UART2PrintString( " - Two parameters required\r\n" );
                         }
@@ -697,8 +707,13 @@ int main (void)
                             }
                             else
                             {
+								#if defined(SUPPORT_LFN) && defined(__PIC24F__)
+                                	UART2PrintString( "Copying Files not Supported in PIC24 Demo if 'SUPPORT_LFN' macro is enabled..\r\n" );
+									break;
+								#endif
+
                                 if (FindFirst( param1,
-                                        ATTR_DIRECTORY | ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN, &searchRecord ))
+                                        ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN, &searchRecord ))
                                 {
                                     UART2PrintString( " - File not found\r\n" );
                                 }
@@ -798,16 +813,19 @@ int main (void)
                         else
                         {
                             if (FindFirst( &(commandInfo.buffer[commandInfo.index]),
-                                    ATTR_DIRECTORY | ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN, &searchRecord ))
+                                    ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN, &searchRecord ))
                             {
                                 UART2PrintString( " - File not found\r\n" );
                             }
                             else
                             {
-                                if (FSremove( &(commandInfo.buffer[commandInfo.index] )))
+                                do
                                 {
-                                    UART2PrintString( " - Error performing command\r\n" );
-                                }
+                                    if (FSremove(searchRecord.filename))
+                                    {
+                                        UART2PrintString( " - Error performing command\r\n" );
+                                    }
+                                }while(!FindNext(&searchRecord));
                             }
                         }
                         break;
@@ -869,7 +887,11 @@ int main (void)
                         }
 
                         GetOneWord( param1 );
-                        GetOneWord( param2 );
+						#if defined(SUPPORT_LFN)
+							GetOneString(param2);
+						#else
+                        	GetOneWord (param2);
+						#endif
                         if ((param1[0] == 0) || (param2[0] == 0))
                         {
                             UART2PrintString( " - Two parameters required\r\n" );
@@ -1031,8 +1053,12 @@ int main (void)
                             break;
                         }
 
-                        GetOneWord( param1 );
-                        GetOneWord( param2 );
+						GetOneWord (param1);
+						#if defined(SUPPORT_LFN)
+							GetOneString(param2);
+						#else
+							GetOneWord (param2);
+						#endif
                         if ((param1[0] == 0) || (param2[0] == 0))
                         {
                             UART2PrintString( " - Two parameters required\r\n" );
@@ -1114,7 +1140,7 @@ int main (void)
                         else
                         {
                             if (FindFirst( &(commandInfo.buffer[commandInfo.index]),
-                                    ATTR_DIRECTORY | ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN, &searchRecord ))
+                                    ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN, &searchRecord ))
                             {
                                 UART2PrintString( " - File not found\r\n" );
                             }
@@ -1370,6 +1396,37 @@ void GetOneWord( char *buffer )
 
     while ((commandInfo.buffer[commandInfo.index] != 0) &&
            (commandInfo.buffer[commandInfo.index] != ' '))
+    {
+        *buffer++ = commandInfo.buffer[commandInfo.index++];
+    }
+    *buffer = 0;
+}
+
+/****************************************************************************
+  Function:
+    void GetOneString( char *buffer )
+
+  Description:
+    This function copies the next string in the command line to the specified
+    buffer. The returned string is null terminated.
+
+  Precondition:
+    commandInfo.buffer and commandInfo.index are valid
+
+  Parameters:
+    *buffer - Pointer to where the String is to be stored.
+
+  Returns:
+    None
+
+  Remarks:
+
+  ***************************************************************************/
+void GetOneString( char *buffer )
+{
+    SkipWhiteSpace();
+
+    while (commandInfo.buffer[commandInfo.index] != 0)
     {
         *buffer++ = commandInfo.buffer[commandInfo.index++];
     }
@@ -2082,6 +2139,10 @@ void PIC24RTCCSetTime( WORD weekDay_hours, WORD minutes_seconds )
 void PrintFileInformation( SearchRec searchRecord )
 {
     char        buffer[20];
+//	#ifdef SUPPORT_LFN
+//    UINT16_VAL  tempWord;
+//    unsigned short int *utf16BitDataAddr;
+//	#endif
 
     // Display the file's date/time stamp.
     sprintf( buffer, "%04d-%02d-%02d ", ((((DWORD_VAL)(searchRecord.timestamp)).w[1] & 0xFE00) >> 9) + 1980,
@@ -2105,7 +2166,23 @@ void PrintFileInformation( SearchRec searchRecord )
     }
 
     // Display the file name.
-    UART2PrintString( searchRecord.filename );
+//	#ifdef SUPPORT_LFN
+//	if(searchRecord.utf16LFNfoundLength)
+//	{
+//		utf16BitDataAddr = searchRecord.utf16LFNfound;
+//		while(*utf16BitDataAddr)
+//		{
+//			tempWord.Val = *utf16BitDataAddr;
+//			UART2PutChar(tempWord.byte.LB);
+//			UART2PutChar(tempWord.byte.HB);
+//			utf16BitDataAddr++;
+//		}
+//	}
+//	#else
+	{
+		UART2PrintString( searchRecord.filename );
+	}
+//	#endif
     UART2PrintString( "\r\n" );
 }
 

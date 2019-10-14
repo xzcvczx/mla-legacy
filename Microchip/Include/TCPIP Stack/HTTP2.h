@@ -198,7 +198,7 @@
 	} HTTP_CONN;
 
 #if defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
-	#define RESERVED_HTTP_MEMORY 0ul
+	#define RESERVED_HTTP_MEMORY 0ul        // Macro indicating how much RAM to allocate on an ethernet controller to store HTTP state data.
 #else
 	#define RESERVED_HTTP_MEMORY ((DWORD)MAX_HTTP_CONNECTIONS * (DWORD)sizeof(HTTP_CONN))
 #endif

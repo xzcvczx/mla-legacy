@@ -34,10 +34,12 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author                           Date            Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * PAT				  	            11/12/07	    Version 1.0 release
- * Pradeep Budagutta                03 Dec 2009     Added Object Header for Double Buffering Support
+ * 11/12/07	    Version 1.0 release
+ * 12/03/09     Added Object Header for Double Buffering Support
+ * 11/15/10		Fixed build error when USE_KEYBOARD is not defined
+ * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 #include <math.h>
@@ -84,6 +86,9 @@ ROUNDDIAL *RdiaCreate
     pDia->value = value;
     pDia->max = max;
     pDia->hdr.state = state;        // state
+    #ifdef USE_KEYBOARD
+    pDia->vAngle = 0;				// initial position
+    #endif
     pDia->curr_xPos = x + radius * 2 / 3;
     pDia->curr_yPos = y;
     pDia->hdr.DrawObj = RdiaDraw;				// draw function
@@ -140,10 +145,7 @@ void RdiaMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
     #ifdef USE_KEYBOARD
 
 // Dimple position table for 15 degree increments
-//    #define QUADRANT_POSITIONS     6
-//    SHORT   _cosine[QUADRANT_POSITIONS] = { 100, 97, 87, 71, 50, 26 };
 SHORT   _cosine[RDIA_QUADRANT_POSITIONS] = { 100, 97, 87, 71, 50, 26};
-    #endif
 
 /* */
 SHORT RdiaCosine(SHORT v)
@@ -198,6 +200,7 @@ SHORT RdiaSine(SHORT v)
         return (_cosine[RDIA_QUADRANT_POSITIONS - 1 - v]);
     }
 }
+    #endif
 
 /*********************************************************************
 * Function: WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
@@ -210,6 +213,7 @@ SHORT RdiaSine(SHORT v)
 WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
     ROUNDDIAL *pDia;
+    WORD      messageID = OBJ_MSG_INVALID;
 
     pDia = (ROUNDDIAL *)pObj;
 
@@ -217,7 +221,6 @@ WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
 
     SHORT           touchRadius, touchX, touchY;
     static SHORT    prevX = -1, prevY = -1;
-    WORD            messageID = OBJ_MSG_INVALID;
 
     // Evaluate if the message is for the button
     // Check if disabled first
@@ -332,12 +335,12 @@ WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
 
     SHORT   newValue;
 
-    // Evaluate if the message is for the button
+    // Evaluate if the message is for the Dial
     // Check if disabled first
     if(GetState(pDia, RDIA_DISABLED))
         return (OBJ_MSG_INVALID);
 
-    if((pMsg->type == TYPE_KEYBOARD) && (pMsg->param1 == pDia->hdr.ID) && (pMsg->uiEvent == EVENT_KEYSCAN))
+    if((pMsg->type == TYPE_KEYBOARD) && ((WORD)pMsg->param1 == pDia->hdr.ID) && (pMsg->uiEvent == EVENT_KEYSCAN))
     {
         if(pMsg->param2 == SCAN_RIGHT_PRESSED)
         {
@@ -347,9 +350,8 @@ WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
                 newValue -= (pDia->max + 1);
             }
 
-            pDia->new_xPos = pDia->radius * 2 * RdiaCosine(newValue) / 100 / 3;
-            pDia->new_yPos = pDia->radius * 2 * RdiaSine(newValue) / 100 / 3;
-            return (RD_MSG_CLOCKWISE);
+            pDia->vAngle += 1;
+            messageID = RD_MSG_CLOCKWISE;
         }
 
         if(pMsg->param2 == SCAN_LEFT_PRESSED)
@@ -360,14 +362,21 @@ WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
                 newValue += (pDia->max + 1);
             }
 
-            pDia->new_xPos = pDia->radius * 2 * RdiaCosine(newValue) / 100 / 3;
-            pDia->new_yPos = pDia->radius * 2 * RdiaSine(newValue) / 100 / 3;
-            return (RD_MSG_CTR_CLOCKWISE);
+            pDia->vAngle -= 1;
+            messageID = RD_MSG_CTR_CLOCKWISE;
         }
+        
+        if (pDia->vAngle > (RDIA_MAX_POSITIONS - 1))
+           	pDia->vAngle = 0;
+        else if (pDia->vAngle < 0)
+           	pDia->vAngle = (RDIA_MAX_POSITIONS - 1);
+           	
+        pDia->new_xPos = pDia->radius * 2 * RdiaCosine(pDia->vAngle) / 100 / 3;
+        pDia->new_yPos = pDia->radius * 2 * RdiaSine(pDia->vAngle) / 100 / 3;
     }
 
         #endif
-    return (OBJ_MSG_INVALID);
+    return (messageID);
 }
 
 /*********************************************************************
@@ -477,20 +486,6 @@ WORD RdiaDraw(void *pObj)
             ) return (0);
 
             // determine if the value will increment or decrement
-                #if defined USE_TOUCHSCREEN
-            if(GetState(pDia, RDIA_ROT_CW))
-            {
-                pDia->value = pDia->value + pDia->res;
-                if(pDia->value > pDia->max)
-                    pDia->value = pDia->max;
-            }
-            else if(GetState(pDia, RDIA_ROT_CCW))
-            {
-                pDia->value = pDia->value - pDia->res;
-                if(pDia->value < 0)
-                    pDia->value = 0;
-            }
-               #elif defined USE_KEYBOARD
             if(GetState(pDia, RDIA_ROT_CW))
             {
                 pDia->value = pDia->value + pDia->res;
@@ -507,7 +502,6 @@ WORD RdiaDraw(void *pObj)
                     pDia->value += (pDia->max + 1);
                 }
             }
-                #endif
 
             // else do not update counter yet
             // locate the new position of the dimple	

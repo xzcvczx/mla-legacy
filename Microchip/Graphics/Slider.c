@@ -34,14 +34,17 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * PAT					11/12/07	Version 1.0 release
- * PAT					04/29/10	- Added OBJ_MSG_PASSIVE message to detect
- *									  event on the slider but with no action.
- *									- fixed the swapped message translation
- *									  in the SldTranslateMsg() when keyboard
- *									  event is detected.
+ * 11/12/07	    Version 1.0 release
+ * 04/29/10	    - Added OBJ_MSG_PASSIVE message to detect event on the slider 
+ *                but with no action.
+ *				- fixed the swapped message translation in the 
+ *                SldTranslateMsg() when keyboard event is detected.
+ * 02/23/11     Removed references to BLACK and WHITE colors. Replaced
+ *              with emboss dark and light colors. These are used
+ *              in rendering the thumb path.
+ * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -616,7 +619,7 @@ WORD SldTranslateMsg(void *pObj, GOL_MSG *pMsg)
         #ifdef USE_KEYBOARD
     if(pMsg->type == TYPE_KEYBOARD)
     {
-        if(pMsg->param1 == pSld->hdr.ID)
+        if((WORD)pMsg->param1 == pSld->hdr.ID)
         {
             if(pMsg->uiEvent == EVENT_KEYSCAN)
             {
@@ -745,7 +748,7 @@ WORD SldDraw(void *pObj)
             }
 
         case SLD_STATE_THUMBPATH1:
-            SetColor(BLACK);                    // draw the black line
+            SetColor(pSld->hdr.pGolScheme->EmbossDkColor);
             if(!GetState(pSld, SLD_VERTICAL))
             {
                 if(!Line(minPos, midPoint, maxPos, midPoint))
@@ -760,7 +763,7 @@ WORD SldDraw(void *pObj)
             state = SLD_STATE_THUMBPATH2;
 
         case SLD_STATE_THUMBPATH2:
-            SetColor(WHITE);                    // draw the white line
+            SetColor(pSld->hdr.pGolScheme->EmbossLtColor);
             if(!GetState(pSld, SLD_VERTICAL))
             {
                 if(!Line(minPos, midPoint + 1, maxPos, midPoint + 1))
@@ -815,7 +818,7 @@ WORD SldDraw(void *pObj)
             }
 
         case SLD_STATE_REDRAWPATH1:         // redraws the lines that it covered
-            SetColor(BLACK);                // redraw the black line first
+            SetColor(pSld->hdr.pGolScheme->EmbossDkColor);
 
             // Check if the redraw area exceeds the actual dimension. This will
             // adjust the redrawing area to just within the parameters
@@ -853,7 +856,7 @@ WORD SldDraw(void *pObj)
             state = SLD_STATE_REDRAWPATH2;
 
         case SLD_STATE_REDRAWPATH2:
-            SetColor(WHITE);                // redraw the white line next
+            SetColor(pSld->hdr.pGolScheme->EmbossLtColor);
             if(!GetState(pSld, SLD_VERTICAL))
             {
                 if(!Line(left, midPoint + 1, right, midPoint + 1))

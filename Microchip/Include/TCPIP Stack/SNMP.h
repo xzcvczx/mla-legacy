@@ -44,10 +44,7 @@
  * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
- * Author               Date     Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Nilesh Rajbharti     1/9/03   Original        (Rev 1.0)
- * Amit Shirbhate 		09/24/08 SNMPv2c Support added.	
+ * V5.36 ---- STACK_USE_MPFS has been removed	
  ********************************************************************/
  
 #ifndef SNMP_H
@@ -62,14 +59,12 @@
 #define DATA_TYPE_TABLE_SIZE    (sizeof(dataTypeTable)/sizeof(dataTypeTable[0]))
 
 
-//This is the file that contains SNMP BIB file.
+//This is the file that contains SNMP bib file.
 //File name must contain all upper case letter and must match
-//with what was included in MPFS image.
-#if defined(STACK_USE_MPFS)
-#define SNMP_BIB_FILE_NAME      "SNMP.BIB"
-#else
+//with what was included in MPFS2 image.
+
 #define SNMP_BIB_FILE_NAME		"snmp.bib"
-#endif
+
 
 // Section:  SNMP Tx pdu offset settings
 #define _SNMPSetTxOffset(o)     (SNMPTxOffset = o)
@@ -77,7 +72,7 @@
 
 
 //Change this to match your OID string length.
-#define OID_MAX_LEN             (15)
+#define OID_MAX_LEN             (18)
 
 #define SNMP_START_OF_VAR       (0)
 #define SNMP_END_OF_VAR         (0xff)
@@ -130,7 +125,7 @@
 //This id is assigned via MIB file.  Only dynamic and AgentID
 //variables can contian ID.  MIB2BIB utility enforces this
 //rules when BIB was generated.
-typedef BYTE SNMP_ID;
+typedef int SNMP_ID;
 typedef BYTE SNMP_INDEX;
 
 /*SNMP MIN and MAX message 484 bytes in size */
@@ -256,6 +251,9 @@ typedef struct
 	BYTE notificationCode;					//Trap notification code
 	UDP_SOCKET socket;						//Udp socket number 
 	DWORD_VAL timestamp;					//Time stamp for trap
+#if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) 
+	SNMP_ID trapIDVar;						// SNMPV2 specific trap
+#endif	
 } SNMP_NOTIFY_INFO;
 
 
@@ -471,7 +469,7 @@ extern BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec);
 extern 	BOOL GetNextLeaf(OID_INFO* rec);
 extern BYTE IsValidLength(WORD *len);
 
-extern BOOL SNMPIdRecrdValidation(PDU_INFO* pduDbPtr,OID_INFO *var,BYTE * oidValuePtr,BYTE oidlen);
+extern BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BYTE oidLen);
 
 
 

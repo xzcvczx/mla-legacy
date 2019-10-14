@@ -60,11 +60,13 @@ static BOOL HandlePossibleTCPDisconnection(SOCKET s);
 #if defined(__18CXX) && !defined(HI_TECH_C)	
 	#pragma udata BSD_uRAM
 #endif
+// Array of BSDSocket elements; used to track all socket state and connection information.
 static struct BSDSocket  BSDSocketArray[BSD_SOCKET_COUNT];
 #if defined(__18CXX) && !defined(HI_TECH_C)	
 	#pragma udata
 #endif
 
+// Contains the next local port number to associate with a socket.
 static WORD gAutoPortNumber = 1024;
 
 
@@ -100,6 +102,7 @@ void BerkeleySocketInit(void)
 	{
 		socket             = (struct BSDSocket *)&BSDSocketArray[s];
 		socket->bsdState   = SKT_CLOSED;
+		socket->SocketID = INVALID_UDP_SOCKET;
 	}
 }
 
@@ -136,6 +139,23 @@ SOCKET socket( int af, int type, int protocol )
 
 	if( af != AF_INET )
 		return INVALID_SOCKET;
+
+	if(protocol == IPPROTO_IP)		
+	{
+		switch(type)
+		{
+			case SOCK_DGRAM:
+				protocol = IPPROTO_UDP;
+			break;
+
+			case SOCK_STREAM:
+				protocol = IPPROTO_TCP;
+			break;
+			
+			default:
+			break;
+		}
+	}
 
 	for( s = 0; s < BSD_SOCKET_COUNT; s++,socket++ )
 	{
@@ -220,7 +240,9 @@ int bind( SOCKET s, const struct sockaddr* name, int namelen )
 
 	if(socket->SocketType == SOCK_DGRAM)
 	{
-		socket->SocketID = UDPOpen(lPort, NULL, 0);
+		//socket->SocketID = UDPOpen(lPort, NULL, 0);
+		
+		socket->SocketID = UDPOpenEx(0,UDP_OPEN_SERVER,lPort, 0);
 		if(socket->SocketID == INVALID_UDP_SOCKET)
 			return SOCKET_ERROR;
 	}
@@ -510,7 +532,9 @@ int connect( SOCKET s, struct sockaddr* name, int namelen )
 	        if(gAutoPortNumber > 5000u) // reset the port numbers
 				gAutoPortNumber = 1024;
 
-			socket->SocketID = UDPOpen(localPort, NULL, remotePort);
+			//socket->SocketID = UDPOpen(localPort, NULL, remotePort);
+			
+			socket->SocketID = UDPOpenEx(0,UDP_OPEN_SERVER,localPort, remotePort);
 			if(socket->SocketID == INVALID_UDP_SOCKET)
 				return SOCKET_ERROR;
 			socket->bsdState = SKT_BOUND;
@@ -602,7 +626,7 @@ int sendto( SOCKET s, const char* buf, int len, int flags, const struct sockaddr
 	struct BSDSocket *socket;
 	int size = SOCKET_ERROR;
 	NODE_INFO remoteInfo;
-	static DWORD startTick;		// NOTE: startTick really should be a per socket BSDSocket structure member since other BSD calls can interfere with the ARP cycles
+//	static DWORD startTick;		// NOTE: startTick really should be a per socket BSDSocket structure member since other BSD calls can interfere with the ARP cycles
 	WORD wRemotePort;
 	struct sockaddr_in local;
 
@@ -634,9 +658,13 @@ int sendto( SOCKET s, const char* buf, int len, int flags, const struct sockaddr
 					return SOCKET_ERROR;
 			}
 		}
+		if(UDPIsOpened((UDP_SOCKET)s) != TRUE)
+			return SOCKET_ERROR;
+		
 		if(remoteInfo.IPAddr.Val == IP_ADDR_ANY)
 			remoteInfo.IPAddr.Val = 0xFFFFFFFFu;
 
+#if 0
 		// Set the remote IP and MAC address if it is different from what we already have stored in the UDP socket
 		if(UDPSocketInfo[socket->SocketID].remoteNode.IPAddr.Val != remoteInfo.IPAddr.Val)
 		{
@@ -654,7 +682,7 @@ int sendto( SOCKET s, const char* buf, int len, int flags, const struct sockaddr
 				return SOCKET_ERROR;
 			}
 		}
-		
+#endif		
 		// Select the UDP socket and see if we can write to it
 		if(UDPIsPutReady(socket->SocketID))
 		{
@@ -820,7 +848,7 @@ int recvfrom( SOCKET s, char* buf, int len, int flags, struct sockaddr* from, in
 			{
 				if((unsigned int)*fromlen >= sizeof(struct sockaddr_in))
 				{
-					rem_addr->sin_addr.S_un.S_addr = UDPSocketInfo[socket->SocketID].remoteNode.IPAddr.Val;
+					rem_addr->sin_addr.S_un.S_addr = UDPSocketInfo[socket->SocketID].remote.remoteNode.IPAddr.Val;
 					rem_addr->sin_port = UDPSocketInfo[socket->SocketID].remotePort;
 					*fromlen = sizeof(struct sockaddr_in);
 				}

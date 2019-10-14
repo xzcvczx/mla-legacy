@@ -385,7 +385,7 @@ void WFSpiTxRx(UINT8   *p_txBuf,
     #endif    
 
 
-#if defined(WF_DEBUG)
+#if defined(WF_DEBUG) && defined(WF_USE_POWER_SAVE_FUNCTIONS)
     /* Cannot communicate with MRF24WB0M when it is in hibernate mode */
     {
         static UINT8 state;  /* avoid local vars in functions called from interrupt */

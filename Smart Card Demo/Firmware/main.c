@@ -36,7 +36,6 @@
   ----  -----------------------------------------
   1.0   Initial release
   1.01  Modified to Support T=1 protocol
-  1.02  Modified to Support PIC32,dsPIC33F & PIC24H controllers
 ********************************************************************/
 
 #include "string.h"

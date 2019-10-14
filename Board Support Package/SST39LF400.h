@@ -38,22 +38,17 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 4/12/2010	Original, ported from SST39LF400A
  * 8/11/2010	Removed dependency on Graphics file. 
+ * 1/14/2011    Swapped SST39LF400WriteWord() parameters for consistency
+ *              with other drivers.
+ * 5/25/2011    Modified WriteArray and ReadArray functions to match
+ *              common interface for other external flash drivers.
  ********************************************************************/
  
 #ifndef _SST39LF400_H
 #define _SST39LF400_H
 
-    #if defined(__dsPIC33F__)
-        #include <p33Fxxxx.h>
-    #elif defined(__PIC24H__)
-        #include <p24Hxxxx.h>
-    #elif defined(__PIC32MX__)
-        #include <plib.h>
-    #else
-        #include <p24Fxxxx.h>
-    #endif
-
-	#include "GenericTypeDefs.h"
+    #include "Compiler.h"
+    #include "GenericTypeDefs.h"
 	#include "HardwareProfile.h"
 
  /************************************************************************
@@ -66,21 +61,9 @@
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39LF400Init(WORD *pBuffer);
+void SST39LF400Init();
 
  /************************************************************************
-* Function: SST39LF400Init                                                  
-*                                                                       
-* Overview: this function initializes IOs and PMP
-*                                                                       
-* Input: none                                                          
-*                                                                       
-* Output: none
-*                                                                       
-************************************************************************/
-void SST39LF400DeInit(WORD *pBuffer);
-
-/************************************************************************
 * Function: BYTE SST39LF400WriteWord(DWORD address, WORD data)
 *                                                                       
 * Overview: this function writes one word
@@ -92,7 +75,7 @@ void SST39LF400DeInit(WORD *pBuffer);
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39LF400WriteWord(DWORD address, WORD data);
+BYTE SST39LF400WriteWord(WORD data, DWORD address);
 
 /************************************************************************
 * Function: WORD SST39LF400ReadWord(DWORD address)
@@ -107,7 +90,7 @@ BYTE SST39LF400WriteWord(DWORD address, WORD data);
 WORD SST39LF400ReadWord(DWORD address);
 
 /************************************************************************
-* Function: BYTE SST39LF400WriteArray(DWORD address, WORD* pData, nCount)
+* Function: BYTE SST39LF400WriteArray(DWORD address, BYTE *pData, WORD nCount)
 *                                                                       
 * Overview: this function writes data array at the address specified
 *                                                                       
@@ -118,10 +101,10 @@ WORD SST39LF400ReadWord(DWORD address);
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39LF400WriteArray(DWORD address, WORD *pData, WORD nCount);
+BYTE SST39LF400WriteArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
-* Function: void SST39LF400ReadArray(DWORD address, WORD* pData, nCount)
+* Function: void SST39LF400ReadArray(DWORD address, BYTE* pData, nCount)
 *                                                                       
 * Overview: this function reads data array from the address specified
 *                                                                       
@@ -130,7 +113,7 @@ BYTE SST39LF400WriteArray(DWORD address, WORD *pData, WORD nCount);
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39LF400ReadArray(DWORD address, WORD *pData, WORD nCount);
+void SST39LF400ReadArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
 * Function: void SST39LF400WaitProgram()
@@ -162,7 +145,7 @@ void SST39LF400ChipErase(void);
 * Overview: This function erases 2K Word section defined by address
 *
 * Input: address - The address location of the sector to be erased.
-*				   The address is decided by Address[30:11] address lines.
+*				   The address is decided by Address[17:11] address lines.
 *            
 * Output: none
 *
@@ -179,7 +162,6 @@ void SST39LF400SectorErase(DWORD address);
 * Output: none
 *
 ************************************************************************/
-//void SST39LF400CheckID();
 WORD SST39LF400CheckID();
 
 #endif //_SST39LF400_H

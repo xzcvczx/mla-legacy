@@ -163,10 +163,10 @@ static ROM DATA_TYPE_INFO dataTypeTable[] =
 SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[SNMP_MAX_NON_REC_ID_OID] =
 {
 #ifdef STACK_USE_SNMPV3_SERVER		
-	{{43,6,1,4,1,0x81,0x85,0x47,6},SNMP_V3},  /* SNMPv3 PVT test MIB OID is not part of mib.h file */
+	{{43,6,1,4,1,0x81,0x85,0x47,0x1,6},SNMP_V3},  /* SNMPv3 PVT test MIB OID is not part of mib.h file */
 #endif			
 	{{43,6,1,2,1,1},SNMP_V2C}, /* Max matching Subids of the MIB2.system tree*/	
-	{{43,6,1,4,1,0x81,0x85,0x47,1},SNMP_V2C}, /*Max matching Subids of the microchip.product tree*/			
+	{{43,6,1,4,1,0x81,0x85,0x47,0x1,1},SNMP_V2C}, /*Max matching Subids of the microchip.product tree*/			
 };
 
 /****************************************************************************
@@ -206,7 +206,9 @@ void SNMPInit(void)
     // Start with no error or flag set.
     SNMPStatus.Val = 0;
 
-    SNMPAgentSocket = UDPOpen(SNMP_AGENT_PORT, 0, INVALID_UDP_SOCKET);
+    //SNMPAgentSocket = UDPOpen(SNMP_AGENT_PORT, 0, INVALID_UDP_SOCKET);
+    
+	SNMPAgentSocket = UDPOpenEx(0,UDP_OPEN_SERVER,SNMP_AGENT_PORT,INVALID_UDP_PORT);
     // SNMPAgentSocket must not be INVALID_UDP_SOCKET.
     // If it is, compile time value of UDP Socket numbers must be increased.
 #ifdef STACK_USE_SNMPV3_SERVER
@@ -368,7 +370,7 @@ void SNMPNotifyPrepare(IP_ADDR* remoteHost,
                         BYTE notificationCode,
                         DWORD timestamp )
 {
-	IP_ADDR* remHostIpAddrPtr;
+	static IP_ADDR* remHostIpAddrPtr;
 	remHostIpAddrPtr = remoteHost;
 							
     strcpy(SNMPNotifyInfo.community, community);
@@ -378,8 +380,9 @@ void SNMPNotifyPrepare(IP_ADDR* remoteHost,
     SNMPNotifyInfo.notificationCode = notificationCode;
 
     SNMPNotifyInfo.timestamp.Val = timestamp;
+	SNMPNotifyInfo.socket = INVALID_UDP_SOCKET;
 
-    ARPResolve(remHostIpAddrPtr);
+//    ARPResolve(remHostIpAddrPtr);
 }
 
 
@@ -416,15 +419,36 @@ BOOL SNMPIsNotifyReady(IP_ADDR* remoteHost)
 
 	IP_ADDR * remHostIpAddrPtr;
 	remHostIpAddrPtr = remoteHost;
+	remoteNode.IPAddr.Val = remHostIpAddrPtr->Val;
+	
+	if(SNMPNotifyInfo.socket == INVALID_UDP_SOCKET)
+	{
+		SNMPNotifyInfo.socket = UDPOpenEx(remoteNode.IPAddr.Val,UDP_OPEN_IP_ADDRESS,AGENT_NOTIFY_PORT,SNMP_NMS_PORT);
+        //return (SNMPNotifyInfo.socket != INVALID_UDP_SOCKET);
+	}
 
+	if(UDPIsOpened(SNMPNotifyInfo.socket)!= TRUE)
+	{
+		return FALSE;
+	}
+	else
+	{
+		return TRUE;
+	}
+
+#if 0
     if ( ARPIsResolved(remHostIpAddrPtr, &remoteNode.MACAddr) )
     {
         remoteNode.IPAddr.Val = remHostIpAddrPtr->Val;
 
-        SNMPNotifyInfo.socket = UDPOpen(AGENT_NOTIFY_PORT, &remoteNode, SNMP_NMS_PORT);
+        //SNMPNotifyInfo.socket = UDPOpen(AGENT_NOTIFY_PORT, &remoteNode, SNMP_NMS_PORT);
+        
+		SNMPNotifyInfo.socket = UDPOpenEx(remoteNode.IPAddr.Val,UDP_OPEN_IP_ADDRESS,AGENT_NOTIFY_PORT,SNMP_NMS_PORT);
 
         return (SNMPNotifyInfo.socket != INVALID_UDP_SOCKET);
     }
+#endif
+
     return FALSE;
 }
 
@@ -568,7 +592,7 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 	BYTE	snmptrap_oids[]  = {0x2b,6,1,6,3,1,1,4,1 }; /* len=10 */
 	BYTE	sysUpTime_oids[] = {0x2b,6,1,2,1,1,3}; /* len = 8 */
 	WORD_VAL trapVarBindLen={0};
-
+	int i=0;
 	hMPFS = MPFSOpenROM((ROM BYTE*)SNMP_BIB_FILE_NAME);
 	if ( hMPFS == MPFS_INVALID_HANDLE )
 	{
@@ -691,32 +715,19 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
 		//2nd varbind  and this is a scalar object so index = 0
 		_SNMPPut(0);
-
-		// for microchip , SNMPNotifyInfo.agentIDVar == MICROCHIP
-		if ( !GetOIDStringByID(SNMPNotifyInfo.agentIDVar, &rec, OIDValue, &OIDLen) )
+		if ( !GetOIDStringByID(SNMPNotifyInfo.trapIDVar, &rec, OIDValue, &OIDLen) )
 		{
 			MPFSClose(hMPFS);
 			UDPClose(SNMPNotifyInfo.socket);
 			return FALSE;
 		}
-		if ( !rec.nodeInfo.Flags.bIsAgentID )
-		{
-			MPFSClose(hMPFS);
-			UDPClose(SNMPNotifyInfo.socket);
-			return FALSE;
-		}
-
-		MPFSSeek(hMPFS, rec.hData, MPFS_SEEK_START);
-
 		_SNMPPut(ASN_OID);
-		MPFSGet(hMPFS, &len);
-		agentIDLen = len;
+		agentIDLen = OIDLen;
+		len  = OIDLen;
 		_SNMPPut(agentIDLen);
-		while( len-- )
+		for(i=0;i<len;i++)
 		{
-			BYTE c;
-			MPFSGet(hMPFS, &c);
-			_SNMPPut(c);
+			_SNMPPut(OIDValue[i]);
 		}
 		tempOffset = _SNMPGetTxOffset();
 		//set the snmp varbind trap offset
@@ -2567,6 +2578,7 @@ BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
 	SNMPV3MSGDATA	*dynPduBuf=NULL;
 	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
 	#endif
+	BYTE idLen = 1;
 	
     lbNextLeaf = FALSE;
     temp.v[0] = 0;
@@ -2740,7 +2752,23 @@ BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
     MPFSGet(hMPFS, &indexInfo.Val);
 
     // Fetch index ID.
-    MPFSGet(hMPFS, &indexRec.id);
+    MPFSGet(hMPFS,&idLen);
+    if(idLen == 1)
+    {
+        BYTE temp;
+        MPFSGet(hMPFS,&temp);
+        indexRec.id = temp & 0xFF;
+        //MPFSGet(hMPFS,(BYTE *)&indexRec.id);
+    }
+    else if(idLen == 2)
+    {
+        BYTE temp[2];
+        MPFSGetArray(hMPFS,temp,2);
+        indexRec.id = 0;
+        indexRec.id = temp[0] & 0xFF;
+        indexRec.id <<= 8;
+        indexRec.id |= temp[1] & 0xFF;
+    }
 
 	// Fetch index data type.
     indexRec.dataType = 0;
@@ -2755,11 +2783,11 @@ BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
         //lbNextSeqeuence = TRUE;
          // Reset the response packet pointer to begining of OID.
        // _SNMPSetTxOffset(OIDValOffset);
-	   #ifdef STACK_USE_SNMPV3_SERVER	
+#ifdef STACK_USE_SNMPV3_SERVER	
 		if(pduDbPtr->snmpVersion == SNMP_V3)
 		   dynPduBuf->length = OIDValOffset;
 		else
-		#endif
+#endif
 		   _SNMPSetTxOffset(OIDValOffset);
 		
         // Jump to this label.  Not a good practice, but once-in-a-while
@@ -2794,7 +2822,7 @@ BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
 	    _SNMPPut(OIDLen);
 	    _SNMPSetTxOffset(prevOffset);
 	}
-	#ifdef STACK_USE_SNMPV3_SERVER	
+#ifdef STACK_USE_SNMPV3_SERVER	
 	else
 	{
 	    // Since we added index bytes to previously copied OID
@@ -2804,7 +2832,7 @@ BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
 	    Snmpv3BufferPut(OIDLen,dynPduBuf);
 		dynPduBuf->length = prevOffset;
 	}
-     #endif
+#endif
 
     // Fetch actual value itself.
     // Need to restore original OID value.
@@ -2875,6 +2903,8 @@ BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* s
 	SNMPV3MSGDATA	*dynPduBuf=NULL;
 	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
 	#endif
+	BYTE idLen=1;
+	
 	/* intialize the local variables to 0 */
 	OIDLen=0;
 	sequenceCnt=0;
@@ -3069,11 +3099,30 @@ BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* s
     MPFSGet(hMPFS, NULL);
 
     indexBytes = 0;
+	 // Fetch index ID.
+    	
 
     MPFSGet(hMPFS, &indexInfo.Val);
 
     // Fetch index ID.
-    MPFSGet(hMPFS, &indexRec.id);
+    MPFSGet(hMPFS,&idLen);
+    if(idLen == 1)
+    {
+        BYTE temp;
+        MPFSGet(hMPFS,&temp);
+        indexRec.id = temp & 0xFF;
+        //MPFSGet(hMPFS,(BYTE *)&indexRec.id);
+    }
+    else if(idLen == 2)
+    {
+        BYTE temp[2];
+        MPFSGetArray(hMPFS, temp,2);
+        indexRec.id = 0;
+        indexRec.id = temp[0] & 0xFF;
+        indexRec.id <<= 8;
+        indexRec.id |= temp[1] & 0xFF;
+    }
+   // MPFSGet(hMPFS, &indexRec.id);
     // Fetch index data type.
     indexRec.dataType = 0;
     MPFSGet(hMPFS, (BYTE*)&indexRec.dataType);
@@ -3187,7 +3236,7 @@ BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* s
 ***************************************************************************/
 BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec)
 {
-	
+	BYTE idLen=1;
 	BYTE savedOID,tempSavedOID;
 	BYTE matchedCount;
 	BYTE snmpVer;
@@ -3236,7 +3285,25 @@ BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec)
 
 	    // Next byte will be node id, if this is a leaf node with variable data.
         if(rec->nodeInfo.Flags.bIsIDPresent)
-	        MPFSGet(hMPFS, &rec->id);
+        {
+        	MPFSGet(hMPFS,&idLen);
+			if(idLen == 1)
+			{
+                            BYTE temp;
+                            MPFSGet(hMPFS,&temp);
+                            rec->id = temp & 0xFF;
+                           //MPFSGet(hMPFS,(BYTE *)&rec->id);
+			}
+			else if(idLen == 2)
+			{
+				BYTE temp[2];
+				MPFSGetArray(hMPFS, temp,2);
+				rec->id = 0;
+				rec->id = temp[0] & 0xFF;
+				rec->id <<= 8;
+				rec->id |= temp[1] & 0xFF;				
+			}				
+        }
 	
         // Read sibling offset, if there is any.
         if(rec->nodeInfo.Flags.bIsSibling)
@@ -3436,6 +3503,7 @@ DidNotFindIt:
 BOOL GetNextLeaf(OID_INFO* rec)
 {
     WORD_VAL temp;
+	BYTE idLen=1; 	 
 
     // If current node is leaf, its next sibling (near or distant) is the next leaf.
     if ( !rec->nodeInfo.Flags.bIsParent )
@@ -3470,8 +3538,28 @@ BOOL GetNextLeaf(OID_INFO* rec)
         MPFSGet(hMPFS, &rec->nodeInfo.Val);
 
         // Next byte will be node id, if this is a leaf node with variable data.
+       
         if ( rec->nodeInfo.Flags.bIsIDPresent )
-            MPFSGet(hMPFS, &rec->id);
+		{
+			 // Fetch index ID.
+		    MPFSGet(hMPFS,&idLen);
+		    if(idLen == 1)  
+                    {
+                        BYTE temp;
+                       	MPFSGet(hMPFS,&temp);
+                        rec->id = temp & 0xFF;
+                    }
+			else if(idLen == 2)
+			{
+				BYTE temp[2];
+				MPFSGetArray(hMPFS, temp,2);
+				rec->id = 0;
+				rec->id = temp[0] & 0xFF;
+				rec->id <<= 8;
+				rec->id |= temp[1] & 0xFF;				
+			}		
+            //MPFSGet(hMPFS,(BYTE *) &rec->id);
+		}
 
         // Fetch sibling offset, if there is any.
         if ( rec->nodeInfo.Flags.bIsSibling ||
@@ -4048,7 +4136,7 @@ BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len)
 	
   Parameters:
 	rec			-	Pointer to SNMP MIB variable object information
-	oidString	-	Pointer to store the string of OID serached
+	oidString	-	Pointer to store the string of OID searched
 	len			-	Oid length
  
   Return Values:
@@ -4149,6 +4237,7 @@ static void ReadMIBRecord(DWORD h, OID_INFO* rec)
 {
     MIB_INFO nodeInfo;
     WORD_VAL tempVal;
+	BYTE idLen=1;
 
     MPFSSeek(hMPFS, h, MPFS_SEEK_START);
 
@@ -4164,8 +4253,26 @@ static void ReadMIBRecord(DWORD h, OID_INFO* rec)
 
     // Read id, if there is any: Only leaf node with dynamic data will have id.
     if ( nodeInfo.Flags.bIsIDPresent )
-        MPFSGet(hMPFS, &rec->id);
-
+    {
+    	 // Fetch index ID.
+	    MPFSGet(hMPFS,&idLen);
+	    if(idLen == 1)
+	    {
+	    	BYTE temp=0;
+	    	MPFSGet(hMPFS,&temp);
+			rec->id = temp & 0xFF;			
+	    }
+		else if(idLen == 2)
+		{
+			BYTE temp[2];
+			MPFSGetArray(hMPFS, temp,2);
+			rec->id = 0;
+			rec->id = temp[0] & 0xFF;
+			rec->id <<= 8;
+			rec->id |= temp[1] & 0xFF;				
+		}		
+        //MPFSGet(hMPFS, &rec->id);
+    }
     // Read Sibling offset if there is any - any node may have sibling
     if ( nodeInfo.Flags.bIsSibling )
     {
@@ -4714,6 +4821,7 @@ void SetErrorStatus(WORD errorStatusOffset,
 ***************************************************************************/
 static BYTE FindOIDsInRequest(WORD pdulen)
 {
+BYTE  structureLen;
 BYTE varCount=0;
 WORD prevUDPRxOffset;
 WORD varBindLen;
@@ -4726,15 +4834,20 @@ WORD snmpPduLen;
 	while(snmpPduLen)
 	{
 		
-		if(!IsValidStructure(&varBindLen))
-			return FALSE;
+		structureLen = IsValidStructure(&varBindLen);
+		if(!structureLen)
+		  return FALSE;
+	//	if(!IsValidStructure(&varBindLen))
+		//	return FALSE;
 
 		SNMPRxOffset=SNMPRxOffset+varBindLen;
 		varCount++;
-		snmpPduLen=snmpPduLen
-					-1 //1 byte for STRUCTURE identifier
-					-1//1 byte for varbind length 
-					-varBindLen;
+		snmpPduLen=snmpPduLen 
+			- structureLen // 1 byte for STRUCTURE identifier + 0x82 or ox81+1+1 byte(s) for varbind length 
+			- varBindLen;
+					//-1 //1 byte for STRUCTURE identifier
+					//-1//1 byte for varbind length 
+				//	-varBindLen;
 	}
 
 	SNMPRxOffset=prevUDPRxOffset;

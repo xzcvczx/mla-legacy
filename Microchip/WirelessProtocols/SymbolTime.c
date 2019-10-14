@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright Â© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED â€œAS ISâ€ WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -38,12 +38,13 @@
 *   This file implements functions used for smybol timer.
 *
 * Change History:
-*  Rev   Date         Description
-*  0.1   11/09/2006   Initial revision
-*  1.0   01/09/2007   Initial release
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  2.1   6/20/2009    Add LCD support
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  0.1   11/09/2006   yfy       Initial revision
+*  1.0   01/09/2007   yfy       Initial release
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  2.1   6/20/2009    yfy       Add LCD support
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 /************************ HEADERS **********************************/
@@ -53,6 +54,7 @@
 #include "GenericTypeDefs.h"
 #include "WirelessProtocols/Console.h"
 /************************ DEFINITIONS ******************************/
+
 
 /************************ FUNCTION PROTOTYPES **********************/
 
@@ -88,11 +90,11 @@ volatile BYTE timerExtension1,timerExtension2;
 void InitSymbolTimer()
 {
 #if defined(__18CXX)
-    T0CON = 0b00000000 | CLOCK_DIVIDER_SETTING;
-    INTCON2bits.TMR0IP = 1;
-    INTCONbits.TMR0IF = 0;
-    INTCONbits.TMR0IE = 1;
-    T0CONbits.TMR0ON = 1;
+    TMR_CON = 0b00000000 | CLOCK_DIVIDER_SETTING;
+    TMR_IP = 1;
+    TMR_IF = 0;
+    TMR_IE = 1;
+    TMR_ON = 1;
 
     timerExtension1 = 0;
     timerExtension2 = 0;
@@ -118,7 +120,7 @@ void InitSymbolTimer()
 *
 * Input:		    none
 *
-* Output:		    TICK - the current symbol time
+* Output:		    MIWI_TICK - the current symbol time
 *
 * Side Effects:	    PIC18 only: the timer interrupt is disabled
 *                   for several instruction cycles while the 
@@ -135,31 +137,55 @@ void InitSymbolTimer()
 *                   might rollover and the byte extension would not 
 *                   get updated.
 ********************************************************************/
-MIWI_TICK TickGet(void)
+MIWI_TICK MiWi_TickGet(void)
 {
     MIWI_TICK currentTime;
     
 #if defined(__18CXX)
-    BYTE failureCounter;
-        
-    /* disable the timer to prevent roll over of the lower 16 bits while before/after reading of the extension */
-    INTCONbits.TMR0IE = 0;
+    //BYTE failureCounter;
+    BYTE IntFlag1;
+    BYTE IntFlag2;
     
     /* copy the byte extension */
     currentTime.byte.b2 = 0;
     currentTime.byte.b3 = 0;
+    
+    /* disable the timer to prevent roll over of the lower 16 bits while before/after reading of the extension */
+    TMR_IE = 0;
 
+#if 1
+    do
+    {
+        IntFlag1 = TMR_IF;
+        currentTime.byte.b0 = TMR_L;
+        currentTime.byte.b1 = TMR_H;
+        IntFlag2 = TMR_IF;
+    } while(IntFlag1 != IntFlag2);
+
+    if( IntFlag1 > 0 )
+    {
+        TMR_IF = 0;
+        timerExtension1++;
+        if(timerExtension1 == 0)
+        {
+            timerExtension2++;
+        }
+    }
+
+#else
+
+    
     failureCounter = 0;
     /* read the timer value */
     do
     {
-        currentTime.byte.b0 = TMR0L;
-        currentTime.byte.b1 = TMR0H;
+        currentTime.byte.b0 = TMR_L;
+        currentTime.byte.b1 = TMR_H;
     } while( currentTime.word.w0 == 0xFFFF && failureCounter++ < 3 );
 
     //if an interrupt occured after IE = 0, then we need to figure out if it was
     //before or after we read TMR0L
-    if(INTCONbits.TMR0IF)
+    if(TMR_IF)
     {
         //if(currentTime.byte.b0<10)
         {
@@ -172,13 +198,14 @@ MIWI_TICK TickGet(void)
             }
         }
     }
+#endif
 
     /* copy the byte extension */
     currentTime.byte.b2 += timerExtension1;
     currentTime.byte.b3 += timerExtension2;
     
     /* enable the timer*/
-    INTCONbits.TMR0IE = 1;
+    TMR_IE = 1;
     
 #elif defined(__dsPIC30F__) || defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__) || defined(__PIC32MX__)
     currentTime.word.w0 = TMR2;

@@ -12,14 +12,14 @@
  *
  * Software License Agreement
  *
- * Copyright © 2002-2007 Microchip Technology Inc.  All rights 
+ * Copyright ï¿½ 2002-2007 Microchip Technology Inc.  All rights 
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and 
  * distribute: 
  * (i)  the Software when embedded on a Microchip microcontroller or 
- *      digital signal controller product (“Device”) which is 
- *      integrated into Licensee’s product; or
+ *      digital signal controller product (ï¿½Deviceï¿½) which is 
+ *      integrated into Licenseeï¿½s product; or
  * (ii) ONLY the Software driver source files ENC28J60.c and 
  *      ENC28J60.h ported to a non-Microchip device used in 
  *      conjunction with a Microchip ethernet controller for the 
@@ -29,7 +29,7 @@
  * Software for additional information regarding your rights and 
  * obligations.
  *
- * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT 
+ * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT 
  * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT 
  * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
  * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL 
@@ -57,7 +57,7 @@
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "LCDBlocking.h"
-#include "Timer.h"
+#include "timer.h"
 
 
 //#define FOUR_BIT_MODE

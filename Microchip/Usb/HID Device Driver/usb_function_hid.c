@@ -101,7 +101,10 @@
 
 
 /** VARIABLES ******************************************************/
-#pragma udata
+#if defined(COMPILER_MPLAB_C18)
+	#pragma udata
+#endif
+
 BYTE idle_rate;
 BYTE active_protocol;   // [0] Boot Protocol [1] Report Protocol
 

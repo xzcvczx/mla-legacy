@@ -36,6 +36,8 @@
   1.02   Initial release
 ********************************************************************/
 
+#if defined(__PIC32MX__)
+
 #ifndef __SC_DRV32_LIB__
 #define __SC_DRV32_LIB__
 
@@ -57,5 +59,5 @@ extern void SCdrv_SendTxData( BYTE data );
 
 #endif
 
-
+#endif
 

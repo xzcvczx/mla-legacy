@@ -122,10 +122,6 @@ void DHCPServerTask(void)
 		DHCP_LISTEN
 	} smDHCPServer = DHCP_OPEN_SOCKET;
 
-#if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
-	static BOOL bLeaseAvailable = TRUE;
-#endif
-
 #if defined(STACK_USE_DHCP_CLIENT)
 	// Make sure we don't clobber anyone else's DHCP server
 	if(DHCPIsServerDetected(0))
@@ -139,7 +135,8 @@ void DHCPServerTask(void)
 	{
 		case DHCP_OPEN_SOCKET:
 			// Obtain a UDP socket to listen/transmit on
-			MySocket = UDPOpen(DHCP_SERVER_PORT, NULL, DHCP_CLIENT_PORT);
+			//MySocket = UDPOpen(DHCP_SERVER_PORT, NULL, DHCP_CLIENT_PORT);
+			MySocket = UDPOpenEx(0,UDP_OPEN_SERVER,DHCP_SERVER_PORT, DHCP_CLIENT_PORT);
 			if(MySocket == INVALID_UDP_SOCKET)
 				break;
 
@@ -207,21 +204,7 @@ void DHCPServerTask(void)
 								break;
 
 							case DHCP_REQUEST_MESSAGE:
-                                #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
-								if ( (BOOTPHeader.ClientIP.Val == 0x00000000u) &&
-									 (bLeaseAvailable == FALSE) )
-								{
-									// Lease available only to the current lease holder
-									break;
-								}
-								#endif
-
 								DHCPReplyToRequest(&BOOTPHeader, bAccept);
-
-                                #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
-								bLeaseAvailable = FALSE;
-								#endif
-
 								break;
 
 							// Need to handle these if supporting more than one DHCP lease
@@ -359,7 +342,7 @@ static void DHCPReplyToDiscovery(BOOTP_HEADER *Header)
 	// Force remote destination address to be the broadcast address, regardless 
 	// of what the node's source IP address was (to ensure we don't try to 
 	// unicast to 0.0.0.0).
-	memset((void*)&UDPSocketInfo[MySocket].remoteNode, 0xFF, sizeof(NODE_INFO));
+	memset((void*)&UDPSocketInfo[MySocket].remote.remoteNode, 0xFF, sizeof(NODE_INFO));
 
 	// Transmit the packet
 	UDPFlush();
@@ -512,7 +495,7 @@ static void DHCPReplyToRequest(BOOTP_HEADER *Header, BOOL bAccept)
 	// Force remote destination address to be the broadcast address, regardless 
 	// of what the node's source IP address was (to ensure we don't try to 
 	// unicast to 0.0.0.0).
-	memset((void*)&UDPSocketInfo[MySocket].remoteNode, 0xFF, sizeof(NODE_INFO));
+	memset((void*)&UDPSocketInfo[MySocket].remote.remoteNode, 0xFF, sizeof(NODE_INFO));
 
 	// Transmit the packet
 	UDPFlush();

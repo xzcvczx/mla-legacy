@@ -37,9 +37,10 @@
 *   This file access MAC EEPROM through SPI interface
 *
 * Change History:
-*  Rev   Date         Description
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #include "SystemProfile.h"
@@ -71,11 +72,23 @@
                 WORD    nvmRole;
             #endif
         #endif
+        
+        #if defined(PROTOCOL_MIWI_PRO)
+            WORD        nvmMyShortAddress;
+            WORD        nvmMyParent;
+            
+            #ifdef NWK_ROLE_COORDINATOR
+                WORD    nvmRoutingTable;
+                WORD    nvmNeighborRoutingTable;
+                WORD    nvmFamilyTree;
+                WORD    nvmRole;
+            #endif
+        #endif
+        
     #else
         
         ROM BYTE filler[ERASE_BLOCK_SIZE] = {0x00};
         
-        ROM WORD_VAL            nvmMyShortAddress;
         ROM WORD_VAL            nvmMyPANID;
         ROM BYTE                nvmCurrentChannel;
         ROM BYTE                nvmConnMode;
@@ -83,6 +96,8 @@
         ROM DWORD_VAL           nvmOutFrameCounter;               
         
         #if defined(PROTOCOL_MIWI)
+            
+            ROM WORD_VAL        nvmMyShortAddress;
             ROM BYTE            nvmMyParent;
             
             #if defined(NWK_ROLE_COORDINATOR)
@@ -90,6 +105,21 @@
                 ROM BYTE        nvmKnownCoordinators;
                 ROM BYTE        nvmRole;
             #endif
+
+        #endif
+        
+        #if defined(PROTOCOL_MIWI_PRO)
+            
+            ROM WORD_VAL        nvmMyShortAddress;
+            ROM BYTE            nvmMyParent;
+            
+            #if defined(NWK_ROLE_COORDINATOR)
+                ROM BYTE        nvmRoutingTable[NUM_COORDINATOR/8];
+                ROM BYTE        nvmNeighborRoutingTable[NUM_COORDINATOR][NUM_COORDINATOR/8];
+                ROM BYTE        nvmFamilyTree[NUM_COORDINATOR];
+                ROM BYTE        nvmRole;
+            #endif
+            
         #endif
         
         ROM BYTE filler2[ERASE_BLOCK_SIZE] = {0x00};
@@ -452,6 +482,19 @@ EEPROM_NEXT_PAGE:
                 #if defined(NWK_ROLE_COORDINATOR)
                     result &= NVMalloc(8, &nvmRoutingTable);
                     result &= NVMalloc(1, &nvmKnownCoordinators);
+                    result &= NVMalloc(1, &nvmRole);
+                #endif
+            #endif
+            
+            #if defined(PROTOCOL_MIWI_PRO)
+
+                result &= NVMalloc(2, &nvmMyShortAddress);
+                result &= NVMalloc(1, &nvmMyParent);
+                
+                #if defined(NWK_ROLE_COORDINATOR)
+                    result &= NVMalloc((NUM_COORDINATOR/8), &nvmRoutingTable);
+                    result &= NVMalloc(((WORD)NUM_COORDINATOR/8*(WORD)NUM_COORDINATOR), &nvmNeighborRoutingTable);
+                    result &= NVMalloc(NUM_COORDINATOR, &nvmFamilyTree);
                     result &= NVMalloc(1, &nvmRole);
                 #endif
             #endif

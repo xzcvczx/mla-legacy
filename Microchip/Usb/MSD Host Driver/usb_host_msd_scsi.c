@@ -29,8 +29,8 @@ Company:         Microchip Technology, Inc.
 Software License Agreement
 
 The software supplied herewith by Microchip Technology Incorporated
-(the “Company”) for its PICmicro® Microcontroller is intended and
-supplied to you, the Company’s customer, for use solely and
+(the ï¿½Companyï¿½) for its PICmicroï¿½ Microcontroller is intended and
+supplied to you, the Companyï¿½s customer, for use solely and
 exclusively on Microchip PICmicro Microcontroller products. The
 software is owned by the Company and/or its supplier, and is
 protected under applicable copyright laws. All rights are reserved.
@@ -39,7 +39,7 @@ user to criminal sanctions under applicable laws, as well as to
 civil liability for the breach of the terms and conditions of this
 license.
 
-THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+THIS SOFTWARE IS PROVIDED IN AN ï¿½AS ISï¿½ CONDITION. NO WARRANTIES,
 WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
 TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -58,7 +58,7 @@ Change History:
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "FSconfig.h"
+#include "FSConfig.h"
 #include "MDD File System/FSDefs.h"
 #include "MDD File System/FSIO.h"
 #include "USB/usb.h"
@@ -70,6 +70,7 @@ Change History:
     #include "uart2.h"
 #endif
 
+#define PERFORM_TEST_UNIT_READY
 
 // *****************************************************************************
 // *****************************************************************************
@@ -354,6 +355,152 @@ MEDIA_INFORMATION * USBHostMSDSCSIMediaInitialize( void )
     while (attempts != 0)
     {
         attempts --;
+
+        #ifdef DEBUG_MODE
+            UART2PrintString( "SCSI: READ CAPACITY 10..." );
+        #endif
+
+        // Fill in the command block with the READ CAPACITY 10 parameters.
+        commandBlock[0] = 0x25;     // Operation Code
+        commandBlock[1] = 0;        //
+        commandBlock[2] = 0;        //
+        commandBlock[3] = 0;        //
+        commandBlock[4] = 0;        //
+        commandBlock[5] = 0;        //
+        commandBlock[6] = 0;        //
+        commandBlock[7] = 0;        //
+        commandBlock[8] = 0;        //
+        commandBlock[9] = 0x00;     // Control
+
+        errorCode = USBHostMSDRead( deviceAddress, 0, commandBlock, 10, inquiryData, 8 );
+        #ifdef DEBUG_MODE
+            UART2PutHex( errorCode ) ;
+            UART2PutChar( ' ' );
+        #endif
+
+        if (!errorCode)
+        {
+            while (!USBHostMSDTransferIsComplete( deviceAddress, &errorCode, &byteCount ))
+            {
+                USBTasks();
+            }
+        }
+
+        if (!errorCode)
+        {
+            #ifdef DEBUG_MODE
+                UART2PutHex( errorCode ) ;
+                UART2PrintString( "\r\n" );
+            #endif
+
+            // Determine sector size.
+            #ifdef DEBUG_MODE
+                UART2PrintString( "SCSI: Sector size:" );
+                UART2PutChar( inquiryData[7] + '0' );
+                UART2PutChar( inquiryData[6] + '0' );
+                UART2PutChar( inquiryData[5] + '0' );
+                UART2PutChar( inquiryData[4] + '0' );
+                UART2PrintString( "\r\n" );
+            #endif
+            mediaInformation.sectorSize                     = (inquiryData[7] << 12) + (inquiryData[6] << 8) + (inquiryData[5] << 4) + (inquiryData[4]);
+            mediaInformation.validityFlags.bits.sectorSize  = 1;
+
+            mediaInformation.errorCode = MEDIA_NO_ERROR;
+            return &mediaInformation;
+        }
+        else
+        {
+            // Perform a Request Sense to try to clear the stall.
+            #ifdef DEBUG_MODE
+                UART2PrintString( "SCSI: REQUEST SENSE..." );
+            #endif
+
+            // Fill in the command block with the REQUEST SENSE parameters.
+            commandBlock[0] = 0x03;     // Operation Code
+            commandBlock[1] = 0;        //
+            commandBlock[2] = 0;        //
+            commandBlock[3] = 0;        //
+            commandBlock[4] = 18;       // Allocation length
+            commandBlock[5] = 0;        // Control
+
+            errorCode = USBHostMSDRead( deviceAddress, 0, commandBlock, 6, inquiryData, 18 );
+            #ifdef DEBUG_MODE
+                UART2PutHex( errorCode ) ;
+                UART2PutChar( ' ' );
+            #endif
+
+            if (!errorCode)
+            {
+                while (!USBHostMSDTransferIsComplete( deviceAddress, &errorCode, &byteCount ))
+                {
+                    USBTasks();
+                }
+            }
+        }
+    }
+
+    attempts = INITIALIZATION_ATTEMPTS;
+    while (attempts != 0)
+    {
+        attempts --;
+
+        // Perform a Request Sense to try to clear the stall.
+        #ifdef DEBUG_MODE
+            UART2PrintString( "SCSI: REQUEST SENSE..." );
+        #endif
+
+        // Fill in the command block with the REQUEST SENSE parameters.
+        commandBlock[0] = 0x03;     // Operation Code
+        commandBlock[1] = 0;        //
+        commandBlock[2] = 0;        //
+        commandBlock[3] = 0;        //
+        commandBlock[4] = 18;       // Allocation length
+        commandBlock[5] = 0;        // Control
+
+        errorCode = USBHostMSDRead( deviceAddress, 0, commandBlock, 6, inquiryData, 18 );
+        #ifdef DEBUG_MODE
+            UART2PutHex( errorCode ) ;
+            UART2PutChar( ' ' );
+        #endif
+
+        if (!errorCode)
+        {
+            while (!USBHostMSDTransferIsComplete( deviceAddress, &errorCode, &byteCount ))
+            {
+                USBTasks();
+            }
+        }
+
+
+        _USBHostMSDSCSI_TestUnitReady();
+
+
+        // Perform a Request Sense to try to clear the stall.
+        #ifdef DEBUG_MODE
+            UART2PrintString( "SCSI: REQUEST SENSE..." );
+        #endif
+
+        // Fill in the command block with the REQUEST SENSE parameters.
+        commandBlock[0] = 0x03;     // Operation Code
+        commandBlock[1] = 0;        //
+        commandBlock[2] = 0;        //
+        commandBlock[3] = 0;        //
+        commandBlock[4] = 18;       // Allocation length
+        commandBlock[5] = 0;        // Control
+
+        errorCode = USBHostMSDRead( deviceAddress, 0, commandBlock, 6, inquiryData, 18 );
+        #ifdef DEBUG_MODE
+            UART2PutHex( errorCode ) ;
+            UART2PutChar( ' ' );
+        #endif
+
+        if (!errorCode)
+        {
+            while (!USBHostMSDTransferIsComplete( deviceAddress, &errorCode, &byteCount ))
+            {
+                USBTasks();
+            }
+        }
 
         #ifdef DEBUG_MODE
             UART2PrintString( "SCSI: READ CAPACITY 10..." );

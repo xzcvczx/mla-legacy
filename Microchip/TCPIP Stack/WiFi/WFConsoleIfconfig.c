@@ -70,6 +70,7 @@
 //============================================================================
 //                                  Globals
 //============================================================================
+extern UINT8 g_hibernate_state;
 
 //============================================================================
 //                                  Local Function Prototypes
@@ -127,11 +128,20 @@ void do_ifconfig_cmd(void)
      UINT8   address[6];
      UINT8 conState, cpId;
 
+	
     // if user only typed in ifconfig with no other parameters
     if (ARGC == 1u)
     {
         IfconfigDisplayStatus();
+		return;
     }
+
+	if (g_hibernate_state)
+	{
+		WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
+		return;
+	}
+
 #if defined(WF_CM_DEBUG)
 	else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "info") )
 	{

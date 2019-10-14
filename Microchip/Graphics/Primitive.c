@@ -3,15 +3,13 @@
  *  Graphic Primitives Layer
  *****************************************************************************
  * FileName:        Primitive.c
- * Dependencies:    Graphics.h
- * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
+ * Processor:       PIC24, dsPIC, PIC32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -33,27 +31,49 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok and
- * Paolo A. Tomayo      11/12/07    Version 1.0 release
- * PAT					05/11/10    Added dynamic Arc() where start and end
+ * 11/12/07     Version 1.0 release
+ * 05/11/10     Added dynamic Arc() where start and end
  *									angle can be specified.
+ * 03/04/11     - Removed SetColor(WHITE) in InitGraph(). Default color
+ *                after InitGraph() is not 0 (BLACK in most displays).
+ *              - removed USE_DRV_XX checks, replaced them with 
+ *                weak attributes.
+ * 05/13/11     Add Transparent Color support in PutImage() and PutImageRLE()
+ *              functions defined in this layer. 
+ * 05/20/11     Added GetCirclePoint() commonly used in Widgets.
+ *           
  *****************************************************************************/
-#include "Graphics/Graphics.h"
-
-#define USE_PRIMITIVE_BEVEL
+#include "HardwareProfile.h"              // needed to provide values for GetMaxX() and GetMaxY() macros
+#include "Graphics/DisplayDriver.h"
+#include "Graphics/Primitive.h"
+#include "Compiler.h" 
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
-void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+#ifdef USE_BITMAP_FLASH
+    void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+    void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+    void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+    void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);        
 
-void    PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+#ifdef USE_COMP_RLE
+    void    PutImageRLE4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+    void    PutImageRLE8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+#endif
+#endif
+
+#ifdef USE_BITMAP_EXTERNAL
+    void    PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+    void    PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+    void    PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+    void    PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+
+#ifdef USE_COMP_RLE
+    void    PutImageRLE4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+    void    PutImageRLE8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+#endif
+#endif
 
 // Current line type
 SHORT   _lineType;
@@ -91,7 +111,7 @@ BYTE _bevelDrawType;
 #define COSINETABLEENTRIES	90
 // Cosine table used to calculate angles when rendering circular objects and  arcs  
 // Make cosine values * 256 instead of 100 for easier math later
-SHORT   _CosineTable[COSINETABLEENTRIES+1] = 
+const SHORT   _CosineTable[COSINETABLEENTRIES+1] __attribute__((aligned(2))) = 
 						{	
 							256, 256, 256, 256, 255, 255, 255, 254, 254, 253,
 							252, 251, 250, 249, 248, 247, 246, 245, 243, 242,
@@ -104,6 +124,276 @@ SHORT   _CosineTable[COSINETABLEENTRIES+1] =
 							44,  40,  36,  31,  27,  22,  18,  13,  9,   4, 
 							0 
 						};
+
+/*********************************************************************
+* Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+*
+* PreCondition: none
+*
+
+* Input: left,top - top left corner coordinates,
+*        right,bottom - bottom right corner coordinates
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: draws rectangle filled with current color
+*
+* Note: none
+*
+********************************************************************/
+WORD __attribute__((weak)) Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    SHORT   x, y;
+
+        #ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
+
+    /* Ready */
+        #else
+    if(IsDeviceBusy() != 0)
+        return (0);
+        #endif
+    for(y = top; y < bottom + 1; y++)
+        for(x = left; x < right + 1; x++)
+            PutPixel(x, y);
+
+    return (1);
+}
+
+/*********************************************************************
+* Function: WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+*
+* PreCondition: none
+*
+* Input: x1,y1 - starting coordinates, x2,y2 - ending coordinates
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: draws line
+*
+* Note: none
+*
+********************************************************************/
+WORD __attribute__((weak)) Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
+{
+    SHORT   deltaX, deltaY;
+    SHORT   error, stepErrorLT, stepErrorGE;
+    SHORT   stepX, stepY;
+    SHORT   steep;
+    SHORT   temp;
+    SHORT   style, type;
+
+        #ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
+
+    /* Ready */
+        #else
+    if(IsDeviceBusy() != 0)
+        return (0);
+        #endif
+
+    // Move cursor
+    MoveTo(x2, y2);
+
+    if(x1 == x2)
+    {
+        if(y1 > y2)
+        {
+            temp = y1;
+            y1 = y2;
+            y2 = temp;
+        }
+
+        style = 0;
+        type = 1;
+        for(temp = y1; temp < y2 + 1; temp++)
+        {
+            if((++style) == _lineType)
+            {
+                type ^= 1;
+                style = 0;
+            }
+
+            if(type)
+            {
+                PutPixel(x1, temp);
+                if(_lineThickness)
+                {
+                    PutPixel(x1 + 1, temp);
+                    PutPixel(x1 - 1, temp);
+                }
+            }
+        }
+
+        return (1);
+    }
+
+    if(y1 == y2)
+    {
+        if(x1 > x2)
+        {
+            temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+
+        style = 0;
+        type = 1;
+        for(temp = x1; temp < x2 + 1; temp++)
+        {
+            if((++style) == _lineType)
+            {
+                type ^= 1;
+                style = 0;
+            }
+
+            if(type)
+            {
+                PutPixel(temp, y1);
+                if(_lineThickness)
+                {
+                    PutPixel(temp, y1 + 1);
+                    PutPixel(temp, y1 - 1);
+                }
+            }
+        }
+
+        return (1);
+    }
+
+    stepX = 0;
+    deltaX = x2 - x1;
+    if(deltaX < 0)
+    {
+        deltaX = -deltaX;
+        --stepX;
+    }
+    else
+    {
+        ++stepX;
+    }
+
+    stepY = 0;
+    deltaY = y2 - y1;
+    if(deltaY < 0)
+    {
+        deltaY = -deltaY;
+        --stepY;
+    }
+    else
+    {
+        ++stepY;
+    }
+
+    steep = 0;
+    if(deltaX < deltaY)
+    {
+        ++steep;
+        temp = deltaX;
+        deltaX = deltaY;
+        deltaY = temp;
+        temp = x1;
+        x1 = y1;
+        y1 = temp;
+        temp = stepX;
+        stepX = stepY;
+        stepY = temp;
+        PutPixel(y1, x1);
+    }
+    else
+    {
+        PutPixel(x1, y1);
+    }
+
+    // If the current error greater or equal zero
+    stepErrorGE = deltaX << 1;
+
+    // If the current error less than zero
+    stepErrorLT = deltaY << 1;
+
+    // Error for the first pixel
+    error = stepErrorLT - deltaX;
+
+    style = 0;
+    type = 1;
+
+    while(--deltaX >= 0)
+    {
+        if(error >= 0)
+        {
+            y1 += stepY;
+            error -= stepErrorGE;
+        }
+
+        x1 += stepX;
+        error += stepErrorLT;
+
+        if((++style) == _lineType)
+        {
+            type ^= 1;
+            style = 0;
+        }
+
+        if(type)
+        {
+            if(steep)
+            {
+                PutPixel(y1, x1);
+                if(_lineThickness)
+                {
+                    PutPixel(y1 + 1, x1);
+                    PutPixel(y1 - 1, x1);
+                }
+            }
+            else
+            {
+                PutPixel(x1, y1);
+                if(_lineThickness)
+                {
+                    PutPixel(x1, y1 + 1);
+                    PutPixel(x1, y1 - 1);
+                }
+            }
+        }
+    }   // end of while
+
+    return (1);
+}
+
+/*********************************************************************
+* Function: void ClearDevice(void)
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: clears screen with current color and sets cursor to 0,0
+*
+* Note: none
+*
+********************************************************************/
+void __attribute__((weak)) ClearDevice(void)
+{
+    while(Bar(0, 0, GetMaxX(), GetMaxY()) == 0);
+    MoveTo(0, 0);
+}
+
 /*********************************************************************
 * Function:  void InitGraph(void)
 *
@@ -140,18 +430,16 @@ void InitGraph(void)
     // Reset device
     ResetDevice();
 
-    // Set active and visual pages
-    SetActivePage(0);
-    SetVisualPage(0);
-
     // Set color to BLACK
-    SetColor(BLACK);
+    SetColor(0);
+
+    // set the transparent color check to be disabled
+#ifdef USE_TRANSPARENT_COLOR
+    TransparentColorDisable();
+#endif    
 
     // Clear screen
     ClearDevice();
-
-    // Set color to WHITE
-    SetColor(WHITE);
 
     // Disable clipping
     SetClip(CLIP_DISABLE);
@@ -199,7 +487,7 @@ void InitGraph(void)
 * Note: none
 *
 ********************************************************************/
-WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant)
+WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant)
 {
 
     // this is using a variant of the Midpoint (Bresenham's) Algorithm
@@ -732,217 +1020,6 @@ WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1, SHORT r2, BYTE octant
 }
 
 /*********************************************************************
-* Function: WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
-*
-* PreCondition: none
-*
-* Input: x1,y1 - starting coordinates, x2,y2 - ending coordinates
-*
-* Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the shape is not yet completely drawn.
-*         - Returns 1 when the shape is completely drawn.
-*         For Blocking configuration:
-*         - Always return 1.
-*
-* Side Effects: none
-*
-* Overview: draws line
-*
-* Note: none
-*
-********************************************************************/
-#ifndef USE_DRV_LINE
-
-/* */
-WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
-{
-    SHORT   deltaX, deltaY;
-    SHORT   error, stepErrorLT, stepErrorGE;
-    SHORT   stepX, stepY;
-    SHORT   steep;
-    SHORT   temp;
-    SHORT   style, type;
-
-        #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0) Nop();
-
-    /* Ready */
-        #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-        #endif
-
-    // Move cursor
-    MoveTo(x2, y2);
-
-    if(x1 == x2)
-    {
-        if(y1 > y2)
-        {
-            temp = y1;
-            y1 = y2;
-            y2 = temp;
-        }
-
-        style = 0;
-        type = 1;
-        for(temp = y1; temp < y2 + 1; temp++)
-        {
-            if((++style) == _lineType)
-            {
-                type ^= 1;
-                style = 0;
-            }
-
-            if(type)
-            {
-                PutPixel(x1, temp);
-                if(_lineThickness)
-                {
-                    PutPixel(x1 + 1, temp);
-                    PutPixel(x1 - 1, temp);
-                }
-            }
-        }
-
-        return (1);
-    }
-
-    if(y1 == y2)
-    {
-        if(x1 > x2)
-        {
-            temp = x1;
-            x1 = x2;
-            x2 = temp;
-        }
-
-        style = 0;
-        type = 1;
-        for(temp = x1; temp < x2 + 1; temp++)
-        {
-            if((++style) == _lineType)
-            {
-                type ^= 1;
-                style = 0;
-            }
-
-            if(type)
-            {
-                PutPixel(temp, y1);
-                if(_lineThickness)
-                {
-                    PutPixel(temp, y1 + 1);
-                    PutPixel(temp, y1 - 1);
-                }
-            }
-        }
-
-        return (1);
-    }
-
-    stepX = 0;
-    deltaX = x2 - x1;
-    if(deltaX < 0)
-    {
-        deltaX = -deltaX;
-        --stepX;
-    }
-    else
-    {
-        ++stepX;
-    }
-
-    stepY = 0;
-    deltaY = y2 - y1;
-    if(deltaY < 0)
-    {
-        deltaY = -deltaY;
-        --stepY;
-    }
-    else
-    {
-        ++stepY;
-    }
-
-    steep = 0;
-    if(deltaX < deltaY)
-    {
-        ++steep;
-        temp = deltaX;
-        deltaX = deltaY;
-        deltaY = temp;
-        temp = x1;
-        x1 = y1;
-        y1 = temp;
-        temp = stepX;
-        stepX = stepY;
-        stepY = temp;
-        PutPixel(y1, x1);
-    }
-    else
-    {
-        PutPixel(x1, y1);
-    }
-
-    // If the current error greater or equal zero
-    stepErrorGE = deltaX << 1;
-
-    // If the current error less than zero
-    stepErrorLT = deltaY << 1;
-
-    // Error for the first pixel
-    error = stepErrorLT - deltaX;
-
-    style = 0;
-    type = 1;
-
-    while(--deltaX >= 0)
-    {
-        if(error >= 0)
-        {
-            y1 += stepY;
-            error -= stepErrorGE;
-        }
-
-        x1 += stepX;
-        error += stepErrorLT;
-
-        if((++style) == _lineType)
-        {
-            type ^= 1;
-            style = 0;
-        }
-
-        if(type)
-        {
-            if(steep)
-            {
-                PutPixel(y1, x1);
-                if(_lineThickness)
-                {
-                    PutPixel(y1 + 1, x1);
-                    PutPixel(y1 - 1, x1);
-                }
-            }
-            else
-            {
-                PutPixel(x1, y1);
-                if(_lineThickness)
-                {
-                    PutPixel(x1, y1 + 1);
-                    PutPixel(x1, y1 - 1);
-                }
-            }
-        }
-    }   // end of while
-
-    return (1);
-}
-
-#endif
-
-/*********************************************************************
 * Function: WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 *
 * PreCondition: None
@@ -966,7 +1043,7 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 * Note: none
 *
 ********************************************************************/
-WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
+WORD __attribute__((weak)) Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 {
     SHORT       style, type, xLimit, xPos, yPos, error;
     DWORD_VAL   temp;
@@ -1352,7 +1429,7 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 * Note: none
 *
 ********************************************************************/
-WORD DrawPoly(SHORT numPoints, SHORT *polyPoints)
+WORD __attribute__((weak)) DrawPoly(SHORT numPoints, SHORT *polyPoints)
 {
     #ifndef USE_NONBLOCKING_CONFIG
 
@@ -1424,84 +1501,10 @@ WORD DrawPoly(SHORT numPoints, SHORT *polyPoints)
                 return (1);
         }
     }
-
     #endif
     return (1);
 }
 
-/*********************************************************************
-* Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
-*
-* PreCondition: none
-*
-* Input: left,top - top left corner coordinates,
-*        right,bottom - bottom right corner coordinates
-*
-* Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the shape is not yet completely drawn.
-*         - Returns 1 when the shape is completely drawn.
-*         For Blocking configuration:
-*         - Always return 1.
-*
-* Side Effects: none
-*
-* Overview: draws rectangle filled with current color
-*
-* Note: none
-*
-********************************************************************/
-#ifndef USE_DRV_BAR
-
-/* */
-WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
-{
-    SHORT   x, y;
-
-        #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0) Nop();
-
-    /* Ready */
-        #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-        #endif
-    for(y = top; y < bottom + 1; y++)
-        for(x = left; x < right + 1; x++)
-            PutPixel(x, y);
-
-    return (1);
-}
-
-#endif
-
-/*********************************************************************
-* Function: void ClearDevice(void)
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: clears screen with current color and sets cursor to 0,0
-*
-* Note: none
-*
-********************************************************************/
-#ifndef USE_DRV_CLEARDEVICE
-
-/* */
-void ClearDevice(void)
-{
-    while(Bar(0, 0, GetMaxX(), GetMaxY()) == 0);
-    MoveTo(0, 0);
-}
-
-#endif
-
-#ifndef USE_DRV_SETFONT
 /*********************************************************************
 * Function: void SetFont(void* font)
 *
@@ -1518,7 +1521,7 @@ void ClearDevice(void)
 * Note: none
 *
 ********************************************************************/
-void SetFont(void *font)
+void __attribute__((weak)) SetFont(void *font)
 {
     FONT_HEADER *pHeader;
 
@@ -1552,97 +1555,7 @@ void SetFont(void *font)
     _fontLastChar = pHeader->lastChar;
     _fontHeight = pHeader->height;
 }
-#endif //#ifndef USE_DRV_SETFONT
 
-/*********************************************************************
-* Function: WORD OutText(XCHAR* textString)
-*
-* PreCondition: none
-*
-* Input: textString - pointer to text string
-*
-* Output: non-zero if drawing done (used for NON-BLOCKING configuration)
-*
-* Side Effects: none
-*
-* Overview: outputs text from current position
-*
-* Note: none
-*
-********************************************************************/
-WORD OutText(XCHAR *textString)
-{
-    #ifndef USE_NONBLOCKING_CONFIG
-
-    XCHAR   ch;
-    while((XCHAR)15 < (XCHAR)(ch = *textString++))
-        while(OutChar(ch) == 0);
-    return (1);
-
-    #else
-
-    XCHAR       ch;
-    static WORD counter = 0;
-
-    while((XCHAR)(ch = *(textString + counter)) > (XCHAR)15)
-    {
-        if(OutChar(ch) == 0)
-            return (0);
-        counter++;
-    }
-
-    counter = 0;
-    return (1);
-    #endif
-}
-
-/*********************************************************************
-* Function: WORD OutTextXY(SHORT x, SHORT y, XCHAR* textString)
-*
-* PreCondition: none
-*
-* Input: x,y - starting coordinates, textString - pointer to text string
-*
-* Output: non-zero if drawing done (used for NON-BLOCKING configuration)
-*
-* Side Effects: none
-*
-* Overview: outputs text from x,y position
-*
-* Note: none
-*
-********************************************************************/
-WORD OutTextXY(SHORT x, SHORT y, XCHAR *textString)
-{
-    #ifndef USE_NONBLOCKING_CONFIG
-    MoveTo(x, y);
-    OutText(textString);
-    return (1);
-
-    #else
-
-    static BYTE start = 1;
-
-    if(start)
-    {
-        MoveTo(x, y);
-        start = 0;
-    }
-
-    if(OutText(textString) == 0)
-    {
-        return (0);
-    }
-    else
-    {
-        start = 1;
-        return (1);
-    }
-
-    #endif
-}
-
-#ifndef USE_DRV_OUTCHAR
 /*********************************************************************
 * Function: WORD OutChar(XCHAR ch)
 *
@@ -1663,7 +1576,7 @@ WORD OutTextXY(SHORT x, SHORT y, XCHAR *textString)
 * Note: none
 *
 ********************************************************************/
-WORD OutChar(XCHAR ch)
+WORD __attribute__((weak)) OutChar(XCHAR ch)
 {
    		#ifdef USE_FONT_FLASH	
     GLYPH_ENTRY *pChTable = NULL;
@@ -1807,10 +1720,95 @@ WORD OutChar(XCHAR ch)
 
     return (1);
 }
-#endif //#ifndef USE_DRV_OUTCHAR
 
+/*********************************************************************
+* Function: WORD OutText(XCHAR* textString)
+*
+* PreCondition: none
+*
+* Input: textString - pointer to text string
+*
+* Output: non-zero if drawing done (used for NON-BLOCKING configuration)
+*
+* Side Effects: none
+*
+* Overview: outputs text from current position
+*
+* Note: none
+*
+********************************************************************/
+WORD __attribute__((weak)) OutText(XCHAR *textString)
+{
+    #ifndef USE_NONBLOCKING_CONFIG
 
-#ifndef USE_DRV_GETTEXTWIDTH
+    XCHAR   ch;
+    while((XCHAR)15 < (XCHAR)(ch = *textString++))
+        while(OutChar(ch) == 0);
+    return (1);
+
+    #else
+
+    XCHAR       ch;
+    static WORD counter = 0;
+
+    while((XCHAR)(ch = *(textString + counter)) > (XCHAR)15)
+    {
+        if(OutChar(ch) == 0)
+            return (0);
+        counter++;
+    }
+
+    counter = 0;
+    return (1);
+    #endif
+}
+
+/*********************************************************************
+* Function: WORD OutTextXY(SHORT x, SHORT y, XCHAR* textString)
+*
+* PreCondition: none
+*
+* Input: x,y - starting coordinates, textString - pointer to text string
+*
+* Output: non-zero if drawing done (used for NON-BLOCKING configuration)
+*
+* Side Effects: none
+*
+* Overview: outputs text from x,y position
+*
+* Note: none
+*
+********************************************************************/
+WORD __attribute__((weak)) OutTextXY(SHORT x, SHORT y, XCHAR *textString)
+{
+    #ifndef USE_NONBLOCKING_CONFIG
+    MoveTo(x, y);
+    OutText(textString);
+    return (1);
+
+    #else
+
+    static BYTE start = 1;
+
+    if(start)
+    {
+        MoveTo(x, y);
+        start = 0;
+    }
+
+    if(OutText(textString) == 0)
+    {
+        return (0);
+    }
+    else
+    {
+        start = 1;
+        return (1);
+    }
+
+    #endif
+}
+
 /*********************************************************************
 * Function: SHORT GetTextWidth(XCHAR* textString, void* font)
 *
@@ -1828,7 +1826,7 @@ WORD OutChar(XCHAR ch)
 * Note: none
 *
 ********************************************************************/
-SHORT GetTextWidth(XCHAR *textString, void *font)
+SHORT __attribute__((weak)) GetTextWidth(XCHAR *textString, void *font)
 {
 		#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) 
     GLYPH_ENTRY *pChTable;
@@ -1917,9 +1915,7 @@ SHORT GetTextWidth(XCHAR *textString, void *font)
             return (0);
     }
 }
-#endif //#ifndef USE_DRV_GETTEXTWIDTH
 
-#ifndef USE_DRV_GETTEXTHEIGHT
 /*********************************************************************
 * Function: SHORT GetTextHeight(void* font)
 *
@@ -1936,7 +1932,7 @@ SHORT GetTextWidth(XCHAR *textString, void *font)
 * Note: none
 *
 ********************************************************************/
-SHORT GetTextHeight(void *font)
+SHORT __attribute__((weak)) GetTextHeight(void *font)
 {
         #ifdef USE_FONT_EXTERNAL
 
@@ -1964,15 +1960,13 @@ SHORT GetTextHeight(void *font)
             return (0);
     }
 }
-#endif //#ifndef USE_DRV_GETTEXTHEIGHT
 
-#ifndef USE_DRV_GETIMAGEWIDTH
 /*********************************************************************
-* Function: SHORT GetImageWidth(void* bitmap)
+* Function: SHORT GetImageWidth(void* image)
 *
 * PreCondition: none
 *
-* Input: bitmap - image pointer
+* Input: image - image pointer
 *
 * Output: none
 *
@@ -1983,23 +1977,23 @@ SHORT GetTextHeight(void *font)
 * Note: none
 *
 ********************************************************************/
-SHORT GetImageWidth(void *bitmap)
+SHORT __attribute__((weak)) GetImageWidth(void *image)
 {
     #ifdef USE_BITMAP_EXTERNAL
 
     SHORT   width;
     #endif
-    switch(*((SHORT *)bitmap))
+    switch(*((SHORT *)image))
     {
             #ifdef USE_BITMAP_FLASH
 
         case FLASH:
-            return (*((FLASH_WORD *) ((IMAGE_FLASH *)bitmap)->address + 2));
+            return (*((FLASH_WORD *) ((IMAGE_FLASH *)image)->address + 2));
             #endif
             #ifdef USE_BITMAP_EXTERNAL
 
         case EXTERNAL:
-            ExternalMemoryCallback(bitmap, 4, 2, &width);
+            ExternalMemoryCallback(image, 4, 2, &width);
             return (width);
             #endif
 
@@ -2007,15 +2001,13 @@ SHORT GetImageWidth(void *bitmap)
             return (0);
     }
 }
-#endif //#ifndef USE_DRV_GETIMAGEWIDTH
 
-#ifndef USE_DRV_GETIMAGEHEIGHT
 /*********************************************************************
-* Function: SHORT GetImageHeight(void* bitmap)
+* Function: SHORT GetImageHeight(void* image)
 *
 * PreCondition: none
 *
-* Input: bitmap - image pointer
+* Input: image - image pointer
 *
 * Output: none
 *
@@ -2026,23 +2018,23 @@ SHORT GetImageWidth(void *bitmap)
 * Note: none
 *
 ********************************************************************/
-SHORT GetImageHeight(void *bitmap)
+SHORT __attribute__((weak)) GetImageHeight(void *image)
 {
     #ifdef USE_BITMAP_EXTERNAL
 
     SHORT   height;
     #endif
-    switch(*((SHORT *)bitmap))
+    switch(*((SHORT *)image))
     {
             #ifdef USE_BITMAP_FLASH
 
         case FLASH:
-            return (*((FLASH_WORD *) ((IMAGE_FLASH *)bitmap)->address + 1));
+            return (*((FLASH_WORD *) ((IMAGE_FLASH *)image)->address + 1));
             #endif
             #ifdef USE_BITMAP_EXTERNAL
             
         case EXTERNAL:
-            ExternalMemoryCallback(bitmap, 2, 2, &height);
+            ExternalMemoryCallback(image, 2, 2, &height);
             return (height);
             #endif
 
@@ -2051,133 +2043,16 @@ SHORT GetImageHeight(void *bitmap)
             return (0);
     }
 }
-#endif //#ifndef USE_DRV_GETIMAGEHEIGHT
-
-#ifndef USE_DRV_PUTIMAGE
-
-/*********************************************************************
-* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
-*
-* PreCondition: none
-*
-* Input: left,top - left top image corner,
-*        bitmap - image pointer,
-*        stretch - image stretch factor
-*
-* Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the image is not yet completely drawn.
-*         - Returns 1 when the image is completely drawn.
-*         For Blocking configuration:
-*         - Always return 1.
-*
-* Side Effects: none
-*
-* Overview: outputs image starting from left,top coordinates
-*
-* Note: image must be located in flash
-*
-********************************************************************/
-WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
-{
-    FLASH_BYTE  *flashAddress;
-    BYTE        colorDepth;
-    WORD        colorTemp;
-
-        #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0) Nop();
-
-    /* Ready */
-        #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-        #endif
-
-    // Save current color
-    colorTemp = GetColor();
-
-    switch(*((SHORT *)bitmap))
-    {
-                #ifdef USE_BITMAP_FLASH
-
-        case FLASH:
-
-            // Image address
-            flashAddress = ((IMAGE_FLASH *)bitmap)->address;
-
-            // Read color depth
-            colorDepth = *(flashAddress + 1);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPP(left, top, flashAddress, stretch); break; 
-                
-                    #if (COLOR_DEPTH >= 4)
-                case 4:     PutImage4BPP(left, top, flashAddress, stretch); break; 
-                    #endif
-                    
-                    #if (COLOR_DEPTH >= 8)
-                case 8:     PutImage8BPP(left, top, flashAddress, stretch); break;
-                    #endif
-                    
-                    #if (COLOR_DEPTH == 16)
-                case 16:    PutImage16BPP(left, top, flashAddress, stretch); break;
-                    #endif
-                    
-                default:    break;
-            }
-
-            break;
-                #endif
-                
-                #ifdef USE_BITMAP_EXTERNAL
-
-        case EXTERNAL:
-
-            // Get color depth
-            ExternalMemoryCallback(bitmap, 1, 1, &colorDepth);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPPExt(left, top, bitmap, stretch); break;
-                
-                    #if (COLOR_DEPTH >= 4)
-                case 4:     PutImage4BPPExt(left, top, bitmap, stretch); break;
-                    #endif
-                    
-                    #if (COLOR_DEPTH >= 8)
-                case 8:     PutImage8BPPExt(left, top, bitmap, stretch); break;
-                    #endif
-                    
-                    #if (COLOR_DEPTH == 16)
-                case 16:    PutImage16BPPExt(left, top, bitmap, stretch); break;
-                    #endif
-                    
-                default:    break;
-            }
-
-            break;
-                #endif
-
-        default:
-            break;
-    }
-
-    // Restore current color
-    SetColor(colorTemp);
-    return (1);
-}
 
     #ifdef USE_BITMAP_FLASH
 
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
-*        bitmap - image pointer,
+*        image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2189,20 +2064,18 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     BYTE                temp = 0;
     WORD                sizeX, sizeY;
     WORD                x, y;
     WORD                xc, yc;
-    BYTE                stretchX, stretchY;
     WORD                pallete[2];
     BYTE                mask;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -2215,22 +2088,21 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     flashAddress += 2;
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
+    
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
-            mask = 0;
             xc = left;
+            mask = 0;
             for(x = 0; x < sizeX; x++)
             {
 
                 // Read 8 pixels from flash
                 if(mask == 0)
                 {
-                    temp = *flashAddress;
-                    flashAddress++;
+                    temp = *flashAddress++;
                     mask = 0x80;
                 }
 
@@ -2238,43 +2110,97 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 if(mask & temp)
                 {
                 // Set color
-                #ifdef USE_PALETTE
-                    SetColor(1);
-                #else
-                    SetColor(pallete[1]);
-                #endif                
+                    #ifdef USE_PALETTE
+                        SetColor(1);
+                    #else
+                        SetColor(pallete[1]);
+                    #endif                
                 }
                 else
                 {
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(0);
-                #else
-                    SetColor(pallete[0]);
+                    // Set color
+                    #ifdef USE_PALETTE
+                        SetColor(0);
+                    #else
+                        SetColor(pallete[0]);
+                    #endif
+                }
+
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
-                }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-
-                // Shift to the next pixel
-                mask >>= 1;
-            }
-
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    // adjust to next location
+                    xc++;
+                    // Shift to the next pixel
+                    mask >>= 1;    
+            }            
             yc++;
         }
     }
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            xc = left;
+            mask = 0;
+
+            for(x = 0; x < sizeX; x++)
+            {
+
+                // Read 8 pixels from flash
+                if(mask == 0)
+                {
+                    temp = *flashAddress++;
+                    mask = 0x80;
+                }
+
+                    // Set color
+                if(mask & temp)
+                {
+                    // Set color
+                    #ifdef USE_PALETTE
+                        SetColor(1);
+                    #else
+                        SetColor(pallete[1]);
+                    #endif                
+                }
+                else
+                {
+                    // Set color
+                    #ifdef USE_PALETTE
+                        SetColor(0);
+                    #else
+                        SetColor(pallete[0]);
+                    #endif
+                }
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                    {
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    }
+                    xc += 2;
+                // Shift to the next pixel
+                mask >>= 1;    
+            }
+            yc+=2;
+        }
+    }    
+
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2289,20 +2215,18 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         #if (COLOR_DEPTH >= 4)
 
 /* */
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
     register WORD       x, y;
     WORD                xc, yc;
     BYTE                temp = 0;
-    register BYTE       stretchX, stretchY;
     WORD                pallete[16];
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -2318,12 +2242,12 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     }
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
+
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
@@ -2332,7 +2256,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 if(x & 0x0001)
                 {
 
-                    // second pixel in byte
+                // second pixel in byte
                 // Set color
                 #ifdef USE_PALETTE
                     SetColor(temp >> 4);
@@ -2342,10 +2266,9 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 }
                 else
                 {
-                    temp = *flashAddress;
-                    flashAddress++;
+                    temp = *flashAddress++;
 
-                    // first pixel in byte
+                // first pixel in byte
                 // Set color
                 #ifdef USE_PALETTE
                     SetColor(temp & 0x0f);
@@ -2354,26 +2277,72 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 #endif
                 }
 
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    xc++;
+            }            
             yc++;
         }
     }
-}
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
 
-        #endif
+               if(x & 0x0001)
+               {
+
+                // second pixel in byte
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp >> 4);
+                #else
+                    SetColor(pallete[temp >> 4]);
+                #endif
+                }
+                else
+                {
+                    temp = *flashAddress++;
+
+                // first pixel in byte
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp & 0x0f);
+                #else
+                    SetColor(pallete[temp & 0x0f]);
+                #endif
+                }
+
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                    {
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    }
+                    xc += 2;
+            }
+            yc+=2;
+        }
+    }    
+}
+        #endif // #if (COLOR_DEPTH >= 4)
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2388,20 +2357,18 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         #if (COLOR_DEPTH >= 8)
 
 /* */
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
     WORD                x, y;
     WORD                xc, yc;
     BYTE                temp;
-    BYTE                stretchX, stretchY;
     WORD                pallete[256];
     WORD                counter;
 
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -2417,47 +2384,75 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     }
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
+
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
-
-                // Read pixels from flash
-                temp = *flashAddress;
-                flashAddress++;
+                temp = *flashAddress++;
 
                 // Set color
-            #ifdef USE_PALETTE
-                SetColor(temp);
-            #else
-                SetColor(pallete[temp]);
-            #endif
+                #ifdef USE_PALETTE
+                    SetColor(temp);
+                #else
+                    SetColor(pallete[temp]);
+                #endif
 
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    xc++;
+            }            
             yc++;
         }
     }
-}
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+                temp = *flashAddress++;
 
-        #endif
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp);
+                #else
+                    SetColor(pallete[temp]);
+                #endif
+    
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                    {
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    }
+                    xc += 2;
+            }            
+            yc+=2;
+        }
+    }    
+
+}
+        #endif // #if (COLOR_DEPTH >= 8)
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2472,18 +2467,16 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         #if (COLOR_DEPTH == 16)
 
 /* */
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_WORD *flashAddress;
-    register FLASH_WORD *tempFlashAddress;
     WORD                sizeX, sizeY;
     register WORD       x, y;
     WORD                xc, yc;
     WORD                temp;
-    register BYTE       stretchX, stretchY;
 
     // Move pointer to size information
-    flashAddress = (FLASH_WORD *)bitmap + 1;
+    flashAddress = (FLASH_WORD *)image + 1;
 
     // Read image size
     sizeY = *flashAddress;
@@ -2492,45 +2485,67 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     flashAddress++;
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
+
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
-            flashAddress = tempFlashAddress;
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
-
-                // Read pixels from flash
-                temp = *flashAddress;
-                flashAddress++;
-
-                // Set color
+                temp = *flashAddress++;
                 SetColor(temp);
 
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    xc++;
+            }            
             yc++;
         }
     }
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+                temp = *flashAddress++;
+                SetColor(temp);
+    
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                    {
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    } 
+                    xc += 2;   
+            }            
+            yc+=2;
+        }
+    }    
+
 }
 
-        #endif
-    #endif
+        #endif //#if (COLOR_DEPTH == 16)
+    #endif // #ifdef USE_BITMAP_FLASH
+
     #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2542,7 +2557,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -2551,18 +2566,17 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     BYTE            *pData;
     SHORT           byteWidth;
 
-    BYTE            temp;
+    BYTE            temp = 0;
     BYTE            mask;
     WORD            sizeX, sizeY;
     WORD            x, y;
     WORD            xc, yc;
-    BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (2 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
@@ -2577,68 +2591,133 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     sizeY = bmp.height;
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
+    
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
     {
-
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
-        memOffset += byteWidth;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            
             pData = lineBuffer;
             mask = 0;
+            
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
 
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *pData++;
-                    mask = 0x80;
-                }
+                    // Read 8 pixels from flash
+                    if(mask == 0)
+                    {
+                        temp = *pData++;
+                        mask = 0x80;
+                    }
+                
+                    // Set color
+                    if(mask & temp)
+                    {
+                        // Set color
+                        #ifdef USE_PALETTE
+                            SetColor(1);
+                        #else
+                            SetColor(pallete[1]);
+                        #endif
+                    }
+                    else
+                    {
+                        // Set color
+                        #ifdef USE_PALETTE
+                            SetColor(0);
+                        #else
+                            SetColor(pallete[0]);
+                        #endif
+                    }
 
-                // Set color
-                if(mask & temp)
-                {
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(1);
-                #else
-                    SetColor(pallete[1]);
+
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
-                }
-                else
-                {
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(0);
-                #else
-                    SetColor(pallete[0]);
-                #endif
-                }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    xc++;
                 // Shift to the next pixel
                 mask >>= 1;
-            }
-
+            }            
             yc++;
         }
     }
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            
+            pData = lineBuffer;
+            mask = 0;
+            
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+
+                      // Read 8 pixels from flash
+                    if(mask == 0)
+                    {
+                        temp = *pData++;
+                        mask = 0x80;
+                    }
+                
+                    // Set color
+                    if(mask & temp)
+                    {
+                        // Set color
+                        #ifdef USE_PALETTE
+                            SetColor(1);
+                        #else
+                            SetColor(pallete[1]);
+                        #endif
+                    }
+                    else
+                    {
+                        // Set color
+                        #ifdef USE_PALETTE
+                            SetColor(0);
+                        #else
+                            SetColor(pallete[0]);
+                        #endif
+                    }
+
+    
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                    {
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    }
+                    xc += 2;
+                // Shift to the next pixel
+                mask >>= 1;
+
+            }            
+            yc+=2;
+        }
+    }    
+
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2653,7 +2732,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         #if (COLOR_DEPTH >= 4)
 
 /* */
-void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -2666,13 +2745,12 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            sizeX, sizeY;
     WORD            x, y;
     WORD            xc, yc;
-    BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (16 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
@@ -2687,15 +2765,67 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     sizeY = bmp.height;
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
-    {
 
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
-        memOffset += byteWidth;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
+    {
+        for(y = 0; y < sizeY; y++)
         {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            
             pData = lineBuffer;
+            
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+                
+                // Read 2 pixels from flash
+                if(x & 0x0001)
+                {
+
+                    // second pixel in byte
+                    // Set color
+                    #ifdef USE_PALETTE
+                        SetColor(temp >> 4);
+                    #else
+                        SetColor(pallete[temp >> 4]);
+                    #endif
+                }
+                else
+                {
+                    temp = *pData++;
+
+                    // first pixel in byte
+                    // Set color
+                    #ifdef USE_PALETTE
+                        SetColor(temp & 0x0f);
+                    #else
+                        SetColor(pallete[temp & 0x0f]);
+                    #endif
+                }
+
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    xc++;
+            }            
+            yc++;
+        }
+    }
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            
+            pData = lineBuffer;
+            
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
@@ -2705,46 +2835,51 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 {
 
                     // second pixel in byte
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(temp >> 4);
-                #else
-                    SetColor(pallete[temp >> 4]);
-                #endif
+                    // Set color
+                    #ifdef USE_PALETTE
+                        SetColor(temp >> 4);
+                    #else
+                        SetColor(pallete[temp >> 4]);
+                    #endif
                 }
                 else
                 {
                     temp = *pData++;
 
                     // first pixel in byte
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(temp & 0x0f);
-                #else
-                    SetColor(pallete[temp & 0x0f]);
+                    // Set color
+                    #ifdef USE_PALETTE
+                        SetColor(temp & 0x0f);
+                    #else
+                        SetColor(pallete[temp & 0x0f]);
+                    #endif
+                }
+
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
-                }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
-            yc++;
+                    {    
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    }
+                    xc += 2;
+            }            
+            yc+=2;
         }
-    }
+    }    
 }
 
         #endif
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2759,7 +2894,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         #if (COLOR_DEPTH >= 8)
 
 /* */
-void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -2771,13 +2906,12 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            sizeX, sizeY;
     WORD            x, y;
     WORD            xc, yc;
-    BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (256 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
@@ -2787,46 +2921,88 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     sizeY = bmp.height;
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
-    {
 
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
-        memOffset += sizeX;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
+    {
+        for(y = 0; y < sizeY; y++)
         {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
+            memOffset += sizeX;
+            
             pData = lineBuffer;
+            
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
                 temp = *pData++;
+                
                 // Set color
-            #ifdef USE_PALETTE
-                SetColor(temp);
-            #else
-                SetColor(pallete[temp]);
-            #endif
+                #ifdef USE_PALETTE
+                    SetColor(temp);
+                #else
+                    SetColor(pallete[temp]);
+                #endif
 
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    xc++;
+            }            
             yc++;
         }
     }
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
+            memOffset += sizeX;
+            
+            pData = lineBuffer;
+            
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+                temp = *pData++;
+
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp);
+                #else
+                    SetColor(pallete[temp]);
+                #endif
+    
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                    {
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    }
+                    xc += 2;
+            }            
+            yc+=2;
+        }
+    }    
+
 }
 
         #endif
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -2841,7 +3017,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         #if (COLOR_DEPTH == 16)
 
 /* */
-void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -2853,10 +3029,9 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            sizeX, sizeY;
     WORD            x, y;
     WORD            xc, yc;
-    BYTE            stretchX, stretchY;
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
@@ -2868,37 +3043,268 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     byteWidth = sizeX << 1;
 
     yc = top;
-    for(y = 0; y < sizeY; y++)
+
+    // Note: For speed the code for loops are repeated. A small code size increase for performance
+    if (stretch == IMAGE_NORMAL)
     {
-
-        // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
-        memOffset += byteWidth;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        for(y = 0; y < sizeY; y++)
         {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            
             pData = lineBuffer;
-
+            
             xc = left;
             for(x = 0; x < sizeX; x++)
-            {
+                {
                 temp = *pData++;
                 SetColor(temp);
 
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                        // Write pixel(s) to screen
+                        PutPixel(xc, yc);
+                    xc++;
+            }            
             yc++;
         }
     }
+    else
+    {
+        for(y = 0; y < sizeY; y++)
+        {
+            // Get line
+            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            memOffset += byteWidth;
+            
+            pData = lineBuffer;
+            
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+                {
+                temp = *pData++;
+                SetColor(temp);
+    
+                #ifdef USE_TRANSPARENT_COLOR
+                    if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                #endif
+                    {
+                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        PutPixel(xc,   yc);
+                        PutPixel(xc,   yc+1);  
+                        PutPixel(xc+1, yc);
+                        PutPixel(xc+1, yc+1);  
+                    }
+                    xc += 2;
+            }            
+            yc+=2;
+        }
+    }    
 }
 
         #endif
     #endif
-#endif // USE_DRV_PUTIMAGE
+
+/*********************************************************************
+* Function: WORD PutImage(SHORT left, SHORT top, void* image, BYTE stretch)
+*
+* PreCondition: none
+*
+* Input: left,top - left top image corner,
+*        image - image pointer,
+*        stretch - image stretch factor
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 1 when the image is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: outputs image starting from left,top coordinates
+*
+* Note: image must be located in flash
+*
+********************************************************************/
+WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE stretch)
+{
+    FLASH_BYTE  *flashAddress;
+    BYTE        colorDepth;
+    WORD        colorTemp;
+    WORD        resType;
+
+#if defined(USE_COMP_RLE) 
+    GFX_IMAGE_HEADER *pimghdr = (GFX_IMAGE_HEADER *)image;
+#endif
+    
+#ifndef USE_NONBLOCKING_CONFIG
+    while(IsDeviceBusy() != 0) Nop();
+
+    /* Ready */
+#else
+    if(IsDeviceBusy() != 0)
+        return (0);
+#endif
+
+    // Save current color
+    colorTemp = GetColor();
+    resType = *((WORD *)image);
+
+
+    switch(resType & (GFX_MEM_MASK | GFX_COMP_MASK))
+    {
+
+                #ifdef USE_COMP_RLE
+                #ifdef USE_BITMAP_FLASH
+        case (FLASH | COMP_RLE):
+            
+            // Image address
+            flashAddress = pimghdr->LOCATION.progByteAddress;
+            // Read color depth
+            colorDepth = pimghdr->colorDepth;
+        
+            // Draw picture
+            switch(colorDepth)
+            {
+                    #if (COLOR_DEPTH >= 4)
+                case 4: 
+                    PutImageRLE4BPP(left, top, flashAddress, stretch); break;
+                    #endif
+  
+                    #if (COLOR_DEPTH >= 8)
+                case 8: 
+                    PutImageRLE8BPP(left, top, flashAddress, stretch); break;
+                    #endif
+                        
+                    default:    break;
+            }
+            break;
+                #endif //#ifdef USE_BITMAP_FLASH
+
+                #ifdef USE_BITMAP_EXTERNAL
+        case (EXTERNAL | COMP_RLE):
+        
+            // Get color depth
+            ExternalMemoryCallback(image, 1, 1, &colorDepth);
+    
+            // Draw picture
+            switch(colorDepth)
+            {
+                    #if (COLOR_DEPTH >= 4)
+                case 4:     
+                    PutImageRLE4BPPExt(left, top, image, stretch); break;
+                    #endif
+                            
+                    #if (COLOR_DEPTH >= 8)
+                case 8:     
+                    PutImageRLE8BPPExt(left, top, image, stretch); break;
+                    #endif
+                            
+                default:    break;
+            }
+            break;
+                #endif //#ifdef USE_BITMAP_EXTERNAL
+                #endif // #ifdef USE_COMP_RLE
+        
+                #ifdef USE_BITMAP_FLASH
+
+        case (FLASH | COMP_NONE):
+
+            // Image address
+            flashAddress = ((IMAGE_FLASH *)image)->address;
+
+            // Read color depth
+            colorDepth = *(flashAddress + 1);
+
+            // Draw picture
+            switch(colorDepth)
+            {
+                case 1:     
+                    PutImage1BPP(left, top, flashAddress, stretch); break;
+                
+                    #if (COLOR_DEPTH >= 4)
+                case 4:     
+                    PutImage4BPP(left, top, flashAddress, stretch); break;
+                    #endif
+                    
+                    #if (COLOR_DEPTH >= 8)
+                case 8:     
+                    PutImage8BPP(left, top, flashAddress, stretch); break;
+                    #endif
+                    
+                    #if (COLOR_DEPTH == 16)
+                case 16:    
+                    PutImage16BPP(left, top, flashAddress, stretch); break;
+                    #endif
+                    
+                default:    break;
+
+            }
+
+            break;
+                #endif // #ifdef USE_BITMAP_FLASH
+                
+                #ifdef USE_BITMAP_EXTERNAL
+
+        case (EXTERNAL | COMP_NONE):
+
+            // Get color depth
+            ExternalMemoryCallback(image, 1, 1, &colorDepth);
+
+            // Draw picture
+            switch(colorDepth)
+            {
+                case 1:     
+                    PutImage1BPPExt(left, top, image, stretch); break;
+                
+                    #if (COLOR_DEPTH >= 4)
+                case 4:     
+                    PutImage4BPPExt(left, top, image, stretch); break;
+                    #endif
+                    
+                    #if (COLOR_DEPTH >= 8)
+                case 8:     
+                    PutImage8BPPExt(left, top, image, stretch); break;
+                    #endif
+                    
+                    #if (COLOR_DEPTH == 16)
+                case 16:    
+                    PutImage16BPPExt(left, top, image, stretch); break;
+                    #endif
+                    
+                default:    break;
+            }
+
+            break;
+                #endif //#ifdef USE_BITMAP_EXTERNAL
+
+                #if defined (GFX_USE_DISPLAY_CONTROLLER_MCHP_DA210)
+                #ifdef USE_COMP_IPU
+        case (FLASH | COMP_IPU):
+        case (EXTERNAL | COMP_IPU):
+        case (EDS_EPMP | COMP_IPU):
+                #endif // #ifdef USE_COMP_IPU
+        case (EDS_EPMP | COMP_NONE):
+        
+            // this requires special processing of images in Extended Data Space
+            // call the driver specific function to perform the processing
+            PutImageDrv(left, top, image, stretch); 
+            break;
+
+                #endif //#if defined (__PIC24FJ256DA210__)
+            
+        default:
+            break;
+    }
+
+    // Restore current color
+    SetColor(colorTemp);
+    return (1);
+}
+
 /*********************************************************************
 * Function:  SHORT GetSineCosine(SHORT v, WORD type)
 *
@@ -2973,7 +3379,7 @@ SHORT GetSineCosine(SHORT v, WORD type)
 * Note: none
 *
 ********************************************************************/
-WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle)
+WORD __attribute__((weak)) DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle)
 {
 
 	SHORT i;
@@ -3011,3 +3417,1354 @@ WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT end
 	}
 	return 1;	
 }	
+
+
+#ifdef USE_GRADIENT
+#define WAIT_UNTIL_FINISH(x)    while(!x)
+
+#if (COLOR_DEPTH == 24)
+#define GetRed(color)       (((color) & 0xFF0000) >> 16)
+#define GetGreen(color)     (((color) & 0x00FF00) >> 8)
+#define GetBlue(color)      ((color) & 0x0000FF)
+#else
+#define GetRed(color)       (((color) & 0xF800) >> 8)
+#define GetGreen(color)     (((color) & 0x07E0) >> 3)
+#define GetBlue(color)      (((color) & 0x001F) << 3)
+#endif
+
+void BarGradient(short left, short top, short right, short bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction)
+{
+
+    WORD startRed, startBlue, startGreen;
+    WORD endRed, endBlue, endGreen;
+
+    long rdiff=0,gdiff=0,bdiff=0;
+    short i,steps;
+
+    SetColor(color2);
+
+    // if length is 100, why waste the bar call?
+    switch(direction)
+    {
+    case GRAD_UP:
+        length = length * (bottom - top);
+        length /= 100;
+        steps = length;
+        WAIT_UNTIL_FINISH(Bar(left,top,right,bottom-steps));
+        break;
+
+    case GRAD_DOWN: 
+        length = length * (bottom - top); 
+        length /= 100; 
+        steps = length;    
+        WAIT_UNTIL_FINISH(Bar(left,top+steps,right,bottom));    
+        break;
+
+    case GRAD_RIGHT:
+        length = length * (right - left);
+        length /= 100;
+        steps = length;
+        WAIT_UNTIL_FINISH(Bar(left+steps,top,right,bottom)); 
+        break;
+
+    case GRAD_LEFT:
+        length = length * (right - left);
+        length /= 100;
+        steps = length;
+        WAIT_UNTIL_FINISH(Bar(left,top,right-steps,bottom)); 
+        break;
+
+    case GRAD_DOUBLE_VER:
+        steps = (right - left) >> 1;
+        break;
+
+    case GRAD_DOUBLE_HOR:
+        steps = (bottom - top) >> 1;
+        break; 
+
+    default: 
+        return;
+    }
+
+    startRed    = GetRed(color1);
+    startGreen  = GetGreen(color1);
+    startBlue   = GetBlue(color1);
+
+    endRed      = GetRed(color2);
+    endGreen    = GetGreen(color2);
+    endBlue     = GetBlue(color2);
+
+    ///////////////////////////////////
+
+    //Find the step size for the red portion//
+    rdiff = ((long)endRed - (long)startRed) << 8;
+    rdiff /= steps;
+
+    //Find the step size for the green portion//
+    gdiff = ((long)endGreen - (long)startGreen) << 8;
+    gdiff /= steps;
+
+    //Find the step size for the blue portion//
+    bdiff = ((long)endBlue - (long)startBlue) << 8;
+    bdiff /= steps;
+
+    short barSize = 1;
+    color1 = RGBConvert(startRed, startGreen, startBlue);
+
+    // PERCENTAGE BASED CODE
+    for(i=0; i < steps; i++)
+    {
+        //Calculate the starting RGB values
+        endRed      = startRed + ((rdiff*i) >> 8);
+        endGreen    = startGreen + ((gdiff*i) >> 8);
+        endBlue     = startBlue + ((bdiff*i) >> 8);
+
+        color2 = RGBConvert(endRed, endGreen, endBlue);
+
+        if(color2 == color1)
+        {
+            barSize++;
+            continue;
+        }
+
+        SetColor(color2);
+        color1 = color2;
+
+        switch(direction)          //This switch statement draws the gradient depending on direction chosen
+        {
+        case GRAD_DOWN:
+            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+            top += barSize;
+        break;
+        
+        case GRAD_UP:
+            WAIT_UNTIL_FINISH(Bar(left,bottom - barSize,right,bottom));
+            bottom -= barSize;
+        break;
+
+        case GRAD_RIGHT:
+            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+            left += barSize;
+        break;
+        
+        case GRAD_LEFT:
+            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
+            right -= barSize;
+        break;
+
+        case GRAD_DOUBLE_VER:
+            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
+            right -= barSize;
+            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+            left += barSize;
+        break;
+
+        case GRAD_DOUBLE_HOR:
+            WAIT_UNTIL_FINISH(Bar(left, bottom - barSize, right, bottom));
+            bottom -= barSize;
+            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+            top += barSize;
+        break; 
+
+        default: 
+            break;
+        }
+
+        barSize = 1;
+    }
+
+    if(barSize > 1)
+    {
+
+        SetColor(RGBConvert(endRed, endGreen, endBlue));
+
+        switch(direction)          //This switch statement draws the gradient depending on direction chosen
+        {
+        case GRAD_DOWN:
+            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+        break;
+        
+        case GRAD_UP:
+            WAIT_UNTIL_FINISH(Bar(left,bottom - barSize,right,bottom));
+        break;
+
+        case GRAD_RIGHT:
+            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+        break;
+        
+        case GRAD_LEFT:
+            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
+        break;
+
+        case GRAD_DOUBLE_VER:
+            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
+            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+        break;
+
+        case GRAD_DOUBLE_HOR:
+            WAIT_UNTIL_FINISH(Bar(left, bottom - barSize, right, bottom));
+            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+        break; 
+
+        default: 
+            break;
+        }
+
+    }
+
+}
+
+WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction)
+{
+    WORD i;
+    WORD sred,sblue,sgreen;
+    WORD ered,eblue,egreen;
+    GFX_COLOR EndColor;
+    long rdiff=0,gdiff=0,bdiff=0;
+    short steps;
+    EndColor = color2;
+
+    switch(direction)     //This switch statement calculates the amount of transitions needed
+    {
+    case GRAD_UP:
+    case GRAD_DOWN:
+        length = length * (y2 - y1 +(rad << 1));
+        length /= 100;
+        steps = length;
+        break;
+
+    case GRAD_RIGHT:
+    case GRAD_LEFT:
+        length = length * (x2 - x1 +(rad << 1));
+        length /= 100;
+        steps = length;
+        break;
+
+    case GRAD_DOUBLE_VER:
+        steps = (x2 - x1 +(rad << 1)) >> 1;
+        break;
+
+    case GRAD_DOUBLE_HOR:
+        steps = (y2 - y1 +(rad << 1)) >> 1;
+        break; 
+
+    default: 
+        return (1);
+    }
+
+    //Calculate the starting RGB values
+    sred    = GetRed(color1);
+    sgreen  = GetGreen(color1);
+    sblue   = GetBlue(color1);
+            
+    ered    = GetRed(color2);
+    egreen  = GetGreen(color2);
+    eblue   = GetBlue(color2);
+
+    ///////////////////////////////////
+
+    //Find the step size for the red portion//
+    rdiff = ((long)ered - (long)sred) << 8;
+    rdiff /= steps;
+
+    //Find the step size for the green portion//
+    gdiff = ((long)egreen - (long)sgreen) << 8;
+    gdiff /= steps;
+
+    //Find the step size for the blue portion//
+    bdiff = ((long)eblue - (long)sblue) << 8;
+    bdiff /= steps;
+
+    typedef enum
+    {
+        BEGIN,
+        CHECK,
+        Q8TOQ1,
+        Q7TOQ2,
+        Q6TOQ3,
+        Q5TOQ4,
+        WAITFORDONE,
+        FACE
+    } FILLCIRCLE_STATES;
+
+    DWORD_VAL temp;
+    static LONG err;
+    static SHORT yLimit, xPos, yPos;
+    static SHORT xCur, yCur, yNew;
+
+    static FILLCIRCLE_STATES state = BEGIN;
+
+    while(1)
+    {
+        if(IsDeviceBusy())
+            return (0);
+        switch(state)
+        {
+            case BEGIN:
+                if(!rad)
+                {   // no radius object is a filled rectangle
+                    state = FACE;
+                    break;
+                }
+
+                // compute variables
+                temp.Val = SIN45 * rad;
+                yLimit = temp.w[1];
+                temp.Val = (DWORD) (ONEP25 - ((LONG) rad << 16));
+                err = (SHORT) (temp.w[1]);
+                xPos = rad;
+                yPos = 0;
+                xCur = xPos;
+                yCur = yPos;
+                yNew = yPos;
+                state = CHECK;
+
+            case CHECK:
+                bevel_fill_check : if(yPos > yLimit)
+                {
+                    state = FACE;
+                    break;
+                }
+
+                // y1New records the last y position
+                yNew = yPos;
+
+                // calculate the next value of x and y
+                if(err > 0)
+                {
+                    xPos--;
+                    err += 5 + ((yPos - xPos) << 1);
+                }
+                else
+                    err += 3 + (yPos << 1);
+                yPos++;
+                state = Q6TOQ3;
+
+            case Q6TOQ3:
+                if(xCur != xPos)
+                {
+
+                    // 6th octant to 3rd octant
+	            	//if (_bevelDrawType & DRAWBOTTOMBEVEL) 
+	            	{ 
+                        if(direction == GRAD_DOUBLE_VER || direction == GRAD_DOUBLE_HOR)
+                            i = (y1 - yCur) - y1 + rad;
+                        else
+                            i = (y2 + yCur) - y1 + rad;
+                
+                        ered = sred + ((rdiff*i) >> 8);
+                        egreen = sgreen + ((gdiff*i) >> 8);
+                        eblue = sblue + ((bdiff*i) >> 8);
+ 
+                        color2 = RGBConvert(ered,egreen,eblue);
+                                         
+                        SetColor(color2);
+            
+                        switch(direction)    //Direction matter because different portions of the circle are drawn
+                        {
+                           case GRAD_LEFT:
+                               if(i>length) SetColor(EndColor);
+                               if(Bar(x1 - yNew, y1 - xCur, x1 - yCur, y2 + xCur) == 0) return (0);
+                                break;
+                           
+                           case GRAD_RIGHT:                     
+                           case GRAD_DOUBLE_VER:
+                                if(i>length) 
+                                    SetColor(EndColor);
+                                
+                                if(Bar(x2 + yCur, y1 - xCur, x2 + yNew, y2 + xCur) == 0)
+                                    return (0);           
+                                break;
+                           
+                           case GRAD_UP:
+                                if(i>length) 
+                                    SetColor(EndColor);
+                                
+                                if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0) 
+                                    return (0);
+                                break;
+
+                           case GRAD_DOWN:
+                           case GRAD_DOUBLE_HOR:
+                                if(i>length) 
+                                    SetColor(EndColor);
+                                if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0)
+                                    return (0);
+                           
+                           default: 
+                               break;
+                        }
+
+                  	}          	
+                    state = Q5TOQ4;
+                    break;
+                }
+
+                state = CHECK;
+                goto bevel_fill_check;
+
+            case Q5TOQ4:
+
+            	//if (_bevelDrawType & DRAWBOTTOMBEVEL) 
+            	{ 
+                    if(direction == GRAD_DOUBLE_VER || direction == GRAD_DOUBLE_HOR)
+                    i = y1 + xPos - y1 + rad;
+                    else
+
+	                // 5th octant to 4th octant
+                    i = (y2 + xPos) - y1 + rad ;
+
+                    //Calculate the starting RGB values
+                    ered = sred + ((rdiff*i) >> 8);
+                    egreen = sgreen + ((gdiff*i) >> 8);
+                    eblue = sblue + ((bdiff*i) >> 8);
+                    
+                    color2 = RGBConvert(ered,egreen,eblue);
+                    SetColor(color2);
+
+                    switch(direction)    //Direction matter because different portions of the circle are drawn
+                    {
+                       case GRAD_LEFT:
+                           if(i>length) 
+                               SetColor(EndColor);
+                           if(Bar(x1 - xCur, y1 - yNew, x1 - xPos, y2 + yNew) == 0) 
+                               return (0);
+                            break;
+                       
+                       case GRAD_RIGHT:                     
+                       case GRAD_DOUBLE_VER:
+                           if(i>length) 
+                               SetColor(EndColor);
+                           if(Bar(x2 + xPos, y1 - yNew, x2 + xCur, y2 + yNew) == 0)
+                               return (0);           
+                            break;
+                       
+                       case GRAD_UP:
+                            if(i>length) 
+                                SetColor(EndColor);
+                            if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0) 
+                                return (0);
+                            break;
+
+                       case GRAD_DOWN:
+                       case GRAD_DOUBLE_HOR:
+                            if(i>length) 
+                                SetColor(EndColor);
+                            if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0)
+                                return (0);
+                       default: 
+                           break;
+                    }
+
+				}
+                state = Q8TOQ1;
+                break;
+
+            case Q8TOQ1:
+
+                // 8th octant to 1st octant
+	            //if (_bevelDrawType & DRAWTOPBEVEL) 
+				{
+                    i = (y1 - xCur) - y1 + rad;
+
+                    //Calculate the starting RGB values
+                    ered = sred + ((rdiff*i) >> 8);
+                    egreen = sgreen + ((gdiff*i) >> 8);
+                    eblue = sblue + ((bdiff*i) >> 8);
+
+                    color2 = RGBConvert(ered,egreen,eblue);
+                    SetColor(color2);
+
+                    switch(direction)    //Direction matter because different portions of the circle are drawn
+                    {
+                       case GRAD_LEFT:
+                           if(i>length) 
+                               SetColor(EndColor);
+                           if(Bar(x2 + xPos, y1 - yNew, x2 + xCur, y2 + yNew) == 0) 
+                               return (0);
+                            break;
+                       
+                       case GRAD_RIGHT:                     
+                       case GRAD_DOUBLE_VER:
+                           if(i>length) 
+                               SetColor(EndColor);
+                           if(Bar(x1 - xCur, y1 - yNew, x1 - xPos, y2 + yNew) == 0) 
+                               return (0);           
+                            break;
+                       
+                       case GRAD_UP:
+                            if(i>length) 
+                                SetColor(EndColor);
+                            if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0) 
+                                return (0);
+                            break;
+
+                       case GRAD_DOWN:
+                       case GRAD_DOUBLE_HOR:
+                            if(i>length) 
+                                SetColor(EndColor);
+                            if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0)
+                                return (0);
+                            break;
+                       
+                       default: 
+                           break;
+                    }
+
+    			}                	
+                state = Q7TOQ2;
+                break;
+
+            case Q7TOQ2:
+
+                // 7th octant to 2nd octant
+	            //if (_bevelDrawType & DRAWTOPBEVEL) 
+				{             
+                    i = (y1 - yNew) - y1 + rad;
+
+                    //Calculate the starting RGB values
+                    ered = sred + ((rdiff*i) >> 8);
+                    egreen = sgreen + ((gdiff*i) >> 8);
+                    eblue = sblue + ((bdiff*i) >> 8);
+
+                    color2 = RGBConvert(ered,egreen,eblue);
+                    
+                    SetColor(color2);
+         
+                    switch(direction)    //Direction matter because different portions of the circle are drawn
+                    {
+                       case GRAD_LEFT:
+                           if(i>length) 
+                               SetColor(EndColor);
+                           if(Bar(x2 + yCur, y1 - xCur, x2 + yNew, y2 + xCur) == 0) 
+                               return (0);
+                            break;
+                       
+                       case GRAD_RIGHT:                     
+                       case GRAD_DOUBLE_VER:
+                           if(i>length) 
+                               SetColor(EndColor);
+                           if(Bar(x1 - yNew, y1 - xCur, x1 - yCur, y2 + xCur) == 0) 
+                               return (0);           
+                            break;
+                       
+                       case GRAD_UP:
+                            if(i>length) 
+                                SetColor(EndColor);
+                            if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0) 
+                                return (0);
+                            break;
+
+                       case GRAD_DOWN:
+                       case GRAD_DOUBLE_HOR:
+                            if(i>length) 
+                                SetColor(EndColor);
+                            if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0) 
+                                return (0);
+                            break;
+                       
+                       default: 
+                           break;
+                    }
+
+				}
+                // update current values
+                xCur = xPos;
+                yCur = yPos;
+                state = CHECK;
+                break;
+
+ 
+
+            case FACE:
+                if((x2 - x1) || (y2 - y1))
+                {
+                i = (y1) - y1 + rad;
+                //Calculate the starting RGB values
+                ered = sred + ((rdiff*i) >> 8);
+                egreen = sgreen + ((gdiff*i) >> 8);
+                eblue = sblue + ((bdiff*i) >> 8);
+
+                color1 = RGBConvert(ered,egreen,eblue);
+ 
+                if(i>length) 
+                    color1 = EndColor;  
+
+                i = (y2) - y1 + rad;
+                //Calculate the ending RGB values
+                ered = sred + ((rdiff*i) >> 8);
+                egreen = sgreen + ((gdiff*i) >> 8);
+                eblue = sblue + ((bdiff*i) >> 8);
+
+                color2 = RGBConvert(ered,egreen,eblue);
+ 
+                if(i>length) 
+                    color2 = EndColor;
+      
+                length -= rad;   //Subtract the radius from the length needed for gradient   
+              
+                if(direction == GRAD_UP || direction == GRAD_DOWN || direction == GRAD_DOUBLE_HOR)
+                {
+                   if(length>= y2-y1)
+                   {
+                       length = 100;
+                   }
+                   else
+                   {
+                       length *= 100;
+                       length /= (y2 -y1);
+                   }               
+                   BarGradient(x1-rad, y1, x2+rad, y2,color1,color2,length,direction);
+                }
+                else
+                {
+                  if(length>=x2-x1)
+                  {
+                      length = 100;
+                  }
+                  else
+                  {
+                       length *= 100;
+                       length /= (x2 -x1);
+                  }
+                   BarGradient(x1, y1-rad, x2, y2+rad,color1,color2,length,direction);
+                }
+            
+                    state = WAITFORDONE;
+                }
+                else
+                {
+                    state = BEGIN;
+                    return (1);
+                }
+
+            case WAITFORDONE:
+                if(IsDeviceBusy())
+                    return (0);
+                state = BEGIN;
+                return (1);
+        }           // end of switch
+    }               // end of while
+  
+}
+#endif
+
+
+#ifdef USE_COMP_RLE
+
+    #ifdef USE_BITMAP_FLASH
+
+        #if (COLOR_DEPTH >= 8)
+/*********************************************************************
+* Function: WORD DecodeRLE8(FLASH_BYTE *flashAddress, BYTE *pixelrow, WORD size)
+*
+* PreCondition: tempFlashAddress should point to the beginning of a RLE compressed block
+*
+* Input: flashAddress - Address of the beginning of a RLE compressed block
+*        pixelrow - Pointer to an array where the decoded row must be stored
+*        size - Size of the decoded data in bytes
+*
+* Output: Number of source bytes traversed
+*
+* Side Effects: none
+*
+* Overview: Decodes the data
+*
+********************************************************************/
+WORD DecodeRLE8(FLASH_BYTE *flashAddress, BYTE *pixel_row, WORD size)
+{
+    WORD sourceOffset = 0;
+    WORD decodeSize = 0;
+
+    while(decodeSize < size)
+    {
+        BYTE code = *flashAddress++;
+        BYTE value = *flashAddress++;
+        sourceOffset += 2;
+        
+        if(code > 0)
+        {
+            decodeSize += code;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                code -= (decodeSize - size);
+            }
+            
+            while(code)
+            {
+                *pixel_row++ = value;
+                code--;
+            }
+        }
+        else
+        {
+            decodeSize += value;
+            sourceOffset += value;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                value -= (decodeSize - size);
+            }
+            
+            while(value)
+            {
+                *pixel_row++ = *flashAddress++;
+                value--;
+            }
+        }
+    }    
+    return (sourceOffset);
+}
+
+/*********************************************************************
+* Function: void PutImageRLE8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+*
+* PreCondition: none
+*
+* Input: left,top - left top image corner, image - image pointer,
+*        stretch - Should be NORMAL when RLE is used
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: outputs the image starting from left,top coordinates
+*
+* Note: image must be located in internal memory
+*
+********************************************************************/
+void PutImageRLE8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    WORD                sizeX, sizeY;
+    WORD                x, y;
+    WORD                xc, yc;
+    BYTE                temp;
+    BYTE                stretchX, stretchY;
+    GFX_COLOR           pallete[256];
+    WORD                counter;
+    BYTE                pixelrow[GetMaxX() + 1];
+    WORD                offset;
+    BYTE                *pixelAddress;
+
+    // Move pointer to size information
+    flashAddress = image + 2;
+
+    // Read image size
+    sizeY = *((FLASH_WORD *)flashAddress);
+    flashAddress += 2;
+    sizeX = *((FLASH_WORD *)flashAddress);
+    flashAddress += 2;
+
+    #if COLOR_DEPTH == 24
+    flashAddress += 2;      // pad word for alignment
+    #endif
+
+    // Read pallete
+    for(counter = 0; counter < 256; counter++)
+    {
+        #if COLOR_DEPTH == 16
+        pallete[counter] = *((FLASH_WORD *)flashAddress);
+        flashAddress += 2;
+        #endif
+
+        #if COLOR_DEPTH == 24
+        pallete[counter] = *((FLASH_DWORD *)flashAddress);
+        flashAddress += 4;
+        #endif
+    }
+
+    yc = top;
+    tempFlashAddress = flashAddress;
+    for(y = 0; y < sizeY; y++)
+    {
+        offset = DecodeRLE8(tempFlashAddress, pixelrow, sizeX);
+        tempFlashAddress += offset;
+        
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
+            pixelAddress = pixelrow;
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+
+                // Read pixels from flash
+                temp = *pixelAddress;
+                pixelAddress++;
+
+                // Set color
+            #ifdef USE_PALETTE
+                SetColor(temp);
+            #else
+                SetColor(pallete[temp]);
+            #endif
+
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    #ifdef USE_TRANSPARENT_COLOR
+                        if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                    #endif
+                            PutPixel(xc, yc);
+                        xc++;    
+                }
+            }
+
+            yc++;
+        }
+    }
+}
+        #endif //#if (COLOR_DEPTH >= 8)
+
+        #if (COLOR_DEPTH >= 4)
+        
+/*********************************************************************
+* Function: WORD DecodeRLE4(FLASH_BYTE *flashAddress, BYTE *pixelrow, WORD size)
+*
+* PreCondition: tempFlashAddress should point to the beginning of a RLE compressed block
+*
+* Input: flashAddress - Address of the beginning of a RLE compressed block
+*        pixelrow - Pointer to an array where the decoded row must be stored
+*        size - Size of the decoded data in bytes
+*
+* Output: Number of source bytes traversed
+*
+* Side Effects: none
+*
+* Overview: Decodes the data
+*
+********************************************************************/
+WORD DecodeRLE4(FLASH_BYTE *flashAddress, BYTE *pixel_row, WORD size)
+{
+    WORD sourceOffset = 0;
+    WORD decodeSize = 0;
+
+    while(decodeSize < size)
+    {
+        BYTE code = *flashAddress++;
+        BYTE value = *flashAddress++;
+        BYTE counter;
+        
+        sourceOffset += 2;
+        
+        if(code > 0)
+        {
+            decodeSize += code;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                code -= (decodeSize - size);
+            }
+            
+            for(counter = 0; counter < code; counter++)
+            {
+                if(counter & 0x01)
+                {
+                    *pixel_row++ = (value >> 4) & 0x0F;
+                }
+                else
+                {
+                    *pixel_row++ = (value) & 0x0F;
+                }
+            }
+        }
+        else
+        {
+            decodeSize += value;
+            sourceOffset += (value + 1) >> 1;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                value -= (decodeSize - size);
+            }
+            
+            for(counter = 0; counter < value; counter++)
+            {
+                if(counter & 0x01)
+                {
+                    *pixel_row++ = (*flashAddress >> 4) & 0x0F;
+                    flashAddress++;
+                }
+                else
+                {
+                    *pixel_row++ = (*flashAddress) & 0x0F;
+                }
+            }
+        }
+    }
+
+    return (sourceOffset);
+}
+
+/*********************************************************************
+* Function: void PutImageRLE4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+*
+* PreCondition: none
+*
+* Input: left,top - left top image corner, image - image pointer,
+*        stretch - Should be NORMAL when RLE is used
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: outputs the image starting from left,top coordinates
+*
+* Note: image must be located in internal memory
+*
+********************************************************************/
+void PutImageRLE4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+{
+    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *tempFlashAddress;
+    WORD                sizeX, sizeY;
+    register WORD       x, y;
+    WORD                xc, yc;
+    BYTE                temp = 0;
+    register BYTE       stretchX, stretchY;
+    GFX_COLOR           pallete[16];
+    WORD                counter;
+    BYTE                pixelrow[GetMaxX() + 1];
+    WORD                offset;
+    BYTE                *pixelAddress;
+
+    // Move pointer to size information
+    flashAddress = image + 2;
+
+    // Read image size
+    sizeY = *((FLASH_WORD *)flashAddress);
+    flashAddress += 2;
+    sizeX = *((FLASH_WORD *)flashAddress);
+    flashAddress += 2;
+
+    #if COLOR_DEPTH == 24
+    flashAddress += 2;          // pad for alignment
+    #endif
+
+    // Read pallete
+    for(counter = 0; counter < 16; counter++)
+    {
+        #if COLOR_DEPTH == 16    
+        pallete[counter] = *((FLASH_WORD *)flashAddress);
+        flashAddress += 2;
+        #endif
+
+        #if COLOR_DEPTH == 24
+        pallete[counter] = *((FLASH_DWORD *)flashAddress);
+        flashAddress += 4;
+        #endif
+    }
+
+    yc = top;
+    tempFlashAddress = flashAddress;
+    for(y = 0; y < sizeY; y++)
+    {
+        offset = DecodeRLE4(tempFlashAddress, pixelrow, sizeX);
+        tempFlashAddress += offset;
+
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
+            pixelAddress = pixelrow;
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+                temp = *pixelAddress;
+                pixelAddress++;
+
+                #ifdef USE_PALETTE
+                    SetColor(temp);
+                #else
+                    SetColor(pallete[temp]);
+                #endif
+
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    #ifdef USE_TRANSPARENT_COLOR
+                        if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                    #endif
+                            PutPixel(xc, yc);
+                        xc++;    
+                }
+            }
+
+            yc++;
+        }
+    }
+}
+        #endif //#if (COLOR_DEPTH >= 4)
+
+    #endif //    #ifdef USE_BITMAP_FLASH
+
+    #ifdef USE_BITMAP_EXTERNAL
+    
+        #if (COLOR_DEPTH >= 8)
+
+/*********************************************************************
+* Function: WORD DecodeRLE8Ext(void *image, DWORD  memAddress, BYTE *pixelrow, WORD size)
+*
+* PreCondition: tempFlashAddress should point to the beginning of a RLE compressed block
+*
+* Input: image - External memory image pointer
+*        memAddress - Address of the beginning of a RLE compressed block
+*        pixelrow - Pointer to an array where the decoded row must be stored
+*        size - Size of the decoded data in bytes
+*
+* Output: Number of source bytes traversed
+*
+* Side Effects: none
+*
+* Overview: Decodes the data from the external flash
+*
+********************************************************************/
+WORD DecodeRLE8Ext(void *image, DWORD memAddress, BYTE *pixel_row, WORD size)
+{
+    WORD sourceOffset = 0;
+    WORD decodeSize = 0;
+
+    while(decodeSize < size)
+    {
+        BYTE code, value;
+        
+        ExternalMemoryCallback(image, memAddress, sizeof(BYTE), &code);
+        memAddress++;
+        ExternalMemoryCallback(image, memAddress, sizeof(BYTE), &value);
+        memAddress++;
+
+        sourceOffset += 2;
+        
+        if(code > 0)
+        {
+            decodeSize += code;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                code -= (decodeSize - size);
+            }
+            
+            while(code)
+            {
+                *pixel_row++ = value;
+                code--;
+            }
+        }
+        else
+        {
+            decodeSize += value;
+            sourceOffset += value;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                value -= (decodeSize - size);
+            }
+            
+            ExternalMemoryCallback(image, memAddress, value * sizeof(BYTE), pixel_row);
+            pixel_row += value;
+            memAddress += value;
+        }
+    }    
+    return (sourceOffset);
+}
+
+/*********************************************************************
+* Function: void PutImageRLE8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+*
+* PreCondition: none
+*
+* Input: left,top - left top image corner, image - image pointer,
+*        stretch - image stretch factor
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: outputs monochrome image starting from left,top coordinates
+*
+* Note: image must be located in external memory
+*
+********************************************************************/
+void PutImageRLE8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            pallete[256];
+    BYTE            pixelrow[(GetMaxX() + 1)];
+    BYTE            *pixelAddress;
+
+    BYTE            temp;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            xc, yc;
+    BYTE            stretchX, stretchY;
+    WORD            offset;
+
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
+
+    // Get pallete (256 entries)
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
+
+    // Set offset to the image data
+    memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
+
+    // Get size
+    sizeX = bmp.width;
+    sizeY = bmp.height;
+
+    yc = top;
+    for(y = 0; y < sizeY; y++)
+    {
+        offset = DecodeRLE8Ext(image, memOffset, pixelrow, sizeX);
+        memOffset += offset;
+        
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
+            pixelAddress = pixelrow;
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+
+                // Read pixels from flash
+                temp = *pixelAddress;
+                pixelAddress++;
+
+                // Set color
+            #ifdef USE_PALETTE
+                SetColor(temp);
+            #else
+                SetColor(pallete[temp]);
+            #endif
+
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    #ifdef USE_TRANSPARENT_COLOR
+                        if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                    #endif
+                            PutPixel(xc, yc);
+                        xc++;    
+                }
+            }
+
+            yc++;
+        }
+    }
+}
+        #endif //#if (COLOR_DEPTH >= 8)
+        
+        #if (COLOR_DEPTH >= 4)
+
+/*********************************************************************
+* Function: WORD DecodeRLE4Ext(void *image, DWORD memAddress, BYTE *pixelrow, WORD size)
+*
+* PreCondition: tempFlashAddress should point to the beginning of a RLE compressed block
+*
+* Input: image - External memory image pointer
+*        memAddress - Address of the beginning of a RLE compressed block
+*        pixelrow - Pointer to an array where the decoded row must be stored
+*        size - Size of the decoded data in bytes
+*
+* Output: Number of source bytes traversed
+*
+* Side Effects: none
+*
+* Overview: Decodes the data
+*
+********************************************************************/
+WORD DecodeRLE4Ext(void *image, DWORD memAddress, BYTE *pixel_row, WORD size)
+{
+    WORD sourceOffset = 0;
+    WORD decodeSize = 0;
+
+    while(decodeSize < size)
+    {
+        BYTE code, value;
+        BYTE counter, temp;
+        
+        ExternalMemoryCallback(image, memAddress, sizeof(BYTE), &code);
+        memAddress++;
+        ExternalMemoryCallback(image, memAddress, sizeof(BYTE), &value);
+        memAddress++;
+        
+        sourceOffset += 2;
+        
+        if(code > 0)
+        {
+            decodeSize += code;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                code -= (decodeSize - size);
+            }
+            
+            for(counter = 0; counter < code; counter++)
+            {
+                if(counter & 0x01)
+                {
+                    *pixel_row++ = (value >> 4) & 0x0F;
+                }
+                else
+                {
+                    *pixel_row++ = (value) & 0x0F;
+                }
+            }
+        }
+        else
+        {
+            decodeSize += value;
+            sourceOffset += (value + 1) >> 1;
+            
+            if(decodeSize > size) //To avoid writing oustide the array bounds
+            {
+                value -= (decodeSize - size);
+            }
+            
+            for(counter = 0; counter < value; counter++)
+            {
+                if(counter & 0x01)
+                {
+                    *pixel_row++ = (temp >> 4) & 0x0F;
+                    memAddress++;
+                }
+                else
+                {
+                    ExternalMemoryCallback(image, memAddress, sizeof(BYTE), &temp);
+                    *pixel_row++ = temp & 0x0F;
+                }
+            }
+        }
+    }
+
+    return (sourceOffset);
+}
+
+/*********************************************************************
+* Function: void PutImageRLE4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+*
+* PreCondition: none
+*
+* Input: left,top - left top image corner, image - image pointer,
+*        stretch - image stretch factor
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: outputs monochrome image starting from left,top coordinates
+*
+* Note: image must be located in external memory
+*
+********************************************************************/
+void PutImageRLE4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+{
+    register DWORD  memOffset;
+    BITMAP_HEADER   bmp;
+    WORD            pallete[16];
+    BYTE            pixelrow[(GetMaxX() + 1)];
+    BYTE            *pixelAddress;
+
+    BYTE            temp;
+    WORD            sizeX, sizeY;
+    WORD            x, y;
+    WORD            xc, yc;
+    BYTE            stretchX, stretchY;
+    WORD            offset;
+
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
+
+    // Get pallete (16 entries)
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
+
+    // Set offset to the image data
+    memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
+
+    // Get size
+    sizeX = bmp.width;
+    sizeY = bmp.height;
+
+    yc = top;
+    for(y = 0; y < sizeY; y++)
+    {
+        offset = DecodeRLE4Ext(image, memOffset, pixelrow, sizeX);
+        memOffset += offset;
+        
+        for(stretchY = 0; stretchY < stretch; stretchY++)
+        {
+            pixelAddress = pixelrow;
+            xc = left;
+            for(x = 0; x < sizeX; x++)
+            {
+
+                // Read pixels from flash
+                temp = *pixelAddress;
+                pixelAddress++;
+
+                // Set color
+            #ifdef USE_PALETTE
+                SetColor(temp);
+            #else
+                SetColor(pallete[temp]);
+            #endif
+
+                // Write pixel to screen
+                for(stretchX = 0; stretchX < stretch; stretchX++)
+                {
+                    #ifdef USE_TRANSPARENT_COLOR
+                        if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
+                    #endif
+                            PutPixel(xc, yc);
+                        xc++;    
+                }
+            }
+
+            yc++;
+        }
+    }
+}
+        #endif //#if (COLOR_DEPTH >= 4)
+
+    #endif //#ifdef USE_BITMAP_EXTERNAL
+    
+#endif //#ifdef USE_COMP_RLE
+
+void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y)
+{
+    DWORD   rad;
+    SHORT   ang;
+    SHORT   temp;
+
+    ang = angle % 45;
+    if((angle / 45) & 0x01)
+        ang = 45 - ang;
+
+    rad = radius;
+    // there is a shift by 8 bits here since this function assumes a shift on the calculations for accuracy
+    // and to avoid long and complex multiplications.
+    rad *= ((DWORD) GetSineCosine(ang, GETCOSINE) << 8);
+
+    *x = ((DWORD_VAL) rad).w[1];
+    rad = radius;
+    rad *= ((DWORD) GetSineCosine(ang, GETSINE) << 8);
+
+    *y = ((DWORD_VAL) rad).w[1];
+
+    if(((angle > 45) && (angle < 135)) || ((angle > 225) && (angle < 315)))
+    {
+        temp = *x;
+        *x = *y;
+        *y = temp;
+    }
+
+    if((angle > 90) && (angle < 270))
+    {
+        *x = -*x;
+    }
+
+    if((angle > 180) && (angle < 360))
+    {
+        *y = -*y;
+    }
+}

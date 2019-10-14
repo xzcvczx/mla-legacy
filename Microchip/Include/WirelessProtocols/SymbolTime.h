@@ -11,7 +11,7 @@
 *
 * Copyright and Disclaimer Notice
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright ¬© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -22,7 +22,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -42,12 +42,13 @@
 *   accurate symbol time measurement
 *
 * Change History:
-*  Rev   Date         Description
-*  0.1   11/09/2006   Initial revision
-*  1.0   01/09/2007   Initial release
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  2.1   06/20/2009   Add LCD support
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  0.1   11/09/2006   yfy       Initial revision
+*  1.0   01/09/2007   yfy       Initial release
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  2.1   06/20/2009   yfy       Add LCD support
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #ifndef __SYMBOL_TIME_H_
@@ -55,7 +56,6 @@
 
 /************************ HEADERS **********************************/
 
-#include "SystemProfile.h"
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
 
@@ -106,6 +106,17 @@
     /* SYMBOLS_TO_TICKS to only be used with input (a) as a constant, otherwise you will blow up the code */
     #define SYMBOLS_TO_TICKS(a) (((DWORD)CLOCK_FREQ/100000) * a / ((DWORD)SYMBOL_TO_TICK_RATE/100000))
     #define TICKS_TO_SYMBOLS(a) (((DWORD)SYMBOL_TO_TICK_RATE/100000) * a / ((DWORD)CLOCK_FREQ/100000))
+
+
+    #define TMR_IF          INTCONbits.TMR0IF
+    #define TMR_IE          INTCONbits.TMR0IE
+    #define TMR_IP          INTCON2bits.TMR0IP
+    #define TMR_ON          T0CONbits.TMR0ON
+    #define TMR_CON         T0CON
+    #define TMR_L           TMR0L
+    #define TMR_H           TMR0H
+    
+    
 #elif defined(__dsPIC30F__) || defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__)
     /* this section is based on the Timer 2/3 module of the dsPIC33/PIC24 family */
     #if(CLOCK_FREQ <= 125000)
@@ -170,8 +181,10 @@
 #define TEN_MILI_SECOND     (ONE_SECOND/100)
 #define FIVE_MILI_SECOND    (ONE_SECOND/200)
 #define TWO_MILI_SECOND     (ONE_SECOND/500)
+#define ONE_MINUTE          (ONE_SECOND*60)
+#define ONE_HOUR            (ONE_MINUTE*60)
 
-#define TickGetDiff(a,b) (a.Val - b.Val)
+#define MiWi_TickGetDiff(a,b) (a.Val - b.Val)
 
 /************************ DATA TYPES *******************************/
 
@@ -201,7 +214,7 @@ typedef union _MIWI_TICK
 } MIWI_TICK;
 
 void InitSymbolTimer(void);
-MIWI_TICK TickGet(void);
+MIWI_TICK MiWi_TickGet(void);
 
 /************************ VARIABLES ********************************/
 

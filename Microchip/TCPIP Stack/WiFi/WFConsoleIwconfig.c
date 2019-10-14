@@ -90,6 +90,8 @@ static BOOL iwconfigSetDomain(void);
 static BOOL iwconfigSetRTS(void);
 static BOOL iwconfigSetTxRate(void);
 
+UINT8 g_hibernate_state = WF_HB_NO_SLEEP;
+UINT8 g_wakeup_notice = FALSE;
 
 /*****************************************************************************
  * FUNCTION: do_iwconfig_cmd
@@ -102,63 +104,100 @@ static BOOL iwconfigSetTxRate(void);
  *****************************************************************************/
 void do_iwconfig_cmd(void)
 {
-	if ( !iwconfigSetCb() )
+	if (!g_hibernate_state && !iwconfigSetCb() )
 		return;
 
     // if user only typed in iwconfig with no other parameters
     if (ARGC == 1u)
     {
-		iwconfigDisplayStatus();
+		if (!g_hibernate_state)
+			iwconfigDisplayStatus();
+		else
+			WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
 		return;
     }
 
-    if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "ssid") == 0) )
+	if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "wakeup") == 0) )
     {
-    	if ( !iwconfigSetSsid() )
+		if (!g_wakeup_notice)
+    		g_wakeup_notice = TRUE;
+		WFConsolePrintRomStr("The Wi-Fi module is awake.", TRUE);	
+		return;
+	}
+
+	if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "hibernate") == 0) )
+    {
+		if (!g_hibernate_state)
+		{
+    		g_hibernate_state = WF_HB_ENTER_SLEEP;
+			g_wakeup_notice = FALSE;
+			WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode.", TRUE);
+		}
+		else
+			WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode.", TRUE);
+		return;
+	}
+	
+	if (g_hibernate_state)
+	{
+		WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
+		return;
+	}
+
+	if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "ssid") == 0) )
+    {
+    	if (!g_hibernate_state && !iwconfigSetSsid())
 			return;
 	}
     else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "mode") == 0) )
     {
-    	if ( !iwconfigSetMode() )
+    	if (!g_hibernate_state && !iwconfigSetMode())
 			return;
 	}
     else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "channel") == 0) )
     {
-    	if ( !iwconfigSetChannel() )
+    	if (!g_hibernate_state && !iwconfigSetChannel())
 			return;
 	}
     else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "power") == 0) )
     {
-    	if ( !iwconfigSetPower() )
+    	if (!g_hibernate_state && !iwconfigSetPower())
 			return;
 	}
     else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "domain") == 0) )
     {
-    	if ( !iwconfigSetDomain() )
+    	if (!g_hibernate_state && !iwconfigSetDomain())
 			return;
 	}
     else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "rts") == 0) )
     {
-    	if ( !iwconfigSetRTS() )
+    	if (!g_hibernate_state && !iwconfigSetRTS())
 			return;
 	}
     else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "txrate") == 0) )
     {
-    	if ( !iwconfigSetTxRate() )
+    	if (!g_hibernate_state && !iwconfigSetTxRate())
 			return;
 	}
+
 	#if defined ( EZ_CONFIG_SCAN )
 	else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "scan") == 0) )
     {
-		WFConsolePrintRomStr("Scan...", TRUE);
-        if (WFStartScan() == WF_SUCCESS)
-	    {
-            SCAN_SET_DISPLAY(SCANCXT.scanState);
-            SCANCXT.displayIdx = 0;
-        }
+    	if (!g_hibernate_state) {
+			WFConsolePrintRomStr("Scan...", TRUE);
+        	if (WFStartScan() == WF_SUCCESS)
+	    	{
+				WFConsolePrintRomStr("Scan completed.", TRUE);
+            	SCAN_SET_DISPLAY(SCANCXT.scanState);
+            	SCANCXT.displayIdx = 0;
+        	}
+			else
+				WFConsolePrintRomStr("Scan failed.", TRUE);	
+    	}
 	    return;
 	}
 	#endif /* EZ_CONFIG_SCAN */
+
     else
     {
 		WFConsolePrintRomStr("Unknown parameter", TRUE);
@@ -476,15 +515,15 @@ static void iwconfigDisplayStatus(void)
 
 static BOOL iwconfigSetSsid(void)
 {
-	if ( !iwconfigCb.isIdle )
-	{
-		WFConsolePrintRomStr("SSID can only be set in idle mode", TRUE);
-		return FALSE;
-	}
-
 	if (ARGC < 3u)
 	{
 		WFConsolePrintRomStr("Missing value for last parameter", TRUE);
+		return FALSE;
+	}
+
+	if (ARGC > 3u)
+	{
+		WFConsolePrintRomStr("SSID may not contain space for this demo", TRUE);
 		return FALSE;
 	}
 
@@ -496,12 +535,6 @@ static BOOL iwconfigSetSsid(void)
 static BOOL iwconfigSetMode(void)
 {
 	UINT8 networkType;
-
-	if (ARGC < 3u)
-	{
-		WFConsolePrintRomStr("Missing value for last parameter", TRUE);
-		return FALSE;
-	}
 
 	WF_CPGetNetworkType(iwconfigCb.cpId, &networkType);
 

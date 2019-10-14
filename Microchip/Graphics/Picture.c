@@ -34,9 +34,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok 	11/12/07	Version 1.0 release
+ * 11/12/07		Version 1.0 release
+ * 01/19/11		Fixed bug when drawing picture from (0,0) position.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -179,8 +180,8 @@ WORD PictDraw(void *pObj)
                 return (1);
             }
 
-            posleft = (pPict->hdr.left + pPict->hdr.right - pPict->scale * GetImageWidth(pPict->pBitmap)) >> 1;
-            postop = (pPict->hdr.top + pPict->hdr.bottom - pPict->scale * GetImageHeight(pPict->pBitmap)) >> 1;
+            posleft = (pPict->hdr.left + 1 + pPict->hdr.right - pPict->scale * GetImageWidth(pPict->pBitmap)) >> 1;
+            postop = (pPict->hdr.top + 1 + pPict->hdr.bottom - pPict->scale * GetImageHeight(pPict->pBitmap)) >> 1;
             posright = (pPict->hdr.right + pPict->hdr.left + pPict->scale * GetImageWidth(pPict->pBitmap)) >> 1;
             posbottom = (pPict->hdr.bottom + pPict->hdr.top + pPict->scale * GetImageHeight(pPict->pBitmap)) >> 1;
             state = DRAW_IMAGE;

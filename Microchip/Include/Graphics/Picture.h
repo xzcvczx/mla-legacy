@@ -4,10 +4,8 @@
  *  Picture control
  *****************************************************************************
  * FileName:        Picture.h
- * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -37,11 +35,13 @@
  * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07		Version 1.0 release
+ * 03/09/11     Removed compile warnings
  *****************************************************************************/
 #ifndef _PICTURE_H
     #define _PICTURE_H
 
     #include <Graphics/GOL.h>
+    #include "GenericTypeDefs.h"
 
 /*********************************************************************
 * Object States Definition: 
@@ -75,7 +75,7 @@ typedef struct
 * Side Effects: none
 *
 ********************************************************************/
-    #define PictGetBitmap(pPict)    pPict->pBitmap
+    #define PictGetBitmap(pPict)    		((PICTURE*)pPict)->pBitmap
 
 /*********************************************************************
 * Macros:  PictSetBitmap(pPict,pBtMap)
@@ -92,7 +92,8 @@ typedef struct
 * Side Effects: none
 *
 ********************************************************************/
-    #define PictSetBitmap(pPict, pBtMap)    pPict->pBitmap = pBtMap
+    #define PictSetBitmap(pPict, pBtmap)    ((PICTURE*)pPict)->pBitmap = pBtmap
+
 
 /*********************************************************************
 * Macros:  PictSetScale(pPict,scl)

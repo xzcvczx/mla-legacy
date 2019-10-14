@@ -3795,7 +3795,8 @@ Not Needed
 
 
 
-/* // A function potentially useful for debugging, but a waste of code otherwise
+#ifdef ENC100_DEBUG
+// A function potentially useful for debugging, but a waste of code otherwise
 void ENC100DumpState(void)
 {
 	WORD w;
@@ -3839,6 +3840,6 @@ void ENC100DumpState(void)
 	}
 	printf("\r\n\r\n");
 }
-*/
+#endif
 
 #endif //#if defined(ENC100_INTERFACE_MODE)

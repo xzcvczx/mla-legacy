@@ -657,7 +657,7 @@ eEthLinkStat  __attribute__((weak)) EthPhyGetLinkStatus(int refresh)
 int  __attribute__((weak)) EthPhyReset(int waitComplete)
 {
 
-	EthMIIMWriteStart(PHY_REG_BMCON, _BMCON_RESET_MASK, _PhyAdd);		// Soft Reset the PHY
+	EthMIIMWriteStart(PHY_REG_BMCON, _PhyAdd, _BMCON_RESET_MASK);		// Soft Reset the PHY
 	
 	if(waitComplete)
 	{	// wait reset self clear

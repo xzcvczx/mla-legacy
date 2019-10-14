@@ -42,6 +42,7 @@
     #define _TEXTENTRY_H
 
     #include <Graphics/GOL.h>
+    #include "GenericTypeDefs.h"
 
 /*********************************************************************
 * Object States Definition: 

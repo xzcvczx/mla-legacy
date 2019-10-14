@@ -2327,7 +2327,9 @@ MDNS_STATIC void mDNSResponder(void)
             mDNSRemote.MACAddr.v[4]=0x00;
             mDNSRemote.MACAddr.v[5]=0xFB;
 
-			mDNS_socket = UDPOpen(MDNS_PORT, &mDNSRemote, MDNS_PORT);
+			//mDNS_socket = UDPOpen(MDNS_PORT, &mDNSRemote, MDNS_PORT);
+			
+			mDNS_socket = UDPOpenEx((DWORD)&mDNSRemote,UDP_OPEN_NODE_INFO,MDNS_PORT,MDNS_PORT);
 
 			if(mDNS_socket == INVALID_UDP_SOCKET)
             {
@@ -2361,7 +2363,7 @@ MDNS_STATIC void mDNSResponder(void)
 			else
 			{
 				/* Reset the Remote-node information in UDP-socket */
-				memcpy((void*)&UDPSocketInfo[mDNS_socket].remoteNode, 
+				memcpy((void*)&UDPSocketInfo[mDNS_socket].remote.remoteNode, 
 						(const void*)&mDNSRemote, sizeof(mDNSRemote));
 				UDPSocketInfo[mDNS_socket].remotePort = MDNS_PORT;
 				UDPSocketInfo[mDNS_socket].localPort = MDNS_PORT;

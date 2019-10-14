@@ -628,8 +628,10 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
     UINT16 byteCount;
     UINT8  regId;
     BOOL  intDisabled;
+    #if defined(WF_DEBUG)
     UINT32 startTickCount;
     UINT32 maxAllowedTicks;
+    #endif
 
     /* create mask to check against for Raw Move complete interrupt for either RAW0 or RAW1 */
     rawIntMask = (rawId == RAW_ID_0)?WF_HOST_INT_MASK_RAW_0_INT_0:WF_HOST_INT_MASK_RAW_1_INT_0;
@@ -658,10 +660,11 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
 	    WF_EintEnable();
     }
 
-
+    #if defined(WF_DEBUG)
     // Before we enter the while loop, get the tick timer count and save it
     maxAllowedTicks = TICKS_PER_SECOND / 2;  /* 500 ms timeout */
     startTickCount = (UINT32)TickGet();
+    #endif
     while (1)
     {
         /* if received an external interrupt that signalled the RAW Move */
@@ -670,12 +673,15 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
 	    {
 		    break;
 	    }
-
+	    
+        #if defined(WF_DEBUG)
 	    /* If timed out waiting for RAW Move complete than lock up */
         if (TickGet() - startTickCount >= maxAllowedTicks)
 	    {
     	    WF_ASSERT(FALSE);
 	    }
+        #endif
+        
     } /* end while */
 
     /* if interrupt was enabled by us here, we should disable it now that we're finished */

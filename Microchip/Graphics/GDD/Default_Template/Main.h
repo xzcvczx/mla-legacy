@@ -39,23 +39,18 @@
     #define _MAIN_H_
 
 ////////////////////////////// INCLUDES //////////////////////////////
-    #if defined(__dsPIC33F__)
-        #include <p33Fxxxx.h>
-    #elif defined(__PIC24H__)
-        #include <p24Hxxxx.h>
-    #elif defined(__PIC32MX__)
-        #include <plib.h>
-    #elif defined (__PIC24F__)
-        #include <p24Fxxxx.h>
-    #else
-        #error "Device selected is not supported."
-    #endif
+////////////////////////////// INCLUDES //////////////////////////////
+    #include "Compiler.h"
     #include "GenericTypeDefs.h"
     #include "Graphics/Graphics.h"
-    #include "EEPROM.h"
+    #include "drv_spi.h"
+    #include "MCHP25LC256.h"
     #include "SST25VF016.h"
-    #include "SST39LF400.h"
     #include "TouchScreen.h"
+    #include "Potentiometer.h"
     #include "Beep.h"
-	#include "cpld.h"
+    #include "HardwareProfile.h"
+    #include "Graphics/mchpGfxDrv.h"
+    #include <cpld.h>
+
 #endif

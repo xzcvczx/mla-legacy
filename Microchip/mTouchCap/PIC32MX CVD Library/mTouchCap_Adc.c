@@ -1,203 +1,146 @@
-
 /******************************************************************************
-
 * File Name:       mTouchCapAdc.c
+* Includes:
+*   void InitADC2(void *ADC1CallBackISR)
+*   void mTouchCapADC_SetChannelADC(WORD channel_select)
+*
 * Dependencies:    None
 * Processor:       PIC32MX795F512H
 * Compiler:        C32
 * Company:         Microchip Technology, Inc.
-
- Software License Agreement:
-
- The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
- exclusively on Microchip PIC Microcontroller products. The
- software is owned by the Company and/or its supplier, and is
- protected under applicable copyright laws. All rights are reserved.
- Any use in violation of the foregoing restrictions may subject the
- user to criminal sanctions under applicable laws, as well as to
- civil liability for the breach of the terms and conditions of this
- license.
-
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
- WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
- TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
- IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
- CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
-
-
-Author          Date    Comments
---------------------------------------------------------------------------------
-MC        22-Ian-2010   First release of ADCDriver.c, ADCDriver.h
-                        Porting for PIC32MX795F512H
-*******************************************************************************/
+* Software License Agreement
+*
+* Copyright © 2011 Microchip Technology Inc.
+* Microchip licenses this software to you solely for use with Microchip
+* products, according to the terms of the accompanying click-wrap software
+* license. Microchip and its licensors retain all right, title and interest in
+* and to the software.  All rights reserved. This software and any accompanying
+* information is for suggestion only. It shall not be deemed to modify
+* Microchip’s standard warranty for its products.  It is your responsibility to
+* ensure that this software meets your requirements.
+*
+* SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR
+* IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
+* NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT WILL
+* MICROCHIP OR ITS LICENSORS BE LIABLE FOR ANY DIRECT OR INDIRECT DAMAGES OR
+* EXPENSES INCLUDING BUT NOT LIMITED TO INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE
+* OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
+* SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, OR ANY CLAIMS BY THIRD PARTIES
+* (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+*
+* The aggregate and cumulative liability of Microchip and its licensors for
+* damages related to the use of the software will in no event exceed $1000 or
+* the amount you paid Microchip for the software, whichever is greater.
+*
+* MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
+* TERMS AND THE TERMS OF THE ACCOMPANYING CLICK-WRAP SOFTWARE LICENSE.
+*
+* Author    Date          Comments
+*--------------------------------------------------------------------------------
+* MC        22-Jan-2010   First release of ADCDriver.c, ADCDriver.h
+*                         Porting for PIC32MX795F512H
+* MWM       28 Mar 2011   Removed ADC ISR, capture now in Timer 4 ISR.
+********************************************************************************/
+#include "config.h"
+#include "HardwareProfile.h"
+#include "GenericTypeDefs.h"
 #include "mTouchCap_Adc.h"
-
 #include "mTouchCap_CvdAPI.h"
-#include "mTouchCap_PIC32MX_CVD_Physical.h"
 
-
-/* call back function, static as it is passed btw Init and ISR */
-static void *ADCallBackISR;
-extern int button_set_number;                       //button set
-extern unsigned int 	dataReadyCVD;	            //global indicating the reading of all channels finished
-extern BYTE ScanChannelIndex;                      // store the index of the channels that has to be scanned
-extern WORD ScanChannels[MAX_ADC_CHANNELS];
-
-
-/******************************************************************************
- * Function:        void __ISR(_ADC_VECTOR, IPL2SOFT) Ad1Handler0(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:       	This function ADC ISR handler
- *
- * Note:            None
- *****************************************************************************/
-void __ISR(_ADC_VECTOR, IPL2SOFT) Ad1Handler0(void)
+void InitADC2(void)
 {
-        void (*ptr_fcn)(void);
-        /* call the callback function */
-        ptr_fcn = (void (*) ())ADCallBackISR;
-        /* if ptr function is null, do not call the callback */
-		if (ptr_fcn != 0)
-        {
-            /* callback init in ADC_Init */
-			(*ptr_fcn)();
-        }    
-        /* acknowlege ISR */
-        IFS1bits.AD1IF = 0;
-}
-/******************************************************************************
- * Function:        void InitADC1(void *ADC1CallBackISR)
- *
- * PreCondition:    None
- *
- * Input:           void *ADC1CallBackISR
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:       	This function the init of ADC
- *
- * Note:            None
- *****************************************************************************/
+//*****************************************************************************
+// ADC Setup
+//*****************************************************************************
 
-void InitADC1(void *ADC1CallBackISR)
-{
     // configure and enable the ADC
-    /* hardware clears the ASAM bit when ADC ISR is generated */
-	/* clearing SAMP bit starts conversion */
-	/* result is INT */
-	AD1CON1 = 0x0010;
-    
-	/* do not scan inputs */
-	/* interrupt at completion of each conversion */
-	/* always use MUXA */
+    AD1CON1 = 0x0;
+
+    /* do not scan inputs */
+    /* interrupt at completion of each conversion */
+    /* always use MUXA */
     AD1CON2 = 0x0;
-    
-	/* clock derived from periph clock */
-	/* TAD = 2 * TPB */
-    AD1CON3 = 0x0000;
-    
-	/* reset value for channel select at this point */
+
+    /* clock derived from periph clock */
+    /* Tadc = 2*(AD1CON<7:0>+1)*Tpbus */
+    /* Tadc = 2*(   2       +1)*Tpbus */
+    /* Tadc = 6 * Tpbus = 6 * 12.5 ns = 75 ns > 65 ns required */
+    AD1CON3 = 0x0002;
+
+    /* reset value for channel select at this point */
     AD1CHS = 0x0;
 
-    //Port pin multiplexed with AN8-AN15 in Analog mode
-    AD1PCFG = 0x00F0; 
-	
-	/* no channel si scanned */
-	AD1CSSL = 0x0;
-	
-	/* initialization of static callback pointer */
-    ADCallBackISR = ADC1CallBackISR;
-	
-	/* interrupt priority is 2 */
-	IPC6bits.AD1IP = 2;
-	/* interrupt subpriority is 0 */
-	IPC6bits.AD1IS = 0;	
-	/* interrupt flag is cleared */
-	IFS1bits.AD1IF = 0;
-	
-	/* ENABLE interrupt */
-	IEC1bits.AD1IE = 1;
+#if  defined(USE_DIRECT_KEYS)
+
+ // Port configuration defined in HardwareProfile.h
+    AD1PCFG = ~( (1<<DIRECTKEY1_CHANNEL) |
+                 (1<<DIRECTKEY2_CHANNEL) |
+                 (1<<DIRECTKEY3_CHANNEL) |
+                 (1<<DIRECTKEY4_CHANNEL) |
+                 (1<<DIRECTKEY5_CHANNEL) |
+                 (1<<DIRECTKEY6_CHANNEL) |
+                 (1<<DIRECTKEY7_CHANNEL) |
+                 (1<<DIRECTKEY8_CHANNEL) );
+
+#elif defined(USE_MATRIX_KEYS)
+
+ // Port configuration defined in HardwareProfile.h
+    AD1PCFG =~((1<<MATRIXKEY0_ROW_CHANNEL)  | (1<<MATRIXKEY0_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY1_ROW_CHANNEL)  | (1<<MATRIXKEY1_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY2_ROW_CHANNEL)  | (1<<MATRIXKEY2_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY3_ROW_CHANNEL)  | (1<<MATRIXKEY3_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY4_ROW_CHANNEL)  | (1<<MATRIXKEY4_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY5_ROW_CHANNEL)  | (1<<MATRIXKEY5_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY6_ROW_CHANNEL)  | (1<<MATRIXKEY6_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY7_ROW_CHANNEL)  | (1<<MATRIXKEY7_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY8_ROW_CHANNEL)  | (1<<MATRIXKEY8_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY9_ROW_CHANNEL)  | (1<<MATRIXKEY9_COLUMN_CHANNEL)  |
+               (1<<MATRIXKEY10_ROW_CHANNEL) | (1<<MATRIXKEY10_COLUMN_CHANNEL) |
+               (1<<MATRIXKEY11_ROW_CHANNEL) | (1<<MATRIXKEY11_COLUMN_CHANNEL) );
+
+#elif defined(USE_SLIDER_4CHNL)
+
+ // Port configuration defined in HardwareProfile.h
+    AD1PCFG = ~( (1<<FOUR_CH_SLIDER1_CHANNEL0) |
+                 (1<<FOUR_CH_SLIDER1_CHANNEL1) |
+                 (1<<FOUR_CH_SLIDER1_CHANNEL2) |
+                 (1<<FOUR_CH_SLIDER1_CHANNEL3) );
+
+#elif defined(USE_SLIDER_2CHNL)
+
+ // Port configuration defined in HardwareProfile.h
+    AD1PCFG = ~( (1<<TWO_CH_SLIDER1_CHANNEL0) |
+                 (1<<TWO_CH_SLIDER1_CHANNEL1) );
+
+#else
+#   error("Don't recognize demo type!")
+#endif
+
+    /* no channel is scanned */
+    AD1CSSL = 0x0;
+
+    /* DIS-ENABLE interrupt */
+    IEC1bits.AD1IE = 0;
 
 }
 
-/******************************************************************************
- * Function:        void ADC1CallbackFunc(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:       	This function is a callback function of the ADC interrupt.
- *                  It executed each time the ADC interrupt occurs, being
- *                  responsible witht the CVD technique data capture/processing.
- *
- * Note:            None
- *****************************************************************************/
-void ADC1CallbackFunc(void)
-{
-    static WORD counter = 0; /* counter up to num of channels * number of reads */
-     
-    /* reading the external caps */
-    /* wrap counte representing the number of channels inside the ReadCVD function */
-    counter = mTouchCapPhy_ReadCVD(counter);
-    
-    /*averaging the data returned by reading */
-    mTouchCapPhy_AverageData(ScanChannels[button_set_number]);
-    
-    counter++; //increment the counter
-    button_set_number++; //and increment the button/channel number
-    
-
-    if(button_set_number == ScanChannelIndex)
-    {
-        /* reset the button numbering */
-		button_set_number = 0;
-    }    
-
-    /* while the average voltage is not calculated this cycle */
-	if(dataReadyCVD==FALSE)
-    {
-        // reschedule the Timer 4 interrupt, as close as possible to the current time.
-        SetPeriodTimer4(1);
-    }
-    
-    return;
-
-}
 
 /********************************************************************
- * Function			:    void mTouchCapADC_SetChannelADC(WORD chan_param)
+ * Function         :    void mTouchCapADC_SetChannelADC(WORD chan_param)
  *
- * PreCondition		:    None
+ * PreCondition     :    None
  *
- * Input			:    channel_select - This contains the input select parameter to be 
-                     	 configured into the ADCHS register as defined below
+ * Input            :    channel_select - This contains the input select parameter to be
+                         configured into the ADCHS register as defined below
  *
- * Output			:    None
+ * Output           :    None
  *
- * Side Effects		:    None
+ * Side Effects     :    None
  *
- * Overview			:    This function sets the positive and negative inputs for 
-                     	 the sample multiplexers A and B.
+ * Overview         :    This function sets the positive and negative inputs for
+                         the sample multiplexers A and B.
  *
- * Note				:
+ * Note             :
  *******************************************************************/
 void mTouchCapADC_SetChannelADC(WORD channel_select)
 {

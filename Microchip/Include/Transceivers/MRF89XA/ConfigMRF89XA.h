@@ -39,6 +39,7 @@
 *
 *  Rev   Date         Author        Description
 *  2.0   4/15/2009    SM            MiWi DE 3.1
+*  4.1   6/3/2011     SM            MAL v2011-06
 ********************************************************************/
 
 #ifndef __CONFIG_MRF89XA_H
@@ -52,10 +53,9 @@
     // band for Microchip MRF89XA. One and only one of the frequency
     // band must be defined 
     /*********************************************************************/
-    #define BAND_902
-    
+    //#define BAND_902
     //#define BAND_915
-    //#define BAND_863
+    #define BAND_863
     
     /*********************************************************************/
     // DATA_RATE_5, DATA_RATE_10, DATA_RATE_20, 
@@ -192,7 +192,20 @@
     // layer.
     /*********************************************************************/
     #define ACK_INFO_SIZE           5
-
+    
+    /*********************************************************************/
+    //USE_IRQ0_AS_INTERRUPT enable MRF89XA transceiver to use both the IRQ0
+    //and IRQ1 interrupts. In MRF89XA.c file IRQ0 is received after 
+    //preamble detection (for accurate RSSI) and IRQ1 received after CRC
+    //correct packet is received.
+    //If IRQ0 and IRQ1 are both connected to PIC interrupts pins then
+    //enable this mode
+    /*********************************************************************/
+    //#define USE_IRQ0_AS_INTERRUPT
+    #define RFIE        PHY_IRQ1_En
+    #define RFIF        PHY_IRQ1
+    #define RF_INT_PIN  IRQ1_INT_PIN
+    #define RF_INT_TRIS IRQ1_INT_TRIS
 
     /***********************************************************************/
     //  SECURITY_KEY_xx defines xxth byte of security key used in the block

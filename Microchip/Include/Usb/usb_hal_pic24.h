@@ -374,6 +374,8 @@ typedef union _POINTER
 #endif
 
 #define USBDisableInterrupts() {IEC5bits.USB1IE=0;}
+#define USBInterruptFlag                IFS5bits.USB1IF
+
 
 
 #if (USB_PULLUP_OPTION == USB_PULLUP_ENABLE) || !defined(USB_PULLUP_OPTION)
@@ -572,8 +574,9 @@ BOOL USBSleepOnSuspend(void);
         extern USB_VOLATILE BYTE USBActiveConfiguration;
         extern USB_VOLATILE IN_PIPE inPipes[1];
         extern USB_VOLATILE OUT_PIPE outPipes[1];
-        extern volatile BDT_ENTRY *pBDTEntryIn[USB_MAX_EP_NUMBER+1];
     #endif
+	extern volatile BDT_ENTRY* pBDTEntryOut[USB_MAX_EP_NUMBER+1];
+	extern volatile BDT_ENTRY* pBDTEntryIn[USB_MAX_EP_NUMBER+1];	
 #endif
 
 #endif //USB_HAL_PIC24F_H

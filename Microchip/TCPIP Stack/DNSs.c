@@ -97,7 +97,9 @@ void DNSServerTask(void)
 	// Create a socket to listen on if this is the first time calling this function
 	if(MySocket == INVALID_UDP_SOCKET)
 	{
-		MySocket = UDPOpen(DNS_PORT, NULL, 0);
+		//MySocket = UDPOpen(DNS_PORT, NULL, 0);
+		
+		MySocket = UDPOpenEx(0,UDP_OPEN_SERVER,DNS_PORT,0);
 		return;
 	}
 

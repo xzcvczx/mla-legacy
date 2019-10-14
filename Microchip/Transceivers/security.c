@@ -1,6 +1,6 @@
 /********************************************************************
-* FileName:		
-* Dependencies:    
+* FileName:		security.c
+* Dependencies: None
 * Processor:	PIC18, PIC24, PIC32, dsPIC30, dsPIC33
 *               tested with 18F4620, dsPIC33FJ256GP710	
 * Complier:     Microchip C18 v3.04 or higher
@@ -50,6 +50,7 @@
 *  2.0   4/15/2009    yfy       MiMAC and MiApp revision
 *  2.1   6/20/2009    yfy       Add LCD support
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #include "SystemProfile.h"
@@ -102,7 +103,7 @@
          * Side Effects:    None
          * 
          ********************************************************************/
-        void encode(IOPUT WORD *text, INPUT WORD *key)
+        void encode(WORD *text, WORD *key)
         {
             WORD part1=text[0], part2=text[1];
             WORD sum=0, delta=0x9E37;
@@ -143,7 +144,7 @@
      * Side Effects:    None
      * 
      ********************************************************************/
-    void CTR(IOPUT BYTE *text, BYTE len, BYTE *key, BYTE *nounce)
+    void CTR(BYTE *text, BYTE len, BYTE *key, BYTE *nounce)
     {
         BYTE block = len/BLOCK_SIZE+1;
         BYTE i, j;
@@ -200,10 +201,10 @@
      * Side Effects:    None
      * 
      ********************************************************************/    
-    void CBC_MAC(   IOPUT BYTE *text, 
-                    INPUT BYTE len, 
-                    INPUT BYTE *key, 
-                    OUTPUT BYTE *MIC)
+    void CBC_MAC(   BYTE *text, 
+                    BYTE len, 
+                    BYTE *key, 
+                    BYTE *MIC)
     {
         BYTE block = len / BLOCK_SIZE + 1;
         BYTE i, j;
@@ -265,10 +266,10 @@
      * Side Effects:    None
      * 
      ********************************************************************/ 
-    void CCM_Enc(   IOPUT BYTE *text, 
-                    INPUT BYTE headerLen, 
-                    INPUT BYTE payloadLen, 
-                    INPUT BYTE *key)
+    void CCM_Enc(   BYTE *text, 
+                    BYTE headerLen, 
+                    BYTE payloadLen, 
+                    BYTE *key)
     {
         BYTE i;
         #if defined(__18CXX)

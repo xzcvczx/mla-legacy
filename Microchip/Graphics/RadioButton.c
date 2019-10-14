@@ -34,9 +34,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok 	11/12/07	Version 1.0 release
+ * 11/12/07	    Version 1.0 release
+ * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -298,7 +299,7 @@ WORD RbTranslateMsg(void *pObj, GOL_MSG *pMsg)
         #ifdef USE_KEYBOARD
     if(pMsg->type == TYPE_KEYBOARD)
     {
-        if(pMsg->param1 == pRb->hdr.ID)
+        if((WORD)pMsg->param1 == pRb->hdr.ID)
         {
             if(pMsg->uiEvent == EVENT_KEYSCAN)
             {

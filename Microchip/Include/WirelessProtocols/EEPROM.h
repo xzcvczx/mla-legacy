@@ -4,21 +4,21 @@
     
     #include "SystemProfile.h"
     
-    #if defined(ENABLE_EEPROM)
-        #include "SystemProfile.h"
-        #include "GenericTypeDefs.h"
-        #include "Compiler.h"
+    #include "SystemProfile.h"
+    #include "GenericTypeDefs.h"
+    #include "Compiler.h"
         
         
-        #define SPI_WRT_STATUS  0x01
-        #define SPI_WRITE       0x02
-        #define SPI_READ        0x03
-        #define SPI_DIS_WRT     0x04
-        #define SPI_RD_STATUS   0x05
-        #define SPI_EN_WRT      0x06
+    #define SPI_WRT_STATUS  0x01
+    #define SPI_WRITE       0x02
+    #define SPI_READ        0x03
+    #define SPI_DIS_WRT     0x04
+    #define SPI_RD_STATUS   0x05
+    #define SPI_EN_WRT      0x06
 
 
-        #define EEPROM_MAC_ADDR 0xFA
+    #define EEPROM_MAC_ADDR 0xFA
         
-    #endif
+    void EEPROMRead(BYTE *dest, BYTE addr, BYTE count);
+
 #endif

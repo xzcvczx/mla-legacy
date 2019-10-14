@@ -343,8 +343,18 @@ CHAR TFTPGetUploadStatus(void)
 	WORD w, w2;
 	BYTE *vData;
 
+	if(UDPIsOpened(_tftpSocket)== FALSE)
+	{
+
+		_tftpSocket = UDPOpenEx((DWORD)(ROM_PTR_BASE)vUploadRemoteHost,
+										 UDP_OPEN_ROM_HOST,TFTP_CLIENT_PORT,
+										 TFTP_SERVER_PORT);
+		smUpload = TFTP_UPLOAD_CONNECT;
+	}
+
 	switch(smUpload)
 	{
+#if 0
 	case TFTP_UPLOAD_GET_DNS:
 		if(!DNSBeginUsage())
 			break;
@@ -364,7 +374,7 @@ CHAR TFTPGetUploadStatus(void)
 		TFTPOpen(&ipRemote);
 		smUpload = TFTP_UPLOAD_CONNECT;
 		break;
-	
+#endif
 	case TFTP_UPLOAD_CONNECT:
 		switch(TFTPIsOpened())
 		{
@@ -512,7 +522,7 @@ void TFTPOpen(IP_ADDR *host)
     MutExVar.group1._hostInfo.IPAddr.Val = host->Val;
 
     // Initiate ARP resolution.
-    ARPResolve(&MutExVar.group1._hostInfo.IPAddr);
+   // ARPResolve(&MutExVar.group1._hostInfo.IPAddr);
 
     // Wait for ARP to get resolved.
     _tftpState = SM_TFTP_WAIT;
@@ -560,19 +570,22 @@ TFTP_RESULT TFTPIsOpened(void)
     switch(_tftpState)
     {
     default:
+		_tftpState = SM_TFTP_READY;
+#if 0
         DEBUG(printf("Resolving remote IP...\n"));
 
         // Check to see if adddress is resolved.
         if ( ARPIsResolved(&MutExVar.group1._hostInfo.IPAddr,
                            &MutExVar.group1._hostInfo.MACAddr) )
         {
-            _tftpSocket = UDPOpen(TFTP_CLIENT_PORT,
+            _tftpSocket = UDPOpenEx(TFTP_CLIENT_PORT,
                                   &MutExVar.group1._hostInfo,
                                   TFTP_SERVER_PORT);
             _tftpState = SM_TFTP_READY;
         }
         else
             break;
+#endif		
 
     case SM_TFTP_READY:
         // Wait for UDP to be ready.  Immediately after this user will

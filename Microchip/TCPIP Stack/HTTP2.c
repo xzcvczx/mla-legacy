@@ -225,8 +225,6 @@
   ***************************************************************************/
 void HTTPInit(void)
 {
-	PTR_BASE oldPtr;
-
     for(curHTTPID = 0; curHTTPID < MAX_HTTP_CONNECTIONS; curHTTPID++)
     {
 		smHTTP = SM_HTTP_IDLE;
@@ -238,10 +236,14 @@ void HTTPInit(void)
 	    // Save the default record (just invalid file handles)
 		curHTTP.file = MPFS_INVALID_HANDLE;
 		curHTTP.offsets = MPFS_INVALID_HANDLE;
-		#if !defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)		
-	    	oldPtr = MACSetWritePtr(BASE_HTTPB_ADDR + curHTTPID*sizeof(HTTP_CONN));
+		#if !defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
+		{
+			PTR_BASE oldPtr;
+
+			oldPtr = MACSetWritePtr(BASE_HTTPB_ADDR + curHTTPID*sizeof(HTTP_CONN));
 			MACPutArray((BYTE*)&curHTTP, sizeof(HTTP_CONN));
 			MACSetWritePtr(oldPtr);
+		}
 		#endif
     }
 

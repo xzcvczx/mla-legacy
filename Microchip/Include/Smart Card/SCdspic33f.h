@@ -36,6 +36,8 @@
   1.02   Initial release
 ********************************************************************/
 
+#if defined(__dsPIC33F__)
+
 #ifndef __SC_DRV33F_LIB__
 #define __SC_DRV33F_LIB__
 
@@ -60,5 +62,5 @@ extern void SCdrv_SendTxData( BYTE data );
 
 #endif
 
-
+#endif
 

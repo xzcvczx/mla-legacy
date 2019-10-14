@@ -116,7 +116,7 @@ void WFEnableMRF24WB0MMode(void)
   	MACInit must be called first.
 
   Parameters:
-    p_version -- pointer to location to store version number.
+    p_version - Pointer to location to store version number.
 
   Returns:
   	None.
@@ -142,7 +142,7 @@ void WFGetMRF24WB0MVersion(UINT8 *p_version)
   	MACInit must be called first.
 
   Parameters:
-    p_deviceInfo -- pointer where device info will be written
+    p_deviceInfo - Pointer where device info will be written
 
   Returns:
   	None.
@@ -179,7 +179,7 @@ void WF_GetDeviceInfo(tWFDeviceInfo *p_deviceInfo)
     connected state.
 
   Parameters:
-    p_mac  -- pointer to 6-byte MAC that will be sent to MRF24WB0M
+    p_mac  - Pointer to 6-byte MAC that will be sent to MRF24WB0M
 
   Returns:
   	None.
@@ -205,7 +205,7 @@ void WF_SetMacAddress(UINT8 *p_mac)
   	MACInit must be called first.
 
   Parameters:
-    p_mac  -- pointer where mac will be written (must point to a 6-byte buffer)
+    p_mac  - Pointer where mac will be written (must point to a 6-byte buffer)
 
   Returns:
   	None.
@@ -242,8 +242,8 @@ void WF_GetMacAddress(UINT8 *p_mac)
   	MACInit must be called first.
 
   Parameters:
-    multicastFilterId -- WF_MULTICAST_FILTER_1 or WF_MULTICAST_FILTER_2
-    multicastAddress  -- 6-byte address (all 0xFF will inactivate the filter)
+    multicastFilterId - WF_MULTICAST_FILTER_1 or WF_MULTICAST_FILTER_2
+    multicastAddress  - 6-byte address (all 0xFF will inactivate the filter)
 
   Returns:
   	None.
@@ -331,8 +331,8 @@ void WF_SetMultiCastFilter(UINT8 multicastFilterId,
   	MACInit must be called first.
 
   Parameters:
-    multicastFilterId -- WF_MULTICAST_FILTER_1 or WF_MULTICAST_FILTER_2
-    multicastAddress -- 6-byte address
+    multicastFilterId - WF_MULTICAST_FILTER_1 or WF_MULTICAST_FILTER_2
+    multicastAddress - 6-byte address
 
   Returns:
   	None.
@@ -395,7 +395,7 @@ void WF_GetMultiCastFilter(UINT8 multicastFilterId,
   	MACInit must be called first.
 
   Parameters:
-    state -- WF_DISABLED or WF_ENABLED
+    state - WF_DISABLED or WF_ENABLED
 
   Returns:
   	None.
@@ -421,7 +421,7 @@ void WF_SetTxDataConfirm(UINT8 state)
   	MACInit must be called first.
 
   Parameters:
-    p_txDataConfirm -- pointer to location where Tx data confirmation state is
+    p_txDataConfirm - Pointer to location where Tx data confirmation state is
 
   Returns:
   	None.
@@ -461,7 +461,7 @@ void WF_GetTxDataConfirm(UINT8 *p_txDataConfirm)
     connected state.
 
   Parameters:
-    regionalDomain -- value to set the regional domain to
+    regionalDomain - Value to set the regional domain to
 
   Returns:
   	None.
@@ -495,7 +495,7 @@ void WF_SetRegionalDomain(UINT8 regionalDomain)
   	MACInit must be called first.
 
   Parameters:
-    p_regionalDomain -- pointer where the regional domain value will be written
+    p_regionalDomain - Pointer where the regional domain value will be written
 
   Returns:
   	None.
@@ -526,7 +526,7 @@ void WF_GetRegionalDomain(UINT8 *p_regionalDomain)
   	MACInit must be called first.
 
   Parameters:
-    rtsThreshold -- value of the packet size threshold
+    rtsThreshold - Value of the packet size threshold
 
   Returns:
   	None.
@@ -558,7 +558,7 @@ void WF_SetRtsThreshold(UINT16 rtsThreshold)
   	MACInit must be called first.
 
   Parameters:
-    p_rtsThreshold -- Pointer to where RTS threshold is written
+    p_rtsThreshold - Pointer to where RTS threshold is written
 
   Returns:
   	None.
@@ -587,7 +587,7 @@ void WF_GetRtsThreshold(UINT16 *p_rtsThreshold)
   	MACInit must be called first.
 
   Parameters:
-    p_macStats -- pointer to where MAC statistics are written
+    p_macStats - Pointer to where MAC statistics are written
 
   Returns:
   	None.
@@ -647,9 +647,9 @@ void WF_GetMacStats(tWFMacStats *p_macStats)
   	MACInit must be called first.
 
   Parameters:
-    paramType -- Parameter type associated with the SetParam msg.
-    p_paramData -- pointer to parameter data
-    paramDataLength -- number of bytes pointed to by p_paramData
+    paramType - Parameter type associated with the SetParam msg.
+    p_paramData - pointer to parameter data
+    paramDataLength - Number of bytes pointed to by p_paramData
 
   Returns:
   	None.

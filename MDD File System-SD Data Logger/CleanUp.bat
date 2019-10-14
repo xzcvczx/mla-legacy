@@ -92,4 +92,8 @@ rd .\"Object - MDD File System-SD Data Logger-PIC24" /S /Q
 
 rd .\"Object - MDD File System-SD Data Logger-PIC32" /S /Q
 
+rd .\MPLAB.X\build /S /Q
+
+rd .\MPLAB.X\dist /S /Q
+
 echo Done.

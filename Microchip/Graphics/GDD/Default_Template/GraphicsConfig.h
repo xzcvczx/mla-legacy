@@ -148,9 +148,18 @@
 	#define GFX_malloc(size)    	malloc(size)
 	#define GFX_free(pObj)    	    free(pObj)
 
+/*********************************************************************
+* Overview: Specifies the color depth used in the demo.
+*
+*********************************************************************/
+
+	#define COLOR_DEPTH             16
+
+
 // GDD_GraphicsConfig.h should be included as the last line in this file (GraphicsConfig.h).
 // The file checks if a certain definition used by GDD has been defined yet or not,
 // if not, it will define it. This allows end users to manually enable/disable other definitions.
+
 #include "GDD_GraphicsConfig.h"
 
 #endif // _GRAPHICSCONFIG_H

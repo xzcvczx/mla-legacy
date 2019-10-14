@@ -15,8 +15,8 @@
     Software License Agreement:
     
     The software supplied herewith by Microchip Technology Incorporated
-    (the “Company”) for its PIC® Microcontroller is intended and
-    supplied to you, the Company’s customer, for use solely and
+    (the "Company") for its PIC(r) Microcontroller is intended and
+    supplied to you, the Company's customer, for use solely and
     exclusively on Microchip PIC Microcontroller products. The
     software is owned by the Company and/or its supplier, and is
     protected under applicable copyright laws. All rights are reserved.
@@ -25,7 +25,7 @@
     civil liability for the breach of the terms and conditions of this
     license.
     
-    THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+    THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
     WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
     TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
     PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -140,6 +140,16 @@
          Previous implementation would not always initialize endpoints correctly 
          to DATA0 DTS state after a clear feature endpoint halt request, for 
          all ping pong mode and usage scenarios.
+         
+   2.9   Fixed an issue with STALL handling behavior on non-EP0 endpoints, for 
+         PIC24 and PIC32 devices.  
+   		  
+   		 Fixed an issue where the ep_data_in[]/ep_data_out[] flags weren't 
+   		 getting re-initialized coincident with the hardware ping pong pointer 
+   		 reset during set configuration events.
+   		 
+   		 Implemented USBGetNextHandle() API function (actually a macro, defined
+   		 in usb_device.h).
 ********************************************************************/
 
 /*----------------------------------------------------------------------------------
@@ -231,7 +241,7 @@ firmware design flexibility.
 //----------------------------------------------------------------------------------*/
 
 /** INCLUDES *******************************************************/
-#include "./USB/USB.h"
+#include "./USB/usb.h"
 #include "HardwareProfile.h"
 
 #include "../USB/usb_device_local.h"
@@ -847,9 +857,9 @@ void USBDeviceTasks(void)
         USB_ERROR_HANDLER(EVENT_BUS_ERROR,0,1);
         USBClearInterruptRegister(U1EIR);               // This clears UERRIF
 
-        //On PIC18 or PIC24F, clearing the source of the error will automatically
-        //  clear the interrupt flag.  On PIC32 the interrut flag must be manually
-        //  cleared. 
+        //On PIC18, clearing the source of the error will automatically clear
+        //  the interrupt flag.  On other devices the interrupt flag must be 
+        //  manually cleared. 
         #if defined(__C32__) || defined(__C30__)
             USBClearInterruptFlag( USBErrorIFReg, USBErrorIFBitNum );
         #endif
@@ -902,7 +912,7 @@ void USBDeviceTasks(void)
                 }
                 else
                 {
-                    USB_TRASFER_COMPLETE_HANDLER(EVENT_TRANSFER, (BYTE*)&USTATcopy.Val, 0);
+                    USB_TRANSFER_COMPLETE_HANDLER(EVENT_TRANSFER, (BYTE*)&USTATcopy.Val, 0);
                 }
 		    }//end if(USBTransactionCompleteIF)
 		    else
@@ -1331,8 +1341,8 @@ static void USBCtrlTrfInHandler(void)
     ((BYTE_VAL*)&pBDTEntryIn[0])->Val ^= USB_NEXT_EP0_IN_PING_PONG;
 
     //Must check if in ADR_PENDING_STATE.  If so, we need to update the address
-    //now, since the IN status stage of the control transfer has evidently
-    //completed successfully.
+    //now, since the IN status stage of the (set address) control transfer has 
+    //evidently completed successfully.
     if(USBDeviceState == ADR_PENDING_STATE)
     {
         U1ADDR = SetupPkt.bDevADR.Val;
@@ -1468,19 +1478,28 @@ static void USBCheckStdRequest(void)
  *
  * Input:           None
  *
- * Output:          None
+ * Output:          Can alter BDT entries.  Can also modify USB stack
+ *                  Maintained variables.
  *
  * Side Effects:    None
  *
  * Overview:        This routine handles the standard SET & CLEAR
  *                  FEATURES requests
  *
- * Note:            None
+ * Note:            This is a private function, intended for internal 
+ *                  use by the USB stack, when processing SET/CLEAR
+ *                  feature requests.  
  *******************************************************************/
 static void USBStdFeatureReqHandler(void)
 {
     BDT_ENTRY *p;
     EP_STATUS current_ep_data;
+    #if defined(__C32__)
+        DWORD* pUEP;
+    #else
+        unsigned char* pUEP;             
+    #endif
+    
 
     #ifdef	USB_SUPPORT_OTG
     //Check for USB On-The-Go (OTG) specific requests
@@ -1580,7 +1599,7 @@ static void USBStdFeatureReqHandler(void)
             {
                 //Mark that we are terminating this transfer and that the user
                 //  needs to be notified later
-                if(SetupPkt.EPDir == 0)
+                if(SetupPkt.EPDir == OUT_FROM_HOST)
                 {
                     ep_data_out[SetupPkt.EPNum].bits.transfer_terminated = 1;
                 }
@@ -1592,7 +1611,7 @@ static void USBStdFeatureReqHandler(void)
 
 			//Then STALL the endpoint
             p->STAT.Val |= _USIE|_BSTALL;
-        }
+        }//if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
         else
         {
 			//Else the request must have been a CLEAR_FEATURE endpoint halt.
@@ -1622,9 +1641,9 @@ static void USBStdFeatureReqHandler(void)
                 //a transaction on the given endpoint.  If so, need to clear UOWN,
                 //set DTS to the proper state, and call the application callback
                 //function.
-                if((current_ep_data.bits.transfer_terminated != 0) || ((p->STAT.UOWN == 1) && (p->STAT.BSTALL == 0)))
+                if((current_ep_data.bits.transfer_terminated != 0) || (p->STAT.UOWN == 1))
                 {
-                    if(SetupPkt.EPDir == 0)
+                    if(SetupPkt.EPDir == OUT_FROM_HOST)
                     {
                         ep_data_out[SetupPkt.EPNum].bits.transfer_terminated = 0;
                     }
@@ -1634,6 +1653,8 @@ static void USBStdFeatureReqHandler(void)
                     }
                     //clear UOWN, clear DTS to DATA0, and finally remove the STALL condition     
                     p->STAT.Val &= ~(_USIE | _DAT1 | _BSTALL);  
+                    //Call the application event handler callback function, so it can 
+					//decide if the endpoint should get re-armed again or not.
                     USB_TRANSFER_TERMINATED_HANDLER(EVENT_TRANSFER_TERMINATED,p,sizeof(p));
                 }
                 else
@@ -1642,9 +1663,16 @@ static void USBStdFeatureReqHandler(void)
                     p->STAT.Val &= ~(_USIE | _DAT1 | _BSTALL); 
                 } 
             #else //else we must not be using ping-pong buffering on the requested endpoint
-                if((current_ep_data.bits.transfer_terminated != 0) || ((p->STAT.UOWN == 1) && (p->STAT.BSTALL == 0)))
+                //Check if we need to call the user transfer terminated event callback function.
+                //We should call the callback, if the endpoint was previously terminated,
+                //or the endpoint is currently armed, and the host is performing clear
+                //endpoint halt, even though the endpoint wasn't stalled.
+                if((current_ep_data.bits.transfer_terminated != 0) || (p->STAT.UOWN == 1))
                 {
-                    if(SetupPkt.EPDir == 0)
+                    //We are going to call the user transfer terminated callback.
+                    //Clear the flag so we know we took care of it and don't need
+                    //to call it again later.
+                    if(SetupPkt.EPDir == OUT_FROM_HOST)
                     {
                         ep_data_out[SetupPkt.EPNum].bits.transfer_terminated = 0;
                     }
@@ -1673,9 +1701,20 @@ static void USBStdFeatureReqHandler(void)
                     p->STAT.Val &= ~(_USIE | _BSTALL);  
                     p->STAT.Val |= _DAT1;
                 } 
+            #endif //end of #if (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0) || (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG)   
+            
+			//Get a pointer to the appropriate UEPn register
+            #if defined(__C32__)
+                pUEP = (DWORD*)(&U1EP0);
+                pUEP += (SetupPkt.EPNum*4);
+            #else
+                pUEP = (unsigned char*)(&U1EP0+SetupPkt.EPNum);
             #endif
-        }//end if
-    }//end if
+
+			//Clear the STALL bit in the UEP register
+            *pUEP &= ~UEP_STALL;            
+        }//end if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
+    }//end if (lots of checks for set/clear endpoint halt)
 }//end USBStdFeatureReqHandler
 
 
@@ -1935,7 +1974,7 @@ void USBStdGetStatusHandler(void)
                     p = (BDT_ENTRY*)pBDTEntryIn[SetupPkt.EPNum];
                 }
 
-                if(p->STAT.Val & _BSTALL)    // Use _BSTALL as a bit mask
+                if((p->STAT.UOWN == 1) && (p->STAT.BSTALL == 1))
                     CtrlTrfData[0]=0x01;    // Set bit0
                 break;
             }
@@ -2333,6 +2372,15 @@ void USBStdSetCfgHandler(void)
     // Assert reset request to all of the Ping Pong buffer pointers
     USBPingPongBufferReset = 1;                                   
 
+	//Re-Initialize all ping pong software state bits to 0 (which corresponds to
+	//the EVEN buffer being the next one that will be used), since we are also 
+	//doing a hardware ping pong pointer reset above.
+	for(i = 0; i < (BYTE)(USB_MAX_EP_NUMBER+1u); i++)
+	{
+		ep_data_in[i].Val = 0u;
+        ep_data_out[i].Val = 0u;
+	}
+
     //clear the alternate interface settings
     memset((void*)&USBAlternateInterface,0x00,USB_MAX_NUM_INT);
 
@@ -2525,16 +2573,14 @@ void USBStallEndpoint(BYTE ep, BYTE dir)
 
     if(ep == 0)
     {
-        /*
-         * If no one knows how to service this request then stall.
-         * Must also prepare EP0 to receive the next SETUP transaction.
-         */
+        //For control endpoints (ex: EP0), we need to STALL both IN and OUT
+        //endpoints.  EP0 OUT must also be prepared to receive the next SETUP 
+        //packet that will arrrive.
         pBDTEntryEP0OutNext->CNT = USB_EP0_BUFF_SIZE;
         pBDTEntryEP0OutNext->ADR = ConvertToPhysicalAddress(&SetupPkt);
-
-        /* v2b fix */
         pBDTEntryEP0OutNext->STAT.Val = _USIE|_DAT0|_DTSEN|_BSTALL;
         pBDTEntryIn[0]->STAT.Val = _USIE|_BSTALL; 
+               
     }
     else
     {
@@ -2543,8 +2589,7 @@ void USBStallEndpoint(BYTE ep, BYTE dir)
     
         //If the device is in FULL or ALL_BUT_EP0 ping pong modes
         //then stall that entry as well
-        #if (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG) || \
-            (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0)
+        #if (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG) || (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0)
     
         p = (BDT_ENTRY*)(&BDT[EP(ep,dir,1)]);
         p->STAT.Val |= _BSTALL | _USIE;
@@ -2578,16 +2623,18 @@ void USBStallEndpoint(BYTE ep, BYTE dir)
  *					and initialized by the USBEnableEndpoint() function first.
  *
  * Input:
- *   BYTE ep - the endpoint number that the data will be transmitted or 
+ *   BYTE ep - The endpoint number that the data will be transmitted or 
  *				received on
- *   BYTE dir - the direction of the transfer
+ *   BYTE dir - The direction of the transaction
  *              This value is either OUT_FROM_HOST or IN_TO_HOST
  *   BYTE* data - For IN transactions: pointer to the RAM buffer containing 
  *				  the data to be sent to the host.
  *				  For OUT transactions: pointer to the RAM buffer that the
  *				  received data should get written to.
- *   BYTE len - length of the data needing to be sent (for IN transactions).
- *				For OUT transactions, the len parameter should normally be set
+ *                Note: The data buffer must reside in a USB module accessible
+ *                portion of RAM.
+ *   BYTE len - The number of bytes of data to be sent (for IN transactions).
+ *				For OUT transactions, the len parameter should be set
  *				to the endpoint size specified in the endpoint descriptor.
  *
  * Output:          
@@ -2665,7 +2712,7 @@ USB_HANDLE USBTransferOnePacket(BYTE ep,BYTE dir,BYTE* data,BYTE len)
     handle->STAT.Val |= _USIE | _DTSEN;
 
     //Point to the next buffer for ping pong purposes.
-    if(dir != 0)
+    if(dir != OUT_FROM_HOST)
     {
         //toggle over the to the next buffer for an IN endpoint
         USBAdvancePingPongBuffer(&pBDTEntryIn[ep]);      
@@ -2692,7 +2739,7 @@ USB_HANDLE USBTransferOnePacket(BYTE ep,BYTE dir,BYTE* data,BYTE len)
     Precondition:
   
     Parameters:
-        BYTE endpoint - the endpoint number you wish to cancel the transfers for
+        BYTE endpoint - the endpoint number you wish to cancel transactions on
      
     Return Values:
         None
@@ -2727,9 +2774,26 @@ void USBCancelIO(BYTE endpoint)
     Function:
         void USBDeviceDetach(void)
     
+    Summary:
+        This function configures the USB module to "soft detach" itself from
+        the USB host.
+    
     Description:
-                
+        This function configures the USB module to perform a "soft detach"
+        operation, by disabling the D+ (or D-) ~1.5k pull up resistor, which
+        lets the host know the device is present and attached.  This will make
+        the host think that the device has been unplugged.  This is potentially
+        useful, as it allows the USB device to force the host to re-enumerate
+        the device (on the firmware has re-enabled the USB module/pull up, by
+        calling USBDeviceAttach(), to "soft re-attach" to the host).
+                        
     Precondition:
+        Should only be called when USB_INTERRUPT is defined.  See remarks
+        section if USB_POLLING mode option is being used (usb_config.h option).
+
+        Additionally, this function should only be called from the main() loop 
+        context.  Do not call this function from within an interrupt handler, as 
+        this function may modify global interrupt enable bits and settings.    
         
     Parameters:
         None
@@ -2738,7 +2802,8 @@ void USBCancelIO(BYTE endpoint)
         None
         
     Remarks:
-        None
+        Important remarks exist for this function.  See the remarks section in 
+        the usb_device.h header file.  See also the USBDeviceAttach() function.
                                                           
   **************************************************************************/
 #if defined(USB_INTERRUPT)
@@ -2842,7 +2907,8 @@ void USBDeviceDetach(void)
         None
         
     Remarks:
-        None
+        See the usb_device.h header file for more details and comments regarding
+        this function.  See also the USBDeviceDetach() function.
                                                           
   **************************************************************************/
 #if defined(USB_INTERRUPT)

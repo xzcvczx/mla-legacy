@@ -42,6 +42,7 @@
 *  Rev   Date         Author        Description
 *  2.0   4/15/2009    yfy           MiMAC and MiApp revision
 *  3.1   5/28/2010    yfy           MiWi DE 3.1
+*  4.1   6/3/2011     yfy           MAL v2011-06
 ********************************************************************/
 
 #ifndef __CONFIGURE_MIWI_H
@@ -99,6 +100,13 @@
         #define OPEN_SOCKET_POLL_INTERVAL       (ONE_SECOND)
         
         
+        /*********************************************************************/
+        // ENABLE_MIWI_ACKNOWLEDGEMENT enables the MiWi stack to acknowledge
+        // the data packet from the application layer.
+        /*********************************************************************/
+        //#define ENABLE_MIWI_ACKNOWLEDGEMENT
+
+
         /*********************************************************************/
         // MIWI_ACK_TIMEOUT is the timeout period in symbols for a node to
         // receive a MiWi network layer acknowledgement. This parameter is 
@@ -193,14 +201,7 @@
         // layer
         /*********************************************************************/
         #define RESYNC_TIMES                0x03
-    
-    
-        /*********************************************************************/
-        // ENABLE_MIWI_ACKNOWLEDGEMENT enables the MiWi stack to acknowledge
-        // the data packet from the application layer.
-        /*********************************************************************/
-        //#define ENABLE_MIWI_ACKNOWLEDGEMENT
-        
+
         
         /*********************************************************************/
         // ENABLE_ENHANCED_DATA_REQUEST enables the Enhanced Data Request 

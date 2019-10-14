@@ -3419,6 +3419,7 @@ UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targ
 	DATA_TYPE_INFO	dataTypeInfo;
 	WORD_VAL		varBindLen = {0};
 	UINT8  			USM_Index=0,temp_index=0;
+	int 			i=0;
 	
 	if(gSNMPv3TrapScopedPduResponseBuf.head == NULL)
 	{
@@ -3577,27 +3578,18 @@ UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targ
 		//2nd varbind  and this is a scalar object so index = 0
 		Snmpv3BufferPut(0,dynTrapScopedPduBuf);
 
-		// for microchip , SNMPNotifyInfo.agentIDVar == MICROCHIP
-		if(!GetOIDStringByID(SNMPNotifyInfo.agentIDVar, &rec, OIDValue, &OIDLen) )
+		if (!GetOIDStringByID(SNMPNotifyInfo.trapIDVar, &rec, OIDValue, &OIDLen) )
 		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
 			return FALSE;
 		}
-		if(!rec.nodeInfo.Flags.bIsAgentID )
-		{
-			return FALSE;
-		}
-
-		MPFSSeek(hMPFS, rec.hData, MPFS_SEEK_START);
-
 		Snmpv3BufferPut(ASN_OID,dynTrapScopedPduBuf);
-		MPFSGet(hMPFS, &len);
-		OIDLen = len;
+		len = OIDLen;
 		Snmpv3BufferPut(OIDLen,dynTrapScopedPduBuf);
-		while( len-- )
+		for(i=0;i<len;i++)
 		{
-			BYTE c;
-			MPFSGet(hMPFS, &c);
-			Snmpv3BufferPut(c,dynTrapScopedPduBuf);
+			Snmpv3BufferPut(OIDValue[i],dynTrapScopedPduBuf);
 		}
 		tempOffset = dynTrapScopedPduBuf->length;
 		//set the snmp varbind trap offset
@@ -4208,6 +4200,7 @@ BOOL Snmpv3Notify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targetIndex)
 		MPFSClose(hMPFS);
 		UDPFlush();
 		UDPClose(SNMPNotifyInfo.socket);
+		SNMPNotifyInfo.socket =  INVALID_UDP_SOCKET;
 
 		Snmpv3FreeDynAllocMem();
 	}

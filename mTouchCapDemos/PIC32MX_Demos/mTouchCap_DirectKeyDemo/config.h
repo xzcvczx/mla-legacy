@@ -4,11 +4,11 @@
 
 Description:
     This file defines variables of interest to the way the touch sense
-	keys operate.
+    keys operate.
 
-*******************************************************************************/
+******************************************************************************/
 
-/*******************************************************************************
+/*****************************************************************************
 
 * FileName:        config.h
 * Dependencies:    None.
@@ -36,87 +36,155 @@ Description:
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date       Comments
---------------------------------------------------------------------------------
-BDB          26-Jun-2008 Initial release
-SB			 22-Oct-2008 
-NMS/NK		 10-Feb-2009 Folder/Files restructuring
-MC           22-Ian-2009 Porting for PIC32MX795F512
 Change History:
+Author          Date       Comments
+-------------------------------------------------------------------------------
+BDB          26-Jun-2008 Initial release
+SB           22-Oct-2008
+NMS/NK       10-Feb-2009 Folder/Files restructuring
+MC           22-Ian-2009 Porting for PIC32MX795F512
+MWM          28 Mar 2011 Moved key performance #define's up to this file
+******************************************************************************/
+#ifndef __CONFIG_H
+#define __CONFIG_H
 
-**************************************************************************************/
-#ifndef __CONFIG_H    
-#define __CONFIG_H 
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Includes	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Includes    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     #include "Compiler.h"
     #include "GenericTypeDefs.h"
     #include "HardwareProfile.h"
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Compiler Directives	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-#define	USE_DIRECT_KEYS
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Compiler Directives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#undef  USE_SLIDER_2CHNL //Not supported yet
+#undef  USE_SLIDER_4CHNL
+#undef  USE_MATRIX_KEYS
+#define USE_DIRECT_KEYS
 
 /************/
 
 /**************************/
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Includes	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Includes    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     #ifdef USE_DIRECT_KEYS
         #include "mTouchCap_DirectKeys.h"
     #endif
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Application specific COMPILER DIRECTIVE~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Application specific COMPILER DIRECTIVE~~~~~~~~  */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Externs  	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Externs     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Function Prototypes  ~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Enums      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Function Prototypes  ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-	
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* ~~~~~~~~~~~~~~~~~~~~~	Constants / Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Enums      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~    Constants / Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Debug count for key press */
-#define 	DEBOUNCECOUNT				3		// Defines How Many consecutive reads for
+#define DEBOUNCECOUNT            3   // Defines How Many consecutive reads for
 
 /* Allow Enough Time to initialize all channels */
-#define 	INITIAL_STARTUP_COUNT		20	// first pass flag to reach steady state average //NC2
+#define INITIAL_STARTUP_COUNT    5  // first pass flag to reach steady state average //NC2
 
 /* Speed control for LED Chaser during Power On */
-#define 	PIC32_POWER_ON_LED_SPEED_COUNT		((GetSystemClock()/1000000)*50)
+//#define PIC32_POWER_ON_LED_SPEED_COUNT      ((GetSystemClock()/1000000)*50)
+#define PIC32_POWER_ON_LED_SPEED_COUNT      ((GetSystemClock()/1000000)*200)
 
+#define REF_CHANNEL              4  // Use AN4/RB4 as reference channel
 
-#define    	NUM_HF_READS     	    	16	 // number of reads in CVD Channels        
+#define TIMER4_PERIOD         3000  // Timer4 clock ticks between button scans
 
-#define		KEYTRIPDIV			    	16 		// the divisors define the trip points for
-										    	// each type of cap sensor.  The trip point
-										    	// is defined as: trip = average/divisor
+#define NUM_HF_READS            32  // number of reads in CVD Channels
+                                    // that are averaged to produce "current" value
 
-#define		HYSTERESIS_VALUE			5		// This is the minimum value which determines untouched condition
+#define ALPHA_INVERSE          128  // Weight in updating average based on current value
+#define LOG2_ALPHA_INVERSE       7  // Equivalent bit shift to averaging weight
+#define KEYTRIPDIV              40
+#define HYSTERESIS_VALUE        40
+/*
+    "Average" data is calculated using the algorithm
 
-#define 	NUM_AVG						20		// Defines frequency of average update
+        Average[new] = (1 - alpha)*Average[old] + alpha*CurFiltdData[new]
 
+    implemented in C code such as
 
-#define 	DEFAULT_TRIP_VALUE	   		500  //default trip value for all channels //NC2
+        averageData[iChannel] = averageData[iChannel]
+                                - (averageData[iChannel]>>Log2AlphaInverse)
+                                + (CurFiltdData[iChannel]>>Log2AlphaInverse);
 
+    The "current" raw data value is based on ADC measurements taken in
+    the Timer 4 ISR call back function, "Timer4CallbackFunc2", found in
+    mTouchCap_Timers.c, with additional filtering and averaging done by
+    "mTouchCapPhy_UpdateData" in mTouchCap_PIC32MX_CVD_Physical.c .
+
+    Trip value and hysteris value are defined by
+        tripValue[iChannel] = averageData[iChannel] / KEYTRIPDIV;
+        hystValue[iChannel] = tripValue[iChannel] / HYSTERESIS_VALUE;
+
+    A button is "pressed" if
+        CurFiltdData[iChannel] < averageData[iChannel] - tripValue[iChannel]
+
+    A button is "released" if
+        CurFiltdData[iChannel] > averageData[iChannel] - tripValue[iChannel] + hystValue[iChannel]
+ */
+
+/*
+  Charge/discharge cycles
+
+  Multiple cycles needed because ADC's sample and hold (SAH)
+  capacitor is much smaller than typical button capacitor.
+
+ */
+#define CHARGE_DISCHARGE_CYCLE_1
+#define CHARGE_DISCHARGE_CYCLE_2
+#define CHARGE_DISCHARGE_CYCLE_3
+#define CHARGE_DISCHARGE_CYCLE_4
+
+//Button charge cycles for Rev 3
+#define BUTTON_CHARGE_CYCLE_1
+#define BUTTON_CHARGE_CYCLE_2
+//#define BUTTON_CHARGE_CYCLE_3
+//#define BUTTON_CHARGE_CYCLE_4
+
+#define DEFAULT_TRIP_VALUE      100  //default trip value for all channels
+
+#define DEFAULT_DECODE_METHOD   DECODE_METHOD_MOST_PRESSED
+
+//#define DEFAULT_FILTER_METHOD   FILTER_METHOD_SLOWAVERAGE
+#define DEFAULT_FILTER_METHOD   FILTER_METHOD_GATEDAVERAGE
+
+// Limit change between consecutive voltage measurements to +/- 1 ADC LSB ?
+#define LIMIT_SLEW_RATE
+//#undef LIMIT_SLEW_RATE
+
+// Use differential instead of single-ended measurements ?
+#define  USE_DIFFERENTIAL_MEASUREMENTS
+//#undef USE_DIFFERENTIAL_MEASUREMENTS
+
+// Dump raw ADC counts out UART?
+#define UART_DUMP_RAW_COUNTS
+#undef  UART_DUMP_RAW_COUNTS
+
+#ifndef UART_DUMP_RAW_COUNTS
+#   define UART_DUMP_ALL_COUNTS // Dump Vpos, Vneg, Vmeas
+#    undef UART_DUMP_ALL_COUNTS
+#endif
 
 #endif // _CONFIG_H

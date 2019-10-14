@@ -33,7 +33,7 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  1.0   Initial release
+  2.7   Initial release
 ********************************************************************/
 
 // PPS INPUT MACROS

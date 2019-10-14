@@ -131,7 +131,8 @@ void UDPPerformanceTask(void)
 	memset(&Remote, 0xFF, sizeof(Remote));
 	
 	// Open a UDP socket for outbound transmission
-	MySocket = UDPOpen(0, &Remote, PERFORMANCE_PORT);
+	MySocket = UDPOpenEx((DWORD)&Remote,UDP_OPEN_NODE_INFO,0,PERFORMANCE_PORT);
+	//MySocket = UDPOpen(0, &Remote, PERFORMANCE_PORT);
 	
 	// Abort operation if no UDP sockets are available
 	// If this ever happens, incrementing MAX_UDP_SOCKETS in 

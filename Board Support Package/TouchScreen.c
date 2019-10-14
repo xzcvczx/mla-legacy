@@ -1,18 +1,16 @@
 /*****************************************************************************
  *
- * Simple 4 wire touch screen driver
+ * Simple 4 wire resistive touch screen driver
  *
  *****************************************************************************
- * FileName:        TouchScreen.c
- * Dependencies:    TouchScreen.h
+ * FileName:        TouchScreenResistive.c
  * Processor:       PIC24, PIC32, dsPIC, PIC24H
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -36,357 +34,106 @@
  *
  * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 01/08/07		...
- * 06/06/07		Basic calibration and GOL messaging are added
- * 02/05/08    	new PICtail support, portrait orientation is added
- * 02/07/08    	PIC32 support
- * 05/27/08    	More robust algorithm
- * 01/07/09    	Graphics PICtail Version 3 support is added
- * 06/25/09    	dsPIC & PIC24H support 
- * 06/29/09		Added event EVENT_STILLPRESS to support continuous press
- * 04/15/10		Qualified EVENT_STILLPRESS to be set only when
- *              an actual touch is occuring.
- *              Removed timer and timer ISR, made the touch detection
- *              a function.
- * 07/27/10    	Added support for parallel flash 
- *				(only on PIC24FJ256DA120 Development Board)
+ * 01/19/11		Ported from TouchScreen driver.
  *****************************************************************************/
+#include "GraphicsConfig.h"
+
+#if defined (USE_TOUCHSCREEN)
+
+#include "Graphics/Graphics.h"
 #include "TouchScreen.h"
-
-#if defined (USE_RESISTIVE_TOUCH)
-
-#if defined (USE_25LC256)
-	#include "EEPROM.h"
-#elif defined (USE_SST25VF016)	
-	#include "SST25VF016.h"
-#elif defined (USE_SST39LF400)	
-	#include "SST39LF400.h"
-#else
-	#warning "Touchscreen is being used but calibration data will not be saved or retrieved. Enable the memory that will hold the calibration data in the Hardware Peofile."	
-#endif	
+#include "TimeDelay.h"
 
 //////////////////////// LOCAL PROTOTYPES ////////////////////////////
-void    TouchGetCalPoints(void);
+extern void TouchHardwareInit(void *initValues);
+extern void TouchStoreCalibration(void);
+extern void	TouchLoadCalibration(void);
+extern void TouchCalHWGetPoints(void);
 
-#define WAIT_UNTIL_FINISH(x)    while(!x)
+extern const WORD mchpTouchScreenVersion;
+
+void 	TouchCheckForCalibration(void);
+
+
+
+// Default Calibration Inset Value (percentage of vertical or horizontal resolution)
+// Calibration Inset = ( CALIBRATIONINSET / 2 ) % , Range of 0–20% with 0.5% resolution
+// Example with CALIBRATIONINSET == 20, the calibration points are measured
+// 10% from the corners.
+#define CALIBRATIONINSET   20       // range 0 <= CALIBRATIONINSET <= 40 
+
+#define CAL_X_INSET    (((GetMaxX()+1)*(CALIBRATIONINSET>>1))/100)
+#define CAL_Y_INSET    (((GetMaxY()+1)*(CALIBRATIONINSET>>1))/100)
+
+//////////////////////// FUNCTION POINTERS ///////////////////////////
+NVM_READ_FUNC           pCalDataRead = NULL;                  // function pointer to data read
+NVM_WRITE_FUNC          pCalDataWrite = NULL;                // function pointer to data write
+NVM_SECTORERASE_FUNC    pCalDataSectorErase = NULL;    // function pointer to data sector erase
 
 //////////////////////// GLOBAL VARIABLES ////////////////////////////
-#define PRESS_THRESHOULD    256 // between 0-0x03ff the lesser this value the lighter the screen must be pressed
-#define CALIBRATION_DELAY   300 // delay between calibration touch points
+#define CALIBRATION_DELAY   300				// delay between calibration touch points
 
-    // Max/Min ADC values for each derection
-volatile WORD   	_calXMin = XMINCAL;
-volatile WORD       _calXMax = XMAXCAL;
-volatile WORD       _calYMin = YMINCAL;
-volatile WORD       _calYMax = YMAXCAL;
-
-// Current ADC values for X and Y channels
-volatile SHORT      adcX = -1;
-volatile SHORT      adcY = -1;
-volatile SHORT      adcPot = 0;
-
-typedef enum
-{
-    SET_X,
-    RUN_X,
-    GET_X,
-    RUN_CHECK_X,
-    CHECK_X,
-    SET_Y,
-    RUN_Y,
-    GET_Y,
-    CHECK_Y,
-    SET_VALUES,
-    GET_POT,
-    RUN_POT
-} TOUCH_STATES;
-
-volatile TOUCH_STATES state = SET_X;
-
-void TouchProcessTouch(void)
-{
-    static SHORT    tempX, tempY;
-    SHORT           temp;
-
-    switch(state)
-    {
-
-        case SET_VALUES:
-            if(!TOUCH_ADC_DONE)
-                break;
-
-            if((WORD) PRESS_THRESHOULD < (WORD) ADC1BUF0)
-            {
-                adcX = -1;
-                adcY = -1;
-            }
-            else
-            {
-                adcX = tempX;
-                adcY = tempY;
-            }
-        // If the hardware supports an analog pot, if not skip it
-        #ifdef ADC_POT
-            state = RUN_POT;
-
-       case RUN_POT:
-            #if defined(__dsPIC33F__) || defined(__PIC24H__)
-            AD1CHS0 = ADC_POT;      // switch ADC channel
-            #else
-            AD1CHS = ADC_POT;       // switch ADC channel
-            #endif
-            AD1CON1bits.SAMP = 1;   // run conversion
-            state = GET_POT;
-            break;
-
-        case GET_POT:
-            if(!AD1CON1bits.DONE)
-                break;
-
-            adcPot = ADC1BUF0;
-        #endif
-            state = SET_X;
-
-        case SET_X:
-            #if defined(__dsPIC33F__) || defined(__PIC24H__)
-            AD1CHS0 = ADC_XPOS;     // switch ADC channel
-            #else
-            AD1CHS = ADC_XPOS;      // switch ADC channel
-            #endif
-            TRIS_XPOS = 1;
-            TRIS_YPOS = 1;
-            TRIS_XNEG = 1;
-            LAT_YNEG = 0;
-            TRIS_YNEG = 0;
-
-            AD1CON1bits.SAMP = 1;   // run conversion
-            state = CHECK_X;
-            break;
-
-        case CHECK_X:
-        case CHECK_Y:
-            if(!TOUCH_ADC_DONE)
-                break;
-
-            if((WORD) PRESS_THRESHOULD > (WORD) ADC1BUF0)
-            {
-	            if (state == CHECK_X)
-	            {
-                	LAT_YPOS = 1;
-                	TRIS_YPOS = 0;
-                	tempX = -1;
-                	state = RUN_X;
-                } 
-                else 
-                {
-	                LAT_XPOS = 1;
-    	            TRIS_XPOS = 0;
-        	        tempY = -1;
-            	    state = RUN_Y;    
-	            }   	
-            }
-            else
-            {
-                adcX = -1;
-                adcY = -1;
-		        #ifdef ADC_POT
-            	    state = RUN_POT;
-            	#else
-            		state = SET_X;	
-            	#endif	    
-                break;
-            }
-
-        case RUN_X:
-        case RUN_Y:
-            AD1CON1bits.SAMP = 1;
-            state = (state == RUN_X) ? GET_X : GET_Y;
-            // no break needed here since the next state is either GET_X or GET_Y
-            
-        case GET_X:
-        case GET_Y:
-            if(!TOUCH_ADC_DONE)
-                break;
-
-            temp = ADC1BUF0;
-            if (state == GET_X)
-	        {
-	            if(temp != tempX)
-	            {
-	                tempX = temp;
-	                state = RUN_X;
-	                break;
-	            }
-	        }
-	        else
-	        {
-	            if(temp != tempY)
-	            {
-	                tempY = temp;
-	                state = RUN_Y;
-	                break;
-	            }		        
-		    }     
-
-            if (state == GET_X) 
-            	TRIS_YPOS = 1;
-            else	
-	            TRIS_XPOS = 1;
-            AD1CON1bits.SAMP = 1;
-            state = (state == GET_X) ? SET_Y : SET_VALUES;
-            break;
-
-        case SET_Y:
-            if(!TOUCH_ADC_DONE)
-                break;
-
-            if((WORD) PRESS_THRESHOULD < (WORD) ADC1BUF0)
-            {
-                adcX = -1;
-                adcY = -1;
-		        #ifdef ADC_POT
-            	    state = RUN_POT;
-            	#else
-                	state = SET_X;
-                #endif	
-                break;
-            }
-
-            #if defined(__dsPIC33F__) || defined(__PIC24H__)
-            AD1CHS0 = ADC_YPOS;     // switch ADC channel
-            #else
-            AD1CHS = ADC_YPOS;      // switch ADC channel
-            #endif
-            TRIS_XPOS = 1;
-            TRIS_YPOS = 1;
-            LAT_XNEG = 0;
-            TRIS_XNEG = 0;
-            TRIS_YNEG = 1;
-
-            AD1CON1bits.SAMP = 1;   // run conversion
-            state = CHECK_Y;
-            break;
-
-        default:
-            state = SET_X;
-    }
-
-}
 
 /*********************************************************************
-* Function: void TouchInit(void)
+* Function: void TouchInit(NVM_WRITE_FUNC pWriteFunc, NVM_READ_FUNC pReadFunc, NVM_SECTORERASE_FUNC pSectorErase, void *initValues)
 *
 * PreCondition: none
 *
-* Input: none
+* Input: pWriteFunc - non-volatile memory write function pointer
+*        pReadFunc - non-volatile memory read function pointer
+*        pSectorErase - non-volatile memory sector function pointer
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: sets ADC 
+* Overview: Initializes the touch screen hardware.
 *
 * Note: none
 *
 ********************************************************************/
-void TouchInit(void)
+void TouchInit(NVM_WRITE_FUNC pWriteFunc, NVM_READ_FUNC pReadFunc, NVM_SECTORERASE_FUNC pSectorErase, void *initValues)
 {
-    // Initialize ADC
-    AD1CON1 = 0x080E0;      // Turn on, auto-convert
-    AD1CON2 = 0;            // AVdd, AVss, int every conversion, MUXA only
-    AD1CON3 = 0x1FFF;       // 31 Tad auto-sample, Tad = 256*Tcy
-    #if defined(__dsPIC33F__) || defined(__PIC24H__)
-    AD1PCFGL = 0;           // All inputs are analog
-    AD1PCFGLbits.PCFG11 = AD1PCFGLbits.PCFG12 = 1;
-    #else
-    #if !(defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__))
-    AD1PCFG = 0;            // All inputs are analog
-    #endif
-    #endif
-    AD1CSSL = 0;            // No scanned inputs
+
+    TouchHardwareInit(initValues);
+    DelayMs(2);
+
+	// assign the addresses of the callback functions
+	// if these are NULL, the TouchLoadCalibration()
+	// and TouchStoreCalibration() will skip the actual
+	// read and/or writes.
+	pCalDataWrite = pWriteFunc;
+	pCalDataSectorErase = pSectorErase;
+	pCalDataRead = pReadFunc;
     
-}
+	// if callbacks has been assigned check if calibration is valid
+	if (pCalDataRead != NULL)
+	{
+		// check if version of library is correct
+		// MCHP_TOUCHSCREEN_RESISTIVE_VERSION should be defined in the hardware profile.
+		if (pCalDataRead(ADDRESS_RESISTIVE_TOUCH_VERSION) != mchpTouchScreenVersion)
+		{
+			// not calibrated yet, perform the calibration 
+			TouchCalibration();
+			// store the calibration data
+			TouchStoreCalibration();
+		}
+		else
+		{
+			// check if user wants to run calibration 
+			TouchCheckForCalibration();
+		}
 
-/*********************************************************************
-* Function: SHORT TouchGetX()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: x coordinate
-*
-* Side Effects: none
-*
-* Overview: returns x coordinate if touch screen is pressed
-*           and -1 if not
-*
-* Note: none
-*
-********************************************************************/
-SHORT TouchGetX(void)
-{
-    long    result;
+		// load the calibration values, to check if the store worked
+		TouchLoadCalibration();
+	}
+	else
+	{
+		// Since there is no Non-Voltile memory, run the calibration since to 
+		// make sure the screen is always calibrated after touch screen initialization.
+		TouchCalibration();
+	}	
 
-    #ifdef SWAP_X_AND_Y
-    result = ADCGetY();
-    #else
-    result = ADCGetX();
-    #endif
-    if(result >= 0)
-    {
-        #ifdef SWAP_X_AND_Y
-        result = (GetMaxX() * (result - _calYMin)) / (_calYMax - _calYMin);
-        #else
-        result = (GetMaxX() * (result - _calXMin)) / (_calXMax - _calXMin);
-        #endif
-        #ifdef FLIP_X
-        result = GetMaxX() - result;
-        #endif
-    }
-
-    return (result);
-}
-
-/*********************************************************************
-* Function: SHORT TouchGetY()
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: y coordinate
-*
-* Side Effects: none
-*
-* Overview: returns y coordinate if touch screen is pressed
-*           and -1 if not
-*
-* Note: none
-*
-********************************************************************/
-SHORT TouchGetY(void)
-{
-    long    result;
-
-    #ifdef SWAP_X_AND_Y
-    result = ADCGetX();
-    #else
-    result = ADCGetY();
-    #endif
-    if(result >= 0)
-    {
-        #ifdef SWAP_X_AND_Y
-        result = (GetMaxY() * (result - _calXMin)) / (_calXMax - _calXMin);
-        #else
-        result = (GetMaxY() * (result - _calYMin)) / (_calYMax - _calYMin);
-        #endif
-        #ifdef FLIP_Y
-        result = GetMaxY() - result;
-        #endif
-    }
-
-    return (result);
 }
 
 /*********************************************************************
@@ -417,14 +164,10 @@ void TouchGetMsg(GOL_MSG *pMsg)
     pMsg->type = TYPE_TOUCHSCREEN;
     pMsg->uiEvent = EVENT_INVALID;
 
-    if(x == -1)
+    if((x == -1) || (y == -1))
     {
         y = -1;
-    }
-    else
-    {
-        if(y == -1)
-            x = -1;
+        x = -1;
     }
 
     if((prevX == x) && (prevY == y) && (x != -1) && (y != -1))
@@ -476,11 +219,11 @@ void TouchGetMsg(GOL_MSG *pMsg)
     prevX = x;
     prevY = y;
 }
-
 /*********************************************************************
-* Function: void TouchStoreCalibration(void)
+* Function: void TouchCheckForCalibration()
 *
-* PreCondition: EEPROMInit() must be called before
+* PreCondition: TouchInit() must be performed before calling this 
+*		        function.
 *
 * Input: none
 *
@@ -488,89 +231,41 @@ void TouchGetMsg(GOL_MSG *pMsg)
 *
 * Side Effects: none
 *
-* Overview: stores calibration parameters into EEPROM
+* Overview: Checks if the user wants to run the calibration routine. 
+*           The calibration check is performed by detecting a continuous
+*		    1 second (approximate) touch on the screen. When calibration
+*		    is detected, it calls the actual calibration sequence
+*           TouchLoadCalibration().
 *
 * Note: none
 *
 ********************************************************************/
-void TouchStoreCalibration(void)
+void TouchCheckForCalibration(void)
 {
-	#if defined (USE_25LC256)  
-    	EEPROMWriteWord(_calXMin, ADDRESS_XMIN);
-    	EEPROMWriteWord(_calXMax, ADDRESS_XMAX);
-    	EEPROMWriteWord(_calYMin, ADDRESS_YMIN);
-    	EEPROMWriteWord(_calYMax, ADDRESS_YMAX);
-    	EEPROMWriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
-    #elif defined (USE_SST39LF400)
-		WORD tempArray[12];
-		
-		SST39LF400Init(tempArray);
-
-	    SST39LF400SectorErase(ADDRESS_XMIN); // erase 4K sector
-		SST39LF400WriteWord(_calXMin, ADDRESS_XMIN);
-		SST39LF400WriteWord(_calXMax, ADDRESS_XMAX);
-		SST39LF400WriteWord(_calYMin, ADDRESS_YMIN);
-		SST39LF400WriteWord(_calYMax, ADDRESS_YMAX);
-		SST39LF400WriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
-		
-		SST39LF400DeInit(tempArray);
-		
-	#elif defined (USE_SST25VF016)
-		SST25SectorErase(ADDRESS_XMIN); // erase 4K sector
-		SST25WriteWord(_calXMin, ADDRESS_XMIN);
-		SST25WriteWord(_calXMax, ADDRESS_XMAX);
-		SST25WriteWord(_calYMin, ADDRESS_YMIN);
-		SST25WriteWord(_calYMax, ADDRESS_YMAX);
-		SST25WriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
-	#else 
-		#error "Touch screen is being used but calibration data cannot be saved!"    
-	#endif
-}
-
-/*********************************************************************
-* Function: void TouchLoadCalibration(void)
-*
-* PreCondition: EEPROMInit() must be called before
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: loads calibration parameters from EEPROM
-*
-* Note: none
-*
-********************************************************************/
-void TouchLoadCalibration(void)
-{
-	#if defined (USE_25LC256)  
-    	_calXMin = EEPROMReadWord(ADDRESS_XMIN);
-    	_calXMax = EEPROMReadWord(ADDRESS_XMAX);
-    	_calYMin = EEPROMReadWord(ADDRESS_YMIN);
-    	_calYMax = EEPROMReadWord(ADDRESS_YMAX);
-    #elif defined (USE_SST39LF400)
-		WORD tempArray[12];
-		
-		SST39LF400Init(tempArray);
-    
-		_calXMin = SST39LF400ReadWord(ADDRESS_XMIN);
-		_calXMax = SST39LF400ReadWord(ADDRESS_XMAX);
-		_calYMin = SST39LF400ReadWord(ADDRESS_YMIN);
-		_calYMax = SST39LF400ReadWord(ADDRESS_YMAX);
-
-		SST39LF400DeInit(tempArray);
-		
-	#elif defined (USE_SST25VF016)
-	    _calXMin = SST25ReadWord(ADDRESS_XMIN);
-	    _calXMax = SST25ReadWord(ADDRESS_XMAX);
-	    _calYMin = SST25ReadWord(ADDRESS_YMIN);
-	    _calYMax = SST25ReadWord(ADDRESS_YMAX);
-	#else 
-		#error "Touch screen is being used but calibration data is not accessible!"    
-	#endif
-}
+	WORD count;
+	
+	// check for calibration
+	// this tests any touches on the touch screen, user has to touch the screen for more than 1
+	// second to make the calibration work 
+	count = 0;
+	while(1)
+	{
+		DelayMs(100);
+		// check if there is a touch
+		if ((TouchGetX() == -1) && (TouchGetY() == -1))
+			break;
+		else
+			count++;
+		if (count == 10)
+		{
+			// do calibration
+        	TouchCalibration();
+        	TouchStoreCalibration();
+        	break;
+  		}      	
+ 	}  	
+	
+}	
 
 /*********************************************************************
 * Function:  void TouchCalibration()
@@ -593,27 +288,19 @@ void TouchCalibration(void)
     static const XCHAR  scr1StrLn1[] = {'I','M','P','O','R','T','A','N','T','.',0};
     static const XCHAR  scr1StrLn2[] = {'P','e','r','f','o','r','m','i','n','g',' ','t','o','u','c','h',0};
     static const XCHAR  scr1StrLn3[] = {'s','c','r','e','e','n',' ','c','a','l','i','b','r','a','t','i','o','n','.',0};
-    static const XCHAR  scr1StrLn4[] = {'T','o','u','c','h','p','o','i','n','t','s',' ','E','X','A','C','T','L','Y',0};
-    static const XCHAR  scr1StrLn5[] = {'a','t',' ','t','h','e',' ','p','o','s','i','t','i','o','n','s',' ','s','h','o','w','n',0};
-    static const XCHAR  scr1StrLn6[] = {'b','y',' ','a','r','r','o','w','s','.',0};
-    static const XCHAR  scr1StrLn7[] = {'T','o','u','c','h',' ','s','c','r','e','e','n',' ','t','o',0};
-    static const XCHAR  scr1StrLn8[] = {'c','o','n','t','i','n','u','e','.',0};
+    static const XCHAR  scr1StrLn4[] = {'P','r','e','s','s',' ','&',' ','h','o','l','d',' ','t','h','e',' ','c','e','n','t','e','r',0};
+    static const XCHAR  scr1StrLn5[] = {'o','f',' ','t','h','e',' ','f','i','l','l','e','d',' ','c','i','r','c','l','e',0};
+    static const XCHAR  scr1StrLn6[] = {'T','o','u','c','h',' ','s','c','r','e','e','n',' ','t','o',0};
+    static const XCHAR  scr1StrLn7[] = {'c','o','n','t','i','n','u','e','.',0};
 
-#if defined (PIC24FJ256DA210_DEV_BOARD)
-    static const XCHAR  scr2StrLn1[] = {'H','o','l','d',' ','S','1',' ','b','u','t','t','o','n',' ','a','n','d',0};
-    static const XCHAR  scr2StrLn2[] = {'p','r','e','s','s',' ','M','C','L','R',' ','r','e','s','e','t',' ','t','o',0};
+    static const XCHAR  scr2StrLn1[] = {'H','o','l','d',' ','s','c','r','e','e','n',' ','f','o','r',' ','1',' ','s','e','c',0};
+    static const XCHAR  scr2StrLn2[] = {'a','f','t','e','r',' ','s','y','s','t','e','m',' ','r','e','s','e','t',' ','t','o',0};
     static const XCHAR  scr2StrLn3[] = {'R','E','P','E','A','T',' ','t','h','e',' ','c','a','l','i','b','r','a','t','i','o','n',0};
     static const XCHAR  scr2StrLn4[] = {'p','r','o','c','e','d','u','r','e','.',0};
-#else
-    static const XCHAR  scr2StrLn1[] = {'H','o','l','d',' ','S','3',' ','b','u','t','t','o','n',' ','a','n','d',0};
-    static const XCHAR  scr2StrLn2[] = {'p','r','e','s','s',' ','M','C','L','R',' ','r','e','s','e','t','(','S','1',')',' ','t','o',0};
-    static const XCHAR  scr2StrLn3[] = {'R','E','P','E','A','T',' ','t','h','e',' ','c','a','l','i','b','r','a','t','i','o','n',0};
-    static const XCHAR  scr2StrLn4[] = {'p','r','o','c','e','d','u','r','e','.',0};
-#endif	
+
     SHORT               x, y;
-
     SHORT               textHeight, textStart;
-
+    
     SetFont((void *) &FONTDEFAULT);
     
     textHeight = GetTextHeight((void *) &FONTDEFAULT);
@@ -623,161 +310,72 @@ void TouchCalibration(void)
     ClearDevice();
 
     SetColor(BRIGHTRED);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn1, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart, (XCHAR *)scr1StrLn1));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn1, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart, (XCHAR *)scr1StrLn1)));
     SetColor(BLACK);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn2, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (1*textHeight), (XCHAR *)scr1StrLn2));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (2*textHeight), (XCHAR *)scr1StrLn3));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (3*textHeight), (XCHAR *)scr1StrLn4));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn5, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (4*textHeight), (XCHAR *)scr1StrLn5));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &FONTDEFAULT))>>1,  \
-    							textStart + (5*textHeight), (XCHAR *)scr1StrLn6));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn2, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (1*textHeight), (XCHAR *)scr1StrLn2)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (2*textHeight), (XCHAR *)scr1StrLn3)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (3*textHeight), (XCHAR *)scr1StrLn4)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn5, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (4*textHeight), (XCHAR *)scr1StrLn5)));
+
     SetColor(BRIGHTRED);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
-    							textStart + (6*textHeight), (XCHAR *)scr1StrLn7));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &FONTDEFAULT))>>1,  \
-    							textStart + (7*textHeight), (XCHAR *)scr1StrLn8));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &FONTDEFAULT))>>1,  \
+    							textStart + (6*textHeight), (XCHAR *)scr1StrLn6)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
+    							textStart + (7*textHeight), (XCHAR *)scr1StrLn7)));
+
+    // Wait for release
+    do
+    {
+        x = TouchGetRawX();
+        y = TouchGetRawY();
+    } while((y != -1) && (x != -1));
 
     // Wait for touch
     do
     {
-        x = ADCGetX();
-        y = ADCGetY();
+        x = TouchGetRawX();
+        y = TouchGetRawY();
     } while((y == -1) || (x == -1));
+    
 
     DelayMs(CALIBRATION_DELAY);
-
+    
     SetColor(WHITE);
     ClearDevice();
 
-    SetColor(BRIGHTRED);
 
-    #ifdef SWAP_X_AND_Y
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, 5, GetMaxX() - 5, 15));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 4, 5, GetMaxX() - 4, 15));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 6, 5, GetMaxX() - 6, 15));
-
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, 5, GetMaxX() - 15, 5));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, 4, GetMaxX() - 15, 4));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, 6, GetMaxX() - 15, 6));
-
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, 6, GetMaxX() - 15, 16));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, 4, GetMaxX() - 15, 14));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, 5, GetMaxX() - 15, 15));
-
-    #else
-    WAIT_UNTIL_FINISH(Line(5, 5, 5, 15));
-    WAIT_UNTIL_FINISH(Line(4, 5, 4, 15));
-    WAIT_UNTIL_FINISH(Line(6, 5, 6, 15));
-
-    WAIT_UNTIL_FINISH(Line(5, 5, 15, 5));
-    WAIT_UNTIL_FINISH(Line(5, 4, 15, 4));
-    WAIT_UNTIL_FINISH(Line(5, 6, 15, 6));
-
-    WAIT_UNTIL_FINISH(Line(5, 6, 15, 16));
-    WAIT_UNTIL_FINISH(Line(5, 4, 15, 14));
-    WAIT_UNTIL_FINISH(Line(5, 5, 15, 15));
-    #endif
-    _calXMin = 0xFFFF;
-    _calXMax = 0;
-    _calYMin = 0xFFFF;
-    _calYMax = 0;
-
-    TouchGetCalPoints();
-
-    SetColor(WHITE);
-    ClearDevice();
-
-    SetColor(BRIGHTRED);
-
-    #ifdef SWAP_X_AND_Y
-    WAIT_UNTIL_FINISH(Line(5, 5, 5, 15));
-    WAIT_UNTIL_FINISH(Line(4, 5, 4, 15));
-    WAIT_UNTIL_FINISH(Line(6, 5, 6, 15));
-
-    WAIT_UNTIL_FINISH(Line(5, 5, 15, 5));
-    WAIT_UNTIL_FINISH(Line(5, 4, 15, 4));
-    WAIT_UNTIL_FINISH(Line(5, 6, 15, 6));
-
-    WAIT_UNTIL_FINISH(Line(5, 6, 15, 16));
-    WAIT_UNTIL_FINISH(Line(5, 4, 15, 14));
-    WAIT_UNTIL_FINISH(Line(5, 5, 15, 15));
-
-    #else
-    WAIT_UNTIL_FINISH(Line(5, GetMaxY() - 5, 5, GetMaxY() - 15));
-    WAIT_UNTIL_FINISH(Line(4, GetMaxY() - 5, 4, GetMaxY() - 15));
-    WAIT_UNTIL_FINISH(Line(6, GetMaxY() - 5, 6, GetMaxY() - 15));
-
-    WAIT_UNTIL_FINISH(Line(5, GetMaxY() - 5, 15, GetMaxY() - 5));
-    WAIT_UNTIL_FINISH(Line(5, GetMaxY() - 4, 15, GetMaxY() - 4));
-    WAIT_UNTIL_FINISH(Line(5, GetMaxY() - 6, 15, GetMaxY() - 6));
-
-    WAIT_UNTIL_FINISH(Line(5, GetMaxY() - 6, 15, GetMaxY() - 16));
-    WAIT_UNTIL_FINISH(Line(5, GetMaxY() - 4, 15, GetMaxY() - 14));
-    WAIT_UNTIL_FINISH(Line(5, GetMaxY() - 5, 15, GetMaxY() - 15));
-    #endif
-    TouchGetCalPoints();
-
-    SetColor(WHITE);
-    ClearDevice();
-
-    SetColor(BRIGHTRED);
-
-    #ifdef SWAP_X_AND_Y
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 5, GetMaxY() - 5, GetMaxX() / 2 - 5, GetMaxY() - 15));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 4, GetMaxY() - 5, GetMaxX() / 2 - 4, GetMaxY() - 15));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 6, GetMaxY() - 5, GetMaxX() / 2 - 6, GetMaxY() - 15));
-
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 5, GetMaxY() - 5, GetMaxX() / 2 - 15, GetMaxY() - 5));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 5, GetMaxY() - 4, GetMaxX() / 2 - 15, GetMaxY() - 4));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 5, GetMaxY() - 6, GetMaxX() / 2 - 15, GetMaxY() - 6));
-
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 5, GetMaxY() - 6, GetMaxX() / 2 - 15, GetMaxY() - 16));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 5, GetMaxY() - 4, GetMaxX() / 2 - 15, GetMaxY() - 14));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() / 2 - 5, GetMaxY() - 5, GetMaxX() / 2 - 15, GetMaxY() - 15));
-
-    #else
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, GetMaxY() / 2 - 5, GetMaxX() - 5, GetMaxY() / 2 - 15));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 4, GetMaxY() / 2 - 5, GetMaxX() - 4, GetMaxY() / 2 - 15));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 6, GetMaxY() / 2 - 5, GetMaxX() - 6, GetMaxY() / 2 - 15));
-
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, GetMaxY() / 2 - 5, GetMaxX() - 15, GetMaxY() / 2 - 5));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, GetMaxY() / 2 - 4, GetMaxX() - 15, GetMaxY() / 2 - 4));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, GetMaxY() / 2 - 6, GetMaxX() - 15, GetMaxY() / 2 - 6));
-
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, GetMaxY() / 2 - 6, GetMaxX() - 15, GetMaxY() / 2 - 16));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, GetMaxY() / 2 - 4, GetMaxX() - 15, GetMaxY() / 2 - 14));
-    WAIT_UNTIL_FINISH(Line(GetMaxX() - 5, GetMaxY() / 2 - 5, GetMaxX() - 15, GetMaxY() / 2 - 15));
-    #endif
-    TouchGetCalPoints();
+    
+    // call actual calibration routine
+    TouchCalHWGetPoints();
 
     SetColor(WHITE);
     ClearDevice();
 
     SetColor(BLACK);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn1, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (1*textHeight), (XCHAR *)scr2StrLn1));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn2, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (2*textHeight), (XCHAR *)scr2StrLn2));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn3, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (3*textHeight), (XCHAR *)scr2StrLn3));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn4, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (4*textHeight), (XCHAR *)scr2StrLn4));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn1, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (1*textHeight), (XCHAR *)scr2StrLn1)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn2, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (2*textHeight), (XCHAR *)scr2StrLn2)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn3, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (3*textHeight), (XCHAR *)scr2StrLn3)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn4, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (4*textHeight), (XCHAR *)scr2StrLn4)));
     SetColor(BRIGHTRED);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (6*textHeight), (XCHAR *)scr1StrLn7));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (7*textHeight), (XCHAR *)scr1StrLn8));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (6*textHeight), (XCHAR *)scr1StrLn6)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (7*textHeight), (XCHAR *)scr1StrLn7)));
 
     // Wait for touch
     do
     {
-        x = ADCGetX();
-        y = ADCGetY();
+        x = TouchGetRawX();
+        y = TouchGetRawY();
     } while((y == -1) || (x == -1));
 
     DelayMs(CALIBRATION_DELAY);
@@ -786,108 +384,6 @@ void TouchCalibration(void)
     ClearDevice();
 }
 
-/*********************************************************************
-* Function: void TouchGetCalPoints(void)
-*
-* PreCondition: InitGraph() must be called before
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: gets values for 3 touches
-*
-* Note: none
-*
-********************************************************************/
-void TouchGetCalPoints(void)
-{
-    static const XCHAR  calStr[] = {'C','A','L','I','B','R','A','T','I','O','N',0};
-    XCHAR               calTouchLeft[] = {'3',' ','t','o','u','c','h','e','s',' ','l','e','f','t',0};
-    SHORT               counter;
-    SHORT               x, y;
-    WORD                ax[3], ay[3];
 
-    SetFont((void *) &FONTDEFAULT);
-
-    SetColor(BRIGHTRED);
-
-    WAIT_UNTIL_FINISH
-    (
-        OutTextXY
-            (
-                (GetMaxX() - GetTextWidth((XCHAR *)calStr, (void *) &FONTDEFAULT)) >> 1,
-                (GetMaxY() - GetTextHeight((void *) &FONTDEFAULT)) >> 1,
-                (XCHAR *)calStr
-            )
-    );
-
-    for(counter = 0; counter < 3; counter++)
-    {
-
-        SetColor(BRIGHTRED);
-
-        calTouchLeft[0] = '3' - counter;
-
-        WAIT_UNTIL_FINISH
-        (
-            OutTextXY
-                (
-                    (GetMaxX() - GetTextWidth(calTouchLeft, (void *) &FONTDEFAULT)) >> 1,
-                    (GetMaxY() + GetTextHeight((void *) &FONTDEFAULT)) >> 1,
-                    calTouchLeft
-                )
-        );
-
-        // Wait for press
-        do
-        {
-            x = ADCGetX();
-            y = ADCGetY();
-        } while((y == -1) || (x == -1));
-
-        ax[counter] = x;
-        ay[counter] = y;
-
-        // Wait for release
-        do
-        {
-            x = ADCGetX();
-            y = ADCGetY();
-        } while((y != -1) && (x != -1));
-
-        SetColor(WHITE);
-
-        WAIT_UNTIL_FINISH
-        (
-            OutTextXY
-                (
-                    (GetMaxX() - GetTextWidth(calTouchLeft, (void *) &FONTDEFAULT)) >> 1,
-                    (GetMaxY() + GetTextHeight((void *) &FONTDEFAULT)) >> 1,
-                    calTouchLeft
-                )
-        );
-
-        DelayMs(CALIBRATION_DELAY);
-    }
-
-    for(counter = 0; counter < 3; counter++)
-    {
-        if(_calXMax < ax[counter])
-            _calXMax = ax[counter];
-
-        if(_calYMin > ay[counter])
-            _calYMin = ay[counter];
-
-        if(_calYMax < ay[counter])
-            _calYMax = ay[counter];
-
-        if(_calXMin > ax[counter])
-            _calXMin = ax[counter];
-    }
-}
-
-#endif // #if defined (USE_RESISTIVE_TOUCH)
+#endif // #if defined (USE_TOUCHSCREEN_RESISTIVE)
 

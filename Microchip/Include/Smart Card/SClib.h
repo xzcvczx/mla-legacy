@@ -37,7 +37,6 @@
   1.0   Initial release
   1.01  Cleaned up unnecessary variables,supported T=1 protocol
         and improvments in T=0 functions following the coding standards
-  1.02  Disciplined the code.
 ********************************************************************/
 
 // Smart Card Library

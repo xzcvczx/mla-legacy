@@ -38,10 +38,11 @@
 *  This file provides the interface into the MiWi stack
 *
 * Change History:
-*  Rev   Date         Description
-*  0.1   11/09/2006   Initial revision
-*  1.0   01/09/2007   Initial release
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  0.1   11/09/2006   yfy       Initial revision
+*  1.0   01/09/2007   yfy       Initial release
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #ifndef __MIWI_H_
@@ -98,7 +99,10 @@ void DumpConnection(BYTE index);
 
 
 #define MIWI_PROTOCOL_ID 0x4D
-#define MIWI_VERSION_NUM 0x31                       //v3.1
+#define MIWI_PRO_PROTOCOL_ID 0x5D
+#define MIWI_VERSION_NUM 0x41                       //v4.1
+
+
 #define MIWI_ACK_REQ 0x04
 
 #define PAYLOAD_START                           11

@@ -43,6 +43,7 @@
 
     #include "Graphics/Graphics.h"
     #include "Primitive.h"
+    #include "GenericTypeDefs.h"
 
     #ifdef USE_PALETTE
 

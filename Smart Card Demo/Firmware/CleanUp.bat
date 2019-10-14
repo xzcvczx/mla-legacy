@@ -86,10 +86,10 @@ echo Removing *.elf files...
 del *.elf /f /q /s
 echo.
 
-echo Removing *.d files...
-del *.d /f /q /s
-echo.
+rd .\Objects /S /Q
 
-rd Objects /S /Q
+rd .\MPLAB.X\build /S /Q
+
+rd .\MPLAB.X\dist /S /Q
 
 echo Done.

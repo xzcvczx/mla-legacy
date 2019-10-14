@@ -57,7 +57,7 @@ Description:
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
+ (the "Company") for its PIC® Microcontroller is intended and
  supplied to you, the Company’s customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
@@ -67,7 +67,7 @@ Description:
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -95,6 +95,8 @@ Description:
 
          Added macro versions of USBDeviceAttach() and USBDeviceDetach()
          so they will compile without error when using polling mode.
+
+  2.7a   No Change
 
   2.8    Added EVENT_TRANSFER_TERMINATED event enum item.
 
@@ -826,6 +828,106 @@ WORD USBHandleGetAddr(USB_HANDLE);
 #define USBHandleGetAddr(handle) ConvertToVirtualAddress((((volatile BDT_ENTRY*)handle)->ADR))
 /*DOM-IGNORE-END*/
 
+
+/********************************************************************
+    Function:
+        USB_HANDLE USBGetNextHandle(BYTE ep_num, BYTE ep_dir)
+    Summary:
+        Retrieves the handle to the next endpoint BDT entry that the 
+        USBTransferOnePacket() will use.
+    Description:
+        Retrieves the handle to the next endpoint BDT that the 
+        USBTransferOnePacket() will use.  Useful for initialization and when
+        ping pong buffering will be used on application endpoints.
+    PreCondition:
+        Will return NULL if the USB device has not yet been configured/the 
+        endpoint specified has not yet been initalized by USBEnableEndpoint().
+    Parameters:
+        BYTE ep_num - The endpoint number to get the handle for (valid 
+            values are 1-15,  0 is not a valid input value for this API)
+        BYTE ep_dir - The endpoint direction associated with the endpoint number 
+            to get the handle for (valid values are OUT_FROM_HOST and IN_TO_HOST).
+    Return Values:
+        USB_HANDLE - Returns the USB_HANDLE (a pointer) to the BDT that will be
+            used next time the USBTransferOnePacket() function is called, for the
+            given ep_num and ep_dir
+    Remarks:
+        This API is useful for initializing USB_HANDLEs during initialization of
+        the application firmware.  It is also useful when ping-pong bufferring is
+        enabled, and the application firmware wishes to arm both the even and odd
+        BDTs for an endpoint simultaneously.  In this case, the application 
+        firmware for sending data to the host would typically be something like 
+        follows:
+        
+        <code lang="c">
+        USB_HANDLE Handle1;
+        USB_HANDLE Handle2;
+        USB_HANDLE* pHandle = &Handle1;
+        BYTE UserDataBuffer1[64];
+        BYTE UserDataBuffer2[64];
+        BYTE* pDataBuffer = &UserDataBuffer1[0];
+        
+        //Add some code that loads UserDataBuffer1[] with useful data to send, 
+        //using the pDataBuffer pointer, for example:
+        //for(i = 0; i < 64; i++)
+        //{
+        //  *pDataBuffer++ = [useful data value];
+        //}
+          
+        //Check if the next USB endpoint BDT is available        
+        if(!USBHandleBusy(USBGetNextHandle(ep_num, IN_TO_HOST))
+        {
+            //The endpoint is available.  Send the data.
+            *pHandle = USBTransferOnePacket(ep_num, ep_dir, pDataBuffer, bytecount);
+            //Toggle the handle and buffer pointer for the next transaction
+            if(pHandle == &Handle1)
+            {
+                pHandle = &Handle2;
+                pDataBuffer = &UserDataBuffer2[0];
+            }
+            else
+            {
+                pHandle = &Handle1;
+                pDataBuffer = &UserDataBuffer1[0];
+            }
+        }
+        
+        //The firmware can then load the next data buffer (in this case 
+        //UserDataBuffer2)with useful data, and send it using the same 
+        //process.  For example:
+
+        //Add some code that loads UserDataBuffer2[] with useful data to send, 
+        //using the pDataBuffer pointer, for example:
+        //for(i = 0; i < 64; i++)
+        //{
+        //  *pDataBuffer++ = [useful data value];
+        //}
+          
+        //Check if the next USB endpoint BDT is available        
+        if(!USBHandleBusy(USBGetNextHandle(ep_num, IN_TO_HOST))
+        {
+            //The endpoint is available.  Send the data.
+            *pHandle = USBTransferOnePacket(ep_num, ep_dir, pDataBuffer, bytecount);
+            //Toggle the handle and buffer pointer for the next transaction
+            if(pHandle == &Handle1)
+            {
+                pHandle = &Handle2;
+                pDataBuffer = &UserDataBuffer2[0];
+            }
+            else
+            {
+                pHandle = &Handle1;
+                pDataBuffer = &UserDataBuffer1[0];
+            }
+        }
+        </code>
+ 
+  *******************************************************************/
+USB_HANDLE USBGetNextHandle(BYTE ep_num, BYTE ep_dir);
+/*DOM-IGNORE-BEGIN*/
+#define USBGetNextHandle(ep_num, ep_dir) ((ep_dir == OUT_FROM_HOST)?((USB_HANDLE)pBDTEntryOut[ep_num]):((USB_HANDLE)pBDTEntryIn[ep_num]))
+/*DOM-IGNORE-END*/
+
 /********************************************************************
     Function:
         void USBEP0Transmit(BYTE options)
@@ -958,13 +1060,20 @@ void USBEP0Receive(BYTE* dest, WORD size, void (*function));
         None
         
     Parameters:
-        ep - the endpoint you want to send the data out of
-        data - the data that you wish to send
-        len - the length of the data that you wish to send
+        ep - the endpoint number you want to send the data out of
+        data - pointer to a user buffer that contains the data that you wish to 
+               send to the host.  Note: This RAM buffer must be accessible by
+               the USB module.
+        len - the number of bytes of data that you wish to send to the host,
+              in the next transaction on this endpoint.  Note: this value
+              should always be less than or equal to the endpoint size, as
+              specified in the USB endpoint descriptor.
         
     Return Values:
-        USB_HANDLE - a handle for the transfer.  This information
-        should be kept to track the status of the transfer
+        USB_HANDLE - Returns a pointer to the BDT entry associated with the
+                     transaction.  The firmware can check for completion
+                     of the transaction by using the USBHandleBusy() function,
+                     using the returned USB_HANDLE value.
         
     Remarks:
         None
@@ -986,12 +1095,22 @@ USB_HANDLE USBTxOnePacket(BYTE ep, BYTE* data, WORD len);
         None
         
     Parameters:
-        ep - the endpoint you want to receive the data into
-        data - where the data will go when it arrives
-        len - the length of the data that you wish to receive
+        ep - The endpoint number you want to receive the data on.
+        data - Pointer to a user buffer where the data will go when 
+               it arrives from the host.  Note: This RAM must be USB module
+               accessible.
+        len - The len parameter should always be set to the maximum endpoint packet
+              size, specified in the USB descriptor for this endpoint.  The host
+              may send <= the number of bytes as the endpoint size in the endpoint
+              descriptor.  After the transaction is complete, the application 
+              firmware can call USBHandleGetLength() to determine how many bytes
+              the host actually sent in the last transaction on this endpoint.
         
     Return Values:
-        None
+        USB_HANDLE - Returns a pointer to the BDT entry associated with the
+                     transaction.  The firmware can check for completion
+                     of the transaction by using the USBHandleBusy() function,
+                     using the returned USB_HANDLE value.
         
     Remarks:
         None
@@ -1007,14 +1126,16 @@ USB_HANDLE USBRxOnePacket(BYTE ep, BYTE* data, WORD len);
         void USBStallEndpoint(BYTE ep, BYTE dir)
         
     Summary:
-         STALLs the specified endpoint
+         Configures the specified endpoint to send STALL to the host, the next
+         time the host tries to access the endpoint.
     
     PreCondition:
         None
         
     Parameters:
-        BYTE ep - the endpoint the data will be transmitted on
-        BYTE dir - the direction of the transfer
+        BYTE ep - The endpoint number that should be configured to send STALL.
+        BYTE dir - The direction of the endpoint to STALL, either 
+                   IN_TO_HOST or OUT_FROM_HOST.
         
     Return Values:
         None
@@ -1030,17 +1151,26 @@ void USBStallEndpoint(BYTE ep, BYTE dir);
         void USBDeviceDetach(void)
    
     Summary:
-        This function indicates to the USB module that the USB device has been
-        detached from the bus.
-
+        This function configures the USB module to "soft detach" itself from
+        the USB host.
+        
     Description:
-        This function indicates to the USB module that the USB device has been
-        detached from the bus.  This function needs to be called in order for the
-        device to start to properly prepare for the next attachment.
-   
+        This function configures the USB module to perform a "soft detach"
+        operation, by disabling the D+ (or D-) ~1.5k pull up resistor, which
+        lets the host know the device is present and attached.  This will make
+        the host think that the device has been unplugged.  This is potentially
+        useful, as it allows the USB device to force the host to re-enumerate
+        the device (on the firmware has re-enabled the USB module/pull up, by
+        calling USBDeviceAttach(), to "soft re-attach" to the host).
+        
     Precondition:
-        Should only be called when USB_INTERRUPT is defined.
+        Should only be called when USB_INTERRUPT is defined.  See remarks
+        section if USB_POLLING mode option is being used (usb_config.h option).
 
+        Additionally, this function should only be called from the main() loop 
+        context.  Do not call this function from within an interrupt handler, as 
+        this function may modify global interrupt enable bits and settings.
+        
     Parameters:
         None
      
@@ -1048,7 +1178,67 @@ void USBStallEndpoint(BYTE ep, BYTE dir);
         None
         
     Remarks:
-        None
+        If the application firmware calls USBDeviceDetach(), it is strongly
+        recommended that the firmware wait at least >= 80ms before calling
+        USBDeviceAttach().  If the firmeware performs a soft detach, and then
+        re-attaches too soon (ex: after a few micro seconds for instance), some
+        hosts may interpret this as an unexpected "glitch" rather than as a
+        physical removal/re-attachment of the USB device.  In this case the host
+        may simply ignore the event without re-enumerating the device.  To 
+        ensure that the host properly detects and processes the device soft
+        detach/re-attach, it is recommended to make sure the device remains 
+        detached long enough to mimic a real human controlled USB 
+        unplug/re-attach event (ex: after calling USBDeviceDetach(), do not
+        call USBDeviceAttach() for at least 80+ms, preferrably longer.
+        
+        Neither the USBDeviceDetach() or USBDeviceAttach() functions are blocking
+        or take long to execute.  It is the application firmware's 
+        responsibility for adding the 80+ms delay, when using these API 
+        functions.
+        
+        Note: The Windows plug and play event handler processing is fairly 
+        slow, especially in certain versions of Windows, and for certain USB
+        device classes.  It has been observed that some device classes need to
+        provide even more USB detach dwell interval (before calling 
+        USBDeviceAttach()), in order to work correctly after re-enumeration.
+        If the USB device is a CDC class device, it is recommended to wait
+        at least 1.5 seconds or longer, before soft re-attaching to the host,
+        to provide the plug and play event handler enough time to finish 
+        processing the removal event, before the re-attach occurs.
+        
+        If the application is using the USB_POLLING mode option, then the 
+        USBDeviceDetach() and USBDeviceAttach() functions are not available.  
+        In this mode, the USB stack relies on the "#define USE_USB_BUS_SENSE_IO" 
+        and "#define USB_BUS_SENSE" options in the 
+        HardwareProfile – [platform name].h file. 
+
+        When using the USB_POLLING mode option, and the 
+        "#define USE_USB_BUS_SENSE_IO" definition has been commented out, then 
+        the USB stack assumes that it should always enable the USB module at 
+        pretty much all times.  Basically, anytime the application firmware 
+        calls USBDeviceTasks(), the firmware will automatically enable the USB 
+        module.  This mode would typically be selected if the application was 
+        designed to be a purely bus powered device.  In this case, the 
+        application is powered from the +5V VBUS supply from the USB port, so 
+        it is correct and sensible in this type of application to power up and 
+        turn on the USB module, at anytime that the microcontroller is 
+        powered (which implies the USB cable is attached and the host is also 
+        powered).
+
+        In a self powered application, the USB stack is designed with the 
+        intention that the user will enable the "#define USE_USB_BUS_SENSE_IO" 
+        option in the HardwareProfile – [platform name].h file.  When this 
+        option is defined, then the USBDeviceTasks() function will automatically 
+        check the I/O pin port value of the designated pin (based on the 
+        #define USB_BUS_SENSE option in the HardwareProfile – [platform name].h 
+        file), every time the application calls USBDeviceTasks().  If the 
+        USBDeviceTasks() function is executed and finds that the pin defined by 
+        the #define USB_BUS_SENSE is in a logic low state, then it will 
+        automatically disable the USB module and tri-state the D+ and D- pins.  
+        If however the USBDeviceTasks() function is executed and finds the pin 
+        defined by the #define USB_BUS_SENSE is in a logic high state, then it 
+        will automatically enable the USB module, if it has not already been 
+        enabled.        
                                                           
   **************************************************************************/
 void USBDeviceDetach(void);
@@ -1091,7 +1281,10 @@ void USBDeviceDetach(void);
         None
      
     Return Values:
-        None                                                        
+        None       
+    
+    Remarks: 
+		See also the USBDeviceDetach() API function documentation.                                                 
 ****************************************************************************/
 void USBDeviceAttach(void);
 

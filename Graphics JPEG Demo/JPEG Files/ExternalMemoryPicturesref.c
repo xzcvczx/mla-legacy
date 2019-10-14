@@ -1,4 +1,0 @@
-#include "Graphics/Graphics.h"
-
-IMAGE_EXTERNAL Scene02 = {0x0003,0x0000,0x00000000};
-IMAGE_EXTERNAL Scene01 = {0x0003,0x0000,0x00009258};

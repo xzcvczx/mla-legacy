@@ -53,11 +53,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 ********************************************************************/
 #if defined (USE_XC2C64A)
 
-
-#include <stdint.h>
-#include <plib.h>
+#include "compiler.h"
+#include "GenericTypeDefs.h"
 #include <cpld.h>
-
+#include <stdint.h>
 
 /********************************************************************
  Section: Code 

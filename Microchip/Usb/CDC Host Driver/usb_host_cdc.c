@@ -73,6 +73,9 @@ ADG          15-Sep-2008 First release
               not fully comply with CDC specifications
               Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
               more than 256 bytes
+ v2.9         Fixed bug with sending SET_CONTROL_LINE_STATE command to device.
+              The bit map settings were being sent as data stage bytes, rather
+			  than as the wValue of the SETUP packet.
 ********************************************************************************/
 
 
@@ -259,7 +262,7 @@ BYTE CDCdeviceAddress = 0; // Holds address of the attached device
 //******************************************************************************
 
 #define PTR_HOST_LINE_CODING_BUFFER  (&CDC_LINE_CODING_Buffer)    // Address of Line Coding buffer
-#define PTR_HOST_CONTROL_LINE_BUFFER (&CDC_CONTROL_SIGNAL_Buffer) // Address of cntrol signal buffer
+#define PTR_HOST_CONTROL_LINE_BUFFER (&CDC_CONTROL_SIGNAL_Buffer) // Address of control signal buffer
 
 
 extern CLIENT_DRIVER_TABLE usbDeviceInterfaceTable;
@@ -627,7 +630,7 @@ void USBHostCDCTasks( void )
                    case SUBSTATE_SET_CONTROL_LINE_STATE:
                          
                        if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
-                                            USB_CDC_SET_CONTROL_LINE_STATE , 0 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_CONTROL_LINE_LENGTH, (BYTE*)PTR_HOST_CONTROL_LINE_BUFFER,
+                                            USB_CDC_SET_CONTROL_LINE_STATE , *(WORD*)PTR_HOST_CONTROL_LINE_BUFFER , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_CONTROL_LINE_LENGTH, NULL,
                                             USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID ))
                        {           
                             _USBHostCDC_SetNextSubState();
@@ -1192,8 +1195,8 @@ BOOL USBHostCDCEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                     {
                                         // if fine goto set  Control line state
                                        if(!USBHostIssueDeviceRequest( deviceInfoCDC[i].deviceAddress, USB_SETUP_HOST_TO_DEVICE | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE, 
-                                                            USB_CDC_SET_CONTROL_LINE_STATE , 0 , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_CONTROL_LINE_LENGTH, (BYTE*)PTR_HOST_CONTROL_LINE_BUFFER,
-                                                            USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID ))
+                                                            USB_CDC_SET_CONTROL_LINE_STATE , *(WORD*)PTR_HOST_CONTROL_LINE_BUFFER , deviceInfoCDC[i].commInterface.interfaceNum , USB_CDC_CONTROL_LINE_LENGTH, NULL,
+                                                            USB_DEVICE_REQUEST_SET , deviceInfoCDC[i].clientDriverID ))    
                                        {           
                                             deviceInfoCDC[i].state = STATE_WAIT_FOR_SET_CONTROL_LINE_STATE;
                                        }

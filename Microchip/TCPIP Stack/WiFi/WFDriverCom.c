@@ -490,9 +490,11 @@ static void ChipReset(void)
     /* Configure reset pin */
     WF_SetRST_N(WF_HIGH);
 
+    /* Let SPI lines settle before first SPI transaction */
+    DelayMs(1);
+    
     /* clear the power bit to disable low power mode on the MRF24WB0M */
     Write16BitWFRegister(WF_PSPOLL_H_REG, 0x0000);
-
 
     /* Set HOST_RESET bit in register to put device in reset */
     Write16BitWFRegister(WF_HOST_RESET_REG, Read16BitWFRegister(WF_HOST_RESET_REG) | WF_HOST_RESET_MASK);

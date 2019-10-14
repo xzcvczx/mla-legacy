@@ -140,7 +140,7 @@ static void SetEventNotificationMask(UINT8 eventNotificationBitMask);
 	MACInit must be called first.
 
   Parameters:
-	p_elements - pointer to the input structure (tWFCAElements) containing the 
+	p_elements - Pointer to the input structure (tWFCAElements) containing the 
 	             connection algorithm elements.
 	             
   Returns:
@@ -205,7 +205,7 @@ void WF_CASetElements(tWFCAElements *p_elements)
 	MACInit must be called first.
 
   Parameters:
-	p_elements - pointer to the output structure (tWFCAElements) where the 
+	p_elements - Pointer to the output structure (tWFCAElements) where the 
 	             connection algorithm elements are written.
 	             
   Returns:
@@ -244,7 +244,7 @@ void WF_CAGetElements(tWFCAElements *p_elements)
 	MACInit must be called first.
 
   Parameters:
-	scanType -- desired scan type.  Either WF_ACTIVE_SCAN or WF_PASSIVE_SCAN.
+	scanType - Desired scan type.  Either WF_ACTIVE_SCAN or WF_PASSIVE_SCAN.
 	             
   Returns:
   	None
@@ -266,7 +266,7 @@ void WF_CASetScanType(UINT8 scanType)
 	void WF_CAGetScanType(UINT8 *p_scanType)
 
   Summary:
-	Gets the Connection Algorith scan type
+	Gets the Connection Algorithm scan type
 
   Description:
 	Reads the current Connection Algorithm scan type.
@@ -275,7 +275,7 @@ void WF_CASetScanType(UINT8 scanType)
 	MACInit must be called first.
 
   Parameters:
-	p_scanType -- Pointer where Connection Algorithm scan type is written.
+	p_scanType - Pointer where Connection Algorithm scan type is written.
 	             
   Returns:
   	None
@@ -310,7 +310,7 @@ void WF_CAGetScanType(UINT8 *p_scanType)
 	MACInit must be called first.
 
   Parameters:
-	minChannelTime -- minimum time to wait for a probe response (in milliseconds)
+	minChannelTime - Minimum time to wait for a probe response (in milliseconds)
 	             
   Returns:
   	None
@@ -341,7 +341,7 @@ void WF_CASetMinChannelTime(UINT16 minChannelTime)
 	MACInit must be called first.
 
   Parameters:
-	p_minChannelTime -- Pointer where minimum time to wait for a probe response 
+	p_minChannelTime - Pointer where minimum time to wait for a probe response 
 	                    (in milliseconds) will be written.
 	             
   Returns:
@@ -379,7 +379,7 @@ void WF_CAGetMinChannelTime(UINT16 *p_minChannelTime)
 	MACInit must be called first.
 
   Parameters:
-	maxChannelTime -- maximum time to wait for a probe response (in milliseconds)
+	maxChannelTime - Maximum time to wait for a probe response (in milliseconds)
 	             
   Returns:
   	None
@@ -410,7 +410,7 @@ void WF_CASetMaxChannelTime(UINT16 maxChannelTime)
 	MACInit must be called first.
 
   Parameters:
-	p_maxChannelTime -- Pointer where maximum channel time is written
+	p_maxChannelTime - Pointer where maximum channel time is written
 	             
   Returns:
   	None
@@ -445,7 +445,7 @@ void WF_CAGetMaxChannelTime(UINT16 *p_maxChannelTime)
 	MACInit must be called first.
 
   Parameters:
-	probeDelay -- Desired probe delay
+	probeDelay - Desired probe delay
 	             
   Returns:
   	None
@@ -476,7 +476,7 @@ void WF_CASetProbeDelay(UINT16 probeDelay)
 	MACInit must be called first.
 
   Parameters:
-	p_probeDelay -- pointer to where probe delay is written
+	p_probeDelay - Pointer to where probe delay is written
 	             
   Returns:
   	None
@@ -511,7 +511,7 @@ void WF_CAGetProbeDelay(UINT16 *p_probeDelay)
 	MACInit must be called first.
 
   Parameters:
-	scanCount -- desired scan count
+	scanCount - Desired scan count
 	             
   Returns:
   	None
@@ -541,7 +541,7 @@ void WF_CASetScanCount(UINT8 scanCount)
 	MACInit must be called first.
 
   Parameters:
-	p_scanCount -- pointer to where scan count is written
+	p_scanCount - Pointer to where scan count is written
 	             
   Returns:
   	None
@@ -577,11 +577,13 @@ void WF_CAGetScanCount(UINT8 *p_scanCount)
 	            the specified value
 	   255:     Connect to the highest RSSI found
 
+	   Note that RSSI is a relative value with no units -- it is not correlated to dBm.
+	   
   Precondition:
 	MACInit must be called first.
 
   Parameters:
-	scanCount -- desired scan count
+	scanCount - Desired scan count
 	             
   Returns:
   	None
@@ -605,13 +607,16 @@ void WF_CASetRssi(UINT8 rssi)
 	Gets the RSSI threshold
 
   Description:
-	See WF_CASetRssi
+	See WF_CASetRssi.  Note that this function only retrieves the RSSI threshold 
+	used during the connection -- this is not the current RSSI of an existing connection.
+	If it is desired to retrieve the current RSSI state then a scan must be performed and
+	the scan result will contain the current RSSI state.
 
   Precondition:
 	MACInit must be called first.
 
   Parameters:
-	p_rssi -- pointer to where RSSI value is written
+	p_rssi - Pointer to where RSSI value is written
 	             
   Returns:
   	None
@@ -642,7 +647,7 @@ void WF_CAGetRssi(UINT8 *p_rssi)
 	MACInit must be called first.
 
   Parameters:
-	cpList -- array of connection profile ID's used to create CP list
+	cpList - Array of connection profile ID's used to create CP list
 	             
   Returns:
   	None
@@ -677,7 +682,7 @@ void WF_CASetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
 	MACInit must be called first.
 
   Parameters:
-	cpList -- array of connection profile ID's used to create CP list
+	cpList - Array of connection profile ID's used to create CP list
 	             
   Returns:
   	None
@@ -742,7 +747,7 @@ void WF_CASetListRetryCount(UINT8 listRetryCount)
 	MACInit must be called first.
 
   Parameters:
-	p_listRetryCount - pointer to where list retry count is written.
+	p_listRetryCount - Pointer to where list retry count is written.
 	             
   Returns:
   	None
@@ -763,10 +768,10 @@ void WF_CAGetListRetryCount(UINT8 *p_listRetryCount)
     void WF_CASetEventNotificationAction(UINT8 eventNotificationAction)
 
   Summary:
-    Reads the CA scan type
+    Sets the WiFi events that the host wishes to be notified of.
 
   Description:
-    Gets the Event Notification Action used by the Connection Algorithm.  The
+    Sets the Event Notification Action used by the Connection Algorithm.  The
     bit mask for the allowable entries is as follows:
     
     <table>
@@ -783,7 +788,7 @@ void WF_CAGetListRetryCount(UINT8 *p_listRetryCount)
     MACInit must be called first.
 
   Parameters:
-    eventNotificationAction -- Bit mask indicating which events the host wants
+    eventNotificationAction - Bit mask indicating which events the host wants
                                to be notifed of.
 
   Returns:
@@ -825,7 +830,7 @@ void WF_CASetEventNotificationAction(UINT8 eventNotificationAction)
     MACInit must be called first.
 
   Parameters:
-    p_eventNotificationAction -- pointer to where returned value is written.
+    p_eventNotificationAction - Pointer to where returned value is written.
 
   Returns:
     None.
@@ -852,7 +857,7 @@ void WF_CAGetEventNotificationAction(UINT8 *p_eventNotificationAction)
     MACInit must be called first.
 
   Parameters:
-    beaconTimeoutAction -- Action to take if a connection is lost due 
+    beaconTimeoutAction - Action to take if a connection is lost due 
                            to a beacon timeout.  Choices are either:
                            * WF_ATTEMPT_TO_RECONNECT
                            * WF_DO_NOT_ATTEMPT_TO_RECONNECT
@@ -885,7 +890,7 @@ void WF_CASetBeaconTimeoutAction(UINT8 beaconTimeoutAction)
     MACInit must be called first.
 
   Parameters:
-    p_beaconTimeoutAction -- pointer where returned value is written.  The value
+    p_beaconTimeoutAction - Pointer where returned value is written.  The value
                              will be either:
                              * WF_ATTEMPT_TO_RECONNECT
                              * WF_DO_NOT_ATTEMPT_TO_RECONNECT
@@ -920,7 +925,7 @@ void WF_CAGetBeaconTimeoutAction(UINT8 *p_beaconTimeoutAction)
     MACInit must be called first.    
 
   Parameters:
-    deauthAction -- Action to take in the event of a deauthentication.
+    deauthAction - Action to take in the event of a deauthentication.
                     Allowable values are:
                     * WF_ATTEMPT_TO_RECONNECT
                     * WF_DO_NOT_ATTEMPT_TO_RECONNECT
@@ -952,7 +957,7 @@ void WF_CASetDeauthAction(UINT8 deauthAction)
     MACInit must be called first. 
 
   Parameters:
-    p_deauthAction -- pointer where returned value is written.  The value will
+    p_deauthAction - Pointer where returned value is written.  The value will
                       be either:
                       * WF_ATTEMPT_TO_RECONNECT
                       * WF_DO_NOT_ATTEMPT_TO_RECONNECT
@@ -985,8 +990,8 @@ void WF_CAGetDeauthAction(UINT8 *p_deauthAction)
     MACInit must be called first. 
 
   Parameters:
-    p_channelList -- pointer to channel list.
-    numChannels   -- number of channels in p_channelList.  If set to 0, the
+    p_channelList - Pointer to channel list.
+    numChannels   - Number of channels in p_channelList.  If set to 0, the
                      MRF24WB0M will use all valid channels for the current 
                      regional domain.
 
@@ -1017,8 +1022,8 @@ void WF_CASetChannelList(UINT8 *p_channelList, UINT8 numChannels)
     MACInit must be called first.
 
   Parameters:
-    p_channelList -- pointer to where channel list will be returned
-    p_numChannels -- pointer to where number of channels in list will be 
+    p_channelList - Pointer to where channel list will be returned
+    p_numChannels - Pointer to where number of channels in list will be 
                      returned
 
   Returns:
@@ -1076,7 +1081,7 @@ void WF_CAGetChannelList(UINT8 *p_channelList, UINT8 *p_numChannels)
     MACInit must be called first.  Only used when PS Poll mode is enabled. 
 
   Parameters:
-    listenInterval -- Number of 100ms intervals between instances when 
+    listenInterval - Number of 100ms intervals between instances when 
                       the MRF24WB0M wakes up to receive buffered messages 
                       from the network.
 
@@ -1121,7 +1126,7 @@ void WF_CASetListenInterval(UINT16 listenInterval)
     MACInit must be called first.  Only used when PS Poll mode is enabled. 
 
   Parameters:
-    p_listenInterval -- pointer to where listen interval is returned
+    p_listenInterval - Pointer to where listen interval is returned
 
   Returns:
     None.
@@ -1208,7 +1213,7 @@ void WF_CASetBeaconTimeout(UINT8 beaconTimeout)
     MACInit must be called first.
 
   Parameters:
-    p_beaconTimeout -- pointer where beacon timeout value is written
+    p_beaconTimeout - Pointer where beacon timeout value is written
 
   Returns:
     None.
@@ -1321,9 +1326,9 @@ UINT8 GetEventNotificationMask(void)
     MACInit must be called first.
 
   Parameters:
-    elementId -- element that is being set
-    p_elementData -- pointer to element data
-    elementDataLength -- number of bytes pointed to by p_elementData
+    elementId - Element that is being set
+    p_elementData - Pointer to element data
+    elementDataLength - Number of bytes pointed to by p_elementData
 
   Returns:
     None.
@@ -1371,10 +1376,10 @@ static void LowLevel_CASetElement(UINT8 elementId,
     MACInit must be called first.
 
   Parameters:
-    elementId -- element that is being read
-    p_elementData -- pointer to where element data will be written
-    elementDataLength -- number of element data bytes that will be read
-    dataReadAction -- If TRUE then read data per paramters and free mgmt response buffer.
+    elementId - Element that is being read
+    p_elementData - Pointer to where element data will be written
+    elementDataLength - Number of element data bytes that will be read
+    dataReadAction - If TRUE then read data per paramters and free mgmt response buffer.
                       If FALSE then return after response received, do not read any data as the 
                       caller will do that, and don't free buffer, as caller will do that as well.
 

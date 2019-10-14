@@ -41,7 +41,7 @@
  *****************************************************************************/
 #include "EEPROM.h"
 
-#if defined (USE_25LC256)
+#if defined (USE_MCHP25LC256)
 
 /************************************************************************
 * Function: EEPROMInit                                                  
@@ -408,5 +408,5 @@ void EEPROMReadArray(WORD address, BYTE *pData, WORD nCount)
     EEPROMCSHigh();
 }
 
-#endif // #if defined (USE_25LC256)
+#endif // #if defined (USE_MCHP25LC256)
 

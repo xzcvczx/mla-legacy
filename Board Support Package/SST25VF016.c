@@ -1,7 +1,6 @@
 /*****************************************************************************
  *
- * Basic access to SPI Flash SST25VF016 located on 
- * Graphics LCD Controller PICtail Plus SSD1926 Board.
+ * Basic access to SPI Flash SST25VF016 and M25P80
  *
  *****************************************************************************
  * FileName:        SST25VF016.c
@@ -13,7 +12,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -35,13 +34,45 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/07/09	...
+ * 01/07/09	   ...
+ * 03/08/11    - Modified header file dependencies
+ *             - Abstracted out SPI component 
+ * 05/11/11    - Updated this file to support both SST25VF016 and M25P80 families
+ *             - Although the file name is still specific for SST25VF016
  *****************************************************************************/
+#include "HardwareProfile.h"
+
+#if defined (USE_SST25VF016) || defined(USE_M25P80)
+
+#include "Compiler.h"
+#include "GenericTypeDefs.h"
+#include "drv_spi.h"
 #include "SST25VF016.h"
 
-#if defined (USE_SST25VF016)
+/************************************************************************
+* SST25 Commands                                                       
+************************************************************************/
+    #define SST25_CMD_READ  (unsigned)0x03
+    #define SST25_CMD_WRITE (unsigned)0x02
+    #define SST25_CMD_WREN  (unsigned)0x06
+    #define SST25_CMD_RDSR  (unsigned)0x05
+    #define SST25_CMD_ERASE (unsigned)0x60
+	
+    #if defined(USE_M25P80)
+      #define SST25_CMD_EWSR  (unsigned)0x06
+      #define SST25_CMD_SER   (unsigned)0xD8
+    #elif defined(USE_SST25VF016)
+      #define SST25_CMD_EWSR  (unsigned)0x50
+      #define SST25_CMD_SER   (unsigned)0x20
+	#else
+	  #error "EWSR and SER commands not defined for the selected Serial flash."
+    #endif
+    
+    #define SST25_CMD_WRSR  (unsigned)0x01
+
+static DRV_SPI_INIT_DATA spiInitData;
 
 /************************************************************************
 * Function: SST25Init                                                  
@@ -53,157 +84,15 @@
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST25Init(void)
+void SST25Init(DRV_SPI_INIT_DATA *pInitData)
 {
-
-		#if defined (EXPLORER_16)
-/************************************************************************
-* For Explorer 16 RD12 is connected to EEPROM chip select.
-* To prevent a conflict between this EEPROM and SST25 flash
-* the chip select of the EEPROM SPI should be pulled up.
-************************************************************************/
-    // Set IOs directions for EEPROM SPI
-    EEPROM_CS_LAT = 1;			// set initial CS value to 1 (not asserted)
-	EEPROM_CS_TRIS = 0;			// set CS pin to output
-		#endif // #if defined (EXPLORER_16)
-		
-    // Initialize SPI
-        #ifdef __PIC32MX
-    SST25_SPISTAT = 0;
-    SST25_SPICON = 0;
-    SST25_SPIBRG = 0;
-    SST25_SPICONbits.MSTEN = 1;
-    SST25_SPICONbits.CKP = 0;
-    SST25_SPICONbits.CKE = 1;
-    SST25_SPICONbits.SMP = 1;
-    SST25_SPIBRG = 1;
-    SST25_SPICONbits.ON = 1;
-    #else
-        #if defined (GFX_PICTAIL_V3)
-    SST25_SPISTAT = 0;
-    SST25_SPICON1 = 0x001b;
-    SST25_SPICON1bits.MSTEN = 1;
-    SST25_SPICON2 = 0;
-    SST25_SPICON1bits.MODE16 = 0;
-    SST25_SPICON1bits.CKE = 0;
-    SST25_SPICON1bits.CKP = 1;
-    SST25_SPICON1bits.SMP = 1;
-    SST25_SPISTATbits.SPIEN = 1;
-        #elif defined (PIC24FJ256DA210_DEV_BOARD)
-    SST25_SPISTAT = 0;
-    #if defined (SPI_CLK_SPEED_8MHZ) 	// use 8 MHZ
-		SST25_SPICON1bits.SPRE = 6; 
-		SST25_SPICON1bits.PPRE = 3;
-	    SST25_SPICON1bits.CKE = 1; 
-    	SST25_SPICON1bits.CKP = 0; 
-    	SST25_SPICON1bits.SMP = 0; 
-	#else 								// use 16 MHZ 
-		SST25_SPICON1bits.SPRE = 7;
-		SST25_SPICON1bits.PPRE = 3;
-	    SST25_SPICON1bits.CKE = 0;
-	    SST25_SPICON1bits.CKP = 1;
-	    SST25_SPICON1bits.SMP = 1;
-	#endif		
-    SST25_SPICON1bits.MSTEN = 1;
-    SST25_SPICON2 = 0;
-    SST25_SPICON1bits.MODE16 = 0;
-    SST25_SPISTATbits.SPIEN = 1;
-        #endif
-	#endif
-    // Set IOs directions for SST25 SPI
-    #if defined (GFX_PICTAIL_V3) || defined (MULTI_MEDIA_BOARD_DM00123)
-    
-    SST25_CS_LAT = 1;
-    SST25_CS_TRIS = 0;
-    #ifndef __PIC32MX__
-    SST25_SCK_TRIS = 0;
-    SST25_SDO_TRIS = 0;
-    SST25_SDI_TRIS = 1;
-    #if defined(__PIC24FJ256GB210__)
-	SST25_SDI_ANS = 0;
-	#endif
-    #endif
-    
-    #elif defined (PIC24FJ256DA210_DEV_BOARD)
-    SST25_CS_LAT = 1;
-    SST25_CS_TRIS = 0;
-	SST25_SDI_ANS = 0;
-    SST25_SDO_ANS = 0;
-    SST25_SCK_TRIS = 0;
-    SST25_SDO_TRIS = 0;
-    SST25_SDI_TRIS = 1;
-	#endif
-
-        #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-    AD1PCFGL = 0xFFFF;
-    RPOR9bits.RP18R = 11;                   // assign RP18 for SCK2
-    RPOR8bits.RP16R = 10;                   // assign RP16 for SDO2
-    RPINR22bits.SDI2R = 17;                 // assign RP17 for SDI2	
-        #elif defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined (__PIC24FJ256GB210__)
-    __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
-    RPOR10bits.RP21R = 11;                  // assign RP21 for SCK2
-    RPOR9bits.RP19R = 10;                   // assign RP19 for SDO2
-    RPINR22bits.SDI2R = 26;                 // assign RP26 for SDI2
-    __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
-        #elif defined(__PIC24FJ256DA210__)
-    __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
-    #if defined (USE_SST25_SPI2)
-	    RPOR1bits.RP2R = 11;                // assign RP2 for SCK2
-	    RPOR0bits.RP1R = 10;                // assign RP1 for SDO2
-	    RPINR22bits.SDI2R = 0;              // assign RP0 for SDI2
-	#elif defined (USE_SST25_SPI1)
-	    RPOR1bits.RP2R = 8;                 // assign RP2 for SCK1
-	    RPOR0bits.RP1R = 7;                 // assign RP1 for SDO1
-	    RPINR20bits.SDI1R = 0;              // assign RP0 for SDI1
-	#endif
-    __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
-        #endif
+    // initialize the SPI channel to be used
+    // SPI_CHANNEL_USED is defined in the hardware profile
+    DRV_SPI_Initialize(pInitData->channel, pInitData);
+    memcpy(&spiInitData, pInitData, sizeof(DRV_SPI_INIT_DATA));
 
     SST25ResetWriteProtection();
 }
-
-/************************************************************************
-* Function SPIPut(BYTE data)                                                       
-*                                                                       
-* Overview:  this function sends a byte                     
-*                                                                       
-* Input: byte to be sent
-*                                                                       
-* Output: none
-*                                                                       
-************************************************************************/
-void SPIPut(BYTE data)
-{
-        #ifdef __PIC32MX
-
-    // Wait for free buffer
-    while(!SST25_SPISTATbits.SPITBE);
-    SST25_SPIBUF = data;
-
-    // Wait for data byte
-    while(!SST25_SPISTATbits.SPIRBF);
-        #else
-
-    // Wait for free buffer
-    while(SST25_SPISTATbits.SPITBF);
-    SST25_SPIBUF = data;
-
-    // Wait for data byte
-    while(!SST25_SPISTATbits.SPIRBF);
-        #endif
-}
-
-/************************************************************************
-* Macros SPIGet()                                                       
-*                                                                       
-* Overview:  this macros gets a byte from SPI                      
-*                                                                       
-* Input: none
-*                                                                       
-* Output: none
-*                                                                       
-************************************************************************/
-#define SPIGet()     SST25_SPIBUF
 
 /************************************************************************
 * Function: void SST25WriteByte(BYTE data, DWORD address)                                           
@@ -218,24 +107,32 @@ void SPIPut(BYTE data)
 void SST25WriteByte(BYTE data, DWORD address)
 {
     SST25WriteEnable();
+
+    while(!SPILock(spiInitData.channel))
+        ;
+
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
+
     SST25CSLow();
 
-    SPIPut(SST25_CMD_WRITE);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_WRITE);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[2]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[2]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[1]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[1]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[0]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[0]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(data);
-    SPIGet();
+    SPIPut(spiInitData.channel, data);
+    SPIGet(spiInitData.channel);
 
     SST25CSHigh();
+
+    SPIUnLock(spiInitData.channel);
 
     // Wait for write end
     while(SST25IsWriteBusy());
@@ -254,24 +151,33 @@ void SST25WriteByte(BYTE data, DWORD address)
 BYTE SST25ReadByte(DWORD address)
 {
     BYTE    temp;
+    
+    while(!SPILock(spiInitData.channel))
+        ;
+    
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
+
     SST25CSLow();
 
-    SPIPut(SST25_CMD_READ);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_READ);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[2]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[2]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[1]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[1]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[0]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[0]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(0);
-    temp = SPIGet();
+    SPIPut(spiInitData.channel, 0);
+    temp = SPIGet(spiInitData.channel);
 
     SST25CSHigh();
+
+    SPIUnLock(spiInitData.channel);
+
     return (temp);
 }
 
@@ -287,11 +193,6 @@ BYTE SST25ReadByte(DWORD address)
 ************************************************************************/
 void SST25WriteWord(WORD data, DWORD address)
 {
-        #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-    AD1PCFGLbits.PCFG6 = 1;
-    AD1PCFGLbits.PCFG7 = 1;
-    AD1PCFGLbits.PCFG8 = 1;
-        #endif
     SST25WriteByte(((WORD_VAL) data).v[0], address);
     SST25WriteByte(((WORD_VAL) data).v[1], address + 1);
 }
@@ -310,11 +211,6 @@ WORD SST25ReadWord(DWORD address)
 {
     WORD_VAL    temp;
 
-        #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-    AD1PCFGLbits.PCFG6 = 1;
-    AD1PCFGLbits.PCFG7 = 1;
-    AD1PCFGLbits.PCFG8 = 1;
-        #endif
     temp.v[0] = SST25ReadByte(address);
     temp.v[1] = SST25ReadByte(address + 1);
 
@@ -334,10 +230,16 @@ WORD SST25ReadWord(DWORD address)
 ************************************************************************/
 void SST25WriteEnable(void)
 {
+    while(!SPILock(spiInitData.channel))
+        ;
+    
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
+
     SST25CSLow();
-    SPIPut(SST25_CMD_WREN);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_WREN);
+    SPIGet(spiInitData.channel);
     SST25CSHigh();
+    SPIUnLock(spiInitData.channel);
 }
 
 /************************************************************************
@@ -354,13 +256,19 @@ BYTE SST25IsWriteBusy(void)
 {
     BYTE    temp;
 
-    SST25CSLow();
-    SPIPut(SST25_CMD_RDSR);
-    SPIGet();
+    while(!SPILock(spiInitData.channel))
+        ;
 
-    SPIPut(0);
-    temp = SPIGet();
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
+
+    SST25CSLow();
+    SPIPut(spiInitData.channel, SST25_CMD_RDSR);
+    SPIGet(spiInitData.channel);
+
+    SPIPut(spiInitData.channel, 0);
+    temp = SPIGet(spiInitData.channel);
     SST25CSHigh();
+    SPIUnLock(spiInitData.channel);
 
     return (temp & 0x01);
 }
@@ -412,27 +320,33 @@ BYTE SST25WriteArray(DWORD address, BYTE *pData, WORD nCount)
 ************************************************************************/
 void SST25ReadArray(DWORD address, BYTE *pData, WORD nCount)
 {
+    while(!SPILock(spiInitData.channel))
+        ;
+
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
+
     SST25CSLow();
 
-    SPIPut(SST25_CMD_READ);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_READ);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[2]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[2]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[1]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[1]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[0]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[0]);
+    SPIGet(spiInitData.channel);
 
     while(nCount--)
     {
-        SPIPut(0);
-        *pData++ = SPIGet();
+        SPIPut(spiInitData.channel, 0);
+        *pData++ = SPIGet(spiInitData.channel);
     }
 
     SST25CSHigh();
+    SPIUnLock(spiInitData.channel);
 }
 
 /************************************************************************
@@ -447,12 +361,17 @@ void SST25ChipErase(void)
 {
     SST25WriteEnable();
 
+    while(!SPILock(spiInitData.channel))
+        ;
+
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
     SST25CSLow();
 
-    SPIPut(SST25_CMD_ERASE);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_ERASE);
+    SPIGet(spiInitData.channel);
 
     SST25CSHigh();
+    SPIUnLock(spiInitData.channel);
 
     // Wait for write end
     while(SST25IsWriteBusy());
@@ -470,22 +389,31 @@ void SST25ChipErase(void)
 ************************************************************************/
 void SST25ResetWriteProtection(void)
 {
+    while(!SPILock(spiInitData.channel))
+        ;
+    
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
+
     SST25CSLow();
 
-    SPIPut(SST25_CMD_EWSR);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_EWSR);
+    SPIGet(spiInitData.channel);
 
     SST25CSHigh();
 
     SST25CSLow();
 
-    SPIPut(SST25_CMD_WRSR);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_WRSR);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(0);
-    SPIGet();
+    SPIPut(spiInitData.channel, 0);
+    SPIGet(spiInitData.channel);
 
     SST25CSHigh();
+    SPIUnLock(spiInitData.channel);
+
+    // Wait for write end
+    while(SST25IsWriteBusy());
 }
 
 /************************************************************************
@@ -501,26 +429,32 @@ void SST25ResetWriteProtection(void)
 void SST25SectorErase(DWORD address)
 {
     SST25WriteEnable();
+    
+    while(!SPILock(spiInitData.channel))
+        ;
+
+    DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
+
     SST25CSLow();
 
-    SPIPut(SST25_CMD_SER);
-    SPIGet();
+    SPIPut(spiInitData.channel, SST25_CMD_SER);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[2]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[2]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[1]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[1]);
+    SPIGet(spiInitData.channel);
 
-    SPIPut(((DWORD_VAL) address).v[0]);
-    SPIGet();
+    SPIPut(spiInitData.channel, ((DWORD_VAL) address).v[0]);
+    SPIGet(spiInitData.channel);
 
     SST25CSHigh();
+    SPIUnLock(spiInitData.channel);
 
     // Wait for write end
-    DelayMs(100);
     while(SST25IsWriteBusy());
 }
 
-#endif // #if defined (USE_SST25VF016)
+#endif // #if defined (USE_SST25VF016) || defined(USE_M25P80)
 

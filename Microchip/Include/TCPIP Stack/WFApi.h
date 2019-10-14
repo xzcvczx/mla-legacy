@@ -61,7 +61,7 @@
 /*-----------------------------*/
 /* WiFi Driver Version Number  */
 /*-----------------------------*/
-#define WF_HOST_DRIVER_VERSION_NUMBER    "2.5.2"
+#define WF_HOST_DRIVER_VERSION_NUMBER    "2.6.0"
 
 /* API defines */
 #define WF_MAX_NUM_CHANNELS             (14)
@@ -72,7 +72,6 @@
 #define WF_RETRY_FOREVER                (255)
 #define WF_CHANNEL_LIST_LENGTH          (14)
 #define WF_MAX_SECURITY_KEY_LENGTH      (64)
-#define WF_NUM_THROTTLE_TABLE_ROWS      (4)
 
 #define WF_MIN_NUM_CPID                 (1)
 #define WF_MAX_NUM_CPID                 (8)
@@ -153,6 +152,7 @@
 #define WF_MULTICAST_FILTER_2       (5)
 
 #define WF_SCAN_ALL ((UINT8)(0xff))
+#define WF_HWRSSIVAL_MAX	200	/* hw RSSI reference value to be used to derive real RSSI */
 /*
 *********************************************************************************************************
 *                                           DATA TYPES                               
@@ -350,6 +350,14 @@ typedef enum
     WF_PS_PS_POLL_DTIM_DISABLED = 3,
     WF_PS_OFF                   = 4
 } tWFPowerSaveState;    
+
+/* Hibernate states */
+typedef enum 
+{
+	WF_HB_NO_SLEEP 		= 0,
+	WF_HB_ENTER_SLEEP 	= 1,
+	WF_HB_WAIT_WAKEUP 	= 2
+} tWFHBState;
 
 typedef enum
 {
@@ -683,14 +691,6 @@ typedef struct WFCAElementsStruct
     UINT16  probeDelay;
 } tWFCAElements;
 
-/*-------------------*/
-/* Tx Throttle Table */
-/*-------------------*/
-typedef struct WFThrottleTableStruct
-{
-    UINT8  dataRate[WF_NUM_THROTTLE_TABLE_ROWS];  // WF_ONE_MBIT_TX_RATE or WF_TWO_MBIT_TX_RATE
-    INT8   txPower[WF_NUM_THROTTLE_TABLE_ROWS];   // -10dB to +10dB
-} tWFThrottleTable;
 
 /*--------------------------*/
 /* used in WF_GetDeviceInfo */
@@ -807,16 +807,18 @@ typedef struct
     
     void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber);
     
-    #define WF_ASSERT(expr)                                 \
-       if (!(expr))                                         \
-       {                                                    \
-           WF_AssertionFailed(WF_MODULE_NUMBER, __LINE__);  \
-       }
+    #define WF_ASSERT(expr)                                     \
+	   do {													    \
+           if (!(expr))                                         \
+           {                                                    \
+               WF_AssertionFailed(WF_MODULE_NUMBER, __LINE__);  \
+       	   }													\
+	   } while (0)
 /*---------------------------*/
 /* else asserts are disabled */
 /*---------------------------*/
 #else 
-    #define WF_ASSERT(expr)
+    #define WF_ASSERT(expr) do {} while (0)
 #endif  /* WF_DEBUG */
 
 
@@ -943,11 +945,6 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId);
 /* Tx Power Control Functions */
 /*----------------------------*/
 #if defined(WF_USE_TX_POWER_CONTROL_FUNCTIONS)
-void WF_ThrottleTableSet(tWFThrottleTable *p_table);
-void WF_ThrottleTableGet(tWFThrottleTable *p_table);
-void WF_ThrottleTableEnable(void);
-void WF_ThrottleTableDisable(UINT8 txPower);
-void WF_ThrottleTableGetState(BOOL *p_state, UINT8 *p_bitRate);
 void WF_TxPowerSetMinMax(INT8 minTxPower, INT8 maxTxPower);
 void WF_TxPowerGetMinMax(INT8 *p_minTxPower, INT8 *p_maxTxPower);
 void WF_TxPowerGetFactoryMax(INT8 *p_factoryMaxTxPower);
@@ -1061,8 +1058,8 @@ void WF_RxDataDeallocateBuffer(void);
   	MACInit must be called first.
 
   Parameters:
-    event -- The event that occurred
-    eventInfo -- Additional information about the event.  This is not applicable 
+    event - The event that occurred
+    eventInfo - Additional information about the event.  This is not applicable 
                  to all events.
 
   Returns:

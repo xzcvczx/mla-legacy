@@ -10,10 +10,8 @@
  *  Ilitek ILI9320
  *****************************************************************************
  * FileName:        drvTFT001.c
- * Dependencies:    Graphics.h
  * Processor:       PIC24, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -40,18 +38,48 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     11/12/07	Version 1.0 release
- * Anton Alkhimenok	    01/30/08	combined version for landscape and portrait
- * Sean Justice         01/30/08    PIC32 support
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
- * Anton Alkhimenok     06/26/09    16-bit PMP support
+ * 11/12/07	    Version 1.0 release
+ * 01/30/08	    combined version for landscape and portrait
+ * 01/30/08     PIC32 support
+ * 06/25/09     dsPIC & PIC24H support 
+ * 06/26/09     16-bit PMP support
+ * 03/11/11     - Modified dependencies
+ *              - changes for Graphics Library Version 3.00
  *****************************************************************************/
-#include "Graphics/Graphics.h"
+//#include "Graphics/Graphics.h"
+
+#include "HardwareProfile.h"
+
+#if defined (GFX_USE_DISPLAY_CONTROLLER_S6D0129)  || defined (GFX_USE_DISPLAY_CONTROLLER_S6D0139) || \
+	defined (GFX_USE_DISPLAY_CONTROLLER_LGDP4531) || defined (GFX_USE_DISPLAY_CONTROLLER_R61505)  || \
+	defined (GFX_USE_DISPLAY_CONTROLLER_SPFD5408) || defined (GFX_USE_DISPLAY_CONTROLLER_ILI9320) || \
+	defined (GFX_USE_DISPLAY_CONTROLLER_R61580)
+
+#include "Compiler.h"
+#include "TimeDelay.h"
+#include "Graphics/DisplayDriver.h"
+#include "Graphics/drvTFT001.h"
+#include "Graphics/Primitive.h"
+  
+#ifdef USE_GFX_PMP
+    #include "Graphics/gfxpmp.h"
+#elif USE_GFX_EPMP
+    #include "Graphics/gfxepmp.h"
+#endif    
+
+// Unsupported Graphics Library Features
+#ifdef USE_TRANSPARENT_COLOR
+    #warning "This driver does not support the transparent feature on PutImage(). Build will use the PutImage() functions defind in the Primitive.c"
+#endif    
 
 // Color
-WORD    _color;
+GFX_COLOR   _color;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
 
 // Clipping region control
 SHORT       _clipRgn;
@@ -63,16 +91,17 @@ SHORT       _clipRight;
 SHORT       _clipBottom;
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
-void        SetReg(WORD index, WORD value);
-void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+#ifndef USE_TRANSPARENT_COLOR
+void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+void        PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
 
-void        PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+void        PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void        PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void        PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+void        PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+#endif
 
 /*********************************************************************
 * Macro:  WritePixel(color)
@@ -112,38 +141,38 @@ void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 ********************************************************************/
 #ifdef USE_16BIT_PMP
 #define SetAddress(addr)                    \
-	{\
-	DisplaySetCommand();                     \
+	{                                       \
+	DisplaySetCommand();                    \
     DeviceWrite(0x0020);                    \
-	DisplaySetData();                        \
+	DisplaySetData();                       \
     DeviceWrite((WORD) addr & 0x00ff);      \
-	DisplaySetCommand();                     \
+	DisplaySetCommand();                    \
     DeviceWrite(0x0021);                    \
-	DisplaySetData();                        \
+	DisplaySetData();                       \
     DeviceWrite((WORD) ((DWORD) addr >> 8));\
-	DisplaySetCommand();                     \
+	DisplaySetCommand();                    \
     DeviceWrite(0x0022);                    \
-	DisplaySetData();                        \
+	DisplaySetData();                       \
 	}
 #else
 #define SetAddress(addr)                    \
 	{\
-	DisplaySetCommand();                     \
+	DisplaySetCommand();                    \
     DeviceWrite(0);                         \
     DeviceWrite(0x20);                      \
-	DisplaySetData();                        \
+	DisplaySetData();                       \
 	DeviceWrite(0);                         \
     DeviceWrite(((DWORD_VAL) (DWORD) addr).v[0]);\
-	DisplaySetCommand();                     \
+	DisplaySetCommand();                    \
     DeviceWrite(0);                         \
     DeviceWrite(0x21);                      \
-	DisplaySetData();                        \
+	DisplaySetData();                       \
 	DeviceWrite(((DWORD_VAL) (DWORD) addr).v[2]);\
 	DeviceWrite(((DWORD_VAL) (DWORD) addr).v[1]);\
-	DisplaySetCommand();                     \
+	DisplaySetCommand();                    \
     DeviceWrite(0);                         \
     DeviceWrite(0x22);                      \
-	DisplaySetData();                        \
+	DisplaySetData();                       \
 	}
 #endif
 
@@ -186,6 +215,40 @@ void SetReg(WORD index, WORD value)
 }
 
 /*********************************************************************
+* Function:  void DisplayBrightness(WORD level)
+*
+* PreCondition: none
+*
+* Input: level - Brightness level. Valid values are 0 to 100.
+*			- 0: brightness level is zero or display is turned off
+*			- 1: brightness level is maximum 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Sets the brightness of the display.
+*
+* Note: none
+*
+********************************************************************/
+void DisplayBrightness(WORD level)
+{
+    // If the brightness can be controlled (for example through PWM)
+    // add code that will control the PWM here.
+
+    if (level > 0)
+    {
+        DisplayBacklightOn();           
+    }    
+    else if (level == 0)
+    {
+        DisplayBacklightOff();
+    }    
+        
+}    
+
+/*********************************************************************
 * Function:  void ResetDevice()
 *
 * PreCondition: none
@@ -207,7 +270,7 @@ void ResetDevice(void)
     DisplayFlashConfig();
 
     // Initialize the device
-	DeviceInit();
+	DriverInterfaceInit();
 
     DelayMs(5);
 
@@ -217,7 +280,7 @@ void ResetDevice(void)
 
     DelayMs(2);
 
-    #if (DISPLAY_CONTROLLER == LGDP4531)
+    #if defined (GFX_USE_DISPLAY_CONTROLLER_LGDP4531)
 
     /////////////////////////////////////////////////////////
     // Synchronization after reset
@@ -279,7 +342,7 @@ void ResetDevice(void)
     DelayMs(20);
 
     /////////////////////////////////////////////////////////
-    #elif (DISPLAY_CONTROLLER == R61505)
+    #elif defined (GFX_USE_DISPLAY_CONTROLLER_R61505)
 
     // Setup display
     SetReg(0x0000, 0x0000);
@@ -360,7 +423,7 @@ void ResetDevice(void)
     SetReg(0x0021, 0x0000);
 
     /////////////////////////////////////////////////////////
-    #elif (DISPLAY_CONTROLLER == S6D0129) || (DISPLAY_CONTROLLER == S6D0139)
+    #elif defined (GFX_USE_DISPLAY_CONTROLLER_S6D0129) || defined (GFX_USE_DISPLAY_CONTROLLER_S6D0139)
 
     // Setup display
     SetReg(0x0000, 0x0001);
@@ -402,7 +465,7 @@ void ResetDevice(void)
     SetReg(0x0022, 0x0000);
 
     /////////////////////////////////////////////////////////
-    #elif (DISPLAY_CONTROLLER == SPFD5408)
+    #elif defined (GFX_USE_DISPLAY_CONTROLLER_SPFD5408)
 
     // Setup display
     SetReg(0x0000, 0x0000);
@@ -472,7 +535,7 @@ void ResetDevice(void)
     SetReg(0x0007, 0x0133);
 
     /////////////////////////////////////////////////////////
-    #elif (DISPLAY_CONTROLLER == ILI9320)
+    #elif defined (GFX_USE_DISPLAY_CONTROLLER_ILI9320)
     SetReg(0x0000, 0x0001); //start Int. osc
     DelayMs(15);
     SetReg(0x0001, 0x0100); //Set SS bit (shift direction of outputs is from S720 to S1)
@@ -529,7 +592,7 @@ void ResetDevice(void)
     SetReg(0x0098, 0x0110); //
     SetReg(0x0007, 0x0173); //display On
     /////////////////////////////////////////////////////////
-    #elif (DISPLAY_CONTROLLER == R61580)
+    #elif defined (GFX_USE_DISPLAY_CONTROLLER_R61580)
 
     // Synchronization after reset
     DelayMs(2);
@@ -593,6 +656,29 @@ void ResetDevice(void)
     #endif
     DelayMs(20);
 }
+
+#ifdef USE_TRANSPARENT_COLOR
+/*********************************************************************
+* Function:  void TransparentColorEnable(GFX_COLOR color)
+*
+* Overview: Sets current transparent color.
+*
+* PreCondition: none
+*
+* Input: color - Color value chosen.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void TransparentColorEnable(GFX_COLOR color)
+{
+    _colorTransparent = color;    
+    _colorTransparentEnable = TRANSPARENT_COLOR_ENABLE;
+
+}
+#endif
 
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)
@@ -747,7 +833,7 @@ WORD GetPixel(SHORT x, SHORT y)
 
     while(PMMODEbits.BUSY);
 
-        #if (DISPLAY_CONTROLLER == ILI9320)
+        #if defined(GFX_USE_DISPLAY_CONTROLLER_ILI9320)
     DelayForSync();
         #endif
 
@@ -755,7 +841,7 @@ WORD GetPixel(SHORT x, SHORT y)
     result.v[1] = PMDIN1;
 
     while(PMMODEbits.BUSY);
-        #if (DISPLAY_CONTROLLER == ILI9320)
+        #if defined (GFX_USE_DISPLAY_CONTROLLER_ILI9320)
     DelayForSync();
         #endif
 
@@ -764,7 +850,7 @@ WORD GetPixel(SHORT x, SHORT y)
     result.v[1] = PMDIN1;
 
     while(PMMODEbits.BUSY);
-        #if (DISPLAY_CONTROLLER == ILI9320)
+        #if defined (GFX_USE_DISPLAY_CONTROLLER_ILI9320)
     DelayForSync();
         #endif
 
@@ -773,7 +859,7 @@ WORD GetPixel(SHORT x, SHORT y)
     result.v[1] = PMDIN1;
 
     while(PMMODEbits.BUSY);
-        #if (DISPLAY_CONTROLLER == ILI9320)
+        #if defined (GFX_USE_DISPLAY_CONTROLLER_ILI9320)
     DelayForSync();
         #endif
 
@@ -785,7 +871,7 @@ WORD GetPixel(SHORT x, SHORT y)
 
     // Read LSB
     result.v[0] = PMDIN1;
-        #if (DISPLAY_CONTROLLER == ILI9320)
+        #if defined (GFX_USE_DISPLAY_CONTROLLER_ILI9320)
     DelayForSync();
         #endif
 
@@ -920,115 +1006,17 @@ void ClearDevice(void)
     DisplayDisable();
 }
 
-/*********************************************************************
-* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
-*
-* PreCondition: none
-*
-* Input: left,top - left top image corner,
-*        bitmap - image pointer,
-*        stretch - image stretch factor
-*
-* Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the image is not yet completely drawn.
-*         - Returns 1 when the image is completely drawn.
-*         For Blocking configuration:
-*         - Always return 1.
-*
-* Side Effects: none
-*
-* Overview: outputs image starting from left,top coordinates
-*
-* Note: image must be located in flash
-*
-********************************************************************/
-#ifdef USE_DRV_PUTIMAGE
-
-/* */
-WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
-{
-#if defined (USE_BITMAP_FLASH) || defined (USE_BITMAP_EXTERNAL)
-    FLASH_BYTE  *flashAddress;
-    BYTE        colorDepth;
-#endif    
-	WORD        colorTemp;
-
-        #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0);
-
-    /* Ready */
-        #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-        #endif
-        #if (DISP_ORIENTATION == 90)
-    top = GetMaxY() - top;
-        #endif
-
-    // Save current color
-    colorTemp = _color;
-
-    switch(*((SHORT *)bitmap))
-    {
-                #ifdef USE_BITMAP_FLASH
-
-        case FLASH:
-
-            // Image address
-            flashAddress = ((IMAGE_FLASH *)bitmap)->address;
-
-            // Read color depth
-            colorDepth = *(flashAddress + 1);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPP(left, top, flashAddress, stretch); break;
-                case 4:     PutImage4BPP(left, top, flashAddress, stretch); break;
-                case 8:     PutImage8BPP(left, top, flashAddress, stretch); break;
-                case 16:    PutImage16BPP(left, top, flashAddress, stretch); break;
-            }
-
-            break;
-                #endif
-                #ifdef USE_BITMAP_EXTERNAL
-
-        case EXTERNAL:
-
-            // Get color depth
-            ExternalMemoryCallback(bitmap, 1, 1, &colorDepth);
-
-            // Draw picture
-            switch(colorDepth)
-            {
-                case 1:     PutImage1BPPExt(left, top, bitmap, stretch); break;
-                case 4:     PutImage4BPPExt(left, top, bitmap, stretch); break;
-                case 8:     PutImage8BPPExt(left, top, bitmap, stretch); break;
-                case 16:    PutImage16BPPExt(left, top, bitmap, stretch); break;
-                default:    break;
-            }
-
-            break;
-                #endif
-
-        default:
-            break;
-    }
-
-    // Restore current color
-    _color = colorTemp;
-    return (1);
-}
+#ifndef USE_TRANSPARENT_COLOR
 
     #ifdef USE_BITMAP_FLASH
 
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
-*        bitmap - image pointer,
+*        image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1040,7 +1028,7 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -1052,15 +1040,19 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     WORD                pallete[2];
     BYTE                mask;
 
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
+
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
-            #if (DISP_ORIENTATION == 0)
-    address = (long)LINE_MEM_PITCH * top + left;
-            #else
-    address = (long)LINE_MEM_PITCH * left + top;
-            #endif
+    #if (DISP_ORIENTATION == 0)
+        address = (long)LINE_MEM_PITCH * top + left;
+    #else
+        address = (long)LINE_MEM_PITCH * left + top;
+    #endif
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -1112,11 +1104,11 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 mask >>= 1;
             }
 
-                    #if (DISP_ORIENTATION == 0)
-            address += LINE_MEM_PITCH;
-                    #else
-            address -= 1;
-                    #endif
+            #if (DISP_ORIENTATION == 0)
+                address += LINE_MEM_PITCH;
+            #else
+                address -= 1;
+            #endif
         }
     }
 
@@ -1124,11 +1116,11 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1140,7 +1132,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -1152,15 +1144,19 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     WORD                pallete[16];
     WORD                counter;
 
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
+
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
-            #if (DISP_ORIENTATION == 0)
-    address = (long)LINE_MEM_PITCH * top + left;
-            #else
-    address = (long)LINE_MEM_PITCH * left + top;
-            #endif
+    #if (DISP_ORIENTATION == 0)
+        address = (long)LINE_MEM_PITCH * top + left;
+    #else
+        address = (long)LINE_MEM_PITCH * left + top;
+    #endif
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -1212,11 +1208,11 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 //temp >>= 4;
             }
 
-                    #if (DISP_ORIENTATION == 0)
-            address += LINE_MEM_PITCH;
-                    #else
-            address -= 1;
-                    #endif
+            #if (DISP_ORIENTATION == 0)
+                address += LINE_MEM_PITCH;
+            #else
+                address -= 1;
+            #endif
         }
     }
 
@@ -1224,11 +1220,11 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1240,7 +1236,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -1252,8 +1248,12 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     WORD                pallete[256];
     WORD                counter;
 
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
+
     // Move pointer to size information
-    flashAddress = bitmap + 2;
+    flashAddress = image + 2;
 
     // Set start address
             #if (DISP_ORIENTATION == 0)
@@ -1312,11 +1312,11 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1328,7 +1328,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register DWORD      address;
     register FLASH_WORD *flashAddress;
@@ -1338,15 +1338,19 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     WORD                temp;
     register BYTE       stretchX, stretchY;
 
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
+
     // Move pointer to size information
-    flashAddress = (FLASH_WORD *)bitmap + 1;
+    flashAddress = (FLASH_WORD *)image + 1;
 
     // Set start address
-            #if (DISP_ORIENTATION == 0)
-    address = (long)LINE_MEM_PITCH * top + left;
-            #else
-    address = (long)LINE_MEM_PITCH * left + top;
-            #endif
+    #if (DISP_ORIENTATION == 0)
+        address = (long)LINE_MEM_PITCH * top + left;
+    #else
+        address = (long)LINE_MEM_PITCH * left + top;
+    #endif
 
     // Read image size
     sizeY = *flashAddress;
@@ -1379,26 +1383,26 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 }
             }
 
-                    #if (DISP_ORIENTATION == 0)
-            address += LINE_MEM_PITCH;
-                    #else
-            address -= 1;
-                    #endif
+            #if (DISP_ORIENTATION == 0)
+                address += LINE_MEM_PITCH;
+            #else
+                address -= 1;
+            #endif
         }
     }
 
     DisplayDisable();
 }
 
-    #endif
+    #endif // USE_BITMAP_FLASH
     #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1410,7 +1414,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1426,18 +1430,23 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Set start address
-            #if (DISP_ORIENTATION == 0)
-    address = (long)LINE_MEM_PITCH * top + left;
-            #else
-    address = (long)LINE_MEM_PITCH * left + top;
-            #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
+
+    // Set start address
+    #if (DISP_ORIENTATION == 0)
+        address = (long)LINE_MEM_PITCH * top + left;
+    #else
+        address = (long)LINE_MEM_PITCH * left + top;
+    #endif
+
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (2 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
@@ -1455,7 +1464,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
         DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
@@ -1493,11 +1502,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 mask >>= 1;
             }
 
-                    #if (DISP_ORIENTATION == 0)
-            address += LINE_MEM_PITCH;
-                    #else
-            address -= 1;
-                    #endif
+            #if (DISP_ORIENTATION == 0)
+                address += LINE_MEM_PITCH;
+            #else
+                address -= 1;
+            #endif
         }
 
         DisplayDisable();
@@ -1505,11 +1514,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1521,7 +1530,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1536,18 +1545,22 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Set start address
-            #if (DISP_ORIENTATION == 0)
-    address = (long)LINE_MEM_PITCH * top + left;
-            #else
-    address = (long)LINE_MEM_PITCH * left + top;
-            #endif
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Set start address
+    #if (DISP_ORIENTATION == 0)
+        address = (long)LINE_MEM_PITCH * top + left;
+    #else
+        address = (long)LINE_MEM_PITCH * left + top;
+    #endif
+
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (16 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
@@ -1565,7 +1578,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
         DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
@@ -1598,11 +1611,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 }
             }
 
-                    #if (DISP_ORIENTATION == 0)
-            address += LINE_MEM_PITCH;
-                    #else
-            address -= 1;
-                    #endif
+            #if (DISP_ORIENTATION == 0)
+                address += LINE_MEM_PITCH;
+            #else
+                address -= 1;
+            #endif
         }
 
         DisplayDisable();
@@ -1610,11 +1623,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1626,7 +1639,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1640,18 +1653,22 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Set start address
-            #if (DISP_ORIENTATION == 0)
-    address = (long)LINE_MEM_PITCH * top + left;
-            #else
-    address = (long)LINE_MEM_PITCH * left + top;
-            #endif
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Set start address
+    #if (DISP_ORIENTATION == 0)
+        address = (long)LINE_MEM_PITCH * top + left;
+    #else
+        address = (long)LINE_MEM_PITCH * left + top;
+    #endif
+
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Get pallete (256 entries)
-    ExternalMemoryCallback(bitmap, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
+    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
@@ -1664,7 +1681,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
         DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
@@ -1684,11 +1701,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 }
             }
 
-                    #if (DISP_ORIENTATION == 0)
-            address += LINE_MEM_PITCH;
-                    #else
-            address -= 1;
-                    #endif
+            #if (DISP_ORIENTATION == 0)
+                address += LINE_MEM_PITCH;
+            #else
+                address -= 1;
+            #endif
         }
 
         DisplayDisable();
@@ -1696,11 +1713,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
+* Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
 *
 * Output: none
@@ -1712,7 +1729,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -1726,15 +1743,19 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 
-    // Set start address
-            #if (DISP_ORIENTATION == 0)
-    address = (long)LINE_MEM_PITCH * top + left;
-            #else
-    address = (long)LINE_MEM_PITCH * left + top;
-            #endif
+    #if (DISP_ORIENTATION == 90)
+        top = GetMaxY() - top;
+    #endif
 
-    // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    // Set start address
+    #if (DISP_ORIENTATION == 0)
+        address = (long)LINE_MEM_PITCH * top + left;
+    #else
+        address = (long)LINE_MEM_PITCH * left + top;
+    #endif
+
+    // Get image header
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
@@ -1747,9 +1768,8 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 
     for(y = 0; y < sizeY; y++)
     {
-
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
         DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
@@ -1769,16 +1789,88 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 }
             }
 
-                    #if (DISP_ORIENTATION == 0)
-            address += LINE_MEM_PITCH;
-                    #else
-            address -= 1;
-                    #endif
+            #if (DISP_ORIENTATION == 0)
+                address += LINE_MEM_PITCH;
+            #else
+                address -= 1;
+            #endif
         }
 
         DisplayDisable();
     }
 }
 
-    #endif // USE_DRV_PUTIMAGE
-#endif
+    #endif //USE_BITMAP_EXTERNAL
+#endif // #ifndef USE_TRANSPARENT_COLOR
+
+
+/*********************************************************************
+* Function: SetClipRgn(left, top, right, bottom)
+*
+* Overview: Sets clipping region.
+*
+* PreCondition: none
+*
+* Input: left - Defines the left clipping region border.
+*		 top - Defines the top clipping region border.
+*		 right - Defines the right clipping region border.
+*	     bottom - Defines the bottom clipping region border.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    _clipLeft=left;
+    _clipTop=top;
+    _clipRight=right;
+    _clipBottom=bottom;
+
+}
+
+/*********************************************************************
+* Function: SetClip(control)
+*
+* Overview: Enables/disables clipping.
+*
+* PreCondition: none
+*
+* Input: control - Enables or disables the clipping.
+*			- 0: Disable clipping
+*			- 1: Enable clipping
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SetClip(BYTE control)
+{
+    _clipRgn=control;
+}
+
+/*********************************************************************
+* Function: IsDeviceBusy()
+*
+* Overview: Returns non-zero if LCD controller is busy 
+*           (previous drawing operation is not completed).
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: Busy status.
+*
+* Side Effects: none
+*
+********************************************************************/
+WORD IsDeviceBusy(void)
+{  
+    return (0);
+}
+
+#endif // #if defined (GFX_USE_DISPLAY_CONTROLLER_S6D0129)  || defined (GFX_USE_DISPLAY_CONTROLLER_S6D0139) ||  ...
+
+

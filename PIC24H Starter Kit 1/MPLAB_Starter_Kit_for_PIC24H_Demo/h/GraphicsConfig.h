@@ -137,4 +137,11 @@
 	#define GFX_malloc(size)    	malloc(size)
 	#define GFX_free(pObj)    	    free(pObj)
 
+/*********************************************************************
+* Overview: Specifies the color depth used in the demo.
+*
+*********************************************************************/
+
+    #define COLOR_DEPTH             1
+
 #endif // _GRAPHICSCONFIG_H

@@ -4,7 +4,6 @@
  * and contains compile options and defaults.
  *********************************************************************
  * FileName:        Graphics.h
- * Dependencies:    See INCLUDES section below
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:        MPLAB C30, MPLAB C32
  * Company:         Microchip Technology, Inc.
@@ -36,61 +35,37 @@
  * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07		Version 1.0 release
+ * 02/24/11     - Removed GRAPHICS CONTROLLER and DISPLAY PANEL Codes
+ *              - Changed USE_CUSTOM to USE_CUSTOM_WIDGET. When custom widgets 
+ *                are created and users do not want to modify files in the
+ *                graphics library.
+ *              - Removed the dependency of this file from HardwareProfile.h
+ *              - Removed macros that defines supported controllers and
+ *                display panels. Refer to Graphics Library Help file 
+ *                for complete list.
+ *              - added #include "gfxcolors.h"
  ********************************************************************/
 #ifndef _GRAPHICS_H
     #define _GRAPHICS_H
 
-//////////////////// COMPILE OPTIONS AND DEFAULTS ////////////////////
-
-///////////// GRAPHICS CONTROLLERS CODES FOR DRIVER LAYER ////////////
-    #define SSD1906                 1
-    #define SSD1926                 2
-    #define S6D0129                 3
-    #define S6D0139                 4
-    #define LGDP4531                5
-    #define R61505                  6
-    #define SPFD5408                7
-    #define SSD1339                 8
-    #define ST7529                  9
-    #define SH1101A                 10
-    #define SSD1303                 11
-    #define HIT1270                 12
-    #define UC1610                  13
-    #define ILI9320                 14
-    #define SSD1289                 15
-    #define HX8347A                 16
-    #define HX8347D                 17
-    #define R61580                  18
-    #define SSD2119                 19
-	#define MCHP_DA210            	100
-	#define CUSTOM_CONTROLLER       -1
-    #define NO_CONTROLLER_DEFINED   -2
-
-////////////// GRAPHICS DISPLAYS CODES FOR DRIVER LAYER //////////////
-    #define TFT_G240320LTSW_118W_E      0			// using SSD1289
-    #define TFT2N0369_E                 0			// using SSD1289
-    #define DT032TFT_TS                 0			// using SSD1289
-    #define DT032TFT                    0			// using SSD1289
-    #define TFT_G320240DTSW_69W_TP_E    1
-    #define _35QVW0T                    1
-    #define PH480272T_005_I06Q          2
-    #define PH480272T_005_I11Q          3
-
 /////////////////////// GRAPHICS_LIBRARY_VERSION /////////////////////
 // MSB is version, LSB is subversion
-    #define GRAPHICS_LIBRARY_VERSION    0x0211
+    #define GRAPHICS_LIBRARY_VERSION    0x0300
 
 ////////////////////////////// INCLUDES //////////////////////////////
-    #include <stdlib.h>
+    #include <stdlib.h>             // needed because of malloc()
     #include "GenericTypeDefs.h"
-    #include "GraphicsConfig.h"
-    #include "HardwareProfile.h"
-	#include "TimeDelay.h"
-	#include "DisplayDriverInterface.h"
-    #include "DisplayDriver.h"  // Display driver layer
-    #include "Primitive.h"      // Graphic primitives layer
-    #include "ScanCodes.h"      // Scan codes for AT keyboard
-    #include "GOL.h"            // GOL layer
+	#include "GraphicsConfig.h"
+    #include "DisplayDriver.h"      // Display Driver layer
+    #include "Primitive.h"          // Graphic Primitives layer
+    #include "GOL.h"                // Graphics Object layer
+
+	#include "ScanCodes.h"          // Scan codes for AT keyboard
+	#include "gfxcolors.h"          // default color definitions, can be overidden by application side
+	                                // see gfxcolor.h for details 
+    
+    #include "Graphics/Palette.h"
+
     #if defined(USE_BUTTON) || defined(USE_BUTTON_MULTI_LINE)
         #include "Button.h"
     #endif
@@ -142,42 +117,12 @@
     #ifdef USE_DIGITALMETER
         #include "DigitalMeter.h"
     #endif
-    #ifdef USE_CUSTOM
-
-// Included for custom control demo
-        #include "CustomControlDemo.h"
+    #ifdef USE_ANALOGCLOCK
+        #include "AnalogClock.h"
     #endif
-
-/*********************************************************************
-* Macros: RGB565CONVERT(red, green, blue)
-*
-* Overview: Converts true color into 5:6:5 RGB format.
-*
-* PreCondition: none
-*
-* Input: Red, Green, Blue components.
-*
-* Output: 5 bits red, 6 bits green, 5 bits blue color.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define RGB565CONVERT(red, green, blue) (WORD) (((red >> 3) << 11) | ((green >> 2) << 5) | (blue >> 3))
-
-/*********************************************************************
-* Macros: RGB332CONVERT(red, green, blue)
-*
-* Overview: Converts true color into 5:6:5 RGB format.
-*
-* PreCondition: none
-*
-* Input: Red, Green, Blue components.
-*
-* Output: 5 bits red, 6 bits green, 5 bits blue color.
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define RGB332CONVERT(red, green, blue) (BYTE) ((red & 0xE0) | ((green & 0xE0) >> 3) | (blue >> 6))
-
+    #ifdef USE_CUSTOM_WIDGET
+        // Use this in case users wants to create a custom widget and do not want to
+        // modify the Graphics Library files.
+        #include "CustomControlWidget.h"
+    #endif
 #endif

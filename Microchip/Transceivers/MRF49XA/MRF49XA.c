@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright Â© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED â€œAS ISâ€ WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -47,15 +47,16 @@
 *  2.0   4/15/2009    yfy       MiMAC and MiApp revision
 *  2.1   6/20/2009    yfy       Add LCD support
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #include "SystemProfile.h"
 
 
 #if defined(MRF49XA)
+    #include "Transceivers/MCHP_MAC.h"
     #include "Transceivers/MRF49XA/MRF49XA.h"
     #include "WirelessProtocols/SymbolTime.h"
-    #include "Transceivers/MCHP_MAC.h"
     #include "WirelessProtocols/Console.h"
     #include "TimeDelay.h"
     #include "WirelessProtocols/NVM.h"
@@ -66,7 +67,7 @@
     //==============================================================
     // Global variables:
     //==============================================================
-   
+        
     /**********************************************************************
      * "#pragma udata" is used to specify the starting address of a 
      * global variable. The address may be MCU dependent on RAM available
@@ -75,7 +76,7 @@
      * assignment.
      **********************************************************************/
     #if defined(__18CXX)
-        #pragma udata MAC_RX_BUFFER = 0x500
+        #pragma udata MAC_RX_BUFFER
     #endif
         volatile RX_PACKET          RxPacket[BANK_SIZE];
     #if defined(__18CXX)
@@ -101,7 +102,7 @@
     #endif
     
     #if defined(__18CXX)
-        #pragma udata MAC_TX_BUFFER = 0x400
+        #pragma udata MAC_TX_BUFFER
     #endif
     volatile BYTE        MACTxBuffer[TX_PACKET_SIZE];     
     #if defined(__18CXX)
@@ -428,7 +429,7 @@ Start_CCA:
                 if( (MACTxBuffer[0] & ACK_MASK) > 0 )        // required acknowledgement
                 {
                     TxMACSeq = MACTxBuffer[1];
-                    t1 = TickGet();
+                    t1 = MiWi_TickGet();
                     while(1)
                     {
                         if( hasAck )
@@ -436,8 +437,8 @@ Start_CCA:
                             status = TRUE;
                             goto TX_END_HERE;
                         }
-                        t2 = TickGet();
-                        if( TickGetDiff(t2, t1) > ONE_SECOND/20 )
+                        t2 = MiWi_TickGet();
+                        if( MiWi_TickGetDiff(t2, t1) > ONE_SECOND/20 )
                         {
                             break;
                         }
@@ -879,9 +880,9 @@ TX_END_HERE:
         #if defined(ENABLE_ACK) && defined(ENABLE_RETRANSMISSION)
             for(i = 0; i < ACK_INFO_SIZE; i++)
             {
-                currentTick = TickGet();
+                currentTick = MiWi_TickGet();
                 if( AckInfo[i].Valid && (currentTick.Val > AckInfo[i].startTick.Val) && 
-                    (TickGetDiff(currentTick, AckInfo[i].startTick) > ONE_SECOND) )
+                    (MiWi_TickGetDiff(currentTick, AckInfo[i].startTick) > ONE_SECOND) )
                 {
                     AckInfo[i].Valid = FALSE;
                 }
@@ -918,7 +919,6 @@ TX_END_HERE:
                 {
                     MACRxPacket.SourceAddress = NULL;
                 }
-                
                 
                 #if defined(ENABLE_SECURITY)
                     if( MACRxPacket.flags.bits.secEn )
@@ -1498,7 +1498,7 @@ IGNORE_HERE:
                                         if( AckInfo[i].Valid && (AckInfo[i].Seq == RxPacket[BankIndex].Payload[1]) &&
                                             AckInfo[i].CRC == received_crc )
                                         {
-                                            AckInfo[i].startTick = TickGet();
+                                            AckInfo[i].startTick = MiWi_TickGet();
                                             break;    
                                         }
                                         if( (ackInfoIndex == 0xFF) && (AckInfo[i].Valid == FALSE) )
@@ -1513,7 +1513,7 @@ IGNORE_HERE:
                                             AckInfo[ackInfoIndex].Valid = TRUE;
                                             AckInfo[ackInfoIndex].Seq = RxPacket[BankIndex].Payload[1];
                                             AckInfo[ackInfoIndex].CRC = received_crc;   
-                                            AckInfo[ackInfoIndex].startTick = TickGet();
+                                            AckInfo[ackInfoIndex].startTick = MiWi_TickGet();
                                         }
 
                                         RxPacket[BankIndex].PayloadLen -= 2;            // remove CRC
@@ -1584,12 +1584,12 @@ RETURN_HERE:
    
         #if defined(__18CXX)
             //check to see if the symbol timer overflowed
-            if(INTCONbits.TMR0IF)
+            if(TMR_IF)
             {
-                if(INTCONbits.TMR0IE)
+                if(TMR_IE)
                 {
                     /* there was a timer overflow */
-                    INTCONbits.TMR0IF = 0;
+                    TMR_IF = 0;
                     timerExtension1++;
                     if(timerExtension1 == 0)
                     {

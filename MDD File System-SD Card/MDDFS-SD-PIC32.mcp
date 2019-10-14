@@ -1,14 +1,14 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC32MX360F512L
+device=PIC32MX460F512L
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsSourceDir
 dir_src=
 dir_bin=
 dir_tmp=.\Object - MDD File System-SD-PIC32
 dir_sin=
-dir_inc=.;.\PIC32;..\Include;..\Include\MDD File System;..\Microchip\Include;..\Microchip\Include\MDD File System;..\..\MDD File System-SD Card;..\..\MDD File System-SD Card\PIC32
+dir_inc=.;.\PIC32;..\Include;..\Include\MDD File System;..\..\Microchip\Include;..\..\Microchip\Include\MDD File System;..\..\MDD File System-SD Card;..\..\MDD File System-SD Card\PIC32
 dir_lib=
 dir_lkr=
 [CAT_FILTERS]
@@ -18,22 +18,22 @@ filter_obj=*.o
 filter_lib=*.a
 filter_lkr=*.ld
 [CAT_SUBFOLDERS]
-subfolder_src=
-subfolder_inc=
+subfolder_src=PIC32
+subfolder_inc=PIC32
 subfolder_obj=
 subfolder_lib=
 subfolder_lkr=
 [FILE_SUBFOLDERS]
 file_000=.
 file_001=.
-file_002=.
+file_002=PIC32
 file_003=.
 file_004=.
 file_005=.
 file_006=.
 file_007=.
 file_008=.
-file_009=.
+file_009=PIC32
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -59,14 +59,14 @@ file_009=no
 [FILE_INFO]
 file_000=..\Microchip\MDD File System\SD-SPI.c
 file_001=..\Microchip\MDD File System\FSIO.c
-file_002=Demonstration.c
-file_003=PIC32\FSconfig.h
-file_004=PIC32\HardwareProfile.h
-file_005=..\Microchip\Include\GenericTypeDefs.h
-file_006=..\Microchip\Include\MDD File System\SD-SPI.h
-file_007=..\Microchip\Include\MDD File System\FSDefs.h
-file_008=..\Microchip\Include\MDD File System\FSIO.h
-file_009=..\Microchip\Include\Compiler.h
+file_002=PIC32\Demonstration3.c
+file_003=..\Microchip\Include\GenericTypeDefs.h
+file_004=..\Microchip\Include\MDD File System\SD-SPI.h
+file_005=..\Microchip\Include\MDD File System\FSDefs.h
+file_006=..\Microchip\Include\MDD File System\FSIO.h
+file_007=..\Microchip\Include\Compiler.h
+file_008=HardwareProfile.h
+file_009=PIC32\FSconfig.h
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

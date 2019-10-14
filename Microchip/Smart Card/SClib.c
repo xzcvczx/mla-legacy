@@ -146,6 +146,9 @@ void SC_Initialize()
 {
 	//Initialize the low level driver
 	SCdrv_InitUART();
+
+	// Initialize smart card library variables
+	txSbit = TRUE;
 }
 
 /*******************************************************************************

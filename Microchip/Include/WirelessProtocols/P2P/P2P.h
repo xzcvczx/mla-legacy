@@ -45,6 +45,7 @@
 *  2.0   4/15/2009    yfy       MiMAC and MiApp revision
 *  2.1   06/20/2009   yfy       Add LCD support
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 #ifndef __P2P_H_
@@ -80,12 +81,14 @@
 #define CMD_CHANNEL_HOPPING                     0x84
 #define CMD_TIME_SYNCHRONIZATION_REQUEST        0x85
 #define CMD_TIME_SYNCHRONIZATION_NOTIFICATION   0x86
+#define CMD_P2P_ACTIVE_SCAN_REQUEST             0x87
 
 #define CMD_TIME_SYNC_DATA_PACKET               0x8A
 #define CMD_TIME_SYNC_COMMAND_PACKET            0x8B
 
 #define CMD_P2P_CONNECTION_RESPONSE             0x91
 #define CMD_P2P_CONNECTION_REMOVAL_RESPONSE     0x92
+#define CMD_P2P_ACTIVE_SCAN_RESPONSE            0x97
 
 #define CMD_MAC_DATA_REQUEST                    0x04
 

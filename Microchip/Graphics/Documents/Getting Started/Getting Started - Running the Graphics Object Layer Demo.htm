@@ -25,30 +25,30 @@ w\:* {behavior:url(#default#VML);}
 <![endif]-->
 <title>Getting Started: Running the “Graphics Object Layer” demo</title>
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
- name="PlaceType"/>
-<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
- name="PlaceName"/>
+ name="country-region"/>
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
  name="City"/>
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
- name="country-region"/>
+ name="PlaceType"/>
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
  name="place"/>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="PlaceName"/>
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:Author>C12109</o:Author>
   <o:LastAuthor>Microchip</o:LastAuthor>
-  <o:Revision>111</o:Revision>
-  <o:TotalTime>644</o:TotalTime>
+  <o:Revision>113</o:Revision>
+  <o:TotalTime>645</o:TotalTime>
   <o:Created>2008-03-30T00:26:00Z</o:Created>
-  <o:LastSaved>2010-11-01T20:33:00Z</o:LastSaved>
+  <o:LastSaved>2011-06-15T23:38:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>2636</o:Words>
-  <o:Characters>15030</o:Characters>
+  <o:Words>2627</o:Words>
+  <o:Characters>14975</o:Characters>
   <o:Company>Microchip Technology Inc</o:Company>
-  <o:Lines>125</o:Lines>
+  <o:Lines>124</o:Lines>
   <o:Paragraphs>35</o:Paragraphs>
-  <o:CharactersWithSpaces>17631</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>17567</o:CharactersWithSpaces>
   <o:Version>11.9999</o:Version>
  </o:DocumentProperties>
 </xml><![endif]--><!--[if gte mso 9]><xml>
@@ -65,7 +65,6 @@ w\:* {behavior:url(#default#VML);}
    <w:WrapTextWithPunct/>
    <w:UseAsianBreakRules/>
    <w:DontGrowAutofit/>
-   <w:UseFELayout/>
   </w:Compatibility>
   <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
  </w:WordDocument>
@@ -84,7 +83,7 @@ st1\:*{behavior:url(#ieooui) }
  @font-face
 	{font-family:"MS Mincho";
 	panose-1:2 2 6 9 4 2 5 8 3 4;
-	mso-font-alt:"\FF2D\FF33 \660E\671D";
+	mso-font-alt:"‚l‚r –¾’©";
 	mso-font-charset:128;
 	mso-generic-font-family:modern;
 	mso-font-pitch:fixed;
@@ -862,13 +861,12 @@ ul
 	mso-pagination:widow-orphan;
 	font-size:10.0pt;
 	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";
 	mso-ansi-language:#0400;
 	mso-fareast-language:#0400;
 	mso-bidi-language:#0400;}
 </style>
 <![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="41986"/>
+ <o:shapedefaults v:ext="edit" spidmax="44034"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext="edit">
   <o:idmap v:ext="edit" data="1"/>
@@ -917,12 +915,11 @@ demo projects are created to run on supported Microchip Demo Boards and
 development hardware. Pre-generated hex files are available on the
 &quot;Precompiled <a
 href="mk:@MSITStore:C:\Microchip%20Solutions%20v2010-08-04\Microchip\Help\Graphics%20Library%20Help.chm::/Demos.html"><span
-style='color:windowtext;text-decoration:none;text-underline:none'>Demos</span></a>&quot;
+style='color:windowtext;text-decoration:none;text-underline:none'>Hex</span></a>&quot;
 sub-directory found in the demo directory. These hex files are generated using
-the alternative hardware profiles found in the sub-directory named
-&quot;Alternative Configurations&quot;. Use the &quot;Demo Compatibility
-Guide&quot; when running pre-generated hex files appropriate for your
-hardware.&nbsp;<o:p></o:p></span></p>
+the alternative hardware profiles found in the sub-directory named &quot;Configs&quot;.
+Use the &quot;Demo Compatibility Guide&quot; when running pre-generated hex
+files appropriate for your hardware.&nbsp;<o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -940,10 +937,10 @@ contains the <a
 href="mk:@MSITStore:C:\Microchip%20Solutions%20v2010-08-04\Microchip\Help\Graphics%20Library%20Help.chm::/GOLFontDefault.html"><span
 style='color:windowtext;text-decoration:none;text-underline:none'>GOLFontDefault</span></a>
 and another named GOLSmallFont. Both fonts are reduced fonts generated using
-character filters defined in the application directory named FontFilter.&nbsp;The
-font tables include only the standard ASCII set (32-127) and the Chinese
-characters that are used in the demo.&nbsp;The summary of the strings used for
-the two modes are placed in the ChineseFontsfontref.h file. <o:p></o:p></span></p>
+character filters defined in the application directory named
+FontFilter.&nbsp;The font tables include only the standard ASCII set (32-127)
+and the Chinese characters that are used in the demo.&nbsp;The summary of the
+strings used for the two modes are placed in the ChineseFontsfontref.h file. <o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'><span
 style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
@@ -972,19 +969,19 @@ are enumerated below:<o:p></o:p></span></p>
 l12 level1 lfo2;tab-stops:list 1.0in'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>S3 - Down Key <o:p></o:p></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>S3 - Enter Key <o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in;mso-list:
 l12 level1 lfo2;tab-stops:list 1.0in'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>S4 - Up Key <o:p></o:p></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>S4 - Down Key <o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in;mso-list:
 l12 level1 lfo2;tab-stops:list 1.0in'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>S5 - Enter Key <o:p></o:p></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>S5 - Up Key <o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in;mso-list:
 l12 level1 lfo2;tab-stops:list 1.0in'><![if !supportLists]><span
@@ -995,10 +992,10 @@ the focus on the screen. <o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>You
 can perform actions on the objects using these buttons. You can actually
-navigate through all the demo screen using buttons S5 and S6. Where S6 toggles
-the object selection and S5 performs the action on the object. S3 and S4
-buttons in this demo works only for the slider. Pressing the S3 or S4 buttons
-will decrement or increment the slider thumb’s position.&nbsp;<o:p></o:p></span></p>
+navigate through all the demo screen using buttons S5 and S6. Where S6 toggles the
+object selection and S5 performs the action on the object. S3 and S4 buttons in
+this demo works only for the slider. Pressing the S3 or S4 buttons will
+decrement or increment the slider thumb’s position.&nbsp;<o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><b style='mso-bidi-font-weight:
 normal'><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></b></p>
@@ -1144,11 +1141,11 @@ l1 level1 lfo8;tab-stops:list 1.0in'><span style='mso-bookmark:_Toc195786411'><s
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>Back («) button
-– This button, located on the left side, directs the user to the previous
-screen. Before the previous screen is shown, all objects in the current screen
-is destroyed and removed from memory. The previous screen is created from
-scratch and displayed, replacing the current screen. <o:p></o:p></span></span></span></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>Back («) button –
+This button, located on the left side, directs the user to the previous screen.
+Before the previous screen is shown, all objects in the current screen is
+destroyed and removed from memory. The previous screen is created from scratch
+and displayed, replacing the current screen. <o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in;mso-list:
 l1 level1 lfo8;tab-stops:list 1.0in'><span style='mso-bookmark:_Toc195786411'><span
@@ -1176,9 +1173,9 @@ l10 level1 lfo10;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'>
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><![if !supportLists]><span
 style='font-family:Arial;mso-fareast-font-family:Arial'><span style='mso-list:
 Ignore'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>The 1st Button
-shows the basic functionality of the object. Appearance of the object changes
-from Pressed to Un-pressed when pressed or released. <o:p></o:p></span></span></span></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>The 1st Button shows
+the basic functionality of the object. Appearance of the object changes from
+Pressed to Un-pressed when pressed or released. <o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in;mso-list:
 l10 level1 lfo10;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'><span
@@ -1199,8 +1196,8 @@ style='font-family:Arial;mso-fareast-font-family:Arial'><span style='mso-list:
 Ignore'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]><span style='font-family:Arial'>The 3rd Button
 shows that multiple bitmaps can be displayed in the face of the button with
-text. For every state a different bitmap can be rendered. Text shown is also moved
-to the upper left corner of the button’s face. <o:p></o:p></span></span></span></span></p>
+text. For every state a different bitmap can be rendered. Text shown is also
+moved to the upper left corner of the button’s face. <o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in;mso-list:
 l10 level1 lfo10;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'><span
@@ -1346,9 +1343,9 @@ and button actions. <o:p></o:p></span></span></span></span></p>
 <p class=MsoPlainText style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><span
 style='font-family:Arial'>Group 2 functions similarly to Group 1 but in this
-group the language selection of the whole demo is controlled by the two radio
-buttons. English is the default setting. To change to Chinese language, select
-the Chinese radio button.&nbsp;<o:p></o:p></span></span></span></span></p>
+group the language selection of the whole demo is controlled by the two radio buttons.
+English is the default setting. To change to Chinese language, select the
+Chinese radio button.&nbsp;<o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><span
@@ -1405,8 +1402,8 @@ l6 level1 lfo16;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'><
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><![if !supportLists]><span
 style='font-family:Arial;mso-fareast-font-family:Arial'><span style='mso-list:
 Ignore'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>The Group Box title
-“Group Box” alignment is controlled by the radio buttons. <o:p></o:p></span></span></span></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>The Group Box
+title “Group Box” alignment is controlled by the radio buttons. <o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in;mso-list:
 l6 level1 lfo16;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'><span
@@ -1448,8 +1445,8 @@ l8 level1 lfo20;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'><
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><![if !supportLists]><span
 style='font-family:Arial;mso-fareast-font-family:Arial'><span style='mso-list:
 Ignore'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>The 1st Slider
-is disabled. All touch screen and key actions on this object are ignored. <o:p></o:p></span></span></span></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>The 1st Slider is
+disabled. All touch screen and key actions on this object are ignored. <o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in;mso-list:
 l8 level1 lfo20;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'><span
@@ -1547,9 +1544,9 @@ l7 level1 lfo24;tab-stops:list 1.0in'><span style='mso-bookmark:_Toc195786411'><
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><![if !supportLists]><span
 style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
 Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]><span style='font-family:Arial'>Center –
-controls the alignment of the text in the List Box. When checked, alignment is
-centered, otherwise left aligned. <o:p></o:p></span></span></span></span></p>
+</span></span></span><![endif]><span style='font-family:Arial'>Center – controls
+the alignment of the text in the List Box. When checked, alignment is centered,
+otherwise left aligned. <o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in;mso-list:
 l5 level1 lfo22;tab-stops:list .75in'><span style='mso-bookmark:_Toc195786411'><span
@@ -1605,8 +1602,8 @@ Box&nbsp;<o:p></o:p></span></b></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><span
-style='font-family:Arial'>This screen is composed of a Window with an Edit Box and
-16 Buttons. This screen emulates the telephone functionality. The buttons
+style='font-family:Arial'>This screen is composed of a Window with an Edit Box
+and 16 Buttons. This screen emulates the telephone functionality. The buttons
 marked with number 0-9, “*” and “#” serves as inputs for a phone number. Every
 time one of these buttons is pressed, the number or character is displayed in
 the Edit Box. The Button with ? symbol is the back space key. Pressing this
@@ -1641,8 +1638,8 @@ pressed or released) controls this movement.&nbsp;<o:p></o:p></span></span></spa
 <p class=MsoPlainText style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><span
 style='font-family:Arial'>METER2 is manually animated by pressing the second
-button. METER1 animation can be also altered by pressing and releasing the
-first button.&nbsp;<o:p></o:p></span></span></span></span></p>
+button. METER1 animation can be also altered by pressing and releasing the first
+button.&nbsp;<o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><span
@@ -1742,14 +1739,14 @@ Control&nbsp;<o:p></o:p></span></b></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><span
-style='font-family:Arial'>This screen is composed of a Window, three Radio
-Buttons and a custom object created and displayed in its client area. The
-custom object shows an animation of a UP and DOWN arrow bitmap and a green bar
-drawn on a blue background. The green bar emulates a fluid level. The level can
-be modified by touching the screen. The level can also be controlled by
-pressing the Radio Buttons. “Heavy Load” sets the level to high, “Normal Load”
-sets the level to medium and “Light Load” sets the level to low. Changing the
-level using the touch screen automatically sets the Radio Button selection. The
+style='font-family:Arial'>This screen is composed of a Window, three Radio Buttons
+and a custom object created and displayed in its client area. The custom object
+shows an animation of a UP and DOWN arrow bitmap and a green bar drawn on a
+blue background. The green bar emulates a fluid level. The level can be
+modified by touching the screen. The level can also be controlled by pressing
+the Radio Buttons. “Heavy Load” sets the level to high, “Normal Load” sets the
+level to medium and “Light Load” sets the level to low. Changing the level
+using the touch screen automatically sets the Radio Button selection. The
 custom object does not process button actions.&nbsp;<o:p></o:p></span></span></span></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
@@ -1822,9 +1819,10 @@ and other countries.<o:p></o:p></span></i></span></span></span></p>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><i><span
-style='font-size:10.0pt;font-family:Arial;color:black'>PICDEM and PICTail are trademarks
-of Microchip Technology Incorporated in the <st1:country-region w:st="on"><st1:place
- w:st="on">U.S.A.</st1:place></st1:country-region> and other countries.<o:p></o:p></span></i></span></span></span></p>
+style='font-size:10.0pt;font-family:Arial;color:black'>PICDEM and PICTail are
+trademarks of Microchip Technology Incorporated in the <st1:country-region
+w:st="on"><st1:place w:st="on">U.S.A.</st1:place></st1:country-region> and
+other countries.<o:p></o:p></span></i></span></span></span></p>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='mso-bookmark:_Toc195786411'><span
 style='mso-bookmark:_Toc195786501'><span style='mso-bookmark:_Toc195786561'><i><span

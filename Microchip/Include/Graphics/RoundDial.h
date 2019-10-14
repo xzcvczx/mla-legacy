@@ -38,10 +38,14 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07	    	Version 1.0 release
  * 03/12/09	     	Added Object Header for Double Buffering Support
+ * 11/15/10	     	Added new structure member for KEYBOARD support 
  *****************************************************************************************/
 #ifndef _ROUNDDIAL_H
     #define _ROUNDDIAL_H
 
+    #include "GenericTypeDefs.h"
+    #include "GraphicsConfig.h"
+    #include "Graphics/GOL.h"
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
@@ -50,12 +54,13 @@
     #define RDIA_ROT_CCW    0x0008  // Bit for rotate counter clockwise state.
     #define RDIA_DRAW       0x4000  // Bit to indicate object must be redrawn.
     #define RDIA_HIDE       0x8000  // Bit to indicate object must be removed from screen.
-    #ifdef USE_KEYBOARD
-        #define RDIA_QUADRANT_POSITIONS 6
-extern SHORT    _cosine[RDIA_QUADRANT_POSITIONS];
-SHORT           RdiaCosine(SHORT v);
-SHORT           RdiaSine(SHORT v);
-    #endif
+#ifdef USE_KEYBOARD
+    #define RDIA_QUADRANT_POSITIONS 6
+    #define RDIA_MAX_POSITIONS      24
+	extern SHORT    _cosine[RDIA_QUADRANT_POSITIONS];
+	SHORT           RdiaCosine(SHORT v);
+	SHORT           RdiaSine(SHORT v);
+#endif
 
 /*********************************************************************
 * Overview: Defines the parameters required for a dial Object.
@@ -79,6 +84,9 @@ typedef struct
     SHORT           curr_yPos;      // Current y position.
     SHORT           new_xPos;       // New x position.
     SHORT           new_yPos;       // New y position.
+    #ifdef USE_KEYBOARD
+    SHORT 			vAngle;
+    #endif
 } ROUNDDIAL;
 
 /*********************************************************************

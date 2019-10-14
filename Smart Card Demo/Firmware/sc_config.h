@@ -1,11 +1,11 @@
 /********************************************************************
  FileName:		sc_config.h
  Dependencies:	See INCLUDES section
- Processor:		PIC18,PIC24,PIC32 & dsPIC33F Microcontrollers
+ Processor:		PIC18, PIC24 Microcontrollers
  Hardware:		This demo is natively intended to be used on Exp 16, LPC
  				& HPC Exp board. This demo can be modified for use on other hardware
  				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24 & dsPIC) & C32 (for PIC32) 
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -36,7 +36,6 @@
   ----  -----------------------------------------
   1.0   Initial release
   1.01  Modified to Support T=1 protocol
-  1.02  Modified to Support PIC32,dsPIC33F & PIC24H controllers
 ********************************************************************/
 
 #ifndef SCCFG_H
@@ -197,7 +196,7 @@
 		#define SCdrv_DisableClock()	    (REFOCONbits.ROON = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr(count)   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
@@ -291,7 +290,7 @@
 		#define SCdrv_DisableClock()	    (CCP1CON = 0x00,T2CONbits.TMR2ON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr(count)   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
@@ -385,7 +384,7 @@
 		#define SCdrv_DisableClock()	    (CCP1CON = 0x00,T2CONbits.TMR2ON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr(count)   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
@@ -479,7 +478,7 @@
 		#define SCdrv_DisableClock()	    (CCP1CON = 0x00,T2CONbits.TMR2ON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr(count)   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)

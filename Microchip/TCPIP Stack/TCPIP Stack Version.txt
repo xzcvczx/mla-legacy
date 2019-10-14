@@ -4,10 +4,117 @@ Microchip TCP/IP Stack Version Log:
 
 Note: Please file bug-reports/bug-fixes at http://support.microchip.com/ or post 
       to the Microchip TCP/IP -> Ethernet Forum at http://forum.microchip.com/
-      Look for stack updates at http://www.microchip.com/tcpip/
+      Look for stack updates at http://www.microchip.com/mal/
+
 
 ********
-v5.31 		19 October 2010
+v5.36       2 June 2011
+********
+Changes:
+1.  Because of changes to the SHOUTcast server configuration, the Internet Radio
+    demo is no longer functional.  This demo has been retained in the stack distribution
+    to provide a TCP/IP code example.
+2.  The UDP module will now perform address resolution and DNS querying automatically.
+    As a result, the UDP module APIs have changed.  The UDPOpenEx function provides this
+    additional functionality.  Please consult the TCP/IP Stack Help File's 
+    "Stack API > UDP" topic for more information.
+3.  The UDPOpen macro has been added to conform to the legacy UDPOpen interface.
+4.  The Announce, BerkeleyAPI, DHCP client/server, DNS client/server, NBNS, Reboot,
+    SNMP, SNTP, TFTPc, UDPPerformanceTest, and ZeroConf modules have been updated to
+    use the new UDP API.  The iPerf demo has also been updated.
+5.  The MPFS Classic and HTTP(1) modules have been removed from the stack.  Function-
+    ality to support these modules has also been removed from the TCP/IP Stack software
+    tools.  MPFS2 and HTTP2 are still supported.
+6.  The UARTConfig demo module has been updated to upload MPFS2 images to the demo board
+    in place of MPFS Classic images.
+7.  To facilitate linking on PIC18 platforms, the number of UDP sockets in demo projects
+    has been reduced from 10 to 8.
+8.  The SNMP Stack application and mib2bib.jar PC utility now both support 1024
+    dynamic IDs.
+9.  SNMP_DEMO_TRAP is a new dynamic variable added to the snmp.mib file to support SMIv2 
+    with TRAPv2.  This will correct a previously existing issue viewing traps with the
+    iReasoning MIB browser.  As per those changes, the mchp.mib file has been modified 
+    to support the SMIv2 standard.  This mib includes MODULE-IDENTITY which will provide
+    MICROCHIP and MIB information.  snmp.mib also includes MODULE-IDENTIY(1), a new
+    number (1) to the existing OID after ENTERPRISE-ID(17095).
+10. Added a preprocessor check that will include the ultoa function if a version of the
+    C32 compiler earlier than 1.12 is used.
+11. Modified the WiFi module to use separate retry counters for AdHoc and Infrastructure
+    modes.
+12. Modified Berkeley API module to accept IPPROTO_IP as a valid protocol for the socket
+    function.  The code will determine the protocol type from the socket type (datagram
+    or stream).
+13. Created MPLAB X projects corresponding to most MPLAB 8 projects and configurations.
+    These projects are located in the MPLAB.X subfolder in the associated demo project
+    directory.  The MPLAB X import wizard can be used to create MPLAB X projects from
+    MPLAB 8 projects that don't have an analogue in the new demo project folders.
+14. Added project support for the dsPIC33E and PIC24E architectures.
+15. All TCP/IP Stack demo projects have been moved to the "TCPIP" subdirectory
+    in the stack installation directory.
+16. Created Java versions of several TCP/IP tools to provide cross-platform support. The
+    TCP/IP Configuration Wizard has not been ported to Java; thus, it is only available
+    for Windows users.
+17. To prevent issues with path length, MPLAB 8 project names have been changed. 
+    A list of the abbreviations used in the project names is available in the MAL help 
+    folder (Microchip Solutions/Microchip/Help/Abbreviations.htm).  The names of the
+    HardwareProfile and TCPIPConfig configuration files have been abbreviated as well.
+18. Changed the configuration inclusion macros used by the TCP/IP Stack demo projects to
+    match the terms used in the project/configuration names.
+19. The "Alternative Configurations" subfolders in most demo projects has been renamed
+    to "Configs."
+20. Added a Google PowerMeter demo for use with the PIC18F87J72 Energy Monitoring PICtail.
+21. The Web Preview tool is no longer included with the stack.
+
+Fixes:
+1.  Fixed a DHCP Server (DHCPs.c) lease leak problem that would occur when 
+    STACK_USE_ZEROCONF_LINK_LOCAL was defined.  This problem would have 
+    resulted in the DHCP server stop giving out any leases until being rebooted.
+2.  Updated the PIC32MX6XX/7XX external PHY SMSC 8720LAN reference design. 
+3.  Fixed bug with window expecting MACGetFreeRxSize() to return values < 32KB.
+4.  Fixed a type casting bug with the CalcIPChecksum function that would cause 
+    an incorrect TX checksum if the checksum value overflowed again after adding
+    the carry bits to the checksum value.
+5.  Fixed a bug in the AutoIP module that may have prevented the module from
+    correctly defending its own address.
+6.  Added a check to the Announce module to ensure the MAC layer is linked before
+    attemping to transmit an Announce message.
+7.  Fixed a bug in the ETH97J60 MACPut function.
+8.  Added an additional preprocessor check in a debug menu setting in WF_Spi.c
+    to prevent a build error.
+9.  Added a fix to the Google PowerMeter demo code to restore SNTP timestamp
+    sourcing if SNTP is enabled.  Previously, it would be overwritten by
+    a possibly invalid HTTP timestamp.
+
+Known Problems:
+1.  Telnet server module does not implement a lot of Telnet functions.  As a 
+    result, it will likely not display correctly or work at all with some Telnet 
+    clients.  The server was tested with the Microsoft telnet.exe utility which 
+    is provided with Microsoft Windows.
+2.  If the DHCP client and DHCP server are used at the same time and you connect 
+    two similar boards to each other (ex: two PICDEM.net 2 boards connected via 
+    a crossover cable), a race condition can occur where both nodes will disable 
+    their DHCP server and neither board will get a successful DHCP lease.  If 
+    this unlikely scenario occurs, as a work around, simply reset one of the 
+    boards to reenable it's DHCP server.
+3.  LCDBlocking.c timing for the LCD_E_IO enable signal is too fast to meet 
+    published data sheet limits for various LCD controllers when compiling for 
+    a PIC32 running at > 43MHz.  Despite this potential timing violation, the 
+    LCD does normally work correctly on the precompiled PIC32 demos for the 
+    Explorer 16 at 80MHz.
+4.  For PIC32 implementations, depending on the configuration, it is possible that the
+    MACGetFreeRxSize() returns a value greater than 64 KB.
+    For backward compatibility reasons the stack uses a 16 bit value to check the returned value
+    and it won't work corretly.
+5.  Limiting the number of UDP sockets to 8 in the stack demos may prevent SNMP trap
+    functionality.  If this occurs, you can increase the MAX_UDP_SOCKETS definition in 
+    TCPIPConfig.h to 10 (if your system will support the increased data memory usage) 
+    to fix this issue.
+6.  The SNMP mib file's date and version parameter does not match the date/version of
+    the current stack release.
+
+
+********
+v5.31       19 October 2010
 ********
 Changes:
 1.  Reorganized demo projects.  The TCPIP ENCX24J600 Demo App, TCPIP PIC32 ETH 
@@ -258,7 +365,7 @@ Known Problems:
 
 
 ********
-v5.25 		07 May 2010
+v5.25       07 May 2010
 ********
 Changes:
 1.  Added support for the Microchip MRF24WB0 802.11 WiFi controller (module 
@@ -452,7 +559,7 @@ Known Problems:
 
 
 ********
-v5.20 		18 November 2009
+v5.20       18 November 2009
 ********
 Changes:
 1.  Added PIC32MX7XX/6XX Family integrated Ethernet controller support.  The 
@@ -595,7 +702,7 @@ Known Problems:
 
 
 ********
-v5.10 		29 July 2009
+v5.10       29 July 2009
 ********
 Changes:
 1.  Added SSL capability to the Telnet server.  If STACK_USE_SSL_SERVER is 
@@ -752,7 +859,7 @@ Known Problems:
 
 
 ********
-v5.00 		27 April 2009
+v5.00       27 April 2009
 ********
 Changes:
 1.  Added ZeroG ZG2100 802.11 WiFi controller support.  The new TCPIP WiFi Demo
@@ -915,7 +1022,7 @@ Known Problems:
 
 
 ********
-v4.55 		10 November 2008
+v4.55       10 November 2008
 ********
 SSL Note: 
    RSA.c and ARCFOUR.c have not changed between the 4.50 and 4.55 releases.  
@@ -1009,7 +1116,7 @@ Known Problems:
 
 
 ********
-v4.51 		24 July 2008
+v4.51       24 July 2008
 ********
 IMPORTANT NOTE: You must use MPLAB 8.10 or higher to successfully open the 
    MPLAB projects.
@@ -1101,7 +1208,7 @@ Known Problems:
 
 
 ********
-v4.50 		02 June 2008
+v4.50       02 June 2008
 ********
 IMPORTANT NOTE: You must use MPLAB 8.10 or higher to successfully open the 
    MPLAB projects.  Also, ensure that the latest C compiler is used.  This 
@@ -1324,7 +1431,7 @@ Known Problems:
 
 
 ********
-v4.18 		28 November 2007
+v4.18       28 November 2007
 ********
 Changes:
 1. Added C32 and PIC32MX support.  Some things were cleaned up in the process.
@@ -1424,7 +1531,7 @@ Known Problems:
 
 
 ********
-v4.16 		06 November 2007
+v4.16       06 November 2007
 ********
 Changes:
 1. Added Internet Radio application.  This is a TCP client application which 
@@ -1518,7 +1625,7 @@ Known Problems:
 
 
 ********
-v4.13		02 October 2007
+v4.13       02 October 2007
 ********
 Changes:
 1. Added command line support to the MPFS2.exe tool.  You can now generate MPFS 
@@ -1613,7 +1720,7 @@ Known Problems:
 
 
 ********
-v4.11		27 August 2007
+v4.11       27 August 2007
 ********
 IMPORTANT NOTE: You must use MPLAB 7.62 or higher to successfully open the 
                 MPLAB projects.
@@ -1846,7 +1953,7 @@ Testing and Performance Notes:
 
 
 ********
-v4.02		10 April 2007
+v4.02       10 April 2007
 ********
 IMPORTANT NOTE: You must use MPLAB 7.41 or higher to successfully open the 
                 MPLAB projects.
@@ -2098,7 +2205,7 @@ Testing and Performance Notes:
 
 
 ********
-v4.00RC		28 December 2006
+v4.00RC     28 December 2006
 ********
 IMPORTANT NOTE: If an external serial EEPROM memory is used to store AppConfig, 
                 it's contents will be invalidated the first time you run this 
@@ -2286,7 +2393,7 @@ Known Problems:
 
 
 ********
-v3.75		14 August 2006
+v3.75       14 August 2006
 ********
 Changes:
 1. Added beta DNS client module (DNS.c).  DHCP was also updated to obtain a DNS 
@@ -2475,7 +2582,7 @@ Guiding Notes:
 
 
 ********
-v3.60		12 July 2006
+v3.60       12 July 2006
 ********
 General Information:
 This stack version is being publicly released, so the following changes are with 
@@ -2530,15 +2637,15 @@ Changes:
 3. Created hardware definitions (pins, interrupt flags, special registers, etc) in 
    Compiler.h for easy changing of hardware.  Four demo board combinations are 
    supported out-of-box now:
-	-EXPLORER_16: Explorer 16 motherboard + Ethernet PICtail Plus daughter card.  
+    -EXPLORER_16: Explorer 16 motherboard + Ethernet PICtail Plus daughter card.  
                       Tested with dsPIC33FJ256GP710, PIC24HJ256GP610, and 
                       PIC24F128GA010 ES PIMs.
-	-HPC_EXPLORER: PICDEM HPC Explorer motherboard + Ethernet PICtail daughter 
+    -HPC_EXPLORER: PICDEM HPC Explorer motherboard + Ethernet PICtail daughter 
                        card.  Tested with PIC18F8722 onboard and PIC18F87J10 PIM.
-	-DSPICDEM11: dsPICDEM 1.1 motherboard + Ethernet PICtail daughter card 
+    -DSPICDEM11: dsPICDEM 1.1 motherboard + Ethernet PICtail daughter card 
                      (manually air wired).  See Compiler.h for proper pins to air wire.  
                      Tested with dsPIC30F6014A PIM.
-	-PICDEMNET2: PICDEM.net 2 motherboard (PIC18F97J60)
+    -PICDEMNET2: PICDEM.net 2 motherboard (PIC18F97J60)
    Change boards by changing the defined macro (Project -> Build Options... -> 
    Project -> MPLAB Cxx -> Add macro).  When moving to custom hardware, add an  
    appropriate profile to Compiler.h.  YOUR_BOARD is present as a placeholder.
@@ -2721,7 +2828,7 @@ Guiding Notes:
 
 
 ********
-v3.50		13 April 2006
+v3.50       13 April 2006
 ********
 Changes:
 1. Improved dsPIC33F and PIC24H support.  UART functions are included now instead of 

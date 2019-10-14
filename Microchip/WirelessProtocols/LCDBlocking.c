@@ -64,6 +64,7 @@
 #include "WirelessProtocols/LCDBlocking.h"
 #include "TimeDelay.h"
 #include "WirelessProtocols/Console.h"
+#include "Transceivers/Transceivers.h"
 
 //#define FOUR_BIT_MODE
 #define SAMSUNG_S6A0032		// This LCD driver chip has a different means of entering 4-bit mode.  

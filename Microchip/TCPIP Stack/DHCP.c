@@ -479,7 +479,9 @@ void DHCPTask(void)
 			
 			case SM_DHCP_GET_SOCKET:
 				// Open a socket to send and receive broadcast messages on
-				DHCPClient.hDHCPSocket = UDPOpen(DHCP_CLIENT_PORT, NULL, DHCP_SERVER_PORT);
+				//DHCPClient.hDHCPSocket = UDPOpen(DHCP_CLIENT_PORT, NULL, DHCP_SERVER_PORT);
+				
+				DHCPClient.hDHCPSocket = UDPOpenEx(0,UDP_OPEN_SERVER,DHCP_CLIENT_PORT, DHCP_SERVER_PORT);
 				if(DHCPClient.hDHCPSocket == INVALID_UDP_SOCKET)
 					break;
 	
@@ -513,7 +515,7 @@ void DHCPTask(void)
 	
 				// Ensure that we transmit to the broadcast IP and MAC addresses
 				// The UDP Socket remembers who it was last talking to
-				memset((void*)&UDPSocketInfo[DHCPClient.hDHCPSocket].remoteNode, 0xFF, sizeof(UDPSocketInfo[0].remoteNode));
+				memset((void*)&UDPSocketInfo[DHCPClient.hDHCPSocket].remote.remoteNode, 0xFF, sizeof(UDPSocketInfo[0].remote.remoteNode));
 	
 				// Send the DHCP Discover broadcast
 				_DHCPSend(DHCP_DISCOVER_MESSAGE, FALSE);
@@ -553,7 +555,7 @@ void DHCPTask(void)
 				// we must set this back to the broadcast address since the 
 				// current socket values are the unicast addresses of the DHCP 
 				// server.
-				memset((void*)&UDPSocketInfo[DHCPClient.hDHCPSocket].remoteNode, 0xFF, sizeof(UDPSocketInfo[0].remoteNode));
+				memset((void*)&UDPSocketInfo[DHCPClient.hDHCPSocket].remote.remoteNode, 0xFF, sizeof(UDPSocketInfo[0].remote.remoteNode));
 	
 				// Send the DHCP request message
 				_DHCPSend(DHCP_REQUEST_MESSAGE, FALSE);
@@ -622,7 +624,9 @@ void DHCPTask(void)
 				}
 	
 				// Open a socket to send and receive DHCP messages on
-				DHCPClient.hDHCPSocket = UDPOpen(DHCP_CLIENT_PORT, NULL, DHCP_SERVER_PORT);
+				//DHCPClient.hDHCPSocket = UDPOpen(DHCP_CLIENT_PORT, NULL, DHCP_SERVER_PORT);
+				
+				DHCPClient.hDHCPSocket = UDPOpenEx(0,UDP_OPEN_SERVER,DHCP_CLIENT_PORT, DHCP_SERVER_PORT);
 				if(DHCPClient.hDHCPSocket == INVALID_UDP_SOCKET)
 					break;
 	

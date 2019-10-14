@@ -40,7 +40,7 @@
 #ifndef _DISPLAY_DRIVER_INTERFACE
 #define _DISPLAY_DRIVER_INTERFACE
 
-#include "Graphics/Graphics.h"
+#include "HardwareProfile.h"
 
 #ifdef USE_GFX_PMP
 #include "Graphics/gfxpmp.h"

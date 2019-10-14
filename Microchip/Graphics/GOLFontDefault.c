@@ -1,9 +1,7 @@
 /*****************************************************************************
  * FileName:        GOLFontDefault.c
- * Dependencies:    Graphics.h
  * Processor:       PIC24F, PIC24H, dsPIC
  * Compiler:        MPLAB C30 v3.23
- * Linker:          MPLAB LINK30 v3.23
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -48,7 +46,7 @@
  *****************************************************************************/
 #include "GraphicsConfig.h"
 #ifndef FONTDEFAULT
-#include <Graphics/Graphics.h>
+#include <Graphics/Primitive.h>
 
 #ifdef USE_GOL
 /*****************************************************************************

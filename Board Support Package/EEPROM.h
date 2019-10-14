@@ -42,17 +42,8 @@
 #ifndef _EEPROM_H
     #define _EEPROM_H
 
-    #if defined(__dsPIC33F__)
-        #include <p33Fxxxx.h>
-    #elif defined(__PIC24H__)
-        #include <p24Hxxxx.h>
-    #elif defined(__PIC32MX__)
-        #include <plib.h>
-    #else
-        #include <p24Fxxxx.h>
-    #endif
-
-	#include "GenericTypeDefs.h"
+   	#include "Compiler.h"
+    #include "GenericTypeDefs.h"
 	#include "HardwareProfile.h"
 	
 /************************************************************************

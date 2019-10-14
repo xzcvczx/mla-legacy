@@ -38,6 +38,8 @@
   1.02  Modified to Support PIC24H microcontrollers
 ********************************************************************/
 
+#if defined(__PIC24F__) || defined(__PIC24H__)
+
 #ifndef __SC_DRV24_LIB__
 #define __SC_DRV24_LIB__
 
@@ -64,5 +66,5 @@ extern void SCdrv_SendTxData( BYTE data );
 
 #endif
 
-
+#endif
 

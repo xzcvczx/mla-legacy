@@ -38,6 +38,8 @@
   1.02  Added extern declaration for "factorD" & "factorF" variables
 ********************************************************************/
 
+#if defined(__18CXX)
+
 #ifndef __SC_DRV18_LIB__
 #define __SC_DRV18_LIB__
 
@@ -62,5 +64,5 @@ extern void WaitMilliSec( WORD ms );
 
 #endif
 
-
+#endif
 

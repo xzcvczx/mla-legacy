@@ -39,11 +39,12 @@
 *   in Console.c
 *
 * Change History:
-*  Rev   Date         Description
-*  0.1   11/09/2006   Initial revision
-*  1.0   01/09/2007   Initial release
-*  2.0   4/15/2009    MiMAC and MiApp revision
-*  3.1   5/28/2010    MiWi DE 3.1
+*  Rev   Date         Author    Description
+*  0.1   11/09/2006   yfy       Initial revision
+*  1.0   01/09/2007   yfy       Initial release
+*  2.0   4/15/2009    yfy       MiMAC and MiApp revision
+*  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 #ifndef  _CONSOLE_H_
 #define  _CONSOLE_H_
@@ -51,7 +52,7 @@
 /************************ HEADERS **********************************/
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
-#include "SystemProfile.h"
+//#include "SystemProfile.h"
 #include "HardwareProfile.h"
 
 #define BAUD_RATE 19200
@@ -97,7 +98,11 @@
         void ConsolePutString(BYTE *s);
         void ConsolePutROMString(ROM char* str);
     
-        #define ConsoleIsGetReady()     (PIR1bits.RCIF)
+        #if defined(EIGHT_BIT_WIRELESS_BOARD)
+            #define ConsoleIsGetReady()     (PIR3bits.RC2IF)
+        #else
+            #define ConsoleIsGetReady()     (PIR1bits.RCIF)
+        #endif
         BYTE ConsoleGet(void);
         BYTE ConsoleGetString(char *buffer, BYTE bufferLen);
         void PrintChar(BYTE);

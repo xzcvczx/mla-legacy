@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Object - MDD File System-SD-PIC24
 dir_sin=
-dir_inc=.;.\PIC24F;..\Include;..\Include\MDD File System;..\Microchip\Include;..\Microchip\Include\MDD File System;..\..\Microchip\Include\MDD File System;..\..\MDD File System-SD Card;..\..\MDD File System-SD Card\PIC24F
+dir_inc=.\PIC24F;..\Include;..\Include\MDD File System;..\..\Microchip\Include;..\..\Microchip\Include\MDD File System;..\..\Microchip\Include\MDD File System;..\..\MDD File System-SD Card;..\..\MDD File System-SD Card\PIC24F
 dir_lib=
 dir_lkr=
 [CAT_FILTERS]
@@ -18,22 +18,22 @@ filter_obj=*.o
 filter_lib=*.a
 filter_lkr=*.gld
 [CAT_SUBFOLDERS]
-subfolder_src=
-subfolder_inc=
+subfolder_src=PIC24F
+subfolder_inc=PIC24F
 subfolder_obj=
 subfolder_lib=
 subfolder_lkr=
 [FILE_SUBFOLDERS]
 file_000=.
 file_001=.
-file_002=.
+file_002=PIC24F
 file_003=.
 file_004=.
 file_005=.
 file_006=.
 file_007=.
 file_008=.
-file_009=.
+file_009=PIC24F
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -59,14 +59,14 @@ file_009=no
 [FILE_INFO]
 file_000=..\Microchip\MDD File System\SD-SPI.c
 file_001=..\Microchip\MDD File System\FSIO.c
-file_002=Demonstration.c
+file_002=PIC24F\Demonstration2.c
 file_003=..\Microchip\Include\GenericTypeDefs.h
 file_004=..\Microchip\Include\MDD File System\SD-SPI.h
 file_005=..\Microchip\Include\MDD File System\FSDefs.h
 file_006=..\Microchip\Include\MDD File System\FSIO.h
-file_007=PIC24F\FSconfig.h
-file_008=PIC24F\HardwareProfile.h
-file_009=..\Microchip\Include\Compiler.h
+file_007=..\Microchip\Include\Compiler.h
+file_008=HardwareProfile.h
+file_009=PIC24F\FSconfig.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

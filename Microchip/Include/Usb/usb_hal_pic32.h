@@ -349,6 +349,7 @@ typedef union _POINTER
         }
 
 #define USBClearUSBInterrupt() IFS1bits.USBIF = 0;
+#define USBInterruptFlag  IFS1bits.USBIF
 #if defined(USB_DISABLE_SOF_HANDLER)
     #define USB_SOF_INTERRUPT 0x00
 #else
@@ -467,13 +468,14 @@ typedef union __USTAT
 
 
 #if defined(USB_SUPPORT_DEVICE) | defined(USB_SUPPORT_OTG)
-#if !defined(USBDEVICE_C)
-    //extern USB_VOLATILE USB_DEVICE_STATE USBDeviceState;
-    extern USB_VOLATILE BYTE USBActiveConfiguration;
-    extern USB_VOLATILE IN_PIPE inPipes[1];
-    extern USB_VOLATILE OUT_PIPE outPipes[1];
-    extern volatile BDT_ENTRY *pBDTEntryIn[USB_MAX_EP_NUMBER+1];
-#endif
+	#if !defined(USBDEVICE_C)
+	    //extern USB_VOLATILE USB_DEVICE_STATE USBDeviceState;
+	    extern USB_VOLATILE BYTE USBActiveConfiguration;
+	    extern USB_VOLATILE IN_PIPE inPipes[1];
+	    extern USB_VOLATILE OUT_PIPE outPipes[1];
+	#endif
+	extern volatile BDT_ENTRY* pBDTEntryOut[USB_MAX_EP_NUMBER+1];
+	extern volatile BDT_ENTRY* pBDTEntryIn[USB_MAX_EP_NUMBER+1];	
 #endif
 
 #endif  //USB_HAL_PIC32_H

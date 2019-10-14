@@ -16,17 +16,11 @@ This file defines all of the hardware-specific information for the project.
 //#define USE_FRC - incompatible with USB operation
 //#define GO_SLOW - incompatible with USB host operation
 
-
-/*********************************************************************
-* Overview: Defines color depth. 
-********************************************************************/
-#define COLOR_DEPTH						1
-
 /*********************************************************************
 * Overview: Display controller selection.
 *                                          
 ********************************************************************/
-#define DISPLAY_CONTROLLER				SH1101A
+#define USE_GFX_DISPLAY_CONTROLLER_SH1101A
 
 /*********************************************************************
 * Overview: Horizontal and vertical display resolution
@@ -108,13 +102,13 @@ This file defines all of the hardware-specific information for the project.
 
 
 // Define the RTCC default initialization.
-#define RTCC_DEFAULT_DAY        19        // 19
-#define RTCC_DEFAULT_MONTH      10        // October
-#define RTCC_DEFAULT_YEAR       10        // 2010
-#define RTCC_DEFAULT_WEEKDAY    2         // Tuesday
-#define RTCC_DEFAULT_HOUR       10        // 10:10:01
-#define RTCC_DEFAULT_MINUTE     10
-#define RTCC_DEFAULT_SECOND     1
+#define RTCC_DEFAULT_DAY        13        // Date
+#define RTCC_DEFAULT_MONTH      05        // Month
+#define RTCC_DEFAULT_YEAR       11        // Year
+#define RTCC_DEFAULT_WEEKDAY    5         // Day
+#define RTCC_DEFAULT_HOUR       10        // hour
+#define RTCC_DEFAULT_MINUTE     10        // Minute
+#define RTCC_DEFAULT_SECOND     1         // Second
 
 #if defined(__PIC24F__)
     #include <p24fxxxx.h>
@@ -173,6 +167,21 @@ This file defines all of the hardware-specific information for the project.
 	#error "Use PIC18, PIC24, dsPIC30, dsPIC33 or PIC32 processor"
 #endif
 
+/*********************************************************************
+* BACKLIGHT CONTROL (these are dummy macros to satisfy common file gfxpmp.h)
+*********************************************************************/
+#define DisplayBacklightConfig()      
+#define DisplayBacklightOn()        
+#define DisplayBacklightOff()          
+
+/*********************************************************************
+* EPMP TIMING PARAMETERS
+*********************************************************************/
+#define PMP_DATA_SETUP_TIME         (0)    
+#define PMP_DATA_WAIT_TIME          (45)  // minimum pulse width requirement of CS controlled RD/WR access in SH1101A is 100 ns
+                                          // but since we have one cycle in setup and one cycle hold (minimum) we can estimate
+                                          // the wait time. 
+#define PMP_DATA_HOLD_TIME          (15)  // based on SH1101A data hold requirement  
 
 /*********************************************************************
 * IOS FOR THE DISPLAY CONTROLLER

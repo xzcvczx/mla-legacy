@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice for P2P Software:
 *
-* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright Â© 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED â€œAS ISâ€ WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -44,6 +44,7 @@
 *  2.0   4/15/2009    yfy       MiMAC and MiApp revision
 *  2.1   6/20/2009    yfy       Add LCD support
 *  3.1   5/28/2010    yfy       MiWi DE 3.1
+*  4.1   6/3/2011     yfy       MAL v2011-06
 ********************************************************************/
 
 /************************ HEADERS **********************************/
@@ -61,6 +62,7 @@
 #include "Transceivers/MCHP_MAC.h"
 #include "Transceivers/Transceivers.h"
 #include "WirelessProtocols/MCHP_API.h"
+#include "WirelessProtocols/EEPROM.h"
 
 
 /************************ VARIABLES ********************************/
@@ -114,7 +116,7 @@
  * assignment.
  **********************************************************************/
 #if defined(__18CXX)
-    #pragma udata TRX_BUFFER=0x100
+    #pragma udata TRX_BUFFER
 #endif
 BYTE TxBuffer[TX_BUFFER_SIZE];
 #if defined(__18CXX)
@@ -130,7 +132,7 @@ BYTE TxBuffer[TX_BUFFER_SIZE];
      * assignment.
      **********************************************************************/
     #if defined(__18CXX)
-        #pragma udata INDIRECT_BUFFER=0x200
+        #pragma udata INDIRECT_BUFFER
     #endif
     INDIRECT_MESSAGE indirectMessages[INDIRECT_MESSAGE_SIZE];   // structure to store the indirect messages
                                                                 // for nodes with radio off duing idle time
@@ -147,7 +149,7 @@ BYTE TxBuffer[TX_BUFFER_SIZE];
  * assignment.
  **********************************************************************/
 #if defined(__18CXX)
-    #pragma udata BIGvariables1 = 0x300
+    #pragma udata BIGvariables1
 #endif
 CONNECTION_ENTRY    ConnectionTable[CONNECTION_SIZE];        // The peer device records for P2P connections
 #if defined(__18CXX)
@@ -159,7 +161,7 @@ CONNECTION_ENTRY    ConnectionTable[CONNECTION_SIZE];        // The peer device 
 #endif
 BYTE            currentChannel = 0;             // current operating channel for the device
 BYTE            TxData;
-BYTE            ConnMode = 0;
+BYTE            ConnMode = DISABLE_ALL_CONN;
 BYTE            P2PCapacityInfo;
 RECEIVED_MESSAGE  rxMessage;                    // structure to store information for the received packet
 BYTE            LatestConnection;
@@ -262,8 +264,8 @@ void P2PTasks(void)
         {
             if( indirectMessages[i].flags.bits.isValid )
             {
-                tmpTick = TickGet();
-                if( TickGetDiff(tmpTick, indirectMessages[i].TickStart) > INDIRECT_MESSAGE_TIMEOUT )
+                tmpTick = MiWi_TickGet();
+                if( MiWi_TickGetDiff(tmpTick, indirectMessages[i].TickStart) > INDIRECT_MESSAGE_TIMEOUT )
                 {
                     indirectMessages[i].flags.Val = 0x00;   
                     Printf("\r\nIndirect message expired");
@@ -279,8 +281,8 @@ void P2PTasks(void)
         // battery power even if something wrong with associated device
         if( P2PStatus.bits.DataRequesting )
         {
-            tmpTick = TickGet();
-            if( TickGetDiff(tmpTick, DataRequestTimer) > RFD_DATA_WAIT )
+            tmpTick = MiWi_TickGet();
+            if( MiWi_TickGetDiff(tmpTick, DataRequestTimer) > RFD_DATA_WAIT )
             {
                 Printf("Data Request Expired\r\n");
                 P2PStatus.bits.DataRequesting = 0;
@@ -295,8 +297,8 @@ void P2PTasks(void)
     #if defined(ENABLE_NETWORK_FREEZER)
         if( P2PStatus.bits.SaveConnection )
         {
-            tmpTick = TickGet();
-            if( TickGetDiff(tmpTick, nvmDelayTick) > (ONE_SECOND) )
+            tmpTick = MiWi_TickGet();
+            if( MiWi_TickGetDiff(tmpTick, nvmDelayTick) > (ONE_SECOND) )
             {
                 P2PStatus.bits.SaveConnection = 0;
                 nvmPutConnectionTable(ConnectionTable);  
@@ -306,8 +308,8 @@ void P2PTasks(void)
     #endif
 
     #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-        tmpTick = TickGet();
-        if( TickGetDiff(tmpTick, TimeSyncTick) > ((ONE_SECOND) * RFD_WAKEUP_INTERVAL) )
+        tmpTick = MiWi_TickGet();
+        if( MiWi_TickGetDiff(tmpTick, TimeSyncTick) > ((ONE_SECOND) * RFD_WAKEUP_INTERVAL) )
         {
             TimeSyncTick.Val += ((DWORD)(ONE_SECOND) * RFD_WAKEUP_INTERVAL);
             if( TimeSyncTick.Val > tmpTick.Val )
@@ -369,6 +371,14 @@ void P2PTasks(void)
                                     break;
                                 }
                                 
+                                // if new connection is not allowed, ignore 
+                                // the request
+                                if( ConnMode == DISABLE_ALL_CONN )
+                                { 
+                                    MiMAC_DiscardPacket();
+                                    break;
+                                }
+                                
                                 #if !defined(TARGET_SMALL) && defined(IEEE_802_15_4)
                                     // if PANID does not match, ignore the request
                                     if( rxMessage.SourcePANID.Val != 0xFFFF &&
@@ -385,23 +395,18 @@ void P2PTasks(void)
                                     status = AddConnection();
                                 }
 
-                                // if new connection is not allowed, ignore 
-                                // the request
-                                if( (ConnMode == DISABLE_ALL_CONN) ||
-                                    (ConnMode == ENABLE_ACTIVE_SCAN_RSP && status != STATUS_ACTIVE_SCAN) ||
-                                    (ConnMode == ENABLE_PREV_CONN && (status != STATUS_EXISTS && status != STATUS_ACTIVE_SCAN)) )
-                                { 
-                                    MiMAC_DiscardPacket();
-                                    break;
+                                if( (ConnMode == ENABLE_PREV_CONN) && (status != STATUS_EXISTS && status != STATUS_ACTIVE_SCAN) )
+                                {
+                                    status = STATUS_NOT_PERMITTED;
                                 }
-                                
+
                                 if( (status == STATUS_SUCCESS || status == STATUS_EXISTS ) &&
                                     MiApp_CB_AllowConnection(LatestConnection) == FALSE )
                                 {
                                     ConnectionTable[LatestConnection].status.Val = 0;
                                     status = STATUS_NOT_PERMITTED;
-                                    break;
-                                }    
+                                }
+                                    
                                 
                                 // prepare the P2P_CONNECTION_RESPONSE command
                                 MiApp_FlushTx();
@@ -439,8 +444,6 @@ void P2PTasks(void)
                                 #if defined(ENABLE_NETWORK_FREEZER)
                                     if( status == STATUS_SUCCESS )
                                     {
-                                        //Printf("Save");
-                                        //PrintChar(LatestConnection);
                                         nvmPutConnectionTableIndex(&(ConnectionTable[LatestConnection]), LatestConnection);
                                     }
                                     
@@ -448,6 +451,49 @@ void P2PTasks(void)
                             #endif  // end of ENABLE_SLEEP
                         }
                         break;
+                    
+                    case CMD_P2P_ACTIVE_SCAN_REQUEST:
+                        {
+                            if(ConnMode > ENABLE_ACTIVE_SCAN_RSP)
+                            {
+                                MiMAC_DiscardPacket();
+                                break;
+                            }
+                            if( currentChannel != rxMessage.Payload[1] )
+                            {
+                                MiMAC_DiscardPacket();
+                                break;
+                            }
+                            
+                            MiApp_FlushTx();
+                            MiApp_WriteData(CMD_P2P_ACTIVE_SCAN_RESPONSE);
+                            MiApp_WriteData(P2PCapacityInfo);
+                            #if ADDITIONAL_NODE_ID_SIZE > 0
+                                for(i = 0; i < ADDITIONAL_NODE_ID_SIZE; i++)
+                                {
+                                    MiApp_WriteData(AdditionalNodeID[i]);
+                                }
+                            #endif
+                            MiMAC_DiscardPacket();
+                            
+                            // unicast the response to the requesting device
+                            #ifdef TARGET_SMALL
+                                #if defined(IEEE_802_15_4)
+                                    SendPacket(FALSE, myPANID, rxMessage.SourceAddress, TRUE, rxMessage.flags.bits.secEn);       
+                                #else
+                                    SendPacket(FALSE, rxMessage.SourceAddress, TRUE, rxMessage.flags.bits.secEn); 
+                                #endif
+                            #else
+                                #if defined(IEEE_802_15_4)
+                                    SendPacket(FALSE, rxMessage.SourcePANID, rxMessage.SourceAddress, TRUE, rxMessage.flags.bits.secEn);
+                                #else
+                                    SendPacket(FALSE, rxMessage.SourceAddress, TRUE, rxMessage.flags.bits.secEn);
+                                #endif
+                            #endif
+                        }
+                        break;
+                        
+                    
                     
                     #ifndef TARGET_SMALL    
                         case CMD_P2P_CONNECTION_REMOVAL_REQUEST:
@@ -505,59 +551,84 @@ void P2PTasks(void)
                             {
                                 case STATUS_SUCCESS:
                                 case STATUS_EXISTS:
+                                    #if defined(IEEE_802_15_4)
+                                        if( myPANID.Val == 0xFFFF )
+                                        {
+                                            myPANID.Val = rxMessage.SourcePANID.Val;
+                                            {
+                                                WORD tmp = 0xFFFF;
+                                                MiMAC_SetAltAddress((BYTE *)&tmp, (BYTE *)&myPANID.Val);
+                                            }    
+                                            #if defined(ENABLE_NETWORK_FREEZER)
+                                                nvmPutMyPANID(myPANID.v);
+                                            #endif
+                                        }
+                                    #endif
                                     AddConnection();
                                     #if defined(ENABLE_NETWORK_FREEZER)
                                         P2PStatus.bits.SaveConnection = 1;
-                                        nvmDelayTick = TickGet();
+                                        nvmDelayTick = MiWi_TickGet();
                                     #endif
                                     break;
-                                
-                                case STATUS_ACTIVE_SCAN:
-                                    if( P2PStatus.bits.Resync )
-                                    {
-                                        P2PStatus.bits.Resync = 0;   
-                                    }
-                                    #ifdef ENABLE_ACTIVE_SCAN 
-                                        else   
-                                        {
-                                            i = 0;
-                                            for(; i < ActiveScanResultIndex; i++)
-                                            {
-                                                if( (ActiveScanResults[i].Channel == currentChannel) &&
-                                                #if defined(IEEE_802_15_4)
-                                                    (ActiveScanResults[i].PANID.Val == rxMessage.SourcePANID.Val) &&
-                                                #endif
-                                                    isSameAddress(ActiveScanResults[i].Address, rxMessage.SourceAddress)
-                                                )
-                                                {
-                                                    break;
-                                                }
-                                            }
-                                            if( i == ActiveScanResultIndex && (i < ACTIVE_SCAN_RESULT_SIZE))
-                                            {
-                                                ActiveScanResults[ActiveScanResultIndex].Channel = currentChannel;
-                                                ActiveScanResults[ActiveScanResultIndex].RSSIValue = rxMessage.PacketRSSI;
-                                                #if defined(IEEE_802_15_4)
-                                                    ActiveScanResults[ActiveScanResultIndex].PANID.Val = rxMessage.SourcePANID.Val;
-                                                #endif
-                                                for(i = 0; i < MY_ADDRESS_LENGTH; i++)
-                                                {
-                                                    ActiveScanResults[ActiveScanResultIndex].Address[i] = rxMessage.SourceAddress[i];
-                                                }
-                                                ActiveScanResultIndex++;
-                                            }
-                                        }
-                                    #endif
-                                    
-                                    break;
-                                    
+ 
                                 default:
                                     break;
                             }                        
                         }
                         MiMAC_DiscardPacket();
                         break; 
-                        
+                    
+                    
+                    case CMD_P2P_ACTIVE_SCAN_RESPONSE:
+                        {
+                            if( P2PStatus.bits.Resync )
+                            {
+                                P2PStatus.bits.Resync = 0;   
+                            }
+                            #ifdef ENABLE_ACTIVE_SCAN 
+                                else   
+                                {
+                                    i = 0;
+                                    for(; i < ActiveScanResultIndex; i++)
+                                    {
+                                        if( (ActiveScanResults[i].Channel == currentChannel) &&
+                                        #if defined(IEEE_802_15_4)
+                                            (ActiveScanResults[i].PANID.Val == rxMessage.SourcePANID.Val) &&
+                                        #endif
+                                            isSameAddress(ActiveScanResults[i].Address, rxMessage.SourceAddress)
+                                        )
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    if( i == ActiveScanResultIndex && (i < ACTIVE_SCAN_RESULT_SIZE))
+                                    {
+                                        ActiveScanResults[ActiveScanResultIndex].Channel = currentChannel;
+                                        ActiveScanResults[ActiveScanResultIndex].RSSIValue = rxMessage.PacketRSSI;
+                                        ActiveScanResults[ActiveScanResultIndex].LQIValue = rxMessage.PacketLQI;
+                                        #if defined(IEEE_802_15_4)
+                                            ActiveScanResults[ActiveScanResultIndex].PANID.Val = rxMessage.SourcePANID.Val;
+                                        #endif
+                                        for(i = 0; i < MY_ADDRESS_LENGTH; i++)
+                                        {
+                                            ActiveScanResults[ActiveScanResultIndex].Address[i] = rxMessage.SourceAddress[i];
+                                        }
+                                        ActiveScanResults[ActiveScanResultIndex].Capability.Val = rxMessage.Payload[1];
+                                        #if ADDITIONAL_NODE_ID_SIZE > 0
+                                            for(i = 0; i < ADDITIONAL_NODE_ID_SIZE; i++)
+                                            {
+                                                ActiveScanResults[ActiveScanResultIndex].PeerInfo[i] = rxMessage.Payload[2+i];
+                                            }
+                                        #endif
+                                        ActiveScanResultIndex++;
+                                    }
+                                }
+                            #endif
+                            MiMAC_DiscardPacket(); 
+                        }
+                        break;
+                    
+                    
                     #ifndef TARGET_SMALL
                         case CMD_P2P_CONNECTION_REMOVAL_RESPONSE:
                         {
@@ -593,14 +664,13 @@ void P2PTasks(void)
                         {
                             BOOL isCommand = FALSE;
                             WORD_VAL tmpW;
-                            MIWI_TICK k1;
                             
                             MiApp_FlushTx();
                             
                             #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP)
                                 MiApp_WriteData(CMD_TIME_SYNC_DATA_PACKET);
                                 isCommand = TRUE;
-                                tmpTick = TickGet();
+                                tmpTick = MiWi_TickGet();
                                 //tmpW.Val = (((ONE_SECOND) * RFD_WAKEUP_INTERVAL) - (tmpTick.Val - TimeSyncTick.Val) + ( TimeSlotTick.Val * TimeSyncSlot ) ) / (ONE_SECOND * 16);
                                 //tmpW.Val = (((ONE_SECOND) * RFD_WAKEUP_INTERVAL) - (tmpTick.Val - TimeSyncTick.Val) + ( TimeSlotTick.Val * TimeSyncSlot ) ) / SYMBOLS_TO_TICKS((DWORD)0xFFFF * MICRO_SECOND_PER_COUNTER_TICK / 16);
                                 tmpW.Val = (((ONE_SECOND) * RFD_WAKEUP_INTERVAL) - (tmpTick.Val - TimeSyncTick.Val) + ( TimeSlotTick.Val * TimeSyncSlot ) ) / SYMBOLS_TO_TICKS((DWORD)0xFFFF * MICRO_SECOND_PER_COUNTER_TICK / 16);
@@ -623,7 +693,7 @@ void P2PTasks(void)
                                 if( indirectMessages[i].flags.bits.isValid )
                                 {    
                                     BYTE j;
-                                    
+
                                     #ifdef ENABLE_BROADCAST
                                         if( indirectMessages[i].flags.bits.isBroadcast )
                                         {
@@ -848,19 +918,15 @@ BOOL MiApp_ProtocolInit(BOOL bNetworkFreezer)
         }
     #endif
     
-    #if defined(IEEE_802_15_4)
-        #if MY_PAN_ID == 0xFFFF
-            myPANID.v[0] = TMRL;
-            myPANID.v[1] = TMRL+0x51;
-        #else
-            myPANID.Val = MY_PAN_ID;
-        #endif
-    #endif
-    
     #if defined(ENABLE_NETWORK_FREEZER)
         if( bNetworkFreezer )
         {
             nvmGetCurrentChannel(&currentChannel);
+            if( currentChannel >= 32 )
+            {
+                return FALSE;
+            }
+            
             #if defined(IEEE_802_15_4)
                 nvmGetMyPANID(myPANID.v);
             #endif
@@ -878,6 +944,7 @@ BOOL MiApp_ProtocolInit(BOOL bNetworkFreezer)
         else
         {
             #if defined(IEEE_802_15_4)
+                myPANID.Val = MY_PAN_ID;
                 nvmPutMyPANID(myPANID.v);
             #endif
             nvmPutCurrentChannel(&currentChannel);
@@ -898,7 +965,6 @@ BOOL MiApp_ProtocolInit(BOOL bNetworkFreezer)
     #if defined(IEEE_802_15_4)
         {
             WORD tmp = 0xFFFF;
-            
             MiMAC_SetAltAddress((BYTE *)&tmp, (BYTE *)&myPANID.Val);
         }
     #endif
@@ -1099,7 +1165,7 @@ BOOL MiApp_ProtocolInit(BOOL bNetworkFreezer)
             #if defined(ENABLE_ENHANCED_DATA_REQUEST) 
                 P2PStatus.bits.Enhanced_DR_SecEn = 0;
             #endif
-            DataRequestTimer = TickGet();  
+            DataRequestTimer = MiWi_TickGet();
             TxBuffer[0] = firstByte;
             TxData = tmpTxData;
             #if defined(ENABLE_TIME_SYNC)
@@ -1231,7 +1297,7 @@ BOOL MiApp_ProtocolInit(BOOL bNetworkFreezer)
                 {
                     indirectMessages[i].PayLoad[j] = TxBuffer[j];
                 }
-                indirectMessages[i].TickStart = TickGet();
+                indirectMessages[i].TickStart = MiWi_TickGet();
                 return TRUE;
             }
         }
@@ -1438,7 +1504,18 @@ BOOL MiApp_UnicastConnection( INPUT BYTE ConnectionIndex,
                 #if defined(IEEE_802_15_4)
                     return IndirectPacket(FALSE, myPANID, ConnectionTable[ConnectionIndex].Address, FALSE, SecEn);
                 #else
-                    return IndirectPacket(FALSE, ConnectionTable[ConnectionIndex].Address, FALSE, SecEn);
+                    // Define the additional step to assign the address to
+                    // bypass compiler bug in C18 v3.38.
+                    BYTE address[MY_ADDRESS_LENGTH];
+                    BYTE i;
+
+                    for(i = 0; i < MY_ADDRESS_LENGTH; i++)
+                    {
+                        address[i] = ConnectionTable[ConnectionIndex].Address[i];  
+                    }
+                    
+                    //return IndirectPacket(FALSE, ConnectionTable[ConnectionIndex].Address, FALSE, SecEn);
+                    return IndirectPacket(FALSE, address, FALSE, SecEn);
                 #endif
             }
         #endif
@@ -1571,8 +1648,20 @@ BOOL    isSameAddress(INPUT BYTE *Address1, INPUT BYTE *Address2)
         switch(Mode)
         {
             case START_CONN_DIRECT:
+                #if defined(IEEE_802_15_4)
+                    #if MY_PAN_ID == 0xFFFF
+                        myPANID.v[0] = TMRL;
+                        myPANID.v[1] = TMRL+0x51;
+                    #else
+                        myPANID.Val = MY_PAN_ID;
+                    #endif
+                    {
+                        WORD tmp = 0xFFFF;
+                        MiMAC_SetAltAddress((BYTE *)&tmp, (BYTE *)&myPANID.Val);
+                    }
+                #endif
                 #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-                    TimeSyncTick = TickGet();
+                    TimeSyncTick = MiWi_TickGet();
                 #endif
                 return TRUE;
                 
@@ -1582,13 +1671,25 @@ BOOL    isSameAddress(INPUT BYTE *Address1, INPUT BYTE *Address2)
                     BYTE channel;
                     BYTE RSSIValue;
                     
+                    #if defined(IEEE_802_15_4)
+                        #if MY_PAN_ID == 0xFFFF
+                            myPANID.v[0] = TMRL;
+                            myPANID.v[1] = TMRL+0x51;
+                        #else
+                            myPANID.Val = MY_PAN_ID;
+                        #endif
+                        {
+                            WORD tmp = 0xFFFF;
+                            MiMAC_SetAltAddress((BYTE *)&tmp, (BYTE *)&myPANID.Val);
+                        }
+                    #endif
                     channel = MiApp_NoiseDetection(ChannelMap, ScanDuration, NOISE_DETECT_ENERGY, &RSSIValue);
                     MiApp_SetChannel(channel);
                     Printf("\r\nStart Wireless Communication on Channel ");
                     PrintDec(channel);
                     Printf("\r\n");
                     #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-                        TimeSyncTick = TickGet();
+                        TimeSyncTick = MiWi_TickGet();
                     #endif
                     return TRUE;
                 }
@@ -1667,14 +1768,14 @@ BOOL    isSameAddress(INPUT BYTE *Address1, INPUT BYTE *Address2)
             return 0xFF;
         }
         
-        t1 = TickGet();
+        t1 = MiWi_TickGet();
         t1.Val -= (ONE_SECOND);
         ConnMode = ENABLE_ALL_CONN;
         P2PStatus.bits.SearchConnection = 1;
         while( P2PStatus.bits.SearchConnection )
         {
-            t2 = TickGet();
-            if( TickGetDiff(t2, t1) > (ONE_SECOND) )
+            t2 = MiWi_TickGet();
+            if( MiWi_TickGetDiff(t2, t1) > (ONE_SECOND) )
             {   
                 t1 = t2;
                 
@@ -1685,6 +1786,7 @@ BOOL    isSameAddress(INPUT BYTE *Address1, INPUT BYTE *Address2)
                 connectionInterval = CONNECTION_INTERVAL-1;
                 if( retry-- == 0 )
                 {
+                    P2PStatus.bits.SearchConnection = 0;
                     return 0xFF;
                 }
                 MiApp_FlushTx();
@@ -1733,13 +1835,17 @@ BOOL    isSameAddress(INPUT BYTE *Address1, INPUT BYTE *Address2)
                 #endif
             }
     
-            P2PTasks();
+            if( MiApp_MessageAvailable())
+            {
+                MiApp_DiscardMessage();
+            }     
+            //P2PTasks();
         }
       
         ConnMode = tmpConnectionMode;
         
         #if defined(ENABLE_TIME_SYNC) && !defined(ENABLE_SLEEP) && defined(ENABLE_INDIRECT_MESSAGE)
-            TimeSyncTick = TickGet();
+            TimeSyncTick = MiWi_TickGet();
         #endif
         return LatestConnection;
         
@@ -1802,9 +1908,25 @@ BOOL MiApp_MessageAvailable(void)
     {
         BYTE i, j;
         
+        if( index > CONNECTION_SIZE )
+        {
+            Printf("\r\n\r\nMy Address: 0x");
+            for(i = 0; i < MY_ADDRESS_LENGTH; i++)
+            {
+                PrintChar(myLongAddress[MY_ADDRESS_LENGTH-1-i]);
+            }
+            #if defined(IEEE_802_15_4)
+                Printf("  PANID: 0x");
+                PrintChar(myPANID.v[1]);
+                PrintChar(myPANID.v[0]);
+            #endif
+            Printf("  Channel: ");
+            PrintDec(currentChannel);
+        }
+            
         if( index < CONNECTION_SIZE )
         {
-            Printf("\r\n\r\nConnection     PeerLongAddress     PeerInfo\r\n");  
+            Printf("\r\nConnection     PeerLongAddress     PeerInfo\r\n");  
             if( ConnectionTable[index].status.bits.isValid )
             {
                 PrintChar(index);
@@ -1928,7 +2050,7 @@ BOOL MiApp_MessageAvailable(void)
         }
         else 
         {
-            if( ConnMode > ENABLE_PREV_CONN )
+            if( ConnMode >= ENABLE_PREV_CONN )
             {
                 return status;
             }
@@ -2034,7 +2156,7 @@ BOOL MiApp_MessageAvailable(void)
                 MiApp_SetChannel( i );
      
                 MiApp_FlushTx();
-                MiApp_WriteData(CMD_P2P_CONNECTION_REQUEST);
+                MiApp_WriteData(CMD_P2P_ACTIVE_SCAN_REQUEST);
                 MiApp_WriteData(currentChannel);
                 #if defined(IEEE_802_15_4)
                     tmpPANID.Val = 0xFFFF;
@@ -2043,12 +2165,16 @@ BOOL MiApp_MessageAvailable(void)
                     SendPacket(TRUE, NULL, TRUE, FALSE);
                 #endif
                 
-                t1 = TickGet();
+                t1 = MiWi_TickGet();
                 while(1)
                 {
-                    P2PTasks();
-                    t2 = TickGet();
-                    if( TickGetDiff(t2, t1) > ((DWORD)(ScanTime[ScanDuration])) )
+                    if( MiApp_MessageAvailable())
+                    {
+                        MiApp_DiscardMessage();
+                    }                     
+                    //P2PTasks();
+                    t2 = MiWi_TickGet();
+                    if( MiWi_TickGetDiff(t2, t1) > ((DWORD)(ScanTime[ScanDuration])) )
                     {
                         // if scan time exceed scan duration, prepare to scan the next channel
                         break;
@@ -2137,7 +2263,7 @@ BOOL MiApp_MessageAvailable(void)
                 /* choose appropriate channel */
                 MiApp_SetChannel(i);
                 
-                t1 = TickGet();
+                t1 = MiWi_TickGet();
                 
                 while(1)
                 {
@@ -2147,8 +2273,8 @@ BOOL MiApp_MessageAvailable(void)
                         maxRSSI = RSSIcheck;
                     }
 
-                    t2 = TickGet();
-                    if( TickGetDiff(t2, t1) > ((DWORD)(ScanTime[ScanDuration])) )
+                    t2 = MiWi_TickGet();
+                    if( MiWi_TickGetDiff(t2, t1) > ((DWORD)(ScanTime[ScanDuration])) )
                     {
                         // if scan time exceed scan duration, prepare to scan the next channel
                         break;
@@ -2212,11 +2338,11 @@ BOOL MiApp_MessageAvailable(void)
         
         for( i = 0; i < FA_BROADCAST_TIME; i++)
         {
-            t1 = TickGet();
+            t1 = MiWi_TickGet();
             while(1)
             {
-                t2 = TickGet();
-                if( TickGetDiff(t2, t1) > SCAN_DURATION_9 )
+                t2 = MiWi_TickGet();
+                if( MiWi_TickGetDiff(t2, t1) > SCAN_DURATION_9 )
                 {
                     MiApp_FlushTx();
                     MiApp_WriteData(CMD_CHANNEL_HOPPING);
@@ -2282,7 +2408,7 @@ BOOL MiApp_MessageAvailable(void)
         BYTE backupChannel = currentChannel;
         MIWI_TICK t1, t2;
         
-        t1 = TickGet();
+        t1 = MiWi_TickGet();
         P2PStatus.bits.Resync = 1;
         for(i = 0; i < RESYNC_TIMES; i++)
         {
@@ -2291,9 +2417,9 @@ BOOL MiApp_MessageAvailable(void)
             j = 0;
             while(P2PStatus.bits.Resync)
             {
-                t2 = TickGet();
+                t2 = MiWi_TickGet();
                 
-                if( TickGetDiff(t2, t1) > SCAN_DURATION_9 )
+                if( MiWi_TickGetDiff(t2, t1) > SCAN_DURATION_9 )
                 {
                     t1.Val = t2.Val;
                     
@@ -2315,7 +2441,7 @@ BOOL MiApp_MessageAvailable(void)
                     j++;
                     
                     MiApp_FlushTx();
-                    MiApp_WriteData(CMD_P2P_CONNECTION_REQUEST);
+                    MiApp_WriteData(CMD_P2P_ACTIVE_SCAN_REQUEST);
                     MiApp_WriteData(currentChannel);
         
                     #if defined(IEEE_802_15_4)
@@ -2324,7 +2450,11 @@ BOOL MiApp_MessageAvailable(void)
                         SendPacket(FALSE, ConnectionTable[ConnectionIndex].Address, TRUE, FALSE);
                     #endif
                 }
-                P2PTasks();
+                if( MiApp_MessageAvailable())
+                {
+                    MiApp_DiscardMessage();
+                }        
+                //P2PTasks();
             }
             if( P2PStatus.bits.Resync == 0 )
             {

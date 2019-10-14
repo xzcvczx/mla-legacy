@@ -42,6 +42,7 @@
  * 				is set, focus or manual user set of EB_DRAW_CARET will draw 
  *				the caret. If this bit is not set, the caret will never 
  *				be shown.
+ * 02/24/11     Modified draw state machine to remove incorrect loops.
 *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -258,7 +259,9 @@ WORD EbDraw(void *pObj)
 {
 typedef enum {
 	EB_STATE_START,
-	EB_STATE_PANEL,
+	EB_STATE_DRAW_PANEL,
+	EB_STATE_PREPARE_FOR_TEXT,
+	EB_STATE_POSITION_TEXT,
 	EB_STATE_TEXT,
     EB_STATE_CARET,
 } EB_DRAW_STATES;
@@ -271,130 +274,171 @@ EDITBOX *pEb;
 
     pEb = (EDITBOX *)pObj;
 
-    if(IsDeviceBusy())
-        return 0;
-
-    switch(state){
-
-        case EB_STATE_START:
-
-          	if(GetState(pEb, EB_HIDE)){
-   	   	        SetColor(pEb->hdr.pGolScheme->CommonBkColor);
-    	        if(!Bar(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom)) return 0;
-    	        return 1;
-    	    }
-
-            if(GetState(pEb,EB_DISABLED)){
-                temp = pEb->hdr.pGolScheme->ColorDisabled;
-                ClrState(pEb,EB_CARET);
-				SetState(pEb,EB_DRAW_CARET);
-	        }else{
-                temp = pEb->hdr.pGolScheme->Color0;
-                if(GetState(pEb,EB_FOCUSED|EB_DRAW_CARET) ==  (EB_FOCUSED|EB_DRAW_CARET)){
-					SetState(pEb,EB_DRAW_CARET);
+    while(!IsDeviceBusy())
+    {
+        switch(state){
+    
+            case EB_STATE_START:
+    
+              	if(GetState(pEb, EB_HIDE)){
+       	   	        SetColor(pEb->hdr.pGolScheme->CommonBkColor);
+        	        if(!Bar(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom)) return 0;
+        	        return 1;
+        	    }
+    
+                if(GetState(pEb,EB_DISABLED)){
+                    temp = pEb->hdr.pGolScheme->ColorDisabled;
+                    ClrState(pEb,EB_CARET);
+    				SetState(pEb,EB_DRAW_CARET);
+    	        }else{
+                    temp = pEb->hdr.pGolScheme->Color0;
+                    if(GetState(pEb,EB_FOCUSED|EB_DRAW_CARET) ==  (EB_FOCUSED|EB_DRAW_CARET)){
+    					SetState(pEb,EB_DRAW_CARET);
+                    }
                 }
-            }
-
-    if(GetState(pEb,EB_DRAW)){
-
-            GOLPanelDraw(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom,0,
-                temp,
-                pEb->hdr.pGolScheme->EmbossDkColor,
-                pEb->hdr.pGolScheme->EmbossLtColor,
-                NULL,
-                GOL_EMBOSS_SIZE);
-
-            state = EB_STATE_PANEL;
-
-        case EB_STATE_PANEL:
-
-            if(!GOLPanelDrawTsk())
-                return 0;
-
-    }
-
-            SetClip(CLIP_ENABLE);
-
-            SetClipRgn(pEb->hdr.left+GOL_EMBOSS_SIZE+EB_INDENT,
-                       pEb->hdr.top+GOL_EMBOSS_SIZE+EB_INDENT,
-                       pEb->hdr.right-GOL_EMBOSS_SIZE-EB_INDENT,
-                       pEb->hdr.bottom-GOL_EMBOSS_SIZE-EB_INDENT);
-
-	        SetFont(pEb->hdr.pGolScheme->pFont);
-
-            if(GetState(pEb,EB_DISABLED)){
-                SetColor(pEb->hdr.pGolScheme->TextColorDisabled);
-            }else{
-                SetColor(pEb->hdr.pGolScheme->TextColor0);
-            }
-
-
-            pText = pEb->pBuffer;
-            temp = 1;
-
-            while((XCHAR)*pText != (XCHAR)0){
-                if((XCHAR)*pText == (XCHAR)'\n')
-                    temp++;
-                pText++;
-            }
-
-            pText = pEb->pBuffer;
-            MoveTo(GetX(),(pEb->hdr.top+pEb->hdr.bottom-temp*pEb->textHeight)>>1);
-
-
-do{
-            width = GetTextWidth(pText,pEb->hdr.pGolScheme->pFont);
-
-            if (!GetState(pEb, EB_CENTER_ALIGN|EB_RIGHT_ALIGN)) {
-                MoveTo(pEb->hdr.left+GOL_EMBOSS_SIZE+EB_INDENT, GetY());
-            }else{
-                if (GetState(pEb, EB_RIGHT_ALIGN)) {
-			        MoveTo(pEb->hdr.right-width-EB_INDENT-GOL_EMBOSS_SIZE, GetY());
-                }else{
-                    MoveTo((pEb->hdr.left+pEb->hdr.right-width)>>1,GetY());
+    
+                if(GetState(pEb,EB_DRAW))
+                {
+    
+                    GOLPanelDraw(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom,0,
+                        temp,
+                        pEb->hdr.pGolScheme->EmbossDkColor,
+                        pEb->hdr.pGolScheme->EmbossLtColor,
+                        NULL,
+                        GOL_EMBOSS_SIZE);
+    
+                    state = EB_STATE_DRAW_PANEL;
+                    // no break here since it will always go to the EB_STATE_DRAW_PANEL state
                 }
-            }
-
-		    state = EB_STATE_TEXT;
-
-        case EB_STATE_TEXT:
-            if(GetState(pEb,EB_DRAW)){
-                if(!OutText(pText))
+                else
+                {
+                    state = EB_STATE_PREPARE_FOR_TEXT;
+                    break;
+                }    
+                
+            case EB_STATE_DRAW_PANEL:
+                if(!GOLPanelDrawTsk())
                     return 0;
-            }else{
-                MoveRel(width, 0);
-            }
-            while((XCHAR)*pText>(XCHAR)15)
-                pText++;
-
-            if((XCHAR)*pText == (XCHAR)'\n')
-            {
-                MoveRel(0, pEb->textHeight);
-            }
-
-}while(*pText++ != 0);
-
-			state = EB_STATE_CARET;
-
-        case EB_STATE_CARET:
-            if(!GetState(pEb,EB_DISABLED)){
-	            
-                if(GetState(pEb,EB_DRAW_CARET) && GetState(pEb,EB_CARET)){
-                    SetColor(pEb->hdr.pGolScheme->TextColor0);
+                state = EB_STATE_PREPARE_FOR_TEXT;
+                
+                // no break here since it will always go to the EB_STATE_PREPARE_FOR_TEXT state
+    
+            case EB_STATE_PREPARE_FOR_TEXT:
+    
+                SetClip(CLIP_ENABLE);
+    
+                SetClipRgn(pEb->hdr.left+GOL_EMBOSS_SIZE+EB_INDENT,
+                           pEb->hdr.top+GOL_EMBOSS_SIZE+EB_INDENT,
+                           pEb->hdr.right-GOL_EMBOSS_SIZE-EB_INDENT,
+                           pEb->hdr.bottom-GOL_EMBOSS_SIZE-EB_INDENT);
+    
+    	        SetFont(pEb->hdr.pGolScheme->pFont);
+    
+                if(GetState(pEb,EB_DISABLED)){
+                    SetColor(pEb->hdr.pGolScheme->TextColorDisabled);
                 }else{
-                    SetColor(pEb->hdr.pGolScheme->Color0);
+                    SetColor(pEb->hdr.pGolScheme->TextColor0);
                 }
+    
+                // get the string buffer
+                pText = pEb->pBuffer;
+                temp = 1;
+    
+                // calculate how many lines are expected so we know where to
+                // place the starting point
+                while((XCHAR)*pText != (XCHAR)0){
+                    if((XCHAR)*pText == (XCHAR)'\n')
+                        temp++;
+                    pText++;
+                }
+    
+                // go back to the start of the buffer
+                pText = pEb->pBuffer;
+                // position the cursor 
+                MoveTo(GetX(),(pEb->hdr.top+pEb->hdr.bottom-temp*pEb->textHeight)>>1);
+                
+                // set state to actual string rendering loop
+                state = EB_STATE_POSITION_TEXT;
+                
+                // no break here since it will always go to the EB_STATE_POSITION_TEXT state
 
-                if(!Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight)) return 0;
-            }
+            case EB_STATE_POSITION_TEXT:
+    
+                // get width of the string to render
+                width = GetTextWidth(pText,pEb->hdr.pGolScheme->pFont);
+    
+                // place the starting point based on text alignment
+                if (!GetState(pEb, EB_CENTER_ALIGN|EB_RIGHT_ALIGN)) {
+                    MoveTo(pEb->hdr.left+GOL_EMBOSS_SIZE+EB_INDENT, GetY());
+                }else{
+                    if (GetState(pEb, EB_RIGHT_ALIGN)) {
+    			        MoveTo(pEb->hdr.right-width-EB_INDENT-GOL_EMBOSS_SIZE, GetY());
+                    }else{
+                        MoveTo((pEb->hdr.left+pEb->hdr.right-width)>>1,GetY());
+                    }
+                }
+    
+    		    state = EB_STATE_TEXT;
+    		    
+    		    // no break here since it will always go to the EB_STATE_TEXT state
+    
+            case EB_STATE_TEXT:
+            
+                // this is the actual string rendering 
+                
+                if(GetState(pEb,EB_DRAW)){
+                    if(!OutText(pText))
+                        return 0;
+                }else{
+                    MoveRel(width, 0);
+                }
+                while((XCHAR)*pText>(XCHAR)15)
+                    pText++;
+    
+                if((XCHAR)*pText == (XCHAR)'\n')
+                {
+                    MoveRel(0, pEb->textHeight);
+                }
+                
+                // check if end of string
+                if (*pText != 0)
+                {
+                    state = EB_STATE_POSITION_TEXT;
+                    pText++;
+                    break;
+                }    
+       			
+       			state = EB_STATE_CARET;
 
-            SetClip(CLIP_DISABLE);
-
-			state = EB_STATE_START;
-
-			return 1;
-    }
-    return 1;
+    		    // no break here since it will always go to the EB_STATE_CARET state
+   
+            case EB_STATE_CARET:
+            
+                // draw the caret if required
+                
+                if(!GetState(pEb,EB_DISABLED)){
+    	            
+                    if(GetState(pEb,EB_DRAW_CARET) && GetState(pEb,EB_CARET)){
+                        SetColor(pEb->hdr.pGolScheme->TextColor0);
+                    }else{
+                        SetColor(pEb->hdr.pGolScheme->Color0);
+                    }
+    
+                    if(!Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight)) 
+                        return 0;
+                }
+    
+                SetClip(CLIP_DISABLE);
+    
+    			state = EB_STATE_START;
+    
+    			return 1;
+    			
+        } // switch()
+        
+    }//  while(!IsDeviceBusy())
+        
+    return 0;
 }
 
 #endif // USE_EDITBOX

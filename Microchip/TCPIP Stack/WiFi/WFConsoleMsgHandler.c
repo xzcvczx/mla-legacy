@@ -78,7 +78,7 @@ typedef struct dataStructDescriptor
 #define kWFValidateWithS8               (2)
 #define kWFValidateWithX8               (3)
 
-
+extern UINT8 g_hibernate_state;
 //============================================================================
 // Function Prototypes
 //============================================================================
@@ -235,6 +235,12 @@ static void do_help_msg(void)
 static void do_get_wfver_cmd(void)
 {
  	tWFDeviceInfo  deviceInfo;
+
+	if (g_hibernate_state)
+	{
+		WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
+		return;
+	}
 
 	WF_GetDeviceInfo(&deviceInfo);
 	WFConsolePrintRomStr("Firmware version   0x", FALSE);

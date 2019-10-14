@@ -223,7 +223,7 @@ WORD PbDraw(void *pObj)
 
     static PB_DRAW_STATES state = REMOVE;
     static DWORD x1;
-    volatile DWORD x2;
+    static DWORD x2;
     static XCHAR text[5] = {'0','0','%',0};
     PROGRESSBAR *pPb;
 

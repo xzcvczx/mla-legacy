@@ -88,8 +88,14 @@ echo.
 
 rd .\Objects /S /Q
 
-rd .\"Object - MDD File System-SD-PIC24" /S /Q
+rd .\PIC18F\"Object - MDD File System-SD-PIC18" /S /Q
 
-rd .\"Object - MDD File System-SD-PIC32" /S /Q
+rd .\PIC24F\"Object - MDD File System-SD-PIC24" /S /Q
+
+rd .\PIC32\"Object - MDD File System-SD-PIC32" /S /Q
+
+rd .\MPLAB.X\build /S /Q
+
+rd .\MPLAB.X\dist /S /Q
 
 echo Done.

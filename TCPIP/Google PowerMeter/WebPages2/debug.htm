@@ -1,0 +1,64 @@
+~inc:header.inc~
+<div id="content">
+<h1>Development Debugging Information</h1>
+
+This page displays the stored preference values and configuration values for your meter demo.  You can modify
+this page to display other application values to assist with application debugging.
+<br /><br />
+After you activate your meter, you can view the authentication POST content that was received from Google on your
+Google PowerMeter gadget's <a href="http://www.google.com/powermeter/settings">settings page</a>.  During activation,
+this information was parsed and loaded into an instance of the POWER_METER_PREFERENCES structure called
+gPowerMeterPreferences.
+
+<br />
+<br />
+
+<h3>These settings were received during authentication</h3>
+<b>Public Key Hash 1:</b><br />
+Authentication POST message parameter name: hash<br />
+gPowerMeterPreferences parameter: pKeyHashes[0]<br />
+Current Value:
+<textarea rows="2" cols="60" readonly="readonly">hash=~hash1~</textarea><br /><br />
+
+<b>Public Key Hash 2:</b><br />
+Authentication POST parameter name: hash<br />
+gPowerMeterPreferences parameter: pKeyHashes[1]<br />
+Current Value:
+<textarea rows="2" cols="60" readonly="readonly">hash=~hash2~</textarea><br /><br />
+
+<b>Public Key Hash 3:</b><br />
+Authentication POST parameter name: hash<br />
+gPowerMeterPreferences parameter: pKeyHashes[2]<br />
+Current Value:
+<textarea rows="2" cols="60" readonly="readonly">hash=~hash3~</textarea><br /><br />
+
+<b>Authentication Token:</b><br />
+Authentication POST parameter name: token<br />
+gPowerMeterPreferences parameter: auth_token<br />
+Current Value:
+<textarea rows="2" cols="60" readonly="readonly">token=~authtoken~</textarea><br /><br />
+
+<b>Authentication Path:</b><br />
+Authentication POST parameter name: path<br />
+gPowerMeterPreferences parameter: auth_path<br />
+Current Value:
+<textarea rows="3" cols="60" readonly="readonly">path=~authpath~</textarea><br /><br />
+
+<h3>These preferences were set in the InitPowerMeterPreferences() function</h3>
+<b>Capture Interval (s):</b> ~cap_int~<br />
+<b>Send Interval (s):</b> ~send_int~<br />
+<b>Transmitting status:</b> ~status~<br />
+<br />
+<h3>These values were set using #defines in MainDemo.h, gqueue.h, and ginsu.h.</h3>
+<b>Device Manufacturer:</b> ~manu~<br />
+<b>Device Model:</b> ~model~<br />
+<b>Number of sensors:</b> ~num_sensor~<br />
+<br />
+<h3>This value was calculated automatically from the MAC address</h3>
+<b>Device ID:</b> ~devid~<br />
+</div>
+
+<div class="spacer">&nbsp;</div>
+</div></div></div></div></div>
+</body>
+</html>

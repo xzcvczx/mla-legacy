@@ -12,8 +12,8 @@
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the �Company�) for its PICmicro� Microcontroller is intended and
- * supplied to you, the Company�s customer, for use solely and
+ * (the ï¿½Companyï¿½) for its PICmicroï¿½ Microcontroller is intended and
+ * supplied to you, the Companyï¿½s customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
  * protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN �AS IS� CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN ï¿½AS ISï¿½ CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -163,7 +163,7 @@ void main (void)
 		while(1);
 
 	// Create a file
-	pointer = FSfopenpgm ("FILE1.TXT", "w");
+	pointer = FSfopenpgm ("FILE3.TXT", "w");
 	if (pointer == NULL)
 		while(1);
 
@@ -202,7 +202,7 @@ void main (void)
 		while(1);
 
 	// Create a second file
-	pointer = FSfopenpgm ("FILE2.TXT", "w");
+	pointer = FSfopenpgm ("FILE1.TXT", "w");
 	if (pointer == NULL)
 		while(1);
 
@@ -216,9 +216,12 @@ void main (void)
 #endif
 
 	// Open file 1 in read mode
-	pointer = FSfopenpgm ("FILE1.TXT", "r");
+	pointer = FSfopenpgm ("FILE3.TXT", "r");
 	if (pointer == NULL)
 		while(1);
+
+   if (FSrenamepgm ("FILE2.TXT", pointer))
+      while(1);
 
 	// Read one four-byte object
 	if (FSfread (receiveBuffer, 4, 1, pointer) != 1)
@@ -322,7 +325,10 @@ void main (void)
 
 #ifdef ALLOW_FILESEARCH
 	// Set attributes
-	attributes = ATTR_DIRECTORY | ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN;
+	attributes = ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN;
+
+   // Functions "FindFirstpgm" & "FindNext" can be used to find files
+   // and directories with required attributes in the current working directory.
 
 	// Find the first TXT file with any (or none) of those attributes that
 	// has a name beginning with the letters "FILE"
@@ -338,7 +344,9 @@ void main (void)
 			while(1);
 	}
 
-	// Delete file 2
+	// Delete file 2.
+	// NOTE : "FSremove" function deletes specific file not directory.
+	//        To delete directories use "FSrmdir" function
 	if (FSremove (rec.filename))
 		while(1);
 #endif

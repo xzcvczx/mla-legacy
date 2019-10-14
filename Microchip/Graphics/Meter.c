@@ -4,15 +4,13 @@
  *  Meter
  *****************************************************************************
  * FileName:        Meter.c
- * Dependencies:    Meter.h
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 Version 3.00, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -34,90 +32,18 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
- * Albert Z.			07/31/08	Added arc colors options
- * P. A. Tamayo			08/20/08	Added accuracy option for displaying values
+ * 11/12/07	    Version 1.0 release
+ * 07/31/08	    Added arc colors options
+ * 08/20/08	    Added accuracy option for displaying values
+ * 04/01/11     Removed sineTable[], use the one in the Primitive.c instead.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 #include <math.h>
 #include <stdio.h>
 
 #ifdef USE_METER
-
-/*********************************************************************
-* This is the sine lookup table used to draw the meter and update
-* the position of the needle. 
-*********************************************************************/
-const char  _sineTable[] __attribute__((aligned(2))) =
-{
-    0x00,
-    0x03,
-    0x06,
-    0x09,
-    0x0c,
-    0x10,
-    0x13,
-    0x16,
-    0x19,
-    0x1c,
-    0x1f,
-    0x22,
-    0x25,
-    0x28,
-    0x2b,
-    0x2e,
-    0x31,
-    0x33,
-    0x36,
-    0x39,
-    0x3c,
-    0x3f,
-    0x41,
-    0x44,
-    0x47,
-    0x49,
-    0x4c,
-    0x4e,
-    0x51,
-    0x53,
-    0x55,
-    0x58,
-    0x5a,
-    0x5c,
-    0x5e,
-    0x60,
-    0x62,
-    0x64,
-    0x66,
-    0x68,
-    0x6a,
-    0x6b,
-    0x6d,
-    0x6f,
-    0x70,
-    0x71,
-    0x73,
-    0x74,
-    0x75,
-    0x76,
-    0x78,
-    0x79,
-    0x7a,
-    0x7a,
-    0x7b,
-    0x7c,
-    0x7d,
-    0x7d,
-    0x7e,
-    0x7e,
-    0x7e,
-    0x7f,
-    0x7f,
-    0x7f,
-    0x7f
-};
 
 /* Internal Functions */
 void    MtrCalcDimensions(METER *pMtr); // used to calculate the meter dimensions
@@ -768,12 +694,12 @@ WORD MtrDraw(void *pObj)
 
                     /* The method uses a lookup table of pre-calculated sine values. The table
 			   is derived from calculating sine values from 0 degrees to 90 degrees.
-			   To save space, the entries are just a byte size. So 360/255 = 1.40625 degrees
+			   To save space, the entries are just a byte size. So 360/256 = 1.40625 degrees
 			   increments is used for each entry. (i.e entry 0 is zero, entry i is 1.40625,
 			   entry 2 is 2*1.40625,... entry n is n*1.40625. 
 			   Get the sine of the entries yields a float value. Since we only use a 
-			   byte for storage we can shift the values by 127 without overflowing the 
-			   storage. Thus we need to shift the computed values by 7 bits. Shifting now 
+			   byte for storage we can shift the values by 128 without overflowing the 
+			   storage. Thus we need to shift the computed values by 8 bits. Shifting now 
 			   permits us to work with integers which greatly reduces the execution time.
 			   With this in mind, the input angles must be translated to 0-90 range with the
 			   quadrant of the original angle stored to translate back the value from the 
@@ -819,17 +745,15 @@ WORD MtrDraw(void *pObj)
                         x2 = 1;
                     }
 
-                    // Find Sine value from look up table
-                    temp *= .71111; // value is derived from
-
-                    // 360/256 = 1.40625. To avoid
+                    // using the calculated angle we get the sine and cosine 
+                    // values from the look up table, then to avoid
                     // division, the inverse is used
-                    x1 = _sineTable[64 - temp] * pMtr->radius;
-                    y1 = _sineTable[temp] * pMtr->radius;
+                    x1 = Cosine(temp) * pMtr->radius;
+                    y1 = Sine(temp) * pMtr->radius;
 
                     // calculate new positions, check if we need to reverse x and y values
-                    pMtr->xPos = ((x2) * (((i == 0) ? x1 : y1) >> 7)) + pMtr->xCenter;
-                    pMtr->yPos = ((y2) * (((i == 0) ? y1 : x1) >> 7)) + pMtr->yCenter;
+                    pMtr->xPos = ((x2) * (((i == 0) ? x1 : y1) >> 8)) + pMtr->xCenter;
+                    pMtr->yPos = ((y2) * (((i == 0) ? y1 : x1) >> 8)) + pMtr->yCenter;
 
                     // now draw the needle with the new position	
                     SetColor(BRIGHTRED);
