@@ -11,7 +11,7 @@
  *
  * Software License Agreement
  *
- * Copyright � 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -21,7 +21,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED �AS IS� WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -69,11 +69,11 @@ _FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 #else
     #if defined(__PIC24FJ256GB110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ256GA110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
+_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ128GA010__)
 _CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
@@ -81,12 +81,12 @@ _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
     #endif
 	#if defined (__PIC24FJ256GB210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif	
 #endif
@@ -142,7 +142,6 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS
 #define ID_LISTBOX2         81
 #define ID_LISTBOX3         82
 #define ID_EDITBOX1         83
-//#define ID_LISTBOX4         84
 
 #define ID_CALL             91
 #define ID_STOPCALL         92
@@ -579,7 +578,6 @@ int main(void)
 //        pMsg - pointer to the non-translated, raw GOL message
 // Output: if the function returns non-zero the message will be processed by default
 // Overview: this function must be implemented by user. GOLMsg() function calls it each
-
 //           time the valid message for the object received
 /////////////////////////////////////////////////////////////////////////////
 WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
@@ -783,7 +781,6 @@ WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 // Overview: this function must be implemented by user. GOLDraw() function calls it each
 //           time when GOL objects drawing is completed. User drawing should be done here.
 //           GOL will not change color, line type and clipping region settings while
-
 //           this function returns zero.
 /////////////////////////////////////////////////////////////////////////////
 WORD GOLDrawCallback(void)
@@ -922,11 +919,8 @@ WORD GOLDrawCallback(void)
                     direction = 1;
                 }
 
-                SetState(pObj, WND_DRAW_TITLE);
-                GOLRedrawRec(pObj->left + GOL_EMBOSS_SIZE,
-                             pObj->top + GOL_EMBOSS_SIZE,
-                             pObj->right - GOL_EMBOSS_SIZE,
-                             pObj->top + GOL_EMBOSS_SIZE + WND_TITLE_HEIGHT);
+                // redraw the whole screen
+                GOLRedrawRec(0, 0, GetMaxX(), GetMaxY());
 
                 prevTick = tick;
             }
@@ -1556,20 +1550,6 @@ void CreatePullDown(void)
             alt2Scheme
         );                  // use alternate scheme
     }
-    else
-    {
-/*        LbCreate
-        (
-            ID_LISTBOX4,                // ID
-            145,
-            BOTTOM_NORMAL,              // dimensions
-            220,
-            BOTTOM_DROPPED,
-            LB_SINGLE_SEL | LB_DRAW | LB_FOCUSED,   // will be created with single select and focused
-            (XCHAR *)ScrSelListLang,                   // list of demo screens
-            alt2Scheme
-        );                 */ // use alternate scheme
-    }
 
     // This object is a ghost object to enable to get messages that touch is outside
     // the list box. It will never be displayed.
@@ -1618,14 +1598,10 @@ WORD MsgPullDown(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
     {
         pLb = (LISTBOX *)GOLFindObject(ID_LISTBOX2);   // find the pull down object
     }
-    else
-    {
-//        pLb = (LISTBOX *)GOLFindObject(ID_LISTBOX4);   // find the pull down object
-    }
     
     if(pMsg->uiEvent == EVENT_RELEASE)
     {                           // state transition must be done
-        if((GetObjID(pObj) == ID_LISTBOX2) /* || (GetObjID(pObj) == ID_LISTBOX4) */)
+        if(GetObjID(pObj) == ID_LISTBOX2) 
         {                       // if released outside list box, go back
             refreshScreen = 1;  // refresh screen only when an item was
         }                       // selected
@@ -1659,15 +1635,6 @@ WORD MsgPullDown(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 
                 return (1);
             }
- /*           else if(GetObjID(pObj) == ID_LISTBOX4)
-            {
-                if(pMsg->uiEvent == EVENT_MOVE)
-                {
-                    pMsg->uiEvent = EVENT_PRESS;
-                    _language = LbGetFocusedItem(pLb);                  // check item selected
-                }
-                return (1);
-            } */
         }
 
         return (0);
@@ -1784,6 +1751,9 @@ void DisplayPullDown(void)
         GOLFree();              // remove the pull down menu
         GOLSetList(pListSaved); // set active list back to saved list
         GOLRedrawRec(left, top, right, bottom);
+        // reset the window so it will not be redrawn
+        ClrState(GOLFindObject(ID_WINDOW1), WND_DRAW);
+
 
         refreshScreen = 0;      // reset the flag to no refresh	
     }
@@ -2201,17 +2171,6 @@ void CreateRadioButtons(void)
     {
         SetState(GOLFindObject(ID_RADIOBUTTON6), RB_CHECKED);
     }
-/*    RbCreate
-    (
-        ID_RADIOBUTTON7,        // ID
-        RB_ORIGIN_X + 135,
-        RB_ORIGIN_Y + 105,
-        RB_ORIGIN_X + 255,
-        RB_ORIGIN_Y + 140,      // dimension
-        RB_DRAW,                // will be dislayed after creation
-        (XCHAR *)Rb6Str,        // "Rb6"
-        altScheme
-    );    */                      // alternative GOL scheme
 }
 
 /* */
@@ -3696,6 +3655,8 @@ WORD RemovePullDownMenu(void)
 
     // redraw objects that were overlapped by pulldown menu
     GOLRedrawRec(pDwnLeft, pDwnTop, pDwnRight, pDwnBottom);
+    // reset the window so it will not be redrawn
+    ClrState(GOLFindObject(ID_WINDOW1), WND_DRAW);
 
     // must reset the pressed button, this code is more compact than searching
     // which one of the three is pressed.
@@ -5220,7 +5181,7 @@ void ErrorTrap(XCHAR *message)
 *
 ********************************************************************/
 #ifdef __PIC32MX__
-    #define __T4_ISR    __ISR(_TIMER_4_VECTOR, ipl7)
+    #define __T4_ISR    __ISR(_TIMER_4_VECTOR, ipl1)
 #else
     #define __T4_ISR    __attribute__((interrupt, shadow, auto_psv))
 #endif
@@ -5259,7 +5220,7 @@ void TickInit(void)
     // Initialize Timer4
     #ifdef __PIC32MX__
     OpenTimer4(T4_ON | T4_PS_1_8, TICK_PERIOD);
-    ConfigIntTimer4(T4_INT_ON | T4_INT_PRIOR_7);
+    ConfigIntTimer4(T4_INT_ON | T4_INT_PRIOR_1);
     #else
     TMR4 = 0;
     PR4 = TICK_PERIOD;
@@ -5424,14 +5385,6 @@ void InitializeBoard(void)
         SST25_SDO_TRIS = 0;
         SST25_SDI_TRIS = 1;
         
-    #elif defined (GFX_PICTAIL_V2)
-        
-        MCHP25LC256_CS_LAT = 1;
-        MCHP25LC256_CS_TRIS = 0;
-        MCHP25LC256_SCK_TRIS  = 0;
-	    MCHP25LC256_SDO_TRIS = 0;
-	    MCHP25LC256_SDI_TRIS = 1;
-	    
 	#endif
 
     // set the peripheral pin select for the SPI channel used

@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright ¬© 2007-2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
  *
  * Microchip licenses to you the right to use, modify, copy and distribute 
  * Software only when embedded on a Microchip microcontroller or digital 
@@ -25,7 +25,7 @@
  * You should refer to the license agreement accompanying this Software for 
  * additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY 
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY 
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
  * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
  * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -54,6 +54,7 @@
 #include "TimeDelay.h"
 #include "HardwareProfile.h"
 #include "WirelessProtocols/SymbolTime.h"
+#include "ConfigApp.h"
 
 #if defined(__18F4620) 
         #pragma romdata CONFIG1H = 0x300001
@@ -814,7 +815,19 @@ void LCDDisplay(char *text, BYTE value, BOOL delay)
             BYTE i;
             for(i = 0; i < 8; i++)
             {
-                DelayMs(250);
+                #if defined(__PIC32MX__)
+                    BYTE ms = 250;
+                    volatile unsigned long _dcnt;                                   
+                    while(ms)                  
+                    {                           
+                        //_dcnt=((unsigned long)(0.001/(1.0/CLOCK_FREQ)/6));  
+                        _dcnt = ((unsigned long)CLOCK_FREQ)/36000ul;  
+                        while(_dcnt--);         
+                        ms--;                  
+                    }   
+                #else
+                    DelayMs(250);
+                #endif
             }
         }
     #endif
@@ -1058,3 +1071,70 @@ BYTE ButtonPressed(void)
         #endif 
     }              
 #endif
+
+
+void PrepareWakeup(void)
+{
+    #if defined(__18CXX)
+        ClrWdt();
+        WDTCONbits.SWDTEN = 1;      // enable watch dog timer
+        #if defined(PIC18_EXPLORER)
+            INTCONbits.INT0IF = 0;
+            INTCON2bits.INTEDG0 = 0;
+            INTCONbits.INT0IE = 1;
+        #elif defined(EIGHT_BIT_WIRELESS_BOARD)
+            INTCONbits.INT0IF = 0;
+            INTCON2bits.INTEDG0 = 0;
+            INTCONbits.INT0IE = 1;
+            INTCON3bits.INT2IF = 0;
+            INTCON2bits.INTEDG2 = 0;
+            INTCON3bits.INT2IE = 1;
+        #elif defined(PICDEMZ)
+            INTCONbits.RBIF = 0;        // clear pin change notification interrupt
+            INTCONbits.RBIE = 1;        // enable pin change notification interrupt
+        #endif
+    #elif defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__)
+        ClrWdt();
+        RCONbits.SWDTEN = 1;        // enable watch dog timer
+        IFS1bits.CNIF = 0;
+        IEC1bits.CNIE = 1;          // enable pin change notification interrupt
+    #elif defined(__PIC32MX__)
+        Enable_PB_1_2_Interrupts(); // enable pin change notification interrupt
+        EnableWDT();                // enable watch dog timer
+        ClearWDT();                 // clear watch dog timer
+    #endif
+    
+    // make sure UART has nothing to output
+    while(ConsoleIsPutReady() == 0);
+}
+
+    
+void AfterWakeup(void)
+{
+    #if defined(__18CXX)
+        #if defined(PIC18_EXPLORER)
+            INTCONbits.INT0IE = 0;
+        #elif defined(EIGHT_BIT_WIRELESS_BOARD)
+            INTCONbits.INT0IE = 0;
+            INTCON3bits.INT2IE = 0;    
+        #elif defined(PICDEMZ)
+            INTCONbits.RBIE = 0;        // disable pin change notification interrupt
+        #endif
+        WDTCONbits.SWDTEN = 0;      // disable watch dog timer
+    #elif defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24FK__) || defined(__PIC24H__)
+        RCONbits.SWDTEN = 0;        // disable watch dog timer                           
+    #elif defined(__PIC32MX__)
+        RCONCLR = RCON_SLEEP_MASK | RCON_IDLE_MASK;   // clear the Sleep and Idle bits
+        DisableWDT();
+    #endif
+}
+
+    
+
+
+
+
+
+
+
+

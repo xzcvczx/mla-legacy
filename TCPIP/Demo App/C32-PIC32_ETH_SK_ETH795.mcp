@@ -567,13 +567,13 @@ file_125=TCPIPConfig.h
 file_126=HTTPPrint.h
 file_127=Configs\TCPIP ETH795.h
 file_128=Configs\HWP PIC32_ETH_SK_ETH795.h
-file_129=..\..\Microchip\Include\Crypto\AES.h
-file_130=..\..\Microchip\Include\Crypto\AES_CBC.h
-file_131=..\..\Microchip\Include\Crypto\AES_CFB.h
-file_132=..\..\Microchip\Include\Crypto\AES_CTR.h
-file_133=..\..\Microchip\Include\Crypto\AES_ECB.h
-file_134=..\..\Microchip\Include\Crypto\AES_OFB.h
-file_135=..\..\Microchip\Include\Crypto\AES_ECB_PIC32.h
+file_129=..\..\Microchip\Include\TCPIP Stack\AES.h
+file_130=..\..\Microchip\Include\TCPIP Stack\AES_CBC.h
+file_131=..\..\Microchip\Include\TCPIP Stack\AES_CFB.h
+file_132=..\..\Microchip\Include\TCPIP Stack\AES_CTR.h
+file_133=..\..\Microchip\Include\TCPIP Stack\AES_ECB.h
+file_134=..\..\Microchip\Include\TCPIP Stack\AES_OFB.h
+file_135=..\..\Microchip\Include\TCPIP Stack\AES_ECB_PIC32.h
 file_136=..\..\Microchip\TCPIP Stack\TCPIP Stack Version.txt
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
@@ -581,7 +581,8 @@ suite_state=
 [TOOL_SETTINGS]
 TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}=-DCFG_INCLUDE_PIC32_ETH_SK_ETH795
 TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}=-g -DCFG_INCLUDE_PIC32_ETH_SK_ETH795 -Wall
-TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=--defsym=_min_heap_size=16000 --defsym=_min_stack_size=2048 -Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Os
+TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=--defsym=_min_heap_size=16000 --defsym=_min_stack_size=2048 -Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Os "-mperipheral-libs"
+TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}_alt=yes
 TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}=
 [INSTRUMENTED_TRACE]
 enable=0

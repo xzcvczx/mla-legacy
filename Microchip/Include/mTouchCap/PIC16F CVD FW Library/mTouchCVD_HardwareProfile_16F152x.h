@@ -1,11 +1,11 @@
 /*************************************************************************
  *  © 2011 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch CVD Framework v1.1
+ *  Project Name:    mTouch CVD Framework v1.00.00
  *  FileName:        mTouchCVD_HardwareProfile_16F152x.h
  *  Dependencies:    mTouchCVD.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
- *  Compiler:        HI-TECH Ver. 9.81 or later
+ *  Compiler:        HI-TECH PRO Ver. 9.80 or later
  *  IDE:             MPLAB® IDE v8.50 (or later) or MPLAB® X                        
  *  Hardware:         
  *  Company:         
@@ -19,14 +19,14 @@
 /**************************************************************************
  * MICROCHIP SOFTWARE NOTICE AND DISCLAIMER: You may use this software, and 
  * any derivatives created by any person or entity by or on your behalf, 
- * exclusively with Microchip's products in accordance with applicable
+ * exclusively with Microchip’s products in accordance with applicable
  * software license terms and conditions, a copy of which is provided for
  * your referencein accompanying documentation. Microchip and its licensors 
  * retain all ownership and intellectual property rights in the 
  * accompanying software and in all derivatives hereto. 
  * 
  * This software and any accompanying information is for suggestion only. 
- * It does not modify Microchip's standard warranty for its products. You 
+ * It does not modify Microchip’s standard warranty for its products. You 
  * agree that you are solely responsible for testing the software and 
  * determining its suitability. Microchip has no obligation to modify, 
  * test, certify, or support the software. 
@@ -35,7 +35,7 @@
  * EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED 
  * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A 
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE, ITS INTERACTION WITH 
- * MICROCHIP'S PRODUCTS, COMBINATION WITH ANY OTHER PRODUCTS, OR USE IN ANY 
+ * MICROCHIP’S PRODUCTS, COMBINATION WITH ANY OTHER PRODUCTS, OR USE IN ANY 
  * APPLICATION. 
  * 
  * IN NO EVENT, WILL MICROCHIP BE LIABLE, WHETHER IN CONTRACT, WARRANTY, 
@@ -77,7 +77,7 @@
 #endif
 
 #if CVD_NUMBER_SENSORS == 1
-    #error Single-sensor scanning code not currently compatible with the PIC16F152x family due to the lack of a DAC module.
+    #error Single-sensor scanning code not currently compatible with the PIC16F152x family.
 #endif
 
 #define CVD_DEBUG_UART_ENABLED
@@ -104,8 +104,6 @@
 #define CVD_SET_ADC_CLK_2MHZ()          ADCON1 = 0b10000000 // 2
 #define CVD_SET_ADC_CLK_1MHZ()          ADCON1 = 0b10000000 // 2
 
-#define CVD_UNIMPLEMENTED_AVAILABLE     0
-
 #if defined(CVD_DEBUG) && (CVD_DEBUG == 1)
 #if !(CVD_DEBUG_SPEED == 9600 || CVD_DEBUG_SPEED == 115200)
     #error CVD_DEBUG_SPEED must be set to either 9600 or 115200 in the configuration file.
@@ -114,7 +112,6 @@
 
 #if     _XTAL_FREQ == 16000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_16MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #define CVD_DEBUG_TXSTA     0b00100100
         #define CVD_DEBUG_RCSTA     0b10010000
@@ -130,7 +127,6 @@
     #endif
 #elif   _XTAL_FREQ ==  8000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_8MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #define CVD_DEBUG_TXSTA     0b00100100
         #define CVD_DEBUG_RCSTA     0b10010000
@@ -146,7 +142,6 @@
     #endif
 #elif   _XTAL_FREQ ==  4000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_4MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #define CVD_DEBUG_TXSTA     0b00100100
         #define CVD_DEBUG_RCSTA     0b10010000
@@ -162,7 +157,6 @@
     #endif
 #elif   _XTAL_FREQ ==  2000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_2MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #error The 115.2kbps UART baudrate option cannot be used with a 2MHz Fosc. Please select '9600'.
     #elif   CVD_DEBUG_SPEED == 9600
@@ -174,7 +168,6 @@
     #endif
 #elif   _XTAL_FREQ ==  1000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_1MHZ()
-    #define CVD_TAD             2
     #if     CVD_DEBUG_SPEED == 115200
         #error The 115.2kbps UART baudrate option cannot be used with a 1MHz Fosc. Please select '9600'.
     #elif   CVD_DEBUG_SPEED == 9600
@@ -187,6 +180,8 @@
 #else
     #error _XTAL_FREQ is not set to a valid value for this processor.
 #endif
+
+#define CVD_ADCON0_BANK     1
 
 // A/D MUX selection for each A/D button, do not change this, refer to datasheet if curious how these are derived
 // Right Justified, Vdd as reference, A/D on, Go/Done  asserted, do not change this, refer to datasheet if curious how these are derived 
@@ -222,6 +217,7 @@
 #define CVD_AD_AN29         0x75
 
 #define CVD_AD_FVR_AND_GO   0x7F // Selects the FVR as the ADC mux option and sets the GO/DONE bit.
+#define CVD_AD_DAC_AND_GO   0x7B // Selects the DAC as the ADC mux option and sets the GO/DONE bit.
 
 #define CVD_SELECT_SENSOR0	    __paste(CVD_AD_, CVD_SENSOR0)
 #define CVD_SELECT_SENSOR1	    __paste(CVD_AD_, CVD_SENSOR1)
@@ -255,7 +251,6 @@
 #define CVD_SELECT_SENSOR29     __paste(CVD_AD_, CVD_SENSOR29)
 #define CVD_SELECT_FVR_AND_GO   __paste(CVD_AD_, FVR_AND_GO)
 #define CVD_SELECT_DAC_AND_GO   __paste(CVD_AD_, DAC_AND_GO)
-#define CVD_SELECT_DAC_NOGO     __paste(CVD_AD_, DAC_NOGO)
 #define CVD_SELECT_ISO_AND_GO   __paste(CVD_AD_, ISO_AND_GO) 
 #define CVD_SELECT_ISO_NOGO     __paste(CVD_AD_, ISO_NOGO) 
 #define CVD_SELECT_REFERENCE    __paste(CVD_AD_, CVD_REFERENCE)

@@ -44,7 +44,7 @@
 
 // error checks
 #if !defined(SPI_CHANNEL_1_ENABLE) && !defined(SPI_CHANNEL_2_ENABLE) && !defined(SPI_CHANNEL_3_ENABLE) && !defined(SPI_CHANNEL_4_ENABLE)   
-    #error "No SPI Channel defined! Please define in Hardware Profile"
+    #warning "No SPI Channel defined! Please define in Hardware Profile"
 #endif
 
 static int spiMutex[4] = { 0, 0, 0, 0 };

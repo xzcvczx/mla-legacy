@@ -62,6 +62,10 @@
 tWFScanCtx  g_ScanCtx;
 #endif /* EZ_CONFIG_SCAN */
 
+#if defined	( WF_HOST_SCAN)
+extern BOOL gHostScanNotAllowed;
+#endif
+
 #if defined(STACK_USE_EZ_CONFIG)
 /* Easy Config Globals */
 extern UINT8 ConnectionProfileID;   //SCC2 ??? what to do with this...
@@ -141,7 +145,8 @@ static int WFEasyConfigProcess(void)
     if (CFGCXT.ssid)
 #if defined(__18CXX)
         WF_CPSetSsid(ConnectionProfileID, 
-        	(ROM char *)CFGCXT.ssid, 
+        	//(ROM char *)CFGCXT.ssid,   Note (VMH): fixed compile warning - not sure why this is necessary.
+        	CFGCXT.ssid, 
             strlen(CFGCXT.ssid));  
 #else
         WF_CPSetSsid(ConnectionProfileID, 
@@ -176,7 +181,7 @@ static int WFEasyConfigProcess(void)
                     /* Clear key */
                     for (i = 0; i < 20; i++)
                         keys[i] = 0;
-                    memcpy(keys, CFGCXT.key, 20);
+                    memcpy(keys, (void*)CFGCXT.key, 20);
                     WF_CPSetSecurity(ConnectionProfileID, WF_SECURITY_WEP_40, CFGCXT.defaultWepKey, keys, 20);
                 }
             }
@@ -191,7 +196,7 @@ static int WFEasyConfigProcess(void)
                     /* Clear key */
                     for (i = 0; i < 52; i++)
                         keys[i] = 0;
-                    memcpy(keys, CFGCXT.key, 52);
+                    memcpy(keys, (void*)CFGCXT.key, 52);
                     WF_CPSetSecurity(ConnectionProfileID, WF_SECURITY_WEP_104, CFGCXT.defaultWepKey, keys, 52);
                 }
             }
@@ -214,7 +219,7 @@ static int WFEasyConfigProcess(void)
 }
 #endif /* STACK_USE_EZ_CONFIG */
 
-#if defined ( EZ_CONFIG_SCAN )
+#if defined ( EZ_CONFIG_SCAN ) || defined (WF_HOST_SCAN)
 void WFInitScan(void)
 {
     SCANCXT.scanState = 0;
@@ -230,7 +235,7 @@ UINT16 WFStartScan(void)
    if (IS_SCAN_IN_PROGRESS(SCANCXT.scanState))
        return WF_ERROR_OPERATION_CANCELLED;
 
-   WF_Scan(WF_SCAN_ALL);
+   WF_Scan(0xff);
 
    SCAN_SET_IN_PROGRESS(SCANCXT.scanState);
    /* Should they be invalidated??? */
@@ -238,6 +243,23 @@ UINT16 WFStartScan(void)
 
    return WF_SUCCESS;
 }
+
+#if defined (WF_HOST_SCAN)
+UINT16 WFStartHostScan(UINT8 profile_id)
+{
+   /* If scan already in progress bail out */
+   if (IS_SCAN_IN_PROGRESS(SCANCXT.scanState))
+       return WF_ERROR_OPERATION_CANCELLED;
+
+   WF_Scan(profile_id);
+
+   SCAN_SET_IN_PROGRESS(SCANCXT.scanState);
+   /* Should they be invalidated??? */
+   //SCAN_CLEAR_VALID(SCANCXT.scanState);
+
+   return WF_SUCCESS;
+}
+#endif
 
 UINT16 WFRetrieveScanResult(UINT8 Idx, tWFScanResult *p_ScanResult)
 {
@@ -270,6 +292,7 @@ WFDisplayScanMgr()
     tWFScanResult   bssDesc;
     char ssid[32];
 	char rssiChan[48];
+	int	count;
 
     if (SCANCXT.numScanResults == 0)
        return;
@@ -285,7 +308,8 @@ WFDisplayScanMgr()
     WFRetrieveScanResult(SCANCXT.displayIdx, &bssDesc);
 
     /* Display SSID */
-    sprintf(ssid, "%s\r\n", bssDesc.ssid);
+	count = SCANCXT.displayIdx + 1;
+    sprintf(ssid, "%d SSID: %s\r\n", count, bssDesc.ssid);
     putsUART(ssid);
 
 	/* Display SSID  & Channel */
@@ -296,9 +320,14 @@ WFDisplayScanMgr()
     if (++SCANCXT.displayIdx == SCANCXT.numScanResults)  {
         SCAN_CLEAR_DISPLAY(SCANCXT.scanState);
         SCANCXT.displayIdx = 0;
-#if defined(WF_CONSOLE)
+#if defined(WF_CONSOLE) & defined(STACK_USE_UART)
         WFConsoleReleaseConsoleMsg();
 #endif
+
+#if defined(WF_HOST_SCAN)
+		gHostScanNotAllowed = FALSE;
+#endif
+
     }
 
     return;

@@ -13,7 +13,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright ï¿½ 2010 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -23,7 +23,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -35,28 +35,36 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 08/04/10    Creation...
+ *****************************************************************************/
+
+/*****************************************************************************
+ * Section: Description
+ *
+ * This module is used to program an external memory source.  The data is sent
+ * via the PC utility external_memory_programmer.  Using the comm_pkt protocol, 
+ * the data is parsed and programed to the external memory.  
+ *
+ * This module is used by serval different Graphics demos and is part of the 
+ * common directory under the Graphics demo.
  *****************************************************************************/
 
 #ifndef _FLASHPROGRAMMER_H
 #define _FLASHPROGRAMMER_H
 
-////////////////////////////// INCLUDES //////////////////////////////
-    #if defined(__dsPIC33F__)
-        #include <p33Fxxxx.h>
-    #elif defined(__PIC24H__)
-        #include <p24Hxxxx.h>
-    #elif defined(__PIC32MX__)
-        #include <plib.h>
-    #else
-        #include <p24Fxxxx.h>
-    #endif
-    #include "HardwareProfile.h"
-    #include "Beep.h"
+/*****************************************************************************
+ * Section: Includes
+ *****************************************************************************/
+#include "Compiler.h"
+#include "HardwareProfile.h"
+#include "Beep.h"
 
 
+/*****************************************************************************
+ * Section: Function Prototypes
+ *****************************************************************************/
+/*****************************************************************************
+ * int ProgramFlash(void)
+ *****************************************************************************/
 int ProgramFlash(void);
     
     

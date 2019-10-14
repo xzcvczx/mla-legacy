@@ -84,7 +84,7 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
+        
     #else
         #error No hardware board defined, see "HardwareProfile.h"
     #endif

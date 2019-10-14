@@ -44,9 +44,10 @@ file_016=HardwareProfiles
 file_017=USB Stack
 file_018=HardwareProfiles
 file_019=HardwareProfiles
-file_020=.
-file_021=USB Stack
+file_020=USB Stack
+file_021=HardwareProfiles
 file_022=.
+file_023=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -71,6 +72,7 @@ file_019=no
 file_020=no
 file_021=no
 file_022=no
+file_023=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -92,9 +94,10 @@ file_016=no
 file_017=no
 file_018=no
 file_019=no
-file_020=yes
+file_020=no
 file_021=no
 file_022=yes
+file_023=yes
 [FILE_INFO]
 file_000=usb_descriptors.c
 file_001=..\..\..\Microchip\USB\usb_device.c
@@ -116,9 +119,10 @@ file_016=HardwareProfile - PIC24F Starter Kit.h
 file_017=..\..\..\Microchip\Include\USB\usb_hal_pic24.h
 file_018=HardwareProfile - PIC24FJ256DA210 Development Board.h
 file_019=HardwareProfile - PIC24FJ256GB210 PIM.h
-file_020=..\Getting Started - Running the Device - HID - Joystick.htm
-file_021=..\..\..\Microchip\USB\usb_device_local.h
+file_020=..\..\..\Microchip\USB\usb_device_local.h
+file_021=HardwareProfile - PIC24FJ64GB502 Microstick.h
 file_022=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_023=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

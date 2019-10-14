@@ -54,8 +54,9 @@
 */
 
 #include "TCPIP Stack/WFMac.h"
-#if defined(WF_CS_TRIS) && defined(WF_USE_POWER_SAVE_FUNCTIONS)
 
+#if defined(WF_CS_TRIS) && defined(WF_USE_POWER_SAVE_FUNCTIONS)
+#include "TCPIP Stack/TCPIP.h"
 
 /*
 *********************************************************************************************************
@@ -101,6 +102,12 @@ typedef struct pwrModeRequestStruct
 static UINT8 g_powerSaveState = WF_PS_OFF;
 static BOOL  g_psPollActive   = FALSE;     
 
+static BOOL  g_sleepNeeded    = FALSE;
+static BOOL  g_AppPowerSaveModeEnabled = FALSE;
+BOOL g_rxDtim;
+
+extern BOOL gRFModuleVer1209orLater;
+
 /*
 *********************************************************************************************************
 *                                           LOCAL FUNCTION PROTOTYPES                          
@@ -110,6 +117,8 @@ static BOOL  g_psPollActive   = FALSE;
 static void SendPowerModeMsg(tWFPwrModeReq *p_powerMode);
 static void SetPowerSaveState(UINT8 powerSaveState);
 
+void SetAppPowerSaveMode(BOOL state);
+BOOL GetAppPowerSaveMode(void);
 
 /*******************************************************************************
   Function:	
@@ -148,6 +157,7 @@ void WFConfigureLowPowerMode(UINT8 action)
     /*-----------------------------------------*/
     if (action == WF_LOW_POWER_MODE_ON)
     {
+        //putrsUART("PS-Poll Enable\r\n");
         Write16BitWFRegister(WF_PSPOLL_H_REG, REG_ENABLE_LOW_POWER_MASK);
         g_psPollActive = TRUE;           
     }        
@@ -156,6 +166,7 @@ void WFConfigureLowPowerMode(UINT8 action)
     /*---------------------------------------------------------------------------------------------*/
     else /* action == WF_LOW_POWER_MODE_OFF */
     {
+        //putrsUART("PS-Poll Disable\r\n");        
         Write16BitWFRegister(WF_PSPOLL_H_REG, 0x00);      
         g_psPollActive = FALSE;                 
 
@@ -212,6 +223,15 @@ void WF_PsPollEnable(BOOL rxDtim)
 {
     tWFPwrModeReq   pwrModeReq;
     
+    // if not currently connected
+    if (gRFModuleVer1209orLater && !WFisConnected())
+    {
+        // save caller parameters for later, when we can enable this mode    
+        g_rxDtim = rxDtim;
+        SetAppPowerSaveMode(TRUE);
+        return;
+    }    
+    
     /* fill in request structure and send message to MRF24WB0M */
     pwrModeReq.mode     = PS_POLL_ENABLED;
     pwrModeReq.wake     = 0;
@@ -228,7 +248,35 @@ void WF_PsPollEnable(BOOL rxDtim)
     }    
     
     WFConfigureLowPowerMode(WF_LOW_POWER_MODE_ON);
+    SetAppPowerSaveMode(TRUE);
+
 }
+
+BOOL isSleepNeeded(void)
+{
+    return g_sleepNeeded;    
+}
+
+void ClearSleepNeeded(void)
+{
+    g_sleepNeeded = FALSE;
+}    
+
+void SetSleepNeeded(void)
+{
+    g_sleepNeeded = TRUE;
+}
+
+void SetAppPowerSaveMode(BOOL state)  // TRUE or FALSE
+{
+    g_AppPowerSaveModeEnabled = state;
+}    
+
+BOOL GetAppPowerSaveMode(void)
+{
+    return g_AppPowerSaveModeEnabled;
+}    
+
 
 /*******************************************************************************
   Function:	
@@ -263,6 +311,8 @@ void WF_PsPollDisable(void)
 
     SetPowerSaveState(WF_PS_OFF);
     WFConfigureLowPowerMode(WF_LOW_POWER_MODE_OFF);    
+    
+    SetAppPowerSaveMode(FALSE);   
 }   
 
 /*******************************************************************************
@@ -399,6 +449,9 @@ void EnsureWFisAwake()
             /* wake up MRF24WB0M */
             WFConfigureLowPowerMode(WF_LOW_POWER_MODE_OFF);
         }    
+        
+        // will need to put device back into PS-Poll sleep mode
+        SetSleepNeeded();
     }
 }        
             

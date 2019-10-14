@@ -60,6 +60,7 @@
 *  0.1	09/29/2010    mynenis	Initial Version
 *  1.0  03/23/2010    mynenis   Updated to work with latest version 
 *                               of MiWi Stack (4.1 Beta)
+*  1.1  23/11/2011    mynenis   Bug Fix in LcdDisplay.c
 **************************************************************************/
 
 /************************ HEADERS ****************************************/
@@ -327,6 +328,8 @@ void ReadMacAddress(void)
     {
         BYTE    Address0, Address1, Address2;
         RF_EEnCS = 0;
+        Nop();
+        Nop();
         SPIPut(0x03);   //Read Sequence to EEPROM
         SPIPut(0xFA);   //MAC address Start byte
         Address0 = SPIGet();
@@ -338,15 +341,19 @@ void ReadMacAddress(void)
             RF_EEnCS = 0;
             SPIPut(0x03);
             SPIPut(0xFD);
-            myLongAddress[2] = SPIGet();
-            myLongAddress[1] = SPIGet();
-            myLongAddress[0] = SPIGet();
-            myLongAddress[3] = 0xFE;
-            myLongAddress[4] = 0xFF;
-            myLongAddress[5] = 0xA3;
-            myLongAddress[6] = 0x04;
-            myLongAddress[7] = 0x00;
-
+            switch(MY_ADDRESS_LENGTH)
+                {
+                    case 8: myLongAddress[7] = 0x00;
+                    case 7: myLongAddress[6] = 0x04;
+                    case 6: myLongAddress[5] = 0xA3;
+                    case 5: myLongAddress[4] = 0xFF;
+                    case 4: myLongAddress[3] = 0xFE;
+                    case 3: myLongAddress[2] = SPIGet();
+                    case 2: myLongAddress[1] = SPIGet();
+                    case 1: myLongAddress[0] = SPIGet();
+                            break;
+                    default: break;
+                }
             RF_EEnCS = 1;
         }
     }

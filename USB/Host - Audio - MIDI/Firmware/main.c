@@ -412,9 +412,7 @@ int main ( void )
  *************************************************************************/
 
 BOOL InitializeSystem ( void )
-{
-    int                 value;
-    
+{    
     #if defined( __PIC24FJ256GB110__ ) || defined(__PIC24FJ256GB210__)
         // PPS - Configure U2RX - put on pin 49 (RP10)
         RPINR19bits.U2RXR = 10;
@@ -482,7 +480,8 @@ BOOL InitializeSystem ( void )
         TRISFbits.TRISF3 = 0;
 
     #elif defined(__PIC32MX__)
-    
+    {
+        int value;
         #if defined(RUN_AT_60MHZ)
             // Use OSCCON default
         #else
@@ -513,7 +512,7 @@ BOOL InitializeSystem ( void )
 
         AD1PCFG = 0xFFFF;   // Set analog pins to digital.
         TRISF = 0x00;
-
+    }
     #else
         #error Cannot initialize
     #endif
@@ -1211,7 +1210,7 @@ BOOL USB_ApplicationEventHandler ( BYTE address, USB_EVENT event, void *data, DW
     
     
     // Handle specific events.
-    switch (event)
+    switch ((INT)event)
     {
         case EVENT_MIDI_ATTACH:
             deviceHandle = data;

@@ -114,4 +114,10 @@
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
 
+    /** Debug print interface ******************************************/
+    #define DEBUG_Init(a)
+    #define DEBUG_Error(a)          
+    #define DEBUG_PrintString(a)    
+    #define DEBUG_PrintHex(a)
+
 #endif  //HARDWARE_PROFILE_PIC32_ETHERNET_STARTER_KIT_H

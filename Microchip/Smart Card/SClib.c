@@ -49,6 +49,15 @@
               is transmitted more effeciently for LRC/CRC mode in T = 1 protocol.
            3) Initialized local variable "txLength" to '0' in function 
               "SC_TransactT1" to remove non-critical compiler warnings.
+  1.02.6   1) Changed the size of some input/output parameters of following static function:-
+                  'SC_UpdateCRC','SC_UpdateEDC' & 'SC_SendT1Block'.
+              This fix is done to optimize the code.
+           2) Modified the contents of 'SC_UpdateCRC' & 'SC_SendT1Block' function to suit
+              the above change.
+           3) Modified "SC_TransactT0" function, to transmit first byte as 0x00 
+              when LC & LE bytes are 0x00.
+           4) Changed the local variable 'edc' from 'WORD' type to 'unsigned short int' type.
+              (In static function :- 'SC_ReceiveT1Block')
 ********************************************************************/
 
 #include <string.h>
@@ -124,9 +133,9 @@ static void SC_CalculateWaitTime(void);
 	BYTE maxSegmentLength = 0x20;
 	BOOL txSbit = TRUE;
 
-	static WORD SC_UpdateCRC(BYTE data,WORD crc);
-	static void SC_UpdateEDC(BYTE data,WORD *edc);
-	static void SC_SendT1Block(BYTE nad,BYTE pcb,WORD length,BYTE *buffer);
+	static unsigned short int SC_UpdateCRC(BYTE data,unsigned short int crc);
+	static void SC_UpdateEDC(BYTE data,unsigned short int *edc);
+	static void SC_SendT1Block(BYTE nad,BYTE pcb,BYTE length,BYTE *buffer);
 	static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffer,unsigned long blockWaitTime);
 
 #endif
@@ -877,6 +886,8 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 		SCdrv_SendTxData( lc );
 	else if( le )
 		SCdrv_SendTxData( le );
+	else
+		SCdrv_SendTxData(0x00);
 
 	while (1)
 	{
@@ -976,7 +987,7 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 
 /*******************************************************************************
   Function:
-    void SC_UpdateCRC(void)
+    static unsigned short int SC_UpdateCRC(BYTE data,unsigned short int crc)
 	
   Description:
     This function calculates 16 bit CRC for T=1 Protocol
@@ -986,7 +997,7 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 
   Parameters:
     BYTE data - Data that has to be used to update CRC.
-	WORD *edc - Pointer to CRC
+	unsigned short int crc - current crc value
 
   Return Values:
     WORD - updated CRC
@@ -995,10 +1006,10 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
     CRC 16 - X^16 + X^12 + X^5 + 1
 
   *****************************************************************************/
-static WORD SC_UpdateCRC(BYTE data,WORD crc)
+static unsigned short int SC_UpdateCRC(BYTE data,unsigned short int crc)
 {
-	WORD index;
-	WORD tempData = (WORD)data << 8;
+	BYTE index;
+	unsigned short int tempData = (unsigned short int)data << 8;
 
 	// Update the CRC & return it Back
 	for (index = 0;index < 8;index++)
@@ -1006,7 +1017,7 @@ static WORD SC_UpdateCRC(BYTE data,WORD crc)
 		if ((crc ^ tempData) & 0x8000)
 		{
 			crc <<= 1;
-			crc ^= (WORD)0x1021; // X^12 + X^5 + 1
+			crc ^= (unsigned short int)0x1021; // X^12 + X^5 + 1
 		}
 		else
 		{
@@ -1021,7 +1032,7 @@ static WORD SC_UpdateCRC(BYTE data,WORD crc)
 
 /*******************************************************************************
   Function:
-    void SC_UpdateEDC(BYTE data,WORD *edc)
+    static void SC_UpdateEDC(BYTE data,unsigned short int *edc)
 	
   Description:
     This function updates Error Data Check value depending on the EDC type
@@ -1032,7 +1043,7 @@ static WORD SC_UpdateCRC(BYTE data,WORD crc)
 
   Parameters:
     BYTE data - Data that has to be used to update EDC.
-	WORD *edc - Pointer to EDC
+	unsigned short int *edc - Pointer to EDC
 
   Return Values:
     None
@@ -1041,7 +1052,7 @@ static WORD SC_UpdateCRC(BYTE data,WORD crc)
     None
 
 *****************************************************************************/
-static void SC_UpdateEDC(BYTE data,WORD *edc)
+static void SC_UpdateEDC(BYTE data,unsigned short int *edc)
 {
 	// Store the updated LRC/CRC in the EDC
 	if (edcType == SC_CRC_TYPE_EDC)	// type = CRC
@@ -1056,7 +1067,7 @@ static void SC_UpdateEDC(BYTE data,WORD *edc)
 
 /*******************************************************************************
   Function:
-    static void SC_SendT1Block(BYTE nad,BYTE pcb,WORD length,BYTE *buffer)
+    static void SC_SendT1Block(BYTE nad,BYTE pcb,BYTE length,BYTE *buffer)
 	
   Description:
     This function transmits a T=1 formatted block
@@ -1067,7 +1078,7 @@ static void SC_UpdateEDC(BYTE data,WORD *edc)
   Parameters:
     BYTE nad - NAD to be transmitted to the card
     BYTE pcb - PCB to be transmitted to the card
-    WORD length - Length of I-Field transmitted to the card
+    BYTE length - Length of I-Field transmitted to the card
     BYTE *buffer - Pointer to data that is to be transmitted to the card
 
   Return Values:
@@ -1077,10 +1088,10 @@ static void SC_UpdateEDC(BYTE data,WORD *edc)
     None
 
 *****************************************************************************/
-static void SC_SendT1Block(BYTE nad,BYTE pcb,WORD length,BYTE *buffer)
+static void SC_SendT1Block(BYTE nad,BYTE pcb,BYTE length,BYTE *buffer)
 {
-	WORD index;
-	WORD edc;
+	BYTE index;
+	unsigned short int edc;
 
 	// Choose the initial value of edc depending upon LRC or CRC
 	if (edcType == SC_CRC_TYPE_EDC)
@@ -1122,7 +1133,7 @@ static void SC_SendT1Block(BYTE nad,BYTE pcb,WORD length,BYTE *buffer)
 	}
 
 	// Transmit EDC
-	SCdrv_SendTxData(edc);
+	SCdrv_SendTxData((BYTE)edc);
 	if (edcType == SC_CRC_TYPE_EDC)
 	{
 		SCdrv_SendTxData(edc>>8);
@@ -1154,7 +1165,7 @@ static void SC_SendT1Block(BYTE nad,BYTE pcb,WORD length,BYTE *buffer)
 *****************************************************************************/
 static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffer,unsigned long blockWaitTimeEtu)
 {
-	WORD edc;
+	unsigned short int edc;
 	WORD index;
 	BYTE expectedLength;
 
@@ -1344,7 +1355,7 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 
 								// Send block with chaining mode, current sequence number, and maximum length.
 								SC_SendT1Block(pfield->NAD,txPCB,txLength,txField);
-								
+
 								// Recieve the Block
 								if(SC_ReceiveT1Block(&rxNAD,&rxPCB,&rxLEN,rxField,currT1BWTetu))
 								{

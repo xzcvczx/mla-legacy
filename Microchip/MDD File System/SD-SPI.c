@@ -55,6 +55,12 @@
              the code.
                        "#define SPI_INTERRUPT_FLAG_ASM  PIR1, 3" is removed from SD-SPI.c
           4) Replaced "__C30" usage with "__C30__" .
+  1.3.6   1) Modified "FSConfig.h" to "FSconfig.h" in '#include' directive.
+          2) Moved 'spiconvalue' variable definition to only C30 usage, as C32
+             is not using it.
+          3) Modified 'MDD_SDSPI_MediaDetect' function to ensure that CMD0 is sent freshly
+             after CS is asserted low. This minimizes the risk of SPI clock pulse master/slave
+             syncronization problems.
 
 ********************************************************************/
 
@@ -65,7 +71,7 @@
 #include "MDD File System/FSDefs.h"
 #include "MDD File System/SD-SPI.h"
 #include "string.h"
-#include "FSConfig.h"
+#include "FSconfig.h"
 
 /******************************************************************************
  * Global Variables
@@ -249,6 +255,8 @@ BYTE MDD_SDSPI_MediaDetect (void)
     //First check if SPI module is enabled or not.
 	if (SPIENABLE == 0)
 	{
+        unsigned char timeout;
+
 		//If the SPI module is not enabled, then the media has evidently not
 		//been initialized.  Try to send CMD0 and CMD13 to reset the device and
 		//get it into SPI mode (if present), and then request the status of
@@ -259,7 +267,25 @@ BYTE MDD_SDSPI_MediaDetect (void)
 		
         //Send CMD0 to reset the media
 	    //If the card is physically present, then we should get a valid response.
-	    response = SendMediaSlowCmd(GO_IDLE_STATE,0x0);
+        timeout = 4;
+        do
+        {
+            //Toggle chip select, to make media abandon whatever it may have been doing
+            //before.  This ensures the CMD0 is sent freshly after CS is asserted low,
+            //minimizing risk of SPI clock pulse master/slave syncronization problems, 
+            //due to possible application noise on the SCK line.
+            SD_CS = 1;
+            WriteSPISlow(0xFF);   //Send some "extraneous" clock pulses.  If a previous
+                                  //command was terminated before it completed normally,
+                                  //the card might not have received the required clocking
+                                  //following the transfer.
+            SD_CS = 0;
+            timeout--;
+    
+            //Send CMD0 to software reset the device
+            response = SendMediaSlowCmd(GO_IDLE_STATE, 0x0);
+        } while((response.r1._byte != 0x01) && (timeout != 0));
+
 	    //Check if response was invalid (R1 response byte should be = 0x01 after GO_IDLE_STATE)
 	    if(response.r1._byte != 0x01)
 	    {
@@ -2142,11 +2168,11 @@ BYTE ReadMediaManual (void)
 void InitSPISlowMode(void)
 {
     #if defined __C30__ || defined __C32__
-    	WORD spiconvalue = 0x0003;
     	#ifdef __PIC32MX__
     		OpenSPI(SPI_START_CFG_1, SPI_START_CFG_2);
     	    SPIBRG = SPICalutateBRG(GetPeripheralClock(), 400000);
     	#else //else C30 = PIC24/dsPIC devices
+    		WORD spiconvalue = 0x0003;
             WORD timeout;
     	    // Calculate the prescaler needed for the clock
     	    timeout = GetSystemClock() / 400000;

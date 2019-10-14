@@ -525,6 +525,12 @@ WORD BtnDraw(void *pObj)
             if(IsDeviceBusy())
                 return (0);
 
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            GFX_DRIVER_SetupDrawUpdate( pB->hdr.left,
+                                        pB->hdr.top,
+                                        pB->hdr.right,
+                                        pB->hdr.bottom);
+#endif
             if(GetState(pB, BTN_HIDE))
             {                       // Hide the button (remove from screen)
 
@@ -547,6 +553,12 @@ WORD BtnDraw(void *pObj)
                     return (0);
                 }
 
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pB->hdr.left,
+                                                pB->hdr.top,
+                                                pB->hdr.right,
+                                                pB->hdr.bottom);
+#endif
                 return (1);
             }
 
@@ -696,7 +708,17 @@ WORD BtnDraw(void *pObj)
             }
             else
             {
-                return DrawButtonFocus(pB, radius, &state);
+                if(DrawButtonFocus(pB, radius, &state))
+                {
+                    #ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                        GFX_DRIVER_CompleteDrawUpdate(   pB->hdr.left,
+                                                        pB->hdr.top,
+                                                        pB->hdr.right,
+                                                        pB->hdr.bottom);
+                    #endif
+                    return 1;
+                }
+                return 0;
             }
 
         case TEXT_DRAW_RUN:
@@ -783,7 +805,17 @@ WORD BtnDraw(void *pObj)
             }
             else
             {
-                return DrawButtonFocus(pB, radius, &state);
+                if(DrawButtonFocus(pB, radius, &state))
+                {
+                    #ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                        GFX_DRIVER_CompleteDrawUpdate(   pB->hdr.left,
+                                                        pB->hdr.top,
+                                                        pB->hdr.right,
+                                                        pB->hdr.bottom);
+                    #endif
+                    return 1;
+                }
+                return 0;
             }
 
         case TEXT_DRAW_RUN:
@@ -793,9 +825,25 @@ WORD BtnDraw(void *pObj)
                 #endif // #ifdef USE_BUTTON_MULTI_LINE
 
         case FOCUS_DRAW:
-            return DrawButtonFocus(pB, radius, &state);
+            if(DrawButtonFocus(pB, radius, &state))
+            {
+                #ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pB->hdr.left,
+                                                    pB->hdr.top,
+                                                    pB->hdr.right,
+                                                    pB->hdr.bottom);
+                #endif
+                return 1;
+            }
+            return 0;
     }
 
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+    GFX_DRIVER_CompleteDrawUpdate(   pB->hdr.left,
+                                    pB->hdr.top,
+                                    pB->hdr.right,
+                                    pB->hdr.bottom);
+#endif
     return (1);
 }
 

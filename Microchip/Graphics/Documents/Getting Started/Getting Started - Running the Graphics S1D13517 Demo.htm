@@ -8,14 +8,26 @@
 <!--
  /* Font Definitions */
  @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
 	{font-family:"Cambria Math";
 	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:"Arial Unicode MS";
+	panose-1:2 11 6 4 2 2 2 2 2 4;}
 @font-face
 	{font-family:Cambria;
 	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+@font-face
+	{font-family:"\@Arial Unicode MS";
+	panose-1:2 11 6 4 2 2 2 2 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin:0in;
@@ -96,6 +108,14 @@ p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
 	margin-bottom:.0001pt;
 	font-size:10.0pt;
 	font-family:"Courier New";}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
 span.Heading1Char
 	{mso-style-name:"Heading 1 Char";
 	mso-style-link:"Heading 1";
@@ -135,11 +155,16 @@ p.msochpdefault, li.msochpdefault, div.msochpdefault
 	font-family:"Times New Roman","serif";}
 .MsoChpDefault
 	{font-size:10.0pt;}
-@page Section1
+@page WordSection1
 	{size:8.5in 11.0in;
 	margin:1.0in 65.95pt 1.0in 65.95pt;}
-div.Section1
-	{page:Section1;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
 -->
 </style>
 
@@ -147,147 +172,29 @@ div.Section1
 
 <body lang=EN-US link=blue vlink=purple>
 
-<div class=Section1>
+<div class=WordSection1>
 
 <p class=MsoPlainText align=center style='text-align:center'><a
 name="_Toc194573682"><b><u><span style='font-size:16.0pt;font-family:"Arial","sans-serif"'>Getting
 Started: Running the “S1D13517” demo</span></u></b></a></p>
 
-<h2><a href="Getting%20Started%20-%20Required%20Hardware.htm">Required Hardware</a><a
-name="_Toc276094144"></a></h2>
+<h2><a href="#required_hardware">Required Hardware</a><a name="_Toc276094144"></a></h2>
 
-<h2><a href="Getting%20Started%20-%20Configuring%20the%20Hardware%20Common.htm">Configuring
-the Hardware</a><a name="_Toc276094145"></a></h2>
+<h2><a href="#configuring_the_software">Configuring the Software</a></h2>
+
+<h2><a href="#required_hardware">Configuring the Hardware</a><a
+name="_Toc276094145"></a></h2>
+
+<h2><a href="Getting%20Started%20-%20Calibrating%20the%20Touch%20Screen.htm">Calibrating
+the Touch Screen</a><a name="_Toc275264589"></a><a name="_Toc276094130"></a></h2>
 
 <h2><a href="Getting%20Started%20-%20Demo%20Compatibility%20Matrix.htm">Demo
 Compatibility Matrix</a></h2>
 
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
-<h2>Device Support</h2>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>This
-demo is supported by the PIC32MX family along with the
-PIC24FJ256GB210.&nbsp;&nbsp; Using the PIC24FJ256GB210, the only configuration
-supported is 16-bit PMP interface and VGA (640x480) display.</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<h3>Demo Configuration</h3>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<h3>PIC32MX Family</h3>
-
-<p class=MsoNormal>All PIC32MX graphics PIMs and starter kits work without code
-change except for ethernet starter kit.</p>
-
-<p class=MsoNormal>Ethernet Starter kit will run with SPI1 configured properly.
-Change the S1D13517 board SPI jumpers to SPI one and change the hardware
-profile to point to SPI1. </p>
-
-<p class=MsoNormal>Some code change is necessary.</p>
-
-<h3>PIC24FJ256GB210</h3>
-
-<p class=MsoNormal>&nbsp;<span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Make
-sure you have the following jumpers set correctly to run the out of the box
-demo:</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>PIC24FJ256GB210
-PIM</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;-
-JP1, JP2, and JP3 jumpers closed to the side the says 'P' which stands for
-parallel (16-bit)</span></p>
-
-<p class=MsoNormal style='margin-left:3.0pt'><span style='font-size:10.0pt;
-font-family:"Arial","sans-serif"'>- Leave JP4 jumper open</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Load
-External Hex file by:</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Programming the PIC</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Calibrate the touch screen if not prompted by pressing and holding down for at
-least 1 second on the touch screen while resetting the microcontroller, then
-follow the on sreen instruction.</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-On the main application screen, select 'Upload', then use the External Memory
-Programmer utility to upload the hex file in the 'Resources' folder. The upload
-should be done via RS-232.</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Please refer to external memory programmer help file and <a
-href="Getting%20Started%20-%20Programming%20Memory%20on%20Graphics%20PICtail%20Daughter%20and%20Demo%20Boards.htm">Getting
-Started - Programming Memory on Graphics PICtail Daughter and Demo Boards.</a></span></p>
-
-<h3>Demo Boards</h3>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Graphics
-PICtail Plus S1D13517 Board</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Set JP3, Jp4, JP5, and JP6 to use SPI2</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Close jumper JP2</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Set PEN_INT jumper to RA14 (mapped to RC3 on the actual PIC24FJ256GB210, due to
-PIM signal remapping)</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Leave J4 jumper open</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Graphics
-Display Truly 5.7&quot; 640x480 Board</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Set jumper to MCU if using software resistive touch driver</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Set jumper to AR1020 if using AR1020 as the resistive touch digitizer</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>You
-can switch between the two touch options above by selecting the appropriate
-sub-hardwareprofile file in the HardwareProfile.h</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Graphics
-Display Truly 7.0&quot; 800x480 Board</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Set jumper to MCU if using software resistive touch driver</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>-
-Set jumper to AR1020 if using AR1020 as the resistive touch digitizer</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>You
-can switch between the two touch options above by selecting the appropriate
-sub-hardwareprofile file in the HardwareProfile.h</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
-
-<p class=MsoPlainText><a name="_Toc276094147"></a><a name="running_the_demo"></a><span
-class=Heading2Char><span style='font-size:14.0pt'>Running the Demo</span></span><span
-style='font-family:"Arial","sans-serif"'>:</span></p>
+<p class=MsoPlainText><span class=Heading2Char><span style='font-size:14.0pt'>Running
+the Demo</span></span><span style='font-family:"Arial","sans-serif"'>:</span></p>
 
 <p class=MsoNormal><a name="_Toc195786561"></a><a name="_Toc195786411"></a><a
 name="_Toc195786501"></a><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>This
@@ -299,69 +206,509 @@ found in the demo:</span></p>
 
 <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>1)
-Alpha Blending - Used throughout the demo to show an overlaying effect and also
-a transparency. This is a hardware accelerated feature. It has it's own demo
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:"Arial","sans-serif"'>1)</span><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Alpha
+Blending - Used throughout the demo to show an overlaying effect and also a
+transparency. This is a hardware accelerated feature. It has its own demo
 screen found under the performance button on the main menu.</span></p>
 
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+<p class=MsoNormal style='text-indent:2.25pt'>&nbsp;</p>
 
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>2)
-Gradient - Used throughout the demo to showcase how gradients can make a demo
-look more cutting edge and give colors depth. The background is a drawn
-gradient and each panel button has a gradient effect to it. This is not a
-hardware accelerated function and can be found in the primitive layer of the
-graphics library. It has it's own demo screen found under the performance
-button on the main menu.</span></p>
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:"Arial","sans-serif"'>2)</span><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Gradient
+- Used throughout the demo to showcase how gradients can make a demo look more
+cutting edge and give colors depth. The background is a drawn gradient and each
+panel button has a gradient effect to it. This is not a hardware accelerated
+function and can be found in the primitive layer of the graphics library. It
+has its own demo screen found under the performance button on the main menu.</span></p>
 
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+<p class=MsoNormal style='text-indent:2.25pt'>&nbsp;</p>
 
-<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>3)
-Transitions - When a user hits a main menu button the panel will scroll out and
-then reappear. Also, the slide show button on the main menu will show the
-screen scroll in all four directions. This is a hardware accelerated function,
-but other controllers in the graphics library support this feature also. The
+<p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+10.0pt;font-family:"Arial","sans-serif"'>3)</span><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Transitions
+- When a user hits a main menu button the panel will scroll out and then
+reappear. Also, the slide show button on the main menu will show the screen
+scroll in all four directions. This is a hardware accelerated function, but
+other controllers in the graphics library support this feature also. The
 transitions were slowed down so the effect could be seen. The user can control
-the speed with software.</span></p>
+the speed with software.<b>&nbsp;</b></span></p>
 
-<p class=MsoNormal><b><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></b></p>
+<h2><a name="configuring_the_software"></a>Configuring the Software </h2>
 
-<p class=MsoPlainText><a
-href="Getting%20Started%20-%20Programming%20External%20Memory.htm"><b><i><span
-style='font-size:14.0pt;font-family:"Arial","sans-serif"'>Setting up the
-External Memory Programming Mode</span></i></b></a></p>
+<p class=MsoPlainText style='text-indent:.25in'><span style='font-family:"Arial","sans-serif"'>To
+run the demo in the supported Development Board combination, set the proper
+hardware profile in the project HardwareProfile.h file: </span></p>
 
-<p class=MsoNormal><b><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></b></p>
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
-<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>Only the
-PIC24F project required external memory programming.</span></p>
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-family:"Arial","sans-serif"'>For VGA display
+use:</span></p>
 
-<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>To program
-the external memory on the Graphics PICtail </span></p>
+<p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
+&quot;Configs/HWP_XXX_VGAv1.h”</span></p>
 
-<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>1.</span><span
-style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span style='font-family:"Arial","sans-serif"'>Hold down MCLR and S6
-switches on the Explorer 16 Board </span></p>
+<p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-family:"Arial","sans-serif"'>For WVGA display use:</span></p>
 
-<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>2.</span><span
-style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span style='font-family:"Arial","sans-serif"'>Release MCLR while
-holding down S6. This will place the board on programming mode.</span></p>
+<p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
+&quot;Configs/HWP_XXX__WVGAv1.h”</span></p>
 
-<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>3.</span><span
-style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span><span style='font-family:"Arial","sans-serif"'>Send the hex data from
-the External Memory Programmer utility.</span></p>
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoPlainText style='margin-left:.25in'><span style='font-family:"Arial","sans-serif"'>Where:
+XXX represents any of the selected Development Boards. </span></p>
+
+<p class=MsoPlainText style='margin-left:.25in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoPlainText style='margin-left:.25in'><span style='font-family:"Arial","sans-serif"'>The
+hardware profile file name refers to the combination of Development Boards that
+are used to run the demo. Refer to the abbreviations summary (<a
+href="../../../Help/Abbreviations.htm">link</a>) for details. </span></p>
+
+<p class=MsoPlainText style='margin-left:.25in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoPlainText style='margin-left:.25in'><span style='font-family:"Arial","sans-serif"'>The
+table below shows the hardware set up for the selected Development Boards
+attached to different Display Boards:</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal><a name="required_hardware"></a><span class=Heading2Char><span
+style='font-size:14.0pt'>Required Hardware/Configuring the Hardware</span></span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>The <a
+href="http://www.microchipdirect.com/productsearch.aspx?Keywords=AC164127-7">Graphics
+LCD Controller PICtail™ Plus S1D13517 Board</a> (AC164127-7) will be connected
+to either the Explorer 16 board or PIC32 Starter Kits. &nbsp;</span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>With each
+combination, special settings of the hardware are enumerated.</span></p>
+
+<p class=MsoPlainText>&nbsp;</p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=995
+ style='width:746.6pt;border-collapse:collapse'>
+ <tr>
+  <td width=335 style='width:251.6pt;border:solid black 1.0pt;border-right:
+  solid windowtext 1.0pt;background:#365F91;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>Selected
+  Development Boards</span></b></p>
+  </td>
+  <td width=210 valign=top style='width:157.5pt;border:solid windowtext 1.0pt;
+  border-left:none;background:#365F91;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>Graphics
+  LCD Controller </span></b></p>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>PICtail™
+  Plus S1D13517 </span></b></p>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>Board
+  (<a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=AC164127-7">AC164127-7</a>)
+  </span></b></p>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>Jumper
+  Settings</span></b></p>
+  </td>
+  <td width=138 style='width:103.5pt;border-top:solid black 1.0pt;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid windowtext 1.0pt;
+  background:#365F91;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>Resistive
+  Touch Method</span></b></p>
+  </td>
+  <td width=150 style='width:112.5pt;border-top:solid black 1.0pt;border-left:
+  none;border-bottom:solid black 1.0pt;border-right:solid windowtext 1.0pt;
+  background:#365F91;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>5.7&#8243;
+  VGA Truly TFT Display Board (<a
+  href="http://www.microchip.com/stellent/idcplg?IdcService=SS_GET_PAGE&amp;nodeId=1406&amp;dDocName=en554208">AC164127-8</a>)
+  </span></b></p>
+  </td>
+  <td width=162 style='width:121.5pt;border:solid black 1.0pt;border-left:none;
+  background:#365F91;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif";color:white'>7.0&#8243;
+  WVGA Truly TFT Display Board (<a
+  href="http://www.microchip.com/stellent/idcplg?IdcService=SS_GET_PAGE&amp;nodeId=1406&amp;dDocName=en553566">AC164127-9</a>)</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=335 rowspan=2 style='width:251.6pt;border-top:none;border-left:
+  solid black 1.0pt;border-bottom:solid black 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM240001">Explorer
+  16</a> (DM240001) </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>+
+  </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=MA240021"><span
+  lang=DE>PIC24FJ256GB210 Plug-In-Module (PIM)</span></a></span><span lang=DE
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'> (MA240021)</span></p>
+  <p class=MsoNormal><span lang=DE style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span lang=DE style='font-size:8.0pt;font-family:"Verdana","sans-serif"'> </span></p>
+  </td>
+  <td width=210 style='width:157.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 0in 0in 0in'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP1 – don’t care</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP2 - closed</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP3, JP4, JP5, JP6 – set to SPI 2</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  J4 - open</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  </td>
+  <td width=138 style='width:103.5pt;border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>4-wire Resistive
+  Touch Screen Driver</span></p>
+  </td>
+  <td width=150 style='width:112.5pt;border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 0in 0in 0in'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see notes 1, 3)</span></p>
+  </td>
+  <td width=162 style='width:121.5pt;border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see notes 1, 3)</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=210 style='width:157.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP1 – set PEN_INT – RC14 (mapped to RC3 on the actual PIC24FJ256GB210, due to
+  PIM signal remapping)</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP2 - closed</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP3, JP4, JP5, JP6 – set to SPI 2</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  J4 - open</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  </td>
+  <td width=138 style='width:103.5pt;border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchip.com/wwwproducts/Devices.aspx?dDocName=en543350">AR1020
+  Touch Controller</a></span></p>
+  </td>
+  <td width=150 style='width:112.5pt;border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see note 2)</span></p>
+  </td>
+  <td width=162 style='width:121.5pt;border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;background:
+  white;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see note 2)</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=335 style='width:251.6pt;border-top:none;border-left:solid black 1.0pt;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:#C6D9F1;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoPlainText><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM240001">Explorer
+  16</a> (DM240001) </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>+
+  </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=MA320001"><span
+  lang=DE>PIC32MX 100P QFP TO 100P Plug-In-Module (PIM)</span></a></span><span
+  lang=DE style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>
+  (MA320001)</span></p>
+  <p class=MsoPlainText><span lang=DE style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  </td>
+  <td width=210 rowspan=2 style='width:157.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:#C6D9F1;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP1 – don’t care</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP2 - closed</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP3, JP4, JP5, JP6 – set to SPI 2</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  J4 - open</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  </td>
+  <td width=138 rowspan=2 style='width:103.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:#C6D9F1;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>4-wire Resistive
+  Touch Screen Driver</span></p>
+  </td>
+  <td width=150 rowspan=2 style='width:112.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:#C6D9F1;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see note 1)</span></p>
+  </td>
+  <td width=162 rowspan=2 style='width:121.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid black 1.0pt;
+  background:#C6D9F1;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see note 1)</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=335 style='width:251.6pt;border-top:none;border-left:solid black 1.0pt;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:#C6D9F1;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoPlainText><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM240001">Explorer
+  16</a> (DM240001) </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>+
+  </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=MA320003"><span
+  lang=DE>PIC32MX CAN-USB Plug-In-Module (PIM)</span></a></span><span lang=DE
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'> (MA320003)</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  </span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=335 style='width:251.6pt;border-top:none;border-left:solid black 1.0pt;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoPlainText><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoPlainText><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM320001">PIC32
+  Starter Kit</a> (DM320001)</span></p>
+  </td>
+  <td width=210 style='width:157.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP1 – don’t care</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP2 - closed</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP3, JP4, JP5, JP6 – set to SPI 2</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  J4 - open</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  </td>
+  <td width=138 rowspan=2 style='width:103.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>4-wire Resistive
+  Touch Screen Driver</span></p>
+  </td>
+  <td width=150 rowspan=2 style='width:112.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see note 1)</span></p>
+  </td>
+  <td width=162 rowspan=2 style='width:121.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid black 1.0pt;
+  background:white;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>(see note 1)</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=335 style='width:251.6pt;border-top:none;border-left:solid black 1.0pt;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 5.4pt 0in 5.4pt'>
+  <p class=MsoPlainText><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoPlainText><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM320004">PIC32
+  Ethernet Starter Kit</a> (DM320004)</span></p>
+  </td>
+  <td width=210 style='width:157.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  background:white;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  </span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP1 – don’t care</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP2 - closed</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  JP3, JP4, JP5, JP6 – set to SPI 1</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;
+  J4 - open</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr style='height:95.75pt'>
+  <td width=995 colspan=5 valign=top style='width:746.6pt;border-top:none;
+  border-left:solid black 1.0pt;border-bottom:solid windowtext 1.0pt;
+  border-right:solid black 1.0pt;padding:0in 0in 0in 0in;height:95.75pt'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>Notes:
+  </span></p>
+  <p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+  8.0pt;font-family:"Verdana","sans-serif"'>1.</span><span style='font-size:
+  7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='font-size:8.0pt;
+  font-family:"Verdana","sans-serif"'>When using Display Boards with the AR1020
+  <b>disabled</b>, make sure the jumpers on the Display Boards are set
+  properly:</span></p>
+  <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  J1, J2, J3, J4 – set to (2-3) (use MCU signals)</span></p>
+  <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  J5 – don’t care&nbsp;</span></p>
+  <p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+  8.0pt;font-family:"Verdana","sans-serif"'>2.</span><span style='font-size:
+  7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='font-size:8.0pt;
+  font-family:"Verdana","sans-serif"'>When using Display Boards with the AR1020
+  <b>enabled</b>, make sure the jumpers on the Display Boards are set properly:</span></p>
+  <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  J1, J2, J3, J4 – set to (1-2) (use AR1020 signals)</span></p>
+  <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  J5 – closed if the LED is used to indicate assertion of the interrupt line.</span></p>
+  <p class=MsoListParagraph style='text-indent:-.25in'><span style='font-size:
+  8.0pt;font-family:"Verdana","sans-serif"'>3.</span><span style='font-size:
+  7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='font-size:8.0pt;
+  font-family:"Verdana","sans-serif"'>When using <a
+  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=MA240021"><span
+  lang=DE>PIC24FJ256GB210 Plug-In-Module (PIM)</span></a></span><span lang=DE
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'> (MA240021) set
+  the PIM jumpers </span><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>properly</span></p>
+  <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  JP1, JP2, JP3 – set jumpers closed to the side that says 'P' which stands for
+  parallel (16-bit)</span></p>
+  <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  JP4 – open</span></p>
+  <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'>&nbsp;</p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoPlainText>&nbsp;<span style='font-size:12.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=486
+ style='width:364.5pt;margin-left:-.4pt;border-collapse:collapse'>
+ <tr style='height:12.75pt'>
+  <td width=486 nowrap colspan=4 valign=bottom style='width:364.5pt;border:
+  solid windowtext 1.0pt;background:white;padding:0in 5.4pt 0in 5.4pt;
+  height:12.75pt'>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Legend:</span></p>
+  </td>
+ </tr>
+ <tr style='height:12.75pt'>
+  <td width=42 nowrap valign=bottom style='width:31.5pt;border:solid windowtext 1.0pt;
+  border-top:none;background:white;padding:0in 5.4pt 0in 5.4pt;height:12.75pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
+  </td>
+  <td width=180 nowrap style='width:135.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:12.75pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Supported
+  out of the box</span></p>
+  </td>
+  <td width=42 valign=bottom style='width:31.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 0in 0in 0in;height:12.75pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#9746;</span></p>
+  </td>
+  <td width=222 style='width:166.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 0in 0in 0in;height:12.75pt'>
+  <p class=MsoNormal style='margin-left:.1in'><span style='font-size:10.0pt;
+  font-family:"Arial","sans-serif"'>Hardware compatible, will need firmware
+  modification</span></p>
+  </td>
+ </tr>
+ <tr style='height:12.75pt'>
+  <td width=42 nowrap valign=bottom style='width:31.5pt;border:solid windowtext 1.0pt;
+  border-top:none;background:white;padding:0in 5.4pt 0in 5.4pt;height:12.75pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#9745;</span></p>
+  </td>
+  <td width=180 nowrap style='width:135.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:12.75pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>Supported,
+  see limitations</span></p>
+  </td>
+  <td width=42 valign=bottom style='width:31.5pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 0in 0in 0in;height:12.75pt'>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10007;</span></p>
+  </td>
+  <td width=222 style='width:166.5pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 0in 0in 0in;height:12.75pt'>
+  <p class=MsoNormal style='margin-left:.1in'><span style='font-size:10.0pt;
+  font-family:"Arial","sans-serif"'>Not supported, hardware not compatible</span></p>
+  </td>
+ </tr>
+</table>
 
 <p class=MsoNormal>&nbsp;</p>
 
-<p class=MsoNormal><b>Trademarks:</b></p>
+<p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal><a name="_Toc276094147"></a><a name="running_the_demo"></a><b>Trademarks:</b></p>
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;
-font-family:"Arial","sans-serif";color:black'>The Microchip name and logo, the Microchip
-logo, MPLAB, and PIC are registered trademarks of Microchip Technology
-Incorporated in the U.S.A. and other countries.</span></i></p>
+font-family:"Arial","sans-serif";color:black'>The Microchip name and logo, the
+Microchip logo, MPLAB, and PIC are registered trademarks of Microchip
+Technology Incorporated in the U.S.A. and other countries.</span></i></p>
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;
 font-family:"Arial","sans-serif";color:black'>PICDEM and PICTail are trademarks

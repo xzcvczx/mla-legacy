@@ -128,7 +128,9 @@ BYTE active_protocol;   // [0] Boot Protocol [1] Report Protocol
 #endif     
 
 /** Section: DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /** Section: CLASS SPECIFIC REQUESTS ****************************************/
 

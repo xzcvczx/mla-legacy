@@ -38,6 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07	    Version 1.0 release
  * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
+ * 07/29/11     Fixed state transition when rendering the text.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -339,7 +340,8 @@ WORD RbDraw(void *pObj)
         DRAW_TEXT_RUN,
         DRAW_CHECK,
         DRAW_CHECK_RUN,
-        DRAW_FOC
+        DRAW_FOC,
+        DRAW_FOC_ACTUAL
     } RB_DRAW_STATES;
 
         #define SIN45   46341
@@ -355,168 +357,218 @@ WORD RbDraw(void *pObj)
 
     pRb = (RADIOBUTTON *)pObj;
 
-    if(IsDeviceBusy())
-        return (0);
-
-    switch(state)
+    while(1)
     {
-        case REMOVE:
-            if(GetState(pRb, (RB_HIDE | RB_DRAW)))
-            {
-                SetColor(pRb->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pRb->hdr.left, pRb->hdr.top, pRb->hdr.right, pRb->hdr.bottom))
-                    return (0);
-            }
 
-            if(GetState(pRb, RB_HIDE))
-                return (1);
-
-            radius = ((pRb->hdr.bottom - pRb->hdr.top) >> 1) - RB_INDENT;
-            x = pRb->hdr.left + ((pRb->hdr.bottom - pRb->hdr.top) >> 1) + RB_INDENT;
-            y = (pRb->hdr.bottom + pRb->hdr.top) >> 1;
-            temp.Val = SIN45;
-
-            if(GetState(pRb, RB_DRAW))
-            {
-                state = DRAW_BUTTON0;
-            }
-            else
-            {
-                state = DRAW_CHECK;
-                goto rb_draw_check;
-            }
-
-        case DRAW_BUTTON0:
-            if(!GetState(pRb, RB_DISABLED))
-            {
-                faceClr = pRb->hdr.pGolScheme->Color0;
-            }
-            else
-            {
-                faceClr = pRb->hdr.pGolScheme->ColorDisabled;
-            }
-
-            GOLPanelDraw
-            (
-                x,
-                y,
-                x,
-                y,
-                radius,
-                faceClr,
-                pRb->hdr.pGolScheme->EmbossDkColor,
-                pRb->hdr.pGolScheme->EmbossLtColor,
-                NULL,
-                GOL_EMBOSS_SIZE
-            );
-            state = DRAW_BUTTON1;
-
-        case DRAW_BUTTON1:
-            if(!GOLPanelDrawTsk())
-            {
-                return (0);
-            }
-
-            state = DRAW_TEXT;
-
-        case DRAW_TEXT:
-            if(pRb->pText != NULL)
-            {
-                SetFont(pRb->hdr.pGolScheme->pFont);
-
-                if(GetState(pRb, RB_DISABLED))
-                {
-                    SetColor(pRb->hdr.pGolScheme->TextColorDisabled);
-                }
-                else
-                {
-                    SetColor(pRb->hdr.pGolScheme->TextColor0);
-                }
-
-                MoveTo
-                (
-                    pRb->hdr.left + pRb->hdr.bottom - pRb->hdr.top + RB_INDENT,
-                    (pRb->hdr.bottom + pRb->hdr.top - pRb->textHeight) >> 1
-                );
-
-                state = DRAW_TEXT_RUN;
-
-            case DRAW_TEXT_RUN:
-                if(!OutText(pRb->pText))
-                    return (0);
-            }
-
-            state = DRAW_CHECK;
-
-    rb_draw_check:
-
-        case DRAW_CHECK:
-            if(GetState(pRb, RB_CHECKED))
-            {
-                if(GetState(pRb, RB_DISABLED))
-                {
-                    SetColor(pRb->hdr.pGolScheme->TextColorDisabled);
-                }
-                else
-                {
-                        #if (COLOR_DEPTH == 1)
-                    SetColor(BLACK);
-                        #else
-                    SetColor(pRb->hdr.pGolScheme->TextColor0);
-                        #endif
-                }
-            }
-            else
-            {
-                if(GetState(pRb, RB_DISABLED))
-                {
-                    SetColor(pRb->hdr.pGolScheme->ColorDisabled);
-                }
-                else
-                {
-                        #if (COLOR_DEPTH == 1)
-                    SetColor(WHITE);
-                        #else
-                    SetColor(pRb->hdr.pGolScheme->Color0);
-                        #endif
-                }
-            }
-
-            state = DRAW_CHECK_RUN;
-
-        case DRAW_CHECK_RUN:
-            checkIndent = (pRb->hdr.bottom - pRb->hdr.top) >> 2;
-            if(!FillCircle(x, y, radius - checkIndent))
-                return (0);
-
-            state = DRAW_FOC;
-
-        case DRAW_FOC:
-            if(GetState(pRb, RB_DRAW | RB_DRAW_FOCUS))
-            {
-                if(IsDeviceBusy())
-                    return (0);
-
-                if(GetState(pRb, RB_FOCUSED))
-                {
-                    SetColor(pRb->hdr.pGolScheme->TextColor0);
-                }
-                else
+        if(IsDeviceBusy())
+            return (0);
+    
+        switch(state)
+        {
+            case REMOVE:
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            GFX_DRIVER_SetupDrawUpdate( pRb->hdr.left,
+                                        pRb->hdr.top,
+                                        pRb->hdr.right,
+                                        pRb->hdr.bottom);
+#endif
+                if(GetState(pRb, (RB_HIDE | RB_DRAW)))
                 {
                     SetColor(pRb->hdr.pGolScheme->CommonBkColor);
+                    if(!Bar(pRb->hdr.left, pRb->hdr.top, pRb->hdr.right, pRb->hdr.bottom))
+                        return (0);
                 }
-
-                SetLineType(FOCUS_LINE);
+    
+                if(GetState(pRb, RB_HIDE))
+            	{
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+	                GFX_DRIVER_CompleteDrawUpdate(   pRb->hdr.left,
+	                                                pRb->hdr.top,
+	                                                pRb->hdr.right,
+	                                                pRb->hdr.bottom);
+#endif
+	                return (1);
+	            }
+                radius = ((pRb->hdr.bottom - pRb->hdr.top) >> 1) - RB_INDENT;
+                x = pRb->hdr.left + ((pRb->hdr.bottom - pRb->hdr.top) >> 1) + RB_INDENT;
+                y = (pRb->hdr.bottom + pRb->hdr.top) >> 1;
+                temp.Val = SIN45;
+    
+                if(GetState(pRb, RB_DRAW))
+                {
+                    state = DRAW_BUTTON0;
+                }
+                else if (GetState(pRb, RB_DRAW_CHECK))
+                {
+                    state = DRAW_CHECK;
+                    break;
+                }
+                else if (GetState(pRb, RB_DRAW_FOCUS))
+                {
+                    state = DRAW_FOC;
+                    break;
+                }
+                else
+            	{
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+	                GFX_DRIVER_CompleteDrawUpdate(   pRb->hdr.left,
+	                                                pRb->hdr.top,
+	                                                pRb->hdr.right,
+	                                                pRb->hdr.bottom);
+#endif
+	                return (1);
+	            }
+    
+            case DRAW_BUTTON0:
+                if(!GetState(pRb, RB_DISABLED))
+                {
+                    faceClr = pRb->hdr.pGolScheme->Color0;
+                }
+                else
+                {
+                    faceClr = pRb->hdr.pGolScheme->ColorDisabled;
+                }
+    
+                GOLPanelDraw
+                (
+                    x,
+                    y,
+                    x,
+                    y,
+                    radius,
+                    faceClr,
+                    pRb->hdr.pGolScheme->EmbossDkColor,
+                    pRb->hdr.pGolScheme->EmbossLtColor,
+                    NULL,
+                    GOL_EMBOSS_SIZE
+                );
+                state = DRAW_BUTTON1;
+    
+            case DRAW_BUTTON1:
+                if(!GOLPanelDrawTsk())
+                {
+                    return (0);
+                }
+    
+                state = DRAW_TEXT;
+    
+            case DRAW_TEXT:
+                if(pRb->pText != NULL)
+                {
+                    SetFont(pRb->hdr.pGolScheme->pFont);
+    
+                    if(GetState(pRb, RB_DISABLED))
+                    {
+                        SetColor(pRb->hdr.pGolScheme->TextColorDisabled);
+                    }
+                    else
+                    {
+                        SetColor(pRb->hdr.pGolScheme->TextColor0);
+                    }
+    
+                    MoveTo
+                    (
+                        pRb->hdr.left + pRb->hdr.bottom - pRb->hdr.top + RB_INDENT,
+                        (pRb->hdr.bottom + pRb->hdr.top - pRb->textHeight) >> 1
+                    );
+    
+                    state = DRAW_TEXT_RUN;
+                }
+    			else
+    			{
+    			    state = DRAW_CHECK;
+                    break;
+    			}
+            
+    		case DRAW_TEXT_RUN:
+                if(!OutText(pRb->pText))
+                    return (0);
+            
+                state = DRAW_CHECK;
+                break;
+    
+            case DRAW_CHECK:
+                if(GetState(pRb, RB_CHECKED))
+                {
+                    if(GetState(pRb, RB_DISABLED))
+                    {
+                        SetColor(pRb->hdr.pGolScheme->TextColorDisabled);
+                    }
+                    else
+                    {
+                            #if (COLOR_DEPTH == 1)
+                        SetColor(BLACK);
+                            #else
+                        SetColor(pRb->hdr.pGolScheme->TextColor0);
+                            #endif
+                    }
+                }
+                else
+                {
+                    if(GetState(pRb, RB_DISABLED))
+                    {
+                        SetColor(pRb->hdr.pGolScheme->ColorDisabled);
+                    }
+                    else
+                    {
+                            #if (COLOR_DEPTH == 1)
+                        SetColor(WHITE);
+                            #else
+                        SetColor(pRb->hdr.pGolScheme->Color0);
+                            #endif
+                    }
+                }
+    
+                state = DRAW_CHECK_RUN;
+    
+            case DRAW_CHECK_RUN:
+                checkIndent = (pRb->hdr.bottom - pRb->hdr.top) >> 2;
+                if(!FillCircle(x, y, radius - checkIndent))
+                    return (0);
+    
+                state = DRAW_FOC;
+                break;
+    
+            case DRAW_FOC:
+                if(GetState(pRb, RB_DRAW | RB_DRAW_FOCUS))
+                {
+                    if(GetState(pRb, RB_FOCUSED))
+                    {
+                        SetColor(pRb->hdr.pGolScheme->TextColor0);
+                    }
+                    else
+                    {
+                        SetColor(pRb->hdr.pGolScheme->CommonBkColor);
+                    }
+    
+                    SetLineType(FOCUS_LINE);
+                    state = DRAW_FOC_ACTUAL;
+                    break;
+                }
+                state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pRb->hdr.left,
+                                                pRb->hdr.top,
+                                                pRb->hdr.right,
+                                                pRb->hdr.bottom);
+#endif
+                return (1);
+    
+            case DRAW_FOC_ACTUAL:
                 if(!Rectangle(pRb->hdr.left, pRb->hdr.top, pRb->hdr.right, pRb->hdr.bottom))
                     return (0);
                 SetLineType(SOLID_LINE);
-            }
+                state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pRb->hdr.left,
+                                                pRb->hdr.top,
+                                                pRb->hdr.right,
+                                                pRb->hdr.bottom);
+#endif
+                return (1);
+        } // end of switch()
+    } // end of while(1)
 
-            state = REMOVE;
-            return (1);
-    }
-
-    return (1);
 }
 
 #endif // USE_RADIOBUTTON

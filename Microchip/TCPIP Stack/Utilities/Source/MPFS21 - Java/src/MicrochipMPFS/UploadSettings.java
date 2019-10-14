@@ -1,13 +1,36 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * UploadSettings.java
- *
- * Created on Oct 8, 2010, 7:03:18 PM
- */
+/*********************************************************************
+*
+*  Upload seetings dialog box. includes HTTP and FTP protocol selection
+*  and configuring IP address, user name and password .
+*
+**********************************************************************
+* FileName:        UploadSettings.java
+* Complier:        JAVA version "1.6.0_20 and onwards"
+* IDE :            Netbean
+* Software License Agreement
+*
+* Copyright (C) 2012 Microchip Technology Inc.  All rights reserved.
+*
+* Microchip licenses to you the right to use, modify, copy, and
+* distribute the Software when used with a Microchip microcontroller or
+* digital signal controller product which is integrated into Licensee's product.
+*
+* You should refer to the license agreement accompanying this
+* Software for additional information regarding your rights and
+* obligations.
+*
+* THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+* WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+* LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+* PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+* MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+* CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+* PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+* BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+* THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+* SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+* (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE
+**********************************************************************/
 
 package MicrochipMPFS;
 import javax.swing.*;
@@ -319,6 +342,43 @@ private void botCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     public boolean getUploadProtocolradBut()
     {
         return radBtnHttp.isSelected();
+    }
+    public void setUploadProtocolRadBtn(int protocolSelection)
+    {
+        if(protocolSelection == 1)
+        {
+            radBtnHttp.setSelected(true);
+            MPFS2.uploadProtocol = MainMPFS.UPLOAD_PROTOCOL_OPTION.HTTP;
+        }
+        else
+        {
+            radBtnFTP.setSelected(true);
+            MPFS2.uploadProtocol = MainMPFS.UPLOAD_PROTOCOL_OPTION.FTP;
+        }
+    }
+
+    public void setUploadAddress(String addr)
+    {
+        uploadAddress = addr;
+        txtIPAddress.setText(addr);
+    }
+
+    public void setUploadPath(String addr)
+    {
+        uploadPath =  addr;
+        txtuploadPath.setText(addr);
+    }
+
+    public void setUploadPass(String addr)
+    {
+        password  = addr;
+        txtPass.setText(addr);
+    }
+
+    public void setUploadUserName(String addr)
+    {
+        username = addr;
+        txtUserName.setText(addr);
     }
 
     void toolTipUploadSettings()

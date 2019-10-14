@@ -49,9 +49,6 @@ Change History
     #define MAX_ALLOWED_CURRENT             (500)         // Maximum power we can supply in mA
 #endif
 
-// Define a debug error printing
-#define DEBUG_ERROR(a)   Nop(); Nop(); Nop();
-
 // Configuration bits for the device.  Please refer to the device datasheet for each device
 //   to determine the correct configuration bit settings
 #ifdef __C30__
@@ -61,6 +58,11 @@ Change History
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
+    #elif defined(__PIC24FJ64GB502__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__PIC24FJ256GB106__)
@@ -78,25 +80,25 @@ Change History
         _FWDT(FWDTEN_OFF);    
     #endif
 #elif defined( __PIC32MX__ )
-     #pragma config UPLLEN   = ON            // USB PLL Enabled
-     #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
-     #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
-     #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
-     #pragma config FPLLODIV = DIV_1         // PLL Output Divider
-     #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
-     #pragma config FWDTEN   = OFF           // Watchdog Timer
-     #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
-     //#pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
-     #pragma config OSCIOFNC = OFF           // CLKO Enable
-     #pragma config POSCMOD  = HS            // Primary Oscillator
-     #pragma config IESO     = OFF           // Internal/External Switch-over
-     #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
-     #pragma config FNOSC    = PRIPLL        // Oscillator Selection
-     #pragma config CP       = OFF           // Code Protect
-     #pragma config BWP      = OFF           // Boot Flash Write Protect
-     #pragma config PWP      = OFF           // Program Flash Write Protect
-     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-     #pragma config DEBUG    = ON            // Background Debugger Enable
+    #pragma config UPLLEN   = ON            // USB PLL Enabled
+    #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
+    #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
+    #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
+    #pragma config FPLLODIV = DIV_1         // PLL Output Divider
+    #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
+    #pragma config FWDTEN   = OFF           // Watchdog Timer
+    #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
+    //#pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
+    #pragma config OSCIOFNC = OFF           // CLKO Enable
+    #pragma config POSCMOD  = HS            // Primary Oscillator
+    #pragma config IESO     = OFF           // Internal/External Switch-over
+    #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
+    #pragma config FNOSC    = PRIPLL        // Oscillator Selection
+    #pragma config CP       = OFF           // Code Protect
+    #pragma config BWP      = OFF           // Boot Flash Write Protect
+    #pragma config PWP      = OFF           // Program Flash Write Protect
+    #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
+    //#pragma config DEBUG    = ON            // Background Debugger Enable
 
 #else
     #error Cannot define configuration bits.
@@ -109,21 +111,20 @@ Change History
 #if defined(__C30__)
 	void _ISR __attribute__((__no_auto_psv__)) _AddressError(void)
 	{
-        DEBUG_ERROR("Address error");
         while(1){}
 	}
 	void _ISR __attribute__((__no_auto_psv__)) _StackError(void)
 	{
-	    DEBUG_ERROR("Stack error");
         while(1){}
 	}
 	
 #elif defined(__C32__)
 	void _general_exception_handler(unsigned cause, unsigned status)
 	{
-        unsigned long address = _CP0_GET_EPC();
+        #if defined(DEBUG_MODE)
+            unsigned long address = _CP0_GET_EPC();
+        #endif
 
-		DEBUG_ERROR("exception");
         while(1){}
 	}
 #endif
@@ -272,6 +273,8 @@ int main(void)
     responseNeeded = FALSE;
     mInitPOT();
 
+    DEBUG_Init(0);
+
     while(1)
     {
         //Keep the USB stack running
@@ -302,7 +305,7 @@ int main(void)
             if( errorCode != USB_SUCCESS)
             {
                 //Error
-                DEBUG_ERROR("Error trying to start read");
+                DEBUG_PrintString("Error trying to start read");
             }
             else
             {
@@ -323,7 +326,7 @@ int main(void)
             else
             {
                 //Error
-                DEBUG_ERROR("Error trying to complete read request");
+                DEBUG_PrintString("Error trying to complete read request");
             }
 
         }
@@ -352,7 +355,7 @@ int main(void)
                     
                     default:
                         //Error, unknown command
-                        DEBUG_ERROR("Error: unknown command received");
+                        DEBUG_PrintString("Error: unknown command received");
                         break;
                 }
             }
@@ -413,7 +416,7 @@ int main(void)
                 if(errorCode != USB_SUCCESS)
                 {
                     //Error
-                    DEBUG_ERROR("Error trying to complete write");
+                    DEBUG_PrintString("Error trying to complete write");
                 }
             }       
         }
@@ -427,7 +430,7 @@ int main(void)
             errorCode = AndroidAppWrite(device_handle,(BYTE*)&outgoing_packet, 2);
             if( errorCode != USB_SUCCESS )
             {
-                DEBUG_ERROR("Error trying to send button update");
+                DEBUG_PrintString("Error trying to send button update");
             }
         }
 
@@ -447,7 +450,7 @@ int main(void)
             errorCode = AndroidAppWrite(device_handle,(BYTE*)&outgoing_packet, 2);
             if( errorCode != USB_SUCCESS )
             {
-                DEBUG_ERROR("Error trying to send button update");
+                DEBUG_PrintString("Error trying to send button update");
             }
 
             buttonsNeedUpdate = FALSE;
@@ -464,7 +467,7 @@ int main(void)
             errorCode = AndroidAppWrite(device_handle,(BYTE*)&outgoing_packet, 2);
             if( errorCode != USB_SUCCESS )
             {
-                DEBUG_ERROR("Error trying to send pot update");
+                DEBUG_PrintString("Error trying to send pot update");
             }
 
             potNeedsUpdate = FALSE;
@@ -534,7 +537,7 @@ BOOL USB_ApplicationDataEventHandler( BYTE address, USB_EVENT event, void *data,
   ***************************************************************************/
 BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
 {
-    switch( event )
+    switch( (INT)event )
     {
         case EVENT_VBUS_REQUEST_POWER:
             // The data pointer points to a byte that represents the amount of power
@@ -546,7 +549,7 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
             }
             else
             {
-                DEBUG_ERROR( "\r\n***** USB Error - device requires too much current *****\r\n" );
+                DEBUG_PrintString( "\r\n***** USB Error - device requires too much current *****\r\n" );
             }
             break;
 
@@ -786,7 +789,7 @@ static BYTE ReadPOT(void)
             temp = temp * 100;
             temp = temp/1023;
         
-        #elif defined(PIC24FJ64GB004_PIM)
+        #elif defined(PIC24FJ64GB004_PIM) || defined(PIC24FJ64GB502_MICROSTICK)
             AD1CHS = 0x7;           //MUXA uses AN7
 
             // Get an ADC sample
@@ -839,7 +842,8 @@ static BYTE ReadPOT(void)
                 defined(PIC32_ETHERNET_STARTER_KIT) || \
                 defined(DSPIC33EP512MU810_PIM) || \
                 defined (PIC24EP512GU810_PIM) || \
-                defined (DSPIC33E_USB_STARTER_KIT)
+                defined (DSPIC33E_USB_STARTER_KIT) || \
+                defined (CEREBOT_32MX7)
             //Doesn't have a Pot
             w.Val = 50;
             temp = 50;

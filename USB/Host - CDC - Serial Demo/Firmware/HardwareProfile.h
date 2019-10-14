@@ -4,7 +4,7 @@
 #define _HARDWARE_PROFILE_H_
 
 #if defined( __C30__ )
-    #if defined (__dsPIC33EP512MU10__)||defined(__PIC24EP512GU810__)
+    #if defined (__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
         #define GetSystemClock()            40000000UL
         #define GetPeripheralClock()        (GetSystemClock())
         #define GetInstructionClock()       GetSystemClock()

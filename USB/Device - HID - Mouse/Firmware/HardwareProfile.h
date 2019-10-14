@@ -84,6 +84,8 @@
             #include "HardwareProfile - PIC24F Starter Kit.h"
         #elif defined(__PIC24FJ64GB004__)
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+        #elif defined(__PIC24FJ64GB502__)
+            #include "HardwareProfile - PIC24FJ64GB502 Microstick.h"
         #elif defined(__PIC24FJ256DA210__)
             #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
         #elif defined(__dsPIC33EP512MU810__)

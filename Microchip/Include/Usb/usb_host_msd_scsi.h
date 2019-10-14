@@ -75,7 +75,7 @@ Change History:
 //DOM-IGNORE-END
 
 #include "USB/usb.h"
-#include "FSConfig.h"
+#include "FSconfig.h"
 #include "MDD File System/FSDefs.h"
 
 // *****************************************************************************

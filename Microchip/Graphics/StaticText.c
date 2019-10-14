@@ -34,10 +34,12 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * PAT 					11/12/07	Version 1.0 release
- * PAT					11/12/07	Fixed clipping enabling location
+ * 11/12/07	   Version 1.0 release
+ * 11/12/07	   Fixed clipping enabling location
+ * 08/04/11    Fixed rendering to check IsDeviceBusy() if not exiting the
+ *             draw routine.
 *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -181,155 +183,175 @@ WORD StDraw(void *pObj)
 
     pSt = (STATICTEXT *)pObj;
 
-    if(IsDeviceBusy())
-        return (0);
-
-    switch(state)
+    while(1)
     {
-        case ST_STATE_IDLE:
-            SetClip(CLIP_DISABLE);
-
-            if(GetState(pSt, ST_HIDE))
-            {
-                SetColor(pSt->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
-                    return (0);
-
-                // State is still IDLE STATE so no need to set
-                return (1);
-            }
-
-            if(GetState(pSt, ST_DRAW))
-            {
-                // show frame if specified to be shown
-                SetLineType(SOLID_LINE);
-                SetLineThickness(NORMAL_LINE);
-
-                if(GetState(pSt, ST_FRAME))
+        if(IsDeviceBusy())
+            return (0);
+    
+        switch(state)
+        {
+            case ST_STATE_IDLE:
+                SetClip(CLIP_DISABLE);
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_SetupDrawUpdate( pSt->hdr.left,
+                                            pSt->hdr.top,
+                                            pSt->hdr.right,
+                                            pSt->hdr.bottom);
+#endif
+    
+                if(GetState(pSt, ST_HIDE))
                 {
-
-                    if(!GetState(pSt, ST_DISABLED))
+                    SetColor(pSt->hdr.pGolScheme->CommonBkColor);
+                    if(!Bar(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
+                        return (0);
+    
+                    // State is still IDLE STATE so no need to set state
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pSt->hdr.left,
+                                                    pSt->hdr.top,
+                                                    pSt->hdr.right,
+                                                    pSt->hdr.bottom);
+#endif
+                    return (1);
+                }
+    
+                if(GetState(pSt, ST_DRAW))
+                {
+                    // show frame if specified to be shown
+                    SetLineType(SOLID_LINE);
+                    SetLineThickness(NORMAL_LINE);
+    
+                    if(GetState(pSt, ST_FRAME))
                     {
-
-                        // show enabled color
-                        SetColor(pSt->hdr.pGolScheme->Color1);
-                        if(!Rectangle(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
-                            return (0);
+    
+                        if(!GetState(pSt, ST_DISABLED))
+                        {
+    
+                            // show enabled color
+                            SetColor(pSt->hdr.pGolScheme->Color1);
+                            if(!Rectangle(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
+                                return (0);
+                        }
+                        else
+                        {
+    
+                            // show disabled color
+                            SetColor(pSt->hdr.pGolScheme->ColorDisabled);
+                            if(!Rectangle(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
+                                return (0);
+                        }
                     }
                     else
                     {
-
-                        // show disabled color
-                        SetColor(pSt->hdr.pGolScheme->ColorDisabled);
+                        // show enabled color
+                        SetColor(pSt->hdr.pGolScheme->CommonBkColor);
                         if(!Rectangle(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
-                            return (0);
+                        	return (0);
+    	                
+    	            } 
+                }
+    
+                state = ST_STATE_CLEANAREA;
+    
+            case ST_STATE_CLEANAREA:
+    
+                // clean area where text will be placed.
+                SetColor(pSt->hdr.pGolScheme->CommonBkColor);
+                if(!Bar(pSt->hdr.left + 1, pSt->hdr.top + 1, pSt->hdr.right - 1, pSt->hdr.bottom - 1))
+                    return (0);
+    
+                // set clipping area, text will only appear inside the static text area.
+                SetClip(CLIP_ENABLE);
+                SetClipRgn(pSt->hdr.left + ST_INDENT, pSt->hdr.top, pSt->hdr.right - ST_INDENT, pSt->hdr.bottom);
+                state = ST_STATE_INIT;
+    
+            case ST_STATE_INIT:
+                if(IsDeviceBusy())
+                    return (0);
+    
+                // set the text color
+                if(!GetState(pSt, ST_DISABLED))
+                {
+                    SetColor(pSt->hdr.pGolScheme->TextColor0);
+                }
+                else
+                {
+                    SetColor(pSt->hdr.pGolScheme->TextColorDisabled);
+                }
+    
+                // use the font specified in the object
+                SetFont(pSt->hdr.pGolScheme->pFont);
+                pCurLine = pSt->pText;                  // get first line of text
+                state = ST_STATE_SETALIGN;              // go to drawing of text
+    
+            case ST_STATE_SETALIGN:
+                if(charCtr == 0)
+                {
+    
+                    // set position of the next character (based on alignment and next character)
+                    textWidth = GetTextWidth(pCurLine, pSt->hdr.pGolScheme->pFont);
+    
+                    // Display text with center alignment
+                    if(GetState(pSt, (ST_CENTER_ALIGN)))
+                    {
+                        MoveTo((pSt->hdr.left + pSt->hdr.right - textWidth) >> 1, pSt->hdr.top + (lineCtr * pSt->textHeight));
+                    }
+    
+                    // Display text with right alignment
+                    else if(GetState(pSt, (ST_RIGHT_ALIGN)))
+                    {
+                        MoveTo((pSt->hdr.right - textWidth - ST_INDENT), pSt->hdr.top + (lineCtr * pSt->textHeight));
+                    }
+    
+                    // Display text with left alignment
+                    else
+                    {
+                        MoveTo(pSt->hdr.left + ST_INDENT, pSt->hdr.top + (lineCtr * pSt->textHeight));
                     }
                 }
-                else
-                {
-                    // show enabled color
-                    SetColor(pSt->hdr.pGolScheme->CommonBkColor);
-                    if(!Rectangle(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
-                    	return (0);
-	                
-	            } 
-            }
-
-            state = ST_STATE_CLEANAREA;
-
-        case ST_STATE_CLEANAREA:
-
-            // clean area where text will be placed.
-            SetColor(pSt->hdr.pGolScheme->CommonBkColor);
-            if(!Bar(pSt->hdr.left + 1, pSt->hdr.top + 1, pSt->hdr.right - 1, pSt->hdr.bottom - 1))
-                return (0);
-
-            // set clipping area, text will only appear inside the static text area.
-            SetClip(CLIP_ENABLE);
-            SetClipRgn(pSt->hdr.left + ST_INDENT, pSt->hdr.top, pSt->hdr.right - ST_INDENT, pSt->hdr.bottom);
-            state = ST_STATE_INIT;
-
-        case ST_STATE_INIT:
-            if(IsDeviceBusy())
-                return (0);
-
-            // set the text color
-            if(!GetState(pSt, ST_DISABLED))
-            {
-                SetColor(pSt->hdr.pGolScheme->TextColor0);
-            }
-            else
-            {
-                SetColor(pSt->hdr.pGolScheme->TextColorDisabled);
-            }
-
-            // use the font specified in the object
-            SetFont(pSt->hdr.pGolScheme->pFont);
-            pCurLine = pSt->pText;                  // get first line of text
-            state = ST_STATE_SETALIGN;              // go to drawing of text
-
-        case ST_STATE_SETALIGN:
-            st_state_alignment : if(!charCtr)
-            {
-
-                // set position of the next character (based on alignment and next character)
-                textWidth = GetTextWidth(pCurLine, pSt->hdr.pGolScheme->pFont);
-
-                // Display text with center alignment
-                if(GetState(pSt, (ST_CENTER_ALIGN)))
-                {
-                    MoveTo((pSt->hdr.left + pSt->hdr.right - textWidth) >> 1, pSt->hdr.top + (lineCtr * pSt->textHeight));
-                }
-
-                // Display text with right alignment
-                else if(GetState(pSt, (ST_RIGHT_ALIGN)))
-                {
-                    MoveTo((pSt->hdr.right - textWidth - ST_INDENT), pSt->hdr.top + (lineCtr * pSt->textHeight));
-                }
-
-                // Display text with left alignment
-                else
-                {
-                    MoveTo(pSt->hdr.left + ST_INDENT, pSt->hdr.top + (lineCtr * pSt->textHeight));
-                }
-            }
-
-            state = ST_STATE_DRAWTEXT;
-
-        case ST_STATE_DRAWTEXT:
-            ch = *(pCurLine + charCtr);
-
-            // output one character at time until a newline character or a NULL character is sampled
-            while((0x0000 != ch) && (0x000A != ch))
-            {
-                if(!OutChar(ch))
-                    return (0);                     // render the character
-                charCtr++;                          // update to next character
+    
+                state = ST_STATE_DRAWTEXT;
+    
+            case ST_STATE_DRAWTEXT:
                 ch = *(pCurLine + charCtr);
-            }
-
-            // pCurText is updated for the next line
-            if(ch == 0x000A)
-            {                                       // new line character
-                pCurLine = pCurLine + charCtr + 1;  // go to first char of next line
-                lineCtr++;                          // update line counter
-                charCtr = 0;                        // reset char counter
-                goto st_state_alignment;            // continue to next line
-            }
-
-            // end of text string is reached no more lines to display
-            else
-            {
-                pCurLine = NULL;                    // reset static variables
-                lineCtr = 0;
-                charCtr = 0;
-                SetClip(CLIP_DISABLE);              // remove clipping
-                state = ST_STATE_IDLE;              // go back to IDLE state
-                return (1);
-            }
-    }
-
-    return (1);
+    
+                // output one character at time until a newline character or a NULL character is sampled
+                while((0x0000 != ch) && (0x000A != ch))
+                {
+                    if(!OutChar(ch))
+                        return (0);                     // render the character
+                    charCtr++;                          // update to next character
+                    ch = *(pCurLine + charCtr);
+                }
+    
+                // pCurText is updated for the next line
+                if(ch == 0x000A)
+                {                                       // new line character
+                    pCurLine = pCurLine + charCtr + 1;  // go to first char of next line
+                    lineCtr++;                          // update line counter
+                    charCtr = 0;                        // reset char counter
+                    state = ST_STATE_SETALIGN;          // continue to next line
+                    break;
+                }
+    
+                // end of text string is reached no more lines to display
+                else
+                {
+                    pCurLine = NULL;                    // reset static variables
+                    lineCtr = 0;
+                    charCtr = 0;
+                    SetClip(CLIP_DISABLE);              // remove clipping
+                    state = ST_STATE_IDLE;              // go back to IDLE state
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pSt->hdr.left,
+                                                    pSt->hdr.top,
+                                                    pSt->hdr.right,
+                                                    pSt->hdr.bottom);
+#endif
+                    return (1);
+                }
+        } // end of switch()
+    } // end of while(1)    
 }
 
 #endif // USE_STATICTEXT

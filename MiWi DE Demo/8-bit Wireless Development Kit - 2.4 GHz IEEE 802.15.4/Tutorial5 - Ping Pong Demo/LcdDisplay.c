@@ -145,7 +145,7 @@ void LCDInit(void)
 {
     #if defined(SENSOR_PORT_UART)
     TRISD |= 0x53;
-    PORTEbits.RDPU = 1;
+            //PORTEbits.RDPU = 1;
 
     PIR3bits.SSP2IF = 0;    //Clear SSP IF
     SSP2STAT = 0x00;        //Enable Slewrate Control, Clearing flags

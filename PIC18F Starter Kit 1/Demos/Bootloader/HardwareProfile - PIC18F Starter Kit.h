@@ -99,7 +99,6 @@
     // Port pins for SCK/SDI/SDO lines
     #define SPICLOCKPORT        PORTCbits.RC2
     #define SPIINPORT           PORTDbits.RD6
-    #define SPIOUTPORT          PORTBbits.RB3
 
     // Registers for the SPI module you want to use
     #define SPICON1             SSP2CON1
@@ -110,6 +109,7 @@
     #define SPISTATbits         SSP2STATbits
 
     #define SPI_INTERRUPT_FLAG  PIR3bits.SSP2IF 
+    #define SPI_INTERRUPT_FLAG_ASM  PIR3, 7    
     #define SPIENABLE           SSP2CON1bits.SSPEN
 
 
@@ -130,7 +130,7 @@
     //  final application design.
     #define DEMO_BOARD PIC18_STARTER_KIT
     #define PIC18_STARTER_KIT
-    #define CLOCK_FREQ 32000000
+    #define CLOCK_FREQ 48000000
     #define GetSystemClock() CLOCK_FREQ
     #define GetInstructionClock() GetSystemClock()
 

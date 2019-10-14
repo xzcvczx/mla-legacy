@@ -4,7 +4,7 @@
   <defaultConf>0</defaultConf>
   <confs>
     <conf name="PIC18_Explorer" type="2">
-      <platformToolSN></platformToolSN>
+      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT101934037:=x:=en</platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\mplabc18\v3.38\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
@@ -58,7 +58,7 @@
       </runprofile>
     </conf>
     <conf name="Explorer_16_-_PIC24_or_dsPIC33" type="2">
-      <platformToolSN></platformToolSN>
+      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT101934037:=x:=en</platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\mplabc30\v3.25\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>

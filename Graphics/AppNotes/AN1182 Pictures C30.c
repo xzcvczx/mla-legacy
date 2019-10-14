@@ -7,7 +7,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright(c) 2012 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -31,13 +31,20 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.2.12
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.45
  *****************************************************************************/
 
 /*****************************************************************************
  * SECTION:  Includes
  *****************************************************************************/
 #include <Graphics/Graphics.h>
+
+/*****************************************************************************
+ * SECTION:  Graphics Library Firmware Check
+ *****************************************************************************/
+#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
+#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#endif
 
 /*****************************************************************************
  * Converted Resources
@@ -58,7 +65,12 @@
  * Label: redLArrow
  * Description:  45x40 pixels, 4-bits per pixel
  ***********************************/
+#if(__C30_VERSION__ > 325)
+asm(".section .const, psv, page");
+#else
 asm(".section .const, psv");
+#endif
+
 
 extern const char __redLArrow[] __attribute__((space(prog), aligned(2)));
 
@@ -158,14 +170,23 @@ asm(".byte 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFF, 0xF
 asm(".byte 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF");
 asm(".byte 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF");
 asm(".byte 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F");
+#if(__C30_VERSION__ > 325)
+asm(".section .const, psv, page");
+#else
 asm(".section .const, psv");
+#endif
 
 /*********************************
  * Bitmap Structure
  * Label: redRArrow
  * Description:  45x40 pixels, 4-bits per pixel
  ***********************************/
+#if(__C30_VERSION__ > 325)
+asm(".section .const, psv, page");
+#else
 asm(".section .const, psv");
+#endif
+
 
 extern const char __redRArrow[] __attribute__((space(prog), aligned(2)));
 
@@ -265,5 +286,9 @@ asm(".byte 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFF, 0xF
 asm(".byte 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF");
 asm(".byte 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xCF, 0xDF, 0xCE, 0xEC, 0xED, 0xFE");
 asm(".byte 0xCC, 0xFF, 0xEC, 0xCD, 0xEC, 0xFF, 0xFF, 0x0F");
+#if(__C30_VERSION__ > 325)
+asm(".section .const, psv, page");
+#else
 asm(".section .const, psv");
+#endif
 

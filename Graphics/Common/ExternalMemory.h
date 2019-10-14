@@ -34,39 +34,35 @@
  * COST OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
+ *****************************************************************************/
+
+/*****************************************************************************
+ * Section: Description
  *
- * Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 08/04/10    Creation...
+ * This module is used to program an external memory source.  The data is sent
+ * via the PC utility external_memory_programmer.  Using the comm_pkt protocol, 
+ * the data is parsed and programed to the external memory.  
+ *
+ * This module is used by serval different Graphics demos and is part of the 
+ * common directory under the Graphics demo.
  *****************************************************************************/
 
 #ifndef _EXTERNAL_MEMORY_H
 #define _EXTERNAL_MEMORY_H
 
-////////////////////////////// INCLUDES //////////////////////////////
-    #if defined(__dsPIC33F__)
-        #include <p33Fxxxx.h>
-    #elif defined(__PIC24H__)
-        #include <p24Hxxxx.h>
-    #elif defined(__PIC32MX__)
-        #include <plib.h>
-    #else
-        #include <p24Fxxxx.h>
-    #endif
-    #include "HardwareProfile.h"
-    #include "SST39VF040.h" // memory on Graphics PICTail Board 2
-    #include "SST25VF016.h" // memory on Graphics PICTail Board 3
-    #include "SST39LF400.h" // parallel flash memory on PIC24FJ256DA210 Development Board
+/*****************************************************************************
+ * Section: Includes
+ *****************************************************************************/
+#include "Compiler.h"
+#include "HardwareProfile.h"
+#include "SST39VF040.h" // memory on Graphics PICTail Board 2
+#include "SST25VF016.h" // memory on Graphics PICTail Board 3
+#include "SST39LF400.h" // parallel flash memory on PIC24FJ256DA210 Development Board
     
 
-// Macros to interface with memory
-#if defined (GFX_PICTAIL_V2)
-    #define FLASHInit()                     SST39Init();
-    #define ChipErase()                     SST39ChipErase();
-    #define WriteArray(address, pdata, len) SST39WriteArray(address, pdata, len)
-    #define ReadArray(address, pdata, len)  SST39ReadArray(address, pdata, len)
-#endif
-
+/*****************************************************************************
+ * Section: Macros
+ *****************************************************************************/
 #if defined (USE_SST25VF016)
     #define FLASHInit(initData)             SST25Init(initData);
 	#define ChipErase()                     SST25ChipErase();

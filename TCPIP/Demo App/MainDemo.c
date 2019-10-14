@@ -94,6 +94,7 @@ static void InitializeBoard(void);
 static void ProcessIO(void);
 #if defined(WF_CS_TRIS)
     static void WF_Connect(void);
+	extern BOOL gRFModuleVer1209orLater;
 #endif
 
 //
@@ -172,10 +173,6 @@ int main(void)
 {
 	static DWORD t = 0;
 	static DWORD dwLastIP = 0;
-	#if defined(WF_USE_POWER_SAVE_FUNCTIONS)
-	BOOL  PsPollEnabled;
-	BOOL  psConfDone = FALSE;
-	#endif
 
 	// Initialize application specific hardware
 	InitializeBoard();
@@ -289,25 +286,6 @@ int main(void)
     // down into smaller pieces so that other tasks can have CPU time.
     while(1)
     {
-	#if defined(WF_USE_POWER_SAVE_FUNCTIONS)
-		if (!psConfDone && WFisConnected()) {	
-			PsPollEnabled = (MY_DEFAULT_PS_POLL == WF_ENABLED);
-			if (!PsPollEnabled) {	 
-				/* disable low power (PS-Poll) mode */
-				#if defined(STACK_USE_UART)
-				putrsUART("Disable PS-Poll\r\n");		 
-				#endif
-				WF_PsPollDisable();
-			} else {
-				/* Enable low power (PS-Poll) mode */
-				#if defined(STACK_USE_UART)
-				putrsUART("Enable PS-Poll\r\n");		
-				#endif
-				WF_PsPollEnable(TRUE);
-			}	
-			psConfDone = TRUE;
-		}
-	#endif
         // Blink LED0 (right most one) every second.
         if(TickGet() - t >= TICK_SECOND/2ul)
         {
@@ -319,6 +297,11 @@ int main(void)
         // for incoming packet, type of packet and calling
         // appropriate stack entity to process it.
         StackTask();
+        
+        #if defined(WF_CS_TRIS)
+		if (gRFModuleVer1209orLater)
+        	WiFiTask();
+        #endif
 
         // This tasks invokes each of the core stack application tasks
         StackApplications();
@@ -484,6 +467,15 @@ static void WF_Connect(void)
     putrsUART("Set Beacon Timeout\r\n");
     #endif
     WF_CASetBeaconTimeout(40);
+
+	if (gRFModuleVer1209orLater)
+    {
+        // If WEP security is used, set WEP Key Type.  The default WEP Key Type is Shared Key.
+        if (AppConfig.SecurityMode == WF_SECURITY_WEP_40 || AppConfig.SecurityMode == WF_SECURITY_WEP_104)
+        {
+            WF_CPSetWepKeyType(ConnectionProfileID, MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE);
+        }
+    }   
     
     /* Set Security */
     #if (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_OPEN)
@@ -529,6 +521,21 @@ static void WF_Connect(void)
                      AppConfig.WepKeyIndex,   /* only used if WEP enabled */
                      AppConfig.SecurityKey,
                      AppConfig.SecurityKeyLength);
+                     
+    #if MY_DEFAULT_PS_POLL == WF_ENABLED
+        WF_PsPollEnable(TRUE);
+        if (gRFModuleVer1209orLater)
+            WFEnableDeferredPowerSave();
+    #else
+        WF_PsPollDisable();
+    #endif
+
+	
+#ifdef WF_AGGRESSIVE_PS
+    if (gRFModuleVer1209orLater)
+        WFEnableAggressivePowerSave();
+#endif
+             
     #if defined(STACK_USE_UART)                     
     putrsUART("Start WiFi Connect\r\n");        
     #endif

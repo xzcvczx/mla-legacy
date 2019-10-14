@@ -1,13 +1,36 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/*********************************************************************
+*
+*  Microchip Information details dialog box.
+*
+**********************************************************************
+* FileName:        AboutBox.java
+* Complier:        JAVA version "1.6.0_20 and onwards"
+* IDE :            Netbean
+* Software License Agreement
+*
+* Copyright (C) 2012 Microchip Technology Inc.  All rights reserved.
+*
+* Microchip licenses to you the right to use, modify, copy, and
+* distribute the Software when used with a Microchip microcontroller or
+* digital signal controller product which is integrated into Licensee's product.
+*
+* You should refer to the license agreement accompanying this
+* Software for additional information regarding your rights and
+* obligations.
+*
+* THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+* WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+* LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+* PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+* MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+* CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+* PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+* BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+* THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+* SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+* (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE
+**********************************************************************/
 
-/*
- * AboutBox.java
- *
- * Created on Oct 13, 2010, 12:31:35 PM
- */
 
 package MicrochipMPFS;
 import javax.swing.*;
@@ -54,12 +77,12 @@ public class AboutBox extends javax.swing.JDialog {
         setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblToolName.setFont(new java.awt.Font("Microsoft Sans Serif", 1, 11)); // NOI18N
+        lblToolName.setFont(new java.awt.Font("Microsoft Sans Serif", 1, 11));
         lblToolName.setText("Microchip MPFS Generator");
         getContentPane().add(lblToolName, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 5, 270, 20));
 
-        lblVersion.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 12));
-        lblVersion.setText("Version 2.2");
+        lblVersion.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 12)); // NOI18N
+        lblVersion.setText("Version 2.2.1");
         getContentPane().add(lblVersion, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 25, 220, 10));
 
         lblCopyRight.setText("Copyright © 2010 Microchip Technology, Inc.");

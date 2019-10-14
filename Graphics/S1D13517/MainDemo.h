@@ -64,7 +64,12 @@
 #include "Beep.h"
 #include "Graphics/Transitions.h"
 #include "FlashProgrammer.h"
-#include "external_images.h"
+#if defined (__C30__)
+    #include "ExternalResource.h"
+    #include "InternalResourceC30.h"
+#else
+    #include "InternalResourceC32.h"
+#endif
 
 /*****************************************************************************
  * SECTION: External memory Comm packet size

@@ -40,6 +40,7 @@
  * 12/03/09     Added Object Header for Double Buffering Support
  * 11/15/10		Fixed build error when USE_KEYBOARD is not defined
  * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
+ * 08/04/11     Fixed drawing states for accelerated Circle and FillCircle functions.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 #include <math.h>
@@ -394,7 +395,9 @@ WORD RdiaDraw(void *pObj)
         RND_PANEL_DRAW,
         RND_PANEL_TASK,
         ERASE_POSITION,
-        DRAW_POSITION
+        DRAW_POSITION,
+        DRAW_POSITION_1,
+        DRAW_POSITION_2
     } RDIA_DRAW_STATES;
 
     static RDIA_DRAW_STATES state = REMOVE;
@@ -404,132 +407,160 @@ WORD RdiaDraw(void *pObj)
 
     pDia = (ROUNDDIAL *)pObj;
 
-    switch(state)
+    while(1)
     {
-        case REMOVE:
-            if(IsDeviceBusy())
-                return (0);
+        if(IsDeviceBusy())
+            return (0);
+    
+        switch(state)
+        {
+            case REMOVE:
 
-            if(GetState(pDia, RDIA_HIDE))
-            {   // Hide the dial (remove from screen)
-                SetColor(pDia->hdr.pGolScheme->CommonBkColor);
-                if
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_SetupDrawUpdate( pDia->hdr.left,
+                                            pDia->hdr.top,
+                                            pDia->hdr.right,
+                                            pDia->hdr.bottom);
+#endif
+                if(GetState(pDia, RDIA_HIDE))
+                {   // Hide the dial (remove from screen)
+                    SetColor(pDia->hdr.pGolScheme->CommonBkColor);
+                    if
+                    (
+                        !Bar
+                            (
+                                pDia->xCenter - pDia->radius,
+                                pDia->yCenter - pDia->radius,
+                                pDia->xCenter + pDia->radius,
+                                pDia->yCenter + pDia->radius
+                            )
+                    ) 
+                    return (0);
+                    
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pDia->hdr.left,
+                                                    pDia->hdr.top,
+                                                    pDia->hdr.right,
+                                                    pDia->hdr.bottom);
+#endif
+                    return (1);
+                }
+    
+                dimpleRadius = (pDia->radius >> 3) + 1;
+    
+                if(GetState(pDia, RDIA_ROT_CCW | RDIA_ROT_CW))
+                {
+                    SetColor(pDia->hdr.pGolScheme->Color0);
+                    state = ERASE_POSITION;
+                    break;
+                }
+    
+                state = RND_PANEL_DRAW;
+    
+            case RND_PANEL_DRAW:
+                if(!GetState(pDia, RDIA_DISABLED))
+                {
+                    faceClr = pDia->hdr.pGolScheme->Color0;
+                }
+                else
+                {
+                    faceClr = pDia->hdr.pGolScheme->ColorDisabled;
+                }
+    
+                SetLineThickness(NORMAL_LINE);
+                SetLineType(SOLID_LINE);
+                GOLPanelDraw
+                (
+                    pDia->xCenter,
+                    pDia->yCenter,
+                    pDia->xCenter,
+                    pDia->yCenter,
+                    pDia->radius,
+                    faceClr,
+                    pDia->hdr.pGolScheme->EmbossLtColor,
+                    pDia->hdr.pGolScheme->EmbossDkColor,
+                    NULL,
+                    GOL_EMBOSS_SIZE
+                );
+                state = RND_PANEL_TASK;
+    
+            case RND_PANEL_TASK:
+                if(!GOLPanelDrawTsk())
+                {
+                    return (0);
+                }
+    
+                state = DRAW_POSITION;
+                break;
+    
+            case ERASE_POSITION:
+                if 
                 (
                     !Bar
                         (
-                            pDia->xCenter - pDia->radius,
-                            pDia->yCenter - pDia->radius,
-                            pDia->xCenter + pDia->radius,
-                            pDia->yCenter + pDia->radius
+                            pDia->curr_xPos - dimpleRadius,
+                            pDia->curr_yPos - dimpleRadius,
+                            pDia->curr_xPos + dimpleRadius,
+                            pDia->curr_yPos + dimpleRadius
                         )
                 ) return (0);
+    
+                // determine if the value will increment or decrement
+                if(GetState(pDia, RDIA_ROT_CW))
+                {
+                    pDia->value = pDia->value + pDia->res;
+                    if(pDia->value > pDia->max)
+                    {
+                        pDia->value -= (pDia->max + 1);
+                    }
+                }
+                else if(GetState(pDia, RDIA_ROT_CCW))
+                {
+                    pDia->value = pDia->value - pDia->res;
+                    if(pDia->value < 0)
+                    {
+                        pDia->value += (pDia->max + 1);
+                    }
+                }
+    
+                // else do not update counter yet
+                // locate the new position of the dimple	
+                pDia->curr_xPos = pDia->xCenter + pDia->new_xPos;
+                pDia->curr_yPos = pDia->yCenter + pDia->new_yPos;
+    
+                ClrState(pDia, RDIA_ROT_CW | RDIA_ROT_CCW); // make sure this is cleared to avoid
+    
+                // unwanted redraw
+                state = DRAW_POSITION;
+    
+            case DRAW_POSITION:
+
+                SetColor(pDia->hdr.pGolScheme->EmbossLtColor);
+                SetLineThickness(NORMAL_LINE);
+                SetLineType(SOLID_LINE);
+                state = DRAW_POSITION_1;
+
+            case DRAW_POSITION_1:
+                if(!Circle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius))
+                    return (0);
+                SetColor(pDia->hdr.pGolScheme->EmbossDkColor);
+                state = DRAW_POSITION_2;
+
+            case DRAW_POSITION_2:
+                if(!FillCircle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius - 1))
+                    return (0);
+    
+                state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pDia->hdr.left,
+                                                pDia->hdr.top,
+                                                pDia->hdr.right,
+                                                pDia->hdr.bottom);
+#endif
                 return (1);
-            }
 
-            dimpleRadius = (pDia->radius >> 3) + 1;
-
-            if(GetState(pDia, RDIA_ROT_CCW | RDIA_ROT_CW))
-            {
-                state = ERASE_POSITION;
-                goto erase_current_pos;
-            }
-
-            state = RND_PANEL_DRAW;
-
-        case RND_PANEL_DRAW:
-            if(!GetState(pDia, RDIA_DISABLED))
-            {
-                faceClr = pDia->hdr.pGolScheme->Color0;
-            }
-            else
-            {
-                faceClr = pDia->hdr.pGolScheme->ColorDisabled;
-            }
-
-            SetLineThickness(NORMAL_LINE);
-            SetLineType(SOLID_LINE);
-            GOLPanelDraw
-            (
-                pDia->xCenter,
-                pDia->yCenter,
-                pDia->xCenter,
-                pDia->yCenter,
-                pDia->radius,
-                faceClr,
-                pDia->hdr.pGolScheme->EmbossLtColor,
-                pDia->hdr.pGolScheme->EmbossDkColor,
-                NULL,
-                GOL_EMBOSS_SIZE
-            );
-            state = RND_PANEL_TASK;
-
-        case RND_PANEL_TASK:
-            if(!GOLPanelDrawTsk())
-            {
-                return (0);
-            }
-
-            state = DRAW_POSITION;
-            goto draw_current_pos;
-
-        case ERASE_POSITION:
-            erase_current_pos : SetColor(pDia->hdr.pGolScheme->Color0);
-            if
-            (
-                !Bar
-                    (
-                        pDia->curr_xPos - dimpleRadius,
-                        pDia->curr_yPos - dimpleRadius,
-                        pDia->curr_xPos + dimpleRadius,
-                        pDia->curr_yPos + dimpleRadius
-                    )
-            ) return (0);
-
-            // determine if the value will increment or decrement
-            if(GetState(pDia, RDIA_ROT_CW))
-            {
-                pDia->value = pDia->value + pDia->res;
-                if(pDia->value > pDia->max)
-                {
-                    pDia->value -= (pDia->max + 1);
-                }
-            }
-            else if(GetState(pDia, RDIA_ROT_CCW))
-            {
-                pDia->value = pDia->value - pDia->res;
-                if(pDia->value < 0)
-                {
-                    pDia->value += (pDia->max + 1);
-                }
-            }
-
-            // else do not update counter yet
-            // locate the new position of the dimple	
-            pDia->curr_xPos = pDia->xCenter + pDia->new_xPos;
-            pDia->curr_yPos = pDia->yCenter + pDia->new_yPos;
-
-            ClrState(pDia, RDIA_ROT_CW | RDIA_ROT_CCW); // make sure this is cleared to avoid
-
-            // unwanted redraw
-            state = DRAW_POSITION;
-
-        case DRAW_POSITION:
-            draw_current_pos : if(IsDeviceBusy()) return (0);
-
-            SetColor(pDia->hdr.pGolScheme->EmbossLtColor);
-            SetLineThickness(NORMAL_LINE);
-            SetLineType(SOLID_LINE);
-            if(!Circle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius))
-                return (0);
-            SetColor(pDia->hdr.pGolScheme->EmbossDkColor);
-            if(!FillCircle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius - 1))
-                return (0);
-
-            state = REMOVE;
-            return (1);
-    }
-
-    return (1);
+        } // end of switch()
+    } // end of while(1)
 }
 
 #endif // USE_ROUNDDIAL

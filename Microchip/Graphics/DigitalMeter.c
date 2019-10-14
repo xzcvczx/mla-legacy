@@ -34,10 +34,12 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Arpan kumar		  06/11/09	  Version 1.0 release
- * PAT				  01/18/10	  Added draw state to redraw only text. 
+ * 06/11/09     Version 1.0 release
+ * 01/18/10     Added draw state to redraw only text. 
+ * 08/08/11     Modified draw states to check IsDeviceBusy() after if not exiting 
+ *              the draw routine.
  ******************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -209,165 +211,211 @@ WORD DmDraw(void *pObj)
     {
         DM_STATE_IDLE,
         DM_STATE_FRAME,
+        DM_STATE_DRAW_FRAME,
         DM_STATE_INIT,
         DM_STATE_SETALIGN,
-        DM_STATE_DRAWTEXT
+        DM_STATE_SETTEXT,
+        DM_STATE_ERASETEXT,
+        DM_STATE_DRAWTEXT,
+        DM_STATE_WRAPUP
     } DM_DRAW_STATES;
 
-    static DIGITALMETER *pDm = NULL;
+    DIGITALMETER *pDm = NULL;
     static DM_DRAW_STATES state = DM_STATE_IDLE;
     static SHORT charCtr = 0, lineCtr = 0;
     static XCHAR CurValue[DM_WIDTH], PreValue[DM_WIDTH];
-    SHORT textWidth = 0;
-    XCHAR ch = 0, pch = 0;
+    static SHORT textWidth = 0;
+    static XCHAR ch = 0, pch = 0;
 
     pDm = (DIGITALMETER *)pObj;
 
+    while(1)
+    {
+
     if(IsDeviceBusy())
         return (0);
+    
+        switch(state)
+        {
+            case DM_STATE_DRAW_FRAME:
+                if(Rectangle(pDm->hdr.left, pDm->hdr.top, pDm->hdr.right, pDm->hdr.bottom) == 0)
+                    return (0);
+                state = DM_STATE_INIT;
+                break;
 
-    switch(state)
-    {
-        case DM_STATE_IDLE:
-            SetClip(CLIP_DISABLE);
-
-            if(GetState(pDm, DM_HIDE) || GetState(pDm, DM_DRAW))
-            {
-	            SetColor(pDm->hdr.pGolScheme->CommonBkColor);
-	            if(Bar(pDm->hdr.left, pDm->hdr.top, pDm->hdr.right, pDm->hdr.bottom) == 0)
-	            	return (0);
-			}
-            // if the draw state was to hide then state is still IDLE STATE so no need to change state
-            if (GetState(pDm, DM_HIDE))
-            	return (1);
-            state = DM_STATE_FRAME;	
-
-        case DM_STATE_FRAME:
-			if(GetState(pDm, DM_DRAW | DM_FRAME) == (DM_DRAW | DM_FRAME))
-            {
-                // show frame if specified to be shown
-                SetLineType(SOLID_LINE);
-                SetLineThickness(NORMAL_LINE);
+            case DM_STATE_IDLE:
+                SetClip(CLIP_DISABLE);
+    
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_SetupDrawUpdate( pDm->hdr.left,
+                                            pDm->hdr.top,
+                                            pDm->hdr.right,
+                                            pDm->hdr.bottom);
+#endif
+                if(GetState(pDm, DM_HIDE) || GetState(pDm, DM_DRAW))
+                {
+    	            SetColor(pDm->hdr.pGolScheme->CommonBkColor);
+    	            if(Bar(pDm->hdr.left, pDm->hdr.top, pDm->hdr.right, pDm->hdr.bottom) == 0)
+    	            	return (0);
+    			}
+                // if the draw state was to hide then state is still IDLE STATE so no need to change state
+                if (GetState(pDm, DM_HIDE))
+                {
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pDm->hdr.left,
+                                                    pDm->hdr.top,
+                                                    pDm->hdr.right,
+                                                    pDm->hdr.bottom);
+#endif
+                	return (1);
+                }
+                state = DM_STATE_FRAME;	
+    
+            case DM_STATE_FRAME:
+    
+    			if(GetState(pDm, DM_DRAW | DM_FRAME) == (DM_DRAW | DM_FRAME))
+                {
+                    // show frame if specified to be shown
+                    SetLineType(SOLID_LINE);
+                    SetLineThickness(NORMAL_LINE);
+                    if(!GetState(pDm, DM_DISABLED))
+                    {
+    
+                        // show enabled color
+                        SetColor(pDm->hdr.pGolScheme->Color1);
+                    }
+                    else
+                    {
+    
+                        // show disabled color
+                        SetColor(pDm->hdr.pGolScheme->ColorDisabled);
+                    }
+                    state = DM_STATE_DRAW_FRAME;
+                    break;
+                }
+                else 
+                {
+                    state = DM_STATE_INIT;
+                }
+    
+            case DM_STATE_INIT:
+                if(IsDeviceBusy())
+                    return (0);
+    
+                // set clipping area, text will only appear inside the static text area.
+                SetClip(CLIP_ENABLE);
+                SetClipRgn(pDm->hdr.left + DM_INDENT, pDm->hdr.top, pDm->hdr.right - DM_INDENT, pDm->hdr.bottom);
+    
+                // set the text color
                 if(!GetState(pDm, DM_DISABLED))
                 {
-
-                    // show enabled color
-                    SetColor(pDm->hdr.pGolScheme->Color1);
-                    if(Rectangle(pDm->hdr.left, pDm->hdr.top, pDm->hdr.right, pDm->hdr.bottom) == 0)
-                        return (0);
+                    SetColor(pDm->hdr.pGolScheme->TextColor0);
                 }
                 else
                 {
-
-                    // show disabled color
-                    SetColor(pDm->hdr.pGolScheme->ColorDisabled);
-                    if(Rectangle(pDm->hdr.left, pDm->hdr.top, pDm->hdr.right, pDm->hdr.bottom) == 0)
-                        return (0);
+                    SetColor(pDm->hdr.pGolScheme->TextColorDisabled);
                 }
-            }
-
-            // set clipping area, text will only appear inside the static text area.
-            SetClip(CLIP_ENABLE);
-            SetClipRgn(pDm->hdr.left + DM_INDENT, pDm->hdr.top, pDm->hdr.right - DM_INDENT, pDm->hdr.bottom);
-            state = DM_STATE_INIT;
-
-        case DM_STATE_INIT:
-            if(IsDeviceBusy())
-                return (0);
-
-            // set the text color
-            if(!GetState(pDm, DM_DISABLED))
-            {
+    
+                // convert the values to be displayed in string format
+                NumberToString(pDm->Pvalue, PreValue, pDm->NoOfDigits, pDm->DotPos);
+                NumberToString(pDm->Cvalue, CurValue, pDm->NoOfDigits, pDm->DotPos);
+    
+                // use the font specified in the object
+                SetFont(pDm->hdr.pGolScheme->pFont);
+    
+                state = DM_STATE_SETALIGN;  // go to drawing of text
+    
+            case DM_STATE_SETALIGN:
+                if(!charCtr)
+                {
+    
+                    // set position of the next character (based on alignment and next character)
+                    textWidth = GetTextWidth(CurValue, pDm->hdr.pGolScheme->pFont);
+    
+                    // Display text with center alignment
+                    if(GetState(pDm, (DM_CENTER_ALIGN)))
+                    {
+                        MoveTo((pDm->hdr.left + pDm->hdr.right - textWidth) >> 1, pDm->hdr.top + (lineCtr * pDm->textHeight));
+                    }
+    
+                    // Display text with right alignment
+                    else if(GetState(pDm, (DM_RIGHT_ALIGN)))
+                    {
+                        MoveTo((pDm->hdr.right - textWidth - DM_INDENT), pDm->hdr.top + (lineCtr * pDm->textHeight));
+                    }
+    
+                    // Display text with left alignment
+                    else
+                    {
+                        MoveTo(pDm->hdr.left + DM_INDENT, pDm->hdr.top + (lineCtr * pDm->textHeight));
+                    }
+                }
+                pch = *(PreValue + charCtr);
+                ch = *(CurValue + charCtr);
+                state = DM_STATE_SETTEXT;    
+    
+            case DM_STATE_SETTEXT:
+    
+                if (0x0000 != ch)
+                {
+                    if(GetState(pDm, DM_DRAW))
+        	        {
+                        SetColor(pDm->hdr.pGolScheme->CommonBkColor);
+    	    	    }
+    	    	    else if(GetState(pDm, DM_UPDATE))
+    	    	    { 
+    	                if(pch != ch)
+    	                {
+                            SetColor(pDm->hdr.pGolScheme->CommonBkColor);
+    	                }        
+                        else
+                        {
+                            state = DM_STATE_DRAWTEXT;
+                            break;
+                        }
+                    }
+                    state = DM_STATE_ERASETEXT;
+                    break;
+                }
+                else 
+                {
+                    state = DM_STATE_WRAPUP;
+                    break;
+                }
+    
+            case DM_STATE_ERASETEXT:
+                if(Bar(GetX(), pDm->hdr.top + 1, GetX() + textWidth, pDm->hdr.bottom - 1) == 0)
+                    return (0);
+                state = DM_STATE_DRAWTEXT;
+    
+            case DM_STATE_DRAWTEXT:
                 SetColor(pDm->hdr.pGolScheme->TextColor0);
-            }
-            else
-            {
-                SetColor(pDm->hdr.pGolScheme->TextColorDisabled);
-            }
-
-            // convert the values to be displayed in string format
-            NumberToString(pDm->Pvalue, PreValue, pDm->NoOfDigits, pDm->DotPos);
-            NumberToString(pDm->Cvalue, CurValue, pDm->NoOfDigits, pDm->DotPos);
-
-            // use the font specified in the object
-            SetFont(pDm->hdr.pGolScheme->pFont);
-
-            state = DM_STATE_SETALIGN;  // go to drawing of text
-
-        case DM_STATE_SETALIGN:
-            if(!charCtr)
-            {
-
-                // set position of the next character (based on alignment and next character)
-                textWidth = GetTextWidth(CurValue, pDm->hdr.pGolScheme->pFont);
-
-                // Display text with center alignment
-                if(GetState(pDm, (DM_CENTER_ALIGN)))
-                {
-                    MoveTo((pDm->hdr.left + pDm->hdr.right - textWidth) >> 1, pDm->hdr.top + (lineCtr * pDm->textHeight));
-                }
-
-                // Display text with right alignment
-                else if(GetState(pDm, (DM_RIGHT_ALIGN)))
-                {
-                    MoveTo((pDm->hdr.right - textWidth - DM_INDENT), pDm->hdr.top + (lineCtr * pDm->textHeight));
-                }
-
-                // Display text with left alignment
-                else
-                {
-                    MoveTo(pDm->hdr.left + DM_INDENT, pDm->hdr.top + (lineCtr * pDm->textHeight));
-                }
-            }
-
-            state = DM_STATE_DRAWTEXT;
-
-        case DM_STATE_DRAWTEXT:
-            pch = *(PreValue + charCtr);
-            ch = *(CurValue + charCtr);
-
-            // output one character at time until a newline character or a NULL character is sampled
-            while((0x0000 != ch))
-            {
-                if(IsDeviceBusy())
-                {
-                    return (0);         // device is busy return
-                }
-
-	            if(GetState(pDm, DM_DRAW))
-    	        {
-                    SetColor(pDm->hdr.pGolScheme->CommonBkColor);
-                    if(Bar(GetX(), pDm->hdr.top + 1, GetX() + textWidth, pDm->hdr.bottom - 1) == 0)
-                        return (0);
-	    	    }
-	    	    else if(GetState(pDm, DM_UPDATE))
-	    	    { 
-	                if(pch != ch)
-	                {
-	                    SetColor(pDm->hdr.pGolScheme->CommonBkColor);
-	                    if(Bar(GetX(), pDm->hdr.top + 1, GetX() + textWidth, pDm->hdr.bottom - 1) == 0)
-	                        return (0);
-	                }        
-                }
-
-                SetColor(pDm->hdr.pGolScheme->TextColor0);
-
+    
                 // render the character
                 while(!OutChar(ch));
                 charCtr++;              // update to next character
                 ch = *(CurValue + charCtr);
                 pch = *(PreValue + charCtr);
-            }
-
-            // end of text string is reached no more lines to display
-            lineCtr = 0;
-            charCtr = 0;
-            SetClip(CLIP_DISABLE);      // remove clipping
-            state = DM_STATE_IDLE;      // go back to IDLE state
-            return (1);
-    }
-
-    return (1);
+                state = DM_STATE_SETTEXT;
+                break;
+    
+            case DM_STATE_WRAPUP:
+    
+                // end of text string is reached no more lines to display
+                lineCtr = 0;
+                charCtr = 0;
+                SetClip(CLIP_DISABLE);      // remove clipping
+                state = DM_STATE_IDLE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pDm->hdr.left,
+                                                pDm->hdr.top,
+                                                pDm->hdr.right,
+                                                pDm->hdr.bottom);
+#endif
+                return (1);
+    
+        } // end of switch()
+    } // end of while(1)
 }
 
 #endif // USE_DIGITALMETER

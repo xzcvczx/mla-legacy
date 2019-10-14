@@ -46,6 +46,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #include "MDD File System/FSIO.h"
 #include "usb_config.h"
 #include "USB/usb.h"
+#include "USB/usb_host_msd.h"
 #if defined( __PIC32MX__ )
     #include "plib.h"
 #endif
@@ -238,8 +239,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
     #pragma config BWP      = OFF       // Boot Flash Write Protect
     #pragma config PWP      = OFF       // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2  // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = OFF       // Background Debugger Enable
-
+    
 #else
     #error Cannot set up configuration bits.
 #endif
@@ -512,9 +512,6 @@ int main (void)
         char                oneChar;
         char                param1[MAX_COMMAND_LENGTH];
         char                param2[MAX_COMMAND_LENGTH];
-        BOOL                readingPot;
-        BOOL                resetting = FALSE;
-        BYTE                returnCode;
         SearchRec           searchRecord;
         int                 value;
 
@@ -1453,6 +1450,8 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
                 PrintString( "\r\n***** USB Error - unspecified *****\r\n" );
                 RedoCommandPrompt();
                 return TRUE;
+                break;
+            default:
                 break;
 
         }

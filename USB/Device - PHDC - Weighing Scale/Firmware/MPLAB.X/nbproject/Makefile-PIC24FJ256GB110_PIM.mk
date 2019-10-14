@@ -11,26 +11,40 @@
 include Makefile
 
 # Environment
-MKDIR=mkdir -p
+SHELL=cmd.exe
+# Adding MPLAB X bin directory to path
+PATH:=C:/Program Files/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/:$(PATH)
+MKDIR=gnumkdir -p
 RM=rm -f 
+MV=mv 
 CP=cp 
+
 # Macros
 CND_CONF=PIC24FJ256GB110_PIM
-
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 IMAGE_TYPE=debug
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf
+OUTPUT_SUFFIX=cof
+DEBUGGABLE_SUFFIX=cof
+FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 else
 IMAGE_TYPE=production
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf
+OUTPUT_SUFFIX=hex
+DEBUGGABLE_SUFFIX=cof
+FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 endif
+
 # Object Directory
 OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
+
 # Distribution Directory
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
+# Object Files Quoted if spaced
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o ${OBJECTDIR}/_ext/926206843/usb_device.o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o ${OBJECTDIR}/_ext/1472/main.o ${OBJECTDIR}/_ext/1472/usb_descriptors.o "${OBJECTDIR}/_ext/1472/Weighing Scale app.o"
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.d ${OBJECTDIR}/_ext/926206843/usb_device.o.d ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.d ${OBJECTDIR}/_ext/1472/main.o.d ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d "${OBJECTDIR}/_ext/1472/Weighing Scale app.o.d"
+
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/1472/app.o ${OBJECTDIR}/_ext/1472/phd_com_model.o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o ${OBJECTDIR}/_ext/1472/main.o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ${OBJECTDIR}/_ext/926206843/usb_device.o ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o
+OBJECTFILES=${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o ${OBJECTDIR}/_ext/926206843/usb_device.o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o ${OBJECTDIR}/_ext/1472/main.o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o
 
 
 CFLAGS=
@@ -38,8 +52,7 @@ ASFLAGS=
 LDLIBSOPTIONS=
 
 # Path to java used to run MPLAB X when this makefile was created
-MP_JAVA_PATH=C:\\Program\ Files\\Java\\jdk1.6.0_23\\jre/bin/
-OS_ORIGINAL="MINGW32_NT-5.1"
+MP_JAVA_PATH="C:\Program Files\Java\jre6/bin/"
 OS_CURRENT="$(shell uname -s)"
 ############# Tool locations ##########################################
 # If you copy a project from one host to another, the path where the  #
@@ -47,23 +60,23 @@ OS_CURRENT="$(shell uname -s)"
 # If you open this project with MPLAB X in the new host, this         #
 # makefile will be regenerated and the paths will be corrected.       #
 #######################################################################
-MP_CC=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-gcc.exe
+MP_CC="C:\Program Files\Microchip\mplabc30\v3.31\bin\pic30-gcc.exe"
 # MP_BC is not defined
-MP_AS=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-as.exe
-MP_LD=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-ld.exe
-MP_AR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-ar.exe
-# MP_BC is not defined
-MP_CC_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
+MP_AS="C:\Program Files\Microchip\mplabc30\v3.31\bin\pic30-as.exe"
+MP_LD="C:\Program Files\Microchip\mplabc30\v3.31\bin\pic30-ld.exe"
+MP_AR="C:\Program Files\Microchip\mplabc30\v3.31\bin\pic30-ar.exe"
+DEP_GEN=${MP_JAVA_PATH}java -jar "C:/Program Files/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/extractobjectdependencies.jar" 
+# fixDeps replaces a bunch of sed/cat/printf statements that slow down the build
+FIXDEPS=fixDeps
+MP_CC_DIR="C:\Program Files\Microchip\mplabc30\v3.31\bin"
 # MP_BC_DIR is not defined
-MP_AS_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
-MP_LD_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
-MP_AR_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
+MP_AS_DIR="C:\Program Files\Microchip\mplabc30\v3.31\bin"
+MP_LD_DIR="C:\Program Files\Microchip\mplabc30\v3.31\bin"
+MP_AR_DIR="C:\Program Files\Microchip\mplabc30\v3.31\bin"
 # MP_BC_DIR is not defined
-.build-conf: ${BUILD_SUBPROJECTS}
-ifneq ($(OS_CURRENT),$(OS_ORIGINAL))
-	@echo "***** WARNING: This make file contains OS dependent code. The OS this makefile is being run is different from the OS it was created in."
-endif
-	${MAKE}  -f nbproject/Makefile-PIC24FJ256GB110_PIM.mk dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf
+
+.build-conf:  ${BUILD_SUBPROJECTS}
+	${MAKE}  -f nbproject/Makefile-PIC24FJ256GB110_PIM.mk dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
 MP_PROCESSOR_OPTION=24FJ256GB110
 MP_LINKER_FILE_OPTION=,-Tp24FJ256GB110.gld
@@ -74,232 +87,124 @@ else
 endif
 
 # ------------------------------------------------------------------------------------
+# Rules for buildStep: assembleWithPreprocess
+ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+else
+endif
+
+# ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/_ext/1472/app.o: ../app.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/app.o.d -o ${OBJECTDIR}/_ext/1472/app.o ../app.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/app.o.d > ${OBJECTDIR}/_ext/1472/app.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/app.o.tmp ${OBJECTDIR}/_ext/1472/app.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/app.o.d > ${OBJECTDIR}/_ext/1472/app.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/app.o.tmp ${OBJECTDIR}/_ext/1472/app.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.tmp
-endif
-${OBJECTDIR}/_ext/1472/phd_com_model.o: ../phd_com_model.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/phd_com_model.o.d -o ${OBJECTDIR}/_ext/1472/phd_com_model.o ../phd_com_model.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/phd_com_model.o.d > ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/phd_com_model.o.d > ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp
-endif
-${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o: ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1753023725 
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d -o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d > ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${CP} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d > ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${CP} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp
-endif
-${OBJECTDIR}/_ext/1472/main.o: ../main.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/main.o.d -o ${OBJECTDIR}/_ext/1472/main.o ../main.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/main.o.d > ${OBJECTDIR}/_ext/1472/main.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/main.o.tmp ${OBJECTDIR}/_ext/1472/main.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/main.o.d > ${OBJECTDIR}/_ext/1472/main.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/main.o.tmp ${OBJECTDIR}/_ext/1472/main.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.tmp
-endif
-${OBJECTDIR}/_ext/1472/usb_descriptors.o: ../usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d -o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ../usb_descriptors.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d > ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d > ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp
-endif
+${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o: ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc_com_model.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1753023725 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.ok ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.d" -o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o "../../../../Microchip/USB/PHDC Device Driver/usb_function_phdc_com_model.c"  
+	
 ${OBJECTDIR}/_ext/926206843/usb_device.o: ../../../../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/926206843 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/926206843/usb_device.o.d -o ${OBJECTDIR}/_ext/926206843/usb_device.o ../../../../Microchip/USB/usb_device.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/926206843/usb_device.o.d > ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/926206843/usb_device.o.d > ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp
-endif
+	@${MKDIR} ${OBJECTDIR}/_ext/926206843 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.ok ${OBJECTDIR}/_ext/926206843/usb_device.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/926206843/usb_device.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/926206843/usb_device.o.d" -o ${OBJECTDIR}/_ext/926206843/usb_device.o ../../../../Microchip/USB/usb_device.c  
+	
+${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o: ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1753023725 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.ok ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d" -o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o "../../../../Microchip/USB/PHDC Device Driver/usb_function_phdc.c"  
+	
 ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o: ../../../../Microchip/USB/usb_hal_pic24.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/926206843 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d -o ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o ../../../../Microchip/USB/usb_hal_pic24.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d > ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d > ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp
-endif
+	@${MKDIR} ${OBJECTDIR}/_ext/926206843 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.ok ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d" -o ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o ../../../../Microchip/USB/usb_hal_pic24.c  
+	
+${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o: ../lcd_explorer16_board.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.ok ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.d" -o ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o ../lcd_explorer16_board.c  
+	
+${OBJECTDIR}/_ext/1472/main.o: ../main.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/main.o.ok ${OBJECTDIR}/_ext/1472/main.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/main.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/main.o.d" -o ${OBJECTDIR}/_ext/1472/main.o ../main.c  
+	
+${OBJECTDIR}/_ext/1472/usb_descriptors.o: ../usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.ok ${OBJECTDIR}/_ext/1472/usb_descriptors.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/usb_descriptors.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/usb_descriptors.o.d" -o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ../usb_descriptors.c  
+	
+${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o: ../Weighing\ Scale\ app.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o.ok ${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/Weighing Scale app.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/Weighing Scale app.o.d" -o "${OBJECTDIR}/_ext/1472/Weighing Scale app.o" "../Weighing Scale app.c"  
+	
 else
-${OBJECTDIR}/_ext/1472/app.o: ../app.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/app.o.d -o ${OBJECTDIR}/_ext/1472/app.o ../app.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/app.o.d > ${OBJECTDIR}/_ext/1472/app.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/app.o.tmp ${OBJECTDIR}/_ext/1472/app.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/app.o.d > ${OBJECTDIR}/_ext/1472/app.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/app.o.tmp ${OBJECTDIR}/_ext/1472/app.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/app.o.tmp
-endif
-${OBJECTDIR}/_ext/1472/phd_com_model.o: ../phd_com_model.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/phd_com_model.o.d -o ${OBJECTDIR}/_ext/1472/phd_com_model.o ../phd_com_model.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/phd_com_model.o.d > ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/phd_com_model.o.d > ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp ${OBJECTDIR}/_ext/1472/phd_com_model.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/phd_com_model.o.tmp
-endif
-${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o: ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1753023725 
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d -o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d > ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${CP} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d > ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${CP} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
-	${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.tmp
-endif
-${OBJECTDIR}/_ext/1472/main.o: ../main.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/main.o.d -o ${OBJECTDIR}/_ext/1472/main.o ../main.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/main.o.d > ${OBJECTDIR}/_ext/1472/main.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/main.o.tmp ${OBJECTDIR}/_ext/1472/main.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/main.o.d > ${OBJECTDIR}/_ext/1472/main.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/main.o.tmp ${OBJECTDIR}/_ext/1472/main.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.tmp
-endif
-${OBJECTDIR}/_ext/1472/usb_descriptors.o: ../usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d -o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ../usb_descriptors.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d > ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d > ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${CP} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
-	${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.tmp
-endif
+${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o: ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc_com_model.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1753023725 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.ok ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o.d" -o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc_com_model.o "../../../../Microchip/USB/PHDC Device Driver/usb_function_phdc_com_model.c"  
+	
 ${OBJECTDIR}/_ext/926206843/usb_device.o: ../../../../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/926206843 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/926206843/usb_device.o.d -o ${OBJECTDIR}/_ext/926206843/usb_device.o ../../../../Microchip/USB/usb_device.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/926206843/usb_device.o.d > ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/926206843/usb_device.o.d > ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.tmp
-endif
+	@${MKDIR} ${OBJECTDIR}/_ext/926206843 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.d 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_device.o.ok ${OBJECTDIR}/_ext/926206843/usb_device.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/926206843/usb_device.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/926206843/usb_device.o.d" -o ${OBJECTDIR}/_ext/926206843/usb_device.o ../../../../Microchip/USB/usb_device.c  
+	
+${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o: ../../../../Microchip/USB/PHDC\ Device\ Driver/usb_function_phdc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1753023725 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.ok ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o.d" -o ${OBJECTDIR}/_ext/1753023725/usb_function_phdc.o "../../../../Microchip/USB/PHDC Device Driver/usb_function_phdc.c"  
+	
 ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o: ../../../../Microchip/USB/usb_hal_pic24.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/926206843 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -omf=elf -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -I".." -I"../../../../Microchip/Include" -MMD -MF ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d -o ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o ../../../../Microchip/USB/usb_hal_pic24.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	@sed -e 's/\"//g' -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d > ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp}
-else 
-	@sed -e 's/\"//g' ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d > ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${CP} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
-	${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.tmp
-endif
+	@${MKDIR} ${OBJECTDIR}/_ext/926206843 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d 
+	@${RM} ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.ok ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o.d" -o ${OBJECTDIR}/_ext/926206843/usb_hal_pic24.o ../../../../Microchip/USB/usb_hal_pic24.c  
+	
+${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o: ../lcd_explorer16_board.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.ok ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o.d" -o ${OBJECTDIR}/_ext/1472/lcd_explorer16_board.o ../lcd_explorer16_board.c  
+	
+${OBJECTDIR}/_ext/1472/main.o: ../main.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/main.o.ok ${OBJECTDIR}/_ext/1472/main.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/main.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/main.o.d" -o ${OBJECTDIR}/_ext/1472/main.o ../main.c  
+	
+${OBJECTDIR}/_ext/1472/usb_descriptors.o: ../usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/usb_descriptors.o.ok ${OBJECTDIR}/_ext/1472/usb_descriptors.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/usb_descriptors.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/usb_descriptors.o.d" -o ${OBJECTDIR}/_ext/1472/usb_descriptors.o ../usb_descriptors.c  
+	
+${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o: ../Weighing\ Scale\ app.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o.ok ${OBJECTDIR}/_ext/1472/Weighing\ Scale\ app.o.err 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/Weighing Scale app.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -omf=coff -x c -c -mcpu=$(MP_PROCESSOR_OPTION) -Wall -I".." -I"../../../../Microchip/Include" -MMD -MF "${OBJECTDIR}/_ext/1472/Weighing Scale app.o.d" -o "${OBJECTDIR}/_ext/1472/Weighing Scale app.o" "../Weighing Scale app.c"  
+	
 endif
 
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE)  -omf=elf  -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -o dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf ${OBJECTFILES}        -Wl,--defsym=__MPLAB_BUILD=1,--report-mem$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION),--defsym=__MPLAB_DEBUG=1,--defsym=__ICD2RAM=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_REAL_ICE=1
+dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
+	${MP_CC} $(MP_EXTRA_LD_PRE)  -omf=coff -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -o dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX} ${OBJECTFILES_QUOTED_IF_SPACED}        -Wl,--defsym=__MPLAB_BUILD=1$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION),--defsym=__MPLAB_DEBUG=1,--defsym=__ICD2RAM=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_ICD3=1
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE)  -omf=elf  -mcpu=$(MP_PROCESSOR_OPTION)  -o dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf ${OBJECTFILES}        -Wl,--defsym=__MPLAB_BUILD=1,--report-mem$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION)
-	${MP_CC_DIR}\\pic30-bin2hex dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.elf -omf=elf
+dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
+	${MP_CC} $(MP_EXTRA_LD_PRE)  -omf=coff -mcpu=$(MP_PROCESSOR_OPTION)  -o dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} ${OBJECTFILES_QUOTED_IF_SPACED}        -Wl,--defsym=__MPLAB_BUILD=1$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION)
+	${MP_CC_DIR}\\pic30-bin2hex dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} -omf=coff
 endif
 
 
@@ -314,4 +219,7 @@ endif
 # Enable dependency checking
 .dep.inc: .depcheck-impl
 
-include .dep.inc
+DEPFILES=$(shell mplabwildcard ${POSSIBLE_DEPFILES})
+ifneq (${DEPFILES},)
+include ${DEPFILES}
+endif

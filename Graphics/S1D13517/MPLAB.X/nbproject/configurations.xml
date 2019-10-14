@@ -16,18 +16,12 @@
                      displayName="Image Decoder"
                      projectFiles="true">
       </logicalFolder>
-      <logicalFolder name="MDD File System"
-                     displayName="MDD File System"
-                     projectFiles="true">
-      </logicalFolder>
-      <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
-      </logicalFolder>
-      <itemPath>../BitmapFile.h</itemPath>
-      <itemPath>../FlashProgrammer.h</itemPath>
+      <itemPath>../ExternalResource.h</itemPath>
       <itemPath>../GraphicsConfig.h</itemPath>
       <itemPath>../HardwareProfile.h</itemPath>
+      <itemPath>../InternalResourceC30.h</itemPath>
+      <itemPath>../InternalResourceC32.h</itemPath>
       <itemPath>../MainDemo.h</itemPath>
-      <itemPath>../icons.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -56,14 +50,6 @@
       <logicalFolder name="Common" displayName="Common" projectFiles="true">
         <itemPath>../../../Microchip/Common/TimeDelay.c</itemPath>
       </logicalFolder>
-      <logicalFolder name="External Memory Programmer"
-                     displayName="External Memory Programmer"
-                     projectFiles="true">
-        <itemPath>../../Common/FlashProgrammer.c</itemPath>
-        <itemPath>../UART.c</itemPath>
-        <itemPath>../../Common/comm_pkt.c</itemPath>
-        <itemPath>../../Common/comm_pkt_callback.c</itemPath>
-      </logicalFolder>
       <logicalFolder name="Graphics" displayName="Graphics" projectFiles="true">
         <itemPath>../../../Microchip/Graphics/AnalogClock.c</itemPath>
         <itemPath>../../../Microchip/Graphics/Button.c</itemPath>
@@ -82,11 +68,9 @@
         <itemPath>../../../Microchip/Graphics/Drivers/gfxepmp.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Images" displayName="Images" projectFiles="true">
-        <itemPath>../Pictures C32.c</itemPath>
-        <itemPath>../external_images.c</itemPath>
-        <itemPath>../gfx_resources_fonts.c</itemPath>
-        <itemPath>../smallicons C30.c</itemPath>
-        <itemPath>../smallicons C32.c</itemPath>
+        <itemPath>../ExternalResource.c</itemPath>
+        <itemPath>../InternalResourceC30.c</itemPath>
+        <itemPath>../InternalResourceC32.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Screens" displayName="Screens" projectFiles="true">
         <itemPath>../alpha_blend_screen.c</itemPath>
@@ -103,18 +87,11 @@
         <itemPath>../security_screen.c</itemPath>
         <itemPath>../upload_screen.c</itemPath>
       </logicalFolder>
-      <logicalFolder name="f1" displayName="USB" projectFiles="true">
-        <itemPath>../../../Microchip/USB/usb_device.c</itemPath>
-        <itemPath>../../../Microchip/USB/Generic Device Driver/usb_function_generic.c</itemPath>
-      </logicalFolder>
-      <itemPath>../ChineseFonts.c</itemPath>
       <itemPath>../MainDemo.c</itemPath>
       <itemPath>../gfx_schemes.c</itemPath>
       <itemPath>../gfx_strings.c</itemPath>
       <itemPath>../gol_callbacks.c</itemPath>
       <itemPath>../timer_tick.c</itemPath>
-      <itemPath>../usb_callback.c</itemPath>
-      <itemPath>../usb_descriptors.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -131,7 +108,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -140,6 +117,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/AnalogClock.c"
             ex="false"
             overriding="true">
@@ -153,9 +139,9 @@
           <property key="enable-all-warnings" value="false"/>
           <property key="pre-instruction-scheduling" value="default"/>
           <property key="enable-short-double" value="false"/>
-          <property key="enable-ansi-warnings" value="false"/>
-          <property key="optimization-level" value="0"/>
           <property key="enable-procedural-abstraction" value="false"/>
+          <property key="optimization-level" value="0"/>
+          <property key="enable-ansi-warnings" value="false"/>
           <property key="enable-fatal-warnings" value="false"/>
           <property key="post-instruction-scheduling" value="default"/>
           <property key="enable-omit-frame-pointer" value="false"/>
@@ -171,9 +157,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -183,47 +167,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
-      </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
-      </item>
-      <item path="../smallicons C32.c" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -234,36 +178,39 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="default"/>
-        <property key="extra-include-directories"
-                  value="../../Common;..;../../../Microchip/Include;../../../Board Support Package"/>
+        <property key="optimization-level" value="s"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
-        <property key="data-model" value="default"/>
-        <property key="enable-all-warnings" value="true"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="default"/>
         <property key="enable-procedural-abstraction" value="false"/>
-        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../Common;..;../../../Microchip/Include;../../../Board Support Package"/>
         <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="data-model" value="default"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-ansi-std" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="large-code"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="scalar-model" value="default"/>
       </C30>
       <C30-AS>
         <property key="omit-debug-dirs" value="false"/>
-        <property key="extra-include-directories-for-assembler" value="..;"/>
+        <property key="extra-include-directories-for-assembler" value=".."/>
         <property key="preprocessor-macros" value=""/>
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -278,6 +225,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value="4000"/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value="4000"/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -288,21 +236,24 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="true"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories"
-                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
       </C30-LD>
       <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="output-file-format" value="elf"/>
+        <property key="legacy-libc" value="false"/>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
@@ -314,7 +265,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -323,9 +274,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -335,7 +293,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -345,37 +303,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -395,8 +323,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -421,11 +349,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -439,7 +369,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -448,9 +378,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -460,7 +397,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -470,37 +407,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -520,8 +427,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -546,11 +453,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -564,7 +473,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -573,9 +482,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -585,7 +501,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -595,37 +511,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -645,8 +531,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -671,11 +557,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -689,7 +577,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -698,9 +586,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -710,7 +605,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -720,37 +615,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -761,17 +626,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="true"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_WVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -786,10 +651,10 @@
         <property key="preprocessor-macros" value=""/>
         <property key="exclude-floating-point-library" value="false"/>
         <property key="list-file" value=""/>
-        <property key="list-assembly" value="false"/>
         <property key="list-source" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="list-assembly" value="false"/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -812,11 +677,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -825,14 +692,14 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3e_EX16_8PMP_VGA" type="2">
+    <conf name="PIC32_795_GFXv3e_EX16_8PMP_VGA" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -841,9 +708,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -853,7 +727,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -863,37 +737,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -913,8 +757,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -939,25 +783,27 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3e_EX16_8PMP_WVGA" type="2">
+    <conf name="PIC32_795_GFXv3e_EX16_8PMP_WVGA" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -966,9 +812,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -978,7 +831,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -988,37 +841,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1038,8 +861,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1064,25 +887,27 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3e_EX16_16PMP_VGA" type="2">
+    <conf name="PIC32_795_GFXv3e_EX16_16PMP_VGA" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1091,9 +916,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1103,7 +935,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1113,37 +945,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1163,8 +965,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1189,25 +991,27 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3e_EX16_16PMP_WVGA" type="2">
+    <conf name="PIC32_795_GFXv3e_EX16_16PMP_WVGA" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1216,9 +1020,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1228,7 +1039,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1238,37 +1049,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1288,8 +1069,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1314,11 +1095,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -1332,7 +1115,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1341,9 +1124,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1353,7 +1143,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1363,77 +1153,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../UART.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1444,17 +1164,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="true"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_VGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1479,11 +1199,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1499,7 +1221,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1508,9 +1230,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1520,7 +1249,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1530,77 +1259,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../UART.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1611,17 +1270,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="true"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_WVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1646,11 +1305,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1666,7 +1327,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1675,9 +1336,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1687,7 +1355,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1697,77 +1365,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../UART.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1778,17 +1376,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="true"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_VGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1813,11 +1411,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1833,7 +1433,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1842,9 +1442,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../Microchip/USB/Generic Device Driver/usb_function_generic.c"
-            ex="true"
-            overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1854,7 +1461,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../../Microchip/USB/usb_device.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1864,77 +1471,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../Common/comm_pkt_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../UART.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../external_images.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../smallicons C30.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_callback.c" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../usb_descriptors.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1945,17 +1482,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="true"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_WVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1980,11 +1517,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>

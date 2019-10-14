@@ -47,6 +47,7 @@
  * 06/25/09             dsPIC & PIC24H support 
  * 09/15/09             Added PIC24FJ256DA210 Development Board Support
  * 06/02/11             Added MPLAB X Support
+ * 01/19/12				Removed support for GFXV2
  ********************************************************************/
 
 #ifndef CFG_INCLUDE_MPLAB_X
@@ -99,14 +100,6 @@
 		//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
 		//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
 
-		/*********************************************************************
-	     * Hardware Configuration for 
-	     * Explorer 16
-     	 * Graphics PicTail v2
-         * Display LGDP4531
-	     ********************************************************************/
-		//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
-		
 	#endif
 
 #elif defined (__PIC32MX__) || defined (__dsPIC33E__) || defined(__PIC24E__) 
@@ -128,14 +121,6 @@
      ********************************************************************/
     //#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
 	//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
-
-    /*********************************************************************
-     * Hardware Configuration for 
-     * Explorer 16
-     * Graphics PicTail v2
-     * Display LGDP4531
-     ********************************************************************/
-	//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -234,9 +219,23 @@
     #include "Configs/HWP_GFXv3_PIC_SK_16PMP_WQVGAv1.h"
 /*********************************************************************
  * Hardware Configuration for
+ * LCC with a Starter Kit 
+ * Ext or Int
+ * QVGA or WQVGA
+ ********************************************************************/
+#elif defined(CFG_INCLUDE_LCC_PIC_SK_EXT_QVGAv1)
+    #include "Configs/HWP_LCC_PIC_SK_EXT_QVGAv1.h"
+#elif defined(CFG_INCLUDE_LCC_PIC_SK_EXT_WQVGAv1)
+    #include "Configs/HWP_LCC_PIC_SK_EXT_WQVGAv1.h"
+#elif defined(CFG_INCLUDE_LCC_PIC_SK_INT_QVGAv1)
+    #include "Configs/HWP_LCC_PIC_SK_INT_QVGAv1.h"
+/*********************************************************************
+ * Hardware Configuration for
  * Multimedia Expasion Board 
  * 8 or 16-bit PMP
  ********************************************************************/
+#elif defined(CFG_INCLUDE_MEB_dsPIC33E_SK_8PMP)
+    #include "Configs/HWP_MEB_dsPIC33E_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_8PMP)
     #include "Configs/HWP_MEB_PIC32_GP_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_16PMP)

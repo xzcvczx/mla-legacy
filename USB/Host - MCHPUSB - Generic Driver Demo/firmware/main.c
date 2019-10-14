@@ -96,7 +96,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
+    
 
 #else
 
@@ -1073,7 +1073,7 @@ BOOL USB_ApplicationEventHandler ( BYTE address, USB_EVENT event, void *data, DW
     #endif
 
     // Handle specific events.
-    switch (event)
+    switch ( (INT)event )
     {
         case EVENT_GENERIC_ATTACH:
             if (size == sizeof(GENERIC_DEVICE_ID))

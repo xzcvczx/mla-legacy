@@ -239,7 +239,7 @@
     </conf>
     <conf name="C32-EX16_ENC28" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -257,7 +257,7 @@
     </conf>
     <conf name="C32-EX16_ENC624" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -275,7 +275,7 @@
     </conf>
     <conf name="C32-EX16_MRF24WB" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -293,7 +293,7 @@
     </conf>
     <conf name="C32-PIC32_ETH_SK_ETH795" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -311,7 +311,7 @@
     </conf>
     <conf name="C32-PIC32_GP_SK_ENC28" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -329,7 +329,7 @@
     </conf>
     <conf name="C32-PIC32_GP_SK_ENC624" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -347,7 +347,7 @@
     </conf>
     <conf name="C32-PIC32_GP_SK_MRF24WB" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -365,7 +365,7 @@
     </conf>
     <conf name="C32-PIC32_USB_SK_ENC28" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -383,7 +383,7 @@
     </conf>
     <conf name="C32-PIC32_USB_SK_ENC624" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -401,7 +401,7 @@
     </conf>
     <conf name="C32-PIC32_USB_SK_MRF24WB" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

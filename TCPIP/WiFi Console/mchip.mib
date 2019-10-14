@@ -41,7 +41,7 @@ control                     OBJECT IDENTIFIER ::=  { microchipInfo 3 }
 snmpUsm			    		OBJECT IDENTIFIER ::=  { microchipInfo 4 }
 snmpTrap					OBJECT IDENTIFIER ::=  { microchipInfo 5 }
 snmpv3PvtObject				OBJECT IDENTIFIER ::=  { microchipInfo 6 }
-trapNotifications 			OBJECT IDENTIFIER ::=  { microchipInfo 7 }
+trapNotifications 			OBJECT IDENTIFIER ::=  { microchipInfo 0 }
 
 mchipMIBConformance         OBJECT IDENTIFIER ::=  { microchipInfo 8 }
 

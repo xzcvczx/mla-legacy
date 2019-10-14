@@ -89,7 +89,7 @@
      * Display VGA
      * AR1020 Touch Controller
      ********************************************************************/
-     //#include "Configs/HWP_GFXv3e_PIC_SK_16PMP_AR1020_VGAv1.h"
+    //#include "Configs/HWP_GFXv3e_PIC_SK_16PMP_AR1020_VGAv1.h"
 
     /*********************************************************************
      * Hardware Configuration for
@@ -97,10 +97,10 @@
      * Graphics PicTail v3e
      * Display VGA
      ********************************************************************/
-	//	#include "Configs/HWP_GFXv3e_EX16_8PMP_VGAv1.h"
-        //  #include "Configs/HWP_GFXv3e_EX16_16PMP_VGAv1.h"
-	    //#include "Configs/HWP_GFXv3e_PIC_SK_8PMP_VGAv1.h"
-         // #include "Configs/HWP_GFXv3e_PIC_SK_16PMP_VGAv1.h"
+    //#include "Configs/HWP_GFXv3e_EX16_8PMP_VGAv1.h"
+    //#include "Configs/HWP_GFXv3e_EX16_16PMP_VGAv1.h"
+	//#include "Configs/HWP_GFXv3e_PIC_SK_8PMP_VGAv1.h"
+    //#include "Configs/HWP_GFXv3e_PIC_SK_16PMP_VGAv1.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -108,10 +108,10 @@
      * Graphics PicTail v3e
      * Display WVGA
      ********************************************************************/
-	  //  #include "Configs/HWP_GFXv3e_EX16_8PMP_WVGAv1.h"
-          //#include "Configs/HWP_GFXv3e_EX16_16PMP_WVGAv1.h"
-	    //#include "Configs/HWP_GFXv3e_PIC_SK_8PMP_WVGAv1.h"
-          #include "Configs/HWP_GFXv3e_PIC_SK_16PMP_WVGAv1.h"
+	//#include "Configs/HWP_GFXv3e_EX16_8PMP_WVGAv1.h"
+    //#include "Configs/HWP_GFXv3e_EX16_16PMP_WVGAv1.h"
+	//#include "Configs/HWP_GFXv3e_PIC_SK_8PMP_WVGAv1.h"
+    #include "Configs/HWP_GFXv3e_PIC_SK_16PMP_WVGAv1.h"
 
 
 #endif

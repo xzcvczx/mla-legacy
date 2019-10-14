@@ -55,6 +55,7 @@
 
 #include "TCPIP Stack/WFMac.h"
 #if defined(WF_CS_TRIS)
+#include "TCPIP Stack/TCPIP.h"  // need this to access STACK_USE_DHCP_CLIENT define
 
 /*
 *********************************************************************************************************
@@ -92,6 +93,17 @@ static volatile BOOL    g_ExIntNeedsServicing;               /* TRUE if external
 
 tRawMoveState RawMoveState;
 
+extern BOOL g_WaitingForMgmtResponse;
+BOOL g_DhcpSuccessful = FALSE;
+BOOL g_WiFiConnectionChanged = FALSE;
+BOOL g_WiFiConnection = FALSE;
+BOOL g_dhcpInProgress = FALSE;
+
+
+extern BOOL g_rxDtim;
+
+
+
 /*
 *********************************************************************************************************
 *                                       LOCAL FUNCTION PROTOTYPES      
@@ -101,6 +113,87 @@ tRawMoveState RawMoveState;
 static void ProcessMgmtRxMsg(void);
 static void ChipReset(void);
 static void ProcessInterruptServiceResult(void);
+
+static BOOL isDhcpInProgress(void);
+
+extern BOOL isSleepNeeded(void);
+extern void SetSleepNeeded(void);
+extern void ClearSleepNeeded(void);
+extern BOOL GetAppPowerSaveMode(void);
+
+
+void WiFiTask(void)
+{
+    #if defined (WF_USE_POWER_SAVE_FUNCTIONS) 
+    //--------------------------------------------------------------------------
+    // if not waiting for a mgmt response and the application wants PS-Poll Mode
+    //--------------------------------------------------------------------------
+    if ((!g_WaitingForMgmtResponse) && (GetAppPowerSaveMode() == TRUE))
+    {
+        // else if changed from connected to disconnected, or vice-versa
+        if (g_WiFiConnectionChanged == TRUE)
+        {
+            g_WiFiConnectionChanged = FALSE;
+
+            // if lost connection
+            if (g_WiFiConnection == FALSE)
+            {
+               WFConfigureLowPowerMode(WF_LOW_POWER_MODE_OFF);
+            }
+            // else connected (or reconnected)  
+            else
+            {
+                // if not using DHCP
+                if (AppConfig.Flags.bIsDHCPEnabled == FALSE)
+                {
+                    WF_PsPollEnable(g_rxDtim);
+                    WFConfigureLowPowerMode(WF_LOW_POWER_MODE_ON);
+                }    
+                // note: if using DHCP, another case will reenable PS-Poll mode
+            } 
+        }            
+        // else if app is using DHCP and we just got an IP address via DHCP
+        else if ((AppConfig.Flags.bIsDHCPEnabled == TRUE) && (g_DhcpSuccessful == TRUE))
+        {
+           g_DhcpSuccessful = FALSE; 
+           WF_PsPollEnable(g_rxDtim);
+           WFConfigureLowPowerMode(WF_LOW_POWER_MODE_ON);
+        }    
+        // if application wants PS-Poll, but the driver disabled it to send a message (and not waiting for DHCP)
+        else if ( g_WiFiConnection == TRUE && isSleepNeeded() && !isDhcpInProgress() )
+        {
+            ClearSleepNeeded();
+            WFConfigureLowPowerMode(WF_LOW_POWER_MODE_ON);
+        }  
+    }    
+    #endif /* WF_USE_POWER_SAVE_FUNCTIONS */
+
+} 
+ 
+    
+static BOOL isDhcpInProgress(void)
+{
+    return g_dhcpInProgress;
+}
+
+
+void SignalDHCPSuccessful()
+{
+    g_DhcpSuccessful = TRUE;
+    g_dhcpInProgress = FALSE;
+}    
+        
+
+void SetDhcpProgressState(void)
+{
+    g_dhcpInProgress = TRUE;
+}    
+
+void SignalWiFiConnectionChanged(BOOL state)
+{
+    g_WiFiConnectionChanged = TRUE;
+    g_WiFiConnection = state;
+}
 
 /*****************************************************************************
  * FUNCTION: WFProcess
@@ -152,20 +245,7 @@ void WFProcess(void)
             WF_EintEnable();
         }
     }
-    //-----------------------------------
-    // else no EINT or Mgmt Rx to process
-    //-----------------------------------
-    else
-    {
-#if defined (WF_USE_POWER_SAVE_FUNCTIONS)
-        /* if PS-Poll mode was enabled by application and was previously deactivated by WF driver */
-        if (WFisPsPollEnabled() && !WFIsPsPollActive() )
-        {
-            /* reactivate PS-Poll mode on MRF24WB0M (allow MRF24WB0M to sleep) */
-            WFConfigureLowPowerMode(WF_LOW_POWER_MODE_ON);
-        }    
-#endif                
-    }
+  
 }
 
 

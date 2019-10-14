@@ -1,13 +1,13 @@
 /*****************************************************************************
  * FileName:        AN1136 Pictures C30.h
- * Processor:       PIC32MX
- * Compiler:        MPLAB C32 (see release notes for tested revision)
- * Linker:          MPLAB LINK32
+ * Processor:       PIC24F, PIC24H, dsPIC
+ * Compiler:        MPLAB C30 (see release notes for tested revision)
+ * Linker:          MPLAB LINK30
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
  *
- * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright(c) 2012 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.2.12
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.45
  *****************************************************************************/
 
 #ifndef AN1136_PICTURES_C30_H_FILE
@@ -41,13 +41,21 @@
  *****************************************************************************/
 #include <Graphics/Graphics.h>
 
+/*****************************************************************************
+ * SECTION:  Graphics Library Firmware Check
+ *****************************************************************************/
+#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
+#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#endif
+
 
 /*****************************************************************************
  * This is an error check for the color depth
  *****************************************************************************/
-#if (COLOR_DEPTH != 16)
+#if (COLOR_DEPTH > 16)
 #error "Color Depth needs to be 16 to correctly use these resources"
 #endif
+
 
 
 /*****************************************************************************

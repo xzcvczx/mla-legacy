@@ -139,17 +139,16 @@
 
 #elif defined (__PIC32MX__) 
 
+	#if defined (__32MX360F512L__) 
+
         /*********************************************************************
          * Hardware Configuration for 
          * Explorer 16 (EXPLORER_16)
          * Graphics PicTail v3 (GFXv3)
          * Display TFT-G240320LTSW-118W-E
          ********************************************************************/
-        //#include "Configs/HWP_GFXv3_EX16_8PMP_SDMSD_QVGAv1.h"
+        #include "Configs/HWP_GFXv3_EX16_8PMP_SDMSD_QVGAv1.h"
 	    //#include "Configs/HWP_GFXv3_EX16_16PMP_SDMSD_QVGAv1.h"
-
-        //#include "Configs/HWP_GFXv3_EX16_8PMP_USBMSD_QVGAv1.h"
-	    //#include "Configs/HWP_GFXv3_EX16_16PMP_USBMSD_QVGAv1.h"
 
         /*********************************************************************
          * Hardware Configuration for 
@@ -159,9 +158,29 @@
          ********************************************************************/
         //#include "Configs/HWP_GFXv3_EX16_8PMP_SDMSD_WQVGAv1.h"
     	//#include "Configs/HWP_GFXv3_EX16_16PMP_SDMSD_WQVGAv1.h"
-    
+
+
+	#elif defined (__32MX460F512L__) 
+
+        /*********************************************************************
+         * Hardware Configuration for 
+         * Explorer 16 (EXPLORER_16)
+         * Graphics PicTail v3 (GFXv3)
+         * Display TFT-G240320LTSW-118W-E
+         ********************************************************************/
+        #include "Configs/HWP_GFXv3_EX16_8PMP_USBMSD_QVGAv1.h"
+	    //#include "Configs/HWP_GFXv3_EX16_16PMP_USBMSD_QVGAv1.h"
+
+        /*********************************************************************
+         * Hardware Configuration for 
+         * Explorer 16 (EXPLORER_16)
+         * Graphics PicTail v3 (GFXv3)
+         * Display PH480272T-005-I11Q
+         ********************************************************************/
         //#include "Configs/HWP_GFXv3_EX16_8PMP_USBMSD_WQVGAv1.h"
     	//#include "Configs/HWP_GFXv3_EX16_16PMP_USBMSD_WQVGAv1.h"
+
+	#elif defined (__32MX795F512L__) 
 
         /*********************************************************************
          * Hardware Configuration for 
@@ -194,7 +213,7 @@
         //#include "Configs/HWP_MEB_PIC32_USB_SK_16PMP_USBMSD.h"
     
         //#include "Configs/HWP_MEB_PIC32_ETH_SK_8PMP_USBMSD.h"
-        //#include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP_USBMSD.h"
+        #include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP_USBMSD.h"
 
         /*********************************************************************
          * Hardware Configuration for 
@@ -202,9 +221,10 @@
          * Low Cost Controller (LCC)
          * Display TFT-G240320LTSW-118W-E
          ********************************************************************/
-
-        #include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_QVGAv1.h"
+        //#include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_QVGAv1.h"
         //#include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_WQVGAv1.h"
+
+    #endif
 
 #endif
 #else
@@ -221,7 +241,18 @@
  * QVGA or WQVGA
  * USB MSD
  ********************************************************************/
-#if defined(CFG_INCLUDE_DA210_BRD_16PMP_USBMSD_QVGAv1)
+#if defined(CFG_INCLUDE_LCC_SK_EXT_USBMSD_QVGAv1)
+    #include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_QVGAv1.h"
+#elif defined(CFG_INCLUDE_LCC_SK_EXT_USBMSD_WQVGAv1)
+    #include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_WQVGAv1.h"
+/*********************************************************************
+ * Hardware Configuration for
+ * LCC Developement board
+ * External Memory
+ * QVGA or WQVGA
+ * USB MSD
+ ********************************************************************/
+#elif defined(CFG_INCLUDE_DA210_BRD_16PMP_USBMSD_QVGAv1)
     #include "Configs/HWP_DA210_BRD_16PMP_USBMSD_QVGAv1.h"
 #elif defined(CFG_INCLUDE_DA210_BRD_16PMP_USBMSD_WQVGAv1)
     #include "Configs/HWP_DA210_BRD_16PMP_USBMSD_WQVGAv1.h"
@@ -278,6 +309,8 @@
  * 8 or 16-bit PMP
  * USB MSD
  ********************************************************************/
+#elif defined(CFG_INCLUDE_MEB_dsPIC33E_SK_8PMP)
+    #include "Configs/HWP_MEB_dsPIC33E_SK_8PMP_USBMSD.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_8PMP)
     #include "Configs/HWP_MEB_PIC32_GP_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_16PMP)

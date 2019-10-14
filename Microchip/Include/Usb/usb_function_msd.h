@@ -76,6 +76,7 @@
    2.6    No Change
    2.8    Added a couple of additional sense key definitions.
    2.9    Added definitions for additional error case checks.
+   2.9d   Added definition for MSD_MODE_SENSE_10.
 
  ********************************************************************/
 #ifndef MSD_H
@@ -149,7 +150,7 @@
     #define MSD_READ_10 						0x28
     #define MSD_WRITE_10 						0x2a
     #define MSD_REQUEST_SENSE 					0x03
-    #define MSD_MODE_SENSE 						0x1a
+    #define MSD_MODE_SENSE  					0x1a
     #define MSD_PREVENT_ALLOW_MEDIUM_REMOVAL 	0x1e
     #define MSD_TEST_UNIT_READY 				0x00
     #define MSD_VERIFY 							0x2f
@@ -160,6 +161,10 @@
     #define MSD_READ10_SECTOR                   0x02
     #define MSD_READ10_TX_SECTOR                0x03
     #define MSD_READ10_TX_PACKET                0x04
+    #define MSD_READ10_FETCH_DATA               0x05
+    #define MSD_READ10_XMITING_DATA             0x06
+    #define MSD_READ10_AWAITING_COMPLETION      0x07
+    #define MSD_READ10_ERROR                    0xFF
     
     #define MSD_WRITE10_WAIT                    0x00
     #define MSD_WRITE10_BLOCK                   0x01

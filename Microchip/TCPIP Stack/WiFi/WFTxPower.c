@@ -207,7 +207,34 @@ void WF_TxPowerGetFactoryMax(INT8 *p_factoryMaxTxPower)
     /* msgData[0] = max power, msgData[1] = min power */
     *p_factoryMaxTxPower = msgData[0];  
 }
-    
-    
+
+/*******************************************************************************
+  Function:	
+    void WF_FixTxRateWithMaxPower(BOOL oneMegaBps)
+
+  Summary:
+    Fix transmission rate with maximum power. 
+
+  Description:
+
+  Precondition:
+  	MACInit must be called first.
+
+  Parameters:
+    oneMegaBps - When true, that is 1 mbps. Otherwise 2 mbps
+
+  Returns:
+  	None.
+  	
+  Remarks:
+  	None.
+  *****************************************************************************/  
+void WF_FixTxRateWithMaxPower(BOOL oneMegaBps)
+{ 
+	UINT8 buf[1];
+
+	buf[1] = oneMegaBps ? 0x20 : 0x40;	/* or 2 Mbps */
+	SendSetParamMsg(PARAM_TX_THROTTLE_TABLE_ON_OFF, buf, sizeof(buf)); 
+}
     
 #endif /* WF_CS_TRIS && WF_USE_TX_POWER_CONTROL_FUNCTIONS */

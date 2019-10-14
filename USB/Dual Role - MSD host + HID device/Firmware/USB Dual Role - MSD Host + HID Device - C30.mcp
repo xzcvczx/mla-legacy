@@ -172,9 +172,9 @@ file_030=HardwareProfile - PIC24FJ64GB004 PIM.h
 file_031=HardwareProfile - PIC24FJ256DA210 Development Board.h
 file_032=HardwareProfile - PIC24FJ256GB210 PIM.h
 file_033=..\..\..\Microchip\USB\usb_device_local.h
-file_034=..\Getting Started - Running the Device - HID - Simple Custom Demo.htm
-file_035=..\IMPORTANT README.txt
-file_036=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_034=..\IMPORTANT README.txt
+file_035=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_036=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

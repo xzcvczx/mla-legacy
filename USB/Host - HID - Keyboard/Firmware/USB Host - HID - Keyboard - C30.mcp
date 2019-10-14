@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24EP512GU810
+device=PIC24FJ256GB110
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -129,8 +129,8 @@ file_020=..\..\..\Microchip\Include\USB\usb_hal.h
 file_021=..\..\..\Microchip\Include\USB\usb_hal_pic24.h
 file_022=..\..\..\Microchip\Include\USB\usb_host.h
 file_023=..\..\..\Microchip\Include\USB\usb_host_hid.h
-file_024=..\Getting Started - Running the Host - HID - Keyboard.htm
-file_025=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_024=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_025=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

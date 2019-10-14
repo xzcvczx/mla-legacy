@@ -252,7 +252,7 @@ void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber)
 {
     #if defined(STACK_USE_UART)
     char buf[64];
-#if defined(DISPLAY_FILENAME)
+#if defined(DISPLAY_FILENAME) && !defined(__18CXX)
 	UINT16 moduleNameIdx;
 	static ROM char *moduleName[] = { 
 		"MainDemo.c",
@@ -282,7 +282,7 @@ void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber)
 	};
 #endif
 
-#if defined(DISPLAY_FILENAME)
+#if defined(DISPLAY_FILENAME)  && !defined(__18CXX)
 	putrsUART("WF ASSERTION at ");
 	if (moduleNumber < 100)
 		moduleNameIdx = moduleNumber;

@@ -490,11 +490,24 @@ WORD ChDraw(void *pObj)
             if(IsDeviceBusy())
                 return (0);
 
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            GFX_DRIVER_SetupDrawUpdate( pCh->hdr.left,
+                                        pCh->hdr.top,
+                                        pCh->hdr.right,
+                                        pCh->hdr.bottom);
+#endif
             if(GetState(pCh, CH_HIDE))
             {   // Hide the Chart (remove from screen)
                 SetColor(pCh->hdr.pGolScheme->CommonBkColor);
                 if(!Bar(pCh->hdr.left, pCh->hdr.top, pCh->hdr.right, pCh->hdr.bottom))
                     return (0);
+
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pCh->hdr.left,
+                                                pCh->hdr.top,
+                                                pCh->hdr.right,
+                                                pCh->hdr.bottom);
+#endif
                 return (1);
             }
 
@@ -775,6 +788,12 @@ WORD ChDraw(void *pObj)
             else
             {
                 state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pCh->hdr.left,
+                                                pCh->hdr.top,
+                                                pCh->hdr.right,
+                                                pCh->hdr.bottom);
+#endif
                 return (1);
             }
 
@@ -2044,6 +2063,12 @@ WORD ChDraw(void *pObj)
             if(pVar == NULL)
             {
                 state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pCh->hdr.left,
+                                                pCh->hdr.top,
+                                                pCh->hdr.right,
+                                                pCh->hdr.bottom);
+#endif
                 return (1);
             }
 
@@ -2066,6 +2091,12 @@ WORD ChDraw(void *pObj)
             }
 
             state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            GFX_DRIVER_CompleteDrawUpdate(   pCh->hdr.left,
+                                            pCh->hdr.top,
+                                            pCh->hdr.right,
+                                            pCh->hdr.bottom);
+#endif
             return (1);
 
             /**************************************************************************/
@@ -2320,6 +2351,12 @@ WORD ChDraw(void *pObj)
                 else
                 {
                     state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pCh->hdr.left,
+                                                    pCh->hdr.top,
+                                                    pCh->hdr.right,
+                                                    pCh->hdr.bottom);
+#endif
                     return (1);
                 }
             }
@@ -2716,9 +2753,21 @@ WORD ChDraw(void *pObj)
                 return (0);
 
             state = REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            GFX_DRIVER_CompleteDrawUpdate(   pCh->hdr.left,
+                                            pCh->hdr.top,
+                                            pCh->hdr.right,
+                                            pCh->hdr.bottom);
+#endif
             return (1);
     }
 
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+    GFX_DRIVER_CompleteDrawUpdate(   pCh->hdr.left,
+                                    pCh->hdr.top,
+                                    pCh->hdr.right,
+                                    pCh->hdr.bottom);
+#endif
     return (1);
 }
 

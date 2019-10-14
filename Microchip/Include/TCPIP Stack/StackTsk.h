@@ -143,5 +143,6 @@ typedef struct __attribute__((__packed__))
 void StackInit(void);
 void StackTask(void);
 void StackApplications(void);
+void RenewDhcp(void);
 
 #endif

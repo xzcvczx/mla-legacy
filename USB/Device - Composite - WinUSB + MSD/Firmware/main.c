@@ -1,19 +1,19 @@
 /********************************************************************
- FileName:		main.c
- Dependencies:	See INCLUDES section
- Processor:		PIC18, PIC24, and PIC32 USB Microcontrollers
- Hardware:		This demo is natively intended to be used on Microchip USB demo
- 				boards supported by the MCHPFSUSB stack.  See release notes for
- 				support matrix.  This demo can be modified for use on other hardware
- 				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
+ FileName:      main.c
+ Dependencies:  See INCLUDES section
+ Processor:	    PIC18, PIC24, dsPIC, and PIC32 USB Microcontrollers
+ Hardware:      This demo is natively intended to be used on Microchip USB demo
+                boards supported by the MCHPFSUSB stack.  See release notes for
+                support matrix.  This demo can be modified for use on other 
+                hardware platforms.
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24/33), C32 (for PIC32)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the �Company�) for its PIC� Microcontroller is intended and
- supplied to you, the Company�s customer, for use solely and
+ (the "Company") for its PIC® Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN �AS IS� CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -198,7 +198,6 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
     #elif defined(__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
         _FOSCSEL(FNOSC_FRC);
         _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
@@ -231,11 +230,15 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
 #elif defined(DSPIC33E_USB_STARTER_KIT)
     _FOSCSEL(FNOSC_FRC);
     _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
     _FWDT(FWDTEN_OFF);
+#elif defined(PIC24FJ64GB502_MICROSTICK)
+    _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    _CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+    _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
 #else
     #error No hardware board defined, see "HardwareProfile.h" and __FILE__
 #endif
@@ -250,17 +253,22 @@
     #pragma udata USB_VARIABLES=0x500
 #elif defined(__18F4450) || defined(__18F2450)
     #pragma udata USB_VARIABLES=0x480
-#else
+#elif defined(__18CXX)
     #pragma udata
 #endif
 
 unsigned char OUTPacket[64];	//User application buffer for receiving and holding OUT packets sent from the host
 unsigned char INPacket[64];		//User application buffer for sending IN packets to the host
-#pragma udata
+
+#if defined(__18CXX)
+    #pragma udata
+#endif
 BOOL blinkStatusValid;
 USB_HANDLE USBGenericOutHandle;
 USB_HANDLE USBGenericInHandle;
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 //The LUN variable definition is critical to the MSD function driver.  This
 //  array is a structure of function pointers that are the functions that 
@@ -444,7 +452,9 @@ void BlinkUSBStatus(void);
 
 
 /** DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /********************************************************************
  * Function:        void main(void)
@@ -566,6 +576,13 @@ static void InitializeSystem(void)
     //Device switches over automatically to PLL output after PLL is locked and ready.
     #endif
     
+    #if defined(__32MX460F512L__)|| defined(__32MX795F512L__)
+    // Configure the PIC32 core for the best performance
+    // at the operating frequency. The operating frequency is already set to 
+    // 60MHz through Device Config Registers
+    SYSTEMConfigPerformance(60000000);
+	#endif
+    
      #if defined(__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
 
     // Configure the device PLL to obtain 60 MIPS operation. The crystal
@@ -622,7 +639,7 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
     
-   #if defined(PIC24FJ64GB004_PIM)
+   #if defined(PIC24FJ64GB004_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
 	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -1351,7 +1368,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch( (INT)event )
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.
@@ -1386,6 +1403,29 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
             //      on, by checking the handle value in the *pdata.
             //2.  Re-arm the endpoint if desired (typically would be the case for OUT 
             //      endpoints).
+
+            //Check if the host recently did a clear endpoint halt on the MSD OUT endpoint.
+            //In this case, we want to re-arm the MSD OUT endpoint, so we are prepared
+            //to receive the next CBW that the host might want to send.
+            //Note: If however the STALL was due to a CBW not valid condition, 
+            //then we are required to have a persistent STALL, where it cannot 
+            //be cleared (until MSD reset recovery takes place).  See MSD BOT 
+            //specs v1.0, section 6.6.1.
+            if(MSDWasLastCBWValid() == FALSE)
+            {
+                //Need to re-stall the endpoints, for persistent STALL behavior.
+    			USBStallEndpoint(MSD_DATA_IN_EP, IN_TO_HOST);
+      			USBStallEndpoint(MSD_DATA_OUT_EP, OUT_FROM_HOST);                 
+            }
+            else
+            {   
+                //Check if the host cleared halt on the bulk out endpoint.  In this
+                //case, we should re-arm the endpoint, so we can receive the next CBW.
+                if((USB_HANDLE)pdata == USBGetNextHandle(MSD_DATA_OUT_EP, OUT_FROM_HOST))
+                {
+                    USBMSDOutHandle = USBRxOnePacket(MSD_DATA_OUT_EP, (BYTE*)&msd_cbw, MSD_OUT_EP_SIZE);
+                }    
+            }    
             break;
         default:
             break;

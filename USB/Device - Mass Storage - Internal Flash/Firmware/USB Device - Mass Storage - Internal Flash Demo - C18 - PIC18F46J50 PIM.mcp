@@ -129,8 +129,8 @@ file_020=HardwareProfile - PIC18F46J50 PIM.h
 file_021=..\..\..\Microchip\USB\usb_device_local.h
 file_022=..\..\..\Microchip\Include\USB\usb_function_msd.h
 file_023=rm18f46j50_g.lkr
-file_024=..\Getting Started - Running the Device - Mass Storage - Internal Flash.htm
-file_025=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_024=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_025=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

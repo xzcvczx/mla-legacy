@@ -52,10 +52,10 @@
 /************************************************************************
  Constants													
  ************************************************************************/
- #if defined USE_SH1101A
+ #if defined USE_GFX_DISPLAY_CONTROLLER_SH1101A
     #define NUM_ACCELEROMETERPADS                   5                       // Number of ACCELEROMETERPADs
     #define STARTING_ADC_CHANNEL            		8
-#elif defined USE_SSD1303
+#elif defined USE_GFX_DISPLAY_CONTROLLER_SSD1303
     #define NUM_ACCELEROMETERPADS                   4                       // Number of ACCELEROMETERPADs
     #define STARTING_ADC_CHANNEL            		9
 #else

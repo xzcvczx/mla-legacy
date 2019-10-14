@@ -1,7 +1,35 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/**********************************************************************
+*
+*            MIB2BIB - MIB to Binary Information Base Builder
+*
+**********************************************************************
+* FileName:        SnmpCommand.java
+* Complier:        JAVA version "1.6.0_20 and onwards"
+* IDE :            Netbean
+* Software License Agreement
+*
+* Copyright (C) 2012 Microchip Technology Inc.  All rights reserved.
+*
+* Microchip licenses to you the right to use, modify, copy, and
+* distribute the Software when used with a Microchip microcontroller or
+* digital signal controller product which is integrated into Licensee's product.
+*
+* You should refer to the license agreement accompanying this
+* Software for additional information regarding your rights and
+* obligations.
+*
+* THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+* WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+* LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+* PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+* MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+* CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+* PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+* BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+* THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+* SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+* (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE
+**********************************************************************/
 
 package mib2bib;
 import java.util.*;
@@ -412,6 +440,7 @@ public class SnmpCommand {
                 if(Character.isDigit(tokens[i].charAt(j)) == false)
                     return 0;
             }
+            j = 0;
             tempOID = Integer.decode(tokens[i]);
             // If number is <= than 127, it need not be adjusted.
             if ( tempOID <= 127 )
@@ -799,13 +828,48 @@ public class SnmpCommand {
         }
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd yyyy hh:mm:ss");
-        fincout.write("/*\n" +
-            " * This file was automatically generated on " + sdf.format(date)+ "\n"+
-            " * by mib2bib utility.\n\n" +
-            " * This file contains 'C' defines for dynamic OIDs and AgentID only.\n" +
-            " * Do not modify this file manually.\n" +
-            " * Include this file in your application source file that handles SNMP callbacks and TRAP.\n" +
-            " */\n");
+        fincout.write("/*******************************************************************\n" +
+            " * FileName: mib.h\r\n"+
+            " * Processor:       PIC18,PIC24E, PIC24F, PIC24H, dsPIC30F, dsPIC33F, dsPIC33E,PIC32\r\n" +
+            " * Compiler:        Microchip C18, C30, C32\r\n" +
+            " * This file was automatically generated on " + sdf.format(date)+ "\r\n"+
+            " * by mib2bib utility.\r\n" +
+            " * This file contains 'C' defines for dynamic OIDs and AgentID only.\r\n" +
+            " * Do not modify this file manually.\r\n" +
+            " * Include this file in your application source file that handles SNMP callbacks and TRAP.\r\n" +
+            " * \r\n" +
+            " * Software License Agreement\r\n" +
+            " *\r\n" +
+            " * Copyright (C) 2012 Microchip Technology Inc.  All rights\r\n" +
+            " * reserved.\r\n" +
+            " *\r\n" +
+            " * Microchip licenses to you the right to use, modify, copy, and \r\n " +
+            " * distribute: \r\n" +
+            " * (i)  the Software when embedded on a Microchip microcontroller or \r\n" +
+            " *      digital signal controller product (\"Device\") which is \r\n" +
+            " *      integrated into Licensee's product; or \r\n" +
+            " * (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,\r\n" +
+            " *		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device\r\n" +
+            " *		used in conjunction with a Microchip ethernet controller for\r\n" +
+            " *		the sole purpose of interfacing with the ethernet controller.\r\n" +
+            " *\r\n" +
+            " * You should refer to the license agreement accompanying this \r\n" +
+            " * Software for additional information regarding your rights and \r\n" +
+            " * obligations.\r\n" +
+            " *\r\n" +
+            " * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED \"AS IS\" WITHOUT\r\n" +
+            " * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT\r\n" +
+            " * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A \r\n" +
+            " * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL\r\n" +
+            " * MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR\r\n" +
+            " * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF\r\n" +
+            " * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS\r\n" +
+            " * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE \r\n" +
+            " * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER \r\n" +
+            " * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT\r\n" +
+            " * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.\r\n" +
+            " *\r\n"+
+            " *******************************************************************/\n");
 
         PreprocessOutput(mibRoot, 0);
         AssignOffset(mibRoot);
@@ -1306,6 +1370,7 @@ class dynamicVar //extends SnmpCommand
         OID_NODE matchingNode;
         OID_NODE duplicateIDRec;
         long id;
+        String intVal;
 
         // Even before we process this command, warn use if total number of
         // dynamic OIDs are exceeding the allowable limit.
@@ -1351,7 +1416,8 @@ class dynamicVar //extends SnmpCommand
             return false;
         }
 
-        id = Integer.decode(pList.get(2).toString());
+        intVal = pList.get(2).toString().replace(" ","");
+        id = Integer.decode(intVal);
         if ( id > MAX_DYNAMIC_ID_SIZE )
         {
             mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.INVALID_OID_ID);
@@ -1387,7 +1453,7 @@ class staticVar //extends SnmpCommand
         OID_NODE matchingNode;
         long i, j, b1, b2, b3, b4;
         int temp;
-
+        String intVal;
         // Must have at least 3 (2+1) arguments.
         if ( pList.size() < 3 )
         {
@@ -1440,7 +1506,8 @@ class staticVar //extends SnmpCommand
                 mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.STATIC_OID_INVALID_ARGS);
                 return false;
             }
-            i = Integer.decode(pList.get(2).toString());
+            intVal = pList.get(2).toString().replace(" ","");
+            i = Integer.decode(intVal);
             if ( i > 0xff )
                 mainMib2bib.ShowWarning(file, line, mib2bib.FILE_ERROR_CODE.VALUE_TRUNCATED);
 
@@ -1461,7 +1528,8 @@ class staticVar //extends SnmpCommand
                 mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.STATIC_OID_INVALID_ARGS);
                 return false;
             }
-            i = Integer.decode(pList.get(2).toString());
+            intVal = pList.get(2).toString().replace(" ","");
+            i = Integer.decode(intVal);
             if ( i > 0xffff )
                 mainMib2bib.ShowWarning(file, line, mib2bib.FILE_ERROR_CODE.VALUE_TRUNCATED);
 
@@ -1485,7 +1553,8 @@ class staticVar //extends SnmpCommand
                 mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.STATIC_OID_INVALID_ARGS);
                 return false;
             }
-            matchingNode.int32 = intSwap(Integer.decode(pList.get(2).toString()));
+            intVal = pList.get(2).toString().replace(" ","");
+            matchingNode.int32 = intSwap(Integer.decode(intVal));
             matchingNode.dataLen = 4;
             for (j = 0; j < matchingNode.dataLen; j++)
             {
@@ -1528,7 +1597,8 @@ class staticVar //extends SnmpCommand
                 return false;
             }
             temp = 0;
-            temp = ParseOIDString(pList.get(2).toString(),matchingNode.oidString, temp);
+            intVal = pList.get(2).toString().replace(" ","");
+            temp = ParseOIDString(intVal,matchingNode.oidString, temp);
             if ( temp == 0)
             {
                 mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.STATIC_OID_INVALID_ARGS);
@@ -1546,10 +1616,10 @@ class staticVar //extends SnmpCommand
                 mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.STATIC_OID_INVALID_ARGS);
                 return false;
             }
-
-            matchingNode.dataLen = (byte)pList.get(2).toString().length();
+            intVal = pList.get(2).toString().replace(" ","");
+            matchingNode.dataLen = (byte)intVal.length();
             String delimiters = "[.]";
-            String[] ipString = pList.get(2).toString().split(delimiters);
+            String[] ipString = intVal.split(delimiters);
             b1 = Integer.decode(ipString[0]);
             b2 = Integer.decode(ipString[1]);
             b3 = Integer.decode(ipString[2]);
@@ -1647,6 +1717,7 @@ class agentID //extends SnmpCommand
         OID_NODE matchingNode;
         OID_NODE duplicateIDRec;
         long id;
+        String intVal;
 
         // There must be 3 (2+1) arguments.
         if ( pList.size() != 3 )
@@ -1678,7 +1749,8 @@ class agentID //extends SnmpCommand
         }
 
         // Convert id into number.
-        id = Integer.decode(pList.get(2).toString());
+        intVal = pList.get(2).toString().replace(" ","");
+        id = Integer.decode(intVal);
         if ( id > MAX_DYNAMIC_ID_SIZE )
         {
             mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.INVALID_OID_ID);
@@ -1732,7 +1804,7 @@ class sequenceVar //extends SnmpCommand
         //OID_NODE.INDEX [] matchingIndexTemp;
         String temp;
         int i;
-
+        String  strVal;
 
         // In this version, only one index is allowed.
         if ( pList.size() != (MAX_NO_OF_INDEX+2)  )
@@ -1757,8 +1829,8 @@ class sequenceVar //extends SnmpCommand
                 mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.INVALID_INDEX_COUNT);
                 return false;
             }
-
-            matchingIndex = LookupOIDName(mibRoot, pList.get(i).toString());
+            strVal = pList.get(i).toString().replace(" ","");
+            matchingIndex = LookupOIDName(mibRoot,strVal);
 
             matchingNode.oid_info_val = setOidInfo(OID_INFO.bIsSequence, matchingNode.oid_info_val);
 

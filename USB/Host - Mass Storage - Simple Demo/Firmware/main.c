@@ -68,7 +68,12 @@
     #elif defined(__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
         _FOSCSEL(FNOSC_FRC);
         _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
-        _FWDT(FWDTEN_OFF);    
+        _FWDT(FWDTEN_OFF);
+    #elif defined(__PIC24FJ64GB502__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+	_CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+	_CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+	_CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)   
     #endif
 #elif defined( __PIC32MX__ )
     #pragma config UPLLEN   = ON            // USB PLL Enabled
@@ -89,7 +94,7 @@
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
+   
 #else
     #error Cannot define configuration bits.
 #endif

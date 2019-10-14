@@ -41,6 +41,11 @@
 #ifndef HARDWARE_PROFILE_PIC32MX795F512L_PIM_H
 #define HARDWARE_PROFILE_PIC32MX795F512L_PIM_H
 
+	/************  PHDC Demo Configuration *******************/ 
+    //#define PHD_USE_POT_FOR_TEMP_SIMULATION
+    //#define PHD_USE_LCD_DISPLAY
+    //#define PHD_USE_RTCC_FOR_TIME_STAMP
+    //#define DEMO_BOARD_HAS_ONLY_ONE_PUSH_BUTTON
     /*******************************************************************/
     /******** USB stack hardware selection options *********************/
     /*******************************************************************/

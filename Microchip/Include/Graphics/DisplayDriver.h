@@ -781,8 +781,77 @@ void RequestDisplayUpdate(void);
 ********************************************************************/
 void UpdateDisplayNow(void);
 
+/*********************************************************************
+* Function: WORD GetDrawBufferAddress(void)
+*
+* Overview: Returns the address of Draw Buffer
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: Address of the Draw Buffer
+*
+* Side Effects: none
+*
+********************************************************************/
+DWORD GetDrawBufferAddress(void);
+
+/*********************************************************************
+* Function: DWORD GetFrameBufferAddress(void)
+*
+* Overview: Returns the address of Frame Buffer
+*
+* PreCondition: _drawbuffer must be set to either GFX_BUFFER1 or GFX_BUFFER2
+*
+* Input: none
+*
+* Output: Address of the Frame Buffer
+*
+* Side Effects: none
+*
+********************************************************************/
+DWORD GetFrameBufferAddress(void);
+
 #endif  //#ifdef USE_DOUBLE_BUFFERING
-    
-          
+
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+
+/*********************************************************************
+* Function: void GFX_DRIVER_SetupDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt16 endy)
+*
+* Overview: Sets up the partital update for bi-stable displays.  
+*
+* PreCondition: none.
+*
+* Input:    startx - the starting position of the partital area that is being updated.
+*           starty - the starting position of the partital area that is being updated.
+*           endx - the ending position of the partital area that is being updated.
+*           endy - the ending position of the partital area that is being updated.
+*
+* Output: none
+*
+* Side Effects: none
+********************************************************************/
+void GFX_DRIVER_SetupDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt16 endy);
+
+/*********************************************************************
+* Function: void GFX_DRIVER_CompleteDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt16 endy)
+*
+* Overview: Completes the partital update for bi-stable displays.  
+*
+* PreCondition: none.
+*
+* Input:    startx - the starting position of the partital area that is being updated.
+*           starty - the starting position of the partital area that is being updated.
+*           endx - the ending position of the partital area that is being updated.
+*           endy - the ending position of the partital area that is being updated.
+*
+* Output: none
+*
+* Side Effects: none
+********************************************************************/
+void GFX_DRIVER_CompleteDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt16 endy)
 #endif
 
+#endif

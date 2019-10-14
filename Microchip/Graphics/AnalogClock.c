@@ -727,7 +727,7 @@ current_hand:
 /*********************************************************************
 * Function: AcSetHour(STATICTEXT *pAc, XCHAR *pText)
 *
-* Notes: Sets the string that will be used.
+* Notes: Sets the Hour value of time.
 *
 ********************************************************************/
 void AcSetHour(ANALOGCLOCK *pAc, SHORT hour)
@@ -740,7 +740,7 @@ void AcSetHour(ANALOGCLOCK *pAc, SHORT hour)
 /*********************************************************************
 * Function: AcSetMinute(STATICTEXT *pSt, XCHAR *pText)
 *
-* Notes: Sets the string that will be used.
+* Notes: Sets the Second value of time.
 *
 ********************************************************************/
 void AcSetSecond(ANALOGCLOCK *pAc, SHORT second)
@@ -753,7 +753,7 @@ void AcSetSecond(ANALOGCLOCK *pAc, SHORT second)
 /*********************************************************************
 * Function: AcSetMinute(STATICTEXT *pSt, XCHAR *pText)
 *
-* Notes: Sets the string that will be used.
+* Notes: Sets the Minute value of time.
 *
 ********************************************************************/
 void AcSetMinute(ANALOGCLOCK *pAc, SHORT minute)

@@ -410,7 +410,7 @@ file_126=yes
 [FILE_INFO]
 file_000=CustomHTTPApp.c
 file_001=DemoSelection.c
-file_002=Fonts.c
+file_002=InternalResourceC32.c
 file_003=GoogleMapMenu.c
 file_004=GoogleStaticMapClient.c
 file_005=MainDemo.c

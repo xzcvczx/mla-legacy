@@ -41,8 +41,8 @@ file_013=USB Stack
 file_014=Common
 file_015=Common
 file_016=Hardware Profile
-file_017=.
-file_018=USB Stack
+file_017=USB Stack
+file_018=.
 file_019=.
 [GENERATED_FILES]
 file_000=no
@@ -83,8 +83,8 @@ file_013=no
 file_014=no
 file_015=no
 file_016=no
-file_017=yes
-file_018=no
+file_017=no
+file_018=yes
 file_019=yes
 [FILE_INFO]
 file_000=usb_descriptors.c
@@ -104,9 +104,9 @@ file_013=..\..\..\Microchip\Include\USB\usb_hal.h
 file_014=..\..\..\Microchip\Include\GenericTypeDefs.h
 file_015=..\..\..\Microchip\Include\Compiler.h
 file_016=HardwareProfile - PIC32 USB Starter Kit.h
-file_017=..\Getting Started - Running the Device - HID - Digitizer Demos.htm
-file_018=..\..\..\Microchip\USB\usb_device_local.h
-file_019=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_017=..\..\..\Microchip\USB\usb_device_local.h
+file_018=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_019=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

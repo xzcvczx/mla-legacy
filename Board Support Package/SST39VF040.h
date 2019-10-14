@@ -41,7 +41,7 @@
 #ifndef _SST39_H
     #define _SST39_H
 
-#include "Graphics/Graphics.h"
+#include "GenericTypeDefs.h"
 
 #ifdef __PIC32MX
 	#define PMDIN1  PMDIN

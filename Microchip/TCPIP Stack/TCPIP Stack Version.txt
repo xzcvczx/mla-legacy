@@ -5,6 +5,71 @@ Microchip TCP/IP Stack Version Log:
 Note: Please file bug-reports/bug-fixes at http://support.microchip.com/ or post 
       to the Microchip TCP/IP -> Ethernet Forum at http://forum.microchip.com/
       Look for stack updates at http://www.microchip.com/mal/
+
+
+********
+v5.41       Feb 2012
+********      
+Changes:
+1.  Added socket number validation to TCP functions.
+2.  Removed the WiFi projects from the Energy Monitoring and WebVend demos.
+3.  Added the "-mperipheral-libs" linker option to C32 projects.
+4.  Moved AES library and header files used by SNMPv3 from the "Crypto" source and 
+        include folders to the to the "TCPIP Stack" source and include folders.
+5.  Changed SNMP MIB trap number from 7 to 0.
+6.  Changed SNMP MIB SYOBJECTID to 43.6.1.4.1.17095.1 (added .1).
+7.  Updated MPFS2 Utility to make path settings persistent.
+8.  Changed default channel list from {1,6,11} to {1,2,3,4,5,6,7,8,9,10,11} for
+    FCC domain
+9.	Added support for WEP with Shared Key
+10.	Added new command "iwconfig scan" & "iwconfig scanresults"
+11.	Added gRFModuleVer1209orLater" flag to identify version 1209 and later
+    specific API's.
+12. Added the following 1209 and later specific API:
+    a) WF_CPSetWepKeyType()
+    b) WF_CMGetConnectContext() 
+    c) WFEnableBroadcastProbeResponse() 
+    d) WFEnableAggressivePowerSave()
+    e) WF_CPSetSsidType()
+    f) WFEnableDeferredPowerSave()
+    g) WF_FixTxRateWithMaxPower()
+
+Fixes:
+1.  Updated MPFS2 Utility path strings for Mac/Linux compatibility.
+2.	Iperf - Resolved application crash due to network disconnection.
+3.	Host Scan - More robust and prevent system hang up.  #define WF_HOST_SCAN.
+4.	Power Save - Improvements with Aggressive PS mode, and better handling of
+    PS in host code.
+5.	Host connect & disconnect - Prevent system hang.
+6.	DHCP Refresh - Better handling of DHCP session in PS mode, and issue DHCP
+    renewal any STA reconnect with AP.
+
+Known Problems:
+1.  Telnet server module does not implement a lot of Telnet functions.  As a 
+    result, it will likely not display correctly or work at all with some Telnet 
+    clients.  The server was tested with the Microsoft telnet.exe utility which 
+    is provided with Microsoft Windows.
+2.  If the DHCP client and DHCP server are used at the same time and you connect 
+    two similar boards to each other (ex: two PICDEM.net 2 boards connected via 
+    a crossover cable), a race condition can occur where both nodes will disable 
+    their DHCP server and neither board will get a successful DHCP lease.  If 
+    this unlikely scenario occurs, as a work around, simply reset one of the 
+    boards to reenable it's DHCP server.
+3.  LCDBlocking.c timing for the LCD_E_IO enable signal is too fast to meet 
+    published data sheet limits for various LCD controllers when compiling for 
+    a PIC32 running at > 43MHz.  Despite this potential timing violation, the 
+    LCD does normally work correctly on the precompiled PIC32 demos for the 
+    Explorer 16 at 80MHz.
+4.  For PIC32 implementations, depending on the configuration, it is possible that the
+    MACGetFreeRxSize() returns a value greater than 64 KB.
+    For backward compatibility reasons the stack uses a 16 bit value to check the returned value
+    and it won't work corretly.
+5.  Limiting the number of UDP sockets to 8 in the stack demos may prevent SNMP trap
+    functionality.  If this occurs, you can increase the MAX_UDP_SOCKETS definition in 
+    TCPIPConfig.h to 10 (if your system will support the increased data memory usage) 
+    to fix this issue.
+6.  The SNMP mib file's date and version parameter does not match the date/version of
+    the current stack release.    
       
       
 ********

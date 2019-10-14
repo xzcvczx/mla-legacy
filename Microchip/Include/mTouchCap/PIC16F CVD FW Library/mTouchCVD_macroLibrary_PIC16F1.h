@@ -1,11 +1,11 @@
 /*************************************************************************
  *  © 2011 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch CVD Framework v1.1
+ *  Project Name:    mTouch CVD Framework v1.00.00
  *  FileName:        mTouchCVD_macroLibrary_PIC16F1.h
  *  Dependencies:    mTouchCVD.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
- *  Compiler:        HI-TECH Ver. 9.81 or later
+ *  Compiler:        HI-TECH PRO Ver. 9.80 or later
  *  IDE:             MPLAB® IDE v8.50 (or later) or MPLAB® X                        
  *  Hardware:         
  *  Company:         
@@ -71,7 +71,6 @@
 * @hideinitializer
 */
 #define MASKBANK(var,bank)        ((var)^((bank)*80h))
-#define   NOBANK(var)             (var & 0x7F)
 
 /** @name Housekeeping Macros
 * These macros perform basic ISR and timer module functions such as checking
@@ -141,35 +140,35 @@ do {                                                                            
 * @ingroup Acquisition
 */
 #if defined(CVD_JITTER_ENABLE)                              // If jittering is enabled
-    #if (CVD_JITTER_TYPE == 0)                              // Type 0: Using ADRESL as the random seed value
-        #define JITTER_START_TIME()                                                                                         \
-            do {                                                                                                            \
-                asm("BANKSEL    _ADRESL"                        );  /* Make sure we're starting in the correct bank     */  \
-                asm("movf   "   ___mkstr(NOBANK(_ADRESL))   ",W");  /* Load ADRESL into the working register            */  \
-                asm("andlw      0x3F"                           );  /* Mask its value to look at only the 5 LSb's       */  \
-                asm("movlb      0"                              );  /* Move to Bank 0 to access TMR0 SFR                */  \
-                asm("addwf      _TMR0"                          );  /* Add the masked ADRESL value as an offset to TMR0 */  \
-            } while (0)
-    #elif (CVD_JITTER_TYPE == 1)                            // Type 1: Using a linear feedback shift register to generate a random value
-        #define JITTER_START_TIME()                                                                                         \
-            do {                                                                                                            \
-                asm("BANKSEL    _mTouchCVD_jitter"              );  /* Make sure we're starting in the correct bank     */  \
-                asm("bcf    "   ___mkstr(_STATUS)           ",0");  /* Clear the carry bit                              */  \
-                asm("rrf    "   ___mkstr(_mTouchCVD_jitter) ",W");  /* Right shift the current jitter seed value        */  \
-                asm("btfsc  "   ___mkstr(_STATUS)           ",0");  /* Check the carry bit - if set, perform XOR        */  \
-                asm("xorlw      0xB4"                           );  /* (cond) XOR the jitter seed with 0xB4             */  \
-                asm("movwf  "   ___mkstr(_mTouchCVD_jitter)     );  /* Store the result as the new jitter seed value    */  \
-                asm("andlw      0x3F"                           );  /* Grab the 5 LSb's from the seed value             */  \
-                asm("movlb      0"                              );  /* Move to Bank 0 to access TMR0 SFR                */  \
-                asm("addwf      _TMR0"                          );  /* Add the masked LFSR value as an offset to TMR0   */  \
-            } while (0)
-    #endif
+#if (CVD_JITTER_TYPE == 0)                                  // Type 0: Using ADRESL as the random seed value
+#define JITTER_START_TIME()                                                                                         \
+do {                                                                                                                \
+    asm("BANKSEL    _ADRESL");                              /* Make sure we're starting in the correct bank     */  \
+    asm("movf   "   ___mkstr(MASKBANK(_ADRESL,1))    ",W"); /* Load ADRESL into the working register            */  \
+    asm("andlw      0x3F");                                 /* Mask its value to look at only the 5 LSb's       */  \
+    asm("movlb      0");                                    /* Move to Bank 0 to access TMR0 SFR                */  \
+    asm("addwf      _TMR0");                                /* Add the masked ADRESL value as an offset to TMR0 */  \
+} while (0)
+#elif (CVD_JITTER_TYPE == 1)                                // Type 1: Using a linear feedback shift register to generate a random value
+#define JITTER_START_TIME()                                                                                                 \
+do {                                                                                                                        \
+    asm("BANKSEL    _mTouchCVD_jitter");                            /* Make sure we're starting in the correct bank     */  \
+    asm("bcf    "   ___mkstr(_STATUS)                        ",0"); /* Clear the carry bit                              */  \
+    asm("rrf    "   ___mkstr(_mTouchCVD_jitter) ",W");              /* Right shift the current jitter seed value        */  \
+    asm("btfsc  "   ___mkstr(_STATUS)                        ",0"); /* Check the carry bit - if set, perform XOR        */  \
+    asm("xorlw      0xB4");                                         /* (cond) XOR the jitter seed with 0xB4             */  \
+    asm("movwf  "   ___mkstr(_mTouchCVD_jitter)     );              /* Store the result as the new jitter seed value    */  \
+    asm("andlw      0x3F");                                         /* Grab the 5 LSb's from the seed value             */  \
+    asm("movlb      0");                                            /* Move to Bank 0 to access TMR0 SFR                */  \
+    asm("addwf      _TMR0");                                        /* Add the masked LFSR value as an offset to TMR0   */  \
+} while (0)
+#endif
 #else                                                       // Do not implement the jittering function
-    #define JITTER_START_TIME()                                                     \
-        do {                                                                        \
-            asm("movlb      0"      );  /* Move to Bank 0 to access TMR0 SFR    */  \
-            asm("clrf       _TMR0"  );  /* Clear TMR0                           */  \
-        } while (0)
+#define JITTER_START_TIME()                                                                             \
+do {                                                                                                    \
+    asm("movlb      0");                                    /* Move to Bank 0 to access TMR0 SFR    */  \
+    asm("clrf       _TMR0");                                /* Clear TMR0                           */  \
+} while (0)
 #endif
 /**
 * @def WAIT_FOR_GODONE_BIT()
@@ -178,7 +177,10 @@ do {                                                                            
 * @hideinitializer
 * @ingroup Acquisition
 */
-#define WAIT_FOR_GODONE_BIT()                       while (GO_nDONE);  
+#define WAIT_FOR_GODONE_BIT()                                       \
+do {                                                                \
+    while (GO_nDONE);                                               \
+} while (0)
 
 /**
 * @def STORE_LAST_RESULT()
@@ -192,10 +194,29 @@ do {                                                                            
 * @hideinitializer
 * @ingroup Acquisition
 */
-#define STORE_LAST_RESULT()                                                     \
-do {                                                                            \
-    last_result = (unsigned int)((ADRESH | 0x04) << 8) + ADRESL - last_result;  \
+#define STORE_LAST_RESULT()                                                                                     \
+do {                                                                                                            \
+    last_result -= (unsigned int)((ADRESH << 8) + ADRESL);   /* last_result = last_result - ADC_Scan_Result */  \
 } while (0)
+
+/**
+* @def IMPLEMENT_JUMP_TABLE()
+* @brief Implements the jump table using the sensor index
+* @param[in] None
+* @hideinitializer
+* @ingroup Acquisition
+*/
+#if (CVD_NUMBER_SENSORS > 1)
+#define IMPLEMENT_JUMP_TABLE()                                                                                          \
+do {                                                                                                                    \
+    asm("BANKSEL 0");                                               /* Make sure we're in the right bank to start   */  \
+    asm("movf   " ___mkstr(MASKBANK(_current_sensor,0)) ",W");      /* Grab the current sensor index value          */  \
+    asm("andlw  0x1F"       );                                      /* Mask it to grab only the 4 LSb's             */  \
+    asm("brw"               );                                      /* Jump through following table                 */  \
+} while (0)
+#else
+#define IMPLEMENT_JUMP_TABLE()                                      // If only 1 sensor, no jump table is required.
+#endif
 //@}
 
 /** @name Timing Critical CVD Scanning Routine Macros
@@ -295,135 +316,107 @@ do {                                                                            
 * @hideinitializer
 * @ingroup Acquisition
 */
-
 #if CVD_NUMBER_SENSORS == 1
+#warning Development Build Note: The noise performance of the single-sensor acquisition method has not yet been tested. We will be performing it soon.
 #define READ_SENSOR_EXPANDED(current_channel, ref_channel, port, pin, ref_port, ref_pin)                                                            \
 do {                                                                        /*                   SINGLE SENSOR SCAN METHOD                      */  \
-    asm("BANKSEL    "   ___mkstr(_DACCON0)                              );  /*                                                                  */  \
-    asm("movlw      "   ___mkstr(CVD_DACCON0_VDD)                       );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_DACCON0))                      );  /* DACCON0 = CVD_DACCON0_VDD                                        */  \
-    asm("movlw      "   ___mkstr(CVD_DACCON1_VDD)                       );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_DACCON1))                      );  /* DACCON1 = CVD_DACCON1_VDD                                        */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                                                  */  \
-    asm("movlw      "   ___mkstr(CVD_SELECT_DAC_NOGO)                   );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                       );  /* ADC Mux --> DAC                                                  */  \
-    asm("movlw LOW  "   ___mkstr(port)                                  );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1L)                                );  /*                                                                  */  \
-    asm("movlw HIGH "   ___mkstr(port)                                  );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0H)                                );  /*                                                                  */  \
-    asm("addlw          0x01"                                           );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1H)                                );  /*                                                                  */  \
-    asm("movlw LOW  "   ___mkstr(port)                                  );  /*                                                                  */  \
-    asm("addlw          0x80"                                           );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0L)                                );  /*                                                                  */  \
-    asm("btfsc      "   ___mkstr(_STATUS)                   ",0"        );  /* FSR0 = Sensor TRIS register                                      */  \
-    asm("incf       "   ___mkstr(_FSR0H)                                );  /* FSR1 = Sensor LAT register                                       */  \
-    CVD_DELAY_CHOLD();                                                      /*                                                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                                                  */  \
-    asm("movlw      "  ___mkstr(current_channel)                        );  /*                                                                  */  \
-    asm("bsf        "  ___mkstr(_INDF0)     ","     ___mkstr(pin)       );  /* Set the sensor to an input                                       */  \
-    asm("movwf      "  ___mkstr(NOBANK(_ADCON0))                        );  /* ADC Mux --> Sensor                                               */  \
-    CVD_DELAY_SETTLE();                                                     /*                                                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                                                  */  \
-    asm("bsf        "  ___mkstr(NOBANK(_ADCON0))            ", 1"       );  /* Begin the conversion by setting the GO/DONE bit                  */  \
-    CVD_GO_DONE_DELAY();                                                    /*                                                                  */  \
-    asm("bcf        "  ___mkstr(_INDF0)     ","     ___mkstr(pin)       );  /* Set the sensor to an output                                      */  \
-    asm("bsf        "  ___mkstr(_INDF1)     ","     ___mkstr(pin)       );  /* Set sensor LAT high                                              */  \
-    asm("global         decimate            "                           );  /*                                                                  */  \
-    asm("call           decimate            "                           );  /* decimate();                                                      */  \
-    asm("BANKSEL    "   ___mkstr(_DACCON0)                              );  /*                                                                  */  \
-    asm("movlw      "   ___mkstr(CVD_DACCON0_VSS)                       );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_DACCON0))                      );  /* DACCON0 = CVD_DACCON0_VSS                                        */  \
-    asm("movlw      "   ___mkstr(CVD_DACCON1_VSS)                       );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_DACCON1))                      );  /* DACCON1 = CVD_DACCON1_VSS                                        */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                                                  */  \
-    asm("movlw      "   ___mkstr(CVD_SELECT_DAC_NOGO)                   );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                       );  /* ADC Mux --> DAC                                                  */  \
-    asm("movlw LOW  "   ___mkstr(port)                                  );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1L)                                );  /*                                                                  */  \
-    asm("movlw HIGH "   ___mkstr(port)                                  );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0H)                                );  /*                                                                  */  \
-    asm("addlw          0x01"                                           );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1H)                                );  /*                                                                  */  \
-    asm("movlw LOW  "   ___mkstr(port)                                  );  /*                                                                  */  \
-    asm("addlw          0x80"                                           );  /*                                                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0L)                                );  /*                                                                  */  \
-    asm("btfsc      "   ___mkstr(_STATUS)                   ",0"        );  /* FSR0 = Sensor TRIS register                                      */  \
-    asm("incf       "   ___mkstr(_FSR0H)                                );  /* FSR1 = Sensor LAT register                                       */  \
-    CVD_DELAY_CHOLD();                                                      /*                                                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                                                  */  \
-    asm("movlw      "  ___mkstr(current_channel)                        );  /*                                                                  */  \
-    asm("bsf        "  ___mkstr(_INDF0)     ","     ___mkstr(pin)       );  /* Set the sensor to an input                                       */  \
-    asm("movwf      "  ___mkstr(NOBANK(_ADCON0))                        );  /* ADC Mux --> Sensor                                               */  \
-    CVD_DELAY_SETTLE();                                                     /*                                                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                                                  */  \
-    asm("bsf        "  ___mkstr(NOBANK(_ADCON0))            ", 1"       );  /* Begin the conversion by setting the GO/DONE bit                  */  \
-    CVD_GO_DONE_DELAY();                                                    /*                                                                  */  \
-    asm("bcf        "  ___mkstr(_INDF0)     ","     ___mkstr(pin)       );  /* Set the sensor to an output                                      */  \
-    asm("bcf        "  ___mkstr(_INDF1)     ","     ___mkstr(pin)       );  /* Set sensor LAT low                                               */  \
+    asm("movlb    1                      ");                                /* Make sure we start off in the correct bank                       */  \
+    asm("movlw "  ___mkstr(current_channel | 0x02)                      );  /* Load the sensor's ADCON0 value and set the GO/DONE bit           */  \
+    asm("movwf "  ___mkstr(MASKBANK(_ADCON0,1))                         );  /* Write the value to the ADCON0 register                           */  \
+    asm("movlw "  ___mkstr(CVD_SELECT_ISO_NOGO)   );                        /* Load an ADCON0 value that will point to an unimplemented channel */  \
+    asm("movwf "  ___mkstr(MASKBANK(_ADCON0,1))                         );  /* Write the value to the ADCON0 register                           */  \
+    asm("movlb    2                      ");                                /*                                                                  */  \
+    asm("bsf   "  ___mkstr(port)         ","      ___mkstr(pin)         );  /* Set the sensor's LAT bit                                         */  \
+    asm("movlb    1                      ");                                /*                                                                  */  \
+    asm("movlw "  ___mkstr(current_channel)                             );  /* Load the sensor's ADCON0 value (do not set GO/DONE)              */  \
+    asm("bsf   "  ___mkstr(port)         ","      ___mkstr(pin)         );  /* Set the sensor to an input                                       */  \
+    asm("movwf "  ___mkstr(MASKBANK(_ADCON0,1))                         );  /* Write the sensor's ADCON0 value to ADCON0                        */  \
+    asm("nop");                                                             /*                                                                  */  \
+    asm("nop");                                                             /* Delay while capacitance voltages settle                          */  \
+    asm("nop");                                                             /*                                                                  */  \
+    asm("bsf   "  ___mkstr(MASKBANK(_ADCON0,1))    ", 1"                );  /* Begin the conversion by setting the GO/DONE bit                  */  \
+    asm("bcf   "  ___mkstr(port)         ","      ___mkstr(pin)         );  /* Set the sensor to an output                                      */  \
+    asm("global   decimate               ");                                /*                                                                  */  \
+    asm("call     decimate               ");                                /* Perform math on the previous scan while conversion completes     */  \
+    asm("movlb    1                      ");                                /*                                                                  */  \
+    asm("movlw "  ___mkstr(current_channel | 0x02)                      );  /* |                                                                */  \
+    asm("movwf "  ___mkstr(MASKBANK(_ADCON0,1))                         );  /* | Same commands as                                               */  \
+    asm("movlw "  ___mkstr(CVD_SELECT_ISO_NOGO)   );                        /* |                  the scan, above.                              */  \
+    asm("movwf "  ___mkstr(MASKBANK(_ADCON0,1))                         );  /* |                                                                */  \
+    asm("movlb    2                      ");                                /*                                                                  */  \
+    asm("bcf   "  ___mkstr(port)         ","      ___mkstr(pin)         );  /* Clear the sensor's LAT bit                                       */  \
+    asm("movlb    1                      ");                                /*                                                                  */  \
+    asm("movlw "  ___mkstr(current_channel)                             );  /* |                                                                */  \
+    asm("bsf   "  ___mkstr(port)         ","      ___mkstr(pin)         );  /* |                                                                */  \
+    asm("movwf "  ___mkstr(MASKBANK(_ADCON0,1))                         );  /* |                                                                */  \
+    asm("nop");                                                             /* | Same commands as                                               */  \
+    asm("nop");                                                             /* |                  the scan, above.                              */  \
+    asm("nop");                                                             /* |                                                                */  \
+    asm("bsf   "  ___mkstr(MASKBANK(_ADCON0,1))    ", 1"                );  /* |                                                                */  \
+    asm("bcf   "  ___mkstr(port)         ","      ___mkstr(pin)         );  /*                                                                  */  \
 } while(0)
 #else
-#define READ_SENSOR_EXPANDED(current_channel, ref_channel, port, pin, ref_port, ref_pin)                            \
-do {                                                                        /* REFERENCE SENSOR SCAN METHOD     */  \
-    asm("movlw LOW  "   ___mkstr(ref_port)                              );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1L)                                );  /*                                  */  \
-    asm("movlw          0x01"                                           );  /*                                  */  \
-    asm("addlw HIGH "   ___mkstr(ref_port)                              );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1H)                                );  /* FSR1 = Reference LAT register    */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                  */  \
-    asm("movlw      "   ___mkstr(ref_channel)                           );  /*                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                       );  /* ADC Mux --> Reference Sensor     */  \
-    asm("bsf        "   ___mkstr(_INDF1)    ","    ___mkstr(ref_pin)    );  /* Set the reference LAT bit        */  \
-    asm("movlw HIGH "   ___mkstr(port)                                  );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0H)                                );  /*                                  */  \
-    asm("movlw LOW  "   ___mkstr(port)                                  );  /*                                  */  \
-    asm("addlw          0x80"                                           );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0L)                                );  /*                                  */  \
-    asm("btfsc      "   ___mkstr(_STATUS)                   ",0"        );  /*                                  */  \
-    asm("incf       "   ___mkstr(_FSR0H)                                );  /* FSR0 = Sensor's TRIS register    */  \
-    CVD_DELAY_CHOLD();                                                      /*                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                  */  \
-    asm("movlw      "   ___mkstr(current_channel)                       );  /*                                  */  \
-    asm("bsf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /* Set the sensor to an input       */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                       );  /* ADC Mux --> Sensor               */  \
-    CVD_DELAY_SETTLE();                                                     /*                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                  */  \
-    asm("bsf        "   ___mkstr(NOBANK(_ADCON0))           ",1"        );  /* Set the GO/DONE bit              */  \
-    CVD_GO_DONE_DELAY();                                                    /*                                  */  \
-    asm("bcf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /* Set the sensor to an output      */  \
-    asm("BANKSEL    "   ___mkstr(port)                                  );  /*                                  */  \
-    asm("bsf        "   ___mkstr(NOBANK(port)) "," ___mkstr(pin)        );  /* Set sensor LAT high              */  \
-    asm("global         decimate"                                       );  /*                                  */  \
-    asm("call           decimate"                                       );  /*                                  */  \
-    asm("movlw LOW  "   ___mkstr(ref_port)                              );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1L)                                );  /*                                  */  \
-    asm("movlw          0x01"                                           );  /*                                  */  \
-    asm("addlw HIGH "   ___mkstr(ref_port)                              );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR1H)                                );  /* FSR1 = Reference LAT register    */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                  */  \
-    asm("movlw      "   ___mkstr(ref_channel)                           );  /*                                  */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                       );  /* ADC Mux --> Reference Sensor     */  \
-    asm("bcf        "   ___mkstr(_INDF1)    ","    ___mkstr(ref_pin)    );  /* Set the reference LAT bit        */  \
-    asm("movlw HIGH "   ___mkstr(port)                                  );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0H)                                );  /*                                  */  \
-    asm("movlw LOW  "   ___mkstr(port)                                  );  /*                                  */  \
-    asm("addlw          0x80"                                           );  /*                                  */  \
-    asm("movwf      "   ___mkstr(_FSR0L)                                );  /*                                  */  \
-    asm("btfsc      "   ___mkstr(_STATUS)                   ",0"        );  /*                                  */  \
-    asm("incf       "   ___mkstr(_FSR0H)                                );  /* FSR0 = Sensor's TRIS register    */  \
-    CVD_DELAY_CHOLD();                                                      /*                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                  */  \
-    asm("movlw      "   ___mkstr(current_channel)                       );  /*                                  */  \
-    asm("bsf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /* Set the sensor to an input       */  \
-    asm("movwf      "   ___mkstr(NOBANK(_ADCON0))                       );  /* ADC Mux --> Sensor               */  \
-    CVD_DELAY_SETTLE();                                                     /*                                  */  \
-    asm("BANKSEL    "   ___mkstr(_ADCON0)                               );  /*                                  */  \
-    asm("bsf        "   ___mkstr(NOBANK(_ADCON0))           ",1"        );  /* Set the GO/DONE bit              */  \
-    CVD_GO_DONE_DELAY();                                                    /*                                  */  \
-    asm("bcf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /* Set the sensor to an output      */  \
-    asm("bcf        "   ___mkstr(_INDF1)    ","    ___mkstr(ref_pin)    );  /* Set reference LAT low            */  \
-    asm("BANKSEL    "   ___mkstr(port)                                  );  /*                                  */  \
-    asm("bcf        "   ___mkstr(NOBANK(port)) "," ___mkstr(pin)        );  /* Set sensor LAT low               */  \
+#define READ_SENSOR_EXPANDED(current_channel, ref_channel, port, pin, ref_port, ref_pin)                       \
+do {                                                                        /*                              */ \
+    asm("movlw LOW  "   ___mkstr(ref_port)                              );  /* Set FSR's                    */ \
+    asm("movwf      "   ___mkstr(_FSR1L)                                );  /* " FSR1 = LAT for Reference   */ \
+    asm("movlw          0x01"                                           );  /* " FSR0 = LAT for Sensor      */ \
+    asm("addlw HIGH "   ___mkstr(ref_port)                              );  /* "                            */ \
+    asm("movwf      "   ___mkstr(_FSR1H)                                );  /* "                            */ \
+    asm("movlw LOW  "   ___mkstr(port)                                  );  /* "                            */ \
+    asm("movwf      "   ___mkstr(_FSR0L)                                );  /* "                            */ \
+    asm("movlw          0x01"                                           );  /* "                            */ \
+    asm("addlw HIGH "   ___mkstr(port)                                  );  /* "                            */ \
+    asm("movwf      "   ___mkstr(_FSR0H)                                );  /* "                            */ \
+    asm("movlb      "   ___mkstr(CVD_ADCON0_BANK)                       );  /*                              */ \
+    asm("movlw      "   ___mkstr(ref_channel)                           );  /* Set ADC Mux to Reference     */ \
+    asm("movwf      "   ___mkstr(MASKBANK(_ADCON0,CVD_ADCON0_BANK))     );  /*                              */ \
+    asm("bcf        "   ___mkstr(_INDF1)    ","    ___mkstr(ref_pin)    );  /* Set LAT registers            */ \
+    asm("bsf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /*                              */ \
+    asm("decf       "   ___mkstr(_FSR0H)                                );  /* Set FSR0 = TRIS for Sensor   */ \
+    asm("movlw LOW  "   ___mkstr(port)                                  );  /* "                            */ \
+    asm("addlw          0x80"                                           );  /* " (PORT + 0x80 is TRIS)      */ \
+    asm("movwf      "   ___mkstr(_FSR0L)                                );  /* "                            */ \
+    asm("btfsc      "   ___mkstr(_STATUS)   ",0"                        );  /* "                            */ \
+    asm("incf       "   ___mkstr(_FSR0H)                                );  /* "                            */ \
+    asm("movlw      "   ___mkstr(current_channel)                       );  /* Perform scan                 */ \
+    asm("bsf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /*                              */ \
+    asm("movwf      "   ___mkstr(MASKBANK(_ADCON0,CVD_ADCON0_BANK))     );  /*                              */ \
+    _delay(3);                                                              /*                              */ \
+    asm("bsf        "   ___mkstr(MASKBANK(_ADCON0,CVD_ADCON0_BANK)) ",1");  /*                              */ \
+    _delay(3);                                                              /*                              */ \
+    asm("bcf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /*                              */ \
+    asm("global         decimate"                                       );  /* Perform math on the previous */ \
+    asm("call           decimate"                                       );  /* sensor while completing scan */ \
+    asm("movlw LOW  "   ___mkstr(ref_port)                              );  /* Set FSR's                    */ \
+    asm("movwf      "   ___mkstr(_FSR1L)                                );  /* " FSR1 = LAT for Reference   */ \
+    asm("movlw          0x01"                                           );  /* " FSR0 = LAT for Sensor      */ \
+    asm("addlw HIGH "   ___mkstr(ref_port)                              );  /* "                            */ \
+    asm("movwf      "   ___mkstr(_FSR1H)                                );  /* "                            */ \
+    asm("movlw LOW  "   ___mkstr(port)                                  );  /* "                            */ \
+    asm("movwf      "   ___mkstr(_FSR0L)                                );  /* "                            */ \
+    asm("movlw          0x01"                                           );  /* "                            */ \
+    asm("addlw HIGH "   ___mkstr(port)                                  );  /* "                            */ \
+    asm("movwf      "   ___mkstr(_FSR0H)                                );  /* "                            */ \
+    asm("movlb      "   ___mkstr(CVD_ADCON0_BANK)                       );  /*                              */ \
+    asm("movlw      "   ___mkstr(ref_channel)                           );  /* Set ADC Mux to Reference     */ \
+    asm("movwf      "   ___mkstr(MASKBANK(_ADCON0,CVD_ADCON0_BANK))     );  /*                              */ \
+    asm("bsf        "   ___mkstr(_INDF1)    ","    ___mkstr(ref_pin)    );  /* Set LAT registers            */ \
+    asm("bcf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /*                              */ \
+    asm("decf       "   ___mkstr(_FSR0H)                                );  /* Set FSR0 to sensor's TRIS    */ \
+    asm("movlw LOW  "   ___mkstr(port)                                  );  /* "                            */ \
+    asm("addlw          0x80"                                           );  /* " (PORT + 0x80 is TRIS)      */ \
+    asm("movwf      "   ___mkstr(_FSR0L)                                );  /* "                            */ \
+    asm("btfsc      "   ___mkstr(_STATUS)   ",0"                        );  /* "                            */ \
+    asm("incf       "   ___mkstr(_FSR0H)                                );  /* "                            */ \
+    asm("movlw      "   ___mkstr(current_channel)                       );  /* Perform scan                 */ \
+    asm("bsf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /*                              */ \
+    asm("movwf      "   ___mkstr(MASKBANK(_ADCON0,CVD_ADCON0_BANK))     );  /*                              */ \
+    _delay(3);                                                              /*                              */ \
+    asm("bsf        "   ___mkstr(MASKBANK(_ADCON0,CVD_ADCON0_BANK)) ",1");  /*                              */ \
+    _delay(3);                                                              /*                              */ \
+    asm("bcf        "   ___mkstr(_INDF0)    ","    ___mkstr(pin)        );  /* Set sensor as input          */ \
+    asm("bcf        "   ___mkstr(_INDF1)    ","    ___mkstr(ref_pin)    );  /* Clear reference LAT register */ \
 } while(0)
 #endif
 
@@ -512,8 +505,9 @@ do {                                                                /*          
     asm("BANKSEL    _ADCON0");                                      /*                                                              */  \
     asm("btfsc    " ___mkstr(MASKBANK(_ADCON0,1)) ",1");            /* Has the ADC scan completed?                                  */  \
     asm("goto       $-1");                                          /* If not, we're going to wait until it is.                     */  \
-    asm("movf     " ___mkstr(MASKBANK(_ADRESH,1)) ",W");            /*                                                              */  \
-    asm("BANKSEL    _last_result");                                 /*                                                              */  \
+    asm("movf     " ___mkstr(MASKBANK(_ADRESH,1)) ",W");            /* Grab the result and offset it by 1024. This makes sure we    */  \
+    asm("addlw      4");                                            /*   never have to handle negative numbers later when we        */  \
+    asm("BANKSEL    _last_result");                                 /*   subtract another ADC result from this one.                 */  \
     asm("movwf    " ___mkstr(MASKBANK(_last_result+1,0)));          /*                                                              */  \
     asm("BANKSEL    _ADRESL");                                      /* Finally, store the low byte as well.                         */  \
     asm("movf     " ___mkstr(MASKBANK(_ADRESL,1)) ",W");            /*                                                              */  \
@@ -526,7 +520,7 @@ do {                                                                /*          
                                                 // Otherwise, code below mirrors code above.
 #define CVD_DECIMATE()                                              \
 do {                                                                \
-    asm("BANKSEL    _last_result");                                 \
+    asm("BANKSEL    0");                                            \
     asm("movlw LOW  _sensor_data");                                 \
     asm("movwf      _FSR0L");                                       \
     asm("movlw HIGH _sensor_data");                                 \
@@ -584,6 +578,7 @@ do {                                                                \
     asm("btfsc    " ___mkstr(MASKBANK(_ADCON0,1)) ",1");            \
     asm("goto       $-1");                                          \
     asm("movf     " ___mkstr(MASKBANK(_ADRESH,1)) ",W");            \
+    asm("addlw      4");                                            \
     asm("BANKSEL    _last_result");                                 \
     asm("movwf    " ___mkstr(MASKBANK(_last_result+1,0)));          \
     asm("BANKSEL    _ADRESL");                                      \
@@ -600,79 +595,142 @@ do {                                                                \
 * the new data.
 */
 //@{
-
 /**
-* @def STORE_SENSOR_SCALE(index, shift)
+* @def STORE_SENSOR_SCALE_256(index)
 * @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index). 
 * @param[in] index the index of the sensor to be scaled and stored
-* @param[in] shift the number of times to shift the accumulator value to the right before storing its value in the CVDSensorData array
 * @hideinitializer
 */
-#define STORE_SENSOR_SCALE(index, shift)                                                \
-    do {                                                                                \
-        CVDSensorData[index-1] = (unsigned int)(CVD_Acq_Filtered_Data[index] >> shift); \
-        CVD_Acq_Filtered_Data[index] = 0;                                               \
-    } while(0)
+#define STORE_SENSOR_SCALE_256(index)                                               \
+do {                                                                                \
+    CVDSensorData[index-1] = (unsigned int)(CVD_Acq_Filtered_Data[index] >> 8);     \
+    CVD_Acq_Filtered_Data[index] = 0;                                               \
+} while(0)
 /**
-* @def STORE_LAST_SENSOR_SCALE(index, shift)
+* @def STORE_LAST_SENSOR_SCALE_256(index)
 * @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index). 
 * @param[in] index the index of the sensor to be scaled and stored
-* @param[in] shift the number of times to shift the accumulator value to the right before storing its value in the CVDSensorData array
 * @hideinitializer
 */
-#define STORE_LAST_SENSOR_SCALE(index, shift)                                                           \
-    do {                                                                                                \
-        CVDSensorData[CVD_NUMBER_SENSORS-1] = (unsigned int)(CVD_Acq_Filtered_Data[index] >> shift);    \
-        CVD_Acq_Filtered_Data[index] = 0;                                                               \
-    } while(0)
+#define STORE_LAST_SENSOR_SCALE_256(index)                                                      \
+do {                                                                                            \
+    CVDSensorData[CVD_NUMBER_SENSORS-1] = (unsigned int)(CVD_Acq_Filtered_Data[index] >> 8);    \
+    CVD_Acq_Filtered_Data[index] = 0;                                                           \
+} while(0)
 /**
-* @def STORE_SINGLE_SENSOR_SCALE(index, shift)
+* @def STORE_SINGLE_SENSOR_SCALE_256(index)
 * @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index) if there is only one sensor in the mTouch application. 
 * @param[in] index the index of the sensor to be scaled and stored
-* @param[in] shift the number of times to shift the accumulator value to the right before storing its value in the CVDSensorData array
 * @hideinitializer
 */
-#define STORE_SINGLE_SENSOR_SCALE(index, shift)                                 \
-    do {                                                                        \
-        CVDSensorData[0] = (unsigned int)(CVD_Acq_Filtered_Data[0] >> shift);   \
-        CVD_Acq_Filtered_Data[0] = 0;                                           \
-    } while(0)
-
+#define STORE_SINGLE_SENSOR_SCALE_256(index)                                                    \
+do {                                                                                            \
+    CVDSensorData[0] = (unsigned int)(CVD_Acq_Filtered_Data[0] >> 8);                           \
+    CVD_Acq_Filtered_Data[0] = 0;                                                               \
+} while(0)
+/**
+* @def STORE_SENSOR_SCALE_16(index)
+* @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index). 
+* @param[in] index the index of the sensor to be scaled and stored
+* @hideinitializer
+*/
+#define STORE_SENSOR_SCALE_16(index)                                                \
+do {                                                                                \
+    CVDSensorData[index-1] = (unsigned int)(CVD_Acq_Filtered_Data[index] >> 4);     \
+    CVD_Acq_Filtered_Data[index] = 0;                                               \
+} while(0)
+/**
+* @def STORE_LAST_SENSOR_SCALE_16(index)
+* @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index). 
+* @param[in] index the index of the sensor to be scaled and stored
+* @hideinitializer
+*/
+#define STORE_LAST_SENSOR_SCALE_16(index)                                                       \
+do {                                                                                            \
+    CVDSensorData[CVD_NUMBER_SENSORS-1] = (unsigned int)(CVD_Acq_Filtered_Data[index] >> 4);    \
+    CVD_Acq_Filtered_Data[index] = 0;                                                           \
+} while(0)
+/**
+* @def STORE_SINGLE_SENSOR_SCALE_16(index)
+* @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index) if there is only one sensor in the mTouch application. 
+* @param[in] index the index of the sensor to be scaled and stored
+* @hideinitializer
+*/
+#define STORE_SINGLE_SENSOR_SCALE_16(index)                                                     \
+do {                                                                                            \
+    CVDSensorData[0] = (unsigned int)(CVD_Acq_Filtered_Data[0] >> 4);                           \
+    CVD_Acq_Filtered_Data[0] = 0;                                                               \
+} while(0)
+/**
+* @def STORE_SENSOR_SCALE_1(index)
+* @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index). 
+* @param[in] index the index of the sensor to be scaled and stored
+* @hideinitializer
+*/
+#define STORE_SENSOR_SCALE_1(index)                                                 \
+do {                                                                                \
+    CVDSensorData[index-1] = (unsigned int)(CVD_Acq_Filtered_Data[index]);          \
+    CVD_Acq_Filtered_Data[index] = 0;                                               \
+} while(0)
+/**
+* @def STORE_LAST_SENSOR_SCALE_1(index)
+* @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index). 
+* @param[in] index the index of the sensor to be scaled and stored
+* @hideinitializer
+*/
+#define STORE_LAST_SENSOR_SCALE_1(index)                                                        \
+do {                                                                                            \
+    CVDSensorData[CVD_NUMBER_SENSORS-1] = (unsigned int)(CVD_Acq_Filtered_Data[index]);         \
+    CVD_Acq_Filtered_Data[index] = 0;                                                           \
+} while(0)
+/**
+* @def STORE_SINGLE_SENSOR_SCALE_1(index)
+* @brief Do not use directly. Expanded utility macro called by STORE_SENSOR(index) if there is only one sensor in the mTouch application. 
+* @param[in] index the index of the sensor to be scaled and stored
+* @hideinitializer
+*/
+#define STORE_SINGLE_SENSOR_SCALE_1(index)                                                      \
+do {                                                                                            \
+    CVDSensorData[0] = (unsigned int)(CVD_Acq_Filtered_Data[0]);                                \
+    CVD_Acq_Filtered_Data[0] = 0;                                                               \
+} while(0)
 /**
 * @def STORE_SENSOR(index)
 * @brief Scales the accumulated result of the CVD acquisition and stores it for main-application access
 *
 * This macro uses the CVD_SCALING configuration option to determine which scaling option to choose.
+* This is achieved by calling one of three macros:
+* CVD_SENSOR_SCALE_1(), CVD_SENSOR_SCALE_16(), and CVD_SENSOR_SCALE_256()
 * @param[in] index the index of the sensor to be scaled and stored
 * @hideinitializer
 * @ingroup Acquisition
 */
 #if (CVD_NUMBER_SENSORS > 1)
-    #if (CVD_SCALING == 1)
-        #define STORE_SENSOR(index)         STORE_SENSOR_SCALE(index, 0) 
-        #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE(index, 0) 
-    #elif (CVD_SCALING == 16)
-        #define STORE_SENSOR(index)         STORE_SENSOR_SCALE(index, 4) 
-        #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE(index, 4) 
-    #elif (CVD_SCALING == 256)
-        #define STORE_SENSOR(index)         STORE_SENSOR_SCALE(index, 8) 
-        #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE(index, 8) 
-    #else
-        #warning CVD_SCALING set to an invalid value. Defaulting to 16:1 scaling.
-        #define STORE_SENSOR(index)         STORE_SENSOR_SCALE(index, 4) 
-        #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE(index, 4)
-    #endif
+#if (CVD_SCALING == 1)
+    #define STORE_SENSOR(index)         STORE_SENSOR_SCALE_1(index) 
+    #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE_1(index) 
+#elif (CVD_SCALING == 16)
+    #define STORE_SENSOR(index)         STORE_SENSOR_SCALE_16(index) 
+    #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE_16(index) 
+#elif (CVD_SCALING == 256)
+    #define STORE_SENSOR(index)         STORE_SENSOR_SCALE_256(index) 
+    #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE_256(index) 
 #else
-    #if (CVD_SCALING == 1)
-        #define STORE_SENSOR(index)         STORE_SINGLE_SENSOR_SCALE(index, 0) 
-    #elif (CVD_SCALING == 16)
-        #define STORE_SENSOR(index)         STORE_SINGLE_SENSOR_SCALE(index, 4) 
-    #elif (CVD_SCALING == 256)
-        #define STORE_SENSOR(index)         STORE_SINGLE_SENSOR_SCALE(index, 8) 
-    #else
-        #warning CVD_SCALING set to an invalid value. Defaulting to 16:1 scaling.
-        #define STORE_SENSOR(index)         STORE_SENSOR_SCALE(index, 4) 
-    #endif
+    #warning CVD_SCALING set to an invalid value. Defaulting to 16:1 scaling.
+    #define STORE_SENSOR(index)         STORE_SENSOR_SCALE_16(index) 
+    #define STORE_LAST_SENSOR(index)    STORE_LAST_SENSOR_SCALE_16(index)
+#endif
+#else
+#if (CVD_SCALING == 1)
+    #define STORE_SENSOR(index)         STORE_SINGLE_SENSOR_SCALE_1(index) 
+#elif (CVD_SCALING == 16)
+    #define STORE_SENSOR(index)         STORE_SINGLE_SENSOR_SCALE_16(index) 
+#elif (CVD_SCALING == 256)
+    #define STORE_SENSOR(index)         STORE_SINGLE_SENSOR_SCALE_256(index) 
+#else
+    #warning CVD_SCALING set to an invalid value. Defaulting to 16:1 scaling.
+    #define STORE_SENSOR(index)         STORE_SENSOR_SCALE_16(index) 
+#endif
 #endif
 /**
 * @def EXIT_SENSOR(index)
@@ -718,14 +776,15 @@ do {                                                                            
 
 #define EXIT_LAST_SENSOR_MAIN()                                                                                                 \
 do {                                                                                                                            \
-    if (--sample_counter != 0) {                          /* Decrement the sample counter and check if it's equal to 0      */  \
+    if (--sample_counter != 0)                            /* Decrement the sample counter and check if it's equal to 0      */  \
         asm("ljmp END_ISR");                              /* If not equal to 0, exit the ISR                                */  \
-    }                                                                                                                           \
     sample_counter = CVD_SAMPLES_PER_SCAN;                /* If equal to 0, reset the sample counter continue with storage  */  \
 } while(0)
     
-#define EXIT_LAST_SENSOR_DECINDEX(index)    index = 0;
-
+#define EXIT_LAST_SENSOR_DECINDEX(index)                                                                    \
+do {                                                                                                        \
+    index = 0;                                                                                              \
+} while(0)
 /**
 * @def SET_DATA_READY_FLAG()
 * @brief Sets the dataReady flag to signal the main application of a new reading
@@ -733,10 +792,10 @@ do {                                                                            
 * @hideinitializer
 * @ingroup Acquisition
 */
-#define SET_DATA_READY_FLAG()       \
-    do {                            \
-        mTouchCVD_dataReady = 1;    \
-    } while(0)
+#define SET_DATA_READY_FLAG()                                       \
+do {                                                                \
+    mTouchCVD_dataReady = 1;                                        \
+} while(0)
 //@}
 
 
@@ -755,359 +814,1238 @@ do {                                                                            
 * @ingroup Acquisition
 */
 #if (CVD_NUMBER_SENSORS == 1)
-
-    #define GENERATE_JUMP_TABLE()       \
-        do {                            \
-            asm("global   sensor_0");   \
-            asm("ljmp     sensor_0");   \
-        } while (0)
-     
-    #define GENERATE_STORAGE_FUNCTION()         STORE_SENSOR(0);   
+#define GENERATE_JUMP_TABLE()                                                                                       \
+do {                                                                                                                \
+    asm("global   sensor_0               ");          /* Required by assembler to know 'sensor_0' is a label    */  \
+    asm("ljmp     sensor_0               ");          /* Jump to the sensor_0 scanning function                 */  \
+} while (0)
     
-#else
-
-    #define CVD_ASM_JUMP_LABEL_1()      case 1:     asm("ljmp sensor_1");
-    #define CVD_ASM_JUMP_LABEL_2()      case 2:     asm("ljmp sensor_2");
-    #define CVD_ASM_JUMP_LABEL_3()      case 3:     asm("ljmp sensor_3");
-    #define CVD_ASM_JUMP_LABEL_4()      case 4:     asm("ljmp sensor_4");
-    #define CVD_ASM_JUMP_LABEL_5()      case 5:     asm("ljmp sensor_5");
-    #define CVD_ASM_JUMP_LABEL_6()      case 6:     asm("ljmp sensor_6");
-    #define CVD_ASM_JUMP_LABEL_7()      case 7:     asm("ljmp sensor_7");
-    #define CVD_ASM_JUMP_LABEL_8()      case 8:     asm("ljmp sensor_8");
-    #define CVD_ASM_JUMP_LABEL_9()      case 9:     asm("ljmp sensor_9");
-    #define CVD_ASM_JUMP_LABEL_10()     case 10:    asm("ljmp sensor_10");
-    #define CVD_ASM_JUMP_LABEL_11()     case 11:    asm("ljmp sensor_11");
-    #define CVD_ASM_JUMP_LABEL_12()     case 12:    asm("ljmp sensor_12");
-    #define CVD_ASM_JUMP_LABEL_13()     case 13:    asm("ljmp sensor_13");
-    #define CVD_ASM_JUMP_LABEL_14()     case 14:    asm("ljmp sensor_14");
-    #define CVD_ASM_JUMP_LABEL_15()     case 15:    asm("ljmp sensor_15");
-    #define CVD_ASM_JUMP_LABEL_16()     case 16:    asm("ljmp sensor_16");
-    #define CVD_ASM_JUMP_LABEL_17()     case 17:    asm("ljmp sensor_17");
-    #define CVD_ASM_JUMP_LABEL_18()     case 18:    asm("ljmp sensor_18");
-    #define CVD_ASM_JUMP_LABEL_19()     case 19:    asm("ljmp sensor_19");
-    #define CVD_ASM_JUMP_LABEL_20()     case 20:    asm("ljmp sensor_20");
-    #define CVD_ASM_JUMP_LABEL_21()     case 21:    asm("ljmp sensor_21");
-    #define CVD_ASM_JUMP_LABEL_22()     case 22:    asm("ljmp sensor_22");
-    #define CVD_ASM_JUMP_LABEL_23()     case 23:    asm("ljmp sensor_23");
-    #define CVD_ASM_JUMP_LABEL_24()     case 24:    asm("ljmp sensor_24");
-    #define CVD_ASM_JUMP_LABEL_25()     case 25:    asm("ljmp sensor_25");
-    #define CVD_ASM_JUMP_LABEL_26()     case 26:    asm("ljmp sensor_26");
-    #define CVD_ASM_JUMP_LABEL_27()     case 27:    asm("ljmp sensor_27");
-    #define CVD_ASM_JUMP_LABEL_28()     case 28:    asm("ljmp sensor_28");
-    #define CVD_ASM_JUMP_LABEL_29()     case 29:    asm("ljmp sensor_29");
-
-    #define CVD_STORE_LABEL_0()         STORE_LAST_SENSOR(0);
-    #define CVD_STORE_LABEL_1()         STORE_SENSOR(1);
-    #define CVD_STORE_LABEL_2()         STORE_SENSOR(2);
-    #define CVD_STORE_LABEL_3()         STORE_SENSOR(3);
-    #define CVD_STORE_LABEL_4()         STORE_SENSOR(4);
-    #define CVD_STORE_LABEL_5()         STORE_SENSOR(5);
-    #define CVD_STORE_LABEL_6()         STORE_SENSOR(6);
-    #define CVD_STORE_LABEL_7()         STORE_SENSOR(7);
-    #define CVD_STORE_LABEL_8()         STORE_SENSOR(8);
-    #define CVD_STORE_LABEL_9()         STORE_SENSOR(9);
-    #define CVD_STORE_LABEL_10()        STORE_SENSOR(10);
-    #define CVD_STORE_LABEL_11()        STORE_SENSOR(11);
-    #define CVD_STORE_LABEL_12()        STORE_SENSOR(12);
-    #define CVD_STORE_LABEL_13()        STORE_SENSOR(13);
-    #define CVD_STORE_LABEL_14()        STORE_SENSOR(14);
-    #define CVD_STORE_LABEL_15()        STORE_SENSOR(15);
-    #define CVD_STORE_LABEL_16()        STORE_SENSOR(16);
-    #define CVD_STORE_LABEL_17()        STORE_SENSOR(17);
-    #define CVD_STORE_LABEL_18()        STORE_SENSOR(18);
-    #define CVD_STORE_LABEL_19()        STORE_SENSOR(19);
-    #define CVD_STORE_LABEL_20()        STORE_SENSOR(20);
-    #define CVD_STORE_LABEL_21()        STORE_SENSOR(21);
-    #define CVD_STORE_LABEL_22()        STORE_SENSOR(22);
-    #define CVD_STORE_LABEL_23()        STORE_SENSOR(23);
-    #define CVD_STORE_LABEL_24()        STORE_SENSOR(24);
-    #define CVD_STORE_LABEL_25()        STORE_SENSOR(25);
-    #define CVD_STORE_LABEL_26()        STORE_SENSOR(26);
-    #define CVD_STORE_LABEL_27()        STORE_SENSOR(27);
-    #define CVD_STORE_LABEL_28()        STORE_SENSOR(28);
-    #define CVD_STORE_LABEL_29()        STORE_SENSOR(29);
-
-    #if (CVD_NUMBER_SENSORS > 30)
-        #error This version of the framework macro library unable to support more than 30 sensors at this time.
-    #endif
-    
-    #if CVD_NUMBER_SENSORS < 30
-        #undef  CVD_ASM_JUMP_LABEL_29()
-        #define CVD_ASM_JUMP_LABEL_29()
-        #undef  CVD_STORE_LABEL_29()
-        #define CVD_STORE_LABEL_29()
-    #endif
-    #if CVD_NUMBER_SENSORS < 29
-        #undef  CVD_ASM_JUMP_LABEL_28()
-        #define CVD_ASM_JUMP_LABEL_28()
-        #undef  CVD_STORE_LABEL_28()
-        #define CVD_STORE_LABEL_28()
-    #endif
-    #if CVD_NUMBER_SENSORS < 28
-        #undef  CVD_ASM_JUMP_LABEL_27()
-        #define CVD_ASM_JUMP_LABEL_27()
-        #undef  CVD_STORE_LABEL_27()
-        #define CVD_STORE_LABEL_27()
-    #endif
-    #if CVD_NUMBER_SENSORS < 27
-        #undef  CVD_ASM_JUMP_LABEL_26()
-        #define CVD_ASM_JUMP_LABEL_26()
-        #undef  CVD_STORE_LABEL_26()
-        #define CVD_STORE_LABEL_26()
-    #endif
-    #if CVD_NUMBER_SENSORS < 26
-        #undef  CVD_ASM_JUMP_LABEL_25()
-        #define CVD_ASM_JUMP_LABEL_25()
-        #undef  CVD_STORE_LABEL_25()
-        #define CVD_STORE_LABEL_25()
-    #endif
-    #if CVD_NUMBER_SENSORS < 25 
-        #undef  CVD_ASM_JUMP_LABEL_24()
-        #define CVD_ASM_JUMP_LABEL_24()
-        #undef  CVD_STORE_LABEL_24()
-        #define CVD_STORE_LABEL_24()
-    #endif
-    #if CVD_NUMBER_SENSORS < 24
-        #undef  CVD_ASM_JUMP_LABEL_23()
-        #define CVD_ASM_JUMP_LABEL_23()
-        #undef  CVD_STORE_LABEL_23()
-        #define CVD_STORE_LABEL_23()
-    #endif
-    #if CVD_NUMBER_SENSORS < 23
-        #undef  CVD_ASM_JUMP_LABEL_22()
-        #define CVD_ASM_JUMP_LABEL_22()
-        #undef  CVD_STORE_LABEL_22()
-        #define CVD_STORE_LABEL_22()
-    #endif
-    #if CVD_NUMBER_SENSORS < 22
-        #undef  CVD_ASM_JUMP_LABEL_21()
-        #define CVD_ASM_JUMP_LABEL_21()
-        #undef  CVD_STORE_LABEL_21()
-        #define CVD_STORE_LABEL_21()
-    #endif
-    #if CVD_NUMBER_SENSORS < 21
-        #undef  CVD_ASM_JUMP_LABEL_20()
-        #define CVD_ASM_JUMP_LABEL_20()
-        #undef  CVD_STORE_LABEL_20()
-        #define CVD_STORE_LABEL_20()
-    #endif
-    #if CVD_NUMBER_SENSORS < 20
-        #undef  CVD_ASM_JUMP_LABEL_19()
-        #define CVD_ASM_JUMP_LABEL_19()
-        #undef  CVD_STORE_LABEL_19()
-        #define CVD_STORE_LABEL_19()
-    #endif
-    #if CVD_NUMBER_SENSORS < 19
-        #undef  CVD_ASM_JUMP_LABEL_18()
-        #define CVD_ASM_JUMP_LABEL_18()
-        #undef  CVD_STORE_LABEL_18()
-        #define CVD_STORE_LABEL_18()
-    #endif
-    #if CVD_NUMBER_SENSORS < 18
-        #undef  CVD_ASM_JUMP_LABEL_17()
-        #define CVD_ASM_JUMP_LABEL_17()
-        #undef  CVD_STORE_LABEL_17()
-        #define CVD_STORE_LABEL_17()
-    #endif
-    #if CVD_NUMBER_SENSORS < 17
-        #undef  CVD_ASM_JUMP_LABEL_16()
-        #define CVD_ASM_JUMP_LABEL_16()
-        #undef  CVD_STORE_LABEL_16()
-        #define CVD_STORE_LABEL_16()
-    #endif
-    #if CVD_NUMBER_SENSORS < 16
-        #undef  CVD_ASM_JUMP_LABEL_15()
-        #define CVD_ASM_JUMP_LABEL_15()
-        #undef  CVD_STORE_LABEL_15()
-        #define CVD_STORE_LABEL_15()
-    #endif
-    #if CVD_NUMBER_SENSORS < 15
-        #undef  CVD_ASM_JUMP_LABEL_14()
-        #define CVD_ASM_JUMP_LABEL_14()
-        #undef  CVD_STORE_LABEL_14()
-        #define CVD_STORE_LABEL_14()
-    #endif
-    #if CVD_NUMBER_SENSORS < 14
-        #undef  CVD_ASM_JUMP_LABEL_13()
-        #define CVD_ASM_JUMP_LABEL_13()
-        #undef  CVD_STORE_LABEL_13()
-        #define CVD_STORE_LABEL_13()
-    #endif
-    #if CVD_NUMBER_SENSORS < 13
-        #undef  CVD_ASM_JUMP_LABEL_12()
-        #define CVD_ASM_JUMP_LABEL_12()
-        #undef  CVD_STORE_LABEL_12()
-        #define CVD_STORE_LABEL_12()
-    #endif
-    #if CVD_NUMBER_SENSORS < 12
-        #undef  CVD_ASM_JUMP_LABEL_11()
-        #define CVD_ASM_JUMP_LABEL_11()
-        #undef  CVD_STORE_LABEL_11()
-        #define CVD_STORE_LABEL_11()
-    #endif
-    #if CVD_NUMBER_SENSORS < 11
-        #undef  CVD_ASM_JUMP_LABEL_10()
-        #define CVD_ASM_JUMP_LABEL_10()
-        #undef  CVD_STORE_LABEL_10()
-        #define CVD_STORE_LABEL_10()
-    #endif
-    #if CVD_NUMBER_SENSORS < 10
-        #undef  CVD_ASM_JUMP_LABEL_9()
-        #define CVD_ASM_JUMP_LABEL_9()
-        #undef  CVD_STORE_LABEL_9()
-        #define CVD_STORE_LABEL_9()
-    #endif
-    #if CVD_NUMBER_SENSORS < 9
-        #undef  CVD_ASM_JUMP_LABEL_8()
-        #define CVD_ASM_JUMP_LABEL_8()
-        #undef  CVD_STORE_LABEL_8()
-        #define CVD_STORE_LABEL_8()
-    #endif
-    #if CVD_NUMBER_SENSORS < 8
-        #undef  CVD_ASM_JUMP_LABEL_7()
-        #define CVD_ASM_JUMP_LABEL_7()
-        #undef  CVD_STORE_LABEL_7()
-        #define CVD_STORE_LABEL_7()
-    #endif
-    #if CVD_NUMBER_SENSORS < 7
-        #undef  CVD_ASM_JUMP_LABEL_6()
-        #define CVD_ASM_JUMP_LABEL_6()
-        #undef  CVD_STORE_LABEL_6()
-        #define CVD_STORE_LABEL_6()
-    #endif
-    #if CVD_NUMBER_SENSORS < 6
-        #undef  CVD_ASM_JUMP_LABEL_5()
-        #define CVD_ASM_JUMP_LABEL_5()
-        #undef  CVD_STORE_LABEL_5()
-        #define CVD_STORE_LABEL_5()
-    #endif
-    #if CVD_NUMBER_SENSORS < 5
-        #undef  CVD_ASM_JUMP_LABEL_4()
-        #define CVD_ASM_JUMP_LABEL_4()
-        #undef  CVD_STORE_LABEL_4()
-        #define CVD_STORE_LABEL_4()
-    #endif
-    #if CVD_NUMBER_SENSORS < 4
-        #undef  CVD_ASM_JUMP_LABEL_3()
-        #define CVD_ASM_JUMP_LABEL_3()
-        #undef  CVD_STORE_LABEL_3()
-        #define CVD_STORE_LABEL_3()
-    #endif
-    #if CVD_NUMBER_SENSORS < 3
-        #undef  CVD_ASM_JUMP_LABEL_2()
-        #define CVD_ASM_JUMP_LABEL_2()
-        #undef  CVD_STORE_LABEL_2()
-        #define CVD_STORE_LABEL_2()
-    #endif
-    #if CVD_NUMBER_SENSORS < 2
-        #undef  CVD_ASM_JUMP_LABEL_1()
-        #define CVD_ASM_JUMP_LABEL_1()
-        #undef  CVD_STORE_LABEL_1()
-        #define CVD_STORE_LABEL_1()
-    #endif
-
-    #define GENERATE_JUMP_TABLE()               \
-        do {                                    \
-            asm("global      sensor_0,"         \
-                            "sensor_1,"         \
-                            "sensor_2,"         \
-                            "sensor_3,"         \
-                            "sensor_4,"         \
-                            "sensor_5,"         \
-                            "sensor_6,"         \
-                            "sensor_7,"         \
-                            "sensor_8,"         \
-                            "sensor_9,"         \
-                            "sensor_10,"        \
-                            "sensor_11,"        \
-                            "sensor_12,"        \
-                            "sensor_13,"        \
-                            "sensor_14,"        \
-                            "sensor_15,"        \
-                            "sensor_16,"        \
-                            "sensor_17,"        \
-                            "sensor_18,"        \
-                            "sensor_19,"        \
-                            "sensor_20,"        \
-                            "sensor_21,"        \
-                            "sensor_22,"        \
-                            "sensor_23,"        \
-                            "sensor_24,"        \
-                            "sensor_25,"        \
-                            "sensor_26,"        \
-                            "sensor_27,"        \
-                            "sensor_28,"        \
-                            "sensor_29 ");      \
-            switch (current_sensor)             \
-            {                                   \
-                case 0: asm("ljmp sensor_0");   \
-                CVD_ASM_JUMP_LABEL_1();         \
-                CVD_ASM_JUMP_LABEL_2();         \
-                CVD_ASM_JUMP_LABEL_3();         \
-                CVD_ASM_JUMP_LABEL_4();         \
-                CVD_ASM_JUMP_LABEL_5();         \
-                CVD_ASM_JUMP_LABEL_6();         \
-                CVD_ASM_JUMP_LABEL_7();         \
-                CVD_ASM_JUMP_LABEL_8();         \
-                CVD_ASM_JUMP_LABEL_9();         \
-                CVD_ASM_JUMP_LABEL_10();        \
-                CVD_ASM_JUMP_LABEL_11();        \
-                CVD_ASM_JUMP_LABEL_12();        \
-                CVD_ASM_JUMP_LABEL_13();        \
-                CVD_ASM_JUMP_LABEL_14();        \
-                CVD_ASM_JUMP_LABEL_15();        \
-                CVD_ASM_JUMP_LABEL_16();        \
-                CVD_ASM_JUMP_LABEL_17();        \
-                CVD_ASM_JUMP_LABEL_18();        \
-                CVD_ASM_JUMP_LABEL_19();        \
-                CVD_ASM_JUMP_LABEL_20();        \
-                CVD_ASM_JUMP_LABEL_21();        \
-                CVD_ASM_JUMP_LABEL_22();        \
-                CVD_ASM_JUMP_LABEL_23();        \
-                CVD_ASM_JUMP_LABEL_24();        \
-                CVD_ASM_JUMP_LABEL_25();        \
-                CVD_ASM_JUMP_LABEL_26();        \
-                CVD_ASM_JUMP_LABEL_27();        \
-                CVD_ASM_JUMP_LABEL_28();        \
-                CVD_ASM_JUMP_LABEL_29();        \
-                default: break;                 \
-            }                                   \
+#define GENERATE_STORAGE_FUNCTION()                                 \
+do {                                                                \
+    STORE_SENSOR(0);                                                \
+} while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 2)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1      ");                        \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
         } while (0)
-
-
-    #define GENERATE_STORAGE_FUNCTION()         \
-        do {                                    \
-            CVD_STORE_LABEL_0();                \
-            CVD_STORE_LABEL_1();                \
-            CVD_STORE_LABEL_2();                \
-            CVD_STORE_LABEL_3();                \
-            CVD_STORE_LABEL_4();                \
-            CVD_STORE_LABEL_5();                \
-            CVD_STORE_LABEL_6();                \
-            CVD_STORE_LABEL_7();                \
-            CVD_STORE_LABEL_8();                \
-            CVD_STORE_LABEL_9();                \
-            CVD_STORE_LABEL_10();               \
-            CVD_STORE_LABEL_11();               \
-            CVD_STORE_LABEL_12();               \
-            CVD_STORE_LABEL_13();               \
-            CVD_STORE_LABEL_14();               \
-            CVD_STORE_LABEL_15();               \
-            CVD_STORE_LABEL_16();               \
-            CVD_STORE_LABEL_17();               \
-            CVD_STORE_LABEL_18();               \
-            CVD_STORE_LABEL_19();               \
-            CVD_STORE_LABEL_20();               \
-            CVD_STORE_LABEL_21();               \
-            CVD_STORE_LABEL_22();               \
-            CVD_STORE_LABEL_23();               \
-            CVD_STORE_LABEL_24();               \
-            CVD_STORE_LABEL_25();               \
-            CVD_STORE_LABEL_26();               \
-            CVD_STORE_LABEL_27();               \
-            CVD_STORE_LABEL_28();               \
-            CVD_STORE_LABEL_29();               \
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
         } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 3)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2                    "); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 4)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3           "); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 5)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4  "); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 6)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 7)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 8)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 9)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 10)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 11)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 12)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 13)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 14)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 15)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 16)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 17)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 18)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 19)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 20)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 21)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 22)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 23)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 24)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+            asm("ljmp     sensor_23              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+            STORE_SENSOR(23);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 25)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23,sensor_24"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+            asm("ljmp     sensor_23              ");                        \
+            asm("ljmp     sensor_24              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+            STORE_SENSOR(23);                                               \
+            STORE_SENSOR(24);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 26)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23,sensor_24,sensor_25"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+            asm("ljmp     sensor_23              ");                        \
+            asm("ljmp     sensor_24              ");                        \
+            asm("ljmp     sensor_25              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+            STORE_SENSOR(23);                                               \
+            STORE_SENSOR(24);                                               \
+            STORE_SENSOR(25);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 27)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23,sensor_24,sensor_25,sensor_26"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+            asm("ljmp     sensor_23              ");                        \
+            asm("ljmp     sensor_24              ");                        \
+            asm("ljmp     sensor_25              ");                        \
+            asm("ljmp     sensor_26              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+            STORE_SENSOR(23);                                               \
+            STORE_SENSOR(24);                                               \
+            STORE_SENSOR(25);                                               \
+            STORE_SENSOR(26);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 28)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23,sensor_24,sensor_25,sensor_26,sensor_27"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+            asm("ljmp     sensor_23              ");                        \
+            asm("ljmp     sensor_24              ");                        \
+            asm("ljmp     sensor_25              ");                        \
+            asm("ljmp     sensor_26              ");                        \
+            asm("ljmp     sensor_27              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+            STORE_SENSOR(23);                                               \
+            STORE_SENSOR(24);                                               \
+            STORE_SENSOR(25);                                               \
+            STORE_SENSOR(26);                                               \
+            STORE_SENSOR(27);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 29)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23,sensor_24,sensor_25,sensor_26,sensor_27,sensor_28"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+            asm("ljmp     sensor_23              ");                        \
+            asm("ljmp     sensor_24              ");                        \
+            asm("ljmp     sensor_25              ");                        \
+            asm("ljmp     sensor_26              ");                        \
+            asm("ljmp     sensor_27              ");                        \
+            asm("ljmp     sensor_28              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+            STORE_SENSOR(23);                                               \
+            STORE_SENSOR(24);                                               \
+            STORE_SENSOR(25);                                               \
+            STORE_SENSOR(26);                                               \
+            STORE_SENSOR(27);                                               \
+            STORE_SENSOR(28);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS == 30)
+    #define GENERATE_JUMP_TABLE()                                           \
+        do {                                                                \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23,sensor_24,sensor_25,sensor_26,sensor_27,sensor_28,sensor_29"); \
+            asm("global   sensor_0,sensor_1,sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8,sensor_9,sensor_10,sensor_11,sensor_12,sensor_13,sensor_14,sensor_15,sensor_16,sensor_17,sensor_18,sensor_19,sensor_20,sensor_21,sensor_22,sensor_23,sensor_24,sensor_25,sensor_26,sensor_27,sensor_28,sensor_29"); \
+            asm("ljmp     sensor_0               ");                        \
+            asm("ljmp     sensor_1               ");                        \
+            asm("ljmp     sensor_2               ");                        \
+            asm("ljmp     sensor_3               ");                        \
+            asm("ljmp     sensor_4               ");                        \
+            asm("ljmp     sensor_5               ");                        \
+            asm("ljmp     sensor_6               ");                        \
+            asm("ljmp     sensor_7               ");                        \
+            asm("ljmp     sensor_8               ");                        \
+            asm("ljmp     sensor_9               ");                        \
+            asm("ljmp     sensor_10              ");                        \
+            asm("ljmp     sensor_11              ");                        \
+            asm("ljmp     sensor_12              ");                        \
+            asm("ljmp     sensor_13              ");                        \
+            asm("ljmp     sensor_14              ");                        \
+            asm("ljmp     sensor_15              ");                        \
+            asm("ljmp     sensor_16              ");                        \
+            asm("ljmp     sensor_17              ");                        \
+            asm("ljmp     sensor_18              ");                        \
+            asm("ljmp     sensor_19              ");                        \
+            asm("ljmp     sensor_20              ");                        \
+            asm("ljmp     sensor_21              ");                        \
+            asm("ljmp     sensor_22              ");                        \
+            asm("ljmp     sensor_23              ");                        \
+            asm("ljmp     sensor_24              ");                        \
+            asm("ljmp     sensor_25              ");                        \
+            asm("ljmp     sensor_26              ");                        \
+            asm("ljmp     sensor_27              ");                        \
+            asm("ljmp     sensor_28              ");                        \
+            asm("ljmp     sensor_29              ");                        \
+        } while (0)
+        
+    #define GENERATE_STORAGE_FUNCTION()                                     \
+        do {                                                                \
+            STORE_LAST_SENSOR(0);                                           \
+            STORE_SENSOR(1);                                                \
+            STORE_SENSOR(2);                                                \
+            STORE_SENSOR(3);                                                \
+            STORE_SENSOR(4);                                                \
+            STORE_SENSOR(5);                                                \
+            STORE_SENSOR(6);                                                \
+            STORE_SENSOR(7);                                                \
+            STORE_SENSOR(8);                                                \
+            STORE_SENSOR(9);                                                \
+            STORE_SENSOR(10);                                               \
+            STORE_SENSOR(11);                                               \
+            STORE_SENSOR(12);                                               \
+            STORE_SENSOR(13);                                               \
+            STORE_SENSOR(14);                                               \
+            STORE_SENSOR(15);                                               \
+            STORE_SENSOR(16);                                               \
+            STORE_SENSOR(17);                                               \
+            STORE_SENSOR(18);                                               \
+            STORE_SENSOR(19);                                               \
+            STORE_SENSOR(20);                                               \
+            STORE_SENSOR(21);                                               \
+            STORE_SENSOR(22);                                               \
+            STORE_SENSOR(23);                                               \
+            STORE_SENSOR(24);                                               \
+            STORE_SENSOR(25);                                               \
+            STORE_SENSOR(26);                                               \
+            STORE_SENSOR(27);                                               \
+            STORE_SENSOR(28);                                               \
+            STORE_SENSOR(29);                                               \
+        } while (0)
+#endif
+#if (CVD_NUMBER_SENSORS > 30)
+    #error This version of the framework macro library unable to support > 30 sensors at this time.
 #endif
 
 #endif

@@ -42,7 +42,9 @@
 #endif
 
 /** V A R I A B L E S ********************************************************/
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 unsigned int I2CStateVariable;	// Used for keeping track of the I2C state
 								// machine when using the HPC Explorer board's
 								// I2C based TC74 temperature sensor.
@@ -54,7 +56,9 @@ char tempString[10];        // Buffer for storing data in ASCII format
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 
 /** D E C L A R A T I O N S **************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 /******************************************************************************
  * Function:        void InitTempSensor(void)
  *
@@ -177,7 +181,7 @@ BOOL AcquireTemperature(void)
     		AD1CON1bits.SAMP = 0;           //Start sampling
     		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
     		while(!AD1CON1bits.DONE);       //Wait for conversion to complete
-	    #elif defined(PIC24F_STARTER_KIT) || defined(PIC24FJ256DA210_DEV_BOARD)
+	    #elif defined(PIC24F_STARTER_KIT) || defined(PIC24FJ256DA210_DEV_BOARD) || defined(PIC24FJ64GB502_MICROSTICK)
 	        temperature.Val = 0x0000;
 	        return TRUE;
 

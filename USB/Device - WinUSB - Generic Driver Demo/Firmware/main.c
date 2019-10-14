@@ -241,6 +241,11 @@
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
     #pragma config DEBUG    = ON            // Background Debugger Enable
+#elif defined(PIC24FJ64GB502_MICROSTICK)
+    _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    _CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+    _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
 #else
     #error No hardware board defined, see "HardwareProfile.h"
 #endif
@@ -255,17 +260,21 @@
     #pragma udata USB_VARIABLES=0x500
 #elif defined(__18F4450) || defined(__18F2450)
     #pragma udata USB_VARIABLES=0x480
-#else
+#elif defined(__18CXX)
     #pragma udata
 #endif
 
 unsigned char OUTPacket[64];	//User application buffer for receiving and holding OUT packets sent from the host
 unsigned char INPacket[64];		//User application buffer for sending IN packets to the host
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 BOOL blinkStatusValid;
 USB_HANDLE USBGenericOutHandle;
 USB_HANDLE USBGenericInHandle;
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 /** PRIVATE PROTOTYPES *********************************************/
 static void InitializeSystem(void);
@@ -408,7 +417,9 @@ void BlinkUSBStatus(void);
 
 
 /** DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /******************************************************************************
  * Function:        void main(void)
@@ -1301,7 +1312,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch( (INT)event )
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

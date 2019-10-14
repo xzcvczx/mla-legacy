@@ -79,7 +79,12 @@ static SM_STACK smStack;
 
 NODE_INFO remoteNode;
 
+#if defined (WF_CS_TRIS) && defined (STACK_USE_DHCP_CLIENT)
+BOOL g_DhcpRenew = FALSE;
+extern void SetDhcpProgressState(void);
+#endif
 
+extern BOOL ARPProcess(void);
 
 /*********************************************************************
  * Function:        void StackInit(void)
@@ -207,10 +212,40 @@ void StackTask(void)
         #if defined( STACK_USE_EZ_CONFIG ) && !defined(__18CXX)
             WFEasyConfigMgr();
         #endif
+        
+        
+    	#if defined(STACK_USE_DHCP_CLIENT)
+        	// Normally, an application would not include  DHCP module
+        	// if it is not enabled. But in case some one wants to disable
+        	// DHCP module at run-time, remember to not clear our IP
+        	// address if link is removed.
+        	if(AppConfig.Flags.bIsDHCPEnabled)
+        	{
+        		if(g_DhcpRenew == TRUE)
+        		{
+        			g_DhcpRenew = FALSE;
+            		AppConfig.MyIPAddr.Val = AppConfig.DefaultIPAddr.Val;
+        			AppConfig.MyMask.Val = AppConfig.DefaultMask.Val;
+        			AppConfig.Flags.bInConfigMode = TRUE;
+        			DHCPInit(0);
+        		}
+        	
+        		// DHCP must be called all the time even after IP configuration is
+        		// discovered.
+        		// DHCP has to account lease expiration time and renew the configuration
+        		// time.
+        		DHCPTask();
+        		
+        		if(DHCPIsBound(0))
+        			AppConfig.Flags.bInConfigMode = FALSE;
+        	}
+    	#endif // STACK_USE_DHCP_CLIENT
+        
+        
     #endif
 
 
-	#if defined(STACK_USE_DHCP_CLIENT)
+	#if defined(STACK_USE_DHCP_CLIENT) && !defined(WF_CS_TRIS)
 	// Normally, an application would not include  DHCP module
 	// if it is not enabled. But in case some one wants to disable
 	// DHCP module at run-time, remember to not clear our IP
@@ -432,3 +467,12 @@ void StackApplications(void)
 	UART2TCPBridgeTask();
 	#endif
 }
+
+#if defined(WF_CS_TRIS) && defined(STACK_USE_DHCP_CLIENT)
+void RenewDhcp(void)
+{
+    g_DhcpRenew = TRUE;
+    SetDhcpProgressState();
+}    
+#endif
+

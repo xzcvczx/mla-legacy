@@ -29,20 +29,42 @@
  * COST OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
- *
- * Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 09/01/10	   ...
  *****************************************************************************/
-
+/*****************************************************************************
+ * Section: Description
+ *
+ * This module handles the callback routines used by the module, comm_pkt.  The
+ * module interfaces with the hardware, in this case serial and/or USB, to 
+ * receive and transmitt data.  The comm_pkt module is abstracted from all
+ * communication mediums.  The user can add/subtract communication mediums
+ * as needed per application's requirements.  
+ *
+ * This module is used by serval different Graphics demos and is part of the 
+ * common directory under the Graphics demo.
+ *****************************************************************************/
 #ifndef COMM_PKT_CALLBACK_H_FILE
 #define COMM_PKT_CALLBACK_H_FILE
 
+/*****************************************************************************
+ * Section: Includes
+ *****************************************************************************/
 #include "comm_pkt.h"
 
 
+/*****************************************************************************
+ * Section: Function Prototypes
+ *****************************************************************************/
+/*****************************************************************************
+ * BOOL COMM_PKT_DataAvailable(COMM_PKT_MEDIA media)
+ *****************************************************************************/
 BOOL COMM_PKT_DataAvailable(COMM_PKT_MEDIA media);
+/*****************************************************************************
+ * WORD COMM_PKT_GetData(COMM_PKT_MEDIA media, BYTE *buffer, WORD offset)
+ *****************************************************************************/
 WORD COMM_PKT_GetData(COMM_PKT_MEDIA media, BYTE *buffer, WORD offset);
+/*****************************************************************************
+ * void COMM_PKT_SendData(COMM_PKT_MEDIA media, BYTE *data, WORD size)
+ *****************************************************************************/
 void COMM_PKT_SendData(COMM_PKT_MEDIA media, BYTE *data, WORD size);
 
 #endif

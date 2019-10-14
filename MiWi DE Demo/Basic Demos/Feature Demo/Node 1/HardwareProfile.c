@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright ¬© 2007-2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
  *
  * Microchip licenses to you the right to use, modify, copy and distribute 
  * Software only when embedded on a Microchip microcontroller or digital 
@@ -25,7 +25,7 @@
  * You should refer to the license agreement accompanying this Software for 
  * additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY 
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY 
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
  * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
  * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -711,7 +711,19 @@ void LCDDisplay(char *text, BYTE value, BOOL delay)
             BYTE i;
             for(i = 0; i < 8; i++)
             {
-                DelayMs(250);
+                #if defined(__PIC32MX__)
+                    BYTE ms = 250;
+                    volatile unsigned long _dcnt;                                   
+                    while(ms)                  
+                    {                           
+                        //_dcnt=((unsigned long)(0.001/(1.0/CLOCK_FREQ)/6));  
+                        _dcnt = ((unsigned long)CLOCK_FREQ)/36000ul;  
+                        while(_dcnt--);         
+                        ms--;                  
+                    }   
+                #else
+                    DelayMs(250);
+                #endif
             }
         }
     #endif

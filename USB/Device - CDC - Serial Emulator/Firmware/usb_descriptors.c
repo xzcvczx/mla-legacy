@@ -298,6 +298,8 @@ ROM BYTE *ROM USB_SD_Ptr[]=
     (ROM BYTE *ROM)&sd002
 };
 
+#if defined(__18CXX)
 #pragma code
+#endif
 #endif
 /** EOF usb_descriptors.c ****************************************************/

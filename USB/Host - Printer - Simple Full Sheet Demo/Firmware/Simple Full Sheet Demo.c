@@ -112,7 +112,7 @@ printer.
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
+   
 
 #else
 
@@ -232,7 +232,7 @@ PRINT_STATUS                    status;
 
 BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
 {
-    switch( event )
+    switch( (INT)event )
     {
         // --------------------------------------------------------------------------
         // Printer events

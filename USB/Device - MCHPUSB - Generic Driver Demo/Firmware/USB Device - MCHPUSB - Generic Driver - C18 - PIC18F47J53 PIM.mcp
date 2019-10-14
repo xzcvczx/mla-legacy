@@ -125,8 +125,8 @@ file_019=HardwareProfile - PIC18F47J53 PIM.h
 file_020=..\..\..\Microchip\USB\usb_device_local.h
 file_021=rm18f47j53_g.lkr
 file_022=..\Important Note.txt
-file_023=..\Getting Started - Running the Device - MCHPUSB - Generic driver demo.htm
-file_024=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_023=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_024=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

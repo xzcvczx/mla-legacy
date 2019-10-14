@@ -174,6 +174,8 @@ void LoadApplication ( void )
     ResetDevice();
 	FillDisplay(0x00);
 
+    MDD_InitIO();
+
     /* Loader main loop */
     while (LoadingApplication)
     {
@@ -182,7 +184,7 @@ void LoadApplication ( void )
 		
         if (BootMediumAttached)
         {
-			/* The boot media is attashed; check if it is also initialized */
+			/* The boot media is attached; check if it is also initialized */
 			if (BootMediumInitialized)
 			{
 				/* Media attashed and initialized */

@@ -236,7 +236,7 @@ void PreLoadDrawProgress(void)
         if(idx == animationStage)
         {    SetColor(RED);}
         else
-            SetColor(GRAY0);
+            SetColor(GRAY224);
 
         FillCircle(x, y, PRE_LOAD_ANIMATION_RADIUS);
         x += PRE_LOAD_AMINATION_CIRCLE_X_DELTA;

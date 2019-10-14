@@ -38,8 +38,7 @@
  * SECTION: Includes
  *****************************************************************************/
 #include "Graphics/Graphics.h"
-#include "icons.h"
-#include "MainDemo.h"//** Remove when complete!!!!!!!!!
+#include "MainDemo.h"
 #include "gfx_schemes.h"
 #include "gfx_strings.h"
 #include "gfx_screens.h"
@@ -59,8 +58,8 @@ extern const FONT_FLASH     Large;          // equal width font
  *****************************************************************************/
 GFX_COLOR    MyColorTable[16] = 
 {   
-    WHITE, WHITE, WHITE, WHITE, 
-    WHITE, WHITE, WHITE, YELLOW, 
+    BRIGHTBLUE, BRIGHTBLUE, BRIGHTBLUE, BRIGHTBLUE, 
+    BRIGHTBLUE, BRIGHTBLUE, BRIGHTBLUE, YELLOW, 
     RED, BLUE, BRIGHTGREEN, BRIGHTGREEN, 
     BRIGHTYELLOW, BRIGHTRED, BRIGHTBLUE, BLACK
 };
@@ -73,6 +72,7 @@ void CreateEnergyScreen(void)
 {
     CHART   *pMyChart;
     GOL_SCHEME *currentScheme;
+    WORD state;
 
     
     GOLFree();                              // free memory for the objects in the previous linked list and start new list
@@ -98,7 +98,11 @@ void CreateEnergyScreen(void)
     OutTextXY(ENERGY_ESCREEN_START + 5,ENERGY_EB_ORIGIN_Y+10,(XCHAR *)D20Str);
     OutTextXY(ENERGY_ESCREEN_START + 200,ENERGY_EB_ORIGIN_Y+10,(XCHAR *)M230Str);
 
-
+    #if (COLOR_DEPTH >= 16)
+        state = CH_BAR | CH_DRAW | CH_3D_ENABLE;
+    #else
+        state = CH_BAR | CH_DRAW;
+    #endif
 
     // create the chart object
     pMyChart =   ChCreate(
@@ -107,19 +111,19 @@ void CreateEnergyScreen(void)
                             ENERGY_EB_ORIGIN_Y+120,  // dimensions
                             ENERGY_ESCREEN_START + 335,
                             GetMaxY() - 20,   //
-                            CH_BAR | CH_DRAW,   // state of the chart
+                            CH_BAR | CH_DRAW | CH_3D_ENABLE,   // state of the chart
                             NULL,                               // data not initialized yet
                             NULL,                               // no paraters and data yet
                             currentScheme//ComfortScheme
                             );                              // style scheme used
 
-    ChSetTitle(pMyChart, (XCHAR*)spaceStr);//SecurityOptionsStr);
+    ChSetTitle(pMyChart, (XCHAR*)spaceStr);
 
-    ChSetTitleFont(pMyChart, (void *) &GOLFontDefault);
+    ChSetTitleFont(pMyChart, (void *) &GOLSmallFont);
 
     // set the grid labels and axis labels font	
-    ChSetGridLabelFont(pMyChart, (void *) &GOLFontDefault);//&GOLSmallFont);
-    ChSetAxisLabelFont(pMyChart, (void *) &GOLFontDefault);//&GOLSmallFont);
+    ChSetGridLabelFont(pMyChart, (void *) &GOLSmallFont);
+    ChSetAxisLabelFont(pMyChart, (void *) &GOLSmallFont);
 
     // set the sample label and value label strings
     ChSetSampleLabel(pMyChart, (XCHAR *)DaysStr);

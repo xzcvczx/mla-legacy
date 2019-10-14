@@ -62,6 +62,10 @@
 #endif /* EZ_CONFIG_SCAN */
 
 
+#if defined (WF_HOST_SCAN)
+extern BOOL	gHostScanNotAllowed;
+#endif
+
 /*==========================================================================*/
 /*                                  DEFINES                                 */
 /*==========================================================================*/
@@ -141,6 +145,10 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
             #if defined(STACK_USE_UART)
             putrsUART("Event: Connection Successful\r\n"); 
             #endif
+
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = FALSE;
+			#endif
             break;
         
         /*--------------------------------------*/            
@@ -154,6 +162,11 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
             putrsUART(connectionFailureStrings[eventInfo]);
             putrsUART("\r\n");
             #endif
+
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = FALSE;
+			#endif
+
             break; 
             
         /*--------------------------------------*/
@@ -167,6 +180,11 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
             putrsUART(connectionLostStrings[eventInfo]);
             putrsUART("\r\n");
             #endif
+
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = TRUE;
+			#endif
+
             break;
             
         /*--------------------------------------*/
@@ -180,6 +198,10 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
             putrsUART(connectionLostStrings[eventInfo]);
             putrsUART("\r\n");
             #endif
+
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = FALSE;
+			#endif
             break;
 
         /*--------------------------------------*/    
@@ -188,6 +210,10 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
             #if defined(STACK_USE_UART)
             putrsUART("Event: Connection Reestablished\r\n");
             #endif
+
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = FALSE;
+			#endif
             break;
             
         /*--------------------------------------*/
@@ -195,13 +221,17 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
         /*--------------------------------------*/  
             #if defined(STACK_USE_UART)
             putrsUART("Event: Scan Results Ready,");
-            sprintf(buf, " %d", eventInfo);
+            sprintf(buf, " %d ", eventInfo);
             putsUART(buf);
             putrsUART("results\r\n");
 			#endif
             #if defined ( EZ_CONFIG_SCAN ) && !defined(__18CXX)
             WFScanEventHandler(eventInfo);
 			#endif /* EZ_CONFIG_SCAN */
+
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = FALSE;
+			#endif
             break;
             
         /*--------------------------------------*/                            
@@ -211,6 +241,10 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
 //            putrsUART("Event: Rx Packet Received - length = ");
 //            sprintf(buf, "%d\r\n", eventInfo);
 //          putsUART(buf);
+			#endif
+
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = FALSE;
 			#endif
             break;
             
@@ -223,8 +257,8 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
     /* Informs the WF driver that we are leaving this function */
     WFSetFuncState(WF_PROCESS_EVENT_FUNC, WF_LEAVING_FUNCTION);
 }    
+ 
 
-  
 /*
 *********************************************************************************************************
 *                                   WF_AssertionFailed()
@@ -253,7 +287,7 @@ void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber)
 {
     #if defined(STACK_USE_UART)
     char buf[64];
-#if defined(DISPLAY_FILENAME)
+#if defined(DISPLAY_FILENAME) && !defined(__18CXX)
 	UINT16 moduleNameIdx;
 	static ROM char *moduleName[] = { 
 		"MainDemo.c",
@@ -283,7 +317,7 @@ void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber)
 	};
 #endif
 
-#if defined(DISPLAY_FILENAME)
+#if defined(DISPLAY_FILENAME) && !defined(__18CXX)
 	putrsUART("WF ASSERTION at ");
 	if (moduleNumber < 100)
 		moduleNameIdx = moduleNumber;

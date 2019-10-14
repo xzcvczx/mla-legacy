@@ -57,7 +57,7 @@
 #include "TCPIP Stack/WFMac.h"
 
 #if defined(WF_CS_TRIS)
-
+BOOL gRFModuleVer1209orLater = FALSE;
 
 /*
 *********************************************************************************************************
@@ -102,7 +102,7 @@ static const UINT8 MchpDefaultMacAddress[WF_MAC_ADDRESS_LENGTH] = {0x00u, 0x04u,
 */
 
 static void WF_LibInitialize(void);
-
+void SetDhcpProgressState(void);
 
 /*****************************************************************************
  * FUNCTION: WF_Init
@@ -121,6 +121,7 @@ static void WF_LibInitialize(void);
 void WF_Init(void)
 {
     UINT8  version;
+	tWFDeviceInfo deviceInfo;
 
     /* initialize WiFi drivers, reset MRF24WB0M */
     WFHardwareInit();
@@ -128,12 +129,23 @@ void WF_Init(void)
     RawInit();
 
     WFGetMRF24WB0MVersion(&version);
+      
     WF_ASSERT(version >= EXPECTED_MRF24WB0M_VERSION_NUMBER);
+
+	WF_GetDeviceInfo(&deviceInfo);
+
+	if (deviceInfo.romVersion == 18 && deviceInfo.patchVersion >= 9)
+		gRFModuleVer1209orLater = TRUE;
   
     WFEnableMRF24WB0MMode();
   
     /* send init messages to MRF24WB0M */
     WF_LibInitialize();
+    
+	if(AppConfig.Flags.bIsDHCPEnabled)
+	{
+    	SetDhcpProgressState();
+    }       
 }
 
 
@@ -152,11 +164,6 @@ static void WF_LibInitialize()
     
     /* Disable Tx Data confirms (from the MRF24WB0M) */
     WF_SetTxDataConfirm(WF_DISABLED);
-
-#if defined(WF_USE_POWER_SAVE_FUNCTIONS)    
-    /* Disable power management */
-    WF_PsPollDisable();
-#endif
 
     /* if the user has left the default MAC address in TCPIPConfig.h unchanged then use */
     /* the unique MRF24WB0M MAC address so prevent multiple devices from having the same   */

@@ -45,6 +45,12 @@
 #include "HardwareProfile.h"
 #include "Graphics/mchpGfxDrv.h"
 
+#ifdef __C30__
+    #ifndef __HAS_EDS__  
+	    #error "Selected PIC device does not have EDS support. Please select device with EDS"
+    #endif
+#endif
+
 // Protect the Display Buffer(s) by declaring the area as a large array.
 // This module is used to declare the memory areas only. 
 // NOTE: Since this module is using large arrays, compile option for this module must be set to -mlarge-arrays

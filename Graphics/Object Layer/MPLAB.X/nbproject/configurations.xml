@@ -96,6 +96,7 @@
         <itemPath>../../../Microchip/Graphics/Drivers/drvTFT001.c</itemPath>
         <itemPath>../../../Microchip/Graphics/Drivers/mchpGfxDrv.c</itemPath>
         <itemPath>../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c</itemPath>
+        <itemPath>../../../Microchip/Graphics/Drivers/mchpGfxLCC.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Graphics" displayName="Graphics" projectFiles="true">
         <itemPath>../../../Microchip/Graphics/Button.c</itemPath>
@@ -120,12 +121,10 @@
         <itemPath>../../../Microchip/Graphics/Window.c</itemPath>
         <itemPath>../../../Microchip/Graphics/Drivers/gfxepmp.c</itemPath>
       </logicalFolder>
-      <itemPath>../ChineseFonts.c</itemPath>
       <itemPath>../CustomControlDemo.c</itemPath>
+      <itemPath>../InternalResourceC30.c</itemPath>
+      <itemPath>../InternalResourceC32.c</itemPath>
       <itemPath>../MainDemo.c</itemPath>
-      <itemPath>../Monofont.c</itemPath>
-      <itemPath>../Pictures C30.c</itemPath>
-      <itemPath>../Pictures C32.c</itemPath>
       <itemPath>../SideButtons.c</itemPath>
       <itemPath>../rtcc.c</itemPath>
     </logicalFolder>
@@ -153,6 +152,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -165,7 +173,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -176,25 +184,28 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="default"/>
-        <property key="extra-include-directories"
-                  value="../../../Board Support Package;..;../../../Microchip/Include;../../../Microchip/Include/Graphics"/>
+        <property key="optimization-level" value="s"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_QVGAv1"/>
-        <property key="data-model" value="default"/>
-        <property key="enable-all-warnings" value="true"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="default"/>
         <property key="enable-procedural-abstraction" value="false"/>
-        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../../Microchip/Include/Graphics"/>
         <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="data-model" value="default"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-ansi-std" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="large-code"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="scalar-model" value="default"/>
       </C30>
       <C30-AS>
         <property key="omit-debug-dirs" value="false"/>
@@ -204,8 +215,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -220,6 +231,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -230,23 +242,24 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories"
-                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
         <property key="legacy-libc" value="false"/>
+        <property key="output-file-format" value="elf"/>
       </C30Global>
       <ICD3PlatformTool>
       </ICD3PlatformTool>
@@ -267,6 +280,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -279,7 +301,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -299,9 +321,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -318,8 +340,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -334,6 +356,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -344,19 +367,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories"
-                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -381,6 +404,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -393,7 +425,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -413,9 +445,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -432,8 +464,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -448,6 +480,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -458,19 +491,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories"
-                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -495,6 +528,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -507,7 +549,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -527,9 +569,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -546,8 +588,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -572,19 +614,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories"
                   value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -609,6 +651,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -621,7 +672,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -641,9 +692,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -660,8 +711,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -686,19 +737,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories"
                   value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -723,6 +774,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -735,7 +795,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -755,9 +815,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -774,8 +834,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -800,19 +860,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories"
                   value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -837,6 +897,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -849,7 +918,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -869,9 +938,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -888,8 +957,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -914,19 +983,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories"
                   value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -951,6 +1020,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -963,7 +1041,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -983,9 +1061,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1002,8 +1080,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1028,19 +1106,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories"
                   value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -1065,6 +1143,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="false"
             overriding="true">
@@ -1078,9 +1165,9 @@
           <property key="enable-all-warnings" value="true"/>
           <property key="pre-instruction-scheduling" value="default"/>
           <property key="enable-short-double" value="false"/>
-          <property key="enable-ansi-warnings" value="false"/>
-          <property key="optimization-level" value="0"/>
           <property key="enable-procedural-abstraction" value="false"/>
+          <property key="optimization-level" value="0"/>
+          <property key="enable-ansi-warnings" value="false"/>
           <property key="enable-fatal-warnings" value="false"/>
           <property key="post-instruction-scheduling" value="default"/>
           <property key="enable-omit-frame-pointer" value="false"/>
@@ -1097,7 +1184,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1117,9 +1204,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1136,8 +1223,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1162,19 +1249,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories"
                   value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -1199,6 +1286,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="false"
             overriding="true">
@@ -1212,9 +1308,9 @@
           <property key="enable-all-warnings" value="true"/>
           <property key="pre-instruction-scheduling" value="default"/>
           <property key="enable-short-double" value="false"/>
-          <property key="enable-ansi-warnings" value="false"/>
-          <property key="optimization-level" value="0"/>
           <property key="enable-procedural-abstraction" value="false"/>
+          <property key="optimization-level" value="0"/>
+          <property key="enable-ansi-warnings" value="false"/>
           <property key="enable-fatal-warnings" value="false"/>
           <property key="post-instruction-scheduling" value="default"/>
           <property key="enable-omit-frame-pointer" value="false"/>
@@ -1231,7 +1327,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../Pictures C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1251,9 +1347,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1270,8 +1366,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1296,19 +1392,19 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories"
                   value="../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
@@ -1324,7 +1420,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1333,6 +1429,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1345,7 +1450,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1356,24 +1461,26 @@
         </C32Global>
       </item>
       <C32>
-        <property key="extra-include-directories"
-                  value="../;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_WQVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
-        <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="place-data-into-section" value="false"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="extra-include-directories"
+                  value="../;../../../Board Support Package;../../../Microchip/Include"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-app-io" value="false"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
         <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
       </C32>
       <C32-AS>
         <property key="omit-debug-dirs" value="false"/>
@@ -1383,8 +1490,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1407,11 +1514,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1427,7 +1536,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1436,6 +1545,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1448,7 +1566,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1468,8 +1586,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1486,8 +1604,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1510,11 +1628,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1530,7 +1650,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1539,6 +1659,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1551,7 +1680,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1571,8 +1700,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1589,8 +1718,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1613,11 +1742,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1633,7 +1764,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1642,6 +1773,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1654,7 +1794,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1674,8 +1814,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1692,8 +1832,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1716,11 +1856,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1729,14 +1871,14 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_8PMP_QVGAv1" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_8PMP_QVGAv1" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1745,6 +1887,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1757,7 +1908,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1777,8 +1928,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1795,8 +1946,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1819,11 +1970,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1832,14 +1985,14 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_8PMP_WQVGAv1" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_8PMP_WQVGAv1" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1848,6 +2001,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1860,7 +2022,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1880,8 +2042,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1898,8 +2060,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1922,11 +2084,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -1935,14 +2099,14 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_16PMP_QVGAv1" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_16PMP_QVGAv1" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1951,6 +2115,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1963,7 +2136,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1983,8 +2156,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2001,8 +2174,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2025,11 +2198,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2038,14 +2213,14 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_16PMP_WQVGAv1" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_16PMP_WQVGAv1" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2054,6 +2229,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2066,7 +2250,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2086,8 +2270,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2104,8 +2288,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2128,11 +2312,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2148,7 +2334,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2157,6 +2343,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2169,7 +2364,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2180,17 +2375,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_8PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2207,8 +2402,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2231,11 +2426,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2251,7 +2448,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2260,6 +2457,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2272,7 +2478,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2283,17 +2489,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_8PMP_WQVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2310,8 +2516,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2334,11 +2540,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2354,7 +2562,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2363,6 +2571,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2375,7 +2592,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2386,17 +2603,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_16PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2413,8 +2630,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2437,11 +2654,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2457,7 +2676,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2466,6 +2685,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2478,7 +2706,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2489,17 +2717,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_16PMP_WQVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2516,8 +2744,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2540,11 +2768,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2560,7 +2790,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2569,6 +2799,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2581,7 +2820,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2601,8 +2840,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2619,8 +2858,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2643,11 +2882,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2663,7 +2904,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2672,6 +2913,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2684,7 +2934,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2704,8 +2954,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2722,8 +2972,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2746,11 +2996,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2766,7 +3018,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2775,6 +3027,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2787,7 +3048,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2807,8 +3068,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2825,8 +3086,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2849,11 +3110,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -2869,7 +3132,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2878,6 +3141,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2890,7 +3162,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2910,8 +3182,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2928,8 +3200,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -2952,17 +3224,20 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
         <property key="no-start-files" value="false"/>
       </C32Global>
       <SKDEPIC32PlatformTool>
+        <property key="whatToProgram" value="all"/>
       </SKDEPIC32PlatformTool>
     </conf>
     <conf name="PIC32_ETH_SK_MEB_8PMP" type="2">
@@ -2972,7 +3247,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2981,6 +3256,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -2993,7 +3277,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3004,24 +3288,26 @@
         </C32Global>
       </item>
       <C32>
-        <property key="extra-include-directories"
-                  value="../;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_MEB_PIC32_ETH_SK_8PMP"/>
-        <property key="exclude-floating-point" value="false"/>
-        <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="place-data-into-section" value="false"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="extra-include-directories"
+                  value="../;../../../Board Support Package;../../../Microchip/Include"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-app-io" value="false"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
         <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
       </C32>
       <C32-AS>
         <property key="omit-debug-dirs" value="false"/>
@@ -3031,8 +3317,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -3055,11 +3341,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -3075,7 +3363,7 @@
         <targetHeader></targetHeader>
         <platformTool>SKDEPIC32PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3084,6 +3372,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -3096,7 +3393,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../Pictures C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3107,17 +3404,1215 @@
         </C32Global>
       </item>
       <C32>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_MEB_PIC32_ETH_SK_16PMP"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="extra-include-directories"
+                  value="../;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-app-io" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
+      </C32>
+      <C32-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
+      </C32-LD>
+      <C32Global>
+        <property key="legacy-libc" value="false"/>
+      </C32Global>
+      <SKDEPIC32PlatformTool>
+      </SKDEPIC32PlatformTool>
+    </conf>
+    <conf name="PIC32_795_LCC_SK_EXT_QVGAv1" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX795F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>2.00</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Board Support Package/Beep.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/EEPROM.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/cpld.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/SSD1926.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="optimization-level" value="-Os"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_LCC_PIC_SK_EXT_QVGAv1;CFG_INCLUDE_MPLAB_X"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;../../../Microchip/Include;../"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-app-io" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
+      </C32>
+      <C32-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
+      </C32-LD>
+      <C32Global>
+      </C32Global>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="PIC32_795_LCC_SK_EXT_WQVGAv1" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX795F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Board Support Package/Beep.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/EEPROM.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/cpld.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/SSD1926.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="optimization-level" value="-Os"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_LCC_PIC_SK_EXT_WQVGAv1"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;../../../Microchip/Include;../"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-app-io" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
+      </C32>
+      <C32-AS>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
+      </C32-LD>
+      <C32Global>
+      </C32Global>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="PIC32_795_LCC_SK_INT_QVGAv1" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX795F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Board Support Package/Beep.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/EEPROM.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/cpld.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/SSD1926.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="optimization-level" value="-Os"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_LCC_PIC_SK_INT_QVGAv1"/>
+        <property key="additional-warnings" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;../../../Microchip/Include;../"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-app-io" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
+      </C32>
+      <C32-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
+      </C32-LD>
+      <C32Global>
+        <property key="legacy-libc" value="false"/>
+      </C32Global>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="PIC24_GP504_GFXv3_EX16_8PMP_QVGAv1" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC24HJ128GP504</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion>null</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="optimization-level" value="s"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_QVGAv1"/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="default"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../../Microchip/Include/Graphics"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="data-model" value="default"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="scalar-model" value="default"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value="..;"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value="&quot;$(TARGETBASE).map&quot;"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="output-file-format" value="coff"/>
+      </C30Global>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="dsPIC33F_GP804_GFXv3_EX16_8PMP_QVGAv1" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>dsPIC33FJ128GP804</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion>null</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="optimization-level" value="s"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_QVGAv1"/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="default"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../../Microchip/Include/Graphics"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="data-model" value="default"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="scalar-model" value="default"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value="..;"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value="&quot;$(TARGETBASE).map&quot;"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="output-file-format" value="coff"/>
+      </C30Global>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="PIC24_GP504_GFXv3_EX16_8PMP_WQVGAv1" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC24HJ128GP504</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion>null</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="scalar-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../../Microchip/Include/Graphics"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_WQVGAv1"/>
+        <property key="data-model" value="default"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="const-model" value="default"/>
+        <property key="code-model" value="large-code"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value="..;"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value="&quot;$(TARGETBASE).map&quot;"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="output-file-format" value="coff"/>
+      </C30Global>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="dsPIC33F_GP804_GFXv3_EX16_8PMP_WQVGAv1" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>dsPIC33FJ128GP804</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion>null</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="scalar-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../../Microchip/Include/Graphics"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_WQVGAv1"/>
+        <property key="data-model" value="default"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="const-model" value="default"/>
+        <property key="code-model" value="large-code"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value="..;"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value="&quot;$(TARGETBASE).map&quot;"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="output-file-format" value="coff"/>
+      </C30Global>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="dsPIC33E_SK_MEB_8PMP" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>dsPIC33EP512MU810</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion>3_30</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.c" ex="false" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
+      </item>
+      <C30>
+        <property key="optimization-level" value="s"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_MEB_dsPIC33E_SK_8PMP"/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="default"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../../Microchip/Include/Graphics"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="data-model" value="large-data"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-all-warnings" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="scalar-model" value="large-scalar"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value=""/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories" value=""/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="output-file-format" value="coff"/>
+        <property key="legacy-libc" value="false"/>
+      </C30Global>
+      <C32>
         <property key="extra-include-directories"
                   value="../;../../../Board Support Package;../../../Microchip/Include"/>
         <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_MEB_PIC32_ETH_SK_16PMP"/>
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_MEB_PIC32_GP_SK_8PMP"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -3134,8 +4629,8 @@
         <property key="list-file" value=""/>
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -3158,17 +4653,117 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
-        <property key="no-start-files" value="false"/>
       </C32Global>
+      <RealICEPlatformTool>
+        <property key="INPUT CAPTURE 16" value="true"/>
+        <property key="INPUT CAPTURE 15" value="true"/>
+        <property key="INPUT CAPTURE 14" value="true"/>
+        <property key="INPUT CAPTURE 9" value="true"/>
+        <property key="RIExTrigs.Four" value="OFF"/>
+        <property key="INPUT CAPTURE 13" value="true"/>
+        <property key="INPUT CAPTURE 8" value="true"/>
+        <property key="INPUT CAPTURE 12" value="true"/>
+        <property key="INPUT CAPTURE 7" value="true"/>
+        <property key="UART 4" value="true"/>
+        <property key="INPUT CAPTURE 11" value="true"/>
+        <property key="INPUT CAPTURE 6" value="true"/>
+        <property key="UART 3" value="true"/>
+        <property key="INPUT CAPTURE 10" value="true"/>
+        <property key="INPUT CAPTURE 5" value="true"/>
+        <property key="UART 2" value="true"/>
+        <property key="RIExTrigs.Three" value="OFF"/>
+        <property key="INPUT CAPTURE 4" value="true"/>
+        <property key="UART 1" value="true"/>
+        <property key="INPUT CAPTURE 3" value="true"/>
+        <property key="INPUT CAPTURE 2" value="true"/>
+        <property key="INPUT CAPTURE 1" value="true"/>
+        <property key="RIExTrigs.Five" value="OFF"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="tracecontrol.medium" value="0"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="REAL TIME CLOCK AND CALENDAR" value="true"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="RIExTrigs.Six" value="OFF"/>
+        <property key="OUTPUT COMPARE 9" value="true"/>
+        <property key="OUTPUT COMPARE 8" value="true"/>
+        <property key="I2C2" value="true"/>
+        <property key="OUTPUT COMPARE 7" value="true"/>
+        <property key="I2C1" value="true"/>
+        <property key="OUTPUT COMPARE 6" value="true"/>
+        <property key="OUTPUT COMPARE 5" value="true"/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="OUTPUT COMPARE 4" value="true"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="OUTPUT COMPARE 3" value="true"/>
+        <property key="OUTPUT COMPARE 2" value="true"/>
+        <property key="CRC" value="true"/>
+        <property key="OUTPUT COMPARE 1" value="true"/>
+        <property key="programoptions.preserveprogramrange.end" value="0xff"/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="memories.id" value="true"/>
+        <property key="RIExTrigs.Zero" value="OFF"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\C13713\mpdeftrace.log"/>
+        <property key="memories.programmemory.end" value="0x557ff"/>
+        <property key="OUTPUT COMPARE 16" value="true"/>
+        <property key="OUTPUT COMPARE 15" value="true"/>
+        <property key="OUTPUT COMPARE 14" value="true"/>
+        <property key="OUTPUT COMPARE 13" value="true"/>
+        <property key="OUTPUT COMPARE 12" value="true"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="OUTPUT COMPARE 11" value="true"/>
+        <property key="USB" value="true"/>
+        <property key="OUTPUT COMPARE 10" value="true"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="TIMER9" value="true"/>
+        <property key="TIMER8" value="true"/>
+        <property key="TIMER7" value="true"/>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="TIMER6" value="true"/>
+        <property key="TIMER5" value="true"/>
+        <property key="TIMER4" value="true"/>
+        <property key="TIMER3" value="true"/>
+        <property key="TIMER2" value="true"/>
+        <property key="TIMER1" value="true"/>
+        <property key="RIExTrigs.One" value="OFF"/>
+        <property key="DCI" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="COMPARATOR" value="true"/>
+        <property key="SPI 4" value="true"/>
+        <property key="SPI 3" value="true"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="SPI 2" value="true"/>
+        <property key="SPI 1" value="true"/>
+        <property key="memories.aux" value="false"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="RIExTrigs.Two" value="OFF"/>
+        <property key="hwtoolclock.instructionspeed" value="4"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="PWM" value="true"/>
+        <property key="ADC 2" value="true"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="ADC 1" value="true"/>
+        <property key="RIExTrigs.Seven" value="OFF"/>
+      </RealICEPlatformTool>
       <SKDEPIC32PlatformTool>
+        <property key="whatToProgram" value="all"/>
       </SKDEPIC32PlatformTool>
     </conf>
   </confs>

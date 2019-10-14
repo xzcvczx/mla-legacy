@@ -198,7 +198,7 @@ ROM BYTE configDescriptor1[]={
     /* Interface Descriptor */
     9,   // Size of this descriptor in bytes
     USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type
-    0,                      // Interface Number
+    MSD_INTF_ID,            // Interface Number
     0,                      // Alternate Setting Number
     2,                      // Number of endpoints in this intf
     MSD_INTF,               // Class code
@@ -224,21 +224,21 @@ ROM BYTE configDescriptor1[]={
     
 //---------------IAD Descriptor------------------------------------
     /* Interface Association Descriptor: CDC Function 1*/ 
-	0x08,   //sizeof(USB_IAD_DSC), // Size of this descriptor in bytes 
-	0x0B,   // Interface assocication descriptor type 
-	1,      // The first associated interface 
-	2,      // Number of contiguous associated interface 
-	COMM_INTF, // bInterfaceClass of the first interface 
+	0x08,             //sizeof(USB_IAD_DSC), // Size of this descriptor in bytes 
+	0x0B,             // Interface assocication descriptor type 
+	CDC_COMM_INTF_ID, // The first associated interface 
+	2,                // Number of contiguous associated interface 
+	COMM_INTF,        // bInterfaceClass of the first interface 
 	ABSTRACT_CONTROL_MODEL, // bInterfaceSubclass of the first interface 
-	V25TER, // bInterfaceProtocol of the first interface 
-	0,      // Interface string index 						
+	V25TER,           // bInterfaceProtocol of the first interface 
+	0,                // Interface string index 						
 
 //---------------CDC Function 1 Descriptors------------------------
 							
     /* Interface Descriptor: CDC Function 1, Status (communication) Interface */
     0x09,   //sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
     USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type
-    1,                      // Interface Number
+    CDC_COMM_INTF_ID,       // Interface Number
     0,                      // Alternate Setting Number
     1,                      // Number of endpoints in this intf
     COMM_INTF,              // Class code
@@ -251,7 +251,7 @@ ROM BYTE configDescriptor1[]={
     sizeof(USB_CDC_HEADER_FN_DSC), //Size of this descriptor in bytes (5)
     CS_INTERFACE,               //bDescriptorType (class specific)
     DSC_FN_HEADER,              //bDescriptorSubtype (header functional descriptor)
-    1, 20,                      //bcdCDC (CDC spec version this fw complies with: v1.20)
+    0x20, 0x01,                 //bcdCDC (CDC spec version this fw complies with: v1.20 [stored in little endian])
 
     //4 bytes: Abstract Control Management Functional Descriptor
     sizeof(USB_CDC_ACM_FN_DSC), //Size of this descriptor in bytes (4)
@@ -263,15 +263,15 @@ ROM BYTE configDescriptor1[]={
     sizeof(USB_CDC_UNION_FN_DSC), //Size of this descriptor in bytes (5)
     CS_INTERFACE,                 //bDescriptorType (class specific)
     DSC_FN_UNION,                 //bDescriptorSubtype (union functional)
-    1,                            //bControlInterface: Interface number of the communication class interface (1)
-    2,                            //bSubordinateInterface0: Data class interface #2 is subordinate to this interface
+    CDC_COMM_INTF_ID,             //bControlInterface: Interface number of the communication class interface (1)
+    CDC_DATA_INTF_ID,             //bSubordinateInterface0: Data class interface #2 is subordinate to this interface
 
     //5 bytes: Call Management Functional Descriptor
     sizeof(USB_CDC_CALL_MGT_FN_DSC), //Size of this descriptor in bytes (5)
     CS_INTERFACE,                    //bDescriptorType (class specific)
     DSC_FN_CALL_MGT,                 //bDescriptorSubtype (call management functional)
     0x00,                            //bmCapabilities: device doesn't handle call management
-    2,                               //bDataInterface: Data class interface ID used for the optional call management
+    CDC_DATA_INTF_ID,                //bDataInterface: Data class interface ID used for the optional call management
 
     /* Endpoint Descriptor */
     0x07,/*sizeof(USB_EP_DSC)*/
@@ -284,7 +284,7 @@ ROM BYTE configDescriptor1[]={
     /* Interface Descriptor: CDC Function 1, Data Interface*/
     0x09,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
     USB_DESCRIPTOR_INTERFACE,      // INTERFACE descriptor type
-    2,                      // Interface Number
+    CDC_DATA_INTF_ID,       // Interface Number
     0,                      // Alternate Setting Number
     2,                      // Number of endpoints in this intf
     DATA_INTF,              // Class code

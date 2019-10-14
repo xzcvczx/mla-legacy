@@ -102,7 +102,7 @@ file_014=..\..\..\Microchip\Include\USB\usb_hal.h
 file_015=..\..\..\Microchip\Include\USB\usb_function_cdc.h
 file_016=..\Lab 4\usb_config.h
 file_017=..\Lab 4\HardwareProfile.h
-file_018=..\Lab 4\rm18F14K50.lkr
+file_018=rm18F14K50.lkr
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

@@ -206,7 +206,6 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
     #elif defined(__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
         _FOSCSEL(FNOSC_FRC);
         _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
@@ -239,7 +238,11 @@
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
+#elif defined(PIC24FJ64GB502_MICROSTICK)
+    _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    _CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+    _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
 #else
     #error No hardware board defined, see "HardwareProfile.h"
 #endif
@@ -279,7 +282,9 @@
 	USB_VOLATILE BYTE EP3OUTOddBuffer[64];	//User buffer for receiving OUT packets sent from the host
 #else	//else must be C30 or C32 device (PIC24 or PIC32)
 	//All SRAM on currently existing PIC24 and PIC32 devices can be accessed by the USB module.
-	#pragma udata
+    #if defined(__18CXX)
+	    #pragma udata
+    #endif
 	USB_VOLATILE BYTE EP1OUTEvenBuffer[64];	//User buffer for receiving OUT packets sent from the host
 	USB_VOLATILE BYTE EP1OUTOddBuffer[64];	//User buffer for receiving OUT packets sent from the host
 	USB_VOLATILE BYTE EP2OUTEvenBuffer[64];	//User buffer for receiving OUT packets sent from the host
@@ -290,7 +295,9 @@
 
 
 //The below variables are only accessed by the CPU and can be placed anywhere in RAM.
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 USB_HANDLE EP1OUTEvenHandle;
 USB_HANDLE EP2OUTEvenHandle;
 USB_HANDLE EP3OUTEvenHandle;
@@ -442,7 +449,9 @@ void BlinkUSBStatus(void);
 
 
 /** DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /******************************************************************************
  * Function:        void main(void)
@@ -587,6 +596,13 @@ static void InitializeSystem(void)
     ANCON0 = 0xFF;                  // Default all pins to digital
     ANCON1 = 0xFF;                  // Default all pins to digital
     #endif
+    
+    #if defined(__32MX460F512L__)|| defined(__32MX795F512L__)
+    // Configure the PIC32 core for the best performance
+    // at the operating frequency. The operating frequency is already set to 
+    // 60MHz through Device Config Registers
+    SYSTEMConfigPerformance(60000000);
+	#endif
      
     #if defined(__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
 
@@ -1483,7 +1499,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((INT)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

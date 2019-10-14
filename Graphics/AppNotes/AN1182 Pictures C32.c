@@ -7,7 +7,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright(c) 2012 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -31,13 +31,20 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.2.12
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.45
  *****************************************************************************/
 
 /*****************************************************************************
  * SECTION:  Includes
  *****************************************************************************/
 #include <Graphics/Graphics.h>
+
+/*****************************************************************************
+ * SECTION:  Graphics Library Firmware Check
+ *****************************************************************************/
+#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
+#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#endif
 
 /*****************************************************************************
  * Converted Resources

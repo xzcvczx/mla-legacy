@@ -27,7 +27,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2010 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -37,7 +37,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -60,15 +60,14 @@
 #include "Graphics/DisplayDriver.h"
 #include "HardwareProfile.h"
 
-// Configuration bits
 #if defined(__dsPIC33F__) || defined(__PIC24H__)
-	_FOSCSEL(FNOSC_PRI);
-	_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
-	_FWDT(FWDTEN_OFF);
+_FOSCSEL(FNOSC_PRI);
+_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
+_FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-	#pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_20, FPLLIDIV = DIV_1, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
-	#pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
-	#pragma config CP = OFF, BWP = OFF, PWP = OFF    
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
+    #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #ifdef USE_COMM_PKT_MEDIA_USB
     #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
     #pragma config UPLLEN   = ON
@@ -76,11 +75,11 @@
 #else
     #if defined(__PIC24FJ256GB110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ256GA110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
+_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ128GA010__)
 _CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
@@ -88,12 +87,12 @@ _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
     #endif
 	#if defined (__PIC24FJ256GB210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif	
 #endif
@@ -118,18 +117,17 @@ extern const FONT_FLASH internalfont;
 // This picture is located in internal flash
 extern const IMAGE_FLASH   internalbitmap;
 
-// This font must be stored in external flash memory installed on
-// Graphics PICTail Plus board
-extern FONT_EXTERNAL        externalfont;
-
-// This bitmap must be stored in external flash memory installed on
-// Graphics PICTail Plus board
-extern IMAGE_EXTERNAL      externalbitmap;
+// External font and bitmap must be stored in external flash memory installed on
+// Graphics PICTail Plus board 
+//See "ExternalResource.h" included in MainDemo.h:
+// FONT_EXTERNAL        externalfont;
+// IMAGE_EXTERNAL      externalbitmap;
 
 /////////////////////////////////////////////////////////////////////////////
 // Function Prototypes
 /////////////////////////////////////////////////////////////////////////////
 void BoardInit(void);
+void CheckExternalFlashHex();
 
 /************************************************************************
 * Macros: SST39PMPInit()
@@ -169,6 +167,10 @@ void BoardInit(void);
 
 #define DEMODELAY 	2000
 
+#if defined (USE_COMM_PKT_MEDIA_USB)
+    extern USB_HANDLE USBGenericInHandle;
+#endif
+
 /* */
 
 int main(void)
@@ -177,31 +179,21 @@ int main(void)
 
     BoardInit();
 
-    #if defined (GFX_PICTAIL_V2)
-    // Initialize IOs related to parallel flash memory
-    // installed on Graphics PICTail Plus board 2
-    FLASHInit();
-    // Initialize graphics
-    InitGraph();
-    #else
     // Initialize graphics
     InitGraph();
     // Initialize flash installed on Graphics PICTail Plus board 3
     FLASHInit((DRV_SPI_INIT_DATA *)&SPI_Init_Data);
-    #endif
     
+    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+    AD1PCFGL = 0xffff;
+    #endif
+
     HardwareButtonInit();
+
+    CheckExternalFlashHex();
 
     while(1)
     {
-
-	    // check if programming is prompted    
-        if(GetHWButtonProgram() == HW_BUTTON_PRESS)
-        {
-	        // The ProgramFlash() function will not return. 
-	        // Application must be reset after programming.
-	        ProgramFlash();
-	    } 
 
         // Display text with font located in internal flash
         // Set current font
@@ -280,60 +272,62 @@ int main(void)
 /////////////////////////////////////////////////////////////////////////////
 void BoardInit(void)
 {
-    #if defined (PIC24FJ256DA210_DEV_BOARD)
+     #if defined(PIC24FJ256DA210_DEV_BOARD)
     
-	    _ANSG8 = 0; /* S1 */
-	    _ANSE9 = 0; /* S2 */
-	    _ANSB5 = 0; /* S3 */
+    _ANSG8 = 0; /* S1 */
+    _ANSE9 = 0; /* S2 */
+    _ANSB5 = 0; /* S3 */
         
     #else
+
     /////////////////////////////////////////////////////////////////////////////
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
     #ifndef MEB_BOARD
-	    LATBbits.LATB15 = 0;
-	    TRISBbits.TRISB15 = 0;
+    LATBbits.LATB15 = 0;
+    TRISBbits.TRISB15 = 0;
     #endif
+
     #endif
 
     /////////////////////////////////////////////////////////////////////////////
     #if defined(__dsPIC33F__) || defined(__PIC24H__)
 
-	    // Configure Oscillator to operate the device at 40Mhz
-	    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-	    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-	    PLLFBD = 38;                    // M=40
-	    CLKDIVbits.PLLPOST = 0;         // N1=2
-	    CLKDIVbits.PLLPRE = 0;          // N2=2
-	    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
-	
-	    // Disable Watch Dog Timer
-	    RCONbits.SWDTEN = 0;
-	
-	    // Clock switching to incorporate PLL
-	    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
-	
-	    // Oscillator with PLL (NOSC=0b011)
-	    __builtin_write_OSCCONL(0x01);  // Start clock switching
-	    while(OSCCONbits.COSC != 0b011);
-	
-	    // Wait for Clock switch to occur	
-	    // Wait for PLL to lock
-	    while(OSCCONbits.LOCK != 1)
-	    { };
-	    
-    #elif defined(__PIC32MX__)
-    
-	    INTEnableSystemMultiVectoredInt();
-    	SYSTEMConfig(GetSystemClock(), SYS_CFG_WAIT_STATES|SYS_CFG_PCACHE);
-    	
-    #endif
+    // Configure Oscillator to operate the device at 40Mhz
+    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+    PLLFBD = 38;                    // M=40
+    CLKDIVbits.PLLPOST = 0;         // N1=2
+    CLKDIVbits.PLLPRE = 0;          // N2=2
+    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
 
-    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+    // Disable Watch Dog Timer
+    RCONbits.SWDTEN = 0;
+
+    // Clock switching to incorporate PLL
+    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
+
+    // Oscillator with PLL (NOSC=0b011)
+    __builtin_write_OSCCONL(0x01);  // Start clock switching
+    while(OSCCONbits.COSC != 0b011);
+
+    // Wait for Clock switch to occur	
+    // Wait for PLL to lock
+    while(OSCCONbits.LOCK != 1)
+    { };     
     
-    	AD1PCFGL = 0xffff;
-    	
+    // Set PMD0 pin functionality to digital
+    AD1PCFGL = AD1PCFGL | 0x1000;
+       
+    #elif defined(__PIC32MX__)
+    INTEnableSystemMultiVectoredInt();
+    SYSTEMConfigPerformance(GetSystemClock());
+    #ifdef MEB_BOARD
+        CPLDInitialize();
+        CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+        CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+    #endif
     #endif
 
      //The following are PIC device specific settings for the SPI channel
@@ -363,14 +357,6 @@ void BoardInit(void)
         SST25_SCK_TRIS = 0;
         SST25_SDO_TRIS = 0;
         SST25_SDI_TRIS = 1;
-        
-    #elif defined (GFX_PICTAIL_V2)
-        
-        MCHP25LC256_CS_LAT = 1;
-        MCHP25LC256_CS_TRIS = 0;
-        MCHP25LC256_SCK_TRIS  = 0;
-	    MCHP25LC256_SDO_TRIS = 0;
-	    MCHP25LC256_SDI_TRIS = 1;
 	    
 	#endif
 
@@ -404,6 +390,104 @@ void BoardInit(void)
 
     #endif
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// void CheckExternalFlashHex(void)
+/////////////////////////////////////////////////////////////////////////////
+void CheckExternalFlashHex()
+{
+    typedef struct 
+    {
+        UINT32 mchpSignature;
+        UINT32 mchpCRCData;
+    } CRC_CHECK; 
+
+    CRC_CHECK externalCRC, expectedCRC;   
+    WORD textHeight;
+    void *pFont;
+    XCHAR *pStr = NULL;
+    BOOL  setProgram = FALSE;
+    
+    XCHAR   msgStr1[] = {'P','r','o','g','r','a','m',' ','E','x','t','e','r','n','a','l',' ','D','a','t','a',0};
+    XCHAR   msgStr2[] = {'E','x','t','e','r','n','a','l',' ','d','a','t','a',' ','i','n','v','a','l','i','d','.',0};
+    XCHAR   msgStr3[] = {'P','l','e','a','s','e',' ','s','e','n','d',' ','d','a','t','a',' ','u','s','i','n','g',0};
+    XCHAR   msgStr4[] = {'"','E','x','t','e','r','n','a','l',' ','M','e','m','o','r','y',0};
+    XCHAR   msgStr5[] = {'P','r','o','g','r','a','m','m','e','r','"',' ','u','t','i','l','i','t','y',0};
+    XCHAR   msgStr6[] = {'N','o','w',' ','w','a','i','t','i','n','g',' ','f','o','r',' ','d','a','t','a',0};
+#ifdef USE_COMM_PKT_MEDIA_USB
+    XCHAR   msgStr7[] = {'v','i','a',' ','U','S','B','.','.','.',0};
+#else
+    XCHAR   msgStr7[] = {'v','i','a',' ','U','A','R','T','.','.','.',0};
+#endif
+
+    pFont = (void*) &internalfont;
+    SetFont(pFont);
+    textHeight = GetTextHeight(pFont);
+
+    // check if the CRC matches the data stored in the external flash memory
+    expectedCRC.mchpCRCData = GRC_CRC32_EXTERNAL_MARKER;
+    expectedCRC.mchpSignature = 0x5048434D;                // this is "MCHP"
+
+    // check if programming is prompted     
+    if(GetHWButtonProgram() == HW_BUTTON_PRESS)
+    {
+        pStr = msgStr1;
+        setProgram = TRUE;
+	} 
+
+    if (setProgram == FALSE)
+    {
+        ReadArray(GRC_CRC32_EXTERNAL_ADDR, (BYTE *)&externalCRC, 8);
+    
+        if  ((expectedCRC.mchpCRCData != externalCRC.mchpCRCData) || \
+             (expectedCRC.mchpSignature != externalCRC.mchpSignature))
+        {
+            // expected and read CRC does not match, proceed to programming flash first
+            // run the flash programming 
+            pStr = msgStr2;
+            setProgram = TRUE;
+        }
+    }
+    
+    if (setProgram == TRUE)
+    {
+        SetColor(BLACK);
+        ClearDevice();
+        SetColor(WHITE);
+        OutTextXY(10,10                 , pStr);
+        OutTextXY(10,10 + (textHeight*2), msgStr3);
+        OutTextXY(10,10 + (textHeight*3), msgStr4);
+        OutTextXY(10,10 + (textHeight*4), msgStr5);
+        OutTextXY(10,10 + (textHeight*5), msgStr6);
+        OutTextXY(10,10 + (textHeight*6), msgStr7);
+
+        // Call the external flash programming routine
+        ProgramFlash();
+
+#if defined (USE_COMM_PKT_MEDIA_USB)
+
+        // check if USB has sent reply to host then do a detach
+        while(!USBHandleBusy(USBGenericInHandle));
+        USBDeviceDetach();
+        // delay the reset to have time for the acknowledge data to be sent to the host side
+        DelayMs(100);
+
+#elif defined (USE_COMM_PKT_MEDIA_SERIAL_PORT)
+
+        // check if UART is still busy sending replies to the host
+        while(U2STAbits.TRMT);
+        // delay the reset to have time for the acknowledge data to be sent to the host side
+        DelayMs(10);
+
+#endif
+
+        // Force Reset to force the checking of the flash memory if programming was a success
+        Reset();
+    }
+    
+}	
+
+
 /*********************************************************************
 * Function: WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer)
 *
@@ -426,11 +510,9 @@ void BoardInit(void)
 * Note: none
 *
 ********************************************************************/
-
 // If there are several memories in the system they can be selected by IDs.
 // In this demo ID for memory chip installed on Graphics PICTail board is assumed to be 0.
 #define SST39_MEMORY    0
-
 /* */
 
 WORD ExternalMemoryCallback(IMAGE_EXTERNAL *memory, LONG offset, WORD nCount, void *buffer)
@@ -439,15 +521,8 @@ WORD ExternalMemoryCallback(IMAGE_EXTERNAL *memory, LONG offset, WORD nCount, vo
     {
 
         // Read data requested into buffer provided
-        #ifdef GFX_PICTAIL_V2
-        SST39PMPInit();
-        SST39ReadArray(memory->address + offset, // address to read from
-        (BYTE *)buffer, nCount);
-        LCDPMPInit();
-        #else
         SST25ReadArray(memory->address + offset, // address to read from
         (BYTE *)buffer, nCount);
-        #endif
     }
 
     return (nCount);

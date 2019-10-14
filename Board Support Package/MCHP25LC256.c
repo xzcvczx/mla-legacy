@@ -142,8 +142,15 @@ BYTE MCHP25LC256ReadByte(WORD address)
 ************************************************************************/
 void MCHP25LC256WriteWord(WORD data, DWORD address)
 {
-    WORD        shortAddress = (WORD) address;
+     WORD        shortAddress = (WORD) address;
      
+//        #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+//    AD1PCFGLbits.PCFG0 = 1;
+//    AD1PCFGLbits.PCFG6 = 1;
+//    AD1PCFGLbits.PCFG7 = 1;
+//    AD1PCFGLbits.PCFG8 = 1;
+//        #endif
+
     MCHP25LC256WriteByte(((WORD_VAL) data).v[0], shortAddress);
     MCHP25LC256WriteByte(((WORD_VAL) data).v[1], shortAddress + 1);
 }
@@ -163,6 +170,12 @@ WORD MCHP25LC256ReadWord(DWORD address)
     WORD        shortAddress = (WORD) address;
     WORD_VAL    temp;
 
+//        #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+//    AD1PCFGLbits.PCFG0 = 1;
+//    AD1PCFGLbits.PCFG6 = 1;
+//    AD1PCFGLbits.PCFG7 = 1;
+//    AD1PCFGLbits.PCFG8 = 1;
+//        #endif
     temp.v[0] = MCHP25LC256ReadByte(shortAddress);
     temp.v[1] = MCHP25LC256ReadByte(shortAddress + 1);
 

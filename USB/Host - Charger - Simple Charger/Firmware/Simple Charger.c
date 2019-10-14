@@ -87,6 +87,11 @@ The demo has been tested with these devices:
     #elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    #elif defined(__PIC24FJ64GB502__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+	_CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+	_CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+	_CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #endif
 
 #elif defined( __PIC32MX__ )
@@ -109,8 +114,6 @@ The demo has been tested with these devices:
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
-
 #else
 
     #error Cannot define configuration bits.
@@ -290,7 +293,14 @@ void InitializeVbusMonitor( void )
 {
     #if defined( __C30__)
         // Set up the A/D converter
-        AD1PCFGL    = 0xFEFF;       // Disable digital input on AN8
+        #if defined(__PIC24FJ256DA210__) 
+            //The over current detection of the PIC24FJ256DA210 development board is
+            //  not connected by default.
+        #elif defined(__PIC24FJ256GB210__)
+            ANSBbits.ANSB8 = 1;
+        #else
+            AD1PCFGL    = 0xFEFF;       // Disable digital input on AN8
+        #endif
         AD1CSSL     = 0x0000;       // No scan
         AD1CHS      = 0x0008;       // Mux A uses AN8
         AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 5*Tcy

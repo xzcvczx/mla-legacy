@@ -41,6 +41,7 @@
          Also added some additional error checking.
   1.3.0  Expanded flash memory pointer size on PIC18 to 24-bits.  This
          allows the MSD volume to exceed 64kB on large flash memory devices.
+  1.3.6   Modified "FSConfig.h" to "FSconfig.h" in '#include' directive.
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -50,7 +51,7 @@
 #include "string.h"
 #include "MDD File System/Internal Flash.h"
 #include "HardwareProfile.h"
-#include "FSConfig.h"
+#include "FSconfig.h"
 
 /*************************************************************************/
 /*  Note:  This file is included as a template of a C file for           */

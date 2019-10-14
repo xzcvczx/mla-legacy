@@ -118,7 +118,9 @@ typedef enum
     WF_CP_ELEMENT_SECURITY 	        = 3,
     WF_CP_ELEMENT_NETWORK_TYPE  	= 4,
     WF_CP_ELEMENT_ADHOC_BEHAVIOR	= 5,
-    WF_CP_ELEMENT_WEP_KEY_INDEX     = 6
+    WF_CP_ELEMENT_WEP_KEY_INDEX     = 6,
+    WF_CP_ELEMENT_SSID_TYPE       	= 7,
+    WF_CP_ELEMENT_WEPKEY_TYPE		= 8
 } tCPElementIds;
 
 /*-------------------------------------------------------------*/
@@ -202,8 +204,11 @@ typedef enum
     PARAM_STATUE_INFO                 = 27,      /* MAC State information                                       */
 	PARAM_SECURITY_CONTROL            = 28,      /* 2 byte data structure to enable/disable encryption          */
     PARAM_FACTORY_SET_TX_MAX_POWER    = 29,      /* gets the factory-set tx max power level                     */
-    PARAM_MRF24WB0M                   = 30       /* a set enables MRF24WB0M Mode, a get gets the version       */                                                
-
+    PARAM_MRF24WB0M                   = 30,       /* a set enables MRF24WB0M Mode, a get gets the version       */  
+    PARAM_BROADCAST_PROBE_RESPONSE    = 31,       /* Allows broadcast probe response in Adhoc mode       */   
+    PARAM_AGGRESSIVE_PS    			  = 32,       /* Allows to turn off RF power quicker       */ 
+    PARAM_CONNECT_CONTEXT             = 33,       /* gets current connection status      */ 
+    PARAM_DEFERRED_POWERSAVE          = 34       /* delay power start after dhcp done      */ 
 } tWFParam;
 
 
@@ -351,6 +356,14 @@ void WFFreeMgmtTx(void);
 BOOL SendRAWManagementFrame(UINT16 bufLen);
 
 void WFEnableMRF24WB0MMode(void);
+
+void WFEnableBroadcastProbeResponse(void);
+void WFEnableDeferredPowerSave(void);
+
+#if defined (WF_AGGRESSIVE_PS)
+void WFEnableAggressivePowerSave(void);
+#endif
+
 void WFGetMRF24WB0MVersion(UINT8 *p_version);
 
 void IgnoreNextMgmtResult();

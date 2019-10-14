@@ -11,7 +11,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -21,7 +21,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -52,7 +52,7 @@
 // Configuration bits
 #if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 #elif defined(__PIC32MX__)
     #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
@@ -422,7 +422,7 @@ int main(void)
     SetPaletteBpp(8);
 #endif
 
-    SetPalette((void*)&_GOL_Palette_Demo, 0, 256);
+    SetPalette((void*)&GOL_Palette_Demo, 0, 256);
 
     EnablePalette();
 
@@ -720,16 +720,17 @@ WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 WORD GOLDrawCallback(void)
 {
     static DWORD    prevTick = 0;                           // keeps previous value of tick
-    static DWORD    prevTime = 0;                           // keeps previous value of time tick
     static BYTE     direction = 1;                          // direction switch for progress bar
     static BYTE     arrowPos = 0;                           // arrows pictures position for custom control demo
     static WORD     wDelay = 40;                           // progress bar delay variable
     OBJ_HEADER      *pObj = NULL;                           // used to change text in Window
     SLIDER          *pSld;                                  // used when updating date and time
     LISTBOX         *pLb;                                   // used when updating date and time
-    WORD            i;
 
     #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(GFX_PICTAIL_LCC))
+
+    static DWORD    prevTime = 0;                           // keeps previous value of time tick
+    WORD            i;
 
 	// check first of the objects for the time display is already created.
 	if (GOLFindObject(ID_STATICTEXT1) != NULL) {
@@ -1318,7 +1319,9 @@ void StartScreen(void)
 void CreatePage(XCHAR *pText)
 {
     OBJ_HEADER  *obj;
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(GFX_PICTAIL_LCC))
     SHORT       i;
+#endif
 
     WndCreate
     (
@@ -1358,7 +1361,7 @@ void CreatePage(XCHAR *pText)
             RightArrowStr,  // RIGHT arrow as text
             navScheme
         );                  // use navigation scheme
-    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(GFX_PICTAIL_LCC))
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(GFX_PICTAIL_LCC))
     RTCCProcessEvents();    // update the date and time strings
     i = 0;
     while(i < 12)
@@ -1382,7 +1385,7 @@ void CreatePage(XCHAR *pText)
         dateTimeStr,                            // text is from time value
         timeScheme
     );                  // alternate scheme
-    #endif
+#endif
     GOLSetFocus(obj);   // set focus for the button
 }
 
@@ -3533,6 +3536,8 @@ WORD RemovePullDownMenu(void)
 
     // redraw objects that were overlapped by pulldown menu
     GOLRedrawRec(pDwnLeft, pDwnTop, pDwnRight, pDwnBottom);
+    // reset the window so it will not be redrawn
+    ClrState(GOLFindObject(ID_WINDOW1), WND_DRAW);
 
     // must reset the pressed button, this code is more compact than searching
     // which one of the three is pressed.
@@ -5172,17 +5177,7 @@ void InitializeBoard(void)
             AD1PCFGLbits.PCFG7 = 1;
             AD1PCFGLbits.PCFG8 = 1;
         #endif
-        
-    #elif defined(__PIC32MX__)
-       #if !defined(GFX_PICTAIL_LCC)
-        INTEnableSystemMultiVectoredInt();
-        SYSTEMConfigPerformance(GetSystemClock());
-       #endif
-        #ifdef MEB_BOARD
-            CPLDInitialize();
-            CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
-            CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
-        #endif // #ifdef MEB_BOARD
+
     #endif // #if defined(__dsPIC33F__) || defined(__PIC24H__)
     
 
@@ -5226,13 +5221,6 @@ void InitializeBoard(void)
         SST25_SDO_TRIS = 0;
         SST25_SDI_TRIS = 1;
         
-    #elif defined (GFX_PICTAIL_V2)
-        
-        MCHP25LC256_CS_LAT = 1;
-        MCHP25LC256_CS_TRIS = 0;
-        MCHP25LC256_SCK_TRIS  = 0;
-	    MCHP25LC256_SDO_TRIS = 0;
-	    MCHP25LC256_SDI_TRIS = 1;
 	    
 	#endif
 

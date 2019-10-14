@@ -38,8 +38,7 @@
  * SECTION: Includes
  *****************************************************************************/
 #include "Graphics/Graphics.h"
-#include "icons.h"
-#include "MainDemo.h"//** Remove when complete!!!!!!!!!
+#include "MainDemo.h"
 #include "gfx_schemes.h"
 #include "gfx_strings.h"
 #include "gfx_screens.h"
@@ -145,21 +144,6 @@ void CreateMainScreen(void)
         currentScheme
     );                      // use alternate scheme 
 
-#if !defined(PIC_SK) && !defined(__PIC32MX360F512L__)
-    BtnCreate
-    (
-        MAIN_SCREEN_ID_UPLOAD_BUT,             // button ID
-        5,
-        (MAIN_SCREEN_BUTTON_HEIGHT * 7) +  50,
-        (GetMaxX() >> 2) - 5,
-        (MAIN_SCREEN_BUTTON_HEIGHT * 8) +  50,     // dimension
-        MAIN_SCREEN_BUTTON_RADIUS,                     // set radius
-        BTN_DRAW, // draw a vertical capsule button
-        NULL,  // no bitmap
-        (XCHAR *)uploadStr,                    // "OFF",      	// text
-        currentScheme
-    );                      // use alternate scheme 
-#endif
     AcCreate
     (
         MAIN_SCREEN_ID_ANALOG_CLOCK,                         // button ID

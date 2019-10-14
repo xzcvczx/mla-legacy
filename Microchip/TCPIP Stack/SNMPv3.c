@@ -1,3 +1,48 @@
+/*********************************************************************
+ *
+ *  Simple Network Management Protocol (SNMP) Version 3 Agent 
+ *  
+ *  Module for Microchip TCP/IP Stack
+ *	 -Provides SNMPv3 API for doing stuff
+ *	
+ *	-Reference: RFCs 3410, 3411, 3412, 3413, 3414 
+ *********************************************************************
+ * FileName:        SNMPv3.c
+ * Dependencies: TCP/IP stack
+ * Processor:       PIC32
+ * Compiler:        Microchip C32 
+ *
+ * Software License Agreement
+ *
+ * Copyright (C) 2012 Microchip Technology Inc.  All rights
+ * reserved.
+ *
+ * Microchip licenses to you the right to use, modify, copy, and
+ * distribute:
+ * (i)  the Software when embedded on a Microchip microcontroller or
+ *      digital signal controller product ("Device") which is
+ *      integrated into Licensee's product; or
+ * (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+ *		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device
+ *		used in conjunction with a Microchip ethernet controller for
+ *		the sole purpose of interfacing with the ethernet controller.
+ *
+ * You should refer to the license agreement accompanying this
+ * Software for additional information regarding your rights and
+ * obligations.
+ *
+ * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+ * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+ * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+ * MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+ * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+ * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+ * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+ * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+ * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
+ ********************************************************************/
 
 #include "TCPIPConfig.h"
 
@@ -8,30 +53,29 @@
 #include "TCPIP Stack/UDP.h"
 
 
-typedef struct 
-{
-	UINT8 privAndAuthFlag:2;
-    UINT8 reportableFlag :1;
-}snmpV3MsgFlagsBitWise;
-
-
 /*   
 SNMP_ENGINE_MAX_MSG_SIZE is determined as the minimum of the max msg size
 values supported among all of the transports available to and supported by the engine. 
 */
 #define SNMP_ENGINE_MAX_MSG_SIZE	1024 
-#define SET_SNMPV3_GET_PDU_INDEX  (gSNMPv3ScopedPduRequestBuf.length++)
 
-
-/*header+MSGID +msgMAXSIZE +msg flag +security model */
+/*Length of the SNMPv3 msg header(x) = Header length (2 bytes) 
++ MSGID size (type(1 byte) + length of value(1 byte)+4 bytes value)
++ msgMAXSIZE(type + length of value +4 bytes value) 
++ msg flag(type + length of value +1 byte value)
++ security model type(type + length of value +1 byte value) */
 #define MSGGLOBAL_HEADER_LEN(x)	( x= (2 \
 							  +1+1+4 \
 							  +1+1+4 \
 							  +1+1+1  \
 							  +1+1+1)\
 						    )
-/*header+ engineID+ engine boot+ engine time+security name+authentication parameters
-+privacy parameters*/
+/*Length of SNMPv3 authoratative msg header length = 
+Header length ( 2 + 2 bytes)  + engineID ( snmpEngnIDLength bytes)
++ engine boot( 4 bytes)+ engine time(4 bytes)
++security name (securityPrimitivesOfIncomingPdu value)
++authentication parameters (snmpOutMsgAuthParamLen value)
++privacy parameters (snmpOutMsgAuthParamLen value)*/
 #define MSG_AUTHORITATIVE_HEADER_LEN(x)   ( x=(2+2 \
 								     +1+1+snmpEngnIDLength \
 								     +1+1+4 \
@@ -46,36 +90,39 @@ values supported among all of the transports available to and supported by the e
 UINT8 snmpEngineID[32]; //Reserving 32 bytes for the snmpEngineID as the octet string length can vary form 5 to 32 
 UINT32 snmpEngineBoots=0;//The number of times that the SNMP engine has (re-)initialized itself since snmpEngineID was last configured.
 DWORD_VAL snmpEngineTime;//The number of seconds since the value of the snmpEngineBoots object last changed
-DWORD_VAL snmpEngineMaxMessageSize;
+DWORD_VAL snmpEngineMaxMessageSize; //The maximum message size the SNMP engine can handle. 
 
 
-UINT8 snmpEngnIDLength=0;
-DWORD snmpEngineTimeOffset=0;
-DWORD_VAL authoritativeSnmpEngineBoots;
+UINT8 snmpEngnIDLength=0; // Engine ID length of the SNMP Engine
+DWORD snmpEngineTimeOffset=0; // Stores the time value in seconds since SNMP Engine reset
+
+//The number of times that the authoritative SNMP engine has (re-)initialized itself since its snmpEngineID was last configured.
+DWORD_VAL authoritativeSnmpEngineBoots; 
+
+//The number of seconds since the value of the authoritativeSnmpEngineBoots object last changed
 DWORD_VAL authoritativeSnmpEngineTime;
 
-UINT8 snmpInMsgAuthParamStrng[12];
-UINT8 snmpInMsgAuthParamLen=12;
-UINT8 snmpInMsgPrvParamStrng[8];
-UINT8 snmpInMsgPrivParamLen=8;
+UINT8 snmpInMsgAuthParamStrng[12]; //Reserving 12 bytes for the incoming SNMPv3 msg authentication parameters.
+UINT8 snmpInMsgAuthParamLen=12; //Incoming SNMPv3 msg authentication parameters string is 12 bytes long.
+UINT8 snmpInMsgPrvParamStrng[8]; //Reserving 8 bytes for the incoming SNMPv3 msg privacy parameters.
+UINT8 snmpInMsgPrivParamLen=8; //Incoming SNMPv3 msg privacy parameters string is 8 bytes long.
 
-UINT8 snmpOutMsgAuthParamStrng[12];
-UINT8 snmpOutMsgAuthParamLen=12;
-UINT8 snmpOutMsgPrvParamStrng[8];
-UINT8 snmpOutMsgPrivParamLen=8;
+UINT8 snmpOutMsgAuthParamStrng[12]; //Reserving 12 bytes for the outgoing SNMPv3 msg authentication parameters.
+UINT8 snmpOutMsgAuthParamLen=12; //Outgoing SNMPv3 msg authentication parameters string is 12 bytes long.
+UINT8 snmpOutMsgPrvParamStrng[8]; //Reserving 8 bytes for the outgoing SNMPv3 msg privacy parameters.
+UINT8 snmpOutMsgPrivParamLen=8; //Outgoing SNMPv3 msg privacy parameters string is 8 bytes long.
 
-UINT16 snmpMsgBufSeekPos=0;
-UINT16 gSNMPv3ScopedPduDataPos=0;
-WORD gSnmpv3UserDBIndex=0; 
-WORD_VAL gUsmStatsEngineID={0}; 	
+UINT32 snmpEngineSecurityModel=0;//Type of security model used. Value Maximum range (2^31-1), RFC3411
+UINT32 snmpEngineMsgProcessModel=0;//Type of Message processing model used. Value Maximum range (2^31-1), RFC3411
+UINT8  snmpSecurityLevel=0;  // Type of security. noAuthNoPriv(0),AuthNoPriv(1),AuthPriv(3)
+UINT8  snmpResponseSecurityFlag=0; //Type of Security for outgoing message in response to the incoming message.
 
-UINT32 snmpEngineSecurityModel=0;//Maximum range (2^31-1), RFC3411    ///done
-UINT32 snmpEngineMsgProcessModel=0;//Maximum range (2^31-1), RFC3411 ///done
-UINT8  snmpSecurityLevel=0; 
-UINT8  snmpResponseSecurityFlag=0;
+DWORD_VAL incomingSnmpPDUmsgID; // Retrived Incoming Msg ID value from PDU
 
-DWORD_VAL incomingSnmpPDUmsgID;
-struct dispatcherProcessPdu incomingPdu;
+
+struct dispatcherProcessPdu incomingPdu;//Incoming PDU details
+
+//Incoming PDU Security primitive details.
 SecuritySysProcessIncomingMsg securityPrimitivesOfIncomingPdu;
 
 extern APP_CONFIG AppConfig;
@@ -83,19 +130,36 @@ extern void SaveAppConfig(void);
 extern WORD SNMPTxOffset;
 extern WORD msgSecrtyParamLenOffset;
 
+//Stored request scoped pdu details
 SNMPV3MSGDATA gSNMPv3ScopedPduRequestBuf ={NULL,0,0,0};
+//Processed response scoped pdu details
 SNMPV3MSGDATA gSNMPv3ScopedPduResponseBuf = {NULL,0,0,0};
+//Response PDU construction offset details
 SNMPV3MSGDATA gSNMPv3PduHeaderBuf = {NULL,0,0,0};
+//TRAP message PDU header construction offset details
 SNMPV3MSGDATA gSNMPv3TrapMsgHeaderBuf = {NULL,0,0,0};
+//TRAP scoped PDU construction offset details
 SNMPV3MSGDATA gSNMPv3TrapScopedPduResponseBuf = {NULL,0,0,0};
 
+//Dynamic memory stub and PDU details for Incoming stored PDU
 SNMPV3_REQUEST_WHOLEMSG gSnmpV3InPduWholeMsgBuf={NULL,NULL,{0},{0},0,0,0,0};
+//Dynamic memory stub details and constructed outgoing stored PDU details
 SNMPV3_RESPONSE_WHOLEMSG gSnmpV3OUTPduWholeMsgBuf={NULL,NULL,{0},{0},0,0,0,0};
+//Dynamic memory stub details and constructed trap PDU details
 SNMPV3_RESPONSE_WHOLEMSG gSnmpV3TrapOUTPduWholeMsgBuf={NULL,NULL,{0},{0},0,0,0,0};
+
+//Offset to read PDU data bytes for processing from dynamic memory stub
+UINT16 snmpMsgBufSeekPos=0;  
+//Offset to read scoped PDU data bytes for processing from dynamic memory stub
+UINT16 gSNMPv3ScopedPduDataPos=0;
+//Index to the particular reference configured in User security model data base snmpV3UserDataBase.
+WORD gSnmpv3UserDBIndex=0;
+//Global variable to find out how many times SNMPv3 engine id has been validated
+WORD_VAL gUsmStatsEngineID={0}; 
 
 
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
-//snmv3 global database for trap table
+//SNMPv3 global configuration database to be used for trap notification
 snmpV3TrapConfigDataBase gSnmpv3TrapConfigData[SNMPV3_USM_MAX_USER]=
 	{ \
 	{"microchip",SNMPV3_MSG_PROCESSING_MODEL,SNMPV3_USM_SECURITY_MODEL,AUTH_PRIV}, \
@@ -117,8 +181,7 @@ void Snmpv3SetErrorStatus(WORD errorStatusOffset,
                            SNMP_ERR_STATUS errorStatus,
                            BYTE errorIndex,SNMPV3MSGDATA *dynScopedPduPutBuf);
 BYTE Snmpv3IsValidAuthStructure(WORD* dataLen);
-BOOL _Snmpv3IsValidInt(UINT8* wholeMsgPtr,WORD* pos, DWORD* val );
-BOOL _IsSNMPv3ValidStructure(UINT8* wholeMsgPtr,WORD* pos, WORD* dataLen );
+
 BYTE _Snmpv3IsValidAuthStructure(WORD* dataLen);
 
 
@@ -360,6 +423,7 @@ DWORD Snmpv3TrackAuthEngineTimeTick(void)
 	would also change. Hence while using this API to change the snmpEngineID dynamically,
 	care should be taken to update the new localized keys at the agent as well as at the manager.
 ***************************************************************************/
+
 void Snmpv3FormulateEngineID(UINT8 fifthOctectIdentifier )
 {
 
@@ -850,10 +914,6 @@ SNMP_ERR_STATUS Snmpv3MsgProcessingModelProcessPDU(BYTE inOutPdu)
 	}
 	return SNMP_NO_ERR;
 }
-
-
-
-
 
 
 void Snmpv3UsmAuthoritativeEngnKeyLocalization(void)
@@ -2414,7 +2474,7 @@ BOOL Snmpv3IsValidInt(DWORD* val)
 
 /****************************************************************************
   Function:
-	BOOL _Snmpv3IsValidInt(UINT8 * wholeMsgPtr,WORD* pos, DWORD* val )
+	BOOL _Snmpv3IsValidInt(UINT8 * wholeMsgPtr,WORD* pos, DWORD* val)
 	
   Summary:
   	Verifies variable datatype as INT and retrieves its value.
@@ -2439,7 +2499,7 @@ BOOL Snmpv3IsValidInt(DWORD* val)
 	None.
 ***************************************************************************/
 
-BOOL _Snmpv3IsValidInt(UINT8 * wholeMsgPtr,WORD* pos, DWORD* val )
+BOOL _Snmpv3IsValidInt(UINT8 * wholeMsgPtr,WORD* pos, DWORD* val)
 {
 	DWORD_VAL tempData;
     UINT8	tempLen=0;
@@ -2524,7 +2584,7 @@ BOOL IsSNMPv3ValidStructure(WORD* dataLen)
 
 /****************************************************************************
   Function:
-	BOOL _IsSNMPv3ValidStructure(UINT8* wholeMsgPtr,UINT16* pos, WORD* dataLen )
+	BOOL _IsSNMPv3ValidStructure(UINT8* wholeMsgPtr,WORD* pos, WORD* dataLen )
 	
   Summary:
   	Decode variable length structure.
@@ -2548,7 +2608,8 @@ BOOL IsSNMPv3ValidStructure(WORD* dataLen)
   Remarks:
 	None.
 ***************************************************************************/
-BOOL _IsSNMPv3ValidStructure(UINT8* wholeMsgPtr,UINT16* pos, WORD* dataLen )
+
+BOOL _IsSNMPv3ValidStructure(UINT8* wholeMsgPtr,WORD* pos, WORD* dataLen )
 {
     DWORD_VAL tempLen;
 

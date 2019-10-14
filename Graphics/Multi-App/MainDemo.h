@@ -103,28 +103,27 @@
 #endif
     #include "SlideShowDemo.h"
     #include "rtcc.h"
-#ifdef USE_COMM_PKT_MEDIA_SERIAL_PORT
+#if (defined(EXPLORER_16) || defined(PIC24FJ256DA210_DEV_BOARD)) && defined (USE_COMM_PKT_MEDIA_SERIAL_PORT)
     #include "FlashProgrammer.h"
 #endif
     #include "cpld.h"
 #if defined(EXPLORER_16) || defined(PIC24FJ256DA210_DEV_BOARD)
-	#include "ResourcesExternalSPIFlash.h"
+	#include "ExternalResource.h"
 #endif
 #if defined(__C30__)
 	#if defined(dsPIC33E_SK)
-    	#include "ResourcesInternalFlash Set2 C30.h"
+    	#include "InternalResourceSet2C30.h"
     #endif
-	#include "ResourcesInternalFlash C30.h"
+	#include "InternalResourceC30.h"
 #elif defined(__PIC32MX__)
     #if !defined(EXPLORER_16)
-    	#include "ResourcesInternalFlash Set2 C32.h"
+    	#include "InternalResourceSet2C32.h"
     #endif
-	#include "ResourcesInternalFlash C32.h"
+	#include "InternalResourceC32.h"
 #endif
 
- //   #include "MainDemoStrings.h"
-
-/////////////////////////////////////////////////////////////////////////////
+    #include "ExternalMemory.h"
+	/////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED
 /////////////////////////////////////////////////////////////////////////////
 extern const FONT_FLASH GOLFontDefault; // default GOL font
@@ -211,6 +210,24 @@ WORD    ExternalMemoryCallback(IMAGE_EXTERNAL *memory, LONG offset, WORD nCount,
  Output: none
 ************************************************************************/
 void    CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pTextD);
+
+/*********************************************************************
+* Function: void ShowError(XCHAR *pStr)
+*
+* PreCondition: none
+*
+* Input:  pStr - pointer to the error message
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: This function shows the equivalent blue screen of death.
+*
+* Note: none
+*
+********************************************************************/
+void ShowError(XCHAR *pStr);
 
 // Macros to enable demos and features
 #if !defined (__PIC24FJ128GA010__) 		// disable this mode when using PIC24FJ128GA010 because of limited flash space

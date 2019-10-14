@@ -160,8 +160,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON           // Debugger Disabled for Starter Kit
-
+   
 #else
 
     #error Cannot define configuration bits.
@@ -265,7 +264,7 @@ BYTE FirstKeyPressed ;
 
 BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
 {
-    switch( event )
+    switch( (INT)event )
     {
         case EVENT_VBUS_REQUEST_POWER:
             // The data pointer points to a byte that represents the amount of power

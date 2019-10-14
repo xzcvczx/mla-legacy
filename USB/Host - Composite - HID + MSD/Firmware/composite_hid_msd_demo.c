@@ -189,7 +189,7 @@ ADG          15-Sep-2008 First release
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
+    
 
 #else
 
@@ -523,7 +523,7 @@ void InitializeTimer( void )
 
 BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
 {
-    switch( event )
+    switch( (INT)event )
     {
         case EVENT_VBUS_REQUEST_POWER:
             // The data pointer points to a byte that represents the amount of power

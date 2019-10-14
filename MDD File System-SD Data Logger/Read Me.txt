@@ -1,0 +1,2 @@
+This demo is no longer supported.For the SD card data logger demo, please refer the below folder:-
+"./Microchip Solutions/USB/Device - Mass Storage - SD Card data logger".

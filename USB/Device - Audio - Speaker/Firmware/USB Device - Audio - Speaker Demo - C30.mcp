@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ64GB004
+device=PIC24FJ256GB110
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -113,8 +113,8 @@ file_016=HardwareProfile - PIC24FJ64GB004 PIM.h
 file_017=..\..\..\Microchip\USB\usb_device_local.h
 file_018=HardwareProfile - PIC24FJ256GB210 PIM.h
 file_019=HardwareProfile - PIC24FJ256DA210 Development Board.h
-file_020=..\Getting Started - Running the Device - Audio Speaker - Demo.htm
-file_021=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_020=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_021=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

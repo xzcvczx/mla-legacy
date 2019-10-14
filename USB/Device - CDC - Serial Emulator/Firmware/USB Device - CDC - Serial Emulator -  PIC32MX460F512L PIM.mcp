@@ -109,8 +109,8 @@ file_015=..\..\..\Microchip\Include\USB\usb_function_cdc.h
 file_016=..\..\..\Microchip\Include\USB\usb_hal.h
 file_017=HardwareProfile - PIC32MX460F512L PIM.h
 file_018=..\..\..\Microchip\USB\usb_device_local.h
-file_019=..\Getting Started - Running the Device - CDC - Serial Emulator.htm
-file_020=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_019=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_020=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

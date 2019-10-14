@@ -335,13 +335,15 @@ void RTCCInit(void)
     RCFGCALbits.RTCEN = 1;
     #endif
     mRTCCOn();
-    mRTCCSetSec(0x01);
-    mRTCCSetMin(0x10);
-    mRTCCSetHour(0x10);
-    mRTCCSetWkDay(0x5);
-    mRTCCSetMonth(0x02);
-    mRTCCSetYear(0x08);
-    mRTCCSetDay(0x15);
+
+    mRTCCSetSec(mRTCCBin2Dec(RTCC_DEFAULT_SECOND));
+    mRTCCSetMin(mRTCCBin2Dec(RTCC_DEFAULT_MINUTE));
+    mRTCCSetHour(mRTCCBin2Dec(RTCC_DEFAULT_HOUR));
+    mRTCCSetWkDay(mRTCCBin2Dec(RTCC_DEFAULT_WEEKDAY));
+    mRTCCSetMonth(mRTCCBin2Dec(RTCC_DEFAULT_MONTH));
+    mRTCCSetYear(mRTCCBin2Dec(RTCC_DEFAULT_YEAR));
+    mRTCCSetDay(mRTCCBin2Dec(RTCC_DEFAULT_DAY));
+
     mRTCCSet();
 }
 

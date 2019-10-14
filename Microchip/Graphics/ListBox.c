@@ -416,6 +416,11 @@ WORD LbTranslateMsg(void *pObj, GOL_MSG *pMsg)
     {
 
         // Check if it falls in list box borders
+		// We do not check any touch events here so application can have 
+		// the versatility to define the action on any of the touch events that 
+		// will be peformed on the list box. Once application sees the LB_MSG_TOUCHSCREEN
+		// reply (returned by this translate message function when touch was performed 
+		// on the list box), application can define any behavior for the list box.
         if
         (
             (pLb->hdr.left < pMsg->param1) &&
@@ -432,6 +437,11 @@ WORD LbTranslateMsg(void *pObj, GOL_MSG *pMsg)
     if(pMsg->type == TYPE_KEYBOARD)
         if((WORD)pMsg->param1 == pLb->hdr.ID)
         {
+			// Check of the event is done here to properly detect that a keyscan event occured.
+            // LB_MSG_MOVE can move the highlight (selection) of the items on the list box when 
+			// scan up or down was performed (example: pressing up or down keys) or LB_MSG_SEL  
+            // can indicate to the application that the highlighted item is selected by the user.
+            // Application can then call the application function that corresponds to the selected item.
             if(pMsg->uiEvent == EVENT_KEYSCAN)
             {
                 if((pMsg->param2 == SCAN_UP_PRESSED) || (pMsg->param2 == SCAN_DOWN_PRESSED))
@@ -588,6 +598,12 @@ WORD LbDraw(void *pObj)
                 break;
 
             case LB_STATE_START:
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_SetupDrawUpdate( pLb->hdr.left,
+                                            pLb->hdr.top,
+                                            pLb->hdr.right,
+                                            pLb->hdr.bottom);
+#endif
                 /////////////////////////////////////////////////////////////////////
                 // REMOVE FROM SCREEN
                 /////////////////////////////////////////////////////////////////////
@@ -596,6 +612,13 @@ WORD LbDraw(void *pObj)
                     SetColor(pLb->hdr.pGolScheme->CommonBkColor);
                     if(!Bar(pLb->hdr.left, pLb->hdr.top, pLb->hdr.right, pLb->hdr.bottom))
                         return (0);
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pLb->hdr.left,
+                                                    pLb->hdr.top,
+                                                    pLb->hdr.right,
+                                                    pLb->hdr.bottom);
+#endif
+
                     return (1);
                 }
     
@@ -677,6 +700,12 @@ WORD LbDraw(void *pObj)
                 {
                     state = LB_STATE_START;
                     SetClip(CLIP_DISABLE);
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pLb->hdr.left,
+                                                    pLb->hdr.top,
+                                                    pLb->hdr.right,
+                                                    pLb->hdr.bottom);
+#endif
                     return (1);
                 }
     

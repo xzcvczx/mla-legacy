@@ -11,33 +11,48 @@
 include Makefile
 
 # Environment
-MKDIR=mkdir -p
+SHELL=cmd.exe
+# Adding MPLAB X bin directory to path
+PATH:=C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/:$(PATH)
+MKDIR=gnumkdir -p
 RM=rm -f 
+MV=mv 
 CP=cp 
-# Macros
-CND_CONF=PIC18F14K50
 
+# Macros
+CND_CONF=pic18f14k50
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 IMAGE_TYPE=debug
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.cof
+OUTPUT_SUFFIX=cof
+DEBUGGABLE_SUFFIX=cof
+FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 else
 IMAGE_TYPE=production
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.cof
+OUTPUT_SUFFIX=hex
+DEBUGGABLE_SUFFIX=cof
+FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 endif
+
 # Object Directory
 OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
+
 # Distribution Directory
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
+# Object Files Quoted if spaced
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1472/hid.o ${OBJECTDIR}/_ext/1472/main.o ${OBJECTDIR}/_ext/1472/usb9.o ${OBJECTDIR}/_ext/1472/usbctrltrf.o ${OBJECTDIR}/_ext/1472/usbdrv.o ${OBJECTDIR}/_ext/1472/usbdsc.o ${OBJECTDIR}/_ext/1472/usbmmap.o ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1472/hid.o.d ${OBJECTDIR}/_ext/1472/main.o.d ${OBJECTDIR}/_ext/1472/usb9.o.d ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d ${OBJECTDIR}/_ext/1472/usbdrv.o.d ${OBJECTDIR}/_ext/1472/usbdsc.o.d ${OBJECTDIR}/_ext/1472/usbmmap.o.d ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d
+
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/1472/main.o ${OBJECTDIR}/_ext/1472/usbdrv.o ${OBJECTDIR}/_ext/1472/usbctrltrf.o ${OBJECTDIR}/_ext/1472/usbmmap.o ${OBJECTDIR}/_ext/1472/usb9.o ${OBJECTDIR}/_ext/1472/usbdsc.o ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o ${OBJECTDIR}/_ext/1472/hid.o
+OBJECTFILES=${OBJECTDIR}/_ext/1472/hid.o ${OBJECTDIR}/_ext/1472/main.o ${OBJECTDIR}/_ext/1472/usb9.o ${OBJECTDIR}/_ext/1472/usbctrltrf.o ${OBJECTDIR}/_ext/1472/usbdrv.o ${OBJECTDIR}/_ext/1472/usbdsc.o ${OBJECTDIR}/_ext/1472/usbmmap.o ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o
 
 
 CFLAGS=
 ASFLAGS=
 LDLIBSOPTIONS=
 
-OS_ORIGINAL="MINGW32_NT-6.1"
+# Path to java used to run MPLAB X when this makefile was created
+MP_JAVA_PATH="C:\Program Files (x86)\Java\jre6/bin/"
 OS_CURRENT="$(shell uname -s)"
 ############# Tool locations ##########################################
 # If you copy a project from one host to another, the path where the  #
@@ -45,41 +60,27 @@ OS_CURRENT="$(shell uname -s)"
 # If you open this project with MPLAB X in the new host, this         #
 # makefile will be regenerated and the paths will be corrected.       #
 #######################################################################
-MP_CC=C:\\MCC18\\bin\\mcc18.exe
-MP_AS=C:\\MCC18\\bin\\..\\mpasm\\MPASMWIN.exe
-MP_LD=C:\\MCC18\\bin\\mplink.exe
-MP_AR=C:\\MCC18\\bin\\mplib.exe
-MP_CC_DIR=C:\\MCC18\\bin
-MP_AS_DIR=C:\\MCC18\\bin\\..\\mpasm
-MP_LD_DIR=C:\\MCC18\\bin
-MP_AR_DIR=C:\\MCC18\\bin
-# This makefile will use a C preprocessor to generate dependency files
-MP_CPP=C:/Program\ Files\ \(x86\)/Microchip/MPLAB\ X\ IDE/mplab_ide/mplab_ide/modules/../../bin/mplab-cpp
-.build-conf: ${BUILD_SUBPROJECTS}
-	${MAKE}  -f nbproject/Makefile-PIC18F14K50.mk dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.cof
+MP_CC="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin\mcc18.exe"
+# MP_BC is not defined
+MP_AS="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin\..\mpasm\MPASMWIN.exe"
+MP_LD="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin\mplink.exe"
+MP_AR="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin\mplib.exe"
+DEP_GEN=${MP_JAVA_PATH}java -jar "C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/extractobjectdependencies.jar" 
+# fixDeps replaces a bunch of sed/cat/printf statements that slow down the build
+FIXDEPS=fixDeps
+MP_CC_DIR="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin"
+# MP_BC_DIR is not defined
+MP_AS_DIR="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin\..\mpasm"
+MP_LD_DIR="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin"
+MP_AR_DIR="C:\Program Files (x86)\Microchip\mplabc18\v3.40\bin"
+# MP_BC_DIR is not defined
 
-# ------------------------------------------------------------------------------------
-# Rules for buildStep: createRevGrep
-ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-__revgrep__:   nbproject/Makefile-${CND_CONF}.mk
-	@echo 'grep -q $$@' > __revgrep__
-	@echo 'if [ "$$?" -ne "0" ]; then' >> __revgrep__
-	@echo '  exit 0' >> __revgrep__
-	@echo 'else' >> __revgrep__
-	@echo '  exit 1' >> __revgrep__
-	@echo 'fi' >> __revgrep__
-	@chmod +x __revgrep__
-else
-__revgrep__:   nbproject/Makefile-${CND_CONF}.mk
-	@echo 'grep -q $$@' > __revgrep__
-	@echo 'if [ "$$?" -ne "0" ]; then' >> __revgrep__
-	@echo '  exit 0' >> __revgrep__
-	@echo 'else' >> __revgrep__
-	@echo '  exit 1' >> __revgrep__
-	@echo 'fi' >> __revgrep__
-	@chmod +x __revgrep__
-endif
+.build-conf:  ${BUILD_SUBPROJECTS}
+	${MAKE}  -f nbproject/Makefile-pic18f14k50.mk dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
+MP_PROCESSOR_OPTION=18F14K50
+MP_PROCESSOR_OPTION_LD=18f14k50
+MP_LINKER_DEBUG_OPTION= -u_DEBUGCODESTART=0x3e00 -u_DEBUGCODELEN=0x200
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: assemble
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
@@ -89,211 +90,115 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/_ext/1472/main.o: ../main.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/main.o ../main.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/main.o.temp ../main.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/main.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/main.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/main.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/main.o.temp >> ${OBJECTDIR}/_ext/1472/main.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usbdrv.o: ../usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbdrv.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdrv.o ../usbdrv.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbdrv.o.temp ../usbdrv.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbdrv.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbdrv.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbdrv.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbdrv.o.temp >> ${OBJECTDIR}/_ext/1472/usbdrv.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usbctrltrf.o: ../usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbctrltrf.o ../usbctrltrf.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbctrltrf.o.temp ../usbctrltrf.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbctrltrf.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbctrltrf.o.temp >> ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usbmmap.o: ../usbmmap.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbmmap.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbmmap.o ../usbmmap.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbmmap.o.temp ../usbmmap.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbmmap.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbmmap.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbmmap.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbmmap.o.temp >> ${OBJECTDIR}/_ext/1472/usbmmap.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usb9.o: ../usb9.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usb9.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usb9.o ../usb9.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usb9.o.temp ../usb9.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usb9.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usb9.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usb9.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usb9.o.temp >> ${OBJECTDIR}/_ext/1472/usb9.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usbdsc.o: ../usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbdsc.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdsc.o ../usbdsc.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbdsc.o.temp ../usbdsc.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbdsc.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbdsc.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbdsc.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbdsc.o.temp >> ${OBJECTDIR}/_ext/1472/usbdsc.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o: ../BootPIC18NonJ.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o ../BootPIC18NonJ.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.temp ../BootPIC18NonJ.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.temp >> ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d
-endif
-	${RM} __temp_cpp_output__
 ${OBJECTDIR}/_ext/1472/hid.o: ../hid.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/hid.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/hid.o ../hid.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/hid.o.temp ../hid.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/hid.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/hid.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/hid.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/hid.o.temp >> ${OBJECTDIR}/_ext/1472/hid.o.d
-endif
-	${RM} __temp_cpp_output__
-else
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/hid.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/hid.o   ../hid.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/hid.o 
+	
 ${OBJECTDIR}/_ext/1472/main.o: ../main.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/main.o ../main.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/main.o.temp ../main.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/main.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/main.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/main.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/main.o.temp >> ${OBJECTDIR}/_ext/1472/main.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usbdrv.o: ../usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbdrv.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdrv.o ../usbdrv.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbdrv.o.temp ../usbdrv.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbdrv.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbdrv.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbdrv.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbdrv.o.temp >> ${OBJECTDIR}/_ext/1472/usbdrv.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usbctrltrf.o: ../usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbctrltrf.o ../usbctrltrf.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbctrltrf.o.temp ../usbctrltrf.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbctrltrf.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbctrltrf.o.temp >> ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d
-endif
-	${RM} __temp_cpp_output__
-${OBJECTDIR}/_ext/1472/usbmmap.o: ../usbmmap.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbmmap.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbmmap.o ../usbmmap.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbmmap.o.temp ../usbmmap.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbmmap.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbmmap.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbmmap.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbmmap.o.temp >> ${OBJECTDIR}/_ext/1472/usbmmap.o.d
-endif
-	${RM} __temp_cpp_output__
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/main.o   ../main.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/main.o 
+	
 ${OBJECTDIR}/_ext/1472/usb9.o: ../usb9.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usb9.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usb9.o ../usb9.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usb9.o.temp ../usb9.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usb9.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usb9.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usb9.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usb9.o.temp >> ${OBJECTDIR}/_ext/1472/usb9.o.d
-endif
-	${RM} __temp_cpp_output__
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usb9.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usb9.o   ../usb9.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usb9.o 
+	
+${OBJECTDIR}/_ext/1472/usbctrltrf.o: ../usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbctrltrf.o   ../usbctrltrf.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbctrltrf.o 
+	
+${OBJECTDIR}/_ext/1472/usbdrv.o: ../usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbdrv.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdrv.o   ../usbdrv.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbdrv.o 
+	
 ${OBJECTDIR}/_ext/1472/usbdsc.o: ../usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/usbdsc.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdsc.o ../usbdsc.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/usbdsc.o.temp ../usbdsc.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/usbdsc.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/usbdsc.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/usbdsc.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/usbdsc.o.temp >> ${OBJECTDIR}/_ext/1472/usbdsc.o.d
-endif
-	${RM} __temp_cpp_output__
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbdsc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdsc.o   ../usbdsc.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbdsc.o 
+	
+${OBJECTDIR}/_ext/1472/usbmmap.o: ../usbmmap.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbmmap.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbmmap.o   ../usbmmap.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbmmap.o 
+	
 ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o: ../BootPIC18NonJ.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o ../BootPIC18NonJ.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.temp ../BootPIC18NonJ.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o   ../BootPIC18NonJ.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o 
+	
 else
-	cat ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.temp >> ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d
-endif
-	${RM} __temp_cpp_output__
 ${OBJECTDIR}/_ext/1472/hid.o: ../hid.c  nbproject/Makefile-${CND_CONF}.mk
-	${RM} ${OBJECTDIR}/_ext/1472/hid.o.d 
-	${MKDIR} ${OBJECTDIR}/_ext/1472 
-	${MP_CC}  -p18F14K50  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/hid.o ../hid.c 
-	${MP_CPP}  -MMD ${OBJECTDIR}/_ext/1472/hid.o.temp ../hid.c __temp_cpp_output__ -D __18F4550 -D __18CXX -I C:\\MCC18\\bin/../h  -D__18F4550
-	printf "%s/" ${OBJECTDIR}/_ext/1472 > ${OBJECTDIR}/_ext/1472/hid.o.d
-ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
-	cat ${OBJECTDIR}/_ext/1472/hid.o.temp | sed -e 's/\\\ /__SPACES__/g' -e's/\\$$/__EOL__/g' -e 's/\\/\\\\/g' -e 's/__SPACES__/\\\ /g' -e 's/__EOL__/\\/g' >> ${OBJECTDIR}/_ext/1472/hid.o.d
-else
-	cat ${OBJECTDIR}/_ext/1472/hid.o.temp >> ${OBJECTDIR}/_ext/1472/hid.o.d
-endif
-	${RM} __temp_cpp_output__
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/hid.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/hid.o   ../hid.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/hid.o 
+	
+${OBJECTDIR}/_ext/1472/main.o: ../main.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/main.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/main.o   ../main.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/main.o 
+	
+${OBJECTDIR}/_ext/1472/usb9.o: ../usb9.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usb9.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usb9.o   ../usb9.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usb9.o 
+	
+${OBJECTDIR}/_ext/1472/usbctrltrf.o: ../usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbctrltrf.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbctrltrf.o   ../usbctrltrf.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbctrltrf.o 
+	
+${OBJECTDIR}/_ext/1472/usbdrv.o: ../usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbdrv.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdrv.o   ../usbdrv.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbdrv.o 
+	
+${OBJECTDIR}/_ext/1472/usbdsc.o: ../usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbdsc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbdsc.o   ../usbdsc.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbdsc.o 
+	
+${OBJECTDIR}/_ext/1472/usbmmap.o: ../usbmmap.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/usbmmap.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/usbmmap.o   ../usbmmap.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/usbmmap.o 
+	
+${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o: ../BootPIC18NonJ.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/1472 
+	@${RM} ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -I"../../../../../../../../../MCC18/h" -I".." -pa=4  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o   ../BootPIC18NonJ.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/BootPIC18NonJ.o 
+	
 endif
 
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.cof: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD}   -p18f14k50  -w -x  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_REAL_ICE=1  -u_DEBUGCODESTART=0x7dc0 -u_DEBUGCODELEN=0xfdc1 -u_DEBUGDATASTART=0x3f4 -u_DEBUGDATALEN=0xc -l ${MP_CC_DIR}\\..\\lib  -odist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.cof ${OBJECTFILES}     
+dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
+	${MP_LD} $(MP_EXTRA_LD_PRE) "..\BootModified.18f14k50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -m"$(BINDIR_)$(TARGETBASE).map" -w -l"../../../../../../../../../MCC18/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_ICD3=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.cof: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD}   -p18f14k50  -w   -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -odist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.cof ${OBJECTFILES}     
+dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
+	${MP_LD} $(MP_EXTRA_LD_PRE) "..\BootModified.18f14k50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -m"$(BINDIR_)$(TARGETBASE).map" -w -l"../../../../../../../../../MCC18/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/MPLAB.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 endif
 
 
@@ -302,9 +207,13 @@ endif
 
 # Clean Targets
 .clean-conf:
-	${RM} -r build/PIC18F14K50
-	${RM} -r dist
+	${RM} -r build/pic18f14k50
+	${RM} -r dist/pic18f14k50
+
 # Enable dependency checking
 .dep.inc: .depcheck-impl
 
-include .dep.inc
+DEPFILES=$(shell mplabwildcard ${POSSIBLE_DEPFILES})
+ifneq (${DEPFILES},)
+include ${DEPFILES}
+endif

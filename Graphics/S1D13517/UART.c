@@ -32,11 +32,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/08/07	...
- * Anton Alkhimenok		02/05/08	PIC32 support is added
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
+ * 01/08/07	    ...
+ * 02/05/08	    PIC32 support is added
+ * 06/25/09     dsPIC & PIC24H support 
  *****************************************************************************/
 #include "MainDemo.h"
 #include "UART.h"

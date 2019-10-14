@@ -495,7 +495,7 @@ void PutPixel(SHORT x, SHORT y)
     DeviceWrite(y);   
     DeviceWrite(GetMaxX() >> 2);    //Setup the end window size/position  
     DeviceWrite(GetMaxY() >> 2);   
-    DeviceWrite(GetMaxY());   
+    DeviceWrite((BYTE)GetMaxY());   
 
     pixelWindow[xc] = _color;
 
@@ -988,7 +988,7 @@ void ClearDevice(void)
     DeviceWrite(0x00);                  // Y Start Position
     DeviceWrite((DISP_HOR_RESOLUTION-1) >>2);     // X End Position 
     DeviceWrite((DISP_VER_RESOLUTION-1) >>2);     // Y End Position
-    DeviceWrite(DISP_VER_RESOLUTION-1);         // Y End Position
+    DeviceWrite((BYTE)(DISP_VER_RESOLUTION-1));         // Y End Position
 
 
     DWORD i;

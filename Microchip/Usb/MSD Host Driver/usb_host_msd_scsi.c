@@ -58,7 +58,7 @@ Change History:
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "FSConfig.h"
+#include "FSconfig.h"
 #include "MDD File System/FSDefs.h"
 #include "MDD File System/FSIO.h"
 #include "USB/usb.h"
@@ -199,7 +199,7 @@ BOOL USBHostMSDSCSIEventHandler( BYTE address, USB_EVENT event, void *data, DWOR
 {
     if (deviceAddress == address)
     {
-        switch( event )
+        switch( (INT) event )
         {
             case EVENT_MSD_NONE:
             case EVENT_MSD_TRANSFER:                 // A MSD transfer has completed

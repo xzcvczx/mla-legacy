@@ -9,7 +9,7 @@
 
  * Software License Agreement
  *
- * Copyright © 2009 Microchip Technology Inc.  All rights reserved.
+ * Copyright ï¿½ 2009 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -19,7 +19,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -47,7 +47,7 @@ Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external m
 // The header file for the driver must be provided HERE:
     #if defined(GFX_PICTAIL_V2)
         #include "SST39VF040.h"     // driver for SST39 parallel flash with JPEG files
-    #elif defined(GFX_PICTAIL_V3) || defined(PIC24FJ256DA210_DEV_BOARD) || defined (MULTI_MEDIA_BOARD_DM00123)
+    #elif defined(GFX_PICTAIL_V3) || defined(PIC24FJ256DA210_DEV_BOARD) || defined (MEB_BOARD)
         #include "SST25VF016.h"     // driver for SST25 SPI flash with JPEG files
     #else
         #error Only Graphics PICtails 2 and 3 are supported

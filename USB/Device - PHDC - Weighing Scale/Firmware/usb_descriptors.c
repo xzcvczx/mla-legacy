@@ -154,8 +154,8 @@ state according to the definition in the USB specification.
 #define __USB_DESCRIPTORS_C
  
 /** INCLUDES *******************************************************/
-#include "./USB/usb.h"
-#include "./USB/usb_function_phdc.h"
+#include "USB/usb.h"
+#include "USB/usb_function_phdc.h"
 
 /** CONSTANTS ******************************************************/
 #if defined(__18CXX)
@@ -223,14 +223,11 @@ ROM BYTE configDescriptor1[]={
 	0x30,					//PHDC_11073PHD_FUNCTION_DESCRIPTOR
 	0,						//
 	1,						//Number of Device specializations
-	0x0f,0x10,
-	//0xAf,0x28, 				//Device Specialization (WEIGH SCALE)
-	//0x08,0x10, 				//Device Specialization (Thermometer)
-	//0x12,x34,
-	//0x34, 0x12,
-	//0x00, 0x00,
-	
-	  
+	0x0f,0x10, 			//Device Specialization (WEIGH SCALE - MDC_DEV_SPEC_PROFILE_SCALE)
+	//0x08,0x10, 			//Device Specialization (Thermometer - MDC_DEV_SPEC_PROFILE_TEMP)
+	//0x11,0x10,            //Device Specialization (Glucose Meter -  MDC_DEV_SPEC_PROFILE_GLUCOSE)	
+	//0x07,0x10,              //Device Specialization (BP Monitor- MDC_DEV_SPEC_PROFILE_BP) 
+		  
 /* Endpoint Descriptor */
     //sizeof(USB_EP_DSC),DSC_EP,_EP02_IN,_BULK,PHDC_DATA_IN_EP_SIZE,0x00
     0x07,					/*sizeof(USB_EP_DSC)*/

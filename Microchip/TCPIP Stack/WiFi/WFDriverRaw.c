@@ -93,7 +93,7 @@ extern BOOL g_rxIndexSetBeyondBuffer;         // debug -- remove after test
 BOOL     RawWindowReady[2];     /* for Tx and Rx, TRUE = ready for use, FALSE = not ready for use */
 UINT8  RawWindowState[2];
 
-
+extern BOOL g_WaitingForMgmtResponse;
 
 /*
 *********************************************************************************************************
@@ -521,7 +521,7 @@ void RawGetByte(UINT16 rawId, UINT8 *pBuffer, UINT16 length)
 #endif
 
     /* if reading a data message do following check */
-    if (!g_MgmtResponseInProgress)
+    if (!g_WaitingForMgmtResponse)
     {
         // if RAW index previously set out of range and caller is trying to do illegal read
         if ( (rawId==RAW_RX_ID)         && 
@@ -570,7 +570,7 @@ void RawSetByte(UINT16 rawId, UINT8 *pBuffer, UINT16 length)
     /* if previously set index past legal range and now trying to write to RAW engine */
     if ( (rawId == 0) && g_rxIndexSetBeyondBuffer && (GetRawWindowState(RAW_TX_ID) == WF_RAW_DATA_MOUNTED) )
     {
-        WF_ASSERT(FALSE);  /* attempting to write past end of RAW window */
+//        WF_ASSERT(FALSE);  /* attempting to write past end of RAW window */
     }
 
     /* write RAW data to chip */

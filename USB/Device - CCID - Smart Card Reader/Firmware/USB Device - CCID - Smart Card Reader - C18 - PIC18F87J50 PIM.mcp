@@ -133,14 +133,14 @@ file_021=..\..\..\Microchip\Include\Smart Card\SCpic18.h
 file_022=..\..\..\Microchip\Include\USB\usb_hal_pic18.h
 file_023=..\..\..\Microchip\USB\usb_device_local.h
 file_024=18f87j50_g.lkr
-file_025=..\Getting Started - Running the Device - CCID - Smart Card Reader.htm
-file_026=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_025=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_026=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=extended-mode
 [TOOL_SETTINGS]
 TS{DD2213A8-6310-47B1-8376-9430CDFC013F}=
-TS{BFD27FBA-4A02-4C0E-A5E5-B812F3E7707C}=/o"$(BINDIR_)$(TARGETBASE).cof" /M"$(BINDIR_)$(TARGETBASE).map" /W
+TS{BFD27FBA-4A02-4C0E-A5E5-B812F3E7707C}=/w /o"$(BINDIR_)$(TARGETBASE).cof"
 TS{C2AF05E7-1416-4625-923D-E114DB6E2B96}=-O-
 TS{ADE93A55-C7C7-4D4D-A4BA-59305F7D0391}=
 [INSTRUMENTED_TRACE]

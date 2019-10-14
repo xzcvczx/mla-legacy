@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="62">
   <projectmakefile>Makefile</projectmakefile>
-  <defaultConf>0</defaultConf>
+  <defaultConf>3</defaultConf>
   <confs>
     <conf name="C18-PICDN2_MRF24WB" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc18\v3.38\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc18\v3.40\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -23,7 +23,7 @@
     </conf>
     <conf name="C30-DA210_BRD_MRF24WB" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc30\v3.25\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc30\v3.31\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -41,7 +41,7 @@
     </conf>
     <conf name="C30-EX16_MRF24WB" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc30\v3.25\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc30\v3.31\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -59,7 +59,7 @@
     </conf>
     <conf name="C32-EX16_MRF24WB" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v2.02\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

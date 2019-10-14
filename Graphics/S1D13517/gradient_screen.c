@@ -38,7 +38,7 @@
  * SECTION: Includes
  *****************************************************************************/
 #include "Graphics/Graphics.h"
-#include "icons.h"
+//#include "icons.h"
 #include "MainDemo.h"//** Remove when complete!!!!!!!!!
 #include "gfx_schemes.h"
 #include "gfx_screens.h"

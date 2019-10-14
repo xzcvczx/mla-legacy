@@ -40,10 +40,13 @@
  * 03/22/11     - Modified for Graphics Library Version 3.00
  *              - Replace color data type from WORD_VAL to GFX_COLOR
  *              - Replace DeviceInit() to DriverInterfaceInit()
+ * 12/13/11     Modify to use USE_GFX_DISPLAY_CONTROLLER_SSD1303 and 
+ *              USE_GFX_DISPLAY_CONTROLLER_SH1101A labels to distinguish 
+ *              between the two displays.
  *****************************************************************************/
 #include "HardwareProfile.h"
 
-#if defined(USE_GFX_DISPLAY_CONTROLLER_SH1101A)
+#if defined(USE_GFX_DISPLAY_CONTROLLER_SH1101A) || defined (USE_GFX_DISPLAY_CONTROLLER_SSD1303)
 
 #include "Compiler.h"
 #include "TimeDelay.h"
@@ -124,7 +127,7 @@ void ResetDevice(void)
     DisplayEnable();
 	DisplaySetCommand();
 
-    #if (DISPLAY_CONTROLLER == SH1101A)
+#if defined(USE_GFX_DISPLAY_CONTROLLER_SH1101A) 
 
     // Setup Display
     DeviceWrite(0xAE);             // turn off the display (AF=ON, AE=OFF)
@@ -181,7 +184,8 @@ void ResetDevice(void)
     // Higher Column Address
     DeviceWrite(0x10);             // Set higher column address
     DelayMs(1);
-    #elif (DISPLAY_CONTROLLER == SSD1303)
+
+#elif defined (USE_GFX_DISPLAY_CONTROLLER_SSD1303)
 
     // Setup Display
     DeviceWrite(0xAE);             // turn off the display (AF=ON, AE=OFF)
@@ -245,9 +249,10 @@ void ResetDevice(void)
     // Higher Column Address
     DeviceWrite(0x10);             // Set higher column address
     DelayMs(1);
-    #else
-        #error The controller is not supported.
-    #endif
+#else
+    #error The controller is not supported.
+#endif
+
     DisplayDisable();
 	DisplaySetData();
 }
@@ -533,5 +538,5 @@ void ClearDevice(void)
 }
 
 
-#endif // #if defined(USE_GFX_DISPLAY_CONTROLLER_SH1101A)
+#endif // #if defined(USE_GFX_DISPLAY_CONTROLLER_SH1101A) || defined (USE_GFX_DISPLAY_CONTROLLER_SSD1303)
 

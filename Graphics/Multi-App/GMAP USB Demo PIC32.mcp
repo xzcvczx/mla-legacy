@@ -469,8 +469,8 @@ file_045=..\..\Board Support Package\TouchScreen.c
 file_046=..\..\Board Support Package\cpld.c
 file_047=..\..\Board Support Package\SST39VF040.c
 file_048=..\..\Board Support Package\EEPROM.c
-file_049=ResourcesInternalFlash C32.c
-file_050=ResourcesExternalSPIFlash.c
+file_049=InternalResourceC32.c
+file_050=ExternalResource.c
 file_051=..\..\Microchip\Graphics\Drivers\TCON_SSD1289.c
 file_052=..\..\Microchip\Graphics\Drivers\SSD1926.c
 file_053=..\..\Microchip\Graphics\GOLSchemeDefault.c
@@ -538,8 +538,8 @@ file_114=..\..\Board Support Package\SST25VF016.h
 file_115=..\..\Board Support Package\TouchScreen.h
 file_116=..\..\Board Support Package\cpld.h
 file_117=..\..\Board Support Package\EEPROM.h
-file_118=ResourcesInternalFlash C32.h
-file_119=ResourcesExternalSPIFlash.h
+file_118=InternalResourceC32.h
+file_119=ExternalResource.h
 file_120=..\..\Board Support Package\drv_spi.h
 file_121=..\..\Microchip\Include\Graphics\DisplayDriver.h
 file_122=..\..\Microchip\Include\Graphics\DisplayDriverInterface.h
@@ -561,7 +561,7 @@ TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=--defsym=_min_heap_size=3000 -Map="$(BI
 TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}=
 TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}042=-gdwarf-2
 TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}042=-Os
-TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}042=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map"
+TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}042=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" "-mperipheral-libs"
 TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}042=
 [ACTIVE_FILE_SETTINGS]
 TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}042_active=yes

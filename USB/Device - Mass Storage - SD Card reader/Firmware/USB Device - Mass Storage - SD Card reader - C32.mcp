@@ -45,8 +45,8 @@ file_017=USB Stack
 file_018=MDD File System
 file_019=USB Stack
 file_020=Hardware Profiles
-file_021=.
-file_022=USB Stack
+file_021=USB Stack
+file_022=.
 file_023=.
 [GENERATED_FILES]
 file_000=no
@@ -95,8 +95,8 @@ file_017=no
 file_018=no
 file_019=no
 file_020=no
-file_021=yes
-file_022=no
+file_021=no
+file_022=yes
 file_023=yes
 [FILE_INFO]
 file_000=main.c
@@ -120,9 +120,9 @@ file_017=..\..\..\Microchip\Include\USB\usb_hal.h
 file_018=..\..\..\Microchip\Include\MDD File System\SD-SPI.h
 file_019=..\..\..\Microchip\Include\USB\usb_hal_pic32.h
 file_020=HardwareProfile - PIC32MX460F512L PIM.h
-file_021=..\Getting Started - Running the Device - Mass Storage - SD Card reader.htm
-file_022=..\..\..\Microchip\USB\usb_device_local.h
-file_023=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_021=..\..\..\Microchip\USB\usb_device_local.h
+file_022=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_023=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

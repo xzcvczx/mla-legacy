@@ -58,11 +58,16 @@
 
 #include "GenericTypeDefs.h"
 
-// Default calibration coefficients
-#define TOUCHCAL_CA 0x2A
-#define TOUCHCAL_CB 0xE67E
-#define TOUCHCAL_CC 0x31
-#define TOUCHCAL_CD 0xE944
+// Default calibration points
+#define TOUCHCAL_ULX 0x2A
+#define TOUCHCAL_ULY 0xE67E
+#define TOUCHCAL_URX 0x2A
+#define TOUCHCAL_URY 0xE67E
+#define TOUCHCAL_LLX 0x2A
+#define TOUCHCAL_LLY 0xE67E
+#define TOUCHCAL_LRX 0x2A
+#define TOUCHCAL_LRY 0xE67E
+
 
 // use this macro to debug the touch screen panel 
 // this will enable the use of debugging functions in the C file.

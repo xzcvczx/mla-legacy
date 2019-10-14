@@ -346,7 +346,7 @@ void WF_CPSetSsid(UINT8 CpId, UINT8 *p_ssid,  UINT8 ssidLength)
                           ssidLength);            /* number of element data bytes */
 
 }   
- 
+
 /*******************************************************************************
   Function:	
     void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength)
@@ -398,6 +398,139 @@ void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength)
     /* free management buffer */
     DeallocateMgmtRxBuffer();
 }   
+
+/*******************************************************************************
+  Function:	
+    void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden)
+
+  Summary:
+    Sets the SSID type for the specified Connection Profile ID.    
+
+  Description:
+    Sets the SSID type element in the Connection Profile. 
+    This is valid only when we create AdHoc network. 
+
+  Precondition:
+    MACInit must be called first.
+
+  Parameters:
+    CpId -- Connection Profile ID
+    hidden -- True or False
+
+  Returns:
+    None.
+  	
+  Remarks:
+    None.
+  *****************************************************************************/
+void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden)
+{
+    LowLevel_CPSetElement(CpId,                   /* CP ID                        */
+                          WF_CP_ELEMENT_SSID_TYPE,     /* Element ID                   */
+                         (UINT8 *)&hidden,         /* pointer to element data      */
+                          1);            /* number of element data bytes */
+
+}  
+
+/*******************************************************************************
+  Function:	
+    void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden)
+
+  Summary:
+    Gets the SSID type for the specified Connection Profile ID.    
+
+  Description:
+    Gets the SSID type element in the Connection Profile.
+
+  Precondition:
+    MACInit must be called first.
+
+  Parameters:
+    CpId - Connection Profile ID
+    hidden - Pointer to the SSID type
+
+  Returns:
+    None.
+  	
+  Remarks:
+    None.
+  *****************************************************************************/
+void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden)
+{
+	 LowLevel_CPGetElement(CpId,                       /* conn. profile ID       */
+                          WF_CP_ELEMENT_SSID_TYPE, /* element ID             */
+                          hidden,              /* element data pointer   */
+                          1,                          /* read one byte          */
+                          TRUE);                      /* read data, free buffer */
+}
+
+/*******************************************************************************
+  Function:	
+    void WF_CPSetWepKeyType(UINT8 CpId, UINT8 wepKeyType)
+
+  Summary:
+    Sets the Wep key type for the specified Connection Profile ID.
+
+  Description:
+    Sets the Wep key Type element a Connection Profile.  Allowable values are:
+    * WF_SECURITY_WEP_SHAREDKEY
+    * WF_SECURITY_WEP_OPENKEY
+
+  Precondition:
+  	MACInit must be called first.
+
+  Parameters:
+    CpId -- Connection Profile ID
+    keyType -- type of key for Wep security (shared key or open key )
+
+  Returns:
+  	None.
+  	
+  Remarks:
+  	None.
+  *****************************************************************************/
+void WF_CPSetWepKeyType(UINT8 CpId, UINT8 wepKeyType)
+{
+    LowLevel_CPSetElement(CpId,                         /* CP ID                        */
+                          WF_CP_ELEMENT_WEPKEY_TYPE,   /* Element ID                   */
+                          &wepKeyType,                 	/* pointer to element data      */
+                          1);                           /* number of element data bytes */
+}   
+
+/*******************************************************************************
+  Function:	
+    void WF_CPGetWepKeyType(UINT8 CpId, UINT8 *p_keyType)
+
+  Summary:
+    Gets the Wep Key type for the specified Connection Profile ID.
+
+  Description:
+    Gets the Network Type element a Connection Profile.  Allowable values are:
+    * WF_SECURITY_WEP_SHAREDKEY
+    * WF_SECURITY_WEP_OPENKEY
+
+  Precondition:
+  	MACInit must be called first.
+
+  Parameters:
+    CpId -- Connection Profile ID
+    networkType -- type of key for Wep security (shared key or open key)
+
+  Returns:
+  	None.
+  	
+  Remarks:
+  	None.
+  *****************************************************************************/ 
+void WF_CPGetWepKeyType(UINT8 CpId, UINT8 *p_wepKeyType)
+{
+    LowLevel_CPGetElement(CpId,                       /* conn. profile ID       */
+                          WF_CP_ELEMENT_WEPKEY_TYPE, /* element ID             */
+                          p_wepKeyType,              /* element data pointer   */
+                          1,                          /* read one byte          */
+                          TRUE);                      /* read data, free buffer */
+}
+
 
 /*******************************************************************************
   Function:	

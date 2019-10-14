@@ -29,10 +29,20 @@
  * COST OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
+ *****************************************************************************/
+/*****************************************************************************
+ * Section: Description
  *
- * Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 09/01/10	   ...
+ * This module decodes communication packets like the ones sent from the PC 
+ * utility, external_memory_programmer.  However, it is not limited to only
+ * one PC utility or device.  Any device may choose to use this style of
+ * communication medium.  More details of the communicaiton protocol can
+ * be found in the extern memory programmer help file documentation.  This
+ * module is abstracted from the communication medium used and can support
+ * multiple communicaiton mediums being serviced at one time.
+ *
+ * This module is used by serval different Graphics demos and is part of the 
+ * common directory under the Graphics demo.
  *****************************************************************************/
 
 /*****************************************************************************
@@ -43,20 +53,26 @@
 #include "comm_pkt_callback.h"
 #include "HardwareProfile.h"
 
+/*****************************************************************************
+ * Section: Variables
+ *****************************************************************************/
 BYTE rxPacket[COMM_PKT_RX_MAX_SIZE + sizeof(COMM_PKT_HDR) + 64] __attribute__((aligned(4)));
 WORD rxPacketIdx;
 
+/*****************************************************************************
+ * Section: Function Prototypes
+ *****************************************************************************/
 BYTE COMM_PKT_GenerateCheckSum(BYTE *payload, WORD payloadLength);
 
 /*****************************************************************************
- * COMM_PKT_Init
+ * void COMM_PKT_Init(void)
  *****************************************************************************/
 void COMM_PKT_Init(void)
 {
     rxPacketIdx = 0;
 }
 /*****************************************************************************
- * COMM_PKT_Update
+ * void COMM_PKT_Update(COMM_PKT_MEDIA media)
  *****************************************************************************/
 void COMM_PKT_Update(COMM_PKT_MEDIA media)
 {
@@ -66,7 +82,7 @@ void COMM_PKT_Update(COMM_PKT_MEDIA media)
     }
 }
 /*****************************************************************************
- * COMM_PKT_RxPacketAvailable
+ * BOOL COMM_PKT_RxPacketAvailable(void)
  *****************************************************************************/
 BOOL COMM_PKT_RxPacketAvailable(void)
 {
@@ -86,7 +102,7 @@ BOOL COMM_PKT_RxPacketAvailable(void)
     return TRUE;
 }
 /*****************************************************************************
- * COMM_PKT_GetRxPacket
+ * BYTE *COMM_PKT_GetRxPacket(void)
  *****************************************************************************/
 BYTE *COMM_PKT_GetRxPacket(void)
 {
@@ -95,7 +111,7 @@ BYTE *COMM_PKT_GetRxPacket(void)
     return rxPacket;
 }
 /*****************************************************************************
- * COMM_PKT_IsPacketValid
+ * BOOL COMM_PKT_IsPacketValid(BYTE *packet)
  *****************************************************************************/
 BOOL COMM_PKT_IsPacketValid(BYTE *packet)
 {
@@ -112,7 +128,7 @@ BOOL COMM_PKT_IsPacketValid(BYTE *packet)
     return TRUE;
 }
 /*****************************************************************************
- * COMM_PKT_SendCommand
+ * void COMM_PKT_SendCommand(COMM_PKT_MEDIA media, BYTE cmd, BYTE *payload, WORD payloadSize)
  *****************************************************************************/
 void COMM_PKT_SendCommand(COMM_PKT_MEDIA media, BYTE cmd, BYTE *payload, WORD payloadSize)
 {
@@ -128,7 +144,7 @@ void COMM_PKT_SendCommand(COMM_PKT_MEDIA media, BYTE cmd, BYTE *payload, WORD pa
     COMM_PKT_SendData(media, payload, payloadSize);
 }
 /*****************************************************************************
- * COMM_PKT_SendCommand
+ * void COMM_PKT_SendReply(COMM_PKT_MEDIA media, BYTE cmd, BYTE ack, BYTE *payload, WORD payloadSize)
  *****************************************************************************/
 void COMM_PKT_SendReply(COMM_PKT_MEDIA media, BYTE cmd, BYTE ack, BYTE *payload, WORD payloadSize)
 {
@@ -144,7 +160,7 @@ void COMM_PKT_SendReply(COMM_PKT_MEDIA media, BYTE cmd, BYTE ack, BYTE *payload,
     COMM_PKT_SendData(media, payload, payloadSize);
 }
 /*****************************************************************************
- * COMM_PKT_Update
+ * BYTE COMM_PKT_GenerateCheckSum(BYTE *payload, WORD payloadLength)
  *****************************************************************************/
 BYTE COMM_PKT_GenerateCheckSum(BYTE *payload, WORD payloadLength)
 {

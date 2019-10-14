@@ -49,12 +49,13 @@
   1.2.7			 Updated several MDD_INTERNAL_FLASH_xxxx definitions.
   				 Also removed PSV 32kB compiler warning, as this is no
 				 longer a limitation in this release.
+  1.3.6			 Modified "FSConfig.h" to "FSconfig.h" in '#include' directive.
 ********************************************************************/
 //DOM-IGNORE-END
 
 
 #include "GenericTypeDefs.h"
-#include "FSConfig.h"
+#include "FSconfig.h"
 #include "MDD File System/FSDefs.h"
 
 #define FALSE	0

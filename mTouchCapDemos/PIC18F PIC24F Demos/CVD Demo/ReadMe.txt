@@ -1,0 +1,68 @@
+**********************************************************************************
+*************************** Readme File for CVD Demo *****************************
+**********************************************************************************
+
+Copyright (c) Microchip Technology Inc.  All rights reserved.
+
+*********************************************************************************
+
+This file contains the information related to the mTouch Capacitive Touch Software
+Library used for CVD Demo. 
+
+**********************************************************************************
+                             Release Information
+**********************************************************************************
+mTouch Cap Library v1.40:         February-2012
+MPLAB version:                    8.83 or Later
+MPLAB-X Version:                  1.00 or Later 
+Compiler Version:                 C18 3.40 or Later, HI-TECH 9.66 or Later
+
+**********************************************************************************
+           mTouch Capacitive Touch Library Testing Details for CVD Demo
+**********************************************************************************
+The mTouch Capacitive Touch Library software is tested using Evaluation
+boards DM183026-2. 8 buttons plugin module must be connected to the low part of the
+sensors connector (channels from 0 to 7).
+
+**********************************************************************************
+    	   mTouch Capacitive Touch Library Set-up Details for CVD Demo
+**********************************************************************************
+
+1)  CVD Demo project can be configured as per user's application by
+    modifying header file "mTouchConfig.h".
+  
+2) How to configure Button?
+
+Step 1: Assign required number of sensors in mTouchConfig.h
+
+Step 2: Initialize mTouch library with mTouchInit() and all sensors with
+        MTouchSetSensor(...) functions.
+
+Step 3: Call pereodically MTouchAcquisition() acquisition function.
+
+Step 4: Get state using MTouchGetSensorState(...) function.
+
+**********************************************************************************
+         mTouch Capacitive Touch Library Demonstration for CVD Demo
+**********************************************************************************
+
+The purpose of this demo is to show the presence of touch on the Cap Touch Buttons
+using CVD acquisition method. When the cap touch button is pressed, the corresponding
+LED will lit-up to indicate the touch. 
+
+**********************************************************************************
+                                mTouch GUI
+**********************************************************************************
+
+This demo sends data from all sensors to UART. Thus the states and the signals(deltas)
+from the sensors can be displayed with an mTouch GUI utility "mTouch GUI.exe"
+located in "...\mTouchCapDemos\Utilities\PIC18F PIC24F Tools\mTouch GUI" folder.
+Please read "mTouch GUI Help.chm" to get started. RX line of the PICkit Serial should be
+connected  to pin 10 (RF0 lable on silk screen) of the J2 connector for "PIC18 Eval Board"
+and connected to pin 8 (RF3 lable on silk screen) of the J2 connector for "PIC24 Eval Board".
+ 
+**********************************************************************************
+                                   Help File
+**********************************************************************************
+
+For more information on mTouch Software Library, refer "mTouch Cap Library Help.chm" file.

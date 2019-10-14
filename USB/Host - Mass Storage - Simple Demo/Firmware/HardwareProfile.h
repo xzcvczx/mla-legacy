@@ -13,7 +13,7 @@
 
     // Various clock values
 
-    #if defined (__dsPIC33EP512MU10__)||defined(__PIC24EP512GU810__)
+    #if defined (__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
         #define GetSystemClock()            40000000UL
         #define GetInstructionClock()       GetSystemClock()
     #else

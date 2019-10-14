@@ -50,26 +50,32 @@
 #include "temperature.h"
 
 /** V A R I A B L E S ********************************************************/
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 BYTE old_sw2,old_sw3;
 BYTE counter;
 BYTE trf_state;
 BYTE temp_mode;
 
-#if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
-    #pragma udata usbram2
-#elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
-    || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)
-    #pragma udata USB_VARIABLES=0x500
-#elif defined(__18F4450) || defined(__18F2450)
-    #pragma udata USB_VARIABLES=0x480
-#else
-    #pragma udata
+#if defined(__18CXX)
+    #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
+        #pragma udata usbram2
+    #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
+        || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)
+        #pragma udata USB_VARIABLES=0x500
+    #elif defined(__18F4450) || defined(__18F2450)
+        #pragma udata USB_VARIABLES=0x480
+    #else
+        #pragma udata
+   #endif
 #endif
 
 DATA_PACKET INPacket;
 DATA_PACKET OUTPacket;
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 BYTE pTemp;                     // Pointer to current logging position, will
                                 // loop to zero once the max index is reached
@@ -97,7 +103,9 @@ WORD_VAL ReadPOT(void);
 void ServiceRequests(void);
 
 /** D E C L A R A T I O N S **************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 void UserInit(void)
 {
     mInitAllLEDs();
@@ -251,6 +259,16 @@ WORD_VAL ReadPOT(void)
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
         #elif defined(PIC24FJ64GB004_PIM)
+            AD1CHS = 0x7;           //MUXA uses AN7
+
+            // Get an ADC sample
+            AD1CON1bits.SAMP = 1;           //Start sampling
+            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            AD1CON1bits.SAMP = 0;           //Start sampling
+            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            while(!AD1CON1bits.DONE);       //Wait for conversion to complete
+            
+        #elif defined(PIC24FJ64GB502_MICROSTICK)
             AD1CHS = 0x7;           //MUXA uses AN7
 
             // Get an ADC sample

@@ -93,28 +93,28 @@
 #ifdef USB_USE_PHDC
 
 /** V A R I A B L E S ********************************************************/
-#if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
-    #pragma udata usbram2
-#elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
-    || defined(__18F2458) || defined(__18F2553) || defined(__18F4458) || defined(__18F4553)
-    #pragma udata USB_VARIABLES=0x500
-#elif defined(__18F4450) || defined(__18F2450)
-	#pragma udata USB_VARIABLES=0x480
-#else
-    #pragma udata
-#endif
+#if defined(__18CXX)
+    #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
+        #pragma udata usbram2
+    #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
+        || defined(__18F2458) || defined(__18F2553) || defined(__18F4458) || defined(__18F4553)
+        #pragma udata USB_VARIABLES=0x500
+    #elif defined(__18F4450) || defined(__18F2450)
+        #pragma udata USB_VARIABLES=0x480
+    #else
+        #pragma udata
+    #endif
+#endif 
 
 volatile FAR unsigned char phdc_data_rx[PHDC_DATA_OUT_EP_SIZE];
 volatile FAR unsigned char phdc_data_tx[PHDC_DATA_IN_EP_SIZE];
 
-
-#pragma udata
-BYTE phdc_rx_len;            // total rx length
+#if defined(__18CXX)
+    #pragma udata
+#endif 
 
 POINTER pPHDCSrc;            // Dedicated source pointer
 POINTER pPHDCDst;            // Dedicated destination pointer
-UINT16 phdc_tx_len;            // total tx length
-BYTE phdc_mem_type;          // _ROM, _RAM
 
 
 UINT16 TransferSize;
@@ -125,10 +125,7 @@ PHDC_RX_ENDPOINT PhdcRXEP[PHDC_RX_ENDPOINTS];
 PHDC_TX_ENDPOINT PhdcTXEP[PHDC_TX_ENDPOINTS];
 
 UINT16 phdcEpDataBitmap;
-extern BYTE  i;
 extern BYTE_VAL *pDst;
-
-
 
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
@@ -248,7 +245,6 @@ void USBDevicePHDCInit(USB_PHDC_CB callback)
 		PhdcTXEP[1].size =PHDC_INT_IN_EP_SIZE;
 	#endif 
 
-    phdc_rx_len = 0;
 	PhdAppCB = callback;
 	phdcEpDataBitmap = 0;
 	  
@@ -289,7 +285,7 @@ UINT8 USBDevicePHDCReceiveData(UINT8 qos, UINT8* buffer, UINT16 len)
 {	
  	PTR_PHDC_RX_ENDPOINT recv_endpoint;
 	UINT8 index;
-	phdc_rx_len = 0;
+	UINT8 phdc_rx_len = 0;
     
 	for(index=0; index< PHDC_RX_ENDPOINTS;index++)
 	{
@@ -344,82 +340,68 @@ UINT8 USBDevicePHDCReceiveData(UINT8 qos, UINT8* buffer, UINT16 len)
 	qos - Quality of service information
     *data - pointer to a RAM/ROM array of data to be transfered to the host
     length - the number of bytes to be transfered.
-	memtype - Indicates whether the data arrya is in ROM or RAM
+	memtype - Indicates whether the data array is in ROM or RAM
 		
  *****************************************************************************/
 void USBDevicePHDCSendData(UINT8 qos, UINT8 *data, UINT16 length,BOOL memtype)
 {
+    PTR_PHDC_TX_ENDPOINT tx_endpoint;
+    UINT8 index;
+    UINT8 i;
 
-	PTR_PHDC_TX_ENDPOINT tx_endpoint;
-	UINT8 index;
-	UINT8 i;
-
-	for(index=0; index< PHDC_TX_ENDPOINTS;index++)
-	{
-		if((PhdcTXEP[index].qos & qos) != 0)
-            break;
-	}
-
-	if(index == PHDC_TX_ENDPOINTS)
-	{
-		return; //no endpoint supports the qos
-	}
-
-	tx_endpoint = &PhdcTXEP[index];
+    for(index=0; index< PHDC_TX_ENDPOINTS;index++)
+    {
+        if((PhdcTXEP[index].qos & qos) != 0)
+        break;
+    }
+    if(index == PHDC_TX_ENDPOINTS)
+    {
+        return; //no endpoint supports the qos
+    }
+    tx_endpoint = &PhdcTXEP[index];
 		
-	if(	(tx_endpoint->transfer_size ==0) && (tx_endpoint->offset ==0) ) //new packet
-	{
-		tx_endpoint->transfer_size = length;
-		tx_endpoint->memtype= memtype;
-		if(tx_endpoint->transfer_size > tx_endpoint->size)
-		{
-			
-			tx_endpoint->bytes_to_send = tx_endpoint->size; //multiple send
-			
-		}
-		else
-		{
-			tx_endpoint->bytes_to_send = tx_endpoint->transfer_size; //only packet to send
-		}
-			
+    if(	(tx_endpoint->transfer_size ==0) && (tx_endpoint->offset ==0) ) //new packet
+    {
+	tx_endpoint->transfer_size = length;
+	tx_endpoint->memtype= memtype;
+	if(tx_endpoint->transfer_size > tx_endpoint->size)
+	{	
+        	tx_endpoint->bytes_to_send = tx_endpoint->size; //multiple send
 	}
 	else
 	{
-		return; //send in progress
-	}
-
-
-    USBMaskInterrupts();
-    
-    
-		
-	tx_endpoint->app_buff = (UINT8*)data;
-	i= tx_endpoint->bytes_to_send;
+	    tx_endpoint->bytes_to_send = tx_endpoint->transfer_size; //only packet to send
+	}		
+    }
+    else
+    {
+        return; //send in progress
+    }
+    USBMaskInterrupts();	
+    tx_endpoint->app_buff = (UINT8*)data;
+    i= tx_endpoint->bytes_to_send;
     pPHDCDst.bRam = (BYTE*)phdc_data_tx; // Set destination pointer
     if(tx_endpoint->memtype == MEM_ROM)            // Determine type of memory source
-	{
-		pPHDCSrc.bRom = (ROM UINT8 *) data;
-					
+    {
+        pPHDCSrc.bRom = (ROM UINT8 *) data;
         while(i)
         {
             *pPHDCDst.bRam = *pPHDCSrc.bRom;
              pPHDCDst.bRam++;
              pPHDCSrc.bRom++;
              i--;
-        }//end while(byte_to_send)
-			
+        }//end while(byte_to_send)		
     }
     else // _RAM
     {
-		pPHDCSrc.bRam = (UINT8*)data;
-		while(i)
+	pPHDCSrc.bRam = (UINT8*)data;
+	while(i)
         {
             *pPHDCDst.bRam = *pPHDCSrc.bRam;
              pPHDCDst.bRam++;
              pPHDCSrc.bRam++;
              i--;
-        }//end while(byte_to_send._word)
-		
+        }//end while(byte_to_send._word)	
     }//end if(phdc_mem_type...)
            
     tx_endpoint->PHDCDataInHandle = USBTxOnePacket(tx_endpoint->ep_num,
@@ -594,6 +576,11 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
 			     PhdAppCB(USB_APP_GET_TRANSFER_SIZE,&TransferSize);
 				 recv_endpoint->transfer_size = TransferSize;			
 			}
+			else if(recv_endpoint->transfer_size > 256)
+			{
+    			//do nothing
+    			recv_endpoint->offset = 0;
+            } 			
 			else
 			{
 				/* copy the data starting from the previuos offset*/

@@ -146,9 +146,7 @@ void BoardInit(void)
     // primary internal oscillator
     OSCCON = 0x7B;
     WDTCONbits.SWDTEN = 0;
-        #if defined(MRF89XA)
-    PHY_RESETn_TRIS = 1;
-        #endif
+    
     EECON2 = 0x55;
     EECON2 = 0xAA;
     PPSCONbits.IOLOCK = 0;
@@ -187,7 +185,7 @@ void BoardInit(void)
     TRISB = 0xFF;
     TRISC = 0xFF;
 
-    TRISD = 0x00;
+    TRISD = 0xFF;
     TRISE = 0xFF;
 
     LATA = 0;
@@ -258,6 +256,8 @@ void BoardInit(void)
         Config_nCS = 1;
         INTCON2bits.INTEDG3 = 1;
     #endif
+        RF_EEnCS_TRIS = 0;
+        RF_EEnCS = 1;
     #if defined(ENABLE_NVM)
         EE_nCS_TRIS = 0;
         EE_nCS = 1;

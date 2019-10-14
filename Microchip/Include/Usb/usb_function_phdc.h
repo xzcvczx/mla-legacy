@@ -2,14 +2,14 @@
   File Information:
     FileName:       usb_function_phdc.h
     Dependencies:   See INCLUDES section
-    Processor:      PIC18, PIC24 or PIC32 USB Microcontrollers
+    Processor:      PIC18 or PIC24 USB Microcontrollers
     Hardware:       The code is natively intended to be used on the following
                     hardware platforms: PICDEM™ FS USB Demo Board,
                     PIC18F87J50 FS USB Plug-In Module, or
                     Explorer 16 + PIC24 USB PIM.  The firmware may be
                     modified for use on other USB platforms by editing the
                     HardwareProfile.h file.
-    Complier:       Microchip C18 (for PIC18),  C30 (for PIC24) or C32 (for PIC32)
+    Complier:   Microchip C18 (for PIC18) or C30 (for PIC24)
     Company:        Microchip Technology, Inc.
 
     Software License Agreement:
@@ -93,21 +93,12 @@
 #ifndef PHDC_H
 #define PHDC_H
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Includes
-// *****************************************************************************
-// *****************************************************************************
-
+/** I N C L U D E S **********************************************************/
 #include "GenericTypeDefs.h"
 #include "USB/usb.h"
 #include "usb_config.h"
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Constants & Data Types
-// *****************************************************************************
-// *****************************************************************************
+/** D E F I N I T I O N S ****************************************************/
 
 
 /* Class-Specific Requests */
@@ -148,7 +139,6 @@
 
 #define PHDC_RX_ENDPOINTS			1
 #define PHDC_TX_ENDPOINTS			2
-
 #define PHDC_BULK_IN_QOS	0x08
 #define PHDC_BULK_OUT_QOS	0x08
 #define PHDC_INT_IN_QOS	0x01
@@ -160,35 +150,15 @@
 #define USB_APP_GET_TRANSFER_SIZE           3
 
 
-//extern USB_HANDLE PHDCDataOutHandle;
-//extern USB_HANDLE PHDCDataInHandle;
-
-
-
 extern volatile FAR unsigned char phdc_data_rx[PHDC_DATA_OUT_EP_SIZE];
 extern volatile FAR unsigned char phdc_data_tx[PHDC_DATA_IN_EP_SIZE];
 
 /* callback function pointer structure for Application to handle events */
 typedef void(* USB_PHDC_CB)(UINT8, void *);
 
-extern volatile BYTE CtrlTrfData[USB_EP0_BUFF_SIZE];
+extern volatile BYTE CtrlTrfData[USB_EP0_BUFF_SIZE];
 
 /** E X T E R N S ************************************************************/
-
-//typedef union _USTAT_STRUCT
-//{
-//  struct
-//	{
-//		UINT8         unused:1;    
-//		UINT8			PPBD:1;
-//		UINT8         dir:1;          /* direction of endpoint   */
-//		UINT8          ep_num:4;
-//		UINT8			NA:1;
-//	}bits;
-//	UINT8 val;
-//} USTAT_STRUCT, *PTR_USTAT_STRUCT;
-
-
 typedef struct PHDC_RX_ENDPOINT_STRUCT
 {
 	UINT8 ep_num;
@@ -214,21 +184,6 @@ typedef struct PHDC_TX_ENDPOINT_STRUCT
 	UINT8 *app_buff;
 	USB_HANDLE PHDCDataInHandle;
 }PHDC_TX_ENDPOINT,*PTR_PHDC_TX_ENDPOINT;
-
-
-
-
-
-
-
-
-extern UINT8 phdc_rx_len;
-extern POINTER pPHDCSrc;
-extern UINT16 phdc_tx_len;
-extern UINT8 phdc_mem_type;
-
-
-
 
 extern volatile CTRL_TRF_SETUP SetupPkt;
 extern ROM UINT8 configDescriptor1[];

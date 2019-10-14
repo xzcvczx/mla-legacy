@@ -87,13 +87,16 @@ Change History:
               correct behavior, since we obviously can't successfully write more
               data than the entire drive volume size.
               General improvements/improved flows/improved inline code comments.
+  2.9d        Added fix to allow MSD devices to be ejected in Mac OSX and so that
+              read-only media does not create an error in Mac OSX every time it is
+              enumerated.
 
 ********************************************************************/
  
 /** I N C L U D E S **************************************************/
 #include "USB/usb.h"
 #include "HardwareProfile.h"
-#include "FSConfig.h"
+#include "FSconfig.h"
 
 #include "USB/usb_function_msd.h"
 
@@ -145,7 +148,10 @@ Change History:
 #define MSD_FAILED_WRITE_MAX_ATTEMPTS (BYTE)100u    //Used for error case handling
 
 /** V A R I A B L E S ************************************************/
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
+
 //State machine variables
 BYTE MSD_State;			// Takes values MSD_WAIT, MSD_DATA_IN or MSD_DATA_OUT
 BYTE MSDCommandState;
@@ -188,7 +194,9 @@ void MSDErrorHandler(BYTE);
 static void MSDComputeDeviceInAndResidue(WORD);
 
 /** D E C L A R A T I O N S **************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /** C L A S S  S P E C I F I C  R E Q ****************************************/
 
@@ -896,10 +904,10 @@ void MSDProcessCommandMediaPresent(void)
           	MSDCommandState = MSD_COMMAND_RESPONSE;
             break;
 	    case MSD_MODE_SENSE:
-        	msd_buffer[0]=0x02;
+        	msd_buffer[0]=0x03;
         	msd_buffer[1]=0x00;
-        	msd_buffer[2]=0x00;
-        	msd_buffer[3]=0x00;
+        	msd_buffer[2]=(LUNWriteProtectState()) ? 0x80 : 0x00;
+        	msd_buffer[3]= 0x00;
  
            	//Compute and load proper csw residue and device in number of byte.
             TransferLength.Val = 0x04;      
@@ -907,17 +915,11 @@ void MSDProcessCommandMediaPresent(void)
         	MSDCommandState = MSD_COMMAND_RESPONSE;
     	    break;
 		case MSD_PREVENT_ALLOW_MEDIUM_REMOVAL:
-            if(LUNMediaDetect())
-            {
-        		msd_csw.dCSWDataResidue = 0x00;
-        	}
-            else
-            {
-        		gblSenseData[LUN_INDEX].SenseKey=S_NOT_READY;
-        		gblSenseData[LUN_INDEX].ASC=ASC_MEDIUM_NOT_PRESENT;
-        		gblSenseData[LUN_INDEX].ASCQ=ASCQ_MEDIUM_NOT_PRESENT;
-        		msd_csw.bCSWStatus = MSD_CSW_COMMAND_FAILED;
-        	}
+        	gblSenseData[LUN_INDEX].SenseKey=S_ILLEGAL_REQUEST;
+        	gblSenseData[LUN_INDEX].ASC=ASC_INVALID_COMMAND_OPCODE;
+        	gblSenseData[LUN_INDEX].ASCQ=ASCQ_INVALID_COMMAND_OPCODE;
+        	msd_csw.bCSWStatus = MSD_CSW_COMMAND_FAILED;
+        	msd_csw.dCSWDataResidue = 0x00;
 			MSDCommandState = MSD_COMMAND_WAIT;
             break;
 		case MSD_TEST_UNIT_READY:
@@ -1110,6 +1112,9 @@ BYTE MSDReadHandler(void)
     switch(MSDReadState)
     {
         case MSD_READ10_WAIT:
+            //Extract the LBA from the CBW.  Note: Also need to perform endian 
+            //swap, since the multi-byte CBW fields are stored big endian, but 
+            //the Microchip C compilers are little endian.
         	LBA.v[3]=gblCBW.CBWCB[2];
         	LBA.v[2]=gblCBW.CBWCB[3];
         	LBA.v[1]=gblCBW.CBWCB[4];
@@ -1268,6 +1273,26 @@ BYTE MSDWriteHandler(void)
                 //have taken care of setting the proper states to report the error to the host.
                 break;
             }    
+      		//Check if the media is write protected before deciding what
+      		//to do with the data.
+      		if(LUNWriteProtectState()) 
+            {
+                //The media appears to be write protected.
+          	    //Let host know error occurred.  The bCSWStatus flag is also used by
+          	    //the write handler, to know not to even attempt the write sequence.
+          	    msd_csw.bCSWStatus = MSD_CSW_COMMAND_FAILED;    
+
+                //Set sense keys so the host knows what caused the error.
+          	    gblSenseData[LUN_INDEX].SenseKey=S_DATA_PROTECT;
+          	    gblSenseData[LUN_INDEX].ASC=ASC_WRITE_PROTECTED;
+          	    gblSenseData[LUN_INDEX].ASCQ=ASCQ_WRITE_PROTECTED;
+
+                //Stall the OUT endpoint, so as to promptly inform the host
+                //that the data cannot be accepted, due to write protected media.
+          		USBStallEndpoint(MSD_DATA_OUT_EP, OUT_FROM_HOST);
+          		MSDWriteState = MSD_WRITE10_WAIT;
+          	    return MSDWriteState;
+          	}
         	
         	MSD_State = MSD_WRITE10_BLOCK;
         	//Fall through to MSD_WRITE10_BLOCK

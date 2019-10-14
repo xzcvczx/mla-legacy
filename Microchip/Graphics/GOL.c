@@ -45,6 +45,7 @@
  * 03/30/11             In 1 BPP mode: Removed all references to WHITE and 
  *                      BLACK color. Replaced them to use the emboss light 
  *                      and dark color instead.
+ * 02/03/12             Added missing cases in GOLRedrawRec().
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -559,16 +560,16 @@ WORD GOLDraw(void)
     {
         if(GOLDrawCallback())
         {
-        	#ifdef USE_TRANSITION_EFFECTS
+            #ifdef USE_DOUBLE_BUFFERING
+				#ifdef USE_TRANSITION_EFFECTS
                 if(TransitionPendingStatus)
                 {
-                    #ifdef GFX_USE_DISPLAY_CONTROLLER_MCHP_DA210
                     TransitionPendingStatus = 0;
 	                while(IsDisplayUpdatePending());
-                   	GFXExecutePendingTransition(_drawbuffer, (_drawbuffer == GFX_BUFFER1)? GFX_BUFFER2: GFX_BUFFER1);
-                    #endif
+                   	GFXExecutePendingTransition(GetDrawBufferAddress(), GetFrameBufferAddress());
                 }
-            #endif
+				#endif
+            #endif //USE_DOUBLE_BUFFERING
             
             // It's last object jump to head
             pCurrentObj = _pGolObjects;
@@ -645,25 +646,42 @@ WORD GOLDraw(void)
 ********************************************************************/
 void GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom)
 {
-    OBJ_HEADER  *pCurrentObj;
+
+   OBJ_HEADER  *pCurrentObj;
+    int overlapX, overlapY;
 
     pCurrentObj = _pGolObjects;
 
     while(pCurrentObj != NULL)
     {
-		if
-        (
-        	((pCurrentObj->left >= left) && (pCurrentObj->left <= right)) ||
-            ((pCurrentObj->right >= left) && (pCurrentObj->right <= right)) ||
-            ((pCurrentObj->top >= top) && (pCurrentObj->top <= bottom)) ||
-            ((pCurrentObj->bottom >= top) && (pCurrentObj->bottom <= bottom))
-		)
+        overlapX = overlapY = 0;
+
+        // check overlaps in x direction
+        if( ((pCurrentObj->left <= left) &&  (pCurrentObj->right >= left))    ||  \
+            ((pCurrentObj->left <= right) &&  (pCurrentObj->right >= right))  ||  \
+            ((pCurrentObj->left <= left) &&  (pCurrentObj->right >= right))   ||  \
+            ((pCurrentObj->left >= left) &&  (pCurrentObj->right <= right))       \
+          )
+            overlapX = 1;
+    
+        // check overlaps in y direction
+        if( ((pCurrentObj->top <= top) &&  (pCurrentObj->bottom >= top))      ||  \
+            ((pCurrentObj->top <= bottom) &&  (pCurrentObj->bottom >= bottom))||  \
+            ((pCurrentObj->top <= top) &&  (pCurrentObj->bottom >= bottom))   ||  \
+            ((pCurrentObj->top >= top) &&  (pCurrentObj->bottom <= bottom))       \
+          )
+            overlapY = 1;
+        
+        // when any portion of the widget is touched by the defined rectangle the
+        // x and y overlaps will exist.
+        if (overlapX & overlapY)
 		{
         	GOLRedraw(pCurrentObj);
         }
-
+    
         pCurrentObj = (OBJ_HEADER *)pCurrentObj->pNxtObj;
     }   //end of while
+
 }
 
 /*********************************************************************

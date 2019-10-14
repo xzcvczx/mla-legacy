@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>mTouch CVD Framework: PC Communications - Troubleshooting the Framework</title>
+<title>mTouch Framework: PC Communications - Troubleshooting</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -13,91 +13,59 @@
     <ul class="tablist">
       <li><a href="main.html"><span>Main&#160;Page</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
     </ul>
   </div>
   <div class="navpath">
     <ul>
       <li><a class="el" href="main.html">main</a>      </li>
-      <li><a class="el" href="_troubleshoot.html">Troubleshooting the Framework</a>      </li>
+      <li><a class="el" href="troubleshoot.html">Troubleshooting</a>      </li>
     </ul>
   </div>
 </div>
 <div class="header">
   <div class="headertitle">
-<h1>PC Communications - Troubleshooting the Framework </h1>  </div>
+<h1>PC Communications - Troubleshooting </h1>  </div>
 </div>
 <div class="contents">
-<p><b>Step-by-Step Guide to Troubleshooting the Framework's PC Communications</b><br/>
-</p>
-<p><br/>
-</p>
+<center> <table  border="2">
+<tr valign="top">
+<td align="left"><center><b>IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT</b></center><p>The default PICKit Serial (PKSA) is not loaded with the correct hex file. To use the PKSA to communicate with the PC, one of two hex files must be programmed into the PKSA. A utility program has been provided to help with this step.</p>
+<p>The two hex files you must choose from: </p>
 <ul>
-<li><b>1. Make sure CVD_DEBUG is enabled and set to 1 in the <a class="el" href="m_touch_c_v_d___config_8h.html" title="Main mTouch application configuration file.">mTouchCVD_Config.h</a> file.</b> <div class="fragment"><pre class="fragment"><span class="preprocessor"> #define CVD_DEBUG 1</span>
-</pre></div></li>
+<li><b>UART_USB_PICKitSerial_V1.40.hex</b> :: When prompted, choose this hex file if you are implementing <b>one-way communication</b>. This hex file will make your PKSA enumerate on the PC as a COM port. The PKSA will now function as a UART-to-USB converter. You can then view ASCII data in a terminal window or use the mTouch One-Way GUI to graph the data in real-time. </li>
+<li><b>PKS_0305_FACTORY_FW.HEX</b> :: When prompted, choose this hex file if you are implementing <b>two-way communication</b>. This hex file is an updated version of the factory default firmware. Your PKSA will behave exactly as before, but with additional support for RS-232 break characters. You can then use the mTouch Two-Way GUI to change configuration values at run-time and view the effect on the sensors in real-time.</li>
 </ul>
-<p><br/>
-</p>
-<ul>
-<li><b>2. Program the board normally (not in debug mode) and connect the PKSA to both the PC and the board.</b><br/>
-</li>
-</ul>
-<p><br/>
-</p>
-<ul>
-<li><b>3. Make sure both the PIC and the PKSA are being supplied with power.</b><br/>
+<p>The PICKit Serial Loader Utility is located in <code>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/PICKit Serial Loader</code></p>
+<p>The <a class="el" href="_p_k_s_a_r_s232.html">PICKit Serial Loader Guide</a> provides more information.</p>
+<center><b>IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT</b></center>  </td></tr>
+</table>
+</center><p><br/>
 <br/>
- Either: <ul>
-<li>
-Supply power to the PIC from an external source that is also supplying power to the PKSA's PWR and GND pins. </li>
-<li>
-Supply power to the PIC from the PKSA by pressing and holding the black button for 3 seconds until the green power LED turns on. </li>
-<li>
-Supply power to the PIC from an external source that is NOT connected to the PWR/GND pins of the PKSA and then supply power to the PKSA by pressing on its black button for 3 seconds until the green power LED turns on. </li>
-</ul>
-Be careful not to supply power to the PIC from two different sources as you may destroy the board.</li>
-</ul>
-<p><br/>
 </p>
+<p>There are two main types of communication built in to the mTouch Framework's mComm module: </p>
 <ul>
-<li><b>4. Is the PKSA's red LED on?</b><br/>
+<li><a class="el" href="ts-_comms-1way.html">One-way communication</a> is handled through UART only. It outputs ASCII data to be read from a terminal window or from a GUI that reads COM ports, such as the mTouch One-Way GUI.<br/>
 <br/>
- If no - <ul>
-<li>
-Use a scope to verify the TX pin of the PKSA is receiving data from the PIC. </li>
-<li>
-If it is, the PKSA's firmware has not been updated to perform as a UART-to-USB converter. See <a class="el" href="_p_k_s_a_r_s232.html">this guide</a> on using the PKSA loader utility to reflash the PICKit Serial Analyzer's firmware. </li>
-</ul>
-If yes -</li>
-</ul>
-<p><br/>
-</p>
-<ul>
-<li><b>5. Determine which COM port has been assigned to the PKSA.</b><br/>
+ You can find the mTouch One-Way GUI in <code>Your MLA Directory/mTouchCapDemos/Utilities/PIC12F PIC16F Utilities/mTouch One-Way GUI</code><br/>
 <br/>
- In Windows - <ul>
-<li>
-Right click 'My Computer' --&gt; Properties --&gt; Hardware --&gt; Device Manager </li>
-<li>
-You should find it listed under "Ports (COM)". </li>
-</ul>
-If it's not there, you need to reinstall the Windows driver for the UART-to-USB behavior. The driver can be found in the PKSA Loader Utility's folder. Correct installation is based on the version of Windows you are using, but can be accomplished by right clicking the file and selecting 'Install' in most cases.</li>
-</ul>
-<p><br/>
-</p>
-<ul>
-<li><b>5. Open the mTouch GUI and make sure the communication settings are set to:</b><br/>
+ If you wish to use the PICKit Serial with this communication type, it must be loaded with the UART-to-USB firmware. See <a class="el" href="_p_k_s_a_r_s232.html">this guide</a> for information on loading this hex file to your PKSA.<br/>
 <br/>
- <ul>
-<li>
-115.2 kbps </li>
-<li>
-COM Port dependant on current assignment in Device Manager. </li>
-</ul>
-</li>
+ </li>
+<li><b>Two-way communication</b> can be implemented with UART, I2C, and SPI. <br/>
+<br/>
+ <a href="../mComm Users Guide.pdf"><b>User's Configuration Guide (PDF)</b></a><br/>
+ <a href="../mComm Programmers Guide.pdf"><b>Programmer's Guide - (PDF)</b></a><br/>
+<br/>
+ The protocol allows for efficient, direct access to EEPROM and RAM for both reading and writing. The data is binary, so must be interpretted by a master instead of a terminal window. This mode allows changing values at run-time and execution of user commands. This option is used for communicating to the mTouch Two-Way GUI and for implementing custom board-level communications.<br/>
+<br/>
+ If you wish to use the PICKit Serial with the UART two-way communication type, the PKSA firmware must be updated to the latest PKSA version to support break characters. See <a class="el" href="_p_k_s_a_r_s232.html">this guide</a> for information on updating the PKSA hex file.<br/>
+<br/>
+ </li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch CVD Framework v1.1 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

@@ -41,6 +41,12 @@
 #ifndef HARDWARE_PROFILE_PICDEM_FSUSB_H
 #define HARDWARE_PROFILE_PICDEM_FSUSB_H
 
+    /************  PHDC Demo Configuration *******************/
+    #define PHD_USE_POT_FOR_TEMP_SIMULATION
+    //#define PHD_USE_LCD_DISPLAY
+    //define PHD_USE_RTCC_FOR_TIME_STAMP
+    //#define DEMO_BOARD_HAS_ONLY_ONE_PUSH_BUTTON
+
     /*******************************************************************/
     /******** USB stack hardware selection options *********************/
     /*******************************************************************/
@@ -56,7 +62,7 @@
     //The PICDEM FS USB Demo Board platform supports the USE_SELF_POWER_SENSE_IO
     //and USE_USB_BUS_SENSE_IO features.  Uncomment the below line(s) if
     //it is desireable to use one or both of the features.
-    //#define USE_SELF_POWER_SENSE_IO
+    #define USE_SELF_POWER_SENSE_IO
     #define tris_self_power     TRISAbits.TRISA2    // Input
     #if defined(USE_SELF_POWER_SENSE_IO)
     #define self_power          PORTAbits.RA2
@@ -64,7 +70,7 @@
     #define self_power          1
     #endif
 
-    //#define USE_USB_BUS_SENSE_IO
+    #define USE_USB_BUS_SENSE_IO
     #define tris_usb_bus_sense  TRISAbits.TRISA1    // Input
     #if defined(USE_USB_BUS_SENSE_IO)
     #define USB_BUS_SENSE       PORTAbits.RA1
@@ -135,7 +141,10 @@
     #define mInitSwitch3()      TRISBbits.TRISB5=1;
     #define sw2                 PORTBbits.RB4
     #define sw3                 PORTBbits.RB5
-    
+
+      /** POT ************************************************************/
+    #define mInitPOT()          {TRISAbits.TRISA0=1;ADCON0=0x01;ADCON2=0x3C;ADCON2bits.ADFM = 1;}
+
     /** USB external transceiver interface (optional) ******************/
     #define tris_usb_vpo        TRISBbits.TRISB3    // Output
     #define tris_usb_vmo        TRISBbits.TRISB2    // Output
@@ -149,5 +158,5 @@
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
-
+    
 #endif  //HARDWARE_PROFILE_PICDEM_FSUSB_H

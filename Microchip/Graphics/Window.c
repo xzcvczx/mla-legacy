@@ -34,9 +34,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok 	11/12/07	Version 1.0 release
+ * 11/12/07	   Version 1.0 release
+ * 07/29/11    Revised states to enable rendering of client area and or title
+ *             area only.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -173,18 +175,19 @@ WORD WndDraw(void *pObj)
 {
     typedef enum
     {
-        WND_REMOVE,
-        WND_TITLE_BAR_DRAW,
-        WND_TITLE_BAR_BITMAP,
-        WND_TITLE_BAR_TEXT,
-        WND_TITLE_BAR_TEXT_DRAW,
-        WND_CLIENT,
-        WND_CLIENT_DRAW
+        WND_DRAW_IDLE,
+        WND_DRAW_HIDE,
+        WND_DRAW_TITLE_BAR,
+        WND_DRAW_TITLE_BAR_BITMAP,
+        WND_DRAW_SET_TITLE_BAR_TEXT,
+        WND_DRAW_TITLE_BAR_TEXT,
+        WND_DRAW_SET_CLIENT_AREA,
+        WND_DRAW_CLIENT_AREA
     } WND_DRAW_STATES;
 
     SHORT temp;
     WINDOW *pW;
-    static WND_DRAW_STATES state = WND_REMOVE;
+    static WND_DRAW_STATES state = WND_DRAW_IDLE;
 
     pW = (WINDOW *)pObj;
 
@@ -195,51 +198,93 @@ WORD WndDraw(void *pObj)
 
         switch(state)
         {
-            case WND_REMOVE:
-                if(GetState(pW, WND_HIDE))
+            case WND_DRAW_IDLE:
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_SetupDrawUpdate( pW->hdr.left,
+                                            pW->hdr.top,
+                                            pW->hdr.right,
+                                            pW->hdr.bottom);
+#endif
+                if(GetState(pW, WND_HIDE)) 
                 {
                     SetColor(pW->hdr.pGolScheme->CommonBkColor);
-                    if(!Bar(pW->hdr.left, pW->hdr.top, pW->hdr.right, pW->hdr.bottom))
-                    {
-                        return (0);
-                    }
-
-                    return (1);
+					state = WND_DRAW_HIDE;
+					// no break; here so it falls through to WND_DRAW_HIDE
                 }
-
                 if(GetState(pW, WND_DRAW_CLIENT))
                 {
-                    state = WND_CLIENT;
+                    state = WND_DRAW_SET_CLIENT_AREA;
                     break;
+				} 
+				else if(GetState(pW, WND_DRAW_TITLE))
+				{
+					state = WND_DRAW_TITLE_BAR;
+					break;
+				}
+                else
+				{
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pW->hdr.left,
+                                                    pW->hdr.top,
+                                                    pW->hdr.right,
+                                                    pW->hdr.bottom);
+#endif
+                    return (1);
+				}
 
-                case WND_CLIENT:
-                    SetLineThickness(NORMAL_LINE);
-                    SetLineType(SOLID_LINE);
-                    GOLPanelDraw
-                    (
-                        pW->hdr.left,
-                        pW->hdr.top,
-                        pW->hdr.right,
-                        pW->hdr.bottom,
-                        0,
-                        pW->hdr.pGolScheme->CommonBkColor,
-                        pW->hdr.pGolScheme->EmbossLtColor,
-                        pW->hdr.pGolScheme->EmbossDkColor,
-                        NULL,
-                        GOL_EMBOSS_SIZE
-                    );
 
-                    state = WND_CLIENT_DRAW;
+            case WND_DRAW_HIDE:
+                if (!Bar(pW->hdr.left, pW->hdr.top, pW->hdr.right, pW->hdr.bottom))
+                    return 0;
+			    state = WND_DRAW_IDLE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pW->hdr.left,
+                                                    pW->hdr.top,
+                                                    pW->hdr.right,
+                                                    pW->hdr.bottom);
+#endif
+                return (1);
+				
+			case WND_DRAW_SET_CLIENT_AREA:
+				SetLineThickness(NORMAL_LINE);
+				SetLineType(SOLID_LINE);
+				GOLPanelDraw
+				(
+					pW->hdr.left,
+					pW->hdr.top,
+					pW->hdr.right,
+					pW->hdr.bottom,
+					0,
+					pW->hdr.pGolScheme->CommonBkColor,
+					pW->hdr.pGolScheme->EmbossLtColor,
+					pW->hdr.pGolScheme->EmbossDkColor,
+					NULL,
+					GOL_EMBOSS_SIZE
+				);
 
-                case WND_CLIENT_DRAW:
-                    if(!GOLPanelDrawTsk())
-                        return (0);
-                }
+				state = WND_DRAW_CLIENT_AREA;
 
-                state = WND_TITLE_BAR_DRAW;
-                break;
+			case WND_DRAW_CLIENT_AREA:
+				if(!GOLPanelDrawTsk())
+					return (0);
 
-            case WND_TITLE_BAR_DRAW:
+                if(GetState(pW, WND_DRAW_TITLE))
+                {
+					state = WND_DRAW_TITLE_BAR;
+					break;
+				} else
+				{
+					state = WND_DRAW_IDLE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pW->hdr.left,
+                                                    pW->hdr.top,
+                                                    pW->hdr.right,
+                                                    pW->hdr.bottom);
+#endif
+					return (1);
+				}
+
+            case WND_DRAW_TITLE_BAR:
                 if(!GetState(pW, WND_DISABLED))
                 {
                     if(GetState(pW, WND_FOCUSED))
@@ -270,11 +315,10 @@ WORD WndDraw(void *pObj)
                     return (0);
                 }
 
-                state = WND_TITLE_BAR_BITMAP;
-
+                state = WND_DRAW_TITLE_BAR_BITMAP;
                 break;
 
-            case WND_TITLE_BAR_BITMAP:
+            case WND_DRAW_TITLE_BAR_BITMAP:
                 if(pW->pBitmap != NULL)
                 {
                     if
@@ -294,50 +338,67 @@ WORD WndDraw(void *pObj)
 
                 if(pW->pText != NULL)
                 {
-                    state = WND_TITLE_BAR_TEXT;
-                    break;
+                    state = WND_DRAW_SET_TITLE_BAR_TEXT;
+                    break;		
+				}
+				else
+				{
+					state = WND_DRAW_IDLE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pW->hdr.left,
+                                                    pW->hdr.top,
+                                                    pW->hdr.right,
+                                                    pW->hdr.bottom);
+#endif
+					return (1);
+				}
 
-                case WND_TITLE_BAR_TEXT:
-                    SetFont(pW->hdr.pGolScheme->pFont);
+			case WND_DRAW_SET_TITLE_BAR_TEXT:
+				SetFont(pW->hdr.pGolScheme->pFont);
 
-                    if(!GetState(pW, WND_DISABLED))
-                    {
-                        if(GetState(pW, WND_FOCUSED))
-                        {
-                            SetColor(pW->hdr.pGolScheme->TextColor1);
-                        }
-                        else
-                        {
-                            SetColor(pW->hdr.pGolScheme->TextColor0);
-                        }
-                    }
-                    else
-                    {
-                        SetColor(pW->hdr.pGolScheme->TextColorDisabled);
-                    }
+				if(!GetState(pW, WND_DISABLED))
+				{
+					if(GetState(pW, WND_FOCUSED))
+					{
+						SetColor(pW->hdr.pGolScheme->TextColor1);
+					}
+					else
+					{
+						SetColor(pW->hdr.pGolScheme->TextColor0);
+					}
+				}
+				else
+				{
+					SetColor(pW->hdr.pGolScheme->TextColorDisabled);
+				}
 
-                    temp = pW->hdr.left + GOL_EMBOSS_SIZE + WND_INDENT;
+				temp = pW->hdr.left + GOL_EMBOSS_SIZE + WND_INDENT;
 
-                    if(pW->pBitmap != NULL)
-                    {
-                        temp += GetImageWidth(pW->pBitmap);
-                    }
+				if(pW->pBitmap != NULL)
+				{
+					temp += GetImageWidth(pW->pBitmap);
+				}
 
-                    if(GetState(pW, WND_TITLECENTER))
-                    {
-                        temp = (temp + (pW->hdr.right - GetTextWidth(pW->pText, pW->hdr.pGolScheme->pFont))) >> 1;
-                    }
+				if(GetState(pW, WND_TITLECENTER))
+				{
+					temp = (temp + (pW->hdr.right - GetTextWidth(pW->pText, pW->hdr.pGolScheme->pFont))) >> 1;
+				}
 
-                    MoveTo(temp, pW->hdr.top + GOL_EMBOSS_SIZE + ((WND_TITLE_HEIGHT - pW->textHeight) >> 1));
+				MoveTo(temp, pW->hdr.top + GOL_EMBOSS_SIZE + ((WND_TITLE_HEIGHT - pW->textHeight) >> 1));
 
-                    state = WND_TITLE_BAR_TEXT_DRAW;
+				state = WND_DRAW_TITLE_BAR_TEXT;
 
-                case WND_TITLE_BAR_TEXT_DRAW:
-                    if(!OutText(pW->pText))
-                        return (0);
-                }
-
-                state = WND_REMOVE;
+			case WND_DRAW_TITLE_BAR_TEXT:
+				if(!OutText(pW->pText))
+					return (0);
+                state = WND_DRAW_IDLE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pW->hdr.left,
+                                                    pW->hdr.top,
+                                                    pW->hdr.right,
+                                                    pW->hdr.bottom);
+#endif
+				
                 return (1);
         }   //end of switch
     }       //end of while

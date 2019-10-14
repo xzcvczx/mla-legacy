@@ -109,8 +109,8 @@ file_015=HardwareProfile - PIC18F46J50 PIM.h
 file_016=..\..\..\Microchip\USB\usb_device_local.h
 file_017=rm18f46j50_g.lkr
 file_018=..\IMPORTANT README.txt
-file_019=..\Getting Started - Running the Device - HID - Simple Custom Demo.htm
-file_020=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_019=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_020=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

@@ -71,7 +71,7 @@
 #define SLIDERXPOS      (STXXPOS + ARROWWIDTH)          // slider left/top pos
 #define SLIDERYPOS      (STXYPOS + STXHEIGHT + 3)
 #define SLIDERWIDTH     (STXWIDTH - (ARROWWIDTH << 1))  // slider width
-#define HWDATAMAX       9                               // # of "Hello World" strings
+#define HWDATAMAX       11                               // # of "Hello World" strings
 #define HELLOWORLDDELAY 30                              // default animation delay
     
     
@@ -100,6 +100,10 @@ extern const FONT_FLASH     ArabicFont;             // font for Arabic translati
 extern const FONT_FLASH     ChineseFont;            // font for Chinese translation
 extern const FONT_FLASH     JapaneseFont;           // font for Japanese translation
 extern const FONT_FLASH     KoreanFont;             // font for Korean translation
+
+// Extended glyphs
+extern const FONT_FLASH     HindiFont;              // font for Hindi translation
+extern const FONT_FLASH     ThaiFont;               // font for Thai translation
 
 /////////////////////////////////////////////////////////////////////////////
 //                       GLOBAL VARIABLES FOR DEMO
@@ -298,6 +302,8 @@ void InitHWData(void)
             case 6:     HWLang[i].pHWFont = (void *) &GOLFontDefault; HWLang[i].pHWStr = (XCHAR *)DutchStr; break;
             case 7:     HWLang[i].pHWFont = (void *) &GOLFontDefault; HWLang[i].pHWStr = (XCHAR *)FrenchStr; break;
             case 8:     HWLang[i].pHWFont = (void *) &KoreanFont; HWLang[i].pHWStr = (XCHAR *)KoreanStr; break;
+            case 9:     HWLang[i].pHWFont = (void *) &HindiFont; HWLang[i].pHWStr = (XCHAR *)HindiStr; break;
+            case 10:    HWLang[i].pHWFont = (void *) &ThaiFont; HWLang[i].pHWStr = (XCHAR *)ThaiStr; break;
             default:    break;
         }
 

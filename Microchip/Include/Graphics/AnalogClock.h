@@ -4,15 +4,13 @@
  *  Analog Clock
  *****************************************************************************
  * FileName:        AnalogClock.h
- * Dependencies:    None 
- * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
+ * Processor:       PIC24, dsPIC, PIC32
+ * Compiler:       	MPLAB C30, C32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2012 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -22,7 +20,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -34,13 +32,12 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *****************************************************************************/
 #ifndef _ANALOGCLOCK_H
     #define _ANALOGCLOCK_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
     #include "GenericTypeDefs.h"
 /*********************************************************************
 * Object States Definition: 
@@ -58,28 +55,25 @@
 /*********************************************************************
 * Overview: Defines the parameters required for a clock Object.
 * 			The following relationships of the parameters determines
-*			the general shape of the button:
-* 			1. Width is determined by right - left.
-*			2. Height is determined by top - bottom.
-*			3. Radius - specifies if the button will have a rounded 
-*						edge. If zero then the button will have 
-*						sharp (cornered) edge.
-*			4. If 2*radius = height = width, the button is a circular button.
+*			the general shape of the clock:
+* 			1. centerx and centery determine the middle of the clock.
+*			2. radius defines the radius of the clock.
+*			4. *pBitmap points to the background image for the analog clock.
 *
 *********************************************************************/
 typedef struct
 {
-    OBJ_HEADER    hdr;        // Generic header for all Objects (see OBJ_HEADER).
-    SHORT         radius;     // Radius of the clock.
-    SHORT		centerx;
-    SHORT		centery;
-    SHORT		valueS;
-    SHORT		prev_valueS;
-    SHORT		valueM;
-    SHORT		prev_valueM;
-    SHORT		valueH;
-    SHORT		prev_valueH;
-    void        *pBitmap;   // Pointer to bitmap used.
+    OBJ_HEADER    hdr;              // Generic header for all Objects (see OBJ_HEADER).
+    SHORT         radius;           // Radius of the clock.
+    SHORT		  centerx;          // center location in X-axis.
+    SHORT		  centery;          // center location in Y-axis.
+    SHORT		  valueS;           // time in Second
+    SHORT		  prev_valueS;      // previous time in Second
+    SHORT		  valueM;           // time in Minute
+    SHORT		  prev_valueM;      // previous time in Minute
+    SHORT		  valueH;           // time in Hour
+    SHORT		  prev_valueH;      // previous time in Hour
+    void          *pBitmap;         // Pointer to bitmap used.
 } ANALOGCLOCK;
 
 
@@ -98,17 +92,16 @@ typedef struct
 * Input: ID - Unique user defined ID for the object instance.
 *        left - Left most position of the object.
 *        top - Top most position of the object. 
-*	   right - Right most position of the object.
-*	   bottom - Bottom most position of the object.
-*        hour - set the current hour.
-*        minute - set the current minute. 
-*        radius - radius of the clock.
-*        sechand - Flag to draw cecond hand or not.
+*        right - Right most position of the object.
+*        bottom - Bottom most position of the object.
+*        hour - Initial hour value.
+*        minute - Initial minute value. 
+*        radius - Sets the radius of the clock.
+*        sechand - Flag to indicate if the second hand will be drawn or not.
 *        state - Sets the initial state of the object.
-*        pBitmap - Pointer to the bitmap used on the face of the button
-*                  dimension of the bitmap must match the dimension of the 
-*				   button.
-*        pText - Pointer to the text of the button.
+*        pBitmap - Pointer to the bitmap used on the face of the analog clock
+*                  dimension of the image must match the dimension of the 
+*				   widget.
 *        pScheme - Pointer to the style scheme used.
 *
 * Output: Returns the pointer to the object created.
@@ -121,8 +114,9 @@ typedef struct
 *		pScheme = GOLCreateScheme();
 *		state = AC_DRAW;
 *
-*		AnalogClock = AcCreate(1,20,64,50,118,0, state, NULL, "ON", pScheme);
-
+*		AnalogClock = AcCreate(ANALOGCLOCK_ID, 20, 64, 50, 118, 1, 20, 30, FALSE, state, NULL, pScheme);
+*	</CODE> 
+*
 * Side Effects: none
 *
 ********************************************************************/
@@ -136,14 +130,14 @@ ANALOGCLOCK *AcCreate
     SHORT       hour,
     SHORT       minute,
     SHORT       radius,
-    BOOL		sechand,
+    BOOL	    sechand,
     WORD        state,
     void        *pBitmap,
     GOL_SCHEME  *pScheme
 );
 
 /*********************************************************************
-* Function: WORD AcDraw(ANALOGCLOCK *pB)
+* Function: WORD AcDraw(ANALOGCLOCK *pAc)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -210,7 +204,7 @@ ANALOGCLOCK *AcCreate
 * Side Effects: none
 *
 ********************************************************************/
-WORD    AcDraw(void *pObj);
+WORD    AcDraw(void *pAc);
 
 /*********************************************************************
 * Function: AcHandsDraw(ANALOGCLOCK *pAc, SHORT hand, SHORT thickness, WORD color, void *pBitmap);
@@ -236,12 +230,12 @@ WORD AcHandsDraw(ANALOGCLOCK *pAc, SHORT hand, SHORT thickness, WORD color, void
 /*********************************************************************
 * Function: AcSetHour(ANALOGCLOCK *pAc, SHORT hour)
 *
-* Overview: Sets the hour of the analog clock.
+* Overview: Sets the hour value of the analog clock.
 *
 * PreCondition: none
 *
 * Input: pAc - The pointer to the object whose hands will be modified.
-*        hour - current hour of the analog clock
+*        hour - New hour time. 
 *
 * Output: none
 *
@@ -253,12 +247,12 @@ void AcSetHour(ANALOGCLOCK *pAc, SHORT hour);
 /*********************************************************************
 * Function: AcSetMinute(ANALOGCLOCK *pAc, SHORT minute)
 *
-* Overview: Sets the minute of the analog clock.
+* Overview: Sets the minute value of the analog clock.
 *
 * PreCondition: none
 *
 * Input: pAc - The pointer to the object whose hands will be modified.
-*        minute - current minute of the analog clock
+*        minute - New minute time. 
 *
 * Output: none
 *
@@ -268,14 +262,14 @@ void AcSetHour(ANALOGCLOCK *pAc, SHORT hour);
 void AcSetMinute(ANALOGCLOCK *pAc, SHORT minute);
 
 /*********************************************************************
-* Function: AcSetMinute(ANALOGCLCOK *pAc, SHORT second)
+* Function: AcSetSecond(ANALOGCLCOK *pAc, SHORT second)
 *
-* Overview: Sets the second of the analog clock.
+* Overview: Sets the second value of the analog clock.
 *
 * PreCondition: none
 *
 * Input: pAc -    The pointer to the object whose hands will be modified.
-*        second - current minute of the analog clock
+*        second - New second time. 
 *
 * Output: none
 *

@@ -30,9 +30,18 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 09/01/10	   ...
+ *****************************************************************************/
+/*****************************************************************************
+ * Section: Description
+ *
+ * This module handles the callback routines used by the module, comm_pkt.  The
+ * module interfaces with the hardware, in this case serial and/or USB, to 
+ * receive and transmitt data.  The comm_pkt module is abstracted from all
+ * communication mediums.  The user can add/subtract communication mediums
+ * as needed per application's requirements.  
+ *
+ * This module is used by serval different Graphics demos and is part of the 
+ * common directory under the Graphics demo.
  *****************************************************************************/
 /*****************************************************************************
  * Section: Includes
@@ -48,6 +57,9 @@
 #include "USB/usb_function_generic.h"
 #endif
 
+/*****************************************************************************
+ * Section: Externs
+ *****************************************************************************/
 #ifdef USE_COMM_PKT_MEDIA_USB
 extern unsigned char OUTPacket[64];	//User application buffer for receiving and holding OUT packets sent from the host
 extern unsigned char INPacket[64];		//User application buffer for sending IN packets to the host
@@ -56,7 +68,7 @@ extern USB_HANDLE USBGenericInHandle;
 #endif
 
 /*****************************************************************************
- * COMM_PKT_Update
+ * BOOL COMM_PKT_DataAvailable(COMM_PKT_MEDIA media)
  *****************************************************************************/
 BOOL COMM_PKT_DataAvailable(COMM_PKT_MEDIA media)
 {
@@ -79,7 +91,7 @@ BOOL COMM_PKT_DataAvailable(COMM_PKT_MEDIA media)
     return FALSE;
 }
 /*****************************************************************************
- * COMM_PKT_Update
+ * WORD COMM_PKT_GetData(COMM_PKT_MEDIA media, BYTE *buffer, WORD offset)
  *****************************************************************************/
 WORD COMM_PKT_GetData(COMM_PKT_MEDIA media, BYTE *buffer, WORD offset)
 {
@@ -118,7 +130,7 @@ WORD COMM_PKT_GetData(COMM_PKT_MEDIA media, BYTE *buffer, WORD offset)
     return offset;
 }
 /*****************************************************************************
- * COMM_PKT_Update
+ * void COMM_PKT_SendData(COMM_PKT_MEDIA media, BYTE *data, WORD size)
  *****************************************************************************/
 void COMM_PKT_SendData(COMM_PKT_MEDIA media, BYTE *data, WORD size)
 {

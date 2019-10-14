@@ -72,7 +72,7 @@ void delay_us(UINT us)
    
     UINT targetCount;  
     UINT bakupCount; 
-    UINT8 loop = 0;
+
     // Assert us not zero. This must be caught during debug phase.
     //ASSERT(us!=0);
     

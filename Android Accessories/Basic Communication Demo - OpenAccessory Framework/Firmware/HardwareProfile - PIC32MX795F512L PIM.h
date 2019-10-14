@@ -120,4 +120,25 @@
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
+
+    /** debugging UART port ********************************************/
+    #define BAUDRATE2       57600UL
+    #define BRG_DIV2        4 
+    #define BRGH2           1
+    
+    #if defined(DEBUG_ENABLE)
+        #include <uart2.h>
+        #define DEBUG_Init(a)           UART2Init()
+        // Define a debug printing interface
+        #define DEBUG_Error(a)          Nop(); Nop(); Nop();
+        #define DEBUG_PrintString(a)    UART2PrintString(a)
+        #define DEBUG_PrintHex(a)       UART2PutHex(a)
+    #else
+        #define DEBUG_Init(a)
+        #define DEBUG_Error(a)          
+        #define DEBUG_PrintString(a)    
+        #define DEBUG_PrintHex(a)       
+    #endif
+
+
 #endif  //HARDWARE_PROFILE_PIC32MX795F512L_PIM_H

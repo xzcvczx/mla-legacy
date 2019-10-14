@@ -202,7 +202,7 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
+        
     #elif defined(__dsPIC33EP512MU810__) || defined (__PIC24EP512GU810__)
         _FOSCSEL(FNOSC_FRC);
         _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
@@ -235,7 +235,11 @@
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
+#elif defined(PIC24FJ64GB502_MICROSTICK)
+    _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    _CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+    _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
 #else
     #error No hardware board defined, see "HardwareProfile.h" and __FILE__
 #endif
@@ -243,7 +247,9 @@
 
 
 /** VARIABLES ******************************************************/
+#if defined(__18CXX)
 #pragma udata
+#endif
 
 #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
     #pragma udata usbram2
@@ -252,14 +258,16 @@
     #pragma udata USB_VARIABLES=0x500
 #elif defined(__18F4450) || defined(__18F2450)
     #pragma udata USB_VARIABLES=0x480
-#else
+#elif defined(__18CXX)
     #pragma udata
 #endif
 
 INT16 ReceivedDataEvenBuffer[NO_OF_SAMPLES_IN_A_USB_FRAME];// Holds the Even Audio Data received from Host
 INT16 ReceivedDataOddBuffer[NO_OF_SAMPLES_IN_A_USB_FRAME]; // Holds the Odd  Audio Data received from Host
 
+#if defined(__18CXX)
 #pragma udata 
+#endif
 UINT8 sampleCounter = 0; // Keeps track of number of samples played.
 USB_HANDLE USBTxHandle = 0;
 USB_HANDLE USBRxEvenHandle = 0;
@@ -571,7 +579,9 @@ void USBCBSendResume(void);
 
 
 /** DECLARATIONS ***************************************************/
+#if defined(__18CXX)
 #pragma code
+#endif
 
 /********************************************************************
  * Function:        void main(void)
@@ -699,6 +709,14 @@ static void InitializeSystem(void)
     }
     //Device switches over automatically to PLL output after PLL is locked and ready.
     #endif
+    
+    
+    #if defined(__32MX460F512L__)|| defined(__32MX795F512L__)
+    // Configure the PIC32 core for the best performance
+    // at the operating frequency. The operating frequency is already set to 
+    // 60MHz through Device Config Registers
+    SYSTEMConfigPerformance(60000000);
+	#endif
     
       #if defined(__dsPIC33EP512MU810__) || defined (__PIC24EP512GU810__)
 
@@ -1946,7 +1964,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((INT)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

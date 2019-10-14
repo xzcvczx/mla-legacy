@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>mTouch CVD Framework: Data Fields</title>
+<title>mTouch Framework: Data Fields</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -13,6 +13,7 @@
     <ul class="tablist">
       <li><a href="main.html"><span>Main&#160;Page</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
     </ul>
   </div>
@@ -35,28 +36,58 @@
 </div>
 <div class="contents">
 &#160;<ul>
-<li>CVD_Decode()
-: <a class="el" href="group___decoding.html#gac9fbc0448eeb1690da198052177c011f">mTouchCVD.h</a>
-, <a class="el" href="group___decoding.html#gac9fbc0448eeb1690da198052177c011f">mTouchCVD.c</a>
+<li>mComm_Init()
+: <a class="el" href="m_comm_8h.html#ae411cd73970859fd79070afa9a1cb319">mComm.h</a>
 </li>
-<li>CVD_Filter_Init()
-: <a class="el" href="m_touch_c_v_d_8c.html#a4929f20a3e3692690545ed671082bd8a">mTouchCVD.c</a>
-, <a class="el" href="m_touch_c_v_d_8h.html#a4929f20a3e3692690545ed671082bd8a">mTouchCVD.h</a>
+<li>mTouch_ButtonStateMachine()
+: <a class="el" href="m_touch_8c.html#a375aad16aafd424786ba67e79cc454d3">mTouch.c</a>
 </li>
-<li>CVD_Filter_UpdateAverage()
-: <a class="el" href="group___decoding.html#gaa4b47300c41fcd7e5d3e1ef1b17c7be9">mTouchCVD.c</a>
-, <a class="el" href="group___decoding.html#gaa4b47300c41fcd7e5d3e1ef1b17c7be9">mTouchCVD.h</a>
+<li>mTouch_ChangeMode()
+: <a class="el" href="m_touch__acquistion_8c.html#a5c62bf914c0353b75955a34212c1faae">mTouch_acquistion.c</a>
+, <a class="el" href="m_touch_8h.html#a5c62bf914c0353b75955a34212c1faae">mTouch.h</a>
 </li>
-<li>ISR()
-: <a class="el" href="group___acquisition.html#ga15e1bec7c941bb3bf0e0c4b665a322b3">mTouchCVD_Acquistion.c</a>
+<li>mTouch_ChangeState()
+: <a class="el" href="m_touch_8c.html#ad155881d69a8795e0c91a6eede8c0308">mTouch.c</a>
 </li>
-<li>mTouchCVD_Init()
-: <a class="el" href="group__m_touch_a_p_i.html#gaed3afe88efb9865846aabe3520633515">mTouchCVD.h</a>
-, <a class="el" href="group__m_touch_a_p_i.html#gaed3afe88efb9865846aabe3520633515">mTouchCVD.c</a>
+<li>mTouch_DecimationFilter()
+: <a class="el" href="m_touch__acquistion_8c.html#a76f244c380bcb78535fbc4b5d086b720">mTouch_acquistion.c</a>
+</li>
+<li>mTouch_Decode()
+: <a class="el" href="group___decoding.html#ga8955adf440115510aace00d81444e268">mTouch.h</a>
+, <a class="el" href="group___decoding.html#ga8955adf440115510aace00d81444e268">mTouch.c</a>
+</li>
+<li>mTouch_Init()
+: <a class="el" href="m_touch_8c.html#ab73968cbb19d4ae25a65698c15906b65">mTouch.c</a>
+, <a class="el" href="m_touch_8h.html#ab73968cbb19d4ae25a65698c15906b65">mTouch.h</a>
+</li>
+<li>mTouch_Scan()
+: <a class="el" href="group___acquisition.html#ga60426826e876a6a8c03b27b45ba02833">mTouch.h</a>
+, <a class="el" href="group___acquisition.html#ga60426826e876a6a8c03b27b45ba02833">mTouch_acquistion.c</a>
+</li>
+<li>MTOUCH_SCAN_FUNCTION()
+: <a class="el" href="m_touch__acquistion_8c.html#a8c156f6881689b25489b63cb166c5fc7">mTouch_acquistion.c</a>
+</li>
+<li>MTOUCH_SCAN_PROTOTYPES()
+: <a class="el" href="m_touch__acquistion_8c.html#ae1846c1507fc938b2655991ace5385fa">mTouch_acquistion.c</a>
+</li>
+<li>mTouch_StoreScanA()
+: <a class="el" href="m_touch__acquistion_8c.html#a4b228af88722e7b340ab2fc561309216">mTouch_acquistion.c</a>
+</li>
+<li>mTouch_StoreScanB()
+: <a class="el" href="m_touch__acquistion_8c.html#af756bb107972edbea40abb69edca89c5">mTouch_acquistion.c</a>
+</li>
+<li>mTouch_UpdateAccumulator2()
+: <a class="el" href="m_touch__acquistion_8c.html#af2038aad410bb39c0955e0de237a8120">mTouch_acquistion.c</a>
+</li>
+<li>mTouch_UpdateBaseline()
+: <a class="el" href="group___decoding.html#gad860d35191988afa8f9d02bcb946c08b">mTouch.c</a>
+</li>
+<li>mTouch_WaitForGoDone()
+: <a class="el" href="m_touch__acquistion_8c.html#a91439b80a8405a79abffe038c8aba548">mTouch_acquistion.c</a>
 </li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch CVD Framework v1.1 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

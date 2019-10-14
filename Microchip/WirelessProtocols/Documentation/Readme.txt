@@ -1,3 +1,7 @@
+MiWi DE 4.2.4
+Fix the bug in corner cases. User for previous versions generally do not need to update.
+Further simplified demos and focus on MiApp interfaces in demo main function.
+
 MiWi DE 4.2.3
 Fix the bug in MiWi P2P that two MRF24J40 nodes cannot connect if Network Freezer is not enabled.
 

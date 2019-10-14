@@ -104,7 +104,6 @@
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
 
 #else
 
@@ -133,7 +132,6 @@ void USBCBSendResume(void);
 WORD_VAL ReadPOT(void);
 
 /** DECLARATIONS ***************************************************/
-#pragma code
 
 /********************************************************************
  * Function:        void main(void)
@@ -349,6 +347,13 @@ static void InitializeSystem(void)
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
     #endif
+    
+    #if defined(__32MX460F512L__)|| defined(__32MX795F512L__)
+    // Configure the PIC32 core for the best performance
+    // at the operating frequency. The operating frequency is already set to 
+    // 60MHz through Device Config Registers
+    SYSTEMConfigPerformance(60000000);
+	#endif
     
 //	The USB specifications require that USB peripheral devices must never source
 //	current onto the Vbus pin.  Additionally, USB peripherals should not source
@@ -1213,7 +1218,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((INT)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

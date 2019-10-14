@@ -80,7 +80,7 @@ typedef struct {
     BYTE            isWifiNeedToConfigure;
     BYTE            isWifiDoneConfigure;
     BYTE            ssid[33];               // 32 for ssid and one for term character
-    tWFNetworkType  type;                   // Net type infrastructure vs adhoc
+    UINT8           type;                   // Net type infrastructure vs adhoc
     BYTE            prevSSID[33];           // previous SSID we were connected to
     BYTE            prevWLAN;               // previous WLAN type
     
@@ -116,7 +116,11 @@ void WFScanEventHandler(UINT16 scanResults);
 
 void WFDisplayScanMgr(void);
 
+#if defined (WF_HOST_SCAN)
+UINT16 WFStartHostScan(UINT8);
+#else
 UINT16 WFStartScan(void);
+#endif
 
 UINT16 WFRetrieveScanResult(UINT8 Idx, tWFScanResult *p_ScanResult);
 

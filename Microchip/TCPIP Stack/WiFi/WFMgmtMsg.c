@@ -78,11 +78,13 @@
 *********************************************************************************************************
 */
 
+BOOL gHostScanNotAllowed = FALSE;			// Flag for Host Scan
+
 static volatile BOOL gMgmtConfirmMsgReceived  = FALSE;
 static BOOL RestoreRxData = FALSE;
 static BOOL g_IgnoreNextMgmtResult = FALSE;
 
-UINT8 g_MgmtResponseInProgress = FALSE;
+BOOL g_WaitingForMgmtResponse = FALSE;
 
 #if defined(WF_DEBUG)
    static UINT8 g_FuncFlags = 0x00;  
@@ -192,7 +194,7 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
 {
     tMgmtMsgRxHdr  hdr;
     
-    g_MgmtResponseInProgress = TRUE;
+    g_WaitingForMgmtResponse = TRUE;
         
     /* Wait until mgmt response is received */
     while (gMgmtConfirmMsgReceived == FALSE)
@@ -212,6 +214,8 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
             WF_EintEnable();
         }    
     }    
+ 
+    g_WaitingForMgmtResponse = FALSE;    
  
     /* set this back to FALSE so the next mgmt send won't think he has a response before one is received */
     gMgmtConfirmMsgReceived = FALSE;
@@ -237,6 +241,14 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
         /* mgmt response subtype had better match subtype we were expecting */
         WF_ASSERT(hdr.subtype == expectedSubtype);
 
+
+#if defined(WF_HOST_SCAN)
+		if (hdr.result == WF_ERROR_HOST_SCAN_NOT_ALLOWED)
+		{
+		    gHostScanNotAllowed = TRUE;
+		}    
+#endif
+
         /* free mgmt buffer */
         DeallocateMgmtRxBuffer();  
         
@@ -247,8 +259,6 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
             PopRawWindow(RAW_RX_ID);
             SetRawWindowState(RAW_RX_ID, WF_RAW_DATA_MOUNTED); 
         }          
-        
-        g_MgmtResponseInProgress = FALSE;         
     }   
 }  
 
@@ -308,6 +318,7 @@ void WaitForMgmtResponseAndReadData(UINT8 expectedSubtype,
     
     /* free the mgmt buffer */    
     DeallocateMgmtRxBuffer();
+    g_WaitingForMgmtResponse = FALSE;  
     
      /* if there was a mounted data packet prior to the mgmt tx/rx transaction, then restore it */    
     if (RestoreRxData == TRUE)
@@ -316,8 +327,6 @@ void WaitForMgmtResponseAndReadData(UINT8 expectedSubtype,
         PopRawWindow(RAW_RX_ID);
         SetRawWindowState(RAW_RX_ID, WF_RAW_DATA_MOUNTED); 
     }          
-        
-    g_MgmtResponseInProgress = FALSE;        
         
 }
 

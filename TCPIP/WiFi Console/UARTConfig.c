@@ -79,9 +79,9 @@ void DoUARTConfig(void)
 		wvTemp.v[1] = AppConfig.MyMACAddr.v[4];
 		wvTemp.v[0] = AppConfig.MyMACAddr.v[5];
 		uitoa(wvTemp.Val, response);
-		putsUART(response);
+		putsUART((char *)response);
 		putrsUART("\r\n\t2: Change host name:\t\t\t");
-		putsUART(AppConfig.NetBIOSName);
+		putsUART((char *)AppConfig.NetBIOSName);
 	    putrsUART("\r\n\t3: Change static IP address:\t\t");
 	    DisplayIPValue(AppConfig.MyIPAddr);
 	    putrsUART("\r\n\t4: Change static gateway address:\t");
@@ -93,9 +93,9 @@ void DoUARTConfig(void)
 		putrsUART("\r\n\t7: Change static secondary DNS server:\t");
 	    DisplayIPValue(AppConfig.SecondaryDNSServer);
 	    putrsUART("\r\n\t8: ");
-		putrsUART((ROM BYTE*)(AppConfig.Flags.bIsDHCPEnabled ? "Dis" : "En"));
+		putrsUART((ROM char*)(AppConfig.Flags.bIsDHCPEnabled ? "Dis" : "En"));
 		putrsUART("able DHCP & IP Gleaning:\t\tDHCP is currently ");
-		putrsUART((ROM BYTE*)(AppConfig.Flags.bIsDHCPEnabled ? "enabled" : "disabled"));
+		putrsUART((ROM char*)(AppConfig.Flags.bIsDHCPEnabled ? "enabled" : "disabled"));
 	    putrsUART("\r\n\t9: Download MPFS image.");
 	    putrsUART("\r\n\t0: Save & Quit.");
 	    putrsUART("\r\nEnter a menu choice: ");

@@ -317,7 +317,7 @@ WORD SST39LF400CheckID()
 void lWrite16(DWORD address, WORD data)
 {
 
-	__eds__ WORD *pWord;
+	volatile __eds__ WORD *pWord;
 
 	pWord = (__eds__ WORD *)(&EPMPCS2Start + address);
 
@@ -347,7 +347,7 @@ WORD temp;
 ************************************************************************/
 WORD lRead16(DWORD address)
 {
-	__eds__ WORD *pWord;
+	volatile __eds__ WORD *pWord;
 	WORD temp;
 
 	pWord = (__eds__ WORD *)(&EPMPCS2Start + address);

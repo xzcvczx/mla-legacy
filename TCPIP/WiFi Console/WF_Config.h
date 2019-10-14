@@ -71,7 +71,7 @@
 //#define WF_USE_DATA_TX_RX_FUNCTIONS
 //#define USE_GRATUITOUS_ARP
 
-
+#define WF_CONSOLE_DEMO
 
 /*= WF_ASSERT MACRO ==================================================================*/
 /* Customize how the WiFi driver assert macro (WF_ASSERT) should operate.             */
@@ -98,7 +98,7 @@
 
 #define MY_DEFAULT_SCAN_TYPE                WF_ACTIVE_SCAN      /* WF_ACTIVE_SCAN or WF_PASSIVE_SCAN */
 
-#define MY_DEFAULT_CHANNEL_LIST             {1,6,11}            /* Desired channel list             */
+#define MY_DEFAULT_CHANNEL_LIST             {1,2,3,4,5,6,7,8,9,10,11}	/* Desired channel list for FCC, use less channels to minimize scan time */
 
 #define MY_DEFAULT_LIST_RETRY_COUNT_ADHOC           (3)                 /* Number of times to try to connect to the SSID when using Ad/Hoc network type */
 #define MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE  (WF_RETRY_FOREVER)  /* Number of times to try to connect to the SSID when using Infrastructure network type */
@@ -110,18 +110,24 @@
                                              WF_NOTIFY_CONNECTION_REESTABLISHED)
 
 #define MY_DEFAULT_PS_POLL                   WF_DISABLED         /* WF_DISABLED or WF_ENABLED */
+/* #define WF_AGGRESSIVE_PS */ 	/* WARNING !!! : This only can work with 1209 module FW version or later.
+							* If you use the earlier version such as 1207 or 1205, then you should not define this.
+							* Defining this will lead ASSERT problem with old module FW.
+							*/
 
 #define MY_DEFAULT_WIFI_SECURITY_MODE        WF_SECURITY_OPEN
 
+#define MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE  WF_SECURITY_WEP_SHAREDKEY  /* WF_SECURITY_WEP_OPENKEY (default) or */
+                                                                         /*  WF_SECURITY_WEP_SHAREDKEY.          */ 
+
 //#define USE_MRF24W_HOST_BUFFER
 
-//#define STACK_USE_EZ_CONFIG
-//#define EZ_CONFIG_SCAN
-//#define EZ_CONFIG_STALL
-//#define EZ_CONFIG_STORE
+#define WF_HOST_SCAN
 
-
-
+#define STACK_USE_EZ_CONFIG
+#define EZ_CONFIG_SCAN
+#define EZ_CONFIG_STALL
+#define EZ_CONFIG_STORE
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -143,8 +149,8 @@
 
 // Default pass phrase used for WF_SECURITY_WPA_WITH_PASS_PHRASE and 
 // WF_SECURITY_WPA2_WITH_PASS_PHRASE security modes
-#define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
-
+//#define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
+#define MY_DEFAULT_PSK_PHRASE               "12345678"
 
 // If using security mode of WF_SECURITY_WPA_WITH_KEY or WF_SECURITY_WPA2_WITH_KEY, then this section 
 // must be set to  match the key for MY_DEFAULT_SSID_NAME and MY_DEFAULT_PSK_PHRASE

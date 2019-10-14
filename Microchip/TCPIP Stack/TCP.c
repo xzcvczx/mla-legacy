@@ -718,6 +718,11 @@ TCP_SOCKET TCPOpen(DWORD dwRemoteHost, BYTE vRemoteHostType, WORD wPort, BYTE vS
   ***************************************************************************/
 BOOL TCPWasReset(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return TRUE;
+    }
+    
 	SyncTCBStub(hTCP);
 	
 	if(MyTCBStub.Flags.bSocketReset)
@@ -760,6 +765,11 @@ BOOL TCPWasReset(TCP_SOCKET hTCP)
   ***************************************************************************/
 BOOL TCPIsConnected(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	return (MyTCBStub.smState == TCP_ESTABLISHED);
 }
@@ -810,6 +820,11 @@ BOOL TCPIsConnected(TCP_SOCKET hTCP)
   ***************************************************************************/
 void TCPDisconnect(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	// Delete all data in the RX FIFO
@@ -936,6 +951,11 @@ void TCPDisconnect(TCP_SOCKET hTCP)
   ***************************************************************************/
 void TCPClose(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	SyncTCBStub(hTCP);
 	MyTCBStub.Flags.bServer = FALSE;
 	TCPDisconnect(hTCP);
@@ -969,6 +989,11 @@ SOCKET_INFO* TCPGetRemoteInfo(TCP_SOCKET hTCP)
 {
 	static SOCKET_INFO	RemoteInfo;
 
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 	SyncTCB();
 	memcpy((void*)&RemoteInfo.remote, (void*)&MyTCB.remote, sizeof(NODE_INFO));
@@ -1012,6 +1037,11 @@ SOCKET_INFO* TCPGetRemoteInfo(TCP_SOCKET hTCP)
   ***************************************************************************/
 void TCPFlush(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	SyncTCBStub(hTCP);
 	SyncTCB();
 
@@ -1051,6 +1081,11 @@ WORD TCPIsPutReady(TCP_SOCKET hTCP)
 {
 	BYTE i;
 
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	i = MyTCBStub.smState;
@@ -1108,6 +1143,11 @@ BOOL TCPPut(TCP_SOCKET hTCP, BYTE byte)
 {
 	WORD wFreeTXSpace;
 
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	wFreeTXSpace = TCPIsPutReady(hTCP);
@@ -1187,6 +1227,11 @@ WORD TCPPutArray(TCP_SOCKET hTCP, BYTE* data, WORD len)
 	WORD wFreeTXSpace;
 	WORD wRightLen = 0;
 
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	wFreeTXSpace = TCPIsPutReady(hTCP);
@@ -1301,6 +1346,11 @@ WORD TCPPutROMArray(TCP_SOCKET hTCP, ROM BYTE* data, WORD len)
 	WORD wFreeTXSpace;
 	WORD wRightLen = 0;
 
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	wFreeTXSpace = TCPIsPutReady(hTCP);
@@ -1476,6 +1526,11 @@ WORD TCPGetTxFIFOFull(TCP_SOCKET hTCP)
 	WORD wDataLen;
 	WORD wFIFOSize;
 
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	// Calculate total usable FIFO size
@@ -1549,6 +1604,11 @@ void TCPDiscard(TCP_SOCKET hTCP)
   ***************************************************************************/
 WORD TCPIsGetReady(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 		
 	if(MyTCBStub.rxHead >= MyTCBStub.rxTail)
@@ -1704,6 +1764,11 @@ WORD TCPGetRxFIFOFree(TCP_SOCKET hTCP)
 	WORD wDataLen;
 	WORD wFIFOSize;
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 	
 	// Calculate total usable FIFO size
@@ -1771,9 +1836,11 @@ WORD TCPPeekArray(TCP_SOCKET hTCP, BYTE *vBuffer, WORD wLen, WORD wStart)
 	WORD w;
 	WORD wBytesUntilWrap;
 
-	if(wLen == 0u)
-		return 0u;
-
+	if(hTCP >= TCP_SOCKET_COUNT || wLen == 0)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	// Find out how many bytes are in the RX FIFO and decrease read length 
@@ -1904,9 +1971,11 @@ WORD TCPFindArrayEx(TCP_SOCKET hTCP, BYTE* cFindArray, WORD wLen, WORD wStart, W
 	BOOL isFinding;
 	BYTE buffer[32];
 
-	if(wLen == 0u)
-		return 0u;
-
+	if(hTCP >= TCP_SOCKET_COUNT || wLen == 0)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	// Find out how many bytes are in the RX FIFO and return 
@@ -2078,9 +2147,11 @@ WORD TCPFindROMArrayEx(TCP_SOCKET hTCP, ROM BYTE* cFindArray, WORD wLen, WORD wS
 	BOOL isFinding;
 	BYTE buffer[32];
 
-	if(wLen == 0u)
-		return 0u;
-
+	if(hTCP >= TCP_SOCKET_COUNT || wLen == 0)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	// Find out how many bytes are in the RX FIFO and return 
@@ -4270,6 +4341,11 @@ BOOL TCPAdjustFIFOSize(TCP_SOCKET hTCP, WORD wMinRXSize, WORD wMinTXSize, BYTE v
 	PTR_BASE ptrTemp, ptrHead;
 	WORD wTXAllocation;
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	// Load up info on this socket
 	SyncTCBStub(hTCP);
 
@@ -4679,6 +4755,11 @@ BOOL TCPStartSSLClient(TCP_SOCKET hTCP, BYTE* host)
 {
 	BYTE i;
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	
 	// Make sure SSL is not established already
@@ -4738,6 +4819,11 @@ BOOL TCPStartSSLClientEx(TCP_SOCKET hTCP, BYTE* host, void * buffer, BYTE suppDa
 {
 	BYTE i;
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	
 	// Make sure SSL is not established already
@@ -4791,6 +4877,11 @@ BOOL TCPStartSSLServer(TCP_SOCKET hTCP)
 {
 	BYTE i;
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	SyncTCB();
 	
@@ -4849,6 +4940,11 @@ BOOL TCPStartSSLServer(TCP_SOCKET hTCP)
 #if defined(STACK_USE_SSL_SERVER)
 BOOL TCPAddSSLListener(TCP_SOCKET hTCP, WORD port)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	
 	if(MyTCBStub.smState != TCP_LISTEN)
@@ -4888,6 +4984,11 @@ BOOL TCPAddSSLListener(TCP_SOCKET hTCP, WORD port)
 #if defined(STACK_USE_SSL)
 BOOL TCPRequestSSLMessage(TCP_SOCKET hTCP, BYTE msg)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	
 	if(msg == SSL_NO_MESSAGE || MyTCBStub.sslReqMessage == SSL_NO_MESSAGE)
@@ -4925,6 +5026,11 @@ BOOL TCPRequestSSLMessage(TCP_SOCKET hTCP, BYTE msg)
 #if defined(STACK_USE_SSL)
 BOOL TCPSSLIsHandshaking(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	return MyTCBStub.Flags.bSSLHandshaking;	
 }
@@ -4954,6 +5060,11 @@ BOOL TCPSSLIsHandshaking(TCP_SOCKET hTCP)
 #if defined(STACK_USE_SSL)
 BOOL TCPIsSSL(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return FALSE;
+    }
+    
 	SyncTCBStub(hTCP);
 	
 	if(MyTCBStub.sslStubID == SSL_INVALID_ID)
@@ -4990,6 +5101,11 @@ BOOL TCPIsSSL(TCP_SOCKET hTCP)
 #if defined(STACK_USE_SSL)
 void TCPSSLHandshakeComplete(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	SyncTCBStub(hTCP);
 	MyTCBStub.Flags.bSSLHandshaking = 0;
 }
@@ -5030,6 +5146,11 @@ void TCPSSLDecryptMAC(TCP_SOCKET hTCP, ARCFOUR_CTX* ctx, WORD len)
 	PTR_BASE wSrc, wDest, wBlockLen, wTemp;
 	BYTE buffer[32];
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	// Set up the pointers
 	SyncTCBStub(hTCP);
 	wSrc = MyTCBStub.rxTail;
@@ -5117,6 +5238,11 @@ void TCPSSLInPlaceMACEncrypt(TCP_SOCKET hTCP, ARCFOUR_CTX* ctx, BYTE* MACSecret,
 	WORD blockLen;
 	BYTE buffer[32];
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	// Set up the pointers
 	SyncTCBStub(hTCP);
 	pos = MyTCBStub.txHead;
@@ -5219,6 +5345,11 @@ void TCPSSLPutRecordHeader(TCP_SOCKET hTCP, BYTE* hdr, BOOL recDone)
 {
 	BYTE i;
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	// Set up the pointers
 	SyncTCBStub(hTCP);
 	
@@ -5277,6 +5408,11 @@ void TCPSSLPutRecordHeader(TCP_SOCKET hTCP, BYTE* hdr, BOOL recDone)
 #if defined(STACK_USE_SSL)
 WORD TCPSSLGetPendingTxSize(TCP_SOCKET hTCP)
 {
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return 0;
+    }
+    
 	SyncTCBStub(hTCP);
 
 	// Non-SSL connections have no pending SSL data
@@ -5322,6 +5458,11 @@ void TCPSSLHandleIncoming(TCP_SOCKET hTCP)
 	PTR_BASE prevRxTail, nextRxHead, startRxTail, wSrc, wDest;
 	WORD wToMove, wLen, wSSLBytesThatPoofed, wDecryptedBytes;
 	
+	if(hTCP >= TCP_SOCKET_COUNT)
+    {
+        return;
+    }
+    
 	// Sync the stub
 	SyncTCBStub(hTCP);
 

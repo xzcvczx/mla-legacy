@@ -38,7 +38,6 @@
  * SECTION: Includes
  *****************************************************************************/
 #include "Graphics/Graphics.h"
-#include "icons.h"
 #include "MainDemo.h"
 #include "gfx_screens.h"
 #include "gol_ids.h"

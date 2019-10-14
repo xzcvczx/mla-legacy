@@ -48,9 +48,9 @@ file_020=USB Stack
 file_021=USB Stack
 file_022=USB Stack
 file_023=.
-file_024=.
+file_024=USB Stack
 file_025=.
-file_026=USB Stack
+file_026=.
 file_027=.
 [GENERATED_FILES]
 file_000=no
@@ -107,8 +107,8 @@ file_021=no
 file_022=no
 file_023=no
 file_024=no
-file_025=yes
-file_026=no
+file_025=no
+file_026=yes
 file_027=yes
 [FILE_INFO]
 file_000=main.c
@@ -135,10 +135,10 @@ file_020=..\..\..\Microchip\Include\USB\usb_function_msd.h
 file_021=..\..\..\Microchip\Include\USB\usb_hal.h
 file_022=..\..\..\Microchip\Include\USB\usb_function_hid.h
 file_023=HardwareProfile - PIC18F47J53 PIM.h
-file_024=rm18f47j53_g.lkr
-file_025=..\Getting Started - Running the Device - Composite - HID + MSD demo.htm
-file_026=..\..\..\Microchip\USB\usb_device_local.h
-file_027=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_024=..\..\..\Microchip\USB\usb_device_local.h
+file_025=rm18f47j53_g.lkr
+file_026=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_027=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

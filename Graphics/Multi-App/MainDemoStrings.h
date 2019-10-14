@@ -64,4 +64,7 @@ const XCHAR BeatsStr[] = {'B','e','a','t','s',0};
 
 const XCHAR ClearStr[] = {'C','l','e','a','r',0};
 const XCHAR DemoStr[] = {'D','e','m','o',0};
+
+const XCHAR MemoryErrorStr[] = {'O','b','j','e','c','t',' ','n','o','t',' ','c','r','e','a','t','e','d',0};
+
 #endif //MAINDEMOSTRINGS_H

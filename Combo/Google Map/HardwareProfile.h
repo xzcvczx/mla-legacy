@@ -59,61 +59,33 @@
 
 	#include "Configs/HWP YOUR_BOARD.h"
 
-#elif defined(CFG_INCLUDE_DA210_BRD_ENC28)
-
-	// DM240312 PIC24FJ256DA210 Development Board, PIC24FJ256DA210, AC164123 Ethernet PICtail Plus (ENC28J60)
-	#include "Configs/HWP DA210_BRD_ENC28.h"
-
-	// Include defines for Graphics library
-	// Truly 3.2" 320x240 display
-	#include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
-	// Powertip 4.3" 480x272 display
-	//#include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
-
-#elif defined(CFG_INCLUDE_DA210_BRD_ENC624_PSP5_IB)
-
-	// DM240312 PIC24FJ256DA210 Development Board, PIC24FJ256DA210, AC164132 Fast 100Mbps Ethernet PICtail/PICtail Plus (ENC624J600) in PSP Mode 5, Indirect addressing (using J1 side edge connector, PMA to AD = open, PMA to A = open, PSPCFG1&4 = GND, PSPCFG2 = GND, PSPCFG3 = 3V3)
-	#include "Configs/HWP DA210_BRD_ENC624 PSP5_IB.h"
-
-	// Include defines for Graphics library
-	// Include defines for Graphics library
-	// Truly 3.2" 320x240 display
-	#include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
-	// Powertip 4.3" 480x272 display
-	//#include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
-
-#elif defined(CFG_INCLUDE_DA210_BRD_ENC624)
-
-	// DM240312 PIC24FJ256DA210 Development Board, PIC24FJ256DA210, AC164132 Fast 100Mbps Ethernet PICtail/PICtail Plus (ENC624J600) in SPI mode (using J2 side edge connector)
-	#include "Configs/HWP DA210_BRD_ENC624.h"
-
-	// Include defines for Graphics library
-	// Include defines for Graphics library
-	// Truly 3.2" 320x240 display
-	#include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
-	// Powertip 4.3" 480x272 display
-	//#include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
-
-#elif defined(CFG_INCLUDE_DA210_BRD_MRF24WB)
-
-	// DM240312 PIC24FJ256DA210 Development Board, PIC24FJ256DA210, AC164136-4 MRF24WB0MA Wi-Fi PICtail/PICtail Plus
-	#include "Configs/HWP DA210_BRD_MRF24WB.h"
-
-	// Include defines for Graphics library
-	// Include defines for Graphics library
-	// Truly 3.2" 320x240 display
-	#include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
-	// Powertip 4.3" 480x272 display
-	//#include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
-
-#elif defined(CFG_INCLUDE_PIC32_ETH_SK_ETH795)
-	// DM320004 PIC32 Ethernet Starter Kit, PIC32MX795F512L, internal Ethernet (National DP83848 PHY)
-	#include "Configs/HWP PIC32_ETH_SK_ETH795.h"
-
-	// Graphics Hardware Configurations
-	#include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP_QVGAv1.h"
-
 #else
-	#error "No extended HardwareProfile .h included.  Add the appropriate compiler macro to the MPLAB project."
+    // Include defines for Graphics library
+#if defined(CFG_INCLUDE_DA210_BRD_16PMP_QVGAv1)
+    // Truly 3.2" 320x240 display
+    #include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
+#elif defined(CFG_INCLUDE_DA210_BRD_16PMP_WQVGAv1)
+	#include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
+    #include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
+#elif defined(__PIC32MX__)
+    // Graphics Hardware Configurations
+    #include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP.h"
+#else
+    // Truly 3.2" 320x240 display
+    #include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
+    // Powertip 4.3" 480x272 display
+    //#include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
+#endif
+
+#if defined(CFG_INCLUDE_DA210_BRD_ENC28)
+    // DM240312 PIC24FJ256DA210 Development Board, PIC24FJ256DA210, AC164123 Ethernet PICtail Plus (ENC28J60)
+    #include "Configs/HWP DA210_BRD_ENC28.h"
+#elif defined(CFG_INCLUDE_DA210_BRD_ENC624)
+    // DM240312 PIC24FJ256DA210 Development Board, PIC24FJ256DA210, AC164132 Fast 100Mbps Ethernet PICtail/PICtail Plus (ENC624J600) in SPI mode (using J2 side edge connector)
+    #include "Configs/HWP DA210_BRD_ENC624.h"
+#elif defined(CFG_INCLUDE_PIC32_ETH_SK_ETH795)
+    // DM320004 PIC32 Ethernet Starter Kit, PIC32MX795F512L, internal Ethernet (National DP83848 PHY)
+    #include "Configs/HWP PIC32_ETH_SK_ETH795.h"
+#endif
 #endif
 

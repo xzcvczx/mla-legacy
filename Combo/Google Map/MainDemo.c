@@ -1018,7 +1018,7 @@ static void InitializeBoard(void)
 		LED_PUT(0x00);				// Turn the LEDs off
 		
 		CNPUESET = 0x00098000;		// Turn on weak pull ups on CN15, CN16, CN19 (RD5, RD7, RD13), which is connected to buttons on PIC32 Starter Kit boards
-        #ifdef MULTI_MEDIA_BOARD_DM00123
+        #ifdef MEB_BOARD
         CPLDInitialize();
         CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
         CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
@@ -1227,7 +1227,7 @@ static void InitializeBoard(void)
      //used. 
     
      //Set IOs directions for SST25 SPI
-        #if defined (GFX_PICTAIL_V3) || defined (MULTI_MEDIA_BOARD_DM00123)   
+        #if defined (GFX_PICTAIL_V3) || defined (MEB_BOARD)
         SST25_CS_LAT = 1;
         SST25_CS_TRIS = 0;
         #ifndef __PIC32MX__

@@ -338,8 +338,10 @@ extern OBJ_HEADER   *_pObjectFocused;
 /*********************************************************************
 * Overview: The default font GOLFontDefault is declared in  
 *           GOLFontDefault.c file included in the Graphics Library. 
-*           To replace this font, add this declaration in the 
-*		    GraphicsConfig.h:
+*           To use this default font, USE_GOL must be defined in 
+*           GraphicsConfig.h.
+*           To replace this default font, add this declaration 
+*		    in the GraphicsConfig.h:
 *				#define FONTDEFAULT yourFont
 *           Then in the project the "yourFont" must be added. 
 *           The Graphics Library will then use the font that the user

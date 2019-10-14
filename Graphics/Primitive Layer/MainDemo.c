@@ -11,7 +11,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -21,7 +21,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -53,11 +53,11 @@ _FWDT(FWDTEN_OFF);
 #else
     #if defined(__PIC24FJ256GB110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ256GA110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
+_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ128GA010__)
 _CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
@@ -65,12 +65,12 @@ _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
     #endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif	  
 	#if defined (__PIC24FJ256GB210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif
 #endif
@@ -85,6 +85,8 @@ void         InitializeBoard(void);
 /////////////////////////////////////////////////////////////////////////////
 extern const FONT_FLASH     Font25;
 extern const FONT_FLASH     Font35;
+extern const FONT_FLASH     Font35_Antialiased;
+extern const XCHAR          AntialisedText[];
 
 /////////////////////////////////////////////////////////////////////////////
 //                            PICTURES
@@ -111,7 +113,7 @@ extern const GFX_IMAGE_HEADER   Sun8bit_RLE;
 /////////////////////////////////////////////////////////////////////////////
 int main(void)
 {
-    SHORT       width, height;
+    SHORT       width, height, temp, x1, y1, x2, y2;
     SHORT       counter;
     const SHORT polyPoints[] = {
         (GetMaxX()+1)/2,    (GetMaxY()+1)/4,
@@ -361,12 +363,46 @@ int main(void)
 
         SetFont((void *) &Font35);
         SetColor(WHITE);
-        width = GetTextWidth("Microchip Tech.", (void *) &Font35);
+        width = GetTextWidth("ANTIALIASED", (void *) &Font35);
         height = GetTextHeight((void *) &Font35);
+        x1 = (GetMaxX() - width) >> 1;
+        y1 = ((GetMaxY() - height) >> 2) - 5;
 
-        OutTextXY((GetMaxX() - width) >> 1, (GetMaxY() - height) >> 1, "Microchip Tech.");
+        // Display Non-Antialised
+        temp = GetTextWidth("NON-", (void *) &Font35);
+        OutTextXY((GetMaxX() - temp) >> 1, ((GetMaxY() - height) >> 2) - height, "NON-");
+        OutTextXY(x1, y1, "ANTIALIASED");
 
-        DelayMs(DEMODELAY);
+        // Display Antialised (Opaque)
+        SetFont((void *) &Font35_Antialiased);
+        width = GetTextWidth((XCHAR *)AntialisedText, (void *) &Font35_Antialiased);
+        height = GetTextHeight((void *) &Font35_Antialiased);
+        y1 = (GetMaxY() - height) >> 1;
+        OutTextXY(x1, y1, (XCHAR *)AntialisedText);
+
+        SetFont((void *) &Font25);
+        temp = GetTextWidth("(Opaque)", (void *) &Font25);
+        OutTextXY(x1 + ((width - temp) >> 1), y1 + height, "(Opaque)");
+
+        // Display Background Gradient
+        width = GetTextWidth((XCHAR *)AntialisedText, (void *) &Font35_Antialiased);
+        y1 = 3 * ((GetMaxY() - height) >> 2) + GetTextHeight((void *) &Font25);
+        x2 = x1 + width;
+        y2 = y1 + height;
+        BarGradient(x1, y1, x2, y2, BRIGHTRED, CYAN, 100, GRAD_RIGHT);
+        while(IsDeviceBusy());
+
+        // Display Antialised (Translucent)
+        SetFont((void *) &Font35_Antialiased);
+        SetColor(WHITE);
+        GFX_Font_SetAntiAliasType(ANTIALIAS_TRANSLUCENT);
+        OutTextXY(x1, y1, (XCHAR *)AntialisedText);
+
+        SetFont((void *) &Font25);
+        temp = GetTextWidth("(Translucent)", (void *) &Font25);
+        OutTextXY(x1 + ((width - temp) >> 1), (3 * (GetMaxY() - height) >> 2) + height +  + GetTextHeight((void *) &Font25), "(Translucent)");
+
+        DelayMs(5*DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 

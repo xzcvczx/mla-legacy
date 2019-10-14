@@ -49,6 +49,14 @@
  *                BITMAP_EXTERNAL  
  * 03/09/11    Removed USE_DRV_xxx.
  * 04/01/11    Added GetSineCosine().
+ * 01/05/12     - Removed the _font global pointer and replaced with currentFont
+ *                structure to make faster OutChar() rendering. 
+ *              - Removed _fontFirstChar, _fontLastChar and _fontHeight globals.
+ *                These are now included in currentFont.
+ *              - break up SetFont(), OutChar() and GetTextWidth() to allow
+ *                versatility of implementing text rendering functions in drivers.
+ *              - added extended glyph support and font anti-aliasing
+ *
  *****************************************************************************/
 #ifndef _PRIMITIVE_H
     #define _PRIMITIVE_H
@@ -114,20 +122,53 @@ extern BYTE     _fontOrientation;
     #define ORIENT_HOR  0
     #define ORIENT_VER  1
 
+extern BYTE _antialiastype;
 /*********************************************************************
-* Overview: This macro sets the data type for the strings and characters.
-*			There are three types
-*			- #define XCHAR   unsigned short     // use multibyte characters (0-2^16 range)
-*			- #define XCHAR   unsigned char      // use unsigned char (0-255 range)
-*			- #define XCHAR   char               // use signed char (0-127 range)
+* Overview: Fonts that enables anti-aliasing can be set to use
+*           opaque or translucent type of anti-aliasing.
 *
 *********************************************************************/
+
+// Mid colors are calculated only once while rendering each character. This is ideal for rendering text over a constant background.
+    #define ANTIALIAS_OPAQUE        0
+
+// Mid values are calculated for every necessary pixel. This feature is useful when rendering text over an image 
+// or when the background is not one flat color.
+    #define ANTIALIAS_TRANSLUCENT   1
+
+/*********************************************************************
+* Overview: This macro sets the data type for the strings and characters.
+*			There are three types used for XCHAR and the type is selected by  
+*           adding one of the macros in GraphicsConfig.h. 
+*	<TABLE>
+*    	In GraphicsConfig.h         XCHAR	                        Description
+*     	##########################  #############################	##########################
+*     	#define USE_MULTIBYTECHAR   #define XCHAR   unsigned short	Use multibyte characters (0-2^16 range).
+*     	#define USE_UNSIGNED_XCHAR  #define XCHAR   unsigned char	Use unsigned char (0-255 range).
+*     	none of the two defined     #define XCHAR   char	        Use signed char (0-127 range).
+*	</TABLE>
+*
+*           Note: Only one of the two or none at all are defined in GraphicsConfig.h.
+*                 - #define USE_MULTIBYTECHAR 
+*                 - #define USE_UNSIGNED_XCHAR 
+*                 - when none are defined, XCHAR defaults to type char.
+*********************************************************************/
+    
     #if defined (USE_MULTIBYTECHAR) 
+    
         #define XCHAR   unsigned short
+        #define UXCHAR  unsigned short
+        
     #elif defined (USE_UNSIGNED_XCHAR)
+    
         #define XCHAR   unsigned char
+        #define UXCHAR  unsigned char
+        
     #else
+    
         #define XCHAR   char
+        #define UXCHAR  unsigned char
+        
     #endif
 
 // bevel drawing type (0 = full bevel, 0xF0 - top bevel only, 0x0F - bottom bevel only
@@ -150,6 +191,20 @@ extern BYTE _bevelDrawType;
     #endif
 
 /*********************************************************************
+* Overview: This defines the size of the buffer used by font functions
+*			to retrieve font data from the external memory. The buffer 
+*			size can be increased to accommodate large font sizes. 
+*			The user must be aware of the expected glyph sizes of the 
+*			characters stored in the font table. 
+*           To modify the size used, declare this macro in the 
+*           GraphicsConfig.h file with the desired size.
+*
+********************************************************************/
+#ifndef EXTERNAL_FONT_BUFFER_SIZE
+    #define EXTERNAL_FONT_BUFFER_SIZE   600
+#endif
+
+/*********************************************************************
 * Overview: Memory type enumeration to determine the source of data.
 *           Used in interpreting bitmap and font from different 
 *           memory sources.
@@ -157,20 +212,20 @@ extern BYTE _bevelDrawType;
 *********************************************************************/
 typedef enum
 {
-	FLASH         = 0x0000, // internal flash
-	EXTERNAL      = 0x0001, // external memory
-	FLASH_JPEG    = 0x0002, // internal flash
-	EXTERNAL_JPEG = 0x0003, // external memory
-	RAM           = 0x0004, // RAM 
-	EDS_EPMP      = 0x0005, // memory in EPMP, base addresses are 
-                        	// are set in the hardware profile
+	FLASH         = 0x0000,                 // internal flash
+	EXTERNAL      = 0x0001,                 // external memory
+	FLASH_JPEG    = 0x0002,                 // internal flash
+	EXTERNAL_JPEG = 0x0003,                 // external memory
+	RAM           = 0x0004,                 // RAM 
+	EDS_EPMP      = 0x0005,                 // memory in EPMP, base addresses are 
+                                            // are set in the hardware profile
 
-	IMAGE_MBITMAP = 0x0000, // data resource is type Microchip bitmap
-	IMAGE_JPEG    = 0x0100, // data resource is type JPEG
+	IMAGE_MBITMAP = 0x0000,                 // data resource is type Microchip bitmap
+	IMAGE_JPEG    = 0x0100,                 // data resource is type JPEG
 
-    COMP_NONE     = 0x0000, // no compression  
-	COMP_RLE      = 0x1000, // compressed with RLE
-	COMP_IPU      = 0x2000, // compressed with DEFLATE (for IPU)
+    COMP_NONE     = 0x0000,                 // no compression  
+	COMP_RLE      = 0x1000,                 // compressed with RLE
+	COMP_IPU      = 0x2000,                 // compressed with DEFLATE (for IPU)
 } GFX_RESOURCE;
 
 #define GFX_COMP_MASK   0xF000
@@ -182,15 +237,17 @@ typedef enum
 *********************************************************************/
 typedef struct
 {
-    GFX_RESOURCE type;       // must be EXTERNAL or EDS_EPMP
-    WORD         ID;         // memory ID, user defined value to differentiate
-                             // between graphics resources of the same type	
-							 //   When using EDS_EPMP the following ID values are
-							 //   reserved and used by the Microchip display driver
-						     //   0 - reserved (do not use)
-							 //   1 - reserved for base address of EPMP CS1
-							 //   2 - reserved for base address of EPMP CS2
-    DWORD        address;    // Data image address (user data, bitmap or font) 
+    GFX_RESOURCE type;                      // Resource type. Valid types are: 
+                                            // - EXTERNAL 
+                                            // - EDS_EPMP
+    WORD         ID;                        // Memory ID, user defined value to differentiate
+                                            // between graphics resources of the same type.	
+                                            // When using EDS_EPMP the following ID values are
+                                            // reserved and used by the Microchip display driver
+                                            //   - 0 - reserved (do not use)
+                                            //   - 1 - reserved for base address of EPMP CS1
+                                            //   - 2 - reserved for base address of EPMP CS2
+    DWORD        address;                   // Data image address (user data, bitmap or font) 
 } GFX_EXTDATA;
 
 /* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
@@ -203,10 +260,10 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    BYTE    compression;     // Compression setting 
-    BYTE    colorDepth;      // Color depth used
-    SHORT   height;          // Image height
-    SHORT   width;           // Image width
+    BYTE        compression;                // Compression setting 
+    BYTE        colorDepth;                 // Color depth used
+    SHORT       height;                     // Image height
+    SHORT       width;                      // Image width
 } BITMAP_HEADER;
 
 /*********************************************************************
@@ -215,8 +272,8 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    GFX_RESOURCE  type;      // must be FLASH
-    FLASH_BYTE    *address;  // image address in FLASH
+    GFX_RESOURCE type;                      // must be FLASH
+    FLASH_BYTE   *address;                  // image address in FLASH
 } IMAGE_FLASH;
 
 /*********************************************************************
@@ -225,8 +282,8 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    GFX_RESOURCE  type;      // must be RAM
-    DWORD         *address;  // image address in RAM
+    GFX_RESOURCE type;                      // must be RAM
+    DWORD        *address;                  // image address in RAM
 } IMAGE_RAM;
 
 /*********************************************************************
@@ -246,30 +303,78 @@ typedef GFX_EXTDATA IMAGE_EXTERNAL;
 *********************************************************************/
 typedef struct
 {
-    BYTE fontID;             // User assigned value
-    BYTE res1        : 4;    // Reserved for future use (must be set to 0).
-    BYTE orientation : 2;    // Orientation of the character glyphs (0,90,180,270 degrees)
-							 //   00 - Normal
-							 //   01 - Characters rotated 270 degrees clockwise
-							 //   10 - Characters rotated 180 degrees
-							 //   11 - Characters rotated 90 degrees clockwise
-    BYTE res2        : 2;    // Reserved for future use (must be set to 0).
-    WORD firstChar;          // Character code of first character (e.g. 32).
-    WORD lastChar;           // Character code of last character in font (e.g. 3006).
-    BYTE height;             // Font characters height in pixels.
-    BYTE reserved;           // Reserved for future use (must be set to 0).
+    BYTE        fontID;                     // User assigned value
+    BYTE        extendedGlyphEntry : 1;     // Extended Glyph entry flag. When set font has extended glyph feature enabled.
+    BYTE        res1               : 1;     // Reserved for future use  (must be set to 0)
+    BYTE        bpp                : 2;     // Actual BPP = 2^bpp
+    BYTE        orientation        : 2;     // Orientation of the character glyphs (0,90,180,270 degrees)
+                                            //   - 00 - Normal
+                                            //   - 01 - Characters rotated 270 degrees clockwise
+                                            //   - 10 - Characters rotated 180 degrees
+                                            //   - 11 - Characters rotated 90 degrees clockwise
+                                            // Note: Rendering DO NOT rotate the characters. The table contains rotated characters
+                                            //       and will be rendered as is. 
+    BYTE        res2               : 2;     // Reserved for future use (must be set to 0).
+    WORD        firstChar;                  // Character code of first character (e.g. 32).
+    WORD        lastChar;                   // Character code of last character in font (e.g. 3006).
+    WORD        height;                     // Font characters height in pixels. 
 } FONT_HEADER;
 
 /*********************************************************************
-* Overview: Structure describing the glyph entry.
+* Overview: Structures describing the glyph entry.
 *
 *********************************************************************/
 typedef struct
 {
-    BYTE    width;           // width of the glyph
-    BYTE    offsetLSB;       // Least Significant Byte of the glyph location offset 
-    WORD    offsetMSB;       // Most Significant (2) Bytes of the glyph location offset
+    BYTE        width;                      // width of the glyph
+    BYTE        offsetLSB;                  // Least Significant Byte of the glyph location offset 
+    WORD        offsetMSB;                  // Most Significant (2) Bytes of the glyph location offset
 } GLYPH_ENTRY;
+
+typedef struct
+{
+    DWORD       offset;                     // Offset Order: LSW_LSB LSW_MSB MSW_MSB MSW_MSB
+    WORD        cursorAdvance;              // x-value by which cursor has to advance after rendering the glyph
+    WORD        glyphWidth;                 // width of the glyph
+    INT16       xAdjust;                    // x-position is adjusted as per this signed number
+    INT16       yAdjust;                    // y-position is adjusted as per this signed number
+} GLYPH_ENTRY_EXTENDED;
+
+/*********************************************************************
+* Overview: Internal structure for currently set font. 
+*
+*********************************************************************/
+typedef struct
+{
+   void         *pFont;                     // pointer to the currently set font
+   FONT_HEADER  fontHeader;                 // copy of the currently set font header
+#ifdef USE_ANTIALIASED_FONTS
+   BYTE  antiAliasType;                     // anti-alias type set
+#endif
+} GFX_FONT_CURRENT;
+
+/*********************************************************************
+* Overview: Structure for character information when rendering the character.
+*
+*********************************************************************/
+typedef struct 
+{ 
+#ifdef USE_FONT_FLASH	
+    GLYPH_ENTRY             *pChTable;
+    GLYPH_ENTRY_EXTENDED    *pChTableExtended;
+#endif
+#ifdef USE_FONT_EXTERNAL
+    BYTE                    chImage[EXTERNAL_FONT_BUFFER_SIZE];
+    SHORT                   chEffectiveGlyphWidth;
+#endif
+    BYTE                    bpp;
+	SHORT                   chGlyphWidth;
+    BYTE                    *pChImage;
+    SHORT                   xAdjust;
+    SHORT                   yAdjust;
+    SHORT                   xWidthAdjust;
+    SHORT                   heightOvershoot;
+} OUTCHAR_PARAM;
 
 /*********************************************************************
 * Overview: Structure for font stored in FLASH memory.
@@ -277,8 +382,8 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    GFX_RESOURCE  type;      // must be FLASH
-    const char    *address;  // font image address in FLASH
+    GFX_RESOURCE  type;                     // must be FLASH
+    const char    *address;                 // font image address in FLASH
 } FONT_FLASH;
 
 /*********************************************************************
@@ -287,8 +392,8 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    GFX_RESOURCE  type;      // must be RAM
-    char          *address;  // font image address in RAM
+    GFX_RESOURCE  type;                     // must be RAM
+    char          *address;                 // font image address in RAM
 } FONT_RAM;
 
 /*********************************************************************
@@ -306,35 +411,35 @@ typedef GFX_EXTDATA FONT_EXTERNAL;
 *********************************************************************/
 typedef struct
 {
-    GFX_RESOURCE     type;             // Graphics resource type, determines the type and location of data
-    WORD             ID;               // memory ID, user defined value to differentiate
-                                       // between graphics resources of the same type	
-							           //   When using EDS_EPMP the following ID values are
-							           //   reserved and used by the Microchip display driver
-									   //   0 - reserved (do not use)
-							           //   1 - reserved for base address of EPMP CS1
-							           //   2 - reserved for base address of EPMP CS2 
+    GFX_RESOURCE     type;                  // Graphics resource type, determines the type and location of data
+    WORD             ID;                    // memory ID, user defined value to differentiate
+                                            // between graphics resources of the same type	
+							                //   When using EDS_EPMP the following ID values are
+							                //   reserved and used by the Microchip display driver
+									        //   0 - reserved (do not use)
+							                //   1 - reserved for base address of EPMP CS1
+							                //   2 - reserved for base address of EPMP CS2 
 	union
 	{
-    	DWORD        extAddress;	   // generic address	
-        FLASH_BYTE   *progByteAddress; // for addresses in program section
-        FLASH_WORD   *progWordAddress; // for addresses in program section
-	    const char   *constAddress;    // for addresses in FLASH
-	    char         *ramAddress;      // for addresses in RAM
+    	DWORD        extAddress;	        // generic address	
+        FLASH_BYTE   *progByteAddress;      // for addresses in program section
+        FLASH_WORD   *progWordAddress;      // for addresses in program section
+	    const char   *constAddress;         // for addresses in FLASH
+	    char         *ramAddress;           // for addresses in RAM
 #if defined(__PIC24F__) 	    
-	    __eds__ char *edsAddress;      // for addresses in EDS
+	    __eds__ char *edsAddress;           // for addresses in EDS
 #endif	    
 	} LOCATION;
     
-	WORD             width;            // width of the image 
-	WORD             height;           // height of the image
-    DWORD            param1;           // Parameters used for the GFX_RESOURCE. Depending on the GFX_RESOURCE type 
-                                       // definition of param1 can change. For IPU and RLE compressed images, param1 
-                                       // indicates the compressed size of the image.
-    DWORD            param2;           // Parameters used for the GFX_RESOURCE. Depending on the GFX_RESOURCE type 
-                                       // definition of param2 can change. For IPU and RLE compressed images, param2 
-                                       // indicates the uncompressed size of the image.
-	WORD             colorDepth;       // color depth of the image
+	WORD             width;                 // width of the image 
+	WORD             height;                // height of the image
+    DWORD            param1;                // Parameters used for the GFX_RESOURCE. Depending on the GFX_RESOURCE type 
+                                            // definition of param1 can change. For IPU and RLE compressed images, param1 
+                                            // indicates the compressed size of the image.
+    DWORD            param2;                // Parameters used for the GFX_RESOURCE. Depending on the GFX_RESOURCE type 
+                                            // definition of param2 can change. For IPU and RLE compressed images, param2 
+                                            // indicates the uncompressed size of the image.
+	WORD             colorDepth;            // color depth of the image
 } GFX_IMAGE_HEADER;
 
 /* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
@@ -346,29 +451,8 @@ typedef IMAGE_FLASH  BITMAP_FLASH    __attribute__ ((deprecated));
 typedef IMAGE_RAM    BITMAP_RAM      __attribute__ ((deprecated));
 typedef GFX_EXTDATA  BITMAP_EXTERNAL __attribute__ ((deprecated));
 
-/*********************************************************************
-* Overview: This defines the size of the buffer used by font functions
-*			to retrieve font data from the external memory. The buffer 
-*			size can be increased to accommodate large font sizes. 
-*			The user must be aware of the expected glyph sizes of the 
-*			characters stored in the font table. 
-*           To modify the size used, declare this macro in the 
-*           GraphicsConfig.h file with the desired size.
-*
-********************************************************************/
-#ifndef EXTERNAL_FONT_BUFFER_SIZE
-    #define EXTERNAL_FONT_BUFFER_SIZE   600
-#endif
-
-// Pointer to the current font image
-extern void     *_font;
-
-// First and last characters in the font
-extern WORD     _fontFirstChar;
-extern WORD     _fontLastChar;
-
-// Installed font height
-extern SHORT    _fontHeight;
+// information on currently set font
+extern GFX_FONT_CURRENT currentFont;
 
 /*********************************************************************
 * Function: WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, 
@@ -579,6 +663,113 @@ void            InitGraph(void);
     #define GetFontOrientation()    _fontOrientation
 
 /*********************************************************************
+* Macro: GFX_Font_SetAntiAliasType(transparency)
+*
+* Overview: Sets font anti-alias type to either Translucent or opaque.
+*
+* PreCondition: Compiler switch USE_ANTIALIASED_FONTS must be enabled
+*
+* Input: transparency - sets font font anti-alias type
+*        - ANTIALIAS_TRANSLUCENT - (or 1) when font anti-alias type is translucent
+*        - ANTIALIAS_OPAQUE - (or 0) when font anti-alias type is opaque
+*
+* Output: none
+*
+********************************************************************/
+    #ifdef USE_ANTIALIASED_FONTS
+        #define GFX_Font_SetAntiAliasType(transparency)  _antialiastype = transparency;
+    #else
+        #define GFX_Font_SetAntiAliasType(transparency)
+    #endif
+
+/*********************************************************************
+* Macro: GFX_Font_GetAntiAliasType()
+*
+* Overview: Returns the font anti-alias type.
+*
+* PreCondition: Compiler switch USE_ANTIALIASED_FONTS must be enabled
+*
+* Input: none
+*
+* Output: Return the current font anti-alias type.
+*        - ANTIALIAS_TRANSLUCENT - (or 1) when font anti-alias is type translucent
+*        - ANTIALIAS_OPAQUE - (or 0) when font anti-alias is type opaque
+*
+********************************************************************/
+    #ifdef USE_ANTIALIASED_FONTS
+        #define GFX_Font_GetAntiAliasType()  _antialiastype
+    #else
+        #define GFX_Font_GetAntiAliasType()
+    #endif
+
+/*********************************************************************
+* Function:  void OutCharGetInfoFlash (XCHAR ch, OUTCHAR_PARAM *pParam)
+*
+* PreCondition: none
+*
+* Input: ch - character code
+*        pParam - pointer to character information structure.
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Gathers the parameters for the specified character of the 
+*           currently set font from Flash memory. This is a step performed
+*           before the character is rendered. 
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+void    OutCharGetInfoFlash (XCHAR ch, OUTCHAR_PARAM *pParam);
+
+/*********************************************************************
+* Function:  void OutCharGetInfoExternal (XCHAR ch, OUTCHAR_PARAM *pParam)
+*
+* PreCondition: none
+*
+* Input: ch - character code
+*        pParam - pointer to character information structure. 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Gathers the parameters for the specified character of the 
+*           currently set font from external memory. This is a step performed
+*           before the character is rendered. 
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+void    OutCharGetInfoExternal(XCHAR ch, OUTCHAR_PARAM *pParam);
+
+/*********************************************************************
+* Function:  void OutCharRender(XCHAR ch, OUTCHAR_PARAM *pParam)
+*
+* PreCondition: none
+*
+* Input: ch - character code
+*        pParam - pointer to character information structure. 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Performs the actual rendering of the character using PutPixel().
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+WORD    OutCharRender(XCHAR ch, OUTCHAR_PARAM *pParam);
+
+/*********************************************************************
 * Function: WORD OutChar(XCHAR ch)
 *
 * Overview: This function outputs a character from the current graphic 
@@ -708,13 +899,13 @@ WORD    OutText(XCHAR *textString);
 WORD    OutTextXY(SHORT x, SHORT y, XCHAR *textString);
 
 /*********************************************************************
-* Function: SHORT GetTextHeight(void* font)
+* Function: SHORT GetTextHeight(void* pFont)
 *
 * Overview: This macro returns the height of the specified font. 
 *			All characters in a given font table have a constant 
 *			height.
 *
-* Input: font - Pointer to the font image.
+* Input: pFont - Pointer to the font image.
 *
 * Output: Returns the font height.
 *
@@ -724,17 +915,17 @@ WORD    OutTextXY(SHORT x, SHORT y, XCHAR *textString);
 * Side Effects: none
 *
 ********************************************************************/
-SHORT   GetTextHeight(void *font);
+SHORT   GetTextHeight(void *pFont);
 
 /*********************************************************************
-* Function: SHORT GetTextWidth(XCHAR* textString, void* font)
+* Function: SHORT GetTextWidth(XCHAR* textString, void* pFont)
 *
 * Overview: This function returns the width of the specified string 
 *			for the specified font. The string must be terminated 
 *			by a line feed or zero.
 *
 * Input: textString - Pointer to the string.
-*		 font - Pointer to the font image.
+*		 pFont - Pointer to the font image.
 *
 * Output: Returns the string width in the specified font.
 *
@@ -744,15 +935,78 @@ SHORT   GetTextHeight(void *font);
 * Side Effects: none
 *
 ********************************************************************/
-SHORT   GetTextWidth(XCHAR *textString, void *font);
+SHORT   GetTextWidth(XCHAR *textString, void *pFont);
 
 /*********************************************************************
-* Function: void SetFont(void* font)
+* Function: SHORT GetTextWidthRam(XCHAR* textString, void* pFont)
+*
+* PreCondition: none
+*
+* Input: textString - pointer to the text string,
+*        pFont - pointer to the font in RAM
+*
+* Output: text width in pixels
+*
+* Side Effects: none
+*
+* Overview: returns text width for the font
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+SHORT    GetTextWidthRam(XCHAR* textString, void* pFont);
+
+/*********************************************************************
+* Function: SHORT GetTextWidthFlash(XCHAR* textString, void* pFont)
+*
+* PreCondition: none
+*
+* Input: textString - pointer to the text string,
+*        pFont - pointer to the font in flash memory
+*
+* Output: text width in pixels
+*
+* Side Effects: none
+*
+* Overview: returns text width for the font
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+SHORT GetTextWidthFlash(XCHAR* textString, void *pFont);
+
+/*********************************************************************
+* Function: SHORT GetTextWidthExternal(XCHAR* textString, void* pFont)
+*
+* PreCondition: none
+*
+* Input: textString - pointer to the text string,
+*        pFont - pointer to the font in external memory
+*
+* Output: text width in pixels
+*
+* Side Effects: none
+*
+* Overview: returns text width for the font
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+SHORT GetTextWidthExternal(XCHAR* textString, void *pFont);
+
+/*********************************************************************
+* Function: void SetFont(void* pFont)
 *
 * Overview: This function sets the current font used in OutTextXY(), 
 *			OutText() and OutChar() functions.
 *
-* Input: font - Pointer to the new font image to be used.
+* Input: pFont - Pointer to the new font image to be used.
 *
 * Output: none
 *
@@ -762,7 +1016,50 @@ SHORT   GetTextWidth(XCHAR *textString, void *font);
 * Side Effects: none
 *
 ********************************************************************/
-void    SetFont(void *font);
+void    SetFont(void *pFont);
+
+/*********************************************************************
+* Function: void SetFontFlash(void* pFont)
+*
+* PreCondition: none
+*
+* Input: pFont - pointer to the font image in FLASH.
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Sets the current font located in FLASH.
+*
+* Note: This function has a weak attribute, the driver layer
+*       may implement this same function to support driver layer
+*       features.
+*
+********************************************************************/
+void    SetFontFlash(void *pFont);
+
+/*********************************************************************
+* Function: void SetFontExternal(void* pFont)
+*
+* PreCondition: none
+*
+* Input: pFont - pointer to the font image located in External Memory.
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Sets the current font located in External Memory.
+*           When using fonts in external memory, the font glyph
+*           buffer size defined by EXTERNAL_FONT_BUFFER_SIZE must
+*           be big enough for the character glyphs.
+*
+* Note: This function has a weak attribute, the driver layer
+*       may implement this same function to support driver layer
+*       features.
+*
+********************************************************************/
+void    SetFontExternal(void *pFont);
 
 /*********************************************************************
 * Macros: SetLineType(lnType)
@@ -1013,14 +1310,21 @@ WORD    FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 *
 * Overview: This function draws a polygon with the current line 
 *			type using the given number of points. The polygon points 
-*			are stored in an array arranged in the following order:
+*			(polyPoints) are stored in an array arranged in the following order:
 *   <PRE> 
-*            SHORT polyPoints[numPoints] = {x0, y0, x1, y1, x2, y2 … xn, yn};
-*            Where n = numPoints - 1
+*            SHORT polyPoints[size] = {x0, y0, x1, y1, x2, y2 … xn, yn};
+*            Where n = # of polygon sides
+*                  size = numPoints * 2
 *	</PRE> 
+*            DrawPoly() draws any shape defined by the polyPoints. The function 
+*            will just draw the lines connecting all the x,y points
+*            enumerated by polyPoints[].
 *
-* Input: numPoints - Defines the number of points in the polygon.
-*		 polyPoints - Pointer to the array of polygon points.
+* Input: numPoints - Defines the number of x,y points in the polygon. 
+*		 polyPoints - Pointer to the array of polygon points. The array defines 
+*                     the x,y points of the polygon. 
+*                     The sequence should be x0, y0, x1, y1, x2, y2, ... xn, yn where
+*                     n is the # of polygon sides.
 *
 * Output: For NON-Blocking configuration:
 *         - Returns 0 when device is busy and the shape is not yet completely drawn.
@@ -1028,6 +1332,17 @@ WORD    FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 *         For Blocking configuration:
 *         - Always return 1.
 *
+* Example:
+*	<CODE> 
+*       SHORT OpenShapeXYPoints[6] = {10, 10, 20, 10, 20, 20};
+*       SHORT ClosedShapeXYPoints[8] = {10, 10, 20, 10, 20, 20, 10, 10};
+* 	
+*       SetColor(WHITE);                         // set color to WHITE
+*       SetLineType(SOLID_LINE);                 // set line to solid line
+*       SetLineThickness(THICK_LINE);            // set line to thick line
+*		DrawPoly(6, OpenShapeXYPoints);	         // draw the open shape  
+*		DrawPoly(8, ClosedShapeXYPoints);	     // draw the closed shape  
+*   </CODE>
 *
 * Side Effects: none
 *
@@ -1373,14 +1688,13 @@ WORD        BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHOR
 *********************************************************************/
 typedef enum
 {
-       GRAD_NONE=0,                     // No Gradients to be drawn
-       GRAD_DOWN,                       // gradient changes in the vertical direction
-       GRAD_RIGHT,                      // gradient change in the horizontal direction
-       GRAD_UP,                         // gradient changes in the vertical direction
-       GRAD_LEFT,                       // gradient change in the horizontal direction
-       GRAD_DOUBLE_VER,                 // two gradient transitions in the vertical direction
-       GRAD_DOUBLE_HOR,                 // two gradient transitions in the horizontal direction
-
+    GRAD_NONE=0,                            // No Gradients to be drawn
+    GRAD_DOWN,                              // gradient changes in the vertical direction
+    GRAD_RIGHT,                             // gradient change in the horizontal direction
+    GRAD_UP,                                // gradient changes in the vertical direction
+    GRAD_LEFT,                              // gradient change in the horizontal direction
+    GRAD_DOUBLE_VER,                        // two gradient transitions in the vertical direction
+    GRAD_DOUBLE_HOR,                        // two gradient transitions in the horizontal direction
 } GFX_GRADIENT_TYPE;
 
 /*********************************************************************
@@ -1389,19 +1703,18 @@ typedef enum
 *********************************************************************/
 typedef struct
 {
-
-GFX_GRADIENT_TYPE  gradientType;        // selected the gradient type 
-DWORD              gradientStartColor;  // sets the starting color of gradient transition
-DWORD              gradientEndColor;    // sets the ending color of gradient transition
-DWORD              gradientLength;      // defines the length of the gradient transition in pixels
-
+    GFX_GRADIENT_TYPE  gradientType;        // selected the gradient type 
+    DWORD              gradientStartColor;  // sets the starting color of gradient transition
+    DWORD              gradientEndColor;    // sets the ending color of gradient transition
+    DWORD              gradientLength;      // defines the length of the gradient transition in pixels
 } GFX_GRADIENT_STYLE;
+
 #endif
 
 #ifdef USE_ALPHABLEND
-extern SHORT _GFXForegroundPage;        // foreground page (or buffer) used in alpha blending
-extern SHORT _GFXBackgroundPage;        // background page (or buffer)  used in alpha blending
-extern SHORT _GFXDestinationPage;       // destination page (or buffer)  used in alpha blending
+extern SHORT _GFXForegroundPage;            // foreground page (or buffer) used in alpha blending
+extern SHORT _GFXBackgroundPage;            // background page (or buffer)  used in alpha blending
+extern SHORT _GFXDestinationPage;           // destination page (or buffer)  used in alpha blending
 
 
 /*********************************************************************

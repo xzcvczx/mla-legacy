@@ -116,7 +116,7 @@
     #pragma udata USB_VARIABLES=0x500
 #elif defined(__18F4450) || defined(__18F2450)
 	#pragma udata USB_VARIABLES=0x480
-#else
+#elif defined(__18CXX)
     #pragma udata
 #endif
 
@@ -129,7 +129,10 @@ LINE_CODING line_coding;    // Buffer to store line coding information
     SERIAL_STATE_NOTIFICATION SerialStatePacket;
 #endif
 
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
+
 BYTE cdc_rx_len;            // total rx length
 
 BYTE cdc_trf_state;         // States are defined cdc.h
@@ -476,7 +479,7 @@ void CDCNotificationHandler(void)
   **********************************************************************************/
 BOOL USBCDCEventHandler(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch( (INT)event )
     {  
         case EVENT_TRANSFER_TERMINATED:
             if(pdata == CDCDataOutHandle)

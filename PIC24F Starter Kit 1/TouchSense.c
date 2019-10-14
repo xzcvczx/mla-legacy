@@ -212,10 +212,10 @@ void CTMUInit( void )
 {
     int     i;
 
-    #if defined USE_SH1101A
+    #if defined USE_GFX_DISPLAY_CONTROLLER_SH1101A
         TRISB    = 0x1F01;     //RB0, RB8, RB9, RB10, RB11, RB12 Tri-state - used by A/D for CTMU/POT
         AD1PCFGL &= ~0x1F01;
-    #elif defined USE_SSD1303
+    #elif defined USE_GFX_DISPLAY_CONTROLLER_SSD1303
         TRISB    = 0x0F01;     //RB0, RB9, RB10, RB11, RB12 Tri-state - used by A/D for CTMU/POT
         AD1PCFGL &= ~0x0F01;
     #endif

@@ -47,9 +47,21 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-#include "./USB/usb.h"
-#include "./USB/usb_function_phdc.h"
+#include "USB/usb.h"
+#include "USB/usb_function_phdc.h"
 #include "HardwareProfile.h"
+#include "USB/usb_function_phdc_com_model.h"
+#include "Weighing Scale app.h"
+#ifdef PHD_USE_RTCC_FOR_TIME_STAMP
+    #include "rtcc.h"
+#endif
+#if defined PHD_USE_LCD_DISPLAY
+    #if defined PIC18_EXPLORER
+        #include "lcd_pic18_explorer_board.h"
+    #elif defined EXPLORER_16
+        #include "lcd_explorer16_board.h"
+    #endif 
+#endif 
 
 /** CONFIGURATION **************************************************/
 #if defined(PICDEM_FS_USB)      // Configuration bits for PICDEM FS USB Demo Board (based on PIC18F4550)
@@ -171,13 +183,13 @@
 #elif defined(EXPLORER_16)
     #if defined(__PIC24FJ256GB110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
     #elif defined(__PIC24FJ256GB210__)
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
-        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__32MX460F512L__) || defined(__32MX795F512L__)
@@ -208,8 +220,8 @@
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__
     #endif
 #elif defined(PIC24F_STARTER_KIT)
-    _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
-    _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+    _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
 #elif defined(PIC24FJ256DA210_DEV_BOARD)
     _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
     _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
@@ -237,28 +249,19 @@
     _FOSCSEL(FNOSC_FRC);
     _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
     _FWDT(FWDTEN_OFF);
+#elif defined(PIC24FJ64GB502_MICROSTICK)
+    _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    _CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+    _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
 #else
     #error No hardware board defined, see "HardwareProfile.h" and __FILE__
 #endif
 
-/** I N C L U D E S **********************************************************/
-
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "USB/usb_device.h"
-#include "USB/usb.h"
-#include "app.h"	
-
-#include "HardwareProfile.h"
-
-
-
 /** V A R I A B L E S ********************************************************/
-#pragma udata
-BOOL stringPrinted;
-
-
+#if defined(__18CXX)
+    #pragma udata
+#endif 
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 static void InitializeSystem(void);
@@ -269,6 +272,8 @@ void YourLowPriorityISRCode();
 void USBCBSendResume(void);
 void BlinkUSBStatus(void);
 void UserInit(void);
+void LCDScreenUpdate (void);
+char* InitgerToAscii(int val);
 
 /** VECTOR REMAPPING ***********************************************/
 #if defined(__18CXX)
@@ -352,7 +357,7 @@ void UserInit(void);
 	
 	
 	//These are your actual interrupt handling routines.
-	#pragma interrupt YourHighPriorityISRCode
+	#pragma interrupt YourHighPriorityISRCode //nosave=section(".tmpdata") 
 	void YourHighPriorityISRCode()
 	{
 		//Check which interrupt flag caused the interrupt.
@@ -401,7 +406,9 @@ void UserInit(void);
 
 
 /** DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif 
 
 /******************************************************************************
  * Function:        void main(void)
@@ -424,16 +431,25 @@ void main(void)
 int main(void)
 #endif
 {   
-    InitializeSystem();
-
+    InitializeSystem(); 
     while(1)
     {
         #if defined(USB_INTERRUPT)
+            if (USB_BUS_SENSE == 0)
+            {
+                // The Device is dettached from Host. So notify the stack about the detach event. 
+                USBDeviceDetach(); 
+                ApplicationInit();
+            }    
             if(USB_BUS_SENSE && (USBGetDeviceState() == DETACHED_STATE))
             {
                 USBDeviceAttach();
+                ApplicationInit(); 
             }
-        #endif
+        #elif defined (USB_POLLING)
+            if((USBGetDeviceState() == DETACHED_STATE))
+                ApplicationInit(); 
+        #endif     
 
         #if defined(USB_POLLING)
 		// Check bus status and service USB interrupts.
@@ -454,7 +470,11 @@ int main(void)
 
 		// Application-specific tasks.
 		// Application related code may be added here, or in the ProcessIO() function.
-        ProcessIO();        
+        ProcessIO(); 
+        #if defined PHD_USE_LCD_DISPLAY
+            LCDScreenUpdate(); 
+        #endif    
+            
     }//end while
 }//end main
 
@@ -637,20 +657,41 @@ static void InitializeSystem(void)
  *****************************************************************************/
 void UserInit(void)
 {
+    #ifdef PHD_USE_RTCC_FOR_TIME_STAMP
+        rtccTimeDate RtccTimeDate;
+    #endif
+    
     //Initialize all of the debouncing variables
     buttonCountsw2 = 0;
     buttonPressedsw2 = FALSE;
 	buttonCountsw3 = 0;
     buttonPressedsw3 = FALSE;	
-    stringPrinted = TRUE;
-
+    
     //Initialize all of the LED pins
 	mInitAllLEDs();
 
     //Initialize the pushbuttons
     mInitAllSwitches();
-	//PHDC_App_Init();
-	ApplicationInit();		
+
+	ApplicationInit();
+	#if defined PHD_USE_RTCC_FOR_TIME_STAMP
+	    RtccInitClock(); 
+	    RtccWrOn();
+	    RtccTimeDate.f.hour = 0x11;        //Set Hour
+        RtccTimeDate.f.min =  0x21;        //Set minute
+        RtccTimeDate.f.sec =  0x56;        //Set second
+        RtccTimeDate.f.mday = 0x10;        //Set day
+        RtccTimeDate.f.mon =  0x12;        //Se month
+        RtccTimeDate.f.year = 0x11;        //set year
+        RtccTimeDate.f.wday = 0x06;        //Set which day of the week for the corrsponding date
+        RtccWriteTimeDate(&RtccTimeDate,1);//write into registers
+        mRtccOn();                         //enable the rtcc
+	#endif 
+	
+	#if defined PHD_USE_LCD_DISPLAY
+	    LCDInit(); 
+	#endif 
+	 		
 }//end UserInit
 
 /********************************************************************
@@ -672,20 +713,207 @@ void UserInit(void)
  *******************************************************************/
 void ProcessIO(void)
 {   
-    //BYTE numBytesRead;
-	//BYTE qos =4;
-	//static UINT8 Task_Flag=0;
-
     //Blink the LEDs according to the USB device status
     BlinkUSBStatus();
     // User Application USB tasks
     if((USBDeviceState < CONFIGURED_STATE)||(USBSuspendControl==1)) return;
 	ApplicationTask();
+}//end ProcessIO
 
 
-   // USBDevicePHDCTxRXService();
-}		//end ProcessIO
+/********************************************************************
+ * Function:        void LCDScreenUpdate (void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        This function updates the LCDText[] buffer with data that is to be 
+                    displayed on the LCD screen. This function also sends the data in 
+                    the LCDText[] Buffer to LCD. 
+ *
+ * Note:            The USB stack is configured to polling mode, must call
+        			USBDeviceTasks() function periodically. LCD code used
+        			in this project is blocking code. To minimize the processor 
+        			time spend on LCDScreenUpdate function we perform the LCD 
+        			update only once in a while. This function sends only one 
+        			Charcter to the LCD per call.
+ *******************************************************************/
+#if defined PHD_USE_LCD_DISPLAY
+void LCDScreenUpdate (void)
+{
+    CHAR8 *Temp = NULL; 
+    BYTE TempValue; 
+    UINT16 Weight; 
+    static BYTE lcdTextCounter = 0;  
+    static UINT16 lcdCount = 500;
+    
+    #ifdef PHD_USE_RTCC_FOR_TIME_STAMP
+        rtccTimeDate Rtcc_read_TimeDate ;
+    #endif 
+    
+    lcdCount--; 
+    if (lcdCount <= 0)
+    {
+        lcdCount = 500; 
+        if (lcdTextCounter == 0)
+        {    
+            //////////////////////////////////////////////
+            /////   Display Weight ///////////////////////
+            //////////////////////////////////////////////
+            Weight = GetWeight();
+            Temp = InitgerToAscii(Weight);
+            TempValue = strlen(Temp); 
+            switch (TempValue)
+            {
+                case 1:
+                    LCDText[0] = ' '; 
+                    LCDText[1] = ' '; 
+                    LCDText[2] = '0'; 
+                    LCDText[4] = Temp[0]; 
+                    break; 
+                case 2:
+                    LCDText[0] = ' '; 
+                    LCDText[1] = ' '; 
+                    LCDText[2] = Temp[0]; 
+                    LCDText[4] = Temp[1]; 
+                    break; 
+                case 3:
+                    LCDText[0] = ' '; 
+                    LCDText[1] = Temp[0];
+                    LCDText[2] = Temp[1]; 
+                    LCDText[4] = Temp[2];
+                    break; 
+                case 4:
+                default:
+                    LCDText[0] = Temp[0];
+                    LCDText[1] = Temp[1]; 
+                    LCDText[2] = Temp[2];
+                    LCDText[4] = Temp[3];
+                break;  
+            }
+            LCDText[3] = '.'; 
+            LCDText[5] = 'k';
+            LCDText[6] = 'g';
+            LCDText[7] = ' ';
 
+        
+            //////////////////////////////////////////////
+            /////   Display Agent State///////////////////
+            ////////////////////////////////////////////// 
+            if (PHDGetAgentState() == PHD_CONNECTED)
+            {
+                LCDText[16] = 'C'; 
+                LCDText[17] = 'O';
+                LCDText[18] = 'N';
+                LCDText[19] = 'C';
+                LCDText[20] = 'T';
+                LCDText[21] = 'D';
+                LCDText[22] = ' ';
+                LCDText[23] = ' ';
+            }    
+            else if (PHDGetAgentState() == PHD_INITIALIZED)
+            {
+                LCDText[16] = 'D'; 
+                LCDText[17] = 'I';
+                LCDText[18] = 'S';
+                LCDText[19] = 'C';
+                LCDText[20] = 'T';
+                LCDText[21] = 'D';
+                LCDText[22] = ' ';
+                LCDText[23] = ' ';
+            }    
+        
+            //////////////////////////////////////////////
+            /////   Display Date  and Time////////////////
+            ////////////////////////////////////////////// 
+            #ifdef PHD_USE_RTCC_FOR_TIME_STAMP     
+                RtccReadTimeDate(&Rtcc_read_TimeDate);        //Rtcc_read_TimeDate will have latest time
+       
+                TempValue = Rtcc_read_TimeDate.f.mon; 
+                LCDText[9] = (TempValue & 0x0F) + 0x30; // LSB of month
+        
+                TempValue = TempValue>>4;
+                LCDText[8] = (TempValue & 0x0F) + 0x30; // MSB of month
+        
+                LCDText[10] = '/'; 
+        
+                TempValue = Rtcc_read_TimeDate.f.mday; 
+                LCDText[12] = (TempValue & 0x0F) + 0x30; // LSB of day
+        
+                TempValue = TempValue>>4;
+                LCDText[11] = (TempValue & 0x0F) + 0x30; // MSB of day
+         
+                LCDText[13] = '/';  
+        
+                TempValue = Rtcc_read_TimeDate.f.year; 
+                LCDText[15] = (TempValue & 0x0F) + 0x30; // LSB of year
+       
+                TempValue = TempValue>>4;
+                LCDText[14] = (TempValue & 0x0F) + 0x30; // MSB of year
+       
+                
+                TempValue = Rtcc_read_TimeDate.f.hour; 
+                LCDText[25] = (TempValue & 0x0F) + 0x30; // LSB of Hours
+        
+                TempValue = TempValue>>4;
+                LCDText[24] = (TempValue & 0x0F) + 0x30; // MSB of Hours
+         
+                LCDText[26] = ':';
+       
+                TempValue = Rtcc_read_TimeDate.f.min; 
+                LCDText[28] = (TempValue & 0x0F) + 0x30; // LSB of Minutes
+        
+                TempValue = TempValue>>4;
+                LCDText[27] = (TempValue & 0x0F) + 0x30; // MSB of Minutes
+        
+                LCDText[29] = ':';
+        
+                TempValue = Rtcc_read_TimeDate.f.sec; 
+                LCDText[31] = (TempValue & 0x0F) + 0x30; // LSB of Seconds
+       
+                TempValue = TempValue>>4;
+                LCDText[30] = (TempValue & 0x0F) + 0x30; // MSB of Seconds
+            #endif     
+            lcdTextCounter++; 
+        } //end of if (lcdTextCounter == 0)
+        else
+        {
+            if (lcdTextCounter == 1)
+                LCD_GO_HOME(); // Set LCD cursor to home. 
+            else if ((lcdTextCounter >= 2) &&(lcdTextCounter <= 17))
+                LCDDataWrite(LCDText[lcdTextCounter-2]); 
+            else if (lcdTextCounter == 18)
+                LCDConfigWrite(0xC0); // set LCD Line 2 
+            else if ((lcdTextCounter >= 19) && (lcdTextCounter <= 35))
+                LCDDataWrite(LCDText[lcdTextCounter-3]);
+            lcdTextCounter++;
+            if (lcdTextCounter >= 35) 
+                lcdTextCounter = 0; 
+             
+        } // end of else    
+    } //end of (lcdCount <= 0)        
+}// end of void LCDScreenUpdate (void)    
+ 
+
+char* InitgerToAscii(int val){
+	
+	static char buf[6] = {0};
+	
+	int i = 4;
+	
+	for(; val && i ; --i, val /= 10)
+	
+		buf[i] = "0123456789abcdef"[val % 10];
+	
+	return &buf[i+1];
+	
+}
+#endif
 /********************************************************************
  * Function:        void BlinkUSBStatus(void)
  *
@@ -889,6 +1117,7 @@ void USBCBWakeFromSuspend(void)
  *******************************************************************/
 void USBCB_SOF_Handler(void)
 {
+   
     // No need to clear UIRbits.SOFIF to 0 here.
     // Callback caller is already doing that.
 
@@ -916,6 +1145,7 @@ void USBCB_SOF_Handler(void)
 //        }
 //    }
 	
+	PhdTimeoutHandlerApp(); 
 	
     if(buttonPressedsw2 == sw2)
     {
@@ -1291,8 +1521,7 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
             USBCBErrorHandler();
             break;
         case EVENT_TRANSFER:
-            Nop();
-	     USBDevicePHDCTxRXService((USTAT_FIELDS*)pdata);
+	        USBDevicePHDCTxRXService((USTAT_FIELDS*)pdata);
             break;
         default:
             break;
@@ -1302,4 +1531,6 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 
 
 /** EOF main.c *************************************************/
+
+
 

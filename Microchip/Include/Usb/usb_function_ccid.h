@@ -152,7 +152,9 @@
 #define USB_CCID_CMD_NOT_SUPPORTED           0x00
 
     
-
+//protocols
+#define USB_CCID_T0_PROTOCOL 0
+#define USB_CCID_T1_PROTOCOL 1
 
 /** E X T E R N S ************************************************************/
 extern volatile CTRL_TRF_SETUP SetupPkt;

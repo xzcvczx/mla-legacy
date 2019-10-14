@@ -9,10 +9,8 @@ This file defines all of the hardware-specific information for the project.
 #ifndef _HARDWARE_PROFILE_H_
 #define _HARDWARE_PROFILE_H_
 
-#define USE_SH1101A
 #define USE_GFX_PMP
 #define USE_8BIT_PMP
-//#define USE_SSD1303
 //#define USE_FRC - incompatible with USB operation
 //#define GO_SLOW - incompatible with USB host operation
 
@@ -21,6 +19,7 @@ This file defines all of the hardware-specific information for the project.
 *                                          
 ********************************************************************/
 #define USE_GFX_DISPLAY_CONTROLLER_SH1101A
+//#define USE_GFX_DISPLAY_CONTROLLER_SSD1303
 
 /*********************************************************************
 * Overview: Horizontal and vertical display resolution
@@ -102,10 +101,10 @@ This file defines all of the hardware-specific information for the project.
 
 
 // Define the RTCC default initialization.
-#define RTCC_DEFAULT_DAY        18        // Date
-#define RTCC_DEFAULT_MONTH      10        // Month
-#define RTCC_DEFAULT_YEAR       11        // Year
-#define RTCC_DEFAULT_WEEKDAY    2         // Day
+#define RTCC_DEFAULT_DAY        20        // Date
+#define RTCC_DEFAULT_MONTH       2        // Month
+#define RTCC_DEFAULT_YEAR       12        // Year
+#define RTCC_DEFAULT_WEEKDAY     1        // Day
 #define RTCC_DEFAULT_HOUR       10        // hour
 #define RTCC_DEFAULT_MINUTE     10        // Minute
 #define RTCC_DEFAULT_SECOND     10        // Second

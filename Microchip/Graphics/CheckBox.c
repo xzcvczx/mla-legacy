@@ -38,6 +38,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07	    Version 1.0 release
  * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
+ * 08/08/11     Fixed rendering to check IsDeviceBusy() if not exiting the 
+ *              draw routine.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -233,90 +235,40 @@ WORD CbDraw(void *pObj)
 {
     typedef enum
     {
-        REMOVE,
-        BOX_DRAW,
-        RUN_DRAW,
-        TEXT_DRAW,
-        TEXT_DRAW_RUN,
-        CHECK_DRAW,
-        FOCUS_DRAW
+        CB_STATE_REMOVE,
+        CB_STATE_BOX_DRAW,
+        CB_STATE_RUN_DRAW,
+        CB_STATE_TEXT_DRAW,
+        CB_STATE_TEXT_DRAW_RUN,
+        CB_STATE_SET_CHECK_DRAW,
+        CB_STATE_CHECK_DRAW,
+        CB_STATE_FOCUS_DRAW
     } CB_DRAW_STATES;
 
-    static CB_DRAW_STATES state = REMOVE;
+    static CB_DRAW_STATES state = CB_STATE_REMOVE;
 
-    SHORT checkIndent;
+    static SHORT checkIndent;
     CHECKBOX *pCb;
 
     pCb = (CHECKBOX *)pObj;
 
-    if(IsDeviceBusy())
-        return (0);
-
-    switch(state)
+    while(1)
     {
-        case REMOVE:
-            if(GetState(pCb, CB_HIDE | CB_DRAW))
-            {
-                SetColor(pCb->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pCb->hdr.left, pCb->hdr.top, pCb->hdr.right, pCb->hdr.bottom))
-                {
-                    return (0);
-                }
-
-                if(GetState(pCb, CB_HIDE))
-                    return (1);
-            }
-
-            state = BOX_DRAW;
-
-        case BOX_DRAW:
-            if(GetState(pCb, CB_DRAW))
-            {
-                if(!GetState(pCb, CB_DISABLED))
-                {
-                    GOLPanelDraw
-                    (
-                        pCb->hdr.left + CB_INDENT,
-                        pCb->hdr.top + CB_INDENT,
-                        pCb->hdr.left + (pCb->hdr.bottom - pCb->hdr.top) - CB_INDENT,
-                        pCb->hdr.bottom - CB_INDENT,
-                        0,
-                        pCb->hdr.pGolScheme->Color0,
-                        pCb->hdr.pGolScheme->EmbossDkColor,
-                        pCb->hdr.pGolScheme->EmbossLtColor,
-                        NULL,
-                        GOL_EMBOSS_SIZE
-                    );
-                }
-                else
-                {
-                    GOLPanelDraw
-                    (
-                        pCb->hdr.left + CB_INDENT,
-                        pCb->hdr.top + CB_INDENT,
-                        pCb->hdr.left + (pCb->hdr.bottom - pCb->hdr.top) - CB_INDENT,
-                        pCb->hdr.bottom - CB_INDENT,
-                        0,
-                        pCb->hdr.pGolScheme->ColorDisabled,
-                        pCb->hdr.pGolScheme->EmbossDkColor,
-                        pCb->hdr.pGolScheme->EmbossLtColor,
-                        NULL,
-                        GOL_EMBOSS_SIZE
-                    );
-                }
-
-                state = RUN_DRAW;
-
-            case RUN_DRAW:
+        if(IsDeviceBusy())
+            return (0);
+    
+        switch(state)
+        {
+            case CB_STATE_RUN_DRAW:
                 if(!GOLPanelDrawTsk())
                     return (0);
-                state = TEXT_DRAW;
+                state = CB_STATE_TEXT_DRAW;
 
-            case TEXT_DRAW:
+            case CB_STATE_TEXT_DRAW:
                 if(pCb->pText != NULL)
                 {
                     SetFont(pCb->hdr.pGolScheme->pFont);
-
+    
                     if(!GetState(pCb, CB_DISABLED))
                     {
                         SetColor(pCb->hdr.pGolScheme->TextColor0);
@@ -325,52 +277,138 @@ WORD CbDraw(void *pObj)
                     {
                         SetColor(pCb->hdr.pGolScheme->TextColorDisabled);
                     }
-
+    
                     MoveTo
                     (
                         pCb->hdr.left + pCb->hdr.bottom - pCb->hdr.top + CB_INDENT,
                         (pCb->hdr.bottom + pCb->hdr.top - pCb->textHeight) >> 1
                     );
-
-                    state = TEXT_DRAW_RUN;
-
-                case TEXT_DRAW_RUN:
-                    if(!OutText(pCb->pText))
-                        return (0);
-                }
-            }
-
-            state = CHECK_DRAW;
-
-        case CHECK_DRAW:
-            if(GetState(pCb, CB_DRAW | CB_DRAW_CHECK))
-            {
-                if(!GetState(pCb, CB_DISABLED))
-                {
-                    if(GetState(pCb, CB_CHECKED))
-                    {
-                        SetColor(pCb->hdr.pGolScheme->TextColor0);
-                    }
-                    else
-                    {
-                        SetColor(pCb->hdr.pGolScheme->Color0);
-                    }
+    
+                    state = CB_STATE_TEXT_DRAW_RUN;
                 }
                 else
                 {
-                    if(GetState(pCb, CB_CHECKED))
+                    state = CB_STATE_SET_CHECK_DRAW;
+                    break;
+                }
+    
+            case CB_STATE_TEXT_DRAW_RUN:
+                if(!OutText(pCb->pText))
+                    return (0);
+
+                state = CB_STATE_SET_CHECK_DRAW;
+                break;
+
+            case CB_STATE_REMOVE:
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+	            GFX_DRIVER_SetupDrawUpdate( pCb->hdr.left,
+	                                        pCb->hdr.top,
+	                                        pCb->hdr.right,
+	                                        pCb->hdr.bottom);
+#endif
+                if(GetState(pCb, CB_HIDE | CB_DRAW))
+                {
+                    SetColor(pCb->hdr.pGolScheme->CommonBkColor);
+                    if(!Bar(pCb->hdr.left, pCb->hdr.top, pCb->hdr.right, pCb->hdr.bottom))
                     {
-                        SetColor(pCb->hdr.pGolScheme->TextColorDisabled);
+                        return (0);
+                    }
+    
+                    if(GetState(pCb, CB_HIDE))
+                	{
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    	GFX_DRIVER_CompleteDrawUpdate(   pCb->hdr.left,
+	                                                    pCb->hdr.top,
+	                                                    pCb->hdr.right,
+	                                                    pCb->hdr.bottom);
+#endif
+	                    return (1);
+                	}
+				}
+    
+                state = CB_STATE_BOX_DRAW;
+    
+            case CB_STATE_BOX_DRAW:
+                if(GetState(pCb, CB_DRAW))
+                {
+                    if(!GetState(pCb, CB_DISABLED))
+                    {
+                        GOLPanelDraw
+                        (
+                            pCb->hdr.left + CB_INDENT,
+                            pCb->hdr.top + CB_INDENT,
+                            pCb->hdr.left + (pCb->hdr.bottom - pCb->hdr.top) - CB_INDENT,
+                            pCb->hdr.bottom - CB_INDENT,
+                            0,
+                            pCb->hdr.pGolScheme->Color0,
+                            pCb->hdr.pGolScheme->EmbossDkColor,
+                            pCb->hdr.pGolScheme->EmbossLtColor,
+                            NULL,
+                            GOL_EMBOSS_SIZE
+                        );
                     }
                     else
                     {
-                        SetColor(pCb->hdr.pGolScheme->ColorDisabled);
+                        GOLPanelDraw
+                        (
+                            pCb->hdr.left + CB_INDENT,
+                            pCb->hdr.top + CB_INDENT,
+                            pCb->hdr.left + (pCb->hdr.bottom - pCb->hdr.top) - CB_INDENT,
+                            pCb->hdr.bottom - CB_INDENT,
+                            0,
+                            pCb->hdr.pGolScheme->ColorDisabled,
+                            pCb->hdr.pGolScheme->EmbossDkColor,
+                            pCb->hdr.pGolScheme->EmbossLtColor,
+                            NULL,
+                            GOL_EMBOSS_SIZE
+                        );
                     }
+    
+                    state = CB_STATE_RUN_DRAW;
+                    break;
                 }
-
-                checkIndent = (pCb->hdr.bottom - pCb->hdr.top) >> 2;
-
-                if
+                else
+                {
+                    state = CB_STATE_SET_CHECK_DRAW;
+                }
+   
+            case CB_STATE_SET_CHECK_DRAW:
+                if(GetState(pCb, CB_DRAW | CB_DRAW_CHECK))
+                {
+                    if(!GetState(pCb, CB_DISABLED))
+                    {
+                        if(GetState(pCb, CB_CHECKED))
+                        {
+                            SetColor(pCb->hdr.pGolScheme->TextColor0);
+                        }
+                        else
+                        {
+                            SetColor(pCb->hdr.pGolScheme->Color0);
+                        }
+                    }
+                    else
+                    {
+                        if(GetState(pCb, CB_CHECKED))
+                        {
+                            SetColor(pCb->hdr.pGolScheme->TextColorDisabled);
+                        }
+                        else
+                        {
+                            SetColor(pCb->hdr.pGolScheme->ColorDisabled);
+                        }
+                    }
+    
+                    checkIndent = (pCb->hdr.bottom - pCb->hdr.top) >> 2;
+                    state = CB_STATE_CHECK_DRAW;
+                }   
+                else
+                {
+                    state = CB_STATE_FOCUS_DRAW;
+                    break;
+                }
+    
+            case CB_STATE_CHECK_DRAW:
+                if 
                 (
                     !Bar
                         (
@@ -383,36 +421,40 @@ WORD CbDraw(void *pObj)
                 {
                     return (0);
                 }
-            }
-
-            state = FOCUS_DRAW;
-
-        case FOCUS_DRAW:
-            if(GetState(pCb, CB_DRAW | CB_DRAW_FOCUS))
-            {
-                if(GetState(pCb, CB_FOCUSED))
+    
+                state = CB_STATE_FOCUS_DRAW;
+    
+            case CB_STATE_FOCUS_DRAW:
+                if(GetState(pCb, CB_DRAW | CB_DRAW_FOCUS))
                 {
-                    SetColor(pCb->hdr.pGolScheme->TextColor0);
+                    if(GetState(pCb, CB_FOCUSED))
+                    {
+                        SetColor(pCb->hdr.pGolScheme->TextColor0);
+                    }
+                    else
+                    {
+                        SetColor(pCb->hdr.pGolScheme->CommonBkColor);
+                    }
+    
+                    SetLineType(FOCUS_LINE);
+                    if(!Rectangle(pCb->hdr.left, pCb->hdr.top, pCb->hdr.right, pCb->hdr.bottom))
+                    {
+                        return (0);
+                    }
+    
+                    SetLineType(SOLID_LINE);
                 }
-                else
-                {
-                    SetColor(pCb->hdr.pGolScheme->CommonBkColor);
-                }
-
-                SetLineType(FOCUS_LINE);
-                if(!Rectangle(pCb->hdr.left, pCb->hdr.top, pCb->hdr.right, pCb->hdr.bottom))
-                {
-                    return (0);
-                }
-
-                SetLineType(SOLID_LINE);
-            }
-
-            state = REMOVE;
-            return (1);
-    }
-
-    return (1);
+    
+                state = CB_STATE_REMOVE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            	GFX_DRIVER_CompleteDrawUpdate(   pCb->hdr.left,
+                                                pCb->hdr.top,
+                                                pCb->hdr.right,
+                                                pCb->hdr.bottom);
+#endif
+                return (1);
+        } // end of switch()   
+    } // end of while(1)
 }
 
 #endif // USE_CHECKBOX

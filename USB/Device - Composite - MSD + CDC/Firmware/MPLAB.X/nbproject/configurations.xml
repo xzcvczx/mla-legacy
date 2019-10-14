@@ -44,7 +44,7 @@
         <itemPath>../../../../Microchip/Include/USB/usb_hal_pic24E.h</itemPath>
         <itemPath>../../../../Microchip/Include/USB/usb_hal_pic32.h</itemPath>
       </logicalFolder>
-      <itemPath>../FSConfig.h</itemPath>
+      <itemPath>../FSconfig.h</itemPath>
       <itemPath>../HardwareProfile.h</itemPath>
       <itemPath>../usb_config.h</itemPath>
     </logicalFolder>

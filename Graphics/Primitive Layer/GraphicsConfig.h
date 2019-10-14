@@ -124,9 +124,11 @@
 *
 *********************************************************************/
     #define USE_FONT_FLASH          // Support for fonts located in internal flash
-
+    #define USE_ANTIALIASED_FONTS   // Support for rendering anti-aliased fonts
+    
 //#define USE_FONT_EXTERNAL		// Support for fonts located in external memory
 
+    #define USE_GRADIENT            // Support for rendering color gradients
 /*********************************************************************
 * Overview: Similar to Font data bitmaps can also be placed in 
 *			two locations. One is in FLASH memory and the other is 

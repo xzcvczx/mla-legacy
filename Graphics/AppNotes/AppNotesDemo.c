@@ -9,7 +9,7 @@
  *
  * Software License Agreement
  *
- * Copyright � 2011 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -19,7 +19,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED �AS IS� WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -63,11 +63,11 @@ _FWDT(FWDTEN_OFF);
 #else
     #if defined(__PIC24FJ256GB110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ256GA110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
+_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ128GA010__)
 _CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
@@ -75,12 +75,12 @@ _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
     #endif
 	#if defined (__PIC24FJ256GB210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif	
 #endif
@@ -352,6 +352,26 @@ WORD CreateMainMenu()
                         )
             )
             return 0;
+
+#if ( defined(USE_16BIT_PMP) && defined(__PIC24FJ256GB210__)) ||                                                \
+    ( defined(USE_16BIT_PMP) && (defined(PIC_SK) || defined(PIC32_GP_SK) || defined(PIC32_ETH_SK) || defined(PIC32_USB_SK))) ||    \
+    ( defined(__dsPIC33F__) || defined(__PIC24H__) )
+ 
+    /* Special case: when using the following
+        - 16-bit PMP on non PIC24FJ256DA210 - pins allocated for the switches are used by PMP data lines
+        - 16-bit PMP with starter kit - pins allocated for the switches are used by PMP data lines
+        - dsPIC and PIC24H PIMs - switches are not mapped to the PIMs
+        AN1227 demo will be disabled and the the icon for that demo
+        will not show on the screen.
+    */
+    if (i == 2)
+    {
+        SetState(GOLFindObject(ID_ICON1+i), DISABLED);
+        BtnSetBitmap((BUTTON*)GOLFindObject(ID_ICON1+i), NULL);
+        BtnSetText((BUTTON*)GOLFindObject(ID_ICON1+i), NULL);
+    }
+ 
+#endif    
     }
     return 1;
     
@@ -716,14 +736,6 @@ void InitializeBoard(void)
         SST25_SDO_TRIS = 0;
         SST25_SDI_TRIS = 1;
         
-    #elif defined (GFX_PICTAIL_V2)
-        
-        MCHP25LC256_CS_LAT = 1;
-        MCHP25LC256_CS_TRIS = 0;
-        MCHP25LC256_SCK_TRIS  = 0;
-	    MCHP25LC256_SDO_TRIS = 0;
-	    MCHP25LC256_SDI_TRIS = 1;
-	    
 	#endif
 
     // set the peripheral pin select for the SPI channel used

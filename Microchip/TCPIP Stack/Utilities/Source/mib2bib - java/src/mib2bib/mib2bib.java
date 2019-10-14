@@ -2,32 +2,35 @@
 *
 *            MIB2BIB - MIB to Binary Information Base Builder
 *
-*********************************************************************
-* FileName:        mib2bib.cpp
-* Complier:        JAVA version "1.6.0_20"
-* Company:         Microchip Technology, Inc.
+**********************************************************************
+* FileName:        mib2bib.java
+* Complier:        JAVA version "1.6.0_20 and onwards"
 * IDE :            Netbean
+*
 * Software License Agreement
 *
-* The software supplied herewith by Microchip Technology Incorporated
-* (the “Company”) for its PICmicro® Microcontroller is intended and
-* supplied to you, the Company’s customer, for use solely and
-* exclusively on Microchip PICmicro Microcontroller products. The
-* software is owned by the Company and/or its supplier, and is
-* protected under applicable copyright laws. All rights are reserved.
-* Any use in violation of the foregoing restrictions may subject the
-* user to criminal sanctions under applicable laws, as well as to
-* civil liability for the breach of the terms and conditions of this
-* license.
+* Copyright (C) 2012 Microchip Technology Inc.  All rights reserved.
 *
-* THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
-* WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
-* TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-* PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
-* IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
-* CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+* Microchip licenses to you the right to use, modify, copy, and
+* distribute the Software when used with a Microchip microcontroller or
+* digital signal controller product which is integrated into Licensee's product.
 *
-********************************************************************/
+* You should refer to the license agreement accompanying this
+* Software for additional information regarding your rights and
+* obligations.
+*
+* THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+* WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+* LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+* PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+* MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+* CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+* PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+* BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+* THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+* SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+* (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE
+**********************************************************************/
 
 package mib2bib;
 import java.io.*;
@@ -909,6 +912,8 @@ public int ParseFile(String input)
                 errorCount++;
                 //break;
             }
+            //if(errorCount > 0)
+              //  break;
 
         } while ( parseResult != PARSE_RESULT.PARSE_NO_MORE );
         br.close();
@@ -1289,12 +1294,12 @@ void ShowWarning(File file, int line, FILE_ERROR_CODE code)
     String str = errorInfo.ErrorInfoStr(code);
     if(str != null)
     {
-        System.out.println(file.getName()+ line + "Warning [" +
-            code + "]" + str);
+        System.out.println(file.getName()+ ": " + line + ": " + "Warning [" +
+            code + "] " + str);
     }
     else
     {
-       System.out.println(file.getName()+ line + "Warning [" +
+       System.out.println(file.getName()+ ": " + line + ": " + "Warning [" +
             code + "] Unknown warning code.\n");
     }
 }
@@ -1318,12 +1323,12 @@ public void ShowError(File file, int line, FILE_ERROR_CODE code)
     String str = errorInfo.ErrorInfoStr(code);
     if(str != null)
     {
-        System.out.println(file.getName()+ line + "Error [" +
-            code + "]" + str);
+        System.out.println(file.getName()+ ": " + line + ": "+ "Error [" +
+            code + "] " + str);
     }
     else
     {
-         System.out.println(file.getName()+ line + "Error [" +
+         System.out.println(file.getName()+ ": " + line + ": " + "Error [" +
             code + "]Unknown error code.\n ");
     }
   
@@ -1372,7 +1377,7 @@ void mib2BibStart(String argc[])
 
 public static void main(String argc[])
 {
-    VERSION_INFO  = VERSION_INFO + " <Thursday, June 16, 2011>\n";
+    VERSION_INFO  = VERSION_INFO + " <Tuesday, Nov 01, 2011>\n";
     VERSION_MESSAGE = VERSION_MESSAGE + VERSION_INFO + "Copyright (c) 2003 Microchip Technology Inc.\n";
     System.out.println(VERSION_MESSAGE);
 

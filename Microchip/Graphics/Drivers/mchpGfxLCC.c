@@ -1,5 +1,5 @@
 /*********************************************************************
- *                  LCC Graphics Driver (mchpGfxLCC)
+ *                  LCC Graphics Dirver (mchpGfxLCC)
  *********************************************************************
  * FileName:        mchpGfxLCC.c
  * Dependencies:    plib.h
@@ -13,7 +13,7 @@
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the "Company") for its PIC Microcontroller is intended
+ * (the “Company”) for its PIC Microcontroller is intended
  * and supplied to you, the Company’s customer, for use solely and
  * exclusively on Microchip PIC Microcontroller products.
  * The software is owned by the Company and/or its supplier, and is
@@ -23,7 +23,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -37,18 +37,12 @@
 #include "HardwareProfile.h"
 
 #if defined (GFX_USE_DISPLAY_CONTROLLER_DMA)
-
-#warning "The LCC Demo board works with an explorer 16 as a proof of concept, but noise is sometimes seen on the LCD panel"
 #include "Compiler.h"
 #include "TimeDelay.h"
 #include "Graphics/DisplayDriver.h"
 #include "Graphics/mchpGfxLCC.h"
 #include "Graphics/gfxtcon.h"
 #include "Graphics/Primitive.h"
-
-#if ((COLOR_DEPTH != 8) && (COLOR_DEPTH != 16))
-    #error "The mchpGfxLCC driver can currently support the COLOR_DEPTH of 8 and 16 only."
-#endif
 
 #if defined(__32MX460F512L__) || defined (__32MX360F512L__) 
 #define LEGACY_MODE
@@ -57,7 +51,6 @@
 
 #ifdef USE_PALETTE
     #include "Graphics/Palette.h"
-
     extern void *_palette;
     extern BYTE PaletteBpp;
     extern BYTE blPaletteChangeError;
@@ -110,6 +103,7 @@ int _VirtToPhys(const void* p);
 /*Macros for External SRAM*/
 #define SRAM_CS       LATFbits.LATF13      
 #define SRAM_TRIS     TRISFbits.TRISF13
+
 #define ADDR15        LATAbits.LATA15
 #define ADDR15_TRIS   TRISAbits.TRISA15
 #define ADDR16        LATDbits.LATD8
@@ -133,27 +127,23 @@ int _VirtToPhys(const void* p);
 #define LINE_LENGTH              DISP_HOR_RESOLUTION
 #define FRAME_HEIGHT             DISP_VER_RESOLUTION
 
-#ifdef LCC_INTERNAL_MEMORY
-#ifdef USE_PALETTE
-BYTE HBackPorch = 2*((DISP_HOR_PULSE_WIDTH+DISP_HOR_BACK_PORCH)-1);     
+
+#if defined (USE_PALETTE) || defined(LCC_EXTERNAL_MEMORY) 
+unsigned int HBackPorch = 2*((DISP_HOR_PULSE_WIDTH+DISP_HOR_BACK_PORCH)-1);     
+BYTE HFrontPorch = 2;
 #else
 BYTE HBackPorch = (DISP_HOR_PULSE_WIDTH+DISP_HOR_BACK_PORCH)-1;     
-#endif
-BYTE HFrontPorch = 1;     
-#else
-
-WORD HBackPorch = 2*((DISP_HOR_PULSE_WIDTH+DISP_HOR_BACK_PORCH)-1);    
-BYTE HFrontPorch = 2;     
+BYTE HFrontPorch = 1;          
 #endif
 
-#define VER_BLANK                 (DISP_VER_PULSE_WIDTH+DISP_VER_BACK_PORCH+DISP_VER_FRONT_PORCH-1)    
+#define VER_BLANK                 (DISP_VER_PULSE_WIDTH+DISP_VER_BACK_PORCH+DISP_VER_FRONT_PORCH)
 
 #define  PMADDR_OVERFLOW               32768          /* Set for 2^15 because that is how many address lines are connected from the PIC32*/
 volatile BYTE DrawCount =0;                          /* The current status of how many pixels have been drawn inbetween a DMA IR*/
-volatile BYTE overflowcount =0;                      /* The count for the amount of overflows that have happened in the PMP Adress*/
+volatile BYTE_VAL overflowcount;                      /* The count for the amount of overflows that have happened in the PMP Adress*/
 
 #ifdef LCC_INTERNAL_MEMORY
-char GraphicsFrame[FRAME_HEIGHT][LINE_LENGTH];                   //8 BPP QVGA graphics frame
+BYTE GraphicsFrame[FRAME_HEIGHT][LINE_LENGTH];                   //8 BPP QVGA graphics frame
 #else 
 char GraphicsFrame[LINE_LENGTH<<1];
 #endif 
@@ -165,7 +155,7 @@ char GraphicsFrame[LINE_LENGTH<<1];
          #define PMP_DATA_LENGTH PMP_DATA_BUS_16
      #else
          #define PMP_DATA_LENGTH PMP_DATA_BUS_8
-#endif
+     #endif
  
 #else
 
@@ -260,7 +250,6 @@ PIXELCLOCK =0;
     #else
     DmaChnSetTxfer(1, &GraphicsFrame[0], (void*)&PMDIN, HBackPorch, 1, 2); 
     #endif
-
     #else    
     #if defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
     BACKLIGHT =0;     //Turn Backlight on
@@ -270,10 +259,8 @@ PIXELCLOCK =0;
     DmaChnSetTxfer(1, (void*)&PMDIN ,&GraphicsFrame[0] , 2, HBackPorch, 16);  
     #endif 
     #endif
-
-	INTSetVectorPriority(INT_VECTOR_DMA(1), INT_PRIORITY_LEVEL_6);		        // set INT controller priority
-	INTSetVectorSubPriority(INT_VECTOR_DMA(1), INT_SUB_PRIORITY_LEVEL_3);		// set INT controller sub-priority
-
+    
+    INTSetVectorPriority(INT_VECTOR_DMA(1), INT_PRIORITY_LEVEL_6);		        // set INT controller priority
     DmaChnSetEvEnableFlags(1, DMA_EV_BLOCK_DONE);	// enable the transfer done interrupt, when all buffer transferred
     INTEnable(INT_SOURCE_DMA(1), INT_ENABLED);		// enable the chn interrupt in the INT controller
 
@@ -284,12 +271,12 @@ PIXELCLOCK =0;
     
    #ifdef LCC_INTERNAL_MEMORY
    #ifdef USE_PALETTE 
-   OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 4); //Start Timer
+   OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 70); //Start Timer
    #else
    OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 27); //Start Timer
    #endif
    #else  //External Memory
-   OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 10); //Start Timer
+   OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 5); //Start Timer
    #endif
 
    DMACONbits.SUSPEND = 0;
@@ -304,9 +291,9 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
   static WORD remaining=0;
   static short line =0;
   static BYTE GraphicsState=1;
- 
+
 #ifdef LEGACY_MODE
-  static WORD dmatransfersremaining=0;
+        static WORD dmatransfersremaining=0;
 
         if(dmatransfersremaining != 0)
          {
@@ -315,15 +302,14 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
              {
                    //Setup DMA Transfer
                    DCH1DSIZ =  MAX_DMA_TRANSFER;
-                   dmatransfersremaining -= MAX_DMA_TRANSFER;
              }
              else
              {
                    //Setup DMA Transfer
-                   DCH1DSIZ =  dmatransfersremaining;
-                   dmatransfersremaining -= DCH1DSIZ;
+                   DCH1DSIZ =  dmatransfersremaining;          
              }
 
+         dmatransfersremaining -= DCH1DSIZ;
          DrawCount=0;
          DCH1INTCLR = 0x08;  //CHBCIF = 0;
          IFS1CLR = 0x20000;  //DMA1IF =0;
@@ -343,12 +329,12 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
               {         
                 VSYNC =0;  
                 line=  -VER_BLANK; 
-                PMADDR = 0;
+                PMADDRCLR = 0xffff;
                 ADDR15=0; ADDR16=0;
                 #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
                 ADDR17=0; ADDR18=0;
                 #endif
-                overflowcount=0;  
+                overflowcount.Val=0;  
                }
 
              else
@@ -360,23 +346,23 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
 
                if(((PMADDR_OVERFLOW - PMADDR) < (LINE_LENGTH)) 
                     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E 
-                           || ((PMADDR ==0) && (overflowcount>0))) 
+                           || ((PMADDR == 0) && (overflowcount.Val>0))) 
                     #else 
                            ) 
                     #endif       
                {   
 
                GraphicsState = 3;      //Do Overflow routine
-               remaining = ((PMADDR_OVERFLOW)-PMADDR);
+               remaining = ((PMADDR_OVERFLOW)- PMADDR);
  
                     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        if(PMADDR==0)
+                        if(PMADDR == 0)
                         {
                             remaining = LINE_LENGTH;
-                            ADDR15 = ++overflowcount;          //count holds the additional address line count
-                            ADDR16 = overflowcount>>1; 
-                            ADDR17 = overflowcount>>2;
-                            ADDR18 = overflowcount>>3;
+                            ADDR15 = ++overflowcount.Val;          //count holds the additional address line count
+                            ADDR16 = overflowcount.bits.b1; 
+                            ADDR17 = overflowcount.bits.b2;
+                            ADDR18 = overflowcount.bits.b3;
                             GraphicsState=2;
                         }
                     #endif
@@ -416,11 +402,11 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
        case 3:                    //Adjust the address lines that aren't part of PMP
              remaining = (LINE_LENGTH-remaining);
  
-             ADDR15 = ++overflowcount;          //count holds the additional address line count
-             ADDR16 = overflowcount>>1; 
+             ADDR15 = ++overflowcount.Val;          //count holds the additional address line count
+             ADDR16 = overflowcount.bits.b1; 
              #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-             ADDR17 = overflowcount>>2;
-             ADDR18 = overflowcount >>3;
+             ADDR17 = overflowcount.bits.b2;
+             ADDR18 = overflowcount.bits.b3;
              #endif
              
 
@@ -443,11 +429,11 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
              break;
  
   case 2:   //Front Porch then Back Porch Start
-           HSYNC =0; 
-           DATA_ENABLE =0; 
+           HSYNC = 0; 
+           DATA_ENABLE = 0; 
            PMMODECLR = 0x0800; //  INCM = 0b00; No Address Incrementing here
 
-           GraphicsState= PMDIN;
+           GraphicsState = PMDIN;
     
             HSYNC = 1;
             //Setup DMA Back Porch
@@ -471,16 +457,16 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
 
 void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
 {
-  static BYTE GraphicsState = 1;
+  static BYTE GraphicsState = 0;
   static short line =0;
 
 #ifdef USE_PALETTE
-  static WORD ColorLUTLine[DISP_HOR_RESOLUTION];
-         WORD *ColorLUTAddr = &ColorLUTLine[0];;
   static BYTE *LUTAddress= &GraphicsFrame[0][0];
 #endif
 
-    if(GraphicsState ==1)
+    GraphicsState ^=1;
+
+    if(GraphicsState == 1)
     {
             #ifdef USE_PALETTE
             DCH1SSIZ =  LINE_LENGTH<<1;
@@ -488,65 +474,64 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
             DCH1SSIZ =  LINE_LENGTH;
             #endif
 
-           GraphicsState++;
-
            if(line++ >= -1)       
            { 
             VSYNC =1; 
             DATA_ENABLE =1;
            
-            #ifdef USE_PALETTE
-            DCH1SSA = _VirtToPhys(&ColorLUTLine[0]);
-            #else
+            #ifndef USE_PALETTE
             DCH1SSA = _VirtToPhys(&GraphicsFrame[line][0]);
             #endif
 
             if(line == (FRAME_HEIGHT)) 
             {
-                 VSYNC =0;
-                 line= 0 - VER_BLANK;
+                 VSYNC = 0;
+                 line = -(VER_BLANK);
                 #ifdef USE_PALETTE
                  LUTAddress = &GraphicsFrame[0][0];
-                 line--;
                 #endif
             }
 
            #ifdef USE_PALETTE
            BYTE i=0;
-           DCH1CONSET =0x80;  //CHEN =1; 
-           DCH1INTCLR = 0x08; //CHBCIF = 0;
-           IFS1CLR = 0x20000; //DMA1IF =0;
 
           /*Do color LUT Here. Each line is 240 bytes*/
            while(i++<10)  
            {  
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];
-            *ColorLUTAddr++ = LUT[*LUTAddress++];       
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];
+            PMDIN = LUT[*LUTAddress++];     
            }
-           return;
-         #endif
+
+           HSYNC =0; 
+           DATA_ENABLE =0;
+           //Perform Back Porch Clock Signal
+           PMDINSET=1;          
+           HSYNC = 1;
+           DCH1SSIZ =  HBackPorch;
+           GraphicsState = 0;
+           #endif
 
            }        
     }
@@ -560,7 +545,6 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
            
            HSYNC = 1;
            DCH1SSIZ =  HBackPorch;
-           GraphicsState= 1;
     }
  
     DCH1INTCLR = 0x08; //CHBCIF = 0;
@@ -586,100 +570,90 @@ void PutPixel(short x, short y)
             return;
     }
 
+    #if (DISP_ORIENTATION	== 270)
+    WORD tempx=x;
+    x = (DISP_HOR_RESOLUTION-1) - y;
+    y = tempx; 
+    #elif (DISP_ORIENTATION == 90)
+    WORD tempy=y;
+    y = (DISP_VER_RESOLUTION-1) - x;
+    x = tempy; 
+    #elif (DISP_ORIENTATION == 180)
+    x = (DISP_HOR_RESOLUTION-1) - x;
+    y = (DISP_VER_RESOLUTION-1) - y;
+    #endif
+
 #ifdef LCC_INTERNAL_MEMORY
-GraphicsFrame[(GetMaxX()-x)][y] = _color;
+GraphicsFrame[y][x] = _color;
 #else
 
-static BYTE pixelcount =0;
-static GFX_COLOR color1;
-static DWORD address1; 
-static BYTE address1bit0, address1bit1;
+static BYTE pixelcount = 1;
+static GFX_COLOR color;
+static DWORD_VAL address[2];
+static BYTE addressbit[2][4];
 static DWORD prevaddr;
-static DWORD address; 
-static BYTE addressbit0, addressbit1;
 
-#ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-static BYTE address1bit2,address1bit3,addressbit2,addressbit3;
-#endif 
+    pixelcount ^= 1;      //Toggle between saving the pixel information and sending two pixels to the SRAM
 
-if(pixelcount++ == 0)
-{
-    #if defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
-    address1 = (DWORD)(76800-(x*240)+(y));  
-    #else //(DISPLAY_PANEL == PH480272T_005_I11Q)
-    address1 = (DWORD)(((y)*(DISP_HOR_RESOLUTION))+(x));
-    #endif
-    address1bit0 = address1 >> 15;
-    address1bit1 = address1 >> 16;
+    address[pixelcount].Val = (DWORD)(((y)*(DISP_HOR_RESOLUTION))+(x));
+    addressbit[pixelcount][0] = address[pixelcount].bits.b15;
+    addressbit[pixelcount][1] = address[pixelcount].bits.b16;
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-    address1bit2 = address1 >> 17;
-    address1bit3 = address1 >> 18;
+    addressbit[pixelcount][2] = address[pixelcount].bits.b17;
+    addressbit[pixelcount][3] = address[pixelcount].bits.b18;
     #endif
-    color1 =  _color;
+
+    if(!pixelcount)
+    {
+    color = _color;
     return;
-}
-else
-{
-
-   pixelcount =0;   //Toggle between saving the pixel information and sending two pixels to the SRAM 
-
-    #if defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
-    address = (DWORD)(76800-(x*240)+(y));  
-    #else //(DISPLAY_PANEL == PH480272T_005_I11Q)
-    address = (DWORD)(((y)*DISP_HOR_RESOLUTION+(x)));
-    #endif
-    addressbit0 = address>>15;
-    addressbit1 = address>>16;
-    #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-    addressbit2 = address >> 17;
-    addressbit3 = address >> 18;
-    #endif
-
+    }    
+    
     DrawCount++;
 
-    while(DrawCount>PIXEL_DRAW_PER_DMA_TX){}   //Added in WQVGA Driver to stabilize refresh rate
+    while(DrawCount>PIXEL_DRAW_PER_DMA_TX){}   //Added to stabilize screen refresh rate
 
-//Suspend DMA
+    //Suspend DMA
     DMACONSET = 0x1000;
-    while(PMMODEbits.BUSY ==1);
 
-//Perform Write
-    ADDR15 = addressbit0;
-    ADDR16 = addressbit1;
+    while(PMMODEbits.BUSY == 1);
+
+  //Perform Write
+    ADDR15 = addressbit[1][0];
+    ADDR16 = addressbit[1][1];
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-    ADDR17 = addressbit2;
-    ADDR18 = addressbit3;
+    ADDR17 = addressbit[1][2];
+    ADDR18 = addressbit[1][3];
     #endif
 
-//Save previous address value
+    //Save previous address value
     prevaddr = PMADDR;     
-    PMADDR = address;             
+    PMADDR = address[1].Val;             
     PMDIN = _color;   
 
-//Setup Write 2
-    ADDR15 = address1bit0;
-    ADDR16 = address1bit1;
+    //Setup Write 2
+    ADDR15 = addressbit[0][0];
+    ADDR16 = addressbit[0][1];
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-    ADDR17 = address1bit2;
-    ADDR18 = address1bit3;
+    ADDR17 = addressbit[0][2];
+    ADDR18 = addressbit[0][3];
     #endif 
   
-    PMADDR = address1;             
-    PMDIN  = (WORD)color1;
+    PMADDR = address[0].Val;             
+    PMDIN  = (WORD)color;
 
-//Clean-up Address Lines
-    ADDR15 = overflowcount;          //count holds the additional address line count
-    ADDR16 = overflowcount>>1; 
+    //Clean-up Address Lines
+    ADDR15 = overflowcount.bits.b0;          //count holds the additional address line count
+    ADDR16 = overflowcount.bits.b1; 
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-    ADDR17 = overflowcount>>2;
-    ADDR18 = overflowcount>>3;
+    ADDR17 = overflowcount.bits.b2;
+    ADDR18 = overflowcount.bits.b3;
     #endif
     PMADDR = prevaddr; 
 
-//ReStart DMA
+//Restart DMA
     DMACONCLR = 0x1000;
-
-}
+ 
 #endif
 }
 
@@ -749,7 +723,7 @@ void SetClip(BYTE control)
 {
     _clipRgn=control;
 }
-
+#ifdef LCC_INTERNAL_MEMORY
 /*********************************************************************
  * Function:        unsigned int _VirtToPhys(const void* p)
  * PreCondition:    None
@@ -767,7 +741,7 @@ int _VirtToPhys(const void* p)
 #ifdef USE_PALETTE
 void StartVBlankInterrupt(void){}
 void  EnablePalette(void){}
-BYTE SetPaletteBpp(BYTE bpp){}
+BYTE SetPaletteBpp(BYTE bpp){return 0;}
 BYTE SetPaletteFlash(PALETTE_ENTRY *pPaletteEntry, WORD startEntry, WORD length)
 {
     WORD counter;
@@ -788,12 +762,27 @@ BYTE SetPaletteFlash(PALETTE_ENTRY *pPaletteEntry, WORD startEntry, WORD length)
 }
 #endif
 
+#endif
 
 GFX_COLOR GetPixel(short x, short y)
 {
 
+    #if (DISP_ORIENTATION	== 270)
+    WORD tempx=x;
+    x = DISP_HOR_RESOLUTION - y;
+    y = tempx; 
+    #elif (DISP_ORIENTATION == 90)
+    WORD tempy=y;
+    y = DISP_VER_RESOLUTION - x;
+    x = tempy; 
+    #elif (DISP_ORIENTATION == 180)
+    x = DISP_HOR_RESOLUTION - x;
+    y = DISP_VER_RESOLUTION - y;
+    #endif
+
+
 #ifdef LCC_INTERNAL_MEMORY
-return GraphicsFrame[(GetMaxX()-x)][y];
+return GraphicsFrame[y][x];
 #else
 static DWORD prevaddr;
 static DWORD address; 
@@ -803,11 +792,8 @@ static GFX_COLOR getcolor;
 static BYTE addressbit2,addressbit3;
 #endif 
 
-    #if defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
-    address = (DWORD)(76800-(x*240)+(y));  
-    #else //(DISPLAY_PANEL == PH480272T_005_I11Q)
     address = (DWORD)(((y)*DISP_HOR_RESOLUTION+(x)));
-    #endif
+
     addressbit0 = address>>15;
     addressbit1 = address>>16;
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
@@ -847,11 +833,11 @@ static BYTE addressbit2,addressbit3;
   PMCONbits.PTRDEN=1;
 
 //Clean-up Address Lines
-    ADDR15 = overflowcount;          //count holds the additional address line count
-    ADDR16 = overflowcount>>1; 
+    ADDR15 = overflowcount.Val;          //count holds the additional address line count
+    ADDR16 = overflowcount.bits.b1; 
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-    ADDR17 = overflowcount>>2;
-    ADDR18 = overflowcount>>3;
+    ADDR17 = overflowcount.bits.b2;
+    ADDR18 = overflowcount.bits.b3;
     #endif
 
     PMADDR = prevaddr; 
@@ -889,14 +875,6 @@ return getcolor;
 WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 {
     SHORT   x, y;
-    static DWORD address; 
-    static WORD  overflowamount=0;
-    static int addresschange;
-       #if !defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
-       addresschange = 1;
-       #else
-       addresschange = -240;
-       #endif
 
    if(_clipRgn)
    {
@@ -910,191 +888,122 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
       bottom = _clipBottom;
     }
 
+    #if (DISP_ORIENTATION == 90)
+    WORD hchange = right - left;
+    WORD vchange = bottom - top;
+    WORD tempy=top;
+    top = (DISP_VER_RESOLUTION-1) - right;
+    left = tempy; 
+    bottom = top + hchange;
+    right = left + vchange;
+    #endif
+
 #ifdef LCC_INTERNAL_MEMORY
 
-for(y = top; y <= bottom; y++)
-   for(x = left; x <= right; x++)
-        GraphicsFrame[(GetMaxX()-x)][y] = _color;
+   for(y = top; y <= bottom; y++)
+      for(x = left; x <= right; x++)
+        GraphicsFrame[y][x] = _color;
 #else
+
+    static DWORD address; 
+    static WORD_VAL  overflowamount;
+    static DWORD prevaddr;  
+    int i; BYTE burstlength;
+    WORD prevMode;
 
     for(y = top; y <= bottom; y++)
       {  
-       #if !defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
+
        address = (DWORD)(((y)*(DISP_HOR_RESOLUTION))+(left));
-       #else
-       address = (DWORD)(76800-(left*240)+(y));
-       #endif
-  
-       for(x = left; x <= right; x+= 8)
-            {
-                static DWORD prevaddr;
 
-                    DrawCount++;
-                    while(DrawCount>PIXEL_DRAW_PER_DMA_TX){}   //Added in WQVGA Driver to stabilize refresh rate
+       x = left;
 
-                    if(((right-x) <= 8))  //Draw less than 8 at a time if x<8
+       while(x <= right)
+            {    
+
+                    if(((right-x) < 10))
                     {
-                    //Suspend DMA
-                    DMACONSET = 0x1000;
-                    while(PMMODEbits.BUSY ==1);
-                    //Perform Write
-                    ADDR15 = address>>15;
-                    ADDR16 = address>>16;
-                    #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                    ADDR17 = address>>17;
-                    ADDR18 = address>>18;
-                    #endif
-
-                    //Save previous address value
-                    prevaddr = PMADDR;     
-                    PMADDR = address;             
-                    PMDIN = _color;   
-                    x-=7;
+                       burstlength = 1;
+                       x++;
                     }
-                    else    //Draw 8 pixels at a time
+                    else
                     {
+                       burstlength = 10;
+                       x += burstlength;
+                    } 
+
+                    overflowamount.Val = (address/PMADDR_OVERFLOW);
+                   
+                    DrawCount++;
+                    
+                    while(DrawCount>(PIXEL_DRAW_PER_DMA_TX>>1)){}   //Added in WQVGA Driver to stabilize refresh rate
+
                     //Suspend DMA
                     DMACONSET = 0x1000;
-                    while(PMMODEbits.BUSY ==1);
-                    //Setup Write 1
-                     overflowamount = (address/PMADDR_OVERFLOW);
-                     ADDR15 = overflowamount;
-                     ADDR16 = overflowamount>>1;
+
+                    while(PMMODEbits.BUSY==1);  //Make sure DMA is suspended
+
+                    //Setup Write 
+                     ADDR15 = overflowamount.Val;
+                     ADDR16 = overflowamount.bits.b1;
                      #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                     ADDR17 = overflowamount>>2;
-                     ADDR18 = overflowamount>>3;
+                     ADDR17 = overflowamount.bits.b2;
+                     ADDR18 = overflowamount.bits.b3;
                      #endif
 
                     //Save previous address value
-                    prevaddr = PMADDR;     
-                    PMADDR = address; 
-                    address  +=  addresschange;            
-                    PMDIN = _color;   
-
-                    //Setup Write 2
-                    if(overflowamount != (address/PMADDR_OVERFLOW))
-                    {
-                        overflowamount = (address/PMADDR_OVERFLOW);
-                        ADDR15 = overflowamount;
-                        ADDR16 = overflowamount>>1;
-                        #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        ADDR17 = overflowamount>>2;
-                        ADDR18 = overflowamount>>3;
-                        #endif
-                    }
-
+                    prevaddr = PMADDR;    
+       
+                    PMCONCLR = 0x8000; // PMCONbits.ON = 0;
+                    PMDIN = _color;
+                    prevMode = (WORD)PMMODE;
+                    PMMODESET = 0x0800;     //  INCM = 0b01; Address Incrementing here
                     PMADDR = address;
-                    address  +=  addresschange;             
-                    PMDINSET = 0;            //Draw pixel 2
+                    PMCONSET = 0x8000;  // PMCONbits.ON = 1; 
 
-                    //Setup Write 3
-                     if(overflowamount != (address/PMADDR_OVERFLOW))
+                   if((address + burstlength) < (PMADDR_OVERFLOW * (overflowamount.Val+1)))
+                   {
+ 
+                   for(i=0;i<burstlength;i++)
+                   {          
+                      PMDINSET = 0;
+                   }  
+                      address += burstlength;
+                   }
+                   else{
+                   for(i=0;i<burstlength;i++)
+                   { 
+
+                    //Setup Write 
+                    if(overflowamount.Val != (address++/PMADDR_OVERFLOW))
                     {
-                        overflowamount = (address/PMADDR_OVERFLOW);
-                        ADDR15 = overflowamount;
-                        ADDR16 = overflowamount>>1;
+                        overflowamount.Val = (address/PMADDR_OVERFLOW);
+                        ADDR15 = overflowamount.Val;
+                        ADDR16 = overflowamount.bits.b1;
                         #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        ADDR17 = overflowamount>>2;
-                        ADDR18 = overflowamount>>3;
+                        ADDR17 = overflowamount.bits.b2;
+                        ADDR18 = overflowamount.bits.b3;
                         #endif
                     }
-
-                    PMADDR = address;  
-                    address  +=  addresschange;           
-                    PMDINSET = 0;            //Draw pixel 3
-
-                    //Setup Write 4
-                    if(overflowamount != (address/PMADDR_OVERFLOW))
-                    {
-                        overflowamount = (address/PMADDR_OVERFLOW);
-                        ADDR15 = overflowamount;
-                        ADDR16 = overflowamount>>1;
-                        #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        ADDR17 = overflowamount>>2;
-                        ADDR18 = overflowamount>>3;
-                        #endif
-                    }
-
-                    PMADDR = address;   
-                    address  +=  addresschange;          
-                    PMDINSET = 0;            //Draw pixel 4
-
-                    //Setup Write 5
-                    if(overflowamount != (address/PMADDR_OVERFLOW))
-                    {
-                        overflowamount = (address/PMADDR_OVERFLOW);
-                        ADDR15 = overflowamount;
-                        ADDR16 = overflowamount>>1;
-                        #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        ADDR17 = overflowamount>>2;
-                        ADDR18 = overflowamount>>3;
-                        #endif
-                    }
-
-                    PMADDR = address;
-                    address  +=  addresschange;            
-                    PMDINSET = 0;            //Draw pixel 5
-
-                    //Setup Write 6
-                    if(overflowamount != (address/PMADDR_OVERFLOW))
-                    {
-                        overflowamount = (address/PMADDR_OVERFLOW);
-                        ADDR15 = overflowamount;
-                        ADDR16 = overflowamount>>1;
-                        #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        ADDR17 = overflowamount>>2;
-                        ADDR18 = overflowamount>>3;
-                        #endif
-                    }
-
-                    PMADDR = address; 
-                    address  +=  addresschange;            
-                    PMDINSET = 0;            //Draw pixel 6
-
-                    //Setup Write 7
-                    if(overflowamount != (address/PMADDR_OVERFLOW))
-                    {
-                        overflowamount = (address/PMADDR_OVERFLOW);
-                        ADDR15 = overflowamount;
-                        ADDR16 = overflowamount>>1;
-                        #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        ADDR17 = overflowamount>>2;
-                        ADDR18 = overflowamount>>3;
-                        #endif
-                    }
-
-                    PMADDR = address; 
-                    address  +=  addresschange;            
-                    PMDINSET = 0;            //Draw pixel 7
-
-                    //Setup Write 8
-                    if(overflowamount != (address/PMADDR_OVERFLOW))
-                    {
-                        overflowamount = (address/PMADDR_OVERFLOW);
-                        ADDR15 = overflowamount;
-                        ADDR16 = overflowamount>>1;
-                        #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        ADDR17 = overflowamount>>2;
-                        ADDR18 = overflowamount>>3;
-                        #endif
-                    }
-
-                    PMADDR = address;           
-                    PMDINSET = 0;            //Draw pixel 8
+       
+                    PMDINSET = 0;
+                   }  
                     }
 
                     //Clean-up Address Lines
-                    ADDR15 = overflowcount;          //count holds the additional address line count
-                    ADDR16 = overflowcount>>1; 
+                    ADDR15 = overflowcount.Val;          //count holds the additional address line count
+                    ADDR16 = overflowcount.bits.b1; 
                     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                    ADDR17 = overflowcount>>2;
-                    ADDR18 = overflowcount>>3;
+                    ADDR17 = overflowcount.bits.b2;
+                    ADDR18 = overflowcount.bits.b3;
                     #endif
+     
+                    PMMODE = prevMode;
                     PMADDR = prevaddr; 
-
+                    
                     //ReStart DMA
                     DMACONCLR = 0x1000;
-                    address  +=  addresschange;
+
              }
 
       }

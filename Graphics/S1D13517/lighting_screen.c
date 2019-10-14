@@ -38,8 +38,7 @@
  * SECTION: Includes
  *****************************************************************************/
 #include "Graphics/Graphics.h"
-#include "icons.h"
-#include "MainDemo.h"//** Remove when complete!!!!!!!!!
+#include "MainDemo.h"
 #include "gfx_schemes.h"
 #include "gfx_screens.h"
 #include "gol_ids.h"
@@ -59,6 +58,12 @@
 
 /*****************************************************************************
  * void CreateLightingScreen(void)
+ *
+ * NOTE:  The lighting demo is not available when using the PIC24FJ256GB210.
+ *        The demo requires loading an image from the external memory, the Epson
+ *        S1D13517 () has some routing conflicts which make loading the image
+ *        difficult and not robust.  For these reasons, the lighting demo has
+ *        been take out for a better out of box experience.
  *****************************************************************************/
 void CreateLightingScreen(void)
 {
@@ -68,7 +73,12 @@ void CreateLightingScreen(void)
 
     SetState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT), BTN_DISABLED);
  
+/***
+ * See above note in the function comment for more information
+ **/
+    #ifndef __PIC24FJ256GB210__
     GFX_BlockUntilFinished(PutImage((GetMaxX() >> 2)+40, 90+10, (void *) &House, IMAGE_NORMAL));
+    #endif
 
     SetActivePage(GetDestinationPage());
 

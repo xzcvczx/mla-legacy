@@ -38,7 +38,7 @@
  * SECTION: Includes
  *****************************************************************************/
 #include "Graphics/Graphics.h"
-#include "MainDemo.h"//** Remove when complete!!!!!!!!!
+#include "MainDemo.h"
 #include "gfx_strings.h"
 #include "gfx_screens.h"
 #include "gfx_schemes.h"
@@ -180,18 +180,20 @@ WORD GOLDrawCallback(void)
 
         case DISPLAY_INFO:           
             return(1); 
-                        
-        case CREATE_UPLOAD:
+
+  #ifndef __PIC32MX                       
+ 
+       case CREATE_UPLOAD:
             UploadExternalMemory();
             screenState = DISPLAY_UPLOAD;
             return (1);
 
         case DISPLAY_UPLOAD:
-#if !defined(PIC_SK) && !defined(__PIC32MX360F512L__)
+            #if defined(ProgramFlash)
             ProgramFlash();
-#endif
+            #endif
             return (1);
-
+  #endif
         case CREATE_PERFORMANCE:
             CreatePerformanceScreen();                                       // create window and radio buttons
             screenState = DISPLAY_PERFORMANCE;                         // switch to next state

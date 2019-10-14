@@ -103,33 +103,23 @@
 
 #endif
 
-
-
-
 // Summary: Macro for the FSfopen FS_APPEND mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
 //              be created if it doesn't exist.  If it does exist, it's file information will be loaded and the
 //              current location in the file will be set to the end.  The user will then be able to write to the file.
 #define FS_APPEND   "a"
-#define APPEND  "a"     //deprecated
 
 // Summary: Macro for the FSfopen FS_WRITE mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
 //              be created if it doesn't exist.  If it does exist, it will be erased and replaced by an empty file
 //              of the same name.  The user will then be able to write to the file.
 #define FS_WRITE    "w"
-#define WRITE   "w"     //deprecated
 
 // Summary: Macro for the FSfopen FS_READ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file information for the 
 //              specified file will be loaded.  If the file does not exist, the FSfopen function will fail.  The user 
 //              will then be able to read from the file.
 #define FS_READ "r"
-#if defined(__32MX795F512L__)
-    #warning FSfopen must use "r" and not READ as input on this device
-#else
-    #define READ    "r"     //deprecated
-#endif
 
 // Summary: Macro for the FSfopen FS_APPEND+ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
@@ -137,23 +127,18 @@
 //              current location in the file will be set to the end.  The user will then be able to write to the file
 //              or read from the file.
 #define FS_APPENDPLUS   "a+"
-#define APPENDPLUS "a+"     //deprecated
 
 // Summary: Macro for the FSfopen FS_WRITE+ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file being opened will
 //              be created if it doesn't exist.  If it does exist, it will be erased and replaced by an empty file
 //              of the same name.  The user will then be able to write to the file or read from the file.
 #define FS_WRITEPLUS    "w+"
-#define WRITEPLUS  "w+"     //deprecated
 
 // Summary: Macro for the FSfopen FS_READ+ mode
 // Description: If this macro is specified as the mode argument in a call of FSfopen, the file information for the 
 //              specified file will be loaded.  If the file does not exist, the FSfopen function will fail.  The user 
 //              will then be able to read from the file or write to the file.
 #define FS_READPLUS     "r+"
-#define READPLUS   "r+"     //deprecated
-
-
 
 #ifndef intmax_t
     #ifdef __PIC24F__
@@ -349,9 +334,10 @@ typedef struct
   Side Effects:
     The FSerrno variable will be changed.
   Description:
+    This function initializes the file system stack & the interfacing device.
     Initializes the static or dynamic memory slots for holding file
-    structures.  Initializes the device with the DISKmount function. Loads 
-    MBR and boot sector information.  Initializes the current working
+    structures. Initializes the device with the DISKmount function. Loads 
+    MBR and boot sector information. Initializes the current working
     directory to the root directory for the device if directory support
     is enabled.
   Remarks:
@@ -365,31 +351,31 @@ int FSInit(void);
   Function:
     FSFILE * FSfopen (const char * fileName, const char *mode)
   Summary:
-    Open a Ascii file
+    Opens a file with ascii input 'fileName' on PIC24/PIC32/dsPIC MCU's.
   Conditions:
     For read modes, file exists; FSInit performed
   Input:
     fileName -  The name of the file to open
     mode -
-         - WRITE -      Create a new file or replace an existing file
-         - READ -       Read data from an existing file
-         - APPEND -     Append data to an existing file
-         - WRITEPLUS -  Create a new file or replace an existing file (reads also enabled)
-         - READPLUS -   Read data from an existing file (writes also enabled)
-         - APPENDPLUS - Append data to an existing file (reads also enabled)
+         - FS_WRITE -      Create a new file or replace an existing file
+         - FS_READ -       Read data from an existing file
+         - FS_APPEND -     Append data to an existing file
+         - FS_WRITEPLUS -  Create a new file or replace an existing file (reads also enabled)
+         - FS_READPLUS -   Read data from an existing file (writes also enabled)
+         - FS_APPENDPLUS - Append data to an existing file (reads also enabled)
   Return Values:
     FSFILE * - The pointer to the file object
     NULL -     The file could not be opened
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    This function will open a file or directory.  First, RAM in the
-    dynamic heap or static array will be allocated to a new FSFILE object.
-    Then, the specified file name will be formatted to ensure that it's
-    in 8.3 format or LFN format. Next, the FILEfind function will be used
-    to search for the specified file name. If the name is found, one of three
-    things will happen: if the file was opened in read mode, its file
-    info will be loaded using the FILEopen function; if it was opened in
+    This function will open a ascii name file or directory on PIC24/PIC32/dsPIC MCU's.
+    First, RAM in the dynamic heap or static array will be allocated to a
+    new FSFILE object. Then, the specified file name will be formatted to
+    ensure that it's in 8.3 format or LFN format. Next, the FILEfind function
+    will be used to search for the specified file name. If the name is found,
+    one of three things will happen: if the file was opened in read mode, its
+    file info will be loaded using the FILEopen function; if it was opened in
     write mode, it will be erased, and a new file will be constructed in
     its place; if it was opened in append mode, its file info will be
     loaded with FILEopen and the current location will be moved to the
@@ -411,31 +397,31 @@ FSFILE * FSfopen(const char * fileName, const char *mode);
   Function:
     FSFILE * wFSfopen (const unsigned short int * fileName, const char *mode)
   Summary:
-    Open a UTF16 file.
+    Opens a file with UTF16 input 'fileName' on PIC24/PIC32/dsPIC MCU's.
   Conditions:
     For read modes, file exists; FSInit performed
   Input:
     fileName -  The name of the file to open
     mode -
-         - WRITE -      Create a new file or replace an existing file
-         - READ -       Read data from an existing file
-         - APPEND -     Append data to an existing file
-         - WRITEPLUS -  Create a new file or replace an existing file (reads also enabled)
-         - READPLUS -   Read data from an existing file (writes also enabled)
-         - APPENDPLUS - Append data to an existing file (reads also enabled)
+         - FS_WRITE -      Create a new file or replace an existing file
+         - FS_READ -       Read data from an existing file
+         - FS_APPEND -     Append data to an existing file
+         - FS_WRITEPLUS -  Create a new file or replace an existing file (reads also enabled)
+         - FS_READPLUS -   Read data from an existing file (writes also enabled)
+         - FS_APPENDPLUS - Append data to an existing file (reads also enabled)
   Return Values:
     FSFILE * - The pointer to the file object
     NULL -     The file could not be opened
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    This function will open a file or directory.  First, RAM in the
-    dynamic heap or static array will be allocated to a new FSFILE object.
-    Then, the specified file name will be formatted to ensure that it's
-    in 8.3 format or LFN format. Next, the FILEfind function will be used
-    to search for the specified file name. If the name is found, one of three
-    things will happen: if the file was opened in read mode, its file
-    info will be loaded using the FILEopen function; if it was opened in
+    This function opens a file with UTF16 input 'fileName' on PIC24/PIC32/dsPIC MCU's.
+    First, RAM in the dynamic heap or static array will be allocated to a
+    new FSFILE object. Then, the specified file name will be formatted to
+    ensure that it's in 8.3 format or LFN format. Next, the FILEfind function
+    will be used to search for the specified file name. If the name is found,
+    one of three things will happen: if the file was opened in read mode, its
+    file info will be loaded using the FILEopen function; if it was opened in
     write mode, it will be erased, and a new file will be constructed in
     its place; if it was opened in append mode, its file info will be
     loaded with FILEopen and the current location will be moved to the
@@ -459,7 +445,8 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Function:
     FSFILE * FSfopenpgm(const rom char * fileName, const rom char *mode)
   Summary:
-    Open a Ascii file named with a ROM string on PIC18
+    Opens a file on PIC18 Microcontrollers where 'fileName' ROM string is given
+    in Ascii format.
   Conditions:
     For read modes, file exists; FSInit performed
   Input:
@@ -471,8 +458,9 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The FSfopenpgm function will copy a PIC18 ROM fileName and mode argument
-    into RAM arrays, and then pass those arrays to the FSfopen function.
+    This function opens a file on PIC18 Microcontrollers where 'fileName' ROM string
+    is given in Ascii format.The FSfopenpgm function will copy a PIC18 ROM fileName and
+    mode argument into RAM arrays, and then pass those arrays to the FSfopen function.
   Remarks:
     This function is for use with PIC18 when passing arguments in ROM.
   ******************************************************************************/
@@ -498,8 +486,9 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
     Search criteria from previous FindFirstpgm call on passed SearchRec object
     will be lost.The FSerrno variable will be changed.
   Description:
-    The FindFirstpgm function will copy a PIC18 ROM fileName argument
-    into a RAM array, and then pass that array to the FindFirst function.
+    This function finds a file named with 'fileName' on PIC18. The FindFirstpgm
+    function will copy a PIC18 ROM fileName argument into a RAM array, and then
+    pass that array to the FindFirst function.
   Remarks:
     Call FindFirstpgm or FindFirst before calling FindNext.
     This function is for use with PIC18 when passing arguments in ROM.
@@ -512,7 +501,7 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Function:
     int FSchdirpgm (const rom char * path)
   Summary:
-    Changed the CWD with a path in ROM on PIC18
+    Changes the CWD to the input path on PIC18
   Conditions:
     None
   Input:
@@ -524,8 +513,8 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
     The current working directory may be changed. The FSerrno variable will
     be changed.
   Description:
-    The FSchdirpgm function passes a PIC18 ROM path pointer to the
-    chdirhelper function.
+    Changes the CWD to the input path on PIC18.The FSchdirpgm function
+    passes a PIC18 ROM path pointer to the chdirhelper function.
   Remarks:
     This function is for use with PIC18 when passing arguments in ROM
   **************************************************************************/
@@ -539,7 +528,7 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Function:
     int FSremovepgm (const rom char * fileName)
   Summary:
-    Delete a file named with a ROM string on PIC18
+    Deletes the file on PIC18 device
   Conditions:
     File not opened; file exists
   Input:
@@ -550,8 +539,9 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The FSremovepgm function will copy a PIC18 ROM fileName argument
-    into a RAM array, and then pass that array to the FSremove function.
+    Deletes the file on PIC18 device.The FSremovepgm function will copy a
+    PIC18 ROM fileName argument into a RAM array, and then pass that array
+    to the FSremove function.
   Remarks:
     This function is for use with PIC18 when passing arguments in ROM.
   *************************************************************/
@@ -563,7 +553,8 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Function:
     int FSmkdirpgm (const rom char * path)
   Summary:
-    Create a directory with a path in ROM on PIC18
+    Creates a directory as per the path mentioned in the input string on 
+    PIC18 devices.
   Conditions:
     None
   Input:
@@ -575,8 +566,10 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
     Will create all non-existent directories in the path. The FSerrno 
     variable will be changed.
   Description:
-    The FSmkdirpgm function passes a PIC18 ROM path pointer to the
-    mkdirhelper function.
+    Creates a directory as per the path mentioned in the input string on 
+    PIC18 devices.'FSmkdirpgm' creates the directories as per the input
+    string path.This function doesn't move the current working
+    directory setting.
   Remarks:
     This function is for use with PIC18 when passing arugments in ROM
   **************************************************************************/
@@ -588,7 +581,7 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Function:
     int FSrmdirpgm (const rom char * path)
   Summary:
-    Delete a directory with a path in ROM on PIC18
+    Deletes the directory as per the ascii input path (PIC18).
   Conditions:
     None.
   Input:
@@ -602,8 +595,9 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The FSrmdirpgm function passes a PIC18 ROM path pointer to the
-    rmdirhelper function.
+    Deletes the directory as per the ascii input path (PIC18).
+    This function deletes the directory as specified in the path.
+    This function wont delete the current working directory.
   Remarks:
     This function is for use with PIC18 when passing arguments in ROM.
   **************************************************************************/
@@ -615,7 +609,7 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Function:
     int FSrenamepgm(const rom char * fileName, FSFILE * fo)
   Summary:
-    Rename a file named with a ROM string on PIC18
+    Renames the file with the ascii ROM string(PIC18)
   Conditions:
     File opened.
   Input:
@@ -627,9 +621,9 @@ FSFILE * wFSfopen(const unsigned short int * fileName, const char *mode);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The Fsrenamepgm function will copy the rom fileName specified
-    by the user into a RAM array and pass that array into the
-    FSrename function.
+    Renames the file with the ascii ROM string(PIC18).The Fsrenamepgm
+    function will copy the rom fileName specified by the user into a 
+    RAM array and pass that array into the FSrename function.
   Remarks:
     This function is for use with PIC18 when passing arguments in ROM.                       
   *****************************************************************/
@@ -909,7 +903,7 @@ int FSattrib (FSFILE * file, unsigned char attributes);
   Function:
     int FSrename (const rom char * fileName, FSFILE * fo)
   Summary:
-    Change the Ascii name of a file or directory
+    Renames the Ascii name of the file or directory on PIC24/PIC32/dsPIC devices
   Conditions:
     File opened.
   Input:
@@ -921,11 +915,10 @@ int FSattrib (FSFILE * file, unsigned char attributes);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The FSrename function will rename a file.  First, it will
-    search through the current working directory to ensure the
-    specified new filename is not already in use.  If it isn't,
-    the new filename will be written to the file entry of the
-    file pointed to by 'fo.'
+    Renames the Ascii name of the file or directory on PIC24/PIC32/dsPIC devices.
+    First, it will search through the current working directory to ensure the
+    specified new filename is not already in use. If it isn't, the new filename
+    will be written to the file entry of the file pointed to by 'fo.'
   Remarks:
     None                                                        
   ***************************************************************/
@@ -937,7 +930,8 @@ int FSrename (const char * fileName, FSFILE * fo);
   Function:
     int wFSrename (const rom unsigned short int * fileName, FSFILE * fo)
   Summary:
-    Change the name of a file or directory to the UTF16 input fileName
+    Renames the name of the file or directory to the UTF16 input fileName
+    on PIC24/PIC32/dsPIC devices
   Conditions:
     File opened.
   Input:
@@ -949,11 +943,11 @@ int FSrename (const char * fileName, FSFILE * fo);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The wFSrename function will rename a file.  First, it will
-    search through the current working directory to ensure the
-    specified new UTF16 filename is not already in use.  If it isn't,
-    the new filename will be written to the file entry of the
-    file pointed to by 'fo.'
+    Renames the name of the file or directory to the UTF16 input fileName
+    on PIC24/PIC32/dsPIC devices. First, it will search through the current
+    working directory to ensure the specified new UTF16 filename is not
+    already in use.  If it isn't, the new filename will be written to the
+    file entry of the file pointed to by 'fo.'
   Remarks:
     None
   ***************************************************************/
@@ -965,7 +959,7 @@ int wFSrename (const unsigned short int * fileName, FSFILE * fo);
   Function:
     int FSremove (const char * fileName)
   Summary:
-    Delete a Ascii file
+    Deletes the file on PIC24/PIC32/dsPIC device.The 'fileName' is in ascii format.
   Conditions:
     File not opened, file exists
   Input:
@@ -976,11 +970,11 @@ int wFSrename (const unsigned short int * fileName, FSFILE * fo);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The FSremove function will attempt to find the specified file with
-    the FILEfind function.  If the file is found, it will be erased
-    using the FILEerase function.The user can also provide ascii alias name
-    of the ascii long file name as the input to this function to get it erased
-    from the memory.
+    Deletes the file on PIC24/PIC32/dsPIC device.The 'fileName' is in ascii format.
+    The FSremove function will attempt to find the specified file with the FILEfind
+    function.  If the file is found, it will be erased using the FILEerase function.
+    The user can also provide ascii alias name of the ascii long file name as the
+    input to this function to get it erased from the memory.
   Remarks:
     None                                       
   **********************************************************************/
@@ -992,7 +986,7 @@ int FSremove (const char * fileName);
   Function:
     int wFSremove (const unsigned short int * fileName)
   Summary:
-    Delete a UTF16 file
+    Deletes the file on PIC24/PIC32/dsPIC device.The 'fileName' is in UTF16 format.
   Conditions:
     File not opened, file exists
   Input:
@@ -1003,6 +997,7 @@ int FSremove (const char * fileName);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
+    Deletes the file on PIC24/PIC32/dsPIC device.The 'fileName' is in UTF16 format.
     The wFSremove function will attempt to find the specified UTF16 file
     name with the FILEfind function. If the file is found, it will be erased
     using the FILEerase function.
@@ -1019,7 +1014,7 @@ int wFSremove (const unsigned short int * fileName);
   Summary:
     Write data to a file
   Conditions:
-    File opened in WRITE, APPEND, WRITE+, APPEND+, READ+ mode
+    File opened in FS_WRITE, FS_APPEND, FS_WRITE+, FS_APPEND+, FS_READ+ mode
   Input:
     data_to_write -     Pointer to source buffer
     size -              Size of units in bytes
@@ -1056,7 +1051,7 @@ size_t FSfwrite(const void *data_to_write, size_t size, size_t n, FSFILE *stream
   Function:
     int FSchdir (char * path)
   Summary:
-    Change the current working directory as per the path specified in Ascii format
+    Changes the current working directory to the ascii input path(PIC24/PIC32/dsPIC)
   Conditions:
     None
   Input:
@@ -1068,8 +1063,8 @@ size_t FSfwrite(const void *data_to_write, size_t size, size_t n, FSFILE *stream
     The current working directory may be changed. The FSerrno variable will
     be changed.
   Description:
-    The FSchdir function passes a RAM pointer to the path to the
-    chdirhelper function.
+    Changes the current working directory to the ascii input path(PIC24/PIC32/dsPIC).
+    The FSchdir function passes a RAM pointer to the path to the chdirhelper function.
   Remarks:
     None                                            
   **************************************************************************/
@@ -1081,7 +1076,8 @@ int FSchdir (char * path);
   Function:
     int wFSchdir (unsigned short int * path)
   Summary:
-    Change the current working directory as per the path specified in UTF16 format
+    Change the current working directory as per the path specified in
+    UTF16 format (PIC24/PIC32/dsPIC)
   Conditions:
     None
   Input:
@@ -1093,8 +1089,9 @@ int FSchdir (char * path);
     The current working directory may be changed. The FSerrno variable will
     be changed.
   Description:
-    The FSchdir function passes a RAM pointer to the path to the
-    chdirhelper function.
+    Change the current working directory as per the path specified in
+    UTF16 format (PIC24/PIC32/dsPIC).The FSchdir function passes a RAM
+    pointer to the path to the chdirhelper function.
   Remarks:
     None                                            
   **************************************************************************/
@@ -1118,6 +1115,7 @@ int wFSchdir (unsigned short int * path);
   Side Effects:
     The FSerrno variable will be changed
   Description:
+    Get the current working directory path in Ascii format.
     The FSgetcwd function will get the name of the current
     working directory and return it to the user.  The name
     will be copied into the buffer pointed to by 'path,'
@@ -1162,6 +1160,7 @@ char * FSgetcwd (char * path, int numbchars);
   Side Effects:
     The FSerrno variable will be changed
   Description:
+    Get the current working directory path in UTF16 format.
     The FSgetcwd function will get the name of the current
     working directory and return it to the user.  The name
     will be copied into the buffer pointed to by 'path,'
@@ -1196,7 +1195,7 @@ char * wFSgetcwd (unsigned short int * path, int numbchars);
   Function:
     int FSmkdir (char * path)
   Summary:
-    Create a directory as per the Ascii input path
+    Creates a directory as per the ascii input path (PIC24/PIC32/dsPIC)
   Conditions:
     None
   Input:
@@ -1208,8 +1207,8 @@ char * wFSgetcwd (unsigned short int * path, int numbchars);
     Will create all non-existent directories in the path. The FSerrno 
     variable will be changed.
   Description:
-    The FSmkdir function passes a RAM pointer to the path to the
-    mkdirhelper function.
+    Creates a directory as per the ascii input path (PIC24/PIC32/dsPIC).
+    This function doesn't move the current working directory setting.
   Remarks:
     None                                            
   **************************************************************************/
@@ -1221,7 +1220,7 @@ int FSmkdir (char * path);
   Function:
     int wFSmkdir (unsigned short int * path)
   Summary:
-    Create a directory as per the UTF16 input path
+    Creates a directory as per the UTF16 input path (PIC24/PIC32/dsPIC)
   Conditions:
     None
   Input:
@@ -1233,8 +1232,8 @@ int FSmkdir (char * path);
     Will create all non-existent directories in the path. The FSerrno 
     variable will be changed.
   Description:
-    The wFSmkdir function passes a RAM pointer to the path to the
-    mkdirhelper function.
+    Creates a directory as per the UTF16 input path (PIC24/PIC32/dsPIC).
+    This function doesn't move the current working directory setting.
   Remarks:
     None                                            
   **************************************************************************/
@@ -1246,7 +1245,7 @@ int wFSmkdir (unsigned short int * path);
   Function:
     int FSrmdir (char * path)
   Summary:
-    Delete a directory as per the Ascii input path
+    Deletes the directory as per the ascii input path (PIC24/PIC32/dsPIC).
   Conditions:
     None
   Input:
@@ -1260,8 +1259,8 @@ int wFSmkdir (unsigned short int * path);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The FSrmdir function passes a RAM pointer to the path to the
-    rmdirhelper function.
+    Deletes the directory as per the ascii input path (PIC24/PIC32/dsPIC).
+    This function wont delete the current working directory.
   Remarks:
     None.
   **************************************************************************/
@@ -1273,7 +1272,7 @@ int FSrmdir (char * path, unsigned char rmsubdirs);
   Function:
     int wFSrmdir (unsigned short int * path, unsigned char rmsubdirs)
   Summary:
-    Delete a directory as per the UTF16 input path
+    Deletes the directory as per the UTF16 input path (PIC24/PIC32/dsPIC).
   Conditions:
     None
   Input:
@@ -1287,8 +1286,8 @@ int FSrmdir (char * path, unsigned char rmsubdirs);
   Side Effects:
     The FSerrno variable will be changed.
   Description:
-    The wFSrmdir function passes a RAM pointer to the path to the
-    rmdirhelper function.
+    Deletes the directory as per the UTF16 input path (PIC24/PIC32/dsPIC).
+    This function wont delete the current working directory.
   Remarks:
     None.
   **************************************************************************/
@@ -1339,7 +1338,7 @@ int SetClockVars (unsigned int year, unsigned char month, unsigned char day, uns
   Function:
     int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
   Summary:
-    Initial search function for the input Ascii fileName
+    Initial search function for the input Ascii fileName on PIC24/PIC32/dsPIC devices.
   Conditions:
     None
   Input:
@@ -1365,6 +1364,7 @@ int SetClockVars (unsigned int year, unsigned char month, unsigned char day, uns
     operations.It is the responsibility of the application to read the "utf16LFNfound"
     before it is lost.The FSerrno variable will be changed.
   Description:
+    Initial search function for the input Ascii fileName on PIC24/PIC32/dsPIC devices.
     The FindFirst function will search for a file based on parameters passed in
     by the user.  This function will use the FILEfind function to parse through
     the current working directory searching for entries that match the specified
@@ -1386,7 +1386,7 @@ int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec);
   Function:
     int wFindFirst (const unsigned short int * fileName, unsigned int attr, SearchRec * rec)
   Summary:
-    Initial search function for the input UTF16 fileName
+    Initial search function for the 'fileName' in UTF16 format on PIC24/PIC32/dsPIC devices.
   Conditions:
     None
   Input:
@@ -1412,6 +1412,7 @@ int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec);
     operations.It is the responsibility of the application to read the "utf16LFNfound"
     before it is lost.The FSerrno variable will be changed.
   Description:
+    Initial search function for the 'fileName' in UTF16 format on PIC24/PIC32/dsPIC devices.
     The wFindFirst function will search for a file based on parameters passed in
     by the user.  This function will use the FILEfind function to parse through
     the current working directory searching for entries that match the specified
@@ -1539,12 +1540,12 @@ int FindNext (SearchRec * rec);
                                               mode) does not exist on the device. 
                  - CE_BADCACHEREAD –          A read from the device failed.
                  - CE_ERASE_FAIL –            The existing file could not be erased (when opening 
-                                              a file in WRITE mode). 
+                                              a file in FS_WRITE mode). 
                  - CE_DIR_FULL –              The directory is full. 
                  - CE_DISK_FULL–              The data memory section is full. 
                  - CE_WRITE_ERROR –           A write to the device failed. 
                  - CE_SEEK_ERROR –            The current position in the file could not be set to 
-                                              the end (when the file was opened in APPEND mode).
+                                              the end (when the file was opened in FS_APPEND mode).
     FSfclose     - 
                  - CE_GOOD –                  No Error 
                  - CE_WRITE_ERROR –           The existing data in the data buffer or the new file
@@ -1831,5 +1832,33 @@ int FSCreateMBR (unsigned long firstSector, unsigned long numSectors);
 void FSGetDiskProperties(FS_DISK_PROPERTIES* properties);
 #endif
 
+/*************************************************************************
+  Function:
+    BYTE FILEget_next_cluster(FSFILE *fo, DWORD n)
+  Summary:
+    Step through a chain of clusters
+  Conditions:
+    None
+  Input:
+    fo - The file to get the next cluster of
+    n -  Number of links in the FAT cluster chain to jump through
+  Return Values:
+    CE_GOOD - Operation successful
+    CE_BAD_SECTOR_READ - A bad read occured of a sector
+    CE_INVALID_CLUSTER - Invalid cluster value \> maxcls
+    CE_FAT_EOF - Fat attempt to read beyond EOF
+  Side Effects:
+    None
+  Description:
+    This function will load 'n' proximate clusters for a file from
+    the FAT on the device.  It will stop checking for clusters if the
+    ReadFAT function returns an error, if it reaches the last cluster in
+    a file, or if the device tries to read beyond the last cluster used
+    by the device.
+  Remarks:
+    None
+  *************************************************************************/
+
+BYTE FILEget_next_cluster(FSFILE *fo, DWORD n);
 
 #endif

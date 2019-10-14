@@ -45,8 +45,15 @@
  * 05/20/11     Added GetCirclePoint() commonly used in Widgets.
  * 07/05/11     Fixed GetTextHeight() limitation of 127 pixels. Limitation
  *              is now 256 pixels. 
- * 10/07/11     Modified GetImageHeight() and GetImageWidth() to support RLE
- *              compressed images.
+ * 01/05/12     - Removed the _font global pointer and replaced with currentFont
+ *                structure to make faster OutChar() rendering. 
+ *              - Removed _fontFirstChar, _fontLastChar and _fontHeight globals.
+ *                These are now included in currentFont.
+ *              - modified OutChar(), GetTextWidth() and GetTextHeight() to 
+ *                use of new currentFont structure.
+ *              - break up SetFont(), OutChar() and GetTextWidth() to allow
+ *                versatility of implementing text rendering functions in drivers.
+ *              - added extended glyph support and font anti-aliasing
  *           
  *****************************************************************************/
 #include "HardwareProfile.h"              // needed to provide values for GetMaxX() and GetMaxY() macros
@@ -94,23 +101,30 @@ SHORT   _cursorX;
 // Current cursor y-coordinates
 SHORT   _cursorY;
 
-// Pointer to the current font
-void    *_font;
+// information on currently set font
+GFX_FONT_CURRENT currentFont;
 
-#ifdef USE_PALETTE
-void    *_palette;
+
+#ifdef USE_ANTIALIASED_FONTS
+
+    BYTE    _antialiastype;
+
+	#ifdef USE_PALETTE
+
+		#error "Antialiasing can not be used when Palette is enabled"
+
+	#endif
+
 #endif
 
-// First and last characters in the font
-WORD    _fontFirstChar; // First character in the font table.
-WORD    _fontLastChar;  // Last character in the font table.
+#ifdef USE_PALETTE
 
-// Installed font height
-SHORT   _fontHeight;
+    void    *_palette;
+
+#endif
 
 // bevel drawing type (0 = full bevel, 0xF0 - top bevel only, 0x0F - bottom bevel only
 BYTE _bevelDrawType; 
-
 
 #define COSINETABLEENTRIES	90
 // Cosine table used to calculate angles when rendering circular objects and  arcs  
@@ -1430,24 +1444,20 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 *
 * Overview: draws line polygon
 *
-* Note: none
+* Note: This function has a weak attribute, the driver layer
+*       may implement this same function to support driver layer
+*       features.
 *
 ********************************************************************/
 WORD __attribute__((weak)) DrawPoly(SHORT numPoints, SHORT *polyPoints)
 {
-    #ifndef USE_NONBLOCKING_CONFIG
+#ifndef USE_NONBLOCKING_CONFIG
 
     SHORT   counter;
     SHORT   sx, sy, ex, ey;
 
-        #ifndef USE_NONBLOCKING_CONFIG
     while(IsDeviceBusy() != 0) Nop();
 
-    /* Ready */
-        #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-        #endif
     sx = *polyPoints++;
     sy = *polyPoints++;
     for(counter = 0; counter < numPoints - 1; counter++)
@@ -1459,7 +1469,7 @@ WORD __attribute__((weak)) DrawPoly(SHORT numPoints, SHORT *polyPoints)
         sy = ey;
     }
 
-    #else
+#else
 
     typedef enum
     {
@@ -1505,12 +1515,78 @@ WORD __attribute__((weak)) DrawPoly(SHORT numPoints, SHORT *polyPoints)
                 return (1);
         }
     }
-    #endif
+#endif
     return (1);
 }
 
 /*********************************************************************
-* Function: void SetFont(void* font)
+* Function: void SetFontFlash(void* pFont)
+*
+* PreCondition: none
+*
+* Input: pFont - pointer to the font image in FLASH.
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Sets the current font located in FLASH.
+*
+* Note: This function has a weak attribute, the driver layer
+*       may implement this same function to support driver layer
+*       features.
+*
+********************************************************************/
+void __attribute__((weak)) SetFontFlash(void *pFont)
+{
+#if defined (USE_FONT_FLASH) || defined (USE_FONT_RAM)
+    FONT_HEADER *pHeader;
+
+#if defined (USE_FONT_FLASH) 
+    pHeader = (FONT_HEADER *) ((FONT_FLASH *)pFont)->address;
+#endif
+#if defined (USE_FONT_RAM)
+    pHeader = (FONT_HEADER *) ((FONT_RAM *)pFont)->address;
+#endif
+    memcpy(&(currentFont.fontHeader), pHeader, sizeof(FONT_HEADER));
+    currentFont.pFont = pFont;
+#endif
+}
+
+/*********************************************************************
+* Function: void SetFontExternal(void* pFont)
+*
+* PreCondition: none
+*
+* Input: pFont - pointer to the font image located in External Memory.
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Sets the current font located in External Memory.
+*           When using fonts in external memory, the font glyph
+*           buffer size defined by EXTERNAL_FONT_BUFFER_SIZE must
+*           be big enough for the character glyphs.
+*
+* Note: This function has a weak attribute, the driver layer
+*       may implement this same function to support driver layer
+*       features.
+*
+********************************************************************/
+void __attribute__((weak)) SetFontExternal(void *pFont)
+{
+#if defined (USE_FONT_EXTERNAL)
+    FONT_HEADER *pHeader;
+
+    pHeader = &(currentFont.fontHeader);
+    ExternalMemoryCallback(pFont, 0, sizeof(FONT_HEADER), pHeader);
+    currentFont.pFont = pFont;
+#endif
+}
+
+/*********************************************************************
+* Function: void SetFont(void* pFont)
 *
 * PreCondition: none
 *
@@ -1522,42 +1598,480 @@ WORD __attribute__((weak)) DrawPoly(SHORT numPoints, SHORT *polyPoints)
 *
 * Overview: defines current font
 *
-* Note: none
+* Note: This function has a weak attribute, the driver layer
+*       may implement this same function to support driver layer
+*       features.
 *
 ********************************************************************/
-void __attribute__((weak)) SetFont(void *font)
+void __attribute__((weak)) SetFont(void *pFont)
 {
-    FONT_HEADER *pHeader;
-
-        #ifdef USE_FONT_EXTERNAL
-    FONT_HEADER header;
-        #endif
-    _font = font;
-    switch(*((SHORT *)font))
+    switch(*((SHORT *)pFont))
     {
-                #ifdef USE_FONT_FLASH
-
         case FLASH:
-            pHeader = (FONT_HEADER *) ((FONT_FLASH *)font)->address;
+        case RAM:
+            SetFontFlash(pFont);
             break;
-
-				#endif // USE_FONT_FLASH
-                #ifdef USE_FONT_EXTERNAL
 				
         case EXTERNAL:
-            pHeader = &header;
-            ExternalMemoryCallback(font, 0, sizeof(FONT_HEADER), pHeader);
+            SetFontExternal(pFont);
             break;
 
-				#endif // USE_FONT_EXTERNAL
-
         default:
-            return;
+            break;
+    }
+}
+
+#ifdef USE_ANTIALIASED_FONTS
+
+static GFX_COLOR   _fgcolor100;
+static GFX_COLOR   _fgcolor25;
+static GFX_COLOR   _fgcolor75;
+static GFX_COLOR   _bgcolor100;
+static GFX_COLOR   _bgcolor25;
+static GFX_COLOR   _bgcolor75;
+
+/*********************************************************************
+* Function: static void __attribute__((always_inline)) calculateColors(void)
+*
+* PreCondition: _bgcolor100 and _fgcolor100 must be set
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: _bgcolor25, _bgcolor75, _fgcolor25 and _fgcolor75 will be calculated
+*
+* Overview: calculates mid values of colors
+*
+* Note: Internal to this file
+*
+********************************************************************/
+static void __attribute__((always_inline)) calculateColors(void)
+{
+    GFX_COLOR   _fgcolor50;
+    GFX_COLOR   _bgcolor50;
+    
+#if (COLOR_DEPTH == 16)
+
+    _fgcolor50  = (_fgcolor100 &  0b1111011111011110u) >> 1;
+    _fgcolor25  = (_fgcolor50  &  0b1111011111011110u) >> 1;
+    _fgcolor75  = _fgcolor50   +  _fgcolor25;
+    
+    _bgcolor50  = (_bgcolor100 &  0b1111011111011110u) >> 1;
+    _bgcolor25  = (_bgcolor50  &  0b1111011111011110u) >> 1;
+    _bgcolor75  = _bgcolor50   +  _bgcolor25;
+
+#elif (COLOR_DEPTH == 24)
+    
+    _fgcolor50  = (_fgcolor100 &  0x00FEFEFEul) >> 1;
+    _fgcolor25  = (_fgcolor50  &  0x00FEFEFEul) >> 1;
+    _fgcolor75  = _fgcolor50   +  _fgcolor25;
+
+    _bgcolor50  = (_bgcolor100 &  0x00FEFEFEul) >> 1;
+    _bgcolor25  = (_bgcolor50  &  0x00FEFEFEul) >> 1;
+    _bgcolor75  = _bgcolor50   +  _bgcolor25;
+
+#elif ((COLOR_DEPTH == 8) || (COLOR_DEPTH == 4))
+        
+    _fgcolor50  = _fgcolor100 >> 1;
+    _fgcolor25  = _fgcolor50  >> 1;
+    _fgcolor75  = _fgcolor50  +  _fgcolor25;
+
+    _bgcolor50  = _bgcolor100 >> 1;
+    _bgcolor25  = _bgcolor50  >> 1;
+    _bgcolor75  = _bgcolor50  +  _bgcolor25;
+
+    #warning "Antialiasing at 8BPP and 4BPP is supported only for Grayscale mode"
+        
+#else
+    
+    #error "Anit-aliasing is currently supported only in 8BPP Grayscale and 16BPP, 24BPP color modes"
+    
+#endif
+    _fgcolor25 += _bgcolor75;
+    _fgcolor75 += _bgcolor25;
+}
+
+#endif //#ifdef USE_ANTIALIASED_FONTS
+
+/*********************************************************************
+* Function:  void OutCharGetInfoFlash (XCHAR ch, OUTCHAR_PARAM *pParam)
+*
+* PreCondition: none
+*
+* Input: ch - character code
+*        pParam - pointer to character information structure.
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Gathers the parameters for the specified character of the 
+*           currently set font from flash memory. This is a step performed
+*           before the character is rendered. 
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+void __attribute__((weak)) OutCharGetInfoFlash (XCHAR ch, OUTCHAR_PARAM *pParam)
+{
+#ifdef USE_FONT_FLASH
+
+    GLYPH_ENTRY_EXTENDED    *pChTableExtended;
+    GLYPH_ENTRY             *pChTable;
+
+    // set color depth of font,
+    // based on 2^bpp where bpp is the color depth setting in the FONT_HEADER
+    pParam->bpp = 1 << currentFont.fontHeader.bpp;
+
+    if(currentFont.fontHeader.extendedGlyphEntry)
+    {
+        pChTableExtended = (GLYPH_ENTRY_EXTENDED *) (((FONT_FLASH *)currentFont.pFont)->address + sizeof(FONT_HEADER)) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar);
+        pParam->pChImage = (BYTE *) (((FONT_FLASH *)currentFont.pFont)->address + pChTableExtended->offset);
+        pParam->chGlyphWidth = pChTableExtended->glyphWidth;
+        pParam->xWidthAdjust = pChTableExtended->glyphWidth - pChTableExtended->cursorAdvance;
+        pParam->xAdjust = pChTableExtended->xAdjust;
+        pParam->yAdjust = pChTableExtended->yAdjust;
+                    
+        if(pParam->yAdjust > 0)
+        {
+            pParam->heightOvershoot = pParam->yAdjust;
+        }
+    }
+    else
+    {
+        pChTable = (GLYPH_ENTRY *) (((FONT_FLASH *)currentFont.pFont)->address + sizeof(FONT_HEADER)) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar);
+        pParam->pChImage = (BYTE *) (((FONT_FLASH *)currentFont.pFont)->address + ((DWORD)(pChTable->offsetMSB) << 8) + pChTable->offsetLSB);
+        pParam->chGlyphWidth = pChTable->width;
     }
 
-    _fontFirstChar = pHeader->firstChar;
-    _fontLastChar = pHeader->lastChar;
-    _fontHeight = pHeader->height;
+#endif // #ifdef USE_FONT_FLASH
+    
+}
+
+/*********************************************************************
+* Function:  void OutCharGetInfoExternal (XCHAR ch, OUTCHAR_PARAM *pParam)
+*
+* PreCondition: none
+*
+* Input: ch - character code
+*        pParam - pointer to character information structure. 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Gathers the parameters for the specified character of the 
+*           currently set font from external memory. This is a step performed
+*           before the character is rendered. 
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+void __attribute__((weak)) OutCharGetInfoExternal(XCHAR ch, OUTCHAR_PARAM *pParam)
+{
+#ifdef USE_FONT_EXTERNAL
+
+    GLYPH_ENTRY             chTable;
+    GLYPH_ENTRY_EXTENDED    chTableExtended;
+    WORD                    imageSize;
+    DWORD_VAL               glyphOffset;
+
+    // set color depth of font,
+    // based on 2^bpp where bpp is the color depth setting in the FONT_HEADER
+    pParam->bpp = 1 << currentFont.fontHeader.bpp;
+       
+    if(currentFont.fontHeader.extendedGlyphEntry)
+    {
+        ExternalMemoryCallback
+        (
+            currentFont.pFont,
+            sizeof(FONT_HEADER) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar) * sizeof(GLYPH_ENTRY_EXTENDED),
+            sizeof(GLYPH_ENTRY_EXTENDED),
+            &chTableExtended
+        );
+    
+        pParam->chGlyphWidth = chTableExtended.glyphWidth;
+        pParam->xWidthAdjust = chTableExtended.glyphWidth - chTableExtended.cursorAdvance;
+        pParam->xAdjust = chTableExtended.xAdjust;
+        pParam->yAdjust = chTableExtended.yAdjust;
+    
+        if(pParam->yAdjust > 0)
+        {
+            pParam->heightOvershoot = pParam->yAdjust;
+        }
+                    
+    }
+    else
+    {
+        // get glyph entry
+        ExternalMemoryCallback
+        (
+            currentFont.pFont,
+            sizeof(FONT_HEADER) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar) * sizeof(GLYPH_ENTRY),
+            sizeof(GLYPH_ENTRY),
+            &chTable
+        );
+        pParam->chGlyphWidth = chTable.width;
+    }
+
+    // width of glyph in bytes
+    imageSize = 0;
+    pParam->chEffectiveGlyphWidth = pParam->chGlyphWidth * pParam->bpp;
+    if(pParam->chEffectiveGlyphWidth & 0x0007)
+        imageSize = 1;
+    imageSize += (pParam->chEffectiveGlyphWidth >> 3);
+
+    // glyph image size
+    imageSize *= currentFont.fontHeader.height;
+
+    if(currentFont.fontHeader.extendedGlyphEntry)
+    {
+        glyphOffset.Val = chTableExtended.offset;
+    }
+    else
+    {
+        // get glyph image
+        glyphOffset.w[1] = (chTable.offsetMSB >> 8);
+        glyphOffset.w[0] = (chTable.offsetMSB << 8) + (chTable.offsetLSB);
+    }
+            
+    ExternalMemoryCallback(currentFont.pFont, glyphOffset.Val, imageSize, &(pParam->chImage));
+    pParam->pChImage = (BYTE *) &(pParam->chImage);
+
+#endif //#ifdef USE_FONT_EXTERNAL
+}
+
+/*********************************************************************
+* Function:  void OutCharRender(XCHAR ch, OUTCHAR_PARAM *pParam)
+*
+* PreCondition: none
+*
+* Input: ch - character code
+*        pParam - pointer to character information structure. 
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Performs the actual rendering of the character using PutPixel().
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+WORD __attribute__((weak)) OutCharRender(XCHAR ch, OUTCHAR_PARAM *pParam)
+{
+    BYTE        temp = 0;
+    BYTE        mask;
+    BYTE        restoremask;
+    SHORT       xCnt, yCnt, x = 0, y;
+#ifdef USE_ANTIALIASED_FONTS
+    BYTE        val, shift;
+    GFX_COLOR   bgcolor;
+#endif
+    
+#ifdef USE_ANTIALIASED_FONTS
+    if(pParam->bpp == 1)
+    {
+        restoremask = 0x01;
+    }
+    else
+    {
+        if(pParam->bpp == 2)
+        {
+            restoremask = 0x03;
+        }
+        else
+        {
+            return -1; // BPP > 2 are not yet supported
+        }
+        
+        bgcolor = GetPixel(GetX(), GetY() + (currentFont.fontHeader.height >> 1));
+        
+        if((_fgcolor100 != GetColor()) || (_bgcolor100 != bgcolor))
+        {
+            _fgcolor100 = GetColor();
+            _bgcolor100 = bgcolor;
+            calculateColors();
+        }
+    }
+#else
+    restoremask = 0x01;
+#endif
+    
+    if(_fontOrientation == ORIENT_HOR)
+    {
+        y = GetY() + pParam->yAdjust;
+        for(yCnt = 0; yCnt < currentFont.fontHeader.height + pParam->heightOvershoot; yCnt++)
+        {
+            x = GetX() + pParam->xAdjust;
+            mask = 0;
+
+#ifdef USE_ANTIALIASED_FONTS
+            shift = 0;
+#endif
+
+            for(xCnt = 0; xCnt < pParam->chGlyphWidth; xCnt++)
+            {
+                if(mask == 0)
+                {
+                    temp = *(pParam->pChImage)++;
+                    mask = restoremask;
+
+#ifdef USE_ANTIALIASED_FONTS
+                    shift = 0;
+#endif
+                }
+
+#ifdef USE_ANTIALIASED_FONTS
+                if(pParam->bpp == 1)                
+                {
+                    if(temp & mask)
+                    {
+                        PutPixel(x, y);
+                    }
+                }
+                else
+                {
+                    val = (temp & mask) >> shift;
+                    if(val)
+                    {
+                        if(GFX_Font_GetAntiAliasType() == ANTIALIAS_TRANSLUCENT)
+                        {
+                            bgcolor = GetPixel(x, y);
+                            if(_bgcolor100 != bgcolor)
+                            {
+                                _bgcolor100 = bgcolor;
+                                calculateColors();
+                            }
+                        }
+
+                        switch(val)
+                        {
+                            case 1:     SetColor(_fgcolor25);
+                                        break;
+                                        
+                            case 2:     SetColor(_fgcolor75);
+                                        break;
+                                        
+                            case 3:     SetColor(_fgcolor100);
+                        }
+                        
+                        PutPixel(x, y);
+                    }
+                }
+
+                mask  <<=  pParam->bpp;
+                shift  +=  pParam->bpp;
+#else
+                if(temp & mask)
+                {
+                    PutPixel(x, y);
+                }
+                
+                mask <<= 1;
+#endif
+                x++;
+            }
+            y++;
+        }
+
+        // move cursor
+        _cursorX = x - pParam->xAdjust - pParam->xWidthAdjust;
+    }
+    else    // If extended glyph is used, then vertical alignment may not be rendered properly and hence users must position the texts properly
+    {
+        y = GetX() + pParam->xAdjust;
+        for(yCnt = 0; yCnt < currentFont.fontHeader.height + pParam->heightOvershoot; yCnt++)
+        {
+            x = GetY() + pParam->yAdjust;
+            mask = 0; 
+
+#ifdef USE_ANTIALIASED_FONTS
+            shift = 0;
+#endif
+
+            for(xCnt = 0; xCnt < pParam->chGlyphWidth; xCnt++)
+            {
+                if(mask == 0)
+                {
+                    temp = *(pParam->pChImage)++;
+                    mask = restoremask; 
+
+#ifdef USE_ANTIALIASED_FONTS
+                    shift = 0;
+#endif
+                }
+
+#ifdef USE_ANTIALIASED_FONTS
+                if(pParam->bpp == 1)                
+                {
+                    if(temp & mask)
+                    {
+                        PutPixel(y, x);
+                    }
+                }
+                else
+                {
+                    val = (temp & mask) >> shift;
+                    if(val)
+                    {
+                        if(GFX_Font_GetAntiAliasType() == ANTIALIAS_TRANSLUCENT)
+                        {
+                            bgcolor = GetPixel(x, y);
+                            if(_bgcolor100 != bgcolor)
+                            {
+                                _bgcolor100 = bgcolor;
+                                calculateColors();
+                            }
+                        }
+                        switch(val)
+                        {
+                            case 1: SetColor(_fgcolor25);
+                                    break;
+                                        
+                            case 2: SetColor(_fgcolor75);
+                                    break;
+                                        
+                            case 3: SetColor(_fgcolor100);
+                        }
+                        PutPixel(y, x);
+                    }
+                }
+
+                mask  <<=  pParam->bpp;
+                shift  +=  pParam->bpp;
+#else
+                if(temp & mask)
+                {
+                    PutPixel(y, x);
+                }
+                mask  <<=  1;
+#endif
+                x--;
+            }
+            y++;
+        }
+
+        // move cursor
+        _cursorY = x - pParam->xAdjust;
+    }
+
+    // restore color
+#ifdef USE_ANTIALIASED_FONTS
+    if(pParam->bpp > 1)
+    {
+        SetColor(_fgcolor100);
+    }
+#endif
+    return (1);
+
 }
 
 /*********************************************************************
@@ -1582,147 +2096,54 @@ void __attribute__((weak)) SetFont(void *font)
 ********************************************************************/
 WORD __attribute__((weak)) OutChar(XCHAR ch)
 {
-   		#ifdef USE_FONT_FLASH	
-    GLYPH_ENTRY *pChTable = NULL;
-    	#endif
-    BYTE        *pChImage = NULL;
+    static OUTCHAR_PARAM OutCharParam;
 
-        #ifdef USE_FONT_EXTERNAL
-    GLYPH_ENTRY chTable;
-    BYTE        chImage[EXTERNAL_FONT_BUFFER_SIZE];
-    WORD        imageSize;
-    DWORD_VAL   glyphOffset;
-        #endif
-    SHORT       chWidth = 0;
-    SHORT       xCnt, yCnt, x = 0, y;
-    BYTE        temp = 0, mask;
+    // initialize variables
+#ifdef USE_FONT_FLASH	
+    OutCharParam.pChTable = NULL;
+    OutCharParam.pChTableExtended = NULL;
+#endif
+#ifdef USE_FONT_EXTERNAL	
+    OutCharParam.pChImage = NULL;
+#endif
+    OutCharParam.xAdjust = 0;
+    OutCharParam.yAdjust = 0;
+    OutCharParam.xWidthAdjust = 0;
+    OutCharParam.heightOvershoot = 0;
 
-        #ifndef USE_NONBLOCKING_CONFIG
+    // check for error conditions (a return value of 0xFFFF means error)
+    if((UXCHAR)ch < (UXCHAR)currentFont.fontHeader.firstChar)
+        return (-1);
+    if((UXCHAR)ch > (UXCHAR)currentFont.fontHeader.lastChar)
+        return (-1);
+#ifndef USE_ANTIALIASED_FONTS
+    if(currentFont.fontHeader.bpp > 1)
+        return (-1);
+#endif
+
+#ifndef USE_NONBLOCKING_CONFIG
     while(IsDeviceBusy() != 0) Nop();
-
-    /* Ready */
-        #else
+#else
     if(IsDeviceBusy() != 0)
         return (0);
-        #endif
-    if((XCHAR)ch < (XCHAR)_fontFirstChar)
-        return (-1);
-    if((XCHAR)ch > (XCHAR)_fontLastChar)
-        return (-1);
+#endif
 
-    switch(*((SHORT *)_font))
+    switch(*((SHORT *)currentFont.pFont))
     {
-                #ifdef USE_FONT_FLASH
 
         case FLASH:
-            pChTable = (GLYPH_ENTRY *) (((FONT_FLASH *)_font)->address + sizeof(FONT_HEADER)) + ((XCHAR)ch - (XCHAR)_fontFirstChar);
-
-            pChImage = (BYTE *) (((FONT_FLASH *)_font)->address + ((DWORD)(pChTable->offsetMSB) << 8) + pChTable->offsetLSB);
-
-            chWidth = pChTable->width;
-
+            OutCharGetInfoFlash(ch, &OutCharParam); 
             break;
-                #endif
-                #ifdef USE_FONT_EXTERNAL
-			
+
         case EXTERNAL:
-
-            // get glyph entry
-            ExternalMemoryCallback
-            (
-                _font,
-                sizeof(FONT_HEADER) + ((XCHAR)ch - (XCHAR)_fontFirstChar) * sizeof(GLYPH_ENTRY),
-                sizeof(GLYPH_ENTRY),
-                &chTable
-            );
-
-            chWidth = chTable.width;
-
-            // width of glyph in bytes
-            imageSize = 0;
-            if(chWidth & 0x0007)
-                imageSize = 1;
-            imageSize += (chWidth >> 3);
-
-            // glyph image size
-            imageSize *= _fontHeight;
-
-            // get glyph image
-            glyphOffset.w[1] = (chTable.offsetMSB >> 8);
-            glyphOffset.w[0] = (chTable.offsetMSB << 8) + (chTable.offsetLSB);
-
-            ExternalMemoryCallback(_font, glyphOffset.Val, imageSize, &chImage);
-            pChImage = (BYTE *) &chImage;
-
+            OutCharGetInfoExternal(ch, &OutCharParam);
             break;
-                #endif
-
+        
         default:
-            break;
-    }
-
-    if(_fontOrientation == ORIENT_HOR)
-    {
-        y = GetY();
-        for(yCnt = 0; yCnt < _fontHeight; yCnt++)
-        {
-            x = GetX();
-            mask = 0;
-            for(xCnt = 0; xCnt < chWidth; xCnt++)
-            {
-                if(mask == 0)
-                {
-                    temp = *pChImage++;
-                    mask = 0x01;
-                }
-
-                if(temp & mask)
-                {
-                    PutPixel(x, y);
-                }
-
-                x++;
-                mask <<= 1;
-            }
-
-            y++;
-        }
-
-        // move cursor
-        _cursorX = x;
-    }
-    else
-    {
-        y = GetX();
-        for(yCnt = 0; yCnt < _fontHeight; yCnt++)
-        {
-            x = GetY();
-            mask = 0; 
-            for(xCnt = 0; xCnt < chWidth; xCnt++)
-            {
-                if(mask == 0)
-                {
-                    temp = *pChImage++;
-                    mask = 0x01; 
-                }
-
-                if(temp & mask)
-                {
-                    PutPixel(y, x);
-                }
-
-                x--;
-                mask <<= 1;
-            }
-
-            y++;
-        }
-
-        // move cursor
-        _cursorY = x;
-    }
-
-    return (1);
+            return 1;
+    }    
+    
+    return (OutCharRender(ch, &OutCharParam));
 }
 
 /*********************************************************************
@@ -1746,7 +2167,7 @@ WORD __attribute__((weak)) OutText(XCHAR *textString)
     #ifndef USE_NONBLOCKING_CONFIG
 
     XCHAR   ch;
-    while((XCHAR)15 < (XCHAR)(ch = *textString++))
+    while((UXCHAR)15 < (UXCHAR)(ch = *textString++))
         while(OutChar(ch) == 0);
     return (1);
 
@@ -1755,7 +2176,7 @@ WORD __attribute__((weak)) OutText(XCHAR *textString)
     XCHAR       ch;
     static WORD counter = 0;
 
-    while((XCHAR)(ch = *(textString + counter)) > (XCHAR)15)
+    while((UXCHAR)(ch = *(textString + counter)) > (UXCHAR)15)
     {
         if(OutChar(ch) == 0)
             return (0);
@@ -1814,12 +2235,217 @@ WORD __attribute__((weak)) OutTextXY(SHORT x, SHORT y, XCHAR *textString)
 }
 
 /*********************************************************************
-* Function: SHORT GetTextWidth(XCHAR* textString, void* font)
+* Function: SHORT GetTextWidthRam(XCHAR* textString, void* pFont)
 *
 * PreCondition: none
 *
 * Input: textString - pointer to the text string,
-*        font - pointer to the font
+*        pFont - pointer to the font in RAM
+*
+* Output: text width in pixels
+*
+* Side Effects: none
+*
+* Overview: returns text width for the font
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+SHORT __attribute__((weak)) GetTextWidthRam(XCHAR* textString, void* pFont)
+{
+#if defined (USE_FONT_RAM)
+    GLYPH_ENTRY *pChTable = NULL;
+    GLYPH_ENTRY_EXTENDED *pChTableExtended = NULL;
+    FONT_HEADER *pHeader;
+
+    SHORT       textWidth;
+    XCHAR       ch;
+    XCHAR       fontFirstChar;
+    XCHAR       fontLastChar;
+
+    pHeader = (FONT_HEADER *) ((FONT_RAM *)pFont)->address;
+    fontFirstChar = pHeader->firstChar;
+    fontLastChar = pHeader->lastChar;
+    if(pHeader->extendedGlyphEntry)
+    {
+        pChTableExtended = (GLYPH_ENTRY_EXTENDED *) (pHeader + 1);
+    }
+    else
+    {
+        pChTable = (GLYPH_ENTRY *) (pHeader + 1);
+    }    
+    textWidth = 0;
+    while((UXCHAR)15 < (UXCHAR)(ch = *textString++))
+    {
+        if((UXCHAR)ch < (UXCHAR)fontFirstChar)
+            continue;
+        if((UXCHAR)ch > (UXCHAR)fontLastChar)
+            continue;
+        if(pHeader->extendedGlyphEntry)
+        {
+            textWidth += (pChTableExtended + ((UXCHAR)ch - (UXCHAR)fontFirstChar))->cursorAdvance;
+        }
+        else
+        {
+            textWidth += (pChTable + ((UXCHAR)ch - (UXCHAR)fontFirstChar))->width;
+        }
+    }
+    return textWidth;
+
+#else
+    return 0;
+#endif //#if defined (USE_FONT_RAM) 
+}
+
+/*********************************************************************
+* Function: SHORT GetTextWidthFlash(XCHAR* textString, void* pFont)
+*
+* PreCondition: none
+*
+* Input: textString - pointer to the text string,
+*        pFont - pointer to the font in flash memory
+*
+* Output: text width in pixels
+*
+* Side Effects: none
+*
+* Overview: returns text width for the font
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+SHORT __attribute__((weak)) GetTextWidthFlash(XCHAR* textString, void* pFont)
+{
+#if defined (USE_FONT_FLASH) 
+    GLYPH_ENTRY *pChTable = NULL;
+    GLYPH_ENTRY_EXTENDED *pChTableExtended = NULL;
+    FONT_HEADER *pHeader;
+
+    SHORT       textWidth;
+    XCHAR       ch;
+    XCHAR       fontFirstChar;
+    XCHAR       fontLastChar;
+
+    pHeader = (FONT_HEADER *) ((FONT_FLASH *)pFont)->address;
+    fontFirstChar = pHeader->firstChar;
+    fontLastChar = pHeader->lastChar;
+    if(pHeader->extendedGlyphEntry)
+    {
+        pChTableExtended = (GLYPH_ENTRY_EXTENDED *) (pHeader + 1);
+    }
+    else
+    {
+        pChTable = (GLYPH_ENTRY *) (pHeader + 1);
+    }    
+    textWidth = 0;
+    while((UXCHAR)15 < (UXCHAR)(ch = *textString++))
+    {
+        if((UXCHAR)ch < (UXCHAR)fontFirstChar)
+            continue;
+        if((UXCHAR)ch > (UXCHAR)fontLastChar)
+            continue;
+        if(pHeader->extendedGlyphEntry)
+        {
+            textWidth += (pChTableExtended + ((UXCHAR)ch - (UXCHAR)fontFirstChar))->cursorAdvance;
+        }
+        else
+        {
+            textWidth += (pChTable + ((UXCHAR)ch - (UXCHAR)fontFirstChar))->width;
+        }
+    }
+
+    return (textWidth);
+
+#else
+    return 0;
+#endif //#if defined (USE_FONT_FLASH) 
+
+}
+
+/*********************************************************************
+* Function: SHORT GetTextWidthExternal(XCHAR* textString, void* pFont)
+*
+* PreCondition: none
+*
+* Input: textString - pointer to the text string,
+*        pFont - pointer to the font in external memory
+*
+* Output: text width in pixels
+*
+* Side Effects: none
+*
+* Overview: returns text width for the font
+*
+* Note: Application should not call this function. This function is for 
+*       versatility of implementing hardware accelerated text rendering
+*       only.
+*
+********************************************************************/
+SHORT __attribute__((weak)) GetTextWidthExternal(XCHAR* textString, void* pFont)
+{
+
+#ifdef USE_FONT_EXTERNAL
+    GLYPH_ENTRY chTable;
+    GLYPH_ENTRY_EXTENDED chTableExtended;
+    FONT_HEADER header;
+
+    SHORT       textWidth;
+    XCHAR       ch;
+    XCHAR       fontFirstChar;
+    XCHAR       fontLastChar;
+
+
+    ExternalMemoryCallback(pFont, 0, sizeof(FONT_HEADER), &header);
+    fontFirstChar = header.firstChar;
+    fontLastChar = header.lastChar;
+    textWidth = 0;
+    while((UXCHAR)15 < (UXCHAR)(ch = *textString++))
+    {
+        if((UXCHAR)ch < (UXCHAR)fontFirstChar)
+            continue;
+        if((UXCHAR)ch > (UXCHAR)fontLastChar)
+            continue;
+        if(header.extendedGlyphEntry)
+        {
+            ExternalMemoryCallback
+            (
+                pFont,
+                sizeof(FONT_HEADER) + sizeof(GLYPH_ENTRY_EXTENDED) * ((UXCHAR)ch - (UXCHAR)fontFirstChar),
+                sizeof(GLYPH_ENTRY_EXTENDED),
+                &chTableExtended
+            );
+            textWidth += chTableExtended.cursorAdvance;
+        }
+        else
+        {
+            ExternalMemoryCallback
+            (
+                pFont,
+                sizeof(FONT_HEADER) + sizeof(GLYPH_ENTRY) * ((UXCHAR)ch - (UXCHAR)fontFirstChar),
+                sizeof(GLYPH_ENTRY),
+                &chTable
+            );
+            textWidth += chTable.width;
+        }
+    }
+
+    return (textWidth);
+#else
+    return 0;
+#endif //#ifdef USE_FONT_EXTERNAL
+}
+
+/*********************************************************************
+* Function: SHORT GetTextWidth(XCHAR* textString, void* pFont)
+*
+* PreCondition: none
+*
+* Input: textString - pointer to the text string,
+*        pFont - pointer to the font
 *
 * Output: text width in pixels
 *
@@ -1830,98 +2456,27 @@ WORD __attribute__((weak)) OutTextXY(SHORT x, SHORT y, XCHAR *textString)
 * Note: none
 *
 ********************************************************************/
-SHORT __attribute__((weak)) GetTextWidth(XCHAR *textString, void *font)
+SHORT __attribute__((weak)) GetTextWidth(XCHAR *textString, void *pFont)
 {
-		#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) 
-    GLYPH_ENTRY *pChTable;
-    FONT_HEADER *pHeader;
-    	#endif
-        #ifdef USE_FONT_EXTERNAL
-    GLYPH_ENTRY chTable;
-    FONT_HEADER header;
-        #endif
-
-    	#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) || defined (USE_FONT_EXTERNAL)
-    SHORT       textWidth;
-    XCHAR       ch;
-    XCHAR       fontFirstChar;
-    XCHAR       fontLastChar;
-    	#endif
-
-    switch(*((SHORT *)font))
+    switch(*((SHORT *)pFont))
     {
-                #ifdef USE_FONT_RAM
-
         case RAM:
-            pHeader = (FONT_HEADER *) ((FONT_RAM *)font)->address;
-            fontFirstChar = pHeader->firstChar;
-            fontLastChar = pHeader->lastChar;
-            pChTable = (GLYPH_ENTRY *) (pHeader + 1);
-            textWidth = 0;
-            while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
-            {
-                if((unsigned XCHAR)ch < (unsigned XCHAR)fontFirstChar)
-                    continue;
-                if((unsigned XCHAR)ch > (unsigned XCHAR)fontLastChar)
-                    continue;
-                textWidth += (pChTable + ((unsigned XCHAR)ch - (unsigned XCHAR)fontFirstChar))->width;
-            }
-
-            return (textWidth);
-                #endif
+            return GetTextWidthRam(textString, pFont);
                 	    
-                #ifdef USE_FONT_FLASH
-
         case FLASH:
-            pHeader = (FONT_HEADER *) ((FONT_FLASH *)font)->address;
-            fontFirstChar = pHeader->firstChar;
-            fontLastChar = pHeader->lastChar;
-            pChTable = (GLYPH_ENTRY *) (pHeader + 1);
-            textWidth = 0;
-            while((XCHAR)15 < (XCHAR)(ch = *textString++))
-            {
-                if((XCHAR)ch < (XCHAR)fontFirstChar)
-                    continue;
-                if((XCHAR)ch > (XCHAR)fontLastChar)
-                    continue;
-                textWidth += (pChTable + ((XCHAR)ch - (XCHAR)fontFirstChar))->width;
-            }
-
-            return (textWidth);
-                #endif
-                #ifdef USE_FONT_EXTERNAL
+            return GetTextWidthFlash(textString, pFont);
 
         case EXTERNAL:
-            ExternalMemoryCallback(font, 0, sizeof(FONT_HEADER), &header);
-            fontFirstChar = header.firstChar;
-            fontLastChar = header.lastChar;
-            textWidth = 0;
-            while((XCHAR)15 < (XCHAR)(ch = *textString++))
-            {
-                if((XCHAR)ch < (XCHAR)fontFirstChar)
-                    continue;
-                if((XCHAR)ch > (XCHAR)fontLastChar)
-                    continue;
-                ExternalMemoryCallback
-                (
-                    font,
-                    sizeof(FONT_HEADER) + sizeof(GLYPH_ENTRY) * ((XCHAR)ch - (XCHAR)fontFirstChar),
-                    sizeof(GLYPH_ENTRY),
-                    &chTable
-                );
-                textWidth += chTable.width;
-            }
-
-            return (textWidth);
-                #endif
-
+            return GetTextWidthExternal(textString, pFont);
+            
         default:
             return (0);
     }
 }
 
+
 /*********************************************************************
-* Function: SHORT GetTextHeight(void* font)
+* Function: SHORT GetTextHeight(void* pFont)
 *
 * PreCondition: none
 *
@@ -1936,32 +2491,39 @@ SHORT __attribute__((weak)) GetTextWidth(XCHAR *textString, void *font)
 * Note: none
 *
 ********************************************************************/
-SHORT __attribute__((weak)) GetTextHeight(void *font)
+SHORT __attribute__((weak)) GetTextHeight(void *pFont)
 {
-        #ifdef USE_FONT_EXTERNAL
+#ifdef USE_FONT_EXTERNAL
+    SHORT height;
+#endif
 
-    unsigned char    height;
-        #endif
-    switch(*((SHORT *)font))
+    // if the current set font is the same just return with 
+    // the already set value in currentFont
+    if (pFont == currentFont.pFont)
+        return currentFont.fontHeader.height;
+    else
     {
-                #ifdef USE_FONT_RAM
-        case RAM:
-            return ((FONT_HEADER *) ((FONT_RAM *)font)->address)->height;
-                #endif
-                
-                #ifdef USE_FONT_FLASH
-        case FLASH:
-            return ((FONT_HEADER *) ((FONT_FLASH *)font)->address)->height;
-                #endif
-                
-                #ifdef USE_FONT_EXTERNAL
-        case EXTERNAL:
-            ExternalMemoryCallback(font, sizeof(FONT_HEADER) - 2, 1, &height);
-            return (height);
-                #endif
-
-        default:
-            return (0);
+        switch(*((SHORT *)pFont))
+        {
+#ifdef USE_FONT_RAM
+            case RAM:
+                return ((FONT_HEADER *) ((FONT_RAM *)pFont)->address)->height;
+#endif
+                    
+#ifdef USE_FONT_FLASH
+            case FLASH:
+                return ((FONT_HEADER *) ((FONT_FLASH *)pFont)->address)->height;
+#endif
+                    
+#ifdef USE_FONT_EXTERNAL
+            case EXTERNAL:
+                ExternalMemoryCallback(pFont, sizeof(FONT_HEADER) - 2, 2, &height);
+                return (height);
+#endif
+    
+            default:
+                return (0);
+        }
     }
 }
 
@@ -3162,8 +3724,12 @@ void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, 
 ********************************************************************/
 WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE stretch)
 {
+#if defined (USE_BITMAP_FLASH)
     FLASH_BYTE  *flashAddress;
+#endif    
+#if defined (USE_BITMAP_FLASH) || defined (USE_BITMAP_EXTERNAL)
     BYTE        colorDepth;
+#endif
     WORD        colorTemp;
     WORD        resType;
 

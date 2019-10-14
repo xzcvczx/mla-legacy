@@ -663,6 +663,7 @@ BOOL AndroidAppInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 BOOL AndroidAppDataEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
 {
     BYTE i;
+    BYTE j;
 
     switch (event)
     {
@@ -685,6 +686,16 @@ BOOL AndroidAppDataEventHandler( BYTE address, USB_EVENT event, void *data, DWOR
                         devices[i].countDown--;
                         break;
                 }
+
+                for(j=0; j<sizeof(protocolVersions)/sizeof(ANDROID_PROTOCOL_VERSION); j++)
+                {
+                    if(protocolVersions[j].versionNumber == devices[i].protocol)
+                    {
+                        protocolVersions[j].dataHandler(address, event, data, size);
+                        break;
+                    }
+                }
+
             }
             return TRUE;
         default:

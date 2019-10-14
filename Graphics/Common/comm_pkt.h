@@ -29,10 +29,20 @@
  * COST OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
+ *****************************************************************************/
+/*****************************************************************************
+ * Section: Description
  *
- * Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 09/01/10	   ...
+ * This module decodes communication packets like the ones sent from the PC 
+ * utility, external_memory_programmer.  However, it is not limited to only
+ * one PC utility or device.  Any device may choose to use this style of
+ * communication medium.  More details of the communicaiton protocol can
+ * be found in the extern memory programmer help file documentation.  This
+ * module is abstracted from the communication medium used and can support
+ * multiple communicaiton mediums being serviced at one time.
+ *
+ * This module is used by serval different Graphics demos and is part of the 
+ * common directory under the Graphics demo.
  *****************************************************************************/
 #ifndef COMM_PKT_HEADER_FILE
 #define COMM_PKT_HEADER_FILE

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="62">
   <projectmakefile>Makefile</projectmakefile>
-  <defaultConf>3</defaultConf>
+  <defaultConf>4</defaultConf>
   <confs>
     <conf name="PIC18_Explorer" type="2">
       <platformToolSN>:=MPLABCommUSB:=04D8:=9004:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB REAL ICE tm (www.microchip.com):=JIT090299112:=o:=en</platformToolSN>
@@ -76,7 +76,7 @@
       </runprofile>
     </conf>
     <conf name="Explorer_16_-_PIC32" type="2">
-      <platformToolSN>:=MPLABCommUSB:=04D8:=9004:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB REAL ICE tm (www.microchip.com):=JIT090299112:=o:=en</platformToolSN>
+      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT101934037:=x:=en</platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\mplabc32\v1.12\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>

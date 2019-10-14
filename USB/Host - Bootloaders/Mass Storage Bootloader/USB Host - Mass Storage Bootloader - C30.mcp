@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ256DA210
+device=PIC24FJ256GB110
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -185,8 +185,8 @@ file_034=..\..\..\Microchip\Include\GenericTypeDefs.h
 file_035=..\..\..\Microchip\Include\Compiler.h
 file_036=boot_hal.h
 file_037=Bootloader Linker Files\PIC24FJ256DA210 Family\boot_msd_boot_p24FJ256DA210.gld
-file_038=..\Getting Started - Running the Host - Bootloaders - Thumbdrive Bootloader.htm
-file_039=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_038=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_039=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

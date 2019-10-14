@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice for MiWi PRO Software:
 *
-* Copyright ¬© 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -454,8 +454,7 @@ HANDLE_DATA_PACKET:
                             // If it is just an empty packet, ignore here.
                             if( MACRxPacket.PayloadLen == 0 )
                             {
-                                MiWiPROStateMachine.bits.DataRequesting = 0;
-                                break;
+                                MiWiPROStateMachine.bits.DataRequesting = 0;                                break;
                             }
                         #endif
                         
@@ -1637,7 +1636,20 @@ ASSIGN_COORDINATOR_SHORT_ADDRESS:
                                 rxMessage.SourcePANID.Val = sourcePANID.Val;
                                 if( MACRxPacket.Payload[8] == 0xFF && MACRxPacket.Payload[9] == 0xFF )
                                 {
-                                    rxMessage.SourceAddress = MACRxPacket.SourceAddress;    
+                                    #if defined(IEEE_802_15_4)
+                                        rxMessage.flags.bits.altSrcAddr = MACRxPacket.altSourceAddress;
+                                        rxMessage.SourceAddress = MACRxPacket.SourceAddress; 
+                                    #else
+                                        if( MACRxPacket.flags.bits.sourcePrsnt )
+                                        {
+                                            rxMessage.SourceAddress = MACRxPacket.SourceAddress; 
+                                        }
+                                        else
+                                        {
+                                            rxMessage.flags.bits.altSrcAddr = 1;
+                                            rxMessage.SourceAddress = &(MACRxPacket.Payload[8]);
+                                        }
+                                    #endif  
                                 }
                                 else
                                 {
@@ -3036,8 +3048,7 @@ START_ASSOCIATION_RESPONSE:
                     PacketRecords[i].RxCounter = INDIRECT_MESSAGE_TIMEOUT_CYCLE + 1;
                     PacketRecords[i].MiWiPROSeq = TxBuffer[10];
                     PacketRecords[i].AltSourceAddr.Val = ShortAddress.Val;
-                    PacketRecords[i].StartTick = MiWi_TickGet();
-                    break;
+                    PacketRecords[i].StartTick = MiWi_TickGet();                    break;
                 }    
             }        
             

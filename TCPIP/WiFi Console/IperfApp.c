@@ -325,8 +325,7 @@ ascii_to_u32s(INT8 *ptr, UINT32 *values, UINT8 count)
 // Todo: implement the jitter report.
 //
 
-static void
-ReportBW_Jitter_Loss(tIperfReport reportType)
+static void ReportBW_Jitter_Loss(tIperfReport reportType)
 {
     UINT32 nAttempted;
     UINT32 nDropped;
@@ -367,14 +366,16 @@ ReportBW_Jitter_Loss(tIperfReport reportType)
             }
 
             sec = (APPCTX.lastCheckTime - APPCTX.startTime)/TICK_SECOND;
-
-            sprintf( (char *) g_ConsoleContext.txBuf,"    - [%2lu- %2lu sec] %3lu/ %3lu (%2lu%%)    %4lu Kbps",
-                      (unsigned long)sec, 
-                      (unsigned long)sec + ( (unsigned long) (APPCTX.mInterval/TICK_SECOND) ),
-                      (unsigned long)nDropped,
-                      (unsigned long)nAttempted,
-                      (unsigned long)nDropped*100/(unsigned long)nAttempted,
-                      (unsigned long) (kbps + ((double) 0.5)));
+					  
+            sprintf( (char *) g_ConsoleContext.txBuf, "    - [0.0- %lu.%lu sec] %3lu/ %3lu (%2lu%%)    %4lu Kbps",
+                 (unsigned long)(msec/1000),
+                 (unsigned long)((msec%1000)/100),
+                 (unsigned long)nDropped,
+                 (unsigned long)nAttempted,
+                 (nAttempted == 0u) ? 0 : ((unsigned long)nDropped*100/(unsigned long)nAttempted),
+                 (unsigned long) (kbps + ((double) 0.5)));
+					  
+					  
 
             WFConsolePrintRamStr( (char *) g_ConsoleContext.txBuf , TRUE);
 

@@ -133,6 +133,7 @@
 #define WF_ERROR_DISCONNECT_FAILED                              ((UINT16)38)
 #define WF_ERROR_NO_STORED_BSS_DESCRIPTOR                       ((UINT16)39)
 #define WF_ERROR_INVALID_MAX_POWER                              ((UINT16)40)
+#define WF_ERROR_HOST_SCAN_NOT_ALLOWED                          ((UINT16)41)
 
 /*---------------------------------------------------------------------*/
 /* Used for eventNotificationField bit mask in tWFCAElements structure */
@@ -245,15 +246,19 @@ typedef struct WFMacStatsStruct
 #define WF_SECURITY_WPA_AUTO_WITH_KEY            (7)
 #define WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE    (8)
 
+/* Wep key types */
+typedef enum
+{
+    WF_SECURITY_WEP_SHAREDKEY			  = 0,
+    WF_SECURITY_WEP_OPENKEY				  = 1
+} tWFWepKeyType;
+
 /*---------------------------------------------------------------------*/
 /* Network Type defines                                                */
 /* Used in WF_CPSet/GetNetworkType, WF_CPSetElements, WF_CPGetElements */
 /*---------------------------------------------------------------------*/
-typedef enum
-{
-    WF_INFRASTRUCTURE = 1,
-    WF_ADHOC          = 2
-} tWFNetworkType;
+#define    WF_INFRASTRUCTURE  (1)
+#define    WF_ADHOC           (2)
 
 /*--------------------------------------------------------*/
 /* Ad Hoc behavior defines                                */
@@ -286,11 +291,11 @@ typedef enum
     WF_ATTEMPT_TO_RECONNECT        = 1 
 } tWFConnectionLossActions;
 
-typedef enum
-{
-    WF_DISABLED = 0,
-    WF_ENABLED  = 1
-} tWFEnableDisable;
+
+
+#define WF_DISABLED     (0)
+#define WF_ENABLED      (1)
+
 
 /* eventInfo defines for WF_ProcessEvent(), case WF_EVENT_CONNECTION_FAILED */
 /* Also value for index 3 of WF_CONNECTION_FAILED_EVENT_SUBTYPE */
@@ -513,6 +518,14 @@ typedef struct WFCPElementsStruct
       Default: WF_ADHOC_CONNECT_THEN_START
       */
     UINT8  adHocBehavior;
+	/**
+	1 - enable hidden ssid in adhoc mode
+	*/
+	UINT8 hiddenSSID;
+	/**
+	0- shared key, 1 - open key
+	*/
+	UINT8 wepKeyType;
 } tWFCPElements;
 
 /*-------------------------------*/
@@ -702,6 +715,15 @@ typedef struct tWFDeviceInfoStruct
     UINT8  patchVersion;  /* Patch version number   */
 } tWFDeviceInfo;
 
+/*--------------------------*/
+/* used in WF_CMGetConnectContext */
+/*--------------------------*/
+typedef struct tWFConnectContextStruct
+{
+    UINT8  channel;	  /* channel number of current connection */
+    UINT8  bssid[6];    /* bssid of connected AP    */
+} tWFConnectContext;
+
 /*--------------*/
 /* Scan Results */
 /*--------------*/
@@ -838,6 +860,11 @@ void WF_Init(void);
 /*-------------------*/
 void WF_GetDeviceInfo(tWFDeviceInfo *p_deviceInfo);
 
+/*-------------------*/
+/* Retrieve connection context  */
+/*-------------------*/
+void WF_CMGetConnectContext(tWFConnectContext *p_ctx);
+
 /*----------------------------*/
 /* WF Driver process function */
 /*----------------------------*/
@@ -873,6 +900,10 @@ void WF_CPGetElements(UINT8 CpId, tWFCPElements *p_elements);
 
 #if defined(WF_USE_INDIVIDUAL_SET_GETS)
     void WF_CPSetSsid(UINT8 CpId, UINT8 *p_ssid,  UINT8 ssidLength);
+	void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden);
+	void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden);
+	void WF_CPSetWepKeyType(UINT8 CpId, UINT8 wepKeyType);
+	void WF_CPGetWepKeyType(UINT8 CpId, UINT8 *p_wepKeyType);
     void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength);
     void WF_CPSetBssid(UINT8 CpId, UINT8 *p_bssid);
     void WF_CPGetBssid(UINT8 CpId, UINT8 *p_bssid);
@@ -940,6 +971,7 @@ void WF_CAGetElements(tWFCAElements *p_elements);
 void WF_CMConnect(UINT8 CpId);
 void WF_CMDisconnect(void);
 void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId);
+void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId);
 
 /*----------------------------*/
 /* Tx Power Control Functions */
@@ -948,6 +980,7 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId);
 void WF_TxPowerSetMinMax(INT8 minTxPower, INT8 maxTxPower);
 void WF_TxPowerGetMinMax(INT8 *p_minTxPower, INT8 *p_maxTxPower);
 void WF_TxPowerGetFactoryMax(INT8 *p_factoryMaxTxPower);
+void WF_FixTxRateWithMaxPower(BOOL oneMegaBps);
 #endif
 
 /*----------------------------*/
@@ -959,6 +992,8 @@ void WF_TxPowerGetFactoryMax(INT8 *p_factoryMaxTxPower);
     void WF_GetPowerSaveState(UINT8 *p_powerSaveState);
     void WF_HibernateEnable(void);
 #endif
+
+void WiFiTask(void);
 
 /*-------------------------*/
 /* RTS Threshold Functions */

@@ -38,6 +38,8 @@
   1.02     Modified to Support PIC24H microcontrollers
   1.02.2   Removed recursive function calls and added delay functions.
            Modified the code in more structured way.
+  1.02.6  The variable 'delayLapsedFlag' is declared as 'volatile' type,
+          as it is modified in the Interrupt Service Routine.
 ********************************************************************/
 #include    <Compiler.h>
 
@@ -53,7 +55,7 @@ unsigned long baudRate;
 unsigned long scReferenceClock; // Smart Card Reference Clock
 unsigned short int rxETUtimeDivisorFactor;
 unsigned short int oneETUtimeinMicroSeconds;
-BOOL delayLapsedFlag = FALSE;
+volatile BOOL delayLapsedFlag = FALSE;
 
 /*******************************************************************************
   Function:

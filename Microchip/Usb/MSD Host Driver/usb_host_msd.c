@@ -212,13 +212,57 @@ Currently this must be set to 1, due to limitations in the USB Host layer.
 //******************************************************************************
 
 // *****************************************************************************
-/* USB Mass Storage Device Information
+// *****************************************************************************
+/* Command Block Wrapper
 
+This is the structure of the Command Block Wrapper, required at the beginning of
+each mass storage transfer.
+*/
+typedef struct __attribute__((packed)) _USB_MSD_CBW
+{
+    DWORD       dCBWSignature;              // Signature, must be a specific constant.
+    DWORD       dCBWTag;                    // Transaction tag. Value in the CSW must match.
+    DWORD       dCBWDataTransferLength;     // Length of the following data transfer.
+    union
+    {
+        struct
+        {
+            BYTE                : 7;
+            BYTE    bfDirection : 1;        // Direction of data transfer (0=OUT, 1=IN).
+        };
+        BYTE        val;
+    }           bmCBWflags;
+    BYTE        bCBWLUN;                    // Logical Unit Number (bits 3:0 only).
+    BYTE        bCBWCBLength;               // Length of command block (bits 4:0 only).
+    BYTE        CBWCB[16];                  // Command block.
+} USB_MSD_CBW;
+
+// *****************************************************************************
+/* Command Status Wrapper
+
+This is the structure of the Command Status Wrapper, required at the end of
+each mass storage transfer.
+*/
+typedef struct __attribute__((packed)) _USB_MSD_CSW
+{
+    DWORD   dCSWSignature;                  // Signature, must be a specific constant.
+    DWORD   dCSWTag;                        // Transaction tag. Must match the CBW.
+    DWORD   dCSWDataResidue;                // Count of data bytes not transferred.
+    BYTE    dCSWStatus;                     // Result of requested operation.
+} USB_MSD_CSW;
+
+
+/* USB Mass Storage Device Information
 This structure is used to hold all the information about an attached Mass Storage device.
 */
 typedef struct _USB_MSD_DEVICE_INFO
 {
-    BYTE                                blockData[31];          // Data buffer for device communication.
+    union __attribute__((packed)) {
+        BYTE                            data[31];          // Data buffer for device communication.
+        USB_MSD_CBW                     cbw;
+        USB_MSD_CSW                     csw;
+    }block;
+
     BYTE                                deviceAddress;          // Address of the device on the bus.
     BYTE                                clientDriverID;         // Client driver ID for device requests.
     BYTE                                errorCode;              // Error code of last error.
@@ -246,48 +290,6 @@ typedef struct _USB_MSD_DEVICE_INFO
     DWORD                               dCBWTag;                // The value of the dCBWTag to verify against the dCSWtag.
     BYTE                                attemptsCSW;            // Number of attempts to retrieve the CSW.
 } USB_MSD_DEVICE_INFO;
-
-
-// *****************************************************************************
-/* Command Block Wrapper
-
-This is the structure of the Command Block Wrapper, required at the beginning of
-each mass storage transfer.
-*/
-typedef struct _USB_MSD_CBW
-{
-    DWORD       dCBWSignature;              // Signature, must be a specific constant.
-    DWORD       dCBWTag;                    // Transaction tag. Value in the CSW must match.
-    DWORD       dCBWDataTransferLength;     // Length of the following data transfer.
-    union
-    {
-        struct
-        {
-            BYTE                : 7;
-            BYTE    bfDirection : 1;        // Direction of data transfer (0=OUT, 1=IN).
-        };
-        BYTE        val;
-    }           bmCBWflags;
-    BYTE        bCBWLUN;                    // Logical Unit Number (bits 3:0 only).
-    BYTE        bCBWCBLength;               // Length of command block (bits 4:0 only).
-    BYTE        CBWCB[16];                  // Command block.
-} USB_MSD_CBW;
-
-
-// *****************************************************************************
-/* Command Status Wrapper
-
-This is the structure of the Command Status Wrapper, required at the end of
-each mass storage transfer.
-*/
-typedef struct _USB_MSD_CSW
-{
-    DWORD   dCSWSignature;                  // Signature, must be a specific constant.
-    DWORD   dCSWTag;                        // Transaction tag. Must match the CBW.
-    DWORD   dCSWDataResidue;                // Count of data bytes not transferred.
-    BYTE    dCSWStatus;                     // Result of requested operation.
-} USB_MSD_CSW;
-
 
 //******************************************************************************
 //******************************************************************************
@@ -603,7 +605,7 @@ void USBHostMSDTasks( void )
                                 break;
 
                             if (!USBHostIssueDeviceRequest( deviceInfoMSD[i].deviceAddress, USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                                    USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[i].interface, 1, deviceInfoMSD[i].blockData, USB_DEVICE_REQUEST_GET, deviceInfoMSD[i].clientDriverID ))
+                                    USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[i].interface, 1, deviceInfoMSD[i].block.data, USB_DEVICE_REQUEST_GET, deviceInfoMSD[i].clientDriverID ))
                             {
                                 _USBHostMSD_SetNextSubState();
                             }
@@ -619,7 +621,7 @@ void USBHostMSDTasks( void )
                                 deviceInfoMSD[i].maxLUN = 0;
                                 if (!errorCode)
                                 {
-                                    deviceInfoMSD[i].maxLUN = deviceInfoMSD[i].blockData[0];
+                                    deviceInfoMSD[i].maxLUN = deviceInfoMSD[i].block.data[0];
                                 }
                                 else
                                 {
@@ -663,7 +665,7 @@ void USBHostMSDTasks( void )
                             #ifdef DEBUG_MODE
                                 UART2PrintString( "MSD: Writing CBW\r\n" );
                             #endif
-                            errorCode = USBHostWrite( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointOUT, deviceInfoMSD[i].blockData, CBW_SIZE );
+                            errorCode = USBHostWrite( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointOUT, deviceInfoMSD[i].block.data, CBW_SIZE );
                             if (errorCode)
                             {
                                 _USBHostMSD_TerminateTransfer( errorCode );
@@ -693,7 +695,7 @@ void USBHostMSDTasks( void )
                                 }
                                 else
                                 {
-                                    if (((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->dCBWDataTransferLength == 0)
+                                    if (deviceInfoMSD[i].block.cbw.dCBWDataTransferLength == 0)
                                     {
                                         #ifdef DEBUG_MODE
                                             UART2PrintString( "MSD: Transfer length=0\r\n" );
@@ -790,7 +792,7 @@ void USBHostMSDTasks( void )
                                 UART2PrintString( "MSD: Getting CSW\r\n" );
                             #endif
 
-                            errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].blockData, CSW_SIZE );
+                            errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].block.data, CSW_SIZE );
                             if (errorCode)
                             {
                                 _USBHostMSD_TerminateTransfer( errorCode );
@@ -823,18 +825,18 @@ void USBHostMSDTasks( void )
                                     }
                                 }
                                 else if ((byteCount != CSW_SIZE) |
-                                         (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWSignature != USB_MSD_DCSWSIGNATURE) |
-                                         (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWTag       != deviceInfoMSD[i].dCBWTag) )
+                                         (deviceInfoMSD[i].block.csw.dCSWSignature != USB_MSD_DCSWSIGNATURE) |
+                                         (deviceInfoMSD[i].block.csw.dCSWTag       != deviceInfoMSD[i].dCBWTag) )
                                 {
                                     _USBHostMSD_TerminateTransfer( USB_MSD_CSW_ERROR );
                                 }
                                 else
                                 {
-                                    deviceInfoMSD[i].bytesTransferred = deviceInfoMSD[i].userDataLength - ((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWDataResidue;
+                                    deviceInfoMSD[i].bytesTransferred = deviceInfoMSD[i].userDataLength - deviceInfoMSD[i].block.csw.dCSWDataResidue;
 
-                                    if (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWStatus != 0x00)
+                                    if (deviceInfoMSD[i].block.csw.dCSWStatus != 0x00)
                                     {
-                                        _USBHostMSD_TerminateTransfer( ((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWStatus | USB_MSD_ERROR );
+                                        _USBHostMSD_TerminateTransfer( deviceInfoMSD[i].block.csw.dCSWStatus | USB_MSD_ERROR );
                                     }
                                     else
                                     {
@@ -843,7 +845,7 @@ void USBHostMSDTasks( void )
 
                                     // If we have a phase error, we need to perform corrective action instead of
                                     // returning to normal running.
-                                    if (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWStatus == MSD_PHASE_ERROR)
+                                    if (deviceInfoMSD[i].block.csw.dCSWStatus == MSD_PHASE_ERROR)
                                     {
                                         deviceInfoMSD[i].flags.val |= MARK_RESET_RECOVERY;
                                         deviceInfoMSD[i].returnState = STATE_RUNNING | SUBSTATE_HOLDING;
@@ -1154,23 +1156,23 @@ BYTE USBHostMSDTransfer( BYTE deviceAddress, BYTE deviceLUN, BYTE direction, BYT
     #endif
 
     // Prepare the CBW so we can give the user back his command block RAM.
-    ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->dCBWSignature             = USB_MSD_DCBWSIGNATURE;
-    ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->dCBWTag                   = deviceInfoMSD[i].dCBWTag;
-    ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->dCBWDataTransferLength    = deviceInfoMSD[i].userDataLength;
-    ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->bmCBWflags.val            = 0;
-    ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->bmCBWflags.bfDirection    = direction;
-    ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->bCBWLUN                   = deviceLUN;
-    ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->bCBWCBLength              = commandBlockLength;
+    deviceInfoMSD[i].block.cbw.dCBWSignature             = USB_MSD_DCBWSIGNATURE;
+    deviceInfoMSD[i].block.cbw.dCBWTag                   = deviceInfoMSD[i].dCBWTag;
+    deviceInfoMSD[i].block.cbw.dCBWDataTransferLength    = deviceInfoMSD[i].userDataLength;
+    deviceInfoMSD[i].block.cbw.bmCBWflags.val            = 0;
+    deviceInfoMSD[i].block.cbw.bmCBWflags.bfDirection    = direction;
+    deviceInfoMSD[i].block.cbw.bCBWLUN                   = deviceLUN;
+    deviceInfoMSD[i].block.cbw.bCBWCBLength              = commandBlockLength;
     for (j=0; j<commandBlockLength; j++)
     {
-        ((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->CBWCB[j]              = commandBlock[j];
+        deviceInfoMSD[i].block.cbw.CBWCB[j]              = commandBlock[j];
     }
 
     #ifndef USB_ENABLE_TRANSFER_EVENT
         // Jump to the transfer state.
         deviceInfoMSD[i].state             = STATE_RUNNING | SUBSTATE_SEND_CBW;
     #else
-        j = USBHostWrite( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointOUT, deviceInfoMSD[i].blockData, CBW_SIZE );
+        j = USBHostWrite( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointOUT, deviceInfoMSD[i].block.data, CBW_SIZE );
         if (j)
         {
             _USBHostMSD_TerminateTransfer( j );
@@ -1400,7 +1402,7 @@ BOOL USBHostMSDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                             // then we can't enumerate the device.
                             errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[device].deviceAddress,
                                     USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
-                                    USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[device].interface, 1, deviceInfoMSD[device].blockData,
+                                    USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[device].interface, 1, deviceInfoMSD[device].block.data,
                                     USB_DEVICE_REQUEST_GET, deviceInfoMSD[device].clientDriverID );
                             if (errorCode)
                             {
@@ -1524,7 +1526,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                         deviceInfoMSD[i].maxLUN = 0;
                         if (!((HOST_TRANSFER_DATA *)data)->bErrorCode)
                         {
-                            deviceInfoMSD[i].maxLUN = deviceInfoMSD[i].blockData[0];
+                            deviceInfoMSD[i].maxLUN = deviceInfoMSD[i].block.data[0];
                         }
                         else
                         {
@@ -1569,7 +1571,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                         }
                         else
                         {
-                            if ((((USB_MSD_CBW *)(deviceInfoMSD[i].blockData))->dCBWDataTransferLength == 0) ||
+                            if ((((USB_MSD_CBW *)(deviceInfoMSD[i].block.data))->dCBWDataTransferLength == 0) ||
                                 (deviceInfoMSD[i].userDataLength == 0))
                             {
                                 #ifdef DEBUG_MODE
@@ -1581,7 +1583,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                     UART2PrintString( "MSD: Getting CSW\r\n" );
                                 #endif
 
-                                errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].blockData, CSW_SIZE );
+                                errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].block.data, CSW_SIZE );
                                 if (errorCode)
                                 {
                                     _USBHostMSD_TerminateTransfer( errorCode );
@@ -1652,7 +1654,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                                 UART2PrintString( "MSD: Getting CSW\r\n" );
                             #endif
 
-                            errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].blockData, CSW_SIZE );
+                            errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].block.data, CSW_SIZE );
                             if (errorCode)
                             {
                                 _USBHostMSD_TerminateTransfer( errorCode );
@@ -1684,18 +1686,18 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                             }
                         }
                         else if ((((HOST_TRANSFER_DATA *)data)->dataCount != CSW_SIZE) |
-                                 (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWSignature != USB_MSD_DCSWSIGNATURE) |
-                                 (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWTag       != deviceInfoMSD[i].dCBWTag) )
+                                 (((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWSignature != USB_MSD_DCSWSIGNATURE) |
+                                 (((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWTag       != deviceInfoMSD[i].dCBWTag) )
                         {
                             _USBHostMSD_TerminateTransfer( USB_MSD_CSW_ERROR );
                         }
                         else
                         {
-                            deviceInfoMSD[i].bytesTransferred = deviceInfoMSD[i].userDataLength - ((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWDataResidue;
+                            deviceInfoMSD[i].bytesTransferred = deviceInfoMSD[i].userDataLength - ((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWDataResidue;
 
-                            if (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWStatus != 0x00)
+                            if (((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWStatus != 0x00)
                             {
-                                _USBHostMSD_TerminateTransfer( ((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWStatus | USB_MSD_ERROR );
+                                _USBHostMSD_TerminateTransfer( ((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWStatus | USB_MSD_ERROR );
                             }
                             else
                             {
@@ -1704,7 +1706,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
 
                             // If we have a phase error, we need to perform corrective action instead of
                             // returning to normal running.
-                            if (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWStatus == MSD_PHASE_ERROR)
+                            if (((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWStatus == MSD_PHASE_ERROR)
                             {
                                 deviceInfoMSD[i].flags.val |= MARK_RESET_RECOVERY;
                                 deviceInfoMSD[i].returnState = STATE_RUNNING;
@@ -1882,8 +1884,8 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                         }
                     }
                     else if ((((HOST_TRANSFER_DATA *)data)->dataCount != CSW_SIZE) |
-                             (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWSignature != USB_MSD_DCSWSIGNATURE) |
-                             (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWTag       != deviceInfoMSD[i].dCBWTag) )
+                             (((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWSignature != USB_MSD_DCSWSIGNATURE) |
+                             (((USB_MSD_CSW *)(deviceInfoMSD[i].block.data))->dCSWTag       != deviceInfoMSD[i].dCBWTag) )
                     {
                         _USBHostMSD_TerminateTransfer( USB_MSD_CSW_ERROR );
                     }
@@ -2056,7 +2058,7 @@ void _USBHostMSD_ResetStateJump( BYTE i )
                     UART2PrintString( "MSD: Getting CSW\r\n" );
                 #endif
 
-                errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].blockData, CSW_SIZE );
+                errorCode = USBHostRead( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN, deviceInfoMSD[i].block.data, CSW_SIZE );
                 if (errorCode)
                 {
                     _USBHostMSD_TerminateTransfer( errorCode );

@@ -327,13 +327,18 @@ void TouchCalibration(void)
         y = TouchGetRawY();
     } while((y != -1) && (x != -1));
 
-    // Wait for touch
+    // Wait for touch and release
     do
     {
         x = TouchGetRawX();
         y = TouchGetRawY();
     } while((y == -1) || (x == -1));
     
+    do
+    {
+        x = TouchGetRawX();
+        y = TouchGetRawY();
+    } while((y != -1) && (x != -1));
 
     DelayMs(CALIBRATION_DELAY);
     

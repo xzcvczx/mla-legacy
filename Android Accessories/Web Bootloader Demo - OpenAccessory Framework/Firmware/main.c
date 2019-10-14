@@ -88,6 +88,11 @@ Change History
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
+    #elif defined(__PIC24FJ64GB502__)
+        _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(I2C1SEL_PRI & IOL1WAY_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+        _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
+        _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__PIC24FJ256GB106__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
@@ -172,7 +177,9 @@ Change History
 #elif defined(__C32__)
 	void _general_exception_handler(unsigned cause, unsigned status)
 	{
-        unsigned long address = _CP0_GET_EPC();
+    	#if defined(DEBUG_MODE)
+            unsigned long address = _CP0_GET_EPC();
+        #endif
 
 		DEBUG_ERROR("exception");
         while(1){}
@@ -375,7 +382,7 @@ BOOL USB_ApplicationDataEventHandler( BYTE address, USB_EVENT event, void *data,
   ***************************************************************************/
 BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
 {
-    switch( event )
+    switch( (INT)event )
     {
         case EVENT_VBUS_REQUEST_POWER:
             // The data pointer points to a byte that represents the amount of power

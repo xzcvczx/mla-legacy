@@ -119,7 +119,16 @@
  ********************************************************************/
 #if defined(CFG_INCLUDE_DA210_BRD_16PMP_QVGAv1)
     #include "Configs/HWP_DA210_BRD_INT_QVGAv1.h"
+/*********************************************************************
+ * Hardware Configuration for
+ * LCC Developement board
+ * Internal Memory
+ * QVGA
+ ********************************************************************/
+#elif defined(CFG_INCLUDE_LCC_SK_INT_QVGAv1)
+    #include "Configs/HWP_LCC_PIC_SK_INT_QVGAv1.h"
 #else
+
 #error "Please make sure that you have a CFG_INCLUDE_xxxx as a compile preprocessor define in the MPLAB X configuration."
 #endif
 

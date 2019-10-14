@@ -65,6 +65,9 @@ Change History:
               Fixed an error where device may never be able to enumerate if it
               is already attached when the host stack initializes.
 
+  2.9d        Fixed PIC32 USB register mapping to be more universal
+              Fixed a race condition between 1msec timer and USB device stack
+
 *******************************************************************************/
 
 #include <stdlib.h>
@@ -1452,11 +1455,18 @@ void USBHostTasks( void )
                             IPC21           |= 0x0600;
                             IEC5            |= 0x0040;
                         #elif defined( __PIC32MX__ )
-                            // Enable the USB interrupt.
-                            IFS1CLR         = 0x02000000;
-                            IPC11CLR        = 0x0000FF00;
-                            IPC11SET        = 0x00001000;
-                            IEC1SET         = 0x02000000;
+                        // Enable the USB interrupt.
+                            IFS1CLR         = _IFS1_USBIF_MASK;
+                            #if defined(_IPC11_USBIP_MASK)
+                                IPC11CLR        = _IPC11_USBIP_MASK | _IPC11_USBIS_MASK;
+                                IPC11SET        = _IPC11_USBIP_MASK & (0x00000004 << _IPC11_USBIP_POSITION);
+                            #elif defined(_IPC7_USBIP_MASK)
+                                IPC7CLR        = _IPC7_USBIP_MASK | _IPC7_USBIS_MASK;
+                                IPC7SET        = _IPC7_USBIP_MASK & (0x00000004 << _IPC7_USBIP_POSITION);
+                            #else
+                                #error "The selected PIC32 device is not currently supported by usb_host.c."
+                            #endif
+                            IEC1SET         = _IEC1_USBIE_MASK;                        
                         #else
                             #error Cannot enable USB interrupt.
                         #endif
@@ -5389,8 +5399,7 @@ BOOL _USB_TransferInProgress( void )
 #if defined(__C30__)
 void __attribute__((__interrupt__, no_auto_psv)) _USB1Interrupt( void )
 #elif defined(__PIC32MX__)
-#pragma interrupt _USB1Interrupt ipl4 vector 45
-void _USB1Interrupt( void )
+void __ISR(_USB_1_VECTOR, ipl4) _USB1Interrupt(void)
 #else
     #error Cannot define timer interrupt vector.
 #endif
@@ -5399,7 +5408,7 @@ void _USB1Interrupt( void )
     #if defined( __C30__)
         IFS5 &= 0xFFBF;
     #elif defined( __PIC32MX__)
-        IFS1CLR = 0x02000000;
+        IFS1CLR = _IFS1_USBIF_MASK;
     #else
         #error Cannot clear USB interrupt.
     #endif
@@ -5457,9 +5466,12 @@ void _USB1Interrupt( void )
                             U1OTGIEbits.T1MSECIE = 0;
                         #endif
     
-                        // Advance to the next state.  We can do this here, because the only time
-                        // we'll get a timer interrupt is while we are in one of the holding states.
-                        _USB_SetNextSubSubState();
+                        if((usbHostState & STATE_MASK) != STATE_DETACHED)
+                        {
+                            // Advance to the next state.  We can do this here, because the only time
+                            // we'll get a timer interrupt is while we are in one of the holding states.
+                            _USB_SetNextSubSubState();
+                        }
                     }
                 }
             }
@@ -5478,9 +5490,12 @@ void _USB1Interrupt( void )
                         U1OTGIEbits.T1MSECIE = 0;
                     #endif
 
-                    // Advance to the next state.  We can do this here, because the only time
-                    // we'll get a timer interrupt is while we are in one of the holding states.
-                    _USB_SetNextSubSubState();
+                    if((usbHostState & STATE_MASK) != STATE_DETACHED)
+                    {
+                        // Advance to the next state.  We can do this here, because the only time
+                        // we'll get a timer interrupt is while we are in one of the holding states.
+                        _USB_SetNextSubSubState();
+                    }
                 }
             }
          #endif

@@ -192,7 +192,6 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
     #else
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__
     #endif
@@ -218,7 +217,6 @@
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
 #else
     #error No hardware board defined, see "HardwareProfile.h"
 #endif
@@ -226,25 +224,31 @@
 
 
 /** VARIABLES ******************************************************/
-#if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
-    #pragma udata usbram2
-#elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
-    || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)
-    #pragma udata USB_VARIABLES=0x500
-#elif defined(__18F4450) || defined(__18F2450)
-    #pragma udata USB_VARIABLES=0x480
-#else
-    #pragma udata
+#if defined(__18CXX)
+    #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
+        #pragma udata usbram2
+    #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
+        || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)
+        #pragma udata USB_VARIABLES=0x500
+    #elif defined(__18F4450) || defined(__18F2450)
+        #pragma udata USB_VARIABLES=0x480
+    #else
+        #pragma udata
+    #endif
 #endif
 
 unsigned char usbCcidBulkOutEndpoint[USB_EP_SIZE];	//User application buffer for receiving and holding OUT packets sent from the host
 unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];		//User application buffer for sending IN packets to the host
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 BOOL blinkStatusValid;
 USB_HANDLE usbCcidBulkOutHandle;
 USB_HANDLE usbCcidBulkInHandle;
 USB_HANDLE usbCcidInterruptInHandle;
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 ///////// CCID proto ////////////////////
 extern void CCID_Init(void);
@@ -401,7 +405,9 @@ void BlinkUSBStatus(void);
 
 
 /** DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /******************************************************************************
  * Function:        void main(void)
@@ -513,7 +519,7 @@ static void InitializeSystem(void)
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
     #endif
-
+    
     #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)|| defined(PIC18F47J53_PIM)
 	//On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
@@ -1211,7 +1217,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((INT)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

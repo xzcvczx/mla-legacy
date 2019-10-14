@@ -51,6 +51,10 @@
  * 03/29/11         - moved prototypes of double buffering feature to
  *                    DisplayDriver.h
  * 04/06/11         - renamed to mchpGfxDrv.h
+ * 12/19/11         - fixed data types on macros.
+ *                  - modified location of compressed and decompressed buffers  
+ *                    to be placed after the display buffer. This will allow
+ *                    to use IPU even if internal memory is used. 
  *****************************************************************************/
 #ifndef _MCHP_DISPLAY_DRIVER_H
 #define _MCHP_DISPLAY_DRIVER_H
@@ -289,10 +293,10 @@ extern volatile DWORD _workArea2BaseAddr;
 #define GFX_SetWorkArea1(a)                 { G1W1ADRL = ((DWORD_VAL)((DWORD)(a))).word.LW; G1W1ADRH = ((DWORD_VAL)((DWORD)(a))).word.HW; }
 #define GFX_SetWorkArea2(a)                 { G1W2ADRL = ((DWORD_VAL)((DWORD)(a))).word.LW; G1W2ADRH = ((DWORD_VAL)((DWORD)(a))).word.HW; }
 
-#define GFX_RCC_SetSrcOffset(srcOffset)   	GFX_SetCommand(RCC_SRCADDR | (srcOffset));      /* Don't do error checking or error corrections */           
-#define GFX_RCC_SetDestOffset(dstOffset)  	GFX_SetCommand(RCC_DESTADDR | (dstOffset));     /* Don't do error checking or error corrections */          
+#define GFX_RCC_SetSrcOffset(srcOffset)   	GFX_SetCommand(RCC_SRCADDR  | (DWORD)(srcOffset));      /* Don't do error checking or error corrections */           
+#define GFX_RCC_SetDestOffset(dstOffset)  	GFX_SetCommand(RCC_DESTADDR | (DWORD)(dstOffset));      /* Don't do error checking or error corrections */          
 #define GFX_RCC_SetSize(width, height)      GFX_SetCommand(RCC_RECTSIZE | (((DWORD)(width)) << 12) | (DWORD)height)     /* Don't do error checking or error corrections */  
-#define GFX_RCC_SetColor(color)             GFX_SetCommand(RCC_COLOR | (color & GFX_COLOR_MASK))       /* Don't do error checking or error corrections */
+#define GFX_RCC_SetColor(color)             GFX_SetCommand(RCC_COLOR    | (color & GFX_COLOR_MASK)) /* Don't do error checking or error corrections */
 #define GFX_RCC_StartCopy(type_of_copy, rop, src_addr_type, dest_addr_type)      GFX_SetCommand(RCC_STARTCOPY | type_of_copy | rop | src_addr_type | dest_addr_type)     /* Don't do error checking or error corrections */
 
 #define CHR_FGCOLOR                         0x50000000ul
@@ -322,7 +326,7 @@ extern volatile DWORD _workArea2BaseAddr;
 
 #define GFX_IPU_SetSrcOffset(offset)   		(GFX_SetCommand(IPU_SRCOFFSET | (DWORD) offset))
 #define GFX_IPU_SetDestOffset(offset)   	(GFX_SetCommand(IPU_DSTOFFSET | (DWORD) offset))
-#define GFX_IPU_Inflate(bytes)            	(GFX_SetCommand(IPU_DSTSIZE   |  bytes     ))
+#define GFX_IPU_Inflate(bytes)            	(GFX_SetCommand(IPU_DSTSIZE   | (DWORD) bytes ))
 
 #define GFX_IPU_GetFinalBlock()           	(G1IPU & 0x0001)
 #define GFX_IPU_GetDecompressionDone()    	(G1IPU & 0x0002)
@@ -366,15 +370,64 @@ extern volatile DWORD _workArea2BaseAddr;
 #endif
 
 #ifdef USE_COMP_IPU
+	/*
+		Notes: 
+              When using IPU with internal memory only, make sure the buffers can fit in 
+		      the internal memory.
+			  IPU Buffer locations:	
+
+			  - Using double buffering
+			      GFX_DECOMPRESSED_DATA_RAM_ADDRESS = GFX_DISPLAY_BUFFER_START_ADDRESS + (GFX_DISPLAY_BUFFER_LENGTH*2)
+			      GFX_COMPRESSED_DATA_RAM_ADDRESS = GFX_DECOMPRESSED_DATA_RAM_ADDRESS + GFX_DECOMPRESSED_BUFFER_SIZE
+
+			  - NOT Using double buffering
+			      GFX_DECOMPRESSED_DATA_RAM_ADDRESS = GFX_DISPLAY_BUFFER_START_ADDRESS + GFX_DISPLAY_BUFFER_LENGTH
+			      GFX_COMPRESSED_DATA_RAM_ADDRESS = GFX_DECOMPRESSED_DATA_RAM_ADDRESS + GFX_DECOMPRESSED_BUFFER_SIZE
+			  
+			  Since the IPU buffers are located right after the display buffer(s) the memory locations
+			  are dependent of the starting address of the display buffer.
+			  To locate the IPU buffers manually (i.e. setting the location manually) define the 
+			  following macros in the the HardwareProfile.h:
+			  #define GFX_DECOMPRESSED_DATA_RAM_ADDRESS ????
+			  #define GFX_COMPRESSED_DATA_RAM_ADDRESS   ????
+
+			  The following macro values can be obtained from the output of the Graphics Resource Converter (GRC) 
+			  when generating image files for IPU:
+			  
+              #define GFX_COMPRESSED_BUFFER_SIZE              (13950)   // value used in based on the GRC output
+              #define GFX_DECOMPRESSED_BUFFER_SIZE            (19216)   // value used in based on the GRC output
+              #define GFX_IPU_TEMP_DATA_TRANSFER_ARRAY_SIZE   (1024)    // 1024 is the maximum value allowed for the transfer array
+			  			  
+	*/ 
+    // Error checks 
+    #ifndef GFX_IPU_TEMP_DATA_TRANSFER_ARRAY_SIZE
+            #error "GFX_IPU_TEMP_DATA_TRANSFER_ARRAY_SIZE must be defined in HardwareProfile.h. See documentation in mchpGfxDrv.h"
+    #endif
+
+    #ifndef GFX_COMPRESSED_BUFFER_SIZE
+            #error "GFX_COMPRESSED_BUFFER_SIZE must be defined in HardwareProfile.h. See documentation in mchpGfxDrv.h"
+    #endif
+
+    #ifndef GFX_DECOMPRESSED_BUFFER_SIZE
+            #error "GFX_DECOMPRESSED_BUFFER_SIZE must be defined in HardwareProfile.h. See documentation in mchpGfxDrv.h"
+    #endif
 
     #ifdef USE_DOUBLE_BUFFERING
-        #define GFX_DECOMPRESSED_DATA_RAM_ADDRESS   (GFX_EPMP_CS1_BASE_ADDRESS + (GFX_DISPLAY_BUFFER_LENGTH*2))
+        #ifndef GFX_DECOMPRESSED_DATA_RAM_ADDRESS
+	        #define GFX_DECOMPRESSED_DATA_RAM_ADDRESS   (GFX_DISPLAY_BUFFER_START_ADDRESS + (GFX_DISPLAY_BUFFER_LENGTH*2))
+        #endif	
+        #ifndef GFX_COMPRESSED_DATA_RAM_ADDRESS       
+            #define GFX_COMPRESSED_DATA_RAM_ADDRESS     (GFX_DISPLAY_BUFFER_START_ADDRESS + (GFX_DISPLAY_BUFFER_LENGTH*2) + GFX_DECOMPRESSED_BUFFER_SIZE)     
+        #endif    	
     #else
-        #define GFX_DECOMPRESSED_DATA_RAM_ADDRESS   (GFX_EPMP_CS1_BASE_ADDRESS + GFX_DISPLAY_BUFFER_LENGTH)
+        #ifndef GFX_DECOMPRESSED_DATA_RAM_ADDRESS
+	        #define GFX_DECOMPRESSED_DATA_RAM_ADDRESS   (GFX_DISPLAY_BUFFER_START_ADDRESS + GFX_DISPLAY_BUFFER_LENGTH)
+        #endif	
+        #ifndef GFX_COMPRESSED_DATA_RAM_ADDRESS       
+            #define GFX_COMPRESSED_DATA_RAM_ADDRESS     (GFX_DISPLAY_BUFFER_START_ADDRESS + GFX_DISPLAY_BUFFER_LENGTH + GFX_DECOMPRESSED_BUFFER_SIZE)     
+        #endif    	
     #endif
-           
-    #define GFX_COMPRESSED_DATA_RAM_ADDRESS         (GFX_DECOMPRESSED_DATA_RAM_ADDRESS + GFX_DECOMPRESSED_BUFFER_SIZE)     
-    	
+    
 #endif
 
 /*********************************************************************
@@ -473,8 +526,8 @@ WORD DrvMemCopy(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset,
 *					 source base address.
 *        dstOffset - offset of the new location of the moved data respect 
 *					 to the source base address.
-*        srcType - sets the source type (RCC_SRC_ADDR_CONTINUOUS or RCC_SRC_ADDR_DISCONTINUOUS)
-*        dstType - sets the source type (RCC_DEST_ADDR_CONTINUOUS or RCC_DEST_ADDR_DISCONTINUOUS) 
+*        srcType - sets the source type (GFX_DATA_CONTINUOUS or GFX_DATA_DISCONTINUOUS)
+*        dstType - sets the destination type (GFX_DATA_CONTINUOUS or GFX_DATA_DISCONTINUOUS) 
 *        copyOp - sets the type of copy operation
 *			- RCC_SOLID_FILL: Solid fill of the set color
 *			- RCC_COPY: direct copy of source to destination

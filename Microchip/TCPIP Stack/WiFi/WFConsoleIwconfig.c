@@ -64,9 +64,12 @@
 #include "TCPIP Stack/WFConsoleMsgs.h"
 #include "TCPIP Stack/WFConsoleMsgHandler.h"
 
-#if defined ( EZ_CONFIG_SCAN )
+#if defined( EZ_CONFIG_SCAN )
 #include "TCPIP Stack/WFEasyConfig.h"
 #endif /* EZ_CONFIG_SCAN */
+
+
+
 //============================================================================
 //                                  Constants
 //============================================================================
@@ -74,9 +77,16 @@
 //============================================================================
 //                                  Globals
 //============================================================================
+extern UINT8 ConnectionProfileID;
+
+#if defined( WF_HOST_SCAN )
+extern BOOL gHostScanNotAllowed;
+UINT8 hostScanProfileID;
+#endif
 
 static BOOL		iwconfigCbInitialized = FALSE;
 tWFIwconfigCb	iwconfigCb;
+
 
 //============================================================================
 //                                  Local Function Prototypes
@@ -89,6 +99,7 @@ static BOOL iwconfigSetPower(void);
 static BOOL iwconfigSetDomain(void);
 static BOOL iwconfigSetRTS(void);
 static BOOL iwconfigSetTxRate(void);
+extern UINT16 WFStartScan(void);
 
 UINT8 g_hibernate_state = WF_HB_NO_SLEEP;
 UINT8 g_wakeup_notice = FALSE;
@@ -104,6 +115,7 @@ UINT8 g_wakeup_notice = FALSE;
  *****************************************************************************/
 void do_iwconfig_cmd(void)
 {
+
 	if (!g_hibernate_state && !iwconfigSetCb() )
 		return;
 
@@ -180,7 +192,7 @@ void do_iwconfig_cmd(void)
 			return;
 	}
 
-	#if defined ( EZ_CONFIG_SCAN )
+	#if (defined(EZ_CONFIG_SCAN) && !defined(WF_HOST_SCAN)) && !defined(__18CXX)
 	else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "scan") == 0) )
     {
     	if (!g_hibernate_state) {
@@ -197,6 +209,58 @@ void do_iwconfig_cmd(void)
 	    return;
 	}
 	#endif /* EZ_CONFIG_SCAN */
+
+
+	#if (defined(EZ_CONFIG_SCAN) && defined(WF_HOST_SCAN)) && !defined(__18CXX)
+	else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "scan") == 0) )
+    {
+    	if (!g_hibernate_state) {
+			
+			if (gHostScanNotAllowed)
+					WFConsolePrintRomStr("Scan not allowed.", TRUE);
+			else {
+				gHostScanNotAllowed = TRUE;
+				WFInitScan();
+				WFConsolePrintRomStr("Scanning...", TRUE);
+				if ((3u <= ARGC) && strcmppgm2ram((char*)ARGV[2], "all") == 0)
+					hostScanProfileID = WF_SCAN_ALL;
+				else
+					hostScanProfileID = ConnectionProfileID;		// Default - current profile
+       			if (WFStartScan() == WF_SUCCESS){
+					WFConsolePrintRomStr("Scan completed.", TRUE);
+				}
+				else {
+					WFConsolePrintRomStr("Scan failed.", TRUE);
+					gHostScanNotAllowed = FALSE;
+				}
+			}
+		}
+		else 
+			WFConsolePrintRomStr("In hibernate mode - scan is not allowed.", TRUE);	
+	    return;
+	}
+	else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "scanresults") == 0) )
+    {
+ 	   	if (IS_SCAN_IN_PROGRESS(SCANCXT.scanState) || gHostScanNotAllowed)
+			WFConsolePrintRomStr("Scanning is still in process...try again later.", TRUE);
+		else {
+			gHostScanNotAllowed = TRUE;
+			SCAN_SET_DISPLAY(SCANCXT.scanState);
+        	SCANCXT.displayIdx = 0;
+			if (SCANCXT.numScanResults > 0) {
+				while (IS_SCAN_STATE_DISPLAY(SCANCXT.scanState))
+				{
+					WFDisplayScanMgr();
+				}
+			}
+			else {
+				gHostScanNotAllowed = FALSE;
+				WFConsolePrintRomStr("Nothing to display ... please run \"scan\" first", TRUE);
+			}
+		}
+		return;
+	}
+	#endif /* WF_HOST_SCAN */
 
     else
     {
@@ -546,15 +610,24 @@ static BOOL iwconfigSetMode(void)
 		}
 		else
 		{
+		    WF_PsPollDisable();
 			WF_CMDisconnect();
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = FALSE;			// don't allow host scan during connection
+			#endif
 		}
 	}
     else if ( (3u <= ARGC) && (strcmppgm2ram((char*)ARGV[2], "managed") == 0) )
     {
 		if ( iwconfigCb.isIdle )
 		{
+			#if defined (WF_HOST_SCAN)
+				gHostScanNotAllowed = TRUE;			// don't allow host scan during connection
+			#endif
+
 			WF_CPSetNetworkType(iwconfigCb.cpId, WF_INFRASTRUCTURE);
 			WF_CMConnect(iwconfigCb.cpId);
+
 		}
 		else
 		{

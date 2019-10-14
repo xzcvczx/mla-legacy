@@ -34,9 +34,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
+ * 11/12/07	    Version 1.0 release
+ * 08/05/11     Fixed rendering to check IsDeviceBusy() in between primitive 
+ *              function calls in case those primitives are hardware accelerated. 
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -187,155 +189,166 @@ WORD GbDraw(void *pObj)
 
     pGb = (GROUPBOX *)pObj;
     
-    if(IsDeviceBusy())
-        return (0);
-
-    switch(state)
+    while(1)
     {
-        case GB_STATE_IDLE:
-
-            if(GetState(pGb, GB_HIDE))
-            {                                                   // Hide the Group Box (remove from screen)
-                SetColor(pGb->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pGb->hdr.left, pGb->hdr.top, pGb->hdr.right, pGb->hdr.bottom))
-					return 0;
-                return (1);
-            }
-
-            state = GB_STATE_HIDETEXT;
-
-        case GB_STATE_HIDETEXT:                                 // hide the text first
-            if(pGb->pText != NULL)
-            {                                                   // needed when dynamically changing
-                SetColor(pGb->hdr.pGolScheme->CommonBkColor);   // the alignement of text
-                if(!Bar(pGb->hdr.left, pGb->hdr.top, pGb->hdr.right, pGb->hdr.top + pGb->textHeight))
-					return 0;
-            }
-
-            state = GB_STATE_SETDIMENSION;
-
-        case GB_STATE_SETDIMENSION:
-            if(IsDeviceBusy())
-                return (0);
-
-            if(GetState(pGb, GB_DISABLED))
-            {   // set color to inactive color
-                SetColor(pGb->hdr.pGolScheme->TextColorDisabled);
-            }
-            else
-            {
-                SetColor(pGb->hdr.pGolScheme->TextColor0);  // active color
-            }
-
-            if(pGb->pText == NULL)
-            {   // there is no text, use full dimensions
-                top = pGb->hdr.top;
-                textLeft = pGb->hdr.left + 1;
-                textRight = textLeft;
-                state = GB_STATE_DRAWTOPRIGHT;  // go to drawing of right top line
-                goto gb_state_draw_lines;
-            }
-            else
-            {   // text is present, set up dimensions with text
-                SetFont(pGb->hdr.pGolScheme->pFont);
-                top = pGb->hdr.top + (pGb->textHeight >> 1);                                // adjust lines on top
-                if(pGb->hdr.state & GB_RIGHT_ALIGN)
-                {
-
-                    // do right aligned
-                    textLeft = pGb->hdr.right - pGb->textWidth - 2;
-                    textRight = pGb->hdr.right - 2;
+        if(IsDeviceBusy())
+            return (0);
+    
+        switch(state)
+        {
+            case GB_STATE_IDLE:
+    
+                if(GetState(pGb, GB_HIDE))
+                {                                                   // Hide the Group Box (remove from screen)
+                    SetColor(pGb->hdr.pGolScheme->CommonBkColor);
+                    if(!Bar(pGb->hdr.left, pGb->hdr.top, pGb->hdr.right, pGb->hdr.bottom))
+    					return 0;
+                    return (1);
                 }
-                else if(pGb->hdr.state & GB_CENTER_ALIGN)
-                {
-
-                    // do center aligned
-                    textLeft = (pGb->hdr.left + pGb->hdr.right - pGb->textWidth) >> 1;
-                    textRight = textLeft + pGb->textWidth;
+    
+                state = GB_STATE_HIDETEXT;
+    
+            case GB_STATE_HIDETEXT:                                 // hide the text first
+                if(pGb->pText != NULL)
+                {                                                   // needed when dynamically changing
+                    SetColor(pGb->hdr.pGolScheme->CommonBkColor);   // the alignement of text
+                    if(!Bar(pGb->hdr.left, pGb->hdr.top, pGb->hdr.right, pGb->hdr.top + pGb->textHeight))
+    					return 0;
+                }
+    
+                state = GB_STATE_SETDIMENSION;
+                break;
+    
+            case GB_STATE_SETDIMENSION:
+    
+                if(GetState(pGb, GB_DISABLED))
+                {   // set color to inactive color
+                    SetColor(pGb->hdr.pGolScheme->TextColorDisabled);
                 }
                 else
                 {
-
-                    // do left aligned
-                    textLeft = pGb->hdr.left + 2;
-                    textRight = pGb->hdr.left + 2 + pGb->textWidth;
+                    SetColor(pGb->hdr.pGolScheme->TextColor0);  // active color
                 }
+    
+                if(pGb->pText == NULL)
+                {   // there is no text, use full dimensions
+                    top = pGb->hdr.top;
+                    textLeft = pGb->hdr.left + 1;
+                    textRight = textLeft;
+                    state = GB_STATE_DRAWTOPRIGHT;  // go to drawing of right top line
+                    break;
+                }
+                else
+                {   // text is present, set up dimensions with text
+                    SetFont(pGb->hdr.pGolScheme->pFont);
+                    top = pGb->hdr.top + (pGb->textHeight >> 1);                                // adjust lines on top
+                    if(pGb->hdr.state & GB_RIGHT_ALIGN)
+                    {
+    
+                        // do right aligned
+                        textLeft = pGb->hdr.right - pGb->textWidth - 2;
+                        textRight = pGb->hdr.right - 2;
+                    }
+                    else if(pGb->hdr.state & GB_CENTER_ALIGN)
+                    {
+    
+                        // do center aligned
+                        textLeft = (pGb->hdr.left + pGb->hdr.right - pGb->textWidth) >> 1;
+                        textRight = textLeft + pGb->textWidth;
+                    }
+                    else
+                    {
+    
+                        // do left aligned
+                        textLeft = pGb->hdr.left + 2;
+                        textRight = pGb->hdr.left + 2 + pGb->textWidth;
+                    }
+    
+                    MoveTo(textLeft, pGb->hdr.top);                                             // move cursor to start of text
+                    state = GB_STATE_DRAWTEXT;
+                }
+    
+            case GB_STATE_DRAWTEXT:
+                if(!OutText(pGb->pText))
+                    return (0);
+                    #if (COLOR_DEPTH == 1)
+                SetColor(WHITE);
+                    #else
+                SetColor(pGb->hdr.pGolScheme->EmbossDkColor);
+                    #endif
+                state = GB_STATE_DRAWTOPRIGHT;
+                break;
+    
+            case GB_STATE_DRAWTOPRIGHT:
+                if(!Line(textRight, top + THREE_D_EFFECT, pGb->hdr.right, top + THREE_D_EFFECT))
+    				return 0;    // top line at right
+                state = GB_STATE_DRAWTOPLEFT;
+                break;
+    
+            case GB_STATE_DRAWTOPLEFT:
+                if(!Line(pGb->hdr.left + THREE_D_EFFECT, top + THREE_D_EFFECT, textLeft, top + THREE_D_EFFECT))
+    				return 0;                     // top line at left
+                state = GB_STATE_DRAWSIDELEFT;
+                break;
+    
+            case GB_STATE_DRAWSIDELEFT:
+                if(!Line(pGb->hdr.left + THREE_D_EFFECT, top + THREE_D_EFFECT, pGb->hdr.left + THREE_D_EFFECT, pGb->hdr.bottom))
+    				return 0;    // side line at left
+                state = GB_STATE_DRAWSIDERIGHT;
+                break;
+    
+            case GB_STATE_DRAWSIDERIGHT:
+                if(!Line(pGb->hdr.right, top + THREE_D_EFFECT, pGb->hdr.right, pGb->hdr.bottom))
+    				return 0;            // side line at right
+                state = GB_STATE_DRAWBOTTOM;
+                break;
+    
+            case GB_STATE_DRAWBOTTOM:
+                if(!Line(pGb->hdr.left + THREE_D_EFFECT, pGb->hdr.bottom, pGb->hdr.right, pGb->hdr.bottom))
+    				return 0; // bottom line
+#if (COLOR_DEPTH == 1)
+                state = GB_STATE_IDLE;
+                return 1;
+#else
+                state = GB_STATE_2DRAWTOPLEFT;
+                break;
+#endif
+#if (COLOR_DEPTH != 1)
+    
+            case GB_STATE_2DRAWTOPLEFT:
+                SetColor(pGb->hdr.pGolScheme->EmbossLtColor);                               // 2nd line top line at left
+                if(!Line(pGb->hdr.left, top, textLeft, top))
+    				return 0;
+                state = GB_STATE_2DRAWTOPRIGHT;
+                break;
+    
+            case GB_STATE_2DRAWTOPRIGHT:
+                if(!Line(textRight, top, pGb->hdr.right, top))
+    				return 0;                                  // 2nd line top line at right
+                state = GB_STATE_2DRAWSIDELEFT;
+                break;
+    
+            case GB_STATE_2DRAWSIDELEFT:
+                if(!Line(pGb->hdr.left, top, pGb->hdr.left, pGb->hdr.bottom - 1))
+    				return 0;               // 2nd line left
+                state = GB_STATE_2DRAWSIDERIGHT;
+                break;
+    
+            case GB_STATE_2DRAWSIDERIGHT:
+                if(!Line(pGb->hdr.right - 1, top + 2, pGb->hdr.right - 1, pGb->hdr.bottom - 1))
+    				return 0; // 2nd line right
+                state = GB_STATE_2DRAWBOTTOM;
+                break;
+    
+            case GB_STATE_2DRAWBOTTOM:
+                if(!Line(pGb->hdr.left + 2, pGb->hdr.bottom - 1, pGb->hdr.right - 1, pGb->hdr.bottom - 1))
+    				return 0;  // 2nd line bottom
+                state = GB_STATE_IDLE;
+                return 1;
+#endif // end of #if (COLOR_DEPTH != 1)
 
-                MoveTo(textLeft, pGb->hdr.top);                                             // move cursor to start of text
-                state = GB_STATE_DRAWTEXT;
-            }
-
-        case GB_STATE_DRAWTEXT:
-            if(!OutText(pGb->pText))
-                return (0);
-                #if (COLOR_DEPTH == 1)
-            SetColor(WHITE);
-                #else
-            SetColor(pGb->hdr.pGolScheme->EmbossDkColor);
-                #endif
-            state = GB_STATE_DRAWTOPRIGHT;
-
-    gb_state_draw_lines:
-
-        case GB_STATE_DRAWTOPRIGHT:
-            if(!Line(textRight, top + THREE_D_EFFECT, pGb->hdr.right, top + THREE_D_EFFECT))
-				return 0;    // top line at right
-            state = GB_STATE_DRAWTOPLEFT;
-
-        case GB_STATE_DRAWTOPLEFT:
-            if(!Line(pGb->hdr.left + THREE_D_EFFECT, top + THREE_D_EFFECT, textLeft, top + THREE_D_EFFECT))
-				return 0;                     // top line at left
-            state = GB_STATE_DRAWSIDELEFT;
-
-        case GB_STATE_DRAWSIDELEFT:
-            if(!Line(pGb->hdr.left + THREE_D_EFFECT, top + THREE_D_EFFECT, pGb->hdr.left + THREE_D_EFFECT, pGb->hdr.bottom))
-				return 0;    // side line at left
-            state = GB_STATE_DRAWSIDERIGHT;
-
-        case GB_STATE_DRAWSIDERIGHT:
-            if(!Line(pGb->hdr.right, top + THREE_D_EFFECT, pGb->hdr.right, pGb->hdr.bottom))
-				return 0;            // side line at right
-            state = GB_STATE_DRAWBOTTOM;
-
-        case GB_STATE_DRAWBOTTOM:
-            if(!Line(pGb->hdr.left + THREE_D_EFFECT, pGb->hdr.bottom, pGb->hdr.right, pGb->hdr.bottom))
-				return 0; // bottom line
-                #if (COLOR_DEPTH == 1)
-            state = GB_STATE_IDLE;
-                #else
-            state = GB_STATE_2DRAWTOPLEFT;
-                #endif
-                #if (COLOR_DEPTH != 1)
-
-        case GB_STATE_2DRAWTOPLEFT:
-            SetColor(pGb->hdr.pGolScheme->EmbossLtColor);                               // 2nd line top line at left
-            if(!Line(pGb->hdr.left, top, textLeft, top))
-				return 0;
-            state = GB_STATE_2DRAWTOPRIGHT;
-
-        case GB_STATE_2DRAWTOPRIGHT:
-            if(!Line(textRight, top, pGb->hdr.right, top))
-				return 0;                                  // 2nd line top line at right
-            state = GB_STATE_2DRAWSIDELEFT;
-
-        case GB_STATE_2DRAWSIDELEFT:
-            if(!Line(pGb->hdr.left, top, pGb->hdr.left, pGb->hdr.bottom - 1))
-				return 0;               // 2nd line left
-            state = GB_STATE_2DRAWSIDERIGHT;
-
-        case GB_STATE_2DRAWSIDERIGHT:
-            if(!Line(pGb->hdr.right - 1, top + 2, pGb->hdr.right - 1, pGb->hdr.bottom - 1))
-				return 0; // 2nd line right
-            state = GB_STATE_2DRAWBOTTOM;
-
-        case GB_STATE_2DRAWBOTTOM:
-            if(!Line(pGb->hdr.left + 2, pGb->hdr.bottom - 1, pGb->hdr.right - 1, pGb->hdr.bottom - 1))
-				return 0;  // 2nd line bottom
-            state = GB_STATE_IDLE;
-                #endif
-    }
-
-    return (1);
+        } // end of switch()
+    } // end of while(1)
 }
 
 #endif // USE_GROUPBOX

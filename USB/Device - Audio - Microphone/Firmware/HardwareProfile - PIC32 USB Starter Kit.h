@@ -78,6 +78,42 @@
     //  final application design.
     #define DEMO_BOARD PIC32_USB_STARTER_KIT
 
+    /********************************************************************
+     * Specify the system clock here. Note that this only for application
+     * use. Changing the system clock frequency here does not change the
+     * actual device system clock. That has to done via the fuse config
+     * options.
+     ********************************************************************/
+
+   /********************************************************************
+     * Specify the system clock here. Note that this only for application
+     * use. Changing the system clock frequency here does not change the
+     * actual device system clock. That has to done via the fuse config
+     * options.
+     ********************************************************************/
+    //#define RUN_AT_48MHZ
+    //#define RUN_AT_24MH
+    #define RUN_AT_60MHZ
+
+    // Various clock values
+    #if defined(RUN_AT_48MHZ)
+        #define GetSystemClock()            48000000UL
+        #define GetPeripheralClock()        48000000UL
+        #define GetInstructionClock()       (GetSystemClock())
+    #elif defined(RUN_AT_24MHZ)
+        #define GetSystemClock()            24000000UL
+        #define GetPeripheralClock()        24000000UL
+        #define GetInstructionClock()       (GetSystemClock())
+    #elif defined(RUN_AT_60MHZ)    
+        #define GetSystemClock()            (60000000ul)
+        #define GetPeripheralClock()        (GetSystemClock()) 
+        #define GetInstructionClock()       (GetSystemClock())
+    #else
+        #error Choose a speed
+    #endif
+   
+    
+
     /** LED ************************************************************/
     #define mInitAllLEDs()      LATD &= 0xFFF8; TRISD &= 0xFFF8;
     

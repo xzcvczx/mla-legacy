@@ -233,8 +233,6 @@ typedef union _POINTER
 #define ConvertToPhysicalAddress(a) ((WORD)(a))   
 #define ConvertToVirtualAddress(a)  ((void *)(a))
 
-
-
 /********************************************************************
 Function:
     BOOL USBSleepOnSuspend(void)

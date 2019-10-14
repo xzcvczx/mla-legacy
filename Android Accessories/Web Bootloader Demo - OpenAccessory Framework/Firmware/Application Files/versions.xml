@@ -62,6 +62,18 @@
     </device>
     <device>
         <model>Blinky Lights Demo</model>
+        <description>PIC24FJ64GB502 Microstick</description>
+        <versions>
+            <version>
+                <major>9</major>
+                <minor>9</minor>
+                <dot>9</dot>
+                <url>http://ww1.microchip.com/downloads/en/SoftwareLibrary/gb5_microstick_v9_9_9.mbn</url>
+            </version>
+        </versions>
+    </device>
+    <device>
+        <model>Blinky Lights Demo</model>
         <description>PIC24FJ256DA210 Development Board</description>
         <versions>
             <version>

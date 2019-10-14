@@ -1,13 +1,6 @@
 /*****************************************************************************
- * GRAPHICS PICTail PLUS BOARD MEMORY PROGRAMMER MODULE
- * This program receives Intel HEX file from UART and programs
- * flash memory installed on Graphics PICTail board.
- *
- * Please read ReadMe file for details.
- *
- *****************************************************************************
  * FileName:        FlashProgrammer.c
- * Dependencies:    FlashProgrammer.h
+ * Dependencies:    See Includes Section
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
@@ -36,10 +29,19 @@
  * COST OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
+ *****************************************************************************/
+/*****************************************************************************
+ * Section: Description
  *
- * Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 08/04/10    Creation...
+ * This module is used to program an external memory source.  The data is sent
+ * via the PC utility external_memory_programmer.  Using the comm_pkt protocol, 
+ * the data is parsed and programed to the external memory.  
+ *
+ * This module is used by serval different Graphics demos and is part of the 
+ * common directory under the Graphics demo.
+ *****************************************************************************/
+/*****************************************************************************
+ * Section: Includes
  *****************************************************************************/
 #include "FlashProgrammer.h"
 #include "comm_pkt.h"
@@ -53,17 +55,26 @@
 #endif
 #include "ExternalMemory.h"
 
+/*****************************************************************************
+ * Section: Module Defines
+ *****************************************************************************/
 #ifdef USE_COMM_PKT_MEDIA_USB
 #define FLASH_PROGRAMMER_COMMUNICATION_MEDIUM (COMM_PKT_MEDIA_USB)
 #else
 #define FLASH_PROGRAMMER_COMMUNICATION_MEDIUM (COMM_PKT_MEDIA_SERIAL_PORT)
 #endif
 
+/*****************************************************************************
+ * Section: Function Prototypes
+ *****************************************************************************/
 void BinaryMemoryUpload(void);
 BOOL BinaryHandlePacket(void);
 BYTE WriteMemory(DWORD addr, BYTE *data, WORD length);
 DWORD CalculateCheckSum(DWORD addr, BYTE *buffer, DWORD range);
 
+/*****************************************************************************
+ * Section: Externs
+ *****************************************************************************/
 #ifdef USE_COMM_PKT_MEDIA_USB
 extern unsigned char OUTPacket[64];	//User application buffer for receiving and holding OUT packets sent from the host
 extern unsigned char INPacket[64];		//User application buffer for sending IN packets to the host
@@ -72,10 +83,13 @@ extern USB_HANDLE USBGenericInHandle;
 #endif
 
 
+/*****************************************************************************
+ * Section: Module Structures
+ *****************************************************************************/
 typedef struct
 {
     DWORD addr __attribute__((packed));
-    BYTE data __attribute__((packed));
+    BYTE data;
 }COMM_PKT_MEMORY_PAYLOAD;
 
 typedef struct
@@ -84,8 +98,14 @@ typedef struct
     DWORD range __attribute__((packed));
 }COMM_PKT_VERIFY_PAYLOAD;
 
+/*****************************************************************************
+ * Section: Functions
+ *****************************************************************************/
 
 
+/*****************************************************************************
+ * int ProgramFlash(void)
+ *****************************************************************************/
 int ProgramFlash(void)
 {
 
@@ -146,10 +166,6 @@ int ProgramFlash(void)
     INTEnableSystemMultiVectoredInt();
     #endif
 
-	#if defined (GFX_PICTAIL_V2)
-    	BeepInit();
-    #endif 
-
     #ifdef USE_COMM_PKT_MEDIA_USB
 	USBGenericOutHandle = 0;	
 	USBGenericInHandle = 0;		
@@ -167,6 +183,9 @@ int ProgramFlash(void)
     return (0);
 }
 
+/*****************************************************************************
+ * void BinaryMemoryUpload(void)
+ *****************************************************************************/
 void BinaryMemoryUpload(void)
 {
     #ifdef USE_COMM_PKT_MEDIA_USB
@@ -201,6 +220,9 @@ void BinaryMemoryUpload(void)
     }
 }
 
+/*****************************************************************************
+ * BOOL BinaryHandlePacket(void)
+ *****************************************************************************/
 BOOL BinaryHandlePacket(void)
 {
     BYTE *packet;
@@ -284,11 +306,17 @@ BOOL BinaryHandlePacket(void)
 
     return result;
 }
+/*****************************************************************************
+ * BYTE WriteMemory(DWORD addr, BYTE *data, WORD length)
+ *****************************************************************************/
 BYTE WriteMemory(DWORD addr, BYTE *data, WORD length)
 {
     return WriteArray(addr, data, length);
 }
 
+/*****************************************************************************
+ * DWORD CalculateCheckSum(DWORD addr, BYTE *buffer, DWORD range)
+ *****************************************************************************/
 DWORD CalculateCheckSum(DWORD addr, BYTE *buffer, DWORD range)
 {
     DWORD   checksum = 0xFFFFFFFF;

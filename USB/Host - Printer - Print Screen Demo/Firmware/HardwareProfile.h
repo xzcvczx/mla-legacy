@@ -181,7 +181,7 @@
     !defined (PIC24FJ256DA210_DEV_BOARD) && \
     !defined (MEB_BOARD) && \
     !defined (GFX_PICTAIL_LCC)    
-	#error "Error: Graphics Hardware Platform is not defined! One of the following boards (GFX_PICTAIL_V3, GFX_PICTAIL_V2, PIC24FJ256DA210_DEV_BOARD, MEB_BOARD) must be defined.
+	#error "Error: Graphics Hardware Platform is not defined! One of the following boards (GFX_PICTAIL_V3, GFX_PICTAIL_V2, PIC24FJ256DA210_DEV_BOARD, MEB_BOARD) must be defined."
 #endif
 
 /*
@@ -1835,45 +1835,29 @@
 
 			#if (DISP_ORIENTATION == 0)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
 			#elif (DISP_ORIENTATION == 180)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   5     
-			#elif (DISP_ORIENTATION == 270)	
-				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
-                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   5     
 			#endif	
 
         #endif
 
-		#if defined (GFX_USE_DISPLAY_PANEL_TFT_640480_8_E)	       ||     \
+		#if defined (GFX_USE_DISPLAY_PANEL_TFT_640480_8_E)  ||  \
             defined (GFX_USE_DISPLAY_PANEL_TFT_800480_33_E)	
 
 			#if (DISP_ORIENTATION == 0)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
 			#elif (DISP_ORIENTATION == 180)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   5     
-			#elif (DISP_ORIENTATION == 270)	
-				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
-                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   4     
 			#endif	
 
         #endif
 
-		//#if (DISPLAY_PANEL == PH480272T_005_I11Q)	
 		#if defined (GFX_USE_DISPLAY_PANEL_PH480272T_005_I11Q)	
 
             #if (DISP_ORIENTATION == 90)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR    6
-			#elif (DISP_ORIENTATION == 180)	
-				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
-                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR    5
 			#elif (DISP_ORIENTATION == 270)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
 			#endif	
             
 		#endif
@@ -1908,11 +1892,17 @@
 		// for  PIC24FJ256DA210 Dev Board or GFX_PICTAIL_V3
 		// Addresses for calibration and version values in SPI Flash on Graphics PICtail 3 & PIC24FJ256DA210 Development Board.
 		// Or Addresses for calibration and version values in Parallel Flash on PIC24FJ256DA210 Development Board.
+
         #define ADDRESS_RESISTIVE_TOUCH_VERSION	(unsigned long)0xFFFFFFFE
-        #define ADDRESS_RESISTIVE_TOUCH_COEFA   (unsigned long)0xFFFFFFFC
-        #define ADDRESS_RESISTIVE_TOUCH_COEFB   (unsigned long)0xFFFFFFFA
-        #define ADDRESS_RESISTIVE_TOUCH_COEFC   (unsigned long)0xFFFFFFF8
-        #define ADDRESS_RESISTIVE_TOUCH_COEFD   (unsigned long)0xFFFFFFF6
+        #define ADDRESS_RESISTIVE_TOUCH_ULX   (unsigned long)0xFFFFFFFC
+        #define ADDRESS_RESISTIVE_TOUCH_ULY   (unsigned long)0xFFFFFFFA
+        #define ADDRESS_RESISTIVE_TOUCH_URX   (unsigned long)0xFFFFFFF8
+        #define ADDRESS_RESISTIVE_TOUCH_URY   (unsigned long)0xFFFFFFF6
+
+        #define ADDRESS_RESISTIVE_TOUCH_LLX   (unsigned long)0xFFFFFFF4
+        #define ADDRESS_RESISTIVE_TOUCH_LLY   (unsigned long)0xFFFFFFF2
+        #define ADDRESS_RESISTIVE_TOUCH_LRX   (unsigned long)0xFFFFFFF0
+        #define ADDRESS_RESISTIVE_TOUCH_LRY   (unsigned long)0xFFFFFFEE
 
         // define the functions to call for the non-volatile memory
         // check out touch screen module for definitions of the following function pointers
@@ -1926,10 +1916,15 @@
 	/* ----------------------------------------- */
 		// for  PIC24FJ256DA210 Dev Board 
 		#define ADDRESS_RESISTIVE_TOUCH_VERSION	(unsigned long)0x0003FFFE
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFA   (unsigned long)0x0003FFFC
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFB   (unsigned long)0x0003FFFA
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFC   (unsigned long)0x0003FFF8
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFD   (unsigned long)0x0003FFF6
+        #define ADDRESS_RESISTIVE_TOUCH_ULX   (unsigned long)0x0003FFFC
+        #define ADDRESS_RESISTIVE_TOUCH_ULY   (unsigned long)0x0003FFFA
+        #define ADDRESS_RESISTIVE_TOUCH_URX   (unsigned long)0x0003FFF8
+        #define ADDRESS_RESISTIVE_TOUCH_URY   (unsigned long)0x0003FFF6
+
+        #define ADDRESS_RESISTIVE_TOUCH_LLX   (unsigned long)0x0003FFF4
+        #define ADDRESS_RESISTIVE_TOUCH_LLY   (unsigned long)0x0003FFF2
+        #define ADDRESS_RESISTIVE_TOUCH_LRX   (unsigned long)0x0003FFF0
+        #define ADDRESS_RESISTIVE_TOUCH_LRY   (unsigned long)0x0003FFEE
 	    
         // define the functions to call for the non-volatile memory
         // check out touch screen module for definitions of the following function pointers
@@ -1944,10 +1939,15 @@
 		#warning "Non-Volatile Memory addresses is not set for touch screen calibration"
 
 		#define ADDRESS_RESISTIVE_TOUCH_VERSION	0
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFA   0
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFB   0
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFC   0
-	    #define ADDRESS_RESISTIVE_TOUCH_COEFD   0
+        #define ADDRESS_RESISTIVE_TOUCH_ULX     0
+        #define ADDRESS_RESISTIVE_TOUCH_ULY     0
+        #define ADDRESS_RESISTIVE_TOUCH_URX     0
+        #define ADDRESS_RESISTIVE_TOUCH_URY     0
+
+        #define ADDRESS_RESISTIVE_TOUCH_LLX     0
+        #define ADDRESS_RESISTIVE_TOUCH_LLY     0
+        #define ADDRESS_RESISTIVE_TOUCH_LRX     0
+        #define ADDRESS_RESISTIVE_TOUCH_LRY     0
 
 		#define NVMSectorErase					((void *)0)
     	#define NVMWrite 						((void *)0)

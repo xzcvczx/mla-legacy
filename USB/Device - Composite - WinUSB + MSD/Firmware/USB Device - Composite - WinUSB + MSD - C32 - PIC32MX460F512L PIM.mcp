@@ -48,8 +48,8 @@ file_020=USB Stack
 file_021=MDD File System
 file_022=Hardware Profile
 file_023=USB Stack
-file_024=.
-file_025=USB Stack
+file_024=USB Stack
+file_025=.
 file_026=.
 [GENERATED_FILES]
 file_000=no
@@ -104,8 +104,8 @@ file_020=no
 file_021=no
 file_022=no
 file_023=no
-file_024=yes
-file_025=no
+file_024=no
+file_025=yes
 file_026=yes
 [FILE_INFO]
 file_000=main.c
@@ -132,9 +132,9 @@ file_020=..\..\..\Microchip\Include\USB\usb_hal.h
 file_021=..\..\..\Microchip\Include\MDD File System\Internal Flash.h
 file_022=HardwareProfile - PIC32MX460F512L PIM.h
 file_023=..\..\..\Microchip\Include\USB\usb_function_generic.h
-file_024=..\Getting Started - Running the Device - Composite - WinUSB + MSD demo.htm
-file_025=..\..\..\Microchip\USB\usb_device_local.h
-file_026=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_024=..\..\..\Microchip\USB\usb_device_local.h
+file_025=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_026=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

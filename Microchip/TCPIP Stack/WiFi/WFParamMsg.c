@@ -105,6 +105,96 @@ void WFEnableMRF24WB0MMode(void)
 
 /*******************************************************************************
   Function:	
+    void WFEnableBroadcastProbeResponse(void)
+
+  Summary:
+    This allows MRF24WB0M to broadcast probe response in Adhoc mode
+
+  Description:
+
+  Precondition:
+  	MACInit must be called first.
+
+  Parameters:
+    None.
+
+  Returns:
+  	None.
+  	
+  Remarks:
+  	None.
+  *****************************************************************************/
+
+void WFEnableBroadcastProbeResponse(void)
+{
+    UINT8 buf[1] = {1};
+    
+    SendSetParamMsg(PARAM_BROADCAST_PROBE_RESPONSE, buf, sizeof(buf)); 
+}   
+
+/*******************************************************************************
+  Function:	
+    void WFEnableDeferredPowerSave(void)
+
+  Summary:
+    This allows MRF24WB0M to enter power save after DHCP process done
+
+  Description:
+
+  Precondition:
+  	MACInit must be called first.
+
+  Parameters:
+    None.
+
+  Returns:
+  	None.
+  	
+  Remarks:
+  	None.
+  *****************************************************************************/
+
+void WFEnableDeferredPowerSave(void)
+{
+    UINT8 buf[1] = {1};
+    
+    SendSetParamMsg(PARAM_DEFERRED_POWERSAVE, buf, sizeof(buf)); 
+}   
+
+#if defined (WF_AGGRESSIVE_PS)
+/*******************************************************************************
+  Function:	
+    void WFEnableAggressivePowerSave(void)
+
+  Summary:
+    This allows MRF24WB0M to turn off RF power quicker in PS mode
+
+  Description:
+
+  Precondition:
+  	MACInit must be called first.
+
+  Parameters:
+    None.
+
+  Returns:
+  	None.
+  	
+  Remarks:
+  	None.
+  *****************************************************************************/
+
+void WFEnableAggressivePowerSave(void)
+{
+    UINT8 buf[1] = {1};
+    
+    SendSetParamMsg(PARAM_AGGRESSIVE_PS, buf, sizeof(buf)); 
+}   
+
+#endif
+
+/*******************************************************************************
+  Function:	
     void WFGetMRF24WB0MVersion(UINT8 *p_version)
 
   Summary:

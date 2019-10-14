@@ -139,6 +139,10 @@ BOOL DHCPClientInitializedOnce = FALSE;
 static BYTE _DHCPReceive(void);
 static void _DHCPSend(BYTE messageType, BOOL bRenewing);
 
+#if defined (WF_CS_IO)
+extern void SignalDHCPSuccessful(void);
+#endif
+
 
 /*****************************************************************************
   Function:
@@ -502,6 +506,12 @@ void DHCPTask(void)
 				// unlinked.  No one will see it.  
 				if(!MACIsLinked())
 					break;
+					
+            	#if defined(WF_CS_IO)
+            	    #if defined(STACK_USE_UART )
+            	        putrsUART("DHCP Send Discovery...\r\n");
+            	    #endif
+            	#endif
 	
 				// Ensure transmitter is ready to accept data
 				if(UDPIsPutReady(DHCPClient.hDHCPSocket) < 300u)
@@ -587,7 +597,15 @@ void DHCPTask(void)
 						DHCPClient.flags.bits.bIsBound = TRUE;	
 
 						if(DHCPClient.validValues.bits.IPAddress)
+						{
 							AppConfig.MyIPAddr = DHCPClient.tempIPAddress;
+							#if defined(WF_CS_IO) 
+							    #if defined(STACK_USE_UART )
+							        putrsUART("DHCP client successful\r\n");
+							    #endif
+    							SignalDHCPSuccessful();
+							#endif
+						}	
 						if(DHCPClient.validValues.bits.Mask)
 							AppConfig.MyMask = DHCPClient.tempMask;
 						if(DHCPClient.validValues.bits.Gateway)

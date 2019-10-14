@@ -102,7 +102,7 @@ full sheet printer.
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
+    
 
 #else
 
@@ -205,7 +205,7 @@ PRINT_STATUS                    status;
 
 BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWORD size )
 {
-    switch( event )
+    switch( (INT)event )
     {
         // --------------------------------------------------------------------------
         // Printer events
@@ -339,7 +339,9 @@ void InitializeVbusMonitor( void )
 {
     #if defined( __C30__)
         // Set up the A/D converter
-        #if !defined(__PIC24FJ256DA210__) 
+        #if defined(__PIC24FJ256DA210__) 
+            //The over current detection of the PIC24FJ256DA210 development board is
+            //  not connected by default.
         #elif defined(__PIC24FJ256GB210__)
             ANSBbits.ANSB8 = 1;
         #else

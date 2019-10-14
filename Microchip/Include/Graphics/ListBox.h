@@ -37,6 +37,7 @@
  * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/12/07		Version 1.0 release
+ * 07/26/11     Rename LbClrtSel() to LbClrSel().
  *****************************************************************************/
 #ifndef _LISTBOX_H
     #define _LISTBOX_H
@@ -408,7 +409,7 @@ void        LbChangeSel(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none 
 *
 ********************************************************************/
-    #define LbClrtSel(pLb, pItem)       \
+    #define LbClrSel(pLb, pItem)       \
     if(pItem->status & LB_STS_SELECTED) \
         LbChangeSel((LISTBOX *)pLb, pItem);
 
@@ -503,7 +504,7 @@ SHORT   LbGetFocusedItem(LISTBOX *pLb);
 * Side Effects: none
 *
 ********************************************************************/
-    #define LbGetItemList(pLb)  ((LISTITEM *)pLb->pItemList)
+    #define LbGetItemList(pLb)  ((LISTITEM *)((LISTBOX *)pLb)->pItemList)
 
 /*********************************************************************
 * Function: WORD LbTranslateMsg(void *pObj, GOL_MSG *pMsg)

@@ -32,11 +32,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author                   Date            Comment
+ * Date            Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		    10/28/2007      Initial Version
- * Pradeep Budagutta		10/28/2007      Display related defines 
- *                                          moved to DisplayConfig.h
+ * 10/28/2007      Initial Version
+ * 10/28/2007      Display related defines moved to DisplayConfig.h
  ********************************************************************/
 #ifndef _GRAPHICSCONFIG_H
     #define _GRAPHICSCONFIG_H

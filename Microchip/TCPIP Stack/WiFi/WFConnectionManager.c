@@ -239,6 +239,52 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
 
 /*******************************************************************************
   Function:	
+    void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
+
+  Summary:
+    Returns the current connection state.
+
+  Description:
+
+  Precondition:
+    MACInit must be called first.
+
+  Parameters:
+    p_state - Pointer to location where connection state will be written
+    p_currentCpId - Pointer to location of current connection profile ID that
+                     is being queried.
+
+  Returns:
+    None.
+  	
+  Remarks:
+    None.
+  *****************************************************************************/
+void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
+{
+    UINT8  hdrBuf[2];
+    UINT8  msgData[2];
+    
+    hdrBuf[0] = WF_MGMT_REQUEST_TYPE;
+    hdrBuf[1] = WF_CM_GET_CONNECTION_STATUS_SUBYTPE;
+
+    SendMgmtMsg(hdrBuf,
+                sizeof(hdrBuf),
+                NULL,
+                0);
+
+    /* wait for mgmt response, read data, free after read */
+	WaitForMgmtResponseAndReadData(WF_CM_GET_CONNECTION_STATUS_SUBYTPE, 
+                                   sizeof(msgData),                  /* num data bytes to read          */
+                                   MGMT_RESP_1ST_DATA_BYTE_INDEX,    /* only used if num data bytes > 0 */
+                                   msgData);                         /* only used if num data bytes > 0 */
+    
+    *p_state       = msgData[0];        /* connection state */
+    *p_currentCpId = msgData[1];        /* current CpId     */
+} 
+
+/*******************************************************************************
+  Function:	
     BOOL WFisConnected()
 
   Summary:
@@ -293,6 +339,32 @@ BOOL WFisConnected()
 void SetLogicalConnectionState(BOOL state)
 {
     g_LogicalConnection = state;
+}
+
+/*******************************************************************************
+  Function:	
+    void WF_CMGetConnectContext(tWFConnectContext *p_ctx)
+
+  Summary:
+    Retrieves WF connection context
+
+  Description:
+
+  Precondition:
+  	MACInit must be called first.
+
+  Parameters:
+    p_ctx -- pointer where connect context will be written
+
+  Returns:
+  	None.
+  	
+  Remarks:
+  	None.
+ *****************************************************************************/
+void WF_CMGetConnectContext(tWFConnectContext *p_ctx)
+{
+    SendGetParamMsg(PARAM_CONNECT_CONTEXT, (UINT8 *)p_ctx, sizeof(*p_ctx));
 }
 
 #endif /* WF_CS_TRIS */

@@ -1,14 +1,14 @@
 /********************************************************************
  FileName:     	ccid-cmds.c
  Dependencies:	See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
+ Processor:		Microchip USB Microcontrollers
  Hardware:		The code is natively intended to be used on the following
  				hardware platforms: PICDEM™ FS USB Demo Board,
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
+ 				PIC18FXXJ50 FS USB Plug-In Module, or
+ 				Explorer 16 + PIC24 USB PIM or PIC32 USB PIM.  The firmware may be
  				modified for use on other USB platforms by editing the
  				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
+ Complier:  	Microchip C18 (for PIC18) , C30 (for PIC24) or C32 (for PIC32) 
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -42,24 +42,30 @@
 /** VARIABLES ******************************************************/
 #if defined(__18CXX)
     #pragma udata CCID
-#else 
-    #pragma udata
 #endif  
    
 USB_CCID_BUFFER  usbCcidApdu; 
 USB_CCID_BUFFER* pUsbCcidApdu = &usbCcidApdu; 
 
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 UINT8  usbCcidOutPacketTrack=0;
 UINT32_VAL usbCcidOutPacketLength;
 INT32 usbCcidNoOfBytesToReceive;
+UINT8 usbCcidProtocolNum; 
+extern BYTE cgtETU;
+extern BYTE maxSegmentLength; 
 
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 /** PRIVATE PROTOTYPES *********************************************/
 void UsbCcidPcToRdrXfrBlock(void);
 void UsbCcidCommandNotSupported(void);
+void UsbCcidSendRdrToPcParameters (void); 
 
 /******************************************************************************
     Function:
@@ -179,7 +185,7 @@ BYTE GetCardStatus(void)
 void CCID_Init()
 {
 	//mInitAllSwitches();
-
+    usbCcidProtocolNum = 0;
 	//Start smart card stack
 	SC_Initialize();
 
@@ -193,6 +199,7 @@ void ProcessCCID()
 	static WORD CardPresentVerifyCounter = 0;
 	static BOOL CardON = FALSE;
 	BYTE i;
+	BYTE ppsData[3]; 
 
 	////// Detect Card Insertion and removal and transmit 	/////////////
 	////// the status on interrupt endpoint 				/////////////
@@ -317,12 +324,17 @@ void ProcessCCID()
                     
                     USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10 );
 				}
-				else  //else is Card is Present
+				else  //else if Card is Present
 				{
 					SC_Initialize();
 					if( SC_PowerOnATR() ) //Get ATR
 					{
-//						SC_DoPPS();	//switch baud rate based on ATR setting					
+//						SC_DoPPS();	//switch baud rate based on ATR setting	
+                        if (SC_T0ProtocolType() && !SC_T1ProtocolType())
+                            usbCcidProtocolNum = USB_CCID_T0_PROTOCOL; 	
+                        else if (!SC_T0ProtocolType() && SC_T1ProtocolType())
+                            usbCcidProtocolNum = USB_CCID_T1_PROTOCOL; 
+                        			
 						card_st.Val 		= 0;
 						card_st.ICC_Status	= GetCardStatus();
 						card_st.CmdStatus	= 0; //processed without error
@@ -339,7 +351,7 @@ void ProcessCCID()
 						pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;  //no extended APDU support
 
 						for (i = 0; i < scATRLength; i++)
-						pUsbCcidApdu->CCID_BulkInBuffer[10 + i] = scCardATR[i];
+						    pUsbCcidApdu->CCID_BulkInBuffer[10 + i] = scCardATR[i];
 						USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, scATRLength+10 );
 				    }
 			        else // ATR Failed
@@ -354,11 +366,9 @@ void ProcessCCID()
 					    pUsbCcidApdu->CCID_BulkInBuffer[8] = ErrCode;		//bError
 					    pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;
                         USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10 );
-				    
-				    }   // End of else ATR Failed
-				
-			    }  // End of else - card is present
-			}  // End case PC_to_RDR_IccPowerOn:    
+				    }// End of else ATR Failed
+			    }// End of else - card is present
+			}// End case PC_to_RDR_IccPowerOn:    
 			break;
 
 			////////////////////////////////////////////////////////////////////////////////////
@@ -415,164 +425,52 @@ void ProcessCCID()
             ////////////////////////////////////////////////////////////////////////////////////
             
 			case USB_CCID_PC_TO_RDR_GET_PARAMETERS:
-                
-				if( SC_GetCardState() == SC_STATE_CARD_ACTIVE )
-				{
-					card_st.Val 		= 0;
-					card_st.ICC_Status	= GetCardStatus();
-					card_st.CmdStatus	= 0; //processed without error
-
-					pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; 		//Msg Type RDR_to_PC_Parameters
-					pUsbCcidApdu->CCID_BulkInBuffer[1] = 5; //protocol data struct length
-
-					pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
-					pUsbCcidApdu->CCID_BulkInBuffer[8] = 0;  //bError none
-					pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;  // T0 Protocol
-
-					// Protocol Data Structure
-					pUsbCcidApdu->CCID_BulkInBuffer[10] = scTA1;	//Fi and Di codes
-					pUsbCcidApdu->CCID_BulkInBuffer[11] = 0;		//no inversion
-					pUsbCcidApdu->CCID_BulkInBuffer[12] = scTC1;	//Extra gaurd time
-					pUsbCcidApdu->CCID_BulkInBuffer[13] = scTC2;	//WI for T0, wwt = 960 * WI * (Fi / f)
-					pUsbCcidApdu->CCID_BulkInBuffer[14] = 0;		//Does not Allow clock stopping
-
-                    USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 15 );
-				}
-				else
-				{
-					//Card not present or not active
-					card_st.Val 		= 0;
-					card_st.ICC_Status	= GetCardStatus();
-					card_st.CmdStatus	= 1; //Command Failed Code
-
-					pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; 		//Msg Type RDR_to_PC_Parameters
-					pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
-					pUsbCcidApdu->CCID_BulkInBuffer[8] = 0xFE;			//bError ICC_MUTE
-					pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;
-
-                    USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10 );
-				}
-
+			    UsbCcidSendRdrToPcParameters(); 
 			break;
 			////////////////////////////////////////////////////////////////////////////////////
 			case USB_CCID_PC_TO_RDR_RESET_PARAMETERS :
-			    if( SC_GetCardState() == SC_STATE_CARD_ACTIVE )
-				{
-			        scTA1 = DEFAULT_FI_DI;
-			        scTC1 = DEFAULT_GUARD_TIME;
-			        scTC2 = DEFAULT_WI;
-//			        USB_CCID_ResetParameters();
-//			        SC_PowerOnATR();
-			        card_st.Val 		= 0;
-					card_st.ICC_Status	= GetCardStatus();
-					card_st.CmdStatus	= 0; //processed without error
-
-					pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; //Msg Type RDR_to_PC_Parameters
-					pUsbCcidApdu->CCID_BulkInBuffer[1] = 5; //protocol data struct length
-
-					pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
-					pUsbCcidApdu->CCID_BulkInBuffer[8] = 0;  //bError none
-					pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;  // T0 Protocol
-
-
-					pUsbCcidApdu->CCID_BulkInBuffer[10] = scTA1;	//Fi and Di codes
-
-					pUsbCcidApdu->CCID_BulkInBuffer[11] = 0;		//no inversion
-					pUsbCcidApdu->CCID_BulkInBuffer[12] = scTC1;	//Extra gaurd time
-					pUsbCcidApdu->CCID_BulkInBuffer[13] = scTC2;	//WI for T0, wwt = 960 * WI * (Fi / f)
-					pUsbCcidApdu->CCID_BulkInBuffer[14] = 0;		//Does not Allow clock stopping
-
-                    USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 15 );
-				}
-				else
-				{
-					//Card not present or not active
-					card_st.Val 		= 0;
-					card_st.ICC_Status	= GetCardStatus();
-					card_st.CmdStatus	= 1; //Command Failed Code
-
-					pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; 		//Msg Type RDR_to_PC_Parameters
-					pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
-					pUsbCcidApdu->CCID_BulkInBuffer[8] = 0xFE;			//bError ICC_MUTE
-					pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;
-
-                    USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10 );
-				}
-
+			    UsbCcidSendRdrToPcParameters();
 			break;
 			////////////////////////////////////////////////////////////////////////////////////
 			case USB_CCID_PC_TO_RDR_SET_PARAMETERS :
-			    if( SC_GetCardState() == SC_STATE_CARD_ACTIVE )
+			    if  (SC_GetCardState() == SC_STATE_CARD_ACTIVE)
 				{
-					if (pUsbCcidApdu->CCID_BulkOutBuffer[7] == 0)   //if T=0 Protocol
+    				if (SC_T0ProtocolType() && SC_T1ProtocolType())
+    				{
+    				    usbCcidProtocolNum = pUsbCcidApdu->CCID_BulkOutBuffer[7];  
+    				}    
+    				ppsData[0] = 0xFF; 
+					if (usbCcidProtocolNum == USB_CCID_T0_PROTOCOL)   //if T=0 Protocol
 					{
-    					
-    					scTA1 = pUsbCcidApdu->CCID_BulkOutBuffer[10]; //Read FI Index
-    					scTC1 = pUsbCcidApdu->CCID_BulkOutBuffer[12]; // Read Guard Time
-    					scTC2 = pUsbCcidApdu->CCID_BulkOutBuffer[13]; // Read WI
-    					ccid_clockstatus = pUsbCcidApdu->CCID_BulkOutBuffer[14]; // Read Clock Stop Status
- //   					USB_CCID_SetParameters();
-    				    
-    				    card_st.Val 		= 0;
-    					card_st.ICC_Status	= GetCardStatus();
-    					card_st.CmdStatus	= 0; //processed without error
-    					
-    				    pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; 	//Msg Type RDR_to_PC_Parameters
-    					pUsbCcidApdu->CCID_BulkInBuffer[1] = 5; //protocol data struct length
-    					pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
-    					pUsbCcidApdu->CCID_BulkInBuffer[8] = 0;  //bError none
-    					pUsbCcidApdu->CCID_BulkInBuffer[9] = SC_T1ProtocolType();  // T0 Protocol
-    					
-    					pUsbCcidApdu->CCID_BulkInBuffer[10] = scTA1;	//Fi and Di codes
-    					pUsbCcidApdu->CCID_BulkInBuffer[11] = 0;		//no inversion
-    					pUsbCcidApdu->CCID_BulkInBuffer[12] = scTC1;	//Extra gaurd time
-    					pUsbCcidApdu->CCID_BulkInBuffer[13] = scTC2;	//WI for T0, wwt = 960 * WI * (Fi / f)
-    					pUsbCcidApdu->CCID_BulkInBuffer[14] = 0;		//Does not Allow clock stopping
-    					
-    					USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 15 );
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[10]; //Read FI Index
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[11]; //bmTCCKST0    
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[12]; // Read Guard Time
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[13]; // Read WI
+    					ppsData[1] = 0x00; 
     					
     	            }
-    	            else if(pUsbCcidApdu->CCID_BulkOutBuffer[7] == 1)	//if T=1 Protocol	
+    	            else if (usbCcidProtocolNum == USB_CCID_T1_PROTOCOL) 
     	            {
-        	            
-        	            card_st.Val 		= 0;
-    					card_st.ICC_Status	= GetCardStatus();
-    					card_st.CmdStatus	= 0; //processed without error
-    					
-    					
-        	            pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS;  //Msg Type RDR_to_PC_Parameters
-        	            pUsbCcidApdu->CCID_BulkInBuffer[1] = 7;                     //protocol data struct length
-        	            pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;           //bStatus
-    					pUsbCcidApdu->CCID_BulkInBuffer[8] = 0;                    //bError none
-    					pUsbCcidApdu->CCID_BulkInBuffer[9] = SC_T1ProtocolType();  // T0 Protocol
-    					
-    					pUsbCcidApdu->CCID_BulkInBuffer[10] = 0x13; 	//Fi and Di codes
-    					pUsbCcidApdu->CCID_BulkInBuffer[11] = 0x10;	//no inversion
-    					pUsbCcidApdu->CCID_BulkInBuffer[12] = 0;	    //Extra gaurd time
-    					pUsbCcidApdu->CCID_BulkInBuffer[13] = 0x45;	//WI for T0, wwt = 960 * WI * (Fi / f)
-    					pUsbCcidApdu->CCID_BulkInBuffer[14] = 0;		//Does not Allow clock stopping
-    					pUsbCcidApdu->CCID_BulkInBuffer[15] = 0xFE;    //bIFSC 
-        	            pUsbCcidApdu->CCID_BulkInBuffer[16] = 0;       //bNadValue
-    					
-    					USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 17 );
-        	            
-        	        }    			
-				}
-				else
-				{
-					//Card not present or not active
-					card_st.Val 		= 0;
-					card_st.ICC_Status	= GetCardStatus();
-					card_st.CmdStatus	= 1; //Command Failed Code
-
-					pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; 		//Msg Type RDR_to_PC_Parameters
-					pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
-					pUsbCcidApdu->CCID_BulkInBuffer[8] = 0xFE;			//bError ICC_MUTE
-					pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;
-
-					USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10 );
-				}
-
+        	            ppsData[1] = 0x01;
+        	            //pUsbCcidApdu->CCID_BulkOutBuffer[10]; //Read FI Index
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[11]; //bmTCCKST1    
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[12]; // Guard Time
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[13]; // bmWaitingIntegersT1
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[14]; // bClockStop
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[15]; //bIFSC
+    					//pUsbCcidApdu->CCID_BulkOutBuffer[16]; //bNadValue
+        	        } 
+        	        ppsData[2] = ppsData[0] ^ ppsData[1];  
+        	        if (SC_T0ProtocolType() && SC_T1ProtocolType()) 
+        	        {  		    
+    			        if (!SC_DoPPS(ppsData))
+    			        {
+        		            SC_Shutdown();
+        			    }
+        			}   
+    				ccid_clockstatus = pUsbCcidApdu->CCID_BulkOutBuffer[14]; // Read Clock Stop Status
+                }
+                UsbCcidSendRdrToPcParameters();				
 			break;
 		
 			#ifndef LOW_PIN_COUNT_USB_DEVELOPMENT_KIT
@@ -673,7 +571,6 @@ void ProcessCCID()
 				#endif 
             break;
         }
-
         usbCcidBulkOutHandle = USBRxOnePacket(USB_EP_BULK_OUT,(BYTE*)&usbCcidBulkOutEndpoint,USB_EP_SIZE);
     }
 }
@@ -745,7 +642,7 @@ void UsbCcidPcToRdrXfrBlock(void)
 			ErrCode 			= 1; //bad len
 		}
 
-		if(SC_T1ProtocolType())
+		if(usbCcidProtocolNum == USB_CCID_T1_PROTOCOL)
 		{
 			t1Pfield.NAD = 0x00;t1Pfield.PCB = 0x00;
 
@@ -774,7 +671,7 @@ void UsbCcidPcToRdrXfrBlock(void)
 				ErrCode 			= -5;  //hardware error
 			}
 		}
-		else
+		else if (usbCcidProtocolNum == USB_CCID_T0_PROTOCOL)
 		{
 			if( !ErrCode && !SC_TransactT0(&CardCmd, &CardResp, pUsbCcidApdu->CCID_BulkOutBuffer+15) )
 			{
@@ -803,9 +700,9 @@ void UsbCcidPcToRdrXfrBlock(void)
 		pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;  			//RFU
         for( temp = 0; temp < CardResp.RXDATALEN; temp++ )
         {
-            if(SC_T1ProtocolType())
+            if(usbCcidProtocolNum == USB_CCID_T1_PROTOCOL)
                 pUsbCcidApdu->CCID_BulkInBuffer[10+temp] = pUsbCcidApdu->CCID_BulkOutBuffer[10+temp];
-            else
+            else if (usbCcidProtocolNum == USB_CCID_T0_PROTOCOL)
 			    pUsbCcidApdu->CCID_BulkInBuffer[10+temp] = pUsbCcidApdu->CCID_BulkOutBuffer[15+temp];
 	    }
 	    pUsbCcidApdu->CCID_BulkInBuffer[10+CardResp.RXDATALEN]   = CardResp.SW1;
@@ -815,12 +712,96 @@ void UsbCcidPcToRdrXfrBlock(void)
     else
     {
 	    pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_DATA_BLOCK; 		//Msg Type
+	    pUsbCcidApdu->CCID_BulkInBuffer[1] = 0x00; 
 		pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
 		pUsbCcidApdu->CCID_BulkInBuffer[8] = ErrCode;		//bError
-		pUsbCcidApdu->CCID_BulkInBuffer[9] = scLastError;
+		pUsbCcidApdu->CCID_BulkInBuffer[9] = 0x02; 
+		//pUsbCcidApdu->CCID_BulkInBuffer[10] = scLastError;
         USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10);
     }
 }  
+
+/********************************************************************
+ * Function:        void UsbCcidSendRdrToPcParameters (void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None 
+ *
+ * Overview:        This function sends parameters to CCID host 
+ *******************************************************************/
+ void UsbCcidSendRdrToPcParameters (void)
+ {
+     union SLOT_STATUS card_st;
+     BYTE Tempvar; 
+     if( SC_GetCardState() == SC_STATE_CARD_ACTIVE )
+	 {
+	    card_st.Val 		= 0;
+		card_st.ICC_Status	= GetCardStatus();
+		card_st.CmdStatus	= 0; //processed without error
+
+		pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; 		//Msg Type RDR_to_PC_Parameters
+		
+	    pUsbCcidApdu->CCID_BulkInBuffer[7]  = card_st.Val;  //bStatus
+		pUsbCcidApdu->CCID_BulkInBuffer[8]  = 0;  //bError none
+		pUsbCcidApdu->CCID_BulkInBuffer[9]  = usbCcidProtocolNum;  //  Protocol Number (T0 or T1?)
+		pUsbCcidApdu->CCID_BulkInBuffer[10] = 0x01;	    //Fi and Di codes
+		
+	    pUsbCcidApdu->CCID_BulkInBuffer[12] = cgtETU - 12;	//Extra gaurd time
+	    
+	    
+		    
+		pUsbCcidApdu->CCID_BulkInBuffer[14] = 0x00;		//Does not allow clock stopping as of now
+
+		// Protocol Data Structure
+		if (usbCcidProtocolNum == USB_CCID_T0_PROTOCOL)
+		{
+    		pUsbCcidApdu->CCID_BulkInBuffer[1] = 5; //protocol data struct length
+    		pUsbCcidApdu->CCID_BulkInBuffer[11] = 0x00;		//Direct
+    		
+    		if(scTD1 & 0x40)
+    		    pUsbCcidApdu->CCID_BulkInBuffer[13] = scTC2;
+            else 
+                pUsbCcidApdu->CCID_BulkInBuffer[13] = SC_WI;     
+
+            USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 15 );
+        }
+        else if (usbCcidProtocolNum == USB_CCID_T1_PROTOCOL)
+        {
+            pUsbCcidApdu->CCID_BulkInBuffer[1] = 7; //protocol data struct length
+            pUsbCcidApdu->CCID_BulkInBuffer[11] = 0x10;		//LRC, Direct
+            
+            if(scTD1 & 0x20)
+		        pUsbCcidApdu->CCID_BulkInBuffer[13] = scTB2;	//WI for T0, wwt = 960 * WI * (Fi / f)
+		    else 
+		        Tempvar = (SC_BWI & 0x0F) << 4; 
+		    pUsbCcidApdu->CCID_BulkInBuffer[13] = Tempvar | SC_CWI; 
+		    pUsbCcidApdu->CCID_BulkInBuffer[15] = maxSegmentLength;	//bIFSD = Size of negotiated IFSC
+		    pUsbCcidApdu->CCID_BulkInBuffer[16] = 0x00;		//bNadValue value used by CCID
+		    
+		    USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 17 );
+		}                       
+	}
+	else
+	{
+		//Card not present or not active
+		card_st.Val 		= 0;
+		card_st.ICC_Status	= GetCardStatus();
+		card_st.CmdStatus	= 1; //Command Failed Code
+
+		pUsbCcidApdu->CCID_BulkInBuffer[0] = USB_CCID_RDR_TO_PC_PARAMETERS; 		//Msg Type RDR_to_PC_Parameters
+		pUsbCcidApdu->CCID_BulkInBuffer[7] = card_st.Val;  //bStatus
+		pUsbCcidApdu->CCID_BulkInBuffer[8] = 0xFE;			//bError ICC_MUTE
+		pUsbCcidApdu->CCID_BulkInBuffer[9] = 0;
+
+        USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10 );
+	}
+ }       
+
 
 /********************************************************************
  * Function:        void UsbCcidCommandNotSupported (void)
@@ -878,6 +859,7 @@ void UsbCcidCommandNotSupported(void)
  #if defined USB_CCID_SUPPORT_ABORT_REQUEST
  void UsbCcidAbortRequestHandler(void)
  {
+     
  }
  #endif
 

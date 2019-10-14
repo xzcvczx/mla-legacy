@@ -68,6 +68,11 @@
 *********************************************************************************************************
 */
 
+#ifdef	WF_HOST_SCAN
+extern BOOL gHostScanNotAllowed;
+extern UINT8 hostScanProfileID;
+#endif
+
 /* used for assertions */
 #if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_WF_MAC
@@ -437,6 +442,8 @@ void WFPeriodicGratuitousArp(void)
 void MACProcess(void)
 {
     
+	//UINT8	profileIDState;
+
     // Let 802.11 processes have a chance to run
     WFProcess();
     
@@ -486,6 +493,25 @@ void MACProcess(void)
 	//following is the workaround algorithm for the 11Mbps broadcast bugfix
 	WFPeriodicGratuitousArp();
 #endif 	
+
+/* Don't do this checking here to avoid inadversely clearing this gHostScanNotAllowed
+ * flag.  This should be handled at a higher level.
+#ifdef	WF_HOST_SCAN
+	if (gHostScanNotAllowed) 
+	{
+	   	WF_CMCheckConnectionState(&profileIDState, &hostScanProfileID);
+		if (profileIDState == WF_CSTATE_CONNECTION_IN_PROGRESS || profileIDState == WF_CSTATE_RECONNECTION_IN_PROGRESS)
+		{
+			gHostScanNotAllowed = TRUE;
+		}	
+		else
+		{
+			gHostScanNotAllowed = FALSE;	
+		}	
+	}
+#endif
+*/
+
 }
 
 #if 0

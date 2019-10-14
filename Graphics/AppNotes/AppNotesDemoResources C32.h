@@ -7,7 +7,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright(c) 2012 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.8.17
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.45
  *****************************************************************************/
 
 #ifndef APPNOTESDEMORESOURCES_C32_H_FILE
@@ -40,6 +40,13 @@
  * SECTION:  Includes
  *****************************************************************************/
 #include <Graphics/Graphics.h>
+
+/*****************************************************************************
+ * SECTION:  Graphics Library Firmware Check
+ *****************************************************************************/
+#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
+#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#endif
 
 
 /*****************************************************************************
@@ -87,9 +94,17 @@ extern const IMAGE_FLASH Back_4bpp_16x16;
  *****************************************************************************/
 
 /*********************************
- * Font File Structure
+ * TTF Font File Structure
  * Label: Gentium_16
- * Description:  Heigth: 18 pixels, range: ' ' to '~'
+ * Description:  Height: 18 pixels, 1 bit per pixel, Range: ' ' to '~'
+ * Comment Block:
+ * Created from Gentium font. 
+ * Gentium font is Copyright (c) 2003-2005, SIL International 
+ * (http://scripts.sil.org/). 
+ * All Rights Reserved. 
+ * Gentium font is licensed under the SIL Open Font 
+ * License, Version 1.0. 
+ * http://scripts.sil.org/OFL 
  ***********************************/
 extern const FONT_FLASH Gentium_16;
 #define Gentium_16_SIZE    (2458)

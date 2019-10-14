@@ -11,3 +11,11 @@ http://www.unifont.org/fontguide/
 
 VeraMono:
 http://www-old.gnome.org/fonts/#Final_Bitstream_Vera_Fonts
+
+Jaipur:
+http://ccat.sas.upenn.edu/plc/hindi/jaipur/jaipur.zip
+
+DB ThaiText:
+http://www.thai-language.com/downloads/dbtt.ttf
+
+The license for these mentioned fonts are available in one of their their parent webpages

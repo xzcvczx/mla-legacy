@@ -1,6 +1,6 @@
-# 
-# Generated Makefile - do not edit! 
-# 
+#
+# Generated Makefile - do not edit!
+#
 # Edit the Makefile in the project folder instead (../Makefile). Each target
 # has a pre- and a post- target defined where you can add customization code.
 #
@@ -31,93 +31,27 @@ DEFAULTCONF=PIC24_GA010_GFXv3_EX16_8PMP_QVGAv1
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=PIC24_GA010_GFXv3_EX16_8PMP_QVGAv1 PIC24_GA010_GFXv3_EX16_8PMP_WQVGAv1 PIC24_GA110_GFXv3_EX16_8PMP_QVGAv1 PIC24_GA110_GFXv3_EX16_8PMP_WQVGAv1 PIC24_GB210_GFXv3_EX16_8PMP_QVGAv1 PIC24_GB210_GFXv3_EX16_8PMP_WQVGAv1 PIC24_GB210_GFXv3_EX16_16PMP_QVGAv1 PIC24_GB210_GFXv3_EX16_16PMP_WQVGAv1 PIC24_DA210_DEV_16PMP_QVGAv1 PIC24_DA210_DEV_16PMP_WQVGAv1 PIC32_360_GFXv3_EX16_8PMP_QVGAv1 PIC32_360_GFXv3_EX16_8PMP_WQVGAv1 PIC32_360_GFXv3_EX16_16PMP_QVGAv1 PIC32_360_GFXv3_EX16_16PMP_WQVGAv1 PIC32_460_GFXv3_EX16_8PMP_QVGAv1 PIC32_460_GFXv3_EX16_8PMP_WQVGAv1 PIC32_460_GFXv3_EX16_16PMP_QVGAv1 PIC32_460_GFXv3_EX16_16PMP_WQVGAv1 PIC_SK_GFXv3_8PMP_QVGAv1 PIC_SK_GFXv3_8PMP_WQVGAv1 PIC_SK_GFXv3_16PMP_QVGAv1 PIC_SK_GFXv3_16PMP_WQVGAv1 PIC32_GP_SK_MEB_8PMP PIC32_GP_SK_MEB_16PMP PIC32_USB_SK_MEB_8PMP PIC32_USB_SK_MEB_16PMP PIC32_ETH_SK_MEB_8PMP PIC32_ETH_SK_MEB_16PMP 
+ALLCONFS=PIC24_GA010_GFXv3_EX16_8PMP_QVGAv1 PIC24_GA010_GFXv3_EX16_8PMP_WQVGAv1 PIC24_GA110_GFXv3_EX16_8PMP_QVGAv1 PIC24_GA110_GFXv3_EX16_8PMP_WQVGAv1 PIC24_GB210_GFXv3_EX16_8PMP_QVGAv1 PIC24_GB210_GFXv3_EX16_8PMP_WQVGAv1 PIC24_GB210_GFXv3_EX16_16PMP_QVGAv1 PIC24_GB210_GFXv3_EX16_16PMP_WQVGAv1 PIC24_DA210_DEV_16PMP_QVGAv1 PIC24_DA210_DEV_16PMP_WQVGAv1 PIC32_360_GFXv3_EX16_8PMP_QVGAv1 PIC32_360_GFXv3_EX16_8PMP_WQVGAv1 PIC32_360_GFXv3_EX16_16PMP_QVGAv1 PIC32_360_GFXv3_EX16_16PMP_WQVGAv1 PIC32_795_GFXv3_EX16_8PMP_QVGAv1 PIC32_795_GFXv3_EX16_8PMP_WQVGAv1 PIC32_795_GFXv3_EX16_16PMP_QVGAv1 PIC32_795_GFXv3_EX16_16PMP_WQVGAv1 PIC_SK_GFXv3_8PMP_QVGAv1 PIC_SK_GFXv3_8PMP_WQVGAv1 PIC_SK_GFXv3_16PMP_QVGAv1 PIC_SK_GFXv3_16PMP_WQVGAv1 PIC32_GP_SK_MEB_8PMP PIC32_GP_SK_MEB_16PMP PIC32_USB_SK_MEB_8PMP PIC32_USB_SK_MEB_16PMP PIC32_ETH_SK_MEB_8PMP PIC32_ETH_SK_MEB_16PMP PIC24_GP504_GFXv3_EX16_8PMP_QVGAv1 PIC24_GP504_GFXv3_EX16_8PMP_WQVGAv1 dsPIC33F_GP804_GFXv3_EX16_8PMP_QVGAv1 dsPIC33F_GP804_GFXv3_EX16_8PMP_WQVGAv1 
 
 
 # build
-.build-impl: .build-pre .validate-impl .depcheck-impl
-	@#echo "=> Running $@... Configuration=$(CONF)"
+.build-impl: .build-pre
 	${MAKE} -f nbproject/Makefile-${CONF}.mk SUBPROJECTS=${SUBPROJECTS} .build-conf
 
 
 # clean
-.clean-impl: .clean-pre .validate-impl .depcheck-impl
-	@#echo "=> Running $@... Configuration=$(CONF)"
+.clean-impl: .clean-pre
 	${MAKE} -f nbproject/Makefile-${CONF}.mk SUBPROJECTS=${SUBPROJECTS} .clean-conf
-
-
-# clobber 
-.clobber-impl: .clobber-pre .depcheck-impl
-	@#echo "=> Running $@..."
-	for CONF in ${ALLCONFS}; \
-	do \
-	    ${MAKE} -f nbproject/Makefile-$${CONF}.mk SUBPROJECTS=${SUBPROJECTS} .clean-conf; \
-	done
-
-# all 
-.all-impl: .all-pre .depcheck-impl
-	@#echo "=> Running $@..."
-	for CONF in ${ALLCONFS}; \
-	do \
-	    ${MAKE} -f nbproject/Makefile-$${CONF}.mk SUBPROJECTS=${SUBPROJECTS} .build-conf; \
-	done
 
 # dependency checking support
 .depcheck-impl:
-	@echo "# This code depends on make tool being used" >.dep.inc
-	@if [ -n "${MAKE_VERSION}" ]; then \
-	    echo "DEPFILES=\$$(wildcard \$$(addsuffix .d, \$${OBJECTFILES}))" >>.dep.inc; \
-	    echo "ifneq (\$${DEPFILES},)" >>.dep.inc; \
-	    echo "include \$${DEPFILES}" >>.dep.inc; \
-	    echo "endif" >>.dep.inc; \
-	else \
-	    echo ".KEEP_STATE:" >>.dep.inc; \
-	    echo ".KEEP_STATE_FILE:.make.state.\$${CONF}" >>.dep.inc; \
-	fi
-
-# configuration validation
-.validate-impl:
-	@if [ ! -f nbproject/Makefile-${CONF}.mk ]; \
-	then \
-	    echo ""; \
-	    echo "Error: can not find the makefile for configuration '${CONF}' in project ${PROJECTNAME}"; \
-	    echo "See 'make help' for details."; \
-	    echo "Current directory: " `pwd`; \
-	    echo ""; \
-	fi
-	@if [ ! -f nbproject/Makefile-${CONF}.mk ]; \
-	then \
-	    exit 1; \
-	fi
-
-
-# help
-.help-impl: .help-pre
-	@echo "This makefile supports the following configurations:"
-	@echo "    ${ALLCONFS}"
-	@echo ""
-	@echo "and the following targets:"
-	@echo "    build  (default target)"
-	@echo "    clean"
-	@echo "    clobber"
-	@echo "    all"
-	@echo "    help"
-	@echo ""
-	@echo "Makefile Usage:"
-	@echo "    make [CONF=<CONFIGURATION>] [SUB=no] build"
-	@echo "    make [CONF=<CONFIGURATION>] [SUB=no] clean"
-	@echo "    make [SUB=no] clobber"
-	@echo "    make [SUB=no] all"
-	@echo "    make help"
-	@echo ""
-	@echo "Target 'build' will build a specific configuration and, unless 'SUB=no',"
-	@echo "    also build subprojects."
-	@echo "Target 'clean' will clean a specific configuration and, unless 'SUB=no',"
-	@echo "    also clean subprojects."
-	@echo "Target 'clobber' will remove all built files from all configurations and,"
-	@echo "    unless 'SUB=no', also from subprojects."
-	@echo "Target 'all' will will build all configurations and, unless 'SUB=no',"
-	@echo "    also build subprojects."
-	@echo "Target 'help' prints this message."
-	@echo ""
-
+#	@echo "# This code depends on make tool being used" >.dep.inc
+#	@if [ -n "${MAKE_VERSION}" ]; then \
+#	    echo "DEPFILES=\$$(wildcard \$$(addsuffix .d, \$${OBJECTFILES}))" >>.dep.inc; \
+#	    echo "ifneq (\$${DEPFILES},)" >>.dep.inc; \
+#	    echo "include \$${DEPFILES}" >>.dep.inc; \
+#	    echo "endif" >>.dep.inc; \
+#	else \
+#	    echo ".KEEP_STATE:" >>.dep.inc; \
+#	    echo ".KEEP_STATE_FILE:.make.state.\$${CONF}" >>.dep.inc; \
+#	fi

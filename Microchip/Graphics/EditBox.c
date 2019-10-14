@@ -283,11 +283,25 @@ EDITBOX *pEb;
         switch(state){
     
             case EB_STATE_START:
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_SetupDrawUpdate( pEb->hdr.left,
+                                            pEb->hdr.top,
+                                            pEb->hdr.right,
+                                            pEb->hdr.bottom);
+#endif
     
               	if(GetState(pEb, EB_HIDE)){
        	   	        SetColor(pEb->hdr.pGolScheme->CommonBkColor);
-        	        if(!Bar(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom)) return 0;
-        	        return 1;
+        	        if(!Bar(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom)) 
+                        return 0;
+
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pEb->hdr.left,
+                                                    pEb->hdr.top,
+                                                    pEb->hdr.right,
+                                                    pEb->hdr.bottom);
+#endif
+                    return 1;
         	    }
     
                 if(GetState(pEb,EB_DISABLED)){
@@ -425,6 +439,12 @@ EDITBOX *pEb;
                 {
                     SetClip(CLIP_DISABLE);
         			state = EB_STATE_START;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                    GFX_DRIVER_CompleteDrawUpdate(   pEb->hdr.left,
+                                                    pEb->hdr.top,
+                                                    pEb->hdr.right,
+                                                    pEb->hdr.bottom);
+#endif
     	    		return 1;
                 }
    
@@ -436,6 +456,12 @@ EDITBOX *pEb;
     
                 SetClip(CLIP_DISABLE);
     			state = EB_STATE_START;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pEb->hdr.left,
+                                                pEb->hdr.top,
+                                                pEb->hdr.right,
+                                                pEb->hdr.bottom);
+#endif
     			return 1;
     			
         } // switch()

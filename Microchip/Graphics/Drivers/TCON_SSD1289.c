@@ -70,7 +70,30 @@
     #define BB_DC                   0x08
     #define BB_BL                   0x10
 
-#if defined (GFX_USE_DISPLAY_CONTROLLER_MCHP_DA210) || defined (GFX_USE_DISPLAY_CONTROLLER_DMA) 
+#if defined (GFX_USE_DISPLAY_CONTROLLER_DMA) 
+
+    #define TCON_CSLow()            (TCON_CS_LAT = 0)
+    #define TCON_CSHigh()           (TCON_CS_LAT = 1)
+    #define TCON_CLKLow()           (TCON_SCL_LAT = 0)
+    #define TCON_CLKHigh()          (TCON_SCL_LAT = 1)
+    #define TCON_DataLow()          (TCON_SDO_LAT = 0)
+    #define TCON_DataHigh()         (TCON_SDO_LAT = 1)
+
+    #define TCON_SetCommand()       (TCON_DC_LAT = 0)
+    #define TCON_SetData()          (TCON_DC_LAT = 1)
+
+    // set the IOs used to outputs. and initialize them all to "1"
+    // set up the TRIS first for outputs, then set the pins
+    // to digital in case it is needed and initialize the signals
+    // to all high.
+    #define InitBitBangedIO() {                     \
+                                TCON_CS_TRIS = 0;   \
+                                TCON_SCL_TRIS = 0;  \
+                                TCON_SDO_TRIS = 0;  \
+                                TCON_DC_TRIS = 0;   \
+                              }   
+
+#elif defined (GFX_USE_DISPLAY_CONTROLLER_MCHP_DA210) 
 
     #define TCON_CSLow()            (TCON_CS_LAT = 0)
     #define TCON_CSHigh()           (TCON_CS_LAT = 1)

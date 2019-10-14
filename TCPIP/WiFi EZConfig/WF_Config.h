@@ -98,7 +98,7 @@
 
 #define MY_DEFAULT_SCAN_TYPE                WF_ACTIVE_SCAN      /* WF_ACTIVE_SCAN or WF_PASSIVE_SCAN */
 
-#define MY_DEFAULT_CHANNEL_LIST             {1,6,11}            /* Desired channel list             */
+#define MY_DEFAULT_CHANNEL_LIST             {1,2,3,4,5,6,7,8,9,10,11}	/* Desired channel list for FCC, use less channels to minimize scan time */
 
 #define MY_DEFAULT_LIST_RETRY_COUNT_ADHOC           (3)                 /* Number of times to try to connect to the SSID when using Ad/Hoc network type */
 #define MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE  (WF_RETRY_FOREVER)  /* Number of times to try to connect to the SSID when using Infrastructure network type */
@@ -110,8 +110,16 @@
                                              WF_NOTIFY_CONNECTION_REESTABLISHED)
 
 #define MY_DEFAULT_PS_POLL                   WF_DISABLED         /* WF_DISABLED or WF_ENABLED */
+/* #define WF_AGGRESSIVE_PS */ 	/* WARNING !!! : This only can work with 1209 module FW version or later.
+							* If you use the earlier version such as 1207 or 1205, then you should not define this.
+							* Defining this will lead ASSERT problem with old module FW.
+							*/
+
+
 
 #define MY_DEFAULT_WIFI_SECURITY_MODE        WF_SECURITY_OPEN
+#define MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE  WF_SECURITY_WEP_OPENKEY /* WF_SECURITY_WEP_OPENKEY (default) or	  */
+																		 /*  WF_SECURITY_WEP_SHAREDKEY. 			 */ 
 
 //#define USE_MRF24W_HOST_BUFFER
 

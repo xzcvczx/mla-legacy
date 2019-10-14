@@ -344,11 +344,12 @@ typedef enum
 }COMMUNITY_TYPE;
 
 
-//This is the list of SNMP action a remote NMS can perform.
-//This inforamtion is passed to application via
-//callback SNMPValidateCommunity().
-//Application should validate the action for given community
-//string.
+/********************************************************************
+  This is the list of SNMP action a remote NMS can perform. This
+  inforamtion is passed to application via callback
+  SNMPValidateCommunity(). Application should validate the action for
+  given community string.                                            
+  ********************************************************************/
 typedef enum
 {
     SNMP_GET            = 0xa0,	//Snmp GET identifier
@@ -435,14 +436,11 @@ extern MPFS_HANDLE hMPFS;	//MPFS file handler
 extern SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[];
 
 
-/****************************************************************************
-  Section:
-	Function Prototypes
-  ***************************************************************************/
+BYTE IsValidLength(WORD *len);
 void SNMPInit(void);
 BOOL SNMPTask(void);
 void SNMPSendTrap(void);
-BYTE SNMPValidateCommunity(BYTE* community);
+BYTE SNMPValidateCommunity(BYTE * community);
 BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index);
 BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index,BYTE ref, SNMP_VAL val);
 BOOL SNMPGetVar(SNMP_ID var, SNMP_INDEX index,BYTE* ref, SNMP_VAL* val);
@@ -452,21 +450,27 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index);
 BOOL SNMPGetExactIndex(SNMP_ID var, SNMP_INDEX index);
 BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len,BYTE index);
 
-BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID,PDU_INFO* pduDbPtr);
-BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr);
+BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID, PDU_INFO* pduDbPtr);
+BYTE ProcessGetNextVar(OID_INFO* rec, PDU_INFO* pduDbPtr);
 BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* errorStatus);
 BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* successor,PDU_INFO* pduDbPtr);
-extern BYTE IsValidStructure(WORD* dataLen);
+BYTE IsValidStructure(WORD* dataLen);
+
+BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len);
+
+
 extern BOOL IsValidInt(DWORD* val);
 extern BYTE _SNMPGet(void);
 extern void _SNMPPut(BYTE v);
 
+
 extern 	void SetErrorStatus(WORD errorStatusOffset,WORD errorIndexOffset, SNMP_ERR_STATUS errorStatus,BYTE errorIndex);
 extern BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec);
 extern 	BOOL GetNextLeaf(OID_INFO* rec);
-extern BYTE IsValidLength(WORD *len);
 
 extern BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BYTE oidLen);
+BOOL GetOIDStringByAddr(OID_INFO* rec, BYTE* oidString, BYTE* len);
+
 
 
 
@@ -475,7 +479,7 @@ extern SNMP_ERR_STATUS Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu);
 extern SNMP_ERR_STATUS Snmpv3ScopedPduProcessing(BYTE inOutPdu);
 
 extern UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targetIndex);
-extern BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len);
+
 
 
 extern void _SNMPDuplexInit(UDP_SOCKET socket);
@@ -483,7 +487,7 @@ extern void Snmpv3GetAuthEngineTime(void);
 extern void Snmpv3UsmAesEncryptDecryptInitVector(BYTE inOutPdu);
 extern void Snmpv3UsmOutMsgAuthenticationParam(UINT8 hashType);
 
-extern BYTE Snmpv3AESDecryptRxedScopedPdu(/*UINT8 userDBIndex*/);
+extern BYTE Snmpv3AESDecryptRxedScopedPdu(void);
 extern BYTE *getSnmpV2GenTrapOid(BYTE generic_trap_code,BYTE *len);
 extern BYTE Snmpv3GetBufferData(SNMPV3MSGDATA getbuf,UINT16 pos);
 extern void Snmpv3FormulateEngineID(UINT8 fifthOctectIdentifier );
@@ -496,6 +500,9 @@ extern BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO *info );
 extern BOOL Snmpv3Notify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targetIndex);
 extern BOOL ProcessSnmpv3MsgData(PDU_INFO* pduDbPtr);
 extern BOOL Snmpv3BufferPut(BYTE val ,SNMPV3MSGDATA *putbuf);
+#if !defined(SNMP_TRAP_DISABLED)
+extern void Snmpv3InitializeUserDataBase(void);
+#endif
 
 
 

@@ -32,10 +32,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date             Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		05/29/2007
- * Sean Justice         02/07/2008  PIC32 support
+ * 05/29/2007       ...
+ * 02/07/2008       PIC32 support
  ********************************************************************/
 #ifndef _MAINDEMO_H
     #define _MAINDEMO_H
@@ -58,5 +58,9 @@
     #include "HardwareProfile.h"
     #include "CustomControlDemo.h"
     #include "Graphics/mchpGfxDrv.h"
-    
+#if defined (__C30__)
+    #include "InternalResourceC30.h"
+#else
+    #include "InternalResourceC32.h"
+#endif    
 #endif // _MAINDEMO_H

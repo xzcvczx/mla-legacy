@@ -209,7 +209,6 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
      #elif defined(__32MX795F512L__)
         #pragma config UPLLEN   = ON        // USB PLL Enabled
         #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
@@ -229,7 +228,6 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
     #else
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__
     #endif
@@ -246,7 +244,9 @@
 
 
 /** VARIABLES ******************************************************/
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 #if defined(__C30__) || defined(__C32__)
 //The LUN variable definition is critical to the MSD function driver.  This
@@ -408,7 +408,9 @@ void USBCBSendResume(void);
 
 
 /** DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /********************************************************************
  * Function:        void main(void)
@@ -519,6 +521,13 @@ static void InitializeSystem(void)
     ANCON1 = 0xFF;                  // Default all pins to digital
     WDTCONbits.ADSHR = 0;			// Select normal SFR locations
     #endif
+    
+    #if defined(__32MX460F512L__)|| defined(__32MX795F512L__)
+    // Configure the PIC32 core for the best performance
+    // at the operating frequency. The operating frequency is already set to 
+    // 60MHz through Device Config Registers
+    SYSTEMConfigPerformance(60000000);
+	#endif
 
     #if defined(PIC18F46J50_PIM) || defined(PIC18F47J53_PIM)
 	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
@@ -1114,7 +1123,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((INT)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

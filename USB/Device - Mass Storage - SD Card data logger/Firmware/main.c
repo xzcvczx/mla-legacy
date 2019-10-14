@@ -210,7 +210,6 @@
         #pragma config BWP      = OFF           // Boot Flash Write Protect
         #pragma config PWP      = OFF           // Program Flash Write Protect
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        #pragma config DEBUG    = ON            // Background Debugger Enable
     #else
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__
     #endif
@@ -239,7 +238,6 @@
     #pragma config BWP      = OFF           // Boot Flash Write Protect
     #pragma config PWP      = OFF           // Program Flash Write Protect
     #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = ON            // Background Debugger Enable
 #else
     #error No hardware board defined, see "HardwareProfile.h" and __FILE__
 #endif
@@ -247,7 +245,9 @@
 
 
 /** VARIABLES ******************************************************/
-#pragma udata
+#if defined(__18CXX)
+    #pragma udata
+#endif
 
 #if defined(__C30__) || defined(__C32__)
 //The LUN variable definition is critical to the MSD function driver.  This
@@ -432,7 +432,9 @@ void USBCBSendResume(void);
 
 
 /** DECLARATIONS ***************************************************/
-#pragma code
+#if defined(__18CXX)
+    #pragma code
+#endif
 
 /********************************************************************
  * Function:        void main(void)
@@ -544,9 +546,9 @@ int main(void)
                 else
                 {
                     #if defined(__18CXX)
-                        logFile = FSfopenpgm("log.csv",WRITE);
+                        logFile = FSfopenpgm("log.csv","w");
                     #else
-                        logFile = FSfopen("log.csv",WRITE);
+                        logFile = FSfopen("log.csv","w");
                     #endif
                 }
     
@@ -613,6 +615,13 @@ static void InitializeSystem(void)
     #elif !defined(PIC18F87J50_PIM)
         AD1PCFG = 0xFFFF;
     #endif
+    
+    #if defined(__32MX460F512L__)|| defined(__32MX795F512L__)
+    // Configure the PIC32 core for the best performance
+    // at the operating frequency. The operating frequency is already set to 
+    // 60MHz through Device Config Registers
+    SYSTEMConfigPerformance(60000000);
+	#endif
 
     #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F47J53_PIM)
 	//On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
@@ -628,6 +637,8 @@ static void InitializeSystem(void)
     }
     //Device switches over automatically to PLL output after PLL is locked and ready.
     #endif
+    
+    
 
     #if defined(PIC18F87J50_PIM)
 	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
@@ -1311,7 +1322,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((INT)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

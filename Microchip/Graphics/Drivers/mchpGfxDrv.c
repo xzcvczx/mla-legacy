@@ -74,6 +74,12 @@
  *                 - PutImage4Bpp() 
  *                 - PutImage1BppExt() 
  *                 - PutImage1Bpp() 
+ * 12/13/11        Fixed offset limit issue on the following 
+ *                 - PutImage1BPPEDS()
+ *                 - PutImage4BPPEDS() 
+ * 01/12/12        Modified OutChar(), GetTextWidth(), GetTextHeight and SetFont()
+ *                 functions to use Primitive Layer routines when performing 
+ *                 PutPixel() text rendering.
  *****************************************************************************/
 #include "HardwareProfile.h"
    
@@ -108,9 +114,57 @@
 
     volatile DWORD  _drawbuffer;
     volatile BYTE   blDisplayUpdatePending;
+	
+	/*********************************************************************
+	* Function: WORD GetDrawBufferAddress(void)
+	*
+	* PreCondition: none
+	*
+	* Input: none
+	*
+	* Output: Address of the Draw Buffer
+	*
+	* Side Effects: none
+	*
+	* Overview: Returns the address of Draw Buffer
+	*
+	* Note:
+	*
+	********************************************************************/
+    DWORD GetDrawBufferAddress(void)
+	{
+        return _drawbuffer;
+    }
+	
+	/*********************************************************************
+	* Function: DWORD GetFrameBufferAddress(void)
+	*
+	* PreCondition: _drawbuffer must be set to either GFX_BUFFER1 or GFX_BUFFER2
+	*
+	* Input: none
+	*
+	* Output: Address of the Frame Buffer
+	*
+	* Side Effects: none
+	*
+	* Overview: Returns the address of Frame Buffer
+	*
+	* Note: 
+	*
+	********************************************************************/
+    DWORD GetFrameBufferAddress(void)
+	{
+        if(_drawbuffer == GFX_BUFFER1)
+        {
+            return GFX_BUFFER2;
+        }
+        else
+        {
+            return GFX_BUFFER1;
+        }
+    }
 
 #endif //USE_DOUBLE_BUFFERING
-
 
 #ifdef USE_COMP_IPU
     
@@ -126,7 +180,9 @@
 
 // check if we can use the driver OutChar
 #if (DISP_ORIENTATION == 0)
-    #define USE_DRV_FONT
+    #if !(defined(USE_ANTIALIASED_FONTS))
+        #define USE_DRV_FONT
+    #endif
 #endif    
 
 // Color
@@ -160,10 +216,11 @@ volatile DWORD 		_displayAreaBaseAddr;
 SHORT 	DrvGetImageColorDepth(void *pImage);
 SHORT   DrvGetImageHeight(void *pImage);
 SHORT   DrvGetImageWidth(void *pImage);
-WORD 	DrvOutChar(XCHAR ch);
-SHORT   DrvGetTextWidth(XCHAR *textString, void *pFont);
-SHORT   DrvGetTextHeight(void *pFont);
-void    SetDrvFont(void *font, FONT_HEADER *pHeader);
+
+SHORT   GetTextWidthEds(XCHAR *textString, void *pFont);
+SHORT   GetTextHeightEds(void *pFont);
+void    SetFontEds(void *pFont);
+WORD 	OutCharEds(XCHAR ch);
 
 #define DrvGetX() (G1CHRX)
 #define DrvGetY() (G1CHRY)
@@ -181,9 +238,11 @@ void EPMP_Init(void)
 
 #if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
     // calculate the divider if using external memory, calcAMWAIT is the minimum EPMP Alternate Master Transfer 
-    volatile WORD gfxClock = (1000000000ul) / (DWORD)((CLKDIVbits.G1CLKSEL == 1)? 96000000ul : 48000000);
-	    	 WORD calcAMWAIT = gfxClock *3;
-				 
+    // from (1000000000ul) / (DWORD)((CLKDIVbits.G1CLKSEL == 1)? 96000000ul : 48000000ul);
+    // there is a factor of 100 to take care of the two decimal places on the calculation
+    volatile WORD gfxClockPeriod = (CLKDIVbits.G1CLKSEL == 1)? 1041 : 2083; 
+	    	 WORD deviceAccessTime;
+
     ANSDbits.ANSD7 = 0;   // PMD15
     ANSDbits.ANSD6 = 0;   // PMD14
     ANSFbits.ANSF0 = 0;   // PMD11
@@ -231,13 +290,16 @@ void EPMP_Init(void)
 	
 		PMCS1MDbits.ACKM = 0;        							// PMACK is not used
 		
+
 		// Calculate the AMWAIT cycles to satisfy the access time of the device
-		if (EPMPCS1_ACCESS_TIME <= calcAMWAIT)
+        deviceAccessTime = EPMPCS1_ACCESS_TIME*100;
+
+		if ((deviceAccessTime) < gfxClockPeriod)
 		    PMCS1MDbits.AMWAIT = 0;
-		else if (EPMPCS1_ACCESS_TIME > calcAMWAIT)
+		else if (deviceAccessTime >= gfxClockPeriod)
 		{
-            PMCS1MDbits.AMWAIT = ((EPMPCS1_ACCESS_TIME - calcAMWAIT) / gfxClock);
-            if ((EPMPCS1_ACCESS_TIME % gfxClock) > 0)
+            PMCS1MDbits.AMWAIT = (deviceAccessTime/gfxClockPeriod);
+            if ((deviceAccessTime % gfxClockPeriod) > 0)
                 PMCS1MDbits.AMWAIT += 1;
         }          
 
@@ -270,14 +332,17 @@ void EPMP_Init(void)
 		PMCS2MDbits.ACKM = 0;        							// PMACK is not used
 		
 		// Calculate the AMWAIT cycles to satisfy the access time of the device
-		if (EPMPCS2_ACCESS_TIME <= calcAMWAIT)
+        deviceAccessTime = EPMPCS2_ACCESS_TIME*100;
+
+		if ((deviceAccessTime) < gfxClockPeriod)
 		    PMCS2MDbits.AMWAIT = 0;
-		else if (EPMPCS2_ACCESS_TIME > calcAMWAIT)
+		else if (deviceAccessTime >= gfxClockPeriod)
 		{
-            PMCS2MDbits.AMWAIT = ((EPMPCS2_ACCESS_TIME - calcAMWAIT) / gfxClock);
-            if ((EPMPCS2_ACCESS_TIME % gfxClock) > 0)
+            PMCS2MDbits.AMWAIT = (deviceAccessTime/gfxClockPeriod);
+            if ((deviceAccessTime % gfxClockPeriod) > 0)
                 PMCS2MDbits.AMWAIT += 1;
         }          
+
 
 	#else	
 		PMCS2CFbits.CSDIS = 1;       							// disable CS2 functionality  
@@ -929,7 +994,7 @@ WORD CopyWindow(DWORD srcAddr, DWORD dstAddr,       \
     // do the block copy with RCC_COPY mode and RCC_ROP_C which is copy source
     // color value is irrelevant here since we are doing a direct source copy
     ROPBlock(   srcAddr, dstAddr, srcOffset, dstOffset, 
-			    RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS, 
+			    GFX_DATA_DISCONTINUOUS, GFX_DATA_DISCONTINUOUS, 
                 RCC_COPY, RCC_ROP_C, 0, actualWidth, actualHeight);
 
     return (1);
@@ -1634,67 +1699,44 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 ********************************************************************/
 void SetFont(void *font)
 {
-    FONT_HEADER *pHeader;
-
-        #ifdef USE_FONT_EXTERNAL
-    FONT_HEADER header;
-        #endif
-    _font = font;
     switch(*((SHORT *)font))
     {
-                #ifdef USE_FONT_FLASH
-
         case FLASH:
-            pHeader = (FONT_HEADER *) ((FONT_FLASH *)font)->address;
+        case RAM:
+            SetFontFlash(font);
             break;
 
-				#endif // USE_FONT_FLASH
-                #ifdef USE_FONT_EXTERNAL
-
-                #ifdef USE_DRV_FONT
-
-		case EDS_EPMP:
-        	pHeader = &header;
-			SetDrvFont(font, pHeader);
-			break;
-
-                #endif // USE_DRV_FONT
-				
         case EXTERNAL:
-            pHeader = &header;
-            ExternalMemoryCallback(font, 0, sizeof(FONT_HEADER), pHeader);
+            SetFontExternal(font);
             break;
 
-				#endif // USE_FONT_EXTERNAL
+    	case EDS_EPMP:
+        	SetFontEds(font);
+			break;
 
         default:
             return;
     }
-
-    _fontFirstChar = pHeader->firstChar;
-    _fontLastChar = pHeader->lastChar;
-    _fontHeight = pHeader->height;
 }
 
+
 /*********************************************************************
-* Function: void SetDrvFont(void* font, FONT_HEADER *pHeader)
+* Function: void SetFontEds(void* pFont)
 *
 * PreCondition: none
 *
 * Input: font - Pointer to the font image in memory.
-*        pHeader - Pointer to the font header. SerDrvFont() populates the 
-*                  header with the selected font information.
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: Sets the location of the current font to be used.
+* Overview: Sets the current active font.
 *
 * Note: none
 *
 ********************************************************************/
-void SetDrvFont(void *font, FONT_HEADER *pHeader)
+void SetFontEds(void *pFont)
 {
 	WORD  TempGPUBpp;
 	
@@ -1707,8 +1749,8 @@ void SetDrvFont(void *font, FONT_HEADER *pHeader)
     _PUBPP = GFX_8_BPP;
 
     // grab the font header from memory
-    while(!ROPBlock( ((FONT_EXTERNAL*) font)->address, (DWORD)(WORD)pHeader, 0, 0, 					\
-	                   RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,   \
+    while(!ROPBlock( ((FONT_EXTERNAL*) pFont)->address, (DWORD)&(currentFont.fontHeader), 0, 0, 					\
+	                   GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,   \
                        sizeof(FONT_HEADER), 1));
 
     // make sure the data copy terminates
@@ -1719,7 +1761,10 @@ void SetDrvFont(void *font, FONT_HEADER *pHeader)
     _PUBPP = TempGPUBpp;
 
 	// set the font address in the CHRGPU	
-    GFX_CHR_SetFont(((FONT_EXTERNAL*) font)->address);
+    GFX_CHR_SetFont(((FONT_EXTERNAL*) pFont)->address);
+
+    currentFont.pFont = pFont;
+
 }
 
 /*********************************************************************
@@ -1741,95 +1786,20 @@ void SetDrvFont(void *font, FONT_HEADER *pHeader)
 ********************************************************************/
 SHORT GetTextWidth(XCHAR *textString, void *font)
 {
-		#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) 
-    GLYPH_ENTRY *pChTable;
-    FONT_HEADER *pHeader;
-    	#endif
-        #ifdef USE_FONT_EXTERNAL
-    GLYPH_ENTRY chTable;
-    FONT_HEADER header;
-        #endif
-
-    	#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) || defined (USE_FONT_EXTERNAL)
-    SHORT       textWidth;
-    XCHAR       ch;
-    XCHAR       fontFirstChar;
-    XCHAR       fontLastChar;
-    	#endif
-
     switch(*((SHORT *)font))
     {
-                #ifdef USE_FONT_RAM
-
         case RAM:
-            pHeader = (FONT_HEADER *) ((FONT_RAM *)font)->address;
-            fontFirstChar = pHeader->firstChar;
-            fontLastChar = pHeader->lastChar;
-            pChTable = (GLYPH_ENTRY *) (pHeader + 1);
-            textWidth = 0;
-            while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
-            {
-                if((unsigned XCHAR)ch < (unsigned XCHAR)fontFirstChar)
-                    continue;
-                if((unsigned XCHAR)ch > (unsigned XCHAR)fontLastChar)
-                    continue;
-                textWidth += (pChTable + ((unsigned XCHAR)ch - (unsigned XCHAR)fontFirstChar))->width;
-            }
-
-            return (textWidth);
-                #endif
+            return GetTextWidthRam(textString, font);
                 	    
-                #ifdef USE_FONT_FLASH
-
         case FLASH:
-            pHeader = (FONT_HEADER *) ((FONT_FLASH *)font)->address;
-            fontFirstChar = pHeader->firstChar;
-            fontLastChar = pHeader->lastChar;
-            pChTable = (GLYPH_ENTRY *) (pHeader + 1);
-            textWidth = 0;
-            while((XCHAR)15 < (XCHAR)(ch = *textString++))
-            {
-                if((XCHAR)ch < (XCHAR)fontFirstChar)
-                    continue;
-                if((XCHAR)ch > (XCHAR)fontLastChar)
-                    continue;
-                textWidth += (pChTable + ((XCHAR)ch - (XCHAR)fontFirstChar))->width;
-            }
-
-            return (textWidth);
-                #endif
-                #ifdef USE_FONT_EXTERNAL
-
-				#ifdef USE_DRV_FONT
-		case EDS_EPMP:	
-   			textWidth = DrvGetTextWidth(textString, font);
-            return (textWidth);
-				#endif
+            return GetTextWidthFlash(textString, font);
 
         case EXTERNAL:
-            ExternalMemoryCallback(font, 0, sizeof(FONT_HEADER), &header);
-            fontFirstChar = header.firstChar;
-            fontLastChar = header.lastChar;
-            textWidth = 0;
-            while((XCHAR)15 < (XCHAR)(ch = *textString++))
-            {
-                if((XCHAR)ch < (XCHAR)fontFirstChar)
-                    continue;
-                if((XCHAR)ch > (XCHAR)fontLastChar)
-                    continue;
-                ExternalMemoryCallback
-                (
-                    font,
-                    sizeof(FONT_HEADER) + sizeof(GLYPH_ENTRY) * ((XCHAR)ch - (XCHAR)fontFirstChar),
-                    sizeof(GLYPH_ENTRY),
-                    &chTable
-                );
-                textWidth += chTable.width;
-            }
+            return GetTextWidthExternal(textString, font);
 
-            return (textWidth);
-                #endif
-
+		case EDS_EPMP:	
+   			return GetTextWidthEds(textString, font);
+          
         default:
             return (0);
     }
@@ -1851,38 +1821,43 @@ SHORT GetTextWidth(XCHAR *textString, void *font)
 * Note: none
 *
 ********************************************************************/
-SHORT GetTextHeight(void *font)
+SHORT GetTextHeight(void *pFont)
 {
-        #ifdef USE_FONT_EXTERNAL
+#ifdef USE_FONT_EXTERNAL
+    SHORT height;
+#endif
 
-    unsigned char    height;
-        #endif
-    switch(*((SHORT *)font))
+    // if the current set font is the same just return with 
+    // the already set value in currentFont
+    if (pFont == currentFont.pFont)
+        return currentFont.fontHeader.height;
+    else
     {
-                #ifdef USE_FONT_RAM
-        case RAM:
-            return ((FONT_HEADER *) ((FONT_RAM *)font)->address)->height;
-                #endif
-                
-                #ifdef USE_FONT_FLASH
-        case FLASH:
-            return ((FONT_HEADER *) ((FONT_FLASH *)font)->address)->height;
-                #endif
-                
-                #ifdef USE_FONT_EXTERNAL
+        switch(*((SHORT *)pFont))
+        {
+#ifdef USE_FONT_RAM
+            case RAM:
+                return ((FONT_HEADER *) ((FONT_RAM *)pFont)->address)->height;
+#endif
+                    
+#ifdef USE_FONT_FLASH
+            case FLASH:
+                return ((FONT_HEADER *) ((FONT_FLASH *)pFont)->address)->height;
+#endif
+                    
+#ifdef USE_FONT_EXTERNAL
+            case EXTERNAL:
+                ExternalMemoryCallback(pFont, sizeof(FONT_HEADER) - 2, 2, &height);
+                return (height);
 
-       			#ifdef USE_DRV_FONT
-        case EDS_EPMP:        
-            return (DrvGetTextHeight(font));
-            	#endif
-            	
-        case EXTERNAL:
-            ExternalMemoryCallback(font, sizeof(FONT_HEADER) - 2, 1, &height);
-            return (height);
-                #endif
+            case EDS_EPMP:        
+                return (GetTextHeightEds(pFont));
 
-        default:
-            return (0);
+#endif
+
+            default:
+                return (0);
+        }
     }
 }
 
@@ -1908,160 +1883,70 @@ SHORT GetTextHeight(void *font)
 ********************************************************************/
 WORD OutChar(XCHAR ch)
 {
-   		#ifdef USE_FONT_FLASH	
-    GLYPH_ENTRY *pChTable = NULL;
-    	#endif
-    BYTE        *pChImage = NULL;
+    static OUTCHAR_PARAM OutCharParam;
 
-        #ifdef USE_FONT_EXTERNAL
-    GLYPH_ENTRY chTable;
-    BYTE        chImage[EXTERNAL_FONT_BUFFER_SIZE];
-    WORD        imageSize;
-    DWORD_VAL   glyphOffset;
-        #endif
-    SHORT       chWidth = 0;
-    SHORT       xCnt, yCnt, x = 0, y;
-    BYTE        temp = 0, mask;
+    // initialize variables
+#ifdef USE_FONT_FLASH	
+    OutCharParam.pChTable = NULL;
+    OutCharParam.pChTableExtended = NULL;
+#endif
+#ifdef USE_FONT_EXTERNAL	
+    OutCharParam.pChImage = NULL;
+#endif
+    OutCharParam.xAdjust = 0;
+    OutCharParam.yAdjust = 0;
+    OutCharParam.xWidthAdjust = 0;
+    OutCharParam.heightOvershoot = 0;
 
-        #ifndef USE_NONBLOCKING_CONFIG
+    // check for error conditions (a return value of 0xFFFF means error)
+    if((UXCHAR)ch < (UXCHAR)currentFont.fontHeader.firstChar)
+        return (-1);
+    if((UXCHAR)ch > (UXCHAR)currentFont.fontHeader.lastChar)
+        return (-1);
+#ifndef USE_ANTIALIASED_FONTS
+    if(currentFont.fontHeader.bpp > 1)
+        return (-1); 
+#endif
+
+#ifndef USE_NONBLOCKING_CONFIG
     while(IsDeviceBusy() != 0) Nop();
-
-    /* Ready */
-        #else
+#else
     if(IsDeviceBusy() != 0)
         return (0);
-        #endif
-    if((XCHAR)ch < (XCHAR)_fontFirstChar)
-        return (-1);
-    if((XCHAR)ch > (XCHAR)_fontLastChar)
-        return (-1);
+#endif
 
-    switch(*((SHORT *)_font))
+    switch(*((SHORT *)currentFont.pFont))
     {
-                #ifdef USE_FONT_FLASH
 
         case FLASH:
-            pChTable = (GLYPH_ENTRY *) (((FONT_FLASH *)_font)->address + sizeof(FONT_HEADER)) + ((XCHAR)ch - (XCHAR)_fontFirstChar);
-
-            pChImage = (BYTE *) (((FONT_FLASH *)_font)->address + ((DWORD)(pChTable->offsetMSB) << 8) + pChTable->offsetLSB);
-
-            chWidth = pChTable->width;
-
+            OutCharGetInfoFlash(ch, &OutCharParam); 
             break;
-                #endif
-                #ifdef USE_FONT_EXTERNAL
 
-	    case EDS_EPMP:
-			if (DrvOutChar(ch) == 0)
+        case EXTERNAL:
+            OutCharGetInfoExternal(ch, &OutCharParam);
+            break;
+
+        case EDS_EPMP:
+            // fonts with extended glyph is not supported by CHRGPU
+            if(currentFont.fontHeader.extendedGlyphEntry)
+                return (-1);
+			if (OutCharEds(ch) == 0)
 				return 0;
 			else
 			{			
 				MoveTo(DrvGetX(), DrvGetY());
 				return 1;
 			}
-			
-        case EXTERNAL:
-
-            // get glyph entry
-            ExternalMemoryCallback
-            (
-                _font,
-                sizeof(FONT_HEADER) + ((XCHAR)ch - (XCHAR)_fontFirstChar) * sizeof(GLYPH_ENTRY),
-                sizeof(GLYPH_ENTRY),
-                &chTable
-            );
-
-            chWidth = chTable.width;
-
-            // width of glyph in bytes
-            imageSize = 0;
-            if(chWidth & 0x0007)
-                imageSize = 1;
-            imageSize += (chWidth >> 3);
-
-            // glyph image size
-            imageSize *= _fontHeight;
-
-            // get glyph image
-            glyphOffset.w[1] = (chTable.offsetMSB >> 8);
-            glyphOffset.w[0] = (chTable.offsetMSB << 8) + (chTable.offsetLSB);
-
-            ExternalMemoryCallback(_font, glyphOffset.Val, imageSize, &chImage);
-            pChImage = (BYTE *) &chImage;
-
-            break;
-                #endif
 
         default:
-            break;
-    }
-
-    if(_fontOrientation == ORIENT_HOR)
-    {
-        y = GetY();
-        for(yCnt = 0; yCnt < _fontHeight; yCnt++)
-        {
-            x = GetX();
-            mask = 0;
-            for(xCnt = 0; xCnt < chWidth; xCnt++)
-            {
-                if(mask == 0)
-                {
-                    temp = *pChImage++;
-                    mask = 0x01;
-                }
-
-                if(temp & mask)
-                {
-                    PutPixel(x, y);
-                }
-
-                x++;
-                mask <<= 1;
-            }
-
-            y++;
-        }
-
-        // move cursor
-        _cursorX = x;
-    }
-    else
-    {
-        y = GetX();
-        for(yCnt = 0; yCnt < _fontHeight; yCnt++)
-        {
-            x = GetY();
-            mask = 0; 
-            for(xCnt = 0; xCnt < chWidth; xCnt++)
-            {
-                if(mask == 0)
-                {
-                    temp = *pChImage++;
-                    mask = 0x01; 
-                }
-
-                if(temp & mask)
-                {
-                    PutPixel(y, x);
-                }
-
-                x--;
-                mask <<= 1;
-            }
-
-            y++;
-        }
-
-        // move cursor
-        _cursorY = x;
-    }
-
-    return (1);
+            return 1;
+    }    
+    
+    return (OutCharRender(ch, &OutCharParam));
 }
 
 /*********************************************************************
-* Function: WORD DrvOutChar(XCHAR ch)
+* Function: WORD OutCharEds(XCHAR ch)
 *
 * PreCondition: none
 *
@@ -2080,7 +1965,7 @@ WORD OutChar(XCHAR ch)
 * Note: none
 *
 ********************************************************************/
-WORD DrvOutChar(XCHAR ch)
+WORD OutCharEds(XCHAR ch)
 {
 	typedef enum
     {
@@ -2142,11 +2027,13 @@ WORD DrvOutChar(XCHAR ch)
 		
 		state = OUTCHAR_IDLE;
 	}
+
+	MoveTo(DrvGetX(), DrvGetY());
 	return (1);
 }
 
 /*********************************************************************
-* Function:  SHORT DrvGetTextWidth(XCHAR *textString, void *pFont)
+* Function:  SHORT GetTextWidthEds(XCHAR *textString, void *pFont)
 *
 * Overview: This function returns the width of the given string for a given font in EDS.
 *
@@ -2161,15 +2048,15 @@ WORD DrvOutChar(XCHAR ch)
 * Side Effects: none
 *
 ********************************************************************/
-SHORT   DrvGetTextWidth(XCHAR *textString, void *pFont)
+SHORT GetTextWidthEds(XCHAR *pString, void *pFont)
 {
-	FONT_HEADER header;
-  	WORD        fontFirstChar;
-    WORD        fontLastChar;
-    WORD 		textWidth, TempGPUBpp;
-    BYTE        temp;
-    static XCHAR       ch;	
-    DWORD 		offset;
+    FONT_HEADER     header;
+    WORD            fontFirstChar;
+    WORD            fontLastChar;
+    WORD 		    textWidth, TempGPUBpp;
+    BYTE            temp;
+    static XCHAR    ch, *pStr;	
+    DWORD 		    offset;
 	
 
 	GFX_WaitForCommandQueue(16);		
@@ -2179,8 +2066,8 @@ SHORT   DrvGetTextWidth(XCHAR *textString, void *pFont)
     TempGPUBpp = _PUBPP;
     _PUBPP = GFX_8_BPP;
 	
-    while(!ROPBlock( ((FONT_EXTERNAL*) pFont)->address, (DWORD)(WORD)&header, 0, 0,             	\
-                       RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,   \
+    while(!ROPBlock( ((FONT_EXTERNAL*) pFont)->address, (DWORD)(WORD)&header, 0, 0,        \
+                       GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,   \
                        sizeof(FONT_HEADER), 1));
 				
 	GFX_WaitForCommandQueue(16);		
@@ -2189,33 +2076,34 @@ SHORT   DrvGetTextWidth(XCHAR *textString, void *pFont)
     fontFirstChar = header.firstChar;
     fontLastChar = header.lastChar;
     textWidth = 0;
-	ch = *textString;
+    pStr = (XCHAR*) pString;
+	ch = *pStr;
 	
-    while((XCHAR)15 < (XCHAR)(ch = *textString++))
+    while((XCHAR)15 < (XCHAR)(ch = *pStr++))
     {
-		if((XCHAR)ch < (XCHAR)fontFirstChar)
-        	continue;
-		if((XCHAR)ch > (XCHAR)fontLastChar)
-        	continue;
+        if((XCHAR)ch < (XCHAR)fontFirstChar)
+            continue;
+        if((XCHAR)ch > (XCHAR)fontLastChar)
+            continue;
 
 		// grab the width of the character
 		offset = sizeof(FONT_HEADER) + (((XCHAR)ch - (XCHAR)fontFirstChar)*sizeof(GLYPH_ENTRY));
-        while(!ROPBlock( ((FONT_EXTERNAL*) pFont)->address, (DWORD)(WORD)&temp, offset, 0,          	\
-                           RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,   \
+        while(!ROPBlock( ((FONT_EXTERNAL*) pFont)->address, (DWORD)(WORD)&temp, offset, 0,     \
+                           GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,   \
                            1, 1));
 
-		GFX_WaitForCommandQueue(16);		
-		while(GFX_IsPuGpuBusy() == 1);
+        GFX_WaitForCommandQueue(16);		
+        while(GFX_IsPuGpuBusy() == 1);
 
-		textWidth += temp;
-	}
+        textWidth += temp;
+    }
 
     _PUBPP = TempGPUBpp;
     return (textWidth);
 }
 
 /*********************************************************************
-* Function:  SHORT DrvGetTextHeight(void *pFont)
+* Function:  SHORT GetTextHeightEds(void *pFont)
 *
 * Overview: This function returns the height of the given font in EDS.
 *
@@ -2229,7 +2117,7 @@ SHORT   DrvGetTextWidth(XCHAR *textString, void *pFont)
 * Side Effects: none
 *
 ********************************************************************/
-SHORT   DrvGetTextHeight(void *pFont)
+SHORT GetTextHeightEds(void *pFont)
 {
 	FONT_HEADER header;
     WORD 		TempGPUBpp;
@@ -2243,7 +2131,7 @@ SHORT   DrvGetTextHeight(void *pFont)
     _PUBPP = GFX_8_BPP;
 	
     while(!ROPBlock(((FONT_EXTERNAL *)pFont)->address, (DWORD)(WORD)&header, 0, 0,      		\
-                    RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,  \
+                    GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,  \
                     sizeof(FONT_HEADER), 1));
 
 	GFX_WaitForCommandQueue(16);		
@@ -2433,10 +2321,10 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     BYTE            	*pByteData = NULL; // To supress warning
 #if (DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90)   
 #if (COLOR_DEPTH == 4) 
-    BYTE nibblePos;
+    BYTE nibblePos = 0;
 #endif
 #if (COLOR_DEPTH == 1)
-    BYTE bitPos;
+    BYTE bitPos = 0;
 #endif
 #endif
 #endif
@@ -2776,7 +2664,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 #ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; // To supress warning 
 #if (COLOR_DEPTH == 4) && ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
-    BYTE nibblePos;
+    BYTE nibblePos = 0;
 #endif
 #endif
 
@@ -3443,10 +3331,10 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     BYTE            	*pByteData = NULL; 
 #if (DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90)   
 #if (COLOR_DEPTH == 4) 
-    BYTE nibblePos;
+    BYTE nibblePos = 0;
 #endif
 #if (COLOR_DEPTH == 1)
-    BYTE bitPos;
+    BYTE bitPos = 0;
 #endif
 #endif
 #endif
@@ -3756,23 +3644,27 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
     BYTE            lineBuffer[((GetMaxX() + (DWORD) 1) / 2) + 1];
+    WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
+
     WORD            palette[16], color;
     BYTE            *pData; 
+	WORD			*pData2;
     WORD 			outputSize;
 	WORD			xLimit;
-	WORD			*pBufAddr, *pData2;
-    WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
-    SHORT           byteWidth;
+	WORD			*pBufAddr;
+
     BYTE            temp = 0;
     WORD            sizeX, sizeY;
     WORD            x, y;
     WORD            yc;
     BYTE            stretchY;
 
+    SHORT           byteWidth;
+
 #ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; 
 #if (COLOR_DEPTH == 4) && ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
-    BYTE nibblePos;
+    BYTE nibblePos = 0;
 #endif
 #endif
 
@@ -3805,7 +3697,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 	}
 	// area of the buffer to use is only the area that
 	// spans the viewable area
-	if ((outputSize > GetMaxX()+1) || (left + outputSize > GetMaxX()+1))
+	if ((outputSize > (GetMaxX()+1)) || (left + outputSize > (GetMaxX()+1)))
 		outputSize = GetMaxX() + 1 - left; 		
 
 	pBufAddr = lineBuffer2;
@@ -4021,12 +3913,14 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
     BYTE            lineBuffer[(GetMaxX() + (DWORD) 1)];
+    WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
+
     WORD            palette[256];    
     BYTE            *pData; 
+    WORD			*pData2;
     WORD 			outputSize;
-    WORD			*pBufAddr, *pData2;
-    WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
 	WORD			xLimit;
+    WORD			*pBufAddr;
 
     BYTE            temp = 0;
     WORD            sizeX, sizeY;
@@ -4428,19 +4322,33 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     BYTE			TempGPUBpp;
     BYTE            lineBuffer[((GetMaxX() + (DWORD) 1) / 8) + 1];
     WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
+
     WORD            palette[2], color;
     BYTE            *pData; 
     WORD			*pData2;
-    WORD 			outputSize, offsetCount;
+    DWORD 			offsetCount;
+	WORD			outputSize;
 	WORD			xLimit;
 
     BYTE            mask, temp = 0;
     WORD            sizeX, sizeY;
     WORD            x, y;
-    WORD            yc, xp, yp;
+    WORD            yc;
     BYTE            stretchY;
     
     CHAR            testStretch = (stretch == IMAGE_NORMAL) ? 0x00 : 0x01;
+
+	#ifdef USE_PALETTE
+    BYTE            	*pByteData = NULL; 
+#if (DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90)   
+#if (COLOR_DEPTH == 4) 
+    BYTE nibblePos = 0;
+#endif
+#if (COLOR_DEPTH == 1)
+    BYTE bitPos = 0;
+#endif
+#endif
+#endif
 
     // First get palette (256 entries)
 
@@ -4475,10 +4383,10 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 		outputSize = GetMaxX() + 1 - left; 		
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
 	// 32 is used here since the palette size is 2 words or 32 bits
 	offsetCount = 32 + (sizeof(BITMAP_HEADER)*8);
@@ -4502,14 +4410,10 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    // if the data is outside the PIC (in extended EDS) we cannot do
 	    // GPU operation with less than 8bpp color depth.
 	    // But since this will be read and the destination is in internal RAM we can use
-	    // 4bpp on the GPU operation.
+	    // 1bpp on the GPU operation.
 	    TempGPUBpp = _PUBPP;
 	    _PUBPP = GFX_1_BPP;
 
-		// make sure there are no pending RCC GPU commands
-	    GFX_WaitForCommandQueue(16);
-	    GFX_WaitForGpu();
-	
 		GFX_SetWorkArea1(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress);
 		GFX_SetWorkArea2((DWORD)(WORD)lineBuffer);
 				
@@ -4535,15 +4439,56 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 
        	pData = lineBuffer;
 
-		#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270) 
-        	pData2 = lineBuffer2;
-	    #elif (DISP_ORIENTATION == 180) 
-        	pData2 = &lineBuffer2[outputSize-1];
-	    #elif (DISP_ORIENTATION == 90) 
-        	pData2 = &lineBuffer2[outputSize-1];
-        #endif	           	
+		// get the location of the line buffer 
+        #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+          	pData2 = lineBuffer2;
+            #ifdef USE_PALETTE
+	            if(IsPaletteEnabled())
+    	        {
+        	        pByteData = (BYTE*)lineBuffer2;
+            	}
+            #endif
+        #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+           	pData2 = &lineBuffer2[outputSize-1];
+           	
+            #ifdef USE_PALETTE
+            if(IsPaletteEnabled())
+            {
+                pByteData = (BYTE *)lineBuffer2;
 
-        xp = 0;
+                #if (COLOR_DEPTH == 8)
+                    pByteData += outputSize;
+                    pByteData--;
+                #endif
+
+                #if (COLOR_DEPTH == 4)
+
+                    pByteData += outputSize / 2;
+					nibblePos = (outputSize & 0x01);
+                    if(nibblePos == 0)
+                    {
+                        pByteData--;
+                    }
+                #endif
+
+                #if (COLOR_DEPTH == 1)
+
+                    pByteData += (outputSize / 8) ;
+                    bitPos = (outputSize & 0x07);
+                    if(bitPos != 0)
+                        bitPos -= 1;  // why -1, since bit position starts at 0 (or first bit is at 0 position)    
+                    else
+                    {
+                        bitPos = 7;
+                        pByteData--;
+                    }				
+                #endif
+                
+            }
+			#endif
+        #endif
+
+
         mask = 0;
         
         // process the pixels on the current line
@@ -4577,14 +4522,95 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	            	color = palette[0];
 	            #endif
 			}
-            
-			#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270) 
-                *pData2++ = color;
-            #elif (DISP_ORIENTATION == 180) 
-                *pData2-- = color;
-            #elif (DISP_ORIENTATION == 90)
-                *pData2-- = color;
-       	    #endif
+           
+
+           #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+                #ifdef USE_PALETTE
+    	          	if(IsPaletteEnabled())
+    	          	{
+                        #if (COLOR_DEPTH == 8)
+                        *pByteData++ = (BYTE)color;
+                        #endif
+
+                        #if (COLOR_DEPTH == 4)
+                        if(x & 0x01)
+                        {
+                            *pByteData++ |= color << 4;
+                        }else
+                        {
+                            *pByteData = color & 0x0F;
+                        }
+                        #endif
+
+                        #if (COLOR_DEPTH == 1)
+                        {
+                            BYTE pos = (BYTE)x & 0x07;
+                            
+                            if(pos == 0)
+                                *pByteData = color;
+                            else
+                                *pByteData |= color << pos;
+
+                            if(pos == 7)
+                                *pByteData++;
+                        }
+                        #endif
+    	          	}
+    	          	else
+    	          	{
+                        *pData2++ = color;
+    	          	}    
+                #else
+                    *pData2++ = color;
+                #endif
+            #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+                #ifdef USE_PALETTE
+    	          	if(IsPaletteEnabled())
+    	          	{
+                        #if (COLOR_DEPTH == 8)
+    	          	    *pByteData-- = (BYTE)color;
+                        #endif
+
+                        #if (COLOR_DEPTH == 4)
+                        if (nibblePos == 1)
+                        {
+                            *pByteData = ((*pByteData & 0xF0) | (color & 0x0F));
+                            pByteData--;
+                            nibblePos = 0;
+                        }else
+                        {
+                            *pByteData = color << 4;
+                            nibblePos = 1;
+                        }
+                        #endif
+                        
+                        #if (COLOR_DEPTH == 1)
+                        {
+                            *pByteData &= ~(1 << bitPos);
+                            *pByteData |= (color << bitPos);
+
+                            if (bitPos == 0)
+                            {
+                                bitPos = 7;
+                                pByteData--;
+                            }
+                            else
+                            {
+                                bitPos--;
+                            }
+                        }
+                        #endif
+    	          	}
+    	          	else
+    	          	{
+                        *pData2-- = color;
+    	          	}    
+                #else
+                    *pData2-- = color;
+                #endif
+       	    #endif			           	     
+
+
 
        	    // Shift to the next pixel (note that if image is stretched, shifting is delayed)
        	    //if (x%(stretch==IMAGE_X2?2:1) == 0) 
@@ -4605,38 +4631,25 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	#endif
 		GFX_RCC_SetSrcOffset(0);
 
+    #if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180)
+        GFX_RCC_SetSize(x, 1);
+    #else
+        GFX_RCC_SetSize(1, x);
+    #endif	
+
+
+
 		for(stretchY = 0; stretchY < stretch; stretchY++)
 		{
-			// adjust the x and y coordinate positions based on the screen rotation
-			#if (DISP_ORIENTATION == 0)
-		    {
-		        xp = left;
-        		yp = yc;
-			} 
-		    #elif (DISP_ORIENTATION == 90)
-		    {
-	        	xp = yc;
-	        	yp = GetMaxX() + 1 - (left + outputSize);
-		    }
-		    #elif (DISP_ORIENTATION == 180)
-		    {
-		        xp = GetMaxX() + 1 - (left + outputSize);
-		        yp = GetMaxY() + 1 - yc;
-		    }
-		    #elif (DISP_ORIENTATION == 270)
-		    {
-	        	xp = GetMaxY() + 1 - yc;
-		        yp = left;
-		    }
-			#endif				
-
-			GFX_RCC_SetDestOffset((yp * (DWORD)DISP_HOR_RESOLUTION) + xp);
-		
-    		#if (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270)
-				GFX_RCC_SetSize(1, outputSize);
-			#else
-				GFX_RCC_SetSize(outputSize, 1);
-			#endif	
+            #if (DISP_ORIENTATION == 0) 
+    			GFX_RCC_SetDestOffset((yc * (DWORD)DISP_HOR_RESOLUTION) + left);
+            #elif (DISP_ORIENTATION == 90)
+    			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
+            #elif (DISP_ORIENTATION == 180)
+    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+            #elif (DISP_ORIENTATION == 270)
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+			#endif	 
 		
 	        #ifdef USE_TRANSPARENT_COLOR
 			    if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
@@ -4691,19 +4704,29 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     BYTE			TempGPUBpp;
     BYTE            lineBuffer[((GetMaxX() + (DWORD) 1) / 2) + 1];
     WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
+
     WORD            palette[16], color;
     BYTE            *pData; 
     WORD			*pData2;
-    WORD 			outputSize, offsetCount;
+	WORD			outputSize;
 	WORD			xLimit;
 
     BYTE            temp = 0;
     WORD            sizeX, sizeY;
     WORD            x, y;
-    WORD            yc, xp, yp;
+    WORD            yc;
     BYTE            stretchY;
 
+    DWORD 			offsetCount;
+
     CHAR            testStretch = (stretch == IMAGE_NORMAL) ? 0x01 : 0x03;
+
+#ifdef USE_PALETTE
+    BYTE            	*pByteData = NULL; 
+#if (COLOR_DEPTH == 4) && ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+    BYTE nibblePos = 0;
+#endif
+#endif
 
     // First get palette (256 entries)
 
@@ -4738,10 +4761,10 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 		outputSize = GetMaxX() + 1 - left; 		
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
 	// 64 is used here since the palette size is 16 words or 64 nibbles
 	offsetCount = 64 + (sizeof(BITMAP_HEADER)<<1);
@@ -4768,10 +4791,6 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    TempGPUBpp = _PUBPP;
 	    _PUBPP = GFX_4_BPP;
 
-		// make sure there are no pending RCC GPU commands
-	    GFX_WaitForCommandQueue(16);
-	    GFX_WaitForGpu();
-	
 		GFX_SetWorkArea1(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress);
 		GFX_SetWorkArea2((DWORD)(WORD)lineBuffer);
 		GFX_RCC_SetSrcOffset(offsetCount);
@@ -4783,18 +4802,46 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    GFX_WaitForCommandQueue(16);
 	    GFX_WaitForGpu();
 	    
-	    // reset the _PUBPP to what it was
-	    _PUBPP = TempGPUBpp;
+   	    // reset the _PUBPP to what it was
+   	    _PUBPP = TempGPUBpp;
 
        	pData = lineBuffer;
 
-		#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270) 
-        	pData2 = lineBuffer2;
-	    #elif (DISP_ORIENTATION == 180) 
-        	pData2 = &lineBuffer2[outputSize-1];
-	    #elif (DISP_ORIENTATION == 90) 
-        	pData2 = &lineBuffer2[outputSize-1];
-        #endif	           	
+        #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+          	pData2 = lineBuffer2;
+            #ifdef USE_PALETTE
+            if(IsPaletteEnabled())
+            {
+                pByteData = (BYTE*)lineBuffer2;
+            }    
+            #endif
+        #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+           	pData2 = &lineBuffer2[outputSize-1];
+
+            #ifdef USE_PALETTE
+            if(IsPaletteEnabled())
+            {
+                pByteData = (BYTE*)lineBuffer2;
+
+                #if (COLOR_DEPTH == 8)
+                    pByteData += outputSize;
+                    pByteData--;
+                #endif
+
+                #if (COLOR_DEPTH == 4)
+
+                    pByteData += outputSize / 2;
+					nibblePos = (outputSize & 0x01);
+                    if(nibblePos == 0)
+					{
+                        pByteData--;
+					}
+				#endif
+
+            }
+			#endif
+
+        #endif
 
         // process the pixels on the current line
         for(x = 0; x < xLimit; x++)
@@ -4812,19 +4859,60 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
                 color = palette[(temp >> (((x>>(stretch-1))&0x0001)*4)) & 0x000F];
             #endif	            
             
-			#if (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270) 
-				// set the color to use based on the pixel value when using PutPixel()
-				SetColor(color);
-			#endif	
+            #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+                #ifdef USE_PALETTE
+    	          	if(IsPaletteEnabled())
+    	          	{
+                        #if (COLOR_DEPTH == 8)
+                        *pByteData++ = (BYTE)color;
+                        #endif
 
-            // Write pixel to buffer
-			#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270) 
-                *pData2++ = color;
-            #elif (DISP_ORIENTATION == 180) 
-                *pData2-- = color;
-            #elif (DISP_ORIENTATION == 90)
-                *pData2-- = color;
-       	    #endif
+                        #if (COLOR_DEPTH == 4)
+                        if(x & 0x01)
+                        {
+                            *pByteData++ |= color << 4;
+                        }else
+                        {
+                            *pByteData = color & 0x0F;
+                        }
+                        #endif
+    	          	}
+    	          	else
+    	          	{
+                        *pData2++ = color;
+    	          	}    
+                #else
+                	*pData2++ = color;
+                #endif
+            #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+               #ifdef USE_PALETTE
+    	          	if(IsPaletteEnabled())
+    	          	{
+                        #if (COLOR_DEPTH == 8)
+    	          	    *pByteData-- = (BYTE)color;
+                        #endif
+
+                        #if (COLOR_DEPTH == 4)
+						if (nibblePos == 1)
+                        {
+                            *pByteData = ((*pByteData & 0xF0) | (color & 0x0F));
+                            pByteData--;
+                            nibblePos = 0;
+                        }else
+                        {
+                            *pByteData = color << 4;
+                            nibblePos = 1;
+                        }
+                        #endif
+    	          	}
+    	          	else
+    	          	{
+                        *pData2-- = color;
+    	          	}    
+                #else
+                	*pData2-- = color;
+                #endif
+       	    #endif		
 
         } // for(x = 0; x < xLimit; x++)
 
@@ -4839,38 +4927,24 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    #endif
 		GFX_RCC_SetSrcOffset(0);
 
+        #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180))
+			GFX_RCC_SetSize(x, 1);
+		#else	
+			GFX_RCC_SetSize(1, x);
+		#endif
+
 		for(stretchY = 0; stretchY < stretch; stretchY++)
 		{
-			// adjust the x and y coordinate positions based on the screen rotation
-		    #if (DISP_ORIENTATION == 0)
-		    {
-		        xp = left;
-        		yp = yc;
-			} 
-		    #elif (DISP_ORIENTATION == 90)
-		    {
-	        	xp = yc;
-	        	yp = GetMaxX() + 1 - (left + outputSize);
-		    }
-		    #elif (DISP_ORIENTATION == 180)
-		    {
-		        xp = GetMaxX() + 1 - (left + outputSize);
-		        yp = GetMaxY() + 1 - yc;
-		    }
-		    #elif (DISP_ORIENTATION == 270)
-		    {
-	        	xp = GetMaxY() + 1 - yc;
-		        yp = left;
-		    }
-			#endif			
 
-			GFX_RCC_SetDestOffset((yp * (DWORD)DISP_HOR_RESOLUTION) + xp);
-		
-    		#if (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270)
-				GFX_RCC_SetSize(1, outputSize);
-			#else
-				GFX_RCC_SetSize(outputSize, 1);
-			#endif	
+            #if (DISP_ORIENTATION == 0) 
+    			GFX_RCC_SetDestOffset((yc * (DWORD)DISP_HOR_RESOLUTION) + left);
+            #elif (DISP_ORIENTATION == 90)
+    			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
+            #elif (DISP_ORIENTATION == 180)
+    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+            #elif (DISP_ORIENTATION == 270)
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+			#endif	 
 		
 			#ifdef USE_TRANSPARENT_COLOR
 			    if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
@@ -4887,10 +4961,9 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
         } // for(stretchY = 0; stretchY < stretch; stretchY++)
         
         // adjust the offset counter (adjust the offset if there are padded bits)
-        if (sizeX & 3)
-			offsetCount += (sizeX + 1);
-		else
-			offsetCount += (sizeX);
+        offsetCount += sizeX;
+        if (sizeX & 1)
+            offsetCount += 1;
 
     } //for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
@@ -4936,8 +5009,13 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     BYTE            temp = 0;
     WORD            sizeX, sizeY;
     WORD            x, y;
-    WORD            yc, xp, yp;
+    WORD            yc;
     BYTE            stretchY;
+
+    #ifdef USE_PALETTE
+    BYTE            	*pByteData = NULL; // To supress warning 
+    #endif
+
 
     // First get palette (256 entries)
 
@@ -4968,14 +5046,14 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	
 	// area of the buffer to use is only the area that
 	// spans the viewable area
-	if ((outputSize > (GetMaxX()+1)) || (left + outputSize > (GetMaxX()+1)))
+	if ((outputSize > (GetMaxX()+1)) || (left + outputSize - 1 > GetMaxX()))
 		outputSize = GetMaxX() + 1 - left; 		
 
 	// some pre-calculations
 	if (outputSize < GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
    	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
@@ -4995,10 +5073,6 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    TempGPUBpp = _PUBPP;
 	    _PUBPP = GFX_8_BPP;
 
-		// make sure there are no pending RCC GPU commands
-	    GFX_WaitForCommandQueue(16);
-	    GFX_WaitForGpu();
-	
 		GFX_SetWorkArea1(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress);
 		GFX_SetWorkArea2((DWORD)(WORD)lineBuffer);
 		// 512 is used here since the palette size is 256 words or 512 bytes
@@ -5011,18 +5085,37 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    GFX_WaitForCommandQueue(16);
 	    GFX_WaitForGpu();
 	    
-	    // reset the _PUBPP to what it was
+        // reset the _PUBPP to what it was
 	    _PUBPP = TempGPUBpp;
 
        	pData = lineBuffer;
 
-		#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270) 
-        	pData2 = lineBuffer2;
-	    #elif (DISP_ORIENTATION == 180) 
-        	pData2 = &lineBuffer2[outputSize-1];
-	    #elif (DISP_ORIENTATION == 90) 
-        	pData2 = &lineBuffer2[outputSize-1];
-        #endif	           	
+		// get the location of the line buffer 
+        #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+          	pData2 = lineBuffer2;
+        #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+           	pData2 = &lineBuffer2[outputSize-1];
+            
+            #ifdef USE_PALETTE
+            if(IsPaletteEnabled())
+            {
+                pData2 -= outputSize/2;
+            }
+            #endif
+        #endif
+
+        #ifdef USE_PALETTE
+            if(IsPaletteEnabled())
+            {
+                #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+                    pByteData = (BYTE*)lineBuffer2;
+                #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+                    pByteData = (BYTE*)lineBuffer2;
+                    pByteData += (outputSize - 1); 
+                #endif           	
+            }
+        #endif
+       	
 
 		// process the pixels of the current line
         for(x = 0; x < xLimit; x++)
@@ -5032,43 +5125,67 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
        	    
             if (stretch == IMAGE_X2)
             {
-                // Write pixel to buffer
-                #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                        *pData2 = temp;
-                    else    
-                        *pData2 = palette[temp];
-                #else
-                    *pData2 = palette[temp];
-                #endif
-                
-                // Write pixel to buffer
-    			#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270) 
-                    pData2++;
-                #elif (DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90)
-                    pData2--;
-           	    #endif
-
-                x++;
+                #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+                    #ifdef USE_PALETTE
+        	          	if(IsPaletteEnabled())
+        	          	{
+        	          	    *pByteData++ = (BYTE)temp;
+        	          	}
+        	          	else
+        	          	{
+                            *pData2++ = palette[temp];
+        	          	}    
+                    #else
+                        *pData2++ = palette[temp];
+                    #endif
+                #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+                   #ifdef USE_PALETTE
+        	          	if(IsPaletteEnabled())
+        	          	{
+        	          	    *pByteData-- = (BYTE)temp;
+        	          	}
+        	          	else
+        	          	{
+                            *pData2-- = palette[temp];
+        	          	}    
+                    #else
+                    	*pData2-- = palette[temp];
+    				#endif
+           	    #endif			
+           	    x++;
 
             }
+
             // Write pixel to buffer
-            #ifdef USE_PALETTE
-                if(IsPaletteEnabled())
-                    *pData2 = temp;
-                else    
-                    *pData2 = palette[temp];
-            #else
-                *pData2 = palette[temp];
-            #endif
-  
-            // Write pixel to buffer
-  			#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270) 
-                pData2++;
-            #elif (DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90)
-                pData2--;
-            #endif
-  
+            #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+                #ifdef USE_PALETTE
+    	          	if(IsPaletteEnabled())
+    	          	{
+    	          	    *pByteData++ = (BYTE)temp;
+    	          	}
+    	          	else
+    	          	{
+                        *pData2++ = palette[temp];
+    	          	}    
+                #else
+                    *pData2++ = palette[temp];
+                #endif
+            #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+               #ifdef USE_PALETTE
+    	          	if(IsPaletteEnabled())
+    	          	{
+    	          	    *pByteData-- = (BYTE)temp;
+    	          	}
+    	          	else
+    	          	{
+                        *pData2-- = palette[temp];
+    	          	}    
+                #else
+                	*pData2-- = palette[temp];
+				#endif
+       	    #endif					  
+
+
         } // for(x = 0; x < xLimit; x++)
 
 		// make sure there are no pending RCC GPU commands
@@ -5082,39 +5199,24 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     	#endif
 		GFX_RCC_SetSrcOffset(0);
 
+	    #if (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270)
+			GFX_RCC_SetSize(1, x);
+		#else
+			GFX_RCC_SetSize(x, 1);
+		#endif	
+
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
-			// adjust the x and y coordinate positions based on the screen rotation
-		    #if (DISP_ORIENTATION == 0)
-		    {
-		        xp = left;
-        		yp = yc;
-			} 
-		    #elif (DISP_ORIENTATION == 90)
-		    {
-	        	xp = yc;
-	        	yp = GetMaxX() + 1 - (left + outputSize);
-		    }
-		    #elif (DISP_ORIENTATION == 180)
-		    {
-		        xp = GetMaxX() + 1 - (left + outputSize);
-		        yp = GetMaxY() + 1 - yc;
-		    }
-		    #elif (DISP_ORIENTATION == 270)
-		    {
-	        	xp = GetMaxY() + 1 - yc;
-		        yp = left;
-		    }
-			#endif
-
-			GFX_RCC_SetDestOffset((yp * (DWORD)DISP_HOR_RESOLUTION) + xp);
-		
-    		#if (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270)
-				GFX_RCC_SetSize(1, outputSize);
-			#else
-				GFX_RCC_SetSize(outputSize, 1);
-			#endif	
-		
+           #if (DISP_ORIENTATION == 0) 
+    			GFX_RCC_SetDestOffset((yc * (DWORD)DISP_HOR_RESOLUTION) + left);
+            #elif (DISP_ORIENTATION == 90)
+    			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
+            #elif (DISP_ORIENTATION == 180)
+    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+            #elif (DISP_ORIENTATION == 270)
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+			#endif	 
+	
 			#ifdef USE_TRANSPARENT_COLOR
 			    if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
 			    {
@@ -5125,7 +5227,8 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
         	    {
     		        GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                 } 
-			
+
+			// update the vertical position counter
             yc++;
         } // for(stretchY = 0; stretchY < stretch; stretchY++)
     } //for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
@@ -5211,13 +5314,13 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     #ifdef USE_DOUBLE_BUFFERING
 		ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, _drawbuffer, 
 				  3, (top * (DWORD)DISP_HOR_RESOLUTION) + left, 
-				  RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS, 
+				  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
 				  RCC_TRANSPARENT_COPY, RCC_ROP_C, GetTransparentColor(),
 				  sizeX, sizeY);
 	#else
 		ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, GFX_GetDisplayArea(), 
 				  3, (top * (DWORD)DISP_HOR_RESOLUTION) + left, 
-				  RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS, 
+				  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
 				  RCC_TRANSPARENT_COPY, RCC_ROP_C, GetTransparentColor(),
 				  sizeX, sizeY);
 	#endif
@@ -5300,8 +5403,6 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
    	            }				
 		    	
 		    	pSrc = lineBuffer2;
-		    	
-		    	//pSrc = lineBuffer;
 		    }	
 			
 			GFX_SetWorkArea1((WORD)pSrc);
@@ -5428,7 +5529,7 @@ WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch)
             GFX_WaitForCommandQueue(GFX_COMMAND_QUEUE_LENGTH);
             GFX_WaitForGpu();
             
-            GFX_SetWorkArea1(piHdr->LOCATION.progByteAddress);
+            GFX_SetWorkArea1(piHdr->LOCATION.edsAddress);
             
             GFX_SetWorkArea2(GFX_DECOMPRESSED_DATA_RAM_ADDRESS);
             GFX_IPU_SetSrcOffset(0);
@@ -5493,10 +5594,11 @@ WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch)
                      GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, RCC_COPY, RCC_ROP_C,     \
                      0, remainder, 1);
 
-            _PUBPP = savedpubpp;
-
             GFX_WaitForCommandQueue(GFX_COMMAND_QUEUE_LENGTH);
             GFX_WaitForGpu();
+
+            _PUBPP = savedpubpp;
+
 
             GFX_SetWorkArea1(GFX_COMPRESSED_DATA_RAM_ADDRESS);
             GFX_SetWorkArea2(GFX_DECOMPRESSED_DATA_RAM_ADDRESS);
@@ -5513,7 +5615,6 @@ WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch)
             }
             
             image = &NewiHdr;
-            resType = *((WORD *)image);
 
         }
             #endif // #ifdef USE_BITMAP_FLASH
@@ -5585,7 +5686,6 @@ WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch)
             return -1;
         }
 
-        resType = *((WORD *)image);
     }
 
 
@@ -5951,21 +6051,20 @@ void StartVBlankInterrupt(void)
             _palette = pPendingPalette;
             pPendingPalette = NULL;
         }
-        
+    }
+
     #endif
         
     #ifdef USE_DOUBLE_BUFFERING
     
-        if(blDisplayUpdatePending)            
-        {
-            UpdateDisplayNow();
-            blDisplayUpdatePending = 0;
-        }
+	if(blDisplayUpdatePending)            
+	{
+		UpdateDisplayNow();
+		blDisplayUpdatePending = 0;
+	}
         
     #endif
     
-    }
-
     #endif
 }
 

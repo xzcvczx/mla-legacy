@@ -54,26 +54,24 @@ extern void SetReg(WORD index, BYTE value);
 /******************************************************************************
  * Helper Functions
  *****************************************************************************/
-        inline void __attribute__ ((always_inline))
-        SetCommandArgument(DWORD arg)
-    {
-        SetReg(0x110B, ((DWORD_VAL) arg).v[3]);
-        SetReg(0x110A, ((DWORD_VAL) arg).v[2]);
-        SetReg(0x1109, ((DWORD_VAL) arg).v[1]);
-        SetReg(0x1108, ((DWORD_VAL) arg).v[0]);
-    }
 
-inline void __attribute__ ((always_inline))
+inline void __attribute__ ((always_inline)) SetCommandArgument(DWORD arg)
+{
+    SetReg(0x110B, ((DWORD_VAL) arg).v[3]);
+    SetReg(0x110A, ((DWORD_VAL) arg).v[2]);
+    SetReg(0x1109, ((DWORD_VAL) arg).v[1]);
+    SetReg(0x1108, ((DWORD_VAL) arg).v[0]);
+}
+
 /* */
-SetCommand(BYTE idx, BYTE flags)
+inline void __attribute__ ((always_inline)) SetCommand(BYTE idx, BYTE flags)
 {
     SetReg(0x110E, flags);  //set response type
     SetReg(0x110F, idx);    //command index
 }
 
-inline volatile DWORD __attribute__ ((always_inline))
 /* */
-GetCommandResponse(BYTE idx)
+inline DWORD __attribute__ ((always_inline)) GetCommandResponse(BYTE idx)
 {
     DWORD_VAL   rsp;
 

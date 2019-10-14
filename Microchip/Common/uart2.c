@@ -238,6 +238,7 @@ void UART2PutChar( char ch )
     U2TXREG = ch;
     #if !defined(__PIC32MX__)
         Nop();
+        Nop();
     #endif
     while(U2STAbits.TRMT == 0);
 }

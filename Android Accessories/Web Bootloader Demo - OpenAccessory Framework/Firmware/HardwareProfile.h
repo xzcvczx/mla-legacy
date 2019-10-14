@@ -54,9 +54,11 @@
         #elif defined(__32MX795F512L__)
             #if defined(PIC32MX795F512L_PIM)
                 #include "HardwareProfile - PIC32MX795F512L PIM.h"
+            #elif defined(CEREBOT_32MX7)
+                #include "HardwareProfile - Cerebot 32MX7.h"
             #elif defined(PIC32_USB_STARTER_KIT)
                 //PIC32 USB Starter Kit II
-                #include "HardwareProfile - PIC32 USB Starter Kit II.h"
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
             #elif defined(PIC32_ETHERNET_STARTER_KIT)
                 #include "HardwareProfile - PIC32 Ethernet Starter Kit.h"
             #endif
@@ -76,6 +78,8 @@
             #include "HardwareProfile - PIC24F Starter Kit.h"
         #elif defined(__PIC24FJ64GB004__)
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+        #elif defined(__PIC24FJ64GB502__)
+            #include "HardwareProfile - PIC24FJ64GB502 Microstick.h"
         #elif defined(__PIC24FJ256DA210__)
             #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
         #elif defined(__dsPIC33EP512MU810__)

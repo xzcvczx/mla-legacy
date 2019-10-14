@@ -1,8 +1,35 @@
-/*
- * MainMPFS.java
- *
- * Created on Aug 23, 2010, 12:25:56 PM
- */
+/*********************************************************************
+*
+*  MPFS entry point for both GUI and CLI.Launch for Generate and upload
+*
+**********************************************************************
+* FileName:        MainMPFS.java
+* Complier:        JAVA version "1.6.0_20 and onwards"
+* IDE :            Netbean
+* Software License Agreement
+*
+* Copyright (C) 2012 Microchip Technology Inc.  All rights reserved.
+*
+* Microchip licenses to you the right to use, modify, copy, and
+* distribute the Software when used with a Microchip microcontroller or
+* digital signal controller product which is integrated into Licensee's product.
+*
+* You should refer to the license agreement accompanying this
+* Software for additional information regarding your rights and
+* obligations.
+*
+* THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+* WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+* LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+* PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+* MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+* CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+* PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+* BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+* THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+* SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+* (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE
+**********************************************************************/
 package MicrochipMPFS;
 import javax.swing.*;
 import java.util.*;
@@ -14,9 +41,17 @@ import javax.swing.ImageIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.Action;
-import java.text.*;
+//import java.text.*;
+//import java.lang.*;
 
 public class MainMPFS extends javax.swing.JFrame {
+    public enum outputFileFormat
+    {
+        BIN,
+        C18_32,
+        ASM30,
+        MDD,
+    };
     public enum MPFS_OUTPUT_VERSION
     {
        MPFS2,
@@ -50,27 +85,27 @@ public class MainMPFS extends javax.swing.JFrame {
             "C:\\Microchip Solutions\\TCPIP\\Demo App\\WebPages2";
     public String defaultProjectBinFilePath =
             "C:\\Microchip Solutions\\TCPIP\\Demo App\\MPFSImg2.bin";
-     public String defaultProjectDirectoryPath =
+    public String defaultProjectDirectoryPath =
              "C:\\Microchip Solutions\\TCPIP\\Demo App";
 
     public String sourceDirectoryPath =
-            "..\\..\\..\\TCPIP\\Demo App\\WebPages2";
+            "../../../TCPIP/Demo App/WebPages2";
     public String sourceDirectoryPath_old =
-            "..\\..\\..\\TCPIP Demo App\\WebPages2";
+            "../../../TCPIP Demo App/WebPages2";
             //"C:\\Microchip Solutions\\TCPIP\\Demo App\\WebPages2";
             //"C:\\Microchip Solutions\\TCPIP Demo App\\WebPages2";
 
     public String projectBinFilePath =
-            "..\\..\\..\\TCPIP\\Demo App\\MPFSImg2.bin";
+            "../../../TCPIP/Demo App/MPFSImg2.bin";
     public String projectBinFilePath_old =
-            "..\\..\\..\\TCPIP Demo App\\MPFSImg2.bin";
+            "../../../TCPIP Demo App/MPFSImg2.bin";
     // "C:\\Microchip Solutions\\TCPIP\\Demo App\\MPFSImg2.bin";
     //         "C:\\Microchip Solutions\\TCPIP Demo App\\MPFSImg2.bin";
 
     public String projectDirectoryPath =
-            "..\\..\\..\\TCPIP\\Demo App";
+            "../../../TCPIP/Demo App";
     public String projectDirectoryPath_old =
-            "..\\..\\..\\TCPIP Demo App";
+            "../../../TCPIP Demo App";
     //   "C:\\Microchip Solutions\\TCPIP\\Demo App";
     //    "C:\\Microchip Solutions\\TCPIP Demo App";
     final ImageIcon icon = new ImageIcon(getClass().getResource("/Resource/mchpIcon.png"));
@@ -78,14 +113,158 @@ public class MainMPFS extends javax.swing.JFrame {
     int progressVal = 0;
     int progressVal_temp=0;
     URL url;
-   public Properties prop = System.getProperties();
+    public Properties prop = System.getProperties();
+
+    public String[] XMLNodeName=
+    {
+        "Setting"
+    };
+    public String[] XMLNodeSettingAttribute=
+    {
+    //    "DefaultSourceDirectory",
+        "SourceDirectory",
+   //     "SourceDirectory_old",
+   //     "DefaultProjectDirectory",
+        "ProjectDirectory",
+   //     "ProjectDirectory_old",
+   //     "DefaultProjectBinFile",
+        "ProjectBinFile",
+   //     "ProjectBinFile_old"
+        "StartWithDirectory",
+        "ImageName",
+        "UploadImageAfterGenerate",
+        "OutputFormat",
+        "UploadProtocol",
+        "DynamicFiles",
+        "NoCompressFiles",
+        "UploadAddress",
+        "UploadPath",
+        "UploadUser",
+        "UploadPass"
+
+    };
+    public enum eXmlNodeAttribute
+    {
+        SOURCE_DIRECTORY_PATH,
+        PROJECT_DIRECTORY_PATH,
+        PROJECT_BIN_FILE_PATH,
+        START_DIRECTORY_RAD_BOTTON,
+        IMAGE_NAME,
+        UPLOAD_BIN_IMAGE_CHKBOX,
+        OUTPUT_IMAGE_FORMAT_RAD_BOTTON,
+        UPLOAD_PROTOCOL,
+        DYNAMIC_FILES,
+        NO_COMPRESS_FILE_LIST,
+        UPLOAD_ADDRESS,
+        UPLOAD_IMAGE_PATH,
+        UPLOAD_USER_NAME,
+        UPLOAD_PASSWORD
+    }
+    xmlInterface xmlIntrf;
+    public Map<eXmlNodeAttribute,String> xmlAttrInfoMap;
+
+    public Map<Byte,outputFileFormat> ouputFormat;
+
+   /*
+    * XML interface file to store the Configuration details
+    */
+   public String xmlOuputfile = "MPFS2SettingDetails.xml";
 
     /** Creates new form MainMPFS */
     public MainMPFS() {
         //Date date = new Date();
         //SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy");
         //this.setIconImage(icon.getImage());
-        //String sourceDirectoryPath_temp;
+       
+         // XML interface class
+        xmlAttrInfoMap = new HashMap<eXmlNodeAttribute,String>();
+        xmlAttrInfoMap.put(eXmlNodeAttribute.SOURCE_DIRECTORY_PATH,XMLNodeSettingAttribute[0]);
+        xmlAttrInfoMap.put( eXmlNodeAttribute.PROJECT_DIRECTORY_PATH,XMLNodeSettingAttribute[1]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.PROJECT_BIN_FILE_PATH,XMLNodeSettingAttribute[2]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.START_DIRECTORY_RAD_BOTTON,XMLNodeSettingAttribute[3]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.IMAGE_NAME,XMLNodeSettingAttribute[4]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.UPLOAD_BIN_IMAGE_CHKBOX,XMLNodeSettingAttribute[5]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.OUTPUT_IMAGE_FORMAT_RAD_BOTTON,XMLNodeSettingAttribute[6]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.UPLOAD_PROTOCOL,XMLNodeSettingAttribute[7]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.DYNAMIC_FILES,XMLNodeSettingAttribute[8]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.NO_COMPRESS_FILE_LIST,XMLNodeSettingAttribute[9]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.UPLOAD_ADDRESS,XMLNodeSettingAttribute[10]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.UPLOAD_IMAGE_PATH,XMLNodeSettingAttribute[11]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.UPLOAD_USER_NAME,XMLNodeSettingAttribute[12]);
+        xmlAttrInfoMap.put(eXmlNodeAttribute.UPLOAD_PASSWORD,XMLNodeSettingAttribute[13]);
+
+        ouputFormat = new HashMap<Byte,outputFileFormat>();
+        ouputFormat.put(Byte.valueOf((byte)0),outputFileFormat.BIN);
+        ouputFormat.put(Byte.valueOf((byte)1),outputFileFormat.C18_32);
+        ouputFormat.put(Byte.valueOf((byte)2),outputFileFormat.ASM30);
+        ouputFormat.put(Byte.valueOf((byte)3),outputFileFormat.MDD);
+
+        JDialog.setDefaultLookAndFeelDecorated(true);
+        File xmlFile = new File(xmlOuputfile);
+        xmlIntrf = new xmlInterface(xmlFile,this);
+        if(xmlFile.isFile() && xmlFile.exists())
+        {
+            //xmlFile.delete();
+            //xmlIntrf = new xmlInterface(xmlFile,this);
+            for(int iLoop=0;iLoop<XMLNodeName.length;iLoop++)
+            {
+                //System.out.println("File already present \n");
+                if(xmlIntrf.validateSettingsNodeInfo(XMLNodeName[iLoop])!= true)
+                {
+                   //System.out.println("if File has problem \n");
+                    File invalidXmlFile = new File("MPFS2SettingDetails.bak");
+                    xmlFile.renameTo(invalidXmlFile);
+                    xmlFile.delete();
+                    xmlIntrf.defaultSettingXmlFileCreation();
+                    JOptionPane.showMessageDialog(null, "Invalid XML File.\n" +
+                           "File saved as MPFS2SettingDetails.bak ."); //, "System Alert:"); //, JOptionPane.OK_OPTION,JOptionPane.INFORMATION_MESSAGE);
+                   //int response = JOptionPane.showConfirmDialog(null, "Invalid XML File.\n" +
+                  //         "File saved as MPFS2SettingDetails.bak .", "System Alert:", JOptionPane.OK_OPTION,JOptionPane.INFORMATION_MESSAGE);
+//                   if(response == JOptionPane.YES_OPTION)
+//                   {
+//                        xmlFile.delete();
+//                        xmlIntrf.defaultSettingXmlFileCreation();
+//                   }
+//                   else
+//                   {
+//                       return;
+//                   }
+                }
+            }
+        }
+        else
+        {
+            //System.out.println("Dafault file is created \n");
+            xmlIntrf.defaultSettingXmlFileCreation();
+        }
+       
+        initComponents();
+        jProgressBar1.setIndeterminate(false);
+        this.setIconImage(icon.getImage());
+        toolTipSettings();
+
+        this.setSize(638,520);
+        
+        //advSetting = new AdvanceSettings(new JFrame(),true,this);
+        //uploadSettings =  new UploadSettings(new JFrame(),true,this);
+        advSetting = new AdvanceSettings(this,true);
+        uploadSettings =  new UploadSettings(this,true);
+        aboutBox = new AboutBox(this,true);
+        txtUploadPath.setText(uploadSettings.getUploadPathStr());
+        aboutStr = "<html>"+"Date Feb,12 2012"+"<br>";
+        String version = "Version MPFS 2.2.1";
+        lebelAbout.setText(aboutStr+version+"</html>");
+        UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
+        MainKeyEventActionIntialization();
+        xmlIntrf.loadSettingsNodeInfo(XMLNodeName[0]);
+        if(radWebDir.isSelected())
+        {
+            radWebDirActionPerformed(null);
+        }
+        else
+        {
+            radPreBuildDirActionPerformed(null);
+        }
         File sourceFile=new File(sourceDirectoryPath);
         File projectBinFile = new File(projectBinFilePath);
         File projectDir = new File(projectDirectoryPath);
@@ -93,17 +272,11 @@ public class MainMPFS extends javax.swing.JFrame {
         File sourceFile_old=new File(sourceDirectoryPath_old);
         File projectBinFile_old = new File(projectBinFilePath_old);
         File projectDir_old = new File(projectDirectoryPath_old);
-        initComponents();
-        jProgressBar1.setIndeterminate(false);
-        this.setIconImage(icon.getImage());
-        toolTipSettings();
-
-        this.setSize(638,520);
-
         // source directory
         try
         {
             sourceDirectoryPath = sourceFile.getCanonicalPath();
+            //System.out.println("initial sourceDirectoryPath =" + sourceDirectoryPath);
             if(sourceFile.exists() == false)
             {
                 if(sourceFile_old.exists() == false)
@@ -117,8 +290,11 @@ public class MainMPFS extends javax.swing.JFrame {
                     sourceDirectoryPath = sourceFile_old.getCanonicalPath();
                 }
             }
-            //System.out.println("sourceDirectoryPath =" + sourceDirectoryPath);
-        }catch(IOException E){}
+            saveXmlNodeValue(eXmlNodeAttribute.SOURCE_DIRECTORY_PATH,sourceDirectoryPath,0,true);
+
+        }catch(IOException E){
+        //System.out.println("Catch sourceDirectoryPath =" + sourceDirectoryPath);
+        }
 
         // project Bin File Path
         try
@@ -133,6 +309,8 @@ public class MainMPFS extends javax.swing.JFrame {
                      projectBinFilePath = projectBinFile_old.getCanonicalPath();
                  }
             }
+            //xmlIntrf.modifyExistingXmlFile("Setting", "ProjectBinFile", projectBinFilePath);
+            saveXmlNodeValue(eXmlNodeAttribute.PROJECT_BIN_FILE_PATH,projectBinFilePath,0,true);
             //System.out.println("projectBinFilePath =" + projectBinFilePath);
         }catch(IOException E){}
 
@@ -149,22 +327,13 @@ public class MainMPFS extends javax.swing.JFrame {
                    projectDirectoryPath = projectDir_old.getCanonicalPath();
                }
             }
+            //xmlIntrf.modifyExistingXmlFile("Setting", "ProjectDirectory", projectDirectoryPath);
+            saveXmlNodeValue(eXmlNodeAttribute.PROJECT_DIRECTORY_PATH,projectDirectoryPath,0,true);
             //System.out.println("projectDirectoryPath =" + projectDirectoryPath);
         }catch(IOException E){}
          // Soure directory Image path
         TextSrcDir.setText(sourceDirectoryPath);
         txtProjectDir.setText(projectDirectoryPath);
-        //advSetting = new AdvanceSettings(new JFrame(),true,this);
-        //uploadSettings =  new UploadSettings(new JFrame(),true,this);
-        advSetting = new AdvanceSettings(this,true);
-        uploadSettings =  new UploadSettings(this,true);
-        aboutBox = new AboutBox(this,true);
-        txtUploadPath.setText(uploadSettings.getUploadPathStr());
-        aboutStr = "<html>"+"Date OCT,18 2011"+"<br>";
-        String version = "Version MPFS 2.2";
-        lebelAbout.setText(aboutStr+version+"</html>");
-        UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
-        MainKeyEventActionIntialization();
     }
 
     /*
@@ -377,6 +546,16 @@ public class MainMPFS extends javax.swing.JFrame {
         txtProjectImageName.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11)); // NOI18N
         txtProjectImageName.setText("MPFSImg2");
         txtProjectImageName.setToolTipText("File name for the image you'd like to create.");
+        txtProjectImageName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtProjectImageNameActionPerformed(evt);
+            }
+        });
+        txtProjectImageName.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtProjectImageNameKeyReleased(evt);
+            }
+        });
         jPanel3.add(txtProjectImageName, new org.netbeans.lib.awtextra.AbsoluteConstraints(179, 68, 164, -1));
 
         lbnImageType.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
@@ -1031,6 +1210,9 @@ public class MainMPFS extends javax.swing.JFrame {
                 TextSrcDir.setText(srcPath);
                 txtProjectDir.setText(browseButton.getParentDirctoryPath());
                 sourceDirectoryPath = TextSrcDir.getText();
+                projectDirectoryPath = txtProjectDir.getText();
+                saveXmlNodeValue(eXmlNodeAttribute.SOURCE_DIRECTORY_PATH,sourceDirectoryPath,0,true);
+                saveXmlNodeValue(eXmlNodeAttribute.PROJECT_DIRECTORY_PATH,projectDirectoryPath,0,true);
             }
         }
         else if(getRadBotPreBuildDirStatus()== true)
@@ -1039,6 +1221,7 @@ public class MainMPFS extends javax.swing.JFrame {
             {
                 TextSrcDir.setText(srcPath);
                 projectBinFilePath = TextSrcDir.getText();
+                saveXmlNodeValue(eXmlNodeAttribute.PROJECT_BIN_FILE_PATH,projectBinFilePath,0,true);
             }
         }
         txtUploadPath.setText(uploadSettings.getUploadPathStr());
@@ -1056,6 +1239,7 @@ public class MainMPFS extends javax.swing.JFrame {
          radPreBuildDir.setEnabled(true);
          btnAdvSetting.setEnabled(true);
          btnAdvSetting.setFocusable(true);
+         saveXmlNodeValue(eXmlNodeAttribute.OUTPUT_IMAGE_FORMAT_RAD_BOTTON,null,1,true);
     }//GEN-LAST:event_radC18C32ActionPerformed
 
     private void radAsmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radAsmActionPerformed
@@ -1070,13 +1254,18 @@ public class MainMPFS extends javax.swing.JFrame {
         radPreBuildDir.setEnabled(true);
         btnAdvSetting.setEnabled(true);
         btnAdvSetting.setFocusable(true);
+        saveXmlNodeValue(eXmlNodeAttribute.OUTPUT_IMAGE_FORMAT_RAD_BOTTON,null,2,true);
     }//GEN-LAST:event_radAsmActionPerformed
 
     private void chkBoxUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkBoxUploadActionPerformed
         // TODO add your handling code here:
-         String str = new String();
+        String str = new String();
         str = txtUploadPath.getText();
         txtUploadPath.setText(txtUploadPath.getText());
+        if(chkBoxUpload.isSelected())
+            saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_BIN_IMAGE_CHKBOX,null,0,true);
+        else
+            saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_BIN_IMAGE_CHKBOX,null,0,false);
     }//GEN-LAST:event_chkBoxUploadActionPerformed
 
     private void radWebDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radWebDirActionPerformed
@@ -1115,7 +1304,10 @@ public class MainMPFS extends javax.swing.JFrame {
              btnGenAndUpload.setText("Generate");
          }
          txtUploadPath.setText(uploadSettings.getUploadPathStr());
-        
+         if(radWebDir.isSelected())
+             saveXmlNodeValue(eXmlNodeAttribute.START_DIRECTORY_RAD_BOTTON,null,1,true);
+         else
+             saveXmlNodeValue(eXmlNodeAttribute.START_DIRECTORY_RAD_BOTTON,null,1,false);
         //this.setSize(null);
     }//GEN-LAST:event_radWebDirActionPerformed
 
@@ -1129,6 +1321,7 @@ public class MainMPFS extends javax.swing.JFrame {
         {
             txtProjectDir.setText(projectPath);
             projectDirectoryPath = projectPath;
+            saveXmlNodeValue(eXmlNodeAttribute.PROJECT_DIRECTORY_PATH,projectDirectoryPath,0,true);
         }
        //if(ProjectDir.getOutputDirctoryPath() != null)
          //   txtProjectDir.setText(ProjectDir.getParentDirctoryPath());
@@ -1152,6 +1345,8 @@ public class MainMPFS extends javax.swing.JFrame {
          * 
          */
         txtUploadPath.setText(uploadSettings.getUploadPathStr());
+        saveXmlNodeValue(eXmlNodeAttribute.DYNAMIC_FILES,advSetting.DynVarStr,0,true);
+        saveXmlNodeValue(eXmlNodeAttribute.NO_COMPRESS_FILE_LIST,advSetting.NoCompStr,0,true);
     }//GEN-LAST:event_btnAdvSettingActionPerformed
 
     private void btnUploadSettingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadSettingActionPerformed
@@ -1168,6 +1363,14 @@ public class MainMPFS extends javax.swing.JFrame {
             uploadProtocol = UPLOAD_PROTOCOL_OPTION.FTP;
         }
         txtUploadPath.setText(uploadSettings.getUploadPathStr());
+        saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_ADDRESS,uploadSettings.getIpAddress(),0,true);
+        saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_IMAGE_PATH,uploadSettings.getUploadPath(),0,true);
+        saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_USER_NAME,uploadSettings.getUserName(),0,true);
+        saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_PASSWORD,uploadSettings.getPasswordName(),0,true);
+        if(uploadProtocol == UPLOAD_PROTOCOL_OPTION.HTTP)
+            saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_PROTOCOL,null,1,true);
+        else
+            saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_PROTOCOL,null,2,true);
     }//GEN-LAST:event_btnUploadSettingActionPerformed
 
     private void chkBoxUploadStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_chkBoxUploadStateChanged
@@ -1180,12 +1383,14 @@ public class MainMPFS extends javax.swing.JFrame {
             str = txtUploadPath.getText();
             txtUploadPath.setText(txtUploadPath.getText());
             btnGenAndUpload.setText("Generate and Upload");
+            saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_BIN_IMAGE_CHKBOX,null,0,true);
         }
         else
         {
             txtUploadPath.setEnabled(false);
             btnUploadSetting.setEnabled(false);
             btnGenAndUpload.setText("Generate");
+            saveXmlNodeValue(eXmlNodeAttribute.UPLOAD_BIN_IMAGE_CHKBOX,null,0,false);
         }
     }//GEN-LAST:event_chkBoxUploadStateChanged
 
@@ -1208,7 +1413,10 @@ public class MainMPFS extends javax.swing.JFrame {
         txtUploadPath.setText(uploadSettings.getUploadPathStr());
         txtUploadPath.setEnabled(true);
         btnUploadSetting.setEnabled(true);
-       
+       if(radWebDir.isSelected())
+             saveXmlNodeValue(eXmlNodeAttribute.START_DIRECTORY_RAD_BOTTON,null,1,true);
+         else
+             saveXmlNodeValue(eXmlNodeAttribute.START_DIRECTORY_RAD_BOTTON,null,1,false);
 
     }//GEN-LAST:event_radPreBuildDirActionPerformed
 
@@ -1227,6 +1435,8 @@ public class MainMPFS extends javax.swing.JFrame {
         radPreBuildDir.setEnabled(true);
         btnAdvSetting.setEnabled(true);
         btnAdvSetting.setFocusable(true);
+        saveXmlNodeValue(eXmlNodeAttribute.OUTPUT_IMAGE_FORMAT_RAD_BOTTON,null,0,true);
+        txtUploadPath.setText(uploadSettings.getUploadPathStr());
     }//GEN-LAST:event_radBinActionPerformed
 
     private void radMddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radMddActionPerformed
@@ -1240,6 +1450,7 @@ public class MainMPFS extends javax.swing.JFrame {
          this.setSize(638, 420);
          radPreBuildDir.setEnabled(false);
          btnAdvSetting.setEnabled(false);
+         saveXmlNodeValue(eXmlNodeAttribute.OUTPUT_IMAGE_FORMAT_RAD_BOTTON,null,3,true);
 
     }//GEN-LAST:event_radMddActionPerformed
 
@@ -1259,8 +1470,22 @@ public class MainMPFS extends javax.swing.JFrame {
             sourceDirectoryPath = TextSrcDir.getText();
             projectDirectoryPath = txtProjectDir.getText();
             projectBinFilePath = projectDirectoryPath+File.separator+imageName;
+            //save the setting
+            saveXmlNodeValue(eXmlNodeAttribute.PROJECT_BIN_FILE_PATH,projectBinFilePath,0,true);
+            saveXmlNodeValue(eXmlNodeAttribute.SOURCE_DIRECTORY_PATH,sourceDirectoryPath,0,true);
+            saveXmlNodeValue(eXmlNodeAttribute.PROJECT_DIRECTORY_PATH,projectDirectoryPath,0,true);
         }
     }//GEN-LAST:event_TextSrcDirActionPerformed
+
+    private void txtProjectImageNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectImageNameActionPerformed
+        // TODO add your handling code here:
+        saveXmlNodeValue(eXmlNodeAttribute.IMAGE_NAME,txtProjectImageName.getText(),0,true);
+    }//GEN-LAST:event_txtProjectImageNameActionPerformed
+
+    private void txtProjectImageNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtProjectImageNameKeyReleased
+        // TODO add your handling code here:
+        saveXmlNodeValue(eXmlNodeAttribute.IMAGE_NAME,txtProjectImageName.getText(),0,true);
+    }//GEN-LAST:event_txtProjectImageNameKeyReleased
 
     void toolTipSettings()
     {
@@ -1315,6 +1540,149 @@ public class MainMPFS extends javax.swing.JFrame {
         return radPreBuildDir.isSelected();
     }
 
+    //xmlIntrf.modifyExistingXmlFile("Setting", "SourceDirectory", sourceDirectoryPath);
+    public void saveXmlNodeValue(eXmlNodeAttribute xmlNodeValue,String sNodeValue,int cNodeValue,boolean bNodevalue)
+    {
+        switch(xmlNodeValue)
+        {
+            case SOURCE_DIRECTORY_PATH :
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.SOURCE_DIRECTORY_PATH), sNodeValue);
+                break;
+            case PROJECT_DIRECTORY_PATH:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.PROJECT_DIRECTORY_PATH), sNodeValue);
+                break;
+            case PROJECT_BIN_FILE_PATH:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.PROJECT_BIN_FILE_PATH), sNodeValue);
+                break;
+            case START_DIRECTORY_RAD_BOTTON:
+                if(bNodevalue == true)
+                    sNodeValue = "True";
+                else
+                    sNodeValue = "False";
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.START_DIRECTORY_RAD_BOTTON), sNodeValue);
+                break;
+            case IMAGE_NAME:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.IMAGE_NAME), sNodeValue);
+                break;
+            case UPLOAD_BIN_IMAGE_CHKBOX:
+                if(bNodevalue == true)
+                    sNodeValue = "True";
+                else
+                    sNodeValue = "False";
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.UPLOAD_BIN_IMAGE_CHKBOX), sNodeValue);
+                break;
+            case OUTPUT_IMAGE_FORMAT_RAD_BOTTON:
+                sNodeValue = Integer.toString(cNodeValue);
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.OUTPUT_IMAGE_FORMAT_RAD_BOTTON), sNodeValue);
+                break;
+            case UPLOAD_PROTOCOL:
+                sNodeValue = Integer.toString(cNodeValue);
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.UPLOAD_PROTOCOL), sNodeValue);
+                break;
+            case DYNAMIC_FILES:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.DYNAMIC_FILES), sNodeValue);
+                break;
+            case NO_COMPRESS_FILE_LIST:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.NO_COMPRESS_FILE_LIST), sNodeValue);
+                break;
+            case UPLOAD_ADDRESS:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.UPLOAD_ADDRESS), sNodeValue);
+                break;
+            case UPLOAD_IMAGE_PATH:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.UPLOAD_IMAGE_PATH), sNodeValue);
+                break;
+            case UPLOAD_USER_NAME:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.UPLOAD_USER_NAME), sNodeValue);
+                break;
+            case UPLOAD_PASSWORD:
+                xmlIntrf.modifyExistingXmlFile(XMLNodeName[0], xmlAttrInfoMap.get(xmlNodeValue.UPLOAD_PASSWORD), sNodeValue);
+                break;
+        }
+    }
+
+    public void setConfiguration(boolean bNodeValue,String sNodeValue,int cNodeValue,int xmlNodeValue)
+    {
+        switch(xmlNodeValue)
+        {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3: //START_DIRECTORY_RAD_BOTTON
+                if(bNodeValue)
+                {
+                    radWebDir.setSelected(true);
+                    radPreBuildDir.setSelected(false);
+                    //radWebDirActionPerformed(null);
+                }
+                else
+                {
+                    radWebDir.setSelected(false);
+                    radPreBuildDir.setSelected(true);
+                    //radPreBuildDirActionPerformed(null);
+                }
+                break;
+            case 4:  // IMAGE_NAME
+                txtProjectImageName.setText(sNodeValue);
+                break;
+            case 5:  // UPLOAD_BIN_IMAGE_CHKBOX
+                if(bNodeValue)
+                {
+                    chkBoxUpload.setSelected(bNodeValue);
+                }
+                else
+                {
+                    chkBoxUpload.setSelected(bNodeValue);
+                }
+                chkBoxUploadStateChanged(null);
+                break;
+            case 6:  // OUTPUT_IMAGE_FORMAT_RAD_BOTTON
+                if(ouputFormat.get((byte)cNodeValue) == outputFileFormat.BIN)
+                {
+                    radBin.setSelected(true);
+                    //radBinActionPerformed(null);
+                }
+                else if(ouputFormat.get((byte)cNodeValue) == outputFileFormat.C18_32)
+                {
+                    radC18C32.setSelected(true);
+                   // radC18C32ActionPerformed(null);
+                }
+                else if(ouputFormat.get((byte)cNodeValue) == outputFileFormat.ASM30)
+                {
+                    radAsm.setSelected(true);
+                    //radAsmActionPerformed(null);
+                }
+                else if(ouputFormat.get((byte)cNodeValue) == outputFileFormat.MDD)
+                {
+                    radMdd.setSelected(true);                
+                   // radMddActionPerformed(null);
+                }
+                break;
+            case 7:  // UPLOAD_PROTOCOL
+                uploadSettings.setUploadProtocolRadBtn(cNodeValue);
+                break;
+            case 8:  // DYNAMIC_FILES
+                advSetting.setDynamicFileStr(sNodeValue);
+                break;
+            case 9: // NO_COMPRESS_FILE_LIST
+                advSetting.setNoCompressionFileStr(sNodeValue);
+                break;
+            case 10: // UPLOAD_ADDRESS
+                uploadSettings.setUploadAddress(sNodeValue);
+                break;
+            case 11: // UPLOAD_IMAGE_PATH
+                uploadSettings.setUploadPath(sNodeValue);
+                break;
+            case 12: // UPLOAD_USER_NAME
+                uploadSettings.setUploadUserName(sNodeValue);
+                break;
+            case 13: // UPLOAD_PASSWORD
+                uploadSettings.setUploadPass(sNodeValue);
+                break;
+        }
+    }
     private void MainKeyEventActionIntialization()
     {
         Action  ESCactionListener = new AbstractAction () {

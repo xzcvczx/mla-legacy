@@ -45,7 +45,6 @@ del "a.out" /f /q
 rmdir "TempOBJ" /s /q
 rmdir "Obj-EM PICtail-PIC24F ENC28" /s /q
 rmdir "Obj-EM PICtail-PIC24F ENC624" /s /q
-rmdir "Obj-EM PICtail-PIC24F MRF24WB" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\publish" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\obj" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\bin\Debug" /s /q

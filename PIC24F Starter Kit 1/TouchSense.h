@@ -4,7 +4,7 @@
 //******************************************************************************
 //******************************************************************************
 
-#if defined USE_SH1101A
+#if defined USE_GFX_DISPLAY_CONTROLLER_SH1101A
 	#if defined TOUCHPAD_DIRECT_TOUCH
 		#define TRIP_VALUE                      0x500
 		#define TRIP_VALUE_BLASTER				0x1000
@@ -17,7 +17,7 @@
 	    #define HYSTERESIS_VALUE                2  
 	#endif
     #define MAX_ALLOWED_CTMU_VAL            0x3FF //Fullscale
-#elif defined USE_SSD1303
+#elif defined USE_GFX_DISPLAY_CONTROLLER_SSD1303
 	#if defined TOUCHPAD_DIRECT_TOUCH
 	    #define TRIP_VALUE                      0x500
 		#define TRIP_VALUE_BLASTER				0x1000

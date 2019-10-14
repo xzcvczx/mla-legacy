@@ -1,3 +1,49 @@
+/*********************************************************************
+ *
+ *  Simple Network Management Protocol (SNMP) Version 3 Agent 
+ *  
+ *  Module for Microchip TCP/IP Stack
+ *	 -Provides SNMPv3 API for doing stuff
+ *	
+ *	-Reference: RFCs 3410, 3411, 3412, 3413, 3414 
+ *********************************************************************
+ * FileName:        SNMPv3.h
+ * Dependencies: TCP/IP stack
+ * Processor:       PIC32
+ * Compiler:        Microchip C32 
+ *
+ * Software License Agreement
+ *
+ * Copyright (C) 2012 Microchip Technology Inc.  All rights
+ * reserved.
+ *
+ * Microchip licenses to you the right to use, modify, copy, and
+ * distribute:
+ * (i)  the Software when embedded on a Microchip microcontroller or
+ *      digital signal controller product ("Device") which is
+ *      integrated into Licensee's product; or
+ * (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+ *		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device
+ *		used in conjunction with a Microchip ethernet controller for
+ *		the sole purpose of interfacing with the ethernet controller.
+ *
+ * You should refer to the license agreement accompanying this
+ * Software for additional information regarding your rights and
+ * obligations.
+ *
+ * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT
+ * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
+ * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
+ * MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
+ * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+ * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
+ * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
+ * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
+ * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
+ ********************************************************************/
+
 #ifndef SNMPV3_H
 #define SNMPV3_H
 
@@ -590,6 +636,21 @@ extern BYTE Snmpv3AESEncryptResponseScopedPdu(SNMPV3_RESPONSE_WHOLEMSG* plain_te
 extern BYTE Snmpv3AuthenticateTxPduForDataIntegrity(SNMPV3_RESPONSE_WHOLEMSG* txDataPtr);
 extern BYTE Snmpv3AuthenticateRxedPduForDataIntegrity(SNMPV3_REQUEST_WHOLEMSG* rxDataPtr);
 extern void Snmpv3UsmSnmpEngnAuthPrivPswdLocalization(UINT8 userDBIndex);
+BOOL _IsSNMPv3ValidStructure(UINT8* wholeMsgPtr,WORD* pos, WORD* dataLen );
+extern BOOL _Snmpv3IsValidInt(UINT8 * wholeMsgPtr,WORD* pos, DWORD* val);
+void Snmpv3Pswd2LocalizedAuthKeyMD5Hashing(UINT8* pswdToLocalized, UINT8 pswdLen);
+void Snmpv3Pswd2LocalizedAuthKeySHAHashing(UINT8* pswdToLocalized, UINT8 pswdLen);
+void Snmpv3UsmSnmpEngnAuthPrivPswdLocalization(UINT8 userDBIndex);
+void Snmpv3InitializeUserDataBase(void);
+void Snmpv3ComputeMd5HmacCode(UINT8 xx_bits,UINT8* digestptr,UINT8 * indata, UINT32 dataLen,
+					  UINT8* userExtendedLclzdKeyIpad, UINT8* userExtendedLclzdKeyOpad);
+void Snmpv3ComputeShaHmacCode(UINT8 xx_bits,UINT8* digestptr, UINT8 * indata, UINT32 dataLen,
+					 UINT8* userExtendedLclzdKeyIpad,UINT8* userExtendedLclzdKeyOpad);
+void Snmpv3AuthKeyZeroing2HmacBufLen64(UINT8* authKey, UINT8 authKeyLen,	UINT8 hashType);
+UINT8* Snmpv3ComputeHmacMD5Digest(UINT8 * inData, UINT32 dataLen,UINT8* userExtendedLclzdKeyIpad,UINT8* userExtendedLclzdKeyOpad);
+UINT8* Snmpv3ComputeHmacShaDigest(UINT8 * inData, UINT32 dataLen,UINT8* userExtendedLclzdKeyIpad,UINT8* userExtendedLclzdKeyOpad);
+
+
 
 
 #endif

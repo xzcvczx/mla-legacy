@@ -2,10 +2,11 @@
 <Graphics_Resource_Converter>
 <Configuration>
 <major>3</major>
-<minor>0</minor>
-<compiler>C32</compiler>
+<minor>13</minor>
+<compiler>C30</compiler>
 <format>CArray</format>
 <graphics_module>false</graphics_module>
+<graphics_model>16 bpp</graphics_model>
 </Configuration>
 <Bitmaps>
 <Bitmap_Resource>

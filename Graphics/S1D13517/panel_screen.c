@@ -10,7 +10,7 @@
  * Company:         Microchip Technology Incorporated
  *
  *
- * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
+ * Copyright ï¿½ 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -20,7 +20,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -38,8 +38,7 @@
  * SECTION: Includes
  *****************************************************************************/
 #include "Graphics/Graphics.h"
-#include "icons.h"
-#include "MainDemo.h"//** Remove when complete!!!!!!!!!
+#include "MainDemo.h"
 #include "gfx_schemes.h"
 #include "gfx_strings.h"
 #include "gfx_screens.h"
@@ -58,6 +57,12 @@ extern WORD             _page;
 
 /*****************************************************************************
  * void CreatePanelScreen(void)
+ *
+ * NOTE:  The lighting demo is not available when using the PIC24FJ256GB210.
+ *        The demo requires loading an image from the external memory, the Epson
+ *        S1D13517 () has some routing conflicts which make loading the image
+ *        difficult and not robust.  For these reasons, the lighting demo has
+ *        been take out for a better out of box experience.
  *****************************************************************************/
 void CreatePanelScreen(void)
 {
@@ -74,10 +79,20 @@ void CreatePanelScreen(void)
     BtnCreate
     (
         PANEL_SCREEN_ID_COMFORT_BUT,                         // button ID
+/***
+ * See above note in the function comment for more information
+ **/
+#ifndef __PIC24FJ256GB210__
         5,
         PANNEL_BUTTON_HEIGHT << 1,
         (GetMaxX() >> 2) - 5,
         PANNEL_BUTTON_HEIGHT *3,                                // dimension
+#else
+        5,
+        (PANNEL_BUTTON_HEIGHT *3) + 10,
+        (GetMaxX() >> 2) - 5,
+        (PANNEL_BUTTON_HEIGHT << 2) + 10,                 // dimension
+#endif
         PANNEL_BUTTON_RADIUS,                                 // set radius
         BTN_DRAW,                           // draw a beveled button
         NULL,                               // no bitmap
@@ -85,6 +100,10 @@ void CreatePanelScreen(void)
         currentScheme
     ); 
                                      // use alternate scheme
+/***
+ * See above note in the function comment for more information
+ **/
+    #ifndef __PIC24FJ256GB210__
     BtnCreate
     (
         PANEL_SCREEN_ID_LIGHTING_BUT,                         // button ID
@@ -98,6 +117,8 @@ void CreatePanelScreen(void)
         (XCHAR *)LightingStr,                   // "HOME", 	    // text
         currentScheme
     );                                      // alternative GOL scheme
+    #endif
+
     BtnCreate
     (
         PANEL_SCREEN_ID_SECURITY_BUT,                         // button ID

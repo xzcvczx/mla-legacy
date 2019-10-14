@@ -45,9 +45,9 @@ file_017=USB Stack
 file_018=USB Stack
 file_019=USB Stack
 file_020=.
-file_021=.
+file_021=USB Stack
 file_022=.
-file_023=USB Stack
+file_023=.
 file_024=.
 [GENERATED_FILES]
 file_000=no
@@ -98,8 +98,8 @@ file_018=no
 file_019=no
 file_020=no
 file_021=no
-file_022=yes
-file_023=no
+file_022=no
+file_023=yes
 file_024=yes
 [FILE_INFO]
 file_000=main.c
@@ -123,16 +123,16 @@ file_017=..\..\..\Microchip\Include\USB\usb_device.h
 file_018=..\..\..\Microchip\Include\USB\usb_function_msd.h
 file_019=..\..\..\Microchip\Include\USB\usb_hal.h
 file_020=HardwareProfile - PIC18F46J50 PIM.h
-file_021=rm18f46j50_g.lkr
-file_022=..\Getting Started - Running the Device - Mass Storage - SD Card reader.htm
-file_023=..\..\..\Microchip\USB\usb_device_local.h
-file_024=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_021=..\..\..\Microchip\USB\usb_device_local.h
+file_022=rm18f46j50_g.lkr
+file_023=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_024=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=
 [TOOL_SETTINGS]
 TS{DD2213A8-6310-47B1-8376-9430CDFC013F}=
-TS{BFD27FBA-4A02-4C0E-A5E5-B812F3E7707C}=/m"$(BINDIR_)$(TARGETBASE).map" /w /o"$(TARGETBASE).cof"
+TS{BFD27FBA-4A02-4C0E-A5E5-B812F3E7707C}=/w /o"$(BINDIR_)$(TARGETBASE).cof"
 TS{C2AF05E7-1416-4625-923D-E114DB6E2B96}=-mL -Ou- -Ot- -Ob- -Op- -Or- -Od- -Opa-
 TS{ADE93A55-C7C7-4D4D-A4BA-59305F7D0391}=
 [INSTRUMENTED_TRACE]

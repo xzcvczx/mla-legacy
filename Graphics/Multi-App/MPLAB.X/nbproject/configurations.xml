@@ -7,8 +7,6 @@
       <logicalFolder name="Board Support Package"
                      displayName="Board Support Package"
                      projectFiles="true">
-        <itemPath>../../../Board Support Package/Beep.h</itemPath>
-        <itemPath>../../../Board Support Package/EEPROM.h</itemPath>
         <itemPath>../../../Board Support Package/Potentiometer.h</itemPath>
         <itemPath>../../../Board Support Package/SST25VF016.h</itemPath>
         <itemPath>../../../Board Support Package/SST39VF040.h</itemPath>
@@ -77,6 +75,7 @@
       <itemPath>../DemoSteps.h</itemPath>
       <itemPath>../DrawTool.h</itemPath>
       <itemPath>../ECG.h</itemPath>
+      <itemPath>../ExternalResource.h</itemPath>
       <itemPath>../FSconfig.h</itemPath>
       <itemPath>../Games.h</itemPath>
       <itemPath>../GraphShow.h</itemPath>
@@ -84,13 +83,15 @@
       <itemPath>../HardwareProfile.h</itemPath>
       <itemPath>../ID.h</itemPath>
       <itemPath>../ImageDecoderConfig.h</itemPath>
+      <itemPath>../InternalResourceC30.h</itemPath>
+      <itemPath>../InternalResourceC32.h</itemPath>
+      <itemPath>../InternalResourceSet2C30.h</itemPath>
+      <itemPath>../InternalResourceSet2C32.h</itemPath>
       <itemPath>../JPEGDemo.h</itemPath>
       <itemPath>../MainDemo.h</itemPath>
       <itemPath>../MainDemoStrings.h</itemPath>
       <itemPath>../MultiFontsDemo.h</itemPath>
       <itemPath>../RGBDemo.h</itemPath>
-      <itemPath>../ResourcesExternalSPIFlash.h</itemPath>
-      <itemPath>../ResourcesInternalFlash C30.h</itemPath>
       <itemPath>../SideButtons.h</itemPath>
       <itemPath>../SlideShowDemo.h</itemPath>
       <itemPath>../TimeDateDemo.h</itemPath>
@@ -114,8 +115,6 @@
       <logicalFolder name="Board Support Package"
                      displayName="Board Support Package"
                      projectFiles="true">
-        <itemPath>../../../Board Support Package/Beep.c</itemPath>
-        <itemPath>../../../Board Support Package/EEPROM.c</itemPath>
         <itemPath>../../../Board Support Package/SST25VF016.c</itemPath>
         <itemPath>../../../Board Support Package/SST39VF040.c</itemPath>
         <itemPath>../../../Board Support Package/TouchScreen.c</itemPath>
@@ -134,6 +133,7 @@
         <itemPath>../../../Microchip/Graphics/Drivers/gfxepmp.c</itemPath>
         <itemPath>../../../Microchip/Graphics/Drivers/mchpGfxDrv.c</itemPath>
         <itemPath>../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c</itemPath>
+        <itemPath>../../../Microchip/Graphics/Drivers/mchpGfxLCC.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Graphics" displayName="Graphics" projectFiles="true">
         <itemPath>../../../Microchip/Graphics/Button.c</itemPath>
@@ -188,17 +188,17 @@
       <itemPath>../DrawTool.c</itemPath>
       <itemPath>../ECG.c</itemPath>
       <itemPath>../ECGBitmaps.c</itemPath>
+      <itemPath>../ExternalResource.c</itemPath>
       <itemPath>../Games.c</itemPath>
       <itemPath>../GraphShow.c</itemPath>
+      <itemPath>../InternalResourceC30.c</itemPath>
+      <itemPath>../InternalResourceC32.c</itemPath>
+      <itemPath>../InternalResourceSet2C30.c</itemPath>
+      <itemPath>../InternalResourceSet2C32.c</itemPath>
       <itemPath>../JPEGDemo.c</itemPath>
       <itemPath>../MainDemo.c</itemPath>
       <itemPath>../MultiFontsDemo.c</itemPath>
       <itemPath>../RGBDemo.c</itemPath>
-      <itemPath>../ResourcesExternalSPIFlash.c</itemPath>
-      <itemPath>../ResourcesInternalFlash C30.c</itemPath>
-      <itemPath>../ResourcesInternalFlash C32.c</itemPath>
-      <itemPath>../ResourcesInternalFlash Set2 C30.c</itemPath>
-      <itemPath>../ResourcesInternalFlash Set2 C32.c</itemPath>
       <itemPath>../SideButtons.c</itemPath>
       <itemPath>../SlideShowDemo.c</itemPath>
       <itemPath>../TimeDateDemo.c</itemPath>
@@ -220,7 +220,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -229,6 +229,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -275,7 +284,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -285,7 +294,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -295,7 +304,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -316,25 +355,28 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="large-scalar"/>
-        <property key="extra-include-directories"
-                  value="../../../Board Support Package;..;../../../Microchip/Include;../../Common;../../../Microchip/Include/Image Decoders;../../../Microchip/Include/MDD File System;../../../Microchip/Include/Graphics"/>
+        <property key="optimization-level" value="s"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_SDMSD_QVGAv1"/>
-        <property key="data-model" value="large-data"/>
-        <property key="enable-all-warnings" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="false"/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="const-in-code"/>
         <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
-        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../Common;../../../Microchip/Include/Image Decoders;../../../Microchip/Include/MDD File System;../../../Microchip/Include/Graphics"/>
         <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="data-model" value="large-data"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-ansi-std" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="const-in-code"/>
-        <property key="code-model" value="large-code"/>
+        <property key="enable-all-warnings" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="scalar-model" value="large-scalar"/>
       </C30>
       <C30-AS>
         <property key="omit-debug-dirs" value="false"/>
@@ -396,7 +438,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -405,6 +447,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -451,7 +502,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -461,7 +512,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -471,7 +522,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -572,7 +653,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -581,6 +662,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -627,7 +717,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -637,7 +727,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -647,7 +737,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -748,7 +868,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -757,6 +877,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -803,7 +932,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -813,7 +942,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -823,7 +952,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -924,7 +1083,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -933,6 +1092,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -945,7 +1113,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -955,7 +1123,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -965,7 +1133,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1056,7 +1254,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1065,6 +1263,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1077,7 +1284,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1087,7 +1294,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1097,7 +1304,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1188,7 +1425,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1197,6 +1434,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1209,7 +1455,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1219,7 +1465,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1229,7 +1475,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1320,7 +1596,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1329,6 +1605,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1341,7 +1626,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1351,7 +1636,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1361,7 +1646,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1452,7 +1767,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1461,6 +1776,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1473,7 +1797,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1483,7 +1807,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1493,7 +1817,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1584,7 +1938,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1593,6 +1947,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="true"
             overriding="false">
@@ -1605,7 +1968,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1615,7 +1978,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1625,7 +1988,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1716,7 +2109,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1725,6 +2118,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="false"
             overriding="true">
@@ -1757,7 +2159,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1767,7 +2169,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1777,7 +2179,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1868,7 +2300,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3.25</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1877,6 +2309,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
             ex="false"
             overriding="true">
@@ -1909,7 +2350,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1919,7 +2360,7 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -1929,7 +2370,37 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -2020,7 +2491,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2029,6 +2500,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/USB/MSD Host Driver/usb_host_msd.c"
             ex="true"
             overriding="false">
@@ -2063,7 +2543,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2073,7 +2553,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2083,7 +2563,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2139,11 +2649,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -2157,7 +2669,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2166,6 +2678,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/USB/MSD Host Driver/usb_host_msd.c"
             ex="true"
             overriding="false">
@@ -2200,7 +2721,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2210,7 +2731,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2220,7 +2741,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2276,11 +2827,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -2294,7 +2847,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2303,6 +2856,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/USB/MSD Host Driver/usb_host_msd.c"
             ex="true"
             overriding="false">
@@ -2337,7 +2899,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2347,7 +2909,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2357,7 +2919,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2413,11 +3005,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -2431,7 +3025,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2440,6 +3034,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/USB/MSD Host Driver/usb_host_msd.c"
             ex="true"
             overriding="false">
@@ -2474,7 +3077,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2484,7 +3087,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2494,7 +3097,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2550,25 +3183,27 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_8PMP_QVGAv1_USBMSD" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_8PMP_QVGAv1_USBMSD" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2577,7 +3212,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2587,7 +3231,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2597,7 +3241,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2643,25 +3317,27 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_8PMP_WQVGAv1_USBMSD" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_8PMP_WQVGAv1_USBMSD" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2670,7 +3346,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2680,7 +3365,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2690,7 +3375,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2736,25 +3451,27 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_16PMP_QVGAv1_USBMSD" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_16PMP_QVGAv1_USBMSD" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2763,7 +3480,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2773,7 +3499,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2783,7 +3509,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2829,25 +3585,27 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_460_GFXv3_EX16_16PMP_WQVGAv1_USBMSD" type="2">
+    <conf name="PIC32_795_GFXv3_EX16_16PMP_WQVGAv1_USBMSD" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX460F512L</targetDevice>
+        <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2856,7 +3614,16 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2866,7 +3633,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2876,7 +3643,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C32.c" ex="true" overriding="false">
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2922,11 +3719,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -2940,7 +3739,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -2949,9 +3748,26 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
         <C32>
@@ -2983,7 +3799,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -2993,7 +3809,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3003,7 +3819,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3059,11 +3905,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -3079,7 +3927,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3088,9 +3936,26 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
         <C32>
@@ -3122,7 +3987,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3132,7 +3997,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3142,7 +4007,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3198,11 +4093,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -3218,7 +4115,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3227,9 +4124,26 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
         <C32>
@@ -3261,7 +4175,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3271,7 +4185,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3281,7 +4195,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3337,11 +4281,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
@@ -3357,7 +4303,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3366,9 +4312,26 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
         <C32>
@@ -3400,7 +4363,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3410,7 +4373,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3420,7 +4383,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3476,17 +4469,89 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
         <property key="legacy-libc" value="false"/>
         <property key="no-start-files" value="false"/>
       </C32Global>
       <RealICEPlatformTool>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="RIExTrigs.Three" value="OFF"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.id" value="true"/>
+        <property key="CHANGE NOTICE" value="true"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="COMPARATOR" value="true"/>
+        <property key="RIExTrigs.Six" value="OFF"/>
+        <property key="REAL TIME CLOCK" value="true"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="RIExTrigs.One" value="OFF"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\C13713\mpdeftrace.log"/>
+        <property key="DMA" value="true"/>
+        <property key="RIExTrigs.Four" value="OFF"/>
+        <property key="INPUT CAPTURE 5" value="true"/>
+        <property key="INPUT CAPTURE 4" value="true"/>
+        <property key="INPUT CAPTURE 3" value="true"/>
+        <property key="INPUT CAPTURE 2" value="true"/>
+        <property key="INPUT CAPTURE 1" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="ADC 1" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="OUTPUT COMPARE 5" value="true"/>
+        <property key="OUTPUT COMPARE 4" value="true"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="OUTPUT COMPARE 3" value="true"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="OUTPUT COMPARE 2" value="true"/>
+        <property key="OUTPUT COMPARE 1" value="true"/>
+        <property key="memories.programmemory.start" value="0x1d000000"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x1d000000"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="RIExTrigs.Seven" value="OFF"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="TIMER5" value="true"/>
+        <property key="memories.programmemory.end" value="0x1d07ffff"/>
+        <property key="RIExTrigs.Two" value="OFF"/>
+        <property key="TIMER4" value="true"/>
+        <property key="TIMER3" value="true"/>
+        <property key="RIExTrigs.Zero" value="OFF"/>
+        <property key="TIMER2" value="true"/>
+        <property key="TIMER1" value="true"/>
+        <property key="I2C5" value="true"/>
+        <property key="hwtoolclock.instructionspeed" value="4"/>
+        <property key="I2C4" value="true"/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="I2C3" value="true"/>
+        <property key="I2C2" value="true"/>
+        <property key="memories.aux" value="false"/>
+        <property key="I2C1" value="true"/>
+        <property key="RIExTrigs.Five" value="OFF"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="INTERRUPT CONTROL" value="true"/>
+        <property key="tracecontrol.medium" value="0"/>
+        <property key="UART6" value="true"/>
+        <property key="UART5" value="true"/>
+        <property key="UART4" value="true"/>
+        <property key="UART3" value="true"/>
+        <property key="UART2" value="true"/>
+        <property key="programoptions.preserveprogramrange.end" value="0x1d0001ff"/>
+        <property key="UART1" value="true"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
       </RealICEPlatformTool>
     </conf>
     <conf name="PIC32_USB_SK_MEB_8PMP_USBMSD" type="2">
@@ -3496,7 +4561,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3505,6 +4570,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
@@ -3547,7 +4621,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3557,7 +4631,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3567,7 +4641,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3623,11 +4727,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -3641,7 +4747,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3650,6 +4756,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
@@ -3692,7 +4807,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3702,7 +4817,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3712,7 +4827,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3768,11 +4913,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -3786,7 +4933,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3795,6 +4942,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
@@ -3837,7 +4993,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3847,7 +5003,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3857,7 +5013,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3913,11 +5099,13 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
@@ -3931,7 +5119,7 @@
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -3940,6 +5128,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
       <item path="../../../Microchip/MDD File System/SD-SPI.c"
             ex="true"
             overriding="false">
@@ -3982,7 +5179,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesExternalSPIFlash.c" ex="true" overriding="false">
+      <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -3992,7 +5189,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash C30.c" ex="true" overriding="false">
+      <item path="../ExternalResource.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -4002,7 +5199,37 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../ResourcesInternalFlash Set2 C30.c" ex="true" overriding="false">
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -4058,14 +5285,713 @@
         <property key="trace-symbols" value=""/>
         <property key="map-file" value=""/>
         <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="symbol-stripping" value=""/>
         <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
       </C32Global>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC32_USB_SK_LCC_EXT_QVGAv1_USBMSD" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX795F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Board Support Package/SST39VF040.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/cpld.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/SSD1926.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/gfxepmp.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/MDD File System/SD-SPI.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Common/comm_pkt.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Common/comm_pkt_callback.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../ExternalResource.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../UART.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="optimization-level" value="-Os"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_LCC_SK_EXT_USBMSD_QVGAv1"/>
+        <property key="additional-warnings" value="true"/>
+        <property key="extra-include-directories"
+                  value="..;../../Common;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-app-io" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
+      </C32>
+      <C32-AS>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value="2048"/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
+      </C32-LD>
+      <C32Global>
+      </C32Global>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC32_USB_SK_LCC_EXT_WQVGv1_USBMSD" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX795F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Board Support Package/SST39VF040.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Board Support Package/cpld.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/SSD1926.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/gfxepmp.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/MDD File System/SD-SPI.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Common/FlashProgrammer.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Common/comm_pkt.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../Common/comm_pkt_callback.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../ExternalResource.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../ExternalResource.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../UART.c" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="optimization-level" value="-Os"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_LCC_SK_EXT_USBMSD_WQVGAv1"/>
+        <property key="additional-warnings" value="true"/>
+        <property key="extra-include-directories"
+                  value="..;../../Common;../../../Board Support Package;../../../Microchip/Include"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-app-io" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="make-warnings-into-errors" value="false"/>
+      </C32>
+      <C32-AS>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value="2048"/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+        <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
+      </C32-LD>
+      <C32Global>
+      </C32Global>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="dsPIC33E_SK_MEB_8PMP_QVGAv1_USBMSD" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>dsPIC33EP512MU810</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion></languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
+        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+      </makeCustomizationType>
+      <item path="../../../Microchip/Graphics/Drivers/mchpGfxDrvBuffer.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/MDD File System/SD-SPI.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../InternalResourceC32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceC32.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C30.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceSet2C32.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="optimization-level" value="s"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_MEB_dsPIC33E_SK_8PMP"/>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="const-in-code"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../../Board Support Package;..;../../../Microchip/Include;../../Common;../../../Microchip/Include/Image Decoders;../../../Microchip/Include/MDD File System;../../../Microchip/Include/Graphics"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="data-model" value="large-data"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-all-warnings" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="scalar-model" value="large-scalar"/>
+      </C30>
+      <C30-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=".."/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="list-file" value="&quot;$(BINDIR_)$(INFILEBASE).lst&quot;"/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="relax" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C30-AS>
+      <C30-LD>
+        <property key="preprocessor-macros" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="../../../../../../../Program Files/Microchip/MPLAB C30/lib;"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="output-file-format" value="coff"/>
+        <property key="legacy-libc" value="false"/>
+      </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>

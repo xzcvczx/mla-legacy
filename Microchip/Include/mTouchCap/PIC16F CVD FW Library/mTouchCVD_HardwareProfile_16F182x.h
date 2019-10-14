@@ -1,11 +1,11 @@
 /*************************************************************************
  *  © 2011 Microchip Technology Inc.                                       
  *  
- *  Project Name:    mTouch CVD Framework v1.1
+ *  Project Name:    mTouch CVD Framework v1.00.00
  *  FileName:        mTouchCVD_HardwareProfile_16F182x.h
  *  Dependencies:    mTouchCVD.h
  *  Processor:       See documentation for supported PIC® microcontrollers 
- *  Compiler:        HI-TECH Ver. 9.81 or later
+ *  Compiler:        HI-TECH PRO Ver. 9.80 or later
  *  IDE:             MPLAB® IDE v8.50 (or later) or MPLAB® X                        
  *  Hardware:         
  *  Company:         
@@ -83,8 +83,8 @@
     #endif
 #endif
 #if defined(_16F1823) || defined(_16LF1823)
-    #if CVD_NUMBER_SENSORS > 7
-        #error The PIC16F/LF1823 is not able to support more than 7 sensors due to memory constraints.
+    #if CVD_NUMBER_SENSORS > 6
+        #error The PIC16F/LF1823 is not able to support more than 6 sensors due to memory constraints.
     #endif
 #endif
 #if defined(_16F1823) || defined(_16LF1823)
@@ -151,8 +151,6 @@
 #define CVD_SET_ADC_CLK_2MHZ()          ADCON1 = 0b10000000 // 2
 #define CVD_SET_ADC_CLK_1MHZ()          ADCON1 = 0b10000000 // 2
 
-#define CVD_UNIMPLEMENTED_AVAILABLE     1
-
 #if defined(CVD_DEBUG) && (CVD_DEBUG == 1)
 #if !(CVD_DEBUG_SPEED == 9600 || CVD_DEBUG_SPEED == 115200)
     #error CVD_DEBUG_SPEED must be set to either 9600 or 115200 in the configuration file.
@@ -161,7 +159,6 @@
 
 #if     _XTAL_FREQ == 32000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_32MHZ()    
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #define CVD_DEBUG_TXSTA     0b00100100
         #define CVD_DEBUG_RCSTA     0b10010000
@@ -177,7 +174,6 @@
     #endif
 #elif   _XTAL_FREQ == 16000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_16MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #define CVD_DEBUG_TXSTA     0b00100100
         #define CVD_DEBUG_RCSTA     0b10010000
@@ -193,7 +189,6 @@
     #endif
 #elif   _XTAL_FREQ ==  8000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_8MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #define CVD_DEBUG_TXSTA     0b00100100
         #define CVD_DEBUG_RCSTA     0b10010000
@@ -209,7 +204,6 @@
     #endif
 #elif   _XTAL_FREQ ==  4000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_4MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #define CVD_DEBUG_TXSTA     0b00100100
         #define CVD_DEBUG_RCSTA     0b10010000
@@ -225,7 +219,6 @@
     #endif
 #elif   _XTAL_FREQ ==  2000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_2MHZ()
-    #define CVD_TAD             1  
     #if     CVD_DEBUG_SPEED == 115200
         #error The 115.2kbps UART baudrate option cannot be used with a 2MHz Fosc. Please select '9600'.
     #elif   CVD_DEBUG_SPEED == 9600
@@ -237,7 +230,6 @@
     #endif
 #elif   _XTAL_FREQ ==  1000000 
     #define CVD_SET_ADC_CLK()   CVD_SET_ADC_CLK_1MHZ()
-    #define CVD_TAD             2
     #if     CVD_DEBUG_SPEED == 115200
         #error The 115.2kbps UART baudrate option cannot be used with a 1MHz Fosc. Please select '9600'.
     #elif   CVD_DEBUG_SPEED == 9600
@@ -253,10 +245,6 @@
 
 
 #define CVD_ADCON0_BANK     1
-#define CVD_DACCON0_VDD         0xC0
-#define CVD_DACCON1_VDD         0x1F
-#define CVD_DACCON0_VSS         0x80
-#define CVD_DACCON1_VSS         0x00
 
 // A/D MUX selection for each A/D button, do not change this, refer to datasheet if curious how these are derived
 // Right Justified, Vdd as reference, A/D on, Go/Done  asserted, do not change this, refer to datasheet if curious how these are derived 
@@ -281,7 +269,6 @@
 
 #define CVD_AD_FVR_AND_GO   0x7F // Selects the FVR as the ADC mux option and sets the GO/DONE bit.
 #define CVD_AD_DAC_AND_GO   0x7B // Selects the DAC as the ADC mux option and sets the GO/DONE bit.
-#define CVD_AD_DAC_NOGO     0x79 // Selects the DAC as the ADC mux option w/o setting the GO/DONE bit.
 #define CVD_AD_ISO_AND_GO   0x43 // Selects an unimplemented, isolated ADC mux option and sets the GO/DONE bit.
 #define CVD_AD_ISO_NOGO     0x41 // Selects an unimplemented, isolated ADC mux option w/o setting the GO/DONE bit.
 
@@ -289,27 +276,36 @@
 #define CVD_SELECT_SENSOR1	    __paste(CVD_AD_, CVD_SENSOR1)
 #define CVD_SELECT_SENSOR2	    __paste(CVD_AD_, CVD_SENSOR2)
 #define CVD_SELECT_SENSOR3	    __paste(CVD_AD_, CVD_SENSOR3)
-#define CVD_SELECT_SENSOR4	    __paste(CVD_AD_, CVD_SENSOR4)
-#define CVD_SELECT_SENSOR5	    __paste(CVD_AD_, CVD_SENSOR5)
-#define CVD_SELECT_SENSOR6	    __paste(CVD_AD_, CVD_SENSOR6)
-#define CVD_SELECT_SENSOR7	    __paste(CVD_AD_, CVD_SENSOR7)
-#define CVD_SELECT_SENSOR8	    __paste(CVD_AD_, CVD_SENSOR8)
-#define CVD_SELECT_SENSOR9	    __paste(CVD_AD_, CVD_SENSOR9)
-#define CVD_SELECT_SENSOR10     __paste(CVD_AD_, CVD_SENSOR10)
-#define CVD_SELECT_SENSOR11     __paste(CVD_AD_, CVD_SENSOR11)
+
+#if !defined(_12F1822) && !defined(_12LF1822)
+    #define CVD_SELECT_SENSOR4	    __paste(CVD_AD_, CVD_SENSOR4)
+    #define CVD_SELECT_SENSOR5	    __paste(CVD_AD_, CVD_SENSOR5)
+    #define CVD_SELECT_SENSOR6	    __paste(CVD_AD_, CVD_SENSOR6)
+    #define CVD_SELECT_SENSOR7	    __paste(CVD_AD_, CVD_SENSOR7)
+#endif
+
+#if defined(_16F1826) || defined(_16LF1826) || defined(_16F1827) || defined(_16LF1827) || defined(_16F1828) || defined(_16LF1828) || defined(_16F1829) || defined(_16LF1829)
+    #define CVD_SELECT_SENSOR8	    __paste(CVD_AD_, CVD_SENSOR8)
+    #define CVD_SELECT_SENSOR9	    __paste(CVD_AD_, CVD_SENSOR9)
+    #define CVD_SELECT_SENSOR10     __paste(CVD_AD_, CVD_SENSOR10)
+    #define CVD_SELECT_SENSOR11     __paste(CVD_AD_, CVD_SENSOR11)
+#endif
+
 #define CVD_SELECT_FVR_AND_GO   __paste(CVD_AD_, FVR_AND_GO)
 #define CVD_SELECT_DAC_AND_GO   __paste(CVD_AD_, DAC_AND_GO)
-#define CVD_SELECT_DAC_NOGO     __paste(CVD_AD_, DAC_NOGO)
 #define CVD_SELECT_ISO_AND_GO   __paste(CVD_AD_, ISO_AND_GO) 
 #define CVD_SELECT_ISO_NOGO     __paste(CVD_AD_, ISO_NOGO) 
 #define CVD_SELECT_REFERENCE    __paste(CVD_AD_, CVD_REFERENCE)
 	
 #if defined(_16F1826) || defined(_16LF1826) || defined(_16F1827) || defined(_16LF1827)
+
     #define CVD_PIN_AN0		0
     #define CVD_PIN_AN1		1
     #define CVD_PIN_AN2		2
     #define CVD_PIN_AN3		3
-    #define CVD_PIN_AN4		4   
+    #define CVD_PIN_AN4		4
+    
+
     #define CVD_PIN_AN5		6	
     #define CVD_PIN_AN6		7	
     #define CVD_PIN_AN7		5	
@@ -326,6 +322,7 @@
     #define CVD_PIN_AN3		4
      
     #if defined(_16F1823) || defined(_16LF1823) || defined(_16F1824) || defined(_16LF1824) || defined(_16F1828) || defined(_16LF1828) || defined(_16F1825) || defined(_16LF1825) || defined(_16F1829) || defined(_16LF1829)
+
         #define CVD_PIN_AN4		0
         #define CVD_PIN_AN5		1
         #define CVD_PIN_AN6		2
@@ -344,14 +341,21 @@
 #define CVD_PIN_SENSOR1     __paste(CVD_PIN_,CVD_SENSOR1)
 #define CVD_PIN_SENSOR2     __paste(CVD_PIN_,CVD_SENSOR2)
 #define CVD_PIN_SENSOR3     __paste(CVD_PIN_,CVD_SENSOR3)
-#define CVD_PIN_SENSOR4     __paste(CVD_PIN_,CVD_SENSOR4)
-#define CVD_PIN_SENSOR5     __paste(CVD_PIN_,CVD_SENSOR5)
-#define CVD_PIN_SENSOR6     __paste(CVD_PIN_,CVD_SENSOR6)
-#define CVD_PIN_SENSOR7     __paste(CVD_PIN_,CVD_SENSOR7)
-#define CVD_PIN_SENSOR8     __paste(CVD_PIN_,CVD_SENSOR8)
-#define CVD_PIN_SENSOR9     __paste(CVD_PIN_,CVD_SENSOR9)
-#define CVD_PIN_SENSOR10    __paste(CVD_PIN_,CVD_SENSOR10)
-#define CVD_PIN_SENSOR11    __paste(CVD_PIN_,CVD_SENSOR11)
+
+#if !defined(_12F1822) && !defined(_12LF1822)
+    #define CVD_PIN_SENSOR4     __paste(CVD_PIN_,CVD_SENSOR4)
+    #define CVD_PIN_SENSOR5     __paste(CVD_PIN_,CVD_SENSOR5)
+    #define CVD_PIN_SENSOR6     __paste(CVD_PIN_,CVD_SENSOR6)
+    #define CVD_PIN_SENSOR7     __paste(CVD_PIN_,CVD_SENSOR7)
+#endif
+
+#if defined(_16F1826) || defined(_16LF1826) || defined(_16F1827) || defined(_16LF1827) || defined(_16F1828) || defined(_16LF1828) || defined(_16F1829) || defined(_16LF1829)
+    #define CVD_PIN_SENSOR8     __paste(CVD_PIN_,CVD_SENSOR8)
+    #define CVD_PIN_SENSOR9     __paste(CVD_PIN_,CVD_SENSOR9)
+    #define CVD_PIN_SENSOR10    __paste(CVD_PIN_,CVD_SENSOR10)
+    #define CVD_PIN_SENSOR11    __paste(CVD_PIN_,CVD_SENSOR11)
+#endif
+
 #define CVD_PIN_REFERENCE   __paste(CVD_PIN_,CVD_REFERENCE)
 
 #if defined(_16F1826) || defined(_16LF1826) || defined(_16F1827) || defined(_16LF1827)
@@ -376,6 +380,7 @@
     #define CVD_PORT_AN3    _PORTA
     
     #if defined(_16F1823) || defined(_16LF1823) || defined(_16F1824) || defined(_16LF1824) || defined(_16F1825) || defined(_16LF1825) || defined(_16F1828) || defined(_16LF1828) || defined(_16F1829) || defined(_16LF1829)
+
         #define CVD_PORT_AN4	_PORTC
         #define CVD_PORT_AN5	_PORTC
         #define CVD_PORT_AN6	_PORTC
@@ -394,15 +399,20 @@
 #define CVD_PORT_SENSOR1    __paste(CVD_PORT_,CVD_SENSOR1)
 #define CVD_PORT_SENSOR2    __paste(CVD_PORT_,CVD_SENSOR2)
 #define CVD_PORT_SENSOR3    __paste(CVD_PORT_,CVD_SENSOR3)
-#define CVD_PORT_SENSOR4    __paste(CVD_PORT_,CVD_SENSOR4)
-#define CVD_PORT_SENSOR5    __paste(CVD_PORT_,CVD_SENSOR5)
-#define CVD_PORT_SENSOR6    __paste(CVD_PORT_,CVD_SENSOR6)
-#define CVD_PORT_SENSOR7    __paste(CVD_PORT_,CVD_SENSOR7)
-#define CVD_PORT_SENSOR8    __paste(CVD_PORT_,CVD_SENSOR8)
-#define CVD_PORT_SENSOR9    __paste(CVD_PORT_,CVD_SENSOR9)
-#define CVD_PORT_SENSOR10   __paste(CVD_PORT_,CVD_SENSOR10)
-#define CVD_PORT_SENSOR11   __paste(CVD_PORT_,CVD_SENSOR11)
 
+#if !defined(_12F1822) && !defined(_12LF1822)
+    #define CVD_PORT_SENSOR4    __paste(CVD_PORT_,CVD_SENSOR4)
+    #define CVD_PORT_SENSOR5    __paste(CVD_PORT_,CVD_SENSOR5)
+    #define CVD_PORT_SENSOR6    __paste(CVD_PORT_,CVD_SENSOR6)
+    #define CVD_PORT_SENSOR7    __paste(CVD_PORT_,CVD_SENSOR7)
+#endif
+
+#if defined(_16F1826) || defined(_16LF1826) || defined(_16F1827) || defined(_16LF1827) || defined(_16F1828) || defined(_16LF1828) || defined(_16F1829) || defined(_16LF1829)
+    #define CVD_PORT_SENSOR8    __paste(CVD_PORT_,CVD_SENSOR8)
+    #define CVD_PORT_SENSOR9    __paste(CVD_PORT_,CVD_SENSOR9)
+    #define CVD_PORT_SENSOR10   __paste(CVD_PORT_,CVD_SENSOR10)
+    #define CVD_PORT_SENSOR11   __paste(CVD_PORT_,CVD_SENSOR11)
+#endif
 
 #define CVD_PORT_REFERENCE  __paste(CVD_PORT_,CVD_REFERENCE)
 

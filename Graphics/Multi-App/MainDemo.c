@@ -12,7 +12,7 @@
  * Software LicenseJpeg
   Agreement
  *
- * Copyright © 2007 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2007 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -22,7 +22,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -81,7 +81,7 @@
 #else
     #if defined(__PIC24FJ256GB110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
+_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ128GA010__)
 _CONFIG2(FNOSC_PRIPLL & POSCMOD_XT)         // Primary XT OSC with PLL
@@ -89,16 +89,16 @@ _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)           // JTAG off, watchdog timer off
     #endif
     #if defined(__PIC24FJ256GA110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
+_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_XT & FNOSC_PRIPLL & IOL1WAY_OFF)
     #endif
 #if defined (__PIC24FJ256GB210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG2( POSCMOD_XT & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif	 
 	#if defined(__dsPIC33E__) || defined(__PIC24E__)
@@ -111,7 +111,6 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
 //                            LOCAL PROTOTYPES
 /////////////////////////////////////////////////////////////////////////////
 #define WAIT_UNTIL_FINISH(x)    while(!x)
@@ -163,7 +162,7 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS
                                                                        
  Output: none
 ************************************************************************/
-void                    StartScreen(void);
+    void StartScreen(void);
 
 /************************************************************************
  Function: Init_CPUClocks()
@@ -174,7 +173,7 @@ void                    StartScreen(void);
                                                                        
  Output: none
 ************************************************************************/
-void                    Init_CPUClocks(void);
+    void Init_CPUClocks(void);
 
 /************************************************************************
  Function: TickInit()
@@ -185,9 +184,31 @@ void                    Init_CPUClocks(void);
                                                                        
  Output: none
 ************************************************************************/
-void                    TickInit(void);
+    void TickInit(void);
 
-void InitializeBoard(void);
+/************************************************************************
+ Function: InitializeBoard()
+                                                                       
+ Overview: Initializes the board components of the demo.
+                                                                       
+ Input: none                                                          
+                                                                       
+ Output: none
+************************************************************************/
+    void InitializeBoard(void);
+
+/************************************************************************
+ Function: CheckExternalFlashHex()
+                                                                       
+ Overview: Checks the external memory if data is valid.
+                                                                       
+ Input: none                                                          
+                                                                       
+ Output: none
+************************************************************************/
+#if defined (EXPLORER_16) || defined (PIC24FJ256DA210_DEV_BOARD)
+    void CheckExternalFlashHex();
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // SPI Channel settings
@@ -202,17 +223,6 @@ void InitializeBoard(void);
     #elif defined (USE_MCHP25LC256)       
         const DRV_SPI_INIT_DATA SPI_Init_Data = {MCHP25LC256_SPI_CHANNEL, 6, 3, 0, 1, 1, 0};
     #endif    
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-// SPI Device Initialization Function 
-/////////////////////////////////////////////////////////////////////////////
-#if defined (USE_SST25VF016)
-    // initialize GFX3 SST25 flash SPI
-    #define FlashInit(pInitData) SST25Init((DRV_SPI_INIT_DATA*)pInitData);                    
-#elif defined (USE_MCHP25LC256)
-    // initialize EEPROM on Explorer 16
-    #define FlashInit(pInitData) MCHP25LC256Init((DRV_SPI_INIT_DATA*)pInitData);                    
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
@@ -239,7 +249,6 @@ volatile DWORD          tick = 0;                           // tick counter
 extern BOOL             gEnableDemoFlag;                    // flag for automatic demo mode
 
 /////////////////////////////////////////////////////////////////////////////
-
 //                            STRINGS USED
 /////////////////////////////////////////////////////////////////////////////
 const XCHAR             ErrMsgStandard[] = {'U','S','B',' ','E','r','r','o','r',0};
@@ -254,7 +263,6 @@ const XCHAR             ErrMsgUnpecifiedErrStr[] = {'U','n','s','p','e','c','i',
 const XCHAR             MsgTouchToProceedStr[] = {'T','o','u','c','h',' ','t','o',' ','p','r','o','c','e','e','d',0};
 
 /////////////////////////////////////////////////////////////////////////////
-
 //                                  MAIN
 /////////////////////////////////////////////////////////////////////////////
 int main(void)
@@ -263,40 +271,6 @@ int main(void)
    
    	InitializeBoard();
   
-
-SetColor(BRIGHTRED);
-ClearDevice();
-
-  
-    // Programming the flash is not possible when using the PIC32 STK since the hardware 
-    // does not support it (no serial port) so we skip this check if using the STKs
-    #if defined (EXPLORER_16) || defined (PIC24FJ256DA210_DEV_BOARD)
-        /**
-         * Force a flash chip program
-         * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
-         * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
-         * DA210 Developement Board     - S1
-         **/
-	    if(GetHWButtonProgram() == HW_BUTTON_PRESS)
-	    {
-				ProgramFlash();
-	    }
-	#endif	//defined (EXPLORER_16) || defined (PIC24FJ256DA210_DEV_BOARD)
-
-    #if defined (GFX_PICTAIL_V2) 
-        #if defined(ENABLE_SD_MSD_DEMO)
-
-    /************************************************************************
-		* For Explorer 16, SPI2 is used to connect to EEPROM.
-		* When using ENABLE_SD_MSD_DEMO on SPI2 we need to set CS of 
-		* SD Card PICtail (RB9) to 1 to prevent conflicts.
-		************************************************************************/
-    LATBbits.LATB9 = 1;                 // set the value to 1 to disable chip select of SD PICtail
-    TRISBbits.TRISB9 = 0;               // set to output
-        #endif
-    EEPROMInit();                       // initialize Exp.16 EEPROM SPI
-    #endif
-
     RTCCInit();                         // Setup the RTCC
     RTCCProcessEvents();
 
@@ -744,11 +718,13 @@ void StartScreen(void)
 void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pTextD)
 {
     WORD    state;
+    BUTTON  *pObj;
+
 
     state = BTN_DRAW;
     if(pTextA == NULL)
         state = BTN_DRAW | BTN_DISABLED;
-    BtnCreate
+    pObj = BtnCreate
     (
         ID_BUTTON_A,
         CtrlBtnLeft(0),
@@ -761,11 +737,13 @@ void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pText
         pTextA,
         altScheme
     );
+    if (pObj == NULL)
+        ShowError((XCHAR *)MemoryErrorStr);
 
     state = BTN_DRAW;
     if(pTextB == NULL)
         state = BTN_DRAW | BTN_DISABLED;
-    BtnCreate
+    pObj = BtnCreate
     (
         ID_BUTTON_B,
         CtrlBtnLeft(1),
@@ -778,11 +756,13 @@ void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pText
         pTextB,
         altScheme
     );
+    if (pObj == NULL)
+        ShowError((XCHAR *)MemoryErrorStr);
 
     state = BTN_DRAW;
     if(pTextC == NULL)
         state = BTN_DRAW | BTN_DISABLED;
-    BtnCreate
+    pObj = BtnCreate
     (
         ID_BUTTON_C,
         CtrlBtnLeft(2),
@@ -795,11 +775,13 @@ void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pText
         pTextC,
         altScheme
     );
+    if (pObj == NULL)
+        ShowError((XCHAR *)MemoryErrorStr);
 
     state = BTN_DRAW;
     if(pTextD == NULL)
         state = BTN_DRAW | BTN_DISABLED;
-    BtnCreate
+    pObj = BtnCreate
     (
         ID_BUTTON_D,
         CtrlBtnLeft(3),
@@ -812,6 +794,8 @@ void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pText
         pTextD,
         altScheme
     );
+    if (pObj == NULL)
+        ShowError((XCHAR *)MemoryErrorStr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1039,7 +1023,7 @@ void Init_CPUClocks(void)
 *
 ********************************************************************/
 #ifdef __PIC32MX__
-    #define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl7)
+    #define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl4)
 #else
     #define __T3_ISR    __attribute__((interrupt, shadow, auto_psv))
 #endif
@@ -1107,7 +1091,7 @@ void TickInit(void)
     // Initialize Timer4
     #ifdef __PIC32MX__
     OpenTimer3(T3_ON | T3_PS_1_8, TICK_PERIOD);  // enable timer to run for approximately 100 us
-    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_7); // Enable interrupt
+    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_1); // Enable interrupt
     #else
     TMR3 = 0;
     PR3 = TICK_PERIOD;							//(for approximately 100 us)
@@ -1297,15 +1281,7 @@ void InitializeBoard(void)
         SST25_SCK_TRIS = 0;
         SST25_SDO_TRIS = 0;
         SST25_SDI_TRIS = 1;
-        
-    #elif defined (GFX_PICTAIL_V2)
-        
-        MCHP25LC256_CS_LAT = 1;
-        MCHP25LC256_CS_TRIS = 0;
-        MCHP25LC256_SCK_TRIS  = 0;
-	    MCHP25LC256_SDO_TRIS = 0;
-	    MCHP25LC256_SDI_TRIS = 1;
-	    
+       
 	#endif
 
     // set the peripheral pin select for the PSI channel used
@@ -1339,16 +1315,156 @@ void InitializeBoard(void)
     #endif
 
     // initialize the Flash Memory driver
-    FlashInit(&SPI_Init_Data);
+    FLASHInit((DRV_SPI_INIT_DATA*)&SPI_Init_Data);
     
     // initialize the timer that manages the tick counter
     TickInit();                     	
 
+    // Initialize the hardware buttons
+    HardwareButtonInit();            
+
+    // Programming the flash is not possible when using the PIC32 STK since the hardware 
+    // does not support it (no serial port) so we skip this check if using the STKs
+    #if defined (EXPLORER_16) || defined (PIC24FJ256DA210_DEV_BOARD)
+        /**
+         * To force a flash chip program
+         * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+         * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+         * DA210 Developement Board     - S1
+         **/
+        // check if data in external flash is valid
+        CheckExternalFlashHex();
+
+	#endif	//defined (EXPLORER_16) || defined (PIC24FJ256DA210_DEV_BOARD)
+
     // initialize the components for Resistive Touch Screen
     TouchInit(NVMWrite, NVMRead, NVMSectorErase, NULL);   	
-    HardwareButtonInit();           	// Initialize the hardware buttons
+
 
 }    
+
+/*********************************************************************
+* Function: void CheckExternalFlashHex()
+*
+* PreCondition: none
+*
+* Input:  none
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: This function checks the data in the external flash is valid.
+*
+* Note: none
+*
+********************************************************************/
+#if defined (EXPLORER_16) || defined (PIC24FJ256DA210_DEV_BOARD)
+void CheckExternalFlashHex()
+{
+    typedef struct 
+    {
+        UINT32 mchpSignature;
+        UINT32 mchpCRCData;
+    } CRC_CHECK; 
+
+    CRC_CHECK externalCRC, expectedCRC;   
+    WORD textHeight;
+    void *pFont;
+    XCHAR *pStr = NULL;
+    BOOL  setProgram = FALSE;
+    
+    XCHAR   msgStr1[] = {'P','r','o','g','r','a','m',' ','E','x','t','e','r','n','a','l',' ','D','a','t','a',0};
+    XCHAR   msgStr2[] = {'E','x','t','e','r','n','a','l',' ','d','a','t','a',' ','i','n','v','a','l','i','d','.',0};
+    XCHAR   msgStr3[] = {'P','l','e','a','s','e',' ','s','e','n','d',' ','d','a','t','a',' ','u','s','i','n','g',0};
+    XCHAR   msgStr4[] = {'"','E','x','t','e','r','n','a','l',' ','M','e','m','o','r','y',0};
+    XCHAR   msgStr5[] = {'P','r','o','g','r','a','m','m','e','r','"',' ','u','t','i','l','i','t','y',0};
+    XCHAR   msgStr6[] = {'N','o','w',' ','w','a','i','t','i','n','g',' ','f','o','r',' ','d','a','t','a',0};
+#ifdef USE_COMM_PKT_MEDIA_USB
+    XCHAR   msgStr7[] = {'v','i','a',' ','U','S','B','.','.','.',0};
+#else
+    XCHAR   msgStr7[] = {'v','i','a',' ','U','A','R','T','.','.','.',0};
+#endif
+
+    pFont = (void*) &GOLFontDefault;
+    SetFont(pFont);
+    textHeight = GetTextHeight(pFont);
+
+    // check if the CRC matches the data stored in the external flash memory
+    expectedCRC.mchpCRCData = GRC_CRC32_EXTERNAL_MARKER;
+    expectedCRC.mchpSignature = 0x5048434D;                // this is "MCHP"
+
+    // check if programming is prompted     
+    if(GetHWButtonProgram() == HW_BUTTON_PRESS)
+    {
+        pStr = msgStr1;
+        setProgram = TRUE;
+	} 
+
+    if (setProgram == FALSE)
+    {
+        ReadArray(GRC_CRC32_EXTERNAL_ADDR, (BYTE *)&externalCRC, 8);
+    
+        if  ((expectedCRC.mchpCRCData != externalCRC.mchpCRCData) || \
+             (expectedCRC.mchpSignature != externalCRC.mchpSignature))
+        {
+            // expected and read CRC does not match, proceed to programming flash first
+            // run the flash programming 
+            pStr = msgStr2;
+            setProgram = TRUE;
+        }
+    }
+    
+    if (setProgram == TRUE)
+    {
+        SetColor(BLACK);
+        ClearDevice();
+        SetColor(WHITE);
+        OutTextXY(10,10                 , pStr);
+        OutTextXY(10,10 + (textHeight*2), msgStr3);
+        OutTextXY(10,10 + (textHeight*3), msgStr4);
+        OutTextXY(10,10 + (textHeight*4), msgStr5);
+        OutTextXY(10,10 + (textHeight*5), msgStr6);
+        OutTextXY(10,10 + (textHeight*6), msgStr7);
+
+        // Call the external flash programming routine
+        ProgramFlash();
+
+        // check if UART is still busy sending replies to the host
+        while(U2STAbits.TRMT);
+        DelayMs(10);
+
+        // Force Reset to force the checking of the flash memory if programming was a success
+        Reset();
+    }
+}	
+#endif
+
+/*********************************************************************
+* Function: void ShowError(XCHAR *pStr)
+*
+* PreCondition: none
+*
+* Input:  pStr - pointer to the error message
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: This function shows the equivalent blue screen of death.
+*
+* Note: none
+*
+********************************************************************/
+void ShowError(XCHAR *pStr)
+{
+    SetColor(BLUE);
+    ClearDevice();
+    SetColor(WHITE);
+    SetFont((void*)&FONTDEFAULT);
+    OutTextXY(0,0,pStr);
+    while(1);
+}
 
 
 /*********************************************************************

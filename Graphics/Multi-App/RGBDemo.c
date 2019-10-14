@@ -59,9 +59,10 @@
 extern XCHAR    RightArrowStr[];
 extern XCHAR    LeftArrowStr[];
 extern XCHAR    ExitStr[];
-XCHAR           OneStr[] = {'1',0};
-XCHAR           TwoStr[] = {'2',0};
-XCHAR           FadeStr[] = {'F','a','d','e',0};
+extern XCHAR    MemoryErrorStr[];
+const XCHAR     OneStr[] = {'1',0};
+const XCHAR     TwoStr[] = {'2',0};
+const XCHAR     FadeStr[] = {'F','a','d','e',0};
 
 const XCHAR     HIDHardwareMsgStr[] = {'D','e','t','e','c','t','i','n','g',' ','H','I','D',' ','D','e','v','i','c','e',0};
 const XCHAR     NoHIDHardwareMsgStr[] = {'N','o',' ','H','I','D',' ','D','e','v','i','c','e',' ','D','e','t','e','c','t','e','d',0};
@@ -176,7 +177,7 @@ typedef enum
 	GOL_SCHEME      *RGBGreenScheme;        // alternative green style scheme
 	GOL_SCHEME      *RGBBlueScheme;         // alternative blue style scheme
 	GOL_SCHEME      *Preset1ColorScheme;    // color scheme for the preset 1 button
-	GOL_SCHEME      *Preset2ColorScheme;    // color scheme for the preset 1 button
+	GOL_SCHEME      *Preset2ColorScheme;    // color scheme for the preset 2 button
 	GOL_SCHEME      *ControlColorScheme;    // color scheme for the control buttons
 	GOL_SCHEME      *LabelColorScheme;      // color scheme for labels
 
@@ -196,6 +197,7 @@ typedef enum
 void CreateRGBDemo(void)
 {
     BUTTON          *pObj;
+    OBJ_HEADER      *pGenObj;
 
     GOLFree();                          // free memory for the objects in the previous linked list and start new list
 
@@ -218,15 +220,26 @@ void CreateRGBDemo(void)
     FadeModeEnable = FALSE;
 
     // create the style schemes
-    RGBRedScheme = GOLCreateScheme();   // create red style scheme
-    RGBGreenScheme = GOLCreateScheme(); // create green style scheme
-    RGBBlueScheme = GOLCreateScheme();  // create blue style scheme
+
+    // create red style scheme
+    if ((RGBRedScheme = GOLCreateScheme()) == NULL)
+        ShowError(MemoryErrorStr);
+    // create green style scheme
+    if ((RGBGreenScheme = GOLCreateScheme()) == NULL)
+        ShowError(MemoryErrorStr);
+    // create blue style scheme
+    if ((RGBBlueScheme = GOLCreateScheme()) == NULL)
+        ShowError(MemoryErrorStr);
 
     // create style scheme for the preset colors and fade control buttons
-    Preset1ColorScheme = GOLCreateScheme();
-    Preset2ColorScheme = GOLCreateScheme();
-    ControlColorScheme = GOLCreateScheme();
-    LabelColorScheme = GOLCreateScheme();
+    if ((Preset1ColorScheme = GOLCreateScheme()) == NULL)
+        ShowError(MemoryErrorStr);
+    if ((Preset2ColorScheme = GOLCreateScheme()) == NULL)
+        ShowError(MemoryErrorStr);
+    if ((ControlColorScheme = GOLCreateScheme()) == NULL)
+        ShowError(MemoryErrorStr);
+    if ((LabelColorScheme = GOLCreateScheme()) == NULL)
+        ShowError(MemoryErrorStr);
 
     RGBRedScheme->Color0 = RGB565CONVERT(0xCC, 0x00, 0x00);
     RGBRedScheme->Color1 = BRIGHTRED;
@@ -277,7 +290,7 @@ void CreateRGBDemo(void)
     updateIntensity = TRUE;
 
     // now create the objects for the RGB demo
-    StCreate
+    pGenObj = (OBJ_HEADER *)StCreate
     (
         ID_HIDDENSTXT,
         PLTXPOS,
@@ -288,8 +301,10 @@ void CreateRGBDemo(void)
         NULL,                           // covered by the palette
         NULL
     );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
 
-    BtnCreate
+    pGenObj = (OBJ_HEADER *)BtnCreate
     (
         ID_UPBTN1,                      // object’s ID
         BTNUPXPOS,
@@ -302,7 +317,10 @@ void CreateRGBDemo(void)
         RightArrowStr,                  // use this text
         RGBRedScheme
     );                              // use red style scheme
-    BtnCreate
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
+
+    pGenObj = (OBJ_HEADER *)BtnCreate
     (
         ID_UPBTN2,                  // object’s ID
         BTNUPXPOS,
@@ -314,8 +332,11 @@ void CreateRGBDemo(void)
         NULL,                       // bitmap used
         RightArrowStr,              // use this text
         RGBGreenScheme
-    );                              // use green style scheme
-    BtnCreate
+    );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
+                              // use green style scheme
+    pGenObj = (OBJ_HEADER *)BtnCreate
     (
         ID_UPBTN3,                  // object’s ID
         BTNUPXPOS,
@@ -327,8 +348,11 @@ void CreateRGBDemo(void)
         NULL,                       // bitmap used
         RightArrowStr,              // use this text
         RGBBlueScheme
-    );                              // use blue style scheme
-    SldCreate
+    );    
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
+                          // use blue style scheme
+    pGenObj = (OBJ_HEADER *)SldCreate
     (
         ID_SLD1,                    // object’s ID
         SLDXPOS,
@@ -341,8 +365,10 @@ void CreateRGBDemo(void)
         RedPos,                     // pos
         RGBRedScheme
     );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
 
-    SldCreate
+    pGenObj = (OBJ_HEADER *)SldCreate
     (
         ID_SLD2,                    // object’s ID
         SLDXPOS,
@@ -355,8 +381,10 @@ void CreateRGBDemo(void)
         GreenPos,                   // pos
         RGBGreenScheme
     );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
 
-    SldCreate
+    pGenObj = (OBJ_HEADER *)SldCreate
     (
         ID_SLD3,                    // object’s ID
         SLDXPOS,
@@ -369,8 +397,10 @@ void CreateRGBDemo(void)
         BluePos,                    // pos
         RGBBlueScheme
     );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
 
-    BtnCreate
+    pGenObj = (OBJ_HEADER *)BtnCreate
     (
         ID_DNBTN1,                  // object’s ID
         BTNDNXPOS,
@@ -382,8 +412,11 @@ void CreateRGBDemo(void)
         NULL,                       // bitmap used
         LeftArrowStr,               // use this text
         RGBRedScheme
-    );                              // use red style scheme
-    BtnCreate
+    );  
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
+                            // use red style scheme
+    pGenObj = (OBJ_HEADER *)BtnCreate
     (
         ID_DNBTN2,                  // object’s ID
         BTNDNXPOS,
@@ -396,7 +429,7 @@ void CreateRGBDemo(void)
         LeftArrowStr,               // use this text
         RGBGreenScheme
     );                              // use green style scheme
-    BtnCreate
+    pGenObj = (OBJ_HEADER *)BtnCreate
     (
         ID_DNBTN3,                  // object’s ID
         BTNDNXPOS,
@@ -413,7 +446,7 @@ void CreateRGBDemo(void)
     Int2Str(greenValue, GreenPos, 3);
     Int2Str(blueValue, BluePos, 3);
 
-    EbCreate
+    pGenObj = (OBJ_HEADER *)EbCreate
     (
         ID_EB1,                     // ID
         EBXPOS,
@@ -426,7 +459,7 @@ void CreateRGBDemo(void)
         RGBRedScheme
     );
 
-    EbCreate
+    pGenObj = (OBJ_HEADER *)EbCreate
     (
         ID_EB2,             // ID
         EBXPOS,
@@ -438,8 +471,10 @@ void CreateRGBDemo(void)
         MAXCHARSIZE,
         RGBGreenScheme
     );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
 
-    EbCreate
+    pGenObj = (OBJ_HEADER *)EbCreate
     (
         ID_EB3,             // ID
         EBXPOS,
@@ -451,10 +486,12 @@ void CreateRGBDemo(void)
         MAXCHARSIZE,
         RGBBlueScheme
     );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
 
     // this object is hidden. It controls the light intensity bars on the
     // right side of the screen (bars that changes colors from GREEN to YELLOW to RED)
-    SldCreate
+    pGenObj = (OBJ_HEADER *)SldCreate
     (
         ID_SLD4,                                // object’s ID
         SLD4XPOS,
@@ -467,8 +504,10 @@ void CreateRGBDemo(void)
         Intensity,  // pos
         NULL
     );
+    if (pGenObj == NULL)
+        ShowError(MemoryErrorStr);
 
-    CreateCtrlButtons(ExitStr, OneStr, TwoStr, FadeStr);
+    CreateCtrlButtons((XCHAR *)ExitStr, (XCHAR *)OneStr, (XCHAR *)TwoStr, (XCHAR *)FadeStr);
 
     // change the style schemes and the behavior of the control buttons
     pObj = (BUTTON *)GOLFindObject(ID_BUTTON_B);
@@ -724,14 +763,14 @@ WORD RGBDemoMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 
             return (1);
 
-        case ID_BUTTON_B:                   //ID_PRE1BTN:
-        case ID_BUTTON_C:                   //ID_PRE2BTN:
+        case ID_BUTTON_B:                   
+        case ID_BUTTON_C:                   
             if(FadeModeEnable == TRUE)
                 return (0);
             if(objMsg == BTN_MSG_RELEASED)
             {                               // check if button is released
                 if(objectID == ID_BUTTON_B)
-                {                           //ID_PRE1BTN) {
+                {                           
                     RedPos = Pres1Red;
                     GreenPos = Pres1Green;
                     BluePos = Pres1Blue;
@@ -1112,7 +1151,8 @@ void Int2Str(XCHAR *pStr, WORD value, SHORT charCount)
     *pStr = 0;
     
     // position to the first valid character position
-    *pStr--;
+    pStr--;
+    charCount--;
 
     // convert the value to string starting from the ones, then tens, then hundreds etc...
     do

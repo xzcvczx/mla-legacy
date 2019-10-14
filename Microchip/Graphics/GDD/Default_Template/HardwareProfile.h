@@ -98,14 +98,6 @@
 		//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
 
 		/*********************************************************************
-	     * Hardware Configuration for 
-	     * Explorer 16
-     	 * Graphics PicTail v2
-         * Display LGDP4531
-	     ********************************************************************/
-		//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
-
-		/*********************************************************************
 		 * Hardware Configuration for
 		 * Exlporer 16 or PIC32 Starter kit   
 		 * Graphics PicTail v3e
@@ -151,14 +143,6 @@
      ********************************************************************/
 	//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
 	//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
-
-    /*********************************************************************
-     * Hardware Configuration for 
-     * Explorer 16
-     * Graphics PicTail v2
-     * Display LGDP4531
-     ********************************************************************/
-	//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
 
     /*********************************************************************
      * Hardware Configuration for 

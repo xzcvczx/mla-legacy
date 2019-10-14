@@ -109,8 +109,8 @@ file_015=HardwareProfile - PIC24F Starter Kit.h
 file_016=..\..\..\Microchip\USB\usb_device_local.h
 file_017=HardwareProfile - PIC24FJ256DA210 Development Board.h
 file_018=HardwareProfile - PIC24FJ256GB210 PIM.h
-file_019=..\Getting Started - Running the Device - Audio - Microphone - demo.htm
-file_020=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_019=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_020=..\..\..\Microchip\Help\MCHPFSUSB Library Help.pdf
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

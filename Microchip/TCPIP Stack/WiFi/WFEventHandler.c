@@ -52,6 +52,7 @@
 /*==========================================================================*/
 #include "TCPIP Stack/WFMac.h"
 #if defined(WF_CS_TRIS)
+#include "TCPIP Stack/TCPIP.h"
 
 
 /*==========================================================================*/
@@ -90,6 +91,11 @@
 static BOOL isNotifyApp(UINT8 event);
 static BOOL isEventNotifyBitSet(UINT8 notifyMask, UINT8 notifyBit);
 
+extern void SignalWiFiConnectionChanged(BOOL state);
+#if defined(STACK_USE_DHCP_CLIENT)
+extern void RenewDhcp(void);
+#endif
+
 /*****************************************************************************
  * FUNCTION: WFProcessMgmtIndicateMsg
  *
@@ -122,6 +128,10 @@ void WFProcessMgmtIndicateMsg()
             {
                 event     = WF_EVENT_CONNECTION_SUCCESSFUL;
                 eventInfo = WF_NO_ADDITIONAL_INFO;
+			    SignalWiFiConnectionChanged(TRUE);
+				#if defined (STACK_USE_DHCP_CLIENT)
+ 			    RenewDhcp();
+				#endif
                 SetLogicalConnectionState(TRUE);
             }
             /* else connection attempt failed */
@@ -145,17 +155,23 @@ void WFProcessMgmtIndicateMsg()
             {
                 event     = WF_EVENT_CONNECTION_TEMPORARILY_LOST;
                 eventInfo = (UINT16)buf[1];    /* lost due to beacon timeout or deauth */
+                SignalWiFiConnectionChanged(FALSE);
             }    
             else if (buf[0] == CONNECTION_PERMANENTLY_LOST)
             {
                 event     = WF_EVENT_CONNECTION_PERMANENTLY_LOST;
                 eventInfo = (UINT16)buf[1];   /* lost due to beacon timeout or deauth */
                 SetLogicalConnectionState(FALSE);
+                SignalWiFiConnectionChanged(FALSE);                
             }
             else if (buf[0] == CONNECTION_REESTABLISHED)
             {
                 event     = WF_EVENT_CONNECTION_REESTABLISHED;
                 eventInfo = (UINT16)buf[1];    /* originally lost due to beacon timeout or deauth */
+				#if defined(STACK_USE_DHCP_CLIENT)
+                RenewDhcp();
+				#endif
+                SignalWiFiConnectionChanged(TRUE);                
             }    
             else
             {

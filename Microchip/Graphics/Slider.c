@@ -45,6 +45,7 @@
  *              with emboss dark and light colors. These are used
  *              in rendering the thumb path.
  * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
+ * 07/29/11     Fixed state transition when hiding the slider.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -651,6 +652,7 @@ WORD SldDraw(void *pObj)
     typedef enum
     {
         SLD_STATE_IDLE,
+        SLD_STATE_HIDE,
         SLD_STATE_PANEL,
         SLD_STATE_THUMBPATH1,
         SLD_STATE_THUMBPATH2,
@@ -672,289 +674,330 @@ WORD SldDraw(void *pObj)
 
     pSld = (SLIDER *)pObj;
 
-    if(IsDeviceBusy())
-        return (0);
+	while(1)
+	{
+		if(IsDeviceBusy())
+			return (0);
 
-    switch(state)
-    {
-        case SLD_STATE_IDLE:
-            if(GetState(pSld, SLD_HIDE))
-            {
-                SetColor(pSld->hdr.pGolScheme->CommonBkColor);      // set to common BK Color
-                if(!Bar(pSld->hdr.left, pSld->hdr.top, pSld->hdr.right, pSld->hdr.bottom))
-                    return (0);
-                return (1);
-            }
-
-            if(!GetState(pSld, SLD_DISABLED))
-            {
-                colorTemp = pSld->hdr.pGolScheme->Color0;           // select enabled color
-            }
-            else
-            {
-                colorTemp = pSld->hdr.pGolScheme->ColorDisabled;    // select disabled color
-            }
-
-            SldGetMinMaxPos(pSld, &minPos, &maxPos);
-
-            midPoint = GetState(pSld, SLD_VERTICAL) ? (pSld->hdr.left + pSld->hdr.right) >> 1 : (pSld->hdr.top + pSld->hdr.bottom) >> 1;
-
-            // calculate the thumb width and height Actually gets the half value
-            // (see calculation of width and height) SldGetWidth() and SldGetHeight()
-            thWidth = pSld->thWidth;                                // gets half the width
-            thHeight = pSld->thHeight;                              // gets half the height
-            SetLineThickness(NORMAL_LINE);
-            SetLineType(SOLID_LINE);
-            if(GetState(pSld, SLD_DRAW))
-            {   // draw the panel for the slider	
-                // modify the color setting if scroll bar mode or slider mode
-                GOLPanelDraw
-                (
-                    pSld->hdr.left,
-                    pSld->hdr.top,
-                    pSld->hdr.right,
-                    pSld->hdr.bottom,
-                    0,
-                    colorTemp,
-                    (GetState(pSld, SLD_SCROLLBAR)) ? pSld->hdr.pGolScheme->EmbossDkColor : pSld->hdr.pGolScheme->EmbossLtColor,
-                    (GetState(pSld, SLD_SCROLLBAR)) ? pSld->hdr.pGolScheme->EmbossLtColor : pSld->hdr.pGolScheme->EmbossDkColor,
-                    NULL,
-                    GOL_EMBOSS_SIZE
-                );
-
-                // initialize current and previous position
-                SldSetPos(pSld, pSld->pos);
-                pSld->prevPos = pSld->currPos;
-
-                state = SLD_STATE_PANEL;
-            }
-            else
-            {   // we do not need to draw the whole object
-                state = SLD_STATE_CLEARTHUMB;   // go to thumb drawing
-                goto sld_state_clearthumb;
-            }
-
-        case SLD_STATE_PANEL:
-            if(!GOLPanelDrawTsk())              // draw the panel of the slider
-                return (0);
-            if(GetState(pSld, SLD_SCROLLBAR))
-            {                               // check if slider or scroll bar
-                state = SLD_STATE_THUMB;    // scrollbar: go directly to thumb drawing
-                goto sld_state_thumb;       // thumb path is not drawn in scrollbar
-            }
-            else
-            {
-                state = SLD_STATE_THUMBPATH1;   // slider: draw thumb path next
-            }
-
-        case SLD_STATE_THUMBPATH1:
-            SetColor(pSld->hdr.pGolScheme->EmbossDkColor);
-            if(!GetState(pSld, SLD_VERTICAL))
-            {
-                if(!Line(minPos, midPoint, maxPos, midPoint))
-                    return (0);
-            }
-            else
-            {
-                if(!Line(midPoint, minPos, midPoint, maxPos))
-                    return (0);
-            }
-
-            state = SLD_STATE_THUMBPATH2;
-
-        case SLD_STATE_THUMBPATH2:
-            SetColor(pSld->hdr.pGolScheme->EmbossLtColor);
-            if(!GetState(pSld, SLD_VERTICAL))
-            {
-                if(!Line(minPos, midPoint + 1, maxPos, midPoint + 1))
-                    return (0);
-            }
-            else
-            {
-                if(!Line(midPoint + 1, minPos, midPoint + 1, maxPos))
-                    return (0);
-            }
-
-            if(GetState(pSld, SLD_DRAW))
-            {                               // if drawing the whole slider
-                state = SLD_STATE_THUMB;    // go straight to drawing the thumb
-                goto sld_state_thumb;
-            }
-            else
-                // if just drawing the thumb
-                state = SLD_STATE_CLEARTHUMB;   // go to state to remove current position
-
-        case SLD_STATE_CLEARTHUMB:              // this removes the current thumb
-            sld_state_clearthumb : if(IsDeviceBusy()) return (0);
-
-            if(!GetState(pSld, SLD_DRAW_THUMB))
-            {                               // SLD_DRAW_THUMB is only set when
-                state = SLD_STATE_FOCUS;    // object type is SLIDER
-                goto sld_state_focus;
-            }
-
-            SetColor(colorTemp);
-
-            // Remove the current thumb by drawing a bar with background color
-            if(!GetState(pSld, SLD_VERTICAL))
-            {
-                if(!Bar(pSld->prevPos - thWidth, midPoint - thHeight, pSld->prevPos + thWidth, midPoint + thHeight))
-                    return (0);
-            }
-            else
-            {
-                if(!Bar(midPoint - thWidth, pSld->prevPos - thHeight, midPoint + thWidth, pSld->prevPos + thHeight))
-                    return (0);
-            }
-
-            if(!GetState(pSld, SLD_SCROLLBAR))
-            {                               // check if slider or scroll bar
-                state = SLD_STATE_REDRAWPATH1;
-            }
-            else
-            {
-                state = SLD_STATE_THUMB;    // go directly to thumb drawing
-                goto sld_state_thumb;       // thumb path is not drawn in scrollbar
-            }
-
-        case SLD_STATE_REDRAWPATH1:         // redraws the lines that it covered
-            SetColor(pSld->hdr.pGolScheme->EmbossDkColor);
-
-            // Check if the redraw area exceeds the actual dimension. This will
-            // adjust the redrawing area to just within the parameters
-            if(!GetState(pSld, SLD_VERTICAL))
-            {
-                if(minPos + thWidth > pSld->prevPos)
-                    left = minPos;
-                else
-                    left = pSld->prevPos - thWidth;
-
-                if(maxPos - thWidth < pSld->prevPos)
-                    right = maxPos;
-                else
-                    right = pSld->prevPos + thWidth;
-
-                if(!Line(left, midPoint, right, midPoint))
-                    return (0);
-            }
-            else
-            {
-                if(minPos + thHeight > pSld->prevPos)
-                    top = minPos;
-                else
-                    top = pSld->prevPos - thHeight;
-                
-				if(maxPos - thHeight < pSld->prevPos)
-                    bottom = maxPos;
-                else
-                    bottom = pSld->prevPos + thHeight;
-                
-				if(!Line(midPoint, top, midPoint, bottom))
-                    return (0);
-            }
-
-            state = SLD_STATE_REDRAWPATH2;
-
-        case SLD_STATE_REDRAWPATH2:
-            SetColor(pSld->hdr.pGolScheme->EmbossLtColor);
-            if(!GetState(pSld, SLD_VERTICAL))
-            {
-                if(!Line(left, midPoint + 1, right, midPoint + 1))
-                    return (0);
-            }
-            else
-            {
-                if(!Line(midPoint + 1, top, midPoint + 1, bottom))
-                    return (0);
-            }
-
-            state = SLD_STATE_THUMB;
-
-        case SLD_STATE_THUMB:
-            sld_state_thumb : if(IsDeviceBusy()) return (0);
-            if(!GetState(pSld, SLD_VERTICAL))
-            {                               // Draw the slider thumb based on the
-                // current position
-                left = pSld->currPos - thWidth;
-                top = midPoint - thHeight;
-                right = pSld->currPos + thWidth;
-                bottom = midPoint + thHeight;
-            }
-            else
-            {
-                left = midPoint - thWidth;
-                top = pSld->currPos - thHeight;
-                right = midPoint + thWidth;
-                bottom = pSld->currPos + thHeight;
-            }
-
-            GOLPanelDraw
-            (
-                left,
-                top,
-                right,
-                bottom,
-                0,                          // set the parameters of the thumb	
-                colorTemp,
-                pSld->hdr.pGolScheme->EmbossLtColor,
-                pSld->hdr.pGolScheme->EmbossDkColor,
-                NULL,
-                (GOL_EMBOSS_SIZE - 1) ? GOL_EMBOSS_SIZE - 1 : 1
-            );
-
-            state = SLD_STATE_THUMBPANEL;
-
-        case SLD_STATE_THUMBPANEL:
-            if(!GOLPanelDrawTsk())          // draw the panel of the thumb
-                return (0);
-
-            pSld->prevPos = pSld->currPos;  // record the current position as previous
-            if(GetState(pSld, SLD_SCROLLBAR))
-            {                               // check if scroll bar focus is not used
-                state = SLD_STATE_IDLE;     // go back to idle state
-                return (1);
-            }
-
-            if(!GetState(pSld, SLD_DRAW_FOCUS))
-            {
-                state = SLD_STATE_IDLE;
-                return (1);
-            }
-
-            state = SLD_STATE_FOCUS;
-
-        case SLD_STATE_FOCUS:
-            sld_state_focus : if(!GetState(pSld, SLD_SCROLLBAR))
-            {                               // do not draw focus when in scroll bar mode
-                SetLineType(FOCUS_LINE);
-                if(GetState(pSld, SLD_FOCUSED))
-                {
-                    SetColor(pSld->hdr.pGolScheme->TextColor0); // draw the focus box
-                }
-                else
-                {
-                    SetColor(colorTemp);                        // remove the focus box, colorTemp
+		switch(state)
+		{
+			case SLD_STATE_IDLE:
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            GFX_DRIVER_SetupDrawUpdate( pSld->hdr.left,
+                                        pSld->hdr.top,
+                                        pSld->hdr.right,
+                                        pSld->hdr.bottom);
+#endif
+				if(GetState(pSld, SLD_HIDE))
+				{
+					SetColor(pSld->hdr.pGolScheme->CommonBkColor);      // set to common BK Color
+					state = SLD_STATE_HIDE;
+                    // no break here so it falls through to SLD_STATE_HIDE
+				}
+                else 
+                {    
+    				if(!GetState(pSld, SLD_DISABLED))
+    				{
+    					colorTemp = pSld->hdr.pGolScheme->Color0;           // select enabled color
+    				}
+    				else
+    				{
+    					colorTemp = pSld->hdr.pGolScheme->ColorDisabled;    // select disabled color
+    				}
+    
+    				SldGetMinMaxPos(pSld, &minPos, &maxPos);
+    
+    				midPoint = GetState(pSld, SLD_VERTICAL) ? (pSld->hdr.left + pSld->hdr.right) >> 1 : (pSld->hdr.top + pSld->hdr.bottom) >> 1;
+    
+    				// calculate the thumb width and height Actually gets the half value
+    				// (see calculation of width and height) SldGetWidth() and SldGetHeight()
+    				thWidth = pSld->thWidth;                                // gets half the width
+    				thHeight = pSld->thHeight;                              // gets half the height
+    				SetLineThickness(NORMAL_LINE);
+    				SetLineType(SOLID_LINE);
+    				if(GetState(pSld, SLD_DRAW))
+    				{   // draw the panel for the slider	
+    					// modify the color setting if scroll bar mode or slider mode
+    					GOLPanelDraw
+    					(
+    						pSld->hdr.left,
+    						pSld->hdr.top,
+    						pSld->hdr.right,
+    						pSld->hdr.bottom,
+    						0,
+    						colorTemp,
+    						(GetState(pSld, SLD_SCROLLBAR)) ? pSld->hdr.pGolScheme->EmbossDkColor : pSld->hdr.pGolScheme->EmbossLtColor,
+    						(GetState(pSld, SLD_SCROLLBAR)) ? pSld->hdr.pGolScheme->EmbossLtColor : pSld->hdr.pGolScheme->EmbossDkColor,
+    						NULL,
+    						GOL_EMBOSS_SIZE
+    					);
+    
+    					// initialize current and previous position
+    					SldSetPos(pSld, pSld->pos);
+    					pSld->prevPos = pSld->currPos;
+    
+    					state = SLD_STATE_PANEL;
+    					break;
+    				}
+    				else 
+    				{   // we do not need to draw the whole object
+    					state = SLD_STATE_CLEARTHUMB;   // go to thumb drawing
+    					break;
+    				}
                 }
 
-                if
-                (
-                    !Rectangle
-                        (
-                            pSld->hdr.left + GOL_EMBOSS_SIZE,
-                            pSld->hdr.top + GOL_EMBOSS_SIZE,
-                            pSld->hdr.right - GOL_EMBOSS_SIZE,
-                            pSld->hdr.bottom - GOL_EMBOSS_SIZE
-                        )
-                ) return (0);
+			case SLD_STATE_HIDE:
+				if (!Bar(pSld->hdr.left, pSld->hdr.top, pSld->hdr.right, pSld->hdr.bottom))
+					return (0);
+				state = SLD_STATE_IDLE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pSld->hdr.left,
+                                                pSld->hdr.top,
+                                                pSld->hdr.right,
+                                                pSld->hdr.bottom);
+#endif
+				return (1);
+				
+			case SLD_STATE_PANEL:
+				if(!GOLPanelDrawTsk())          // draw the panel of the slider
+					return (0);
+				if(GetState(pSld, SLD_SCROLLBAR))
+				{                               // check if slider or scroll bar
+					state = SLD_STATE_THUMB;    // scrollbar: go directly to thumb drawing
+					break;                      // thumb path is not drawn in scrollbar
+				}
+				else
+				{
+					state = SLD_STATE_THUMBPATH1;   // slider: draw thumb path next
+				}
 
-                SetLineType(SOLID_LINE);                        // reset line type
-            }
+			case SLD_STATE_THUMBPATH1:
+				SetColor(pSld->hdr.pGolScheme->EmbossDkColor);
+				if(!GetState(pSld, SLD_VERTICAL))
+				{
+					if(!Line(minPos, midPoint, maxPos, midPoint))
+						return (0);
+				}
+				else
+				{
+					if(!Line(midPoint, minPos, midPoint, maxPos))
+						return (0);
+				}
 
-            state = SLD_STATE_IDLE;                             // set state to idle
-            return (1); // return as done
-    }
+				state = SLD_STATE_THUMBPATH2;
 
-    return (1);
+			case SLD_STATE_THUMBPATH2:
+				SetColor(pSld->hdr.pGolScheme->EmbossLtColor);
+				if(!GetState(pSld, SLD_VERTICAL))
+				{
+					if(!Line(minPos, midPoint + 1, maxPos, midPoint + 1))
+						return (0);
+				}
+				else
+				{
+					if(!Line(midPoint + 1, minPos, midPoint + 1, maxPos))
+						return (0);
+				}
+
+				if(GetState(pSld, SLD_DRAW))
+				{                               // if drawing the whole slider
+					state = SLD_STATE_THUMB;    // go straight to drawing the thumb
+					break; 
+				}
+				else
+					// if just drawing the thumb
+					state = SLD_STATE_CLEARTHUMB;   // go to state to remove current position
+
+			case SLD_STATE_CLEARTHUMB:              // this removes the current thumb
+				if(IsDeviceBusy()) 
+				    return (0);
+
+				if(!GetState(pSld, SLD_DRAW_THUMB))
+				{                               // SLD_DRAW_THUMB is only set when
+					state = SLD_STATE_FOCUS;    // object type is SLIDER
+					break; 
+				}
+
+				SetColor(colorTemp);
+
+				// Remove the current thumb by drawing a bar with background color
+				if(!GetState(pSld, SLD_VERTICAL))
+				{
+					if(!Bar(pSld->prevPos - thWidth, midPoint - thHeight, pSld->prevPos + thWidth, midPoint + thHeight))
+						return (0);
+				}
+				else
+				{
+					if(!Bar(midPoint - thWidth, pSld->prevPos - thHeight, midPoint + thWidth, pSld->prevPos + thHeight))
+						return (0);
+				}
+
+				if(!GetState(pSld, SLD_SCROLLBAR))
+				{                               // check if slider or scroll bar
+					state = SLD_STATE_REDRAWPATH1;
+				}
+				else
+				{
+					state = SLD_STATE_THUMB;    // go directly to thumb drawing
+					break;                      // thumb path is not drawn in scrollbar
+				}
+
+			case SLD_STATE_REDRAWPATH1:         // redraws the lines that it covered
+				SetColor(pSld->hdr.pGolScheme->EmbossDkColor);
+
+				// Check if the redraw area exceeds the actual dimension. This will
+				// adjust the redrawing area to just within the parameters
+				if(!GetState(pSld, SLD_VERTICAL))
+				{
+					if(minPos + thWidth > pSld->prevPos)
+						left = minPos;
+					else
+						left = pSld->prevPos - thWidth;
+
+					if(maxPos - thWidth < pSld->prevPos)
+						right = maxPos;
+					else
+						right = pSld->prevPos + thWidth;
+
+					if(!Line(left, midPoint, right, midPoint))
+						return (0);
+				}
+				else
+				{
+					if(minPos + thHeight > pSld->prevPos)
+						top = minPos;
+					else
+						top = pSld->prevPos - thHeight;
+					
+					if(maxPos - thHeight < pSld->prevPos)
+						bottom = maxPos;
+					else
+						bottom = pSld->prevPos + thHeight;
+					
+					if(!Line(midPoint, top, midPoint, bottom))
+						return (0);
+				}
+
+				state = SLD_STATE_REDRAWPATH2;
+
+			case SLD_STATE_REDRAWPATH2:
+				SetColor(pSld->hdr.pGolScheme->EmbossLtColor);
+				if(!GetState(pSld, SLD_VERTICAL))
+				{
+					if(!Line(left, midPoint + 1, right, midPoint + 1))
+						return (0);
+				}
+				else
+				{
+					if(!Line(midPoint + 1, top, midPoint + 1, bottom))
+						return (0);
+				}
+
+				state = SLD_STATE_THUMB;
+
+			case SLD_STATE_THUMB:
+				if(IsDeviceBusy()) 
+				    return (0);
+				if(!GetState(pSld, SLD_VERTICAL))
+				{                               // Draw the slider thumb based on the
+					// current position
+					left = pSld->currPos - thWidth;
+					top = midPoint - thHeight;
+					right = pSld->currPos + thWidth;
+					bottom = midPoint + thHeight;
+				}
+				else
+				{
+					left = midPoint - thWidth;
+					top = pSld->currPos - thHeight;
+					right = midPoint + thWidth;
+					bottom = pSld->currPos + thHeight;
+				}
+
+				GOLPanelDraw
+				(
+					left,
+					top,
+					right,
+					bottom,
+					0,                          // set the parameters of the thumb	
+					colorTemp,
+					pSld->hdr.pGolScheme->EmbossLtColor,
+					pSld->hdr.pGolScheme->EmbossDkColor,
+					NULL,
+					(GOL_EMBOSS_SIZE - 1) ? GOL_EMBOSS_SIZE - 1 : 1
+				);
+
+				state = SLD_STATE_THUMBPANEL;
+
+			case SLD_STATE_THUMBPANEL:
+				if(!GOLPanelDrawTsk())          // draw the panel of the thumb
+					return (0);
+
+				pSld->prevPos = pSld->currPos;  // record the current position as previous
+				if(GetState(pSld, SLD_SCROLLBAR))
+				{                               // check if scroll bar focus is not used
+					state = SLD_STATE_IDLE;     // go back to idle state
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pSld->hdr.left,
+                                                pSld->hdr.top,
+                                                pSld->hdr.right,
+                                                pSld->hdr.bottom);
+#endif
+					return (1);
+				}
+
+				if(!GetState(pSld, SLD_DRAW_FOCUS))
+				{
+					state = SLD_STATE_IDLE;
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+                GFX_DRIVER_CompleteDrawUpdate(   pSld->hdr.left,
+                                                pSld->hdr.top,
+                                                pSld->hdr.right,
+                                                pSld->hdr.bottom);
+#endif
+					return (1);
+				}
+
+				state = SLD_STATE_FOCUS;
+
+			case SLD_STATE_FOCUS:
+				if(!GetState(pSld, SLD_SCROLLBAR))
+				{                               // do not draw focus when in scroll bar mode
+					SetLineType(FOCUS_LINE);
+					if(GetState(pSld, SLD_FOCUSED))
+					{
+						SetColor(pSld->hdr.pGolScheme->TextColor0); // draw the focus box
+					}
+					else
+					{
+						SetColor(colorTemp);                        // remove the focus box, colorTemp
+					}
+
+					if
+					(
+						!Rectangle
+							(
+								pSld->hdr.left + GOL_EMBOSS_SIZE,
+								pSld->hdr.top + GOL_EMBOSS_SIZE,
+								pSld->hdr.right - GOL_EMBOSS_SIZE,
+								pSld->hdr.bottom - GOL_EMBOSS_SIZE
+							)
+					) return (0);
+
+					SetLineType(SOLID_LINE);                        // reset line type
+				}
+
+				state = SLD_STATE_IDLE;                             // set state to idle
+#ifdef USE_BISTABLE_DISPLAY_GOL_AUTO_REFRESH
+            GFX_DRIVER_CompleteDrawUpdate(   pSld->hdr.left,
+                                            pSld->hdr.top,
+                                            pSld->hdr.right,
+                                            pSld->hdr.bottom);
+#endif
+				return (1); // return as done
+		}
+    } // end of while(1)
 }
 
 #endif // USE_SLIDER

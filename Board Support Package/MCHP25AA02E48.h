@@ -137,7 +137,7 @@ union _MCHP25AA02E48Status_    MCHP25AA02E48ReadStatus(void);
 * Output: none
 *                                                                       
 ************************************************************************/
-void MCHP25AA02E48WriteByte(BYTE data, WORD address);
+void                    MCHP25AA02E48WriteByte(BYTE data, WORD address);
 
 /************************************************************************
 * Function: BYTE MCHP25AA02E48ReadByte(WORD address)       
@@ -149,7 +149,7 @@ void MCHP25AA02E48WriteByte(BYTE data, WORD address);
 * Output: data read
 *                                                                       
 ************************************************************************/
-BYTE MCHP25AA02E48ReadByte(WORD address);
+BYTE                    MCHP25AA02E48ReadByte(WORD address);
 
 /************************************************************************
 * Function: void MCHP25AA02E48WriteWord(WODR data, WORD address)                                           
@@ -161,7 +161,7 @@ BYTE MCHP25AA02E48ReadByte(WORD address);
 * Output: none                                                         
 *                                                                       
 ************************************************************************/
-void MCHP25AA02E48WriteWord(WORD data, DWORD address);
+void                    MCHP25AA02E48WriteWord(WORD data, DWORD address);
 
 /************************************************************************
 * Function: WORD MCHP25AA02E48ReadWord(WORD address)             
@@ -173,7 +173,7 @@ void MCHP25AA02E48WriteWord(WORD data, DWORD address);
 * Output: data read
 *                                                                       
 ************************************************************************/
-WORD MCHP25AA02E48ReadWord(DWORD address);
+WORD                    MCHP25AA02E48ReadWord(DWORD address);
 
 /************************************************************************
 * Function: MCHP25AA02E48WriteEnable()                                       
@@ -186,7 +186,7 @@ WORD MCHP25AA02E48ReadWord(DWORD address);
 * Output: none
 *
 ************************************************************************/
-void MCHP25AA02E48WriteEnable(void);
+void                    MCHP25AA02E48WriteEnable(void);
 
 /************************************************************************
 * Function: BYTE MCHP25LC256WriteArray(DWORD address, BYTE* pData, nCount)
@@ -198,7 +198,7 @@ void MCHP25AA02E48WriteEnable(void);
 * Output: return 1 if the operation was successfull
 *                                                                     
 ************************************************************************/
-BYTE MCHP25AA02E48WriteArray(DWORD address, BYTE *pData, WORD nCount);
+BYTE                    MCHP25AA02E48WriteArray(DWORD address, BYTE *pData, WORD nCount);
 
 /************************************************************************
 * Function: void MCHP25AA02E48ReadArray(WORD address, BYTE* pData, nCount)
@@ -208,13 +208,11 @@ BYTE MCHP25AA02E48WriteArray(DWORD address, BYTE *pData, WORD nCount);
 * Input: flash memory address, pointer to the buffer, data number
 *                                                                       
 ************************************************************************/
-void MCHP25AA02E48ReadArray(WORD address, BYTE *pData, WORD nCount);
-
+void                    MCHP25AA02E48ReadArray(WORD address, BYTE *pData, WORD nCount);
 /************************************************************************
 * Function: DWORD MCHP25AA02E48GetEUI48NodeAddress(BYTE *eui48NodeAddr)
 ************************************************************************/
 void MCHP25AA02E48GetEUI48NodeAddress(BYTE *eui48NodeAddr);
-
 /************************************************************************
 * Function: void MCHP25AA02E64GetEUI48NodeAddress(BYTE *eui64NodeAddr)
 ************************************************************************/

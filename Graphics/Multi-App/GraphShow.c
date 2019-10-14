@@ -441,8 +441,8 @@ void SetUpNextDemo(CHART *pChart)
     // reset all
     ChHideSeries(pChart, 0);
 
-    // reset all state bits
-    ClrState(pChart, 0xFFFF);
+    // reset all chart state bits
+    ClrState(pChart, 0xE36F);
 
     // set up the percent range				
     temp = rand() % 100;
@@ -621,7 +621,7 @@ WORD xcharStrCopyAppend(XCHAR *pDest, XCHAR *pSrc, WORD copy)
         // find the end of the string to append the source to the destination
         while((ch = *pointerTo) != 0)
         {
-            *pointerTo++;
+            pointerTo++;
             length++;
         }
     }

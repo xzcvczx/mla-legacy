@@ -10,7 +10,7 @@
 *
 * Copyright and Disclaimer Notice for MiWi Software:
 *
-* Copyright ¬© 2007-2010 Microchip Technology Inc.  All rights reserved.
+* Copyright © 2007-2010 Microchip Technology Inc.  All rights reserved.
 *
 * Microchip licenses to you the right to use, modify, copy and distribute 
 * Software only when embedded on a Microchip microcontroller or digital 
@@ -21,7 +21,7 @@
 * You should refer to the license agreement accompanying this Software for 
 * additional information regarding your rights and obligations.
 *
-* SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY 
+* SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY 
 * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY 
 * WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A 
 * PARTICULAR PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE 
@@ -371,8 +371,7 @@ HANDLE_DATA_PACKET:
                             // If it is just an empty packet, ignore here.
                             if( MACRxPacket.PayloadLen == 0 )
                             {
-                                MiWiStateMachine.bits.DataRequesting = 0;
-                                break;
+                                MiWiStateMachine.bits.DataRequesting = 0;                                break;
                             }
                         #endif
                         
@@ -416,6 +415,7 @@ HANDLE_DATA_PACKET:
                                     
                                     MTP.flags.Val = MACRxPacket.flags.Val;
                                     #if defined(IEEE_802_15_4)
+                                        MTP.DestPANID.Val = myPANID.Val;
                                         MTP.altSrcAddr = MACRxPacket.altSourceAddress;
                                     #endif
                                     
@@ -1020,7 +1020,21 @@ ThisPacketIsForMe:
                                 rxMessage.SourcePANID.Val = sourcePANID.Val;
                                 if( MACRxPacket.Payload[8] == 0xFF && MACRxPacket.Payload[9] == 0xFF )
                                 {
-                                    rxMessage.SourceAddress = MACRxPacket.SourceAddress;    
+                                    #if defined(IEEE_802_15_4)
+                                        rxMessage.flags.bits.altSrcAddr = MACRxPacket.altSourceAddress;
+                                        rxMessage.SourceAddress = MACRxPacket.SourceAddress; 
+                                    #else
+                                        if( MACRxPacket.flags.bits.sourcePrsnt )
+                                        {
+                                            rxMessage.SourceAddress = MACRxPacket.SourceAddress; 
+                                        }
+                                        else
+                                        {
+                                            rxMessage.flags.bits.altSrcAddr = 1;
+                                            rxMessage.SourceAddress = &(MACRxPacket.Payload[8]);
+                                        }
+                                    #endif
+                                    
                                 }
                                 else
                                 {
