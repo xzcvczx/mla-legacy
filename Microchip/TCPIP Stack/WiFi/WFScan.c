@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFScan.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFScan.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author              Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -70,18 +70,18 @@
 
 static BOOL WF_CMIsHostScanAllowed(void)
 {
-	UINT8	profileID;
-	UINT8	profileIDState;
+    UINT8   profileID;
+    UINT8   profileIDState;
   
-	WF_CMCheckConnectionState(&profileIDState, &profileID);
+    WF_CMCheckConnectionState(&profileIDState, &profileID);
     if (profileIDState == WF_CSTATE_CONNECTION_IN_PROGRESS || profileIDState == WF_CSTATE_RECONNECTION_IN_PROGRESS)
         return FALSE;
 
-	return TRUE;
+    return TRUE;
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     UINT16 WF_Scan(UINT8 CpId)
 
   Summary:
@@ -97,12 +97,12 @@ static BOOL WF_CMIsHostScanAllowed(void)
     WF_ScanGetResult().
 
     Scan results are retained on the MRF24W until:
-    1.	Calling WF_Scan() again (after scan results returned from previous 
-         call).
-    2.	MRF24W reset.
+    1.  Calling WF_Scan() again (after scan results returned from previous 
+        call).
+    2.  MRF24W reset.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile to use.  
@@ -132,26 +132,26 @@ static BOOL WF_CMIsHostScanAllowed(void)
                calling this function.
 
   Returns:
-  	Operation results. Success or Failure
-  	
+    Operation results. Success or Failure
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 UINT16 WF_Scan(UINT8 CpId)
 {
     UINT8   hdr[4];
 
-	/* WARNING !!! : 
-	* Host scan is allowed only in idle or connected state. 
-	* If module FW is in the midst of connection ( or reconenction) process, then
-	* host scan can hammer connection process, and furthermore it may cause
-	* fatal failure in module FW operation. To be safte to use host scan, we strongly
-	* recommend you to disable module FW connection manager by uncommenting
-	* #define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE	
-	* in WF_Config.h
-	*/
-	if (!WF_CMIsHostScanAllowed())	
-		return WF_ERROR_OPERATION_CANCELLED;
+    /* WARNING !!! : 
+    * Host scan is allowed only in idle or connected state. 
+    * If module FW is in the midst of connection ( or reconenction) process, then
+    * host scan can hammer connection process, and furthermore it may cause
+    * fatal failure in module FW operation. To be safte to use host scan, we strongly
+    * recommend you to disable module FW connection manager by uncommenting
+    * #define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE    
+    * in WF_Config.h
+    */
+    if (!WF_CMIsHostScanAllowed())    
+        return WF_ERROR_OPERATION_CANCELLED;
     
     hdr[0] = WF_MGMT_REQUEST_TYPE;
     hdr[1] = WF_SCAN_START_SUBTYPE; 
@@ -164,13 +164,13 @@ UINT16 WF_Scan(UINT8 CpId)
                 0);              /* no data          */
 
     /* wait for mgmt response, free it after it comes in (no data needed) */
-	WaitForMgmtResponse(WF_SCAN_START_SUBTYPE, FREE_MGMT_BUFFER); 
+    WaitForMgmtResponse(WF_SCAN_START_SUBTYPE, FREE_MGMT_BUFFER); 
 
-	return WF_SUCCESS;
+    return WF_SUCCESS;
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_ScanGetResult(UINT8 listIndex, tWFScanResult  *p_scanResult)
 
   Summary:
@@ -183,7 +183,7 @@ UINT16 WF_Scan(UINT8 CpId)
     format of scan result).    
 
   Precondition:
-  	MACInit must be called first.  WF_EVENT_SCAN_RESULTS_READY event must have
+    MACInit must be called first.  WF_EVENT_SCAN_RESULTS_READY event must have
     already occurrerd.
 
   Parameters:
@@ -196,17 +196,17 @@ UINT16 WF_Scan(UINT8 CpId)
     p_scanResult->rssi
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_ScanGetResult(UINT8          listIndex, 
                        tWFScanResult  *p_scanResult)
 {
     
     UINT8   hdr[4];
-	/* char rssiChan[48]; */ /* reference for how to retrieve RSSI */
+    /* char rssiChan[48]; */ /* reference for how to retrieve RSSI */
     
     hdr[0] = WF_MGMT_REQUEST_TYPE;
     hdr[1] = WF_SCAN_GET_RESULTS_SUBTYPE; 
@@ -229,9 +229,9 @@ void WF_ScanGetResult(UINT8          listIndex,
     p_scanResult->beaconPeriod = WFSTOHS(p_scanResult->beaconPeriod);
     p_scanResult->atimWindow   = WFSTOHS(p_scanResult->atimWindow);
 
-	/* reference for how to retrieve RSSI */
-	/* Display SSID  & Channel */ 
-	/* sprintf(rssiChan, "  => RSSI: %u, Channel: %u\r\n",  p_scanResult->rssi, p_scanResult->channel);  */
+    /* reference for how to retrieve RSSI */
+    /* Display SSID  & Channel */ 
+    /* sprintf(rssiChan, "  => RSSI: %u, Channel: %u\r\n",  p_scanResult->rssi, p_scanResult->channel);  */
     /* putsUART(rssiChan); */
 }                        
 

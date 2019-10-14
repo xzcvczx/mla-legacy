@@ -2,17 +2,17 @@
 
  MRF24W Driver API Interface
  Module for Microchip TCP/IP Stack
-  -Provides access to MRF24W WiFi controller
+  -Provides access to MRF24W WiFi controller (MRF24WB0MA/B, MRF24WG0MA/B)
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFApi.h
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFApi.h
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -174,9 +174,9 @@
 /*---------------------------------------------------------------------*/
 /* Used for Tx mode selection */
 /*---------------------------------------------------------------------*/
-#define WF_TXMODE_G_RATES		0
-#define WF_TXMODE_B_RATES		1
-#define WF_TXMODE_LEGACY_RATES	2
+#define WF_TXMODE_G_RATES        0
+#define WF_TXMODE_B_RATES        1
+#define WF_TXMODE_LEGACY_RATES   2
 
 /*------------------------------------------------------------------------------------------*/
 /* Multicast Filter ID's                                                                    */
@@ -205,11 +205,11 @@
     #define WF_MULTICAST_USE_FILTERS    (2)
 #endif /* MRF24WG */
 
-#define WF_MASK_DEAUTH_REASONCODE	((UINT8)0x80)
-#define WF_MASK_DISASSOC_REASONCODE	((UINT8)0x40)
+#define WF_MASK_DEAUTH_REASONCODE       ((UINT8)0x80)
+#define WF_MASK_DISASSOC_REASONCODE     ((UINT8)0x40)
 
 #define WF_SCAN_ALL ((UINT8)(0xff))
-#define WF_HWRSSIVAL_MAX	200	/* hw RSSI reference value to be used to derive real RSSI */
+#define WF_HWRSSIVAL_MAX    200    /* hw RSSI reference value to be used to derive real RSSI */
 /*
 *********************************************************************************************************
 *                                           DATA TYPES                               
@@ -258,32 +258,32 @@ typedef struct WFMacStatsStruct
       Number of frames successfully transmitted that had the multicast bit set 
       in the destination MAC address.
       */
-	UINT32 MibTxMulticastCtr;
+    UINT32 MibTxMulticastCtr;
     /**
       Number of Tx frames that failed due to the number of transmits exceeding 
       the retry count.
       */
-	UINT32 MibTxFailedCtr;
-	UINT32 MibTxRtryCtr;        // Number of times a transmitted frame needed to be retried 
-	UINT32 MibTxMultRtryCtr;    // Number of times a frame was successfully transmitted after more than one retransmission.
-	UINT32 MibTxSuccessCtr;     // Number of Tx frames successfully transmitted.
+    UINT32 MibTxFailedCtr;
+    UINT32 MibTxRtryCtr;        // Number of times a transmitted frame needed to be retried 
+    UINT32 MibTxMultRtryCtr;    // Number of times a frame was successfully transmitted after more than one retransmission.
+    UINT32 MibTxSuccessCtr;     // Number of Tx frames successfully transmitted.
     UINT32 MibRxDupCtr;         // Number of frames received where the Sequence Control field indicates a duplicate.
-	UINT32 MibRxCtsSuccCtr;     // Number of CTS frames received in response to an RTS frame.
-	UINT32 MibRxCtsFailCtr;     // Number of times an RTS frame was not received in response to a CTS frame.
-	UINT32 MibRxAckFailCtr;     // Number of times an Ack was not received in response to a Tx frame.
-	UINT32 MibRxBytesCtr;       // Total number of Rx bytes received.
-	UINT32 MibRxFragCtr;        // Number of successful received frames (management or data)
-	UINT32 MibRxMultCtr;        // Number of frames received with the multicast bit set in the destination MAC address.
-	UINT32 MibRxFCSErrCtr;      // Number of frames received with an invalid Frame Checksum (FCS).
+    UINT32 MibRxCtsSuccCtr;     // Number of CTS frames received in response to an RTS frame.
+    UINT32 MibRxCtsFailCtr;     // Number of times an RTS frame was not received in response to a CTS frame.
+    UINT32 MibRxAckFailCtr;     // Number of times an Ack was not received in response to a Tx frame.
+    UINT32 MibRxBytesCtr;       // Total number of Rx bytes received.
+    UINT32 MibRxFragCtr;        // Number of successful received frames (management or data)
+    UINT32 MibRxMultCtr;        // Number of frames received with the multicast bit set in the destination MAC address.
+    UINT32 MibRxFCSErrCtr;      // Number of frames received with an invalid Frame Checksum (FCS).
 
     /**
       Number of frames received where the Protected Frame subfield of the Frame Control Field is set to 
       one and the WEPOn value for the key mapped to the transmitter’s MAC address indicates the frame 
       should not have been encrypted.
       */
-	UINT32 MibRxWEPUndecryptCtr;
-	UINT32 MibRxFragAgedCtr; // Number of times that fragments ‘aged out’, or were not received in the allowable time.
-	UINT32 MibRxMICFailureCtr; // Number of MIC failures that have occurred.
+    UINT32 MibRxWEPUndecryptCtr;
+    UINT32 MibRxFragAgedCtr; // Number of times that fragments ‘aged out’, or were not received in the allowable time.
+    UINT32 MibRxMICFailureCtr; // Number of MIC failures that have occurred.
 } tWFMacStats;
 
 
@@ -300,9 +300,9 @@ typedef struct WFMacStatsStruct
 #define WF_SECURITY_WPA2_WITH_PASS_PHRASE        (6)
 #define WF_SECURITY_WPA_AUTO_WITH_KEY            (7)
 #define WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE    (8)
-#define WF_SECURITY_WPS_PUSH_BUTTON    		     (9)
-#define WF_SECURITY_WPS_PIN    				     (10)
-#define WF_SECURITY_EAP    				     	 (11)	/* currently not supported */
+#define WF_SECURITY_WPS_PUSH_BUTTON              (9)
+#define WF_SECURITY_WPS_PIN                      (10)
+#define WF_SECURITY_EAP                          (11)    /* currently not supported */
 
 
 /* Wep key types */
@@ -316,8 +316,8 @@ typedef struct WFMacStatsStruct
 /*---------------------------------------------------------------------*/
 #define WF_INFRASTRUCTURE 1
 #define WF_ADHOC          2
-#define WF_P2P            3 	
-#define WF_SOFT_AP        4 	
+#define WF_P2P            3     
+#define WF_SOFT_AP        4     
 
 /*--------------------------------------------------------*/
 /* Ad Hoc behavior defines                                */
@@ -358,13 +358,13 @@ typedef struct WFMacStatsStruct
 #define WF_SECURITY_MISMATCH_FAILURE            (9)
 #define WF_NO_SUITABLE_AP_FOUND_FAILURE         (10)
 #define WF_RETRY_FOREVER_NOT_SUPPORTED_FAILURE  (11)
-#define WF_LINK_LOST							(12)
+#define WF_LINK_LOST                            (12)
 #define WF_TKIP_MIC_FAILURE                     (13)
 #define WF_RSN_MIXED_MODE_NOT_SUPPORTED         (14)
-#define WF_RECV_DEAUTH							(15)
-#define WF_RECV_DISASSOC						(16)
-#define WF_WPS_FAILURE							(17)
-#define WF_P2P_FAILURE							(18)
+#define WF_RECV_DEAUTH                          (15)
+#define WF_RECV_DISASSOC                        (16)
+#define WF_WPS_FAILURE                          (17)
+#define WF_P2P_FAILURE                          (18)
 
 /* Reason Codes */
 #define WF_UNSPECIFIED                          (1)
@@ -449,9 +449,9 @@ typedef struct WFMacStatsStruct
 #define WF_PS_OFF                    (4)
 
 /* Hibernate states */
-#define WF_HB_NO_SLEEP 		(0)
-#define WF_HB_ENTER_SLEEP 	(1)
-#define WF_HB_WAIT_WAKEUP 	(2)
+#define WF_HB_NO_SLEEP          (0)
+#define WF_HB_ENTER_SLEEP       (1)
+#define WF_HB_WAIT_WAKEUP       (2)
 
 /* Pin Level */
 #define WF_LOW   (0)
@@ -474,8 +474,8 @@ typedef struct WFMacStatsStruct
 /* eventInfo define for WF_ProcessEvent() when no additional info is supplied */
 #define WF_NO_ADDITIONAL_INFO       ((UINT16)0xffff)
 
-#define ENABLE_WPS_PRINTS	(1 << 0)
-#define ENABLE_P2P_PRINTS	(1 << 1)
+#define ENABLE_WPS_PRINTS    1 //(1 << 0)
+#define ENABLE_P2P_PRINTS    (1 << 1)
 
 /*-----------------------------*/
 /* Connection Profile Elements */
@@ -605,14 +605,14 @@ typedef struct WFCPElementsStruct
       Default: WF_ADHOC_CONNECT_THEN_START
       */
     UINT8  adHocBehavior;
-	/**
-	1 - enable hidden ssid in adhoc mode
-	*/
-	UINT8 hiddenSSID;
-	/**
-	0- shared key, 1 - open key
-	*/
-	UINT8 wepKeyType;
+    /**
+    1 - enable hidden ssid in adhoc mode
+    */
+    UINT8 hiddenSSID;
+    /**
+    0- shared key, 1 - open key
+    */
+    UINT8 wepKeyType;
 } tWFCPElements;
 
 /*-------------------------------*/
@@ -791,15 +791,15 @@ typedef struct WFCAElementsStruct
     UINT16  probeDelay;
 
 #if defined (MRF24WG)
-	/**
-	Default : 4
-	*/
-	UINT16 dtimInterval;
+    /**
+    Default : 4
+    */
+    UINT16 dtimInterval;
 
-	/**
-	Default : 100 (ms)
-	*/
-	UINT16 beaconPrd;
+    /**
+    Default : 100 (ms)
+    */
+    UINT16 beaconPrd;
 #endif
 } tWFCAElements;
 
@@ -823,18 +823,6 @@ typedef struct tWFConnectContextStruct
     UINT8  channel;    /* channel number of current connection */
     UINT8  bssid[6];    /* bssid of connected AP    */
 } tWFConnectContext;
-	
-    /*--------------------------------------*/
-    /* used in WF_Connect in WiCom mode	*/
-    /*--------------------------------------*/
-    typedef struct tWFConnectParamsStruct
-    {
-    	UINT8 bssid[6];
-    	UINT16 beaconPrd;
-    	UINT16 capInfo;
-    	UINT8 channel;
-    	UINT8 secType;
-    } tWFConnectParams;
 #endif
 
 /*--------------*/
@@ -875,11 +863,11 @@ typedef struct
     /**
       List of Network basic rates.  Each rate has the following format:
       
-	  Bit 7
+      Bit 7
       * 0 – rate is not part of the basic rates set
       * 1 – rate is part of the basic rates set
 
-	  Bits 6:0 
+      Bits 6:0 
       Multiple of 500kbps giving the supported rate.  For example, a value of 2 
       (2 * 500kbps) indicates that 1mbps is a supported rate.  A value of 4 in 
       this field indicates a 2mbps rate (4 * 500kbps).
@@ -895,8 +883,8 @@ typedef struct
 } tWFScanResult; 
 
 typedef struct WFHibernate {
-	UINT8 state;
-	UINT8 wakeup_notice;
+    UINT8 state;
+    UINT8 wakeup_notice;
 } tWFHibernate;
 
 #if defined(WF_CM_DEBUG)
@@ -917,18 +905,18 @@ typedef struct
 
     } tWFMultiCastConfig;
     #endif
-	
+    
 typedef struct
 {
-	UINT8 ssid[32];
-	UINT8 netKey[64];
-	UINT16 authType;
-	UINT16 encType;
-	UINT8 netIdx;
-	UINT8 ssidLen;
-	UINT8 keyIdx;
-	UINT8 keyLen;
-	UINT8 bssid[6];
+    UINT8 ssid[32];
+    UINT8 netKey[64];
+    UINT16 authType;
+    UINT16 encType;
+    UINT8 netIdx;
+    UINT8 ssidLen;
+    UINT8 keyIdx;
+    UINT8 keyLen;
+    UINT8 bssid[6];
 } tWFWpsCred;
 #endif /* MRF24WG */
 
@@ -971,12 +959,12 @@ typedef struct
     
     void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber);
     
-    #define WF_ASSERT(expr)                                     \
-	   do {													    \
-           if (!(expr))                                         \
-       	   {                                                    \
-           	    WF_AssertionFailed(WF_MODULE_NUMBER, __LINE__); \
-       	   }													\
+    #define WF_ASSERT(expr)                                         \
+       do {                                                         \
+           if (!(expr))                                             \
+              {                                                     \
+                   WF_AssertionFailed(WF_MODULE_NUMBER, __LINE__);  \
+              }                                                     \
        } while (0)
 /*---------------------------*/
 /* else asserts are disabled */
@@ -1045,10 +1033,8 @@ void WF_CPGetElements(UINT8 CpId, tWFCPElements *p_elements);
 
 #if defined(WF_USE_INDIVIDUAL_SET_GETS)
     void WF_CPSetSsid(UINT8 CpId, UINT8 *p_ssid,  UINT8 ssidLength);
-    #if defined(MRF24WG)
-	void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden);
-	void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden);
-    #endif
+    void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden);
+    void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden);
     void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength);
     void WF_CPSetBssid(UINT8 CpId, UINT8 *p_bssid);
     void WF_CPGetBssid(UINT8 CpId, UINT8 *p_bssid);
@@ -1066,17 +1052,13 @@ void WF_CPGetElements(UINT8 CpId, tWFCPElements *p_elements);
     void WF_CPGetDefaultWepKeyIndex(UINT8 CpId, UINT8 *p_defaultWepKeyIndex);
     void WF_CPSetNetworkType(UINT8 CpId, UINT8 networkType);
     void WF_CPGetNetworkType(UINT8 CpId, UINT8 *p_networkType);
-    #if defined(MRF24WG)
     void WF_CPSetWepKeyType(UINT8 CpId, UINT8 wepKeyType);
     void WF_CPGetWepKeyType(UINT8 CpId, UINT8 *p_wepKeyType);
-        void WF_CPGetWPSCredentials(UINT8 CpId, tWFWpsCred *p_cred);
-		#ifdef WICOM_MODE
-		void WF_CPSetPMK(UINT8 CpId, UINT8 *pmk);
-		#endif /* WICOM_MODE */
-    #endif
+#if defined (MRF24WG)	
+    void WF_CPGetWPSCredentials(UINT8 CpId, tWFWpsCred *p_cred);
+#endif
     void WF_CPSetAdHocBehavior(UINT8 CpId, UINT8 adHocBehavior);
     void WF_CPGetAdHocBehavior(UINT8 CpId, UINT8 *p_adHocBehavior);
-    
 #endif /* WF_USE_INDIVIDUAL_SET_GETS */
 
 /*--------------------------------*/
@@ -1107,7 +1089,7 @@ void WF_CAGetElements(tWFCAElements *p_elements);
     void WF_CASetListenInterval(UINT16 listenInterval);
     void WF_CAGetListenInterval(UINT16 *p_listenInterval);
     #if defined(MRF24WG)
-	    void WF_CASetDtimInterval(UINT16 dtimInterval);
+        void WF_CASetDtimInterval(UINT16 dtimInterval);
         void WF_CAGetDtimInterval(UINT16 *p_dtimInterval);
     #endif
     void WF_CASetBeaconTimeout(UINT8 beaconTimeout);
@@ -1120,8 +1102,8 @@ void WF_CAGetElements(tWFCAElements *p_elements);
     void WF_CAGetMaxChannelTime(UINT16 *p_minChannelTime);
     void WF_CASetProbeDelay(UINT16 probeDelay);
     void WF_CAGetProbeDelay(UINT16 *p_probeDelay);
-	void WF_CASetBeaconPeriod(UINT16 beaconPeriod);
-	void WF_CAGetBeaconPeriod(UINT16 *beaconPeriod);
+    void WF_CASetBeaconPeriod(UINT16 beaconPeriod);
+    void WF_CAGetBeaconPeriod(UINT16 *beaconPeriod);
 #endif /* WF_USE_INDIVIDUAL_SET_GETS */
 
 /*--------------------------------*/
@@ -1136,7 +1118,6 @@ void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId);
     void WF_SetTxMode(UINT8 mode);
     void WF_GetTxMode(UINT8 *mode);
     void WFEnableDebugPrint(UINT8 option);
-    void WF_SetStackVersion(UINT8 major, UINT8 minor);
 #endif
     void WF_SetLinkDownThreshold(UINT8 threshold);
 
@@ -1150,7 +1131,7 @@ void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId);
     #else /* !defined (MRF24WG) */
         void WF_TxPowerSetMinMax(INT8 minTxPower, INT8 maxTxPower);
         void WF_TxPowerGetMinMax(INT8 *p_minTxPower, INT8 *p_maxTxPower);
-		void WF_FixTxRateWithMaxPower(BOOL oneMegaBps);
+        void WF_FixTxRateWithMaxPower(BOOL oneMegaBps);
     #endif /* defined (MRF24WG) */
     void WF_TxPowerGetFactoryMax(INT8 *p_factoryMaxTxPower);
 #endif
@@ -1162,7 +1143,7 @@ void WiFiTask(void);
 /*----------------------------*/
 #if defined(WF_USE_POWER_SAVE_FUNCTIONS)
     void WF_PsPollDisable(void);
-	void WF_PsPollEnable(BOOL rxDtim);
+    void WF_PsPollEnable(BOOL rxDtim);
     void WF_GetPowerSaveState(UINT8 *p_powerSaveState);
     void WF_HibernateEnable(void);
 #endif
@@ -1193,7 +1174,7 @@ void WF_GetRegionalDomain(UINT8 *p_regionalDomain);  /* see tWFRegDomain enumera
     void WF_GetMultiCastFilter(UINT8 multicastFilterId, UINT8 multicastAddress[6]);
     #if defined(MRF24WG)
         void WF_MulticastSetConfig(tWFMultiCastConfig *p_config);
-		void WF_EnableSWMultiCastFilter(void);
+        void WF_EnableSWMultiCastFilter(void);
     #endif
 
 #endif /* WF_USE_MULTICAST_FUNCTIONS */
@@ -1245,31 +1226,6 @@ void WFSpiTxRx_Rom(ROM UINT8 *p_txBuf,
 /*--------------------------*/
 /* Event Handling Functions */
 /*--------------------------*/
-/*******************************************************************************
-  Function:	
-    void WF_ProcessEvent(UINT8 event,
-                         UINT16 eventInfo,
-                         UINT8 *extraInfo);
-
-  Summary:
-    Process events from the MRF24W
-
-  Description:
-
-  Precondition:
-  	MACInit must be called first.
-
-  Parameters:
-    event - The event that occurred
-    eventInfo - Additional information about the event.  This is not applicable 
-                 to all events.
-
-  Returns:
-  	None.
-  	
-  Remarks:
-  	None.
-  *****************************************************************************/
 void WF_ProcessEvent(UINT8 event, UINT16 eventInfo, UINT8 *extraInfo);
 
 #if defined(MRF24WG)
@@ -1287,9 +1243,13 @@ extern void WF_DisableModuleConnectionManager(void);
 
 #define SHA1_MAC_LEN 20
 extern void pbkdf2_sha1(const char *passphrase, const char *ssid, UINT16 ssid_len,
-		 UINT16 iterations, UINT8 *buf, UINT16 buflen);
+                        UINT16 iterations, UINT8 *buf, UINT16 buflen);
 
 extern void WF_ConvPassphrase2Key(UINT8 key_len, UINT8 *key, UINT8 ssid_len, UINT8 *ssid);
+
+#ifdef WIFI_NET_TEST
+extern void wifi_net_test_print(char *str, UINT32 param);
+#endif
 
 #endif /* __WF_API_H_ */
 

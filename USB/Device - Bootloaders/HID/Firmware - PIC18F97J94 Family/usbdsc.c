@@ -188,7 +188,7 @@ rom USB_DEV_DSC device_dsc=
     EP0_BUFF_SIZE,          // Max packet size for EP0, see usbcfg.h
     0x04D8,                 // Vendor ID: Microchip
     0x003C,                 // Product ID: HID Bootloader
-    0x0002,                 // Device release number in BCD format
+    0x0100,                 // Device release number in BCD format
     0x01,                   // Manufacturer string index
     0x02,                   // Product string index
     0x00,                   // Device serial number string index

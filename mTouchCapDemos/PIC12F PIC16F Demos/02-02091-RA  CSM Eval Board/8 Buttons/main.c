@@ -94,7 +94,10 @@ void main(void)
     //================================================================================================                                                           
     
     mTouch_Init();                  // mTouch Initialization (Required)
-      
+    #if defined(MCOMM_ENABLED)
+    mComm_Init();                   // mComm Initialization  (Required for communications)
+    #endif  
+    
     INTCONbits.GIE = 1;             // Initialization complete. Begin servicing interrupts.
     
     while(1)
@@ -211,19 +214,13 @@ void Example_System_Init()
 void interrupt ISR(void)
 {
     // EXAMPLE INTERRUPT SERVICE ROUTINE
-
-    SAVE_STATE();                       // mTouch Framework-supplied general ISR save state macro. 
-                                        // Not required, but convenient. 
-
         
-        if (mTouch_checkInterrupt())    // Checks if the TMRxIE and TMRxIF flags are both equal to 1.
-        {
-            mTouch_Scan();              // Required if running as ISR slave. The mTouch timer interrupt 
-                                        // flag is cleared inside the mTouch_Scan() function.
-        }
-    
-    RESTORE_STATE();                    // mTouch Framework-supplied general ISR restore state macro. 
-                                        // Not required, but convienent.
+    if (mTouch_checkInterrupt())    // Checks if the TMRxIE and TMRxIF flags are both equal to 1.
+    {
+        mTouch_Scan();              // Required if running as ISR slave. The mTouch timer interrupt 
+                                    // flag is cleared inside the mTouch_Scan() function.
+    }
+
 }
 
 

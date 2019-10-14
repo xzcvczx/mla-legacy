@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFDriverRaw.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFDriverRaw.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -661,11 +661,11 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
     // if external interrupt is disabled, enable it because we need it for the while(1) loop to exit
     if(intDisabled)
     {
-	    WF_EintEnable();
+        WF_EintEnable();
     }
     else if(WF_EintIsPending())
     {
-	    WF_EintEnable();
+        WF_EintEnable();
     }
 
     #if defined(WF_DEBUG)
@@ -677,17 +677,17 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
     {
         /* if received an external interrupt that signalled the RAW Move */
         /* completed then break out of this loop                         */
-	    if(RawMoveState.rawInterrupt & rawIntMask)
-	    {
-		    break;
-	    }
-	    
+        if(RawMoveState.rawInterrupt & rawIntMask)
+        {
+            break;
+        }
+        
         #if defined(WF_DEBUG)
-	    /* If timed out waiting for RAW Move complete than lock up */
+        /* If timed out waiting for RAW Move complete than lock up */
         if (TickGet() - startTickCount >= maxAllowedTicks)
-	    {
-    	    WF_ASSERT(FALSE);
-	    }
+        {
+            WF_ASSERT(FALSE);
+        }
         #endif
         
     } /* end while */
@@ -695,7 +695,7 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
     /* if interrupt was enabled by us here, we should disable it now that we're finished */
     if(intDisabled)
     {
-	    WF_EintDisable();
+        WF_EintDisable();
     }
 
     /* read the byte count and return it */

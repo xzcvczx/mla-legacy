@@ -197,6 +197,15 @@
                                                     //      On normal device power up, the init value
                                                     //           is not erased.
                                                     
+        #define MTOUCH_EEPROM_STORED_IN_RAM         // <-- If EEPROM is enabled and this value is
+                                                    //     defined, the mTouch configuration options
+                                                    //     will be stored in a RAM array - not in EEPROM.
+                                                    //     This can be used to support two-way
+                                                    //     communications on PICs with no EEPROM or
+                                                    //     as a way to reset to factory settings when
+                                                    //     the processor is powered off.
+        
+        
 //****************************************************************************************************
 //  ____                              ____       _               
 // / ___|  ___ _ __  ___  ___  _ __  / ___|  ___| |_ _   _ _ __  

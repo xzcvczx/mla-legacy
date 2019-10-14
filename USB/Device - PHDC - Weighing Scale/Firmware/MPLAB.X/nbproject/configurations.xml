@@ -85,6 +85,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.40</languageToolchainVersion>
@@ -250,6 +251,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F47J53</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.40</languageToolchainVersion>
@@ -377,6 +379,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F87J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.40</languageToolchainVersion>
@@ -504,6 +507,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F4550</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.40</languageToolchainVersion>
@@ -662,6 +666,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.40</languageToolchainVersion>
@@ -805,6 +810,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB106</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -956,6 +962,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ64GB004</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1097,6 +1104,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1238,6 +1246,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB210</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1379,6 +1388,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256DA210</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1530,6 +1540,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ64GB502</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>

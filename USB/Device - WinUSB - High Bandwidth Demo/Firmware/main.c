@@ -12,7 +12,7 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the "Company") for its PIC� Microcontroller is intended and
+ (the "Company") for its PIC(R) Microcontroller is intended and
  supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
@@ -48,6 +48,7 @@
 
   2.7b  Improvements to USBCBSendResume(), to make it easier to use.
   2.9f  Adding new part support
+  2.9h  Updated to support MS OS Descriptor for plug and play Win 8 experience
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -156,7 +157,7 @@
         #pragma config IESO     = OFF      	// Internal External (clock) Switchover
         #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
         #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
-        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
         #pragma config WPDIS    = WPDIS     // Program memory not write protected
         #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
         #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
@@ -603,6 +604,25 @@ int main(void)
  *******************************************************************/
 static void InitializeSystem(void)
 {
+    #if defined(_PIC14E)
+        ANSELA = 0x00;
+        ANSELB = 0x00;
+        ANSELC = 0x00;
+        TRISA  = 0x00;
+        TRISB  = 0x00;
+        TRISC  = 0x00;
+        OSCTUNE = 0;
+        #if defined (USE_INTERNAL_OSC)
+            OSCCON = 0x7C;   // PLL enabled, 3x, 16MHz internal osc, SCS external
+            OSCCONbits.SPLLMULT = 1;   // 1=3x, 0=4x
+            ACTCON = 0x90;   // Enable active clock tuning with USB
+        #else
+            OSCCON = 0x3C;   // PLL enabled, 3x, 16MHz internal osc, SCS external
+            OSCCONbits.SPLLMULT = 0;   // 1=3x, 0=4x
+            ACTCON = 0x00;   // Active clock tuning disabled
+        #endif
+    #endif
+    
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM) & !defined(PIC18F97J94_FAMILY))
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif defined(__C30__) || defined __XC16__
@@ -676,7 +696,7 @@ static void InitializeSystem(void)
         ANCON3 = 0xFF;
         #if(USB_SPEED_OPTION == USB_FULL_SPEED)
             //Enable INTOSC active clock tuning if full speed
-            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            ACTCON = 0x90;                  //Enable active clock self tuning for USB operation
             while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
                                             //with USB operation (ex: if using two speed 
                                             //startup or otherwise performing clock switching)
@@ -693,6 +713,12 @@ static void InitializeSystem(void)
             while(OSCCON2bits.PLLRDY != 1);   //Wait for PLL lock
             *((unsigned char*)0xFB5) = 0x90;  //Enable active clock tuning for USB operation
         #endif
+        //Configure all analog capable pins to enable digital input buffer
+        ANSELA = 0x00;
+        ANSELB = 0x00;
+        ANSELC = 0x00;
+        ANSELD = 0x00;
+        ANSELE = 0x00;        
     #endif
     #if defined(__32MX460F512L__)|| defined(__32MX795F512L__)
     // Configure the PIC32 core for the best performance
@@ -1331,6 +1357,8 @@ void USBCBErrorHandler(void)
  *****************************************************************************/
 void USBCBCheckOtherReq(void)
 {
+    //Check for class specific requests, and if necessary, handle it.
+    USBCheckVendorRequest();
 }//end
 
 

@@ -120,7 +120,9 @@ project will have to be modified to make the BootPage section larger.
 // see the compiler documentation, and/or click "Help --> Topics..." and then 
 // select "PIC18 Config Settings" in the Language Tools section.
 
-#if defined(PIC18F97J94_FS_USB_PIM)			// Configuration bits for PIC18F97J94 FS USB Plug-In Module board
+#if defined(PIC18F97J94_FS_USB_PIM) || defined(PIC18F87J94_FS_USB_PIM)			
+
+        // Configuration bits for PIC18F97J94 FS USB Plug-In Module board
         #pragma config STVREN   = ON      	// Stack overflow reset
         #pragma config XINST    = OFF   	// Extended instruction set
         #pragma config BOREN    = ON        // BOR Enabled
@@ -132,7 +134,7 @@ project will have to be modified to make the BootPage section larger.
         #pragma config IESO     = OFF      	// Internal External (clock) Switchover
         #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
         #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
-        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
         #pragma config WPDIS    = WPDIS     // Program memory not write protected
         #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
         #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
@@ -181,7 +183,7 @@ void
 _entry (void)
 {
 	_asm
-	bsf		TRISG, 7, 0			//Address: 0x00		//Configure RG7 as input pin (not strictly necessary since reset state is already = 1)
+	bsf		mInitSwitch2		//Address: 0x00		//Configure sw2 as input pin (not strictly necessary since reset state is already = 1)
 	nop							//Address: 0x02		//Filler to waste 2 bytes of program memory
 	bra		BootEntryIOCheck	//Address: 0x04		//bra BootEntryIOCheck skips past the high-priority interrupt redirect
 	nop							//Address: 0x06		//Filler to waste 2 bytes of program memory
@@ -191,9 +193,9 @@ _entry (void)
 
 BootEntryIOCheck:
 	//Perform an I/O pin check to see if we should enter either the main application firmware, or this bootloader firmware.
-	//Currently using RB4 I/O pin for this purpose.  If pushbutton pressed (RB4 = 0), enter bootloader firmware.
-	//If not pressed (RB4 = 1, due to pull up resistor), enter the main application firmware instead.
-    btfss	PORTG, 7, 0			//Address: 0x0C		//Check RG7 I/O pin state	
+	//io_cfg.h defines sw2 I/O pin for this purpose.  If sw2 is pressed (sw2 = 0), enter bootloader firmware.
+	//If not pressed (sw2 = 1, due to pull up resistor), enter the main application firmware instead.
+    btfss	sw2        			//Address: 0x0C		//Check sw2 I/O pin state	
     bra		BootAppStart		//Address: 0x0E		//If pushbutton pressed, enter bootloader	
 
 	//Otherwise, need to enter the main application firmware.
@@ -233,6 +235,22 @@ BootAppStart:					//Address: 0x1C		//If executing the main application firmware,
  *****************************************************************************/
 void Main(void)
 {   
+    // TODO: remove this code when PIC18F97J94 A3 silicon is available
+	//Check for failed state (A1 silicon errata)
+	unsigned char a = 0xA9;
+	unsigned char b = 0x56;
+	
+	if(a == 0x56)
+	{
+		mInitAllLEDs();
+
+		mLED_1_On();
+		mLED_2_On();
+		Reset();
+		while(1);
+	}	
+    // TODO: end of errata code to remove
+	
 	//NOTE: The c018.o file is not included in the linker script for this project.
 	//The C initialization code in the c018.c (comes with C18 compiler in the src directory)
 	//file is instead modified and included here manually.  This is done so as to provide
@@ -292,7 +310,8 @@ void Main(void)
  *****************************************************************************/
 static void InitializeSystem(void)
 {
-    #if defined(PIC18F97J94_FS_USB_PIM)
+    #if defined(PIC18F97J94_FS_USB_PIM) || defined(PIC18F87J94_FS_USB_PIM)			
+
         //Make sure to select oscillator settings consistent with USB operation.
         //If the user application firmware entered the bootloader through the absolute
         //entry point, it is possible the clock source may not have already been compatible
@@ -303,16 +322,19 @@ static void InitializeSystem(void)
         OSCCON = 0x01;              //FRC+PLL selected
        
         //Enable INTOSC active clock tuning if full speed
-        OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+        ACTCON = 0x90; //Enable active clock self tuning for USB operation
         while(OSCCON2bits.LOCK == 0)      //Make sure PLL is locked/frequency is compatible
         {
             ClrWdt();
         } 
+
     #else
+
         #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
 		//Also make sure the correct board is selected in usbcfg.h.  If 
 		//everything is correct, comment out the above "#error ..." line
 		//to suppress the error message.
+
     #endif
 
 	//USB module may have already been on if the application firmware calls the bootloader

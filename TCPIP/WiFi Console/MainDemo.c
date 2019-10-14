@@ -92,7 +92,7 @@ BYTE AN0String[8];
 // Private helper functions.
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
-static void InitializeBoard(void);
+/*static */void InitializeBoard(void);
 
 #if defined(WF_CS_TRIS)
     void WF_Connect(void);
@@ -352,6 +352,14 @@ int main(void)
     // job.
     // If a task needs very long time to do its job, it must be broken
     // down into smaller pieces so that other tasks can have CPU time.
+    #if !defined( MRF24WG)  && defined( __PIC32MX__ )
+    AutoUpdate_UartXMODEM_Roadrunner();
+	#endif
+	
+	#if defined(STACK_USE_AUTOUPDATE_UART) && defined (MRF24WG)
+	AutoUpdate_UartXMODEM_24G();
+	#endif
+	
     while(1)
     {
         // Blink LED0 (right most one) every second.
@@ -394,7 +402,16 @@ int main(void)
 		// the inputs on the board itself.
 		// Any custom modules or processing you need to do should
 		// go here.
-	
+		
+		#if defined(STACK_USE_AUTOUPDATE_TCPCLIENT) && defined (MRF24WG)
+		AutoUpdate_TCPClient();
+		#endif
+
+		
+
+		#if defined(STACK_USE_FTP_CLIENT)
+		FTPClient();
+		#endif
 		
 		#if defined(STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE)
 		GenericTCPClient();
@@ -410,6 +427,7 @@ int main(void)
 		
 		#if defined(STACK_USE_ICMP_CLIENT)
 		PingDemo();
+		PingConsole();
 		#endif
 		
 		#if defined(STACK_USE_SNMP_SERVER) && !defined(SNMP_TRAP_DISABLED)
@@ -673,7 +691,7 @@ void DisplayIPValue(IP_ADDR IPVal)
   Remarks:
     None
   ***************************************************************************/
-static void InitializeBoard(void)
+/*static*/ void InitializeBoard(void)
 {	
 	// LEDs
 	LED0_TRIS = 0;

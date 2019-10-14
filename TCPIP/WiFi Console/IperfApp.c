@@ -1260,7 +1260,7 @@ StateMachineTxArpResolve(void)
 static void
 StateMachineUDPTxOpen(void)
 {
-    if ( (APPCTX.udpSock = UDPOpenEx((DWORD)APPCTX.remoteSide.remote.IPAddr.v,UDP_OPEN_NODE_INFO, 0, APPCTX.mServerPort)) == INVALID_UDP_SOCKET )
+    if ( (APPCTX.udpSock = UDPOpenEx((DWORD)((unsigned int)APPCTX.remoteSide.remote.IPAddr.v),UDP_OPEN_NODE_INFO, 0, APPCTX.mServerPort)) == INVALID_UDP_SOCKET )
     {
         /* error case */
         WFConsolePrintRomStr("Create UDP socket failed", TRUE);
@@ -1295,7 +1295,7 @@ static void
 StateMachineTCPTxOpen(void)
 {
 
-   if  ( (APPCTX.tcpClientSock = TCPOpen( (DWORD) &APPCTX.remoteSide.remote, TCP_OPEN_NODE_INFO,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT)) == INVALID_SOCKET )
+   if  ( (APPCTX.tcpClientSock = TCPOpen( (DWORD) ((unsigned int)&APPCTX.remoteSide.remote), TCP_OPEN_NODE_INFO,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT)) == INVALID_SOCKET )
    {
        /* error case */
         WFConsolePrintRomStr("Create TCP socket failed", TRUE);

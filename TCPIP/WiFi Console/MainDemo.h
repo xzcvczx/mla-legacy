@@ -67,9 +67,14 @@ void DoUARTConfig(void);
 
 void SMTPDemo(void);
 void PingDemo(void);
+void PingConsole(void);
 void SNMPTrapDemo(void);
 void SNMPV2TrapDemo(void);
 void GenericTCPClient(void);
+void FTPClient(void);
+BOOL	AutoUpdate_UartXMODEM_24G(void);
+void AutoUpdate_TCPClient(void);
+int AutoUpdate_UartXMODEM_Roadrunner(void);
 void GenericTCPServer(void);
 void BerkeleyTCPClientDemo(void);
 void BerkeleyTCPServerDemo(void);

@@ -109,23 +109,19 @@
         //      Programming the Microcontroller:        Resets EEPROM values
         //      Powering on/off the Microcontroller:    No change to EEPROM values
 
-        __delay_ms(1);
+        __delay_ms(2);
         
         if (MTOUCH_EEPROM_read(0x01) != MTOUCH_EEPROM_INIT_VALUE)                                
         {   
-            MTOUCH_EEPROM_write(0x01, MTOUCH_EEPROM_INIT_VALUE);    // Initialization Value
             mTouch_EEPROM_Reset();                                  // mTouch EEPROM Block
+            MTOUCH_EEPROM_write(0x01, MTOUCH_EEPROM_INIT_VALUE);    // Initialization Value
         }
     }
     
     // Resets the EEPROM
     void mTouch_EEPROM_Reset()
-    {
-    
-        // 
+    {    
         // The default EEPROM values are stored in constant memory. Loop to initialize.
-        //
-    
         for (uint8_t i = 0; i < MTOUCH_EEPROM_SIZE; i++)
         {
             MTOUCH_EEPROM_write(MTOUCH_EEPROM_START_ADR + i, mTouch_EEPROM_default[i]);

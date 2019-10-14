@@ -395,7 +395,7 @@ void ARPInit(void)
     Cache.MACAddr.v[4] = 0xff;
     Cache.MACAddr.v[5] = 0xff;
 
-	Cache.IPAddr.Val = 0x0;
+	Cache.IPAddr.Val = 0xfffffffful;
 }
 #endif
 

@@ -158,7 +158,7 @@ WORD gSnmpv3UserDBIndex=0;
 WORD_VAL gUsmStatsEngineID={0}; 
 
 
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 //SNMPv3 global configuration database to be used for trap notification
 snmpV3TrapConfigDataBase gSnmpv3TrapConfigData[SNMPV3_USM_MAX_USER]=
 	{ \
@@ -1596,13 +1596,11 @@ BOOL ProcessSnmpv3MsgData(PDU_INFO* pduDbPtr)
 			
 				varBindHeaderOffset = dynScopedBufPtr->length;
 				previousGetBufpos = gSNMPv3ScopedPduDataPos;
-				if(Snmpv3GetBufferData(gSNMPv3ScopedPduRequestBuf,previousGetBufpos+0x0E)==0x0)
-				{
-					noOfVarbindreq = 0;
-				}
+				
 				smSnmp++;
 			case SM_RESPONSE_PDU_LEN_OFFSET:
-
+				// The exact Reponse will be updated with varBindHeaderOffset
+				// After reading no of varbinds from FindOIDsFromSnmpV3Request
 				if(!noOfVarbindreq)
 					Snmpv3BufferPut(REPORT_RESPONSE,dynScopedBufPtr);
 				else
@@ -1694,6 +1692,18 @@ BOOL ProcessSnmpv3MsgData(PDU_INFO* pduDbPtr)
 				else	//Find number of OIDs/varbinds's data requested in received PDU.
 					noOfVarbindreq = FindOIDsFromSnmpV3Request(varBindHeaderLen);
 				
+				tempOffset = dynScopedBufPtr->length;
+				dynScopedBufPtr->length = varBindHeaderOffset;
+				if(!noOfVarbindreq)
+				{
+					Snmpv3BufferPut(REPORT_RESPONSE,dynScopedBufPtr);
+				}
+				else
+				{
+					Snmpv3BufferPut(GET_RESPONSE,dynScopedBufPtr);	
+				}				
+				dynScopedBufPtr->length = tempOffset;
+								
 				Snmpv3BufferPut(STRUCTURE,dynScopedBufPtr);
 				varBindHeaderOffset_3 = dynScopedBufPtr->length;
 				Snmpv3BufferPut(0x82,dynScopedBufPtr);
@@ -3036,7 +3046,7 @@ BYTE _Snmpv3IsValidAuthStructure(WORD* dataLen)
 }
 
 
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 UINT8 gSNMPV3TrapSecurityLevel = NO_REPORT_NO_PRIVACY_NO_AUTH;
 #define INVALID_INDEX 0xFF
 

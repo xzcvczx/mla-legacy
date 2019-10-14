@@ -1,12 +1,12 @@
 /*************************************************************************
- *  © 2011 Microchip Technology Inc.                                       
+ *  ï¿½ 2011 Microchip Technology Inc.                                       
  *  
  *  Project Name:    mTouch Library
  *  FileName:        mTouchConfig.h
  *  Dependencies:    None.
  *  Processor:       PIC18, PIC24
  *  Compiler:        HI-TECH, MPLAB C18 and MPLAB C30
- *  IDE:             MPLAB® IDE or MPLAB® X                        
+ *  IDE:             MPLABï¿½ IDE or MPLABï¿½ X                        
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  Description:     Configuration file for mTouch library.
  *************************************************************************/
@@ -112,7 +112,7 @@
   CTMU charge delay settings.
   This value is used when "chargeDelay" is set to -1 in MTouchSetSensor(...) call.
   ***************************************************************************/
-#define MTOUCH_DEFAULT_CHARGE_DELAY   7                                          
+#define MTOUCH_DEFAULT_CHARGE_DELAY   3
 
 /****************************************************************************
   Default threshold for press event detection.

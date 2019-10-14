@@ -43,15 +43,15 @@
         <itemPath>../../../../Graphics/Common/FlashProgrammer.h</itemPath>
       </logicalFolder>
       <logicalFolder name="mTouch" displayName="mTouch" projectFiles="true">
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouch.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouch2ChSlider.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouch4ChSlider.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouchAcquisitionPIC24.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouchButton.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouchControl.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouchDebug.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouchMatrixButton.h</itemPath>
-        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F Library/mTouchSensor.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouch.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouch2ChSlider.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouch4ChSlider.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouchAcquisitionMCU16.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouchButton.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouchControl.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouchDebug.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouchMatrixButton.h</itemPath>
+        <itemPath>../../../../Microchip/Include/mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouchSensor.h</itemPath>
       </logicalFolder>
       <logicalFolder name="Wireless Transceivers"
                      displayName="Wireless Transceivers"

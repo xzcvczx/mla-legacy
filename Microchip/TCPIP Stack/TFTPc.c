@@ -95,7 +95,7 @@ typedef enum
 } TFTP_OPCODE;
 
 
-UDP_SOCKET _tftpSocket;         // TFTP Socket for TFTP server link
+UDP_SOCKET _tftpSocket = TFTP_UPLOAD_COMPLETE;         // TFTP Socket for TFTP server link
 WORD _tftpError;                // Variable to preserve error condition causes for later transmission
 
 static union
@@ -349,12 +349,10 @@ CHAR TFTPGetUploadStatus(void)
 		_tftpSocket = UDPOpenEx((DWORD)(ROM_PTR_BASE)vUploadRemoteHost,
 										 UDP_OPEN_ROM_HOST,TFTP_CLIENT_PORT,
 										 TFTP_SERVER_PORT);
-		smUpload = TFTP_UPLOAD_CONNECT;
 	}
 
 	switch(smUpload)
 	{
-#if 0
 	case TFTP_UPLOAD_GET_DNS:
 		if(!DNSBeginUsage())
 			break;
@@ -374,7 +372,6 @@ CHAR TFTPGetUploadStatus(void)
 		TFTPOpen(&ipRemote);
 		smUpload = TFTP_UPLOAD_CONNECT;
 		break;
-#endif
 	case TFTP_UPLOAD_CONNECT:
 		switch(TFTPIsOpened())
 		{
@@ -647,6 +644,7 @@ void TFTPOpenFile(BYTE *fileName, TFTP_FILE_MODE mode)
     // Most TFTP servers accept connection TFTP port. but once
     // connection is established, they use other temp. port,
     UDPSocketInfo[_tftpSocket].remotePort = TFTP_SERVER_PORT;
+	memcpy(&UDPSocketInfo[_tftpSocket].remote.remoteHost, &MutExVar.group1._hostInfo.IPAddr.Val, sizeof(DWORD));
 
     // Tell remote server about our intention.
     _TFTPSendFileName(mode, fileName);

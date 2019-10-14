@@ -949,6 +949,8 @@ UINT8* secNamePtr=NULL;
 
 	secNamePtr= securityPrimitivesOfIncomingPdu.securityName;
 
+	if(securityPrimitivesOfIncomingPdu.securityNameLength == 0)
+		return TRUE; //If "report" is expected, Retrun.
 	//Check if the received packet is expecting "report" as response.
 	if(!strncmp((const char *)secNamePtr,
 				(const char *)reportMsgName,		
@@ -1104,9 +1106,12 @@ BOOL Snmpv3ValidateSecNameAndSecLvl(void)
 	
 	
 	tempLen=securityPrimitivesOfIncomingPdu.securityNameLength;
-	if(tempLen == 0x0u)
-		return FALSE;
-
+	if(tempLen == 0x0u) // report is expected
+	{
+		gSnmpv3UserDBIndex=0;
+		return TRUE;
+	}
+	
 	inSecNamePtr=securityPrimitivesOfIncomingPdu.securityName;
 	inSecurityLevel = securityPrimitivesOfIncomingPdu.securityLevel;
 

@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFConnectionManager.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFConnectionManager.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,9 +42,9 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author         Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- KH                 27 Jan 2010 Created for MRF24W
+ KH             27 Jan 2010 Created for MRF24W
 ******************************************************************************/
 
 /*
@@ -91,8 +91,8 @@ typedef struct caElementResponseStruct
 typedef struct cmInfoResponseStruct
 {
     tMgmtMsgRxHdr   mgmtHdr;                /* normal 4-byte hdr for all mgmt responses */
-    //UINT8			infoId;					/* index 4 */
-    //UINT8			infoDataLength;		    /* index 5 */
+    //UINT8           infoId;               /* index 4                                  */
+    //UINT8           infoDataLength;       /* index 5                                  */
     /* info data follows */
 } tCMInfoResponseHdr;
 #endif
@@ -127,27 +127,27 @@ static void SetEventNotificationMask(UINT8 eventNotificationBitMask);
 #if defined(WF_USE_GROUP_SET_GETS)
 /*****************************************************************************
   Function:
-	void WF_CASetElements(tWFCAElements *p_elements)
+    void WF_CASetElements(tWFCAElements *p_elements)
 
   Summary:
-	Writes all Connection Algorithm elements.
+    Writes all Connection Algorithm elements.
 
   Description:
-	Sends a message to the MRF24W which sets all the Connection Algorithm 
-	elements.
+    Sends a message to the MRF24W which sets all the Connection Algorithm 
+    elements.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_elements - Pointer to the input structure (tWFCAElements) containing the 
-	             connection algorithm elements.
-	             
+    p_elements - Pointer to the input structure (tWFCAElements) containing the 
+                 connection algorithm elements.
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void WF_CASetElements(tWFCAElements *p_elements)
 {
@@ -192,27 +192,27 @@ void WF_CASetElements(tWFCAElements *p_elements)
 
 /*****************************************************************************
   Function:
-	void WF_CASetElementsN(const tWFCAElements *p_elements)
+    void WF_CASetElementsN(const tWFCAElements *p_elements)
 
   Summary:
-	Writes all Connection Algorithm elements.
+    Writes all Connection Algorithm elements.
 
   Description:
-	Sends a message to the MRF24W which sets all the Connection Algorithm
-	elements.
+    Sends a message to the MRF24W which sets all the Connection Algorithm
+    elements.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_elements - Pointer to the input structure (tWFCAElements) containing the
-	             connection algorithm elements.
+    p_elements - Pointer to the input structure (tWFCAElements) containing the
+                 connection algorithm elements.
 
   Returns:
-  	None
+    None
 
   Remarks:
-	None
+    None
 *****************************************************************************/
 void WF_CASetElementsN(const tWFCAElements *p_elements)
 {
@@ -235,27 +235,27 @@ void WF_CASetElementsN(const tWFCAElements *p_elements)
 
 /*****************************************************************************
   Function:
-	void WF_CAGetElements(tWFCAElements *p_elements)
+    void WF_CAGetElements(tWFCAElements *p_elements)
 
   Summary:
-	Reads all Connection Algorithm elements.
+    Reads all Connection Algorithm elements.
 
   Description:
-	Sends a message to the MRF24W which requests all the Connection Algorithm 
-	elements.
+    Sends a message to the MRF24W which requests all the Connection Algorithm 
+    elements.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_elements - Pointer to the output structure (tWFCAElements) where the 
-	             connection algorithm elements are written.
-	             
+    p_elements - Pointer to the output structure (tWFCAElements) where the 
+                 connection algorithm elements are written.
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void WF_CAGetElements(tWFCAElements *p_elements)
 {
@@ -275,27 +275,27 @@ void WF_CAGetElements(tWFCAElements *p_elements)
 #if defined(WF_USE_INDIVIDUAL_SET_GETS)
 /*****************************************************************************
   Function:
-	void WF_CASetScanType(UINT8 scanType)
+    void WF_CASetScanType(UINT8 scanType)
 
   Summary:
-	Sets the Connection Algorith scan type
+    Sets the Connection Algorith scan type
 
   Description:
-	Configures the Connection Algorithm for the desired scan type.
+    Configures the Connection Algorithm for the desired scan type.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	scanType - Desired scan type.  Either WF_ACTIVE_SCAN or WF_PASSIVE_SCAN.
-	             
+    scanType - Desired scan type.  Either WF_ACTIVE_SCAN or WF_PASSIVE_SCAN.
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Active scanning causes the MRF24W to send probe requests.  Passive
-	scanning implies the MRF24W only listens for beacons.
-	Default is WF_ACTIVE_SCAN.
+    Active scanning causes the MRF24W to send probe requests.  Passive
+    scanning implies the MRF24W only listens for beacons.
+    Default is WF_ACTIVE_SCAN.
 *****************************************************************************/
 void WF_CASetScanType(UINT8 scanType)
 {
@@ -306,27 +306,27 @@ void WF_CASetScanType(UINT8 scanType)
 
 /*****************************************************************************
   Function:
-	void WF_CAGetScanType(UINT8 *p_scanType)
+    void WF_CAGetScanType(UINT8 *p_scanType)
 
   Summary:
-	Gets the Connection Algorithm scan type
+    Gets the Connection Algorithm scan type
 
   Description:
-	Reads the current Connection Algorithm scan type.
+    Reads the current Connection Algorithm scan type.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_scanType - Pointer where Connection Algorithm scan type is written.
-	             
+    p_scanType - Pointer where Connection Algorithm scan type is written.
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Active scanning causes the MRF24W to send probe requests.  Passive
-	scanning implies the MRF24W only listens for beacons.  
-	Default is WF_ACTIVE_SCAN.
+    Active scanning causes the MRF24W to send probe requests.  Passive
+    scanning implies the MRF24W only listens for beacons.  
+    Default is WF_ACTIVE_SCAN.
 *****************************************************************************/
 void WF_CAGetScanType(UINT8 *p_scanType)
 {
@@ -338,28 +338,28 @@ void WF_CAGetScanType(UINT8 *p_scanType)
 
 /*****************************************************************************
   Function:
-	void WF_CASetMinChannelTime(UINT16 minChannelTime)
+    void WF_CASetMinChannelTime(UINT16 minChannelTime)
 
   Summary:
-	Sets the minimum channel time (in milliseconds)
+    Sets the minimum channel time (in milliseconds)
 
   Description:
-	The minimum time (in milliseconds) the connection manager will wait for a 
-	probe response after sending a probe request.  If no probe responses are 
-	received in minChannelTime then the connection manager will go on to the 
-	next channel, if any are left to scan, or quit.
+    The minimum time (in milliseconds) the connection manager will wait for a 
+    probe response after sending a probe request.  If no probe responses are 
+    received in minChannelTime then the connection manager will go on to the 
+    next channel, if any are left to scan, or quit.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	minChannelTime - Minimum time to wait for a probe response (in milliseconds)
-	             
+    minChannelTime - Minimum time to wait for a probe response (in milliseconds)
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 200ms
+    Default is 200ms
 *****************************************************************************/
 void WF_CASetMinChannelTime(UINT16 minChannelTime)
 {
@@ -371,27 +371,27 @@ void WF_CASetMinChannelTime(UINT16 minChannelTime)
 
 /*****************************************************************************
   Function:
-	void WF_CAGetMinChannelTime(UINT16 *p_minChannelTime)
+    void WF_CAGetMinChannelTime(UINT16 *p_minChannelTime)
 
   Summary:
-	Gets the current Connection Algorithm minimum channel time.
+    Gets the current Connection Algorithm minimum channel time.
 
   Description:
-	Gets the minimum time the connection manager waits for a probe response after
-	sending a probe request.
+    Gets the minimum time the connection manager waits for a probe response after
+    sending a probe request.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_minChannelTime - Pointer where minimum time to wait for a probe response 
-	                    (in milliseconds) will be written.
-	             
+    p_minChannelTime - Pointer where minimum time to wait for a probe response 
+                       (in milliseconds) will be written.
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void WF_CAGetMinChannelTime(UINT16 *p_minChannelTime)
 {
@@ -407,28 +407,28 @@ void WF_CAGetMinChannelTime(UINT16 *p_minChannelTime)
 
 /*****************************************************************************
   Function:
-	void WF_CASetMaxChannelTime(UINT16 maxChannelTime)
+    void WF_CASetMaxChannelTime(UINT16 maxChannelTime)
 
   Summary:
-	Sets the maximum channel time (in milliseconds)
+    Sets the maximum channel time (in milliseconds)
 
   Description:
-	The maximum time (in milliseconds) the connection manager will wait for a 
-	probe response after sending a probe request.  If no probe responses are 
-	received in maxChannelTime then the connection manager will go on to the 
-	next channel, if any are left to scan, or quit.
+    The maximum time (in milliseconds) the connection manager will wait for a 
+    probe response after sending a probe request.  If no probe responses are 
+    received in maxChannelTime then the connection manager will go on to the 
+    next channel, if any are left to scan, or quit.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	maxChannelTime - Maximum time to wait for a probe response (in milliseconds)
-	             
+    maxChannelTime - Maximum time to wait for a probe response (in milliseconds)
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 400ms
+    Default is 400ms
 *****************************************************************************/
 void WF_CASetMaxChannelTime(UINT16 maxChannelTime)
 {
@@ -440,26 +440,26 @@ void WF_CASetMaxChannelTime(UINT16 maxChannelTime)
 
 /*****************************************************************************
   Function:
-	void WF_CAGetMaxChannelTime(UINT16 *p_maxChannelTime)
+    void WF_CAGetMaxChannelTime(UINT16 *p_maxChannelTime)
 
   Summary:
-	Gets the Max Channel Time (in milliseconds)
+    Gets the Max Channel Time (in milliseconds)
 
   Description:
-	Gets the maximum time the connection manager waits for a probe response after
-	sending a probe request.
+    Gets the maximum time the connection manager waits for a probe response after
+    sending a probe request.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_maxChannelTime - Pointer where maximum channel time is written
-	             
+    p_maxChannelTime - Pointer where maximum channel time is written
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 400ms
+    Default is 400ms
 *****************************************************************************/
 void WF_CAGetMaxChannelTime(UINT16 *p_maxChannelTime)
 {
@@ -475,57 +475,57 @@ void WF_CAGetMaxChannelTime(UINT16 *p_maxChannelTime)
 
 /*****************************************************************************
   Function:
-	void WF_CASetProbeDelay(UINT16 probeDelay)
+    void WF_CASetProbeDelay(UINT16 probeDelay)
 
   Summary:
-	Sets the Probe Delay (in microseconds)
+    Sets the Probe Delay (in microseconds)
 
   Description:
-	The number of microseconds to delay before transmitting a probe request
-	following the channel change event.
+    The number of microseconds to delay before transmitting a probe request
+    following the channel change event.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	probeDelay - Desired probe delay
-	             
+    probeDelay - Desired probe delay
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 20uS
+    Default is 20uS
 *****************************************************************************/
 void WF_CASetProbeDelay(UINT16 probeDelay)
 {
     probeDelay = HSTOWFS(probeDelay);                   /* fix up endianness before sending */
-    LowLevel_CASetElement(WF_CA_ELEMENT_PROBE_DELAY,    /* Element ID                   */
-                          (UINT8 *)&probeDelay,         /* pointer to element data      */
-                          sizeof(probeDelay));          /* number of element data bytes */
+    LowLevel_CASetElement(WF_CA_ELEMENT_PROBE_DELAY,    /* Element ID                       */
+                          (UINT8 *)&probeDelay,         /* pointer to element data          */
+                          sizeof(probeDelay));          /* number of element data bytes     */
 } 
 
 /*****************************************************************************
   Function:
-	void WF_CAGetProbeDelay(UINT16 probeDelay)
+    void WF_CAGetProbeDelay(UINT16 probeDelay)
 
   Summary:
-	Gets the Probe Delay (in microseconds)
+    Gets the Probe Delay (in microseconds)
 
   Description:
-	The number of microseconds to delay before transmitting a probe request
-	following the channel change event.
+    The number of microseconds to delay before transmitting a probe request
+    following the channel change event.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_probeDelay - Pointer to where probe delay is written
-	             
+    p_probeDelay - Pointer to where probe delay is written
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 20uS
+    Default is 20uS
 *****************************************************************************/
 void WF_CAGetProbeDelay(UINT16 *p_probeDelay)
 {
@@ -541,26 +541,26 @@ void WF_CAGetProbeDelay(UINT16 *p_probeDelay)
 
 /*****************************************************************************
   Function:
-	void WF_CASetScanCount(UINT8 scanCount)
+    void WF_CASetScanCount(UINT8 scanCount)
 
   Summary:
-	Sets the scan count
+    Sets the scan count
 
   Description:
-	The number of times the Connection Manager will scan a channel while attempting
-	to find a particular WiFi network.
+    The number of times the Connection Manager will scan a channel while attempting
+    to find a particular WiFi network.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	scanCount - Desired scan count
-	             
+    scanCount - Desired scan count
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 1
+    Default is 1
 *****************************************************************************/
 void WF_CASetScanCount(UINT8 scanCount)
 {
@@ -571,26 +571,26 @@ void WF_CASetScanCount(UINT8 scanCount)
 
 /*****************************************************************************
   Function:
-	void WF_CAGetScanCount(UINT8 *p_scanCount)
+    void WF_CAGetScanCount(UINT8 *p_scanCount)
 
   Summary:
-	Gets the scan count
+    Gets the scan count
 
   Description:
-	The number of times the Connection Manager will scan a channel while attempting
-	to find a particular WiFi network.
+    The number of times the Connection Manager will scan a channel while attempting
+    to find a particular WiFi network.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_scanCount - Pointer to where scan count is written
-	             
+    p_scanCount - Pointer to where scan count is written
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 1
+    Default is 1
 *****************************************************************************/
 void WF_CAGetScanCount(UINT8 *p_scanCount)
 {
@@ -603,36 +603,36 @@ void WF_CAGetScanCount(UINT8 *p_scanCount)
 
 /*****************************************************************************
   Function:
-	void WF_CASetRssi(UINT8 rssi)
+    void WF_CASetRssi(UINT8 rssi)
 
   Summary:
-	Sets the RSSI threshold
+    Sets the RSSI threshold
 
   Description:
-	Specifies the RSSI behavior when connecting.  This value is only used if
-	  1) The current Connection Profile has not defined an SSID or BSSID
-	  2) An SSID is defined in the current Connection Profile and multiple
-	     access points are discovered with the same SSID.
-	     
-	 Values:
-	   0      : Connect to the first network found
-	   1 - 254 (MRF24WB), 1 - 128 (MRF24WG): Only connect to a network if the RSSI
-	   	is greater than or equal to the specified value
-	   255:     Connect to the highest RSSI found
+    Specifies the RSSI behavior when connecting.  This value is only used if
+      1) The current Connection Profile has not defined an SSID or BSSID
+      2) An SSID is defined in the current Connection Profile and multiple
+         access points are discovered with the same SSID.
+         
+     Values:
+       0      : Connect to the first network found
+       1 - 254 (MRF24WB), 1 - 128 (MRF24WG): Only connect to a network if the RSSI
+           is greater than or equal to the specified value
+       255:     Connect to the highest RSSI found
 
-	   Note that RSSI is a relative value with no units -- it is not correlated to dBm.
-	   
+       Note that RSSI is a relative value with no units -- it is not correlated to dBm.
+       
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	scanCount - Desired scan count
-	             
+    scanCount - Desired scan count
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 255
+    Default is 255
 *****************************************************************************/
 void WF_CASetRssi(UINT8 rssi)
 {
@@ -644,59 +644,59 @@ void WF_CASetRssi(UINT8 rssi)
 
 /*****************************************************************************
   Function:
-	void WF_CAGetRssi(UINT8 p_rssi)
+    void WF_CAGetRssi(UINT8 p_rssi)
 
   Summary:
-	Gets the RSSI threshold
+    Gets the RSSI threshold
 
   Description:
-	See WF_CASetRssi.  Note that this function only retrieves the RSSI threshold 
-	used during the connection -- this is not the current RSSI of an existing connection.
-	If it is desired to retrieve the current RSSI state then a scan must be performed and
-	the scan result will contain the current RSSI state.
+    See WF_CASetRssi.  Note that this function only retrieves the RSSI threshold 
+    used during the connection -- this is not the current RSSI of an existing connection.
+    If it is desired to retrieve the current RSSI state then a scan must be performed and
+    the scan result will contain the current RSSI state.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_rssi - Pointer to where RSSI value is written
-	             
+    p_rssi - Pointer to where RSSI value is written
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Default is 255
+    Default is 255
 *****************************************************************************/
 void WF_CAGetRssi(UINT8 *p_rssi)
 {
     LowLevel_CAGetElement(WF_CA_ELEMENT_RSSI,      /* Element ID                   */
                           p_rssi,                  /* pointer to element data      */
                           1,                       /* number of element data bytes */
-                         TRUE);                    /* read data, free buffer       */
+                          TRUE);                   /* read data, free buffer       */
 }          
 
 
 /*****************************************************************************
   Function:
-	void WF_CASetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
+    void WF_CASetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
 
   Summary:
-	Not currently supported
+    Not currently supported
 
   Description:
-	Not currently supported
+    Not currently supported
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	cpList - Array of connection profile ID's used to create CP list
-	             
+    cpList - Array of connection profile ID's used to create CP list
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Not currently supported.  The list size is always WF_CP_LIST_SIZE.
+    Not currently supported.  The list size is always WF_CP_LIST_SIZE.
     The list should start at index 0.  Unused entries in the list must be set 
     to 0xff.
 *****************************************************************************/
@@ -713,25 +713,25 @@ void WF_CASetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
 
 /*****************************************************************************
   Function:
-	void WF_CAGetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
+    void WF_CAGetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
 
   Summary:
-	Not currently supported
+    Not currently supported
 
   Description:
-	Not currently supported
+    Not currently supported
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	cpList - Array of connection profile ID's used to create CP list
-	             
+    cpList - Array of connection profile ID's used to create CP list
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Not currently supported.  The list size is always WF_CP_LIST_SIZE.
+    Not currently supported.  The list size is always WF_CP_LIST_SIZE.
 *****************************************************************************/
 void WF_CAGetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
 {
@@ -746,26 +746,26 @@ void WF_CAGetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
 
 /*****************************************************************************
   Function:
-	void WF_CASetListRetryCount(UINT8 listRetryCount)
+    void WF_CASetListRetryCount(UINT8 listRetryCount)
 
   Summary:
-	Sets the list retry count
+    Sets the list retry count
 
   Description:
-	Number of times to cycle through Connection Profile List before giving up on 
-	the connection attempt.  Since lists are not yet supported, this function 
-	actually sets the number of times the Connection Manager will try to connect
-	with the current Connection Profile before giving up.
+    Number of times to cycle through Connection Profile List before giving up on 
+    the connection attempt.  Since lists are not yet supported, this function 
+    actually sets the number of times the Connection Manager will try to connect
+    with the current Connection Profile before giving up.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	listRetryCount - 0 to 254 or WF_RETRY_FOREVER (255)
-	             
+    listRetryCount - 0 to 254 or WF_RETRY_FOREVER (255)
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
     None
 *****************************************************************************/
@@ -778,23 +778,23 @@ void WF_CASetListRetryCount(UINT8 listRetryCount)
 
 /*****************************************************************************
   Function:
-	void WF_CAGetListRetryCount(UINT8 *p_listRetryCount)
+    void WF_CAGetListRetryCount(UINT8 *p_listRetryCount)
 
   Summary:
-	Gets the list retry count
+    Gets the list retry count
 
   Description:
-	See description in WF_CASetListRetryCount()
+    See description in WF_CASetListRetryCount()
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	p_listRetryCount - Pointer to where list retry count is written.
-	             
+    p_listRetryCount - Pointer to where list retry count is written.
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
     None
 *****************************************************************************/
@@ -836,7 +836,7 @@ void WF_CAGetListRetryCount(UINT8 *p_listRetryCount)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -849,7 +849,7 @@ void WF_CASetEventNotificationAction(UINT8 eventNotificationAction)
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetEventNotificationAction(UINT8 *p_eventNotificationAction)
 
   Summary:
@@ -877,7 +877,7 @@ void WF_CASetEventNotificationAction(UINT8 eventNotificationAction)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -887,7 +887,7 @@ void WF_CAGetEventNotificationAction(UINT8 *p_eventNotificationAction)
 }  
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CASetBeaconTimeoutAction(UINT8 beaconTimeoutAction)
 
   Summary:
@@ -907,7 +907,7 @@ void WF_CAGetEventNotificationAction(UINT8 *p_eventNotificationAction)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -920,7 +920,7 @@ void WF_CASetBeaconTimeoutAction(UINT8 beaconTimeoutAction)
 }      
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetBeaconTimeoutAction(UINT8 *p_beaconTimeoutAction)
 
   Summary:
@@ -954,7 +954,7 @@ void WF_CAGetBeaconTimeoutAction(UINT8 *p_beaconTimeoutAction)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CASetDeauthAction(UINT8 deauthAction)
 
   Summary:
@@ -975,7 +975,7 @@ void WF_CAGetBeaconTimeoutAction(UINT8 *p_beaconTimeoutAction)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -987,7 +987,7 @@ void WF_CASetDeauthAction(UINT8 deauthAction)
 }      
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetDeauthAction(UINT8 *p_deauthAction)
 
   Summary:
@@ -1007,7 +1007,7 @@ void WF_CASetDeauthAction(UINT8 deauthAction)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1020,7 +1020,7 @@ void WF_CAGetDeauthAction(UINT8 *p_deauthAction)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CASetChannelList(UINT8 *p_channelList, UINT8 numChannels)
 
   Summary:
@@ -1040,7 +1040,7 @@ void WF_CAGetDeauthAction(UINT8 *p_deauthAction)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1055,7 +1055,7 @@ void WF_CASetChannelList(UINT8 *p_channelList, UINT8 numChannels)
 #define RAW_MGMT_RX_ID   RAW_RX_ID
 #endif
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetChannelList(UINT8 *p_channelList, UINT8 *p_numChannels)
 
   Summary:
@@ -1074,7 +1074,7 @@ void WF_CASetChannelList(UINT8 *p_channelList, UINT8 numChannels)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1103,7 +1103,7 @@ void WF_CAGetChannelList(UINT8 *p_channelList, UINT8 *p_numChannels)
 }
     
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CASetListenInterval(UINT16 listenInterval)
 
   Summary:
@@ -1133,7 +1133,7 @@ void WF_CAGetChannelList(UINT8 *p_channelList, UINT8 *p_numChannels)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1143,20 +1143,20 @@ void WF_CASetListenInterval(UINT16 listenInterval)
     listenInterval = HSTOWFS(listenInterval);
 
     LowLevel_CASetElement(WF_CA_ELEMENT_LISTEN_INTERVAL,    /* Element ID                   */
-                         (UINT8 *)&listenInterval,          /* pointer to element data      */
+                          (UINT8 *)&listenInterval,         /* pointer to element data      */
                           sizeof(listenInterval));          /* number of element data bytes */
 }      
 
 #if defined(MRF24WG)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CASetDtimInterval(UINT16 dtimInterval)
 
   Summary:
-    Sets the dtim interval.
+    Sets the dtim interval for MRF24WG0MA/B.
 
   Description:
-    Sets the dtim interval used by the Connection Algorithm.  
+    Sets the dtim interval used by the Connection Algorithm for MRF24WG0MA/B.  
 
   Precondition:
     MACInit must be called first.  Only used when PS Poll mode is enabled. 
@@ -1168,7 +1168,7 @@ void WF_CASetListenInterval(UINT16 listenInterval)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1178,13 +1178,13 @@ void WF_CASetDtimInterval(UINT16 dtimInterval)
     dtimInterval = HSTOWFS(dtimInterval);
 
     LowLevel_CASetElement(WF_CA_ELEMENT_DTIM_INTERVAL,    /* Element ID                   */
-                         (UINT8 *)&dtimInterval,          /* pointer to element data      */
+                          (UINT8 *)&dtimInterval,         /* pointer to element data      */
                           sizeof(dtimInterval));          /* number of element data bytes */
 }      
 #endif /* MRF24WG */
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetListenInterval(UINT16 *p_listenInterval)
 
   Summary:
@@ -1212,7 +1212,7 @@ void WF_CASetDtimInterval(UINT16 dtimInterval)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1229,14 +1229,14 @@ void WF_CAGetListenInterval(UINT16 *p_listenInterval)
 
 #if defined(MRF24WG)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CASetBeaconPeriod(UINT16 beaconPeriod)
 
   Summary:
-    Sets the beacon period in Adhoc start mode
+    Sets the beacon period in Adhoc start mode for MRF24WG0MA/B
 
   Description:
-    Sets the beacon period used by the Connection Algorithm.  
+    Sets the beacon period used by the Connection Algorithm for MRF24WG0MA/B.  
 
   Precondition:
     MACInit must be called first.
@@ -1246,7 +1246,7 @@ void WF_CAGetListenInterval(UINT16 *p_listenInterval)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1256,19 +1256,19 @@ void WF_CASetBeaconPeriod(UINT16 beaconPeriod)
     beaconPeriod = HSTOWFS(beaconPeriod);
 
     LowLevel_CASetElement(WF_CA_ELEMENT_BEACON_PERIOD,    /* Element ID                   */
-                         (UINT8 *)&beaconPeriod,          /* pointer to element data      */
+                          (UINT8 *)&beaconPeriod,         /* pointer to element data      */
                           sizeof(beaconPeriod));          /* number of element data bytes */
 }      
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetBeaconPeriod(UINT16 *beaconPeriod)
 
   Summary:
-    Retrieves beacon period in Adhoc start mode
+    Retrieves beacon period in Adhoc start mode for MRF24WG0MA/B.
 
   Description:
-    Gets Beacon period in Adhoc start mode
+    Gets Beacon period in Adhoc start mode for MRF24WG0MA/B.
 
   Precondition:
     MACInit must be called first.
@@ -1278,16 +1278,16 @@ void WF_CASetBeaconPeriod(UINT16 beaconPeriod)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
 void WF_CAGetBeaconPeriod(UINT16 *beaconPeriod)
 {
-    LowLevel_CAGetElement(WF_CA_ELEMENT_BEACON_PERIOD,     /* Element ID                   */
-                         (UINT8 *)beaconPeriod,          /* pointer to element data      */
-                          sizeof(*beaconPeriod),                    /* number of element data bytes */
-                          TRUE);                             /* read data, free buffer       */
+    LowLevel_CAGetElement(WF_CA_ELEMENT_BEACON_PERIOD,   /* Element ID                   */
+                          (UINT8 *)beaconPeriod,         /* pointer to element data      */
+                          sizeof(*beaconPeriod),         /* number of element data bytes */
+                          TRUE);                         /* read data, free buffer       */
 
     /* fix endianness before returning value */
     *beaconPeriod = WFSTOHS(*beaconPeriod);
@@ -1295,14 +1295,14 @@ void WF_CAGetBeaconPeriod(UINT16 *beaconPeriod)
  
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetDtimInterval(UINT16 *p_dtimInterval)
 
   Summary:
-    Gets the dtim interval.    
+    Gets the dtim interval for MRF24WG0MA/B.    
 
   Description:
-    Gets the DTIM Interval used by the Connection Algorithm. 
+    Gets the DTIM Interval used by the Connection Algorithm for MRF24WG0MA/B. 
 
   Precondition:
     MACInit must be called first.  Only used when PS Poll mode is enabled. 
@@ -1312,16 +1312,16 @@ void WF_CAGetBeaconPeriod(UINT16 *beaconPeriod)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
 void WF_CAGetDtimInterval(UINT16 *p_dtimInterval)
 {
     LowLevel_CAGetElement(WF_CA_ELEMENT_DTIM_INTERVAL,     /* Element ID                   */
-                         (UINT8 *)p_dtimInterval,          /* pointer to element data      */
-                          sizeof(UINT16),                    /* number of element data bytes */
-                          TRUE);                             /* read data, free buffer       */
+                          (UINT8 *)p_dtimInterval,         /* pointer to element data      */
+                          sizeof(UINT16),                  /* number of element data bytes */
+                          TRUE);                           /* read data, free buffer       */
 
     /* fix endianness before returning value */
     *p_dtimInterval = WFSTOHS(*p_dtimInterval);
@@ -1329,7 +1329,7 @@ void WF_CAGetDtimInterval(UINT16 *p_dtimInterval)
 #endif /* MRF24WG */  
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CASetBeaconTimeout(UINT8 beaconTimeout)
 
   Summary:
@@ -1359,7 +1359,7 @@ void WF_CAGetDtimInterval(UINT16 *p_dtimInterval)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1371,7 +1371,7 @@ void WF_CASetBeaconTimeout(UINT8 beaconTimeout)
 }      
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CAGetBeaconTimeout(UINT8 *p_beaconTimeout)
 
   Summary:
@@ -1400,7 +1400,7 @@ void WF_CASetBeaconTimeout(UINT8 beaconTimeout)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
  *****************************************************************************/
@@ -1413,7 +1413,7 @@ void WF_CAGetBeaconTimeout(UINT8 *p_beaconTimeout)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     static void SetEventNotificationMask(UINT8 eventNotificationBitMask)
 
   Summary:
@@ -1443,7 +1443,7 @@ void WF_CAGetBeaconTimeout(UINT8 *p_beaconTimeout)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -1453,7 +1453,7 @@ static void SetEventNotificationMask(UINT8 eventNotificationBitMask)
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     UINT8 GetEventNotificationMask(void)
 
   Summary:
@@ -1482,7 +1482,7 @@ static void SetEventNotificationMask(UINT8 eventNotificationBitMask)
 
   Returns:
     A UINT8 of the event notification bit mask.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -1493,7 +1493,7 @@ UINT8 GetEventNotificationMask(void)
 #endif /* WF_USE_INDIVIDUAL_SET_GETS */
     
 /*******************************************************************************
-  Function:	
+  Function:    
     static void LowLevel_CASetElement(UINT8 elementId, 
                                       UINT8 *p_elementData, 
                                       UINT8 elementDataLength)
@@ -1542,7 +1542,7 @@ static void LowLevel_CASetElement(UINT8 elementId,
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     static void LowLevel_CAGetElement(UINT8 elementId, 
                                       UINT8 *p_elementData, 
                                       UINT8 elementDataLength,
@@ -1575,9 +1575,9 @@ static void LowLevel_CASetElement(UINT8 elementId,
     after getting the data from this function.
  *****************************************************************************/
 static void LowLevel_CAGetElement(UINT8 elementId, 
-                                    UINT8 *p_elementData, 
-                                    UINT8 elementDataLength,
-                                    UINT8 dataReadAction)    /* TRUE or FALSE */
+                                  UINT8 *p_elementData, 
+                                  UINT8 elementDataLength,
+                                  UINT8 dataReadAction)    /* TRUE or FALSE */
 {
     UINT8  hdrBuf[4];
             
@@ -1594,36 +1594,35 @@ static void LowLevel_CAGetElement(UINT8 elementId,
     if (dataReadAction == (UINT8)TRUE)
     {
         /* wait for mgmt response, read desired data, and then free response buffer */
-    	WaitForMgmtResponseAndReadData(WF_CA_GET_ELEMENT_SUBTYPE, 
-                   	                             elementDataLength,                   /* num data bytes to read                */
-                   	                             sizeof(tCAElementResponseHdr),       /* index of first byte of element data   */
-                   	                             p_elementData);                      /* where to write element data           */
+        WaitForMgmtResponseAndReadData(WF_CA_GET_ELEMENT_SUBTYPE, 
+                                       elementDataLength,                   /* num data bytes to read                */
+                                       sizeof(tCAElementResponseHdr),       /* index of first byte of element data   */
+                                       p_elementData);                      /* where to write element data           */
     }
     else
     {
         /* wait for mgmt response, don't read any data bytes, do not release mgmt buffer */
         WaitForMgmtResponse(WF_CA_GET_ELEMENT_SUBTYPE, DO_NOT_FREE_MGMT_BUFFER);
-    }                   	                             
+    }                                                    
 }
 
-void
-WF_DisableModuleConnectionManager(void)
+void WF_DisableModuleConnectionManager(void)
 {
-	WF_CASetListRetryCount(0 /* MY_DEFAULT_LIST_RETRY_COUNT */);
-	WF_CASetDeauthAction(WF_DO_NOT_ATTEMPT_TO_RECONNECT);
-	WF_CASetBeaconTimeoutAction(WF_DO_NOT_ATTEMPT_TO_RECONNECT);
+    WF_CASetListRetryCount(0 /* MY_DEFAULT_LIST_RETRY_COUNT */);
+    WF_CASetDeauthAction(WF_DO_NOT_ATTEMPT_TO_RECONNECT);
+    WF_CASetBeaconTimeoutAction(WF_DO_NOT_ATTEMPT_TO_RECONNECT);
 }
   
 #if defined(WF_CM_DEBUG)
 static void LowLevel_CMInfo(UINT8 infoId, 
-									UINT8 *p_infoData, 
-                                    UINT8 infoDataLength,
-                                    UINT8 dataReadAction)    /* TRUE or FALSE */
+                            UINT8 *p_infoData, 
+                            UINT8 infoDataLength,
+                            UINT8 dataReadAction)    /* TRUE or FALSE */
 {
     UINT8  hdrBuf[4];
             
     hdrBuf[0] = WF_MGMT_REQUEST_TYPE;       /* indicate this is a mgmt msg     */
-    hdrBuf[1] = WF_CM_INFO_SUBTYPE;			/* mgmt request subtype            */     
+    hdrBuf[1] = WF_CM_INFO_SUBTYPE;         /* mgmt request subtype            */     
     hdrBuf[2] = infoId;                     /* info ID                         */
     hdrBuf[3] = 0;                          /* not used                        */
 
@@ -1635,22 +1634,22 @@ static void LowLevel_CMInfo(UINT8 infoId,
     if (dataReadAction == (UINT8)TRUE)
     {
         /* wait for mgmt response, read desired data, and then free response buffer */
-    	WaitForMgmtResponseAndReadData(WF_CM_INFO_SUBTYPE, 
-                   	                             infoDataLength,                   /* num data bytes to read                */
-                   	                             sizeof(tCMInfoResponseHdr),       /* index of first byte of info data   */
-                   	                             p_infoData);                      /* where to write info data           */
+        WaitForMgmtResponseAndReadData(WF_CM_INFO_SUBTYPE, 
+                                       infoDataLength,                   /* num data bytes to read                */
+                                       sizeof(tCMInfoResponseHdr),       /* index of first byte of info data   */
+                                       p_infoData);                      /* where to write info data           */
     }
     else
     {
         /* wait for mgmt response, don't read any data bytes, do not release mgmt buffer */
         WaitForMgmtResponse(WF_CM_INFO_SUBTYPE, DO_NOT_FREE_MGMT_BUFFER);
-    }                   	                             
+    }                                                    
 }
 
 void WF_CMInfoGetFSMStats(tWFCMInfoFSMStats *p_info)
 {
     LowLevel_CMInfo(WF_CM_INFO_GET_FSM_STATS,      /* info ID              */
-					(UINT8 *)p_info,  /* pointer to info data */
+                    (UINT8 *)p_info,  /* pointer to info data */
                     sizeof(tWFCMInfoFSMStats),  /* num data bytes          */
                     TRUE);                  /* read data, free buffer  */
 }

@@ -1297,7 +1297,7 @@ static void
 StateMachineTCPTxOpen(void)
 {
 
-   if  ( (APPCTX.tcpClientSock = TCPOpen( (DWORD) &APPCTX.remoteSide.remote, TCP_OPEN_NODE_INFO,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT)) == INVALID_SOCKET )
+   if  ( (APPCTX.tcpClientSock = TCPOpen( (DWORD) ((unsigned int)&APPCTX.remoteSide.remote), TCP_OPEN_NODE_INFO,  APPCTX.mServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT)) == INVALID_SOCKET )
    {
        /* error case */
         WFConsolePrintRomStr("Create TCP socket failed", TRUE);

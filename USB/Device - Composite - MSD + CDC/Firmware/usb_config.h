@@ -92,7 +92,7 @@
 //#define USB_TRANSCEIVER_OPTION USB_EXTERNAL_TRANSCEIVER
 
 #define USB_SPEED_OPTION USB_FULL_SPEED
-//                       USB_LOW_SPEED (not valid option for PIC24F devices)
+//#define USB_SPEED_OPTION USB_LOW_SPEED //(not valid option for PIC24F devices)
 
 //------------------------------------------------------------------------------------------------------------------
 //Option to enable auto-arming of the status stage of control transfers, if no

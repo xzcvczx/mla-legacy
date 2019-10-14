@@ -87,6 +87,7 @@
 // Allows the use of FSfopenpgm, FSremovepgm, etc with PIC18
 #if defined(__18CXX)
     #define ALLOW_PGMFUNCTIONS
+    #define USE_PIC18
 #endif
 /************************************************************************/
 

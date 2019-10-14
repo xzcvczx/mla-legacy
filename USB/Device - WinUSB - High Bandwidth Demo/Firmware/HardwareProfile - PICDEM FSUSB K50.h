@@ -69,9 +69,6 @@
     #endif
 
 
-    //Uncomment the following line to make the output HEX of this  
-    //  project work with the MCHPUSB Bootloader    
-    //#define PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER
 	
     //Uncomment the following line to make the output HEX of this 
     //  project work with the HID Bootloader
@@ -96,7 +93,7 @@
     #define PICDEM_FS_USB_K50
     #define PIC18F45K50_FAMILY
     #define CLOCK_FREQ 48000000
-
+    #define GetSystemClock() CLOCK_FREQ
 
     /** LED ************************************************************/
     #define mInitAllLEDs()      LATD &= 0xF0; TRISD &= 0xF0;

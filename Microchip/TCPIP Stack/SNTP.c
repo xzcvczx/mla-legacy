@@ -86,6 +86,9 @@
 // pool server closest to your geography, but it will still work
 // if you use the global pool.ntp.org address or choose the wrong 
 // one or ship your embedded device to another geography.
+#ifdef WIFI_NET_TEST
+#define NTP_SERVER  "ntp" WIFI_NET_TEST_DOMAIN
+#else
 #define NTP_SERVER	"pool.ntp.org"
 //#define NTP_SERVER	"europe.pool.ntp.org"
 //#define NTP_SERVER	"asia.pool.ntp.org"
@@ -93,6 +96,7 @@
 //#define NTP_SERVER	"north-america.pool.ntp.org"
 //#define NTP_SERVER	"south-america.pool.ntp.org"
 //#define NTP_SERVER	"africa.pool.ntp.org"
+#endif
 
 // Defines the structure of an NTP packet
 typedef struct
@@ -125,7 +129,6 @@ static DWORD dwSNTPSeconds = 0;
 
 // Tick count of last update
 static DWORD dwLastUpdateTick = 0;
-
 
 /*****************************************************************************
   Function:
@@ -181,7 +184,7 @@ void SNTPClient(void)
 	{
 		case SM_HOME:
 			if(MySocket == INVALID_UDP_SOCKET)
-				MySocket = UDPOpenEx((DWORD)NTP_SERVER,UDP_OPEN_ROM_HOST,0,NTP_SERVER_PORT);
+				MySocket = UDPOpenEx((DWORD)(PTR_BASE)NTP_SERVER,UDP_OPEN_ROM_HOST,0,NTP_SERVER_PORT);
 			
 			SNTPState++;
 			break;
@@ -337,6 +340,9 @@ void SNTPClient(void)
 			if(((BYTE*)&pkt.tx_ts_fraq)[0] & 0x80)
 				dwSNTPSeconds++;
 
+			#ifdef WIFI_NET_TEST
+				wifi_net_test_print("SNTP: current time", dwSNTPSeconds);
+			#endif
 			break;
 
 		case SM_SHORT_WAIT:

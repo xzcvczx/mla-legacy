@@ -3627,6 +3627,66 @@
         <C18LanguageToolchain>
         </C18LanguageToolchain>
       </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom_24G.c"
             ex="true"
             overriding="false">
@@ -4302,6 +4362,66 @@
         </C18LanguageToolchain>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETHPIC32IntMac.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
             ex="true"
             overriding="false">
         <C18>
@@ -9041,6 +9161,66 @@
         <C18LanguageToolchain>
         </C18LanguageToolchain>
       </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom_24G.c"
             ex="true"
             overriding="false">
@@ -9720,6 +9900,66 @@
         <C18LanguageToolchain>
         </C18LanguageToolchain>
       </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
             overriding="false">
@@ -9845,7 +10085,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -11072,8 +11312,6 @@
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
       </C30Global>
-      <HI-TECH-COMP>
-      </HI-TECH-COMP>
       <ICD3PlatformTool>
       </ICD3PlatformTool>
     </conf>
@@ -11084,7 +11322,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -12314,7 +12552,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -12493,6 +12731,66 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETHPIC32IntMac.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
             ex="true"
             overriding="false">
         <C30>
@@ -13117,7 +13415,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -13188,6 +13486,66 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETHPIC32ExtPhyDP83848.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
             ex="true"
             overriding="false">
         <C30>
@@ -13374,7 +13732,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -14604,7 +14962,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -15832,9 +16190,9 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ128GA010</targetDevice>
         <targetHeader></targetHeader>
-        <platformTool>ICD3PlatformTool</platformTool>
+        <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -16013,6 +16371,66 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETHPIC32IntMac.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
             ex="true"
             overriding="false">
         <C30>
@@ -16627,8 +17045,8 @@
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
       </C30Global>
-      <ICD3PlatformTool>
-      </ICD3PlatformTool>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
     </conf>
     <conf name="XC16-EX16_MRF24WG" type="2">
       <toolsSet>
@@ -16637,7 +17055,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -16708,6 +17126,66 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETHPIC32ExtPhyDP83848.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
             ex="true"
             overriding="false">
         <C30>
@@ -19476,6 +19954,66 @@
         <C32Global>
         </C32Global>
       </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom_24G.c"
             ex="true"
             overriding="false">
@@ -20075,10 +20613,86 @@
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_elf.a"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
@@ -23872,6 +24486,66 @@
         <C32Global>
         </C32Global>
       </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom_24G.c"
             ex="true"
             overriding="false">
@@ -24460,10 +25134,86 @@
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_elf.a"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
@@ -27142,6 +27892,66 @@
         <C32Global>
         </C32Global>
       </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom_24G.c"
             ex="true"
             overriding="false">
@@ -27730,10 +28540,86 @@
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_elf.a"
             ex="true"
             overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsole.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIfconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwconfig.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleIwpriv.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/WiFi/WFConsoleMsgHandler.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"

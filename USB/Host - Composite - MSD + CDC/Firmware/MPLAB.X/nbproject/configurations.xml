@@ -78,6 +78,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -186,6 +187,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -294,6 +296,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -359,6 +362,8 @@
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
@@ -369,6 +374,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -434,6 +440,8 @@
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>

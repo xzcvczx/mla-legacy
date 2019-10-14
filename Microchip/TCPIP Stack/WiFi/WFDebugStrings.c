@@ -39,8 +39,8 @@ ROM char *connectionLostStrings[] = {
                                         "WF_BEACON_TIMEOUT",        /* 1 */
                                         "WF_DEAUTH_RECEIVED",       /* 2 */
                                         "WF_DISASSOCIATE_RECEIVED", /* 3 */
-					"WF_TKIP_MIC_FAILURE", 		/* 4 */                                            
-                                        "WF_LINK_DOWN" 			/* 5 */
+                                        "WF_TKIP_MIC_FAILURE",      /* 4 */                                            
+                                        "WF_LINK_DOWN"              /* 5 */
                                     };  
                                                                       
 #if defined(MRF24WG) && !defined(__18CXX)
@@ -149,52 +149,52 @@ ROM char *connectionLostStrings[] = {
                                         "SESSION_OVERLAPPED",
                                         "DECRYPT_CRC_FAILURE",
                                         "24G_NOT_SUPPORTED",
-        								"RETRY_FAILURE",
-               							"INVALID_MSG",
+                                        "RETRY_FAILURE",
+                                        "INVALID_MSG",
                                         "AUTH_FAILURE",
                                         "ASSOC_FAILURE",
-        								"MSG_TIMEOUT",
+                                        "MSG_TIMEOUT",
                                         "SESSION_TIMEOUT",
-        								"DEVPASSWD_AUTH_FAILURE",	/* 10 */
+                                        "DEVPASSWD_AUTH_FAILURE",    /* 10 */
                                         "NO_CONN_TOREG",
                                         "MULTI_PBC_DETECTED",
-        								"EAP_FAILURE",
+                                        "EAP_FAILURE",
                                         "DEV_BUSY",
-        								"SETUP_LOCKED"
+                                        "SETUP_LOCKED"
                                     };
 
-	static ROM char *P2PErr[] = {
-       					"WFD_SUCCESS",
-       					"WFD_INFO_CURRENTLY_UNAVAILABLE",
-       					"WFD_INCOMPATIBLE_PARAMS",
-       					"WFD_LIMIT_REACHED",
-       					"WFD_INVALID_PARAMS",
-       					"WFD_UNABLE_TO_ACCOMMODATE",
-       					"WFD_PREV_PROTOCOL_ERROR",
-       					"WFD_NO_COMMON_CHANNELS",
-       					"WFD_UNKNOWN_GROUP",
-       					"",
-       					"WFD_INCOMPATIBLE_PROV_METHOD",	/* 10 */
-       					"WFD_REJECTED_BY_USER",
-       					"WFD_NO_MEM",
-       					"WFD_INVALID_ACTION",
-       					"WFD_TX_FAILURE",
-       					"WFD_TIME_OUT"
-				};
-			
-	static ROM char *P2PState[] = {
-       					"P2PSTIdle",
-        				"P2PSTScan",
-        				"P2PSTListen",
-        				"P2PSTFind",
-        				"P2PSTStartFormation",
-        				"P2PSTGONegoReqDone",
-        				"P2PSTGOWaitNegoReqDone",
-        				"P2PSTWaitFormationDone",
-        				"P2PSTInvite",
-        				"P2PSTProvision",
-        				"P2PSTClient"
-				};
+    static ROM char *P2PErr[] = {
+                           "WFD_SUCCESS",
+                           "WFD_INFO_CURRENTLY_UNAVAILABLE",
+                           "WFD_INCOMPATIBLE_PARAMS",
+                           "WFD_LIMIT_REACHED",
+                           "WFD_INVALID_PARAMS",
+                           "WFD_UNABLE_TO_ACCOMMODATE",
+                           "WFD_PREV_PROTOCOL_ERROR",
+                           "WFD_NO_COMMON_CHANNELS",
+                           "WFD_UNKNOWN_GROUP",
+                           "",
+                           "WFD_INCOMPATIBLE_PROV_METHOD",    /* 10 */
+                           "WFD_REJECTED_BY_USER",
+                           "WFD_NO_MEM",
+                           "WFD_INVALID_ACTION",
+                           "WFD_TX_FAILURE",
+                           "WFD_TIME_OUT"
+                };
+            
+    static ROM char *P2PState[] = {
+                        "P2PSTIdle",
+                        "P2PSTScan",
+                        "P2PSTListen",
+                        "P2PSTFind",
+                        "P2PSTStartFormation",
+                        "P2PSTGONegoReqDone",
+                        "P2PSTGOWaitNegoReqDone",
+                        "P2PSTWaitFormationDone",
+                        "P2PSTInvite",
+                        "P2PSTProvision",
+                        "P2PSTClient"
+                };
 
 #endif /* MRF24WG */
 
@@ -285,27 +285,27 @@ void WF_OutputConnectionContext(void)
     char buf[6];
 
 #if defined(EZ_CONFIG_STORE)
-	if (AppConfig.networkType == WF_INFRASTRUCTURE)  {
+    if (AppConfig.networkType == WF_INFRASTRUCTURE)  {
 #else
-	if (TRUE) {
+    if (TRUE) {
 #endif
-    	WF_CMGetConnectContext(&context);
+        WF_CMGetConnectContext(&context);
     
-    	putrsUART("\tbssid:    ");
-    	for (i = 0; i < 6; ++i) {
-        	if (i < 5) {
-            	sprintf(buf, "%02X:", context.bssid[i]);
-            	putsUART(buf);
-        	} else {
-            	sprintf(buf, "%02X\r\n", context.bssid[i]);
-            	putsUART(buf);
-        	}    
-    	}
+        putrsUART("\tbssid:    ");
+        for (i = 0; i < 6; ++i) {
+            if (i < 5) {
+                sprintf(buf, "%02X:", context.bssid[i]);
+                putsUART(buf);
+            } else {
+                sprintf(buf, "%02X\r\n", context.bssid[i]);
+                putsUART(buf);
+            }    
+        }
     
-    	putrsUART("\tchannel:  ");
-    	sprintf(buf, "%d\r\n", context.channel);
-    	putsUART(buf);
-	}
+        putrsUART("\tchannel:  ");
+        sprintf(buf, "%d\r\n", context.channel);
+        putsUART(buf);
+    }
       
 }    
 #endif /* MRF24WG */ 
@@ -369,8 +369,8 @@ static void OutputConnectionTempLostMsg(UINT16 eventInfo)
 static void OutputConnectionFailedMsg(UINT16 eventInfo)
 {       
 #if defined(MRF24WG)
-	UINT8 status;
-	UINT8 reason;
+    UINT8 status;
+    UINT8 reason;
 
     status = (UINT8)(eventInfo >> 8);
     reason = (UINT8)(eventInfo & 0xff);
@@ -405,7 +405,7 @@ static void OutputConnectionFailedMsg(UINT16 eventInfo)
         #endif
     } 
     else if (status == WF_P2P_FAILURE) 
-	{
+    {
         putrsUART("Event: Connection Failed : ");
         putrsUART(connectionFailureStrings[status]);
         putrsUART(" : ");
@@ -476,6 +476,11 @@ void WF_OutputConnectionInfo(const APP_CONFIG *p_AppConfig)
 {
     #if !defined(__18CXX)
     UINT8 channelList[] = MY_DEFAULT_CHANNEL_LIST;
+
+#if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
+    UINT8 channelList_softAP_redirect[] = MY_DEFAULT_CHANNEL_LIST_POSTSCAN;
+#endif
+
     int i;
     char buf[64];
     
@@ -514,41 +519,78 @@ void WF_OutputConnectionInfo(const APP_CONFIG *p_AppConfig)
         if (AppConfig.networkType == WF_ADHOC) 
         {
             putrsUART("AdHoc\r\n");
-		}
-        else 
+        }
+        else if (AppConfig.networkType == WF_SOFT_AP) 
         {
-        #if (MY_DEFAULT_NETWORK_TYPE == WF_INFRASTRUCTURE)
+            putrsUART("SoftAP\r\n");
+        }
+        else if (AppConfig.networkType == WF_INFRASTRUCTURE) 
+        {
             putrsUART("Infrastructure\r\n");
-		#elif (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
-			putrsUART("SoftAP\r\n");
-		#endif
-		}
+        }
+        else
+        {   // Default to unknown 
+            putrsUART("Unknown\r\n");        
+        }
     #else
         #if (MY_DEFAULT_NETWORK_TYPE == WF_ADHOC)
             putrsUART("AdHoc\r\n");
         #elif (MY_DEFAULT_NETWORK_TYPE == WF_P2P)
             putrsUART("WiFi Direct\r\n");
-		#elif (MY_DEFAULT_NETWORK_TYPE == WF_INFRASTRUCTURE)
-		    #if (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PUSH_BUTTON)
-		        putrsUART("Infrastructure (using WPS Push Button)\r\n");
-		    #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN)
+        #elif (MY_DEFAULT_NETWORK_TYPE == WF_INFRASTRUCTURE)
+            #if (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PUSH_BUTTON)
+                putrsUART("Infrastructure (using WPS Push Button)\r\n");
+            #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN)
                 putrsUART("Infrastructure (using WPS Pin)\r\n"); 
             #else
                 putrsUART("Infrastructure\r\n");
             #endif
-	    #endif
+        #endif
     #endif /* EZ_CONFIG_STORE  */
            
     #if MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP
-    	putrsUART("Scan Type:       ");
-    	#if (MY_DEFAULT_SCAN_TYPE == WF_PASSIVE_SCAN)
-       	 putrsUART("Passive Scan\r\n");
-   	 	#else
-       	putrsUART("Active Scan\r\n");    
-    	#endif
-	#endif	/* MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP */
+        putrsUART("Scan Type:       ");
+        #if (MY_DEFAULT_SCAN_TYPE == WF_PASSIVE_SCAN)
+            putrsUART("Passive Scan\r\n");
+        #else
+           putrsUART("Active Scan\r\n");    
+        #endif
+    #endif    /* MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP */
     
     putrsUART("Channel List:    ");
+
+#if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)  // Clean up later........
+    if (AppConfig.networkType==WF_SOFT_AP)
+    {
+		for (i = 0; i < sizeof(channelList); ++i)
+		{
+			sprintf(buf, "%d", channelList[i]); 
+			putsUART(buf);	 
+			
+			if (i != sizeof(channelList) - 1)
+			{
+				putrsUART(", ");
+			}	 
+			else
+			{
+				putrsUART("\r\n");
+			}	 
+		}
+		
+		if (sizeof(channelList) == 0)
+		{
+			putrsUART("All channels in domain\r\n");
+		}
+			
+    }
+    else
+    {	
+		if (sizeof(channelList_softAP_redirect) == 0)
+		{
+			putrsUART("All channels in domain\r\n");
+		}
+    }
+#else	
     for (i = 0; i < sizeof(channelList); ++i)
     {
         sprintf(buf, "%d", channelList[i]); 
@@ -568,36 +610,37 @@ void WF_OutputConnectionInfo(const APP_CONFIG *p_AppConfig)
     {
         putrsUART("All channels in domain\r\n");
     }
+#endif
 
-	#if MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP
-    	putrsUART("Retry Count:     ");
-    	#if (MY_DEFAULT_LIST_RETRY_COUNT == WF_RETRY_FOREVER)
-       		putrsUART("Retry Forever\r\n");
-    	#else
-        	sprintf(buf, "%d\r\n", MY_DEFAULT_LIST_RETRY_COUNT);
-        	putsUART(buf);  
-    	#endif
+    #if MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP
+        putrsUART("Retry Count:     ");
+        #if (MY_DEFAULT_LIST_RETRY_COUNT == WF_RETRY_FOREVER)
+            putrsUART("Retry Forever\r\n");
+        #else
+            sprintf(buf, "%d\r\n", MY_DEFAULT_LIST_RETRY_COUNT);
+            putsUART(buf);  
+        #endif
 
-    	putrsUART("Beacon Timeout:  ");
-    	#if (MY_DEFAULT_BEACON_TIMEOUT == 0)
-       	 putrsUART("Ignored\r\n");
-   		#else
-        	sprintf(buf, "%d\r\n", MY_DEFAULT_BEACON_TIMEOUT);
-        	putsUART(buf);
-    	#endif
-	#endif	/* MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP */
+        putrsUART("Beacon Timeout:  ");
+        #if (MY_DEFAULT_BEACON_TIMEOUT == 0)
+            putrsUART("Ignored\r\n");
+        #else
+            sprintf(buf, "%d\r\n", MY_DEFAULT_BEACON_TIMEOUT);
+            putsUART(buf);
+        #endif
+    #endif    /* MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP */
    
     WF_OutputSecurityDebugMessage(AppConfig.WepKeyIndex);
 
-	#if MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP
-    	putrsUART("Power Save:      ");
-    	#if (MY_DEFAULT_PS_POLL == WF_ENABLED)
-        	putrsUART("Enabled\r\n");
-    	#else
-        	putrsUART("Disabled\r\n");    
-    	#endif
-    #endif	/* MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP */
-	
+    #if MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP
+        putrsUART("Power Save:      ");
+        #if (MY_DEFAULT_PS_POLL == WF_ENABLED)
+            putrsUART("Enabled\r\n");
+        #else
+            putrsUART("Disabled\r\n");    
+        #endif
+    #endif    /* MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP */
+    
     #if defined(WF_CONSOLE_DEMO)
         putrsUART("IP Address:      ");
         #if defined(ENABLE_STATIC_IP)
@@ -679,11 +722,11 @@ static void WF_OutputSecurityDebugMessage(UINT8 wepKeyIndex)
         putrsUART("WPA with key, auto-select\r\n");
     #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE)
         putrsUART("WPA with pass phrase, auto-select\r\n");
-	#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PUSH_BUTTON)
+    #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PUSH_BUTTON)
         putrsUART("WPS push button method\r\n");
-	#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN)
+    #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN)
         putrsUART("WPS PIN method\r\n");
-	#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_EAP)
+    #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_EAP)
         putrsUART("WPA Enterprise\r\n");
     #endif 
     
@@ -730,7 +773,7 @@ static void WF_OutputSecurityDebugMessage(UINT8 wepKeyIndex)
 void ValidateConfig(void)
 {
     char buf[64];
-  
+
     #if (   (MY_DEFAULT_NETWORK_TYPE == WF_INFRASTRUCTURE) \
                                  &&                        \
             ((MY_DEFAULT_WIFI_SECURITY_MODE != WF_SECURITY_WPS_PIN) && (MY_DEFAULT_WIFI_SECURITY_MODE != WF_SECURITY_WPS_PUSH_BUTTON)))
@@ -939,7 +982,7 @@ void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber)
     
     putrsUART("Line Number = ");
     
-    sprintf(buf, "%d\r\n", lineNumber);
+    sprintf(buf, "%d", lineNumber);
     putsUART(buf);
 #endif /* STACK_USE_UART */
     
@@ -979,8 +1022,16 @@ void WF_DisplayModuleAssertInfo()
 
 #endif /* WF_DEBUG */
 
+#ifdef WIFI_NET_TEST
+void wifi_net_test_print(char *str, UINT32 param)
+{
+	char buf[64];
 
-
+	sprintf(buf, "%s %u", str, param);
+    putsUART(buf);
+    putrsUART("\r\n");
+}
+#endif
 #endif /* WF_CS_TRIS */
 
 

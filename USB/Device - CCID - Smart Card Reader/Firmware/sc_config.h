@@ -622,6 +622,111 @@
 
 		// Disable Pull up's for SMART_CARD_DETECTION & SIM_CARD_DETECTION
 		#define SCdrv_DisbleCardSimPresentPinPullUp()	(INTCON2bits.RBPU = 1)
+
+	#elif defined(__18F87J94)
+
+        #define RCIF   RC1IF
+
+		#define HPC_EXPLORER
+
+		// Note : SYS_FREQ denotes the System clock frequency
+		#define SYS_FREQ 64000000UL
+
+		// Note : FCY denotes the instruction cycle clock frequency (SYS_FREQ/4)"
+		#define FCY (SYS_FREQ/4)
+
+		#include <p18cxxx.h>
+		#include <delays.h>
+		#include <math.h>
+
+		// Enable Port Pin of Micro as Vcc for Smart Card
+		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
+
+		// Provide clock from the Micro to the Smart Card
+		#define  ENABLE_SC_EXTERNAL_CLOCK
+
+		// Set Clock Freq to drive Smart Card
+		#define Scdrv_ClockSet()            (TMR2 = 0,T2CON = 0x00,PR2 = 3,CCPR1L = 2,TRISCbits.TRISC2 = 0,CCP1CON = 0x00)
+
+		//Enable UART
+		#define SCdrv_EnableUART()	    	(RCSTAbits.SPEN = 1)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableClock()	    	(CCP1CON = 0x0C,T2CONbits.TMR2ON = 1)
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableClock()	    (CCP1CON = 0x00,T2CONbits.TMR2ON = 0,TMR2 = 0)
+
+		// Set Clock Freq to drive Smart Card
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0x86,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+
+		// One count of timer 0 corresponds to how much micro seconds...
+		#define TIMER0_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(128/(FCY/1000000UL))
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0H = (count) >> 8,TMR0L = (count) & 0x00FF)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableDelayTimer()	    	(T0CONbits.TMR0ON = 1)
+		#define SCdrv_SetClockPinLow() LATEbits.LATE3 = 0;
+        #define SCdrv_SetClockPinHigh() LATEbits.LATE3 = 1;
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableDelayTimer()	    	(T0CONbits.TMR0ON = 0)
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_CIRCUIT_INPUT_CLK    		FCY
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_POWER2_VALUE      		(BYTE)0
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_DIVISOR_VALUE      		(BYTE)PR2
+		
+		#define REF_CLOCK_TO_SMART_CARD     (unsigned long)((FCY * 4)/(pow(2,4)))
+        #define SMART_CARD_CLOCK_IN_KHZ 3000 //this macro used by USB descriptors, SMART_CARD_CLOCK_IN_KHZ =REF_CLOCK_TO_SMART_CARD/1000
+		#define SMART_CARD_DEFAULT_DATA_RATE 8064 //this macro used by USB descriptors, SMART_CARD_DEFAULT_DATA_RATE = REF_CLOCK_TO_SMART_CARD/372
+
+
+		//Turn on 1/off 0 card power
+		#define SCdrv_SetSwitchCardPower(x) 			(LATBbits.LATB0=(x))
+
+		//set reset state to the value x
+		#define SCdrv_SetSwitchCardReset(x) 			(LATBbits.LATB4=(x))
+
+		//set tx pin to value x
+		#define SCdrv_SetTxPinData(x) 					(LATCbits.LATC6=(x))
+
+		//Get Smart Card Present status
+		#define SCdrv_CardPresent()	      				(PORTBbits.RB3 || !PORTBbits.RB1)
+
+		//Get Rx Pin Data
+		#define SCdrv_GetRxPinData()               		(PORTCbits.RC7)
+
+		//Set Tx Pin direction
+		#define SCdrv_TxPin_Direction(flag)    			(TRISCbits.TRISC6 = flag)
+
+		//Set Rx Pin direction
+		#define SCdrv_RxPin_Direction(flag)    			(TRISCbits.TRISC7 = flag)
+
+		//Set Power Pin direction connected to the smart card
+		#define SCdrv_PowerPin_Direction(flag) 			(TRISBbits.TRISB0 = flag)
+
+		//Set Reset Pin direction connected to the smart card
+		#define SCdrv_ResetPin_Direction(flag) 			(TRISBbits.TRISB4 = flag)
+
+		//Set Card Present Pin direction connected to the smart card
+		#define SCdrv_CardPresent_Direction(flag) 		(TRISBbits.TRISB3 = flag)
+
+		//Set Sim Present Pin direction connected to the smart card
+		#define SCdrv_SimPresent_Direction(flag) 		(TRISBbits.TRISB1 = flag)
+
+		// Enable Pull up's for SMART_CARD_DETECTION & SIM_CARD_DETECTION
+		#define SCdrv_EnableCardSimPresentPinPullUp()	(ANCON1 = (ANCON1 | 0x1F),INTCON2bits.RBPU = 0)
+
+		// Disable Pull up's for SMART_CARD_DETECTION & SIM_CARD_DETECTION
+		#define SCdrv_DisbleCardSimPresentPinPullUp()	(INTCON2bits.RBPU = 1)
+
 		
     /*******************************************************************/
     /****************If using PIC18F14K50 Lowpincount board*************/

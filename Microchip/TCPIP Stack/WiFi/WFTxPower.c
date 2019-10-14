@@ -2,17 +2,17 @@
 
  MRF24W Driver Tx Power functions
  Module for Microchip TCP/IP Stack
-  -Provides access to MRF24W WiFi controller
+  -Provides access to MRF24W WiFi controller (MRF24WB0MA/B, MRF24WG0MA/B)
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFTxPower.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFTxPower.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -83,30 +83,30 @@
 
 #if defined (MRF24WG)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_TxPowerSetMax(INT8 maxTxPower)
 
   Summary:
-    Sets the Tx max power on the MRF24WG0M.
+    Sets the Tx max power on the MRF24WG0MA/B.
 
   Description:
-    After initialization the MRF24WG0M max Tx power is determined by a 
+    After initialization the  MRF24WG0MA/B max Tx power is determined by a 
     factory-set value.  This function can set a different maximum 
     Tx power levels.  However, this function can never set a maximum Tx power 
     greater than the factory-set value, which can be read via 
     WF_TxPowerGetFactoryMax(). 
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     maxTxPower - valid range (0 to 18 dBm)
 
   Returns:
-  	None.
-  	
+     None.
+      
   Remarks:
-  	No conversion of units needed, input to MRF24WG0M is in dBm.
+      No conversion of units needed, input to  MRF24WG0MA/B is in dBm.
   *****************************************************************************/
 void WF_TxPowerSetMax(INT8 maxTxPower)
 {
@@ -124,30 +124,30 @@ void WF_TxPowerSetMax(INT8 maxTxPower)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_TxPowerGetMax(INT8 *p_maxTxPower)
 
   Summary:
-    Gets the Tx max power on the MRF24WG0M.
+    Gets the Tx max power on the MRF24WG0MA/B.
 
   Description:
-    After initialization the MRF24WG0M max Tx power is determined by a 
+    After initialization the  MRF24WG0MA/B max Tx power is determined by a 
     factory-set value.  This function can set a different maximum 
     Tx power levels.  However, this function can never set a maximum Tx power 
     greater than the factory-set value, which can be read via 
     WF_TxPowerGetFactoryMax(). 
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_maxTxPower - Pointer to location to write the maxTxPower
 
   Returns:
-  	None.
-  	
+     None.
+      
   Remarks:
-  	No conversion of units needed, input to MRF24WG0M is in dBm.
+      No conversion of units needed, input to MRF24WG0MA/B is in dBm.
   *****************************************************************************/ 
 void WF_TxPowerGetMax(INT8 *p_maxTxPower)
 {
@@ -163,31 +163,31 @@ void WF_TxPowerGetMax(INT8 *p_maxTxPower)
 }
 #else /* !defined (MRF24WG) */
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_TxPowerSetMinMax(INT8 minTxPower, INT8 maxTxPower)
 
   Summary:
-    Sets the Tx min and max power on the MRF24W.
+    Sets the Tx min and max power on the MRF24WB0MA/B.
 
   Description:
-    After initialization the MRF24W max Tx power is determined by a 
+    After initialization the MRF24WB0MA/B max Tx power is determined by a 
     factory-set value.  This function can set a different minimum and maximum 
     Tx power levels.  However, this function can never set a maximum Tx power 
     greater than the factory-set value, which can be read via 
     WF_TxPowerGetFactoryMax(). 
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     minTxPower - Desired minTxPower (-10 to 10dB) 
     maxTxPower - Desired maxTxPower (-10 to 10dB)
 
   Returns:
-  	None.
-  	
+     None.
+      
   Remarks:
-  	No conversion of units needed, input to MRF24W is in dB.
+      No conversion of units needed, input to MRF24WB0MA/B is in dB.
   *****************************************************************************/
 void WF_TxPowerSetMinMax(INT8 minTxPower, INT8 maxTxPower)
 {
@@ -214,31 +214,31 @@ void WF_TxPowerSetMinMax(INT8 minTxPower, INT8 maxTxPower)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_TxPowerGetMinMax(INT8 *p_minTxPower, INT8 *p_maxTxPower)
 
   Summary:
-    Gets the Tx min and max power on the MRF24W.
+    Gets the Tx min and max power on the MRF24WB0MA/B.
 
   Description:
-    After initialization the MRF24W max Tx power is determined by a 
+    After initialization the MRF24WB0MA/B max Tx power is determined by a 
     factory-set value.  This function can set a different minimum and maximum 
     Tx power levels.  However, this function can never set a maximum Tx power 
     greater than the factory-set value, which can be read via 
     WF_TxPowerGetFactoryMax(). 
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_minTxPower - Pointer to location to write the minTxPower
     p_maxTxPower - Pointer to location to write the maxTxPower
 
   Returns:
-  	None.
-  	
+     None.
+      
   Remarks:
-  	No conversion of units needed, input to MRF24W is in dB.
+      No conversion of units needed, input to MRF24WB0MA/B is in dB.
   *****************************************************************************/ 
 void WF_TxPowerGetMinMax(INT8 *p_minTxPower, INT8 *p_maxTxPower)
 {
@@ -260,46 +260,48 @@ void WF_TxPowerGetMinMax(INT8 *p_minTxPower, INT8 *p_maxTxPower)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_FixTxRateWithMaxPower(BOOL oneMegaBps)
 
   Summary:
-    Fix transmission rate with maximum power. 
+    Fix transmission rate with maximum power for MRF24WB0MA/B. 
 
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     oneMegaBps - When true, that is 1 mbps. Otherwise 2 mbps
 
   Returns:
-  	None.
-  	
+     None.
+      
   Remarks:
-  	None.
+     None.
   *****************************************************************************/  
 void WF_FixTxRateWithMaxPower(BOOL oneMegaBps)
 { 
-	UINT8 buf[1];
+    UINT8 buf[1];
 
-	buf[1] = oneMegaBps ? 0x20 : 0x40;	/* or 2 Mbps */
-	SendSetParamMsg(PARAM_TX_THROTTLE_TABLE_ON_OFF, buf, sizeof(buf)); 
+    buf[1] = oneMegaBps ? 0x20 : 0x40;    /* or 2 Mbps */
+    SendSetParamMsg(PARAM_TX_THROTTLE_TABLE_ON_OFF, buf, sizeof(buf)); 
 }
 #endif /* defined (MRF24WG) */
   
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_TxPowerGetFactoryMax(INT8 *p_factoryMaxTxPower)
 
   Summary:
-    Retrieves the factory-set max Tx power from the MRF24W.
+    Retrieves the factory-set max Tx power from the MRF24WB0MA/B and MRF24WG0MA/B.
 
   Description:
+     For MRF24WB, desired maxTxPower (-10 to 10 dBm), in 1dB steps
+     For MRF24WG, desired maxTxPower ( 0 to 18 dBm), in 1dB steps
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_factoryMaxTxPower - 
@@ -307,10 +309,10 @@ void WF_FixTxRateWithMaxPower(BOOL oneMegaBps)
     for MRF24WG, desired maxTxPower ( 0 to 18 dBm), in 1dB steps
 
   Returns:
-  	None.
-  	
+     None.
+      
   Remarks:
-  	None.
+     None.
   *****************************************************************************/  
 void WF_TxPowerGetFactoryMax(INT8 *p_factoryMaxTxPower)
 {

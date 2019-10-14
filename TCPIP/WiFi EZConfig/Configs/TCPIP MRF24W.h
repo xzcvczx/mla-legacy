@@ -60,6 +60,11 @@
 /* Application Level Module Selection
  *   Uncomment or comment the following lines to enable or
  *   disabled the following high-level application modules.
+ *
+ * If certain compilations are enabled (eg STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE), 
+ * check whether the files (eg GenericTCPClient.c) are located in folder (eg \TCPIP\WiFi EZConfig).
+ * You may need to copy such files from the Demo App or WiFi Console folder.
+ *
  */
 #define STACK_USE_UART					// Application demo using UART for IP address display and stack configuration
 //#define STACK_USE_UART2TCP_BRIDGE		// UART to TCP Bridge application example
@@ -77,8 +82,8 @@
 //#define STACK_USE_SNMP_SERVER			// Simple Network Management Protocol v2C Community Agent
 //#define STACK_USE_SNMPV3_SERVER			// Simple Network Management Protocol v3 Agent
 //#define STACK_USE_TFTP_CLIENT			// Trivial File Transfer Protocol client
-//#define STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE	// HTTP Client example in GenericTCPClient.c
-//#define STACK_USE_GENERIC_TCP_SERVER_EXAMPLE	// ToUpper server example in GenericTCPServer.c
+//#define STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE	// HTTP Client example in GenericTCPClient.c. If using EZConfig, need to copy this file from Demo App or WiFi Console.
+//#define STACK_USE_GENERIC_TCP_SERVER_EXAMPLE	// ToUpper server example in GenericTCPServer.c. If using EZConfig, need to copy this file from Demo App or WiFi Console.
 //#define STACK_USE_TELNET_SERVER			// Telnet server
 #define STACK_USE_ANNOUNCE				// Microchip Embedded Ethernet Device Discoverer server/client
 //#define STACK_USE_DNS					// Domain Name Service Client for resolving hostname strings to IP addresses

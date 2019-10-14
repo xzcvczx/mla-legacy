@@ -1177,7 +1177,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((int)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFDriverCom.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFDriverCom.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -284,6 +284,12 @@ void SignalDHCPSuccessful()
 void SetDhcpProgressState(void)
 {
     g_dhcpInProgress = TRUE;
+
+    // disable power save mode while DHCP in progress
+    if (GetAppPowerSaveMode() == TRUE)
+    {
+        WFConfigureLowPowerMode(WF_LOW_POWER_MODE_OFF);
+    }
 }    
 
 void SignalWiFiConnectionChanged(BOOL state)
@@ -623,7 +629,7 @@ static void ChipReset(void)
 
     /* after reset is started poll register to determine when HW reset has completed */
     timeoutPeriod = TICKS_PER_SECOND * 3;  /* 3000 ms */
-    startTickCount = (UINT32)TickGet();  
+    startTickCount = (UINT32)TickGet();
     do
     {
         Write16BitWFRegister(WF_INDEX_ADDR_REG, WF_HW_STATUS_REG);
@@ -788,65 +794,65 @@ void WFEintHandler(void)
     /*--------------------------------------------------------*/    
     /* if driver is waiting for a RAW Move Complete interrupt */
     /*--------------------------------------------------------*/
-	if (RawMoveState.waitingForRawMoveCompleteInterrupt)
-	{
-		/* read hostInt register and hostIntMask register to determine cause of interrupt */
-		g_EintHostIntRegValue      = Read8BitWFRegister(WF_HOST_INTR_REG);
-		g_EintHostIntMaskRegValue  = Read8BitWFRegister(WF_HOST_MASK_REG);
+    if (RawMoveState.waitingForRawMoveCompleteInterrupt)
+    {
+        /* read hostInt register and hostIntMask register to determine cause of interrupt */
+        g_EintHostIntRegValue      = Read8BitWFRegister(WF_HOST_INTR_REG);
+        g_EintHostIntMaskRegValue  = Read8BitWFRegister(WF_HOST_MASK_REG);
     
-		// AND the two registers together to determine which active, enabled interrupt has occurred
-		g_EintHostInt = g_EintHostIntRegValue & g_EintHostIntMaskRegValue;
+        // AND the two registers together to determine which active, enabled interrupt has occurred
+        g_EintHostInt = g_EintHostIntRegValue & g_EintHostIntMaskRegValue;
 
         /* if a RAW0/RAW1 Move Complete interrupt occurred or a level 2 interrupt occurred, indicating */
         /* that a RAW2-5 Move Complete interrupt occurred                                           */
-		if (g_EintHostInt & (WF_HOST_INT_MASK_RAW_0_INT_0 | WF_HOST_INT_MASK_RAW_1_INT_0 | WF_HOST_INT_MASK_INT2))
-		{
-    		/* save the copy of the active interrupts */
-			RawMoveState.rawInterrupt = g_EintHostInt;
-			RawMoveState.waitingForRawMoveCompleteInterrupt = FALSE;
-			
-			/* if no other interrupts occurred other than a RAW0/RAW1/RAW2/RAW3/RAW4 Raw Move Complete */
-			if((g_EintHostInt & ~(WF_HOST_INT_MASK_RAW_0_INT_0 | WF_HOST_INT_MASK_RAW_1_INT_0 | WF_HOST_INT_MASK_INT2)) == 0)
-			{
-				/* clear the RAW interrupts, re-enable interrupts, and exit */
-				Write8BitWFRegister(WF_HOST_INTR_REG, (WF_HOST_INT_MASK_RAW_0_INT_0 | 
-				                                       WF_HOST_INT_MASK_RAW_1_INT_0 | 
-				                                       WF_HOST_INT_MASK_INT2));
-				Write16BitWFRegister(WF_HOST_INTR2_REG, (WF_HOST_INT_MASK_RAW_2_INT_0 | 
-				                                         WF_HOST_INT_MASK_RAW_3_INT_0 | 
-				                                         WF_HOST_INT_MASK_RAW_4_INT_0 |
-				                                         WF_HOST_INT_MASK_RAW_5_INT_0));
-
-				WF_EintEnable();
-				return;
-			}
-			/* else we got a RAW0/RAW1/RAW2/RAW3/RAW4/RAW5 Raw Move Completet interrupt, but, there is also at */
-			/* least one other interrupt present                                                               */
-    		else
-    		{
-    			// save the other interrupts and clear them, along with the Raw Move Complete interrupts
-    			// keep interrupts disabled
-    			Write16BitWFRegister(WF_HOST_INTR2_REG, (WF_HOST_INT_MASK_RAW_2_INT_0   | 
-    			                                         WF_HOST_INT_MASK_RAW_3_INT_0   | 
-    			                                         WF_HOST_INT_MASK_RAW_4_INT_0   |
-    			                                         WF_HOST_INT_MASK_RAW_5_INT_0));
-    			g_HostIntSaved |= (g_EintHostInt & ~(WF_HOST_INT_MASK_RAW_0_INT_0 | WF_HOST_INT_MASK_RAW_1_INT_0 | WF_HOST_INT_MASK_INT2));
-    			Write8BitWFRegister(WF_HOST_INTR_REG, g_EintHostInt);
-    			
-    		}
-	    }
-	    /*--------------------------------------------------------------------------------------------------*/	    
-	    /* else we did not get a 'RAW Move Complete' interrupt, but we did get at least one other interrupt */
-	    /*--------------------------------------------------------------------------------------------------*/
-	    else
+        if (g_EintHostInt & (WF_HOST_INT_MASK_RAW_0_INT_0 | WF_HOST_INT_MASK_RAW_1_INT_0 | WF_HOST_INT_MASK_INT2))
         {
-			g_HostIntSaved |= g_EintHostInt;
-			Write8BitWFRegister(WF_HOST_INTR_REG, g_EintHostInt);
-			WF_EintEnable();
-        }
-	}
+            /* save the copy of the active interrupts */
+            RawMoveState.rawInterrupt = g_EintHostInt;
+            RawMoveState.waitingForRawMoveCompleteInterrupt = FALSE;
+            
+            /* if no other interrupts occurred other than a RAW0/RAW1/RAW2/RAW3/RAW4 Raw Move Complete */
+            if((g_EintHostInt & ~(WF_HOST_INT_MASK_RAW_0_INT_0 | WF_HOST_INT_MASK_RAW_1_INT_0 | WF_HOST_INT_MASK_INT2)) == 0)
+            {
+                /* clear the RAW interrupts, re-enable interrupts, and exit */
+                Write8BitWFRegister(WF_HOST_INTR_REG, (WF_HOST_INT_MASK_RAW_0_INT_0 | 
+                                                       WF_HOST_INT_MASK_RAW_1_INT_0 | 
+                                                       WF_HOST_INT_MASK_INT2));
+                Write16BitWFRegister(WF_HOST_INTR2_REG, (WF_HOST_INT_MASK_RAW_2_INT_0 | 
+                                                         WF_HOST_INT_MASK_RAW_3_INT_0 | 
+                                                         WF_HOST_INT_MASK_RAW_4_INT_0 |
+                                                         WF_HOST_INT_MASK_RAW_5_INT_0));
 
-   	// Once we're in here, external interrupts have already been disabled so no need to call WF_EintDisable() in here
+                WF_EintEnable();
+                return;
+            }
+            /* else we got a RAW0/RAW1/RAW2/RAW3/RAW4/RAW5 Raw Move Completet interrupt, but, there is also at */
+            /* least one other interrupt present                                                               */
+            else
+            {
+                // save the other interrupts and clear them, along with the Raw Move Complete interrupts
+                // keep interrupts disabled
+                Write16BitWFRegister(WF_HOST_INTR2_REG, (WF_HOST_INT_MASK_RAW_2_INT_0   | 
+                                                         WF_HOST_INT_MASK_RAW_3_INT_0   | 
+                                                         WF_HOST_INT_MASK_RAW_4_INT_0   |
+                                                         WF_HOST_INT_MASK_RAW_5_INT_0));
+                g_HostIntSaved |= (g_EintHostInt & ~(WF_HOST_INT_MASK_RAW_0_INT_0 | WF_HOST_INT_MASK_RAW_1_INT_0 | WF_HOST_INT_MASK_INT2));
+                Write8BitWFRegister(WF_HOST_INTR_REG, g_EintHostInt);
+                
+            }
+        }
+        /*--------------------------------------------------------------------------------------------------*/        
+        /* else we did not get a 'RAW Move Complete' interrupt, but we did get at least one other interrupt */
+        /*--------------------------------------------------------------------------------------------------*/
+        else
+        {
+            g_HostIntSaved |= g_EintHostInt;
+            Write8BitWFRegister(WF_HOST_INTR_REG, g_EintHostInt);
+            WF_EintEnable();
+        }
+    }
+
+    // Once we're in here, external interrupts have already been disabled so no need to call WF_EintDisable() in here
    
     /* notify state machine that an interrupt occurred */
     g_ExIntNeedsServicing = TRUE;
@@ -883,7 +889,7 @@ void WFHardwareInit(void)
 
     /* initialize the SPI interface */
     WF_SpiInit();
-    
+
     /* Toggle the module into and then out of hibernate */
     WF_SetCE_N(WF_HIGH); /* disable module */
     WF_SetCE_N(WF_LOW);  /* enable module  */

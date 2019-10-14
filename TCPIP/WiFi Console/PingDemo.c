@@ -166,4 +166,119 @@ void PingDemo(void)
 			break;
 	}
 }
+
+BYTE PING_Console_Host[32]="192.168.1.1";
+INT32 Count_PingConsole = 0;
+#if defined(STACK_USE_CERTIFATE_DEBUG)
+BOOL b_PingFroever = FALSE;
+#endif
+void PingConsole(void)
+{
+	static enum
+	{
+		SM_HOME = 0,
+		SM_GET_ICMP_RESPONSE
+	} PingState = SM_HOME;
+	static DWORD Timer;
+	LONG ret;
+	static INT32 statistics_send=0, statistics_Recv=0, statistics_lost=0;
+	static INT32 statistics_TimeMax=0, statistics_TimeMin=0, statistics_TimeTotal=0;
+#if defined(STACK_USE_CERTIFATE_DEBUG)	
+	if(b_PingFroever == TRUE) Count_PingConsole = 4;
+#endif
+	switch(PingState)
+	{
+		case SM_HOME:
+			if(Count_PingConsole > 0)
+			{
+				if(TickGet() - Timer > 1ul*TICK_SECOND)
+				{
+					if(!ICMPBeginUsage())   break;
+					Timer = TickGet();
+					// Send ICMP echo request
+					#if defined(STACK_USE_DNS)
+						ICMPSendPingToHostROM((ROM BYTE*)PING_Console_Host);
+						statistics_send ++;
+					#else
+						putsUART("DNS assert ...");while(1);
+					#endif
+					Count_PingConsole --;
+					PingState = SM_GET_ICMP_RESPONSE;
+				}
+			}break;	
+		case SM_GET_ICMP_RESPONSE:
+			// Get the status of the ICMP module
+			ret = ICMPGetReply();					
+			if(ret == -2)
+			{
+				// Do nothing: still waiting for echo
+				break;
+			}
+			else if(ret == -1)
+			{
+				// Request timed out
+				statistics_lost ++; 
+				putsUART("Ping timed out ");
+				{ char buf_t[20]; sprintf(buf_t,":Lost %d times\r\n",(int)statistics_lost);putsUART(buf_t);}
+				PingState = SM_HOME;
+				if(Count_PingConsole ==0) goto _DonePingConsole;
+			}
+			else if(ret == -3)
+			{
+				// DNS address not resolvable
+				putsUART("Can't resolve IP\r\n");
+				PingState = SM_HOME;
+				Count_PingConsole =0;
+			}
+			else
+			{
+				// Echo received.  Time elapsed is stored in ret (Tick units).
+				statistics_Recv ++;
+				DWORD delay = TickConvertToMilliseconds((DWORD)ret);
+				if(delay > statistics_TimeMax) statistics_TimeMax = delay;
+				if(delay < statistics_TimeMin) statistics_TimeMin = delay;
+				if(statistics_TimeMin ==0) statistics_TimeMin = delay;
+				statistics_TimeTotal += delay;
+				putsUART("Reply From ");
+				char buf_t[32]={0};
+				sprintf(buf_t, "%s: time=%dms\r\n",PING_Console_Host, (int)delay);
+				putsUART(buf_t);
+				PingState = SM_HOME;
+				if(Count_PingConsole ==0) goto _DonePingConsole;
+			}
+			
+			// Finished with the ICMP module, release it so other apps can begin using it
+			ICMPEndUsage();
+			break;
+		default:
+			break;
+
+	}
+	return;
+_DonePingConsole:
+			ICMPEndUsage();
+			putsUART("Ping statistics for ");
+			putsUART((char*)PING_Console_Host);
+			putsUART(":\r\n");
+			
+			putsUART("  Packets: ");
+			char buf_t[20];
+			sprintf(buf_t, "Sent = %d, ",(int)statistics_send);		putsUART(buf_t);
+			sprintf(buf_t, "Received = %d, ",(int)statistics_Recv);	putsUART(buf_t);
+			sprintf(buf_t, "Lost = %d ", (int)statistics_lost);		putsUART(buf_t);
+			sprintf(buf_t, "(%d%c loss)", (int)((100*statistics_lost)/statistics_send), '%'); putsUART(buf_t);
+	
+			putsUART("\r\nApproximate round trip times in milli-seconds:\r\n");
+			sprintf(buf_t, "  Minimum = %dms, ", (int)statistics_TimeMin);putsUART(buf_t);
+			sprintf(buf_t, "Maximum = %dms, ", (int)statistics_TimeMax);putsUART(buf_t);
+			if(statistics_Recv != 0)
+				sprintf(buf_t, "Average = %dms\r\n>", (int)(statistics_TimeTotal/statistics_Recv) );putsUART(buf_t);
+			putsUART("\r\n>");
+			statistics_send=0; statistics_Recv=0; statistics_lost=0;
+			statistics_TimeMax=0; statistics_TimeMin=0; statistics_TimeTotal=0;
+			return;
+
+}
+
+
 #endif	//#if defined(STACK_USE_ICMP_CLIENT)

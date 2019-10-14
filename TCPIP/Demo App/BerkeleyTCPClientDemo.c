@@ -57,7 +57,11 @@
 
 
 #define PORTNUM 80
+#ifdef WIFI_NET_TEST
+static ROM BYTE ServerName[] =  "www" WIFI_NET_TEST_DOMAIN;
+#else
 static ROM BYTE ServerName[] =  "www.google.com";
+#endif
 // This is specific to this HTTP Client example
 static BYTE sendRequest[] = "GET /search?as_q=Microchip&as_sitesearch=microchip.com HTTP/1.0\r\nHost: www.google.com\r\nConnection: close\r\n\r\n";
 

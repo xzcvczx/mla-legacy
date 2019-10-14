@@ -205,13 +205,19 @@ typedef unsigned long int uint32_t;
 #elif   defined(_16LF1902) || defined(_16LF1903) || defined(_16LF1904) || defined(_16LF1906) || defined(_16LF1907) 
     #include "Alternative Configurations/mTouch_hardwareProfile_16LF190x.h"
     #define _16LF190x
+#elif   defined(_12F1552) || defined(_12LF1552)
+    #include "Alternative Configurations/mTouch_hardwareProfile_12F1552.h"
+    #define _12F1552
 #elif   defined(_16F1526) || defined(_16LF1526) || defined(_16F1527) || defined(_16LF1527) 
     #include "Alternative Configurations/mTouch_hardwareProfile_16F152x.h"
     #define _16F152x
 #elif   defined(_16F1516) || defined(_16LF1516) || defined(_16F1517) || defined(_16LF1517) || defined(_16F1518) || defined(_16LF1518) || defined(_16F1519) || defined(_16LF1519)
     #include "Alternative Configurations/mTouch_hardwareProfile_16F151x.h" 
     #define _16F151x
-#elif   defined(_16F1507) || defined(_16LF1507) || defined(_16F1509) || defined(_16LF1509)
+#elif   defined(_16F1512) || defined(_16LF1512) || defined(_16F1513) || defined(_16LF1513)
+    #include "Alternative Configurations/mTouch_hardwareProfile_16F1512-3.h" 
+    #define _16F15123
+#elif   defined(_12F1501) || defined(_12LF1501) || defined(_16F1503) || defined(_16LF1503) || defined(_16F1507) || defined(_16LF1507) || defined(_16F1509) || defined(_16LF1509)
     #include "Alternative Configurations/mTouch_hardwareProfile_16F150x.h" 
     #define _16F150x
 #elif   defined(_16F913) || defined(_16F914) || defined(_16F916) || defined(_16F917) || defined(_16F946)
@@ -254,7 +260,384 @@ typedef unsigned long int uint32_t;
 #define PIC_ADC_ADFM_LEFT           0
 #endif
 
+    #if defined(MTOUCH_USE_GPIO)
+        #define MTOUCH_PORT_C_SENSOR(index)     GP
+        #define MTOUCH_PORT_ASM_SENSOR(index)   _GP
+        #define MTOUCH_LAT_C_SENSOR(index)      GPIO
+        #define MTOUCH_LAT_ASM_SENSOR(index)    _GPIO  
+        #define MTOUCH_LETTER_SENSOR0           IO
+        #define MTOUCH_LETTER_SENSOR1           IO
+        #define MTOUCH_LETTER_SENSOR2           IO
+        #define MTOUCH_LETTER_SENSOR3           IO
+        #define MTOUCH_LETTER_SENSOR4           IO
+        #define MTOUCH_LETTER_SENSOR5           IO
+        #define MTOUCH_LETTER_SENSOR6           IO
+        #define MTOUCH_LETTER_SENSOR7           IO
+    #else
+        #define MTOUCH_LETTER_SENSOR0           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR0)
+        #define MTOUCH_LETTER_SENSOR1           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR1)
+        #define MTOUCH_LETTER_SENSOR2           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR2)
+        #define MTOUCH_LETTER_SENSOR3           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR3)
+        #define MTOUCH_LETTER_SENSOR4           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR4)
+        #define MTOUCH_LETTER_SENSOR5           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR5)
+        #define MTOUCH_LETTER_SENSOR6           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR6)
+        #define MTOUCH_LETTER_SENSOR7           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR7)
+        #define MTOUCH_LETTER_SENSOR8           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR8)
+        #define MTOUCH_LETTER_SENSOR9           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR9)
+        #define MTOUCH_LETTER_SENSOR10          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR10)
+        #define MTOUCH_LETTER_SENSOR11          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR11)
+        #define MTOUCH_LETTER_SENSOR12          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR12)
+        #define MTOUCH_LETTER_SENSOR13          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR13)
+        #define MTOUCH_LETTER_SENSOR14          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR14)
+        #define MTOUCH_LETTER_SENSOR15          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR15)
+        #define MTOUCH_LETTER_SENSOR16          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR16)
+        #define MTOUCH_LETTER_SENSOR17          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR17)
+        #define MTOUCH_LETTER_SENSOR18          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR18)
+        #define MTOUCH_LETTER_SENSOR19          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR19)
+        #define MTOUCH_LETTER_SENSOR20          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR20)
+        #define MTOUCH_LETTER_SENSOR21          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR21)
+        #define MTOUCH_LETTER_SENSOR22          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR22)
+        #define MTOUCH_LETTER_SENSOR23          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR23)
+        #define MTOUCH_LETTER_SENSOR24          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR24)
+        #define MTOUCH_LETTER_SENSOR25          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR25)
+        #define MTOUCH_LETTER_SENSOR26          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR26)
+        #define MTOUCH_LETTER_SENSOR27          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR27)
+        #define MTOUCH_LETTER_SENSOR28          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR28)
+        #define MTOUCH_LETTER_SENSOR29          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR29)
+        
+        #define MTOUCH_PORT_C_SENSOR0            __paste4(R,MTOUCH_LETTER_SENSOR0)
+        #define MTOUCH_PORT_C_SENSOR1            __paste4(R,MTOUCH_LETTER_SENSOR1)
+        #define MTOUCH_PORT_C_SENSOR2            __paste4(R,MTOUCH_LETTER_SENSOR2)
+        #define MTOUCH_PORT_C_SENSOR3            __paste4(R,MTOUCH_LETTER_SENSOR3)
+        #define MTOUCH_PORT_C_SENSOR4            __paste4(R,MTOUCH_LETTER_SENSOR4)
+        #define MTOUCH_PORT_C_SENSOR5            __paste4(R,MTOUCH_LETTER_SENSOR5)
+        #define MTOUCH_PORT_C_SENSOR6            __paste4(R,MTOUCH_LETTER_SENSOR6)
+        #define MTOUCH_PORT_C_SENSOR7            __paste4(R,MTOUCH_LETTER_SENSOR7)
+        #define MTOUCH_PORT_C_SENSOR8            __paste4(R,MTOUCH_LETTER_SENSOR8)
+        #define MTOUCH_PORT_C_SENSOR9            __paste4(R,MTOUCH_LETTER_SENSOR9)
+        #define MTOUCH_PORT_C_SENSOR10           __paste4(R,MTOUCH_LETTER_SENSOR10)
+        #define MTOUCH_PORT_C_SENSOR11           __paste4(R,MTOUCH_LETTER_SENSOR11)
+        #define MTOUCH_PORT_C_SENSOR12           __paste4(R,MTOUCH_LETTER_SENSOR12)
+        #define MTOUCH_PORT_C_SENSOR13           __paste4(R,MTOUCH_LETTER_SENSOR13)
+        #define MTOUCH_PORT_C_SENSOR14           __paste4(R,MTOUCH_LETTER_SENSOR14)
+        #define MTOUCH_PORT_C_SENSOR15           __paste4(R,MTOUCH_LETTER_SENSOR15)
+        #define MTOUCH_PORT_C_SENSOR16           __paste4(R,MTOUCH_LETTER_SENSOR16)
+        #define MTOUCH_PORT_C_SENSOR17           __paste4(R,MTOUCH_LETTER_SENSOR17)
+        #define MTOUCH_PORT_C_SENSOR18           __paste4(R,MTOUCH_LETTER_SENSOR18)
+        #define MTOUCH_PORT_C_SENSOR19           __paste4(R,MTOUCH_LETTER_SENSOR19)
+        #define MTOUCH_PORT_C_SENSOR20           __paste4(R,MTOUCH_LETTER_SENSOR20)
+        #define MTOUCH_PORT_C_SENSOR21           __paste4(R,MTOUCH_LETTER_SENSOR21)
+        #define MTOUCH_PORT_C_SENSOR22           __paste4(R,MTOUCH_LETTER_SENSOR22)
+        #define MTOUCH_PORT_C_SENSOR23           __paste4(R,MTOUCH_LETTER_SENSOR23)
+        #define MTOUCH_PORT_C_SENSOR24           __paste4(R,MTOUCH_LETTER_SENSOR24)
+        #define MTOUCH_PORT_C_SENSOR25           __paste4(R,MTOUCH_LETTER_SENSOR25)
+        #define MTOUCH_PORT_C_SENSOR26           __paste4(R,MTOUCH_LETTER_SENSOR26)
+        #define MTOUCH_PORT_C_SENSOR27           __paste4(R,MTOUCH_LETTER_SENSOR27)
+        #define MTOUCH_PORT_C_SENSOR28           __paste4(R,MTOUCH_LETTER_SENSOR28)
+        #define MTOUCH_PORT_C_SENSOR29           __paste4(R,MTOUCH_LETTER_SENSOR29)
+        #define MTOUCH_PORT_C_SENSOR(index)      __paste3(MTOUCH_PORT_C_SENSOR, index)
 
+        #define MTOUCH_PORT_ASM_SENSOR0          __paste4(_R,MTOUCH_LETTER_SENSOR0)
+        #define MTOUCH_PORT_ASM_SENSOR1          __paste4(_R,MTOUCH_LETTER_SENSOR1)
+        #define MTOUCH_PORT_ASM_SENSOR2          __paste4(_R,MTOUCH_LETTER_SENSOR2)
+        #define MTOUCH_PORT_ASM_SENSOR3          __paste4(_R,MTOUCH_LETTER_SENSOR3)
+        #define MTOUCH_PORT_ASM_SENSOR4          __paste4(_R,MTOUCH_LETTER_SENSOR4)
+        #define MTOUCH_PORT_ASM_SENSOR5          __paste4(_R,MTOUCH_LETTER_SENSOR5)
+        #define MTOUCH_PORT_ASM_SENSOR6          __paste4(_R,MTOUCH_LETTER_SENSOR6)
+        #define MTOUCH_PORT_ASM_SENSOR7          __paste4(_R,MTOUCH_LETTER_SENSOR7)
+        #define MTOUCH_PORT_ASM_SENSOR8          __paste4(_R,MTOUCH_LETTER_SENSOR8)
+        #define MTOUCH_PORT_ASM_SENSOR9          __paste4(_R,MTOUCH_LETTER_SENSOR9)
+        #define MTOUCH_PORT_ASM_SENSOR10         __paste4(_R,MTOUCH_LETTER_SENSOR10)
+        #define MTOUCH_PORT_ASM_SENSOR11         __paste4(_R,MTOUCH_LETTER_SENSOR11)
+        #define MTOUCH_PORT_ASM_SENSOR12         __paste4(_R,MTOUCH_LETTER_SENSOR12)
+        #define MTOUCH_PORT_ASM_SENSOR13         __paste4(_R,MTOUCH_LETTER_SENSOR13)
+        #define MTOUCH_PORT_ASM_SENSOR14         __paste4(_R,MTOUCH_LETTER_SENSOR14)
+        #define MTOUCH_PORT_ASM_SENSOR15         __paste4(_R,MTOUCH_LETTER_SENSOR15)
+        #define MTOUCH_PORT_ASM_SENSOR16         __paste4(_R,MTOUCH_LETTER_SENSOR16)
+        #define MTOUCH_PORT_ASM_SENSOR17         __paste4(_R,MTOUCH_LETTER_SENSOR17)
+        #define MTOUCH_PORT_ASM_SENSOR18         __paste4(_R,MTOUCH_LETTER_SENSOR18)
+        #define MTOUCH_PORT_ASM_SENSOR19         __paste4(_R,MTOUCH_LETTER_SENSOR19)
+        #define MTOUCH_PORT_ASM_SENSOR20         __paste4(_R,MTOUCH_LETTER_SENSOR20)
+        #define MTOUCH_PORT_ASM_SENSOR21         __paste4(_R,MTOUCH_LETTER_SENSOR21)
+        #define MTOUCH_PORT_ASM_SENSOR22         __paste4(_R,MTOUCH_LETTER_SENSOR22)
+        #define MTOUCH_PORT_ASM_SENSOR23         __paste4(_R,MTOUCH_LETTER_SENSOR23)
+        #define MTOUCH_PORT_ASM_SENSOR24         __paste4(_R,MTOUCH_LETTER_SENSOR24)
+        #define MTOUCH_PORT_ASM_SENSOR25         __paste4(_R,MTOUCH_LETTER_SENSOR25)
+        #define MTOUCH_PORT_ASM_SENSOR26         __paste4(_R,MTOUCH_LETTER_SENSOR26)
+        #define MTOUCH_PORT_ASM_SENSOR27         __paste4(_R,MTOUCH_LETTER_SENSOR27)
+        #define MTOUCH_PORT_ASM_SENSOR28         __paste4(_R,MTOUCH_LETTER_SENSOR28)
+        #define MTOUCH_PORT_ASM_SENSOR29         __paste4(_R,MTOUCH_LETTER_SENSOR29)
+        #define MTOUCH_PORT_ASM_SENSOR(index)    __paste3(MTOUCH_PORT_ASM_SENSOR, index)
+    #endif
+    
+        
+    
+    #if defined(MTOUCH_USE_PORT)
+        #define MTOUCH_LAT_C_SENSOR0            __paste4(PORT,MTOUCH_LETTER_SENSOR0)
+        #define MTOUCH_LAT_C_SENSOR1            __paste4(PORT,MTOUCH_LETTER_SENSOR1)
+        #define MTOUCH_LAT_C_SENSOR2            __paste4(PORT,MTOUCH_LETTER_SENSOR2)
+        #define MTOUCH_LAT_C_SENSOR3            __paste4(PORT,MTOUCH_LETTER_SENSOR3)
+        #define MTOUCH_LAT_C_SENSOR4            __paste4(PORT,MTOUCH_LETTER_SENSOR4)
+        #define MTOUCH_LAT_C_SENSOR5            __paste4(PORT,MTOUCH_LETTER_SENSOR5)
+        #define MTOUCH_LAT_C_SENSOR6            __paste4(PORT,MTOUCH_LETTER_SENSOR6)
+        #define MTOUCH_LAT_C_SENSOR7            __paste4(PORT,MTOUCH_LETTER_SENSOR7)
+        #define MTOUCH_LAT_C_SENSOR8            __paste4(PORT,MTOUCH_LETTER_SENSOR8)
+        #define MTOUCH_LAT_C_SENSOR9            __paste4(PORT,MTOUCH_LETTER_SENSOR9)
+        #define MTOUCH_LAT_C_SENSOR10           __paste4(PORT,MTOUCH_LETTER_SENSOR10)
+        #define MTOUCH_LAT_C_SENSOR11           __paste4(PORT,MTOUCH_LETTER_SENSOR11)
+        #define MTOUCH_LAT_C_SENSOR12           __paste4(PORT,MTOUCH_LETTER_SENSOR12)
+        #define MTOUCH_LAT_C_SENSOR13           __paste4(PORT,MTOUCH_LETTER_SENSOR13)
+        #define MTOUCH_LAT_C_SENSOR14           __paste4(PORT,MTOUCH_LETTER_SENSOR14)
+        #define MTOUCH_LAT_C_SENSOR15           __paste4(PORT,MTOUCH_LETTER_SENSOR15)
+        #define MTOUCH_LAT_C_SENSOR16           __paste4(PORT,MTOUCH_LETTER_SENSOR16)
+        #define MTOUCH_LAT_C_SENSOR17           __paste4(PORT,MTOUCH_LETTER_SENSOR17)
+        #define MTOUCH_LAT_C_SENSOR18           __paste4(PORT,MTOUCH_LETTER_SENSOR18)
+        #define MTOUCH_LAT_C_SENSOR19           __paste4(PORT,MTOUCH_LETTER_SENSOR19)
+        #define MTOUCH_LAT_C_SENSOR20           __paste4(PORT,MTOUCH_LETTER_SENSOR20)
+        #define MTOUCH_LAT_C_SENSOR21           __paste4(PORT,MTOUCH_LETTER_SENSOR21)
+        #define MTOUCH_LAT_C_SENSOR22           __paste4(PORT,MTOUCH_LETTER_SENSOR22)
+        #define MTOUCH_LAT_C_SENSOR23           __paste4(PORT,MTOUCH_LETTER_SENSOR23)
+        #define MTOUCH_LAT_C_SENSOR24           __paste4(PORT,MTOUCH_LETTER_SENSOR24)
+        #define MTOUCH_LAT_C_SENSOR25           __paste4(PORT,MTOUCH_LETTER_SENSOR25)
+        #define MTOUCH_LAT_C_SENSOR26           __paste4(PORT,MTOUCH_LETTER_SENSOR26)
+        #define MTOUCH_LAT_C_SENSOR27           __paste4(PORT,MTOUCH_LETTER_SENSOR27)
+        #define MTOUCH_LAT_C_SENSOR28           __paste4(PORT,MTOUCH_LETTER_SENSOR28)
+        #define MTOUCH_LAT_C_SENSOR29           __paste4(PORT,MTOUCH_LETTER_SENSOR29)
+        #define MTOUCH_LAT_C_SENSOR(index)      __paste3(MTOUCH_LAT_C_SENSOR, index)
+
+        #define MTOUCH_LAT_ASM_SENSOR0          __paste4(_PORT,MTOUCH_LETTER_SENSOR0)
+        #define MTOUCH_LAT_ASM_SENSOR1          __paste4(_PORT,MTOUCH_LETTER_SENSOR1)
+        #define MTOUCH_LAT_ASM_SENSOR2          __paste4(_PORT,MTOUCH_LETTER_SENSOR2)
+        #define MTOUCH_LAT_ASM_SENSOR3          __paste4(_PORT,MTOUCH_LETTER_SENSOR3)
+        #define MTOUCH_LAT_ASM_SENSOR4          __paste4(_PORT,MTOUCH_LETTER_SENSOR4)
+        #define MTOUCH_LAT_ASM_SENSOR5          __paste4(_PORT,MTOUCH_LETTER_SENSOR5)
+        #define MTOUCH_LAT_ASM_SENSOR6          __paste4(_PORT,MTOUCH_LETTER_SENSOR6)
+        #define MTOUCH_LAT_ASM_SENSOR7          __paste4(_PORT,MTOUCH_LETTER_SENSOR7)
+        #define MTOUCH_LAT_ASM_SENSOR8          __paste4(_PORT,MTOUCH_LETTER_SENSOR8)
+        #define MTOUCH_LAT_ASM_SENSOR9          __paste4(_PORT,MTOUCH_LETTER_SENSOR9)
+        #define MTOUCH_LAT_ASM_SENSOR10         __paste4(_PORT,MTOUCH_LETTER_SENSOR10)
+        #define MTOUCH_LAT_ASM_SENSOR11         __paste4(_PORT,MTOUCH_LETTER_SENSOR11)
+        #define MTOUCH_LAT_ASM_SENSOR12         __paste4(_PORT,MTOUCH_LETTER_SENSOR12)
+        #define MTOUCH_LAT_ASM_SENSOR13         __paste4(_PORT,MTOUCH_LETTER_SENSOR13)
+        #define MTOUCH_LAT_ASM_SENSOR14         __paste4(_PORT,MTOUCH_LETTER_SENSOR14)
+        #define MTOUCH_LAT_ASM_SENSOR15         __paste4(_PORT,MTOUCH_LETTER_SENSOR15)
+        #define MTOUCH_LAT_ASM_SENSOR16         __paste4(_PORT,MTOUCH_LETTER_SENSOR16)
+        #define MTOUCH_LAT_ASM_SENSOR17         __paste4(_PORT,MTOUCH_LETTER_SENSOR17)
+        #define MTOUCH_LAT_ASM_SENSOR18         __paste4(_PORT,MTOUCH_LETTER_SENSOR18)
+        #define MTOUCH_LAT_ASM_SENSOR19         __paste4(_PORT,MTOUCH_LETTER_SENSOR19)
+        #define MTOUCH_LAT_ASM_SENSOR20         __paste4(_PORT,MTOUCH_LETTER_SENSOR20)
+        #define MTOUCH_LAT_ASM_SENSOR21         __paste4(_PORT,MTOUCH_LETTER_SENSOR21)
+        #define MTOUCH_LAT_ASM_SENSOR22         __paste4(_PORT,MTOUCH_LETTER_SENSOR22)
+        #define MTOUCH_LAT_ASM_SENSOR23         __paste4(_PORT,MTOUCH_LETTER_SENSOR23)
+        #define MTOUCH_LAT_ASM_SENSOR24         __paste4(_PORT,MTOUCH_LETTER_SENSOR24)
+        #define MTOUCH_LAT_ASM_SENSOR25         __paste4(_PORT,MTOUCH_LETTER_SENSOR25)
+        #define MTOUCH_LAT_ASM_SENSOR26         __paste4(_PORT,MTOUCH_LETTER_SENSOR26)
+        #define MTOUCH_LAT_ASM_SENSOR27         __paste4(_PORT,MTOUCH_LETTER_SENSOR27)
+        #define MTOUCH_LAT_ASM_SENSOR28         __paste4(_PORT,MTOUCH_LETTER_SENSOR28)
+        #define MTOUCH_LAT_ASM_SENSOR29         __paste4(_PORT,MTOUCH_LETTER_SENSOR29)
+        #define MTOUCH_LAT_ASM_SENSOR(index)    __paste3(MTOUCH_LAT_ASM_SENSOR, index)
+    #elif !defined(MTOUCH_USE_GPIO)
+        #define MTOUCH_LAT_C_SENSOR0            __paste4(LAT,MTOUCH_LETTER_SENSOR0)
+        #define MTOUCH_LAT_C_SENSOR1            __paste4(LAT,MTOUCH_LETTER_SENSOR1)
+        #define MTOUCH_LAT_C_SENSOR2            __paste4(LAT,MTOUCH_LETTER_SENSOR2)
+        #define MTOUCH_LAT_C_SENSOR3            __paste4(LAT,MTOUCH_LETTER_SENSOR3)
+        #define MTOUCH_LAT_C_SENSOR4            __paste4(LAT,MTOUCH_LETTER_SENSOR4)
+        #define MTOUCH_LAT_C_SENSOR5            __paste4(LAT,MTOUCH_LETTER_SENSOR5)
+        #define MTOUCH_LAT_C_SENSOR6            __paste4(LAT,MTOUCH_LETTER_SENSOR6)
+        #define MTOUCH_LAT_C_SENSOR7            __paste4(LAT,MTOUCH_LETTER_SENSOR7)
+        #define MTOUCH_LAT_C_SENSOR8            __paste4(LAT,MTOUCH_LETTER_SENSOR8)
+        #define MTOUCH_LAT_C_SENSOR9            __paste4(LAT,MTOUCH_LETTER_SENSOR9)
+        #define MTOUCH_LAT_C_SENSOR10           __paste4(LAT,MTOUCH_LETTER_SENSOR10)
+        #define MTOUCH_LAT_C_SENSOR11           __paste4(LAT,MTOUCH_LETTER_SENSOR11)
+        #define MTOUCH_LAT_C_SENSOR12           __paste4(LAT,MTOUCH_LETTER_SENSOR12)
+        #define MTOUCH_LAT_C_SENSOR13           __paste4(LAT,MTOUCH_LETTER_SENSOR13)
+        #define MTOUCH_LAT_C_SENSOR14           __paste4(LAT,MTOUCH_LETTER_SENSOR14)
+        #define MTOUCH_LAT_C_SENSOR15           __paste4(LAT,MTOUCH_LETTER_SENSOR15)
+        #define MTOUCH_LAT_C_SENSOR16           __paste4(LAT,MTOUCH_LETTER_SENSOR16)
+        #define MTOUCH_LAT_C_SENSOR17           __paste4(LAT,MTOUCH_LETTER_SENSOR17)
+        #define MTOUCH_LAT_C_SENSOR18           __paste4(LAT,MTOUCH_LETTER_SENSOR18)
+        #define MTOUCH_LAT_C_SENSOR19           __paste4(LAT,MTOUCH_LETTER_SENSOR19)
+        #define MTOUCH_LAT_C_SENSOR20           __paste4(LAT,MTOUCH_LETTER_SENSOR20)
+        #define MTOUCH_LAT_C_SENSOR21           __paste4(LAT,MTOUCH_LETTER_SENSOR21)
+        #define MTOUCH_LAT_C_SENSOR22           __paste4(LAT,MTOUCH_LETTER_SENSOR22)
+        #define MTOUCH_LAT_C_SENSOR23           __paste4(LAT,MTOUCH_LETTER_SENSOR23)
+        #define MTOUCH_LAT_C_SENSOR24           __paste4(LAT,MTOUCH_LETTER_SENSOR24)
+        #define MTOUCH_LAT_C_SENSOR25           __paste4(LAT,MTOUCH_LETTER_SENSOR25)
+        #define MTOUCH_LAT_C_SENSOR26           __paste4(LAT,MTOUCH_LETTER_SENSOR26)
+        #define MTOUCH_LAT_C_SENSOR27           __paste4(LAT,MTOUCH_LETTER_SENSOR27)
+        #define MTOUCH_LAT_C_SENSOR28           __paste4(LAT,MTOUCH_LETTER_SENSOR28)
+        #define MTOUCH_LAT_C_SENSOR29           __paste4(LAT,MTOUCH_LETTER_SENSOR29)
+        #define MTOUCH_LAT_C_SENSOR(index)      __paste3(MTOUCH_LAT_C_SENSOR, index)
+
+        #define MTOUCH_LAT_ASM_SENSOR0          __paste4(_LAT,MTOUCH_LETTER_SENSOR0)
+        #define MTOUCH_LAT_ASM_SENSOR1          __paste4(_LAT,MTOUCH_LETTER_SENSOR1)
+        #define MTOUCH_LAT_ASM_SENSOR2          __paste4(_LAT,MTOUCH_LETTER_SENSOR2)
+        #define MTOUCH_LAT_ASM_SENSOR3          __paste4(_LAT,MTOUCH_LETTER_SENSOR3)
+        #define MTOUCH_LAT_ASM_SENSOR4          __paste4(_LAT,MTOUCH_LETTER_SENSOR4)
+        #define MTOUCH_LAT_ASM_SENSOR5          __paste4(_LAT,MTOUCH_LETTER_SENSOR5)
+        #define MTOUCH_LAT_ASM_SENSOR6          __paste4(_LAT,MTOUCH_LETTER_SENSOR6)
+        #define MTOUCH_LAT_ASM_SENSOR7          __paste4(_LAT,MTOUCH_LETTER_SENSOR7)
+        #define MTOUCH_LAT_ASM_SENSOR8          __paste4(_LAT,MTOUCH_LETTER_SENSOR8)
+        #define MTOUCH_LAT_ASM_SENSOR9          __paste4(_LAT,MTOUCH_LETTER_SENSOR9)
+        #define MTOUCH_LAT_ASM_SENSOR10         __paste4(_LAT,MTOUCH_LETTER_SENSOR10)
+        #define MTOUCH_LAT_ASM_SENSOR11         __paste4(_LAT,MTOUCH_LETTER_SENSOR11)
+        #define MTOUCH_LAT_ASM_SENSOR12         __paste4(_LAT,MTOUCH_LETTER_SENSOR12)
+        #define MTOUCH_LAT_ASM_SENSOR13         __paste4(_LAT,MTOUCH_LETTER_SENSOR13)
+        #define MTOUCH_LAT_ASM_SENSOR14         __paste4(_LAT,MTOUCH_LETTER_SENSOR14)
+        #define MTOUCH_LAT_ASM_SENSOR15         __paste4(_LAT,MTOUCH_LETTER_SENSOR15)
+        #define MTOUCH_LAT_ASM_SENSOR16         __paste4(_LAT,MTOUCH_LETTER_SENSOR16)
+        #define MTOUCH_LAT_ASM_SENSOR17         __paste4(_LAT,MTOUCH_LETTER_SENSOR17)
+        #define MTOUCH_LAT_ASM_SENSOR18         __paste4(_LAT,MTOUCH_LETTER_SENSOR18)
+        #define MTOUCH_LAT_ASM_SENSOR19         __paste4(_LAT,MTOUCH_LETTER_SENSOR19)
+        #define MTOUCH_LAT_ASM_SENSOR20         __paste4(_LAT,MTOUCH_LETTER_SENSOR20)
+        #define MTOUCH_LAT_ASM_SENSOR21         __paste4(_LAT,MTOUCH_LETTER_SENSOR21)
+        #define MTOUCH_LAT_ASM_SENSOR22         __paste4(_LAT,MTOUCH_LETTER_SENSOR22)
+        #define MTOUCH_LAT_ASM_SENSOR23         __paste4(_LAT,MTOUCH_LETTER_SENSOR23)
+        #define MTOUCH_LAT_ASM_SENSOR24         __paste4(_LAT,MTOUCH_LETTER_SENSOR24)
+        #define MTOUCH_LAT_ASM_SENSOR25         __paste4(_LAT,MTOUCH_LETTER_SENSOR25)
+        #define MTOUCH_LAT_ASM_SENSOR26         __paste4(_LAT,MTOUCH_LETTER_SENSOR26)
+        #define MTOUCH_LAT_ASM_SENSOR27         __paste4(_LAT,MTOUCH_LETTER_SENSOR27)
+        #define MTOUCH_LAT_ASM_SENSOR28         __paste4(_LAT,MTOUCH_LETTER_SENSOR28)
+        #define MTOUCH_LAT_ASM_SENSOR29         __paste4(_LAT,MTOUCH_LETTER_SENSOR29)
+        #define MTOUCH_LAT_ASM_SENSOR(index)    __paste3(MTOUCH_LAT_ASM_SENSOR, index)
+    #endif
+
+    #define MTOUCH_TRIS_C_SENSOR0           __paste4(TRIS,MTOUCH_LETTER_SENSOR0)
+    #define MTOUCH_TRIS_C_SENSOR1           __paste4(TRIS,MTOUCH_LETTER_SENSOR1)
+    #define MTOUCH_TRIS_C_SENSOR2           __paste4(TRIS,MTOUCH_LETTER_SENSOR2)
+    #define MTOUCH_TRIS_C_SENSOR3           __paste4(TRIS,MTOUCH_LETTER_SENSOR3)
+    #define MTOUCH_TRIS_C_SENSOR4           __paste4(TRIS,MTOUCH_LETTER_SENSOR4)
+    #define MTOUCH_TRIS_C_SENSOR5           __paste4(TRIS,MTOUCH_LETTER_SENSOR5)
+    #define MTOUCH_TRIS_C_SENSOR6           __paste4(TRIS,MTOUCH_LETTER_SENSOR6)
+    #define MTOUCH_TRIS_C_SENSOR7           __paste4(TRIS,MTOUCH_LETTER_SENSOR7)
+    #define MTOUCH_TRIS_C_SENSOR8           __paste4(TRIS,MTOUCH_LETTER_SENSOR8)
+    #define MTOUCH_TRIS_C_SENSOR9           __paste4(TRIS,MTOUCH_LETTER_SENSOR9)
+    #define MTOUCH_TRIS_C_SENSOR10          __paste4(TRIS,MTOUCH_LETTER_SENSOR10)
+    #define MTOUCH_TRIS_C_SENSOR11          __paste4(TRIS,MTOUCH_LETTER_SENSOR11)
+    #define MTOUCH_TRIS_C_SENSOR12          __paste4(TRIS,MTOUCH_LETTER_SENSOR12)
+    #define MTOUCH_TRIS_C_SENSOR13          __paste4(TRIS,MTOUCH_LETTER_SENSOR13)
+    #define MTOUCH_TRIS_C_SENSOR14          __paste4(TRIS,MTOUCH_LETTER_SENSOR14)
+    #define MTOUCH_TRIS_C_SENSOR15          __paste4(TRIS,MTOUCH_LETTER_SENSOR15)
+    #define MTOUCH_TRIS_C_SENSOR16          __paste4(TRIS,MTOUCH_LETTER_SENSOR16)
+    #define MTOUCH_TRIS_C_SENSOR17          __paste4(TRIS,MTOUCH_LETTER_SENSOR17)
+    #define MTOUCH_TRIS_C_SENSOR18          __paste4(TRIS,MTOUCH_LETTER_SENSOR18)
+    #define MTOUCH_TRIS_C_SENSOR19          __paste4(TRIS,MTOUCH_LETTER_SENSOR19)
+    #define MTOUCH_TRIS_C_SENSOR20          __paste4(TRIS,MTOUCH_LETTER_SENSOR20)
+    #define MTOUCH_TRIS_C_SENSOR21          __paste4(TRIS,MTOUCH_LETTER_SENSOR21)
+    #define MTOUCH_TRIS_C_SENSOR22          __paste4(TRIS,MTOUCH_LETTER_SENSOR22)
+    #define MTOUCH_TRIS_C_SENSOR23          __paste4(TRIS,MTOUCH_LETTER_SENSOR23)
+    #define MTOUCH_TRIS_C_SENSOR24          __paste4(TRIS,MTOUCH_LETTER_SENSOR24)
+    #define MTOUCH_TRIS_C_SENSOR25          __paste4(TRIS,MTOUCH_LETTER_SENSOR25)
+    #define MTOUCH_TRIS_C_SENSOR26          __paste4(TRIS,MTOUCH_LETTER_SENSOR26)
+    #define MTOUCH_TRIS_C_SENSOR27          __paste4(TRIS,MTOUCH_LETTER_SENSOR27)
+    #define MTOUCH_TRIS_C_SENSOR28          __paste4(TRIS,MTOUCH_LETTER_SENSOR28)
+    #define MTOUCH_TRIS_C_SENSOR29          __paste4(TRIS,MTOUCH_LETTER_SENSOR29)
+    #define MTOUCH_TRIS_C_SENSOR(index)     __paste3(MTOUCH_TRIS_C_SENSOR, index)
+
+    #define MTOUCH_TRIS_ASM_SENSOR0         __paste4(_TRIS,MTOUCH_LETTER_SENSOR0)
+    #define MTOUCH_TRIS_ASM_SENSOR1         __paste4(_TRIS,MTOUCH_LETTER_SENSOR1)
+    #define MTOUCH_TRIS_ASM_SENSOR2         __paste4(_TRIS,MTOUCH_LETTER_SENSOR2)
+    #define MTOUCH_TRIS_ASM_SENSOR3         __paste4(_TRIS,MTOUCH_LETTER_SENSOR3)
+    #define MTOUCH_TRIS_ASM_SENSOR4         __paste4(_TRIS,MTOUCH_LETTER_SENSOR4)
+    #define MTOUCH_TRIS_ASM_SENSOR5         __paste4(_TRIS,MTOUCH_LETTER_SENSOR5)
+    #define MTOUCH_TRIS_ASM_SENSOR6         __paste4(_TRIS,MTOUCH_LETTER_SENSOR6)
+    #define MTOUCH_TRIS_ASM_SENSOR7         __paste4(_TRIS,MTOUCH_LETTER_SENSOR7)
+    #define MTOUCH_TRIS_ASM_SENSOR8         __paste4(_TRIS,MTOUCH_LETTER_SENSOR8)
+    #define MTOUCH_TRIS_ASM_SENSOR9         __paste4(_TRIS,MTOUCH_LETTER_SENSOR9)
+    #define MTOUCH_TRIS_ASM_SENSOR10        __paste4(_TRIS,MTOUCH_LETTER_SENSOR10)
+    #define MTOUCH_TRIS_ASM_SENSOR11        __paste4(_TRIS,MTOUCH_LETTER_SENSOR11)
+    #define MTOUCH_TRIS_ASM_SENSOR12        __paste4(_TRIS,MTOUCH_LETTER_SENSOR12)
+    #define MTOUCH_TRIS_ASM_SENSOR13        __paste4(_TRIS,MTOUCH_LETTER_SENSOR13)
+    #define MTOUCH_TRIS_ASM_SENSOR14        __paste4(_TRIS,MTOUCH_LETTER_SENSOR14)
+    #define MTOUCH_TRIS_ASM_SENSOR15        __paste4(_TRIS,MTOUCH_LETTER_SENSOR15)
+    #define MTOUCH_TRIS_ASM_SENSOR16        __paste4(_TRIS,MTOUCH_LETTER_SENSOR16)
+    #define MTOUCH_TRIS_ASM_SENSOR17        __paste4(_TRIS,MTOUCH_LETTER_SENSOR17)
+    #define MTOUCH_TRIS_ASM_SENSOR18        __paste4(_TRIS,MTOUCH_LETTER_SENSOR18)
+    #define MTOUCH_TRIS_ASM_SENSOR19        __paste4(_TRIS,MTOUCH_LETTER_SENSOR19)
+    #define MTOUCH_TRIS_ASM_SENSOR20        __paste4(_TRIS,MTOUCH_LETTER_SENSOR20)
+    #define MTOUCH_TRIS_ASM_SENSOR21        __paste4(_TRIS,MTOUCH_LETTER_SENSOR21)
+    #define MTOUCH_TRIS_ASM_SENSOR22        __paste4(_TRIS,MTOUCH_LETTER_SENSOR22)
+    #define MTOUCH_TRIS_ASM_SENSOR23        __paste4(_TRIS,MTOUCH_LETTER_SENSOR23)
+    #define MTOUCH_TRIS_ASM_SENSOR24        __paste4(_TRIS,MTOUCH_LETTER_SENSOR24)
+    #define MTOUCH_TRIS_ASM_SENSOR25        __paste4(_TRIS,MTOUCH_LETTER_SENSOR25)
+    #define MTOUCH_TRIS_ASM_SENSOR26        __paste4(_TRIS,MTOUCH_LETTER_SENSOR26)
+    #define MTOUCH_TRIS_ASM_SENSOR27        __paste4(_TRIS,MTOUCH_LETTER_SENSOR27)
+    #define MTOUCH_TRIS_ASM_SENSOR28        __paste4(_TRIS,MTOUCH_LETTER_SENSOR28)
+    #define MTOUCH_TRIS_ASM_SENSOR29        __paste4(_TRIS,MTOUCH_LETTER_SENSOR29)
+    #define MTOUCH_TRIS_ASM_SENSOR(index)   __paste3(MTOUCH_TRIS_ASM_SENSOR, index)
+
+    #define MTOUCH_PIN_SENSOR0              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR0)
+    #define MTOUCH_PIN_SENSOR1              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR1)
+    #define MTOUCH_PIN_SENSOR2              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR2)
+    #define MTOUCH_PIN_SENSOR3              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR3)
+    #define MTOUCH_PIN_SENSOR4              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR4)
+    #define MTOUCH_PIN_SENSOR5              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR5)
+    #define MTOUCH_PIN_SENSOR6              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR6)
+    #define MTOUCH_PIN_SENSOR7              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR7)
+    #define MTOUCH_PIN_SENSOR8              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR8)
+    #define MTOUCH_PIN_SENSOR9              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR9)
+    #define MTOUCH_PIN_SENSOR10             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR10)
+    #define MTOUCH_PIN_SENSOR11             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR11)
+    #define MTOUCH_PIN_SENSOR12             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR12)
+    #define MTOUCH_PIN_SENSOR13             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR13)
+    #define MTOUCH_PIN_SENSOR14             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR14)
+    #define MTOUCH_PIN_SENSOR15             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR15)
+    #define MTOUCH_PIN_SENSOR16             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR16)
+    #define MTOUCH_PIN_SENSOR17             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR17)
+    #define MTOUCH_PIN_SENSOR18             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR18)
+    #define MTOUCH_PIN_SENSOR19             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR19)
+    #define MTOUCH_PIN_SENSOR20             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR20)
+    #define MTOUCH_PIN_SENSOR21             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR21)
+    #define MTOUCH_PIN_SENSOR22             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR22)
+    #define MTOUCH_PIN_SENSOR23             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR23)
+    #define MTOUCH_PIN_SENSOR24             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR24)
+    #define MTOUCH_PIN_SENSOR25             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR25)
+    #define MTOUCH_PIN_SENSOR26             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR26)
+    #define MTOUCH_PIN_SENSOR27             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR27)
+    #define MTOUCH_PIN_SENSOR28             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR28)
+    #define MTOUCH_PIN_SENSOR29             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR29)
+    #define MTOUCH_PIN_REFERENCE            __paste4(MTOUCH_PIN_,CVD_REFERENCE)
+    #define MTOUCH_PIN_SENSOR(index)        __paste3(MTOUCH_PIN_SENSOR, index)
+        
+    #define MTOUCH_SELECT_SENSOR0	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR0)
+    #define MTOUCH_SELECT_SENSOR1	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR1)
+    #define MTOUCH_SELECT_SENSOR2	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR2)
+    #define MTOUCH_SELECT_SENSOR3	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR3)
+    #define MTOUCH_SELECT_SENSOR4	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR4)
+    #define MTOUCH_SELECT_SENSOR5	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR5)
+    #define MTOUCH_SELECT_SENSOR6	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR6)
+    #define MTOUCH_SELECT_SENSOR7	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR7)
+    #define MTOUCH_SELECT_SENSOR8	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR8)
+    #define MTOUCH_SELECT_SENSOR9	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR9)
+    #define MTOUCH_SELECT_SENSOR10          __paste4(MTOUCH_AD_, MTOUCH_SENSOR10)
+    #define MTOUCH_SELECT_SENSOR11          __paste4(MTOUCH_AD_, MTOUCH_SENSOR11)
+    #define MTOUCH_SELECT_SENSOR12          __paste4(MTOUCH_AD_, MTOUCH_SENSOR12)
+    #define MTOUCH_SELECT_SENSOR13          __paste4(MTOUCH_AD_, MTOUCH_SENSOR13)
+    #define MTOUCH_SELECT_SENSOR14          __paste4(MTOUCH_AD_, MTOUCH_SENSOR14)
+    #define MTOUCH_SELECT_SENSOR15          __paste4(MTOUCH_AD_, MTOUCH_SENSOR15)
+    #define MTOUCH_SELECT_SENSOR16          __paste4(MTOUCH_AD_, MTOUCH_SENSOR16)
+    #define MTOUCH_SELECT_SENSOR17          __paste4(MTOUCH_AD_, MTOUCH_SENSOR17)
+    #define MTOUCH_SELECT_SENSOR18          __paste4(MTOUCH_AD_, MTOUCH_SENSOR18)
+    #define MTOUCH_SELECT_SENSOR19          __paste4(MTOUCH_AD_, MTOUCH_SENSOR19)
+    #define MTOUCH_SELECT_SENSOR20          __paste4(MTOUCH_AD_, MTOUCH_SENSOR20)
+    #define MTOUCH_SELECT_SENSOR21          __paste4(MTOUCH_AD_, MTOUCH_SENSOR21)
+    #define MTOUCH_SELECT_SENSOR22          __paste4(MTOUCH_AD_, MTOUCH_SENSOR22)
+    #define MTOUCH_SELECT_SENSOR23          __paste4(MTOUCH_AD_, MTOUCH_SENSOR23)
+    #define MTOUCH_SELECT_SENSOR24          __paste4(MTOUCH_AD_, MTOUCH_SENSOR24)
+    #define MTOUCH_SELECT_SENSOR25          __paste4(MTOUCH_AD_, MTOUCH_SENSOR25)
+    #define MTOUCH_SELECT_SENSOR26          __paste4(MTOUCH_AD_, MTOUCH_SENSOR26)
+    #define MTOUCH_SELECT_SENSOR27          __paste4(MTOUCH_AD_, MTOUCH_SENSOR27)
+    #define MTOUCH_SELECT_SENSOR28          __paste4(MTOUCH_AD_, MTOUCH_SENSOR28)
+    #define MTOUCH_SELECT_SENSOR29          __paste4(MTOUCH_AD_, MTOUCH_SENSOR29)
+    #define MTOUCH_SELECT_FVR_AND_GO        __paste4(MTOUCH_AD_, FVR_AND_GO)
+    #define MTOUCH_SELECT_DAC_AND_GO        __paste4(MTOUCH_AD_, DAC_AND_GO)
+    #define MTOUCH_SELECT_DAC_NOGO          __paste4(MTOUCH_AD_, DAC_NOGO)
+    #define MTOUCH_SELECT_ISO_AND_GO        __paste4(MTOUCH_AD_, ISO_AND_GO) 
+    #define MTOUCH_SELECT_ISO_NOGO          __paste4(MTOUCH_AD_, ISO_NOGO) 
+    #define MTOUCH_SELECT_REFERENCE         __paste4(MTOUCH_AD_, CVD_REFERENCE)
+    #define MTOUCH_SELECT_SENSOR(index)     __paste3(MTOUCH_SELECT_SENSOR, index)
+    
+    
 //****************************************************************************************************
 // __     __    _ _     _       _          ____             __ _                       _   _             
 // \ \   / /_ _| (_) __| | __ _| |_ ___   / ___|___  _ __  / _(_) __ _ _   _ _ __ __ _| |_(_) ___  _ __  
@@ -391,7 +774,7 @@ typedef unsigned long int uint32_t;
 #else
 #define CVD_STATE_TIMER_BITS 0
 #endif
-#if (CVD_STATE_TIMER_BITS > 8)
+#if ( (CVD_STATE_TIMER_BITS > 8) || defined(MTOUCH_EEPROM_ENABLED) )
     #define MTOUCH_STATE_TIMER()               uint16_t timer
 #else
     #define MTOUCH_STATE_TIMER()               __paste(unsigned timer  :,CVD_STATE_TIMER_BITS)
@@ -495,7 +878,7 @@ typedef unsigned long int uint32_t;
 #else
 #define CVD_STATE_DEBOUNCE_BITS 0
 #endif
-#if (CVD_STATE_DEBOUNCE_BITS > 8)
+#if (CVD_STATE_DEBOUNCE_BITS > 8) || defined(MTOUCH_EEPROM_ENABLED)
     #define MTOUCH_STATE_DEBOUNCE()               uint16_t debounce
 #elif CVD_STATE_DEBOUNCE_BITS != 0
     #define MTOUCH_STATE_DEBOUNCE()               __paste(unsigned debounce  :,CVD_STATE_DEBOUNCE_BITS)
@@ -576,7 +959,7 @@ typedef unsigned long int uint32_t;
 #else
 #define CVD_STATE_SPS_BITS 0
 #endif
-#if (CVD_STATE_SPS_BITS > 8)
+#if (CVD_STATE_SPS_BITS > 8) || defined(MTOUCH_EEPROM_ENABLED)
     #define MTOUCH_STATE_SAMPLE_COUNTER()               uint16_t sampleCounter
 #else
     #define MTOUCH_STATE_SAMPLE_COUNTER()               __paste(unsigned sampleCounter  :,CVD_STATE_SPS_BITS)
@@ -684,7 +1067,7 @@ typedef unsigned long int uint32_t;
 #else
 #define CVD_STATE_BLCOUNT_BITS 0
 #endif
-#if (CVD_STATE_BLCOUNT_BITS > 8)
+#if (CVD_STATE_BLCOUNT_BITS > 8) || defined(MTOUCH_EEPROM_ENABLED)
     #define MTOUCH_STATE_BASELINE_COUNT()         uint16_t baselineCount
     #define MTOUCH_BLCOUNT_16BITS_REQUIRED
 #else
@@ -1182,9 +1565,11 @@ typedef unsigned long int uint32_t;
     #define MTOUCH_ASM_MACRO_GLOBAL_SCAN_LABELS() asm("global sensor_0")    
     #define PRESS_THRESHOLD_INIT {THRESHOLD_PRESS_SENSOR0}
     #define RELEASE_THRESHOLD_INIT {THRESHOLD_RELEASE_SENSOR0}
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0}
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
-    #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0 }
-    #endif
+        #undef MTOUCH_UNIQUE_OVERSAMPLE_ENABLE
+        #warning Disabling MTOUCH_UNIQUE_OVERSAMPLE_ENABLE because only one sensor is enabled.
+    #endif    
 #endif
 #if MTOUCH_NUMBER_SENSORS == 2
     #define MTOUCH_INDEXMINUSONE_0 1
@@ -1194,6 +1579,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR0}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 3
     #define MTOUCH_INDEXMINUSONE_0 2
@@ -1203,6 +1589,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 4
     #define MTOUCH_INDEXMINUSONE_0 3
@@ -1212,6 +1599,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 5
     #define MTOUCH_INDEXMINUSONE_0 4
@@ -1221,6 +1609,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 6
     #define MTOUCH_INDEXMINUSONE_0 5
@@ -1230,6 +1619,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 7
     #define MTOUCH_INDEXMINUSONE_0 6
@@ -1239,6 +1629,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 8
     #define MTOUCH_INDEXMINUSONE_0 7
@@ -1248,6 +1639,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 9
     #define MTOUCH_INDEXMINUSONE_0 8
@@ -1257,6 +1649,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 10
     #define MTOUCH_INDEXMINUSONE_0 9
@@ -1266,6 +1659,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 11
     #define MTOUCH_INDEXMINUSONE_0 10
@@ -1275,6 +1669,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 12
     #define MTOUCH_INDEXMINUSONE_0 11
@@ -1284,6 +1679,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 13
     #define MTOUCH_INDEXMINUSONE_0 12
@@ -1293,6 +1689,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 14
     #define MTOUCH_INDEXMINUSONE_0 13
@@ -1302,6 +1699,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 15
     #define MTOUCH_INDEXMINUSONE_0 14
@@ -1311,6 +1709,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 16
     #define MTOUCH_INDEXMINUSONE_0 15
@@ -1320,6 +1719,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 17
     #define MTOUCH_INDEXMINUSONE_0 16
@@ -1329,6 +1729,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 18
     #define MTOUCH_INDEXMINUSONE_0 17
@@ -1338,6 +1739,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 19
     #define MTOUCH_INDEXMINUSONE_0 18
@@ -1347,6 +1749,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 20
     #define MTOUCH_INDEXMINUSONE_0 19
@@ -1356,6 +1759,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 21
     #define MTOUCH_INDEXMINUSONE_0 20
@@ -1365,6 +1769,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 22
     #define MTOUCH_INDEXMINUSONE_0 21
@@ -1374,6 +1779,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 23
     #define MTOUCH_INDEXMINUSONE_0 22
@@ -1383,6 +1789,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 24
     #define MTOUCH_INDEXMINUSONE_0 23
@@ -1392,6 +1799,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22, MTOUCH_OVERSAMPLE23 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22, MTOUCH_SELECT_SENSOR23}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 25
     #define MTOUCH_INDEXMINUSONE_0 24
@@ -1401,6 +1809,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22, MTOUCH_OVERSAMPLE23, MTOUCH_OVERSAMPLE24 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22, MTOUCH_SELECT_SENSOR23, MTOUCH_SELECT_SENSOR24}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 26
     #define MTOUCH_INDEXMINUSONE_0 25
@@ -1410,6 +1819,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22, MTOUCH_OVERSAMPLE23, MTOUCH_OVERSAMPLE24, MTOUCH_OVERSAMPLE25 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22, MTOUCH_SELECT_SENSOR23, MTOUCH_SELECT_SENSOR24, MTOUCH_SELECT_SENSOR25}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 27
     #define MTOUCH_INDEXMINUSONE_0 26
@@ -1419,6 +1829,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22, MTOUCH_OVERSAMPLE23, MTOUCH_OVERSAMPLE24, MTOUCH_OVERSAMPLE25, MTOUCH_OVERSAMPLE26 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22, MTOUCH_SELECT_SENSOR23, MTOUCH_SELECT_SENSOR24, MTOUCH_SELECT_SENSOR25, MTOUCH_SELECT_SENSOR26}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 28
     #define MTOUCH_INDEXMINUSONE_0 27
@@ -1428,6 +1839,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22, MTOUCH_OVERSAMPLE23, MTOUCH_OVERSAMPLE24, MTOUCH_OVERSAMPLE25, MTOUCH_OVERSAMPLE26, MTOUCH_OVERSAMPLE27 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22, MTOUCH_SELECT_SENSOR23, MTOUCH_SELECT_SENSOR24, MTOUCH_SELECT_SENSOR25, MTOUCH_SELECT_SENSOR26, MTOUCH_SELECT_SENSOR27}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 29
     #define MTOUCH_INDEXMINUSONE_0 28
@@ -1437,6 +1849,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22, MTOUCH_OVERSAMPLE23, MTOUCH_OVERSAMPLE24, MTOUCH_OVERSAMPLE25, MTOUCH_OVERSAMPLE26, MTOUCH_OVERSAMPLE27, MTOUCH_OVERSAMPLE28 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22, MTOUCH_SELECT_SENSOR23, MTOUCH_SELECT_SENSOR24, MTOUCH_SELECT_SENSOR25, MTOUCH_SELECT_SENSOR26, MTOUCH_SELECT_SENSOR27, MTOUCH_SELECT_SENSOR28}
 #endif
 #if MTOUCH_NUMBER_SENSORS == 30
     #define MTOUCH_INDEXMINUSONE_0 29
@@ -1446,6 +1859,7 @@ typedef unsigned long int uint32_t;
     #if defined(MTOUCH_UNIQUE_OVERSAMPLE_ENABLE)
     #define MTOUCH_UNIQUE_OVERSAMPLE_INIT   { MTOUCH_OVERSAMPLE0, MTOUCH_OVERSAMPLE1, MTOUCH_OVERSAMPLE2, MTOUCH_OVERSAMPLE3, MTOUCH_OVERSAMPLE4, MTOUCH_OVERSAMPLE5, MTOUCH_OVERSAMPLE6, MTOUCH_OVERSAMPLE7, MTOUCH_OVERSAMPLE8, MTOUCH_OVERSAMPLE9, MTOUCH_OVERSAMPLE10, MTOUCH_OVERSAMPLE11, MTOUCH_OVERSAMPLE12, MTOUCH_OVERSAMPLE13, MTOUCH_OVERSAMPLE14, MTOUCH_OVERSAMPLE15, MTOUCH_OVERSAMPLE16, MTOUCH_OVERSAMPLE17, MTOUCH_OVERSAMPLE18, MTOUCH_OVERSAMPLE19, MTOUCH_OVERSAMPLE20, MTOUCH_OVERSAMPLE21, MTOUCH_OVERSAMPLE22, MTOUCH_OVERSAMPLE23, MTOUCH_OVERSAMPLE24, MTOUCH_OVERSAMPLE25, MTOUCH_OVERSAMPLE26, MTOUCH_OVERSAMPLE27, MTOUCH_OVERSAMPLE28, MTOUCH_OVERSAMPLE29 }
     #endif
+    #define MTOUCH_SENSOR_CHANNEL_INIT  {MTOUCH_SELECT_SENSOR0, MTOUCH_SELECT_SENSOR1, MTOUCH_SELECT_SENSOR2, MTOUCH_SELECT_SENSOR3, MTOUCH_SELECT_SENSOR4, MTOUCH_SELECT_SENSOR5, MTOUCH_SELECT_SENSOR6, MTOUCH_SELECT_SENSOR7, MTOUCH_SELECT_SENSOR8, MTOUCH_SELECT_SENSOR9, MTOUCH_SELECT_SENSOR10, MTOUCH_SELECT_SENSOR11, MTOUCH_SELECT_SENSOR12, MTOUCH_SELECT_SENSOR13, MTOUCH_SELECT_SENSOR14, MTOUCH_SELECT_SENSOR15, MTOUCH_SELECT_SENSOR16, MTOUCH_SELECT_SENSOR17, MTOUCH_SELECT_SENSOR18, MTOUCH_SELECT_SENSOR19, MTOUCH_SELECT_SENSOR20, MTOUCH_SELECT_SENSOR21, MTOUCH_SELECT_SENSOR22, MTOUCH_SELECT_SENSOR23, MTOUCH_SELECT_SENSOR24, MTOUCH_SELECT_SENSOR25, MTOUCH_SELECT_SENSOR26, MTOUCH_SELECT_SENSOR27, MTOUCH_SELECT_SENSOR28, MTOUCH_SELECT_SENSOR29}
 #endif
 
 #if defined(MTOUCH_EEPROM_ENABLED)
@@ -2022,382 +2436,7 @@ typedef unsigned long int uint32_t;
 #endif
 
 
-    #if defined(MTOUCH_USE_GPIO)
-        #define MTOUCH_PORT_C_SENSOR(index)     GP
-        #define MTOUCH_PORT_ASM_SENSOR(index)   _GP
-        #define MTOUCH_LAT_C_SENSOR(index)      GPIO
-        #define MTOUCH_LAT_ASM_SENSOR(index)    _GPIO  
-        #define MTOUCH_LETTER_SENSOR0           IO
-        #define MTOUCH_LETTER_SENSOR1           IO
-        #define MTOUCH_LETTER_SENSOR2           IO
-        #define MTOUCH_LETTER_SENSOR3           IO
-        #define MTOUCH_LETTER_SENSOR4           IO
-        #define MTOUCH_LETTER_SENSOR5           IO
-        #define MTOUCH_LETTER_SENSOR6           IO
-        #define MTOUCH_LETTER_SENSOR7           IO
-    #else
-        #define MTOUCH_LETTER_SENSOR0           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR0)
-        #define MTOUCH_LETTER_SENSOR1           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR1)
-        #define MTOUCH_LETTER_SENSOR2           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR2)
-        #define MTOUCH_LETTER_SENSOR3           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR3)
-        #define MTOUCH_LETTER_SENSOR4           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR4)
-        #define MTOUCH_LETTER_SENSOR5           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR5)
-        #define MTOUCH_LETTER_SENSOR6           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR6)
-        #define MTOUCH_LETTER_SENSOR7           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR7)
-        #define MTOUCH_LETTER_SENSOR8           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR8)
-        #define MTOUCH_LETTER_SENSOR9           __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR9)
-        #define MTOUCH_LETTER_SENSOR10          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR10)
-        #define MTOUCH_LETTER_SENSOR11          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR11)
-        #define MTOUCH_LETTER_SENSOR12          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR12)
-        #define MTOUCH_LETTER_SENSOR13          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR13)
-        #define MTOUCH_LETTER_SENSOR14          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR14)
-        #define MTOUCH_LETTER_SENSOR15          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR15)
-        #define MTOUCH_LETTER_SENSOR16          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR16)
-        #define MTOUCH_LETTER_SENSOR17          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR17)
-        #define MTOUCH_LETTER_SENSOR18          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR18)
-        #define MTOUCH_LETTER_SENSOR19          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR19)
-        #define MTOUCH_LETTER_SENSOR20          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR20)
-        #define MTOUCH_LETTER_SENSOR21          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR21)
-        #define MTOUCH_LETTER_SENSOR22          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR22)
-        #define MTOUCH_LETTER_SENSOR23          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR23)
-        #define MTOUCH_LETTER_SENSOR24          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR24)
-        #define MTOUCH_LETTER_SENSOR25          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR25)
-        #define MTOUCH_LETTER_SENSOR26          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR26)
-        #define MTOUCH_LETTER_SENSOR27          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR27)
-        #define MTOUCH_LETTER_SENSOR28          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR28)
-        #define MTOUCH_LETTER_SENSOR29          __paste5(MTOUCH_LETTER_,MTOUCH_SENSOR29)
-        
-        #define MTOUCH_PORT_C_SENSOR0            __paste4(R,MTOUCH_LETTER_SENSOR0)
-        #define MTOUCH_PORT_C_SENSOR1            __paste4(R,MTOUCH_LETTER_SENSOR1)
-        #define MTOUCH_PORT_C_SENSOR2            __paste4(R,MTOUCH_LETTER_SENSOR2)
-        #define MTOUCH_PORT_C_SENSOR3            __paste4(R,MTOUCH_LETTER_SENSOR3)
-        #define MTOUCH_PORT_C_SENSOR4            __paste4(R,MTOUCH_LETTER_SENSOR4)
-        #define MTOUCH_PORT_C_SENSOR5            __paste4(R,MTOUCH_LETTER_SENSOR5)
-        #define MTOUCH_PORT_C_SENSOR6            __paste4(R,MTOUCH_LETTER_SENSOR6)
-        #define MTOUCH_PORT_C_SENSOR7            __paste4(R,MTOUCH_LETTER_SENSOR7)
-        #define MTOUCH_PORT_C_SENSOR8            __paste4(R,MTOUCH_LETTER_SENSOR8)
-        #define MTOUCH_PORT_C_SENSOR9            __paste4(R,MTOUCH_LETTER_SENSOR9)
-        #define MTOUCH_PORT_C_SENSOR10           __paste4(R,MTOUCH_LETTER_SENSOR10)
-        #define MTOUCH_PORT_C_SENSOR11           __paste4(R,MTOUCH_LETTER_SENSOR11)
-        #define MTOUCH_PORT_C_SENSOR12           __paste4(R,MTOUCH_LETTER_SENSOR12)
-        #define MTOUCH_PORT_C_SENSOR13           __paste4(R,MTOUCH_LETTER_SENSOR13)
-        #define MTOUCH_PORT_C_SENSOR14           __paste4(R,MTOUCH_LETTER_SENSOR14)
-        #define MTOUCH_PORT_C_SENSOR15           __paste4(R,MTOUCH_LETTER_SENSOR15)
-        #define MTOUCH_PORT_C_SENSOR16           __paste4(R,MTOUCH_LETTER_SENSOR16)
-        #define MTOUCH_PORT_C_SENSOR17           __paste4(R,MTOUCH_LETTER_SENSOR17)
-        #define MTOUCH_PORT_C_SENSOR18           __paste4(R,MTOUCH_LETTER_SENSOR18)
-        #define MTOUCH_PORT_C_SENSOR19           __paste4(R,MTOUCH_LETTER_SENSOR19)
-        #define MTOUCH_PORT_C_SENSOR20           __paste4(R,MTOUCH_LETTER_SENSOR20)
-        #define MTOUCH_PORT_C_SENSOR21           __paste4(R,MTOUCH_LETTER_SENSOR21)
-        #define MTOUCH_PORT_C_SENSOR22           __paste4(R,MTOUCH_LETTER_SENSOR22)
-        #define MTOUCH_PORT_C_SENSOR23           __paste4(R,MTOUCH_LETTER_SENSOR23)
-        #define MTOUCH_PORT_C_SENSOR24           __paste4(R,MTOUCH_LETTER_SENSOR24)
-        #define MTOUCH_PORT_C_SENSOR25           __paste4(R,MTOUCH_LETTER_SENSOR25)
-        #define MTOUCH_PORT_C_SENSOR26           __paste4(R,MTOUCH_LETTER_SENSOR26)
-        #define MTOUCH_PORT_C_SENSOR27           __paste4(R,MTOUCH_LETTER_SENSOR27)
-        #define MTOUCH_PORT_C_SENSOR28           __paste4(R,MTOUCH_LETTER_SENSOR28)
-        #define MTOUCH_PORT_C_SENSOR29           __paste4(R,MTOUCH_LETTER_SENSOR29)
-        #define MTOUCH_PORT_C_SENSOR(index)      __paste3(MTOUCH_PORT_C_SENSOR, index)
 
-        #define MTOUCH_PORT_ASM_SENSOR0          __paste4(_R,MTOUCH_LETTER_SENSOR0)
-        #define MTOUCH_PORT_ASM_SENSOR1          __paste4(_R,MTOUCH_LETTER_SENSOR1)
-        #define MTOUCH_PORT_ASM_SENSOR2          __paste4(_R,MTOUCH_LETTER_SENSOR2)
-        #define MTOUCH_PORT_ASM_SENSOR3          __paste4(_R,MTOUCH_LETTER_SENSOR3)
-        #define MTOUCH_PORT_ASM_SENSOR4          __paste4(_R,MTOUCH_LETTER_SENSOR4)
-        #define MTOUCH_PORT_ASM_SENSOR5          __paste4(_R,MTOUCH_LETTER_SENSOR5)
-        #define MTOUCH_PORT_ASM_SENSOR6          __paste4(_R,MTOUCH_LETTER_SENSOR6)
-        #define MTOUCH_PORT_ASM_SENSOR7          __paste4(_R,MTOUCH_LETTER_SENSOR7)
-        #define MTOUCH_PORT_ASM_SENSOR8          __paste4(_R,MTOUCH_LETTER_SENSOR8)
-        #define MTOUCH_PORT_ASM_SENSOR9          __paste4(_R,MTOUCH_LETTER_SENSOR9)
-        #define MTOUCH_PORT_ASM_SENSOR10         __paste4(_R,MTOUCH_LETTER_SENSOR10)
-        #define MTOUCH_PORT_ASM_SENSOR11         __paste4(_R,MTOUCH_LETTER_SENSOR11)
-        #define MTOUCH_PORT_ASM_SENSOR12         __paste4(_R,MTOUCH_LETTER_SENSOR12)
-        #define MTOUCH_PORT_ASM_SENSOR13         __paste4(_R,MTOUCH_LETTER_SENSOR13)
-        #define MTOUCH_PORT_ASM_SENSOR14         __paste4(_R,MTOUCH_LETTER_SENSOR14)
-        #define MTOUCH_PORT_ASM_SENSOR15         __paste4(_R,MTOUCH_LETTER_SENSOR15)
-        #define MTOUCH_PORT_ASM_SENSOR16         __paste4(_R,MTOUCH_LETTER_SENSOR16)
-        #define MTOUCH_PORT_ASM_SENSOR17         __paste4(_R,MTOUCH_LETTER_SENSOR17)
-        #define MTOUCH_PORT_ASM_SENSOR18         __paste4(_R,MTOUCH_LETTER_SENSOR18)
-        #define MTOUCH_PORT_ASM_SENSOR19         __paste4(_R,MTOUCH_LETTER_SENSOR19)
-        #define MTOUCH_PORT_ASM_SENSOR20         __paste4(_R,MTOUCH_LETTER_SENSOR20)
-        #define MTOUCH_PORT_ASM_SENSOR21         __paste4(_R,MTOUCH_LETTER_SENSOR21)
-        #define MTOUCH_PORT_ASM_SENSOR22         __paste4(_R,MTOUCH_LETTER_SENSOR22)
-        #define MTOUCH_PORT_ASM_SENSOR23         __paste4(_R,MTOUCH_LETTER_SENSOR23)
-        #define MTOUCH_PORT_ASM_SENSOR24         __paste4(_R,MTOUCH_LETTER_SENSOR24)
-        #define MTOUCH_PORT_ASM_SENSOR25         __paste4(_R,MTOUCH_LETTER_SENSOR25)
-        #define MTOUCH_PORT_ASM_SENSOR26         __paste4(_R,MTOUCH_LETTER_SENSOR26)
-        #define MTOUCH_PORT_ASM_SENSOR27         __paste4(_R,MTOUCH_LETTER_SENSOR27)
-        #define MTOUCH_PORT_ASM_SENSOR28         __paste4(_R,MTOUCH_LETTER_SENSOR28)
-        #define MTOUCH_PORT_ASM_SENSOR29         __paste4(_R,MTOUCH_LETTER_SENSOR29)
-        #define MTOUCH_PORT_ASM_SENSOR(index)    __paste3(MTOUCH_PORT_ASM_SENSOR, index)
-    #endif
-    
-        
-    
-    #if defined(MTOUCH_USE_PORT)
-        #define MTOUCH_LAT_C_SENSOR0            __paste4(PORT,MTOUCH_LETTER_SENSOR0)
-        #define MTOUCH_LAT_C_SENSOR1            __paste4(PORT,MTOUCH_LETTER_SENSOR1)
-        #define MTOUCH_LAT_C_SENSOR2            __paste4(PORT,MTOUCH_LETTER_SENSOR2)
-        #define MTOUCH_LAT_C_SENSOR3            __paste4(PORT,MTOUCH_LETTER_SENSOR3)
-        #define MTOUCH_LAT_C_SENSOR4            __paste4(PORT,MTOUCH_LETTER_SENSOR4)
-        #define MTOUCH_LAT_C_SENSOR5            __paste4(PORT,MTOUCH_LETTER_SENSOR5)
-        #define MTOUCH_LAT_C_SENSOR6            __paste4(PORT,MTOUCH_LETTER_SENSOR6)
-        #define MTOUCH_LAT_C_SENSOR7            __paste4(PORT,MTOUCH_LETTER_SENSOR7)
-        #define MTOUCH_LAT_C_SENSOR8            __paste4(PORT,MTOUCH_LETTER_SENSOR8)
-        #define MTOUCH_LAT_C_SENSOR9            __paste4(PORT,MTOUCH_LETTER_SENSOR9)
-        #define MTOUCH_LAT_C_SENSOR10           __paste4(PORT,MTOUCH_LETTER_SENSOR10)
-        #define MTOUCH_LAT_C_SENSOR11           __paste4(PORT,MTOUCH_LETTER_SENSOR11)
-        #define MTOUCH_LAT_C_SENSOR12           __paste4(PORT,MTOUCH_LETTER_SENSOR12)
-        #define MTOUCH_LAT_C_SENSOR13           __paste4(PORT,MTOUCH_LETTER_SENSOR13)
-        #define MTOUCH_LAT_C_SENSOR14           __paste4(PORT,MTOUCH_LETTER_SENSOR14)
-        #define MTOUCH_LAT_C_SENSOR15           __paste4(PORT,MTOUCH_LETTER_SENSOR15)
-        #define MTOUCH_LAT_C_SENSOR16           __paste4(PORT,MTOUCH_LETTER_SENSOR16)
-        #define MTOUCH_LAT_C_SENSOR17           __paste4(PORT,MTOUCH_LETTER_SENSOR17)
-        #define MTOUCH_LAT_C_SENSOR18           __paste4(PORT,MTOUCH_LETTER_SENSOR18)
-        #define MTOUCH_LAT_C_SENSOR19           __paste4(PORT,MTOUCH_LETTER_SENSOR19)
-        #define MTOUCH_LAT_C_SENSOR20           __paste4(PORT,MTOUCH_LETTER_SENSOR20)
-        #define MTOUCH_LAT_C_SENSOR21           __paste4(PORT,MTOUCH_LETTER_SENSOR21)
-        #define MTOUCH_LAT_C_SENSOR22           __paste4(PORT,MTOUCH_LETTER_SENSOR22)
-        #define MTOUCH_LAT_C_SENSOR23           __paste4(PORT,MTOUCH_LETTER_SENSOR23)
-        #define MTOUCH_LAT_C_SENSOR24           __paste4(PORT,MTOUCH_LETTER_SENSOR24)
-        #define MTOUCH_LAT_C_SENSOR25           __paste4(PORT,MTOUCH_LETTER_SENSOR25)
-        #define MTOUCH_LAT_C_SENSOR26           __paste4(PORT,MTOUCH_LETTER_SENSOR26)
-        #define MTOUCH_LAT_C_SENSOR27           __paste4(PORT,MTOUCH_LETTER_SENSOR27)
-        #define MTOUCH_LAT_C_SENSOR28           __paste4(PORT,MTOUCH_LETTER_SENSOR28)
-        #define MTOUCH_LAT_C_SENSOR29           __paste4(PORT,MTOUCH_LETTER_SENSOR29)
-        #define MTOUCH_LAT_C_SENSOR(index)      __paste3(MTOUCH_LAT_C_SENSOR, index)
-
-        #define MTOUCH_LAT_ASM_SENSOR0          __paste4(_PORT,MTOUCH_LETTER_SENSOR0)
-        #define MTOUCH_LAT_ASM_SENSOR1          __paste4(_PORT,MTOUCH_LETTER_SENSOR1)
-        #define MTOUCH_LAT_ASM_SENSOR2          __paste4(_PORT,MTOUCH_LETTER_SENSOR2)
-        #define MTOUCH_LAT_ASM_SENSOR3          __paste4(_PORT,MTOUCH_LETTER_SENSOR3)
-        #define MTOUCH_LAT_ASM_SENSOR4          __paste4(_PORT,MTOUCH_LETTER_SENSOR4)
-        #define MTOUCH_LAT_ASM_SENSOR5          __paste4(_PORT,MTOUCH_LETTER_SENSOR5)
-        #define MTOUCH_LAT_ASM_SENSOR6          __paste4(_PORT,MTOUCH_LETTER_SENSOR6)
-        #define MTOUCH_LAT_ASM_SENSOR7          __paste4(_PORT,MTOUCH_LETTER_SENSOR7)
-        #define MTOUCH_LAT_ASM_SENSOR8          __paste4(_PORT,MTOUCH_LETTER_SENSOR8)
-        #define MTOUCH_LAT_ASM_SENSOR9          __paste4(_PORT,MTOUCH_LETTER_SENSOR9)
-        #define MTOUCH_LAT_ASM_SENSOR10         __paste4(_PORT,MTOUCH_LETTER_SENSOR10)
-        #define MTOUCH_LAT_ASM_SENSOR11         __paste4(_PORT,MTOUCH_LETTER_SENSOR11)
-        #define MTOUCH_LAT_ASM_SENSOR12         __paste4(_PORT,MTOUCH_LETTER_SENSOR12)
-        #define MTOUCH_LAT_ASM_SENSOR13         __paste4(_PORT,MTOUCH_LETTER_SENSOR13)
-        #define MTOUCH_LAT_ASM_SENSOR14         __paste4(_PORT,MTOUCH_LETTER_SENSOR14)
-        #define MTOUCH_LAT_ASM_SENSOR15         __paste4(_PORT,MTOUCH_LETTER_SENSOR15)
-        #define MTOUCH_LAT_ASM_SENSOR16         __paste4(_PORT,MTOUCH_LETTER_SENSOR16)
-        #define MTOUCH_LAT_ASM_SENSOR17         __paste4(_PORT,MTOUCH_LETTER_SENSOR17)
-        #define MTOUCH_LAT_ASM_SENSOR18         __paste4(_PORT,MTOUCH_LETTER_SENSOR18)
-        #define MTOUCH_LAT_ASM_SENSOR19         __paste4(_PORT,MTOUCH_LETTER_SENSOR19)
-        #define MTOUCH_LAT_ASM_SENSOR20         __paste4(_PORT,MTOUCH_LETTER_SENSOR20)
-        #define MTOUCH_LAT_ASM_SENSOR21         __paste4(_PORT,MTOUCH_LETTER_SENSOR21)
-        #define MTOUCH_LAT_ASM_SENSOR22         __paste4(_PORT,MTOUCH_LETTER_SENSOR22)
-        #define MTOUCH_LAT_ASM_SENSOR23         __paste4(_PORT,MTOUCH_LETTER_SENSOR23)
-        #define MTOUCH_LAT_ASM_SENSOR24         __paste4(_PORT,MTOUCH_LETTER_SENSOR24)
-        #define MTOUCH_LAT_ASM_SENSOR25         __paste4(_PORT,MTOUCH_LETTER_SENSOR25)
-        #define MTOUCH_LAT_ASM_SENSOR26         __paste4(_PORT,MTOUCH_LETTER_SENSOR26)
-        #define MTOUCH_LAT_ASM_SENSOR27         __paste4(_PORT,MTOUCH_LETTER_SENSOR27)
-        #define MTOUCH_LAT_ASM_SENSOR28         __paste4(_PORT,MTOUCH_LETTER_SENSOR28)
-        #define MTOUCH_LAT_ASM_SENSOR29         __paste4(_PORT,MTOUCH_LETTER_SENSOR29)
-        #define MTOUCH_LAT_ASM_SENSOR(index)    __paste3(MTOUCH_LAT_ASM_SENSOR, index)
-    #elif !defined(MTOUCH_USE_GPIO)
-        #define MTOUCH_LAT_C_SENSOR0            __paste4(LAT,MTOUCH_LETTER_SENSOR0)
-        #define MTOUCH_LAT_C_SENSOR1            __paste4(LAT,MTOUCH_LETTER_SENSOR1)
-        #define MTOUCH_LAT_C_SENSOR2            __paste4(LAT,MTOUCH_LETTER_SENSOR2)
-        #define MTOUCH_LAT_C_SENSOR3            __paste4(LAT,MTOUCH_LETTER_SENSOR3)
-        #define MTOUCH_LAT_C_SENSOR4            __paste4(LAT,MTOUCH_LETTER_SENSOR4)
-        #define MTOUCH_LAT_C_SENSOR5            __paste4(LAT,MTOUCH_LETTER_SENSOR5)
-        #define MTOUCH_LAT_C_SENSOR6            __paste4(LAT,MTOUCH_LETTER_SENSOR6)
-        #define MTOUCH_LAT_C_SENSOR7            __paste4(LAT,MTOUCH_LETTER_SENSOR7)
-        #define MTOUCH_LAT_C_SENSOR8            __paste4(LAT,MTOUCH_LETTER_SENSOR8)
-        #define MTOUCH_LAT_C_SENSOR9            __paste4(LAT,MTOUCH_LETTER_SENSOR9)
-        #define MTOUCH_LAT_C_SENSOR10           __paste4(LAT,MTOUCH_LETTER_SENSOR10)
-        #define MTOUCH_LAT_C_SENSOR11           __paste4(LAT,MTOUCH_LETTER_SENSOR11)
-        #define MTOUCH_LAT_C_SENSOR12           __paste4(LAT,MTOUCH_LETTER_SENSOR12)
-        #define MTOUCH_LAT_C_SENSOR13           __paste4(LAT,MTOUCH_LETTER_SENSOR13)
-        #define MTOUCH_LAT_C_SENSOR14           __paste4(LAT,MTOUCH_LETTER_SENSOR14)
-        #define MTOUCH_LAT_C_SENSOR15           __paste4(LAT,MTOUCH_LETTER_SENSOR15)
-        #define MTOUCH_LAT_C_SENSOR16           __paste4(LAT,MTOUCH_LETTER_SENSOR16)
-        #define MTOUCH_LAT_C_SENSOR17           __paste4(LAT,MTOUCH_LETTER_SENSOR17)
-        #define MTOUCH_LAT_C_SENSOR18           __paste4(LAT,MTOUCH_LETTER_SENSOR18)
-        #define MTOUCH_LAT_C_SENSOR19           __paste4(LAT,MTOUCH_LETTER_SENSOR19)
-        #define MTOUCH_LAT_C_SENSOR20           __paste4(LAT,MTOUCH_LETTER_SENSOR20)
-        #define MTOUCH_LAT_C_SENSOR21           __paste4(LAT,MTOUCH_LETTER_SENSOR21)
-        #define MTOUCH_LAT_C_SENSOR22           __paste4(LAT,MTOUCH_LETTER_SENSOR22)
-        #define MTOUCH_LAT_C_SENSOR23           __paste4(LAT,MTOUCH_LETTER_SENSOR23)
-        #define MTOUCH_LAT_C_SENSOR24           __paste4(LAT,MTOUCH_LETTER_SENSOR24)
-        #define MTOUCH_LAT_C_SENSOR25           __paste4(LAT,MTOUCH_LETTER_SENSOR25)
-        #define MTOUCH_LAT_C_SENSOR26           __paste4(LAT,MTOUCH_LETTER_SENSOR26)
-        #define MTOUCH_LAT_C_SENSOR27           __paste4(LAT,MTOUCH_LETTER_SENSOR27)
-        #define MTOUCH_LAT_C_SENSOR28           __paste4(LAT,MTOUCH_LETTER_SENSOR28)
-        #define MTOUCH_LAT_C_SENSOR29           __paste4(LAT,MTOUCH_LETTER_SENSOR29)
-        #define MTOUCH_LAT_C_SENSOR(index)      __paste3(MTOUCH_LAT_C_SENSOR, index)
-
-        #define MTOUCH_LAT_ASM_SENSOR0          __paste4(_LAT,MTOUCH_LETTER_SENSOR0)
-        #define MTOUCH_LAT_ASM_SENSOR1          __paste4(_LAT,MTOUCH_LETTER_SENSOR1)
-        #define MTOUCH_LAT_ASM_SENSOR2          __paste4(_LAT,MTOUCH_LETTER_SENSOR2)
-        #define MTOUCH_LAT_ASM_SENSOR3          __paste4(_LAT,MTOUCH_LETTER_SENSOR3)
-        #define MTOUCH_LAT_ASM_SENSOR4          __paste4(_LAT,MTOUCH_LETTER_SENSOR4)
-        #define MTOUCH_LAT_ASM_SENSOR5          __paste4(_LAT,MTOUCH_LETTER_SENSOR5)
-        #define MTOUCH_LAT_ASM_SENSOR6          __paste4(_LAT,MTOUCH_LETTER_SENSOR6)
-        #define MTOUCH_LAT_ASM_SENSOR7          __paste4(_LAT,MTOUCH_LETTER_SENSOR7)
-        #define MTOUCH_LAT_ASM_SENSOR8          __paste4(_LAT,MTOUCH_LETTER_SENSOR8)
-        #define MTOUCH_LAT_ASM_SENSOR9          __paste4(_LAT,MTOUCH_LETTER_SENSOR9)
-        #define MTOUCH_LAT_ASM_SENSOR10         __paste4(_LAT,MTOUCH_LETTER_SENSOR10)
-        #define MTOUCH_LAT_ASM_SENSOR11         __paste4(_LAT,MTOUCH_LETTER_SENSOR11)
-        #define MTOUCH_LAT_ASM_SENSOR12         __paste4(_LAT,MTOUCH_LETTER_SENSOR12)
-        #define MTOUCH_LAT_ASM_SENSOR13         __paste4(_LAT,MTOUCH_LETTER_SENSOR13)
-        #define MTOUCH_LAT_ASM_SENSOR14         __paste4(_LAT,MTOUCH_LETTER_SENSOR14)
-        #define MTOUCH_LAT_ASM_SENSOR15         __paste4(_LAT,MTOUCH_LETTER_SENSOR15)
-        #define MTOUCH_LAT_ASM_SENSOR16         __paste4(_LAT,MTOUCH_LETTER_SENSOR16)
-        #define MTOUCH_LAT_ASM_SENSOR17         __paste4(_LAT,MTOUCH_LETTER_SENSOR17)
-        #define MTOUCH_LAT_ASM_SENSOR18         __paste4(_LAT,MTOUCH_LETTER_SENSOR18)
-        #define MTOUCH_LAT_ASM_SENSOR19         __paste4(_LAT,MTOUCH_LETTER_SENSOR19)
-        #define MTOUCH_LAT_ASM_SENSOR20         __paste4(_LAT,MTOUCH_LETTER_SENSOR20)
-        #define MTOUCH_LAT_ASM_SENSOR21         __paste4(_LAT,MTOUCH_LETTER_SENSOR21)
-        #define MTOUCH_LAT_ASM_SENSOR22         __paste4(_LAT,MTOUCH_LETTER_SENSOR22)
-        #define MTOUCH_LAT_ASM_SENSOR23         __paste4(_LAT,MTOUCH_LETTER_SENSOR23)
-        #define MTOUCH_LAT_ASM_SENSOR24         __paste4(_LAT,MTOUCH_LETTER_SENSOR24)
-        #define MTOUCH_LAT_ASM_SENSOR25         __paste4(_LAT,MTOUCH_LETTER_SENSOR25)
-        #define MTOUCH_LAT_ASM_SENSOR26         __paste4(_LAT,MTOUCH_LETTER_SENSOR26)
-        #define MTOUCH_LAT_ASM_SENSOR27         __paste4(_LAT,MTOUCH_LETTER_SENSOR27)
-        #define MTOUCH_LAT_ASM_SENSOR28         __paste4(_LAT,MTOUCH_LETTER_SENSOR28)
-        #define MTOUCH_LAT_ASM_SENSOR29         __paste4(_LAT,MTOUCH_LETTER_SENSOR29)
-        #define MTOUCH_LAT_ASM_SENSOR(index)    __paste3(MTOUCH_LAT_ASM_SENSOR, index)
-    #endif
-
-    #define MTOUCH_TRIS_C_SENSOR0           __paste4(TRIS,MTOUCH_LETTER_SENSOR0)
-    #define MTOUCH_TRIS_C_SENSOR1           __paste4(TRIS,MTOUCH_LETTER_SENSOR1)
-    #define MTOUCH_TRIS_C_SENSOR2           __paste4(TRIS,MTOUCH_LETTER_SENSOR2)
-    #define MTOUCH_TRIS_C_SENSOR3           __paste4(TRIS,MTOUCH_LETTER_SENSOR3)
-    #define MTOUCH_TRIS_C_SENSOR4           __paste4(TRIS,MTOUCH_LETTER_SENSOR4)
-    #define MTOUCH_TRIS_C_SENSOR5           __paste4(TRIS,MTOUCH_LETTER_SENSOR5)
-    #define MTOUCH_TRIS_C_SENSOR6           __paste4(TRIS,MTOUCH_LETTER_SENSOR6)
-    #define MTOUCH_TRIS_C_SENSOR7           __paste4(TRIS,MTOUCH_LETTER_SENSOR7)
-    #define MTOUCH_TRIS_C_SENSOR8           __paste4(TRIS,MTOUCH_LETTER_SENSOR8)
-    #define MTOUCH_TRIS_C_SENSOR9           __paste4(TRIS,MTOUCH_LETTER_SENSOR9)
-    #define MTOUCH_TRIS_C_SENSOR10          __paste4(TRIS,MTOUCH_LETTER_SENSOR10)
-    #define MTOUCH_TRIS_C_SENSOR11          __paste4(TRIS,MTOUCH_LETTER_SENSOR11)
-    #define MTOUCH_TRIS_C_SENSOR12          __paste4(TRIS,MTOUCH_LETTER_SENSOR12)
-    #define MTOUCH_TRIS_C_SENSOR13          __paste4(TRIS,MTOUCH_LETTER_SENSOR13)
-    #define MTOUCH_TRIS_C_SENSOR14          __paste4(TRIS,MTOUCH_LETTER_SENSOR14)
-    #define MTOUCH_TRIS_C_SENSOR15          __paste4(TRIS,MTOUCH_LETTER_SENSOR15)
-    #define MTOUCH_TRIS_C_SENSOR16          __paste4(TRIS,MTOUCH_LETTER_SENSOR16)
-    #define MTOUCH_TRIS_C_SENSOR17          __paste4(TRIS,MTOUCH_LETTER_SENSOR17)
-    #define MTOUCH_TRIS_C_SENSOR18          __paste4(TRIS,MTOUCH_LETTER_SENSOR18)
-    #define MTOUCH_TRIS_C_SENSOR19          __paste4(TRIS,MTOUCH_LETTER_SENSOR19)
-    #define MTOUCH_TRIS_C_SENSOR20          __paste4(TRIS,MTOUCH_LETTER_SENSOR20)
-    #define MTOUCH_TRIS_C_SENSOR21          __paste4(TRIS,MTOUCH_LETTER_SENSOR21)
-    #define MTOUCH_TRIS_C_SENSOR22          __paste4(TRIS,MTOUCH_LETTER_SENSOR22)
-    #define MTOUCH_TRIS_C_SENSOR23          __paste4(TRIS,MTOUCH_LETTER_SENSOR23)
-    #define MTOUCH_TRIS_C_SENSOR24          __paste4(TRIS,MTOUCH_LETTER_SENSOR24)
-    #define MTOUCH_TRIS_C_SENSOR25          __paste4(TRIS,MTOUCH_LETTER_SENSOR25)
-    #define MTOUCH_TRIS_C_SENSOR26          __paste4(TRIS,MTOUCH_LETTER_SENSOR26)
-    #define MTOUCH_TRIS_C_SENSOR27          __paste4(TRIS,MTOUCH_LETTER_SENSOR27)
-    #define MTOUCH_TRIS_C_SENSOR28          __paste4(TRIS,MTOUCH_LETTER_SENSOR28)
-    #define MTOUCH_TRIS_C_SENSOR29          __paste4(TRIS,MTOUCH_LETTER_SENSOR29)
-    #define MTOUCH_TRIS_C_SENSOR(index)     __paste3(MTOUCH_TRIS_C_SENSOR, index)
-
-    #define MTOUCH_TRIS_ASM_SENSOR0         __paste4(_TRIS,MTOUCH_LETTER_SENSOR0)
-    #define MTOUCH_TRIS_ASM_SENSOR1         __paste4(_TRIS,MTOUCH_LETTER_SENSOR1)
-    #define MTOUCH_TRIS_ASM_SENSOR2         __paste4(_TRIS,MTOUCH_LETTER_SENSOR2)
-    #define MTOUCH_TRIS_ASM_SENSOR3         __paste4(_TRIS,MTOUCH_LETTER_SENSOR3)
-    #define MTOUCH_TRIS_ASM_SENSOR4         __paste4(_TRIS,MTOUCH_LETTER_SENSOR4)
-    #define MTOUCH_TRIS_ASM_SENSOR5         __paste4(_TRIS,MTOUCH_LETTER_SENSOR5)
-    #define MTOUCH_TRIS_ASM_SENSOR6         __paste4(_TRIS,MTOUCH_LETTER_SENSOR6)
-    #define MTOUCH_TRIS_ASM_SENSOR7         __paste4(_TRIS,MTOUCH_LETTER_SENSOR7)
-    #define MTOUCH_TRIS_ASM_SENSOR8         __paste4(_TRIS,MTOUCH_LETTER_SENSOR8)
-    #define MTOUCH_TRIS_ASM_SENSOR9         __paste4(_TRIS,MTOUCH_LETTER_SENSOR9)
-    #define MTOUCH_TRIS_ASM_SENSOR10        __paste4(_TRIS,MTOUCH_LETTER_SENSOR10)
-    #define MTOUCH_TRIS_ASM_SENSOR11        __paste4(_TRIS,MTOUCH_LETTER_SENSOR11)
-    #define MTOUCH_TRIS_ASM_SENSOR12        __paste4(_TRIS,MTOUCH_LETTER_SENSOR12)
-    #define MTOUCH_TRIS_ASM_SENSOR13        __paste4(_TRIS,MTOUCH_LETTER_SENSOR13)
-    #define MTOUCH_TRIS_ASM_SENSOR14        __paste4(_TRIS,MTOUCH_LETTER_SENSOR14)
-    #define MTOUCH_TRIS_ASM_SENSOR15        __paste4(_TRIS,MTOUCH_LETTER_SENSOR15)
-    #define MTOUCH_TRIS_ASM_SENSOR16        __paste4(_TRIS,MTOUCH_LETTER_SENSOR16)
-    #define MTOUCH_TRIS_ASM_SENSOR17        __paste4(_TRIS,MTOUCH_LETTER_SENSOR17)
-    #define MTOUCH_TRIS_ASM_SENSOR18        __paste4(_TRIS,MTOUCH_LETTER_SENSOR18)
-    #define MTOUCH_TRIS_ASM_SENSOR19        __paste4(_TRIS,MTOUCH_LETTER_SENSOR19)
-    #define MTOUCH_TRIS_ASM_SENSOR20        __paste4(_TRIS,MTOUCH_LETTER_SENSOR20)
-    #define MTOUCH_TRIS_ASM_SENSOR21        __paste4(_TRIS,MTOUCH_LETTER_SENSOR21)
-    #define MTOUCH_TRIS_ASM_SENSOR22        __paste4(_TRIS,MTOUCH_LETTER_SENSOR22)
-    #define MTOUCH_TRIS_ASM_SENSOR23        __paste4(_TRIS,MTOUCH_LETTER_SENSOR23)
-    #define MTOUCH_TRIS_ASM_SENSOR24        __paste4(_TRIS,MTOUCH_LETTER_SENSOR24)
-    #define MTOUCH_TRIS_ASM_SENSOR25        __paste4(_TRIS,MTOUCH_LETTER_SENSOR25)
-    #define MTOUCH_TRIS_ASM_SENSOR26        __paste4(_TRIS,MTOUCH_LETTER_SENSOR26)
-    #define MTOUCH_TRIS_ASM_SENSOR27        __paste4(_TRIS,MTOUCH_LETTER_SENSOR27)
-    #define MTOUCH_TRIS_ASM_SENSOR28        __paste4(_TRIS,MTOUCH_LETTER_SENSOR28)
-    #define MTOUCH_TRIS_ASM_SENSOR29        __paste4(_TRIS,MTOUCH_LETTER_SENSOR29)
-    #define MTOUCH_TRIS_ASM_SENSOR(index)   __paste3(MTOUCH_TRIS_ASM_SENSOR, index)
-
-    #define MTOUCH_PIN_SENSOR0              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR0)
-    #define MTOUCH_PIN_SENSOR1              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR1)
-    #define MTOUCH_PIN_SENSOR2              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR2)
-    #define MTOUCH_PIN_SENSOR3              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR3)
-    #define MTOUCH_PIN_SENSOR4              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR4)
-    #define MTOUCH_PIN_SENSOR5              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR5)
-    #define MTOUCH_PIN_SENSOR6              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR6)
-    #define MTOUCH_PIN_SENSOR7              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR7)
-    #define MTOUCH_PIN_SENSOR8              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR8)
-    #define MTOUCH_PIN_SENSOR9              __paste4(MTOUCH_PIN_,MTOUCH_SENSOR9)
-    #define MTOUCH_PIN_SENSOR10             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR10)
-    #define MTOUCH_PIN_SENSOR11             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR11)
-    #define MTOUCH_PIN_SENSOR12             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR12)
-    #define MTOUCH_PIN_SENSOR13             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR13)
-    #define MTOUCH_PIN_SENSOR14             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR14)
-    #define MTOUCH_PIN_SENSOR15             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR15)
-    #define MTOUCH_PIN_SENSOR16             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR16)
-    #define MTOUCH_PIN_SENSOR17             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR17)
-    #define MTOUCH_PIN_SENSOR18             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR18)
-    #define MTOUCH_PIN_SENSOR19             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR19)
-    #define MTOUCH_PIN_SENSOR20             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR20)
-    #define MTOUCH_PIN_SENSOR21             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR21)
-    #define MTOUCH_PIN_SENSOR22             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR22)
-    #define MTOUCH_PIN_SENSOR23             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR23)
-    #define MTOUCH_PIN_SENSOR24             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR24)
-    #define MTOUCH_PIN_SENSOR25             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR25)
-    #define MTOUCH_PIN_SENSOR26             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR26)
-    #define MTOUCH_PIN_SENSOR27             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR27)
-    #define MTOUCH_PIN_SENSOR28             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR28)
-    #define MTOUCH_PIN_SENSOR29             __paste4(MTOUCH_PIN_,MTOUCH_SENSOR29)
-    #define MTOUCH_PIN_REFERENCE            __paste4(MTOUCH_PIN_,CVD_REFERENCE)
-    #define MTOUCH_PIN_SENSOR(index)        __paste3(MTOUCH_PIN_SENSOR, index)
-        
-    #define MTOUCH_SELECT_SENSOR0	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR0)
-    #define MTOUCH_SELECT_SENSOR1	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR1)
-    #define MTOUCH_SELECT_SENSOR2	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR2)
-    #define MTOUCH_SELECT_SENSOR3	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR3)
-    #define MTOUCH_SELECT_SENSOR4	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR4)
-    #define MTOUCH_SELECT_SENSOR5	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR5)
-    #define MTOUCH_SELECT_SENSOR6	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR6)
-    #define MTOUCH_SELECT_SENSOR7	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR7)
-    #define MTOUCH_SELECT_SENSOR8	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR8)
-    #define MTOUCH_SELECT_SENSOR9	        __paste4(MTOUCH_AD_, MTOUCH_SENSOR9)
-    #define MTOUCH_SELECT_SENSOR10          __paste4(MTOUCH_AD_, MTOUCH_SENSOR10)
-    #define MTOUCH_SELECT_SENSOR11          __paste4(MTOUCH_AD_, MTOUCH_SENSOR11)
-    #define MTOUCH_SELECT_SENSOR12          __paste4(MTOUCH_AD_, MTOUCH_SENSOR12)
-    #define MTOUCH_SELECT_SENSOR13          __paste4(MTOUCH_AD_, MTOUCH_SENSOR13)
-    #define MTOUCH_SELECT_SENSOR14          __paste4(MTOUCH_AD_, MTOUCH_SENSOR14)
-    #define MTOUCH_SELECT_SENSOR15          __paste4(MTOUCH_AD_, MTOUCH_SENSOR15)
-    #define MTOUCH_SELECT_SENSOR16          __paste4(MTOUCH_AD_, MTOUCH_SENSOR16)
-    #define MTOUCH_SELECT_SENSOR17          __paste4(MTOUCH_AD_, MTOUCH_SENSOR17)
-    #define MTOUCH_SELECT_SENSOR18          __paste4(MTOUCH_AD_, MTOUCH_SENSOR18)
-    #define MTOUCH_SELECT_SENSOR19          __paste4(MTOUCH_AD_, MTOUCH_SENSOR19)
-    #define MTOUCH_SELECT_SENSOR20          __paste4(MTOUCH_AD_, MTOUCH_SENSOR20)
-    #define MTOUCH_SELECT_SENSOR21          __paste4(MTOUCH_AD_, MTOUCH_SENSOR21)
-    #define MTOUCH_SELECT_SENSOR22          __paste4(MTOUCH_AD_, MTOUCH_SENSOR22)
-    #define MTOUCH_SELECT_SENSOR23          __paste4(MTOUCH_AD_, MTOUCH_SENSOR23)
-    #define MTOUCH_SELECT_SENSOR24          __paste4(MTOUCH_AD_, MTOUCH_SENSOR24)
-    #define MTOUCH_SELECT_SENSOR25          __paste4(MTOUCH_AD_, MTOUCH_SENSOR25)
-    #define MTOUCH_SELECT_SENSOR26          __paste4(MTOUCH_AD_, MTOUCH_SENSOR26)
-    #define MTOUCH_SELECT_SENSOR27          __paste4(MTOUCH_AD_, MTOUCH_SENSOR27)
-    #define MTOUCH_SELECT_SENSOR28          __paste4(MTOUCH_AD_, MTOUCH_SENSOR28)
-    #define MTOUCH_SELECT_SENSOR29          __paste4(MTOUCH_AD_, MTOUCH_SENSOR29)
-    #define MTOUCH_SELECT_FVR_AND_GO        __paste4(MTOUCH_AD_, FVR_AND_GO)
-    #define MTOUCH_SELECT_DAC_AND_GO        __paste4(MTOUCH_AD_, DAC_AND_GO)
-    #define MTOUCH_SELECT_DAC_NOGO          __paste4(MTOUCH_AD_, DAC_NOGO)
-    #define MTOUCH_SELECT_ISO_AND_GO        __paste4(MTOUCH_AD_, ISO_AND_GO) 
-    #define MTOUCH_SELECT_ISO_NOGO          __paste4(MTOUCH_AD_, ISO_NOGO) 
-    #define MTOUCH_SELECT_REFERENCE         __paste4(MTOUCH_AD_, CVD_REFERENCE)
-    #define MTOUCH_SELECT_SENSOR(index)     __paste3(MTOUCH_SELECT_SENSOR, index)
     
 // Include the macro library header file that corresponds to the currently selected PIC microcontroller's core.
 #if defined(_PIC14E)
@@ -2536,14 +2575,17 @@ typedef unsigned long int uint32_t;
         
     #endif
     
-    #if   (PIC_ADC_BITS ==  8)
-        #define MTOUCH_ADC_INIT()       PIC_ADC_SETCLK();
-    #elif (PIC_ADC_BITS == 10)
-        #define MTOUCH_ADC_INIT()       PIC_ADC_SETCLK();   PIC_ADC_ADFM = PIC_ADC_ADFM_RIGHT;
-    #elif (PIC_ADC_BITS == 12)
-        #define MTOUCH_ADC_INIT()       PIC_ADC_SETCLK();   PIC_ADC_ADFM = PIC_ADC_ADFM_RIGHT;
+    #if   defined(PIC_ADC_HCVD_AVAILABLE)
+        #define MTOUCH_ADC_INIT()       mTouch_HCVD_Init();
+    #else
+        #if   (PIC_ADC_BITS ==  8)
+            #define MTOUCH_ADC_INIT()       PIC_ADC_SETCLK();
+        #elif (PIC_ADC_BITS == 10)
+            #define MTOUCH_ADC_INIT()       PIC_ADC_SETCLK();   PIC_ADC_ADFM = PIC_ADC_ADFM_RIGHT;
+        #elif (PIC_ADC_BITS == 12)
+            #define MTOUCH_ADC_INIT()       PIC_ADC_SETCLK();   PIC_ADC_ADFM = PIC_ADC_ADFM_RIGHT;
+        #endif
     #endif
-
     #if (MTOUCH_NUMBER_SENSORS <= 8)
     #define MTOUCH_STATEMASK_BYTES  1
     #elif (MTOUCH_NUMBER_SENSORS <= 16)

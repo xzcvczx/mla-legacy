@@ -82,6 +82,52 @@
 ;ready to begin receiving USB traffic well before the 10ms recovery interval
 ;has elapsed.
 
+#ifdef __18F87J94
+    #define PIC18F97J94_FAMILY
+#endif
+#ifdef __18F97J94
+    #define PIC18F97J94_FAMILY
+#endif
+
+
+
+#ifdef PIC18F97J94_FAMILY
+;-----------------------------------------------
+;High Priority Interrupt Vector
+;-----------------------------------------------
+HiPriVector		code	0x08
+HighPriorityIntVector:
+		goto	YourHighPriorityISRCode	;Interrupt context save will be done at the start of this C function.
+
+;-----------------------------------------------
+;Low Priority Interrupt Vector
+;-----------------------------------------------
+LowPriVector	code	0x18
+LowPriorityIntVector:
+		goto	YourLowPriorityISRCode	;Interrupt context save will be done at the start of this C function.
+
+;------------------------------------------------------------------------------------------------------------
+;BELOW SECTION IS ONLY NECESSARY IF THIS PROJECT WILL BE PROGRAMMED WITH THE HID BOOTLOADER.  IF THIS IS
+;NOT REQUIRED, THE BELOW SECTIONS MAY BE COMMENTED OUT.
+;------------------------------------------------------------------------------------------------------------
+
+;----------------------------------------------------------------------
+;Remapped High Priority Interrupt Vector (for use with HID Bootloader)
+;----------------------------------------------------------------------
+Remapped_HiPriVector		code	0x1008
+Remapped_HighPriorityIntVector:
+		goto	YourHighPriorityISRCode	;Interrupt context save will be done at the start of this C function.
+
+;----------------------------------------------------------------------
+;Remapped Low Priority Interrupt Vector (for use with HID Bootloader)
+;----------------------------------------------------------------------
+Remapped_LowPriVector	code	0x1018
+Remapped_LowPriorityIntVector:
+		goto	YourLowPriorityISRCode	;Interrupt context save will be done at the start of this C function.
+		
+#else  ;#ifdef PIC18F97J94_FAMILY
+;All other PIC18 devices
+
 
 
 ;-----------------------------------------------
@@ -162,6 +208,6 @@ Remapped_GotoLowPriIntHandler:
 
 
 
-		
+#endif		
 		
 		end

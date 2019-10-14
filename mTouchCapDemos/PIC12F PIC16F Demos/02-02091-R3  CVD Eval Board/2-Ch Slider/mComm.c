@@ -193,21 +193,21 @@
                 // Hardware I2C Initialization
                 //=============================
                 
-            MCOMM_I2C_SSPSTAT = 0b10000000;     // SMP: Slew rate control disabled for standard speed mode.
-                                                // CKE: Disable SMBus specific inputs
-            MCOMM_I2C_SSPCON1 = 0b00110110;     // WCOL: Write Collision bit cleared
-                                                // SSPOV: Receive Overflow bit cleared
-                                                // SSPEN: Serial Port enabled
-                                                // CKP: Clock line released
-                                                // SSPM: I2C Slave mode, 7-bit address
-            MCOMM_I2C_SSPCON2 = 0b00000001;     // GCEN: General call disabled
-                                                // SEN: Clock stretching is enabled for both slave transmit and slave receive
-            MCOMM_I2C_SSPCON3 = 0b00000011;     // SCIE: Start condition interrupt is disabled
-                                                // BOEN: Buffer overwrite is disabled
-                                                // SDAHT: Minimum of 100ns hold time on SDA after the falling edge of SCL
-                                                // SBCDE: Slave mode bus collision detection interrupts are disabled
-                                                // AHEN: Address holding enabled   - CLOCK STRETCHING
-                                                // DHEN: Data holding enabled      - CLOCK STRETCHING
+            MCOMM_I2C_SSPSTAT = 0b10000000;     // SMP:     Slew rate control disabled for standard speed mode.
+                                                // CKE:     Disable SMBus specific inputs
+            MCOMM_I2C_SSPCON1 = 0b00110110;     // WCOL:    Write Collision bit cleared
+                                                // SSPOV:   Receive Overflow bit cleared
+                                                // SSPEN:   Serial Port enabled
+                                                // CKP:     Clock line released
+                                                // SSPM:    I2C Slave mode, 7-bit address
+            MCOMM_I2C_SSPCON2 = 0b00000001;     // GCEN:    General call disabled
+                                                // SEN:     Clock stretching is enabled for both slave transmit and slave receive
+            MCOMM_I2C_SSPCON3 = 0b01000000;     // SCIE:    Start condition interrupt is disabled
+                                                // BOEN:    Buffer overwrite is disabled
+                                                // SDAHT:   Minimum of 100ns hold time on SDA after the falling edge of SCL
+                                                // SBCDE:   Slave mode bus collision detection interrupts are disabled
+                                                // AHEN:    Address holding disabled
+                                                // DHEN:    Data holding disabled
                                                 
             MCOMM_I2C_SSPMSK  = 0b11111110;     // Address Mask
             MCOMM_I2C_SSPADD  = MCOMM_I2C_ADDRESS;
@@ -221,15 +221,15 @@
         
         #elif defined(MCOMM_SPI_IMPLEMENTED)
         
-            MCOMM_SPI_SSPSTAT = 0b00000000;     // SMP: Cleared for slave mode
-                                                // CKE: Tramsmit occurs on transition from idle to active clock state
-                                                // BF: Buffer full bit cleared
-            MCOMM_SPI_SSPCON1 = 0b00100100;     // WCOL: Write Collection bit cleared
-                                                // SSPOV: Receive overflow bit cleared
-                                                // SSPEN: Serial Port enabled
-                                                // CKP: Idle state for clock is low
-                                                // SSPM: SPI Slave mode, nSS pin enabled
-            MCOMM_SPI_SSPCON3 = 0b00000000;     // BOEN: Buffer overwrite disabled
+            MCOMM_SPI_SSPSTAT = 0b00000000;     // SMP:     Cleared for slave mode
+                                                // CKE:     Tramsmit occurs on transition from idle to active clock state
+                                                // BF:      Buffer full bit cleared
+            MCOMM_SPI_SSPCON1 = 0b00100100;     // WCOL:    Write Collection bit cleared
+                                                // SSPOV:   Receive overflow bit cleared
+                                                // SSPEN:   Serial Port enabled
+                                                // CKP:     Idle state for clock is low
+                                                // SSPM:    SPI Slave mode, nSS pin enabled
+            MCOMM_SPI_SSPCON3 = 0b00000000;     // BOEN:    Buffer overwrite disabled
             
             MCOMM_SPI_SSPIE   = 1;              // Turn on SPI slave interrupts
             MCOMM_SPI_PEIE    = 1;              // Turn on peripheral interrupts
@@ -374,8 +374,26 @@
 
         MCOMM_I2C_SSPIF = 0;
         
-        
-        if (MCOMM_I2C_RnW)          // Read or Write?
+        if (MCOMM_I2C_STOP)
+        {
+            if (mComm_input.flags.bits.write)   // If we've stopped after a write
+            {                                   //  request, execute the write.
+                /**************************************************************
+                * Packet complete. Validate checksum, then provide the data 
+                * to the application layer.
+                **************************************************************/
+                if (mComm_input.checksum == 0)
+                {
+                    MCOMM_I2C_SSPADD = MCOMM_I2C_ADDRESS_BUSY;  // Change I2C Address to stop writes
+                    
+                    mComm_Process(mComm_input.buffer[0]);       // Write Response
+                    while (mComm_output.iterator());            // Execute writes
+                    
+                    MCOMM_I2C_SSPADD = MCOMM_I2C_ADDRESS;       // Change I2C Address back on
+                }
+            }
+        }
+        else if (MCOMM_I2C_RnW)          // Read or Write?
         {   
         
             mComm_input.flags.bits.write = 0;       // Set 'read' flag.    
@@ -418,10 +436,6 @@
                         
                 } while (MCOMM_I2C_WCOL);   // Retry if failed until successful
 
-                MCOMM_I2C_SSPOV = 0;        // Clearing overflow flag
-                MCOMM_I2C_CKP = 1;          // Stop clock stretching and allow
-                                            //    the master to begin clocking
-                                            //    out the new data in SSPBUF.
             } // end: Valid Checksum
         }
         else        // Read or Write?   Write.
@@ -457,29 +471,13 @@
                 
             }   // end DnA
             
-            if (MCOMM_I2C_SSPOV)        // If an overflow condition was detected.
-            {                           //    If this has affected the integrity
-                MCOMM_I2C_SSPOV = 0;    //    of the message, we will see from the
-            }                           //    checksum and length of the packet.
         }   // end RnW
         
-        
-        if (MCOMM_I2C_STOP && mComm_input.flags.bits.write) // If we've stopped after a write
-        {                                                   //  request, execute the write.
-            /**************************************************************
-            * Packet complete. Validate checksum, then provide the data 
-            * to the application layer.
-            **************************************************************/
-            if (mComm_input.checksum == 0)
-            {
-                MCOMM_I2C_SSPADD = MCOMM_I2C_ADDRESS_BUSY;  // Change I2C Address to stop writes
-                
-                mComm_Process(mComm_input.buffer[0]);       // Write Response
-                while (mComm_output.iterator());            // Execute writes
-                
-                MCOMM_I2C_SSPADD = MCOMM_I2C_ADDRESS;       // Change I2C Address back on
-            }
-        }
+        MCOMM_I2C_SSPOV = 0;    // Clearing overflow flag
+        MCOMM_I2C_CKP = 1;      // Stop clock stretching and allow
+                                //    the master to begin clocking
+                                //    out the new data in SSPBUF.
+
         
     // end - defined(MCOMM_I2C_IMPLEMENTED)
     #elif defined(MCOMM_SPI_IMPLEMENTED)

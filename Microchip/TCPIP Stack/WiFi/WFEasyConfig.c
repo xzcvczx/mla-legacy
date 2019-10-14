@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFEasyConfig.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFEasyConfig.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Steve Collmeyer    24 Sep 2009 Initial
  Brad Rex           09 Feb 2010 Update for MRF24WB
@@ -67,6 +67,11 @@ tWFScanCtx  g_ScanCtx;
 extern UINT8 ConnectionProfileID;
 
 tWFEasyConfigCtx g_easyConfigCtx;
+
+#if MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP			
+tWFScanResult preScanResult[50];      //WF_PRESCAN  May change struct later for memory optimization
+extern tWFHibernate WF_hibernate;
+#endif
 
 /* Easy Config Private Functions */
 static int WFEasyConfigProcess(void);
@@ -106,7 +111,7 @@ static int WFEasyConfigProcess(void)
     
     #if defined (EZ_CONFIG_STALL)
     if (CFGCXT.cfg_state == cfg_stopped)
-	{
+    {
         /* State machine just started get current time stamp */
         CFGCXT.cfg_state = cfg_stalled;
         CFGCXT.timeStart = TickGet();
@@ -115,7 +120,7 @@ static int WFEasyConfigProcess(void)
     
     /* Wait for stall time to expire */
     if (CFGCXT.cfg_state == cfg_stalled)
-	{
+    {
         UINT32 time = TickGet();
         if ((time - CFGCXT.timeStart) < WF_STALL_TIME_MS)
             return 0;
@@ -141,8 +146,8 @@ static int WFEasyConfigProcess(void)
     if (CFGCXT.ssid)
 #if defined(__18CXX)
         WF_CPSetSsid(ConnectionProfileID, 
-        	//(ROM char *)CFGCXT.ssid,   Note (VMH): fixed compile warning - not sure why this is necessary.
-        	CFGCXT.ssid, 
+            //(ROM char *)CFGCXT.ssid,   Note (VMH): fixed compile warning - not sure why this is necessary.
+            CFGCXT.ssid, 
             strlen(CFGCXT.ssid));  
 #else
         WF_CPSetSsid(ConnectionProfileID, 
@@ -151,14 +156,14 @@ static int WFEasyConfigProcess(void)
 #endif       
 
 #if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
-		if ((BYTE)CFGCXT.security == WF_SECURITY_WPA_WITH_PASS_PHRASE
-			|| (BYTE)CFGCXT.security == WF_SECURITY_WPA2_WITH_PASS_PHRASE
-			|| (BYTE)CFGCXT.security == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE) {
-			WF_ConvPassphrase2Key(strlen((char *)CFGCXT.key), CFGCXT.key,
-				strlen((char*)CFGCXT.ssid), CFGCXT.ssid);
-			CFGCXT.security--;
-		}
-#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
+        if ((BYTE)CFGCXT.security == WF_SECURITY_WPA_WITH_PASS_PHRASE
+            || (BYTE)CFGCXT.security == WF_SECURITY_WPA2_WITH_PASS_PHRASE
+            || (BYTE)CFGCXT.security == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE) 
+        {
+            WF_ConvPassphrase2Key(strlen((char *)CFGCXT.key), CFGCXT.key, strlen((char*)CFGCXT.ssid), CFGCXT.ssid);
+            CFGCXT.security--;
+        }
+#endif    /* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
 
     /* Now deal with security... */
     switch ((BYTE)CFGCXT.security) {
@@ -217,14 +222,29 @@ static int WFEasyConfigProcess(void)
     WF_CPSetNetworkType(ConnectionProfileID, CFGCXT.type);
 
 #if defined(DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE)
-	WF_DisableModuleConnectionManager();
+    WF_DisableModuleConnectionManager();
 #endif
 
-	if (AppConfig.networkType == WF_INFRASTRUCTURE) 
-    	WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE);
-	
+    if (AppConfig.networkType == WF_INFRASTRUCTURE) 
+        WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE);
+    
+#if MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP
+    // SoftAP: To allow redirection, need to hibernate before changing network type. Module FW has SoftAP flag and therefore hibernate mode
+    //             is needed to clear this indication and allow proper network change. 
+    //             This should work for non-SoftAP. But these have not been tested yet.
+    WF_hibernate.state = WF_HB_ENTER_SLEEP;
+    WF_hibernate.wakeup_notice = FALSE;
+    //WFConsolePrintRomStr("SoftAP redirection: Put Wi-Fi module into hibernate mode.", TRUE);
+
+    DelayMs(200);
+
+    WF_hibernate.wakeup_notice = TRUE;
+    //WFConsolePrintRomStr("Wakeup Wi-Fi module.", TRUE);
+#else    
     /* Kick off connection now... */
     WF_CMConnect(ConnectionProfileID);
+#endif
+
     /* Change state and return TRUE to show we are done! */
     CFGCXT.cfg_state = cfg_stopped;
 
@@ -251,7 +271,7 @@ UINT16 WFStartScan(void)
         return WF_ERROR_OPERATION_CANCELLED;
    
     if (WF_Scan(WF_SCAN_ALL) != WF_SUCCESS)
-		return WF_ERROR_OPERATION_CANCELLED;
+        return WF_ERROR_OPERATION_CANCELLED;
 
     SCAN_SET_IN_PROGRESS(SCANCXT.scanState);
  
@@ -287,8 +307,8 @@ void WFDisplayScanMgr()
 {
     tWFScanResult   bssDesc;
     char ssid[80];
-	char rssiChan[48];
-	int	count;
+    char rssiChan[48];
+    int    count;
 
     if (SCANCXT.numScanResults == 0)
        return;
@@ -304,14 +324,49 @@ void WFDisplayScanMgr()
     WFRetrieveScanResult(SCANCXT.displayIdx, &bssDesc);
 
     /* Display SSID */
-	count = SCANCXT.displayIdx + 1;
+    count = SCANCXT.displayIdx + 1;
     sprintf(ssid, "%d SSID: %s\r\n", count, bssDesc.ssid);
     putsUART(ssid);
 
-	/* Display SSID  & Channel */
+    /* Display SSID  & Channel */
     /* RSSI_MAX : 200, RSSI_MIN : 106 */
-    sprintf(rssiChan, "  => RSSI: %u, Channel: %u\r\n", bssDesc.rssi, bssDesc.channel);
+#ifdef STACK_USE_CERTIFATE_DEBUG	
+	sprintf(rssiChan, "  => RSSI: %u, Channel: %u", bssDesc.rssi, bssDesc.channel);
     putsUART(rssiChan);
+	/* Display BSSID */
+	sprintf(rssiChan, " , BSSID: %02x:%02x:%02x:%02x:%02x:%02x ,", 
+				 bssDesc.bssid[0],bssDesc.bssid[1],bssDesc.bssid[2],
+				 bssDesc.bssid[3],bssDesc.bssid[4],bssDesc.bssid[5]);
+	putsUART(rssiChan);
+	/* Display Security Mode */
+	if((bssDesc.apConfig & 0x10) == 0)	  // bit4==0:	open (no security)
+	{
+		sprintf(rssiChan, "Security mode: %s\r\n", "Open");
+	}
+	else								 // bit4== 1:	security
+	{			 
+		if ((bssDesc.apConfig & 0x80) == 0x80) // bit7 ==  1: WPA2
+		{
+			sprintf(rssiChan, "Security mode: %s\r\n", "WPA2");
+		}
+		else if((bssDesc.apConfig & 0x40) == 0x40)//bit6==1: WPA
+		{
+			sprintf(rssiChan, "Security mode: %s\r\n", "WPA");
+		}
+		else									  // bit7==0, bit6 ==0, WEP
+		{
+			sprintf(rssiChan, "Security mode: %s\r\n", "WEP");
+		}
+	}
+	putsUART(rssiChan);
+#else
+	sprintf(rssiChan, "  => RSSI: %u, Channel: %u\r\n", bssDesc.rssi, bssDesc.channel);
+    putsUART(rssiChan);
+#endif
+
+#if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP) 		
+	preScanResult[SCANCXT.displayIdx]= bssDesc;    // WF_PRESCAN
+#endif
 
     if (++SCANCXT.displayIdx == SCANCXT.numScanResults)  {
         SCAN_CLEAR_DISPLAY(SCANCXT.scanState);

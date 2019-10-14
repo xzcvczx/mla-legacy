@@ -1,12 +1,12 @@
 /*********************************************************************
  *
- *   HID Device Bootloader Firmware for PIC18F7J94 Family Devices
+ *   HID Device Bootloader Firmware for PIC18F97J94 Family Devices
  *
  *********************************************************************
  * FileName:        Boot18FxxJxxFamily.c
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.42+
+ * Compiler:        C18 3.43+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -35,21 +35,30 @@
  * Fritz Schlunder		02/17/09	Slight modifications for 
  *									MCHPFSUSB v2.4 release. 
  * Fritz Schlunder		06/27/12	Modifed for PIC18F97J94 Family devices
+ * Brian Tompson        09/27/12    Adjusted flash erase block size,
+ *                                  erase logic, config byte size and 
+ *                                  starting location for PIC18F97J94 ONLY
  ********************************************************************/
 
 /** C O N S T A N T S **********************************************************/
 
 //Section defining the address range to erase for the erase device command, along with the valid programming range to be reported by the QUERY_DEVICE command.
-#define StartPageToErase				4        //The 1024 byte page starting at address 0x1000 will be erased.
-#define ProgramMemStart					0x001000 //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH 64 BYTE BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
-#define ConfigWordsSectionLength		0x08	 //8 bytes worth of Configuration words on the PIC18F97J94 Family devices
+#define StartPageToErase                8           //The 512 byte page starting at address 0x1000 will be erased.
+#define ProgramMemStart					0x001000    //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH 64 BYTE BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
+#define ConfigWordsSectionLength		0x10        //16 bytes worth of Configuration words on the PIC18F97J94 Family devices
 
 #if defined(__18F97J94)||defined(__18F87J94)||defined(__18F67J94)       //128kB flash devices
-	#define MaxPageToEraseNoConfigs		126		 //Last page of flash on the device, which does not contain the flash configuration words.
-	#define MaxPageToEraseWithConfigs	127		 //Page 127 contains the flash configurations words on this device.
-	#define ProgramMemStopNoConfigs		0x01FC00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ProgramMemStopWithConfigs	0x01FFF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ConfigWordsStartAddress		0x01FFF8 //0xXXXF8 is CONFIG1L on this device
+    // 512 byte flash erase block size
+	#define MaxPageToEraseNoConfigs		254		 //Last page of flash on the device, which does not contain the flash configuration words.
+	#define MaxPageToEraseWithConfigs	255		 //Page 255 contains the flash configurations words on this device.
+	#define ProgramMemStopNoConfigs		0x01FE00    //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  
+                                                    // This address does not get updated, 
+                                                    // but the one just below it does: 
+                                                    // IE: If ProgramMemStopNoConfig = 0x200, 
+                                                    //      0x1FF is the last programmed 
+                                                    //      address (0x200 not programmed)**	
+	#define ProgramMemStopWithConfigs	0x01FFF0 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+	#define ConfigWordsStartAddress		0x01FFF0 //0xXXXF0 is CONFIG1L on this device
 #elif defined(__18F96J99)||defined(__18F86J99)||defined(__18F66J99)     //96kB flash devices
 	#define MaxPageToEraseNoConfigs		94		 //Last page of flash on the device, which does not contain the flash configuration words.
 	#define MaxPageToEraseWithConfigs	95		 //Page 127 contains the flash configurations words on this device.
@@ -157,7 +166,7 @@ unsigned short long ProgramMemStopAddress;
 PacketToFromPC PacketFromPC;
 PacketToFromPC PacketToPC;
 unsigned char BootState;
-unsigned char ErasePageTracker;
+unsigned int ErasePageTracker;
 unsigned char ProgrammingBuffer[BufferSize];
 unsigned char BufferedDataIndex;
 unsigned short long ProgrammedPointer;
@@ -266,7 +275,7 @@ void ProcessIO(void)
 				break;
 			case ERASE_DEVICE:
 			{
-				for(ErasePageTracker = StartPageToErase; ErasePageTracker < (MaxPageToErase + 1); ErasePageTracker++)
+				for(ErasePageTracker = StartPageToErase; ErasePageTracker < (MaxPageToErase + (unsigned int)1); ErasePageTracker++)
 				{
 					ClearWatchdog();
 					EraseFlash();
@@ -341,7 +350,7 @@ void ProcessIO(void)
 //from the bus.
 void ResetDeviceCleanly(void)
 {
-	UCONbits.SUSPND = 0;		//Disable USB module
+	UCONbits.SUSPND = 0;		
 	UCON = 0x00;				//Disable USB module
 	//And wait awhile for the USB cable capacitance to discharge down to disconnected (SE0) state. 
 	//Otherwise host might not realize we disconnected/reconnected when we do the reset.
@@ -355,15 +364,14 @@ void ResetDeviceCleanly(void)
 
 void EraseFlash(void)
 {
-    //Really want this: TBLPTR = ((unsigned short long)ErasePageTracker << 10); 
+    //Really want this: TBLPTR = ((unsigned short long)ErasePageTracker <<  9);  // for  512 byte erase blocks
     //However compiler is not very efficient at this, so we do this instead:
 	TBLPTRL = 0x00;
 	TBLPTRH = ErasePageTracker;
 	TBLPTRU = 0x00;
+
 	_asm
 	bcf		STATUS, 0, 0
-	rlcf	TBLPTRH, 1, 0
-	rlcf	TBLPTRU, 1, 0
 	rlcf	TBLPTRH, 1, 0
 	rlcf	TBLPTRU, 1, 0
 	_endasm 
@@ -371,6 +379,7 @@ void EraseFlash(void)
 	EECON1 = 0b00010100;                    //Prepare to erase a flash page
     UnlockAndActivate(CORRECT_UNLOCK_KEY);  //Now make the operation take place
 	ClrWdt();                               //Erase operations take awhile, refresh the watchdog
+
 }	
 
 

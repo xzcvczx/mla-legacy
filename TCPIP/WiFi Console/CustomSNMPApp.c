@@ -68,12 +68,13 @@
 	Global Variables
   ***************************************************************************/
 /*This Macro is used to provide maximum try for a failure Trap server address  */
+#if !defined(SNMP_TRAP_DISABLED)
 #define MAX_TRY_TO_SEND_TRAP (10)
-
 BYTE gSendTrapFlag=FALSE;//global flag to send Trap
 BYTE gOIDCorrespondingSnmpMibID=MICROCHIP;
 BYTE gGenericTrapNotification=ENTERPRISE_SPECIFIC;
 BYTE gSpecificTrapNotification=VENDOR_TRAP_DEFAULT; // Vendor specific trap code
+#endif 
 
 #ifdef STACK_USE_SNMPV3_SERVER
 static BYTE gSnmpv3UserSecurityName[SNMPV3_USER_SECURITY_NAME_LEN_MEM_USE];
@@ -144,6 +145,7 @@ SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[SNMP_MAX_NON_REC_ID_OID] =
 
 #endif /* STACK_USE_SMIV2 */
 
+#if !defined(SNMP_TRAP_DISABLED)
 /*
 #if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 //if gSetTrapSendFlag == FALSE then the last varbind variable for 
@@ -157,13 +159,15 @@ BYTE	gSetTrapSendFlag = FALSE;
 /*Initialize trap table with no entries.*/
 TRAP_INFO trapInfo = { TRAP_TABLE_SIZE };
 
+
 static DWORD SNMPGetTimeStamp(void);
+
 static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val,UINT8 targetIndex);
 
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 UINT8 	gSendTrapSMstate=0;
 #endif
-
+#endif
 /****************************************************************************
   ===========================================================================
   Section:
@@ -1034,11 +1038,12 @@ BYTE SNMPValidateCommunity(BYTE * community)
 				return READ_COMMUNITY;
 		}
 	}
-	
+#if !defined(SNMP_TRAP_DISABLED)	
 	// Could not find any matching community, set up to send a trap
 	gSpecificTrapNotification=VENDOR_TRAP_DEFAULT;
 	gGenericTrapNotification=AUTH_FAILURE;
 	gSendTrapFlag=TRUE;
+#endif	
 	return INVALID_COMMUNITY;
 	
 }
@@ -1104,7 +1109,7 @@ BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len,BYTE index)
 			return TRUE;
 		}
 		break;
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)		
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)&& !defined(SNMP_TRAP_DISABLED)
 	case SNMP_TARGET_SECURITY_NAME :			// 43.6.1.4.1.17095.5.1.1.4: READWRITE ASCII_STRING.
 		if(len <= USER_SECURITY_NAME_LEN)
 		{
@@ -1173,7 +1178,7 @@ BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len,BYTE index)
 ********************************************************************/
 BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index, BYTE ref, SNMP_VAL val)
 {
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 	BYTE tempUserNameLen = 0;
 #endif 
 
@@ -1186,7 +1191,7 @@ BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index, BYTE ref, SNMP_VAL val)
     case LED_D6:
         LED1_IO = val.byte;
         return TRUE;
-
+#if !defined(SNMP_TRAP_DISABLED)
     case TRAP_RECEIVER_IP:
         // Make sure that index is within our range.
         if ( index < trapInfo.Size )
@@ -1259,6 +1264,7 @@ BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index, BYTE ref, SNMP_VAL val)
             return TRUE;
         }
         break;
+#endif 
 #ifdef STACK_USE_SNMPV3_SERVER	
 	case USM_AUTH_PROT:
 		if(index>SNMPV3_USM_MAX_USER)
@@ -1365,7 +1371,7 @@ BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index, BYTE ref, SNMP_VAL val)
             return TRUE;
         }
 		break;
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)		
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 	case SNMP_TARGET_INDEX_ID : 		// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
 		break;
 	case SNMP_TARGET_MP_MODEL : 		// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.
@@ -1483,6 +1489,7 @@ BOOL SNMPGetExactIndex(SNMP_ID var, SNMP_INDEX index)
     
     switch(var)
     {
+#if !defined(SNMP_TRAP_DISABLED)
 	    case TRAP_RECEIVER_ID:
 	    case TRAP_RECEIVER_ENABLED:
 		case TRAP_RECEIVER_IP:
@@ -1496,6 +1503,7 @@ BOOL SNMPGetExactIndex(SNMP_ID var, SNMP_INDEX index)
 	            return TRUE;
 	        }
 	    break;
+#endif
 	#ifdef STACK_USE_SNMPV3_SERVER		
 		case USM_INDEX_ID:
 		case USM_AUTH_KEY:
@@ -1508,7 +1516,7 @@ BOOL SNMPGetExactIndex(SNMP_ID var, SNMP_INDEX index)
 	            return TRUE;
 	        }
 		break;
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 		case SNMP_TARGET_INDEX_ID : 		// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
 		case SNMP_TARGET_MP_MODEL : 		// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.
 		case  SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
@@ -1562,6 +1570,7 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index)
 
     switch(var)
     {
+#if !defined(SNMP_TRAP_DISABLED)
     case TRAP_RECEIVER_ID:
 	case TRAP_RECEIVER_ENABLED:
 	case TRAP_RECEIVER_IP:
@@ -1582,7 +1591,8 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index)
             return TRUE;
         }
         break;
-	#ifdef STACK_USE_SNMPV3_SERVER	
+#endif
+#ifdef STACK_USE_SNMPV3_SERVER	
 	case USM_INDEX_ID:
 	case USM_AUTH_KEY:
 	case USM_AUTH_PROT:
@@ -1600,7 +1610,7 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index)
             return TRUE;
         }
         break;
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 	case SNMP_TARGET_INDEX_ID : 		// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
 	case SNMP_TARGET_MP_MODEL : 		// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.
 	case SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
@@ -1713,11 +1723,12 @@ BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BY
 	    case LED_D6:
 	    case PUSH_BUTTON:
 	   	case ANALOG_POT0:
+#if !defined(SNMP_TRAP_DISABLED)	   	
 	    case TRAP_RECEIVER_ID:
 	    case TRAP_RECEIVER_ENABLED:
 	    case TRAP_RECEIVER_IP:
 	    case TRAP_COMMUNITY:	
-
+#endif
 #if defined(USE_LCD)
 		case LCD_DISPLAY:
 #endif
@@ -1744,7 +1755,7 @@ BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BY
 			case USER_SECURITY_NAME:
 			case USM_AUTH_KEY:
 			case USM_PRIV_KEY:
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 			case SNMP_TARGET_INDEX_ID :			// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
 			case SNMP_TARGET_MP_MODEL :			// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.		
 			case  SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
@@ -1877,7 +1888,7 @@ BOOL SNMPGetVar(SNMP_ID var, SNMP_INDEX index, BYTE* ref, SNMP_VAL* val)
     case ANALOG_POT0:
         val->word = atoi((char*)AN0String);
         return TRUE;
-
+#if !defined(SNMP_TRAP_DISABLED)
     case TRAP_RECEIVER_ID:
         if ( index < trapInfo.Size )
         {
@@ -1921,7 +1932,8 @@ BOOL SNMPGetVar(SNMP_ID var, SNMP_INDEX index, BYTE* ref, SNMP_VAL* val)
             return TRUE;
         }
         break;
-		#ifdef STACK_USE_SNMPV3_SERVER	
+#endif
+#ifdef STACK_USE_SNMPV3_SERVER	
 	case ENGINE_ID:
 		if(snmpEngnIDLength == 0u)
 			*ref = SNMP_END_OF_VAR;
@@ -2031,7 +2043,7 @@ BOOL SNMPGetVar(SNMP_ID var, SNMP_INDEX index, BYTE* ref, SNMP_VAL* val)
             return TRUE;
 		}
 		break;
-#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 	case SNMP_TARGET_INDEX_ID :			// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
 		if(index < SNMPV3_USM_MAX_USER)
 		{
@@ -2100,7 +2112,7 @@ BOOL SNMPGetVar(SNMP_ID var, SNMP_INDEX index, BYTE* ref, SNMP_VAL* val)
     return FALSE;
 }
 
-
+#if !defined(SNMP_TRAP_DISABLED)
 /*********************************************************************
   Function:
   	static DWORD SNMPGetTimeStamp(void)
@@ -2171,5 +2183,5 @@ static DWORD SNMPGetTimeStamp(void)
     
     return timeStamp;
 }
-
+#endif /* !defined(SNMP_TRAP_DISABLED)*/
 #endif	//#if defined(STACK_USE_SNMP_SERVER)

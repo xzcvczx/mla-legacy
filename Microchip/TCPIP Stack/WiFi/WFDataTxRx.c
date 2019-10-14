@@ -6,13 +6,13 @@
   -Reference: MRF24WB0M Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFDataTxRx.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFDataTxRx.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author                Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24WB0M
 ******************************************************************************/
@@ -106,14 +106,14 @@ typedef struct rxDataPreambleStruct
 /* This structure starts at RAW index 0 within the RAW Rx buffer.                                      */
 typedef struct
 {
-    tRxDataPreamble   preamble;               /* 2 bytes (type and subtype)                                                  */               
-    UINT16  rssi;				              /* the value of the MRF24WB0M RSSI when the data frame was received                */
-    UINT16  arrivalTime_th;		              /* value of the 32-bit MRF24WB0M system clock when the frame arrived (bits 31-16)  */
-    UINT16  arrivalTime_bh;                   /* MRF24WB0M system clock (bits 15-0)                                              */ 
-    UINT16  dataLen;				          /* byte length of the payload which immediately follows this data structure    */
-    UINT8   snapHeader[6];                    /* WiFi-specific Snap header                                                   */
-    UINT8   dstAddr[WF_MAC_ADDRESS_LENGTH];   /* MAC Address to which the data frame was directed.                           */
-    UINT8   srcAddr[WF_MAC_ADDRESS_LENGTH];   /* MAC Address of the Station that sent the Data frame.                        */
+    tRxDataPreamble   preamble;               /* 2 bytes (type and subtype)                                                     */               
+    UINT16  rssi;                             /* the value of the MRF24WB0M RSSI when the data frame was received               */
+    UINT16  arrivalTime_th;                   /* value of the 32-bit MRF24WB0M system clock when the frame arrived (bits 31-16) */
+    UINT16  arrivalTime_bh;                   /* MRF24WB0M system clock (bits 15-0)                                             */ 
+    UINT16  dataLen;                          /* byte length of the payload which immediately follows this data structure       */
+    UINT8   snapHeader[6];                    /* WiFi-specific Snap header                                                      */
+    UINT8   dstAddr[WF_MAC_ADDRESS_LENGTH];   /* MAC Address to which the data frame was directed.                              */
+    UINT8   srcAddr[WF_MAC_ADDRESS_LENGTH];   /* MAC Address of the Station that sent the Data frame.                           */
 } tWFRxDataIndicate; /* 28 bytes */
 #endif
 

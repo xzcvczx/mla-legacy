@@ -91,10 +91,10 @@
     #define CLOCK_FREQ 64000000
   
     /** LED ************************************************************/
-    #define mInitAllLEDs()      {LATH &= 0xF3; TRISH &= 0xF3;}
+    #define mInitAllLEDs()      {LATB &= 0xFC; TRISB &= 0xFC;}
     
-    #define mLED_1              LATHbits.LATH2
-    #define mLED_2              LATHbits.LATH3
+    #define mLED_1              LATBbits.LATB0
+    #define mLED_2              LATBbits.LATB1
     #define mLED_3              mLED_1          //Only two LEDs on this PIM
     #define mLED_4              mLED_2          //Only two LEDs on this PIM
     

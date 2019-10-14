@@ -53,7 +53,8 @@ LIBPATH .
   CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND        PROTECTED
 #ELSE
   CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED		   
-  CODEPAGE   NAME=page       START=0x1000               END=0xFFF7
+  CODEPAGE   NAME=page       START=0x1000               END=0xFBFF	
+  CODEPAGE   NAME=configpage START=0xFC00               END=0xFFF7	PROTECTED	//cannot be programmed by HID Bootloader unless "Allow Configuration Words Programming" is checked
 #FI
 
 CODEPAGE   NAME=config     START=0xFFF8            END=0xFFFF         PROTECTED

@@ -117,7 +117,8 @@ echo Removing funclist file...
 del project.X\funclist /f /q /s
 echo.
 
-rd project.X\build /S /Q
-rd project.X\dist  /S /Q
+rd project.X\build              /S /Q
+rd project.X\dist               /S /Q
+rd project.X\nbproject\private  /S /Q
 
 echo Done.

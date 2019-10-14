@@ -33,6 +33,9 @@
   2.7	03/10/2010	 Initial Release.  
   2.7   03/19/2010   Added support for parameters to allow silent 
                      operation when called from installer script.
+  2.9h  07/27/2012   Modifed so program only searched .exe directory
+                     when looking for .inf files, instead of also 
+                     searching all subdirectories.
 ********************************************************************/
 
 using System;
@@ -257,8 +260,8 @@ namespace DriverManagementTool
                 try
                 {
                     DirectoryInfo di = new DirectoryInfo(".\\");
-                    //Look for all *.inf files in the current directory, as well as all subdirectories.
-                    FileInfo[] files = di.GetFiles("*.inf", SearchOption.AllDirectories);
+                    //Look for all *.inf files in the current directory.
+                    FileInfo[] files = di.GetFiles("*.inf", SearchOption.TopDirectoryOnly);
                     //Check if there were no .inf files found.  If so, set error code so status box is updated meaningfully.
                     if (files.Length == 0)
                     {

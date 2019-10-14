@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFPowerSave.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFPowerSave.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -125,7 +125,7 @@ void SetAppPowerSaveMode(BOOL state);
 BOOL GetAppPowerSaveMode(void);
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WFConfigureLowPowerMode(UINT8 action)
 
   Summary:
@@ -139,7 +139,7 @@ BOOL GetAppPowerSaveMode(void);
     activity has ceased, to again activate PS-Poll mode. 
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     action - Can be either:
@@ -147,10 +147,10 @@ BOOL GetAppPowerSaveMode(void);
              * WF_LOW_POWER_MODE_OFF
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WFConfigureLowPowerMode(UINT8 action)
 {
@@ -191,7 +191,7 @@ void WFConfigureLowPowerMode(UINT8 action)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_PsPollEnable(BOOL rxDtim,  BOOL aggressive)
 
   Summary:
@@ -216,16 +216,16 @@ void WFConfigureLowPowerMode(UINT8 action)
         continually activates and deactivates PS-Poll mode via SPI messages.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     rxDtim -  TRUE listens at the DTIM interval and FALSE listens at the CASetListenInterval
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_PsPollEnable(BOOL rxDtim)
 {
@@ -297,7 +297,7 @@ BOOL GetAppPowerSaveMode(void)
 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_PsPollDisable(void)
 
   Summary:
@@ -307,16 +307,16 @@ BOOL GetAppPowerSaveMode(void)
     Disables PS Poll mode.  The MRF24W will stay active and not go sleep.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     None.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_PsPollDisable(void)
 {
@@ -333,7 +333,7 @@ void WF_PsPollDisable(void)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetPowerSaveState(UINT8 *p_powerSaveState)
 
   Summary:
@@ -352,16 +352,16 @@ void WF_PsPollDisable(void)
     </table>
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_powerSaveState - Pointer to where power state is written
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetPowerSaveState(UINT8 *p_powerSaveState)
 {
@@ -369,7 +369,7 @@ void WF_GetPowerSaveState(UINT8 *p_powerSaveState)
 }  
 
 /*******************************************************************************
-  Function:	
+  Function:    
     BOOL WFisPsPollEnabled(void)
 
   Summary:
@@ -378,16 +378,16 @@ void WF_GetPowerSaveState(UINT8 *p_powerSaveState)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     None.
 
   Returns:
-  	TRUE if application has enabled PS-Poll mode, else returns FALSE
-  	
+    TRUE if application has enabled PS-Poll mode, else returns FALSE
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 BOOL WFisPsPollEnabled(void)
 {
@@ -402,7 +402,7 @@ BOOL WFisPsPollEnabled(void)
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     BOOL WFIsPsPollActive(void)
 
   Summary: Determine if PS Poll is currently active.
@@ -414,16 +414,16 @@ BOOL WFisPsPollEnabled(void)
     driver to determine if PS-Poll is active or has been temporarily disabled. 
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     None.
 
   Returns:
-  	TRUE if driver has enabled PS-Poll, else FALSE
-  	
+    TRUE if driver has enabled PS-Poll, else FALSE
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 BOOL WFIsPsPollActive(void)
 {
@@ -431,7 +431,7 @@ BOOL WFIsPsPollActive(void)
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void EnsureWFisAwake()
 
   Summary:
@@ -444,16 +444,16 @@ BOOL WFIsPsPollActive(void)
     mode and wake up the MRF24W.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     None.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void EnsureWFisAwake()
 {
@@ -477,7 +477,7 @@ void EnsureWFisAwake()
 
             
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_HibernateEnable()
 
   Summary:
@@ -491,16 +491,16 @@ void EnsureWFisAwake()
     To remove the MRF24W from hibernate mode call WF_Init().
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     None.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	Note that because the MRF24W does not save state, there will be a
+      Note that because the MRF24W does not save state, there will be a
     disconnect between the TCP/IP stack and the MRF24B0M state.  If it is
     desired by the application to use hibernate, additional measures must be
     taken to save application state.  Then the host should be reset.  This will
@@ -514,11 +514,11 @@ void WF_HibernateEnable()
 {
     WF_SetCE_N(WF_HIGH);   /* set XCEN33 pin high, which puts MRF24W in hibernate mode */
 
-    /* SetPowerSaveState(WF_PS_HIBERNATE);	*/
+    /* SetPowerSaveState(WF_PS_HIBERNATE);    */
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     static void SendPowerModeMsg(tWFPwrModeReq *p_powerMode)
 
   Summary:
@@ -527,16 +527,16 @@ void WF_HibernateEnable()
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_powerMode - Pointer to tWFPwrModeReq structure to send to MRF24W.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 static void SendPowerModeMsg(tWFPwrModeReq *p_powerMode)
 {
@@ -555,12 +555,12 @@ static void SendPowerModeMsg(tWFPwrModeReq *p_powerMode)
                sizeof(tWFPwrModeReq));
 
     /* wait for mgmt response, free buffer after it comes in (no data to read) */
-	WaitForMgmtResponse(WF_SET_POWER_MODE_SUBTYPE, FREE_MGMT_BUFFER);
+    WaitForMgmtResponse(WF_SET_POWER_MODE_SUBTYPE, FREE_MGMT_BUFFER);
     
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void SetPowerSaveState(UINT8 powerSaveState)
 
   Summary:
@@ -569,7 +569,7 @@ static void SendPowerModeMsg(tWFPwrModeReq *p_powerMode)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     powerSaveState - Value of the power save state desired.
@@ -584,10 +584,10 @@ static void SendPowerModeMsg(tWFPwrModeReq *p_powerMode)
     </table>
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void SetPowerSaveState(UINT8 powerSaveState)
 {

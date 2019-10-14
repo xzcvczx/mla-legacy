@@ -88,6 +88,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F14K50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.38</languageToolchainVersion>
@@ -251,6 +252,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.38</languageToolchainVersion>
@@ -411,6 +413,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F87J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.38</languageToolchainVersion>
@@ -571,6 +574,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F47J53</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.38</languageToolchainVersion>
@@ -731,6 +735,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F4550</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.38</languageToolchainVersion>
@@ -891,6 +896,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ64GB004</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1058,6 +1064,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1241,6 +1248,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>1.12</languageToolchainVersion>
@@ -1274,6 +1282,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1286,6 +1296,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1298,6 +1310,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1310,6 +1324,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1320,6 +1336,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1330,6 +1348,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1340,6 +1360,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1350,6 +1372,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1360,6 +1384,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1389,18 +1415,19 @@
       </C32-AS>
       <C32-LD>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
-      <XC32>
-      </XC32>
     </conf>
     <conf name="PIC32MX795F512L_PIM" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>1.12</languageToolchainVersion>
@@ -1434,6 +1461,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1446,6 +1475,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1458,6 +1489,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1470,6 +1503,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1480,6 +1515,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1490,6 +1527,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1500,6 +1539,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1510,6 +1551,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1520,6 +1563,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1565,6 +1610,8 @@
       </C32-AS>
       <C32-LD>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
         <property key="legacy-libc" value="false"/>
         <property key="no-start-files" value="false"/>
@@ -1612,8 +1659,6 @@
                   value="C:\Documents and Settings\I00155\mpdeftrace.log"/>
         <property key="tracecontrol.tracefilemax" value="54600"/>
       </RealICEPlatformTool>
-      <XC32>
-      </XC32>
     </conf>
   </confs>
 </configurationDescriptor>

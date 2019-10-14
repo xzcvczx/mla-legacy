@@ -57,8 +57,8 @@
 								// that use EP0 IN or OUT for sending large amounts of
 								// application related data.
 									
-#define USB_MAX_NUM_INT     	1   // For tracking Alternate Setting
-#define USB_MAX_EP_NUMBER	    1
+#define USB_MAX_NUM_INT     	1   // Number of interface descriptors in the device (used for tracking Alternate Setting)
+#define USB_MAX_EP_NUMBER	    1   // Maximum endpoint number used in the device
 
 //Device descriptor - if these two definitions are not defined then
 //  a ROM USB_DEVICE_DESCRIPTOR variable by the exact name of device_dsc
@@ -163,7 +163,7 @@
 #define MSD_INTF_ID             0x00
 #define MSD_IN_EP_SIZE          64u
 #define MSD_OUT_EP_SIZE         64u
-#define MAX_LUN                 0    //Includes 0, 0 == 1 LUN, 1 == 2 LUNs, etc.
+#define MAX_LUN                 0u   //Includes 0 (ex: 0 = 1 LUN, 1 = 2 LUN, etc.)
 #define MSD_DATA_IN_EP          1u
 #define MSD_DATA_OUT_EP         1u
 #define MSD_BUFFER_ADDRESS      0x600

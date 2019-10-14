@@ -13,8 +13,8 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the �Company�) for its PIC� Microcontroller is intended and
- supplied to you, the Company�s customer, for use solely and
+ (the "Company") for its PIC� Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -23,7 +23,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN �AS IS� CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -40,6 +40,7 @@
   		"USB Device - WinUSB - Generic Driver Demo"
   		firmware project.
   2.6   No Change
+  2.9h  Updated to support MS OS Descriptor for plug and play Win 8 experience
 ********************************************************************/
 
 //NOTE: This main_smallSRAM.c is a small USB SRAM version of the
@@ -185,7 +186,7 @@
         #pragma config IESO     = OFF      	// Internal External (clock) Switchover
         #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
         #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
-        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
         #pragma config WPDIS    = WPDIS     // Program memory not write protected
         #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
         #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
@@ -198,7 +199,7 @@
 #elif defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
-     #pragma config STVREN = ON            //stack overflow/underflow reset enabled
+     #pragma config STVREN = ON          //stack overflow/underflow reset enabled
      #pragma config XINST = OFF          //Extended instruction set disabled
      #pragma config CPUDIV = OSC1        //No CPU system clock divide
      #pragma config CP0 = OFF            //Program memory is not code-protected
@@ -651,6 +652,25 @@ int main(void)
  *******************************************************************/
 static void InitializeSystem(void)
 {
+    #if defined(_PIC14E)
+        ANSELA = 0x00;
+        ANSELB = 0x00;
+        ANSELC = 0x00;
+        TRISA  = 0x00;
+        TRISB  = 0x00;
+        TRISC  = 0x00;
+        OSCTUNE = 0;
+        #if defined (USE_INTERNAL_OSC)
+            OSCCON = 0x7C;   // PLL enabled, 3x, 16MHz internal osc, SCS external
+            OSCCONbits.SPLLMULT = 1;   // 1=3x, 0=4x
+            ACTCON = 0x90;   // Enable active clock tuning with USB
+        #else
+            OSCCON = 0x3C;   // PLL enabled, 3x, 16MHz internal osc, SCS external
+            OSCCONbits.SPLLMULT = 0;   // 1=3x, 0=4x
+            ACTCON = 0x00;   // Active clock tuning disabled
+        #endif
+    #endif
+    
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM) & !defined(PIC18F97J94_FAMILY))
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif defined(__C30__) || defined __XC16__
@@ -712,9 +732,7 @@ static void InitializeSystem(void)
     #endif
 
     #if defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
-	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-	//use the ANCONx registers to control this, which is different from other devices which
-	//use the ADCON1 register for this purpose.
+	//Configure all I/O pins to use digital input buffers.  
     ANCON0 = 0x7F;                  // all pins to digital except AN7
     ANCON1 = 0xBF;                  // Default all pins to digital.  Bandgap on.
     #endif
@@ -726,7 +744,7 @@ static void InitializeSystem(void)
         ANCON3 = 0xFF;
         #if(USB_SPEED_OPTION == USB_FULL_SPEED)
             //Enable INTOSC active clock tuning if full speed
-            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            ACTCON = 0x90;                  //Enable active clock self tuning for USB operation
             while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
                                             //with USB operation (ex: if using two speed 
                                             //startup or otherwise performing clock switching)
@@ -1218,20 +1236,25 @@ void USBCBSuspend(void)
 
 	//Alternatively, the microcontorller may use clock switching to reduce current consumption.
 	#if defined(__18CXX)
-	//Configure device for low power consumption
-	mLED_1_Off();
-	mLED_2_Off();
-	led_count = 3;
-	#if defined(OSCTUNE)
-		OSCTUNEbits.INTSRC = 0;		//31kHz from INTRC, less accurate but lower power
-	#endif
-	OSCCON = 0x03;				//Sleep on sleep, 31kHz selected as microcontroller clock source
-	//Should configure all I/O pins for lowest power consumption.
-	//Typically this is done by driving unused I/O pins as outputs and driving them high or low.
-	//In this example, this is not done however, in case the user is expecting the I/O pins
-	//to remain tri-state and has hooked something up to them.
-	//Leaving the I/O pins floating will waste power and should not be done in a
-	//real application.
+    	//Configure device for low power consumption
+    	mLED_1_Off();
+    	mLED_2_Off();
+    	led_count = 3;
+    	//Should also configure all other I/O pins for lowest power consumption.
+    	//Typically this is done by driving unused I/O pins as outputs and driving them high or low.
+    	//In this example, this is not done however, in case the user is expecting the I/O pins
+    	//to remain tri-state and has hooked something up to them.
+    	//Leaving the I/O pins floating will waste power and should not be done in a
+    	//real application.  
+
+        //Note: The clock switching code needed is processor specific, as the 
+        //clock trees and registers aren't identical accross all PIC18 USB device
+        //families.
+    	#if defined(PIC18F97J94_FAMILY)
+            OSCCON = 0x06;  //FRC / 16 = 500kHz selected.
+    	#else
+        	OSCCON = 0x13;	//Sleep on sleep, 125kHz selected as microcontroller clock source
+    	#endif
 	#endif
 
 	//IMPORTANT NOTE: Do not clear the USBActivityIF (ACTVIF) bit here.  This bit is 
@@ -1271,23 +1294,32 @@ void USBCBWakeFromSuspend(void)
 	// packets.  In order to do this, the USB module must receive proper
 	// clocking (IE: 48MHz clock must be available to SIE for full speed USB
 	// operation).  
-	// Make sure the selected oscillator settings are consistant with USB operation 
-	// before returning from this function.
+	// Make sure the selected oscillator settings are consistent with USB 
+    // operation before returning from this function.
 
-	#if defined(__18CXX)
 	//Switch clock back to main clock source necessary for USB operation
-	//Previous clock source was 31kHz from INTRC (set in the USBCBSuspend() function)
-	OSCCON = 0x60;		//Primary clock source selected.
-    //Adding a software start up delay will ensure
-    //that the primary oscillator and PLL are running before executing any other
-    //code.  If the PLL isn't being used, (ex: primary osc = 48MHz externally applied EC)
-    //then this code adds a small unnecessary delay, but it is harmless to execute anyway.
-	{
-        unsigned int pll_startup_counter = 800;	//Long delay at 31kHz, but ~0.8ms at 48MHz
-        while(pll_startup_counter--);			//Clock will switch over while executing this delay loop
-    }
-	#endif	
-	
+	//Previous clock source was something low frequency as set in the 
+	//USBCBSuspend() function.
+	#if defined(__18CXX)
+        #if defined(PIC18F97J94_FAMILY)
+            OSCCON3 = 0x01; //8MHz FRC / 2 = 4MHz output
+            OSCCON = 0x01;  //FRC with PLL selected 
+            while(OSCCON2bits.LOCK == 0);   //Wait for PLL lock       
+    	#elif defined(PIC18F45K50_FAMILY)
+            OSCCON = 0x70;  //Switch to 16MHz HFINTOSC (+ PLL)
+            while(OSCCON2bits.PLLRDY != 1);   //Wait for PLL lock
+        #else
+        	OSCCON = 0x60;		//Primary clock source selected.
+            //Adding a software start up delay will ensure
+            //that the primary oscillator and PLL are running before executing any other
+            //code.  If the PLL isn't being used, (ex: primary osc = 48MHz externally applied EC)
+            //then this code adds a small unnecessary delay, but it is harmless to execute anyway.
+        	{
+                unsigned int pll_startup_counter = 800;	//Long delay at 31kHz, but ~0.8ms at 48MHz
+                while(pll_startup_counter--);			//Clock will switch over while executing this delay loop
+            }
+        #endif
+	#endif		
 }
 
 /********************************************************************
@@ -1384,6 +1416,8 @@ void USBCBErrorHandler(void)
  *****************************************************************************/
 void USBCBCheckOtherReq(void)
 {
+    //Check for class specific requests, and if necessary, handle it.
+    USBCheckVendorRequest();
 }//end
 
 

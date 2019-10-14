@@ -60,6 +60,11 @@
 /* Application Level Module Selection
  *   Uncomment or comment the following lines to enable or
  *   disabled the following high-level application modules.
+ *
+ * If certain compilations are enabled (eg STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE), 
+ * check whether the files (eg GenericTCPClient.c) are located in folder (eg \TCPIP\WiFi EZConfig).
+ * You may need to copy such files from the Demo App or WiFi Console folder.
+ *
  */
 #define STACK_USE_UART					// Application demo using UART for IP address display and stack configuration
 //#define STACK_USE_UART2TCP_BRIDGE		// UART to TCP Bridge application example
@@ -78,10 +83,15 @@
 //#define STACK_USE_SNMPV3_SERVER			// Simple Network Management Protocol v3 Agent
 //#define STACK_USE_TFTP_CLIENT			// Trivial File Transfer Protocol client
 //#define STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE	// HTTP Client example in GenericTCPClient.c
+#define STACK_USE_AUTOUPDATE_TCPCLIENT 
+#define STACK_USE_AUTOUPDATE_UART
+
+#define STACK_USE_FTP_CLIENT 
+#define STACK_USE_CERTIFATE_DEBUG
 //#define STACK_USE_GENERIC_TCP_SERVER_EXAMPLE	// ToUpper server example in GenericTCPServer.c
 //#define STACK_USE_TELNET_SERVER			// Telnet server
 //#define STACK_USE_ANNOUNCE				// Microchip Embedded Ethernet Device Discoverer server/client
-//#define STACK_USE_DNS					// Domain Name Service Client for resolving hostname strings to IP addresses
+#define STACK_USE_DNS					// Domain Name Service Client for resolving hostname strings to IP addresses
 //#define STACK_USE_DNS_SERVER			// Domain Name Service Server for redirection to the local device
 //#define STACK_USE_NBNS					// NetBIOS Name Service Server for repsonding to NBNS hostname broadcast queries
 //#define STACK_USE_REBOOT_SERVER			// Module for resetting this PIC remotely.  Primarily useful for a Bootloader.
@@ -276,13 +286,15 @@
 			WORD wRXBufferSize;
 		} TCPSocketInitializer[] =
 		{
-			{TCP_PURPOSE_GENERIC_TCP_CLIENT, TCP_ETH_RAM, 4026, 20},
+			{TCP_PURPOSE_GENERIC_TCP_CLIENT, TCP_ETH_RAM, 3002/*4026*/, 1024/*20*/},
 			{TCP_PURPOSE_GENERIC_TCP_SERVER, TCP_ETH_RAM, 20, 4026},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
 			//{TCP_PURPOSE_FTP_COMMAND, TCP_ETH_RAM, 100, 40},
-			//{TCP_PURPOSE_FTP_DATA, TCP_ETH_RAM, 0, 128},
+#ifdef STACK_USE_FTP_CLIENT
+			{TCP_PURPOSE_FTP_DATA, TCP_ETH_RAM, 0, 128},
+#endif
 			//{TCP_PURPOSE_TCP_PERFORMANCE_TX, TCP_ETH_RAM, 200, 1},
 			//{TCP_PURPOSE_TCP_PERFORMANCE_RX, TCP_ETH_RAM, 40, 1500},
 			//{TCP_PURPOSE_UART_2_TCP_BRIDGE, TCP_ETH_RAM, 256, 256},

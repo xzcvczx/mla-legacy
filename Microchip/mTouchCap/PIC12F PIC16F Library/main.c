@@ -493,9 +493,6 @@ void interrupt ISR(void)
     // 2. If MTOUCH_INTEGRATION_TYPE is defined as MTOUCH_CALLED_FROM_ISR, the example API usage below 
     //    is required to service mTouch scanning.
 
-    SAVE_STATE();                       // mTouch Framework-supplied general ISR save state macro. 
-                                        // Not required, but convenient. 
-
     #if defined(MCOMM_ENABLED) && defined(MCOMM_TWO_WAY_ENABLED)  
         // If the V2 comms have been enabled, we need to receive incoming requests.
         #if     (MCOMM_TYPE == MCOMM_UART_TWO_WAY)
@@ -507,8 +504,7 @@ void interrupt ISR(void)
         #endif
         {
             mComm_Receive();            // Two-way Communication Receive Service Function
-        }
-        
+        }        
     #endif  
     
     
@@ -524,10 +520,7 @@ void interrupt ISR(void)
                                         // new scan and is checked at the end of the scan.
                                         // Bad data can affect the readings if this flag is not set.
     #endif
-    
-    
-    RESTORE_STATE();                    // mTouch Framework-supplied general ISR restore state macro. 
-                                        // Not required, but convienent.
+
 }
 #endif
 

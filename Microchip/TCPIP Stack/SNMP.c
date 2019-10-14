@@ -769,7 +769,9 @@ BOOL SNMPTask(void)
     if ( lbReturn == FALSE )
         goto _SNMPDiscard;
 
+#if !defined(SNMP_TRAP_DISABLED)
 	if(gSendTrapFlag==(BYTE)FALSE)	
+#endif		
    		UDPFlush();
 
 	#ifdef STACK_USE_SNMPV3_SERVER
@@ -1647,7 +1649,6 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
 
 
-#if !defined(SNMP_TRAP_DISABLED)
 /****************************************************************************
   Function:
 	BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, 
@@ -1663,8 +1664,7 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
   	by the agent application to send the pdu.
 	
   Precondition:
-	SNMPNotify() is called.	
-	
+		
   Parameters:
 	id			-	System ID to use identify this agent.
 	info		-	Pointer to SNMP MIB variable object information
@@ -1709,7 +1709,7 @@ BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len)
     }
     return FALSE;
 }
-#endif
+
 
 
 /****************************************************************************
@@ -2558,13 +2558,13 @@ BYTE ProcessGetNextVar(OID_INFO* rec, PDU_INFO* pduDbPtr)
 		lbNextLeaf = TRUE;
         if ( !GetNextLeaf(rec))
 			return FALSE;
-	}
-
+    }    
     // Get complete OID string from oid record.
     if ( !GetOIDStringByAddr(rec, OIDValue, &OIDLen))
 	{	
         return FALSE;
 	}
+
 	//to validate the REC ID is present or not
 	while(1)
 	{
@@ -3433,6 +3433,17 @@ FoundIt:
 		return FALSE;
     }
 
+	if(getZeroInstance)
+	{
+		rec->index = SNMP_INDEX_INVALID;	
+		// Here to get the first available index with initializing rec->index to SNMP_INDEX_INVALID
+		if(!SNMPGetNextIndex(rec->id, &rec->index))
+		{
+			rec->index = 0;
+		}
+		
+	}
+
 	return TRUE;
 
 DidNotFindIt:
@@ -3572,7 +3583,13 @@ BOOL GetNextLeaf(OID_INFO* rec)
         // to it.
         rec->indexLen = 1;
         rec->index = 0;
-
+		if (rec->nodeInfo.Flags.bIsSequence)
+	    {
+		   rec->index = SNMP_INDEX_INVALID;		   
+		   // Here to get the first available index with initializing rec->index to SNMP_INDEX_INVALID
+		   if(!SNMPGetNextIndex(rec->id, &rec->index))
+			   rec->index = 0;
+	    }
         return TRUE;
     }
     return FALSE;
@@ -4294,7 +4311,7 @@ WORD_VAL bytesAdded2Pdu;
 			{
 				//If private mib object is requested and community do not match, 
 				//generate authentication failure TRAP
-
+#if !defined(SNMP_TRAP_DISABLED)
 				Getbulk_N=0;
 				noOfVarToBeInResponse=0;
 				smSnmp=SM_PKT_STRUCT_LEN_OFFSET;	
@@ -4307,6 +4324,7 @@ WORD_VAL bytesAdded2Pdu;
 				gSpecificTrapNotification=VENDOR_TRAP_DEFAULT;
 				gGenericTrapNotification=AUTH_FAILURE;
 				gSendTrapFlag=TRUE;	
+#endif				
 
 			}
 			/*else 
@@ -4508,16 +4526,21 @@ WORD_VAL bytesAdded2Pdu;
 				templen=OIDLen;
 				ptroid=OIDValue;	
 				
-				if(appendZeroToOID)
-					_SNMPPut(OIDLen+1);//for appending "0"
+				if(appendZeroToOID || getZeroInstance)
+					_SNMPPut(OIDLen+1);//for appending index
 				else 
 					_SNMPPut(OIDLen);//do not append "0"
 
 				//Put OID
 				while( templen-- )
 					_SNMPPut(*ptroid++);
-				
-				if(appendZeroToOID)
+
+				if(getZeroInstance)
+				{
+					_SNMPPut(OIDInfo.index);//Appending '0' to OID in response
+					varPairLen.Val = OIDLen + 2+1;
+				}
+				else if(appendZeroToOID)
 				{
 					_SNMPPut(0x00);//Appending '0' to OID in response
 					varPairLen.Val = OIDLen + 2+1;

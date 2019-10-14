@@ -239,11 +239,6 @@ void CreateTimeSettingsScreen(void)
 
 	CreateCommonObjects();
 
-    // on this screen we want the Microchip Icon button panel to show up
-    // since it is used to reprogram the flash for the icons.
-    ClrState(GetObjID(ID_MCHPICON), BTN_NOPANEL);
-    SetState(GetObjID(ID_MCHPICON), BTN_DRAW);
-
 	SetColor(REMOTE_GRAY);
     while(!Bar(0, TOP_MARGIN, GetMaxX(), GetMaxY()));
 

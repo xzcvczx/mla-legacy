@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFConnectionProfile.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFConnectionProfile.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author                Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -101,7 +101,7 @@ static void LowLevel_CPGetElement(UINT8 CpId,
                                   UINT8 dataReadAction);
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPCreate(UINT8 *p_CpId)
 
   Summary:
@@ -110,7 +110,7 @@ static void LowLevel_CPGetElement(UINT8 CpId,
   Description:
     Requests the MRF24W to create a Connection Profile (CP), assign it an ID, 
     and set all the elements to default values.  The ID returned by this function
-	is used in other connection profile functions.  A maximum of 2 Connection 
+    is used in other connection profile functions.  A maximum of 2 Connection 
     Profiles can exist on the MRF24W.
 
   Precondition:
@@ -122,7 +122,7 @@ static void LowLevel_CPGetElement(UINT8 CpId,
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -141,14 +141,14 @@ void WF_CPCreate(UINT8 *p_CpId)
                 0);              /* no data */
     
     /* wait for MRF24W management response, read data, free response after read */
-	WaitForMgmtResponseAndReadData(WF_CP_CREATE_PROFILE_SUBTYPE, 
+    WaitForMgmtResponseAndReadData(WF_CP_CREATE_PROFILE_SUBTYPE, 
                                    1,                             /* num data bytes to read          */
-	                               MGMT_RESP_1ST_DATA_BYTE_INDEX, /* read starting at index 4        */
-	                               p_CpId);                       /* write data here                 */
+                                   MGMT_RESP_1ST_DATA_BYTE_INDEX, /* read starting at index 4        */
+                                   p_CpId);                       /* write data here                 */
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPDelete(UINT8 CpId)
 
   Summary:
@@ -169,7 +169,7 @@ void WF_CPCreate(UINT8 *p_CpId)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -186,11 +186,11 @@ void WF_CPDelete(UINT8 CpId)
                 1);              /* data size  */
 
     /* wait for mgmt response, free it after it comes in (no data needed) */
-	WaitForMgmtResponse(WF_CP_DELETE_PROFILE_SUBTYPE, FREE_MGMT_BUFFER); 
+    WaitForMgmtResponse(WF_CP_DELETE_PROFILE_SUBTYPE, FREE_MGMT_BUFFER); 
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetIds(UINT8 *p_cpIdList)
 
   Summary:
@@ -218,7 +218,7 @@ void WF_CPDelete(UINT8 CpId)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -235,7 +235,7 @@ void WF_CPGetIds(UINT8 *p_cpIdList)
                 0);
     
     /* wait for mgmt response, read data, free after read */
-	WaitForMgmtResponseAndReadData(WF_CP_GET_ID_LIST_SUBTYPE, 
+    WaitForMgmtResponseAndReadData(WF_CP_GET_ID_LIST_SUBTYPE, 
                                    1,                                /* num data bytes to read          */
                                    MGMT_RESP_1ST_DATA_BYTE_INDEX,    /* only used if num data bytes > 0 */
                                    p_cpIdList);                      /* only used if num data bytes > 0 */
@@ -246,7 +246,7 @@ void WF_CPGetIds(UINT8 *p_cpIdList)
 extern BOOL gRFModuleVer1209orLater;
 #endif
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetElements(UINT8 CpId, tWFCPElements *p_elements)
 
   Summary:
@@ -266,7 +266,7 @@ extern BOOL gRFModuleVer1209orLater;
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -275,7 +275,7 @@ void WF_CPSetElements(UINT8 CpId, tWFCPElements *p_elements)
     WF_ASSERT(p_elements->ssidLength <= WF_MAX_SSID_LENGTH);
 
 #if !defined(MRF24WG)
-	LowLevel_CPSetElement(CpId,                   /* CP ID                        */
+    LowLevel_CPSetElement(CpId,                   /* CP ID                        */
                           WF_CP_ELEMENT_ALL,      /* Element ID                   */
                           (UINT8 *)p_elements,    /* pointer to element data      */
                           gRFModuleVer1209orLater ? sizeof(tWFCPElements)
@@ -290,7 +290,7 @@ void WF_CPSetElements(UINT8 CpId, tWFCPElements *p_elements)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetElements(UINT8 CpId, tWFCPElements *p_elements)
 
   Summary:
@@ -310,7 +310,7 @@ void WF_CPSetElements(UINT8 CpId, tWFCPElements *p_elements)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -326,7 +326,7 @@ void WF_CPGetElements(UINT8 CpId, tWFCPElements *p_elements)
 
 #if defined(WF_USE_INDIVIDUAL_SET_GETS)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden)
 
   Summary:
@@ -345,7 +345,7 @@ void WF_CPGetElements(UINT8 CpId, tWFCPElements *p_elements)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -359,7 +359,7 @@ void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden)
 }  
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden)
 
   Summary:
@@ -377,13 +377,13 @@ void WF_CPSetSsidType(UINT8 CpId, UINT8 hidden)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
 void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden)
 {
-	 LowLevel_CPGetElement(CpId,                       /* conn. profile ID       */
+     LowLevel_CPGetElement(CpId,                       /* conn. profile ID       */
                           WF_CP_ELEMENT_SSID_TYPE, /* element ID             */
                           hidden,              /* element data pointer   */
                           1,                          /* read one byte          */
@@ -391,7 +391,7 @@ void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength)
 
   Summary:
@@ -399,9 +399,9 @@ void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden)
 
   Description:
     Sets the SSID and SSID Length elements in the Connection Profile.  Note that
-	an Access Point can have either a visible or hidden SSID.  If an Access Point
-	uses a hidden SSID then an active scan must be used (see scanType field in the 
-	Connection Algorithm).
+    an Access Point can have either a visible or hidden SSID.  If an Access Point
+    uses a hidden SSID then an active scan must be used (see scanType field in the 
+    Connection Algorithm).
 
   Precondition:
     MACInit must be called first.
@@ -413,7 +413,7 @@ void WF_CPGetSsidType(UINT8 CpId, UINT8 *hidden)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -428,7 +428,7 @@ void WF_CPSetSsid(UINT8 CpId, UINT8 *p_ssid,  UINT8 ssidLength)
 }   
  
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength)
 
   Summary:
@@ -447,7 +447,7 @@ void WF_CPSetSsid(UINT8 CpId, UINT8 *p_ssid,  UINT8 ssidLength)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -480,7 +480,7 @@ void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetBssid(UINT8 CpId, UINT8 *p_bssid)
 
   Summary:
@@ -498,7 +498,7 @@ void WF_CPGetSsid(UINT8 CpId, UINT8 *p_ssid, UINT8 *p_ssidLength)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -511,7 +511,7 @@ void WF_CPSetBssid(UINT8 CpId, UINT8 *p_bssid)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetBssid(UINT8 CpId, UINT8 *p_bssid)
 
   Summary:
@@ -529,7 +529,7 @@ void WF_CPSetBssid(UINT8 CpId, UINT8 *p_bssid)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -543,7 +543,7 @@ void WF_CPGetBssid(UINT8 CpId, UINT8 *p_bssid)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetNetworkType(UINT8 CpId, UINT8 networkType)
 
   Summary:
@@ -555,17 +555,17 @@ void WF_CPGetBssid(UINT8 CpId, UINT8 *p_bssid)
     * WF_ADHOC
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
     networkType - Type of network to create (infrastructure or adhoc)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_CPSetNetworkType(UINT8 CpId, UINT8 networkType)
 {
@@ -576,7 +576,7 @@ void WF_CPSetNetworkType(UINT8 CpId, UINT8 networkType)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetNetworkType(UINT8 CpId, UINT8 networkType)
 
   Summary:
@@ -588,17 +588,17 @@ void WF_CPSetNetworkType(UINT8 CpId, UINT8 networkType)
     * WF_ADHOC
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
     networkType - Type of network to create (infrastructure or adhoc)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/ 
 void WF_CPGetNetworkType(UINT8 CpId, UINT8 *p_networkType)
 {
@@ -610,7 +610,7 @@ void WF_CPGetNetworkType(UINT8 CpId, UINT8 *p_networkType)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetWepKeyType(UINT8 CpId, UINT8 wepKeyType)
 
   Summary:
@@ -620,28 +620,28 @@ void WF_CPGetNetworkType(UINT8 CpId, UINT8 *p_networkType)
      Sets the Wep key type for the specified Connection Profile ID.  
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId       -- Connection Profile ID
     wepKeyType -- WF_SECURITY_WEP_SHAREDKEY or WF_SECURITY_WEP_OPENKEY (default)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_CPSetWepKeyType(UINT8 CpId, UINT8 wepKeyType)
 {
-    LowLevel_CPSetElement(CpId,                         /* CP ID                        */
+    LowLevel_CPSetElement(CpId,                        /* CP ID                        */
                           WF_CP_ELEMENT_WEPKEY_TYPE,   /* Element ID                   */
-                          &wepKeyType,                 	/* pointer to element data      */
-                          1);                           /* number of element data bytes */
+                          &wepKeyType,                 /* pointer to element data      */
+                          1);                          /* number of element data bytes */
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetWepKeyType(UINT8 CpId, UINT8 *p_keyType)
 
   Summary:
@@ -653,17 +653,17 @@ void WF_CPSetWepKeyType(UINT8 CpId, UINT8 wepKeyType)
     * WF_SECURITY_WEP_OPENKEY
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId -- Connection Profile ID
     networkType -- type of key for Wep security (shared key or open key)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/ 
 void WF_CPGetWepKeyType(UINT8 CpId, UINT8 *p_wepKeyType)
 {
@@ -675,38 +675,15 @@ void WF_CPGetWepKeyType(UINT8 CpId, UINT8 *p_wepKeyType)
 }
 
 #if defined(MRF24WG)
-#ifdef WICOM_MODE
-void WF_CPSetPMK(UINT8 CpId, UINT8 *pmk)
-{
-    UINT8  hdrBuf[5];
-    UINT8  *p_key;
-
-    /* Write out header portion of msg */
-    hdrBuf[0] = WF_MGMT_REQUEST_TYPE;           /* indicate this is a mgmt msg     */
-    hdrBuf[1] = WF_CP_SET_ELEMENT_SUBTYPE;      /* mgmt request subtype            */     
-    hdrBuf[2] = CpId;                           /* Connection Profile ID           */
-    hdrBuf[3] = WF_CP_ELEMENT_UPDATE_PMK;         /* Element ID                      */
-  	hdrBuf[4] = 32;      /* pmk length */ 
-    
-    SendMgmtMsg(hdrBuf,              /* msg header which includes the security type and WEP index)    */
-                sizeof(hdrBuf),      /* msg header length                                             */
-                pmk,               /* msg data (security key), can be NULL                          */
-                32);  /* msg data length (will be 0 if p_securityKey is NULL)          */
-    
-    /* wait for mgmt response, free after it comes in, don't need data bytes */
-    WaitForMgmtResponse(WF_CP_SET_ELEMENT_SUBTYPE, FREE_MGMT_BUFFER);
-}   
-#endif	/* WICOM_MODE */
-
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetWPSCredentials(UINT8 CpId, tWFWpsCred *p_cred)
 
   Summary:
-    Gets the WPS credentials for the specified Connection Profile ID.
+    Gets the WPS credentials for the specified Connection Profile ID for MRF24WG0MA/B.
 
   Description:
-    Gets the WPS credentials after WPS completed
+    Gets the WPS credentials after WPS completed for MRF24WG0MA/B.
 
   Precondition:
     MACInit must be called first.
@@ -717,7 +694,7 @@ void WF_CPSetPMK(UINT8 CpId, UINT8 *pmk)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -732,7 +709,7 @@ void WF_CPGetWPSCredentials(UINT8 CpId, tWFWpsCred *p_cred)
 #endif /* MRF24WG */ 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetSecurity(UINT8 CpId, 
                           UINT8 securityType,
                           UINT8 wepKeyIndex,
@@ -760,7 +737,7 @@ void WF_CPGetWPSCredentials(UINT8 CpId, tWFWpsCred *p_cred)
     </table>
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
@@ -773,10 +750,10 @@ void WF_CPGetWPSCredentials(UINT8 CpId, tWFWpsCred *p_cred)
                          is WF_SECURITY_OPEN)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_CPSetSecurity(UINT8 CpId, 
                       UINT8 securityType,
@@ -800,8 +777,8 @@ void WF_CPSetSecurity(UINT8 CpId,
     
     /* if security is open (no key) or WPS push button method */
     if (securityType == WF_SECURITY_OPEN 
-		|| securityType == WF_SECURITY_WPS_PUSH_BUTTON
-		|| securityType == WF_SECURITY_EAP)
+        || securityType == WF_SECURITY_WPS_PUSH_BUTTON
+        || securityType == WF_SECURITY_EAP)
     {
         hdrBuf[4]         = 2;      /* Only data is security type and wep index */ 
         p_key             = NULL;   
@@ -825,7 +802,7 @@ void WF_CPSetSecurity(UINT8 CpId,
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetSecurity(UINT8 CpId, 
                           UINT8 securityType,
                           UINT8 wepKeyIndex,
@@ -853,7 +830,7 @@ void WF_CPSetSecurity(UINT8 CpId,
     </table>
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
@@ -866,10 +843,10 @@ void WF_CPSetSecurity(UINT8 CpId,
                          is WF_SECURITY_OPEN)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_CPGetSecurity(UINT8 CpId, 
                       UINT8 *p_securityType,
@@ -930,7 +907,7 @@ void WF_CPGetSecurity(UINT8 CpId,
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetDefaultWepKeyIndex(UINT8 CpId, UINT8 defaultWepKeyIndex)
 
   Summary:
@@ -942,17 +919,17 @@ void WF_CPGetSecurity(UINT8 CpId,
     keys to use.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
     defaultWepKeyIndex - Index of WEP key to use (0 - 3)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	Note that only key 0 amongst AP manufacturers is typically used.  Using any
+      Note that only key 0 amongst AP manufacturers is typically used.  Using any
     of the other three keys may be unpredictable from brand to brand.
   *****************************************************************************/
 void WF_CPSetDefaultWepKeyIndex(UINT8 CpId, UINT8 defaultWepKeyIndex)
@@ -964,7 +941,7 @@ void WF_CPSetDefaultWepKeyIndex(UINT8 CpId, UINT8 defaultWepKeyIndex)
 }  
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetDefaultWepKeyIndex(UINT8 CpId, UINT8 *p_defaultWepKeyIndex)
 
   Summary:
@@ -976,17 +953,17 @@ void WF_CPSetDefaultWepKeyIndex(UINT8 CpId, UINT8 defaultWepKeyIndex)
     keys to use.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
     p_defaultWepKeyIndex - Pointer to index of WEP key to use (0 - 3)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	Note that only key 0 amongst AP manufacturers is typically used.  Using any
+    Note that only key 0 amongst AP manufacturers is typically used.  Using any
     of the other three keys may be unpredictable from brand to brand.
   *****************************************************************************/
 void WF_CPGetDefaultWepKeyIndex(UINT8 CpId, UINT8 *p_defaultWepKeyIndex)
@@ -999,7 +976,7 @@ void WF_CPGetDefaultWepKeyIndex(UINT8 CpId, UINT8 *p_defaultWepKeyIndex)
 }
   
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPSetAdHocBehavior(UINT8 CpId, UINT8 adHocBehavior)
 
   Summary:
@@ -1012,17 +989,17 @@ void WF_CPGetDefaultWepKeyIndex(UINT8 CpId, UINT8 *p_defaultWepKeyIndex)
     * WF_ADHOC_START_ONLY
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
     adHocBehavior - Value of the adhoc behavior for this connection profile.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_CPSetAdHocBehavior(UINT8 CpId, UINT8 adHocBehavior)
 {
@@ -1033,7 +1010,7 @@ void WF_CPSetAdHocBehavior(UINT8 CpId, UINT8 adHocBehavior)
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CPGetAdHocBehavior(UINT8 CpId, UINT8 *p_adHocBehavior)
 
   Summary:
@@ -1046,7 +1023,7 @@ void WF_CPSetAdHocBehavior(UINT8 CpId, UINT8 adHocBehavior)
     * WF_ADHOC_START_ONLY
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
@@ -1054,10 +1031,10 @@ void WF_CPSetAdHocBehavior(UINT8 CpId, UINT8 adHocBehavior)
                      connection profile.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_CPGetAdHocBehavior(UINT8 CpId, UINT8 *p_adHocBehavior)
 {
@@ -1070,7 +1047,7 @@ void WF_CPGetAdHocBehavior(UINT8 CpId, UINT8 *p_adHocBehavior)
 #endif /* WF_USE_INDIVIDUAL_SET_GETS */
 
 /*******************************************************************************
-  Function:	
+  Function:    
     static void LowLevel_CPSetElement(UINT8 CpId, 
                                   UINT8 elementId, 
                                   UINT8 *p_elementData, 
@@ -1085,7 +1062,7 @@ void WF_CPGetAdHocBehavior(UINT8 CpId, UINT8 *p_adHocBehavior)
     prior to calling this function.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
@@ -1094,10 +1071,10 @@ void WF_CPGetAdHocBehavior(UINT8 CpId, UINT8 *p_adHocBehavior)
     elementDataLength - Number of bytes pointed to by p_elementData
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 static void LowLevel_CPSetElement(UINT8 CpId, 
                                   UINT8 elementId, 
@@ -1124,7 +1101,7 @@ static void LowLevel_CPSetElement(UINT8 CpId,
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     static void LowLevel_CPGetElement(UINT8 CpId, 
                                       UINT8 elementId, 
                                       UINT8 *p_elementData, 
@@ -1140,7 +1117,7 @@ static void LowLevel_CPSetElement(UINT8 CpId,
     prior to calling this function.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     CpId - Connection Profile ID
@@ -1153,10 +1130,10 @@ static void LowLevel_CPSetElement(UINT8 CpId,
                       and don't free buffer, as caller will do that as well.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 static void LowLevel_CPGetElement(UINT8 CpId, 
                                     UINT8 elementId, 
@@ -1179,7 +1156,7 @@ static void LowLevel_CPGetElement(UINT8 CpId,
     if (dataReadAction == (UINT8)TRUE)
     {
         /* wait for mgmt response, read desired data, and then free response buffer */
-    	WaitForMgmtResponseAndReadData(WF_CP_GET_ELEMENT_SUBTYPE, 
+        WaitForMgmtResponseAndReadData(WF_CP_GET_ELEMENT_SUBTYPE, 
                                        elementDataLength,                   /* num data bytes to read                */
                                        sizeof(tCPElementResponseHdr),       /* index of first byte of element data   */
                                        p_elementData);                      /* where to write element data           */
@@ -1188,7 +1165,7 @@ static void LowLevel_CPGetElement(UINT8 CpId,
     {
         /* wait for mgmt response, don't read any data bytes, do not release mgmt buffer */
         WaitForMgmtResponse(WF_CP_GET_ELEMENT_SUBTYPE, DO_NOT_FREE_MGMT_BUFFER);
-    }                   	                             
+    }                                                    
 }
     
 

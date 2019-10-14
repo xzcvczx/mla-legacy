@@ -143,7 +143,7 @@
         #pragma config IESO     = OFF      	// Internal External (clock) Switchover
         #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
         #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
-        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
         #pragma config WPDIS    = WPDIS     // Program memory not write protected
         #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
         #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
@@ -617,7 +617,7 @@ static void InitializeSystem(void)
         ANCON3 = 0xFF;
         #if(USB_SPEED_OPTION == USB_FULL_SPEED)
             //Enable INTOSC active clock tuning if full speed
-            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            ACTCON = 0x90; //Enable active clock self tuning for USB operation
             while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
                                             //with USB operation (ex: if using two speed 
                                             //startup or otherwise performing clock switching)

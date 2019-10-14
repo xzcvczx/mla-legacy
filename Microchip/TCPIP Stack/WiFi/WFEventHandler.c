@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFEventHandler.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFEventHandler.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -114,7 +114,7 @@ void WFProcessMgmtIndicateMsg()
     UINT8 buf[6];
     UINT8 event = 0xff;
     UINT16 eventInfo;
-	tMgmtIndicatePassphraseReady passphraseReady;
+    tMgmtIndicatePassphraseReady passphraseReady;
 
     /* read 2-byte header of management message */
     RawRead(RAW_MGMT_RX_ID, 0, sizeof(tMgmtIndicateHdr), (UINT8 *)&hdr); 
@@ -127,49 +127,49 @@ void WFProcessMgmtIndicateMsg()
         /*-----------------------------------------------------------------*/
 #if defined(MRF24WG)
 /* There is one data byte with this message */
-		   RawRead(RAW_MGMT_RX_ID, sizeof(tMgmtIndicateHdr),2, buf); /* read first 2 bytes after header */ 
-		   /* if connection attempt successful */
-		   if (buf[0] == CONNECTION_ATTEMPT_SUCCESSFUL)
-		   {
-			    event	 = WF_EVENT_CONNECTION_SUCCESSFUL;
-			    eventInfo = WF_NO_ADDITIONAL_INFO;
-			    SignalWiFiConnectionChanged(TRUE);
-				#if defined (STACK_USE_DHCP_CLIENT)
- 			    RenewDhcp();
-				#endif
-                SetLogicalConnectionState(TRUE);
-		   }
-		   /* else connection attempt failed */
-		   else 
-		   {
-			   event	 = WF_EVENT_CONNECTION_FAILED;
-			   eventInfo = (UINT16)(buf[0] << 8 | buf[1]);			   /* contains connection failure code */
-			   SetLogicalConnectionState(FALSE);				
-		   }  
-
-#else	/* !defined(MRF24WG) */
-            /* There is one data byte with this message */
-            RawRead(RAW_MGMT_RX_ID, sizeof(tMgmtIndicateHdr), 1, buf); /* read first byte after header */ 
+            RawRead(RAW_MGMT_RX_ID, sizeof(tMgmtIndicateHdr),2, buf); /* read first 2 bytes after header */
             /* if connection attempt successful */
             if (buf[0] == CONNECTION_ATTEMPT_SUCCESSFUL)
             {
-                event     = WF_EVENT_CONNECTION_SUCCESSFUL;
+                event = WF_EVENT_CONNECTION_SUCCESSFUL;
                 eventInfo = WF_NO_ADDITIONAL_INFO;
-			    SignalWiFiConnectionChanged(TRUE);
-				#if defined (STACK_USE_DHCP_CLIENT)
- 			    RenewDhcp();
-				#endif
+                SignalWiFiConnectionChanged(TRUE);
+                #if defined (STACK_USE_DHCP_CLIENT)
+                    RenewDhcp();
+                #endif
                 SetLogicalConnectionState(TRUE);
             }
             /* else connection attempt failed */
-            else 
+            else
             {
-                event     = WF_EVENT_CONNECTION_FAILED;
-                eventInfo = (UINT16)buf[0];             /* contains connection failure code */
-                SetLogicalConnectionState(FALSE);                
-            }  
-#endif	/* defined(MRF24WG) */
-            break;
+                event = WF_EVENT_CONNECTION_FAILED;
+                eventInfo = (UINT16)(buf[0] << 8 | buf[1]); /* contains connection failure code */
+                SetLogicalConnectionState(FALSE);
+            }
+
+#else    /* !defined(MRF24WG) */
+        /* There is one data byte with this message */
+        RawRead(RAW_MGMT_RX_ID, sizeof(tMgmtIndicateHdr), 1, buf); /* read first byte after header */
+        /* if connection attempt successful */
+        if (buf[0] == CONNECTION_ATTEMPT_SUCCESSFUL)
+        {
+            event = WF_EVENT_CONNECTION_SUCCESSFUL;
+            eventInfo = WF_NO_ADDITIONAL_INFO;
+            SignalWiFiConnectionChanged(TRUE);
+            #if defined (STACK_USE_DHCP_CLIENT)
+                RenewDhcp();
+            #endif
+            SetLogicalConnectionState(TRUE);
+        }
+        /* else connection attempt failed */
+        else
+        {
+            event = WF_EVENT_CONNECTION_FAILED;
+            eventInfo = (UINT16)buf[0];             /* contains connection failure code */
+            SetLogicalConnectionState(FALSE);
+        }
+#endif    /* defined(MRF24WG) */
+        break;
             
         /*-----------------------------------------------------------------*/
         case WF_EVENT_CONNECTION_LOST_SUBTYPE:
@@ -184,7 +184,7 @@ void WFProcessMgmtIndicateMsg()
                 event     = WF_EVENT_CONNECTION_TEMPORARILY_LOST;
                 eventInfo = (UINT16)buf[1];    /* lost due to beacon timeout or deauth */
                 SignalWiFiConnectionChanged(FALSE);
-            }    
+            }
             else if (buf[0] == CONNECTION_PERMANENTLY_LOST)
             {
                 event     = WF_EVENT_CONNECTION_PERMANENTLY_LOST;
@@ -197,9 +197,10 @@ void WFProcessMgmtIndicateMsg()
                 event     = WF_EVENT_CONNECTION_REESTABLISHED;
                 eventInfo = (UINT16)buf[1];    /* originally lost due to beacon timeout or deauth */
                 #if defined(STACK_USE_DHCP_CLIENT)
-                RenewDhcp();
-				#endif
-                SignalWiFiConnectionChanged(TRUE);                
+                    RenewDhcp();
+                #endif
+                SignalWiFiConnectionChanged(TRUE);
+                SetLogicalConnectionState(TRUE);
             }    
             else
             {
@@ -225,15 +226,15 @@ void WFProcessMgmtIndicateMsg()
             RawRead(RAW_MGMT_RX_ID, sizeof(tMgmtIndicateHdr), 2, (UINT8 *)&eventInfo);
             eventInfo = WFSTOHS(eventInfo);     /* fix endianess of 16-bit value */
             break;    
-			
+            
 #if defined(MRF24WG)
-		case WF_EVENT_KEY_CALCULATION_REQUEST_SUBTYPE:
-			event = WF_EVENT_KEY_CALCULATION_REQUEST;
-			RawRead(RAW_MGMT_RX_ID, sizeof(tMgmtIndicateHdr), 
-				sizeof(tMgmtIndicatePassphraseReady), (UINT8 *)&passphraseReady);
-			break;
+        case WF_EVENT_KEY_CALCULATION_REQUEST_SUBTYPE:
+            event = WF_EVENT_KEY_CALCULATION_REQUEST;
+            RawRead(RAW_MGMT_RX_ID, sizeof(tMgmtIndicateHdr),
+            sizeof(tMgmtIndicatePassphraseReady), (UINT8 *)&passphraseReady);
+            break;
 #endif
-			
+            
         /*-----------------------------------------------------------------*/
         default:
         /*-----------------------------------------------------------------*/

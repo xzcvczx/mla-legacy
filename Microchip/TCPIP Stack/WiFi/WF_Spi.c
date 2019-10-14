@@ -4,13 +4,13 @@
  Module for Microchip TCP/IP Stack
 
 *******************************************************************************
- FileName:		WF_Spi.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WF_Spi.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -22,8 +22,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -40,10 +40,10 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author         Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Zero G				Sep 2008	Initial version
- KO					31 Oct 2008	Port to PIC24F and PIC32 for TCP/IP stack v4.52
+ Zero G         Sep 2008    Initial version
+ KO             31 Oct 2008 Port to PIC24F and PIC32 for TCP/IP stack v4.52
 ******************************************************************************/
 
 /*
@@ -134,25 +134,25 @@ static void ConfigureSpiMRF24W(void);
 
 /*****************************************************************************
   Function:
-	void WF_SpiInit(void)
+    void WF_SpiInit(void)
 
   Summary:
-	Initializes the SPI interface to the MRF24W device.
+    Initializes the SPI interface to the MRF24W device.
 
   Description:
-	Configures the SPI interface for communications with the MRF24W.
+    Configures the SPI interface for communications with the MRF24W.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
+    None
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	This function is called by WFHardwareInit.
+    This function is called by WFHardwareInit.
 *****************************************************************************/
 void WF_SpiInit(void)
 {
@@ -201,29 +201,29 @@ void WF_SpiInit(void)
 
 /*****************************************************************************
   Function:
-	void ConfigureSpiMRF24W(void)
+    void ConfigureSpiMRF24W(void)
 
   Summary:
-	Configures the SPI interface to the MRF24W.
+    Configures the SPI interface to the MRF24W.
 
   Description:
-	Configures the SPI interface for communications with the MRF24W.
+    Configures the SPI interface for communications with the MRF24W.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
+    None
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	1) If the SPI bus is shared with other peripherals this function is called
-	each time an SPI transaction occurs by WF_SpiEnableChipSelect.  Otherwise it 
-	is called once during initialization by WF_SpiInit. 
-	   
-	2) Maximum SPI clock rate for the MRF24W is 25MHz.
+    1) If the SPI bus is shared with other peripherals this function is called
+    each time an SPI transaction occurs by WF_SpiEnableChipSelect.  Otherwise it 
+    is called once during initialization by WF_SpiInit. 
+       
+    2) Maximum SPI clock rate for the MRF24W is 25MHz.
 *****************************************************************************/
 static void ConfigureSpiMRF24W(void)
 {
@@ -239,10 +239,10 @@ static void ConfigureSpiMRF24W(void)
     /* data is sampled on rising edge   */
     /* set the clock divider            */
     #if defined(__18CXX)
-        WF_SPICON1 = 0x20;      // SSPEN bit is set, SPI in master mode, (0x30 is for FOSC/4),
-                                //   IDLE state is low level (0x32 is for FOSC/64)
-        WF_SPISTATbits.CKE = 1; // Transmit data on falling edge of clock
+        WF_SPICON1 = 0x10;      // Disable SPI Master (SSPEN=0),  FOSC/4, idle state for clock=low),
+        WF_SPISTATbits.CKE = 0; // Transmit data on falling edge of clock
         WF_SPISTATbits.SMP = 1; // Input sampled at end of data output time
+        WF_SPICON1 = 0x30;      // Now set SSPEN (SPI in master mode)
     #elif defined(__C30__)
         WF_SPICON1 = 0x027B;    // Fcy Primary prescaler 1:1, secondary prescaler 2:1, CKP=1, CKE=0, SMP=1
         WF_SPICON2 = 0x0000;
@@ -258,27 +258,27 @@ static void ConfigureSpiMRF24W(void)
 
 /*****************************************************************************
   Function:
-	void WF_SpiEnableChipSelect(void)
+    void WF_SpiEnableChipSelect(void)
 
   Summary:
-	Enables the MRF24W SPI chip select.
+    Enables the MRF24W SPI chip select.
 
   Description:
-	Enables the MRF24W SPI chip select as part of the sequence of SPI 
-	communications.
+    Enables the MRF24W SPI chip select as part of the sequence of SPI 
+    communications.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
+    None
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	If the SPI bus is shared with other peripherals then the current SPI context
-	is saved.
+    If the SPI bus is shared with other peripherals then the current SPI context
+    is saved.
 *****************************************************************************/
 void WF_SpiEnableChipSelect(void)
 {
@@ -305,27 +305,27 @@ void WF_SpiEnableChipSelect(void)
 
 /*****************************************************************************
   Function:
-	void WF_SpiDisableChipSelect(void)
+    void WF_SpiDisableChipSelect(void)
 
   Summary:
-	Disables the MRF24W SPI chip select.
+    Disables the MRF24W SPI chip select.
 
   Description:
-	Disables the MRF24W SPI chip select as part of the sequence of SPI 
-	communications.
+    Disables the MRF24W SPI chip select as part of the sequence of SPI 
+    communications.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
+    None
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	If the SPI bus is shared with other peripherals then the current SPI context
-	is restored.
+    If the SPI bus is shared with other peripherals then the current SPI context
+    is restored.
 *****************************************************************************/
 void WF_SpiDisableChipSelect(void)
 {
@@ -346,28 +346,28 @@ void WF_SpiDisableChipSelect(void)
 
 /*****************************************************************************
   Function:
-	void WFSpiTxRx(void)
+    void WFSpiTxRx(void)
 
   Summary:
-	Transmits and receives SPI bytes
+    Transmits and receives SPI bytes
 
   Description:
-	Transmits and receives N bytes of SPI data.
+    Transmits and receives N bytes of SPI data.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	p_txBuf - pointer to SPI tx data
-	txLen   - number of bytes to Tx
-	p_rxBuf - pointer to where SPI rx data will be stored
-	rxLen   - number of SPI rx bytes caller wants copied to p_rxBuf
+    p_txBuf - pointer to SPI tx data
+    txLen   - number of bytes to Tx
+    p_rxBuf - pointer to where SPI rx data will be stored
+    rxLen   - number of SPI rx bytes caller wants copied to p_rxBuf
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Will clock out the larger of txLen or rxLen, and pad if necessary.
+    Will clock out the larger of txLen or rxLen, and pad if necessary.
 *****************************************************************************/
 void WFSpiTxRx(UINT8   *p_txBuf, 
                UINT16  txLen, 
@@ -432,29 +432,29 @@ void WFSpiTxRx(UINT8   *p_txBuf,
 #if defined(__18CXX)   
 /*****************************************************************************
   Function:
-	void WFSpiTxRx_Rom(void)
+    void WFSpiTxRx_Rom(void)
 
   Summary:
-	Transmits and receives SPI bytes
+    Transmits and receives SPI bytes
 
   Description:
-	Specific to the PIC18, transmits bytes from ROM storage and receives SPI data 
-	bytes.
+    Specific to the PIC18, transmits bytes from ROM storage and receives SPI data 
+    bytes.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	p_txBuf - pointer to SPI ROM tx data
-	txLen   - number of bytes to Tx
-	p_rxBuf - pointer to where SPI rx data will be stored
-	rxLen   - number of SPI rx bytes caller wants copied to p_rxBuf
+    p_txBuf - pointer to SPI ROM tx data
+    txLen   - number of bytes to Tx
+    p_rxBuf - pointer to where SPI rx data will be stored
+    rxLen   - number of SPI rx bytes caller wants copied to p_rxBuf
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Will clock out the larger of txLen or rxLen, and pad if necessary.
+    Will clock out the larger of txLen or rxLen, and pad if necessary.
 *****************************************************************************/
 void WFSpiTxRx_Rom(ROM UINT8 *p_txBuf, 
                      UINT16    txLen, 
@@ -503,27 +503,27 @@ void WFSpiTxRx_Rom(ROM UINT8 *p_txBuf,
 #if defined (SPI_IS_SHARED)
 /*****************************************************************************
   Function:
-	void SaveSpiContext(void)
+    void SaveSpiContext(void)
 
   Summary:
-	Saves SPI context.
+    Saves SPI context.
 
   Description:
-	Saves the SPI context (mainly speed setting) before using the SPI to
+    Saves the SPI context (mainly speed setting) before using the SPI to
     access MRF24W.  Turn off the SPI module before reconfiguring it.
     We only need this function if SPI lines are shared.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
+    None
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Only called if SPI_IS_SHARED is defined
+    Only called if SPI_IS_SHARED is defined
 *****************************************************************************/
 static void SaveSpiContext(void)
 {
@@ -539,27 +539,27 @@ static void SaveSpiContext(void)
 
 /*****************************************************************************
   Function:
-	void RestoreSpiContext(void)
+    void RestoreSpiContext(void)
 
   Summary:
-	Restores SPI context.
+    Restores SPI context.
 
   Description:
-	Restores the SPI context (mainly speed setting) after using the SPI to
+    Restores the SPI context (mainly speed setting) after using the SPI to
     access MRF24W.  Turn off the SPI module before reconfiguring it.
     We only need this function if SPI lines are shared.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
+    None
 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	Only called if SPI_IS_SHARED is defined
+    Only called if SPI_IS_SHARED is defined
 *****************************************************************************/
 static void RestoreSpiContext(void)
 {

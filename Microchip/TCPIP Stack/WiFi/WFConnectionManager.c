@@ -2,17 +2,17 @@
 
  MRF24W Driver Connection Manager
  Module for Microchip TCP/IP Stack
-  -Provides access to MRF24W WiFi controller
+  -Provides access to MRF24W WiFi controller (MRF24WB0MA/B, MRF24WG0MA/B)
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFConnectionManager.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFConnectionManager.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -74,7 +74,7 @@ static BOOL g_LogicalConnection = FALSE;
 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CMConnect(UINT8 CpId)
 
   Summary:
@@ -95,7 +95,7 @@ static BOOL g_LogicalConnection = FALSE;
     MACInit must be called first.
 
   Parameters:
-    CpId - If this value is equal to an existing Connection Profile’s ID than 
+    CpId - If this value is equal to an existing Connection Profileï¿½s ID than 
             only that Connection Profile will be used to attempt a connection to 
             a WiFi network.  
             If this value is set to WF_CM_CONNECT_USING_LIST then the 
@@ -104,7 +104,7 @@ static BOOL g_LogicalConnection = FALSE;
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -127,42 +127,23 @@ void WF_CMConnect(UINT8 CpId)
     WaitForMgmtResponse(WF_CM_CONNECT_SUBYTPE, FREE_MGMT_BUFFER);
 }
 
-#ifdef WICOM_MODE
-void WF_CMConnectWicom(UINT8 CpId, tWFConnectParams *connParams)
-{
-   UINT8  hdrBuf[4];
-
-    /* Write out header portion of msg (which is whole msg, there is no data) */
-    hdrBuf[0] = WF_MGMT_REQUEST_TYPE;    /* indicate this is a mgmt msg     */
-    hdrBuf[1] = WF_CM_CONNECT_SUBYTPE;   /* mgmt request subtype            */  
-    hdrBuf[2] = CpId;
-    hdrBuf[3] = 0;  
-
-    SendMgmtMsg(hdrBuf,
-                sizeof(hdrBuf),
-                (UINT8 *)connParams,
-                sizeof(tWFConnectParams));
-   
-    /* wait for mgmt response, free after it comes in, don't need data bytes */
-    WaitForMgmtResponse(WF_CM_CONNECT_SUBYTPE, FREE_MGMT_BUFFER);
-}
-#endif
-
 static BOOL
 WF_CMIsDisconnectAllowed(void)
 {
-	UINT8	profileID;
-	UINT8	profileIDState;
+    UINT8   profileID;
+    UINT8   profileIDState;
   
-	WF_CMCheckConnectionState(&profileIDState, &profileID);
+    WF_CMCheckConnectionState(&profileIDState, &profileID);
     if (profileIDState == WF_CSTATE_CONNECTED_INFRASTRUCTURE || profileIDState == WF_CSTATE_CONNECTED_ADHOC)
+    {
         return TRUE;
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     UINT16 WF_CMDisconnect(void)
 
   Summary:
@@ -172,9 +153,7 @@ WF_CMIsDisconnectAllowed(void)
   Description:
     Directs the Connection Manager to close any open connection or connection 
     attempt in progress.  No further attempts to connect are taken until 
-    WF_CMConnect() is called.  Generates the event 
-    WF_EVENT_CONNECTION_PERMANENTLY_LOST when the connection is successfully
-    terminated.
+    WF_CMConnect() is called.  
     
   Precondition:
     MACInit must be called.
@@ -184,7 +163,7 @@ WF_CMIsDisconnectAllowed(void)
 
   Returns:
     Operation results. Success or Failure
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -192,17 +171,19 @@ UINT16 WF_CMDisconnect(void)
 {
     UINT8  hdrBuf[2];
 
-	/* WARNING !!! : 
-	* Disconnect is allowed only in connected state. 
-	* If module FW is in the midst of connection ( or reconenction) process, then
-	* disconnect can hammer connection process, and furthermore it may cause
-	* fatal failure in module FW operation. To be safte to use disconnect, we strongly
-	* recommend you to disable module FW connection manager by uncommenting
-	* #define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE	
-	* in WF_Config.h
-	*/
-	if (!WF_CMIsDisconnectAllowed())
-		return WF_ERROR_DISCONNECT_FAILED;
+    /* WARNING !!! :
+    * Disconnect is allowed only in connected state.
+    * If module FW is in the midst of connection (or reconnection) process, then
+    * disconnect can hammer connection process, and furthermore it may cause
+    * fatal failure in module FW operation. To be safe to use disconnect, we strongly
+    * recommend you to disable module FW connection manager by uncommenting
+    * #define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE
+    * in WF_Config.h
+    */
+    if (!WF_CMIsDisconnectAllowed())
+    {
+        return WF_ERROR_DISCONNECT_FAILED;
+    }
 
     hdrBuf[0] = WF_MGMT_REQUEST_TYPE;
     hdrBuf[1] = WF_CM_DISCONNECT_SUBYTPE;
@@ -222,13 +203,14 @@ UINT16 WF_CMDisconnect(void)
 }    
     
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
 
   Summary:
     Returns the current connection state.
 
   Description:
+     Returns the current connection state.
 
   Precondition:
     MACInit must be called first.
@@ -240,7 +222,7 @@ UINT16 WF_CMDisconnect(void)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -258,7 +240,7 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
                 0);
 
     /* wait for mgmt response, read data, free after read */
-	WaitForMgmtResponseAndReadData(WF_CM_GET_CONNECTION_STATUS_SUBYTPE, 
+    WaitForMgmtResponseAndReadData(WF_CM_GET_CONNECTION_STATUS_SUBYTPE, 
                                    sizeof(msgData),                  /* num data bytes to read          */
                                    MGMT_RESP_1ST_DATA_BYTE_INDEX,    /* only used if num data bytes > 0 */
                                    msgData);                         /* only used if num data bytes > 0 */
@@ -277,15 +259,14 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
 }  
 
 /*******************************************************************************
-  Function:	
+  Function:    
     BOOL WFisConnected()
 
   Summary:
     Query the connection status of the MRF24W.
 
   Description:
-    Determine the fine granularity status of the connection state of the
-    MRF24W.
+    Determine the fine granularity status of the connection state of the MRF24W.
 
   Precondition:
     MACInit must be called first.
@@ -296,7 +277,7 @@ void WF_CMGetConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
   Returns:
     TRUE if the MRF24W is either connected or attempting to connect.
     FALSE for all other conditions.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -306,7 +287,7 @@ BOOL WFisConnected()
 }      
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void SetLogicalConnectionState(BOOL state)
 
   Summary:
@@ -325,7 +306,7 @@ BOOL WFisConnected()
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -336,13 +317,14 @@ void SetLogicalConnectionState(BOOL state)
 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
 
   Summary:
     Returns the current connection state.
 
   Description:
+    Returns the current connection state.
 
   Precondition:
     MACInit must be called first.
@@ -354,7 +336,7 @@ void SetLogicalConnectionState(BOOL state)
 
   Returns:
     None.
-  	
+      
   Remarks:
     None.
   *****************************************************************************/
@@ -372,7 +354,7 @@ void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
                 0);
 
     /* wait for mgmt response, read data, free after read */
-	WaitForMgmtResponseAndReadData(WF_CM_GET_CONNECTION_STATUS_SUBYTPE, 
+    WaitForMgmtResponseAndReadData(WF_CM_GET_CONNECTION_STATUS_SUBYTPE, 
                                    sizeof(msgData),                  /* num data bytes to read          */
                                    MGMT_RESP_1ST_DATA_BYTE_INDEX,    /* only used if num data bytes > 0 */
                                    msgData);                         /* only used if num data bytes > 0 */
@@ -383,25 +365,26 @@ void WF_CMCheckConnectionState(UINT8 *p_state, UINT8 *p_currentCpId)
 
 #if defined (MRF24WG)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_CMGetConnectContext(tWFConnectContext *p_ctx)
 
   Summary:
-    Retrieves WF connection context
+    Retrieves WF connection context for MRF24WG0MA/B
 
   Description:
+    Retrieves WF connection context for MRF24WG0MA/B
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_ctx -- pointer where connect context will be written
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+      None.
  *****************************************************************************/
 void WF_CMGetConnectContext(tWFConnectContext *p_ctx)
 {
@@ -411,7 +394,7 @@ void WF_CMGetConnectContext(tWFConnectContext *p_ctx)
 
 #if defined(__C32__)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_ConvPassphrase2Key(UINT8 key_len, UINT8 *key, UINT8 ssid_len, UINT8 *ssid)
 
   Summary:
@@ -420,7 +403,7 @@ void WF_CMGetConnectContext(tWFConnectContext *p_ctx)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     key_len : key length
@@ -429,20 +412,20 @@ void WF_CMGetConnectContext(tWFConnectContext *p_ctx)
     ssid : ssid
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
  *****************************************************************************/
 
 void
 WF_ConvPassphrase2Key(UINT8 key_len, UINT8 *key, UINT8 ssid_len, UINT8 *ssid)
 {
-	UINT8 psk[32];
+    UINT8 psk[32];
 
-	key[key_len] = '\0';
-	pbkdf2_sha1((const char *)key, (const char *)ssid, ssid_len, 4096, (UINT8 *)psk, 32);
-	memcpy(key, psk, 32);
+    key[key_len] = '\0';
+    pbkdf2_sha1((const char *)key, (const char *)ssid, ssid_len, 4096, (UINT8 *)psk, 32);
+    memcpy(key, psk, 32);
 }
 #endif /* __C32__ */
 

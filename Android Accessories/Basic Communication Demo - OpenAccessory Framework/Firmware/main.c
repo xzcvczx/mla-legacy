@@ -766,9 +766,9 @@ static BYTE ReadPOT(void)
 
             // Get an ADC sample
             AD1CON1bits.SAMP = 1;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             AD1CON1bits.SAMP = 0;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
             temp = (DWORD)ADC1BUF0;
@@ -780,9 +780,9 @@ static BYTE ReadPOT(void)
 
             // Get an ADC sample
             AD1CON1bits.SAMP = 1;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             AD1CON1bits.SAMP = 0;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
             temp = (DWORD)ADC1BUF0;
@@ -794,9 +794,9 @@ static BYTE ReadPOT(void)
 
             // Get an ADC sample
             AD1CON1bits.SAMP = 1;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             AD1CON1bits.SAMP = 0;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
             temp = (DWORD)ADC1BUF0;
@@ -808,9 +808,9 @@ static BYTE ReadPOT(void)
 
             // Get an ADC sample
             AD1CON1bits.SAMP = 1;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             AD1CON1bits.SAMP = 0;           //Start sampling
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             while(!AD1CON1bits.DONE);       //Wait for conversion to complete
 
             temp = (DWORD)ADC1BUF0;
@@ -829,7 +829,7 @@ static BYTE ReadPOT(void)
             AD1CON1SET = 0x8000; // turn ADC ON
 
             AD1CON1SET = 0x0002; // start sampling ...
-            for(w.Val=0;w.Val<1000;w.Val++); //Sample delay, conversion start automatically
+            for(w.Val=0;w.Val<1000;w.Val++){Nop();} //Sample delay, conversion start automatically
             AD1CON1CLR = 0x0002; // start Converting
             while (!(AD1CON1 & 0x0001));// conversion done?
 

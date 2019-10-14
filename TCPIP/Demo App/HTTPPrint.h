@@ -13,11 +13,11 @@
  * Copyright (C) 2012 Microchip Technology Inc.  All rights
  * reserved.
  *
- * Microchip licenses to you the right to use, modify, copy, and
- * distribute:
- * (i)  the Software when embedded on a Microchip microcontroller or
- *      digital signal controller product ("Device") which is
- *      integrated into Licensee's product; or
+ * Microchip licenses to you the right to use, modify, copy, and 
+  * distribute: 
+ * (i)  the Software when embedded on a Microchip microcontroller or 
+ *      digital signal controller product ("Device") which is 
+ *      integrated into Licensee's product; or 
  * (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
  *		ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device
  *		used in conjunction with a Microchip ethernet controller for
@@ -48,7 +48,6 @@
 
 #if defined(STACK_USE_HTTP2_SERVER)
 
-extern HTTP_CONN curHTTP;
 extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];
 extern BYTE curHTTPID;
 
@@ -86,6 +85,7 @@ void HTTPPrint_read_comm(WORD);
 void HTTPPrint_write_comm(WORD);
 void HTTPPrint_smtps_en(void);
 void HTTPPrint_snmp_en(void);
+void HTTPPrint_uploadeImage(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -264,6 +264,9 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000049:
 			HTTPPrint_snmp_en();
+			break;
+        case 0x0000004a:
+			HTTPPrint_uploadeImage();
 			break;
 		default:
 			// Output notification for undefined values

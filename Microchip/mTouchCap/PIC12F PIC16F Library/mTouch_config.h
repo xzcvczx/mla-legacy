@@ -216,42 +216,41 @@
 //
 //****************************************************************************************************
                                                     
-    #define MTOUCH_NUMBER_SENSORS       7           // <-- Total number of mTouch sensors that will
+    #define MTOUCH_NUMBER_SENSORS       8           // <-- Total number of mTouch sensors that will
                                                     //     be scanned. This includes all matrix,
                                                     //     proximity, button, or slider traces.
 
     // Analog Pin Configuration
-    #define MTOUCH_SENSOR0              AN12         
-    #define MTOUCH_SENSOR1              AN10         /// @cond    
-    #define MTOUCH_SENSOR2              AN8    
-    #define MTOUCH_SENSOR3              AN9   
-    #define MTOUCH_SENSOR4              AN11
-    #define MTOUCH_SENSOR5              AN13
-    #define MTOUCH_SENSOR6              AN4
+    #define MTOUCH_SENSOR0              AN0          
+    #define MTOUCH_SENSOR1              AN1          /// @cond    
+    #define MTOUCH_SENSOR2              AN2    
+    #define MTOUCH_SENSOR3              AN3   
+    #define MTOUCH_SENSOR4              AN4 
+    #define MTOUCH_SENSOR5              AN5 
+    #define MTOUCH_SENSOR6              AN6
     #define MTOUCH_SENSOR7              AN7
     #define MTOUCH_SENSOR8              AN8 
     #define MTOUCH_SENSOR9              AN9
     #define MTOUCH_SENSOR10             AN10    
     #define MTOUCH_SENSOR11             AN11    
     #define MTOUCH_SENSOR12             AN12    
-    #define MTOUCH_SENSOR13             AN13   
-      
-    #define MTOUCH_SENSOR14             AN4    
-    #define MTOUCH_SENSOR15             AN5   
-    #define MTOUCH_SENSOR16             AN6   
-    #define MTOUCH_SENSOR17             AN7   
-    #define MTOUCH_SENSOR18             AN8   
-    #define MTOUCH_SENSOR19             AN9   
-    #define MTOUCH_SENSOR20             AN10   
-    #define MTOUCH_SENSOR21             AN11   
-    #define MTOUCH_SENSOR22             AN12   
-    #define MTOUCH_SENSOR23             AN13   
-    #define MTOUCH_SENSOR24             AN4        // TIP:
-    #define MTOUCH_SENSOR25             AN5        // Extra sensor definitions can be ignored - they will
-    #define MTOUCH_SENSOR26             AN6        // only be implemented if MTOUCH_NUMBER_SENSORS defines that
-    #define MTOUCH_SENSOR27             AN7        // they are enabled.
-    #define MTOUCH_SENSOR28             AN8        
-    #define MTOUCH_SENSOR29             AN9        
+    #define MTOUCH_SENSOR13             AN13
+    #define MTOUCH_SENSOR14             AN14   
+    #define MTOUCH_SENSOR15             AN15  
+    #define MTOUCH_SENSOR16             AN16  
+    #define MTOUCH_SENSOR17             AN17  
+    #define MTOUCH_SENSOR18             AN18  
+    #define MTOUCH_SENSOR19             AN19  
+    #define MTOUCH_SENSOR20             AN20   
+    #define MTOUCH_SENSOR21             AN21   
+    #define MTOUCH_SENSOR22             AN22   
+    #define MTOUCH_SENSOR23             AN23   
+    #define MTOUCH_SENSOR24             AN24       // TIP:
+    #define MTOUCH_SENSOR25             AN25       // Extra sensor definitions can be ignored - they will
+    #define MTOUCH_SENSOR26             AN26       // only be implemented if MTOUCH_NUMBER_SENSORS defines that
+    #define MTOUCH_SENSOR27             AN27       // they are enabled.
+    #define MTOUCH_SENSOR28             AN28       
+    #define MTOUCH_SENSOR29             AN29      
     /// @endcond
 
 

@@ -6,13 +6,13 @@
   -Reference: MRF24WB0M Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WF_Config.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WF_Config.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -70,8 +70,9 @@
     #define WF_MODULE_NUMBER    WF_MODULE_WF_CONFIG
 #endif
 
-
-
+#if MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP
+extern UINT8 g_scan_done;
+#endif
 
 /*****************************************************************************
  * FUNCTION: WF_ProcessEvent
@@ -181,7 +182,12 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo, UINT8 *extraInfo)
 
             #if defined ( EZ_CONFIG_SCAN ) && !defined(__18CXX)
             WFScanEventHandler(eventInfo);
-			#endif /* EZ_CONFIG_SCAN */
+            #endif /* EZ_CONFIG_SCAN */
+
+            #if MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP	 
+            g_scan_done = 1;    // WF_PRESCAN          
+            #endif 
+			
             break;
             
         default:

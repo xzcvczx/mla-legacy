@@ -258,7 +258,7 @@ namespace DriverManagementTool
                 try
                 {
                     DirectoryInfo di = new DirectoryInfo(".\\");
-                    //Look for all *.inf files in the current directory, as well as all subdirectories.
+                    //Look for all *.inf files in the current directory.
                     FileInfo[] files = di.GetFiles("*.inf", SearchOption.TopDirectoryOnly);
                     //Check if there were no .inf files found.  If so, set error code so status box is updated meaningfully.
                     if (files.Length == 0)

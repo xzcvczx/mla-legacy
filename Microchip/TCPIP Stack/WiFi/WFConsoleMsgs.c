@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFConsoleMsgs.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFConsoleMsgs.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -53,7 +53,6 @@
 #include "TCPIP Stack/TCPIP.h"
 #include "TCPIP Stack/WFConsole.h"
 
-#if defined ( WF_CONSOLE )
 
 //---------------------
 // token parsing states
@@ -97,8 +96,13 @@ ROM INT8 iwPrivCmd[]    = "iwpriv";
 #endif // WF_CONSOLE_IFCFGUTIL
 
 ROM INT8 seeDocHelp[]      = "see documentation";
+ROM INT8 pingCmd[]        = "ping"; 
+ROM INT8 pingHelp[]       = "ping 192.168.1.1";
 
-
+#if defined(STACK_USE_CERTIFATE_DEBUG)
+ROM INT8 KillPingCmd[]        = "killping";
+ROM INT8 KillPingHelp[]       = "killping";
+#endif
 //----------------------
 // Console Command Table
 //-----------------------
@@ -145,13 +149,88 @@ const tWFCmd g_consoleCmd[] = {
 
     {iwPrivCmd,                    // [6]
      seeDocHelp,
-     12}
+     12},
 #endif // WF_CONSOLE_IFCFGUTIL
+	
+	{pingCmd,
+	pingHelp,
+	1}
+#if defined(STACK_USE_CERTIFATE_DEBUG)	
+	,
+	{KillPingCmd,
+	KillPingHelp,
+ 	1}
+#endif
 };
 
 const UINT8 g_numCmds   = sizeof(g_consoleCmd) / sizeof(tWFCmd);
 
 
+/*****************************************************************************
+ * FUNCTION: ConvertASCIIHexToBinary
+ *
+ * RETURNS: TRUE if conversion successful, else FALSE
+ *
+ * PARAMS:  p_ascii   -- ascii string to be converted
+ *          p_binary  -- binary value if conversion successful
+ *
+ * NOTES:   Converts an input ascii hex string to binary value (up to 32-bit value)
+ *****************************************************************************/
+BOOL ConvertASCIIHexToBinary(INT8 *p_ascii, UINT16 *p_binary)
+{
+    INT8  i;
+    UINT32 multiplier = 1;
+
+    *p_binary = 0;
+
+    // not allowed to have a string of more than 4 nibbles
+    if (strlen((char*)p_ascii) > 8u)
+    {
+        return FALSE;
+    }
+
+    // first, ensure all characters are a hex digit
+    for (i = (UINT8)strlen((char *)p_ascii) - 1; i >= 0 ; --i)
+    {
+        if (!isxdigit(p_ascii[i]))
+        {
+            return FALSE;
+        }
+        *p_binary += multiplier * HexToBin(p_ascii[i]);
+        multiplier *= 16;
+    }
+
+    return TRUE;
+}
+
+/*****************************************************************************
+ * FUNCTION: HexToBin
+ *
+ * RETURNS: binary value associated with ASCII hex input value
+ *
+ * PARAMS:  hexChar -- ASCII hex character
+ *
+ * NOTES:   Converts an input ascii hex character to its binary value.  Function
+ *          does not error check; it assumes only hex characters are passed in.
+ *****************************************************************************/
+UINT8 HexToBin(UINT8 hexChar)
+{
+    if ((hexChar >= 'a') && (hexChar <= 'f'))
+    {
+        return (0x0a + (hexChar - 'a'));
+    }
+    else if ((hexChar >= 'A') && (hexChar <= 'F'))
+    {
+        return (0x0a + (hexChar - 'A'));
+    }
+    else //  ((hexChar >= '0') && (hexChar <= '9'))
+    {
+        return (0x00 + (hexChar - '0'));
+    }
+
+}
+
+#if defined ( WF_CONSOLE )
 /*****************************************************************************
  * FUNCTION: TokenizeCmdLine
  *
@@ -238,44 +317,6 @@ UINT8 GetCmdId(void)
     return INVALID_CMD;
 }
 
-
-
-/*****************************************************************************
- * FUNCTION: ConvertASCIIHexToBinary
- *
- * RETURNS: TRUE if conversion successful, else FALSE
- *
- * PARAMS:  p_ascii   -- ascii string to be converted
- *          p_binary  -- binary value if conversion successful
- *
- * NOTES:   Converts an input ascii hex string to binary value (up to 32-bit value)
- *****************************************************************************/
-BOOL ConvertASCIIHexToBinary(INT8 *p_ascii, UINT16 *p_binary)
-{
-    INT8  i;
-    UINT32 multiplier = 1;
-
-    *p_binary = 0;
-
-    // not allowed to have a string of more than 4 nibbles
-    if (strlen((char*)p_ascii) > 8u)
-    {
-        return FALSE;
-    }
-
-    // first, ensure all characters are a hex digit
-    for (i = (UINT8)strlen((char *)p_ascii) - 1; i >= 0 ; --i)
-    {
-        if (!isxdigit(p_ascii[i]))
-        {
-            return FALSE;
-        }
-        *p_binary += multiplier * HexToBin(p_ascii[i]);
-        multiplier *= 16;
-    }
-
-    return TRUE;
-}
 
 /*****************************************************************************
  * FUNCTION: ConvertASCIIUnsignedDecimalToBinary
@@ -368,33 +409,6 @@ BOOL ConvertASCIISignedDecimalToBinary(INT8 *p_ascii, INT16 *p_binary)
     }
 
     return TRUE;
-}
-
-/*****************************************************************************
- * FUNCTION: HexToBin
- *
- * RETURNS: binary value associated with ASCII hex input value
- *
- * PARAMS:  hexChar -- ASCII hex character
- *
- * NOTES:   Converts an input ascii hex character to its binary value.  Function
- *          does not error check; it assumes only hex characters are passed in.
- *****************************************************************************/
-UINT8 HexToBin(UINT8 hexChar)
-{
-    if ((hexChar >= 'a') && (hexChar <= 'f'))
-    {
-        return (0x0a + (hexChar - 'a'));
-    }
-    else if ((hexChar >= 'A') && (hexChar <= 'F'))
-    {
-        return (0x0a + (hexChar - 'A'));
-    }
-    else //  ((hexChar >= '0') && (hexChar <= '9'))
-    {
-        return (0x00 + (hexChar - '0'));
-    }
-
 }
 
 BOOL ExtractandValidateU16Range(INT8 *p_string, UINT16 *pValue, UINT16 minValue, UINT16 maxValue)

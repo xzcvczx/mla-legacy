@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFConsoleMsgHandler.h
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFConsoleMsgHandler.h
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -57,8 +57,6 @@
 
 #include "TCPIP Stack/TCPIP.h"
 #include "TCPIP Stack/WFConsole.h"
-
-#if defined ( WF_CONSOLE )
 
 #include "TCPIP Stack/WFConsoleMsgHandler.h"
 #include "TCPIP Stack/WFConsoleIfconfig.h"
@@ -78,12 +76,14 @@ typedef struct dataStructDescriptor
 #define kWFValidateWithS8               (2)
 #define kWFValidateWithX8               (3)
   
-extern tWFHibernate WF_hibernate;
-
 //============================================================================
 // Function Prototypes
 //============================================================================
-
+#if defined ( WF_CONSOLE )
+static void do_ping_cmd(void); 
+#if defined(STACK_USE_CERTIFATE_DEBUG)
+static void do_KillPing_cmd(void);
+#endif
 static void    do_help_msg(void);
 static void    do_get_wfver_cmd(void);
 static void    do_cls_cmd(void);
@@ -93,6 +93,46 @@ static void    do_cls_cmd(void);
     static void    do_wps_push_button_cmd(void);
     static void    do_wps_get_credentials_cmd(void);
 #endif   
+#endif
+    BOOL convertAsciiToHexInPlace( INT8 *p_string, UINT8 expectedHexBinSize )
+{
+
+    INT8  ascii_buffer[3];
+    UINT8  hex_binary_index = 0;
+    INT8  *hex_string_start = p_string;
+    UINT16 hex_buffer = 0;
+
+    /* gobble up any hex prefix */
+    if ( memcmppgm2ram (hex_string_start, (const ROM FAR char*) "0x", 2) == 0 )
+         hex_string_start+=2;
+
+   if ( strlen( (char *) hex_string_start) != (expectedHexBinSize*2) )
+      return FALSE;
+
+    while ( hex_binary_index < expectedHexBinSize )
+    {
+
+      memcpy ( ascii_buffer, (const char*) hex_string_start, 2 );
+      ascii_buffer[2] = '\0';
+
+      /* convert the hex string to a machine hex value */
+      if ( !ConvertASCIIHexToBinary( ascii_buffer,&hex_buffer) )
+        return FALSE;
+
+      p_string[hex_binary_index++] = (UINT8) hex_buffer;
+
+      hex_string_start +=2;
+
+    }
+
+    return TRUE;
+
+}
+
+#if defined ( WF_CONSOLE )
+
+    extern tWFHibernate WF_hibernate;
+
 
 /*****************************************************************************
  * FUNCTION: process_cmd
@@ -138,7 +178,7 @@ void process_cmd(void)
 
         case HELP_MSG:
             do_help_msg();
-			WFConsoleSetMsgFlag();
+            WFConsoleSetMsgFlag();
             break;
 
         case GET_WF_VERSION_MSG:
@@ -184,45 +224,18 @@ void process_cmd(void)
             
 #endif // WF_CONSOLE_IFCFGUTIL
 
+		case PING_MSG:
+			do_ping_cmd();
+			break;
+#if defined(STACK_USE_CERTIFATE_DEBUG)			
+		case KILLPING_MSG:
+			do_KillPing_cmd();
+			break;
+#endif
         default:
-			WFConsoleSetMsgFlag();
+            WFConsoleSetMsgFlag();
             break;
     }
-}
-
-BOOL convertAsciiToHexInPlace( INT8 *p_string, UINT8 expectedHexBinSize )
-{
-
-    INT8  ascii_buffer[3];
-    UINT8  hex_binary_index = 0;
-    INT8  *hex_string_start = p_string;
-    UINT16 hex_buffer = 0;
-
-    /* gobble up any hex prefix */
-    if ( memcmppgm2ram (hex_string_start, (const ROM FAR char*) "0x", 2) == 0 )
-         hex_string_start+=2;
-
-   if ( strlen( (char *) hex_string_start) != (expectedHexBinSize*2) )
-      return FALSE;
-
-    while ( hex_binary_index < expectedHexBinSize )
-    {
-
-      memcpy ( ascii_buffer, (const char*) hex_string_start, 2 );
-      ascii_buffer[2] = '\0';
-
-      /* convert the hex string to a machine hex value */
-      if ( !ConvertASCIIHexToBinary( ascii_buffer,&hex_buffer) )
-        return FALSE;
-
-      p_string[hex_binary_index++] = (UINT8) hex_buffer;
-
-      hex_string_start +=2;
-
-    }
-
-    return TRUE;
-
 }
 
 static void do_cls_cmd(void)
@@ -244,7 +257,51 @@ static void do_help_msg(void)
         putrsUART("\n\r");
     }
 
+
+
 }
+
+#if defined(STACK_USE_ICMP_CLIENT)
+extern BYTE PING_Console_Host[32];
+extern INT32 Count_PingConsole ;
+#if defined(STACK_USE_CERTIFATE_DEBUG)
+extern BOOL b_PingFroever;
+void do_KillPing_cmd(void)
+{
+	putsUART("Stop Ping by mannual\r\n");
+	Count_PingConsole = 0;
+	b_PingFroever = FALSE;
+}
+#endif
+void do_ping_cmd(void)
+{
+	int i;
+
+	if(ARGC < 2u)
+	{
+		putsUART("Please input destination: ping xx.xx.xx.xx count\r\n");
+		return;
+	}
+	for(i=0;i<strlen((const char*)ARGV[1]);i++) PING_Console_Host[i] = ARGV[1][i];
+	if(ARGC == 3u)
+	{
+#if defined (STACK_USE_CERTIFATE_DEBUG)
+		if( strcmppgm2ram((char*)ARGV[2], "forever") == 0)
+		{
+			b_PingFroever = TRUE;
+		}
+		else
+#endif
+			sscanf((const char*)ARGV[2],"%d",(int*)&Count_PingConsole);
+	}
+	else 
+		Count_PingConsole = 4;
+
+}
+#else
+void do_KillPing_cmd(void){}
+void do_ping_cmd(void){}
+#endif
 
 /*****************************************************************************
  * FUNCTION: do_get_wfver_cmd
@@ -258,27 +315,27 @@ static void do_help_msg(void)
 
 static void do_get_wfver_cmd(void)
 {
- 	tWFDeviceInfo  deviceInfo;
-	if (WF_hibernate.state)
-	{
-		WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
-		return;
-	}
-	WF_GetDeviceInfo(&deviceInfo);
-	
-	#if defined(MRF24WG)
-	    WFConsolePrintRomStr("MRF24WG firmware version: 0x", FALSE);
+    tWFDeviceInfo  deviceInfo;
+    if (WF_hibernate.state)
+    {
+        WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
+        return;
+    }
+    WF_GetDeviceInfo(&deviceInfo);
+    
+    #if defined(MRF24WG)
+        WFConsolePrintRomStr("MRF24WG firmware version: 0x", FALSE);
 
-	#else
-	    WFConsolePrintRomStr("MRF24WB firmware version:     0x", FALSE);	
-	#endif
+    #else
+        WFConsolePrintRomStr("MRF24WB firmware version:     0x", FALSE);    
+    #endif
 
-	WFConsolePrintHex(deviceInfo.romVersion, 2);
-	WFConsolePrintHex(deviceInfo.patchVersion, 2);
-	WFConsolePrintRomStr("", TRUE);  
+    WFConsolePrintHex(deviceInfo.romVersion, 2);
+    WFConsolePrintHex(deviceInfo.patchVersion, 2);
+    WFConsolePrintRomStr("", TRUE);  
 
-	WFConsolePrintRomStr("Host Driver version:      ", FALSE);
-	WFConsolePrintRomStr(WF_HOST_DRIVER_VERSION_NUMBER, TRUE);
+    WFConsolePrintRomStr("Host Driver version:      ", FALSE);
+    WFConsolePrintRomStr(WF_HOST_DRIVER_VERSION_NUMBER, TRUE);
 }
 
 #if defined(MRF24WG)
@@ -402,18 +459,6 @@ static void do_wps_get_credentials_cmd(void)
     
     
 } 
-
-#if 0
-	UINT8 ssid[32];
-	UINT8 netKey[64];
-	UINT16 authType;
-	UINT16 encType;
-	UINT8 netIdx;
-	UINT8 ssidLen;
-	UINT8 keyIdx;
-	UINT8 keyLen;
-	UINT8 bssid[6];   
-#endif	
 
 #endif /* MRF24WG */
 

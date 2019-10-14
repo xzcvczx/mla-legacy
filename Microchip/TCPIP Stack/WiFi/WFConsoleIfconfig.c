@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFConsoleIfconfig.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFConsoleIfconfig.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -78,7 +78,7 @@ extern tWFHibernate WF_hibernate;
 //                                  Local Function Prototypes
 //============================================================================
 static void IfconfigDisplayStatus(void);
-static BOOL       isMacAddress(INT8 *p_string, UINT8 *p_Address);
+static BOOL isMacAddress(INT8 *p_string, UINT8 *p_Address);
 #if defined(STACK_USE_DHCP_CLIENT)
 static void setDHCPState(BOOL enable);
 #endif
@@ -130,57 +130,57 @@ void do_ifconfig_cmd(void)
      UINT8 conState, cpId;
      IP_ADDR ipAddress;
 
-	
+    
     // if user only typed in ifconfig with no other parameters
     if (ARGC == 1u)
     {
         IfconfigDisplayStatus();
-		return;
+        return;
     }
 
-	if (WF_hibernate.state)
-	{
-		WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
-		return;
-	}
+    if (WF_hibernate.state)
+    {
+        WFConsolePrintRomStr("The Wi-Fi module is in hibernate mode - command failed.", TRUE);
+        return;
+    }
 
 #if defined(WF_CM_DEBUG)
-	else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "info") )
-	{
+    else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "info") )
+    {
         UINT8 i;
-		tWFCMInfoFSMStats cm_stats;
+        tWFCMInfoFSMStats cm_stats;
 
-		WF_CMInfoGetFSMStats(&cm_stats);
-		for (i = 0; i < 12; i++)
-		{
-    		sprintf( (char *) g_ConsoleContext.txBuf,
-            		"[%02X]: %02X%02X %02X%02X",   
-					i, 
-					cm_stats.byte[i*4 + 0],
-					cm_stats.byte[i*4 + 1],
-					cm_stats.byte[i*4 + 2],
-					cm_stats.byte[i*4 + 3]
-					);
-    		WFConsolePrintRamStr( (char *) g_ConsoleContext.txBuf , TRUE);
-		}
-	}
-	else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "scan") )
-	{
-		if (WF_Scan(1) != WF_SUCCESS) // scan, using CP 1
-			WFConsolePrintRomStr("Scan failed", TRUE);
-	}
-	else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "scanget") ) //"scangetresult"
-	{
-		tWFScanResult pScanResult[1];
+        WF_CMInfoGetFSMStats(&cm_stats);
+        for (i = 0; i < 12; i++)
+        {
+            sprintf( (char *) g_ConsoleContext.txBuf,
+                    "[%02X]: %02X%02X %02X%02X",   
+                    i, 
+                    cm_stats.byte[i*4 + 0],
+                    cm_stats.byte[i*4 + 1],
+                    cm_stats.byte[i*4 + 2],
+                    cm_stats.byte[i*4 + 3]
+                    );
+            WFConsolePrintRamStr( (char *) g_ConsoleContext.txBuf , TRUE);
+        }
+    }
+    else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "scan") )
+    {
+        if (WF_Scan(1) != WF_SUCCESS) // scan, using CP 1
+            WFConsolePrintRomStr("Scan failed", TRUE);
+    }
+    else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "scanget") ) //"scangetresult"
+    {
+        tWFScanResult pScanResult[1];
 
-		WF_ScanGetResult(0, pScanResult);
-	}
-	else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "cpgete") ) //"cpgetelements"
-	{
-		tWFCPElements pCPElements[1];
+        WF_ScanGetResult(0, pScanResult);
+    }
+    else if ( (ARGC == 2u) && !strcmp((char *) ARGV[1], "cpgete") ) //"cpgetelements"
+    {
+        tWFCPElements pCPElements[1];
 
-		WF_CPGetElements(1, pCPElements);
-	}
+        WF_CPGetElements(1, pCPElements);
+    }
 #endif
     // else if 2 arguments and the second arg is IP address
     else if ( (ARGC == 2u) && (StringToIPAddress((BYTE*)ARGV[1], &ipAddress)) )
@@ -217,21 +217,21 @@ void do_ifconfig_cmd(void)
             return;
         }
 
-         WF_SetMacAddress( macAddress );
-		AppConfig.MyMACAddr.v[0] = macAddress[0];
+        WF_SetMacAddress( macAddress );
+        AppConfig.MyMACAddr.v[0] = macAddress[0];
         AppConfig.MyMACAddr.v[1] = macAddress[1];
         AppConfig.MyMACAddr.v[2] = macAddress[2];
         AppConfig.MyMACAddr.v[3] = macAddress[3];
         AppConfig.MyMACAddr.v[4] = macAddress[4];
         AppConfig.MyMACAddr.v[5] = macAddress[5];
     }
-	else if ( (2u <= ARGC) && (strcmppgm2ram((char *)ARGV[1], (ROM FAR char *)"netmask") == 0) )
-	{
-		if (ARGC != 3u)
-		{
-			missingValue();
-			return;
-		}
+    else if ( (2u <= ARGC) && (strcmppgm2ram((char *)ARGV[1], (ROM FAR char *)"netmask") == 0) )
+    {
+        if (ARGC != 3u)
+        {
+            missingValue();
+            return;
+        }
 
         #if defined(STACK_USE_DHCP_CLIENT)
         if ( DHCPIsEnabled(0) )
@@ -258,14 +258,14 @@ void do_ifconfig_cmd(void)
         AppConfig.DefaultMask.v[1] = ipAddress.v[1];
         AppConfig.DefaultMask.v[2] = ipAddress.v[2];
         AppConfig.DefaultMask.v[3] = ipAddress.v[3];  
-	}
-	else if ( (2u <= ARGC) && (strcmppgm2ram((char *)ARGV[1], (ROM FAR char *)"gateway") == 0) )
-	{
-		if (ARGC != 3u)
-		{
-			missingValue();
-			return;
-		}
+    }
+    else if ( (2u <= ARGC) && (strcmppgm2ram((char *)ARGV[1], (ROM FAR char *)"gateway") == 0) )
+    {
+        if (ARGC != 3u)
+        {
+            missingValue();
+            return;
+        }
 
         if ( !StringToIPAddress((BYTE*)ARGV[2], &ipAddress) )
         {
@@ -277,35 +277,35 @@ void do_ifconfig_cmd(void)
         AppConfig.MyGateway.v[1] = ipAddress.v[1];
         AppConfig.MyGateway.v[2] = ipAddress.v[2];
         AppConfig.MyGateway.v[3] = ipAddress.v[3];
-	}
-	else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "auto-dhcp") == 0) )
-	{
-		if (ARGC != 3u)
-		{
-			missingValue();
-			return;
-		}
+    }
+    else if ( (2u <= ARGC) && (strcmppgm2ram((char*)ARGV[1], "auto-dhcp") == 0) )
+    {
+        if (ARGC != 3u)
+        {
+            missingValue();
+            return;
+        }
 
         #if defined(STACK_USE_DHCP_CLIENT)
-		if (strcmppgm2ram((char*)ARGV[2], "start") == 0)
-		{
-			setDHCPState(TRUE);
-		}
-		else if (strcmppgm2ram((char*)ARGV[2], "stop") == 0)
-		{
-			setDHCPState(FALSE);
-		}
-		else
-		#endif
-		{
-			WFConsolePrintRomStr("   Invalid dhcp param", TRUE);
-			return;
-		}
-	}
+        if (strcmppgm2ram((char*)ARGV[2], "start") == 0)
+        {
+            setDHCPState(TRUE);
+        }
+        else if (strcmppgm2ram((char*)ARGV[2], "stop") == 0)
+        {
+            setDHCPState(FALSE);
+        }
+        else
+        #endif
+        {
+            WFConsolePrintRomStr("   Invalid dhcp param", TRUE);
+            return;
+        }
+    }
     else
     {
         notHandledParam(1);
-	}
+    }
 }
 
 static void missingValue(void)
@@ -317,8 +317,8 @@ static void missingValue(void)
 static void notHandledParam(UINT8 index)
 {
     WFConsolePrintRomStr("Param ", FALSE);
-	WFConsolePrintInteger(index, 'd');
-	WFConsolePrintRomStr(" not handled", TRUE);
+    WFConsolePrintInteger(index, 'd');
+    WFConsolePrintRomStr(" not handled", TRUE);
 }
 
 

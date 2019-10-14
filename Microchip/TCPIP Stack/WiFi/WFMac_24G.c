@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFMac.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFMac.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,11 +42,11 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author                Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Michael Palladino	10/13/07	Original
- KO					31 Oct 2008	Port to PIC24F and PIC32 for TCP/IP stack v4.52
- KH					19 Jun 2009	Modified MACMemCopyAsync to support TCB to TCB copy
+ Michael Palladino    10/13/07    Original
+ KO                   31 Oct 2008 Port to PIC24F and PIC32 for TCP/IP stack v4.52
+ KH                   19 Jun 2009 Modified MACMemCopyAsync to support TCB to TCB copy
 ******************************************************************************/
 
 /*
@@ -121,7 +121,7 @@ extern void ValidateConfig(void);
 //============================================================================
 #define ENC_RX_BUF_TO_RAW_RX_BUF_ADJUSTMENT          ((RXSTART + ENC_PREAMBLE_SIZE)   - (ENC_PREAMBLE_OFFSET   + WF_RX_PREAMBLE_SIZE))
 #define ENC_TX_BUF_TO_RAW_TX_BUF_ADJUSTMENT          ((TXSTART + WF_TX_PREAMBLE_SIZE) - (WF_TX_PREAMBLE_OFFSET + WF_TX_PREAMBLE_SIZE))
-#define ENC_TCB_BUF_TO_RAW_SCRATCH_BUF_ADJUSTMENT    (BASE_TCB_ADDR)
+#define ENC_TCB_BUF_TO_RAW_SCRATCH_BUF_ADJUSTMENT    (BASE_SCRATCH_ADDR)
 
 //============================================================================
 //                                  RAW Constants
@@ -192,6 +192,7 @@ static UINT16 g_encIndex[2];       /* index 0 stores current ENC read index, ind
 
 UINT16 g_rxBufferLength;
 static UINT16 g_txPacketLength;
+static UINT16 g_sizeofScratchMemory = 0;
 #if defined(WF_DEBUG)
 static BOOL   g_txBufferFlushed;
 #endif
@@ -218,13 +219,13 @@ UINT8 GetReadPtrRawWindow()
 
 /*****************************************************************************
   Function:
-	void SyncENCPtrRAWState(UINT8 encPtrId)
+    void SyncENCPtrRAWState(UINT8 encPtrId)
 
   Summary:
-	Synchronizes the Ethernet RAM index to the WiFi RAW window index.
+    Synchronizes the Ethernet RAM index to the WiFi RAW window index.
 
   Description:
-	Any time stack code changes the index within the 'logical' Ethernet RAM
+    Any time stack code changes the index within the 'logical' Ethernet RAM
     this function must be called to assure the RAW driver is synced up with
     where the stack code thinks it is within the Ethernet RAM.  This applies
     to reading/writing tx data, rx data, or tcb data.  
@@ -232,16 +233,16 @@ UINT8 GetReadPtrRawWindow()
     This function is typically called right after g_encIndex[] is updated.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	encPtrId -- ENC_RD_PTR_ID or ENC_WT_PTR_ID
-	             
+    encPtrId -- ENC_RD_PTR_ID or ENC_WT_PTR_ID
+                 
   Returns:
-  	None
-  	
+      None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 static void SyncENCPtrRAWState(UINT8 encPtrId, UINT16 encIndex)
 {
@@ -276,7 +277,7 @@ static void SyncENCPtrRAWState(UINT8 encPtrId, UINT16 encIndex)
     /*----------------------------------------------------------------------------------*/    
     /* else if the input read or write pointer is in the Tx section of the Ethernet RAM */
     /*----------------------------------------------------------------------------------*/
-    else if (g_encIndex[encPtrId] < BASE_TCB_ADDR)   
+    else if (g_encIndex[encPtrId] < BASE_SCRATCH_ADDR/*BASE_TCB_ADDR*/)   
     {
         /* if the Tx data raw window has not yet been allocated (the stack is creating a new Tx data packet) */
         if (GetRawWindowState(RAW_DATA_TX_ID) != WF_RAW_DATA_MOUNTED)
@@ -288,11 +289,11 @@ static void SyncENCPtrRAWState(UINT8 encPtrId, UINT16 encIndex)
             startTickCount = (UINT32)TickGet();
             while ( !AllocateDataTxBuffer(MCHP_DATA_PACKET_SIZE) )
             {
-        	    /* If timed out than lock up -- something bad happened */
+                /* If timed out than lock up -- something bad happened */
                 if (TickGet() - startTickCount >= maxAllowedTicks)
-		        {
-			        WF_ASSERT(FALSE);  /* timeout occurred */
-		        }
+                {
+                    WF_ASSERT(FALSE);  /* timeout occurred */
+                }
             } 
         } 
 
@@ -341,54 +342,54 @@ int WFArpBroadcastIntervalSec = 5; //interval in seconds, default to 5, can be c
  *          None
  *
  *  NOTES: this is a workaround algorithm for a bug appearing on some APs: they broadcasts
-		   ARP Request over basic rate at 11Mpbs, that leaves our devices in dark. Here
-		   we do ARP Request in the beginning for all the memebers in the subnet, then 
-		   periodically do Gratuitous ARP to keep ourselves alive with the AP
+           ARP Request over basic rate at 11Mpbs, that leaves our devices in dark. Here
+           we do ARP Request in the beginning for all the memebers in the subnet, then 
+           periodically do Gratuitous ARP to keep ourselves alive with the AP
  *****************************************************************************/
 void WFPeriodicGratuitousArp(void)
 {
-	static DWORD oldTime = 0, currTime;
-	static BYTE op_req = ARP_OPERATION_REQ;
+    static DWORD oldTime = 0, currTime;
+    static BYTE op_req = ARP_OPERATION_REQ;
 
     if (!MACIsLinked())
     {
         return;
     }    
 
-	currTime = TickGet();
-	
-	if ( (currTime < oldTime) //wrap-around case
-			||
-		 ((currTime - oldTime) > WFArpBroadcastIntervalSec*TICK_SECOND)
-		)
-	{
+    currTime = TickGet();
+    
+    if ( (currTime < oldTime) //wrap-around case
+            ||
+         ((currTime - oldTime) > WFArpBroadcastIntervalSec*TICK_SECOND)
+        )
+    {
         op_req = op_req == ARP_OPERATION_REQ ? ARP_OPERATION_RESP : ARP_OPERATION_REQ;
-		ARPSendPkt(*(DWORD *)&AppConfig.MyIPAddr, *(DWORD *)&AppConfig.MyIPAddr, op_req );	
-		oldTime = currTime;
-	}
+        ARPSendPkt(*(DWORD *)&AppConfig.MyIPAddr, *(DWORD *)&AppConfig.MyIPAddr, op_req );    
+        oldTime = currTime;
+    }
 }
 #endif //defined(STACK_CLIENT_MODE) && defined(USE_GRATUITOUS_ARP)
 
 #if defined(SAVE_WPS_CONFIDENTIALS)
 enum {
-	AUTH_OPEN		= 0x01,
-	AUTH_WPA_PSK	= 0x02,
-	AUTH_SHARED 	= 0x04,
-	AUTH_WPA		= 0x08,
-	AUTH_WPA2		= 0x10,
-	AUTH_WPA2_PSK	= 0x20	
+    AUTH_OPEN       = 0x01,
+    AUTH_WPA_PSK    = 0x02,
+    AUTH_SHARED     = 0x04,
+    AUTH_WPA        = 0x08,
+    AUTH_WPA2       = 0x10,
+    AUTH_WPA2_PSK   = 0x20    
 };
-	
+    
 enum {
-	ENC_NONE		= 0x01,
-	ENC_WEP 		= 0x02,
-	ENC_TKIP		= 0x04,
-	ENC_AES 		= 0x08
+    ENC_NONE        = 0x01,
+    ENC_WEP         = 0x02,
+    ENC_TKIP        = 0x04,
+    ENC_AES         = 0x08
 };
 
 enum {
-	WEP_SHORT_KEY_SIZE	= 5,
-	WEP_LONG_KEY_SIZE	= 13
+    WEP_SHORT_KEY_SIZE  = 5,
+    WEP_LONG_KEY_SIZE   = 13
 };
 
 enum {
@@ -447,136 +448,136 @@ union sec_key {
 static UINT8
 ConvAscii2Hex(UINT8 a)
 {
-	if (a >= '0' && a <= '9')
-		return (UINT8)(a - 48);
-	if (a >= 'a' && a <= 'f')
-		return (UINT8)(a - 97 + 10);
-	if (a >= 'A' && a <= 'F')
-		return (UINT8)(a - 65 + 10);
+    if (a >= '0' && a <= '9')
+        return (UINT8)(a - 48);
+    if (a >= 'a' && a <= 'f')
+        return (UINT8)(a - 97 + 10);
+    if (a >= 'A' && a <= 'F')
+        return (UINT8)(a - 65 + 10);
 
-	return '?';
+    return '?';
 }
 
 static void
 ConvAsciiKey2Hex(UINT8 *key, UINT8 keyLen, UINT8 *hexKey)
 {
-	UINT8 i;
+    UINT8 i;
 
-	for (i = 0; i < keyLen; i += 2) {
-		hexKey[i / 2] = ConvAscii2Hex(key[i]) << 4;
-		hexKey[i / 2] |= ConvAscii2Hex(key[i + 1]);
-	}
+    for (i = 0; i < keyLen; i += 2) {
+        hexKey[i / 2] = ConvAscii2Hex(key[i]) << 4;
+        hexKey[i / 2] |= ConvAscii2Hex(key[i + 1]);
+    }
 }
 
 static void
 ConfigWep(tWFWpsCred *cred, UINT8 *secType, union sec_key *key)
 {
-	UINT8 i;
-	UINT8 wep_key[WEP_LONG_KEY_SIZE];
-	struct sec_wep40 *wep_ctx = (struct sec_wep40 *)key;
-	UINT8 *keys = (UINT8 *)wep_ctx + 1;
-	UINT8 key_len;
-	
-	if (cred->keyLen == WEP_SHORT_KEY_SIZE * 2) {
-		*secType =	WF_SECURITY_WEP_40;
-		ConvAsciiKey2Hex(cred->netKey, cred->keyLen, wep_key);
-		key_len = cred->keyLen / 2;
-	} else if (cred->keyLen == WEP_SHORT_KEY_SIZE) {
-		*secType =	WF_SECURITY_WEP_40;
-		memcpy(wep_key, cred->netKey, cred->keyLen);
-		key_len = cred->keyLen;
-	} else if (cred->keyLen == WEP_LONG_KEY_SIZE * 2) {
-		*secType =	WF_SECURITY_WEP_104;
-		ConvAsciiKey2Hex(cred->netKey, cred->keyLen, wep_key);
-		key_len = cred->keyLen / 2;
-	} else if (cred->keyLen == WEP_LONG_KEY_SIZE) {
-		*secType = WF_SECURITY_WEP_104;
-		memcpy(wep_key, cred->netKey, cred->keyLen);
-		key_len = cred->keyLen;
-	} else {
-		WF_ASSERT(FALSE);
-	}
-	
-	for (i = 0; i < 4; i++)
-		memcpy(keys + i * key_len, wep_key, key_len);
-				
-	wep_ctx->key_idx = cred->keyIdx - 1;
+    UINT8 i;
+    UINT8 wep_key[WEP_LONG_KEY_SIZE];
+    struct sec_wep40 *wep_ctx = (struct sec_wep40 *)key;
+    UINT8 *keys = (UINT8 *)wep_ctx + 1;
+    UINT8 key_len;
+    
+    if (cred->keyLen == WEP_SHORT_KEY_SIZE * 2) {
+        *secType = WF_SECURITY_WEP_40;
+        ConvAsciiKey2Hex(cred->netKey, cred->keyLen, wep_key);
+        key_len = cred->keyLen / 2;
+    } else if (cred->keyLen == WEP_SHORT_KEY_SIZE) {
+        *secType = WF_SECURITY_WEP_40;
+        memcpy(wep_key, cred->netKey, cred->keyLen);
+        key_len = cred->keyLen;
+    } else if (cred->keyLen == WEP_LONG_KEY_SIZE * 2) {
+        *secType = WF_SECURITY_WEP_104;
+        ConvAsciiKey2Hex(cred->netKey, cred->keyLen, wep_key);
+        key_len = cred->keyLen / 2;
+    } else if (cred->keyLen == WEP_LONG_KEY_SIZE) {
+        *secType = WF_SECURITY_WEP_104;
+        memcpy(wep_key, cred->netKey, cred->keyLen);
+        key_len = cred->keyLen;
+    } else {
+        WF_ASSERT(FALSE);
+    }
+    
+    for (i = 0; i < 4; i++)
+        memcpy(keys + i * key_len, wep_key, key_len);
+                
+    wep_ctx->key_idx = cred->keyIdx - 1;
 }
 
 static void 
 WF_SaveWPSCredentials(UINT8 CpId)
 {
-	tWFWpsCred cred;
-	union sec_key key;
-	UINT8 *psk;
-	static BOOL once = FALSE;
+    tWFWpsCred cred;
+    union sec_key key;
+    UINT8 *psk;
+    static BOOL once = FALSE;
 
-	if (!once) {
-		WF_CPGetWPSCredentials(CpId, &cred);
-		cred.authType = SHORTSWAP(cred.authType);
-		cred.encType = SHORTSWAP(cred.encType);
-		memcpy((void *)AppConfig.MySSID, (void *)cred.ssid, cred.ssidLen);
-		AppConfig.SsidLength = cred.ssidLen;
-		switch (cred.authType) {
-		case AUTH_OPEN:
-			if (cred.encType == ENC_NONE) {
-				AppConfig.SecurityMode = WF_SECURITY_OPEN;
-			} else if (cred.encType == ENC_WEP) {
-				ConfigWep(&cred, &AppConfig.SecurityMode, &key);
-				if (AppConfig.SecurityMode == WF_SECURITY_WEP_40) {
-					memcpy((void *)AppConfig.SecurityKey, (void *)key.wep40.key, WEP_SHORT_KEY_SIZE * 4);
-					AppConfig.SecurityKeyLength = WEP_SHORT_KEY_SIZE * 4;
-					AppConfig.WepKeyIndex = key.wep40.key_idx;
-				} else if (AppConfig.SecurityMode == WF_SECURITY_WEP_104) {
-					memcpy((void *)AppConfig.SecurityKey, (void *)key.wep104.key, WEP_LONG_KEY_SIZE * 4);
-					AppConfig.SecurityKeyLength = WEP_LONG_KEY_SIZE * 4;
-					AppConfig.WepKeyIndex = key.wep104.key_idx;
-				} else {
-					WF_ASSERT(FALSE);
-				}
-			}
-			break;
-		case AUTH_SHARED:
-			ConfigWep(&cred, &AppConfig.SecurityMode, &key);
-			if (AppConfig.SecurityMode == WF_SECURITY_WEP_40) {
-				memcpy((void *)AppConfig.SecurityKey, (void *)key.wep40.key, WEP_SHORT_KEY_SIZE * 4);
-				AppConfig.SecurityKeyLength = WEP_SHORT_KEY_SIZE * 4;
-				AppConfig.WepKeyIndex = key.wep40.key_idx;
-			} else if (AppConfig.SecurityMode == WF_SECURITY_WEP_104) {
-				memcpy((void *)AppConfig.SecurityKey, (void *)key.wep104.key, WEP_LONG_KEY_SIZE * 4);
-				AppConfig.SecurityKeyLength = WEP_LONG_KEY_SIZE * 4;
-				AppConfig.WepKeyIndex = key.wep104.key_idx;
-			} else {
-				WF_ASSERT(FALSE);
-			}
-			break;
-		case AUTH_WPA_PSK:
-		case AUTH_WPA2_PSK:
-			psk = (UINT8 *)AppConfig.SecurityKey;
-			memset((void *)psk, 0x00, 64);
-			if (cred.keyLen == 64) {
-				AppConfig.SecurityMode = cred.authType == AUTH_WPA_PSK ?
-					WF_SECURITY_WPA_WITH_KEY : WF_SECURITY_WPA2_WITH_KEY;
-				AppConfig.SecurityKeyLength = 32;
-				ConvAsciiKey2Hex(cred.netKey, cred.keyLen, psk);
-			} else if (cred.keyLen >= 8 && cred.keyLen < 64) {
-				AppConfig.SecurityMode = cred.authType == AUTH_WPA_PSK ?
-					WF_SECURITY_WPA_WITH_PASS_PHRASE : WF_SECURITY_WPA2_WITH_PASS_PHRASE;
-				AppConfig.SecurityKeyLength = cred.keyLen;
-				if (AppConfig.SecurityKeyLength > 8 
-					&& cred.netKey[AppConfig.SecurityKeyLength - 1] == '\0')
-					--AppConfig.SecurityKeyLength;
-				memcpy(psk, cred.netKey, AppConfig.SecurityKeyLength);
-			}
-			break;
-		default:
-			WF_ASSERT(FALSE);
-			break;
-		}
-		once = TRUE;
-	}
+    if (!once) {
+        WF_CPGetWPSCredentials(CpId, &cred);
+        cred.authType = SHORTSWAP(cred.authType);
+        cred.encType = SHORTSWAP(cred.encType);
+        memcpy((void *)AppConfig.MySSID, (void *)cred.ssid, cred.ssidLen);
+        AppConfig.SsidLength = cred.ssidLen;
+        switch (cred.authType) {
+        case AUTH_OPEN:
+            if (cred.encType == ENC_NONE) {
+                AppConfig.SecurityMode = WF_SECURITY_OPEN;
+            } else if (cred.encType == ENC_WEP) {
+                ConfigWep(&cred, &AppConfig.SecurityMode, &key);
+                if (AppConfig.SecurityMode == WF_SECURITY_WEP_40) {
+                    memcpy((void *)AppConfig.SecurityKey, (void *)key.wep40.key, WEP_SHORT_KEY_SIZE * 4);
+                    AppConfig.SecurityKeyLength = WEP_SHORT_KEY_SIZE * 4;
+                    AppConfig.WepKeyIndex = key.wep40.key_idx;
+                } else if (AppConfig.SecurityMode == WF_SECURITY_WEP_104) {
+                    memcpy((void *)AppConfig.SecurityKey, (void *)key.wep104.key, WEP_LONG_KEY_SIZE * 4);
+                    AppConfig.SecurityKeyLength = WEP_LONG_KEY_SIZE * 4;
+                    AppConfig.WepKeyIndex = key.wep104.key_idx;
+                } else {
+                    WF_ASSERT(FALSE);
+                }
+            }
+            break;
+        case AUTH_SHARED:
+            ConfigWep(&cred, &AppConfig.SecurityMode, &key);
+            if (AppConfig.SecurityMode == WF_SECURITY_WEP_40) {
+                memcpy((void *)AppConfig.SecurityKey, (void *)key.wep40.key, WEP_SHORT_KEY_SIZE * 4);
+                AppConfig.SecurityKeyLength = WEP_SHORT_KEY_SIZE * 4;
+                AppConfig.WepKeyIndex = key.wep40.key_idx;
+            } else if (AppConfig.SecurityMode == WF_SECURITY_WEP_104) {
+                memcpy((void *)AppConfig.SecurityKey, (void *)key.wep104.key, WEP_LONG_KEY_SIZE * 4);
+                AppConfig.SecurityKeyLength = WEP_LONG_KEY_SIZE * 4;
+                AppConfig.WepKeyIndex = key.wep104.key_idx;
+            } else {
+                WF_ASSERT(FALSE);
+            }
+            break;
+        case AUTH_WPA_PSK:
+        case AUTH_WPA2_PSK:
+            psk = (UINT8 *)AppConfig.SecurityKey;
+            memset((void *)psk, 0x00, 64);
+            if (cred.keyLen == 64) {
+                AppConfig.SecurityMode = cred.authType == AUTH_WPA_PSK ?
+                    WF_SECURITY_WPA_WITH_KEY : WF_SECURITY_WPA2_WITH_KEY;
+                AppConfig.SecurityKeyLength = 32;
+                ConvAsciiKey2Hex(cred.netKey, cred.keyLen, psk);
+            } else if (cred.keyLen >= 8 && cred.keyLen < 64) {
+                AppConfig.SecurityMode = cred.authType == AUTH_WPA_PSK ?
+                    WF_SECURITY_WPA_WITH_PASS_PHRASE : WF_SECURITY_WPA2_WITH_PASS_PHRASE;
+                AppConfig.SecurityKeyLength = cred.keyLen;
+                if (AppConfig.SecurityKeyLength > 8 
+                    && cred.netKey[AppConfig.SecurityKeyLength - 1] == '\0')
+                    --AppConfig.SecurityKeyLength;
+                memcpy(psk, cred.netKey, AppConfig.SecurityKeyLength);
+            }
+            break;
+        default:
+            WF_ASSERT(FALSE);
+            break;
+        }
+        once = TRUE;
+    }
 }
-#endif	/* #if defined(SAVE_WPS_CONFIDENTIALS) */
+#endif    /* #if defined(SAVE_WPS_CONFIDENTIALS) */
 
 // if WPA Passphrase being used
 #if RETRIEVE_BINARY_KEY == TRUE        
@@ -592,13 +593,10 @@ void RetrieveBinaryKey(UINT8 cpid)
       
     /* copy binary key into AppConfig */
     WF_CPGetSecurity(cpid, &securityType, &wepKeyIndex, AppConfig.SecurityKey, &AppConfig.SecurityKeyLength);
-    #if (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_WITH_PASS_PHRASE)
-        AppConfig.SecurityMode = WF_SECURITY_WPA_WITH_KEY;
-    #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA2_WITH_PASS_PHRASE)
-        AppConfig.SecurityMode = WF_SECURITY_WPA2_WITH_KEY;
-    #else
-        AppConfig.SecurityMode = WF_SECURITY_WPA_AUTO_WITH_KEY;
-    #endif                                 
+	if (AppConfig.SecurityMode == WF_SECURITY_WPA_WITH_PASS_PHRASE
+		|| AppConfig.SecurityMode == WF_SECURITY_WPA2_WITH_PASS_PHRASE
+		|| AppConfig.SecurityMode == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE)
+		AppConfig.SecurityMode -= 1;                              
 }          
 #endif /* RETRIEVE_BINARY_KEY == TRUE */  
 
@@ -610,62 +608,62 @@ static void CheckHibernate(void)
     #endif
     
     #if defined( WF_CONSOLE_IFCFGUTIL )
-     	if (WF_hibernate.wakeup_notice && (WF_hibernate.state == WF_HB_WAIT_WAKEUP)) 
-     	{
-    	    DelayMs(200);
+         if (WF_hibernate.wakeup_notice && (WF_hibernate.state == WF_HB_WAIT_WAKEUP)) 
+         {
+            DelayMs(200);
     
-    		WF_hibernate.state = WF_HB_NO_SLEEP;
-    		StackInit();
-        	#if defined(WF_CONSOLE_DEMO)
-    		IperfAppInit();
-    		#endif
+            WF_hibernate.state = WF_HB_NO_SLEEP;
+            StackInit();
+            #if defined(WF_CONSOLE_DEMO)
+            IperfAppInit();
+            #endif
     
-    		WF_Connect();
-    	}
+            WF_Connect();
+        }
     #endif
 
-	
+    
     #if defined( WF_CONSOLE_IFCFGUTIL )
        wait_console_input:
     #endif
         
     #if defined(WF_CONSOLE) 
-		WFConsoleProcess();
-		#if defined( WF_CONSOLE_DEMO )
-    		if (WF_hibernate.state == WF_HB_NO_SLEEP)
-    		{
-    			IperfAppCall();
-    		}	
-       		WFConsoleProcessEpilogue();
-	    #endif
-	#endif
+        WFConsoleProcess();
+        #if defined( WF_CONSOLE_DEMO )
+            if (WF_hibernate.state == WF_HB_NO_SLEEP)
+            {
+                IperfAppCall();
+            }    
+            WFConsoleProcessEpilogue();
+        #endif
+    #endif
 
 
-	#if defined( WF_CONSOLE_IFCFGUTIL )
-		if (WF_hibernate.state != WF_HB_NO_SLEEP) 
-    	{
-			if (WF_hibernate.state == WF_HB_ENTER_SLEEP) 
-    		{
-        		// if we are connected then disconnect before going into hibernate state
-        		WF_CMGetConnectionState(&state, &cpid);
-        		if ((state == WF_CSTATE_CONNECTED_INFRASTRUCTURE) || (state == WF_CSTATE_CONNECTED_ADHOC))
-        		{
-            		WF_CMDisconnect();
-                }  		
+    #if defined( WF_CONSOLE_IFCFGUTIL )
+        if (WF_hibernate.state != WF_HB_NO_SLEEP) 
+        {
+            if (WF_hibernate.state == WF_HB_ENTER_SLEEP) 
+            {
+                // if we are connected then disconnect before going into hibernate state
+                WF_CMGetConnectionState(&state, &cpid);
+                if ((state == WF_CSTATE_CONNECTED_INFRASTRUCTURE) || (state == WF_CSTATE_CONNECTED_ADHOC))
+                {
+                    WF_CMDisconnect();
+                }          
 
-			    WF_HibernateEnable();
-				WF_hibernate.state = WF_HB_WAIT_WAKEUP;
-			}
-			if (WF_hibernate.wakeup_notice) 
-			{
-				//continue;
-			}	
-			else
-			{
-				goto wait_console_input;
-            }				
-		}
-	#endif	    
+                WF_HibernateEnable();
+                WF_hibernate.state = WF_HB_WAIT_WAKEUP;
+            }
+            if (WF_hibernate.wakeup_notice) 
+            {
+                //continue;
+            }    
+            else
+            {
+                goto wait_console_input;
+            }                
+        }
+    #endif        
 } 
 #endif /* WF_USE_POWER_SAVE_FUNCTIONS */   
 
@@ -681,31 +679,35 @@ static void CheckHibernate(void)
  *****************************************************************************/
 void MACProcess(void)
 {
-	static BOOL oneTimeJobDone = FALSE;
+    static BOOL oneTimeJobDone = FALSE;
     /* Let 802.11 processes have a chance to run */
     WFProcess();
 
-	if (MACIsLinked()) {
-		if (!oneTimeJobDone) {
-   	   		#if defined(STACK_USE_UART) && defined(MRF24WG)
-        	WF_OutputConnectionContext(); 
-    		#endif
+    if (MACIsLinked()) 
+    {
+        if (!oneTimeJobDone) 
+        {
+            #if defined(STACK_USE_UART) && defined(MRF24WG)
+                WF_OutputConnectionContext(); 
+            #endif
     
-    		// Retrieves binary key if we connected with WPA passphrase and changes AppConfig so we will
-    		// use the binary key to reconnect
-    		#if RETRIEVE_BINARY_KEY == TRUE
-        	RetrieveBinaryKey(1);
-    		#endif
-	
-			#if defined(SAVE_WPS_CONFIDENTIALS)
-			WF_SaveWPSCredentials(1);
-			#endif	/* defined(SAVE_WPS_CONFIDENTIALS) */
-			
-			oneTimeJobDone = TRUE;
-		}
-	} else {
-		oneTimeJobDone = FALSE;
-	}
+            // Retrieves binary key if we connected with WPA passphrase and changes AppConfig so we will
+            // use the binary key to reconnect
+            #if RETRIEVE_BINARY_KEY == TRUE
+                RetrieveBinaryKey(1);
+            #endif
+    
+            #if defined(SAVE_WPS_CONFIDENTIALS)
+                WF_SaveWPSCredentials(1);
+            #endif    /* defined(SAVE_WPS_CONFIDENTIALS) */
+            
+            oneTimeJobDone = TRUE;
+        }
+    } 
+    else 
+    {
+        oneTimeJobDone = FALSE;
+    }
 
     // checks if going into or coming out of hibernate mode
     #if defined(WF_USE_POWER_SAVE_FUNCTIONS)    
@@ -713,10 +715,34 @@ void MACProcess(void)
     #endif    
     
     #if defined(STACK_CLIENT_MODE) && defined(USE_GRATUITOUS_ARP)
-    	//following is the workaround algorithm for the 11Mbps broadcast bugfix
-    	WFPeriodicGratuitousArp();
-    #endif 	
+        //following is the workaround algorithm for the 11Mbps broadcast bugfix
+        WFPeriodicGratuitousArp();
+    #endif     
 }
+
+  /******************************************************************************
+   * Function:		  UINT16 WFGetTCBSize(void)
+   *
+   * PreCondition:	  None
+   *
+   * Input: 		  None
+   *
+   * Output:		  Number of bytes in the TCB
+   *
+   * Side Effects:	  None
+   *
+   * Overview:		  Returns number of bytes available in TCP Control Block (TCB) so
+   *				  higher-layer code can determine if the number of bytes available
+   *				  can support the structures designated to be stored in the TCB.
+   *
+   * Note:			  When running with WiFi the TCB is contained in the Scratch Memory
+   *				  on the MRF24W.
+   *****************************************************************************/
+  UINT16 WFGetTCBSize(void)
+  {
+	  return g_sizeofScratchMemory;
+  }
+
 
  /******************************************************************************
  * Function:        void MACInit(void)
@@ -768,10 +794,10 @@ void RawInit(void)
 
     /* Mount scratch memory, index defaults to 0.  This will stay permanently mounted.   */
     /* If one needs to know, this function returns the number of bytes in scratch memory */
-    ScratchMount(RAW_SCRATCH_ID);
+    g_sizeofScratchMemory = ScratchMount(RAW_SCRATCH_ID);
     
     g_encPtrRAWId[ENC_RD_PTR_ID] = RAW_DATA_RX_ID;
-    g_encIndex[ENC_RD_PTR_ID]    = BASE_TCB_ADDR;
+    g_encIndex[ENC_RD_PTR_ID]    = BASE_SCRATCH_ADDR;//BASE_TCB_ADDR;
 
     SetRawWindowState(RAW_DATA_TX_ID, WF_RAW_UNMOUNTED);
 
@@ -820,26 +846,26 @@ BOOL MACIsLinked(void)
 
 /*****************************************************************************
   Function:
-	BOOL MACIsTxReady(void))
+    BOOL MACIsTxReady(void))
 
   Summary:
-	Checks if a tx data buffer is available on the WiFi chip.
+    Checks if a tx data buffer is available on the WiFi chip.
 
   Description:
-	Checks if a raw window is currently mounted.  If not, the tx data raw window
-	is mounted.
+    Checks if a raw window is currently mounted.  If not, the tx data raw window
+    is mounted.
 
   Precondition:
-	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-	None
-	             
+    None
+                 
   Returns:
-  	True if tx data buffer available, else false
-  	
+    True if tx data buffer available, else false
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 BOOL MACIsTxReady(void)
 {
@@ -1389,10 +1415,10 @@ void MACMemCopyAsync(PTR_BASE destAddr, PTR_BASE sourceAddr, WORD len)
     /*-------------------------------------------------*/
     /* This is a special case. We cannot perform a RAW Copy operation within the same RAW window,              */
     /* but we can copy manually data from one section of the scratch to another section of the scratch window. */
-    if ((destAddr >= BASE_TCB_ADDR) && (sourceAddr >= BASE_TCB_ADDR) )
+    if ((destAddr >= BASE_SCRATCH_ADDR/*BASE_TCB_ADDR*/) && (sourceAddr >= BASE_SCRATCH_ADDR/*BASE_TCB_ADDR*/) )
     {
         bytesLeft = len;
-		rawScratchId = RAW_SCRATCH_ID; 
+        rawScratchId = RAW_SCRATCH_ID;
         /* save the current RAW index in this scratch window */
         origRawIndex = RawGetIndex(RAW_SCRATCH_ID);
         
@@ -1482,7 +1508,7 @@ void MACMemCopyAsync(PTR_BASE destAddr, PTR_BASE sourceAddr, WORD len)
         /* if stack trying to copy from RAW Tx Data Window to same RAW Tx Data Window */ 
         if (((g_encIndex[ENC_WT_PTR_ID] >= TXSTART) && (g_encIndex[ENC_RD_PTR_ID] >= TXSTART))
                                                     &&
-            ((g_encIndex[ENC_WT_PTR_ID] < BASE_TCB_ADDR) && (g_encIndex[ENC_RD_PTR_ID] < BASE_TCB_ADDR)))                                                     
+            ((g_encIndex[ENC_WT_PTR_ID] < BASE_SCRATCH_ADDR) && (g_encIndex[ENC_RD_PTR_ID] < BASE_SCRATCH_ADDR)))                                                     
         {
             WF_ASSERT(FALSE);  /* can't copy from within same raw window */
         }
@@ -1733,28 +1759,28 @@ void MACPowerUp(void)
 
 void RawSendUntamperedData(UINT8 *pReq, UINT16 len)
 {
-	BOOL    res;
-	UINT8 preambleBuf[2];
-	UINT16 byteCount;
+    BOOL    res;
+    UINT8 preambleBuf[2];
+    UINT16 byteCount;
 
     WF_ASSERT(GetTxRawWindowState() != WF_RAW_DATA_MOUNTED);
 
-	// RAW memory alloc
-	res = AllocateDataTxBuffer(len);
+    // RAW memory alloc
+    res = AllocateDataTxBuffer(len);
     WF_ASSERT(res == TRUE);           /* if ever change this need to deallocate Tx buffer */
 
-	/* fill out 2 byte preamble of request message */
-	preambleBuf[0] = WF_DATA_REQUEST_TYPE;            // indicate this is a data msg
-	preambleBuf[1] = WF_UNTAMPERED_DATA_MSG_SUBTYPE;  // untampered data subtype
+    /* fill out 2 byte preamble of request message */
+    preambleBuf[0] = WF_DATA_REQUEST_TYPE;            // indicate this is a data msg
+    preambleBuf[1] = WF_UNTAMPERED_DATA_MSG_SUBTYPE;  // untampered data subtype
 
     /* write out preamble */
     RawWrite(RAW_TX_ID, 0, sizeof(preambleBuf), preambleBuf);
 
-	// write out payload
-	RawSetByte(RAW_TX_ID, (UINT8 *) pReq, len);
+    // write out payload
+    RawSetByte(RAW_TX_ID, (UINT8 *) pReq, len);
 
-	// Instruct WF chip to transmit the packet data in the raw window
-	RawSendTxBuffer(len + sizeof(preambleBuf));
+    // Instruct WF chip to transmit the packet data in the raw window
+    RawSendTxBuffer(len + sizeof(preambleBuf));
 
 }
 #endif
@@ -1762,29 +1788,29 @@ void RawSendUntamperedData(UINT8 *pReq, UINT16 len)
 
 /*****************************************************************************
   Function:
-	WORD CalcIPBufferChecksum(WORD len)
+    WORD CalcIPBufferChecksum(WORD len)
 
   Summary:
-	Calculates an IP checksum in the MAC buffer itself.
+    Calculates an IP checksum in the MAC buffer itself.
 
   Description:
-	This function calculates an IP checksum over an array of input data 
-	existing in the MAC buffer.  The checksum is the 16-bit one's complement 
-	of one's complement sum of all words in the data (with zero-padding if 
-	an odd number of bytes are summed).  This checksum is defined in RFC 793.
+    This function calculates an IP checksum over an array of input data 
+    existing in the MAC buffer.  The checksum is the 16-bit one's complement 
+    of one's complement sum of all words in the data (with zero-padding if 
+    an odd number of bytes are summed).  This checksum is defined in RFC 793.
 
   Precondition:
-	TCP is initialized and the MAC buffer pointer is set to the start of
-	the buffer.
+    TCP is initialized and the MAC buffer pointer is set to the start of
+    the buffer.
 
   Parameters:
-	len - number of bytes to be checksummed
+    len - number of bytes to be checksummed
 
   Returns:
-	The calculated checksum.
+    The calculated checksum.
 
   Remarks:
-	All Microchip MACs should perform this function in hardware.
+    All Microchip MACs should perform this function in hardware.
   ***************************************************************************/
 extern WORD RawCalculateChecksum(UINT16 length);
 WORD CalcIPBufferChecksum(WORD len)

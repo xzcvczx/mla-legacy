@@ -53,12 +53,13 @@
  * THESE TERMS. 
  *************************************************************************/
 /** @file mTouch_HardwareProfile_16F150x.h
-* @brief Support for: PIC16F1503, PIC16F1507, PIC16F1508, PIC16F1509
+* @brief Support for: PIC12F1501, PIC16F1503, PIC16F1507, PIC16F1508, PIC16F1509
 */
 /// @cond
 #if !defined(__MTOUCH_HARDWARE_16F150X_H)
     #define  __MTOUCH_HARDWARE_16F150X_H
 
+#if !defined(_12F1501) && !defined(_12LF1501)
 #if !defined(_16F1503) && !defined(_16LF1503)
 #if !defined(_16F1507) && !defined(_16LF1507)
 #if !defined(_16F1508) && !defined(_16LF1508)
@@ -68,7 +69,13 @@
 #endif
 #endif
 #endif
+#endif
 
+#if defined(_12F1501) || defined(_12LF1501)
+    #if MTOUCH_NUMBER_SENSORS > 4
+        #error The PIC12F/LF1501 is not able to support more than 4 sensors due to pinout limitations.
+    #endif
+#endif
 #if defined(_16F1503) || defined(_16LF1503)
     #if MTOUCH_NUMBER_SENSORS > 8
         #error The PIC16F/LF1503 is not able to support more than 8 sensors due to pinout limitations.
@@ -147,7 +154,52 @@
 //===========================================================
 //  DAC Configuration
 //===========================================================
-// NOT AVAILABLE
+#if !defined(_16F1507) && !defined(_16LF1507)
+
+    #define PIC_DAC_AVAILABLE
+    #define PIC_DACOUT_AVAILABLE
+    
+    #define MTOUCH_USE_DACOUT1          // Only uncomment one at a time.
+    //#define MTOUCH_USE_DACOUT2
+
+    #if     defined(MTOUCH_USE_DACOUT2)
+        #define PIC_DACOUT_TRIS_C               TRISA2
+        #define PIC_DACOUT_LAT_C                LATA2
+        #define PIC_DACOUT_LAT_ASM              _LATA
+        #define PIC_DACOUT_PIN                  2
+    #elif   defined(MTOUCH_USE_DACOUT1)
+        #define PIC_DACOUT_TRIS_C               TRISA0
+        #define PIC_DACOUT_LAT_C                LATA0
+        #define PIC_DACOUT_LAT_ASM              _LATA
+        #define PIC_DACOUT_PIN                  0
+    #endif
+    
+    #define PIC_DACCON0_VDD                     0x80
+    #define PIC_DACCON1_VDD                     0x1F
+    #define PIC_DACCON0_VSS                     0x80
+    #define PIC_DACCON1_VSS                     0x00
+
+    #if     defined(MTOUCH_USE_DACOUT1)
+        #define PIC_DACOUT_DACCON0_VSS          0xA0
+        #define PIC_DACOUT_DACCON0_1_3RD_VDD    0xA0
+        #define PIC_DACOUT_DACCON0_HALF_VDD     0xA0
+        #define PIC_DACOUT_DACCON0_2_3RD_VDD    0xA0
+        #define PIC_DACOUT_DACCON0_VDD          0xA0
+    #elif   defined(MTOUCH_USE_DACOUT2)
+        #define PIC_DACOUT_DACCON0_VSS          0x90
+        #define PIC_DACOUT_DACCON0_1_3RD_VDD    0x90
+        #define PIC_DACOUT_DACCON0_HALF_VDD     0x90
+        #define PIC_DACOUT_DACCON0_2_3RD_VDD    0x90
+        #define PIC_DACOUT_DACCON0_VDD          0x90
+    #endif
+    
+    #define PIC_DACOUT_DACCON1_VSS              0x00
+    #define PIC_DACOUT_DACCON1_1_3RD_VDD        0x0B
+    #define PIC_DACOUT_DACCON1_HALF_VDD         0x10
+    #define PIC_DACOUT_DACCON1_2_3RD_VDD        0x16
+    #define PIC_DACOUT_DACCON1_VDD              0x1F
+
+#endif
 
 //===========================================================
 //  Software-enabled Watchdog Timer Configuration
@@ -169,20 +221,29 @@
 #define MTOUCH_AD_AN1           0x05
 #define MTOUCH_AD_AN2           0x09
 #define MTOUCH_AD_AN3           0x0D
-#define MTOUCH_AD_AN4           0x11
-#define MTOUCH_AD_AN5           0x15
-#define MTOUCH_AD_AN6           0x19
-#define MTOUCH_AD_AN7           0x1D
 
-#if !defined(_16F1503) && !defined(_16LF1503)
-#define MTOUCH_AD_AN8           0x21
-#define MTOUCH_AD_AN9           0x25
-#define MTOUCH_AD_AN10          0x29
-#define MTOUCH_AD_AN11          0x2D
+#if !defined(_16F1501) && !defined(_16LF1501)
+    #define MTOUCH_AD_AN4           0x11
+    #define MTOUCH_AD_AN5           0x15
+    #define MTOUCH_AD_AN6           0x19
+    #define MTOUCH_AD_AN7           0x1D
+
+    #if !defined(_16F1503) && !defined(_16LF1503)
+        #define MTOUCH_AD_AN8           0x21
+        #define MTOUCH_AD_AN9           0x25
+        #define MTOUCH_AD_AN10          0x29
+        #define MTOUCH_AD_AN11          0x2D
+    #endif
 #endif
 
 #define MTOUCH_AD_ISO_AND_GO    0x33 
 #define MTOUCH_AD_ISO_NOGO      0x31
+
+#if !defined(_16F1507) && !defined(_16LF1507)
+    #define MTOUCH_AD_DAC_AND_GO    0x7B    
+    #define MTOUCH_AD_DAC_NOGO      0x79   
+#endif
+
 
 #define MTOUCH_PIN_AN0          0
 #define MTOUCH_PIN_AN1          1

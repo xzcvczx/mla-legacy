@@ -87,6 +87,10 @@
              in it's usage.
           7) Modified "FSFopen" function so that when you try to open a file that doesn't exist on the disk,
              variable "FSerrno" is assigned to CE_FILE_NOT_FOUND.
+  1.4.2   1) Minor Modification in "CreateFileEntry" function to fix a bug for file name lengths of
+             26,39....characters (multiples of 13)
+          2) Fixed the LoadMBR() function to scan all of the MBR entries and return success on the first
+             supported drive or fail after the 4 table entries.
 ********************************************************************/
 
 #include "Compiler.h"
@@ -1692,41 +1696,46 @@ BYTE LoadMBR(DISK *dsk)
         }
         else
         {
-            /*    Valid Master Boot Record Loaded   */
+            BYTE i;
+            PTE_MBR* partitionEntry = &Partition->Partition0;
 
-            // Get the 32 bit offset to the first partition
-            dsk->firsts = Partition->Partition0.PTE_FrstSect;
+            for(i=0; i<4; i++)
+            {                
+                /*    Valid Master Boot Record Loaded   */
 
-            // check if the partition type is acceptable
-              type = Partition->Partition0.PTE_FSDesc;
+                // Get the 32 bit offset to the first partition
+                dsk->firsts = partitionEntry->PTE_FrstSect;
 
-            switch (type)
-            {
-                case 0x01:
-                    dsk->type = FAT12;
-                    break;
+                // check if the partition type is acceptable
+                  type = partitionEntry->PTE_FSDesc;
 
-            case 0x04:
-                case 0x06:
-                case 0x0E:
-                    dsk->type = FAT16;
-                    break;
+                switch (type)
+                {
+                    case 0x01:
+                        dsk->type = FAT12;
+                        break;
 
-                case 0x0B:
-                case 0x0C:
+                case 0x04:
+                    case 0x06:
+                    case 0x0E:
+                        dsk->type = FAT16;
+                        return(error);
 
-#ifdef SUPPORT_FAT32 // If FAT32 supported.
-            dsk->type = FAT32;    // FAT32 is supported too
-#else
-            FSerrno = CE_CARDFAT32;
-            error = CE_CARDFAT32;
-#endif
-                    break;
+                    case 0x0B:
+                    case 0x0C:
+                        #ifdef SUPPORT_FAT32 // If FAT32 supported.
+                            dsk->type = FAT32;    // FAT32 is supported too
+                            return(error);
+                        #endif
+                } // switch
 
-                default:
-                    FSerrno = CE_UNSUPPORTED_FS;
-                    error = CE_UNSUPPORTED_FS;
-            } // switch
+                /* If we are here, we didn't find a matching partition.  We
+                   should increment to the next partition table entry */
+                partitionEntry++;
+            }
+
+            FSerrno = CE_UNSUPPORTED_FS;
+            error = CE_UNSUPPORTED_FS;
         }
     }
 
@@ -3342,7 +3351,10 @@ CETYPE CreateFileEntry(FILEOBJ fo, WORD *fHandle, BYTE mode, BOOL createFirstClu
 				// Load the destination address only once and during first time,
 				if(firstTime)
 				{
-					dest = (unsigned short int *)(fo -> utf16LFNptr + fileNameLength - reminder - 1);
+					if(reminder)
+						dest = (unsigned short int *)(fo -> utf16LFNptr + fileNameLength - reminder - 1);
+					else
+						dest = (unsigned short int *)(fo -> utf16LFNptr + fileNameLength - MAX_UTF16_CHARS_IN_LFN_ENTRY - 1);
 					firstTime = FALSE;
 				}
 			}

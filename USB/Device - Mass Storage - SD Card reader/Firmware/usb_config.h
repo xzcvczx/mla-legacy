@@ -139,7 +139,7 @@
 
 #define USB_SUPPORT_DEVICE
 
-#define USB_NUM_STRING_DESCRIPTORS 4    //Include the lang ID codes string in this count
+#define USB_NUM_STRING_DESCRIPTORS 4    //Include the lang ID codes string 0 in this count
 
 //#define USB_INTERRUPT_LEGACY_CALLBACKS
 #define USB_ENABLE_ALL_HANDLERS

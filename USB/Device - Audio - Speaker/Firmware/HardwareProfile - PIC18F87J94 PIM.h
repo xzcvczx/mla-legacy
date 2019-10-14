@@ -185,6 +185,7 @@
 	// PWM mode, Single output, Active High
 	#define mInitPWM() 			{ PR2 = PWM_PERIOD;\
 								  CCPR1L = 0;\
+								  RPOR10_11bits.RPO11R = 4;\
 								  TRISCbits.TRISC2 = 0;\
 								  mInitTimer();\
 								  CCP1CON = 0x0c;\

@@ -245,7 +245,7 @@ contact data is sent to the host for each HID report.
         #pragma config IESO     = OFF      	// Internal External (clock) Switchover
         #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
         #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
-        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
         #pragma config WPDIS    = WPDIS     // Program memory not write protected
         #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
         #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
@@ -398,7 +398,7 @@ contact data is sent to the host for each HID report.
 /** VARIABLES ******************************************************/
 #if defined(__18CXX)
     #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
-        #pragma udata usbram2
+        #pragma udata HID_VARS=0x260
     #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
         || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)\
         || defined(__18LF24K50) || defined(__18F24K50) || defined(__18LF25K50)\
@@ -445,7 +445,6 @@ contact data is sent to the host for each HID report.
 #endif
 
 unsigned char hid_report_in[HID_INT_IN_EP_SIZE] IN_DATA_BUFFER_ADDRESS_TAG;
-unsigned char hid_report_out[HID_INT_OUT_EP_SIZE] OUT_DATA_BUFFER_ADDRESS_TAG;
 
 #if defined(__18CXX)
     #pragma udata
@@ -728,7 +727,7 @@ static void InitializeSystem(void)
         ANCON3 = 0xFF;
         #if(USB_SPEED_OPTION == USB_FULL_SPEED)
             //Enable INTOSC active clock tuning if full speed
-            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            ACTCON = 0x90; //Enable active clock self tuning for USB operation
             while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
                                             //with USB operation (ex: if using two speed 
                                             //startup or otherwise performing clock switching)
@@ -1429,13 +1428,21 @@ void USBCBSuspend(void)
 	#if defined(OSCTUNE)
 		OSCTUNEbits.INTSRC = 0;		//31kHz from INTRC, less accurate but lower power
 	#endif
-	OSCCON = 0x03;				//Sleep on sleep, 31kHz selected as microcontroller clock source
+
 	//Should configure all I/O pins for lowest power consumption.
 	//Typically this is done by driving unused I/O pins as outputs and driving them high or low.
 	//In this example, this is not done however, in case the user is expecting the I/O pins
 	//to remain tri-state and has hooked something up to them.
 	//Leaving the I/O pins floating will waste power and should not be done in a
 	//real application.
+
+	#if !defined(PIC18F97J94_FAMILY)
+	    OSCCON = 0x03;		//Sleep on sleep, 31kHz selected as microcontroller clock source
+	#else
+	    OSCCON = 0x06;      //Sleep on sleep, 500kHz from FRC selected
+	#endif
+
+
 	#endif
 
 	//IMPORTANT NOTE: Do not clear the USBActivityIF (ACTVIF) bit here.  This bit is 

@@ -12,7 +12,7 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the "Company") for its PIC® Microcontroller is intended and
+ (the "Company") for its PICï¿½ Microcontroller is intended and
  supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
@@ -48,7 +48,7 @@
 
 /** I N C L U D E S **********************************************************/
 
-#include "USB/USB.h"
+#include "USB/usb.h"
 #include "USB/usb_function_msd.h"
 
 #include "HardwareProfile.h"
@@ -149,7 +149,7 @@
         #pragma config IESO     = OFF      	// Internal External (clock) Switchover
         #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
         #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
-        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
         #pragma config WPDIS    = WPDIS     // Program memory not write protected
         #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
         #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
@@ -617,7 +617,7 @@ static void InitializeSystem(void)
         ANCON3 = 0xFF;
         #if(USB_SPEED_OPTION == USB_FULL_SPEED)
             //Enable INTOSC active clock tuning if full speed
-            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            ACTCON = 0x90; //Enable active clock self tuning for USB operation
             while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
                                             //with USB operation (ex: if using two speed 
                                             //startup or otherwise performing clock switching)
@@ -783,7 +783,7 @@ void ProcessIO(void)
 // The USB firmware stack will call the callback functions USBCBxxx() in response to certain USB related
 // events.  For example, if the host PC is powering down, it will stop sending out Start of Frame (SOF)
 // packets to your device.  In response to this, all USB devices are supposed to decrease their power
-// consumption from the USB Vbus to <2.5mA each.  The USB module detects this condition (which according
+// consumption from the USB Vbus to <2.5mA* each.  The USB module detects this condition (which according
 // to the USB specifications is 3+ms of no bus activity/SOF packets) and then calls the USBCBSuspend()
 // function.  You should modify these callback functions to take appropriate actions for each of these
 // conditions.  For example, in the USBCBSuspend(), you may wish to add code that will decrease power
@@ -909,11 +909,13 @@ void USBCBWakeFromSuspend(void)
 	// If clock switching or other power savings measures were taken when
 	// executing the USBCBSuspend() function, now would be a good time to
 	// switch back to normal full power run mode conditions.  The host allows
-	// a few milliseconds of wakeup time, after which the device must be 
+	// 10+ milliseconds of wakeup time, after which the device must be 
 	// fully back to normal, and capable of receiving and processing USB
 	// packets.  In order to do this, the USB module must receive proper
 	// clocking (IE: 48MHz clock must be available to SIE for full speed USB
-	// operation).
+	// operation).  
+	// Make sure the selected oscillator settings are consistent with USB 
+    // operation before returning from this function.
 }
 
 /********************************************************************

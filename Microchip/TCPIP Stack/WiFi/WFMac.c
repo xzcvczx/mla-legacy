@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFMac.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFMac.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,11 +42,11 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author               Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Michael Palladino	10/13/07	Original
- KO					31 Oct 2008	Port to PIC24F and PIC32 for TCP/IP stack v4.52
- KH					19 Jun 2009	Modified MACMemCopyAsync to support TCB to TCB copy
+ Michael Palladino    10/13/07    Original
+ KO                   31 Oct 2008 Port to PIC24F and PIC32 for TCP/IP stack v4.52
+ KH                   19 Jun 2009 Modified MACMemCopyAsync to support TCB to TCB copy
 ******************************************************************************/
 
 /*
@@ -107,7 +107,7 @@
 //============================================================================
 #define ENC_RX_BUF_TO_RAW_RX_BUF_ADJUSTMENT          ((RXSTART + ENC_PREAMBLE_SIZE)   - (ENC_PREAMBLE_OFFSET   + WF_RX_PREAMBLE_SIZE))
 #define ENC_TX_BUF_TO_RAW_TX_BUF_ADJUSTMENT          ((TXSTART + WF_TX_PREAMBLE_SIZE) - (WF_TX_PREAMBLE_OFFSET + WF_TX_PREAMBLE_SIZE))
-#define ENC_TCB_BUF_TO_RAW_SCRATCH_BUF_ADJUSTMENT    (BASE_TCB_ADDR)
+#define ENC_TCB_BUF_TO_RAW_SCRATCH_BUF_ADJUSTMENT    (BASE_SCRATCH_ADDR)
 
 //============================================================================
 //                                  RAW Constants
@@ -184,10 +184,7 @@ static UINT16 g_txPacketLength;
 static BOOL   g_txBufferFlushed;
 static BOOL   g_mgmtRxInProgress = FALSE;
 static BOOL   g_mgmtAppWaiting = FALSE;
-#if 0
 static UINT16 g_sizeofScratchMemory = 0;
-#endif
-
 BOOL g_rxIndexSetBeyondBuffer;        // debug -- remove after test
 
 
@@ -234,7 +231,7 @@ static void SyncENCPtrRAWState(UINT8 encPtrId)
     /*----------------------------------------------------*/
     /* if encPtr[encPtrId] in the enc rx or enc tx buffer */
     /*----------------------------------------------------*/
-    if ( g_encIndex[encPtrId] < BASE_TCB_ADDR )
+    if ( g_encIndex[encPtrId] < BASE_SCRATCH_ADDR/*BASE_TCB_ADDR*/ )
     {
         /*--------------------------------------*/
         /* if encPtr[encPtrId] in enc Rx buffer */
@@ -267,11 +264,11 @@ static void SyncENCPtrRAWState(UINT8 encPtrId)
                 /* The AllocateDataTxBuffer call may not succeed immediately.                                              */
                 while ( !AllocateDataTxBuffer(MCHP_DATA_PACKET_SIZE) )
                 {
-            	    /* If timed out than lock up */
+                    /* If timed out than lock up */
                     if (TickGet() - startTickCount >= maxAllowedTicks)
-			        {
-    			        WF_ASSERT(FALSE);  /* timeout occurred */
-			        }
+                    {
+                        WF_ASSERT(FALSE);  /* timeout occurred */
+                    }
                 } /* end while */
             } 
 
@@ -343,7 +340,7 @@ static void SyncENCPtrRAWState(UINT8 encPtrId)
             }
 
             // if we currently have a buffer mounted then we need to save it
-	        // need to check for both data and mgmt packets
+            // need to check for both data and mgmt packets
             if ( (GetRawWindowState(rawId) == WF_RAW_DATA_MOUNTED) || (GetRawWindowState(rawId) == WF_RAW_MGMT_MOUNTED) )
             {
                 PushRawWindow(rawId);
@@ -415,31 +412,31 @@ int WFArpBroadcastIntervalSec = 5; //interval in seconds, default to 5, can be c
  *          None
  *
  *  NOTES: this is a workaround algorithm for a bug appearing on some APs: they broadcasts
-		   ARP Request over basic rate at 11Mpbs, that leaves our devices in dark. Here
-		   we do ARP Request in the beginning for all the memebers in the subnet, then 
-		   periodically do Gratuitous ARP to keep ourselves alive with the AP
+           ARP Request over basic rate at 11Mpbs, that leaves our devices in dark. Here
+           we do ARP Request in the beginning for all the memebers in the subnet, then 
+           periodically do Gratuitous ARP to keep ourselves alive with the AP
  *****************************************************************************/
 void WFPeriodicGratuitousArp(void)
 {
-	static DWORD oldTime = 0, currTime;
-	static BYTE op_req = ARP_OPERATION_REQ;
+    static DWORD oldTime = 0, currTime;
+    static BYTE op_req = ARP_OPERATION_REQ;
 
     if (!MACIsLinked())
     {
         return;
     }    
 
-	currTime = TickGet();
-	
-	if ( (currTime < oldTime) //wrap-around case
-			||
-		 ((currTime - oldTime) > WFArpBroadcastIntervalSec*TICK_SECOND)
-		)
-	{
+    currTime = TickGet();
+    
+    if ( (currTime < oldTime) //wrap-around case
+            ||
+         ((currTime - oldTime) > WFArpBroadcastIntervalSec*TICK_SECOND)
+        )
+    {
         op_req = op_req == ARP_OPERATION_REQ ? ARP_OPERATION_RESP : ARP_OPERATION_REQ;
-		ARPSendPkt(*(DWORD *)&AppConfig.MyIPAddr, *(DWORD *)&AppConfig.MyIPAddr, op_req );	
-		oldTime = currTime;
-	}
+        ARPSendPkt(*(DWORD *)&AppConfig.MyIPAddr, *(DWORD *)&AppConfig.MyIPAddr, op_req );    
+        oldTime = currTime;
+    }
 }
 #endif //defined(STACK_CLIENT_MODE) && defined(USE_GRATUITOUS_ARP)
 
@@ -459,22 +456,22 @@ void MACProcess(void)
     // Let 802.11 processes have a chance to run
     WFProcess();
 
-	#if defined( WF_CONSOLE_IFCFGUTIL )
- 	  	if (WF_hibernate.wakeup_notice && WF_hibernate.state == WF_HB_WAIT_WAKEUP) 
-     	{
-		    DelayMs(200);
-	
-    		WF_hibernate.state = WF_HB_NO_SLEEP;
-    		StackInit();
-        	#if defined(WF_CONSOLE) && !defined(STACK_USE_EZ_CONFIG)
-    		    IperfAppInit();
-    		#endif
+    #if defined( WF_CONSOLE_IFCFGUTIL )
+           if (WF_hibernate.wakeup_notice && WF_hibernate.state == WF_HB_WAIT_WAKEUP) 
+         {
+            DelayMs(200);
     
-    		WF_Connect();
-		}
-	#endif
-	
-	
+            WF_hibernate.state = WF_HB_NO_SLEEP;
+            StackInit();
+            #if defined(WF_CONSOLE) && !defined(STACK_USE_EZ_CONFIG)
+                IperfAppInit();
+            #endif
+    
+            WF_Connect();
+        }
+    #endif
+    
+    
     #if defined(WF_CONSOLE_DEMO)
         IperfAppCall();
     #endif
@@ -485,37 +482,37 @@ void MACProcess(void)
     #endif
            
     #if defined(WF_CONSOLE)
-		WFConsoleProcess();
-		#if defined( WF_CONSOLE_IFCFGUTIL )
-    		if (WF_hibernate.state == WF_HB_NO_SLEEP)
-    			IperfAppCall();
-    		#elif !defined(STACK_USE_EZ_CONFIG)
-    			IperfAppCall();
-    		#endif
-    		WFConsoleProcessEpilogue();
-	#endif
+        WFConsoleProcess();
+        #if defined( WF_CONSOLE_IFCFGUTIL )
+            if (WF_hibernate.state == WF_HB_NO_SLEEP)
+                IperfAppCall();
+            #elif !defined(STACK_USE_EZ_CONFIG)
+                IperfAppCall();
+            #endif
+            WFConsoleProcessEpilogue();
+    #endif
     
-	#if defined( WF_CONSOLE_IFCFGUTIL )
-		if (WF_hibernate.state != WF_HB_NO_SLEEP) 
-    	{
-			if (WF_hibernate.state == WF_HB_ENTER_SLEEP) 
-    		{
-				SetLogicalConnectionState(FALSE);
+    #if defined( WF_CONSOLE_IFCFGUTIL )
+        if (WF_hibernate.state != WF_HB_NO_SLEEP) 
+        {
+            if (WF_hibernate.state == WF_HB_ENTER_SLEEP) 
+            {
+                SetLogicalConnectionState(FALSE);
                 #if defined(WF_USE_POWER_SAVE_FUNCTIONS)
-				    WF_HibernateEnable();
+                    WF_HibernateEnable();
                 #endif
-				WF_hibernate.state = WF_HB_WAIT_WAKEUP;
-			}
-			if (WF_hibernate.wakeup_notice) 
-			{
-				//continue;
-			}	
-			else
-			{
-				goto wait_console_input;
-            }				
-		}
-	#endif 		    
+                WF_hibernate.state = WF_HB_WAIT_WAKEUP;
+            }
+            if (WF_hibernate.wakeup_notice) 
+            {
+                //continue;
+            }    
+            else
+            {
+                goto wait_console_input;
+            }                
+        }
+    #endif             
 #endif /* !defined (WF_EASY_CONFIG_DEMO) */
     
     /* SG. Deadlock avoidance code when two applications contend for the one tx pipe                              */
@@ -560,13 +557,11 @@ void MACProcess(void)
     }
 
 #if defined(STACK_CLIENT_MODE) && defined(USE_GRATUITOUS_ARP)
-	//following is the workaround algorithm for the 11Mbps broadcast bugfix
-	WFPeriodicGratuitousArp();
-#endif 	
+    //following is the workaround algorithm for the 11Mbps broadcast bugfix
+    WFPeriodicGratuitousArp();
+#endif     
 }
 
-#if 0
-/* Not needed, removing to save g_sizeofScratchMemory storage */
  /******************************************************************************
  * Function:        UINT16 WFGetTCBSize(void)
  *
@@ -589,7 +584,7 @@ UINT16 WFGetTCBSize(void)
 {
     return g_sizeofScratchMemory;
 }
-#endif
+
 
  /******************************************************************************
  * Function:        void MACInit(void)
@@ -620,14 +615,13 @@ void RawInit(void)
     ScratchUnmount(RAW_TX_ID);
 
     // mount scratch temporarily to see how many bytes it has, then unmount it
-    // g_sizeofScratchMemory = ScratchMount(RAW_RX_ID);  /* put back in if need to know size of scratch */
-    ScratchMount(RAW_RX_ID);
+    g_sizeofScratchMemory = ScratchMount(RAW_RX_ID);  /* put back in if need to know size of scratch */
     ScratchUnmount(RAW_RX_ID);
 
     RawWindowReady[RAW_RX_ID] = FALSE;
 
     g_encPtrRAWId[ENC_RD_PTR_ID] = RAW_RX_ID;
-    g_encIndex[ENC_RD_PTR_ID]    = BASE_TCB_ADDR;
+    g_encIndex[ENC_RD_PTR_ID]    = BASE_SCRATCH_ADDR;//BASE_TCB_ADDR;
 
     // don't mount tx raw at init because it's needed for raw mgmt messages
     RawWindowReady[RAW_TX_ID]    = FALSE;
@@ -1397,7 +1391,7 @@ void MACMemCopyAsync(PTR_BASE destAddr, PTR_BASE sourceAddr, WORD len)
     // if copying bytes from TCB to TCB
     // This is a special case because we cannot do a RAW copy within the same RAW window
     // but we can easily copy Scratch data from one section of Scratch to another section of Scratch.
-    if ( (len > 0u) && (destAddr >= BASE_TCB_ADDR) && (sourceAddr >= BASE_TCB_ADDR) )
+    if ( (len > 0u) && (destAddr >= BASE_SCRATCH_ADDR/*BASE_TCB_ADDR*/) && (sourceAddr >= BASE_SCRATCH_ADDR/*BASE_TCB_ADDR*/) )
     {
         bytesLeft = len;
         
@@ -1715,29 +1709,29 @@ void MACPutROMArray(ROM BYTE *val, WORD len)
 
 /*****************************************************************************
   Function:
-	WORD CalcIPBufferChecksum(WORD len)
+    WORD CalcIPBufferChecksum(WORD len)
 
   Summary:
-	Calculates an IP checksum in the MAC buffer itself.
+    Calculates an IP checksum in the MAC buffer itself.
 
   Description:
-	This function calculates an IP checksum over an array of input data 
-	existing in the MAC buffer.  The checksum is the 16-bit one's complement 
-	of one's complement sum of all words in the data (with zero-padding if 
-	an odd number of bytes are summed).  This checksum is defined in RFC 793.
+    This function calculates an IP checksum over an array of input data 
+    existing in the MAC buffer.  The checksum is the 16-bit one's complement 
+    of one's complement sum of all words in the data (with zero-padding if 
+    an odd number of bytes are summed).  This checksum is defined in RFC 793.
 
   Precondition:
-	TCP is initialized and the MAC buffer pointer is set to the start of
-	the buffer.
+    TCP is initialized and the MAC buffer pointer is set to the start of
+    the buffer.
 
   Parameters:
-	len - number of bytes to be checksummed
+    len - number of bytes to be checksummed
 
   Returns:
-	The calculated checksum.
+    The calculated checksum.
 
   Remarks:
-	All Microchip MACs should perform this function in hardware.
+    All Microchip MACs should perform this function in hardware.
   ***************************************************************************/
 WORD CalcIPBufferChecksum(WORD len)
 {
@@ -1842,38 +1836,38 @@ void MACPowerUp(void)
 
 void RawSendUntamperedData(UINT8 *pReq, UINT16 len)
 {
-	BOOL    res;
-	UINT8 preambleBuf[2];
-	UINT16 byteCount;
+    BOOL    res;
+    UINT8 preambleBuf[2];
+    UINT16 byteCount;
 
     if (GetTxRawWindowState() == WF_RAW_DATA_MOUNTED)
     {
         WF_ASSERT(FALSE);
     }        
 
-	// RAW memory alloc
-	res = AllocateDataTxBuffer(len);
+    // RAW memory alloc
+    res = AllocateDataTxBuffer(len);
     
     /* if could not allocate enough bytes */
-	if (res != TRUE)
-	{
-		// Release whatever has been allocated.
-		DeallocateDataTxBuffer();
+    if (res != TRUE)
+    {
+        // Release whatever has been allocated.
+        DeallocateDataTxBuffer();
         WF_ASSERT(FALSE);
-	}
+    }
 
-	/* fill out 2 byte preamble of request message */
-	preambleBuf[0] = WF_DATA_REQUEST_TYPE;            // indicate this is a data msg
-	preambleBuf[1] = WF_UNTAMPERED_DATA_MSG_SUBTYPE;  // untampered data subtype
+    /* fill out 2 byte preamble of request message */
+    preambleBuf[0] = WF_DATA_REQUEST_TYPE;            // indicate this is a data msg
+    preambleBuf[1] = WF_UNTAMPERED_DATA_MSG_SUBTYPE;  // untampered data subtype
 
     /* write out preamble */
     RawWrite(RAW_TX_ID, 0, sizeof(preambleBuf), preambleBuf);
 
-	// write out payload
-	RawSetByte(RAW_TX_ID, (UINT8 *) pReq, len);
+    // write out payload
+    RawSetByte(RAW_TX_ID, (UINT8 *) pReq, len);
 
-	// Instruct WF chip to transmit the packet data in the raw window
-	RawSendTxBuffer(len + sizeof(preambleBuf));
+    // Instruct WF chip to transmit the packet data in the raw window
+    RawSendTxBuffer(len + sizeof(preambleBuf));
 
 }
 #endif

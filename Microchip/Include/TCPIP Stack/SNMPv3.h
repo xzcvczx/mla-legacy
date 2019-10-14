@@ -66,7 +66,7 @@ extern	UINT32 snmpEngineBoots;//The number of times that the SNMP engine has (re
 extern DWORD_VAL snmpEngineTime;//The number of seconds since the value of the snmpEngineBoots object last changed
 extern	DWORD_VAL snmpEngineMaxMessageSize;
 extern UINT8 snmpEngnIDLength;
-#define SNMPV3_USM_MAX_USER	3
+#define SNMPV3_USM_MAX_USER	3 //User Security Model should have atleast 1 user. Default is 3. User should change as per the requirement.  
 
 //SNMPv3 User Security Name length
 #define USER_SECURITY_NAME_LEN (16)

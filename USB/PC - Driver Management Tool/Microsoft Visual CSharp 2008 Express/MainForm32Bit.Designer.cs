@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm64Bit));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm32Bit));
             this.Install_btn = new System.Windows.Forms.Button();
             this.Remove_btn = new System.Windows.Forms.Button();
             this.OutputStatus_lstbx = new System.Windows.Forms.ListBox();
@@ -81,7 +81,7 @@
             this.Controls.Add(this.Install_btn);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm32Bit";
-            this.Text = "USB Driver Management Tool 32-Bit";
+            this.Text = "USB Driver Management Tool";
             this.ResumeLayout(false);
 
         }

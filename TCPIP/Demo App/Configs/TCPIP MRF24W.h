@@ -53,6 +53,15 @@
 #include "Compiler.h"
 #define GENERATED_BY_TCPIPCONFIG "Version 1.0.3383.23374"
 
+#if defined(__C32__)
+//#define WIFI_NET_TEST
+/* 
+* This is only for Wi-Fi internal test.
+* Only "Demo App" can run this test.
+*/
+#define WIFI_NET_TEST_DOMAIN	".wpdsw.com"
+#endif
+
 // =======================================================================
 //   Application Options
 // =======================================================================
@@ -60,6 +69,11 @@
 /* Application Level Module Selection
  *   Uncomment or comment the following lines to enable or
  *   disabled the following high-level application modules.
+ *
+ * If certain compilations are enabled (eg STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE), 
+ * check whether the files (eg GenericTCPClient.c) are located in folder (eg \TCPIP\WiFi EZConfig).
+ * You may need to copy such files from the Demo App or WiFi Console folder.
+ *
  */
 #define STACK_USE_UART					// Application demo using UART for IP address display and stack configuration
 //#define STACK_USE_UART2TCP_BRIDGE		// UART to TCP Bridge application example
@@ -233,7 +247,7 @@
  */
 	// Allocate how much total RAM (in bytes) you want to allocate
 	// for use by your TCP TCBs, RX FIFOs, and TX FIFOs.
-	#define TCP_ETH_RAM_SIZE					(8192ul)
+	#define TCP_ETH_RAM_SIZE					1 //(8192ul)
 	#define TCP_PIC_RAM_SIZE					(0ul)
 	#define TCP_SPI_RAM_SIZE					(0ul)
 	#define TCP_SPI_RAM_BASE_ADDRESS			(0x00)
@@ -378,7 +392,8 @@
 	#define HTTP_MIN_CALLBACK_FREE	(16u)
 
 	#define STACK_USE_HTTP_APP_RECONFIG		// Use the AppConfig web page in the Demo App (~2.5kb ROM, ~0b RAM)
-	#define STACK_USE_HTTP_MD5_DEMO			// Use the MD5 Demo web page (~5kb ROM, ~160b RAM)
+	#define STACK_USE_HTTP_MD5_DEMO			// Use the MD5 Demo web page (~5kb ROM, ~160b RAM)	
+	#define STACK_USE_AUTOUPDATE_HTTPSERVER  //Using http to upload Patch to wifi Module
 	//#define STACK_USE_HTTP_EMAIL_DEMO		// Use the e-mail demo web page
 
 // -- SSL Options --------------------------------------------------------
@@ -440,7 +455,11 @@
 	// SNMP module adds one byte extra after SNMP_COMMUNITY_MAX_LEN
 	// for adding '\0' NULL character.
 	#define SNMP_COMMUNITY_MAX_LEN  	(8u)
+#ifdef WIFI_NET_TEST
+	#define SNMP_MAX_COMMUNITY_SUPPORT	1u
+#else
 	#define SNMP_MAX_COMMUNITY_SUPPORT	(3u)
+#endif
 	#define NOTIFY_COMMUNITY_LEN		(SNMP_COMMUNITY_MAX_LEN)
 
 	// Default SNMPv2C community names.  These can be overridden at run time if

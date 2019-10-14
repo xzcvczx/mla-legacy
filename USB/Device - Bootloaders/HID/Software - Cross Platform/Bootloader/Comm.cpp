@@ -34,7 +34,7 @@
 #include <QCoreApplication>
 #include <QTime>
 
-const int Comm::SyncWaitTime = 2000;
+const int Comm::SyncWaitTime = 40000;
 
 /**
  *

@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFMgmtMsg.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFMgmtMsg.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -106,7 +106,7 @@ void SendMgmtMsg(UINT8 *p_header,
 {
     UINT32 timeoutPeriod;
     UINT32 startTickCount;
-    
+
     /* cannot send management messages while in WF_ProcessEvent() */
     WF_ASSERT(!isInWFProcessEvent());
 
@@ -215,33 +215,33 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
         /* read and verify result before freeing up buffer to ensure our message send was successful */
         RawRead(RAW_MGMT_RX_ID, 0, (UINT16)(sizeof(tMgmtMsgRxHdr)), (UINT8 *)&hdr);
 
-		/* mgmt response subtype had better match subtype we were expecting */
+        /* mgmt response subtype had better match subtype we were expecting */
         WF_ASSERT(hdr.subtype == expectedSubtype);
-		
+        
         /* Mgmt response 'result' field should always indicate success.  If this assert is hit the error codes are located */
         /* WFApi.h.  Search for WF_SUCCESS for the list of error codes.                                                    */
-		if (hdr.result == WF_ERROR_HOST_SCAN_NOT_ALLOWED)
-		{
-			#if defined(STACK_USE_UART)
-		    putrsUART("Host Scan Failed. Host scan is allowed only in idle or connected state\r\n");
-			#endif
-		} else if (hdr.result == WF_ERROR_INVALID_WPS_PIN) 
-		{        
+        if (hdr.result == WF_ERROR_HOST_SCAN_NOT_ALLOWED)
+        {
             #if defined(STACK_USE_UART)
-			putrsUART("WPS failed : Invalid WPS PIN data\r\n");
-			#endif 
+                putrsUART("Host Scan Failed. Host scan is allowed only in idle or connected state\r\n");
+            #endif
+        } else if (hdr.result == WF_ERROR_INVALID_WPS_PIN) 
+        {        
+            #if defined(STACK_USE_UART)
+                putrsUART("WPS failed : Invalid WPS PIN data\r\n");
+            #endif 
         } else if (hdr.result == WF_ERROR_DISCONNECT_FAILED) 
         {
-        	#if defined(STACK_USE_UART)
-			putrsUART("Disconnect failed. Disconnect is allowed only when module is in connected state\r\n");
-			#endif
+            #if defined(STACK_USE_UART)
+                putrsUART("Disconnect failed. Disconnect is allowed only when module is in connected state\r\n");
+            #endif
         } 
         else if (hdr.result == WF_ERROR_NO_STORED_BSS_DESCRIPTOR) 
         {
-        	#if defined(STACK_USE_UART)
-			putrsUART("No stored scan results\r\n");
-			#endif
-		} 
+            #if defined(STACK_USE_UART)
+                putrsUART("No stored scan results\r\n");
+            #endif
+        } 
                
         /* free mgmt buffer */
         DeallocateMgmtRxBuffer();

@@ -1,12 +1,12 @@
 /*********************************************************************
  *
- * Microchip USB C18 Firmware -  HID Bootloader Version 1.0 for PIC18F87J50 Family Devices
+ * Microchip USB C18 Firmware -  HID Bootloader for PIC18FXXJXX USB Devices
  *
  *********************************************************************
- * FileName:        Boot87J50Family.h
+ * FileName:        Boot18FxxJxxFamily.h
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 2.30.01+
+ * Compiler:        C18 3.43+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,14 +31,14 @@
  *
  * File version         Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 1.0					04/09/2008	Original
+ * 2.9g					04/09/2012	Original, started from PIC18F87J50 version.
  ********************************************************************/
-#ifndef BOOT87J50FAMILY_H
-#define BOOT87J50FAMILY_H
+#ifndef BOOTXXJXXFAMILY_H
+#define BOOTXXJXXFAMILY_H
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void UserInit(void);
 void ProcessIO(void);
 
 
-#endif //BOOT87J50FAMILY_H
+#endif //BOOTXXJXXFAMILY_H

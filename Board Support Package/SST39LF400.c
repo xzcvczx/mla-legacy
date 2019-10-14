@@ -43,6 +43,9 @@
  *              with other drivers.
  * 5/25/2011    Modified WriteArray and ReadArray functions to match
  *              common interface for other external flash drivers.
+ * 10/9/2012    Removed EDS code in lRead16() and lWrite16() so we 
+ *              do not need to set -mlarge-arrays compiler settings
+ *              for the file.
  ********************************************************************/
 #include "SST39LF400.h"
 
@@ -316,69 +319,49 @@ WORD SST39LF400CheckID()
 ************************************************************************/
 void lWrite16(DWORD address, WORD data)
 {
-#if __XC16_VERSION != 1000
+    WORD pointer;
+    WORD temp;  
+    
+    address <<= 1;
+    address += (DWORD)CS2_BASE_ADDRESS;
+    pointer = ((DWORD_VAL)address).w[0];
+    pointer |= 0x8000;
+    address <<= 1;
+    temp = DSWPAG;
+    DSWPAG = ((DWORD_VAL)address).v[2];
+    *((WORD*)pointer) = data;
 
-	volatile __eds__ WORD *pWord;
+    while(PMCON2bits.BUSY);
 
-	pWord = (__eds__ WORD *)(&EPMPCS2Start + address);
+    DSWPAG = temp;
 
-	// do this sequence since the flash device is slow 
-	// See EPMP FRM (DS39730) Section on Read/Write Operation
-	while(PMCON2bits.BUSY);
-		*pWord = data;
-#else		
-// Example code to do the writes manually
-
-WORD pointer;
-WORD temp;
-		address <<= 1;
-		address += (DWORD)CS2_BASE_ADDRESS;
-		pointer = ((DWORD_VAL)address).w[0];
-		pointer |= 0x8000;
-		address <<= 1;
-        temp = DSWPAG;
-		DSWPAG = ((DWORD_VAL)address).v[2];
-		*((WORD*)pointer) = data;
-		while(PMCON2bits.BUSY);
-        DSWPAG = temp;
-#endif
 }
 
 /************************************************************************
 ************************************************************************/
 WORD lRead16(DWORD address)
 {
-#if __XC16_VERSION != 1000
 
-	volatile __eds__ WORD *pWord;
-	WORD temp;
-
-	pWord = (__eds__ WORD *)(&EPMPCS2Start + address);
-	temp = *pWord;
+    WORD pointer;
+    volatile WORD data;
+    WORD temp;
 	
-	// do this sequence since the flash device is slow 
-	// See EPMP FRM (DS39730) Section on Read/Write Operation
-	while(PMCON2bits.BUSY);
-	return PMDIN1;
-#else
-// Example code to do the writes manually
+    address <<= 1;
+    address += CS2_BASE_ADDRESS;
+    pointer = ((DWORD_VAL)address).w[0];
+    pointer |= 0x8000;
+    address <<= 1;
+    temp = DSRPAG;
+    DSRPAG = ((DWORD_VAL)address).v[2];
+    data = *((WORD*)pointer);
+    
+    while(PMCON2bits.BUSY);
 
-WORD pointer;
-volatile WORD data;
-WORD temp;
-		address <<= 1;
-		address += CS2_BASE_ADDRESS;
-		pointer = ((DWORD_VAL)address).w[0];
-		pointer |= 0x8000;
-		address <<= 1;
-        temp = DSRPAG;
-		DSRPAG = ((DWORD_VAL)address).v[2];
-		data = *((WORD*)pointer);
-		while(PMCON2bits.BUSY);
-		data = PMDIN1;
-		DSRPAG = temp;
-		return data;
-#endif
+    data = PMDIN1;
+    DSRPAG = temp;
+
+    return data;
+
 }
 
 #endif //USE_SST39LF400

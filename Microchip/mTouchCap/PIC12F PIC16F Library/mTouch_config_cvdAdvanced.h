@@ -64,7 +64,10 @@
 //    \_/\_/ \__,_| \_/ \___|_|  \___/|_|  |_| |_| |_|   |_| |_|_| |_| |_|_|_| |_|\__, |
 //                                                                                |___/ 
 //****************************************************************************************************
-                                            
+    
+    // NOTE: If this is a HARDWARE CVD processor, these options do not apply. See the bottom of this
+    //       file for all related options.
+    
     #define CVD_SETTLING_DELAY          5       // <-- Adjusts the number of additional instruction cycles
                                                 //     to add to the Chold&Csensor settling time.
                                                 //     The larger this value is, the more susceptible to
@@ -124,6 +127,9 @@
 //
 //****************************************************************************************************
 
+    // NOTE: If this is a HARDWARE CVD processor, these options do not apply. See the bottom of this
+    //       file for all related options.
+    
     //#define CVD_GUARD_IO_ENABLED                                  // <-- If defined, the framework will implement a 
                                                                     //     guard sensor using an IO port.
                                                                     //     For information about guard sensors, please refer 
@@ -168,6 +174,8 @@
 //  
 //****************************************************************************************************
 
+    // NOTE: If this is a HARDWARE CVD processor, these options do not apply. See the bottom of this
+    //       file for all related options.
 
     //#define CVD_MUTUAL_ENABLED                      // <-- If defined, the framework will integrate a mutual
                                                     //     sensor into the differential CVD scan.
@@ -184,7 +192,8 @@
         
         
 
-#define MTOUCH_UNIQUE_OVERSAMPLE_ENABLE
+//#define MTOUCH_UNIQUE_OVERSAMPLE_ENABLE
+
     #define MTOUCH_OVERSAMPLE0          10
     #define MTOUCH_OVERSAMPLE1          10
     #define MTOUCH_OVERSAMPLE2          10
@@ -215,7 +224,6 @@
     #define MTOUCH_OVERSAMPLE27         10
     #define MTOUCH_OVERSAMPLE28         10
     #define MTOUCH_OVERSAMPLE29         10
-        
         
         
 //#define MTOUCH_UNIQUE_REFERENCE_OPTIONS     // NOTE: CVD_FORCE_REF_DAC overrides this setting at all times.
@@ -251,3 +259,19 @@
     #define CVD_REFERENCE_SENSOR28          MTOUCH_SENSOR0  
     #define CVD_REFERENCE_SENSOR29          MTOUCH_SENSOR0    
 
+
+//
+// HARDWARE CVD OPTIONS - Does not affect anything if a non-Hardware-CVD ADC is used.
+//
+
+    #define HCVD_PRECHARGE_DELAY        5
+    #define HCVD_SETTLING_DELAY         5
+
+    // #define HCVD_GUARD_ENABLE       
+    
+        #define HCVD_GRDAOE_BITVALUE    1
+        #define HCVD_GRDBOE_BITVALUE    1
+        
+    #define HCVD_ADDCAP_AUTOCAL_ENABLE
+    
+    

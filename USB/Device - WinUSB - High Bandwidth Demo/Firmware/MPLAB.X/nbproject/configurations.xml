@@ -9,7 +9,6 @@
         <itemPath>../../../../Microchip/Include/GenericTypeDefs.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="Hardware Profile" projectFiles="true">
-        <itemPath>../HardwareProfile - Low Pin Count USB Development Kit.h</itemPath>
         <itemPath>../HardwareProfile - PIC18F Starter Kit 1.h</itemPath>
         <itemPath>../HardwareProfile - PIC18F46J50 PIM.h</itemPath>
         <itemPath>../HardwareProfile - PIC18F47J53 PIM.h</itemPath>
@@ -25,6 +24,11 @@
         <itemPath>../HardwareProfile - PICDEM FSUSB.h</itemPath>
         <itemPath>../HardwareProfile - dsPIC33E USB Starter Kit.h</itemPath>
         <itemPath>../HardwareProfile - dsPIC33EP512MU810 PIM.h</itemPath>
+        <itemPath>../HardwareProfile - PIC18F87J94 PIM.h</itemPath>
+        <itemPath>../HardwareProfile - LPC USB Development Kit - PIC18F14K50.h</itemPath>
+        <itemPath>../HardwareProfile - LPC USB Development Kit - PIC16F1459.h</itemPath>
+        <itemPath>../HardwareProfile - PIC18F97J94 PIM.h</itemPath>
+        <itemPath>../HardwareProfile - PICDEM FSUSB K50.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="USB" projectFiles="true">
         <itemPath>../../../../Microchip/Include/USB/usb.h</itemPath>
@@ -82,6 +86,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC16F1459</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>null</languageToolchainVersion>
@@ -107,48 +112,13 @@
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../main.c" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
-      <C18>
-        <property key="code-model" value="ms"/>
-        <property key="data-model" value="oa-"/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-ob" value="true"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-om" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ow" value="true"/>
-        <property key="extra-include-directories"
-                  value="..;../../../../Microchip/Include"/>
-        <property key="optimization-master" value="Enable all"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="procedural-abstraction-passes" value="0"/>
-        <property key="storage-class" value="sca"/>
-        <property key="verbose" value="false"/>
-        <property key="warning-level" value="2"/>
-      </C18>
-      <C18-AS>
-      </C18-AS>
-      <C18-LD>
-      </C18-LD>
-      <C18LanguageToolchain>
-      </C18LanguageToolchain>
       <HI-TECH-COMP>
         <property key="define-macros" value=""/>
         <property key="extra-include-directories"
@@ -171,14 +141,17 @@
       </HI-TECH-COMP>
       <HI-TECH-LINK>
       </HI-TECH-LINK>
-      <RealICEPlatformTool>
-      </RealICEPlatformTool>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+      <XC8-config-global>
+      </XC8-config-global>
     </conf>
     <conf name="LPC_USB_Development_Kit_PIC18F14K50" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F14K50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -254,6 +227,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -339,6 +313,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F47J53</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -424,9 +399,209 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F87J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../main_smallSRAM.c" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../rm18f14k50.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="code-model" value="ms"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC18F87J94_PIM" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F97J94</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../main_smallSRAM.c" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../rm18f14k50.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="code-model" value="ms"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
+      </C18-LD>
+      <C18LanguageToolchain>
+      </C18LanguageToolchain>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
+    </conf>
+    <conf name="PIC18F97J94_PIM" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F87J94</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.43</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -498,17 +673,22 @@
       <C18-AS>
       </C18-AS>
       <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
       </C18-LD>
       <C18LanguageToolchain>
       </C18LanguageToolchain>
-      <RealICEPlatformTool>
-      </RealICEPlatformTool>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
     </conf>
     <conf name="PICDEM_FSUSB" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F4550</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -583,6 +763,100 @@
       <C18-AS>
       </C18-AS>
       <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
+      </C18-LD>
+      <C18LanguageToolchain>
+      </C18LanguageToolchain>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PICDEM_FSUSB_K50" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F45K50</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../main_smallSRAM.c" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../rm18f14k50.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="code-model" value="ms"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
       </C18-LD>
       <C18LanguageToolchain>
       </C18LanguageToolchain>
@@ -594,6 +868,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -679,6 +954,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB106</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -780,6 +1056,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256DA210</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -881,6 +1158,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ64GB004</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -982,6 +1260,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1083,6 +1362,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB210</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1211,6 +1491,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ64GB502</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -1312,6 +1593,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1362,6 +1644,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1372,6 +1656,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1382,6 +1668,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1410,6 +1698,8 @@
       </C32-AS>
       <C32-LD>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
@@ -1420,6 +1710,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1470,6 +1761,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1480,6 +1773,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1490,6 +1785,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1516,6 +1813,8 @@
       </C32-AS>
       <C32-LD>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
@@ -1526,6 +1825,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1592,6 +1892,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1602,6 +1904,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1612,6 +1916,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1638,6 +1944,8 @@
       </C32-AS>
       <C32-LD>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
@@ -1648,6 +1956,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1698,6 +2007,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1708,6 +2019,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1718,6 +2031,8 @@
         </C32-AS>
         <C32-LD>
         </C32-LD>
+        <C32CPP>
+        </C32CPP>
         <C32Global>
         </C32Global>
       </item>
@@ -1744,6 +2059,8 @@
       </C32-AS>
       <C32-LD>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>

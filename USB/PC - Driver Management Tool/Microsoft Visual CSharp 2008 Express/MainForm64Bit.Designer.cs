@@ -81,7 +81,7 @@
             this.Controls.Add(this.Install_btn);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm64Bit";
-            this.Text = "USB Driver Management Tool 64-Bit";
+            this.Text = "USB Driver Management Tool";
             this.ResumeLayout(false);
 
         }

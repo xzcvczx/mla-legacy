@@ -62,7 +62,11 @@
 
 
 // Defines the server to be accessed for this application
+#ifdef WIFI_NET_TEST
+static BYTE ServerName[] =	"www" WIFI_NET_TEST_DOMAIN;
+#else
 static BYTE ServerName[] =	"www.google.com";
+#endif
 
 // Defines the port to be accessed for this application
 #if defined(STACK_USE_SSL_CLIENT)
@@ -127,7 +131,7 @@ void GenericTCPClient(void)
 	{
 		case SM_HOME:
 			// Connect a socket to the remote TCP server
-			MySocket = TCPOpen((DWORD)&ServerName[0], TCP_OPEN_RAM_HOST, ServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT);
+			MySocket = TCPOpen((DWORD)(PTR_BASE)&ServerName[0], TCP_OPEN_RAM_HOST, ServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT);
 			
 			// Abort operation if no TCP socket of type TCP_PURPOSE_GENERIC_TCP_CLIENT is available
 			// If this ever happens, you need to go add one to TCPIPConfig.h

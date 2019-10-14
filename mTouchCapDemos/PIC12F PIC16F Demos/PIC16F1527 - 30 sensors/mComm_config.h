@@ -1,4 +1,56 @@
-
+/*************************************************************************
+ *  © 2012 Microchip Technology Inc.                                       
+ *  
+ *  Project Name:    mTouch Framework v2.1
+ *  FileName:        mComm_config.h
+ *  Dependencies:    mComm_optionsForConfig.h
+ *  Processor:       See documentation for supported PIC® microcontrollers 
+ *  Compiler:        HI-TECH Ver. 9.81 or later
+ *  IDE:             MPLAB® IDE v8.50 (or later) or MPLAB® X                        
+ *  Hardware:         
+ *  Company:         
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *  Description:     
+ *************************************************************************/
+/**************************************************************************
+ * MICROCHIP SOFTWARE NOTICE AND DISCLAIMER: You may use this software, and 
+ * any derivatives created by any person or entity by or on your behalf, 
+ * exclusively with Microchip's products in accordance with applicable
+ * software license terms and conditions, a copy of which is provided for
+ * your referencein accompanying documentation. Microchip and its licensors 
+ * retain all ownership and intellectual property rights in the 
+ * accompanying software and in all derivatives hereto. 
+ * 
+ * This software and any accompanying information is for suggestion only. 
+ * It does not modify Microchip's standard warranty for its products. You 
+ * agree that you are solely responsible for testing the software and 
+ * determining its suitability. Microchip has no obligation to modify, 
+ * test, certify, or support the software. 
+ * 
+ * THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
+ * EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED 
+ * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A 
+ * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE, ITS INTERACTION WITH 
+ * MICROCHIP'S PRODUCTS, COMBINATION WITH ANY OTHER PRODUCTS, OR USE IN ANY 
+ * APPLICATION. 
+ * 
+ * IN NO EVENT, WILL MICROCHIP BE LIABLE, WHETHER IN CONTRACT, WARRANTY, 
+ * TORT (INCLUDING NEGLIGENCE OR BREACH OF STATUTORY DUTY), STRICT 
+ * LIABILITY, INDEMNITY, CONTRIBUTION, OR OTHERWISE, FOR ANY INDIRECT, 
+ * SPECIAL, PUNITIVE, EXEMPLARY, INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, 
+ * FOR COST OR EXPENSE OF ANY KIND WHATSOEVER RELATED TO THE SOFTWARE, 
+ * HOWSOEVER CAUSED, EVEN IF MICROCHIP HAS BEEN ADVISED OF THE POSSIBILITY 
+ * OR THE DAMAGES ARE FORESEEABLE. TO THE FULLEST EXTENT ALLOWABLE BY LAW, 
+ * MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN ANY WAY RELATED TO THIS 
+ * SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY, THAT YOU HAVE PAID 
+ * DIRECTLY TO MICROCHIP FOR THIS SOFTWARE. 
+ * 
+ * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF 
+ * THESE TERMS. 
+ *************************************************************************/
+/** @file   mComm_config.h
+*   @brief  mComm Configuration! Main configuration file for the mComm module.
+*/
 #ifndef __MCOMM_CONFIG_H
 #define __MCOMM_CONFIG_H
 
@@ -222,30 +274,24 @@
         //  MCOMM_UART_1WAY_DECIMAL             :: Output ASCII values in decimal format    
         //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         #define MCOMM_UART_1WAY_OUTPUT          MCOMM_UART_1WAY_DECIMAL
-        #define MCOMM_UART_1WAY_DELIMITER       ';'
+        #define MCOMM_UART_1WAY_DELIMITER       ','
   
         //  mComm One-Way Output Data
         //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         // NOTE: ONLY APPLIES TO ONE-WAY UART CONFIGURATION
+        //
+        // mTouch One-Way GUI Support:
+        //  * STATE, TOGGLE, and SLIDER outputs must always been enabled. 
+        //      (If toggle/slider is not being implemented in your configuration, a 0 will be output 
+        //       instead of the variable's value.)
+        //  * One or both: READING and/or BASELINE outputs must be enabled.
+        //  * MATRIX output cannot be enabled. The matrix output is provided for viewing in a terminal
+        //      window. It is not supported by the one-way GUI at this time.
         //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-        //#define MCOMM_UART_1WAY_OUT_GUIv1_1   // <-- If defined, a fixed header will be used for GUI
-                                                //     compatibility:
-                                                //
-                                                //      <state mask> ; <toggle mask> ; <slider> ;
-                                                //  
-                                                //          If toggle mode is not implemented, a '00000'
-                                                //          will be output in its place.
-                                                //
-                                                //          If slider mode is not implemented, a '00000'
-                                                //          will be output in its place.
-                                                //
-                                                //     If not defined, the output is determined only 
-                                                //     by what is defined, below. No 0 values will be
-                                                //     output to maintain a specific packet structure.
         
         #define MCOMM_UART_1WAY_OUT_STATE       // <-- If defined, outputs the state mask
-        //#define MCOMM_UART_1WAY_OUT_TOGGLE    // <-- If defined, outputs the toggle state mask
-        //#define MCOMM_UART_1WAY_OUT_SLIDER    // <-- If defined, outputs the slider output value
+        #define MCOMM_UART_1WAY_OUT_TOGGLE      // <-- If defined, outputs the toggle state mask
+        #define MCOMM_UART_1WAY_OUT_SLIDER      // <-- If defined, outputs the slider output value
         //#define MCOMM_UART_1WAY_OUT_MATRIX    // <-- If defined, outputs the matrix press coordinate
         #define MCOMM_UART_1WAY_OUT_READING     // <-- If defined, outputs the raw reading values
         //#define MCOMM_UART_1WAY_OUT_BASELINE  // <-- If defined, outputs the sensor baseline values
@@ -293,7 +339,7 @@
     #define     MCOMM_SPI_SSPIF                 PIR1bits.SSPIF
     #define     MCOMM_SPI_PEIE                  INTCONbits.PEIE
     #define     MCOMM_SPI_IOCIF                 INTCONbits.IOCIF
-
+    
     #define     MCOMM_UART_RCREG                RCREG
     #define     MCOMM_UART_TXREG                TXREG
     #define     MCOMM_UART_TXSTA                TXSTA
@@ -311,7 +357,7 @@
     #define     MCOMM_UART_PEIE                 INTCONbits.PEIE
     #define     MCOMM_UART_RCIF                 PIR1bits.RCIF
     #define     MCOMM_UART_RCIE                 PIE1bits.RCIE
-
+    
     #if defined(MCOMM_ENABLE_STREAM) && defined(MCOMM_STREAM_STORED_IN_RAM)
         #define MCOMM_STREAM_ADDR           (uint8_t*)&mComm_stream
         #define MCOMM_STREAMCONFIG_ADDR     (uint8_t*)&mComm_streamConfig

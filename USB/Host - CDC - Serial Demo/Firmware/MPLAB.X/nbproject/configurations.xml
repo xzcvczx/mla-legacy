@@ -42,6 +42,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -124,7 +125,14 @@
         <property key="input-libraries" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="map-file" value=""/>
+        <property key="oXC16ld-extra-opts" value=""/>
+        <property key="oXC16ld-fill-upper" value="0"/>
+        <property key="oXC16ld-force-link" value="false"/>
+        <property key="oXC16ld-no-smart-io" value="false"/>
+        <property key="oXC16ld-nostdlib" value="false"/>
+        <property key="oXC16ld-stackguard" value="16"/>
         <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="report-memory-usage" value="false"/>
         <property key="secure-eeprom" value="no_eeprom"/>
         <property key="secure-flash" value="no_flash"/>
@@ -150,6 +158,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -196,7 +205,28 @@
       <C32-AS>
       </C32-AS>
       <C32-LD>
+        <property key="enable-check-sections" value="false"/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>
@@ -207,6 +237,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -253,7 +284,28 @@
       <C32-AS>
       </C32-AS>
       <C32-LD>
+        <property key="enable-check-sections" value="false"/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="3000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <RealICEPlatformTool>

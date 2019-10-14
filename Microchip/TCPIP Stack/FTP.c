@@ -357,6 +357,13 @@ SM_FTP_RESPOND_Label:
     return TRUE;
 }
 
+#ifdef WIFI_NET_TEST
+static BOOL FTPVerify(BYTE *login, BYTE *password)
+{
+	return TRUE;
+}
+#endif
+
 static BOOL ExecuteFTPCommand(FTP_COMMAND cmd)
 {
     switch(cmd)

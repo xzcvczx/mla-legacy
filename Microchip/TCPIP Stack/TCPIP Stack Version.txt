@@ -7,6 +7,43 @@ Note: Please file bug-reports/bug-fixes at http://support.microchip.com/ or post
       Look for stack updates at http://www.microchip.com/mal/
 
 ********
+v5.42.04    Oct 2012
+********      
+Changes:
+1.  (MRF24WB/G) Patch update features are added into MRF24WB0MA/B and MRF24WG0MA/MB. 
+    MRF24WB0MA/B (no RF module FW version update is necessary)
+            Serial Port (Xmodem)
+    MRF24WG0MA/B (Requires RF module FW version 3107 or later.)
+            Serial Port (Xmodem), Web Client, Web Server
+2.  (MRF24WB/G) FTP client is added into WiFi console demo app.
+3.  (MRF24WB/G) Flexible scratch memory is used to allocate TCB.
+4.  SSL client with RSA 2048bits is enabled by default. Applies only for PIC24/32. Not supported for PIC18.
+5.  16-bit mode feature is available on PIC32.
+6.  (MRF24WG) Enhance SoftAP with EZConfig features with pre-scan and redirection features. 
+    Change SoftAP address from 192.168.1.1 to 192.168.1.3
+    Added WEP security, which requires RF module FW version 3107 or later.
+    Refer to WF_Config.h for more information.
+7.  Added support for PIC32MX6XX external PHY's: RTL 8201FL.
+	Only RMII configuration is supported with RTLPHY8201FL PHY.
+	This PHY driver works in Default Ethernet IO mode with PIC32MX675F512H .
+	If Alternate Ethernet IO mode is used for other PIC devices, then configuration bit need 
+	to be changed w.r.t Alternate Ethernet IO.
+	To get the status of MAC link with this PHY,  PHY Link Status need to be read twice.
+	EthPhyGetLinkStatus(int refresh) API is used to read the PHY link status and for this PHY
+	to read link status twice, the parameter refresh should be 1.
+
+	
+Fixes:
+1.  (MRF24WG) SoftAP under EZConfig has pre-scan and redirection features. Able to be redirected to infrastructure mode AP.
+2.  If SNMP_TRAP_DISABLED macro is enabled from TCPIP XXX.h file, there will be no TRAP table information for SNMP manager.
+	That is SNMP agent won't send information related to trap. By default SNMP_TRAP_DISABLED macro is disabled.
+3.  Fix typo error in v5.42.02
+    (MRF24WG) SoftAP default address is changed from 169.254.1.1 to 192.168.1.1  
+4.  Fixed SNMP tabular issue if SNMP instances starts other than 0.
+5.  Fixed ARP initialization bug that resulted in TCP packets sent to ETH MAC broadcast address.
+
+
+********
 v5.42.02    Aug 2012
 ********      
 Fixes:

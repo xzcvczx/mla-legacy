@@ -164,7 +164,7 @@
 #define MSD_INTF_ID             0x00
 #define MSD_IN_EP_SIZE          64
 #define MSD_OUT_EP_SIZE         64
-#define MAX_LUN 0
+#define MAX_LUN                 0   //base 0 number.  0 == 1 LUN
 #define MSD_DATA_IN_EP          1
 #define MSD_DATA_OUT_EP         1
 #define MSD_BUFFER_ADDRESS      0x600

@@ -14,8 +14,8 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the �Company�) for its PIC� Microcontroller is intended and
- supplied to you, the Company�s customer, for use solely and
+ (the "Company") for its PIC(R) Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -24,7 +24,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN �AS IS� CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -288,6 +288,69 @@ ROM BYTE *ROM USB_SD_Ptr[]=
     (ROM BYTE *ROM)&sd003
 };
 
+
+
+#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+    //Microsoft "OS Descriptor" - This descriptor is based on a Microsoft specific 
+    //specification (not part of the standard USB 2.0 specs or class specs). 
+    //Implementing this special descriptor allows WinUSB driver package installation
+    //to be automatic on Windows 8.  For additional details, see:
+    //http://msdn.microsoft.com/en-us/library/windows/hardware/hh450799(v=vs.85).aspx
+    MS_OS_DESCRIPTOR MSOSDescriptor =
+    {   
+        sizeof(MSOSDescriptor),         //bLength - lenght of this descriptor in bytes
+        USB_DESCRIPTOR_STRING,          //bDescriptorType - "string"
+        {'M','S','F','T','1','0','0'},  //qwSignature - special values that specifies the OS descriptor spec version that this firmware implements
+        GET_MS_DESCRIPTOR,              //bMS_VendorCode - defines the "GET_MS_DESCRIPTOR" bRequest literal value
+        0x00                            //bPad - always 0x00
+    };
+    
+    
+    //Extended Compat ID OS Feature Descriptor
+    MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor =
+    {
+        //----------Header Section--------------
+        sizeof(CompatIDFeatureDescriptor),  //dwLength
+        0x0100,                             //bcdVersion = 1.00
+        EXTENDED_COMPAT_ID,                 //wIndex
+        0x01,                               //bCount - 0x01 "Function Section(s)" implemented in this descriptor
+        {0,0,0,0,0,0,0},                    //Reserved[7]
+        //----------Function Section 1----------
+        0x00,                               //bFirstInterfaceNumber: the WinUSB interface in this firmware is interface #0
+        0x01,                               //Reserved - fill this reserved byte with 0x01 according to documentation
+        {'W','I','N','U','S','B',0x00,0x00},//compatID - "WINUSB" (with two null terminators to fill all 8 bytes)
+        {0,0,0,0,0,0,0,0},                  //subCompatID - eight bytes of 0
+        {0,0,0,0,0,0}                       //Reserved
+    };    
+    
+    
+    //Extended Properties OS Feature Descriptor
+    MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor =
+    {
+        //----------Header Section--------------
+        sizeof(ExtPropertyFeatureDescriptor),   //dwLength
+        0x0100,                                 //bcdVersion = 1.00
+        EXTENDED_PROPERTIES,                    //wIndex
+        0x0001,                                 //wCount - 0x0001 "Property Sections" implemented in this descriptor
+        //----------Property Section 1----------
+        132,                                    //dwSize - 132 bytes in this Property Section
+        0x00000001,                             //dwPropertyDataType (Unicode string)
+        40,                                     //wPropertyNameLength - 40 bytes in the bPropertyName field
+        {'D','e','v','i','c','e','I','n','t','e','r','f','a','c','e','G','U','I','D', 0x0000},  //bPropertyName - "DeviceInterfaceGUID"
+        78,                                     //dwPropertyDataLength - 78 bytes in the bPropertyData field (GUID value in UNICODE formatted string, with braces and dashes)
+        //The below value is the Device Interface GUID (a 128-bit long "globally unique identifier")
+        //Please modify the GUID value in your application before moving to production.
+        //When you change the GUID, you must also change the PC application software
+        //that connects to this device, as the software looks for the device based on 
+        //VID, PID, and GUID.  All three values in the PC application must match 
+        //the values in this firmware.
+        //The GUID value can be a randomly generated 128-bit hexadecimal number, 
+        //formatted like the below value.  The actual value is not important,
+        //so long as it is almost certain to be globally unique, and matches the
+        //PC software that communicates with this firmware.
+        {'{','5','8','d','0','7','2','1','0','-','2','7','c','1','-','1','1','d','d','-','b','d','0','b','-','0','8','0','0','2','0','0','c','9','a','6','6','}',0x0000}  //bPropertyData - this is the actual GUID value.  Make sure this matches the PC application code trying to connect to the device.
+    };    
+#endif
 /** EOF usb_descriptors.c ***************************************************/
 
 #endif

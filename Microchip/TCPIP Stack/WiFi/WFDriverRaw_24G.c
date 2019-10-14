@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFDriverRaw.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFDriverRaw.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -279,26 +279,26 @@ UINT16 RawCalculateChecksum(UINT16 length)
 
 /*****************************************************************************
   Function:
-	BOOL AllocateMgmtTxBuffer(UINT16 bytesNeeded)
+    BOOL AllocateMgmtTxBuffer(UINT16 bytesNeeded)
 
   Summary:
-	Allocates a Mgmt Tx buffer
+    Allocates a Mgmt Tx buffer
 
   Description:
     Determines if WiFi chip has enough memory to allocate a tx mgmt buffer, and, 
     if so, allocates it.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	bytesNeeded -- number of bytes needed for the mgmt tx message
-	             
+    bytesNeeded -- number of bytes needed for the mgmt tx message
+                 
   Returns:
-  	True if mgmt tx buffer successfully allocated, else False
-  	
+    True if mgmt tx buffer successfully allocated, else False
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 BOOL AllocateMgmtTxBuffer(UINT16 bytesNeeded)
 {
@@ -330,25 +330,25 @@ BOOL AllocateMgmtTxBuffer(UINT16 bytesNeeded)
 
 /*****************************************************************************
   Function:
-	void DeallocateMgmtRxBuffer(void)
+    void DeallocateMgmtRxBuffer(void)
 
   Summary:
-	Deallocates a mgmt Rx buffer
+    Deallocates a mgmt Rx buffer
 
   Description:
     Called by WiFi driver when its finished processing a Rx mgmt message.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
-	             
+    None
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void DeallocateMgmtRxBuffer(void)
 {
@@ -358,26 +358,26 @@ void DeallocateMgmtRxBuffer(void)
 
 /*****************************************************************************
   Function:
-	BOOL AllocateDataTxBuffer(UINT16 bytesNeeded)
+    BOOL AllocateDataTxBuffer(UINT16 bytesNeeded)
 
   Summary:
-	Allocates a Data Tx buffer for use by the TCP/IP stack.
+    Allocates a Data Tx buffer for use by the TCP/IP stack.
 
   Description:
     Determines if WiFi chip has enough memory to allocate a tx data buffer, and, 
     if so, allocates it.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	bytesNeeded -- number of bytes needed for the data tx message
-	             
+    bytesNeeded -- number of bytes needed for the data tx message
+                 
   Returns:
-  	True if data tx buffer successfully allocated, else False
-  	
+    True if data tx buffer successfully allocated, else False
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 BOOL AllocateDataTxBuffer(UINT16 bytesNeeded)
 {
@@ -416,10 +416,10 @@ BOOL AllocateDataTxBuffer(UINT16 bytesNeeded)
 
 /*****************************************************************************
   Function:
-	void SendRAWDataFrame(UINT16 bufLen)
+    void SendRAWDataFrame(UINT16 bufLen)
 
   Summary:
-	Sends a data frame to the WiFi chip for transmission to the 802.11 network.
+    Sends a data frame to the WiFi chip for transmission to the 802.11 network.
 
   Description:
     After the TCP/IP stack has created a data frame and called MACFlush() this
@@ -430,16 +430,16 @@ BOOL AllocateDataTxBuffer(UINT16 bytesNeeded)
     frame to send (as opposed to a management frame).
 
   Precondition:
-	None
+    None
 
   Parameters:
-	bufLen -- number of data bytes that comprise the data frame.
-	             
+    bufLen -- number of data bytes that comprise the data frame.
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void SendRAWDataFrame(UINT16 bufLen)
 {
@@ -461,26 +461,26 @@ void SendRAWDataFrame(UINT16 bufLen)
 
 /*****************************************************************************
   Function:
-	void SendRAWManagementFrame(UINT16 bufLen)
+    void SendRAWManagementFrame(UINT16 bufLen)
 
   Summary:
-	Sends a management frame to the WiFi chip.
+    Sends a management frame to the WiFi chip.
 
   Description:
     The management header, which consists of a type and subtype, have already
     been written to the frame before this function is called.    
 
   Precondition:
-	None
+    None
 
   Parameters:
-	bufLen -- number of bytes that comprise the management frame. 
-	             
+    bufLen -- number of bytes that comprise the management frame. 
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void SendRAWManagementFrame(UINT16 bufLen)
 {
@@ -491,10 +491,10 @@ void SendRAWManagementFrame(UINT16 bufLen)
 
 /*****************************************************************************
   Function:
-	void DeallocateDataRxBuffer(void)
+    void DeallocateDataRxBuffer(void)
 
   Summary:
-	Deallocates a Data Rx buffer
+    Deallocates a Data Rx buffer
 
   Description:
     Typically called by MACGetHeader(), the assumption being that when the stack
@@ -503,16 +503,16 @@ void SendRAWManagementFrame(UINT16 bufLen)
     and the packet is thrown away.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	None
-	             
+    None
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void DeallocateDataRxBuffer(void)
 {
@@ -547,26 +547,26 @@ void RawSendTxBuffer(UINT16 len)
 
 /*****************************************************************************
   Function:
-	UINT16 RawMountRxBuffer(UINT8 rawId)
+    UINT16 RawMountRxBuffer(UINT8 rawId)
 
   Summary:
-	Mounts most recent Rx message.
+    Mounts most recent Rx message.
 
   Description:
     This function mounts the most recent Rx message from the WiFi chip, which
     could be either a management or a data message.  
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawId -- RAW ID specifying which raw window to mount the rx packet in.
-	             
+    rawId -- RAW ID specifying which raw window to mount the rx packet in.
+                 
   Returns:
-  	length -- number of bytes in the received message.
-  	
+    length -- number of bytes in the received message.
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 UINT16 RawMountRxBuffer(UINT8 rawId)
 {
@@ -588,10 +588,10 @@ UINT16 RawMountRxBuffer(UINT8 rawId)
 
 /*****************************************************************************
   Function:
-	void RawToRawCopy(UINT8 rawDestId, UINT8 rawSourceId, UINT16 length)
+    void RawToRawCopy(UINT8 rawDestId, UINT8 rawSourceId, UINT16 length)
 
   Summary:
-	Performs a data copy from one raw window to another.
+    Performs a data copy from one raw window to another.
 
   Description:
     There is an additional step needed before invoking RawMove(); need to 
@@ -599,18 +599,18 @@ UINT16 RawMountRxBuffer(UINT8 rawId)
     the information is there before the WiFi chip starts the copy operation.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawDestId   -- RAW ID that is the destination of copy
-	rawSourceId -- RAW ID that is the source of copy
-	length      -- number of bytes to copy from source to destination
-	             
+    rawDestId   -- RAW ID that is the destination of copy
+    rawSourceId -- RAW ID that is the source of copy
+    length      -- number of bytes to copy from source to destination
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void RawToRawCopy(UINT8 rawDestId, UINT8 rawSourceId, UINT16 length)
 {
@@ -628,10 +628,10 @@ void RawToRawCopy(UINT8 rawDestId, UINT8 rawSourceId, UINT16 length)
 
 /*****************************************************************************
   Function:
-	void PushRawWindow(UINT8 rawId)
+    void PushRawWindow(UINT8 rawId)
 
   Summary:
-	Pushes a Raw window
+    Pushes a Raw window
 
   Description:
     Each RAW window can have its context saved in a 'stack' that is one level 
@@ -639,16 +639,16 @@ void RawToRawCopy(UINT8 rawDestId, UINT8 rawSourceId, UINT16 length)
     is destroyed.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawId -- RAW window that is being pushed
-	             
+    rawId -- RAW window that is being pushed
+                 
   Returns:
-  	None
-  	
+    None
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void PushRawWindow(UINT8 rawId)
 {
@@ -658,10 +658,10 @@ void PushRawWindow(UINT8 rawId)
 
 /*****************************************************************************
   Function:
-	UINT16 PopRawWindow(UINT8 rawId)
+    UINT16 PopRawWindow(UINT8 rawId)
 
   Summary:
-	Pops a Raw window
+    Pops a Raw window
 
   Description:
     Each RAW window can have its context saved in a 'stack' that is one level 
@@ -670,17 +670,17 @@ void PushRawWindow(UINT8 rawId)
     is lost.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawId -- RAW window that is being popped
-	             
+    rawId -- RAW window that is being popped
+                 
   Returns:
-  	Byte count of the RAW window buffer being restored.  If no context has 
-  	been saved this function returns a 0.
-  	
+    Byte count of the RAW window buffer being restored.  If no context has 
+    been saved this function returns a 0.
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 UINT16 PopRawWindow(UINT8 rawId)
 {
@@ -694,10 +694,10 @@ UINT16 PopRawWindow(UINT8 rawId)
 
 /*****************************************************************************
   Function:
-	UINT16 ScratchMount(UINT8 rawId)
+    UINT16 ScratchMount(UINT8 rawId)
 
   Summary:
-	Mounts RAW scratch window
+    Mounts RAW scratch window
 
   Description:
     The scratch window is not dynamically allocated, but references a static
@@ -705,16 +705,16 @@ UINT16 PopRawWindow(UINT8 rawId)
     the scratch window is unmounted.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawId -- RAW window ID being used to mount the scratch data
-	             
+    rawId -- RAW window ID being used to mount the scratch data
+                 
   Returns:
-  	Size, in bytes, of Scratch buffer
-  	
+    Size, in bytes, of Scratch buffer
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 UINT16 ScratchMount(UINT8 rawId)
 {
@@ -729,10 +729,10 @@ UINT16 ScratchMount(UINT8 rawId)
 
 /*****************************************************************************
   Function:
-	void ScratchUnmount(UINT8 rawId)
+    void ScratchUnmount(UINT8 rawId)
 
   Summary:
-	Unmounts RAW scratch window
+    Unmounts RAW scratch window
 
   Description:
     The scratch window is not dynamically allocated, but references a static
@@ -740,16 +740,16 @@ UINT16 ScratchMount(UINT8 rawId)
     the scratch window is unmounted.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawId -- RAW window ID that was used to mount the scratch window
-	             
+    rawId -- RAW window ID that was used to mount the scratch window
+                 
   Returns:
-  	Size, in bytes, of Scratch buffer
-  	
+    Size, in bytes, of Scratch buffer
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 void ScratchUnmount(UINT8 rawId)
 {
@@ -820,22 +820,22 @@ void RawWrite(UINT8 rawId, UINT16 startIndex, UINT16 length, UINT8 *p_src)
                            UINT16 size)
 
   Summary:
-	Performs RAW Move operation
+    Performs RAW Move operation
 
   Description:
-	Raw Moves perform a variety of operations (e.g. allocating tx buffers, 
-	mounting rx buffers, copying from one raw window to another, etc.)
+    Raw Moves perform a variety of operations (e.g. allocating tx buffers, 
+    mounting rx buffers, copying from one raw window to another, etc.)
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawId -- Raw ID 0 thru 5, except is srcDest is RAW_COPY, in which case rawId 
-	         contains the source address in the upper 4 bits and destination 
-	         address in lower 4 bits.
-	         
-	srcDest -- object that will either be the source or destination of the move:
-	              RAW_MAC          
+    rawId -- Raw ID 0 thru 5, except is srcDest is RAW_COPY, in which case rawId 
+             contains the source address in the upper 4 bits and destination 
+             address in lower 4 bits.
+             
+    srcDest -- object that will either be the source or destination of the move:
+                  RAW_MAC          
                   RAW_MGMT_POOL    
                   RAW_DATA_POOL    
                   RAW_SCRATCH_POOL 
@@ -845,14 +845,14 @@ void RawWrite(UINT8 rawId, UINT16 startIndex, UINT16 length, UINT8 *p_src)
     rawIsDestination -- true is srcDest is the destination, false if srcDest is 
                         the source of the move
 
-	size -- number of bytes to overlay (not always applicable)
-	             
+    size -- number of bytes to overlay (not always applicable)
+                 
   Returns:
-  	Not always applicable, depending on the type of the raw move.  When applicable, 
-  	this function returns the number of bytes overlayed by the raw move.
-  	
+     Not always applicable, depending on the type of the raw move.  When applicable, 
+     this function returns the number of bytes overlayed by the raw move.
+      
   Remarks:
-	None
+    None
 *****************************************************************************/
 static UINT16 RawMove(UINT16    rawId,           
                        UINT16   srcDest,         
@@ -909,28 +909,28 @@ static UINT16 RawMove(UINT16    rawId,
 
 /*****************************************************************************
   Function:
-	BOOL RawSetIndex(UINT16 rawId, UINT16 index)
+    BOOL RawSetIndex(UINT16 rawId, UINT16 index)
 
   Summary:
-	Sets the index within the specified RAW window.
+    Sets the index within the specified RAW window.
 
   Description:
-    Sets the index within the specified RAW window.	If attempt to set RAW index 
+    Sets the index within the specified RAW window.    If attempt to set RAW index 
     outside boundaries of RAW window (past the end) this function will time out.  
     It's legal to set the index past the end of the raw window so long as there 
     is no attempt to read or write at that index.
 
   Precondition:
-	None
+    None
 
   Parameters:
-	rawId -- RAW window ID
-	index -- desired index within RAW window
-	             
+    rawId -- RAW window ID
+    index -- desired index within RAW window
+                 
   Returns:
-  	True if successful, False if caller tried to set raw index past end of 
-  	window
-  	
+     True if successful, False if caller tried to set raw index past end of 
+     window
+      
   Remarks:
     None
 *****************************************************************************/
@@ -1120,11 +1120,11 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
     // if external interrupt is disabled, enable it because we need it for the while(1) loop to exit
     if(intDisabled)
     {
-	    WF_EintEnable();
+        WF_EintEnable();
     }
     else if(WF_EintIsPending())
     {
-	    WF_EintEnable();
+        WF_EintEnable();
     }
 
     #if defined(WF_DEBUG)
@@ -1136,25 +1136,25 @@ static UINT16 WaitForRawMoveComplete(UINT8 rawId)
     {
         /* if received an external interrupt that signalled the RAW Move */
         /* completed then break out of this loop                         */
-	    if(RawMoveState.rawInterrupt & rawIntMask)
-	    {
-		    break;
-	    }
-	    
-	    #if defined(WF_DEBUG)
-	    /* If timed out waiting for RAW Move complete than lock up */
+        if(RawMoveState.rawInterrupt & rawIntMask)
+        {
+            break;
+        }
+        
+        #if defined(WF_DEBUG)
+        /* If timed out waiting for RAW Move complete than lock up */
         if (TickGet() - startTickCount >= maxAllowedTicks)
-	    {
-    	    WF_ASSERT(FALSE);
-	    }
-	    #endif
+        {
+            WF_ASSERT(FALSE);
+        }
+        #endif
 
     } /* end while */
 
     /* if interrupt was enabled by us here, we should disable it now that we're finished */
     if(intDisabled)
     {
-	    WF_EintDisable();
+        WF_EintDisable();
     }
 
     /* read the byte count and return it */ 

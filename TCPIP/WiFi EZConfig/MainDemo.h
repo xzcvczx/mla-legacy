@@ -75,6 +75,7 @@ void DoUARTConfig(void);
 
 void SMTPDemo(void);
 void PingDemo(void);
+void PingConsole(void);
 void SNMPTrapDemo(void);
 void SNMPV2TrapDemo(void);
 void GenericTCPClient(void);

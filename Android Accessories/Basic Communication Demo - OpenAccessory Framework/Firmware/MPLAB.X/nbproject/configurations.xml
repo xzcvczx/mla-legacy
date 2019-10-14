@@ -53,7 +53,6 @@
       <itemPath>../usb_config.c</itemPath>
       <itemPath>../../../../Microchip/USB/usb_host.c</itemPath>
       <itemPath>../../../../Microchip/USB/Android Host Driver/usb_host_android.c</itemPath>
-      <itemPath>../../../../Microchip/USB/Android Host Driver/usb_host_android_protocol_v1.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -68,7 +67,8 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
-        <platformTool>PICkit3PlatformTool</platformTool>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
@@ -100,18 +100,36 @@
         <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-large-arrays" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-short-double" value="false"/>
+        <property key="enable-symbols" value="false"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
         <property key="isolate-each-function" value="false"/>
-        <property key="optimization-level" value="s"/>
+        <property key="keep-inline" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="0"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="preprocessor-macros" value="PIC24F_ADK_FOR_ANDROID"/>
         <property key="scalar-model" value="default"/>
+        <property key="use-cci" value="false"/>
       </C30>
       <C30-AS>
         <property key="assembler-symbols" value=""/>
@@ -168,14 +186,15 @@
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
       </C30Global>
-      <PICkit3PlatformTool>
-      </PICkit3PlatformTool>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
     </conf>
     <conf name="PIC24FJ256GB110_PIM" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -266,6 +285,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ64GB004</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -356,6 +376,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB210</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -446,6 +467,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ64GB502</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -536,6 +558,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB106</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -642,6 +665,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24EP512GU810</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -733,6 +757,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>dsPIC33EP512MU810</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -824,6 +849,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>dsPIC33EP512MU810</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.00</languageToolchainVersion>
@@ -915,6 +941,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -996,6 +1023,8 @@
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <ICD3PlatformTool>
@@ -1006,6 +1035,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1087,6 +1117,8 @@
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <ICD3PlatformTool>
@@ -1097,6 +1129,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1178,6 +1211,8 @@
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <ICD3PlatformTool>
@@ -1188,6 +1223,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1269,6 +1305,8 @@
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <ICD3PlatformTool>
@@ -1279,6 +1317,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
@@ -1360,6 +1399,8 @@
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
       </C32Global>
       <ICD3PlatformTool>

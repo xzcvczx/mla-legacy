@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFParamMsg.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFParamMsg.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -76,7 +76,7 @@
 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WFEnableMRF24WB0MMode(void)
 
   Summary:
@@ -85,16 +85,16 @@
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     None.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WFEnableMRF24WB0MMode(void)
 {
@@ -104,7 +104,7 @@ void WFEnableMRF24WB0MMode(void)
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WFEnableBroadcastProbeResponse(void)
 
   Summary:
@@ -113,16 +113,16 @@ void WFEnableMRF24WB0MMode(void)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-    None.
+    None.    
 
   Returns:
-  	None.
-  	
+    None.    
+      
   Remarks:
-  	None.
+    None.    
   *****************************************************************************/
 
 void WFEnableBroadcastProbeResponse(void)
@@ -133,7 +133,7 @@ void WFEnableBroadcastProbeResponse(void)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
   WF_SetLinkDownThreshold(UINT8 threshold)
 
   Summary:
@@ -149,10 +149,10 @@ void WFEnableBroadcastProbeResponse(void)
     event.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
  *****************************************************************************/
 
 void WF_SetLinkDownThreshold(UINT8 threshold)
@@ -162,7 +162,7 @@ void WF_SetLinkDownThreshold(UINT8 threshold)
 
 #if !defined(MRF24WG)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WFEnableDeferredPowerSave(void)
 
   Summary:
@@ -171,16 +171,16 @@ void WF_SetLinkDownThreshold(UINT8 threshold)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-    None.
+    None.    
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 
 void WFEnableDeferredPowerSave(void)
@@ -194,7 +194,7 @@ void WFEnableDeferredPowerSave(void)
 #if defined (WF_AGGRESSIVE_PS)
 #if !defined(MRF24WG)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WFEnableAggressivePowerSave(void)
 
   Summary:
@@ -203,16 +203,16 @@ void WFEnableDeferredPowerSave(void)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
-    None.
+    None.    
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 
 void WFEnableAggressivePowerSave(void)
@@ -225,7 +225,7 @@ void WFEnableAggressivePowerSave(void)
 #endif
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WFGetMRF24WB0MVersion(UINT8 *p_version)
 
   Summary:
@@ -234,16 +234,16 @@ void WFEnableAggressivePowerSave(void)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_version - Pointer to location to store version number.
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WFGetMRF24WB0MVersion(UINT8 *p_version)
 {
@@ -251,7 +251,7 @@ void WFGetMRF24WB0MVersion(UINT8 *p_version)
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetDeviceInfo(tWFDeviceInfo *p_deviceInfo)
 
   Summary:
@@ -260,30 +260,30 @@ void WFGetMRF24WB0MVersion(UINT8 *p_version)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_deviceInfo - Pointer where device info will be written
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetDeviceInfo(tWFDeviceInfo *p_deviceInfo)
 {
-	UINT8  msgData[2];
+    UINT8  msgData[2];
 
     SendGetParamMsg(PARAM_SYSTEM_VERSION, msgData, sizeof(msgData));
-	
-	p_deviceInfo->deviceType   = MRF24WB0M_DEVICE;
-	p_deviceInfo->romVersion   = msgData[0];
-	p_deviceInfo->patchVersion = msgData[1];
+    
+    p_deviceInfo->deviceType   = MRF24WB0M_DEVICE;
+    p_deviceInfo->romVersion   = msgData[0];
+    p_deviceInfo->patchVersion = msgData[1];
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_SetMacAddress(UINT8 *p_mac)
 
   Summary:
@@ -296,17 +296,17 @@ void WF_GetDeviceInfo(tWFDeviceInfo *p_deviceInfo)
     different MAC.
 
   Precondition:
-  	MACInit must be called first.  Cannot be called when the MRF24W is in a
+    MACInit must be called first.  Cannot be called when the MRF24W is in a
     connected state.
 
   Parameters:
     p_mac  - Pointer to 6-byte MAC that will be sent to MRF24W
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_SetMacAddress(UINT8 *p_mac)
 {
@@ -314,7 +314,7 @@ void WF_SetMacAddress(UINT8 *p_mac)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetMacAddress(UINT8 *p_mac)
 
   Summary:
@@ -323,16 +323,16 @@ void WF_SetMacAddress(UINT8 *p_mac)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_mac  - Pointer where mac will be written (must point to a 6-byte buffer)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetMacAddress(UINT8 *p_mac)
 {
@@ -341,7 +341,7 @@ void WF_GetMacAddress(UINT8 *p_mac)
 
 #if defined(WF_USE_MULTICAST_FUNCTIONS)
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_SetMultiCastFilter(UINT8 multicastFilterId, 
                                UINT8 multicastAddress[6])
 
@@ -360,17 +360,17 @@ void WF_GetMacAddress(UINT8 *p_mac)
     By default, both Multicast Filters are inactive.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     multicastFilterId - WF_MULTICAST_FILTER_1 or WF_MULTICAST_FILTER_2
     multicastAddress  - 6-byte address (all 0xFF will inactivate the filter)
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_SetMultiCastFilter(UINT8 multicastFilterId,
                            UINT8 multicastAddress[6])
@@ -408,7 +408,7 @@ void WF_SetMultiCastFilter(UINT8 multicastFilterId,
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetMultiCastFilter(UINT8 multicastFilterId,
                                UINT8 multicastAddress[6])
 
@@ -449,17 +449,17 @@ void WF_SetMultiCastFilter(UINT8 multicastFilterId,
     [53]    -- Compare Address 5 type
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     multicastFilterId - WF_MULTICAST_FILTER_1 or WF_MULTICAST_FILTER_2
     multicastAddress - 6-byte address
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetMultiCastFilter(UINT8 multicastFilterId,
                            UINT8 multicastAddress[6])
@@ -490,19 +490,19 @@ void WF_GetMultiCastFilter(UINT8 multicastFilterId,
         startIndex = 46; /* index of first byte of index 5 address filter */
     }    
 
-	WaitForMgmtResponseAndReadData(WF_GET_PARAM_SUBTYPE,       /* expected subtype                           */ 
+    WaitForMgmtResponseAndReadData(WF_GET_PARAM_SUBTYPE,       /* expected subtype                           */ 
                                    sizeof(paramData),          /* num data bytes to read                     */
                                    startIndex,                 /* starting at this index                     */
                                    paramData);                 /* write the response data here               */
-	
-	
-	memcpy((void *)multicastAddress, (void *)&paramData[0], 6);
+    
+    
+    memcpy((void *)multicastAddress, (void *)&paramData[0], 6);
 }                                   
 
 #endif /* WF_USE_MULTICAST_FUNCTIONS */
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_SetTxDataConfirm(UINT8 state)
 
   Summary:
@@ -513,16 +513,16 @@ void WF_GetMultiCastFilter(UINT8 multicastFilterId,
     confirms should always be disabled.
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     state - WF_DISABLED or WF_ENABLED
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_SetTxDataConfirm(UINT8 state)
 {
@@ -530,7 +530,7 @@ void WF_SetTxDataConfirm(UINT8 state)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetTxDataConfirm(UINT8 *p_txDataConfirm)
 
   Summary:
@@ -539,16 +539,16 @@ void WF_SetTxDataConfirm(UINT8 state)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_txDataConfirm - Pointer to location where Tx data confirmation state is
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetTxDataConfirm(UINT8 *p_txDataConfirm)
 {    
@@ -556,7 +556,7 @@ void WF_GetTxDataConfirm(UINT8 *p_txDataConfirm)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_SetRegionalDomain(UINT8 regionalDomain)
 
   Summary:
@@ -578,17 +578,17 @@ void WF_GetTxDataConfirm(UINT8 *p_txDataConfirm)
     * WF_DOMAIN_JAPAN_B
 
   Precondition:
-  	MACInit must be called first.  This function must not be called while in a
+    MACInit must be called first.  This function must not be called while in a
     connected state.
 
   Parameters:
     regionalDomain - Value to set the regional domain to
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_SetRegionalDomain(UINT8 regionalDomain)
 {
@@ -596,7 +596,7 @@ void WF_SetRegionalDomain(UINT8 regionalDomain)
 } 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetRegionalDomain(UINT8 *p_regionalDomain)
 
   Summary:
@@ -613,16 +613,16 @@ void WF_SetRegionalDomain(UINT8 regionalDomain)
     * WF_DOMAIN_JAPAN_B
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_regionalDomain - Pointer where the regional domain value will be written
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetRegionalDomain(UINT8 *p_regionalDomain)
 {
@@ -630,7 +630,7 @@ void WF_GetRegionalDomain(UINT8 *p_regionalDomain)
 }   
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_SetRtsThreshold(UINT16 rtsThreshold)
 
   Summary:
@@ -644,16 +644,16 @@ void WF_GetRegionalDomain(UINT8 *p_regionalDomain)
     WF_RTS_THRESHOLD_MAX (2347).
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     rtsThreshold - Value of the packet size threshold
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_SetRtsThreshold(UINT16 rtsThreshold)
 {
@@ -666,7 +666,7 @@ void WF_SetRtsThreshold(UINT16 rtsThreshold)
 } 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetRtsThreshold(UINT16 *p_rtsThreshold)
 
   Summary:
@@ -676,16 +676,16 @@ void WF_SetRtsThreshold(UINT16 rtsThreshold)
     Gets the RTS/CTS packet size threshold.  
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_rtsThreshold - Pointer to where RTS threshold is written
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetRtsThreshold(UINT16 *p_rtsThreshold)
 {
@@ -696,7 +696,7 @@ void WF_GetRtsThreshold(UINT16 *p_rtsThreshold)
 } 
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void WF_GetMacStats(tWFMacStats *p_macStats)
 
   Summary:
@@ -705,16 +705,16 @@ void WF_GetRtsThreshold(UINT16 *p_rtsThreshold)
   Description:
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     p_macStats - Pointer to where MAC statistics are written
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void WF_GetMacStats(tWFMacStats *p_macStats)
 {
@@ -737,7 +737,7 @@ void WF_GetMacStats(tWFMacStats *p_macStats)
 }
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void SendSetParamMsg(UINT8 paramType, 
                          UINT8 *p_paramData, 
                          UINT8 paramDataLength)
@@ -765,7 +765,7 @@ void WF_GetMacStats(tWFMacStats *p_macStats)
     3      mac state      (not used)
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
     paramType - Parameter type associated with the SetParam msg.
@@ -773,10 +773,10 @@ void WF_GetMacStats(tWFMacStats *p_macStats)
     paramDataLength - Number of bytes pointed to by p_paramData
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void SendSetParamMsg(UINT8 paramType, 
                      UINT8 *p_paramData, 
@@ -794,12 +794,12 @@ void SendSetParamMsg(UINT8 paramType,
                 p_paramData,       /* param data        */
                 paramDataLength);  /* param data length */
 
-   	/* wait for MRF24W management response; free response because not needed */
-	WaitForMgmtResponse(WF_SET_PARAM_SUBTYPE, FREE_MGMT_BUFFER); 
+    /* wait for MRF24W management response; free response because not needed */
+    WaitForMgmtResponse(WF_SET_PARAM_SUBTYPE, FREE_MGMT_BUFFER); 
 }    
 
 /*******************************************************************************
-  Function:	
+  Function:    
     void SendGetParamMsg(UINT8 paramType, 
                          UINT8 *p_paramData, 
                          UINT8 paramDataLength)
@@ -832,15 +832,15 @@ void SendSetParamMsg(UINT8 paramType,
     N      Data[N]        Nth byte of param data
 
   Precondition:
-  	MACInit must be called first.
+    MACInit must be called first.
 
   Parameters:
 
   Returns:
-  	None.
-  	
+    None.
+      
   Remarks:
-  	None.
+    None.
   *****************************************************************************/
 void SendGetParamMsg(UINT8 paramType, 
                      UINT8 *p_paramData, 
@@ -858,7 +858,7 @@ void SendGetParamMsg(UINT8 paramType,
                 NULL,            /* no data          */
                 0);              /* no data          */
 
-	WaitForMgmtResponseAndReadData(WF_GET_PARAM_SUBTYPE,       /* expected subtype                           */ 
+    WaitForMgmtResponseAndReadData(WF_GET_PARAM_SUBTYPE,       /* expected subtype                           */ 
                                    paramDataLength,            /* num data bytes to read                     */
                                    MSG_PARAM_START_DATA_INDEX, /* data for GetParam always starts at index 6 */
                                    p_paramData);               /* write the response data here               */

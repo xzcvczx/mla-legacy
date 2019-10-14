@@ -118,7 +118,7 @@ void GenericTCPClient(void)
 	{
 		case SM_HOME:
 			// Connect a socket to the remote TCP server
-			MySocket = TCPOpen((DWORD)&ServerName[0], TCP_OPEN_RAM_HOST, ServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT);
+			MySocket = TCPOpen((DWORD)(PTR_BASE)&ServerName[0], TCP_OPEN_RAM_HOST, ServerPort, TCP_PURPOSE_GENERIC_TCP_CLIENT);
 			
 			// Abort operation if no TCP socket of type TCP_PURPOSE_GENERIC_TCP_CLIENT is available
 			// If this ever happens, you need to go add one to TCPIPConfig.h

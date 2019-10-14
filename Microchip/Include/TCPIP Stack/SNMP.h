@@ -254,7 +254,7 @@ typedef struct
 	BYTE notificationCode;					//Trap notification code
 	UDP_SOCKET socket;						//Udp socket number 
 	DWORD_VAL timestamp;					//Time stamp for trap
-#if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) 
+#if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) && !defined(SNMP_TRAP_DISABLED)
 	SNMP_ID trapIDVar;						// SNMPV2 specific trap
 #endif	
 } SNMP_NOTIFY_INFO;
@@ -426,9 +426,11 @@ extern SNMPV3MSGDATA gSNMPv3ScopedPduResponseBuf;
   Section:
 	Global Variables
   ***************************************************************************/
+#if !defined(SNMP_TRAP_DISABLED)  
 extern BYTE gSendTrapFlag;//Global flag to send Trap
 extern BYTE gGenericTrapNotification;//Global flag for Generic trap notification
 extern BYTE gSpecificTrapNotification;//Global flag for vendor specific trap notification
+#endif
 extern BYTE gOIDCorrespondingSnmpMibID;//Gloabal var to store SNMP ID of var for OID received in SNMP request.
 extern BYTE	gSetTrapSendFlag;
 extern BYTE appendZeroToOID;//global flag to modify OID by appending zero	
@@ -506,9 +508,7 @@ extern BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO *info );
 extern BOOL Snmpv3Notify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targetIndex);
 extern BOOL ProcessSnmpv3MsgData(PDU_INFO* pduDbPtr);
 extern BOOL Snmpv3BufferPut(BYTE val ,SNMPV3MSGDATA *putbuf);
-#if !defined(SNMP_TRAP_DISABLED)
 extern void Snmpv3InitializeUserDataBase(void);
-#endif
 
 
 

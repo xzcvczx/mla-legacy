@@ -92,6 +92,11 @@ BYTE AN0String[8];
 	int __C30_UART = 2;
 #endif
 
+#if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
+UINT8 g_scan_done = 0;        // WF_PRESCAN   This will be set wheneven event scan results are ready.
+UINT8 g_prescan_waiting = 1;  // WF_PRESCAN   This is used only to allow POR prescan once.
+#endif
+
 // Private helper functions.
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
@@ -234,6 +239,11 @@ int main(void)
     static DWORD ButtonPushStart = 0;
     #endif
 
+    #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
+    UINT8            channelList[] = MY_DEFAULT_CHANNEL_LIST_PRESCAN;  // WF_PRESCAN
+    tWFScanResult	 bssDesc;
+    #endif
+	
 	// Initialize application specific hardware
 	InitializeBoard();
 
@@ -307,9 +317,27 @@ int main(void)
     WFInitScan();
     #endif
 
+    #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
+    // WF_PRESCAN: Pre-scan before starting up as SoftAP mode  
+    WF_CASetScanType(MY_DEFAULT_SCAN_TYPE);
+    WF_CASetChannelList(channelList, sizeof(channelList));
+		
+    if (WFStartScan() == WF_SUCCESS)
+    {
+        SCAN_SET_DISPLAY(SCANCXT.scanState);
+        SCANCXT.displayIdx = 0;
+        //putsUART("main: Prescan WFStartScan() success ................. \r\n");
+    }
+	
+    // Needed to trigger g_scan_done		
+    WFRetrieveScanResult(0, &bssDesc);		
+    #else
+
     #if defined(WF_CS_TRIS)
     WF_Connect();
-    #endif
+    #endif // defined(WF_CS_TRIS)
+
+	#endif // (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)
 
 	// Initialize any application-specific modules or functions/
 	// For this demo application, this only includes the
@@ -357,6 +385,25 @@ int main(void)
     // down into smaller pieces so that other tasks can have CPU time.
     while(1)
     {
+        #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)    
+        if (g_scan_done) {
+           if (g_prescan_waiting) {	   	
+               putrsUART((ROM char*)"\n SoftAP prescan results ........ \r\n\n");
+               SCANCXT.displayIdx = 0;
+               while (IS_SCAN_STATE_DISPLAY(SCANCXT.scanState)) {
+                   WFDisplayScanMgr();
+               }
+               putrsUART((ROM char*)"\r\n ");
+			
+               #if defined(WF_CS_TRIS)
+               WF_Connect();
+               #endif
+               g_scan_done = 0;
+               g_prescan_waiting = 0;
+           }
+        }
+        #endif // (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)   
+
         #if defined (EZ_CONFIG_STORE)
         // Hold button3 for 4 seconds to reset to defaults.
 		if (BUTTON3_IO == 0u) {  // Button is pressed
@@ -457,6 +504,7 @@ int main(void)
 		
 		#if defined(STACK_USE_ICMP_CLIENT)
 		PingDemo();
+		PingConsole();
 		#endif
 		
 		#if defined(STACK_USE_SNMP_SERVER) && !defined(SNMP_TRAP_DISABLED)
@@ -526,6 +574,9 @@ void WF_Connect(void)
 {
     //UINT8 ConnectionProfileID;
     UINT8 channelList[] = MY_DEFAULT_CHANNEL_LIST;
+    #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)	 
+    UINT8 channelList_postscan[] = MY_DEFAULT_CHANNEL_LIST_POSTSCAN;
+    #endif
 	 
     /* create a Connection Profile */
     WF_CPCreate(&ConnectionProfileID);
@@ -535,11 +586,7 @@ void WF_Connect(void)
     WF_CPSetSsid(ConnectionProfileID, 
                  AppConfig.MySSID, 
                  AppConfig.SsidLength);
-    
-    #if defined(WF_USE_HIDDEN_SSID)
-   	    WF_CPSetSsidType(ConnectionProfileID, FALSE);
-    #endif
- 
+     
     WF_CPSetNetworkType(ConnectionProfileID, AppConfig.networkType);
     if (AppConfig.networkType == WF_ADHOC)
     {
@@ -571,10 +618,21 @@ void WF_Connect(void)
 
     }
 
-        
     WF_CASetScanType(MY_DEFAULT_SCAN_TYPE);
     
+    #if (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)	 
+    if (((CFGCXT.type!=WF_SOFT_AP)&&(CFGCXT.prevWLAN==WF_SOFT_AP)) || (AppConfig.networkType!=WF_SOFT_AP))
+    {
+        // putrsUART("\r\n\r\nWF_Connect: Channel list update when transitioning from SoftAP to non-SoftAP or NOT in SoftAP..\r\n\r\n");
+        WF_CASetChannelList(channelList_postscan, sizeof(channelList_postscan));
+    }
+    else
+    {
     WF_CASetChannelList(channelList, sizeof(channelList));
+    }
+    #else
+    WF_CASetChannelList(channelList, sizeof(channelList));
+    #endif // (MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP)	 
     
     // The Retry Count parameter tells the WiFi Connection manager how many attempts to make when trying
     // to connect to an existing network.  In the Infrastructure case, the default is to retry forever so that
@@ -602,6 +660,10 @@ void WF_Connect(void)
     #if defined(STACK_USE_UART)   
         WF_OutputConnectionInfo(&AppConfig);
     #endif
+
+	#if (SOFTAP_CHECK_LINK_STATUS == WF_ENABLED)
+		WF_SetLinkDownThreshold(SOFTAP_LINK_FAILURE_THRESHOLD);
+	#endif
 
     WF_CMConnect(ConnectionProfileID);
 }   
@@ -1041,7 +1103,10 @@ static void InitAppConfig(void)
 //		}
 
 #if MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP
-		AppConfig.MyIPAddr.Val = 192ul | 168ul<<8ul | 1ul<<16ul | 1ul<<24ul;
+		// SoftAP on certain setups with IP 192.168.1.1 has problem with DHCP client assigning new IP address on redirection.
+		// 192.168.1.1 is a common IP address with most APs. This is still under investigation.
+		// For now, assign this as 192.168.1.3
+		AppConfig.MyIPAddr.Val = 192ul | 168ul<<8ul | 1ul<<16ul | 3ul<<24ul;
 		AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
 		AppConfig.MyMask.Val = 255ul | 255ul<<8ul | 0ul<<16ul | 0ul<<24ul;
 		AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;

@@ -45,9 +45,19 @@
 #define UCFG_VAL                _PUEN|_TRINT|_FS|MODE_PP
 
 
-/* Uncomment only the hardware platform that you are using*/
-//#define PIC18F4550_PICDEM_FS_USB
-#define PIC18F97J94_FS_USB_PIM
+
+#if defined( __18F4550 )
+    #define PIC18F4550_PICDEM_FS_USB
+#endif // __18F97J94
+
+#if defined( __18F97J94 )
+    #define PIC18F97J94_FS_USB_PIM
+#endif // __18F97J94
+
+#if defined( __18F87J94 )
+    #define PIC18F87J94_FS_USB_PIM
+#endif // __18F87J94
+
 //#define YOUR_BOARD
 
 
@@ -55,11 +65,11 @@
     #define USE_SELF_POWER_SENSE_IO
     #define USE_USB_BUS_SENSE_IO
 
-#elif defined(PIC18F97J94_FS_USB_PIM)
+#elif defined(PIC18F97J94_FS_USB_PIM) || defined(PIC18F87J94_FS_USB_PIM)
     //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board		
 
-/*If using the YOUR_BOARD selection, uncomment below section as appropriate for your hardware*/
-//#elif defined(YOUR_BOARD)
+    /*If using the YOUR_BOARD selection, uncomment below section as appropriate for your hardware*/
+    //#elif defined(YOUR_BOARD)
 	//#define USE_SELF_POWER_SENSE_IO	//See MCHPFSUSB Firmware User's Guide
    	//#define USE_USB_BUS_SENSE_IO		//(DS51679) for more details about these features.
 

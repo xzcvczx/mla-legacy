@@ -8,9 +8,8 @@ Signature = "$Windows NT$"
 Class = CustomUSBDevices
 ClassGuid= {a503e2d3-a031-49dc-b684-c99085dbfe92}
 Provider = %MFGNAME%
-DriverVer=10/12/2010,1.0.0.3
-CatalogFile=MCHPWinUSBDevice_v2.cat	;CAT file used when obtaining a WHQL signature on the driver package
-					;Otherwise isn't needed.
+DriverVer=07/20/2012,1.0.0.4
+CatalogFile=MCHPWinUSBDevice_v2.cat	;CAT file needed for a signed driver pacakage
 ;------------------------------------------------------------------------------
 ; ========== Manufacturer/Models sections ===========
 ;------------------------------------------------------------------------------
@@ -69,7 +68,7 @@ ServiceBinary   = %12%\WinUSB.sys
 KmdfService=WINUSB, WinUsb_Install
 
 [WinUSB_Install]
-KmdfLibraryVersion=1.9
+KmdfLibraryVersion=1.11
 
 [USB_Install.HW]
 AddReg=Dev_AddReg
@@ -85,11 +84,11 @@ AddReg=CoInstallers_AddReg
 CopyFiles=CoInstallers_CopyFiles
 
 [CoInstallers_AddReg]
-HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01011.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
 
 [CoInstallers_CopyFiles]
 WinUSBCoInstaller2.dll
-WdfCoInstaller01009.dll
+WdfCoInstaller01011.dll
 
 [DestinationDirs]
 CoInstallers_CopyFiles=11
@@ -102,17 +101,17 @@ CoInstallers_CopyFiles=11
 
 [SourceDisksFiles.x86]
 WinUSBCoInstaller2.dll=1
-WdfCoInstaller01009.dll=1
+WdfCoInstaller01011.dll=1
 
 [SourceDisksFiles.amd64]
 WinUSBCoInstaller2.dll=2
-WdfCoInstaller01009.dll=2
+WdfCoInstaller01011.dll=2
 
 ; =================== Strings ===================
 
 [Strings]
 MFGNAME="Microchip Technology, Inc."
-DESCRIPTION="Microchip WinUSB Device"
+DESCRIPTION="WinUSB Device"
 WinUSB_SvcDesc="WinUSB Device"
 DISK_NAME="WinUSB Device Install Disk"
 DEVICEMANAGERCATEGORY="Custom USB Devices"

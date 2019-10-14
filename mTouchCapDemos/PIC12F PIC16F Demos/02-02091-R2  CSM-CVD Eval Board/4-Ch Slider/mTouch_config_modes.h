@@ -50,7 +50,9 @@
  * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF 
  * THESE TERMS. 
  *************************************************************************/
- 
+/** @file   mTouch_config_modes.c
+*   @brief  Framework Configuration! Scanning mode options.
+*/
  
  
     #define MTOUCH_NUM_MODES                    0

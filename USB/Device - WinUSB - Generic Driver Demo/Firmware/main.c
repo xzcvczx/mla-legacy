@@ -12,7 +12,7 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the "Company") for its PIC� Microcontroller is intended and
+ (the "Company") for its PIC(R) Microcontroller is intended and
  supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
@@ -49,6 +49,7 @@
   2.8   Improvements to USBCBSendResume(), to make it easier to use.
   2.9   Added Support for dsPIC33EP512MU810/PIC24EP512GU810 devices.
   2.9f  Adding new part support
+  2.9h  Updated to support MS OS Descriptor for plug and play Win 8 experience
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -157,7 +158,7 @@
         #pragma config IESO     = OFF      	// Internal External (clock) Switchover
         #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
         #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
-        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
         #pragma config WPDIS    = WPDIS     // Program memory not write protected
         #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
         #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
@@ -704,7 +705,7 @@ static void InitializeSystem(void)
         ANCON3 = 0xFF;
         #if(USB_SPEED_OPTION == USB_FULL_SPEED)
             //Enable INTOSC active clock tuning if full speed
-            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            ACTCON = 0x90; //Enable active clock self tuning for USB operation
             while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
                                             //with USB operation (ex: if using two speed 
                                             //startup or otherwise performing clock switching)
@@ -1263,6 +1264,8 @@ void USBCBErrorHandler(void)
  *****************************************************************************/
 void USBCBCheckOtherReq(void)
 {
+    //Check for class specific requests, and if necessary, handle it.
+    USBCheckVendorRequest();
 }//end
 
 

@@ -15,8 +15,8 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PIC(R) Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -25,7 +25,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -135,6 +135,26 @@
                                                 //In this special case, the timeout becomes approximately:
 //Timeout(in milliseconds) = ((1000 * (USB_STATUS_STAGE_TIMEOUT - 1)) / (USBDeviceTasks() polling frequency in Hz))
 //------------------------------------------------------------------------------------------------------------------
+
+
+//When implemented, the Microsoft OS Descriptor allows the WinUSB driver package 
+//installation to be automatic on Windows 8, and is therefore recommended.
+#define IMPLEMENT_MICROSOFT_OS_DESCRIPTOR
+
+//Some definitions, only needed when using the MS OS descriptor.
+#if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
+    #define MICROSOFT_OS_DESCRIPTOR_INDEX   (unsigned char)0xEE //Magic string index number for the Microsoft OS descriptor
+    #define GET_MS_DESCRIPTOR               (unsigned char)0xEE //(arbitarily assigned, but should not clobber/overlap normal bRequests)
+    #define EXTENDED_COMPAT_ID              (WORD)0x0004
+    #define EXTENDED_PROPERTIES             (WORD)0x0005
+    typedef struct __attribute__ ((packed)) _MS_OS_DESCRIPTOR{BYTE bLength;BYTE bDscType;WORD string[7];BYTE vendorCode;BYTE bPad;}MS_OS_DESCRIPTOR;
+    typedef struct __attribute__ ((packed)) _MS_COMPAT_ID_FEATURE_DESC{DWORD dwLength;WORD bcdVersion;WORD wIndex;BYTE bCount;BYTE Reserved[7];BYTE bFirstInterfaceNumber;BYTE Reserved1;BYTE compatID[8];BYTE subCompatID[8];BYTE Reserved2[6];}MS_COMPAT_ID_FEATURE_DESC;
+    typedef struct __attribute__ ((packed)) _MS_EXT_PROPERTY_FEATURE_DESC{DWORD dwLength;WORD bcdVersion;WORD wIndex;WORD wCount;DWORD dwSize;DWORD dwPropertyDataType;WORD wPropertyNameLength;WORD bPropertyName[20];DWORD dwPropertyDataLength;WORD bPropertyData[39];}MS_EXT_PROPERTY_FEATURE_DESC;
+    extern MS_OS_DESCRIPTOR MSOSDescriptor;
+    extern MS_COMPAT_ID_FEATURE_DESC CompatIDFeatureDescriptor;
+    extern MS_EXT_PROPERTY_FEATURE_DESC ExtPropertyFeatureDescriptor;
+#endif
+
 
 #define USB_SUPPORT_DEVICE
 

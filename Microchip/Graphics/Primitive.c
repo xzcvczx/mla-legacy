@@ -57,6 +57,8 @@
  * 05/01/12     - Added clipping support commonly used in drivers
  *              - Added putimagepartial support                          
  * 06/11/12     - Added alpha blending support for Bar(), FillBevel(), Arc().
+ * 10/16/12     Fixed issue on PutImageRLExBpp() &  PutImageRLExBppExt() when
+ *              system level palette is used. 
  *****************************************************************************/
 #include "HardwareProfile.h"              // needed to provide values for GetMaxX() and GetMaxY() macros
 #include "Graphics/DisplayDriver.h"
@@ -2008,7 +2010,7 @@ static void __attribute__((always_inline)) calculateColors(void)
     _fgcolor75  = _fgcolor50   +  _fgcolor25;
 
     _bgcolor50  = ConvertColor50(_bgcolor100);
-    _bgcolor25  = ConvertColor50(_bgcolor100);
+    _bgcolor25  = ConvertColor25(_bgcolor100);
     _bgcolor75  = _bgcolor50   +  _bgcolor25;
 
 #elif ((COLOR_DEPTH == 8) || (COLOR_DEPTH == 4))
@@ -5274,14 +5276,15 @@ WORD DecodeRLE8(FLASH_BYTE *flashAddress, BYTE *pixel_row, WORD size)
 void PutImageRLE8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
     WORD                x, y;
     WORD                xc, yc;
     BYTE                temp;
     BYTE                stretchX, stretchY;
-    GFX_COLOR           pallete[256];
+#ifndef USE_PALETTE
+    GFX_COLOR           imagePalette[256];
     WORD                counter;
+#endif
     BYTE                pixelrow[GetMaxX() + 1];
     WORD                offset;
     BYTE                *pixelAddress;
@@ -5300,25 +5303,38 @@ void PutImageRLE8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     #endif
 
     // Read pallete
-    for(counter = 0; counter < 256; counter++)
-    {
-        #if COLOR_DEPTH == 16
-        pallete[counter] = *((FLASH_WORD *)flashAddress);
-        flashAddress += 2;
-        #endif
+    #ifdef USE_PALETTE
+        // Adjust the address to skip the palette section.
+        // Pixel data are indices not actual color data.
+        // Palette to be used is assumed to be system level
+        // defined. This supports only 16 bits per palette entry width.
+        // 24 bits palette entry width is not supported.
+        flashAddress = flashAddress + 512;
+        
+    #else
+        // grab the palette of the image
+        // the actual color used are in this palette
+        for(counter = 0; counter < 256; counter++)
+        {
+            #if COLOR_DEPTH == 16
+                imagePalette[counter] = *((FLASH_WORD *)flashAddress);
+                flashAddress += 2;
+            #endif
+    
+            #if COLOR_DEPTH == 24
+                imagePalette[counter] = *((FLASH_DWORD *)flashAddress);
+                flashAddress += 4;
+            #endif
+        }
 
-        #if COLOR_DEPTH == 24
-        pallete[counter] = *((FLASH_DWORD *)flashAddress);
-        flashAddress += 4;
-        #endif
-    }
-
+    #endif
+    
     yc = top;
-    tempFlashAddress = flashAddress;
+
     for(y = 0; y < sizeY; y++)
     {
-        offset = DecodeRLE8(tempFlashAddress, pixelrow, sizeX);
-        tempFlashAddress += offset;
+        offset = DecodeRLE8(flashAddress, pixelrow, sizeX);
+        flashAddress += offset;
         
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
@@ -5335,7 +5351,7 @@ void PutImageRLE8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             #ifdef USE_PALETTE
                 SetColor(temp);
             #else
-                SetColor(pallete[temp]);
+                SetColor(imagePalette[temp]);
             #endif
 
                 // Write pixel to screen
@@ -5455,14 +5471,15 @@ WORD DecodeRLE4(FLASH_BYTE *flashAddress, BYTE *pixel_row, WORD size)
 void PutImageRLE4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 {
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
     register WORD       x, y;
     WORD                xc, yc;
     BYTE                temp = 0;
     register BYTE       stretchX, stretchY;
-    GFX_COLOR           pallete[16];
+#ifndef USE_PALETTE
+    GFX_COLOR           imagePalette[16];
     WORD                counter;
+#endif
     BYTE                pixelrow[GetMaxX() + 1];
     WORD                offset;
     BYTE                *pixelAddress;
@@ -5481,25 +5498,35 @@ void PutImageRLE4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     #endif
 
     // Read pallete
-    for(counter = 0; counter < 16; counter++)
-    {
-        #if COLOR_DEPTH == 16    
-        pallete[counter] = *((FLASH_WORD *)flashAddress);
-        flashAddress += 2;
-        #endif
+    #ifdef USE_PALETTE
+        // Adjust the address to skip the palette section.
+        // Pixel data are indices not actual color data.
+        // Palette to be used is assumed to be system level
+        // defined. This supports only 16 bits per palette entry width.
+        // 24 bits palette entry width is not supported.
+        flashAddress = flashAddress + 32;
 
-        #if COLOR_DEPTH == 24
-        pallete[counter] = *((FLASH_DWORD *)flashAddress);
-        flashAddress += 4;
-        #endif
-    }
+    #else
+        for(counter = 0; counter < 16; counter++)
+        {
+            #if COLOR_DEPTH == 16    
+                imagePalette[counter] = *((FLASH_WORD *)flashAddress);
+                flashAddress += 2;
+            #endif
+    
+            #if COLOR_DEPTH == 24
+                imagePalette[counter] = *((FLASH_DWORD *)flashAddress);
+                flashAddress += 4;
+            #endif
+        }
+    #endif
 
     yc = top;
-    tempFlashAddress = flashAddress;
+    
     for(y = 0; y < sizeY; y++)
     {
-        offset = DecodeRLE4(tempFlashAddress, pixelrow, sizeX);
-        tempFlashAddress += offset;
+        offset = DecodeRLE4(flashAddress, pixelrow, sizeX);
+        flashAddress += offset;
 
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
@@ -5513,7 +5540,7 @@ void PutImageRLE4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 #ifdef USE_PALETTE
                     SetColor(temp);
                 #else
-                    SetColor(pallete[temp]);
+                    SetColor(imagePalette[temp]);
                 #endif
 
                 // Write pixel to screen
@@ -5626,7 +5653,9 @@ void PutImageRLE8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
-    WORD            pallete[256];
+#ifndef USE_PALETTE
+    GFX_COLOR       imagePalette[256];
+#endif
     BYTE            pixelrow[(GetMaxX() + 1)];
     BYTE            *pixelAddress;
 
@@ -5640,11 +5669,21 @@ void PutImageRLE8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     // Get image header
     ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
-    // Get pallete (256 entries)
-    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(WORD), pallete);
+    // Set offset to the image data, 256 is used since this function is for 8bpp images
+    #ifdef USE_PALETTE
+        // use system palette, skip the image palette and adjust the offset
+        // assumes palette entry width is 16 bits, 
+        // 24 bits palette width is not supported
+        memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
+    #else
+        memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(GFX_COLOR);
 
-    // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
+        // Get image palette, since this will be used to render the pixels
+        // when system palette is used, the image palette is assumed to be
+        // the same as the system palette so we do not fetch it
+        ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 256 * sizeof(GFX_COLOR), imagePalette);
+
+    #endif
 
     // Get size
     sizeX = bmp.width;
@@ -5671,7 +5710,7 @@ void PutImageRLE8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
             #ifdef USE_PALETTE
                 SetColor(temp);
             #else
-                SetColor(pallete[temp]);
+                SetColor(imagePalette[temp]);
             #endif
 
                 // Write pixel to screen
@@ -5798,7 +5837,9 @@ void PutImageRLE4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
-    WORD            pallete[16];
+#ifndef USE_PALETTE
+    GFX_COLOR       imagePalette[16];
+#endif
     BYTE            pixelrow[(GetMaxX() + 1)];
     BYTE            *pixelAddress;
 
@@ -5812,11 +5853,20 @@ void PutImageRLE4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     // Get image header
     ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
-    // Get pallete (16 entries)
-    ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), pallete);
+    // Set offset to the image data, 16 is used since this function is for 4bpp images
+    #ifdef USE_PALETTE
+        // assumes palette entry width is 16 bits, 
+        // 24 bits palette width is not supported
+        memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
+    #else
+        memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(GFX_COLOR);
 
-    // Set offset to the image data
-    memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
+        // Get image palette, since this will be used to render the pixels
+        // when system palette is used, the image palette is assumed to be
+        // the same as the system palette so we do not fetch it
+        ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(GFX_COLOR), imagePalette);
+
+    #endif
 
     // Get size
     sizeX = bmp.width;
@@ -5843,7 +5893,7 @@ void PutImageRLE4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
             #ifdef USE_PALETTE
                 SetColor(temp);
             #else
-                SetColor(pallete[temp]);
+                SetColor(imagePalette[temp]);
             #endif
 
                 // Write pixel to screen

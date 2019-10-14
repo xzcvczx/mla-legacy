@@ -81,7 +81,7 @@
 */ 
 //@{
 
-    mTouch_State                mTouch_state;           // Collection of single-bit flags    
+    mTouch_State                mTouch_state;           // Collection of single-bit flags
     mTouch_StateVariables       mTouch_stateVars;       // Sensor variables and other counters
     uint16_t                    mTouch_average          [MTOUCH_NUMBER_SENSORS];    
 

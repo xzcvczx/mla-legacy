@@ -433,6 +433,10 @@
     void    mTouch_ErrorDetect      (void);     // Checks all sensor I/Os for shorts to Vss or Vdd
     #endif
     
+    #if defined(PIC_ADC_HCVD_AVAILABLE)
+    void    mTouch_HCVD_Init        (void);
+    #endif
+    
 //================================================================================================
 //          _____                _          _    ____ ___ 
 //  _ __ __|_   _|__  _   _  ___| |__      / \  |  _ \_ _|

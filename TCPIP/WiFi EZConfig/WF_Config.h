@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WF_Config.h
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WF_Config.h
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author             Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -68,9 +68,9 @@
 #define WF_CONSOLE              /* needed for console demo */
 #define WF_CONSOLE_IFCFGUTIL    /* needed for console demo */
 
-#define ADHOC_RETRY_COUNT           (3)
+#define ADHOC_RETRY_COUNT    (3)
 
-#define CFG_WF_ADHOC          2	
+#define CFG_WF_ADHOC          2    
 #define CFG_WF_SOFT_AP        4 
 
 #define MY_DEFAULT_DOMAIN                   WF_DOMAIN_FCC
@@ -82,44 +82,72 @@
 /*--------------------------------------------*/
 #if MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC
 #define MY_DEFAULT_SSID_NAME                "EasyConfig"
-#define MY_DEFAULT_BEACON_TIMEOUT           (40)   /* Number of beacon periods */
-#define MY_DEFAULT_SCAN_TYPE                WF_ACTIVE_SCAN      /* WF_ACTIVE_SCAN or WF_PASSIVE_SCAN */
-#define MY_DEFAULT_CHANNEL_LIST             {}            /* Desired channel list             */
-#define MY_DEFAULT_LIST_RETRY_COUNT          ADHOC_RETRY_COUNT
-#define MY_DEFAULT_PS_POLL                   WF_DISABLED    /* PS is not supported in Adhoc */
+#define MY_DEFAULT_BEACON_TIMEOUT           (40)                /* Number of beacon periods             */
+#define MY_DEFAULT_SCAN_TYPE                WF_ACTIVE_SCAN      /* WF_ACTIVE_SCAN or WF_PASSIVE_SCAN    */
+#define MY_DEFAULT_CHANNEL_LIST             {}                  /* Desired channel list                 */
+#define MY_DEFAULT_CHANNEL_LIST_PRESCAN     {}                  /* Applicable for SoftAP only    */
+#define MY_DEFAULT_CHANNEL_LIST_POSTSCAN    {}                  /* Applicable for SoftAP only    */
+#define MY_DEFAULT_LIST_RETRY_COUNT         ADHOC_RETRY_COUNT
+#define MY_DEFAULT_PS_POLL                  WF_DISABLED         /* PS is not supported in Adhoc         */
 #if !defined(MRF24WG)
-/* #define WF_AGGRESSIVE_PS */	/* WARNING !!! : This only can work with 1209 module FW version or later.
-						* If you use the earlier version such as 1207 or 1205, then you should not define this.
-						* Defining this will lead ASSERT problem with old module FW.
-						*/
+/* #define WF_AGGRESSIVE_PS */  /* WARNING !!! : This only can work with 1209 module FW version or later.
+                        * If you use the earlier version such as 1207 or 1205, then you should not define this.
+                        * Defining this will lead ASSERT problem with old module FW.
+                        */
 #endif
 #define MY_DEFAULT_WIFI_SECURITY_MODE        WF_SECURITY_OPEN
 /*------------------------------------------*/
 /* else if starting this demo in SoftAP mode */
 /*------------------------------------------*/
 #elif MY_DEFAULT_NETWORK_TYPE == CFG_WF_SOFT_AP
-/* Please note that this demo is only for demoing SoftAP function, not full "EasyConfig" function. 
+/* SoftAP function has the full "EasyConfig" function. 
 * Your STA can connect to the SoftAP as a client, get the DHCP IP, run ping, and run web browser to connect to Web Server
-* of SoftAP. But unlike Adhoc mode above it may not direct you to connect to another AP in infrastructure mode.
+* of SoftAP. It will allow you to re-connect / redirect to another AP in infrastructure mode.
 * The reason this demo sits here is simply A) borrow DHCP server; B) borrow HTTP server.
 *
-* Also note that this is a very simplified SoftAP. So its function is limited as , A) no routing supported; B) only 1 client allowed
-* at a time.  And security wise currently it only supports open mode.
+* Before starting up as SoftAP, prescan (MY_DEFAULT_CHANNEL_LIST_PRESCAN) will be executed.
+* For SoftAP, default channel is assigned as MY_DEFAULT_CHANNEL_LIST i.e single channel 6. This means SoftAP
+* will start up in channel 6.
+* When scan option is selected in EZConfig web browser in SoftAP mode, the prescan results will be displayed.
+* Repeated selection of this scan option will always display the prescan results. From this prescan list, the user can select 
+* an AP to be redirected to.
+* When redirected to another AP, the channel list will change to allow more channel listings in infrastructure mode, 
+* i.e all channels MY_DEFAULT_CHANNEL_LIST_POSTSCAN. This means AP will scan MY_DEFAULT_CHANNEL_LIST_POSTSCAN
+* channel list. 
 *
-* SoftAP's default IP is 192.168.1.1 and its Network Mask is 255.255.0.0
+* Also note that this is a very simplified SoftAP. So its function is limited as , A) no routing supported; B) only 1 client allowed
+* at a time.  And security wise currently it supports both open mode and WEP security.
+*
+* SoftAP's default IP is 192.168.1.3 and its Network Mask is 255.255.0.0
+* SoftAP on certain setups with IP adress 192.168.1.1 has problem with DHCP client assigning new IP address on redirection.
+* 192.168.1.1 is a common IP address with most APs. This is still under investigation.
+* For now, assign this as 192.168.1.3
 */
 #if defined (MRF24WG)
-	#define MY_DEFAULT_WIFI_SECURITY_MODE				WF_SECURITY_OPEN			/* only open security supported */
-    #define MY_DEFAULT_SCAN_TYPE                        WF_ACTIVE_SCAN   			 /* Dummy, Not used  */
-    #define MY_DEFAULT_SSID_NAME                        "MCHPSoftAP" 				/* Set SoftAP ssid */
-    #define MY_DEFAULT_LIST_RETRY_COUNT                 ADHOC_RETRY_COUNT            /* Dummy, Not used  */
-    #define MY_DEFAULT_CHANNEL_LIST                     {6}                    /* Set SoftAP network channel */
-    #define MY_DEFAULT_BEACON_TIMEOUT                   (40)       					 /* Dummy, Not used  */
-    #define MY_DEFAULT_PS_POLL                          WF_DISABLED					 /* Dummy, Not used  */
-#else	/* !defined (MRF24WG) */
+    #define MY_DEFAULT_WIFI_SECURITY_MODE       WF_SECURITY_OPEN        /* Open & WEP security supported.     
+                                                                         * For WEP security, RF Module FW version 3107
+                                                                         * or the later needs. 
+                                                                         */
+    #define MY_DEFAULT_SCAN_TYPE                WF_ACTIVE_SCAN          /* Dummy, Not used                  */
+    #define MY_DEFAULT_SSID_NAME                "MCHPSoftAP"            /* Set SoftAP ssid                  */
+    #define MY_DEFAULT_LIST_RETRY_COUNT         ADHOC_RETRY_COUNT       /* Dummy, Not used                  */
+    #define MY_DEFAULT_CHANNEL_LIST             {6}                     /* Set SoftAP network channel       */
+    #define MY_DEFAULT_CHANNEL_LIST_PRESCAN     {1, 6, 11}              /* SoftAP: Pre-scan channel list WF_PRESCAN */
+    #define MY_DEFAULT_CHANNEL_LIST_POSTSCAN    {}                      /* SoftAP: Post-scan channel list */
+    #define MY_DEFAULT_BEACON_TIMEOUT           (40)                    /* Dummy, Not used                  */
+    #define MY_DEFAULT_PS_POLL                  WF_DISABLED             /* Dummy, Not used                  */
+	#define SOFTAP_CHECK_LINK_STATUS			WF_DISABLED					
+	#define SOFTAP_LINK_FAILURE_THRESHOLD		40						/* Consecutive null packet transmission failures
+																		* for this amount of times.
+																		* Then Softap considers the client has gone away.
+																		* This is only effective when SOFTAP_CHECK_LINK_STATUS
+																		* is enabled. This function is only valid with RF module FW
+																		* 3107 or the later.
+																		*/
+#else    /* !defined (MRF24WG) */
 #error "MRF24WB does not support SoftAP"
-#endif	/* defined (MRF24WG) */
-#endif	/* MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC */
+#endif    /* defined (MRF24WG) */
+#endif    /* MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC */
 
 #define MY_DEFAULT_EVENT_NOTIFICATION_LIST  (WF_NOTIFY_CONNECTION_ATTEMPT_SUCCESSFUL  |         \
                                              WF_NOTIFY_CONNECTION_ATTEMPT_FAILED      |         \

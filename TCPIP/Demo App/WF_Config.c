@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WF_Config.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WF_Config.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author                Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
@@ -81,7 +81,7 @@ extern void ReenablePowerSaveMode(void);
 
 #if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
 extern tPassphraseReady g_WpsPassphrase;
-#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
+#endif    /* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
 
 /*****************************************************************************
  * FUNCTION: WF_ProcessEvent
@@ -92,7 +92,9 @@ extern tPassphraseReady g_WpsPassphrase;
  *           eventInfo  -- additional information about the event.  Not all events
  *                         have associated info, in which case this value will be
  *                         set to WF_NO_ADDITIONAL_INFO (0xff)
- *           extraInfo - more additional information about the event
+ *           extraInfo - more additional information about the event.
+ *                            WPA Passphrase that is sent to the host in case the host wants to speed 
+ *                            up connection by doing the passphrase to key calculation
  *
  *  NOTES:   The Host application must NOT directly call this function.  This 
  *           function is called by the WiFi Driver code when an event occurs
@@ -161,19 +163,19 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo, UINT8 *extraInfo)
 
             #if defined ( EZ_CONFIG_SCAN ) && !defined(__18CXX)
             WFScanEventHandler(eventInfo);
-			#endif /* EZ_CONFIG_SCAN */
+            #endif /* EZ_CONFIG_SCAN */
             break;
-			
+            
         case WF_EVENT_KEY_CALCULATION_REQUEST:
-		#if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
-			g_WpsPassphrase.valid = TRUE;
-			memcpy((void *)&g_WpsPassphrase.passphrase, (void *)extraInfo, sizeof(g_WpsPassphrase.passphrase));
-			#if defined(STACK_USE_UART)
-                putrsUART("Event: WPS pass phrase Ready\r\n");
-            #endif /* STACK_USE_UART */
-		#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */	
-			break;  
-		
+            #if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
+                g_WpsPassphrase.valid = TRUE;
+                memcpy((void *)&g_WpsPassphrase.passphrase, (void *)extraInfo, sizeof(g_WpsPassphrase.passphrase));
+                #if defined(STACK_USE_UART)
+                    putrsUART("Event: WPS pass phrase Ready\r\n");
+                #endif /* STACK_USE_UART */
+            #endif  /* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */    
+            break;  
+        
         default:
             WF_ASSERT(FALSE);  /* unknown event */
             break;

@@ -2131,7 +2131,7 @@ MDNS_STATIC void mDNSResponder(void)
             mDNSRemote.MACAddr.v[5]=0xFB;
 
 			
-			mDNS_socket = UDPOpenEx((DWORD)&mDNSRemote,UDP_OPEN_NODE_INFO,MDNS_PORT,MDNS_PORT);
+			mDNS_socket = UDPOpenEx((DWORD)(PTR_BASE)&mDNSRemote,UDP_OPEN_NODE_INFO,MDNS_PORT,MDNS_PORT);
 
 			if(mDNS_socket == INVALID_UDP_SOCKET)
             {

@@ -1,19 +1,19 @@
 /********************************************************************
- FileName:		main.c
- Dependencies:	See INCLUDES section
- Processor:		PIC18, PIC24, and PIC32 USB Microcontrollers
- Hardware:		This demo is natively intended to be used on Microchip USB demo
- 				boards supported by the MCHPFSUSB stack.  See release notes for
- 				support matrix.  This demo can be modified for use on other hardware
- 				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
- Company:		Microchip Technology, Inc.
+ FileName:      main.c
+ Dependencies:  See INCLUDES section
+ Processor:     PIC18, PIC24, dsPIC, and PIC32 USB Microcontrollers
+ Hardware:      This demo is natively intended to be used on Microchip USB demo
+                boards supported by the MCHPFSUSB stack.  See release notes for
+                support matrix.  This demo can be modified for use on other hardware
+                platforms.
+ Complier:      Microchip C18 (for PIC18), XC16 (for PIC24/dsPIC), XC32 (for PIC32)
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PIC® Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -45,13 +45,14 @@
         stack on PIC18 devices.  The previous version did not allocate
         enough RAM for the worst case scenario, when USB_INTERRUPTS mode
         was used, causing potentially unexpected operation.
+  2.9h  Adding new part support
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
 
 #include <stdio.h>
 
-#include "USB/USB.h"
+#include "USB/usb.h"
 #include "HardwareProfile.h"
 #include "MDD File System/SD-SPI.h"
 #include "MDD File System/FSIO.h"
@@ -120,6 +121,29 @@
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT   
 
+// Configuration bits for PIC18F97J94 PIM and PIC18F87J94 PIM
+#elif defined(PIC18F97J94_PIM) || defined(PIC18F87J94_PIM)
+        #pragma config STVREN   = ON      	// Stack overflow reset
+        #pragma config XINST    = OFF   	// Extended instruction set
+        #pragma config BOREN    = ON        // BOR Enabled
+        #pragma config BORV     = 0         // BOR Set to "2.0V" nominal setting
+        #pragma config CP0      = OFF      	// Code protect disabled
+        #pragma config FOSC     = FRCPLL    // Firmware should also enable active clock tuning for this setting
+        #pragma config SOSCSEL  = LOW       // SOSC circuit configured for crystal driver mode
+        #pragma config CLKOEN   = OFF       // Disable clock output on RA6
+        #pragma config IESO     = OFF      	// Internal External (clock) Switchover
+        #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
+        #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
+        #pragma config FSCM     = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config WPDIS    = WPDIS     // Program memory not write protected
+        #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
+        #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
+        #pragma config LS48MHZ  = SYSX2     // Low Speed USB clock divider
+        #pragma config WDTCLK   = LPRC      // WDT always uses INTOSC/LPRC oscillator
+        #pragma config WDTEN    = ON        // WDT disabled; SWDTEN can control WDT
+        #pragma config WINDIS   = WDTSTD    // Normal non-window mode WDT.
+        #pragma config VBTBOR   = OFF       // VBAT BOR disabled
+        
 #elif defined(PIC18F46J50_PIM) || defined(PIC18F47J53_PIM)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
@@ -159,7 +183,6 @@
         #pragma config PWRTEN = OFF
         #pragma config BOREN  = OFF
         #pragma config BORV   = 30
-//        #pragma config VREGEN = ON
         #pragma config WDTEN  = OFF
         #pragma config WDTPS  = 32768
         #pragma config MCLRE  = OFF
@@ -606,13 +629,13 @@ int main(void)
  *******************************************************************/
 static void InitializeSystem(void)
 {
-    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
+    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM) & !defined(PIC18F97J94_FAMILY))
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif defined(__C30__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ64GB004_PIM)
             AD1PCFGL = 0xFFFF;
         #endif
-    #elif !defined(PIC18F87J50_PIM)
+    #elif !defined(PIC18F87J50_PIM) & !defined(PIC18F97J94_FAMILY)
         AD1PCFG = 0xFFFF;
     #endif
     
@@ -636,6 +659,19 @@ static void InitializeSystem(void)
         while(pll_startup_counter--);
     }
     //Device switches over automatically to PLL output after PLL is locked and ready.
+    #endif
+    #if defined(PIC18F97J94_FAMILY)
+        //Configure I/O pins for digital input mode.
+        ANCON1 = 0xFF;
+        ANCON2 = 0xFF;
+        ANCON3 = 0xFF;
+        #if(USB_SPEED_OPTION == USB_FULL_SPEED)
+            //Enable INTOSC active clock tuning if full speed
+            ACTCON = 0x90; //Enable active clock self tuning for USB operation
+            while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
+                                            //with USB operation (ex: if using two speed 
+                                            //startup or otherwise performing clock switching)
+        #endif
     #endif
     
     
@@ -806,14 +842,24 @@ WORD_VAL ReadPOT(void)
 {
     WORD_VAL w;
 
-    #if defined(__18CXX)
-        mInitPOT();
-
-        ADCON0bits.GO = 1;              // Start AD conversion
-        while(ADCON0bits.NOT_DONE);     // Wait for conversion
-
-        w.v[0] = ADRESL;
-        w.v[1] = ADRESH;
+    #if defined(__18CXX) || defined(__XC8)
+        #if defined(PIC18F97J94_PIM) 
+            ADCON1Lbits.SAMP = 1;           // Start AD sampling/convert sequence
+            while(ADCON1Lbits.DONE == 0);   // Wait for result complete
+            w.v[0] = ADCBUF3L;
+            w.v[1] = ADCBUF3H;       
+        #elif defined(PIC18F87J94_PIM)
+            ADCON1Lbits.SAMP = 1;           // Start AD sampling/convert sequence
+            while(ADCON1Lbits.DONE == 0);   // Wait for result complete
+            w.v[0] = ADCBUF0L;
+            w.v[1] = ADCBUF0H;       
+        #else
+            mInitPOT();
+            ADCON0bits.GO = 1;              // Start AD conversion
+            while(ADCON0bits.GO);     // Wait for conversion
+            w.v[0] = ADRESL;
+            w.v[1] = ADRESH;
+        #endif
 
     #elif defined(__C30__) || defined(__C32__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM)
@@ -876,7 +922,7 @@ WORD_VAL ReadPOT(void)
 // The USB firmware stack will call the callback functions USBCBxxx() in response to certain USB related
 // events.  For example, if the host PC is powering down, it will stop sending out Start of Frame (SOF)
 // packets to your device.  In response to this, all USB devices are supposed to decrease their power
-// consumption from the USB Vbus to <2.5mA each.  The USB module detects this condition (which according
+// consumption from the USB Vbus to <2.5mA* each.  The USB module detects this condition (which according
 // to the USB specifications is 3+ms of no bus activity/SOF packets) and then calls the USBCBSuspend()
 // function.  You should modify these callback functions to take appropriate actions for each of these
 // conditions.  For example, in the USBCBSuspend(), you may wish to add code that will decrease power
@@ -887,6 +933,10 @@ WORD_VAL ReadPOT(void)
 // The USBCBSendResume() function is special, in that the USB stack will not automatically call this
 // function.  This function is meant to be called from the application firmware instead.  See the
 // additional comments near the function.
+
+// Note *: The "usb_20.pdf" specs indicate 500uA or 2.5mA, depending upon device classification. However,
+// the USB-IF has officially issued an ECN (engineering change notice) changing this to 2.5mA for all 
+// devices.  Make sure to re-download the latest specifications to get all of the newest ECNs.
 
 /******************************************************************************
  * Function:        void USBCBSuspend(void)
@@ -998,11 +1048,13 @@ void USBCBWakeFromSuspend(void)
 	// If clock switching or other power savings measures were taken when
 	// executing the USBCBSuspend() function, now would be a good time to
 	// switch back to normal full power run mode conditions.  The host allows
-	// a few milliseconds of wakeup time, after which the device must be 
+	// 10+ milliseconds of wakeup time, after which the device must be 
 	// fully back to normal, and capable of receiving and processing USB
 	// packets.  In order to do this, the USB module must receive proper
 	// clocking (IE: 48MHz clock must be available to SIE for full speed USB
-	// operation).
+	// operation).  
+	// Make sure the selected oscillator settings are consistent with USB 
+    // operation before returning from this function.
 }
 
 /********************************************************************

@@ -100,6 +100,10 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="f1" displayName="ModuleFlash" projectFiles="true">
+        <itemPath>../ModuleFlash/AutoUpdate_UartXMODEM_Roadrunner.c</itemPath>
+        <itemPath>../ModuleFlash/SPI_MemAccess.c</itemPath>
+      </logicalFolder>
       <logicalFolder name="TCPIP Stack" displayName="TCPIP Stack" projectFiles="true">
         <itemPath>../../../Microchip/TCPIP Stack/ARCFOUR.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/ARP.c</itemPath>
@@ -188,6 +192,10 @@
       <itemPath>../WF_Config.c</itemPath>
       <itemPath>../GenericTCPClient.c</itemPath>
       <itemPath>../GenericTCPServer.c</itemPath>
+      <itemPath>../AutoUpdate_common_24G.c</itemPath>
+      <itemPath>../AutoUpdate_TCPClient_24G.c</itemPath>
+      <itemPath>../AutoUpdate_Uart_24G.c</itemPath>
+      <itemPath>../FTPClientDemo.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

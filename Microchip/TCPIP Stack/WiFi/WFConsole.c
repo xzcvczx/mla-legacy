@@ -6,13 +6,13 @@
   -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
- FileName:		WFConsole.c
- Dependencies:	TCP/IP Stack header files
- Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- Compiler:		Microchip C32 v1.10b or higher
-				Microchip C30 v3.22 or higher
-				Microchip C18 v3.34 or higher
- Company:		Microchip Technology, Inc.
+ FileName:      WFConsole.c
+ Dependencies:  TCP/IP Stack header files
+ Processor:     PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:      Microchip C32 v1.10b or higher
+                Microchip C30 v3.22 or higher
+                Microchip C18 v3.34 or higher
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement
 
@@ -24,8 +24,8 @@
       Licensee's product; or
  (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
       ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
-	  conjunction with a Microchip ethernet controller for the sole purpose 
-	  of interfacing with the ethernet controller.
+      conjunction with a Microchip ethernet controller for the sole purpose 
+      of interfacing with the ethernet controller.
 
  You should refer to the license agreement accompanying this Software for 
  additional information regarding your rights and obligations.
@@ -42,7 +42,7 @@
  OTHERWISE.
 
 
- Author				Date		Comment
+ Author                Date        Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
@@ -399,21 +399,21 @@ void WFConsoleProcess(void)
 void WFConsoleProcessEpilogue(void)
 {
     if (WFConsoleIsConsoleMsgReceived())
-	{
-		if (( memcmppgm2ram(ARGV[0], "iperf", 5) == 0 ) || ( memcmppgm2ram(ARGV[0], "kill", 4) == 0 ))
-		{
-    		return;
+    {
+        if (( memcmppgm2ram(ARGV[0], "iperf", 5) == 0 ) || ( memcmppgm2ram(ARGV[0], "kill", 4) == 0 ))
+        {
+            return;
         } 
-	
-		if ( memcmppgm2ram(ARGV[0], "help", 4) != 0 )
-		{
-			WFConsolePrintRomStr("Unknown cmd: ", FALSE);
-			WFConsolePrintRamStr(ARGV[0], TRUE);
-		}
-	 		
+    
+        if ( memcmppgm2ram(ARGV[0], "help", 4) != 0 )
+        {
+            WFConsolePrintRomStr("Unknown cmd: ", FALSE);
+            WFConsolePrintRamStr(ARGV[0], TRUE);
+        }
+             
 
-	    WFConsoleReleaseConsoleMsg();
-	}
+        WFConsoleReleaseConsoleMsg();
+    }
 }
 
 INT8 ** WFConsoleGetCmdLineArgv(void)
@@ -1164,43 +1164,43 @@ BOOL WFConsoleIsConsoleMsgReceived(void)
 
 void WFConsolePrintInteger(UINT32 val, char mode)
 {
-	switch (mode)
-	{
-	case 'c':
-		sprintf( (char *) g_ConsoleContext.txBuf, "%c", (int)val);
-		break;
-	case 'x':
-		sprintf( (char *) g_ConsoleContext.txBuf, "%x", (unsigned int)val);
-		break;
-	case 'u':
-		sprintf( (char *) g_ConsoleContext.txBuf, "%u", (unsigned int)val);
-		break;
-	case 'd':
-	default:
-		sprintf( (char *) g_ConsoleContext.txBuf, "%d", (int)val);
-	}
+    switch (mode)
+    {
+    case 'c':
+        sprintf( (char *) g_ConsoleContext.txBuf, "%c", (int)val);
+        break;
+    case 'x':
+        sprintf( (char *) g_ConsoleContext.txBuf, "%x", (unsigned int)val);
+        break;
+    case 'u':
+        sprintf( (char *) g_ConsoleContext.txBuf, "%u", (unsigned int)val);
+        break;
+    case 'd':
+    default:
+        sprintf( (char *) g_ConsoleContext.txBuf, "%d", (int)val);
+    }
 
-	putsUART( (char*) g_ConsoleContext.txBuf);
+    putsUART( (char*) g_ConsoleContext.txBuf);
 }
 
 void WFConsolePrintHex(UINT32 val, UINT8 width)
 {
-	switch (width)
-	{
-	case 2:
-		sprintf( (char *) g_ConsoleContext.txBuf, "%02x", (unsigned int)val);
-		break;
-	case 4:
-		sprintf( (char *) g_ConsoleContext.txBuf, "%04x", (unsigned int)val);
-		break;
-	case 8:
-		sprintf( (char *) g_ConsoleContext.txBuf, "%08lx", (unsigned long)val);
-		break;
-	default:
-		sprintf( (char *) g_ConsoleContext.txBuf, "%x", (unsigned int)val);
-	}
+    switch (width)
+    {
+    case 2:
+        sprintf( (char *) g_ConsoleContext.txBuf, "%02x", (unsigned int)val);
+        break;
+    case 4:
+        sprintf( (char *) g_ConsoleContext.txBuf, "%04x", (unsigned int)val);
+        break;
+    case 8:
+        sprintf( (char *) g_ConsoleContext.txBuf, "%08lx", (unsigned long)val);
+        break;
+    default:
+        sprintf( (char *) g_ConsoleContext.txBuf, "%x", (unsigned int)val);
+    }
 
-	putsUART( (char*) g_ConsoleContext.txBuf);
+    putsUART( (char*) g_ConsoleContext.txBuf);
 }
 
 #endif /* WF_CONSOLE */
