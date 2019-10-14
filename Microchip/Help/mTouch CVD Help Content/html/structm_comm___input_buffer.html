@@ -33,19 +33,13 @@
 </div>
 <div class="contents">
 <!-- doxytag: class="mComm_InputBuffer" -->
-<p>Stores the data input by the master.  
-<a href="#_details">More...</a></p>
-
 <p><code>#include &lt;<a class="el" href="m_comm_8h_source.html">mComm.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structm_comm___input_buffer.html#aae5a12e607d0f782506d9e6ec6179c64">index</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracks the current index value of the input.  <a href="#aae5a12e607d0f782506d9e6ec6179c64"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structm_comm___input_buffer.html#a0480b812cba9c1d9c71a5fb1071bd0fc">counter</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to count how many bytes remain to be received by the master in this packet.  <a href="#a0480b812cba9c1d9c71a5fb1071bd0fc"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structm_comm___input_buffer.html#a59eac9627282a484fbaf0aa7aa3b8a9a">checksum</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracks the current checksum value for the input packet.  <a href="#a59eac9627282a484fbaf0aa7aa3b8a9a"></a><br/></td></tr>
 <tr><td class="memItemLeft" >union {</td></tr>
 <tr><td class="memItemLeft" >&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="structm_comm___input_buffer.html#af61f8246015db4f0a85a942ac747131e">all</a></td></tr>
 <tr><td class="memItemLeft" >&#160;&#160;&#160;struct {</td></tr>
@@ -57,9 +51,8 @@ Data Fields</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the input packet data.  <a href="#a8d06f288063a5615acb5cb64ecb2028d"></a><br/></td></tr>
 </table>
 <hr/><a name="_details"></a><h2>Detailed Description</h2>
-<p>Stores the data input by the master. </p>
 
-<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00142">142</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
+<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00130">130</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
 <hr/><h2>Field Documentation</h2>
 <a class="anchor" id="af61f8246015db4f0a85a942ac747131e"></a><!-- doxytag: member="mComm_InputBuffer::all" ref="af61f8246015db4f0a85a942ac747131e" args="" -->
 <div class="memitem">
@@ -72,7 +65,7 @@ Data Fields</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00153">153</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
+<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00141">141</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
 
 </div>
 </div>
@@ -102,7 +95,7 @@ Data Fields</h2></td></tr>
 
 <p>Stores the input packet data. </p>
 
-<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00173">173</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
+<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00162">162</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
 
 </div>
 </div>
@@ -117,9 +110,7 @@ Data Fields</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Tracks the current checksum value for the input packet. </p>
-
-<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00146">146</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
+<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00134">134</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
 
 </div>
 </div>
@@ -134,9 +125,7 @@ Data Fields</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Used to count how many bytes remain to be received by the master in this packet. </p>
-
-<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00145">145</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
+<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00133">133</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
 
 </div>
 </div>
@@ -166,7 +155,7 @@ Data Fields</h2></td></tr>
 
 <p>'1' if the input buffer is full and ready for processing </p>
 
-<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00156">156</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
+<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00144">144</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
 
 </div>
 </div>
@@ -181,9 +170,7 @@ Data Fields</h2></td></tr>
 </div>
 <div class="memdoc">
 
-<p>Tracks the current index value of the input. </p>
-
-<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00144">144</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
+<p>Definition at line <a class="el" href="m_comm_8h_source.html#l00132">132</a> of file <a class="el" href="m_comm_8h_source.html">mComm.h</a>.</p>
 
 </div>
 </div>
@@ -191,7 +178,7 @@ Data Fields</h2></td></tr>
 <li><a class="el" href="m_comm_8h_source.html">mComm.h</a></li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

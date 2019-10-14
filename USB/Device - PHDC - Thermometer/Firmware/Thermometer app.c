@@ -349,8 +349,7 @@ void ApplicationTask(void)
 #if defined DEMO_BOARD_HAS_ONLY_ONE_PUSH_BUTTON
 // Some of the demo boards has only one pushbutton. The demo works the following way for all the above demo boards. If the pushbutton is pressed for the first time
 // then the Weig Scale Agent sends an Association request to the  Manager. If the push button is pressed for the second, third or fourth time the Agent sends some measured data 
-// to the Manager. If the Pushbutton is pressed  for the Fifth time the Agent disconnects from the Manager and resets the bush button counter. 
-    static BOOL dataTransferInitiated = FALSE;  
+// to the Manager. If the Pushbutton is pressed  for the Fifth time the Agent disconnects from the Manager and resets the bush button counter.   
     if (buttonPressedsw2)
     {
        if(dataSendingUnderProgress == FALSE)

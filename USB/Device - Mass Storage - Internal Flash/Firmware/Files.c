@@ -11,7 +11,7 @@
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PICmicro® Microcontroller is intended and
+ * (the "Company") for its PICmicro(R) Microcontroller is intended and
  * supplied to you, the Company’s customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
@@ -21,7 +21,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -47,17 +47,58 @@
 
 
 #if defined(__PIC32MX__)
-    #define MBR_ATTRIBUTES __attribute__ ((aligned (ERASE_BLOCK_SIZE),section(".MDD_FILES")))
-    #define PARTITION_ATTRIBUTES __attribute__ ((section(".MDD_FILES")))
+    #define MBR_ATTRIBUTES                      __attribute__((aligned (ERASE_BLOCK_SIZE),section(".MDD_FILES")))
+    #define PARTITION_ATTRIBUTES(sector_num)    __attribute__ ((section(".MDD_FILES")))
 #elif defined(__C30__)
-    #define MBR_ATTRIBUTES __attribute__ ((aligned (ERASE_BLOCK_SIZE),section(".MDD_FILES"),address(FILES_ADDRESS),space(prog)))
-    #define PARTITION_ATTRIBUTES __attribute__((section(".MDD_FILES"),space(prog)))
+    #define MBR_ATTRIBUTES                      __attribute__((space(psv), address(FILES_ADDRESS)))
+    #define PARTITION_ATTRIBUTES(sector_num)    __attribute__((space(psv), address(FILES_ADDRESS + (sector_num * MEDIA_SECTOR_SIZE))))
 #elif defined(__18CXX)
     #define MBR_ATTRIBUTES
-    #define PARTITION_ATTRIBUTES
+    #define PARTITION_ATTRIBUTES(sector_num)
 #else
     #error "Compiler not supported."
 #endif
+
+
+/*********** Sector Address Calculation macros ********************
+    These macros are used to calculate the sector address of each
+    of the blocks.  These are then used to locate where the blocks
+    go in program memory on certain processors using processor specific
+    attribute() commands
+*******************************************************************/
+#define BOOT_SECTOR_ADDRESS         1
+#define FAT0_ADDRESS                (BOOT_SECTOR_ADDRESS + 1)
+#define FATx_ADDRESS                (FAT0_ADDRESS + 1)
+#define ROOTDIRECTORY0_ADDRESS      (FAT0_ADDRESS + MDD_INTERNAL_FLASH_NUM_FAT_SECTORS)
+
+#if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>16)
+    #define ROOTDIRECTORY1_ADDRESS  (ROOTDIRECTORY0_ADDRESS + 1)
+#else
+    #define ROOTDIRECTORY1_ADDRESS  (ROOTDIRECTORY0_ADDRESS)
+#endif
+
+#if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>32)
+    #define ROOTDIRECTORY2_ADDRESS  (ROOTDIRECTORY1_ADDRESS + 1)
+#else
+    #define ROOTDIRECTORY2_ADDRESS  (ROOTDIRECTORY1_ADDRESS)
+#endif
+
+#if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>48)
+    #define ROOTDIRECTORY3_ADDRESS  (ROOTDIRECTORY2_ADDRESS + 1)
+#else
+    #define ROOTDIRECTORY3_ADDRESS  (ROOTDIRECTORY2_ADDRESS)
+#endif
+
+#define SLACK0_ADDRESS              (ROOTDIRECTORY3_ADDRESS + 1)
+#define SLACK1_ADDRESS              (SLACK0_ADDRESS + 1)
+#define SLACK2_ADDRESS              (SLACK1_ADDRESS + 1)
+#define SLACK3_ADDRESS              (SLACK2_ADDRESS + 1)
+#define SLACK4_ADDRESS              (SLACK3_ADDRESS + 1)
+#define SLACK5_ADDRESS              (SLACK4_ADDRESS + 1)
+#define SLACK6_ADDRESS              (SLACK5_ADDRESS + 1)
+#define SLACK7_ADDRESS              (SLACK6_ADDRESS + 1)
+/******************************************************************/
+
 
 //------------------------------------------------------------------------------
 //Master boot record at LBA = 0
@@ -134,7 +175,7 @@ ROM BYTE MBR_ATTRIBUTES MasterBootRecord[MEDIA_SECTOR_SIZE] =
 //Physical Sector - 1, Logical Sector - 0.  
 //This is the first sector in the partition, and is known as the "volume boot record" or "partition boot sector"
 //Note: This table is filesystem specific.  Re-formatting the drive will overwrite this table.  
-ROM BYTE PARTITION_ATTRIBUTES BootSector[MEDIA_SECTOR_SIZE]  =
+ROM BYTE PARTITION_ATTRIBUTES(BOOT_SECTOR_ADDRESS) BootSector[MEDIA_SECTOR_SIZE]  =
 {
 0xEB, 0x3C, 0x90,			//Jump instruction
 'M', 'S', 'D', 'O', 'S', '5', '.', '0',	//OEM Name "MSDOS5.0"
@@ -199,7 +240,7 @@ MDD_INTERNAL_FLASH_NUM_FAT_SECTORS, 0x00,         //Sectors per FAT
 //(no pad bits).  This means every other byte is a "shared" byte, that is split
 //down the middle and is part of two adjacent 12-bit entries.  
 //The entries are in little endian format.
-ROM BYTE PARTITION_ATTRIBUTES FAT0[MEDIA_SECTOR_SIZE] =
+ROM BYTE PARTITION_ATTRIBUTES(FAT0_ADDRESS) FAT0[MEDIA_SECTOR_SIZE] =
 {
     0xF8,0x0F,   //Copy of the media descriptor 0xFF8
     0x00,
@@ -208,11 +249,11 @@ ROM BYTE PARTITION_ATTRIBUTES FAT0[MEDIA_SECTOR_SIZE] =
 
 //Optional additional FAT space here, only needed for drives > ~174kB.
 #if(MDD_INTERNAL_FLASH_NUM_FAT_SECTORS > 1)
-ROM BYTE PARTITION_ATTRIBUTES FATx[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_NUM_FAT_SECTORS - 1)];
+ROM BYTE PARTITION_ATTRIBUTES(FATx_ADDRESS) FATx[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_NUM_FAT_SECTORS - 1)];
 #endif
 
 
-ROM BYTE PARTITION_ATTRIBUTES RootDirectory0[MEDIA_SECTOR_SIZE] =
+ROM BYTE PARTITION_ATTRIBUTES(ROOTDIRECTORY0_ADDRESS) RootDirectory0[MEDIA_SECTOR_SIZE] =
 {
     //Root
     'D','r','i','v','e',' ','N','a','m','e',' ',   //Drive Name (11 characters, padded with spaces)
@@ -238,17 +279,17 @@ ROM BYTE PARTITION_ATTRIBUTES RootDirectory0[MEDIA_SECTOR_SIZE] =
 };
 
 #if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>16)
-        ROM BYTE PARTITION_ATTRIBUTES RootDirectory1[MEDIA_SECTOR_SIZE] = 
+        ROM BYTE PARTITION_ATTRIBUTES(ROOTDIRECTORY1_ADDRESS) RootDirectory1[MEDIA_SECTOR_SIZE] = 
         {0};
 #endif
 
 #if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>32)
-    ROM BYTE PARTITION_ATTRIBUTES RootDirectory2[MEDIA_SECTOR_SIZE] = 
+    ROM BYTE PARTITION_ATTRIBUTES(ROOTDIRECTORY2_ADDRESS) RootDirectory2[MEDIA_SECTOR_SIZE] = 
     {0};
 #endif
 
 #if (MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT>48)
-        ROM BYTE PARTITION_ATTRIBUTES RootDirectory3[MEDIA_SECTOR_SIZE] = 
+    ROM BYTE PARTITION_ATTRIBUTES(ROOTDIRECTORY3_ADDRESS) RootDirectory3[MEDIA_SECTOR_SIZE] = 
     {0};
 #endif
 
@@ -261,7 +302,7 @@ ROM BYTE PARTITION_ATTRIBUTES RootDirectory0[MEDIA_SECTOR_SIZE] =
 //contents "Data".  This is the contents of the FILE.TXT, based on our
 //RootDirectory0[] and FAT0[] settings above.
 #if (MDD_INTERNAL_FLASH_DRIVE_CAPACITY>0)
-ROM BYTE PARTITION_ATTRIBUTES slack0[MEDIA_SECTOR_SIZE] =
+ROM BYTE PARTITION_ATTRIBUTES(SLACK0_ADDRESS) slack0[MEDIA_SECTOR_SIZE] =
 {
     'D','a','t','a'
 };
@@ -279,56 +320,55 @@ ROM BYTE PARTITION_ATTRIBUTES slack0[MEDIA_SECTOR_SIZE] =
 
 #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY>1)
     #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 64)
-        ROM BYTE PARTITION_ATTRIBUTES slack1[MEDIA_SECTOR_SIZE*63] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK1_ADDRESS) slack1[MEDIA_SECTOR_SIZE*63] = {0};
     #else
-        ROM BYTE PARTITION_ATTRIBUTES slack1[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 1u)] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK1_ADDRESS) slack1[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 1u)] = {0};
     #endif
 #endif
 
 #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 64)
     #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 127)
-        ROM BYTE PARTITION_ATTRIBUTES slack2[MEDIA_SECTOR_SIZE*63] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK2_ADDRESS) slack2[MEDIA_SECTOR_SIZE*63] = {0};
     #else
-        ROM BYTE PARTITION_ATTRIBUTES slack2[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 64u)] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK2_ADDRESS) slack2[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 64u)] = {0};
     #endif
 #endif
 
 #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 127)
     #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 190)
-        ROM BYTE PARTITION_ATTRIBUTES slack3[MEDIA_SECTOR_SIZE*63] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK3_ADDRESS) slack3[MEDIA_SECTOR_SIZE*63] = {0};
     #else
-        ROM BYTE PARTITION_ATTRIBUTES slack3[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 127u)] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK3_ADDRESS) slack3[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 127u)] = {0};
     #endif
 #endif
 
 #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 190)
     #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 253)
-        ROM BYTE PARTITION_ATTRIBUTES slack4[MEDIA_SECTOR_SIZE*63] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK4_ADDRESS) slack4[MEDIA_SECTOR_SIZE*63] = {0};
     #else
-        ROM BYTE PARTITION_ATTRIBUTES slack4[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 190u)] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK4_ADDRESS) slack4[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 190u)] = {0};
     #endif
 #endif
 
 #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 253)
     #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 316)
-        ROM BYTE PARTITION_ATTRIBUTES slack5[MEDIA_SECTOR_SIZE*63] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK5_ADDRESS) slack5[MEDIA_SECTOR_SIZE*63] = {0};
     #else
-        ROM BYTE PARTITION_ATTRIBUTES slack5[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 253u)] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK5_ADDRESS) slack5[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 253u)] = {0};
     #endif
 #endif
 
 #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 316)
     #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 379)
-        ROM BYTE PARTITION_ATTRIBUTES slack6[MEDIA_SECTOR_SIZE*63] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK6_ADDRESS) slack6[MEDIA_SECTOR_SIZE*63] = {0};
     #else
-        ROM BYTE PARTITION_ATTRIBUTES slack6[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 316u)] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK6_ADDRESS) slack6[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 316u)] = {0};
     #endif
 #endif
 
 #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 379)
     #if(MDD_INTERNAL_FLASH_DRIVE_CAPACITY >= 442)
-        ROM BYTE PARTITION_ATTRIBUTES slack6[MEDIA_SECTOR_SIZE*63] = {0};
-        #error "Your MSD Volume is really huge.  Double click this message and add more flash memory placeholder bytes."
+        #error "Your MSD Volume is larger than this example has provisions for.  Double click this message and add more flash memory placeholder bytes."
         //If your MDD_INTERNAL_FLASH_DRIVE_CAPACITY is > 442 sectors, then you need to declare more place holder
         //BYTE arrays to allocate to the MSD volume.  If you don't do this, the linker might try to "re-use" the
         //flash memory by placing program code inside the MSD volume, which would cause unanticipated behavior.
@@ -336,7 +376,7 @@ ROM BYTE PARTITION_ATTRIBUTES slack0[MEDIA_SECTOR_SIZE] =
         //to follow, and keep adding as many more slackx[] arrays as needed to meet your 
         //MDD_INTERNAL_FLASH_DRIVE_CAPACITY size requirements.
     #else
-        ROM BYTE PARTITION_ATTRIBUTES slack6[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 379u)] = {0};
+        ROM BYTE PARTITION_ATTRIBUTES(SLACK7_ADDRESS) slack7[MEDIA_SECTOR_SIZE*(MDD_INTERNAL_FLASH_DRIVE_CAPACITY - 379u)] = {0};
     #endif
 #endif
 

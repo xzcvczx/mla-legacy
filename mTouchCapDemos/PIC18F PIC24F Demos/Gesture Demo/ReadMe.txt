@@ -64,12 +64,17 @@ The lower 8 LEDs(LED D1-D7) are used for Right-Left gesture.
 This demo sends data from all sensors to UART. Thus the states and the signals(deltas)
 from the sensors can be displayed with an mTouch GUI utility "mTouch GUI.exe"
 located in "...\mTouchCapDemos\Utilities\PIC18F PIC24F Tools\mTouch GUI" folder.
-Please read "mTouch GUI Help.chm" to get started. RX line of the PICkit Serial should be
-connected  to pin 10 (RF0 lable on silk screen) of the J2 connector for "PIC18 Eval Board"
-and connected to pin 8 (RF3 lable on silk screen) of the J2 connector for "PIC24 Eval Board".
+Please read "mTouch GUI Help.chm" in this folder to get started. RX line of the
+PICkit Serial (pin 6) should be connected to pin 6 (RF0 label on silk screen)
+of the J2 connector for "PIC18 Eval Board" and connected to pin 10 (RF3 label on
+silk screen) of the J2 connector for "PIC24 Eval Board".
+Also PICkit Serial pin 2 MUST be connected to Vdd on the board (pin 1 of J2) and
+PICkit Serial pin 3 MUST be connected to ground on the board (pin 2 of J2).
+
 
 *******************************************************************************
                                 Help File
 *******************************************************************************
 
-For more information on mTouch Software Library, refer "mTouch Cap Library Help.chm" file.
+For more information about mTouch Software Library, refer "mTouch Cap Library Help.chm"
+file located in "...\Microchip\Help" folder.

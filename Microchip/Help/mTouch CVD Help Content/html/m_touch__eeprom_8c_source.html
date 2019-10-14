@@ -31,7 +31,7 @@
 <a href="m_touch__eeprom_8c.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*************************************************************************</span>
 <a name="l00002"></a>00002 <span class="comment"> *  © 2012 Microchip Technology Inc.                                       </span>
 <a name="l00003"></a>00003 <span class="comment"> *  </span>
-<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.0</span>
+<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.1</span>
 <a name="l00005"></a>00005 <span class="comment"> *  FileName:        mTouch_eeprom.c</span>
 <a name="l00006"></a>00006 <span class="comment"> *  Dependencies:    mTouch.h</span>
 <a name="l00007"></a>00007 <span class="comment"> *  Processor:       See documentation for supported PIC® microcontrollers </span>
@@ -82,23 +82,26 @@
 <a name="l00052"></a>00052 <span class="comment"> * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF </span>
 <a name="l00053"></a>00053 <span class="comment"> * THESE TERMS. </span>
 <a name="l00054"></a>00054 <span class="comment"> *************************************************************************/</span>
-<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="m_touch_8h.html" title="Required include! The main framework header file used by all framework files.">mTouch.h</a>&quot;</span>
-<a name="l00059"></a>00059 
-<a name="l00060"></a>00060 <span class="preprocessor">#if defined(MTOUCH_EEPROM_ENABLED)</span>
-<a name="l00061"></a>00061 <span class="preprocessor"></span>
-<a name="l00062"></a>00062 
-<a name="l00063"></a>00063 <span class="preprocessor">    #if defined(MTOUCH_EEPROM_ENABLED)</span>
-<a name="l00064"></a>00064 <span class="preprocessor"></span>    
-<a name="l00065"></a>00065     <span class="comment">// At compile-time, initialize the first 8 bytes of EEPROM to 0xFF.</span>
-<a name="l00066"></a>00066     <span class="comment">// This erases the mTouch initialization byte, allowing a new configuration to be loaded on power-up.</span>
-<a name="l00067"></a>00067     __EEPROM_DATA(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF);             <span class="comment">// Must write 8 bytes at a time.</span>
-<a name="l00068"></a>00068     
+<a name="l00055"></a>00055  
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="m_touch_8h.html" title="Required include! The main framework header file used by all framework files.">mTouch.h</a>&quot;</span>
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058 <span class="preprocessor">#if defined(MTOUCH_EEPROM_ENABLED)</span>
+<a name="l00059"></a>00059 <span class="preprocessor"></span>
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061 <span class="preprocessor">    #if defined(MTOUCH_EEPROM_ENABLED)</span>
+<a name="l00062"></a>00062 <span class="preprocessor"></span>    
+<a name="l00063"></a>00063     <span class="comment">// At compile-time, initialize the first 8 bytes of EEPROM to 0xFF.</span>
+<a name="l00064"></a>00064     <span class="comment">// This erases the mTouch initialization byte, allowing a new configuration to be loaded on power-up.</span>
+<a name="l00065"></a>00065 <span class="preprocessor">    #if !defined(MTOUCH_EEPROM_STORED_IN_RAM)</span>
+<a name="l00066"></a>00066 <span class="preprocessor"></span>    __EEPROM_DATA(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF);             <span class="comment">// Must write 8 bytes at a time.</span>
+<a name="l00067"></a>00067 <span class="preprocessor">    #endif</span>
+<a name="l00068"></a>00068 <span class="preprocessor"></span>    
 <a name="l00069"></a>00069     <span class="comment">//</span>
 <a name="l00070"></a>00070     <span class="comment">// NOTE: Do not change the order of these values without also editing the address calculations in mTouch_eeprom.h</span>
 <a name="l00071"></a>00071     <span class="comment">//       New values can be safely added to the end without causing calculation errors.</span>
 <a name="l00072"></a>00072     <span class="comment">//   </span>
 <a name="l00073"></a>00073     
-<a name="l00074"></a>00074     <span class="keyword">const</span> uint8_t   mTouch_EEPROM_default       [<a class="code" href="m_touch__eeprom_8h.html#a4aa8b1ab96fa7ff4e5b65c17ebc7305b">MTOUCH_EEPROM_SIZE</a>]    =   {                       
+<a name="l00074"></a>00074     <span class="keyword">const</span> uint8_t   mTouch_EEPROM_default       [<a class="code" href="m_touch__eeprom_8h.html#a4aa8b1ab96fa7ff4e5b65c17ebc7305b">MTOUCH_EEPROM_SIZE</a>]    =   {
 <a name="l00075"></a>00075                                                                                 (uint8_t)(<a class="code" href="group___configuration.html#ga20790a896621aa156c94728c0fa661eb" title="Number of consecutive scans a sensor must be decoded as pressed before changing states.">MTOUCH_DEBOUNCE_PRESS</a> &amp; 0xFF),                
 <a name="l00076"></a>00076                                                                                 (uint8_t)(<a class="code" href="group___configuration.html#ga20790a896621aa156c94728c0fa661eb" title="Number of consecutive scans a sensor must be decoded as pressed before changing states.">MTOUCH_DEBOUNCE_PRESS</a> &gt;&gt; 8),                  
 <a name="l00077"></a>00077                                                                                 (uint8_t)(<a class="code" href="group___configuration.html#gab8e5ed0f0297a6afce2287baa76aedb5" title="Number of consecutive scans a sensor must be decoded as released before changing states.">MTOUCH_DEBOUNCE_RELEASE</a> &amp; 0xFF),              
@@ -118,45 +121,51 @@
 <a name="l00091"></a>00091                                                                             };
 <a name="l00092"></a>00092 <span class="preprocessor">    #endif</span>
 <a name="l00093"></a>00093 <span class="preprocessor"></span>    
-<a name="l00094"></a>00094     <span class="comment">// Function Prototypes</span>
-<a name="l00095"></a>00095     <span class="keywordtype">void</span> mTouch_EEPROM_Init(<span class="keywordtype">void</span>);
-<a name="l00096"></a>00096     <span class="keywordtype">void</span> mTouch_EEPROM_Reset(<span class="keywordtype">void</span>);
-<a name="l00097"></a>00097 
-<a name="l00098"></a>00098     <span class="comment">// Initializes the EEPROM</span>
-<a name="l00099"></a>00099     <span class="keywordtype">void</span> mTouch_EEPROM_Init()
-<a name="l00100"></a>00100     {
-<a name="l00101"></a>00101         <span class="comment">// Only writes the default values to the EEPROM if the mTouch initialization</span>
-<a name="l00102"></a>00102         <span class="comment">// value is not present at the starting address. This ensures configuration</span>
-<a name="l00103"></a>00103         <span class="comment">// settings and edits are (both) non-volatile and reset when programmed.</span>
-<a name="l00104"></a>00104         <span class="comment">//  So...</span>
-<a name="l00105"></a>00105         <span class="comment">//      Programming the Microcontroller:        Resets EEPROM values</span>
-<a name="l00106"></a>00106         <span class="comment">//      Powering on/off the Microcontroller:    No change to EEPROM values</span>
-<a name="l00107"></a>00107 
-<a name="l00108"></a>00108         <span class="keywordflow">if</span> (<a class="code" href="m_touch__eeprom_8h.html#aff0b532fb80ff54f7c14969905d59b9f">MTOUCH_EEPROM_read</a>(<a class="code" href="m_touch__config_8h.html#a2e444eadd603e930da95209adb57ad32">MTOUCH_EEPROM_START_ADR</a>) != <a class="code" href="m_touch__config_8h.html#aa0adda4d796f335a222a66c14b74ff3f">MTOUCH_EEPROM_INIT_VALUE</a>)                                
-<a name="l00109"></a>00109         {   
-<a name="l00110"></a>00110             <a class="code" href="m_touch__eeprom_8h.html#adc16159f3250fead80875011062d4a63">MTOUCH_EEPROM_write</a>(0x01, <a class="code" href="m_touch__config_8h.html#aa0adda4d796f335a222a66c14b74ff3f">MTOUCH_EEPROM_INIT_VALUE</a>);    <span class="comment">// Initialization Value</span>
-<a name="l00111"></a>00111             mTouch_EEPROM_Reset();                                  <span class="comment">// mTouch EEPROM Block</span>
-<a name="l00112"></a>00112         }
-<a name="l00113"></a>00113     }
-<a name="l00114"></a>00114     
-<a name="l00115"></a>00115     <span class="comment">// Resets the EEPROM</span>
-<a name="l00116"></a>00116     <span class="keywordtype">void</span> mTouch_EEPROM_Reset()
-<a name="l00117"></a>00117     {
-<a name="l00118"></a>00118     
-<a name="l00119"></a>00119         <span class="comment">// </span>
-<a name="l00120"></a>00120         <span class="comment">// The default EEPROM values are stored in constant memory. Loop to initialize.</span>
-<a name="l00121"></a>00121         <span class="comment">//</span>
-<a name="l00122"></a>00122     
-<a name="l00123"></a>00123         <span class="keywordflow">for</span> (uint8_t i = 0; i &lt; <a class="code" href="m_touch__eeprom_8h.html#a4aa8b1ab96fa7ff4e5b65c17ebc7305b">MTOUCH_EEPROM_SIZE</a>; i++)
-<a name="l00124"></a>00124         {
-<a name="l00125"></a>00125             <a class="code" href="m_touch__eeprom_8h.html#adc16159f3250fead80875011062d4a63">MTOUCH_EEPROM_write</a>(<a class="code" href="m_touch__config_8h.html#a2e444eadd603e930da95209adb57ad32">MTOUCH_EEPROM_START_ADR</a> + i, mTouch_EEPROM_default[i]);
-<a name="l00126"></a>00126         }
-<a name="l00127"></a>00127     }
+<a name="l00094"></a>00094 <span class="preprocessor">          #if defined(MTOUCH_EEPROM_STORED_IN_RAM)</span>
+<a name="l00095"></a>00095 <span class="preprocessor"></span>          uint8_t   mTouch_configOptions        [<a class="code" href="m_touch__config_8h.html#a2e444eadd603e930da95209adb57ad32">MTOUCH_EEPROM_START_ADR</a> + <a class="code" href="m_touch__eeprom_8h.html#a4aa8b1ab96fa7ff4e5b65c17ebc7305b">MTOUCH_EEPROM_SIZE</a>];
+<a name="l00096"></a>00096 <span class="preprocessor">          #endif</span>
+<a name="l00097"></a>00097 <span class="preprocessor"></span>    
+<a name="l00098"></a>00098     <span class="comment">// Function Prototypes</span>
+<a name="l00099"></a>00099     <span class="keywordtype">void</span> mTouch_EEPROM_Init(<span class="keywordtype">void</span>);
+<a name="l00100"></a>00100     <span class="keywordtype">void</span> mTouch_EEPROM_Reset(<span class="keywordtype">void</span>);
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102     <span class="comment">// Initializes the EEPROM</span>
+<a name="l00103"></a>00103     <span class="keywordtype">void</span> mTouch_EEPROM_Init()
+<a name="l00104"></a>00104     {
+<a name="l00105"></a>00105         <span class="comment">// Only writes the default values to the EEPROM if the mTouch initialization</span>
+<a name="l00106"></a>00106         <span class="comment">// value is not present at the starting address. This ensures configuration</span>
+<a name="l00107"></a>00107         <span class="comment">// settings and edits are (both) non-volatile and reset when programmed.</span>
+<a name="l00108"></a>00108         <span class="comment">//  So...</span>
+<a name="l00109"></a>00109         <span class="comment">//      Programming the Microcontroller:        Resets EEPROM values</span>
+<a name="l00110"></a>00110         <span class="comment">//      Powering on/off the Microcontroller:    No change to EEPROM values</span>
+<a name="l00111"></a>00111 
+<a name="l00112"></a>00112         __delay_ms(1);
+<a name="l00113"></a>00113         
+<a name="l00114"></a>00114         <span class="keywordflow">if</span> (<a class="code" href="m_touch__eeprom_8h.html#aff0b532fb80ff54f7c14969905d59b9f">MTOUCH_EEPROM_read</a>(0x01) != <a class="code" href="m_touch__config_8h.html#aa0adda4d796f335a222a66c14b74ff3f">MTOUCH_EEPROM_INIT_VALUE</a>)                                
+<a name="l00115"></a>00115         {   
+<a name="l00116"></a>00116             <a class="code" href="m_touch__eeprom_8h.html#adc16159f3250fead80875011062d4a63">MTOUCH_EEPROM_write</a>(0x01, <a class="code" href="m_touch__config_8h.html#aa0adda4d796f335a222a66c14b74ff3f">MTOUCH_EEPROM_INIT_VALUE</a>);    <span class="comment">// Initialization Value</span>
+<a name="l00117"></a>00117             mTouch_EEPROM_Reset();                                  <span class="comment">// mTouch EEPROM Block</span>
+<a name="l00118"></a>00118         }
+<a name="l00119"></a>00119     }
+<a name="l00120"></a>00120     
+<a name="l00121"></a>00121     <span class="comment">// Resets the EEPROM</span>
+<a name="l00122"></a>00122     <span class="keywordtype">void</span> mTouch_EEPROM_Reset()
+<a name="l00123"></a>00123     {
+<a name="l00124"></a>00124     
+<a name="l00125"></a>00125         <span class="comment">// </span>
+<a name="l00126"></a>00126         <span class="comment">// The default EEPROM values are stored in constant memory. Loop to initialize.</span>
+<a name="l00127"></a>00127         <span class="comment">//</span>
 <a name="l00128"></a>00128     
-<a name="l00129"></a>00129 <span class="preprocessor">#endif</span>
+<a name="l00129"></a>00129         <span class="keywordflow">for</span> (uint8_t i = 0; i &lt; <a class="code" href="m_touch__eeprom_8h.html#a4aa8b1ab96fa7ff4e5b65c17ebc7305b">MTOUCH_EEPROM_SIZE</a>; i++)
+<a name="l00130"></a>00130         {
+<a name="l00131"></a>00131             <a class="code" href="m_touch__eeprom_8h.html#adc16159f3250fead80875011062d4a63">MTOUCH_EEPROM_write</a>(<a class="code" href="m_touch__config_8h.html#a2e444eadd603e930da95209adb57ad32">MTOUCH_EEPROM_START_ADR</a> + i, mTouch_EEPROM_default[i]);
+<a name="l00132"></a>00132         }
+<a name="l00133"></a>00133     }
+<a name="l00134"></a>00134     
+<a name="l00135"></a>00135 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

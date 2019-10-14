@@ -93,6 +93,11 @@ ADG          15-Sep-2008 First release
     #include "uart2.h"
 #endif
 
+#if !defined(USB_NUM_BULK_NAKS)
+    #define USB_HOST_CDC_NAK_TIMEOUT 1
+#else
+    #define USB_HOST_CDC_NAK_TIMEOUT 0
+#endif
 
 // *****************************************************************************
 // *****************************************************************************
@@ -1588,8 +1593,8 @@ BOOL USBHostCDCInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                                deviceInfoCDC[device].dataInterface.endpointOUT          = endpointOUT;
                                deviceInfoCDC[device].dataInterface.endpointOutDataSize  = endpointOUTsize;
                            
-                               USBHostSetNAKTimeout( address, endpointIN,  1, USB_NUM_BULK_NAKS );
-                               USBHostSetNAKTimeout( address, endpointOUT, 1, USB_NUM_BULK_NAKS );
+                               USBHostSetNAKTimeout( address, endpointIN,  USB_HOST_CDC_NAK_TIMEOUT, USB_NUM_BULK_NAKS );
+                               USBHostSetNAKTimeout( address, endpointOUT, USB_HOST_CDC_NAK_TIMEOUT, USB_NUM_BULK_NAKS );
                            }
                            else
                            {

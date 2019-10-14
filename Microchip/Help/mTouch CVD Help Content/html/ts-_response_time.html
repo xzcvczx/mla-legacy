@@ -30,7 +30,7 @@
 </div>
 <div class="contents">
 <p>The response time of your system is going to be determined by the equation: </p>
-<div class="fragment"><pre class="fragment"> Response Time = mTouch ISR Interrupt Rate * <a class="code" href="group___configuration.html#ga120981aeda98930e49691ea39c1b550e" title="Number of active-mode mTouch sensor inputs to scan.">MTOUCH_NUMBER_SENSORS</a> * <a class="code" href="group___configuration.html#ga4c1d9252bcdcc1cb2aa56787cd90cd2b" title="Determines the degree of oversampling and the sample rate of your system.">MTOUCH_SAMPLES_PER_SCAN</a> * <a class="code" href="group___configuration.html#ga20790a896621aa156c94728c0fa661eb" title="Number of consecutive scans a sensor must be decoded as pressed before changing states.">MTOUCH_DEBOUNCE_PRESS</a>
+<div class="fragment"><pre class="fragment"> Response Time = mTouch ISR Interrupt Rate * MTOUCH_NUMBER_SENSORS * <a class="code" href="group___configuration.html#ga4c1d9252bcdcc1cb2aa56787cd90cd2b" title="Determines the degree of oversampling and the sample rate of your system.">MTOUCH_SAMPLES_PER_SCAN</a> * <a class="code" href="group___configuration.html#ga20790a896621aa156c94728c0fa661eb" title="Number of consecutive scans a sensor must be decoded as pressed before changing states.">MTOUCH_DEBOUNCE_PRESS</a>
 </pre></div><p><br/>
 </p>
 <p><b>Suggestions for Making the Response Time Faster:</b><br/>
@@ -73,7 +73,7 @@
  <a class="el" href="group___configuration.html#gab8e5ed0f0297a6afce2287baa76aedb5" title="Number of consecutive scans a sensor must be decoded as released before changing states.">MTOUCH_DEBOUNCE_RELEASE</a> is for the PRESS-to-RELEASE transition. </li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

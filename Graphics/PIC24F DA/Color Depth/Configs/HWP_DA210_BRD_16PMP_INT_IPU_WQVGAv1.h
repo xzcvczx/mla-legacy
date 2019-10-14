@@ -1141,10 +1141,21 @@
         #define DisplaySetCommand()         LATCbits.LATC2 = 0
         #define DisplaySetData()            LATCbits.LATC2 = 1
 
-        // Definitions for CS pin
-        #define DisplayConfig()             TRISDbits.TRISD10 = 0             
-        #define DisplayEnable()             LATDbits.LATD10 = 0
-        #define DisplayDisable()            LATDbits.LATD10 = 1
+        /*****
+        * The MA330025-2 and MA240025-2 PIMs default to use RK12 for the 
+        * pin 70 of the 100 pin PIM header.  
+        *****/
+        #if defined (__dsPIC33EP512MU814__) || defined (__PIC24EP512GU814__)
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISKbits.TRISK12 = 0             
+            #define DisplayEnable()             LATKbits.LATK12 = 0
+            #define DisplayDisable()            LATKbits.LATK12 = 1
+        #else
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISDbits.TRISD10 = 0             
+            #define DisplayEnable()             LATDbits.LATD10 = 0
+            #define DisplayDisable()            LATDbits.LATD10 = 1
+        #endif        
 
         // Definitions for FLASH CS pin
         #define DisplayFlashConfig()         

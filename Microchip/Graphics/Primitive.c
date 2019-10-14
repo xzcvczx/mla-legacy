@@ -4026,9 +4026,6 @@ WORD __attribute__((weak)) DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT
     #error "The USE_GRADIENT feature is not currently supported when USE_PALETTE is enabled."
 #endif
 
-
-#define WAIT_UNTIL_FINISH(x)    while(!x)
-
 #if (COLOR_DEPTH == 24)
 #define GetRed(color)       (((color) & 0xFF0000) >> 16)
 #define GetGreen(color)     (((color) & 0x00FF00) >> 8)
@@ -4057,28 +4054,28 @@ WORD BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_COLOR col
         length = length * (bottom - top);
         length /= 100;
         steps = length;
-        WAIT_UNTIL_FINISH(Bar(left,top,right,bottom-steps));
+        while(!Bar(left,top,right,bottom-steps));
         break;
 
     case GRAD_DOWN: 
         length = length * (bottom - top); 
         length /= 100; 
         steps = length;    
-        WAIT_UNTIL_FINISH(Bar(left,top+steps,right,bottom));    
+        while(!Bar(left,top+steps,right,bottom));    
         break;
 
     case GRAD_RIGHT:
         length = length * (right - left);
         length /= 100;
         steps = length;
-        WAIT_UNTIL_FINISH(Bar(left+steps,top,right,bottom)); 
+        while(!Bar(left+steps,top,right,bottom)); 
         break;
 
     case GRAD_LEFT:
         length = length * (right - left);
         length /= 100;
         steps = length;
-        WAIT_UNTIL_FINISH(Bar(left,top,right-steps,bottom)); 
+        while(!Bar(left,top,right-steps,bottom)); 
         break;
 
     case GRAD_DOUBLE_VER:
@@ -4140,36 +4137,36 @@ WORD BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_COLOR col
         switch(direction)          //This switch statement draws the gradient depending on direction chosen
         {
         case GRAD_DOWN:
-            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+            while(!Bar(left, top, right, top + barSize));
             top += barSize;
         break;
         
         case GRAD_UP:
-            WAIT_UNTIL_FINISH(Bar(left,bottom - barSize,right,bottom));
+            while(!Bar(left,bottom - barSize,right,bottom));
             bottom -= barSize;
         break;
 
         case GRAD_RIGHT:
-            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+            while(!Bar(left, top, left + barSize, bottom));
             left += barSize;
         break;
         
         case GRAD_LEFT:
-            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
+            while(!Bar(right - barSize, top, right, bottom));
             right -= barSize;
         break;
 
         case GRAD_DOUBLE_VER:
-            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
+            while(!Bar(right - barSize, top, right, bottom));
             right -= barSize;
-            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+            while(!Bar(left, top, left + barSize, bottom));
             left += barSize;
         break;
 
         case GRAD_DOUBLE_HOR:
-            WAIT_UNTIL_FINISH(Bar(left, bottom - barSize, right, bottom));
+            while(!Bar(left, bottom - barSize, right, bottom));
             bottom -= barSize;
-            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+            while(!Bar(left, top, right, top + barSize));
             top += barSize;
         break; 
 
@@ -4188,29 +4185,29 @@ WORD BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_COLOR col
         switch(direction)          //This switch statement draws the gradient depending on direction chosen
         {
         case GRAD_DOWN:
-            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+            while(!Bar(left, top, right, top + barSize));
         break;
         
         case GRAD_UP:
-            WAIT_UNTIL_FINISH(Bar(left,bottom - barSize,right,bottom));
+            while(!Bar(left,bottom - barSize,right,bottom));
         break;
 
         case GRAD_RIGHT:
-            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+            while(!Bar(left, top, left + barSize, bottom));
         break;
         
         case GRAD_LEFT:
-            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
+            while(!Bar(right - barSize, top, right, bottom));
         break;
 
         case GRAD_DOUBLE_VER:
-            WAIT_UNTIL_FINISH(Bar(right - barSize, top, right, bottom));
-            WAIT_UNTIL_FINISH(Bar(left, top, left + barSize, bottom));
+            while(!Bar(right - barSize, top, right, bottom));
+            while(!Bar(left, top, left + barSize, bottom));
         break;
 
         case GRAD_DOUBLE_HOR:
-            WAIT_UNTIL_FINISH(Bar(left, bottom - barSize, right, bottom));
-            WAIT_UNTIL_FINISH(Bar(left, top, right, top + barSize));
+            while(!Bar(left, bottom - barSize, right, bottom));
+            while(!Bar(left, top, right, top + barSize));
         break; 
 
         default: 
@@ -4303,8 +4300,8 @@ WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, 
 
     while(1)
     {
-        if(IsDeviceBusy())
-            return (0);
+        while(IsDeviceBusy()); 
+            
         switch(state)
         {
             case BEGIN:
@@ -4371,32 +4368,29 @@ WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, 
                         {
                            case GRAD_LEFT:
                                if(i>length) SetColor(EndColor);
-                               if(Bar(left - yNew, top - xCur, left - yCur, bottom + xCur) == 0) return (0);
+                               Bar(left - yNew, top - xCur, left - yCur, bottom + xCur);
                                 break;
                            
                            case GRAD_RIGHT:                     
                            case GRAD_DOUBLE_VER:
                                 if(i>length) 
                                     SetColor(EndColor);
-                                
-                                if(Bar(right + yCur, top - xCur, right + yNew, bottom + xCur) == 0)
-                                    return (0);           
+                               
+                                Bar(right + yCur, top - xCur, right + yNew, bottom + xCur);          
                                 break;
                            
                            case GRAD_UP:
                                 if(i>length) 
                                     SetColor(EndColor);
                                 
-                                if(Bar(left - xCur, top - yNew, right + xCur, top - yCur) == 0) 
-                                    return (0);
+                                Bar(left - xCur, top - yNew, right + xCur, top - yCur);
                                 break;
 
                            case GRAD_DOWN:
                            case GRAD_DOUBLE_HOR:
                                 if(i>length) 
                                     SetColor(EndColor);
-                                if(Bar(left - xCur, bottom + yCur, right + xCur, bottom + yNew) == 0)
-                                    return (0);
+                                Bar(left - xCur, bottom + yCur, right + xCur, bottom + yNew);
                            
                            default: 
                                break;
@@ -4434,31 +4428,27 @@ WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, 
                        case GRAD_LEFT:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(left - xCur, top - yNew, left - xPos, bottom + yNew) == 0) 
-                               return (0);
+                           Bar(left - xCur, top - yNew, left - xPos, bottom + yNew); 
                             break;
                        
                        case GRAD_RIGHT:                     
                        case GRAD_DOUBLE_VER:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(right + xPos, top - yNew, right + xCur, bottom + yNew) == 0)
-                               return (0);           
+                           Bar(right + xPos, top - yNew, right + xCur, bottom + yNew);           
                             break;
                        
                        case GRAD_UP:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(left - yNew, top - xCur, right + yNew, top - xPos) == 0) 
-                                return (0);
+                            Bar(left - yNew, top - xCur, right + yNew, top - xPos); 
                             break;
 
                        case GRAD_DOWN:
                        case GRAD_DOUBLE_HOR:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(left - yNew, bottom + xPos, right + yNew, bottom + xCur) == 0)
-                                return (0);
+                            Bar(left - yNew, bottom + xPos, right + yNew, bottom + xCur);
                        default: 
                            break;
                     }
@@ -4487,31 +4477,27 @@ WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, 
                        case GRAD_LEFT:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(right + xPos, top - yNew, right + xCur, bottom + yNew) == 0) 
-                               return (0);
+                           Bar(right + xPos, top - yNew, right + xCur, bottom + yNew);
                             break;
                        
                        case GRAD_RIGHT:                     
                        case GRAD_DOUBLE_VER:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(left - xCur, top - yNew, left - xPos, bottom + yNew) == 0) 
-                               return (0);           
+                           Bar(left - xCur, top - yNew, left - xPos, bottom + yNew);           
                             break;
                        
                        case GRAD_UP:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(left - yNew, bottom + xPos, right + yNew, bottom + xCur) == 0) 
-                                return (0);
+                            Bar(left - yNew, bottom + xPos, right + yNew, bottom + xCur);
                             break;
 
                        case GRAD_DOWN:
                        case GRAD_DOUBLE_HOR:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(left - yNew, top - xCur, right + yNew, top - xPos) == 0)
-                                return (0);
+                            Bar(left - yNew, top - xCur, right + yNew, top - xPos);
                             break;
                        
                        default: 
@@ -4543,31 +4529,27 @@ WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, 
                        case GRAD_LEFT:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(right + yCur, top - xCur, right + yNew, bottom + xCur) == 0) 
-                               return (0);
+                           Bar(right + yCur, top - xCur, right + yNew, bottom + xCur);
                             break;
                        
                        case GRAD_RIGHT:                     
                        case GRAD_DOUBLE_VER:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(left - yNew, top - xCur, left - yCur, bottom + xCur) == 0) 
-                               return (0);           
+                           Bar(left - yNew, top - xCur, left - yCur, bottom + xCur);           
                             break;
                        
                        case GRAD_UP:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(left - xCur, bottom + yCur, right + xCur, bottom + yNew) == 0) 
-                                return (0);
+                            Bar(left - xCur, bottom + yCur, right + xCur, bottom + yNew);
                             break;
 
                        case GRAD_DOWN:
                        case GRAD_DOUBLE_HOR:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(left - xCur, top - yNew, right + xCur, top - yCur) == 0) 
-                                return (0);
+                            Bar(left - xCur, top - yNew, right + xCur, top - yCur);
                             break;
                        
                        default: 
@@ -4646,8 +4628,7 @@ WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, 
                 }
 
             case WAITFORDONE:
-                if(IsDeviceBusy())
-                    return (0);
+                while(IsDeviceBusy());
                 state = BEGIN;
                 return (1);
         }           // end of switch

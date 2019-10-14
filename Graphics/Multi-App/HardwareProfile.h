@@ -134,7 +134,7 @@
 	     * dsPIC33E/PIC24E Starter Kit
 	     * Display TFT-G240320LTSW-118W-E
 	     ********************************************************************/
-		#include "Configs/HWP_MEB_dsPIC33E_SK_8PMP_USBMSD.h"	
+		#include "Configs/HWP_MEB_PIC_SK_8PMP_USBMSD.h"	
 	
 
 #elif defined (__PIC32MX__) 

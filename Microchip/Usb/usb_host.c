@@ -1455,7 +1455,7 @@ void USBHostTasks( void )
                             IPC21           |= 0x0600;
                             IEC5            |= 0x0040;
                         #elif defined( __PIC32MX__ )
-                        // Enable the USB interrupt.
+                            // Enable the USB interrupt.
                             IFS1CLR         = _IFS1_USBIF_MASK;
                             #if defined(_IPC11_USBIP_MASK)
                                 IPC11CLR        = _IPC11_USBIP_MASK | _IPC11_USBIS_MASK;
@@ -1552,6 +1552,7 @@ void USBHostTasks( void )
                             {
                                 USB_FREE_AND_CLEAR( pEP0Data );
                             }
+
                             if ((pEP0Data = (BYTE *)USB_MALLOC( 8 )) == NULL)
                             {
                                 #ifdef DEBUG_MODE
@@ -2978,21 +2979,40 @@ BOOL _USB_FindDeviceLevelClientDriver( void )
         else
         {
             // Check for a device-specific client driver by VID & PID
-            #ifdef ALLOW_GLOBAL_VID_AND_PID
-            if (((usbTPL[i].device.idVendor  == pDesc->idVendor ) &&
-                 (usbTPL[i].device.idProduct == pDesc->idProduct)) ||
-                ((usbTPL[i].device.idVendor  == 0xFFFF) &&
-                 (usbTPL[i].device.idProduct == 0xFFFF)))
-            #else
             if ((usbTPL[i].device.idVendor  == pDesc->idVendor ) &&
-                (usbTPL[i].device.idProduct == pDesc->idProduct)   )
-            #endif
+                (usbTPL[i].device.idProduct == pDesc->idProduct))
             {
                 #ifdef DEBUG_MODE
                     UART2PrintString( "HOST: Device validated by VID/PID\r\n" );
                 #endif
                 usbDeviceInfo.flags.bfUseDeviceClientDriver = 1;
             }
+
+            #ifdef ALLOW_GLOBAL_VID_AND_PID
+            if ((usbTPL[i].device.idVendor  == 0xFFFF) &&
+                (usbTPL[i].device.idProduct == 0xFFFF))
+            {
+                USB_OVERRIDE_CLIENT_DRIVER_EVENT_DATA   eventData;
+                     
+                // Make sure the application layer does not have a problem with the selection.
+                // If the application layer returns FALSE, which it should if the event is not
+                // defined, then accept the selection.
+                eventData.idVendor          = pDesc->idVendor;              
+                eventData.idProduct         = pDesc->idProduct;             
+                eventData.bDeviceClass      = usbTPL[i].device.bClass;          
+                eventData.bDeviceSubClass   = usbTPL[i].device.bSubClass;       
+                eventData.bDeviceProtocol   = usbTPL[i].device.bProtocol;       
+    
+                if (!USB_HOST_APP_EVENT_HANDLER( USB_ROOT_HUB, EVENT_OVERRIDE_CLIENT_DRIVER_SELECTION,
+                                &eventData, sizeof(USB_OVERRIDE_CLIENT_DRIVER_EVENT_DATA) ))
+                {
+                    #ifdef DEBUG_MODE
+                        UART2PrintString( "HOST: Device validated by VID/PID\r\n" );
+                    #endif
+                    usbDeviceInfo.flags.bfUseDeviceClientDriver = 1;
+                }
+            }    
+            #endif
         }
 
         if (usbDeviceInfo.flags.bfUseDeviceClientDriver)
@@ -3460,7 +3480,7 @@ void _USB_FindNextToken( void )
         if (!usbBusInfo.flags.bfIsochronousTransfersDone)
         {
             // Look for any isochronous operations.
-            if (_USB_FindServiceEndpoint( USB_TRANSFER_TYPE_ISOCHRONOUS ))
+            while (_USB_FindServiceEndpoint( USB_TRANSFER_TYPE_ISOCHRONOUS ))
             {
                 switch (pCurrentEndpoint->transferState & TSTATE_MASK)
                 {
@@ -3468,35 +3488,30 @@ void _USB_FindNextToken( void )
                         switch (pCurrentEndpoint->transferState & TSUBSTATE_MASK)
                         {
                             case TSUBSTATE_ISOCHRONOUS_READ_DATA:
-                                if (pCurrentEndpoint->wIntervalCount == 0)
+                                // Don't overwrite data the user has not yet processed.  We will skip this interval.    
+                                if (((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid)
                                 {
-                                    // Reset the interval count for the next packet.
-                                    pCurrentEndpoint->wIntervalCount  = pCurrentEndpoint->wInterval;
-
-                                    // Don't overwrite data the user has not yet processed.  We will skip this interval.    
-                                    if (((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid)
-                                    {
-                                        // We have buffer overflow.
-                                    }
-                                    else
-                                    {
-                                        // Initialize the data buffer.
-                                        ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 0;
-                                        pCurrentEndpoint->dataCount = 0;
-    
-                                        _USB_SetDATA01( DTS_DATA0 );    // Always DATA0 for isochronous
-                                        _USB_SetBDT( USB_TOKEN_IN );
-                                        _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_IN );
-                                        return;
-                                    }    
+                                    // We have buffer overflow.
                                 }
+                                else
+                                {
+                                    // Initialize the data buffer.
+                                    ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 0;
+                                    pCurrentEndpoint->dataCount = 0;
+
+                                    _USB_SetDATA01( DTS_DATA0 );    // Always DATA0 for isochronous
+                                    _USB_SetBDT( USB_TOKEN_IN );
+                                    _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_IN );
+                                    return;
+                                }    
                                 break;
 
                             case TSUBSTATE_ISOCHRONOUS_READ_COMPLETE:
                                 // Isochronous transfers are continuous until the user stops them.
                                 // Send an event that there is new data, and reset for the next
                                 // interval.
-                                pCurrentEndpoint->transferState = TSTATE_ISOCHRONOUS_READ | TSUBSTATE_ISOCHRONOUS_READ_DATA;
+                                pCurrentEndpoint->transferState     = TSTATE_ISOCHRONOUS_READ | TSUBSTATE_ISOCHRONOUS_READ_DATA;
+                                pCurrentEndpoint->wIntervalCount    = pCurrentEndpoint->wInterval;
 
                                 // Update the valid data length for this buffer.
                                 ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].dataLength = pCurrentEndpoint->dataCount;
@@ -3540,7 +3555,8 @@ void _USB_FindNextToken( void )
                                 // Isochronous transfers are continuous until the user stops them.
                                 // Send an event that there is an error, and reset for the next
                                 // interval.
-                                pCurrentEndpoint->transferState = TSTATE_ISOCHRONOUS_READ | TSUBSTATE_ISOCHRONOUS_READ_DATA;
+                                pCurrentEndpoint->transferState     = TSTATE_ISOCHRONOUS_READ | TSUBSTATE_ISOCHRONOUS_READ_DATA;
+                                pCurrentEndpoint->wIntervalCount    = pCurrentEndpoint->wInterval;
                                 #if defined( USB_ENABLE_TRANSFER_EVENT )
                                     if (StructQueueIsNotFull(&usbEventQueue, USB_EVENT_QUEUE_DEPTH))
                                     {
@@ -3571,32 +3587,27 @@ void _USB_FindNextToken( void )
                         switch (pCurrentEndpoint->transferState & TSUBSTATE_MASK)
                         {
                             case TSUBSTATE_ISOCHRONOUS_WRITE_DATA:
-                                if (pCurrentEndpoint->wIntervalCount == 0)
+                                if (!((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid)
                                 {
-                                    // Reset the interval count for the next packet.
-                                    pCurrentEndpoint->wIntervalCount  = pCurrentEndpoint->wInterval;
-
-                                    if (!((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid)
-                                    {
-                                        // We have buffer underrun.
-                                    }
-                                    else
-                                    {
-                                        pCurrentEndpoint->dataCount = ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].dataLength;
-    
-                                        _USB_SetDATA01( DTS_DATA0 );    // Always DATA0 for isochronous
-                                        _USB_SetBDT( USB_TOKEN_OUT );
-                                        _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_OUT );
-                                        return;
-                                    }    
+                                    // We have buffer underrun.
                                 }
+                                else
+                                {
+                                    pCurrentEndpoint->dataCount = ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].dataLength;
+
+                                    _USB_SetDATA01( DTS_DATA0 );    // Always DATA0 for isochronous
+                                    _USB_SetBDT( USB_TOKEN_OUT );
+                                    _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_OUT );
+                                    return;
+                                }    
                                 break;
 
                             case TSUBSTATE_ISOCHRONOUS_WRITE_COMPLETE:
                                 // Isochronous transfers are continuous until the user stops them.
                                 // Send an event that data has been sent, and reset for the next
                                 // interval.
-                                pCurrentEndpoint->transferState = TSTATE_ISOCHRONOUS_WRITE | TSUBSTATE_ISOCHRONOUS_WRITE_DATA;
+                                pCurrentEndpoint->wIntervalCount    = pCurrentEndpoint->wInterval;
+                                pCurrentEndpoint->transferState     = TSTATE_ISOCHRONOUS_WRITE | TSUBSTATE_ISOCHRONOUS_WRITE_DATA;
 
                                 // Update the valid data length for this buffer.
                                 ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 0;
@@ -3632,13 +3643,16 @@ void _USB_FindNextToken( void )
                                 {
                                     ((ISOCHRONOUS_DATA *)pCurrentEndpoint->pUserData)->currentBufferUSB = 0;
                                 }
+								((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].bfDataLengthValid = 1;                                
                                 break;
 
                             case TSUBSTATE_ERROR:
                                 // Isochronous transfers are continuous until the user stops them.
                                 // Send an event that there is an error, and reset for the next
                                 // interval.
-                                pCurrentEndpoint->transferState = TSTATE_ISOCHRONOUS_WRITE | TSUBSTATE_ISOCHRONOUS_WRITE_DATA;
+                                pCurrentEndpoint->transferState     = TSTATE_ISOCHRONOUS_WRITE | TSUBSTATE_ISOCHRONOUS_WRITE_DATA;
+                                pCurrentEndpoint->wIntervalCount    = pCurrentEndpoint->wInterval;
+
                                 #if defined( USB_ENABLE_TRANSFER_EVENT )
                                     if (StructQueueIsNotFull(&usbEventQueue, USB_EVENT_QUEUE_DEPTH))
                                     {
@@ -3675,8 +3689,9 @@ void _USB_FindNextToken( void )
                 {
                     // We should never use this, but in case we do, put the endpoint
                     // in a recoverable state.
-                    pCurrentEndpoint->transferState               = TSTATE_IDLE;
-                    pCurrentEndpoint->status.bfTransferComplete   = 1;
+                    pCurrentEndpoint->transferState             = TSTATE_IDLE;
+                    pCurrentEndpoint->wIntervalCount            = pCurrentEndpoint->wInterval;
+                    pCurrentEndpoint->status.bfTransferComplete = 1;
                 }
             }
 
@@ -3689,7 +3704,7 @@ void _USB_FindNextToken( void )
         if (!usbBusInfo.flags.bfInterruptTransfersDone)
         {
             // Look for any interrupt operations.
-            if (_USB_FindServiceEndpoint( USB_TRANSFER_TYPE_INTERRUPT ))
+            while (_USB_FindServiceEndpoint( USB_TRANSFER_TYPE_INTERRUPT ))
             {
                 switch (pCurrentEndpoint->transferState & TSTATE_MASK)
                 {
@@ -3697,20 +3712,15 @@ void _USB_FindNextToken( void )
                         switch (pCurrentEndpoint->transferState & TSUBSTATE_MASK)
                         {
                             case TSUBSTATE_INTERRUPT_READ_DATA:
-                                if (pCurrentEndpoint->wIntervalCount == 0)
-                                {
-                                    // Reset the interval count for the next packet.
-                                    pCurrentEndpoint->wIntervalCount = pCurrentEndpoint->wInterval;
-
-                                    _USB_SetBDT( USB_TOKEN_IN );
-                                    _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_IN );
-                                    return;
-                                }
+                                _USB_SetBDT( USB_TOKEN_IN );
+                                _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_IN );
+                                return;
                                 break;
 
                             case TSUBSTATE_INTERRUPT_READ_COMPLETE:
-                                pCurrentEndpoint->transferState               = TSTATE_IDLE;
-                                pCurrentEndpoint->status.bfTransferComplete   = 1;
+                                pCurrentEndpoint->transferState             = TSTATE_IDLE;
+                                pCurrentEndpoint->wIntervalCount            = pCurrentEndpoint->wInterval;
+                                pCurrentEndpoint->status.bfTransferComplete = 1;
                                 #if defined( USB_ENABLE_TRANSFER_EVENT )
                                     if (StructQueueIsNotFull(&usbEventQueue, USB_EVENT_QUEUE_DEPTH))
                                     {
@@ -3733,8 +3743,9 @@ void _USB_FindNextToken( void )
                                 break;
 
                             case TSUBSTATE_ERROR:
-                                pCurrentEndpoint->transferState               = TSTATE_IDLE;
-                                pCurrentEndpoint->status.bfTransferComplete   = 1;
+                                pCurrentEndpoint->transferState             = TSTATE_IDLE;
+                                pCurrentEndpoint->wIntervalCount            = pCurrentEndpoint->wInterval;
+                                pCurrentEndpoint->status.bfTransferComplete = 1;
                                 #if defined( USB_ENABLE_TRANSFER_EVENT )
                                     if (StructQueueIsNotFull(&usbEventQueue, USB_EVENT_QUEUE_DEPTH))
                                     {
@@ -3766,20 +3777,15 @@ void _USB_FindNextToken( void )
                         switch (pCurrentEndpoint->transferState & TSUBSTATE_MASK)
                         {
                             case TSUBSTATE_INTERRUPT_WRITE_DATA:
-                                if (pCurrentEndpoint->wIntervalCount == 0)
-                                {
-                                    // Reset the interval count for the next packet.
-                                    pCurrentEndpoint->wIntervalCount = pCurrentEndpoint->wInterval;
-
-                                    _USB_SetBDT( USB_TOKEN_OUT );
-                                    _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_OUT );
-                                    return;
-                                }
+                                _USB_SetBDT( USB_TOKEN_OUT );
+                                _USB_SendToken( pCurrentEndpoint->bEndpointAddress, USB_TOKEN_OUT );
+                                return;
                                 break;
 
                             case TSUBSTATE_INTERRUPT_WRITE_COMPLETE:
-                                pCurrentEndpoint->transferState               = TSTATE_IDLE;
-                                pCurrentEndpoint->status.bfTransferComplete   = 1;
+                                pCurrentEndpoint->transferState             = TSTATE_IDLE;
+                                pCurrentEndpoint->wIntervalCount            = pCurrentEndpoint->wInterval;
+                                pCurrentEndpoint->status.bfTransferComplete = 1;
                                 #if defined( USB_ENABLE_TRANSFER_EVENT )
                                     if (StructQueueIsNotFull(&usbEventQueue, USB_EVENT_QUEUE_DEPTH))
                                     {
@@ -3802,8 +3808,9 @@ void _USB_FindNextToken( void )
                                 break;
 
                             case TSUBSTATE_ERROR:
-                                pCurrentEndpoint->transferState               = TSTATE_IDLE;
-                                pCurrentEndpoint->status.bfTransferComplete   = 1;
+                                pCurrentEndpoint->transferState             = TSTATE_IDLE;
+                                pCurrentEndpoint->wIntervalCount            = pCurrentEndpoint->wInterval;
+                                pCurrentEndpoint->status.bfTransferComplete = 1;
                                 #if defined( USB_ENABLE_TRANSFER_EVENT )
                                     if (StructQueueIsNotFull(&usbEventQueue, USB_EVENT_QUEUE_DEPTH))
                                     {
@@ -3840,8 +3847,9 @@ void _USB_FindNextToken( void )
                 {
                     // We should never use this, but in case we do, put the endpoint
                     // in a recoverable state.
-                    pCurrentEndpoint->status.bfTransferComplete   = 1;
-                    pCurrentEndpoint->transferState               = TSTATE_IDLE;
+                    pCurrentEndpoint->transferState             = TSTATE_IDLE;
+                    pCurrentEndpoint->wIntervalCount            = pCurrentEndpoint->wInterval;
+                    pCurrentEndpoint->status.bfTransferComplete = 1;
                 }
             }
 
@@ -4113,8 +4121,11 @@ BOOL _USB_FindServiceEndpoint( BYTE transferType )
 						}
 						else
 						{
-							pCurrentEndpoint = pEndpoint;
-							return TRUE;
+							if (pEndpoint->wIntervalCount == 0)
+							{
+    							pCurrentEndpoint = pEndpoint;
+    							return TRUE;
+    			            }				
 						}
 						break;
 					#endif
@@ -4832,18 +4843,22 @@ BOOL _USB_ParseConfigurationDescriptor( void )
                 if ((newInterfaceInfo = (USB_INTERFACE_INFO *)USB_MALLOC( sizeof(USB_INTERFACE_INFO) )) == NULL)
                 {
                     // Out of memory
-                    error = TRUE;   
+                    error = TRUE; 
+                      
                 }
 
-                // Initialize the interface node
-                newInterfaceInfo->interface             = bInterfaceNumber;
-                newInterfaceInfo->clientDriver          = ClientDriver;
-                newInterfaceInfo->pInterfaceSettings    = NULL;
-                newInterfaceInfo->pCurrentSetting       = NULL;
-
-                // Insert it into the list.
-                newInterfaceInfo->next                  = pTempInterfaceList;
-                pTempInterfaceList                      = newInterfaceInfo;
+                if(error == FALSE)
+                {
+                    // Initialize the interface node
+                    newInterfaceInfo->interface             = bInterfaceNumber;
+                    newInterfaceInfo->clientDriver          = ClientDriver;
+                    newInterfaceInfo->pInterfaceSettings    = NULL;
+                    newInterfaceInfo->pCurrentSetting       = NULL;
+    
+                    // Insert it into the list.
+                    newInterfaceInfo->next                  = pTempInterfaceList;
+                    pTempInterfaceList                      = newInterfaceInfo;
+                }
             }
 
             if (!error)

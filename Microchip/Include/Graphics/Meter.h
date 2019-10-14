@@ -169,8 +169,9 @@ typedef struct
 * Function: METER  *MtrCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
 *							  SHORT bottom, WORD state, SHORT value, 
 *							  SHORT minValue, SHORT maxValue, 
+*							  void *pTitleFont, void  *pValueFont,				 
 *							  XCHAR *pText, GOL_SCHEME *pScheme)				 
-*
+*           
 * Overview: This function creates a METER object with the parameters given. 
 *			It automatically attaches the new object into a global linked list of 
 *			objects and returns the address of the object.
@@ -186,6 +187,8 @@ typedef struct
 *		 value - Initial value set to the meter.
 *		 minValue - The minimum value the meter will display.
 *		 maxValue - The maximum value the meter will display.
+*        pTitleFont - Pointer to the font used for the Title.
+*        pScheme - Pointer to the font used for the Value.
 *        pText - Pointer to the text label of the meter.
 *        pScheme - Pointer to the style scheme used.
 *

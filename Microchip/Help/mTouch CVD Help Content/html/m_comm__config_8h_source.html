@@ -31,7 +31,7 @@
 <a href="m_comm__config_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*************************************************************************</span>
 <a name="l00002"></a>00002 <span class="comment"> *  © 2012 Microchip Technology Inc.                                       </span>
 <a name="l00003"></a>00003 <span class="comment"> *  </span>
-<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.0</span>
+<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.1</span>
 <a name="l00005"></a>00005 <span class="comment"> *  FileName:        mComm_config.h</span>
 <a name="l00006"></a>00006 <span class="comment"> *  Dependencies:    mComm_optionsForConfig.h</span>
 <a name="l00007"></a>00007 <span class="comment"> *  Processor:       See documentation for supported PIC® microcontrollers </span>
@@ -81,7 +81,7 @@
 <a name="l00054"></a>00054 <span class="preprocessor">#ifndef __MCOMM_CONFIG_H</span>
 <a name="l00055"></a>00055 <span class="preprocessor"></span><span class="preprocessor">#define __MCOMM_CONFIG_H</span>
 <a name="l00056"></a>00056 <span class="preprocessor"></span>
-<a name="l00057"></a>00057 <span class="preprocessor">    #include &quot;<a class="code" href="m_comm__options_for_config_8h.html" title="Internal mComm header file provides pre-defined options for more user-friendly mComm configuration...">mComm_optionsForConfig.h</a>&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">    #include &quot;<a class="code" href="m_comm__options_for_config_8h.html">mComm_optionsForConfig.h</a>&quot;</span>
 <a name="l00058"></a>00058     
 <a name="l00059"></a>00059 
 <a name="l00060"></a>00060 <span class="comment">//****************************************************************************************************</span>
@@ -301,205 +301,199 @@
 <a name="l00274"></a>00274         <span class="comment">//  MCOMM_UART_1WAY_DECIMAL             :: Output ASCII values in decimal format    </span>
 <a name="l00275"></a>00275         <span class="comment">//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <a name="l00276"></a><a class="code" href="m_comm__config_8h.html#a5f400d7990c7564e3805a5a79ce425fc">00276</a> <span class="preprocessor">        #define MCOMM_UART_1WAY_OUTPUT          MCOMM_UART_1WAY_DECIMAL</span>
-<a name="l00277"></a><a class="code" href="m_comm__config_8h.html#ae022c11f432abd1297fe91212b7b3855">00277</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_UART_1WAY_DELIMITER       &#39;;&#39;</span>
+<a name="l00277"></a><a class="code" href="m_comm__config_8h.html#ae022c11f432abd1297fe91212b7b3855">00277</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_UART_1WAY_DELIMITER       &#39;,&#39;</span>
 <a name="l00278"></a>00278 <span class="preprocessor"></span>  
 <a name="l00279"></a>00279         <span class="comment">//  mComm One-Way Output Data</span>
 <a name="l00280"></a>00280         <span class="comment">//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <a name="l00281"></a>00281         <span class="comment">// NOTE: ONLY APPLIES TO ONE-WAY UART CONFIGURATION</span>
-<a name="l00282"></a>00282         <span class="comment">//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<a name="l00283"></a>00283         <span class="comment">//#define MCOMM_UART_1WAY_OUT_GUIv1_1   // &lt;-- If defined, a fixed header will be used for GUI</span>
-<a name="l00284"></a>00284                                                 <span class="comment">//     compatibility:</span>
-<a name="l00285"></a>00285                                                 <span class="comment">//</span>
-<a name="l00286"></a>00286                                                 <span class="comment">//      &lt;state mask&gt; ; &lt;toggle mask&gt; ; &lt;slider&gt; ;</span>
-<a name="l00287"></a>00287                                                 <span class="comment">//  </span>
-<a name="l00288"></a>00288                                                 <span class="comment">//          If toggle mode is not implemented, a &#39;00000&#39;</span>
-<a name="l00289"></a>00289                                                 <span class="comment">//          will be output in its place.</span>
-<a name="l00290"></a>00290                                                 <span class="comment">//</span>
-<a name="l00291"></a>00291                                                 <span class="comment">//          If slider mode is not implemented, a &#39;00000&#39;</span>
-<a name="l00292"></a>00292                                                 <span class="comment">//          will be output in its place.</span>
-<a name="l00293"></a>00293                                                 <span class="comment">//</span>
-<a name="l00294"></a>00294                                                 <span class="comment">//     If not defined, the output is determined only </span>
-<a name="l00295"></a>00295                                                 <span class="comment">//     by what is defined, below. No 0 values will be</span>
-<a name="l00296"></a>00296                                                 <span class="comment">//     output to maintain a specific packet structure.</span>
-<a name="l00297"></a>00297         
-<a name="l00298"></a><a class="code" href="m_comm__config_8h.html#af6a29b036fbb9377fa12f236145b0b1c">00298</a> <span class="preprocessor">        #define MCOMM_UART_1WAY_OUT_STATE       // &lt;-- If defined, outputs the state mask</span>
-<a name="l00299"></a>00299 <span class="preprocessor"></span>        <span class="comment">//#define MCOMM_UART_1WAY_OUT_TOGGLE    // &lt;-- If defined, outputs the toggle state mask</span>
-<a name="l00300"></a>00300         <span class="comment">//#define MCOMM_UART_1WAY_OUT_SLIDER    // &lt;-- If defined, outputs the slider output value</span>
-<a name="l00301"></a>00301         <span class="comment">//#define MCOMM_UART_1WAY_OUT_MATRIX    // &lt;-- If defined, outputs the matrix press coordinate</span>
-<a name="l00302"></a><a class="code" href="m_comm__config_8h.html#a90817df23be8e58aaab3f2cb840b2256">00302</a> <span class="preprocessor">        #define MCOMM_UART_1WAY_OUT_READING     // &lt;-- If defined, outputs the raw reading values</span>
-<a name="l00303"></a>00303 <span class="preprocessor"></span>        <span class="comment">//#define MCOMM_UART_1WAY_OUT_BASELINE  // &lt;-- If defined, outputs the sensor baseline values</span>
-<a name="l00304"></a>00304         
-<a name="l00305"></a>00305         
-<a name="l00306"></a>00306 <span class="comment">//****************************************************************************************************</span>
-<a name="l00307"></a>00307 <span class="comment">//  ____            _     _              _          _          _     </span>
-<a name="l00308"></a>00308 <span class="comment">// |  _ \ ___  __ _(_)___| |_ ___ _ __  | |    __ _| |__   ___| |___ </span>
-<a name="l00309"></a>00309 <span class="comment">// | |_) / _ \/ _` | / __| __/ _ \ &#39;__| | |   / _` | &#39;_ \ / _ \ / __|</span>
-<a name="l00310"></a>00310 <span class="comment">// |  _ &lt;  __/ (_| | \__ \ ||  __/ |    | |__| (_| | |_) |  __/ \__ \</span>
-<a name="l00311"></a>00311 <span class="comment">// |_| \_\___|\__, |_|___/\__\___|_|    |_____\__,_|_.__/ \___|_|___/</span>
-<a name="l00312"></a>00312 <span class="comment">//            |___/   </span>
-<a name="l00313"></a>00313 <span class="comment">//****************************************************************************************************</span>
-<a name="l00314"></a>00314 <span class="comment">// These values are provided here for easy access. In most cases you will not need to edit them.</span>
-<a name="l00315"></a>00315 <span class="comment">// If your processor has more than one SSP/UART module, you may need to rename these registers to</span>
-<a name="l00316"></a>00316 <span class="comment">// specify which SSP/UART you are accessing. ex: SSPSTAT might become SSP1STAT or SSP2STAT.</span>
-<a name="l00317"></a><a class="code" href="m_comm__config_8h.html#a78fb73ae0826e7dd09b9e22f8e8b44e0">00317</a> <span class="preprocessor">    #define     MCOMM_I2C_ADDRESS               0xA0            // Address of I2C module when available for a new packet</span>
-<a name="l00318"></a><a class="code" href="m_comm__config_8h.html#ae9c7d9860af3a12afaeb22680295c980">00318</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_ADDRESS_BUSY          0xA2            // Address of I2C module when not able to receive new packets</span>
-<a name="l00319"></a><a class="code" href="m_comm__config_8h.html#a3e35940d26ac8fb9d8760195f9cbc6f1">00319</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPSTAT               SSPSTAT         // aka SSP1STAT</span>
-<a name="l00320"></a><a class="code" href="m_comm__config_8h.html#a5a53b00da3128638a49a1c3dad79a125">00320</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPCON1               SSPCON1         // aka SSP1CON1</span>
-<a name="l00321"></a><a class="code" href="m_comm__config_8h.html#abda81a9259f516d4a96ac106e818f73a">00321</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPCON2               SSPCON2         // aka SSP1CON2</span>
-<a name="l00322"></a><a class="code" href="m_comm__config_8h.html#a3d4e8f3fd645a898943afa0f490d8cb0">00322</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPCON3               SSPCON3</span>
-<a name="l00323"></a><a class="code" href="m_comm__config_8h.html#af7834b9d03419c5b4a0c7674a143c3c1">00323</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPMSK                SSPMSK</span>
-<a name="l00324"></a><a class="code" href="m_comm__config_8h.html#a1902f1362b40a7e13acf0ece766d8495">00324</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPADD                SSPADD</span>
-<a name="l00325"></a><a class="code" href="m_comm__config_8h.html#a2949439482d97e74b6c088fb3240ec61">00325</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPBUF                SSPBUF</span>
-<a name="l00326"></a><a class="code" href="m_comm__config_8h.html#abfee90f234ec373b2443be2b4c90f5c8">00326</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_CKP                   SSPCON1bits.CKP</span>
-<a name="l00327"></a><a class="code" href="m_comm__config_8h.html#a1c8ad39a5f1283b9533ab85b30f3e974">00327</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_RnW                   SSPSTATbits.R_nW</span>
-<a name="l00328"></a><a class="code" href="m_comm__config_8h.html#a66cd2d8347d1bdf17840b9a80ad5fe2d">00328</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_DnA                   SSPSTATbits.D_nA</span>
-<a name="l00329"></a><a class="code" href="m_comm__config_8h.html#a743cbf6f6841096460fc4e6c59232d3d">00329</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_STOP                  SSPSTATbits.P</span>
-<a name="l00330"></a><a class="code" href="m_comm__config_8h.html#acef80f06b770b87e93654eb9d76dccad">00330</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPOV                 SSPCON1bits.SSPOV</span>
-<a name="l00331"></a><a class="code" href="m_comm__config_8h.html#a5dabe2f8c2ba02607250e351827ba7b5">00331</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_WCOL                  SSPCON1bits.WCOL</span>
-<a name="l00332"></a><a class="code" href="m_comm__config_8h.html#af9f2aa480011a6eca117f94474c3f70e">00332</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPIE                 PIE1bits.SSPIE</span>
-<a name="l00333"></a><a class="code" href="m_comm__config_8h.html#a51a0254420c69c9edbb795b28de85a97">00333</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPIF                 PIR1bits.SSPIF</span>
-<a name="l00334"></a><a class="code" href="m_comm__config_8h.html#a89eb5f78f95718c2ad65011cc683626e">00334</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_PEIE                  INTCONbits.PEIE</span>
-<a name="l00335"></a>00335 <span class="preprocessor"></span>
-<a name="l00336"></a><a class="code" href="m_comm__config_8h.html#a5c94cd8c4960c1dc76a8f49aa4fbd50f">00336</a> <span class="preprocessor">    #define     MCOMM_SPI_SS_PIN                RB5             // Must be a pin with Interrupt-On-Change functionality</span>
-<a name="l00337"></a><a class="code" href="m_comm__config_8h.html#a1fbca3989187a51ac3271af5952256a3">00337</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_ADDRESS               0xA0            // The address is the first byte sent for SPI and must match with this value</span>
-<a name="l00338"></a><a class="code" href="m_comm__config_8h.html#ac057019612bb1684370d2b4837c9300f">00338</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPSTAT               SSPSTAT</span>
-<a name="l00339"></a><a class="code" href="m_comm__config_8h.html#ac7b790b6c15600fbf786e2ad9295a6f5">00339</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPCON1               SSPCON1</span>
-<a name="l00340"></a><a class="code" href="m_comm__config_8h.html#ac5a9f30a96b166e6e111abffa9a6cf8a">00340</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPCON3               SSPCON3</span>
-<a name="l00341"></a><a class="code" href="m_comm__config_8h.html#a144414049060fc67cea2640323ee95a9">00341</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPBUF                SSPBUF</span>
-<a name="l00342"></a><a class="code" href="m_comm__config_8h.html#a3c6e6ac1f67eb2255ccced5bd14f550b">00342</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_WCOL                  SSPCON1bits.WCOL</span>
-<a name="l00343"></a><a class="code" href="m_comm__config_8h.html#aa54080988a81117411586c34d4a3ba0f">00343</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPOV                 SSPCON1bits.SSPOV</span>
-<a name="l00344"></a><a class="code" href="m_comm__config_8h.html#a893850cd880d3381928db2f505059387">00344</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPIE                 PIE1bits.SSPIE</span>
-<a name="l00345"></a><a class="code" href="m_comm__config_8h.html#a57a3192dcf213645f5fde69cc1413bcb">00345</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPIF                 PIR1bits.SSPIF</span>
-<a name="l00346"></a><a class="code" href="m_comm__config_8h.html#a9b17bd8b6b5ec6aea46b8f51da4d680e">00346</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_PEIE                  INTCONbits.PEIE</span>
-<a name="l00347"></a><a class="code" href="m_comm__config_8h.html#aee68ff16400c6ffaa1a1b02c008c77b3">00347</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_IOCIF                 INTCONbits.IOCIF</span>
-<a name="l00348"></a>00348 <span class="preprocessor"></span>    
-<a name="l00349"></a><a class="code" href="m_comm__config_8h.html#a823a78d601c85b5b559d98c2d895cae7">00349</a> <span class="preprocessor">    #define     MCOMM_UART_RCREG                RCREG</span>
-<a name="l00350"></a><a class="code" href="m_comm__config_8h.html#a56a587cbd0db8b06023d54f53fe25712">00350</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXREG                TXREG</span>
-<a name="l00351"></a><a class="code" href="m_comm__config_8h.html#accd4543920a53c00caf51d8272296922">00351</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXSTA                TXSTA</span>
-<a name="l00352"></a><a class="code" href="m_comm__config_8h.html#a349625982023ffff3bc13b37c7aa4eee">00352</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_RCSTA                RCSTA</span>
-<a name="l00353"></a><a class="code" href="m_comm__config_8h.html#a2334db15272048bf7205b2145870b5aa">00353</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_BAUDCON              BAUDCON</span>
-<a name="l00354"></a><a class="code" href="m_comm__config_8h.html#ab55176cde5fb32d25e381b83b5d1604c">00354</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_SPBRGL               SPBRGL</span>
-<a name="l00355"></a><a class="code" href="m_comm__config_8h.html#a79fae29a678fbd65f5f5a53feedf5ace">00355</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_SPBRGH               SPBRGH</span>
-<a name="l00356"></a><a class="code" href="m_comm__config_8h.html#ab10a52ce51c0b4ee7d8266fbde651d71">00356</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXIF                 PIR1bits.TXIF</span>
-<a name="l00357"></a><a class="code" href="m_comm__config_8h.html#ae134e3520d6ef2c47ea091c372bc46b5">00357</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_OERR                 RCSTAbits.OERR</span>
-<a name="l00358"></a><a class="code" href="m_comm__config_8h.html#a10166a5f1241092e0905e345c7a5ca5f">00358</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_CREN                 RCSTAbits.CREN</span>
-<a name="l00359"></a><a class="code" href="m_comm__config_8h.html#a492f1edfb1fdf960eaab9b9677143054">00359</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_BRGH                 TXSTAbits.BRGH</span>
-<a name="l00360"></a><a class="code" href="m_comm__config_8h.html#a15b05e1e64ad5312f26f44805bbd692a">00360</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_BRG16                BAUDCONbits.BRG16</span>
-<a name="l00361"></a><a class="code" href="m_comm__config_8h.html#ab65e85c383e50bdf0e7082f46eb6cfda">00361</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_SPEN                 RCSTAbits.SPEN</span>
-<a name="l00362"></a><a class="code" href="m_comm__config_8h.html#a72082c2a4b5b37335dd3883164ea47a0">00362</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXEN                 TXSTAbits.TXEN</span>
-<a name="l00363"></a><a class="code" href="m_comm__config_8h.html#a175b765f6b37dec398f18a2355137b8a">00363</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_PEIE                 INTCONbits.PEIE</span>
-<a name="l00364"></a><a class="code" href="m_comm__config_8h.html#a9eba9bc9541b7428e334624b7dc79b40">00364</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_RCIF                 PIR1bits.RCIF</span>
-<a name="l00365"></a><a class="code" href="m_comm__config_8h.html#ab2ef8593e7d3bde6ed7ed2e972c9bd62">00365</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_RCIE                 PIE1bits.RCIE</span>
-<a name="l00366"></a>00366 <span class="preprocessor"></span>    
-<a name="l00367"></a>00367 <span class="preprocessor">    #if defined(MCOMM_ENABLE_STREAM) &amp;&amp; defined(MCOMM_STREAM_STORED_IN_RAM)</span>
-<a name="l00368"></a><a class="code" href="m_comm__config_8h.html#aad5f2c96c2b3617035a7f5bc1106bd23">00368</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAM_ADDR           (uint8_t*)&amp;mComm_stream</span>
-<a name="l00369"></a><a class="code" href="m_comm__config_8h.html#a03fdd26a264f27d3680de70bf8bb3ed1">00369</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAMCONFIG_ADDR     (uint8_t*)&amp;mComm_streamConfig</span>
-<a name="l00370"></a>00370 <span class="preprocessor"></span><span class="preprocessor">    #elif defined(MCOMM_ENABLE_STREAM)</span>
-<a name="l00371"></a>00371 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAM_ADDR           (uint8_t*)0x0000</span>
-<a name="l00372"></a>00372 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAMCONFIG_ADDR     (uint8_t*)&amp;mComm_streamConfig</span>
-<a name="l00373"></a>00373 <span class="preprocessor"></span><span class="preprocessor">    #else</span>
-<a name="l00374"></a>00374 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAM_ADDR           (uint8_t*)0x0000</span>
-<a name="l00375"></a>00375 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAMCONFIG_ADDR     (uint8_t*)0x0000</span>
-<a name="l00376"></a>00376 <span class="preprocessor"></span><span class="preprocessor">    #endif</span>
-<a name="l00377"></a>00377 <span class="preprocessor"></span>    
-<a name="l00378"></a>00378 <span class="preprocessor">    #if defined(MCOMM_ENABLE_CUSTOM_OPCODE)</span>
-<a name="l00379"></a>00379 <span class="preprocessor"></span><span class="preprocessor">        #if defined(MCOMM_CUSTOM_VARIABLE)</span>
-<a name="l00380"></a><a class="code" href="m_comm__config_8h.html#ac944160fad3d3dfd4f99dea042e45540">00380</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_CUSTOM_VAR_ADDR       ,(uint8_t*)&amp;MCOMM_CUSTOM_VARIABLE       // Comma is intentional</span>
-<a name="l00381"></a>00381 <span class="preprocessor"></span><span class="preprocessor">        #else</span>
-<a name="l00382"></a>00382 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_CUSTOM_VAR_ADDR</span>
-<a name="l00383"></a>00383 <span class="preprocessor"></span><span class="preprocessor">        #endif</span>
-<a name="l00384"></a>00384 <span class="preprocessor"></span><span class="preprocessor">    #else</span>
-<a name="l00385"></a>00385 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_CUSTOM_VAR_ADDR</span>
-<a name="l00386"></a>00386 <span class="preprocessor"></span><span class="preprocessor">    #endif</span>
-<a name="l00387"></a>00387 <span class="preprocessor"></span>
-<a name="l00388"></a>00388 <span class="comment">//****************************************************************************************************</span>
-<a name="l00389"></a>00389 <span class="comment">//  ___       _ _   _       _ _          _   _              __     __    _                 </span>
-<a name="l00390"></a>00390 <span class="comment">// |_ _|_ __ (_) |_(_) __ _| (_)______ _| |_(_) ___  _ __   \ \   / /_ _| |_   _  ___  ___ </span>
-<a name="l00391"></a>00391 <span class="comment">//  | || &#39;_ \| | __| |/ _` | | |_  / _` | __| |/ _ \| &#39;_ \   \ \ / / _` | | | | |/ _ \/ __|</span>
-<a name="l00392"></a>00392 <span class="comment">//  | || | | | | |_| | (_| | | |/ / (_| | |_| | (_) | | | |   \ V / (_| | | |_| |  __/\__ \</span>
-<a name="l00393"></a>00393 <span class="comment">// |___|_| |_|_|\__|_|\__,_|_|_/___\__,_|\__|_|\___/|_| |_|    \_/ \__,_|_|\__,_|\___||___/</span>
-<a name="l00394"></a>00394 <span class="comment">//</span>
-<a name="l00395"></a>00395 <span class="comment">//****************************************************************************************************</span>
-<a name="l00396"></a>00396     
-<a name="l00397"></a>00397     <span class="comment">//========================================================================</span>
-<a name="l00398"></a>00398     <span class="comment">// Streaming Default Values</span>
-<a name="l00399"></a>00399     <span class="comment">//========================================================================</span>
-<a name="l00400"></a>00400     <span class="comment">// The stream is a list of output vectors that can be modified to send any</span>
-<a name="l00401"></a>00401     <span class="comment">// number/order of RAM arrays through the communications.</span>
-<a name="l00402"></a>00402     <span class="comment">//</span>
-<a name="l00403"></a>00403     <span class="comment">// If it is stored in RAM (configuration option, above) then the output</span>
-<a name="l00404"></a>00404     <span class="comment">// vectors of the stream may be edited at runtime by the master or PIC.</span>
-<a name="l00405"></a>00405     
-<a name="l00406"></a><a class="code" href="m_comm__config_8h.html#ab4451ca37ad7aed80f79d97e468b2572">00406</a> <span class="preprocessor">    #define MCOMM_STREAM_SIZE           7           // Maximum number of user-editable vector locations</span>
-<a name="l00407"></a>00407 <span class="preprocessor"></span>                                                    <span class="comment">// NOTE: The actual array size is one larger to fit</span>
-<a name="l00408"></a>00408                                                     <span class="comment">//       a permanent 0-length vector entry. This</span>
-<a name="l00409"></a>00409                                                     <span class="comment">//       should never be overwritten by the master!</span>
-<a name="l00410"></a>00410                                                     <span class="comment">//       If it is, the communications will break.</span>
-<a name="l00411"></a>00411                                                     
-<a name="l00412"></a>00412     <span class="comment">//                                      Variable Address                Length in Bytes</span>
-<a name="l00413"></a><a class="code" href="m_comm__config_8h.html#a478f8a4e444830eec77028fd716b2d54">00413</a> <span class="preprocessor">    #define MCOMM_STREAM_VALUE0         {   (uint8_t*)&amp;mTouch_stateMask,    MTOUCH_STATEMASK_BYTES  }</span>
-<a name="l00414"></a><a class="code" href="m_comm__config_8h.html#addcdca5d1d7efdbdfe2c00d99f7f3e7b">00414</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_STREAM_VALUE1         {   (uint8_t*)&amp;mTouch_sensorData,   2*MTOUCH_NUMBER_SENSORS }</span>
-<a name="l00415"></a><a class="code" href="m_comm__config_8h.html#a30263e5ae450dd74f2e485d735efc7ab">00415</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_STREAM_VALUE2         {   (uint8_t*)&amp;mTouch_average,      2*MTOUCH_NUMBER_SENSORS }</span>
-<a name="l00416"></a>00416 <span class="preprocessor"></span>
-<a name="l00417"></a>00417     
-<a name="l00418"></a>00418     <span class="comment">//========================================================================</span>
-<a name="l00419"></a>00419     <span class="comment">// mComm Configuration Block Values</span>
-<a name="l00420"></a>00420     <span class="comment">//========================================================================</span>
-<a name="l00421"></a>00421     <span class="comment">// Two configuration blocks are implemented in constant memory to store</span>
-<a name="l00422"></a>00422     <span class="comment">// the current configuration of the system. Which values are stored depends</span>
-<a name="l00423"></a>00423     <span class="comment">// on the following values.</span>
-<a name="l00424"></a>00424     <span class="comment">//</span>
-<a name="l00425"></a>00425     <span class="comment">// This data is accessible by the master by reading from RAM locations:</span>
-<a name="l00426"></a>00426     <span class="comment">//  0x0000 :: Literals</span>
-<a name="l00427"></a>00427     <span class="comment">//  0x0001 :: Addresses</span>
-<a name="l00428"></a>00428     <span class="comment">//</span>
-<a name="l00429"></a>00429     <span class="comment">// These configuration blocks can then tell the master where the important</span>
-<a name="l00430"></a>00430     <span class="comment">// RAM arrays are located that it might wish to read/write to.</span>
-<a name="l00431"></a>00431     <span class="comment">//</span>
-<a name="l00432"></a>00432     <span class="comment">// Example:</span>
-<a name="l00433"></a>00433     <span class="comment">//  * The master wishes to read the current reading for each sensor.</span>
-<a name="l00434"></a>00434     <span class="comment">//      1. The master will request to read from RAM location 0x0000. </span>
-<a name="l00435"></a>00435     <span class="comment">//          The PIC will respond with the values in MCOMM_CONFIG_LIT_INIT.</span>
-<a name="l00436"></a>00436     <span class="comment">//          The master then takes the 4th byte and knows the number of sensors (&quot;X&quot;). </span>
-<a name="l00437"></a>00437     <span class="comment">//      2. The master will request to read from RAM location 0x0001.</span>
-<a name="l00438"></a>00438     <span class="comment">//          The PIC will respond with the values in MCOMM_CONFIG_ADDR_INIT.</span>
-<a name="l00439"></a>00439     <span class="comment">//          The master then takes the 5th address and knows where the raw</span>
-<a name="l00440"></a>00440     <span class="comment">//           data array is being stored in RAM (&quot;Y&quot;). </span>
-<a name="l00441"></a>00441     <span class="comment">//      3. The master will then request to read 2*X bytes from RAM location Y.</span>
-<a name="l00442"></a>00442     <span class="comment">//</span>
-<a name="l00443"></a>00443     <span class="comment">//      NOTE: Steps 1 &amp; 2 only need to be performed once.</span>
-<a name="l00444"></a>00444     
-<a name="l00445"></a><a class="code" href="m_comm__config_8h.html#ab7e6bf1437f308f293f3882a639a1fe5">00445</a> <span class="preprocessor">    #define MCOMM_CONFIG_LIT_SIZE       10</span>
-<a name="l00446"></a><a class="code" href="m_comm__config_8h.html#a6902ba10f8328b6fac40db8613c3d061">00446</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_CONFIG_LIT_INIT       {                                                       \</span>
-<a name="l00447"></a>00447 <span class="preprocessor">                                            MCOMM_CONFIGURATION_BYTE,                           \</span>
-<a name="l00448"></a>00448 <span class="preprocessor">                                            MCOMM_INPUTBUFFER_SIZE,                             \</span>
-<a name="l00449"></a>00449 <span class="preprocessor">                                            MCOMM_STREAM_SIZE,                                  \</span>
-<a name="l00450"></a>00450 <span class="preprocessor">                                            MTOUCH_NUMBER_SENSORS,                              \</span>
-<a name="l00451"></a>00451 <span class="preprocessor">                                            MTOUCH_CONFIGURATION_BYTE,                          \</span>
-<a name="l00452"></a>00452 <span class="preprocessor">                                            MTOUCH_EEPROM_POW2_SIZE,                            \</span>
-<a name="l00453"></a>00453 <span class="preprocessor">                                            MTOUCH_FRAMEWORK_VERSION,                           \</span>
-<a name="l00454"></a>00454 <span class="preprocessor">                                            MTOUCH_SOFTWARE_VERSION,                            \</span>
-<a name="l00455"></a>00455 <span class="preprocessor">                                            MTOUCH_HARDWARE_VERSION,                            \</span>
-<a name="l00456"></a>00456 <span class="preprocessor">                                            MTOUCH_BOARD_ID                                     \</span>
-<a name="l00457"></a>00457 <span class="preprocessor">                                        }</span>
-<a name="l00458"></a>00458 <span class="preprocessor"></span>                                    
-<a name="l00459"></a>00459     
-<a name="l00460"></a><a class="code" href="m_comm__config_8h.html#a84096621bc5479cf91f460250c29a3dd">00460</a> <span class="preprocessor">    #define MCOMM_CONFIG_ADDR_SIZE      9</span>
-<a name="l00461"></a><a class="code" href="m_comm__config_8h.html#aee936c8c6ef6d768a5ff93e43cc1a351">00461</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_CONFIG_ADDR_INIT      {                                                       \</span>
-<a name="l00462"></a>00462 <span class="preprocessor">                                            (uint8_t*) MCOMM_STREAMCONFIG_ADDR,                 \</span>
-<a name="l00463"></a>00463 <span class="preprocessor">                                            (uint8_t*) MCOMM_STREAM_ADDR,                       \</span>
-<a name="l00464"></a>00464 <span class="preprocessor">                                            (uint8_t*) MTOUCH_EEPROM_START_ADR,                 \</span>
-<a name="l00465"></a>00465 <span class="preprocessor">                                            (uint8_t*) &amp;mTouch_stateMask,                       \</span>
-<a name="l00466"></a>00466 <span class="preprocessor">                                            (uint8_t*) &amp;mTouch_sensorData,                      \</span>
-<a name="l00467"></a>00467 <span class="preprocessor">                                            (uint8_t*) &amp;mTouch_average,                         \</span>
-<a name="l00468"></a>00468 <span class="preprocessor">                                            (uint8_t*) MCOMM_SLIDER_ADR,                        \</span>
-<a name="l00469"></a>00469 <span class="preprocessor">                                            (uint8_t*) MCOMM_TOGGLE_ADR                         \</span>
-<a name="l00470"></a>00470 <span class="preprocessor">                                            MCOMM_CUSTOM_VAR_ADDR                               \</span>
-<a name="l00471"></a>00471 <span class="preprocessor">                                        }</span>
-<a name="l00472"></a>00472 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00282"></a>00282         <span class="comment">//</span>
+<a name="l00283"></a>00283         <span class="comment">// mTouch One-Way GUI Support:</span>
+<a name="l00284"></a>00284         <span class="comment">//  * STATE, TOGGLE, and SLIDER outputs must always been enabled. </span>
+<a name="l00285"></a>00285         <span class="comment">//      (If toggle/slider is not being implemented in your configuration, a 0 will be output </span>
+<a name="l00286"></a>00286         <span class="comment">//       instead of the variable&#39;s value.)</span>
+<a name="l00287"></a>00287         <span class="comment">//  * One or both: READING and/or BASELINE outputs must be enabled.</span>
+<a name="l00288"></a>00288         <span class="comment">//  * MATRIX output cannot be enabled. The matrix output is provided for viewing in a terminal</span>
+<a name="l00289"></a>00289         <span class="comment">//      window. It is not supported by the one-way GUI at this time.</span>
+<a name="l00290"></a>00290         <span class="comment">//:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<a name="l00291"></a>00291         
+<a name="l00292"></a><a class="code" href="m_comm__config_8h.html#af6a29b036fbb9377fa12f236145b0b1c">00292</a> <span class="preprocessor">        #define MCOMM_UART_1WAY_OUT_STATE       // &lt;-- If defined, outputs the state mask</span>
+<a name="l00293"></a><a class="code" href="m_comm__config_8h.html#aaec5a7bd0db7bc5d8d3ad95f147fc90f">00293</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_UART_1WAY_OUT_TOGGLE      // &lt;-- If defined, outputs the toggle state mask</span>
+<a name="l00294"></a><a class="code" href="m_comm__config_8h.html#a4dea806ccb8e3f154f3aca06b972603e">00294</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_UART_1WAY_OUT_SLIDER      // &lt;-- If defined, outputs the slider output value</span>
+<a name="l00295"></a>00295 <span class="preprocessor"></span>        <span class="comment">//#define MCOMM_UART_1WAY_OUT_MATRIX    // &lt;-- If defined, outputs the matrix press coordinate</span>
+<a name="l00296"></a><a class="code" href="m_comm__config_8h.html#a90817df23be8e58aaab3f2cb840b2256">00296</a> <span class="preprocessor">        #define MCOMM_UART_1WAY_OUT_READING     // &lt;-- If defined, outputs the raw reading values</span>
+<a name="l00297"></a>00297 <span class="preprocessor"></span>        <span class="comment">//#define MCOMM_UART_1WAY_OUT_BASELINE  // &lt;-- If defined, outputs the sensor baseline values</span>
+<a name="l00298"></a>00298         
+<a name="l00299"></a>00299         
+<a name="l00300"></a>00300 <span class="comment">//****************************************************************************************************</span>
+<a name="l00301"></a>00301 <span class="comment">//  ____            _     _              _          _          _     </span>
+<a name="l00302"></a>00302 <span class="comment">// |  _ \ ___  __ _(_)___| |_ ___ _ __  | |    __ _| |__   ___| |___ </span>
+<a name="l00303"></a>00303 <span class="comment">// | |_) / _ \/ _` | / __| __/ _ \ &#39;__| | |   / _` | &#39;_ \ / _ \ / __|</span>
+<a name="l00304"></a>00304 <span class="comment">// |  _ &lt;  __/ (_| | \__ \ ||  __/ |    | |__| (_| | |_) |  __/ \__ \</span>
+<a name="l00305"></a>00305 <span class="comment">// |_| \_\___|\__, |_|___/\__\___|_|    |_____\__,_|_.__/ \___|_|___/</span>
+<a name="l00306"></a>00306 <span class="comment">//            |___/   </span>
+<a name="l00307"></a>00307 <span class="comment">//****************************************************************************************************</span>
+<a name="l00308"></a>00308 <span class="comment">// These values are provided here for easy access. In most cases you will not need to edit them.</span>
+<a name="l00309"></a>00309 <span class="comment">// If your processor has more than one SSP/UART module, you may need to rename these registers to</span>
+<a name="l00310"></a>00310 <span class="comment">// specify which SSP/UART you are accessing. ex: SSPSTAT might become SSP1STAT or SSP2STAT.</span>
+<a name="l00311"></a><a class="code" href="m_comm__config_8h.html#a78fb73ae0826e7dd09b9e22f8e8b44e0">00311</a> <span class="preprocessor">    #define     MCOMM_I2C_ADDRESS               0xA0            // Address of I2C module when available for a new packet</span>
+<a name="l00312"></a><a class="code" href="m_comm__config_8h.html#ae9c7d9860af3a12afaeb22680295c980">00312</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_ADDRESS_BUSY          0xA2            // Address of I2C module when not able to receive new packets</span>
+<a name="l00313"></a><a class="code" href="m_comm__config_8h.html#a3e35940d26ac8fb9d8760195f9cbc6f1">00313</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPSTAT               SSPSTAT         // aka SSP1STAT</span>
+<a name="l00314"></a><a class="code" href="m_comm__config_8h.html#a5a53b00da3128638a49a1c3dad79a125">00314</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPCON1               SSPCON1         // aka SSP1CON1</span>
+<a name="l00315"></a><a class="code" href="m_comm__config_8h.html#abda81a9259f516d4a96ac106e818f73a">00315</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPCON2               SSPCON2         // aka SSP1CON2</span>
+<a name="l00316"></a><a class="code" href="m_comm__config_8h.html#a3d4e8f3fd645a898943afa0f490d8cb0">00316</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPCON3               SSPCON3</span>
+<a name="l00317"></a><a class="code" href="m_comm__config_8h.html#af7834b9d03419c5b4a0c7674a143c3c1">00317</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPMSK                SSPMSK</span>
+<a name="l00318"></a><a class="code" href="m_comm__config_8h.html#a1902f1362b40a7e13acf0ece766d8495">00318</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPADD                SSPADD</span>
+<a name="l00319"></a><a class="code" href="m_comm__config_8h.html#a2949439482d97e74b6c088fb3240ec61">00319</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPBUF                SSPBUF</span>
+<a name="l00320"></a><a class="code" href="m_comm__config_8h.html#abfee90f234ec373b2443be2b4c90f5c8">00320</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_CKP                   SSPCON1bits.CKP</span>
+<a name="l00321"></a><a class="code" href="m_comm__config_8h.html#a1c8ad39a5f1283b9533ab85b30f3e974">00321</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_RnW                   SSPSTATbits.R_nW</span>
+<a name="l00322"></a><a class="code" href="m_comm__config_8h.html#a66cd2d8347d1bdf17840b9a80ad5fe2d">00322</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_DnA                   SSPSTATbits.D_nA</span>
+<a name="l00323"></a><a class="code" href="m_comm__config_8h.html#a743cbf6f6841096460fc4e6c59232d3d">00323</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_STOP                  SSPSTATbits.P</span>
+<a name="l00324"></a><a class="code" href="m_comm__config_8h.html#acef80f06b770b87e93654eb9d76dccad">00324</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPOV                 SSPCON1bits.SSPOV</span>
+<a name="l00325"></a><a class="code" href="m_comm__config_8h.html#a5dabe2f8c2ba02607250e351827ba7b5">00325</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_WCOL                  SSPCON1bits.WCOL</span>
+<a name="l00326"></a><a class="code" href="m_comm__config_8h.html#af9f2aa480011a6eca117f94474c3f70e">00326</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPIE                 PIE1bits.SSPIE</span>
+<a name="l00327"></a><a class="code" href="m_comm__config_8h.html#a51a0254420c69c9edbb795b28de85a97">00327</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_SSPIF                 PIR1bits.SSPIF</span>
+<a name="l00328"></a><a class="code" href="m_comm__config_8h.html#a89eb5f78f95718c2ad65011cc683626e">00328</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_I2C_PEIE                  INTCONbits.PEIE</span>
+<a name="l00329"></a>00329 <span class="preprocessor"></span>
+<a name="l00330"></a><a class="code" href="m_comm__config_8h.html#a5c94cd8c4960c1dc76a8f49aa4fbd50f">00330</a> <span class="preprocessor">    #define     MCOMM_SPI_SS_PIN                RB5             // Must be a pin with Interrupt-On-Change functionality</span>
+<a name="l00331"></a><a class="code" href="m_comm__config_8h.html#a1fbca3989187a51ac3271af5952256a3">00331</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_ADDRESS               0xA0            // The address is the first byte sent for SPI and must match with this value</span>
+<a name="l00332"></a><a class="code" href="m_comm__config_8h.html#ac057019612bb1684370d2b4837c9300f">00332</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPSTAT               SSPSTAT</span>
+<a name="l00333"></a><a class="code" href="m_comm__config_8h.html#ac7b790b6c15600fbf786e2ad9295a6f5">00333</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPCON1               SSPCON1</span>
+<a name="l00334"></a><a class="code" href="m_comm__config_8h.html#ac5a9f30a96b166e6e111abffa9a6cf8a">00334</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPCON3               SSPCON3</span>
+<a name="l00335"></a><a class="code" href="m_comm__config_8h.html#a144414049060fc67cea2640323ee95a9">00335</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPBUF                SSPBUF</span>
+<a name="l00336"></a><a class="code" href="m_comm__config_8h.html#a3c6e6ac1f67eb2255ccced5bd14f550b">00336</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_WCOL                  SSPCON1bits.WCOL</span>
+<a name="l00337"></a><a class="code" href="m_comm__config_8h.html#aa54080988a81117411586c34d4a3ba0f">00337</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPOV                 SSPCON1bits.SSPOV</span>
+<a name="l00338"></a><a class="code" href="m_comm__config_8h.html#a893850cd880d3381928db2f505059387">00338</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPIE                 PIE1bits.SSPIE</span>
+<a name="l00339"></a><a class="code" href="m_comm__config_8h.html#a57a3192dcf213645f5fde69cc1413bcb">00339</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_SSPIF                 PIR1bits.SSPIF</span>
+<a name="l00340"></a><a class="code" href="m_comm__config_8h.html#a9b17bd8b6b5ec6aea46b8f51da4d680e">00340</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_PEIE                  INTCONbits.PEIE</span>
+<a name="l00341"></a><a class="code" href="m_comm__config_8h.html#aee68ff16400c6ffaa1a1b02c008c77b3">00341</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_SPI_IOCIF                 INTCONbits.IOCIF</span>
+<a name="l00342"></a>00342 <span class="preprocessor"></span>    
+<a name="l00343"></a><a class="code" href="m_comm__config_8h.html#a823a78d601c85b5b559d98c2d895cae7">00343</a> <span class="preprocessor">    #define     MCOMM_UART_RCREG                RCREG</span>
+<a name="l00344"></a><a class="code" href="m_comm__config_8h.html#a56a587cbd0db8b06023d54f53fe25712">00344</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXREG                TXREG</span>
+<a name="l00345"></a><a class="code" href="m_comm__config_8h.html#accd4543920a53c00caf51d8272296922">00345</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXSTA                TXSTA</span>
+<a name="l00346"></a><a class="code" href="m_comm__config_8h.html#a349625982023ffff3bc13b37c7aa4eee">00346</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_RCSTA                RCSTA</span>
+<a name="l00347"></a><a class="code" href="m_comm__config_8h.html#a2334db15272048bf7205b2145870b5aa">00347</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_BAUDCON              BAUDCON</span>
+<a name="l00348"></a><a class="code" href="m_comm__config_8h.html#ab55176cde5fb32d25e381b83b5d1604c">00348</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_SPBRGL               SPBRGL</span>
+<a name="l00349"></a><a class="code" href="m_comm__config_8h.html#a79fae29a678fbd65f5f5a53feedf5ace">00349</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_SPBRGH               SPBRGH</span>
+<a name="l00350"></a><a class="code" href="m_comm__config_8h.html#ab10a52ce51c0b4ee7d8266fbde651d71">00350</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXIF                 PIR1bits.TXIF</span>
+<a name="l00351"></a><a class="code" href="m_comm__config_8h.html#ae134e3520d6ef2c47ea091c372bc46b5">00351</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_OERR                 RCSTAbits.OERR</span>
+<a name="l00352"></a><a class="code" href="m_comm__config_8h.html#a10166a5f1241092e0905e345c7a5ca5f">00352</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_CREN                 RCSTAbits.CREN</span>
+<a name="l00353"></a><a class="code" href="m_comm__config_8h.html#a492f1edfb1fdf960eaab9b9677143054">00353</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_BRGH                 TXSTAbits.BRGH</span>
+<a name="l00354"></a><a class="code" href="m_comm__config_8h.html#a15b05e1e64ad5312f26f44805bbd692a">00354</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_BRG16                BAUDCONbits.BRG16</span>
+<a name="l00355"></a><a class="code" href="m_comm__config_8h.html#ab65e85c383e50bdf0e7082f46eb6cfda">00355</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_SPEN                 RCSTAbits.SPEN</span>
+<a name="l00356"></a><a class="code" href="m_comm__config_8h.html#a72082c2a4b5b37335dd3883164ea47a0">00356</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_TXEN                 TXSTAbits.TXEN</span>
+<a name="l00357"></a><a class="code" href="m_comm__config_8h.html#a175b765f6b37dec398f18a2355137b8a">00357</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_PEIE                 INTCONbits.PEIE</span>
+<a name="l00358"></a><a class="code" href="m_comm__config_8h.html#a9eba9bc9541b7428e334624b7dc79b40">00358</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_RCIF                 PIR1bits.RCIF</span>
+<a name="l00359"></a><a class="code" href="m_comm__config_8h.html#ab2ef8593e7d3bde6ed7ed2e972c9bd62">00359</a> <span class="preprocessor"></span><span class="preprocessor">    #define     MCOMM_UART_RCIE                 PIE1bits.RCIE</span>
+<a name="l00360"></a>00360 <span class="preprocessor"></span>    
+<a name="l00361"></a>00361 <span class="preprocessor">    #if defined(MCOMM_ENABLE_STREAM) &amp;&amp; defined(MCOMM_STREAM_STORED_IN_RAM)</span>
+<a name="l00362"></a><a class="code" href="m_comm__config_8h.html#aad5f2c96c2b3617035a7f5bc1106bd23">00362</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAM_ADDR           (uint8_t*)&amp;mComm_stream</span>
+<a name="l00363"></a><a class="code" href="m_comm__config_8h.html#a03fdd26a264f27d3680de70bf8bb3ed1">00363</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAMCONFIG_ADDR     (uint8_t*)&amp;mComm_streamConfig</span>
+<a name="l00364"></a>00364 <span class="preprocessor"></span><span class="preprocessor">    #elif defined(MCOMM_ENABLE_STREAM)</span>
+<a name="l00365"></a>00365 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAM_ADDR           (uint8_t*)0x0000</span>
+<a name="l00366"></a>00366 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAMCONFIG_ADDR     (uint8_t*)&amp;mComm_streamConfig</span>
+<a name="l00367"></a>00367 <span class="preprocessor"></span><span class="preprocessor">    #else</span>
+<a name="l00368"></a>00368 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAM_ADDR           (uint8_t*)0x0000</span>
+<a name="l00369"></a>00369 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_STREAMCONFIG_ADDR     (uint8_t*)0x0000</span>
+<a name="l00370"></a>00370 <span class="preprocessor"></span><span class="preprocessor">    #endif</span>
+<a name="l00371"></a>00371 <span class="preprocessor"></span>    
+<a name="l00372"></a>00372 <span class="preprocessor">    #if defined(MCOMM_ENABLE_CUSTOM_OPCODE)</span>
+<a name="l00373"></a>00373 <span class="preprocessor"></span><span class="preprocessor">        #if defined(MCOMM_CUSTOM_VARIABLE)</span>
+<a name="l00374"></a><a class="code" href="m_comm__config_8h.html#ac944160fad3d3dfd4f99dea042e45540">00374</a> <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_CUSTOM_VAR_ADDR       ,(uint8_t*)&amp;MCOMM_CUSTOM_VARIABLE       // Comma is intentional</span>
+<a name="l00375"></a>00375 <span class="preprocessor"></span><span class="preprocessor">        #else</span>
+<a name="l00376"></a>00376 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_CUSTOM_VAR_ADDR</span>
+<a name="l00377"></a>00377 <span class="preprocessor"></span><span class="preprocessor">        #endif</span>
+<a name="l00378"></a>00378 <span class="preprocessor"></span><span class="preprocessor">    #else</span>
+<a name="l00379"></a>00379 <span class="preprocessor"></span><span class="preprocessor">        #define MCOMM_CUSTOM_VAR_ADDR</span>
+<a name="l00380"></a>00380 <span class="preprocessor"></span><span class="preprocessor">    #endif</span>
+<a name="l00381"></a>00381 <span class="preprocessor"></span>
+<a name="l00382"></a>00382 <span class="comment">//****************************************************************************************************</span>
+<a name="l00383"></a>00383 <span class="comment">//  ___       _ _   _       _ _          _   _              __     __    _                 </span>
+<a name="l00384"></a>00384 <span class="comment">// |_ _|_ __ (_) |_(_) __ _| (_)______ _| |_(_) ___  _ __   \ \   / /_ _| |_   _  ___  ___ </span>
+<a name="l00385"></a>00385 <span class="comment">//  | || &#39;_ \| | __| |/ _` | | |_  / _` | __| |/ _ \| &#39;_ \   \ \ / / _` | | | | |/ _ \/ __|</span>
+<a name="l00386"></a>00386 <span class="comment">//  | || | | | | |_| | (_| | | |/ / (_| | |_| | (_) | | | |   \ V / (_| | | |_| |  __/\__ \</span>
+<a name="l00387"></a>00387 <span class="comment">// |___|_| |_|_|\__|_|\__,_|_|_/___\__,_|\__|_|\___/|_| |_|    \_/ \__,_|_|\__,_|\___||___/</span>
+<a name="l00388"></a>00388 <span class="comment">//</span>
+<a name="l00389"></a>00389 <span class="comment">//****************************************************************************************************</span>
+<a name="l00390"></a>00390     
+<a name="l00391"></a>00391     <span class="comment">//========================================================================</span>
+<a name="l00392"></a>00392     <span class="comment">// Streaming Default Values</span>
+<a name="l00393"></a>00393     <span class="comment">//========================================================================</span>
+<a name="l00394"></a>00394     <span class="comment">// The stream is a list of output vectors that can be modified to send any</span>
+<a name="l00395"></a>00395     <span class="comment">// number/order of RAM arrays through the communications.</span>
+<a name="l00396"></a>00396     <span class="comment">//</span>
+<a name="l00397"></a>00397     <span class="comment">// If it is stored in RAM (configuration option, above) then the output</span>
+<a name="l00398"></a>00398     <span class="comment">// vectors of the stream may be edited at runtime by the master or PIC.</span>
+<a name="l00399"></a>00399     
+<a name="l00400"></a><a class="code" href="m_comm__config_8h.html#ab4451ca37ad7aed80f79d97e468b2572">00400</a> <span class="preprocessor">    #define MCOMM_STREAM_SIZE           7           // Maximum number of user-editable vector locations</span>
+<a name="l00401"></a>00401 <span class="preprocessor"></span>                                                    <span class="comment">// NOTE: The actual array size is one larger to fit</span>
+<a name="l00402"></a>00402                                                     <span class="comment">//       a permanent 0-length vector entry. This</span>
+<a name="l00403"></a>00403                                                     <span class="comment">//       should never be overwritten by the master!</span>
+<a name="l00404"></a>00404                                                     <span class="comment">//       If it is, the communications will break.</span>
+<a name="l00405"></a>00405                                                     
+<a name="l00406"></a>00406     <span class="comment">//                                      Variable Address                Length in Bytes</span>
+<a name="l00407"></a><a class="code" href="m_comm__config_8h.html#a478f8a4e444830eec77028fd716b2d54">00407</a> <span class="preprocessor">    #define MCOMM_STREAM_VALUE0         {   (uint8_t*)&amp;mTouch_stateMask,    MTOUCH_STATEMASK_BYTES  }</span>
+<a name="l00408"></a><a class="code" href="m_comm__config_8h.html#addcdca5d1d7efdbdfe2c00d99f7f3e7b">00408</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_STREAM_VALUE1         {   (uint8_t*)&amp;mTouch_sensorData,   2*MTOUCH_NUMBER_SENSORS }</span>
+<a name="l00409"></a><a class="code" href="m_comm__config_8h.html#a30263e5ae450dd74f2e485d735efc7ab">00409</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_STREAM_VALUE2         {   (uint8_t*)&amp;mTouch_average,      2*MTOUCH_NUMBER_SENSORS }</span>
+<a name="l00410"></a>00410 <span class="preprocessor"></span>
+<a name="l00411"></a>00411     
+<a name="l00412"></a>00412     <span class="comment">//========================================================================</span>
+<a name="l00413"></a>00413     <span class="comment">// mComm Configuration Block Values</span>
+<a name="l00414"></a>00414     <span class="comment">//========================================================================</span>
+<a name="l00415"></a>00415     <span class="comment">// Two configuration blocks are implemented in constant memory to store</span>
+<a name="l00416"></a>00416     <span class="comment">// the current configuration of the system. Which values are stored depends</span>
+<a name="l00417"></a>00417     <span class="comment">// on the following values.</span>
+<a name="l00418"></a>00418     <span class="comment">//</span>
+<a name="l00419"></a>00419     <span class="comment">// This data is accessible by the master by reading from RAM locations:</span>
+<a name="l00420"></a>00420     <span class="comment">//  0x0000 :: Literals</span>
+<a name="l00421"></a>00421     <span class="comment">//  0x0001 :: Addresses</span>
+<a name="l00422"></a>00422     <span class="comment">//</span>
+<a name="l00423"></a>00423     <span class="comment">// These configuration blocks can then tell the master where the important</span>
+<a name="l00424"></a>00424     <span class="comment">// RAM arrays are located that it might wish to read/write to.</span>
+<a name="l00425"></a>00425     <span class="comment">//</span>
+<a name="l00426"></a>00426     <span class="comment">// Example:</span>
+<a name="l00427"></a>00427     <span class="comment">//  * The master wishes to read the current reading for each sensor.</span>
+<a name="l00428"></a>00428     <span class="comment">//      1. The master will request to read from RAM location 0x0000. </span>
+<a name="l00429"></a>00429     <span class="comment">//          The PIC will respond with the values in MCOMM_CONFIG_LIT_INIT.</span>
+<a name="l00430"></a>00430     <span class="comment">//          The master then takes the 4th byte and knows the number of sensors (&quot;X&quot;). </span>
+<a name="l00431"></a>00431     <span class="comment">//      2. The master will request to read from RAM location 0x0001.</span>
+<a name="l00432"></a>00432     <span class="comment">//          The PIC will respond with the values in MCOMM_CONFIG_ADDR_INIT.</span>
+<a name="l00433"></a>00433     <span class="comment">//          The master then takes the 5th address and knows where the raw</span>
+<a name="l00434"></a>00434     <span class="comment">//           data array is being stored in RAM (&quot;Y&quot;). </span>
+<a name="l00435"></a>00435     <span class="comment">//      3. The master will then request to read 2*X bytes from RAM location Y.</span>
+<a name="l00436"></a>00436     <span class="comment">//</span>
+<a name="l00437"></a>00437     <span class="comment">//      NOTE: Steps 1 &amp; 2 only need to be performed once.</span>
+<a name="l00438"></a>00438     
+<a name="l00439"></a><a class="code" href="m_comm__config_8h.html#ab7e6bf1437f308f293f3882a639a1fe5">00439</a> <span class="preprocessor">    #define MCOMM_CONFIG_LIT_SIZE       10</span>
+<a name="l00440"></a><a class="code" href="m_comm__config_8h.html#a6902ba10f8328b6fac40db8613c3d061">00440</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_CONFIG_LIT_INIT       {                                                       \</span>
+<a name="l00441"></a>00441 <span class="preprocessor">                                            MCOMM_CONFIGURATION_BYTE,                           \</span>
+<a name="l00442"></a>00442 <span class="preprocessor">                                            MCOMM_INPUTBUFFER_SIZE,                             \</span>
+<a name="l00443"></a>00443 <span class="preprocessor">                                            MCOMM_STREAM_SIZE,                                  \</span>
+<a name="l00444"></a>00444 <span class="preprocessor">                                            MTOUCH_NUMBER_SENSORS,                              \</span>
+<a name="l00445"></a>00445 <span class="preprocessor">                                            MTOUCH_CONFIGURATION_BYTE,                          \</span>
+<a name="l00446"></a>00446 <span class="preprocessor">                                            MTOUCH_EEPROM_POW2_SIZE,                            \</span>
+<a name="l00447"></a>00447 <span class="preprocessor">                                            MTOUCH_FRAMEWORK_VERSION,                           \</span>
+<a name="l00448"></a>00448 <span class="preprocessor">                                            MTOUCH_SOFTWARE_VERSION,                            \</span>
+<a name="l00449"></a>00449 <span class="preprocessor">                                            MTOUCH_HARDWARE_VERSION,                            \</span>
+<a name="l00450"></a>00450 <span class="preprocessor">                                            MTOUCH_BOARD_ID                                     \</span>
+<a name="l00451"></a>00451 <span class="preprocessor">                                        }</span>
+<a name="l00452"></a>00452 <span class="preprocessor"></span>                                    
+<a name="l00453"></a>00453     
+<a name="l00454"></a><a class="code" href="m_comm__config_8h.html#a84096621bc5479cf91f460250c29a3dd">00454</a> <span class="preprocessor">    #define MCOMM_CONFIG_ADDR_SIZE      9</span>
+<a name="l00455"></a><a class="code" href="m_comm__config_8h.html#aee936c8c6ef6d768a5ff93e43cc1a351">00455</a> <span class="preprocessor"></span><span class="preprocessor">    #define MCOMM_CONFIG_ADDR_INIT      {                                                       \</span>
+<a name="l00456"></a>00456 <span class="preprocessor">                                            (uint8_t*) MCOMM_STREAMCONFIG_ADDR,                 \</span>
+<a name="l00457"></a>00457 <span class="preprocessor">                                            (uint8_t*) MCOMM_STREAM_ADDR,                       \</span>
+<a name="l00458"></a>00458 <span class="preprocessor">                                            (uint8_t*) MTOUCH_EEPROM_START_ADR,                 \</span>
+<a name="l00459"></a>00459 <span class="preprocessor">                                            (uint8_t*) &amp;mTouch_stateMask,                       \</span>
+<a name="l00460"></a>00460 <span class="preprocessor">                                            (uint8_t*) &amp;mTouch_sensorData,                      \</span>
+<a name="l00461"></a>00461 <span class="preprocessor">                                            (uint8_t*) &amp;mTouch_average,                         \</span>
+<a name="l00462"></a>00462 <span class="preprocessor">                                            (uint8_t*) MCOMM_SLIDER_ADR,                        \</span>
+<a name="l00463"></a>00463 <span class="preprocessor">                                            (uint8_t*) MCOMM_TOGGLE_ADR                         \</span>
+<a name="l00464"></a>00464 <span class="preprocessor">                                            MCOMM_CUSTOM_VAR_ADDR                               \</span>
+<a name="l00465"></a>00465 <span class="preprocessor">                                        }</span>
+<a name="l00466"></a>00466 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

@@ -445,11 +445,10 @@ int main(void)
             {
                 USBDeviceAttach();
                 ApplicationInit(); 
-            }
-        #elif defined (USB_POLLING)
-            if((USBGetDeviceState() == DETACHED_STATE))
-                ApplicationInit(); 
-        #endif     
+            } 
+        #endif
+	if(USBDeviceState < CONFIGURED_STATE)
+            ApplicationInit();      
 
         #if defined(USB_POLLING)
 		// Check bus status and service USB interrupts.

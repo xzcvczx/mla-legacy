@@ -44,6 +44,7 @@
  * Date		    Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 02/24/11	    For Graphics Library Version 3.00 
+ * 01/20/12	    Modified for Graphics Library Version 3.04 
  ********************************************************************/
 
 #ifndef __HARDWARE_PROFILE_H
@@ -287,8 +288,10 @@
 #ifdef PIC_SK
 	#if defined (__PIC32MX__)
 		   #define PIC32_SK 
-	#elif defined (__dsPIC33E__) || (__PIC24E__)
+	#elif defined (__dsPIC33E__) 
 		   #define dsPIC33E_SK
+    #elif defined (__PIC24E__)
+		   #define PIC24E_SK
 	#endif
 #endif
 
@@ -1142,10 +1145,21 @@
         #define DisplaySetCommand()         LATCbits.LATC2 = 0
         #define DisplaySetData()            LATCbits.LATC2 = 1
 
-        // Definitions for CS pin
-        #define DisplayConfig()             TRISDbits.TRISD10 = 0             
-        #define DisplayEnable()             LATDbits.LATD10 = 0
-        #define DisplayDisable()            LATDbits.LATD10 = 1
+        /*****
+        * The MA330025-2 and MA240025-2 PIMs default to use RK12 for the 
+        * pin 70 of the 100 pin PIM header.  
+        *****/
+        #if defined (__dsPIC33EP512MU814__) || defined (__PIC24EP512GU814__)
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISKbits.TRISK12 = 0             
+            #define DisplayEnable()             LATKbits.LATK12 = 0
+            #define DisplayDisable()            LATKbits.LATK12 = 1
+        #else
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISDbits.TRISD10 = 0             
+            #define DisplayEnable()             LATDbits.LATD10 = 0
+            #define DisplayDisable()            LATDbits.LATD10 = 1
+        #endif        
 
         // Definitions for FLASH CS pin
         #define DisplayFlashConfig()         
@@ -1874,15 +1888,6 @@
 	/* ----------------------------------------- */
 		// for  PIC24FJ256DA210 Dev Board 
 		#define ADDRESS_RESISTIVE_TOUCH_VERSION	(unsigned long)0x0003FFFE
-        #define ADDRESS_RESISTIVE_TOUCH_ULX   (unsigned long)0x0003FFFC
-        #define ADDRESS_RESISTIVE_TOUCH_ULY   (unsigned long)0x0003FFFA
-        #define ADDRESS_RESISTIVE_TOUCH_URX   (unsigned long)0x0003FFF8
-        #define ADDRESS_RESISTIVE_TOUCH_URY   (unsigned long)0x0003FFF6
-
-        #define ADDRESS_RESISTIVE_TOUCH_LLX   (unsigned long)0x0003FFF4
-        #define ADDRESS_RESISTIVE_TOUCH_LLY   (unsigned long)0x0003FFF2
-        #define ADDRESS_RESISTIVE_TOUCH_LRX   (unsigned long)0x0003FFF0
-        #define ADDRESS_RESISTIVE_TOUCH_LRY   (unsigned long)0x0003FFEE
 	    
         // define the functions to call for the non-volatile memory
         // check out touch screen module for definitions of the following function pointers
@@ -2039,7 +2044,7 @@
         #endif
     #elif defined (MEB_BOARD)
         // this is dependent on the Starter Kit used
-    	#if defined (PIC32_GP_SK) || defined (PIC32_USB_SK) || defined (dsPIC33E_SK)
+    	#if defined (PIC32_GP_SK) || defined (PIC32_USB_SK) || defined (dsPIC33E_SK) || defined (PIC24E_SK)
             #define SST25_SPI_CHANNEL 2
     	#elif defined (PIC32_ETH_SK)
             #define SST25_SPI_CHANNEL 4
@@ -2150,6 +2155,16 @@
 
     #endif
 
+    #define SPIFlashConfigurePins() {                           \
+                                            SST25_SDO_ANS  = 0; \
+                                            SST25_SDI_ANS  = 0; \
+                                            SST25_CS_LAT   = 1; \
+                                            SST25_CS_TRIS  = 0; \
+                                            SST25_SCK_TRIS = 0; \
+                                            SST25_SDO_TRIS = 0; \
+                                            SST25_SDI_TRIS = 1; \
+                                    }        
+    
 #endif // #if defined (USE_SST25VF016)
 
 

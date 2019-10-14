@@ -41,18 +41,17 @@ Include dependency graph for mTouch.c:<!-- endSectionHeader --></div>
 <!-- startSectionSummary --><!-- endSectionSummary --><!-- startSectionContent --><div class="dyncontent">
 <div class="center"><img src="m_touch_8c__incl.png" border="0" usemap="#m_touch_8c" alt=""/></div>
 <map name="m_touch_8c" id="m_touch_8c">
-<area shape="rect" id="node3" href="m_touch_8h.html" title="Required include! The main framework header file used by all framework files." alt="" coords="583,83,660,112"/><area shape="rect" id="node7" href="m_touch__config_8h.html" title="Framework Configuration! Main configuration file for the mTouch Framework." alt="" coords="229,160,349,189"/><area shape="rect" id="node15" href="m_touch__process_configuration_8h.html" title="Internal framework header file performing many pre&#45;compiler checks and generating predefined values f..." alt="" coords="424,160,629,189"/><area shape="rect" id="node17" href="m_touch__modes_8h.html" title="Internal framework header file implementing scanning mode functionality." alt="" coords="653,160,779,189"/><area shape="rect" id="node19" href="m_comm_8h.html" title="The main mComm header file used by all mComm files." alt="" coords="803,160,885,189"/><area shape="rect" id="node9" href="m_touch__options_for_config_8h.html" title="Defines the valid labeled values for several framework configuration options." alt="" coords="5,237,187,267"/><area shape="rect" id="node11" href="m_touch__config__slider_8h.html" title="Framework Configuration! Slider and Wheel Configuration Options." alt="" coords="211,237,368,267"/><area shape="rect" id="node13" href="m_touch__config__modes_8h.html" title="mTouch_config_modes.h" alt="" coords="392,237,557,267"/></map>
+<area shape="rect" id="node3" href="m_touch_8h.html" title="Required include! The main framework header file used by all framework files." alt="" coords="583,83,660,112"/><area shape="rect" id="node7" href="m_touch__config_8h.html" title="Framework Configuration! Main configuration file for the mTouch Framework." alt="" coords="229,160,349,189"/><area shape="rect" id="node15" href="m_touch__process_configuration_8h.html" title="Internal framework header file performing many pre&#45;compiler checks and generating predefined values f..." alt="" coords="424,160,629,189"/><area shape="rect" id="node17" href="m_touch__modes_8h.html" title="Internal framework header file implementing scanning mode functionality." alt="" coords="653,160,779,189"/><area shape="rect" id="node19" href="m_comm_8h.html" title="mComm.h" alt="" coords="803,160,885,189"/><area shape="rect" id="node9" href="m_touch__options_for_config_8h.html" title="Defines the valid labeled values for several framework configuration options." alt="" coords="5,237,187,267"/><area shape="rect" id="node11" href="m_touch__config__slider_8h.html" title="Framework Configuration! Slider and Wheel Configuration Options." alt="" coords="211,237,368,267"/><area shape="rect" id="node13" href="m_touch__config__modes_8h.html" title="mTouch_config_modes.h" alt="" coords="392,237,557,267"/></map>
 <!-- endSectionContent --></div>
 
 <p><a href="m_touch_8c_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#acc7ec5fd1a62c74218c24ab827097214">sensorIndex</a>&#160;&#160;&#160;0</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#a76bf8d775a5a9b12c3bee3e63175177b">MTOUCH_SENSOR_state</a>&#160;&#160;&#160;mTouch_stateVars.sensor[0].state</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#adad9dba6f415315e9096e25e0a568ea4">MTOUCH_SENSOR_timer</a>&#160;&#160;&#160;mTouch_stateVars.sensor[0].timer</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#af128a65491e37332cd350c2a6bb996c1">MTOUCH_SENSOR_debounce</a>&#160;&#160;&#160;mTouch_stateVars.sensor[0].debounce</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#a34702d137db1539f9b7c5cd701624ae1">MTOUCH_SENSOR_timeout</a>&#160;&#160;&#160;mTouch_stateVars.sensor[0].timeout</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#a76bf8d775a5a9b12c3bee3e63175177b">MTOUCH_SENSOR_state</a>&#160;&#160;&#160;(*sensor).state</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#adad9dba6f415315e9096e25e0a568ea4">MTOUCH_SENSOR_timer</a>&#160;&#160;&#160;(*sensor).timer</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#af128a65491e37332cd350c2a6bb996c1">MTOUCH_SENSOR_debounce</a>&#160;&#160;&#160;(*sensor).debounce</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#a34702d137db1539f9b7c5cd701624ae1">MTOUCH_SENSOR_timeout</a>&#160;&#160;&#160;(*sensor).timeout</td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m_touch_8c.html#ab73968cbb19d4ae25a65698c15906b65">mTouch_Init</a> (void)</td></tr>
@@ -92,7 +91,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MTOUCH_SENSOR_debounce&#160;&#160;&#160;mTouch_stateVars.sensor[0].debounce</td>
+          <td class="memname">#define MTOUCH_SENSOR_debounce&#160;&#160;&#160;(*sensor).debounce</td>
         </tr>
       </table>
 </div>
@@ -105,7 +104,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MTOUCH_SENSOR_state&#160;&#160;&#160;mTouch_stateVars.sensor[0].state</td>
+          <td class="memname">#define MTOUCH_SENSOR_state&#160;&#160;&#160;(*sensor).state</td>
         </tr>
       </table>
 </div>
@@ -118,7 +117,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MTOUCH_SENSOR_timeout&#160;&#160;&#160;mTouch_stateVars.sensor[0].timeout</td>
+          <td class="memname">#define MTOUCH_SENSOR_timeout&#160;&#160;&#160;(*sensor).timeout</td>
         </tr>
       </table>
 </div>
@@ -131,20 +130,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MTOUCH_SENSOR_timer&#160;&#160;&#160;mTouch_stateVars.sensor[0].timer</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="acc7ec5fd1a62c74218c24ab827097214"></a><!-- doxytag: member="mTouch.c::sensorIndex" ref="acc7ec5fd1a62c74218c24ab827097214" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define sensorIndex&#160;&#160;&#160;0</td>
+          <td class="memname">#define MTOUCH_SENSOR_timer&#160;&#160;&#160;(*sensor).timer</td>
         </tr>
       </table>
 </div>
@@ -185,7 +171,7 @@ Pressed State</h2>
 <dl class="note"><dt><b>Note:</b></dt><dd>The baseline is never updated while the sensor is pressed so the system can remember where the unpressed value should end up. Because of this, the baseline can be better thought of as a released-state average.</dd></dl>
 </p>
 
-<p>Definition at line <a class="el" href="m_touch_8c_source.html#l00576">576</a> of file <a class="el" href="m_touch_8c_source.html">mTouch.c</a>.</p>
+<p>Definition at line <a class="el" href="m_touch_8c_source.html#l00579">579</a> of file <a class="el" href="m_touch_8c_source.html">mTouch.c</a>.</p>
 
 <p><!-- startSectionHeader --><div class="dynheader">
 Here is the caller graph for this function:<!-- endSectionHeader --></div>
@@ -346,7 +332,7 @@ Here is the call graph for this function:<!-- endSectionHeader --></div>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

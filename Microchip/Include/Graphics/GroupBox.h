@@ -93,14 +93,17 @@ typedef struct
 * Overview: This function sets the text used by passing the pointer
 *			to the static string.
 *
-* PreCondition: none
+* PreCondition: The style scheme used for the object MUST be initialized
+*               with a valid font. If font is not valid, textWidth and
+*               textHeight parameter of GROUPBOX will be undefined.
 *
 * Input: pGb - the pointer to the object whose state will be modified.
 *        pText - pointer to the text that will be used.
 *
 * Output: none
 *
-* Side Effects: none
+* Side Effects: Modifies the object width and height depending on the 
+*               selected string width and font height.
 *
 ********************************************************************/
 void        GbSetText(GROUPBOX *pGb, XCHAR *pText);

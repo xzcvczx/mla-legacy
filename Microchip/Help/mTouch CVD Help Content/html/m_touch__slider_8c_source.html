@@ -31,7 +31,7 @@
 <a href="m_touch__slider_8c.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*************************************************************************</span>
 <a name="l00002"></a>00002 <span class="comment"> *  © 2012 Microchip Technology Inc.                                       </span>
 <a name="l00003"></a>00003 <span class="comment"> *  </span>
-<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.0</span>
+<a name="l00004"></a>00004 <span class="comment"> *  Project Name:    mTouch Framework v2.1</span>
 <a name="l00005"></a>00005 <span class="comment"> *  FileName:        mTouch_slider.c</span>
 <a name="l00006"></a>00006 <span class="comment"> *  Dependencies:    mTouch.h</span>
 <a name="l00007"></a>00007 <span class="comment"> *  Processor:       See documentation for supported PIC® microcontrollers </span>
@@ -568,49 +568,48 @@
 <a name="l00543"></a>00543 <span class="preprocessor"></span><span class="preprocessor">            #else                                                                               // No maximum step size defined.</span>
 <a name="l00544"></a>00544 <span class="preprocessor"></span>                MTOUCH_SLIDER_EQUALS_NEWSLIDER();                                               <span class="comment">// Simply store the result as-is.</span>
 <a name="l00545"></a>00545 <span class="preprocessor">            #endif</span>
-<a name="l00546"></a>00546 <span class="preprocessor"></span>            
-<a name="l00547"></a>00547             
-<a name="l00548"></a>00548         } <span class="comment">// end - if slider decoded </span>
-<a name="l00549"></a>00549 <span class="preprocessor">    #if MTOUCH_NUMBER_OF_SLIDERS &gt; 1</span>
-<a name="l00550"></a>00550 <span class="preprocessor"></span>    } <span class="comment">// end - for loop over all sliders</span>
-<a name="l00551"></a>00551 <span class="preprocessor">    #endif</span>
-<a name="l00552"></a>00552 <span class="preprocessor"></span>    
-<a name="l00553"></a>00553 <span class="preprocessor">    #if defined(MTOUCH_SLIDERS_WHEELS_IMPLEMENTED)</span>
-<a name="l00554"></a>00554 <span class="preprocessor"></span>    <span class="keywordflow">for</span> (int8_t i = SPEEDLOGWINDOW - 1; i &gt;= 1; i--)
-<a name="l00555"></a>00555     {
-<a name="l00556"></a>00556         scrollingStep[i] = scrollingStep[i-1];                                      <span class="comment">//shift the log data</span>
-<a name="l00557"></a>00557     }
-<a name="l00558"></a>00558     scrollingStep[0] = mTouch_GetSlider(0) - lastSlidervalue;                       <span class="comment">//log the last moving steps</span>
-<a name="l00559"></a>00559     
-<a name="l00560"></a>00560     <span class="comment">// Solve the 0,255 point problem</span>
-<a name="l00561"></a>00561          <span class="keywordflow">if</span> ((mTouch_GetSlider(0) - lastSlidervalue) &lt; -100)    { scrollingStep[0]  = (int8_t)(mTouch_GetSlider(0) - lastSlidervalue + 0xFF); }
-<a name="l00562"></a>00562     <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((mTouch_GetSlider(0) - lastSlidervalue) &gt;  100)    { scrollingStep[0]  = (int8_t)(mTouch_GetSlider(0) - lastSlidervalue - 0xFF); }
-<a name="l00563"></a>00563     <span class="keywordflow">else</span>                                                        { scrollingStep[0]  = (int8_t)(mTouch_GetSlider(0) - lastSlidervalue);        }
-<a name="l00564"></a>00564 
-<a name="l00565"></a>00565     int16_t  currentSpeed = 0;
-<a name="l00566"></a>00566     <span class="keywordflow">for</span>(int8_t i = SPEEDLOGWINDOW - 1; i &gt;= 0  ; i--)
-<a name="l00567"></a>00567     {
-<a name="l00568"></a>00568         currentSpeed += scrollingStep[i];                       <span class="comment">// Sum up all the speed in the log window, then average</span>
-<a name="l00569"></a>00569     }
-<a name="l00570"></a>00570     
-<a name="l00571"></a>00571     currentSpeed   /= SPEEDLOGWINDOW;
-<a name="l00572"></a>00572     currentSpeed    = (currentSpeed *3  + lastSpeed) &gt;&gt; 2;      <span class="comment">// Average the speed</span>
-<a name="l00573"></a>00573     lastSpeed       = currentSpeed;
-<a name="l00574"></a>00574     lastSlidervalue = mTouch_GetSlider(0);                      <span class="comment">// Log the last position for next step calculation</span>
-<a name="l00575"></a>00575     
-<a name="l00576"></a>00576          <span class="keywordflow">if</span> (currentSpeed &gt;  2) {   wheelStatus.direction   = CLOCKWISE;        }
-<a name="l00577"></a>00577     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (currentSpeed &lt; -2) {   wheelStatus.direction   = COUNTERCLOCKWISE; }
-<a name="l00578"></a>00578     <span class="keywordflow">else</span>                        {   wheelStatus.direction   = NOSCROLLING;      }
-<a name="l00579"></a>00579 
-<a name="l00580"></a>00580     <span class="keywordflow">if</span> (currentSpeed &lt; 0)       {   wheelStatus.speed       = -currentSpeed;    }
-<a name="l00581"></a>00581     <span class="keywordflow">else</span>                        {   wheelStatus.speed       =  currentSpeed;    }
-<a name="l00582"></a>00582 <span class="preprocessor">    #endif</span>
-<a name="l00583"></a>00583 <span class="preprocessor"></span>}
-<a name="l00584"></a>00584 
-<a name="l00585"></a>00585 <span class="preprocessor">#endif // End - #if defined(MTOUCH_SLIDERS_ENABLED)  </span>
+<a name="l00546"></a>00546 <span class="preprocessor"></span>        }
+<a name="l00547"></a>00547         
+<a name="l00548"></a>00548 <span class="preprocessor">    #if MTOUCH_NUMBER_OF_SLIDERS &gt; 1</span>
+<a name="l00549"></a>00549 <span class="preprocessor"></span>    }
+<a name="l00550"></a>00550 <span class="preprocessor">    #endif</span>
+<a name="l00551"></a>00551 <span class="preprocessor"></span>    
+<a name="l00552"></a>00552 <span class="preprocessor">    #if defined(MTOUCH_SLIDERS_WHEELS_IMPLEMENTED)</span>
+<a name="l00553"></a>00553 <span class="preprocessor"></span>    <span class="keywordflow">for</span> (int8_t i = SPEEDLOGWINDOW - 1; i &gt;= 1; i--)
+<a name="l00554"></a>00554     {
+<a name="l00555"></a>00555         scrollingStep[i] = scrollingStep[i-1];                                      <span class="comment">//shift the log data</span>
+<a name="l00556"></a>00556     }
+<a name="l00557"></a>00557     scrollingStep[0] = mTouch_GetSlider(0) - lastSlidervalue;                       <span class="comment">//log the last moving steps</span>
+<a name="l00558"></a>00558     
+<a name="l00559"></a>00559     <span class="comment">// Solve the 0,255 point problem</span>
+<a name="l00560"></a>00560          <span class="keywordflow">if</span> ((mTouch_GetSlider(0) - lastSlidervalue) &lt; -100)    { scrollingStep[0]  = (int8_t)(mTouch_GetSlider(0) - lastSlidervalue + 0xFF); }
+<a name="l00561"></a>00561     <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((mTouch_GetSlider(0) - lastSlidervalue) &gt;  100)    { scrollingStep[0]  = (int8_t)(mTouch_GetSlider(0) - lastSlidervalue - 0xFF); }
+<a name="l00562"></a>00562     <span class="keywordflow">else</span>                                                        { scrollingStep[0]  = (int8_t)(mTouch_GetSlider(0) - lastSlidervalue);        }
+<a name="l00563"></a>00563 
+<a name="l00564"></a>00564     int16_t  currentSpeed = 0;
+<a name="l00565"></a>00565     <span class="keywordflow">for</span>(int8_t i = SPEEDLOGWINDOW - 1; i &gt;= 0  ; i--)
+<a name="l00566"></a>00566     {
+<a name="l00567"></a>00567         currentSpeed += scrollingStep[i];                       <span class="comment">// Sum up all the speed in the log window, then average</span>
+<a name="l00568"></a>00568     }
+<a name="l00569"></a>00569     
+<a name="l00570"></a>00570     currentSpeed   /= SPEEDLOGWINDOW;
+<a name="l00571"></a>00571     currentSpeed    = (currentSpeed *3  + lastSpeed) &gt;&gt; 2;      <span class="comment">// Average the speed</span>
+<a name="l00572"></a>00572     lastSpeed       = currentSpeed;
+<a name="l00573"></a>00573     lastSlidervalue = mTouch_GetSlider(0);                      <span class="comment">// Log the last position for next step calculation</span>
+<a name="l00574"></a>00574     
+<a name="l00575"></a>00575          <span class="keywordflow">if</span> (currentSpeed &gt;  2) {   wheelStatus.direction   = CLOCKWISE;        }
+<a name="l00576"></a>00576     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (currentSpeed &lt; -2) {   wheelStatus.direction   = COUNTERCLOCKWISE; }
+<a name="l00577"></a>00577     <span class="keywordflow">else</span>                        {   wheelStatus.direction   = NOSCROLLING;      }
+<a name="l00578"></a>00578 
+<a name="l00579"></a>00579     <span class="keywordflow">if</span> (currentSpeed &lt; 0)       {   wheelStatus.speed       = -currentSpeed;    }
+<a name="l00580"></a>00580     <span class="keywordflow">else</span>                        {   wheelStatus.speed       =  currentSpeed;    }
+<a name="l00581"></a>00581 <span class="preprocessor">    #endif</span>
+<a name="l00582"></a>00582 <span class="preprocessor"></span>}
+<a name="l00583"></a>00583 
+<a name="l00584"></a>00584 <span class="preprocessor">#endif // End - #if defined(MTOUCH_SLIDERS_ENABLED)  </span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

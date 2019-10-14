@@ -6,10 +6,10 @@ device=PIC32MX220F032D
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
 dir_bin=
-dir_tmp=.\Objects\460F512L_PIM
+dir_tmp=.\Objects\220F032D_PIM
 dir_sin=
-dir_inc=..\..\..\Microchip\Include;.
-dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
+dir_inc=.;..\..\..\Microchip\Include
+dir_lib=C:\Program Files\Microchip\mplabc32\v2.02\pic32mx\lib
 dir_lkr=
 [CAT_FILTERS]
 filter_src=*.s;*.c
@@ -113,7 +113,7 @@ suite_state=
 [TOOL_SETTINGS]
 TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}=
 TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}=-g -DPIC32MX220F032D_PIM -Os
-TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=-Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -mips16
+TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map"
 TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}=
 [INSTRUMENTED_TRACE]
 enable=0

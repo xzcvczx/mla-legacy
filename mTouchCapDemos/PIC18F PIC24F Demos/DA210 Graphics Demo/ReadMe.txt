@@ -108,4 +108,5 @@ for other controllers.
 *******************************************************************************
                                  Help File
 *******************************************************************************
-For more information on mTouch Software Library, refer "mTouch Cap Library Help.chm" file.
+For more information about mTouch Software Library, refer "mTouch Cap Library Help.chm"
+file located in "...\Microchip\Help" folder.

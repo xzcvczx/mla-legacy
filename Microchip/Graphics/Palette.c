@@ -33,9 +33,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Pradeep Budagutta    11/06/09    Version 1.0 release
+ * 11/06/09     Version 1.0 release
+ * 03/20/12     Fixed error on SetPalette() when palette is from external memory.
  *****************************************************************************/
 #include "Graphics/Palette.h"
 
@@ -96,9 +97,7 @@ BYTE SetPalette(void *pPalette, WORD startEntry, WORD length)
     BYTE            status = -1;
     PALETTE_FLASH   *pPaletteFlash;
 #ifdef USE_PALETTE_EXTERNAL
-    WORD            i;
-    PALETTE_ENTRY   paletteEntry;
-    PALETTE_HEADER  header;
+    PALETTE_ENTRY   paletteEntry[256];
 #endif
 
     switch(*((SHORT *)pPalette))
@@ -115,18 +114,9 @@ BYTE SetPalette(void *pPalette, WORD startEntry, WORD length)
 
     #ifdef USE_PALETTE_EXTERNAL
         case EXTERNAL:
-            ExternalMemoryCallback(pPalette, 0, sizeof(PALETTE_HEADER), &header);
-            if(length > header.length)
-            {
-                length = header.length;
-            }
-            
-            status = 0;
-            for(i = 0; i < length; i++)
-            {
-                ExternalMemoryCallback(pPalette, sizeof(PALETTE_HEADER) + (i * sizeof(paletteEntry)), sizeof(paletteEntry), (void*)&paletteEntry);
-                status += SetPaletteFlash(&paletteEntry, startEntry + i, 1);
-            }
+            ExternalMemoryCallback(pPalette, (startEntry * sizeof(PALETTE_ENTRY)), sizeof(PALETTE_ENTRY)*length, (void*)paletteEntry);
+
+            status = SetPaletteFlash(paletteEntry, startEntry, length);
             break;
     #endif
     }

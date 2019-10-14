@@ -60,17 +60,6 @@
 #define USB_MAX_NUM_INT     	1   // For tracking Alternate Setting
 #define USB_MAX_EP_NUMBER	    1
 
-//Device descriptor - if these two definitions are not defined then
-//  a ROM USB_DEVICE_DESCRIPTOR variable by the exact name of device_dsc
-//  must exist.
-#define USB_USER_DEVICE_DESCRIPTOR &device_dsc
-#define USB_USER_DEVICE_DESCRIPTOR_INCLUDE extern ROM USB_DEVICE_DESCRIPTOR device_dsc
-
-//Configuration descriptors - if these two definitions do not exist then
-//  a ROM BYTE *ROM variable named exactly USB_CD_Ptr[] must exist.
-#define USB_USER_CONFIG_DESCRIPTOR USB_CD_Ptr
-#define USB_USER_CONFIG_DESCRIPTOR_INCLUDE extern ROM BYTE *ROM USB_CD_Ptr[]
-
 //Make sure only one of the below "#define USB_PING_PONG_MODE"
 //is uncommented.
 //#define USB_PING_PONG_MODE USB_PING_PONG__NO_PING_PONG
@@ -144,18 +133,6 @@
 #define USB_SUPPORT_DEVICE
 
 #define USB_NUM_STRING_DESCRIPTORS 3
-
-//#define USB_INTERRUPT_LEGACY_CALLBACKS
-#define USB_ENABLE_ALL_HANDLERS
-//#define USB_ENABLE_SUSPEND_HANDLER
-//#define USB_ENABLE_WAKEUP_FROM_SUSPEND_HANDLER
-//#define USB_ENABLE_SOF_HANDLER
-//#define USB_ENABLE_ERROR_HANDLER
-//#define USB_ENABLE_OTHER_REQUEST_HANDLER
-//#define USB_ENABLE_SET_DESCRIPTOR_HANDLER
-//#define USB_ENABLE_INIT_EP_HANDLER
-//#define USB_ENABLE_EP0_DATA_HANDLER
-//#define USB_ENABLE_TRANSFER_COMPLETE_HANDLER
 
 /** DEVICE CLASS USAGE *********************************************/
 #define USB_USE_HID

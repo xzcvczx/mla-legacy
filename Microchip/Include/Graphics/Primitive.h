@@ -1596,7 +1596,8 @@ void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
 *                        BYTE direction);
 *
 * Overview: This renders a bar onto the screen, but instead of one color, a gradient is drawn
-* depending on the direction (GFX_GRADIENT_TYPE), length, and colors chosen
+* depending on the direction (GFX_GRADIENT_TYPE), length, and colors chosen. This function is
+* a blocking call.
 *
 * Description: 
 *        <img name="BarGradient.jpg" />
@@ -1612,7 +1613,7 @@ void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
 *        length - From 0-100%. How much of a gradient is wanted
 *        direction - Gradient Direction	
 *
-* Output: Returns 1 if the rendering is done, 0 if not yet done.
+* Output: Always returns a 1 since it is a blocking function.
 *
 * Example:
 *   <CODE> 
@@ -1651,8 +1652,9 @@ WORD        BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_CO
 *                          SHORT rad, GFX_COLOR color1, GFX_COLOR color2, 
 *                          DWORD length, BYTE direction);
 *
-* Overview: This renders a gradient on the screen. It works the same as the fillbevel function, 
-* except a gradient out of color1 and color2 is drawn depending on the direction (GFX_GRADIENT_TYPE).
+* Overview: This renders a filled bevel with gradient color on the fill. It works the same as the fillbevel function, 
+* except a gradient out of color1 and color2 is drawn depending on the direction (GFX_GRADIENT_TYPE). This function
+* is a blocking call.
 *
 * Description: 
 *        <img name="BevelGradient.jpg" />
@@ -1674,7 +1676,7 @@ WORD        BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_CO
 *        length - From 0-100%. How much of a gradient is wanted
 *        direction - see GFX_GRADIENT_TYPE	 
 *
-* Output: Returns 1 if the rendering is done, 0 if not yet done.
+* Output: Always returns a 1 since it is a blocking function.
 *
 * Side Effects: none
 *

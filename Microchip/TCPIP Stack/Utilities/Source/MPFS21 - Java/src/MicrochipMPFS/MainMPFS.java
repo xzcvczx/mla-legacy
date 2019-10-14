@@ -1345,8 +1345,8 @@ public class MainMPFS extends javax.swing.JFrame {
          * 
          */
         txtUploadPath.setText(uploadSettings.getUploadPathStr());
-        saveXmlNodeValue(eXmlNodeAttribute.DYNAMIC_FILES,advSetting.DynVarStr,0,true);
-        saveXmlNodeValue(eXmlNodeAttribute.NO_COMPRESS_FILE_LIST,advSetting.NoCompStr,0,true);
+        saveXmlNodeValue(eXmlNodeAttribute.DYNAMIC_FILES,advSetting.getDynamicFileStr(),0,true);
+        saveXmlNodeValue(eXmlNodeAttribute.NO_COMPRESS_FILE_LIST,advSetting.getNoCompressionFileStr(),0,true);
     }//GEN-LAST:event_btnAdvSettingActionPerformed
 
     private void btnUploadSettingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadSettingActionPerformed

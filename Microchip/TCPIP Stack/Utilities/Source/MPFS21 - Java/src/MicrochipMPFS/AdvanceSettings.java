@@ -60,6 +60,9 @@ public class AdvanceSettings extends javax.swing.JDialog {
         toolTipAdvanceSettings();        
 
         AdvanceSettingKeyEventActionIntialization();
+        DynVarStr = txtDynFiles.getText();
+        NoCompStr = txtDoNotCompress.getText();
+        
 //        Action  ESCactionListener = new AbstractAction () {
 //          public void actionPerformed(ActionEvent actionEvent) {
 //            setVisible(false);
@@ -357,21 +360,23 @@ private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     public void setDynamicFileStr(String dynamicVarStr)
     {
         txtDynFiles.setText(dynamicVarStr);
+        DynVarStr = txtDynFiles.getText();
     }
 
     public void setNoCompressionFileStr(String noCompressStr)
     {
         txtDoNotCompress.setText(noCompressStr);
+        noCompressStr = txtDoNotCompress.getText();
     }
 
-    public void getDynamicFileStr(String dynamicVarStr)
+    public String getDynamicFileStr()
     {
-        txtDynFiles.getText();
+        return txtDynFiles.getText();
     }
 
-    public void getNoCompressionFileStr(String noCompressStr)
+    public String getNoCompressionFileStr()
     {
-        txtDoNotCompress.getText();
+        return txtDoNotCompress.getText();
     }
 
     void toolTipAdvanceSettings()

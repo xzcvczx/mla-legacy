@@ -415,7 +415,7 @@ typedef BOOL (*USB_CLIENT_INIT)   ( BYTE address, DWORD flags, BYTE clientDriver
 #else
     // If the application does not provide an event handler, then we will
     // assume that all events function without error.
-    #define USB_HOST_APP_EVENT_HANDLER(a,e,d,s) TRUE
+    #define USB_HOST_APP_EVENT_HANDLER(a,e,d,s) ((e==EVENT_OVERRIDE_CLIENT_DRIVER_SELECTION)?FALSE:TRUE)
 #endif
 
 

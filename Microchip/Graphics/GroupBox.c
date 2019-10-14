@@ -39,6 +39,7 @@
  * 11/12/07	    Version 1.0 release
  * 08/05/11     Fixed rendering to check IsDeviceBusy() in between primitive 
  *              function calls in case those primitives are hardware accelerated. 
+ * 03/06/12     Added GbSetText() function.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -80,7 +81,6 @@ GROUPBOX *GbCreate
     pGb->hdr.right = right;				// right position
     pGb->hdr.bottom = bottom;			// bottom position
     pGb->hdr.state = state;				// initial state
-    pGb->pText = pText;					// text label used
     pGb->hdr.DrawObj = GbDraw;			// draw function 	
     pGb->hdr.MsgObj = GbTranslateMsg;   // message function
     pGb->hdr.MsgDefaultObj = NULL;		// default message function
@@ -92,18 +92,34 @@ GROUPBOX *GbCreate
     else
         pGb->hdr.pGolScheme = (GOL_SCHEME *)pScheme;
 
-    pGb->textWidth = 0;
-    pGb->textHeight = 0;
     if(pText != NULL)
     {
-
         // Set the text width & height
-        pGb->textWidth = GetTextWidth(pText, pGb->hdr.pGolScheme->pFont);
-        pGb->textHeight = GetTextHeight(pGb->hdr.pGolScheme->pFont);
-    }
-
+        GbSetText(pGb, pText);
+    } 
+    else
+    {
+        pGb->pText = NULL;
+        pGb->textWidth = 0;
+        pGb->textHeight = 0;
+    }    
     GOLAddObject((OBJ_HEADER *)pGb);
     return (pGb);
+}
+
+/*********************************************************************
+* Function: GbSetText(GROUPBOX *pGb, char *pText)
+*
+* Overview: Sets the text.
+*
+********************************************************************/
+void GbSetText(GROUPBOX *pGb, XCHAR *pText)
+{
+    pGb->pText = pText;
+    // Set the text width & height
+    pGb->textWidth = GetTextWidth(pText, pGb->hdr.pGolScheme->pFont);
+    pGb->textHeight = GetTextHeight(pGb->hdr.pGolScheme->pFont);
+        
 }
 
 /*********************************************************************

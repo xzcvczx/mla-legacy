@@ -348,7 +348,7 @@ typedef union _POINTER
             }\
         }
 
-#define USBClearUSBInterrupt() IFS1bits.USBIF = 0;
+#define USBClearUSBInterrupt() INTClearFlag(INT_USB);
 #define USBInterruptFlag  IFS1bits.USBIF
 #if defined(USB_DISABLE_SOF_HANDLER)
     #define USB_SOF_INTERRUPT 0x00

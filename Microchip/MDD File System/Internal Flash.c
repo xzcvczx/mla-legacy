@@ -42,6 +42,8 @@
   1.3.0  Expanded flash memory pointer size on PIC18 to 24-bits.  This
          allows the MSD volume to exceed 64kB on large flash memory devices.
   1.3.6   Modified "FSConfig.h" to "FSconfig.h" in '#include' directive.
+  1.3.8   Modified "MDD_IntFlash_SectorRead" to write the correct word data
+          in 'buffer' pointer
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -233,6 +235,7 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
     WORD i;
     DWORD flashAddress;
     BYTE TBLPAGSave;
+    WORD_VAL temp;
     
     //Error check.  Make sure the host is trying to read from a legitimate
     //address, which corresponds to the MSD volume (and not some other program
@@ -256,8 +259,9 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
         TBLPAG = (BYTE)(flashAddress >> 16);   //Load TBLPAG pointer (upper 8 bits of total address.  A sector could get split at 
                                         //a 16-bit address boundary, and therefore could exist on two TBLPAG pages.
                                         //Therefore, need to reload TBLPAG every iteration of the for() loop
-        *(WORD*)buffer = __builtin_tblrdl((WORD)flashAddress);
-        buffer += 2u;                   //Just wrote a word.  Increment pointer for next word.
+        temp.Val = __builtin_tblrdl((WORD)flashAddress);
+        *buffer++ = temp.v[0];
+        *buffer++ = temp.v[1];
         flashAddress += 2u;             //Increment address by 2.  No MSD data stored in the upper WORD (which only has one implemented byte anyway).
         
     }   

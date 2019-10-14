@@ -281,8 +281,10 @@
 #ifdef PIC_SK
 	#if defined (__PIC32MX__)
 		   #define PIC32_SK 
-	#elif defined (__dsPIC33E__) || (__PIC24E__)
+	#elif defined (__dsPIC33E__) 
 		   #define dsPIC33E_SK
+    #elif defined (__PIC24E__)
+		   #define PIC24E_SK
 	#endif
 #endif
 
@@ -1136,10 +1138,21 @@
         #define DisplaySetCommand()         LATCbits.LATC2 = 0
         #define DisplaySetData()            LATCbits.LATC2 = 1
 
-        // Definitions for CS pin
-        #define DisplayConfig()             TRISDbits.TRISD10 = 0             
-        #define DisplayEnable()             LATDbits.LATD10 = 0
-        #define DisplayDisable()            LATDbits.LATD10 = 1
+        /*****
+        * The MA330025-2 and MA240025-2 PIMs default to use RK12 for the 
+        * pin 70 of the 100 pin PIM header.  
+        *****/
+        #if defined (__dsPIC33EP512MU814__) || defined (__PIC24EP512GU814__)
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISKbits.TRISK12 = 0             
+            #define DisplayEnable()             LATKbits.LATK12 = 0
+            #define DisplayDisable()            LATKbits.LATK12 = 1
+        #else
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISDbits.TRISD10 = 0             
+            #define DisplayEnable()             LATDbits.LATD10 = 0
+            #define DisplayDisable()            LATDbits.LATD10 = 1
+        #endif        
 
         // Definitions for FLASH CS pin
         #define DisplayFlashConfig()         
@@ -2024,7 +2037,7 @@
         #endif
     #elif defined (MEB_BOARD)
         // this is dependent on the Starter Kit used
-    	#if defined (PIC32_GP_SK) || defined (PIC32_USB_SK) || defined (dsPIC33E_SK)
+    	#if defined (PIC32_GP_SK) || defined (PIC32_USB_SK) || defined (dsPIC33E_SK) || defined (PIC24E_SK)
             #define SST25_SPI_CHANNEL 2
     	#elif defined (PIC32_ETH_SK)
             #define SST25_SPI_CHANNEL 4

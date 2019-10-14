@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="62">
   <projectmakefile>Makefile</projectmakefile>
-  <defaultConf>0</defaultConf>
+  <defaultConf>4</defaultConf>
   <confs>
     <conf name="PIC24_DA210_DEV_16PMP_QVGAv1_ENC28" type="2">
       <platformToolSN></platformToolSN>

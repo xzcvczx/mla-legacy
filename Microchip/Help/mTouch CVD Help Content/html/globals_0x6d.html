@@ -272,8 +272,14 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 <li>MCOMM_UART_1WAY_OUT_READING
 : <a class="el" href="m_comm__config_8h.html#a90817df23be8e58aaab3f2cb840b2256">mComm_config.h</a>
 </li>
+<li>MCOMM_UART_1WAY_OUT_SLIDER
+: <a class="el" href="m_comm__config_8h.html#a4dea806ccb8e3f154f3aca06b972603e">mComm_config.h</a>
+</li>
 <li>MCOMM_UART_1WAY_OUT_STATE
 : <a class="el" href="m_comm__config_8h.html#af6a29b036fbb9377fa12f236145b0b1c">mComm_config.h</a>
+</li>
+<li>MCOMM_UART_1WAY_OUT_TOGGLE
+: <a class="el" href="m_comm__config_8h.html#aaec5a7bd0db7bc5d8d3ad95f147fc90f">mComm_config.h</a>
 </li>
 <li>MCOMM_UART_1WAY_OUTPUT
 : <a class="el" href="m_comm__config_8h.html#a5f400d7990c7564e3805a5a79ce425fc">mComm_config.h</a>
@@ -407,6 +413,10 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 <li>MTOUCH_CONTROLS_ISR
 : <a class="el" href="m_touch__options_for_config_8h.html#a5c81684680ee270c3254b559cb1c2152">mTouch_optionsForConfig.h</a>
 </li>
+<li>mTouch_currentScan
+: <a class="el" href="m_touch_8h.html#ad74b3f8b877c7b7d513b9212d54dcb82">mTouch.h</a>
+, <a class="el" href="m_touch__acquistion_8c.html#ad74b3f8b877c7b7d513b9212d54dcb82">mTouch_acquistion.c</a>
+</li>
 <li>MTOUCH_CURRENTSCAN_VALUE
 : <a class="el" href="m_touch_8h.html#ae6182ea7b7b96091bd91b02b9724486b">mTouch.h</a>
 </li>
@@ -515,6 +525,9 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 </li>
 <li>MTOUCH_EEPROM_START_ADR
 : <a class="el" href="m_touch__config_8h.html#a2e444eadd603e930da95209adb57ad32">mTouch_config.h</a>
+</li>
+<li>MTOUCH_EEPROM_STORED_IN_RAM
+: <a class="el" href="m_touch__config_8h.html#a1977b772da79e6efa42f5d431e6e1b15">mTouch_config.h</a>
 </li>
 <li>MTOUCH_EEPROM_SYS_ADR
 : <a class="el" href="m_touch__eeprom_8h.html#a57e9fd235ecc2509523dc21904f07802">mTouch_eeprom.h</a>
@@ -1454,6 +1467,9 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 <li>MTOUCH_NUMBER_SLIDER2_SENSORS
 : <a class="el" href="m_touch__config__slider_8h.html#aba09912e7da20155ae3c9b8dec8a4302">mTouch_config_slider.h</a>
 </li>
+<li>mTouch_oversample
+: <a class="el" href="m_touch__acquistion_8c.html#aa3e2c47e7ecc16a50818d512103a10a9">mTouch_acquistion.c</a>
+</li>
 <li>MTOUCH_OVERSAMPLE0
 : <a class="el" href="m_touch__config__cvd_advanced_8h.html#a65fa5937f4f0d7bc51e58d3d632da37a">mTouch_config_cvdAdvanced.h</a>
 </li>
@@ -1544,6 +1560,9 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 <li>MTOUCH_OVERSAMPLE9
 : <a class="el" href="m_touch__config__cvd_advanced_8h.html#af01c725e5143bc82ff0f51d46d2194e9">mTouch_config_cvdAdvanced.h</a>
 </li>
+<li>mTouch_Oversample_Default
+: <a class="el" href="m_touch__acquistion_8c.html#ac5f356c01fbf14b25b402e94ac62ce00">mTouch_acquistion.c</a>
+</li>
 <li>MTOUCH_POWER_UP_SAMPLES
 : <a class="el" href="group___configuration.html#ga554a0e0288a98468d9e57ef5f21081bc">mTouch_config.h</a>
 </li>
@@ -1551,8 +1570,8 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 : <a class="el" href="m_touch_8h.html#a7d72b112c35bc51408030eb7ecdcacd2aed5b3f2b7065991010f45eb04759ef01">mTouch.h</a>
 </li>
 <li>mTouch_pressThreshold
-: <a class="el" href="m_touch_8c.html#ab29410255e81d186a19b48c01053fc96">mTouch.c</a>
-, <a class="el" href="m_touch_8h.html#ab29410255e81d186a19b48c01053fc96">mTouch.h</a>
+: <a class="el" href="m_touch_8h.html#ab29410255e81d186a19b48c01053fc96">mTouch.h</a>
+, <a class="el" href="m_touch_8c.html#ab29410255e81d186a19b48c01053fc96">mTouch.c</a>
 </li>
 <li>mTouch_previousSensor
 : <a class="el" href="m_touch__acquistion_8c.html#ac75b101e92e5e9f1da8ffef9968f73f0">mTouch_acquistion.c</a>
@@ -1604,12 +1623,13 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 : <a class="el" href="group___configuration.html#ga25cbd75115206e9ebd486d1eadf9e80c">mTouch_config.h</a>
 </li>
 <li>mTouch_Scan()
-: <a class="el" href="group___acquisition.html#ga60426826e876a6a8c03b27b45ba02833">mTouch.h</a>
-, <a class="el" href="group___acquisition.html#ga60426826e876a6a8c03b27b45ba02833">mTouch_acquistion.c</a>
+: <a class="el" href="group___acquisition.html#ga60426826e876a6a8c03b27b45ba02833">mTouch_acquistion.c</a>
+, <a class="el" href="group___acquisition.html#ga60426826e876a6a8c03b27b45ba02833">mTouch.h</a>
 </li>
 <li>MTOUCH_SCAN_FUNCTION()
-: <a class="el" href="m_touch__acquistion_8c.html#a8c156f6881689b25489b63cb166c5fc7">mTouch_acquistion.c</a>
+: <a class="el" href="m_touch__acquistion_8c.html#a95c3b8d1f282060ab16b9d479c381942">mTouch_acquistion.c</a>
 , <a class="el" href="m_touch__macro_library__common_8h.html#af0e04432459b8a721ea7da138dee9c7c">mTouch_macroLibrary_common.h</a>
+, <a class="el" href="m_touch__acquistion_8c.html#ae67b2ab309e13f5b5d986a77ee86f5ca">mTouch_acquistion.c</a>
 </li>
 <li>MTOUCH_SCAN_FUNCTIONALITY
 : <a class="el" href="group___configuration.html#gaf4dbe0f0b02e92689bb34a139cc9d100">mTouch_config.h</a>
@@ -1619,6 +1639,12 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 </li>
 <li>MTOUCH_SCAN_PROTOTYPES()
 : <a class="el" href="m_touch__acquistion_8c.html#ae1846c1507fc938b2655991ace5385fa">mTouch_acquistion.c</a>
+</li>
+<li>mTouch_ScanA
+: <a class="el" href="m_touch__acquistion_8c.html#af67749fc5d04faeb760250212ec682a4">mTouch_acquistion.c</a>
+</li>
+<li>mTouch_ScanB
+: <a class="el" href="m_touch__acquistion_8c.html#a012eaa2610ea954a92ec444967c034e3">mTouch_acquistion.c</a>
 </li>
 <li>MTOUCH_SCANFUNCTIONA
 : <a class="el" href="m_touch__macro_library__common_8h.html#ad061b9022b395b40eb63de4da8aa511a">mTouch_macroLibrary_common.h</a>
@@ -1654,16 +1680,16 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 : <a class="el" href="m_touch_8c.html#adad9dba6f415315e9096e25e0a568ea4">mTouch.c</a>
 </li>
 <li>mTouch_sensorData
-: <a class="el" href="m_touch__acquistion_8c.html#a6e24f307e58e95e12550082469099ae2">mTouch_acquistion.c</a>
-, <a class="el" href="m_touch_8h.html#a6e24f307e58e95e12550082469099ae2">mTouch.h</a>
+: <a class="el" href="m_touch_8h.html#a6e24f307e58e95e12550082469099ae2">mTouch.h</a>
+, <a class="el" href="m_touch__acquistion_8c.html#a6e24f307e58e95e12550082469099ae2">mTouch_acquistion.c</a>
 </li>
 <li>mTouch_Service
 : <a class="el" href="m_touch_8h.html#a96203f03b9e8e101c8c59c562c49ef40">mTouch.h</a>
 </li>
 <li>MTOUCH_SLEEP_STABILIZE_OSC
-: <a class="el" href="m_touch__macro_library__common_8h.html#ab4075a9c8250eb2a503a4305eec9cdb6">mTouch_macroLibrary_common.h</a>
+: <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#ab4075a9c8250eb2a503a4305eec9cdb6">mTouchCVD_macroLibrary_PIC16F.h</a>
 , <a class="el" href="m_touch_c_v_d__macro_library___p_i_c18_f_8h.html#ab4075a9c8250eb2a503a4305eec9cdb6">mTouchCVD_macroLibrary_PIC18F.h</a>
-, <a class="el" href="m_touch_c_v_d__macro_library___p_i_c16_f_8h.html#ab4075a9c8250eb2a503a4305eec9cdb6">mTouchCVD_macroLibrary_PIC16F.h</a>
+, <a class="el" href="m_touch__macro_library__common_8h.html#ab4075a9c8250eb2a503a4305eec9cdb6">mTouch_macroLibrary_common.h</a>
 </li>
 <li>MTOUCH_SLIDER0_SENSOR0
 : <a class="el" href="group___configuration.html#ga61061c569a01c468b7178440a280f2cc">mTouch_config_slider.h</a>
@@ -1712,6 +1738,9 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 <li>mTouch_StoreScanB()
 : <a class="el" href="m_touch__acquistion_8c.html#af756bb107972edbea40abb69edca89c5">mTouch_acquistion.c</a>
 </li>
+<li>MTOUCH_UNIQUE_OVERSAMPLE_ENABLE
+: <a class="el" href="m_touch__config__cvd_advanced_8h.html#ab2cbddb6bc244ff2122324988cf88edc">mTouch_config_cvdAdvanced.h</a>
+</li>
 <li>mTouch_UpdateAccumulator2()
 : <a class="el" href="m_touch__acquistion_8c.html#af2038aad410bb39c0955e0de237a8120">mTouch_acquistion.c</a>
 </li>
@@ -1723,7 +1752,7 @@ Here is a list of all functions, variables, defines, enums, and typedefs with li
 </li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

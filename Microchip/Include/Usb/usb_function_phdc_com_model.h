@@ -36,20 +36,20 @@
     This file contains all of functions, macros, definitions, variables,
     datatypes, etc. that are required for usage with the application software
 	.
-       
+
     This file is located in the "\<Install Directory\>\\Microchip\\Include\\USB"
     directory.
 
   Description:
     Application file
-    
+
     This file contains all of functions, macros, definitions, variables,
     datatypes, etc. that are required for usage with the application software.
-    
+
     This file is located in the "\<Install Directory\>\\Microchip\\Include\\USB"
     directory.
-    
-                        
+
+
 
 ********************************************************************/
 
@@ -58,7 +58,7 @@
   Rev    Description
   ----   -----------
   1.0   Initial release
-  2.0   
+  2.0
 
 ********************************************************************/
 #ifndef _PHD_COM_H
@@ -78,8 +78,8 @@
 typedef void(* PHDC_APP_CB)(UINT8);
 
 
-/* Application States */ 
-#define PHD_INITIALIZED  0x00 
+/* Application States */
+#define PHD_INITIALIZED  0x00
 #define PHD_CONNECTED    0x01
 #define PHD_MEASUREMENT_SENT 0x02
 #define PHD_DISCONNECTED  0x03
@@ -94,9 +94,9 @@ typedef void(* PHDC_APP_CB)(UINT8);
 #define  PHD_COM_STATE_ASSOC_OPERATING               0x05
 #define  PHD_COM_STATE_DISASSOCIATING                0x06
 
-/* requests */ 
+/* requests */
 #define PHD_ASSOCIATION_REQUEST     0xE200
-#define PHD_ASSOCIATION_RESPONSE    0xE300  
+#define PHD_ASSOCIATION_RESPONSE    0xE300
 #define PHD_RELEASE_REQUEST         0xE400
 #define PHD_RELEASE_RESPONSE        0xE500
 #define PHD_ABORT_REQUEST           0xE600
@@ -104,199 +104,199 @@ typedef void(* PHDC_APP_CB)(UINT8);
 
 
  /******************************************************************************
- * Function:        
+ * Function:
  *      void PHDConnect(void)
- * 
- * Summary:         
- *      This function is used to connect to the PHD Manager. 
  *
- * Description:        
- *       This function initiates connection to the PHD Manager by sending an 
- *       Association request to manager.  The Agent doesn't get connected to 
- *	 the Manager immediately after calling this function. Upon receiving 
+ * Summary:
+ *      This function is used to connect to the PHD Manager.
+ *
+ * Description:
+ *       This function initiates connection to the PHD Manager by sending an
+ *   Association request to manager.  The Agent doesn't get connected to
+ *	 the Manager immediately after calling this function. Upon receiving
  *	 the association request from an Agent, the PHD Manager responds with
  *	 an association response. The association response tells whether Manager
- *	 accepting the request or rejecting it. The Association response from 
- *	 the Manager is handled by the PHD stack. The PHD stack calls a callback 
- *	 function (void(* PHDC_APP_CB)(UINT8)) to the application with status of 
- *	 the connection. 
- *	 The Manager should respond to the Agent within the specified timeout of 
+ *	 accepting the request or rejecting it. The Association response from
+ *	 the Manager is handled by the PHD stack. The PHD stack calls a callback
+ *	 function (void(* PHDC_APP_CB)(UINT8)) to the application with status of
+ *	 the connection.
+ *	 The Manager should respond to the Agent within the specified timeout of
  *	 ASSOCIATION_REQUEST_TIMEOUT. The Agent should send the Association request
- *	 once more if the ASSOCIATION_REQUEST_TIMEOUT is expired. This function
- *	 starts a Timer for the Association Timeout request. The timeout is handled 
- *	 by the PHDTimeoutHandler() function.
+ *	 once more if no response is received from Manager and ASSOCIATION_REQUEST_TIMEOUT
+ *   is expired. This function starts a Timer for the Association Timeout request.
+ *   The timeout is handled by the PHDTimeoutHandler() function.
  *
- * Conditions:    
- *       The agent should be in PHD_INITIALIZED state. 
+ * Conditions:
+ *       The agent should be in PHD_INITIALIZED state.
  *
- * Parameters:            
+ * Parameters:
  *	None
  *
- * Return:          
+ * Return:
  *	None
  *
- * Side Effects:    
+ * Side Effects:
  *	None
  *
  * Remarks:
- *      None            
+ *      None
  *
  *****************************************************************************/
 void PHDConnect(void);
 
 /******************************************************************************
- * Function:        
+ * Function:
  *      void PHDDisConnect(void)
- * 
- * Summary:         
- *      This function is used to disconnect from the PHD Manager. 
  *
- * Description:        
- *       This function initiates disconnection of the Agent from the PHD Manager by sending an 
- *	 Release request to manager.  The Agent doesn't get disconnected from the Manager 
- *	 immediately after calling this function. The PHD Manager sends back a release response 
+ * Summary:
+ *      This function is used to disconnect from the PHD Manager.
+ *
+ * Description:
+ *       This function initiates disconnection of the Agent from the PHD Manager by sending an
+ *	 Release request to manager.  The Agent doesn't get disconnected from the Manager
+ *	 immediately after calling this function. The PHD Manager sends back a release response
  *	 to the Agent. The Agent responds back with an Abort Message and the Agent moves to DISCONNECTED
- *	 state. The PHD stack calls a callback function (void(* PHDC_APP_CB)(UINT8)) to the application 
- *	 with status of the connection. This function disables all timeout. 
+ *	 state. The PHD stack calls a callback function (void(* PHDC_APP_CB)(UINT8)) to the application
+ *	 with status of the connection. This function disables all timeout.
  *
- * Conditions:    
- *       The agent should be in PHD_CONNECTED state. 
+ * Conditions:
+ *    None.
  *
- * Parameters:            
+ * Parameters:
  *	None
  *
- * Return:          
+ * Return:
  *	None
  *
- * Side Effects:    
+ * Side Effects:
  *	None
  *
  * Remarks:
- *      None            
+ *      None
  *
  *****************************************************************************/
 void PHDDisConnect(void);
 
 
 /******************************************************************************
- * Function:        
+ * Function:
  *      void PHDAppInit(PHDC_APP_CB callback)
- * 
- * Summary:         
- *      This function is used to initialize the PHD stack. 
  *
- * Description:        
+ * Summary:
+ *      This function is used to initialize the PHD stack.
+ *
+ * Description:
  *       This function initializes all the application related items.
- *       The input to the function is address of the callback function. This callback function 
- *	 which will be called by PHD stack when there is a change in Agent's connection status. 
+ *       The input to the function is address of the callback function. This callback function
+ *	 which will be called by PHD stack when there is a change in Agent's connection status.
  *
- * Conditions:    
- *       None 
+ * Conditions:
+ *       None
  *
- * Parameters:            
+ * Parameters:
  *	PHDC_APP_CB callback - Pointer to application Call Back Function.
  *
- * Return:          
+ * Return:
  *	None
  *
- * Side Effects:    
+ * Side Effects:
  *	None
  *
  * Remarks:
- *      None            
+ *      None
  *
  *****************************************************************************/
 void PHDAppInit(PHDC_APP_CB);
 
 /******************************************************************************
- * Function:        
+ * Function:
  *      void PHDTimeoutHandler(void)
- * 
- * Summary:         
- *      This function is used to handle all timeout.  
  *
- * Description:        
+ * Summary:
+ *      This function is used to handle all timeout.
+ *
+ * Description:
  *       This function handles all timers. This function should be called once in every milli Second.
  *
- * Conditions:    
- *       None 
+ * Conditions:
+ *       None
  *
- * Parameters:            
+ * Parameters:
  *	None
  *
- * Return:          
+ * Return:
  *	None
  *
- * Side Effects:    
+ * Side Effects:
  *	None
  *
  * Remarks:
- *      If USB is used at the Transport layer then the USB SOF handler can call this function.             
+ *      If USB is used at the Transport layer then the USB SOF handler can call this function.
  *
  *****************************************************************************/
 void PHDTimeoutHandler(void);
 
 /******************************************************************************
- * Function:        
+ * Function:
  *      void PHDSendMeasuredData(void)
- * 
- * Summary:         
- *      This function is used to send measurement data to the PHD Manager.   
  *
- * Description:        
- *       This function sends measurement data to manager. Before calling this function 
+ * Summary:
+ *      This function is used to send measurement data to the PHD Manager.
+ *
+ * Description:
+ *       This function sends measurement data to manager. Before calling this function
  *       the caller should fill the Application buffer with the data to send. The Agent
- *	 expects a Confirmation from the Manager for the data sent. This confirmation should 
- *	 arrive at the Agent within a specified time of CONFIRM_TIMEOUT. The function starts 
+ *	 expects a Confirmation from the Manager for the data sent. This confirmation should
+ *	 arrive at the Agent within a specified time of CONFIRM_TIMEOUT. The function starts
  *	 a Timer to see if the Confirmation from the Manager arrives within specified time.
  *	 The timeout is handled by the PHDTimeoutHandler() function.
  *
- * Conditions:    
- *       Before calling this function the caller should fill the Application buffer with the data to send. 
+ * Conditions:
+ *       Before calling this function the caller should fill the Application buffer with the data to send.
  *
- * Parameters:            
+ * Parameters:
  *	None
  *
- * Return:          
+ * Return:
  *	None
  *
- * Side Effects:    
+ * Side Effects:
  *	None
  *
  * Remarks:
- *      None           
+ *      None
  *
  *****************************************************************************/
 void PHDSendMeasuredData(void);
 
 /******************************************************************************
- * Function:        
+ * Function:
  *      void PHDSendAppBufferPointer(UINT8 * pAppBuffer)
- * 
- * Summary:         
- *      This function is used to send measurement data to the PHD Manager.   
  *
- * Description:        
- *       This function passes the application buffer pointer to the PHD stack. The PHD stack 
- *       uses this pointer send and receive data through the transport layer. 
+ * Summary:
+ *      This function is used to send measurement data to the PHD Manager.
  *
- * Conditions:    
- *       
+ * Description:
+ *       This function passes the application buffer pointer to the PHD stack. The PHD stack
+ *       uses this pointer send and receive data through the transport layer.
  *
- * Parameters:            
+ * Conditions:
+ *
+ *
+ * Parameters:
  *	UINT8 *pAppBuffer - Pointer to Application Buffer.
  *
- * Return:          
+ * Return:
  *	None
  *
- * Side Effects:    
+ * Side Effects:
  *	None
  *
  * Remarks:
- *      None           
+ *      None
  *
  *****************************************************************************/
-void PHDSendAppBufferPointer(UINT8 * pAppBuffer); 
+void PHDSendAppBufferPointer(UINT8 * pAppBuffer);
 
 #endif
 

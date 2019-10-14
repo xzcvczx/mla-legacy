@@ -49,6 +49,8 @@
  *              state.
  * 09/27/11     EbTranslateMsg() should process touch without USE_FOCUS
  *              enabled.
+ * 03/20/12     Modified EbSetText() to terminate if end of string is detected
+ *              before max length is reached.
 *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -126,6 +128,9 @@ XCHAR* pointerTo;
         length++;
         if(length >= pEb->charMax){
             *pointerTo = 0;
+            break;
+        }
+        if(ch == 0){
             break;
         }
     }while(ch);

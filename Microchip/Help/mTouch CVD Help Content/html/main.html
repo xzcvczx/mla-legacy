@@ -23,9 +23,9 @@
 <h1>mTouch Framework Documentation</h1>  </div>
 </div>
 <div class="contents">
-<h3 class="version">v2.0 </h3><h2><a class="anchor" id="Intro"></a>
+<h3 class="version">v2.1 </h3><h2><a class="anchor" id="Intro"></a>
 Introduction</h2>
-<p>Thank you for downloading the mTouch Framework.</p>
+<p>Thank you for downloading the mTouch Framework v2.1, part of the mTouch Library v1.40.02 package in the MLA.</p>
 <p>The mTouch Framework is a software package enabling designers to easily integrate touch technologies to their application. It combines high sensitivity with conducted and radiated noise immunity.</p>
 <p>Simple configuration file allows for easy setup. Microchip also offers full source code access for more advanced touch designers.</p>
 <p><br/>
@@ -66,6 +66,7 @@ Introduction</h2>
 <tr valign="top">
 <td align="left"><a class="el" href="troubleshoot.html">Troubleshooting</a> <ul>
 <li><a class="el" href="ts-_comms.html">PC Communications</a> </li>
+<li><a class="el" href="_b_c_p_g_u_i.html">Backwards-compatible UART for prev. Profilab GUI</a> </li>
 </ul>
 </td><td>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; </td><td align="left"><a class="el" href="_software_license.html">License Agreement</a><br/>
 <br/>
@@ -92,7 +93,7 @@ Introduction</h2>
 <li>
 <b>/mTouchCap</b> <ul>
 <li>
-<b>/PIC12F PIC16F CVD Library</b><br/>
+<b>/PIC12F PIC16F Library</b><br/>
  Contains the C source (.c) and C header (.h) files for the mTouch Framework.<br/>
  <b>IMPORTANT</b>: The files in this directory should never be directly editted. Copy to a local application folder. <ul>
 <li>
@@ -108,7 +109,7 @@ mTouch Source Files <ul>
 <li>
 <a class="el" href="m_touch__proximity_8c.html" title="Implements the mTouch proximity decoding, if enabled.">mTouch_proximity.c</a> implements the proximity sensor decoding and state machine, if enabled. </li>
 <li>
-<a class="el" href="m_touch__eeprom_8c.html" title="Implements the mTouch EEPROM initialization and reset functions.">mTouch_eeprom.c</a> implements the mTouch EEPROM mapping and read/write functions, if enabled. </li>
+<a class="el" href="m_touch__eeprom_8c.html">mTouch_eeprom.c</a> implements the mTouch EEPROM mapping and read/write functions, if enabled. </li>
 </ul>
 </li>
 <li>
@@ -158,24 +159,24 @@ mTouch Header Files<br/>
 mComm Source Files<br/>
  These files implement the mTouch communications module called 'mComm'. <ul>
 <li>
-<a class="el" href="m_comm_8c.html" title="Implements the initialization and send/receive functions for the mComm module.">mComm.c</a> contains the basic logic for all supported communication types </li>
+<a class="el" href="m_comm_8c.html">mComm.c</a> contains the basic logic for all supported communication types </li>
 <li>
-<a class="el" href="m_comm__opcodes_8c.html" title="Internal mComm source file implements the default opcode actions for the mComm module.">mComm_opcodes.c</a> implements the read/write actions for each opcode </li>
+<a class="el" href="m_comm__opcodes_8c.html">mComm_opcodes.c</a> implements the read/write actions for each opcode </li>
 <li>
-<a class="el" href="m_comm__custom_8c.html" title="Example mComm custom opcode implementation. By default, implements an onChange state notification pac...">mComm_custom.c</a> implements a custom opcode and should be referenced when creating your own custom behavior. </li>
+<a class="el" href="m_comm__custom_8c.html">mComm_custom.c</a> implements a custom opcode and should be referenced when creating your own custom behavior. </li>
 </ul>
 </li>
 <li>
 mComm Header Files<br/>
  <ul>
 <li>
-<a class="el" href="m_comm_8h.html" title="The main mComm header file used by all mComm files.">mComm.h</a> is the main header file for the module. Automatically included by <a class="el" href="m_touch_8h.html" title="Required include! The main framework header file used by all framework files.">mTouch.h</a>. </li>
+<a class="el" href="m_comm_8h.html">mComm.h</a> is the main header file for the module. Automatically included by <a class="el" href="m_touch_8h.html" title="Required include! The main framework header file used by all framework files.">mTouch.h</a>. </li>
 <li>
 <a class="el" href="m_comm__config_8h.html" title="mComm Configuration! Main configuration file for the mComm module.">mComm_config.h</a> stores all the configuration options for the mComm module. </li>
 <li>
-<a class="el" href="m_comm__options_for_config_8h.html" title="Internal mComm header file provides pre-defined options for more user-friendly mComm configuration...">mComm_optionsForConfig.h</a> contains pre-defined labels for easier user configuration. Do not edit. </li>
+<a class="el" href="m_comm__options_for_config_8h.html">mComm_optionsForConfig.h</a> contains pre-defined labels for easier user configuration. Do not edit. </li>
 <li>
-<a class="el" href="m_comm__process_configuration_8h.html" title="Internal mComm header file performing many pre-compiler checks and generating predefined values for m...">mComm_processConfiguration.h</a> performs much of the pre-compiling work to confirm a valid configuration and then set up the flags and variables to aid the compiler in generating a custom mComm application. </li>
+<a class="el" href="m_comm__process_configuration_8h.html">mComm_processConfiguration.h</a> performs much of the pre-compiling work to confirm a valid configuration and then set up the flags and variables to aid the compiler in generating a custom mComm application. </li>
 </ul>
 </li>
 <li>
@@ -212,6 +213,9 @@ See <code>Your MLA Directory/Microchip/mTouchCap/PIC12F PIC16F CVD Library/Alter
 <li>
 <b>/12-Key Matrix</b><br/>
  Implements a 12-key 3x4 matrix daughter board on pins 0-6 </li>
+<li>
+<b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br/>
+ Implements the 4-sensor MoC daught board connected to pins 2-5 </li>
 </ul>
 </li>
 <li>
@@ -229,6 +233,9 @@ See <code>Your MLA Directory/Microchip/mTouchCap/PIC12F PIC16F CVD Library/Alter
 <li>
 <b>/12-Key Matrix</b><br/>
  Implements a 12-key 3x4 matrix daughter board on pins 0-6 </li>
+<li>
+<b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br/>
+ Implements the 4-sensor MoC daught board connected to pins 2-5 </li>
 </ul>
 </li>
 <li>
@@ -246,6 +253,9 @@ See <code>Your MLA Directory/Microchip/mTouchCap/PIC12F PIC16F CVD Library/Alter
 <li>
 <b>/12-Key Matrix</b><br/>
  Implements a 12-key 3x4 matrix daughter board on pins 0-6 </li>
+<li>
+<b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br/>
+ Implements the 4-sensor MoC daught board connected to pins 2-5 </li>
 </ul>
 </li>
 <li>
@@ -263,6 +273,9 @@ See <code>Your MLA Directory/Microchip/mTouchCap/PIC12F PIC16F CVD Library/Alter
 <li>
 <b>/12-Key Matrix</b><br/>
  Implements a 12-key 3x4 matrix daughter board on pins 0-6 </li>
+<li>
+<b>/Metal-over-Capacitive Daughter Board (AC183026)</b><br/>
+ Implements the 4-sensor MoC daught board connected to pins 2-5 </li>
 </ul>
 </li>
 <li>
@@ -280,7 +293,7 @@ See <code>Your MLA Directory/Microchip/mTouchCap/PIC12F PIC16F CVD Library/Alter
 </li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>mTouch Framework v2.0 documentation by&#160;
+<hr class="footer"/><address class="footer"><small>mTouch Framework v2.1 documentation by&#160;
 <a href="http://www.microchip.com"> 
 <img class="footer" src="../includes/mchp.jpeg" alt="Click here to visit our website at www.microchip.com"/></a></small></address> 
 </body> 

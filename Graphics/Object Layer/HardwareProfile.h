@@ -154,7 +154,7 @@
     //#include "Configs/HWP_MEB_PIC32_USB_SK_16PMP.h"
     //#include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP.h"
     
-    //#include "Configs/HWP_MEB_dsPIC33E_SK_8PMP.h"
+    //#include "Configs/HWP_MEB_PIC_SK_8PMP.h"
 
     /*********************************************************************
      * Hardware Configuration for 

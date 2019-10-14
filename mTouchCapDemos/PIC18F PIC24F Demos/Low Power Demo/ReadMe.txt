@@ -77,4 +77,5 @@ The steps involved in the implementation of the logic is given below:
                                    Help File
 *******************************************************************************
 
-For more information on mTouch Software Library, refer "mTouch Cap Library Help.chm" file.
+For more information about mTouch Software Library, refer "mTouch Cap Library Help.chm"
+file located in "...\Microchip\Help" folder.

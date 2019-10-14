@@ -36,7 +36,8 @@
  * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 11/06/09    Initial Release
- * 08/20/10    Modified PALETTE_EXTERNAL to be of type GFX_EXTDATA. 
+ * 08/20/10    Modified PALETTE_EXTERNAL to be of type GFX_EXTDATA.
+ * 03/20/12    Modified PALETTE_ENTRY structure to have packed attribute. 
  *****************************************************************************/
 #ifndef _PALETTE_H
     #define _PALETTE_H
@@ -54,22 +55,24 @@
 *           - For Monochrome: 4 bits are used to represent the luma.
 *
 *********************************************************************/
-typedef union
+typedef union __attribute__ ((packed))
 {
     WORD    value;						// a 16-bit value representing a color or palette entry
-    struct
+    struct __attribute__ ((packed))
     {
-        BYTE    r : 5;					// represents the RED component 
-        BYTE    g : 6;					// represents the GREEN component 
-        BYTE    b : 5;					// represents the BLUE component 
+        WORD    r : 5;					// represents the RED component 
+        WORD    g : 6;					// represents the GREEN component 
+        WORD    b : 5;					// represents the BLUE component 
     } color;							// color value in 5-6-5 RGB format
 
-    struct
+    struct __attribute__ ((packed))
     {
-        BYTE    luma : 4;				// monochrome LUMA value
-    } monchrome;						// monochrome LUMA value
+        WORD    reserved : 12;			// reserved, used as a filler 
+        WORD    luma : 4;				// monochrome LUMA value
+    } monochrome;						// monochrome LUMA value
 
 } PALETTE_ENTRY;
+
 
 /*********************************************************************
 * Overview: Structure for the palette header. 

@@ -60,7 +60,7 @@
 
 /* Request/Response Sizes */
 #define ASSOCIATION_REQUEST_SIZE           54
-#define CONFIG_EVENT_REPORT_SIZE           152
+#define CONFIG_EVENT_REPORT_SIZE           72
 #define MDS_ATTRIBUTES_SIZE             160
 #define MEASUREMENT_DATA_SIZE              44
 #define PHD_MDS_ATTR_ABS_TIME_STAMP_POINTER 152
