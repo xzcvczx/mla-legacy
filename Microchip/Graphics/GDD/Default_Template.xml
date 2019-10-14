@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<gfx_lib_info version="2.10">
+<gfx_lib_info version="2.11">
   <COPY_FILES_FOLDER>
 	.\Microchip\Graphics\GDD\Default_Template
   </COPY_FILES_FOLDER>
@@ -12,13 +12,15 @@
   <GRAPHICS_REFERENCE_FILES>
      <BoardSupportPackage>
        <list>Board Support Package\TouchScreen.c</list>
-       <list>Board Support Package\TouchScreen.h</list>
-       <list>Board Support Package\EEPROM.c</list>
-       <list>Board Support Package\EEPROM.h</list>
-       <list>Board Support Package\Beep.c</list>
-       <list>Board Support Package\Beep.h</list>
-       <list>Board Support Package\SST25VF016.c</list>
-       <list>Board Support Package\SST25VF016.h</list>
+	   <list>Board Support Package\TouchScreen.h</list>
+	   <list>Board Support Package\EEPROM.c</list>
+	   <list>Board Support Package\EEPROM.h</list>
+	   <list>Board Support Package\Beep.c</list>
+	   <list>Board Support Package\Beep.h</list>
+	   <list>Board Support Package\SST25VF016.c</list>
+	   <list>Board Support Package\SST25VF016.h</list>
+	   <list>Board Support Package\cpld.c</list>
+	   <list>Board Support Package\cpld.h</list>
      </BoardSupportPackage>
      <Graphics>
 		<list>Microchip\Graphics\DisplayDriver.c</list>

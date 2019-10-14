@@ -134,7 +134,7 @@ typedef void (*IMG_LOOP_CALLBACK)(void);
 
 #ifdef IMG_USE_ONLY_MDD_FILE_SYSTEM_FOR_INPUT
 
- #include <MDD File System\FSIO.h>
+ #include <MDD File System/FSIO.h>
 
  #define IMG_FILE         FSFILE
  #define IMG_FREAD        FSfread
@@ -167,7 +167,7 @@ typedef void (*IMG_LOOP_CALLBACK)(void);
 #define IMG_SCREEN_HEIGHT        (GetMaxY()+1)
 
 #ifdef IMG_USE_ONLY_565_GRAPHICS_DRIVER_FOR_OUTPUT
-       #include "Graphics\Graphics.h"
+       #include "Graphics/Graphics.h"
        #define IMG_vSetColor(r, g, b)   SetColor(RGB565CONVERT((r), (g), (b)))
        #define IMG_vSetColor565(color)  SetColor(color)
        #define _PutPixel(x, y)          PutPixel(x, y)

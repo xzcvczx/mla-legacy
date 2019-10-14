@@ -6,7 +6,7 @@
  * FileName:        Meter.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,17 +34,17 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * PAT					11/12/07	Version 1.0 release
- * Albert Z.			07/31/08	Added arc colors options
- * PAT					08/20/08	Added accuracy option for displaying values
- * PAT					01/18/10	Fixed MtrIncVal() and MtrDecVal() macros
+ * 11/12/07		Version 1.0 release
+ * 07/31/08		Added arc colors options
+ * 08/20/08		Added accuracy option for displaying values
+ * 01/18/10		Fixed MtrIncVal() and MtrDecVal() macros
  *****************************************************************************/
 #ifndef _METER_H
     #define _METER_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 // Compile time Options for Meter
     #define METER_DISPLAY_VALUES_ENABLE // This enables the display of the values.
@@ -252,7 +252,7 @@ METER   *MtrCreate
         );
 
 /*********************************************************************
-* Function: WORD MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg)
+* Function: WORD MtrTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates the translated 
@@ -279,10 +279,10 @@ METER   *MtrCreate
 * Side Effects: none
 *
 ********************************************************************/
-WORD    MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg);
+WORD    MtrTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG* pMsg)
+* Function: MtrMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: This function performs the actual state change 
 *			based on the translated message given. Meter value is set
@@ -305,7 +305,7 @@ WORD    MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void    MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG *pMsg);
+void    MtrMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Macros:  MtrGetVal(pMtr)
@@ -429,7 +429,7 @@ void    MtrSetVal(METER *pMtr, SHORT newVal);
     }
 
 /*********************************************************************
-* Function: WORD MtrDraw(METER *pMtr)
+* Function: WORD MtrDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -463,7 +463,7 @@ void    MtrSetVal(METER *pMtr, SHORT newVal);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    MtrDraw(METER *pMtr);
+WORD MtrDraw(void *pObj);
 
 /*********************************************************************
 * Macro: MtrSetTitleFont(pMtr, pNewFont)   (((METER*)pMtr)->pTitleFont = pNewFont)

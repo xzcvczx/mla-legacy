@@ -58,8 +58,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypeDefs.h"
-#include "USB\usb.h"
-#include "USB\usb_host_charger.h"
+#include "USB/usb.h"
+#include "USB/usb_host_charger.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE
@@ -94,7 +94,7 @@ static BOOL _USBHostCharger_FindDevice( BYTE address );
 
 /****************************************************************************
   Function:
-    BOOL USBHostChargerInitialize ( BYTE address, DWORD flags )
+    BOOL USBHostChargerInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is called by the USB Embedded Host layer when a device
@@ -112,6 +112,8 @@ static BOOL _USBHostCharger_FindDevice( BYTE address );
   Parameters:
     BYTE address    - Device's address on the bus
     DWORD flags     - Initialization flags
+    BYTE clientDriverID - ID to send when issuing a Device Request via
+                            USBHostIssueDeviceRequest() or USBHostSetDeviceConfiguration().
 
   Return Values:
     TRUE    - Initialization was successful
@@ -123,7 +125,7 @@ static BOOL _USBHostCharger_FindDevice( BYTE address );
     attached device.
   ***************************************************************************/
 
-BOOL USBHostChargerInitialize( BYTE address, DWORD flags )
+BOOL USBHostChargerInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 {
     BYTE    *pDesc;
 
@@ -145,6 +147,7 @@ BOOL USBHostChargerInitialize( BYTE address, DWORD flags )
 
     // Save device the address, VID, & PID
     usbChargingDevices[currentChargingRecord].ID.deviceAddress = address;
+    usbChargingDevices[currentChargingRecord].ID.clientDriverID = clientDriverID;
     pDesc  = USBHostGetDeviceDescriptor(address);
     pDesc += 8;
     usbChargingDevices[currentChargingRecord].ID.vid  =  (WORD)*pDesc;       pDesc++;

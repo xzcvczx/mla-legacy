@@ -39,7 +39,7 @@
  * PAT				  	            11/12/07	    Version 1.0 release
  * Pradeep Budagutta                03 Dec 2009     Added Object Header for Double Buffering Support
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include <math.h>
 
 #ifdef USE_ROUNDDIAL
@@ -77,20 +77,24 @@ ROUNDDIAL *RdiaCreate
     pDia->hdr.ID = ID;              // unique id assigned for referencing
     pDia->hdr.pNxtObj = NULL;       // initialize pointer to NULL
     pDia->hdr.type = OBJ_ROUNDDIAL; // set object type
-    pDia->xCenter = x;          // x coordinate of center
-    pDia->yCenter = y;          // y coordinate of center
-    pDia->radius = radius;      // radius of dial
+    pDia->xCenter = x;				// x coordinate of center
+    pDia->yCenter = y;				// y coordinate of center
+    pDia->radius = radius;			// radius of dial
     pDia->res = res;
     pDia->value = value;
     pDia->max = max;
     pDia->hdr.state = state;        // state
     pDia->curr_xPos = x + radius * 2 / 3;
     pDia->curr_yPos = y;
+    pDia->hdr.DrawObj = RdiaDraw;				// draw function
+    pDia->hdr.MsgObj = RdiaTranslateMsg;		// message function
+    pDia->hdr.MsgDefaultObj = RdiaMsgDefault;	// default message function
+    pDia->hdr.FreeObj = NULL;					// free function
 
-    pDia->hdr.left = x - radius;        // left position
-    pDia->hdr.top = y - radius;          // top position
-    pDia->hdr.right = x + radius;      // right position
-    pDia->hdr.bottom = y + radius;    // bottom position
+    pDia->hdr.left = x - radius;    // left position
+    pDia->hdr.top = y - radius;     // top position
+    pDia->hdr.right = x + radius;   // right position
+    pDia->hdr.bottom = y + radius;  // bottom position
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -104,15 +108,19 @@ ROUNDDIAL *RdiaCreate
 }
 
 /*********************************************************************
-* Function: RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg)
+* Function: RdiaMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 *
 * Notes: This the default operation to change the state of the dial.
 *		 Called inside GOLMsg() when GOLMsgCallback() returns a 1.
 *
 ********************************************************************/
-void RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG *pMsg)
+void RdiaMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    ROUNDDIAL *pDia;
+
+    pDia = (ROUNDDIAL *)pObj;
+
     switch(translatedMsg)
     {
         case RD_MSG_CLOCKWISE:      SetState(pDia, RDIA_ROT_CW | RDIA_DRAW);    // set rotate left and redraw
@@ -192,15 +200,19 @@ SHORT RdiaSine(SHORT v)
 }
 
 /*********************************************************************
-* Function: WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
+* Function: WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 *
 * Notes: Evaluates the message if the object will be affected by the 
 *		 message or not.
 *
 ********************************************************************/
-WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
+WORD RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    ROUNDDIAL *pDia;
+
+    pDia = (ROUNDDIAL *)pObj;
+
         #ifdef USE_TOUCHSCREEN
 
     SHORT           touchRadius, touchX, touchY;
@@ -359,13 +371,13 @@ WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD RdiaDraw(ROUNDDIAL *pDia)
+* Function: WORD RdiaDraw(void *pObj)
 *
 *
 * Notes: This is the state machine to draw the dial.
 *
 ********************************************************************/
-WORD RdiaDraw(ROUNDDIAL *pDia)
+WORD RdiaDraw(void *pObj)
 {
     typedef enum
     {
@@ -379,6 +391,9 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
     static RDIA_DRAW_STATES state = REMOVE;
     static SHORT dimpleRadius;
     WORD faceClr;
+    ROUNDDIAL *pDia;
+
+    pDia = (ROUNDDIAL *)pObj;
 
     switch(state)
     {

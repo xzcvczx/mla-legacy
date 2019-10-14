@@ -41,7 +41,7 @@
  *****************************************************************************/
 #include "EEPROM.h"
 
-#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+#if defined (USE_25LC256)
 
 /************************************************************************
 * Function: EEPROMInit                                                  
@@ -408,4 +408,5 @@ void EEPROMReadArray(WORD address, BYTE *pData, WORD nCount)
     EEPROMCSHigh();
 }
 
-#endif
+#endif // #if defined (USE_25LC256)
+

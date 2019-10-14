@@ -5,14 +5,14 @@
  *********************************************************************
  * FileName:        HardwareProfile_xxx.h
  * Dependencies:    None
- * Processor:       PIC24F, PIC24H, dsPIC, PIC32 
+ * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:        Microchip C32 v1.00 or higher
  *					Microchip C30 v3.01 or higher
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
  *
- * Copyright © 2002-2009 Microchip Technology Inc.  All rights 
+ * Copyright © 2002-2010 Microchip Technology Inc.  All rights 
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and 
@@ -42,13 +42,14 @@
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
  *
- * Author               Date		Comment
+ * Date		Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Howard Schlunder		10/03/06	Original, copied from Compiler.h
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
- * Pradeep Budagutta	15 Sep 2009 Added PIC24FJ256DA210 Development Board Support
- * PAT                  04/07/10    Removed GRAPHICS_HARDWARE_PLATFORM 
- *                                  Added MMB support
+ * 10/03/06	Original, copied from Compiler.h
+ * 06/25/09 dsPIC & PIC24H support 
+ * 09/15/09 Added PIC24FJ256DA210 Development Board Support
+ * 04/07/10 Removed GRAPHICS_HARDWARE_PLATFORM 
+ *          Added MMB support
+ * 08/20/10 Added check on drivers used.
  ********************************************************************/
 #ifndef __HARDWARE_PROFILE_H
     #define __HARDWARE_PROFILE_H
@@ -99,7 +100,7 @@
 * Overview: This macro returns instruction clock frequency 
 *			used in Hertz.
 *			* value for PIC24 is <PRE>(GetSystemClock()/2) </PRE> 
-*			* value for PIC32 is (GetSystemClock()/PFMWSbits.CHECON) </PRE> 
+*			* value for PIC32 is <PRE>(GetSystemClock()) </PRE> 
 *
 ********************************************************************/
     #if defined(__PIC24F__) || defined(__PIC24H__) || defined(__dsPIC33F__)
@@ -107,6 +108,13 @@
     #elif defined(__PIC32MX__)
         #define GetInstructionClock()   (GetSystemClock())
     #endif
+
+/*********************************************************************
+* PIC Device Specific includes
+*********************************************************************/
+#ifdef __PIC32MX
+	#include <p32xxxx.h>
+#endif
 
 /*********************************************************************
 * UART SETTINGS
@@ -167,7 +175,68 @@
 #endif
 
 /*********************************************************************
-* SETTINGS FOR DISPLAY DRIVER FEATURE for PIC24FJ256DA210 Family of
+* IPU OPERATION MACROS.
+*********************************************************************/
+/* ********************************************************************
+* These defines the cache areas when using IPU of the Graphics Module. 
+* The IPU operation will need two cache areas:
+* - for compressed data (GFX_COMPRESSED_DATA_RAM_ADDRESS, 
+*   GFX_COMPRESSED_BUFFER_SIZE)
+* - for decompressed data (GFX_DECOMPRESSED_DATA_RAM_ADDRESS, 
+*   GFX_DECOMPRESSED_BUFFER_SIZE)
+* These two areas are not part of the memory that the Display Driver 
+* uses for the viewable pixels. These two areas will exclusively be 
+* used by the IPU operation to perform the decompression.
+* The use of the IPU cache areas assumes that the hardware used
+* is the PIC24FJ256DA210 Development Board where the EPMP CS1 is hooked
+* up to SRAM and EPMP CS2 is hooked up to a parallel flash memory.
+* Make sure that the buffer sizes are word aligned since IPU operates 
+* only on WORD aligned addresses.
+* Users can derive the size of the two areas based on the output of the
+* "Graphics Resource Converter" tool used to generate the hex or C array
+* of the compressed images. Please refer to the "Graphics Resource 
+* Converter" Help file for details.
+* If the compressed image is placed in Parallel Flash, then the
+* GFX_COMPRESSED_BUFFER_SIZE is not needed since the IPU module
+* can access the compressed data directly.
+********************************************************************  */
+
+#if defined (PIC24FJ256DA210_DEV_BOARD)
+   #if defined (USE_COMP_IPU)
+      #if defined (GFX_EPMP_CS1_BASE_ADDRESS)
+
+         #define GFX_COMPRESSED_BUFFER_SIZE              (1546)
+         #define GFX_DECOMPRESSED_BUFFER_SIZE            (2074)
+         #define GFX_IPU_TEMP_DATA_TRANSFER_ARRAY_SIZE   (1024)
+
+         #ifdef USE_DOUBLE_BUFFERING
+            #define GFX_DECOMPRESSED_DATA_RAM_ADDRESS   (GFX_EPMP_CS1_BASE_ADDRESS + (GFX_DISPLAY_BUFFER_LENGTH*2))
+         #else
+            #define GFX_DECOMPRESSED_DATA_RAM_ADDRESS   (GFX_EPMP_CS1_BASE_ADDRESS + GFX_DISPLAY_BUFFER_LENGTH)
+         #endif
+   
+         #define GFX_COMPRESSED_DATA_RAM_ADDRESS        (GFX_DECOMPRESSED_DATA_RAM_ADDRESS + GFX_DECOMPRESSED_BUFFER_SIZE)     
+
+      #else
+         #warning "EPMP CS1 Base Address not defined. If you are using IPU make sure that the GFX_COMPRESSED_DATA_RAM_ADDRESS & GFX_DECOMPRESSED_DATA_RAM_ADDRESS are allocated properly in internal memory."                   
+      #endif
+
+      // Error checks
+      #if defined (GFX_EPMP_CS2_BASE_ADDRESS) && defined (GFX_COMPRESSED_BUFFER_SIZE)
+         #if ((GFX_COMPRESSED_DATA_RAM_ADDRESS+GFX_COMPRESSED_BUFFER_SIZE) > GFX_EPMP_CS2_BASE_ADDRESS)
+            #error "Compressed data buffer is overlapping EPMP CS2 space. Adjust the EPMP CS2 Base Address value."
+         #endif
+      #elif defined (GFX_EPMP_CS2_BASE_ADDRESS) && defined (GFX_DECOMPRESSED_BUFFER_SIZE)
+         #if ((GFX_DECOMPRESSED_DATA_RAM_ADDRESS+GFX_DECOMPRESSED_BUFFER_SIZE) > GFX_EPMP_CS2_BASE_ADDRESS)
+            #error "Decompressed data buffer is overlapping EPMP CS2 space. Adjust the EPMP CS2 Base Address value."
+         #endif
+      #endif          
+   #endif //#if defined (USE_COMP_IPU)
+#endif //#if defined (PIC24FJ256DA210_DEV_BOARD)
+
+
+/*********************************************************************
+* SETTINGS FOR DISPLAY DRIVER FEATURE for PIC24FJ256DA210  Family of
 * display controller
 *********************************************************************/
 
@@ -342,93 +411,211 @@
 /* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
    &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
 
+#endif //ifdef _GRAPHICS_H
+
+/*********************************************************************
+* Default Hardware Selection 
+* - This sets up the default hardware for the selected hardware
+*   platform.
+********************************************************************/
+
+#ifdef PIC24FJ256DA210_DEV_BOARD
+	   #if defined (GFX_EPMP_CS2_BASE_ADDRESS)
+	       #define   USE_SST39LF400					   // use parallel flash since EPMP CS 2 is enabled
+       #else	
+           #define	 USE_SST25VF016                    // use the SPI Flash 
+       #endif 
+       #define       USE_RESISTIVE_TOUCH               // use the resistive touch 
+#endif
+
+#ifdef GFX_PICTAIL_V2
+       #define       USE_25LC256                       // use the SPI Flash on Explorer 16 
+       #define       USE_SST39VF040                    // use the parallel on GFX Board 
+       #define       USE_RESISTIVE_TOUCH               // use the resistive touch 
+	   #define		 USE_GFX_PICTAIL_V2_BEEPER         // use the PWM controlled beeper 
+#endif
+
+#ifdef GFX_PICTAIL_V3
+       #define       USE_SST25VF016                    // use the SPI Flash 
+       #define       USE_RESISTIVE_TOUCH               // use the resistive touch 
+#endif
+
+#ifdef MULTI_MEDIA_BOARD_DM00123
+	   #define       USE_XC2C64A					   // use the CPLD on the board	
+       #define       USE_SST25VF016                    // use the SPI Flash 
+       #define       USE_RESISTIVE_TOUCH               // use the resistive touch 
+	   #define       USE_ACCELEROMETER_BMA150		   // use the accelerometer module	
+       #define       USE_JOYSTICK_MEB                  // use the joystick
+#endif
+
 /*********************************************************************
 * IOS FOR THE DISPLAY CONTROLLER
 *********************************************************************/
-#if defined (GFX_PICTAIL_V1)
-	// Definitions for reset pin
-	#define RST_TRIS_BIT    TRISCbits.TRISC1
-    #define RST_LAT_BIT     LATCbits.LATC1
-
-	// Definitions for RS pin
-    #define RS_TRIS_BIT TRISBbits.TRISB15
-    #define RS_LAT_BIT  LATBbits.LATB15
-
-	// Definitions for CS pin
-    #define CS_TRIS_BIT TRISDbits.TRISD8
-    #define CS_LAT_BIT  LATDbits.LATD8
-
-	// Definitions for FLASH CS pin
-    #define CS_FLASH_LAT_BIT    LATDbits.LATD9
-    #define CS_FLASH_TRIS_BIT   TRISDbits.TRISD9
-
-#elif defined (GFX_PICTAIL_V2)
+#if defined (GFX_PICTAIL_V2)
     #if (DISPLAY_CONTROLLER == LGDP4531)
         #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
 
-			// Definitions for reset pin
-            #define RST_TRIS_BIT    TRISAbits.TRISA4
-            #define RST_LAT_BIT     LATAbits.LATA4
+            // Definitions for reset pin
+            #define DisplayResetConfig()        TRISAbits.TRISA4 = 0    
+            #define DisplayResetEnable()        LATAbits.LATA4 = 0
+            #define DisplayResetDisable()       LATAbits.LATA4 = 1
 
-			// Definitions for RS pin
-            #define RS_TRIS_BIT TRISAbits.TRISA1
-            #define RS_LAT_BIT  LATAbits.LATA1
+            // Definitions for RS pin
+            #define DisplayCmdDataConfig()      TRISAbits.TRISA1 = 0
+            #define DisplaySetCommand()         LATAbits.LATA1 = 0
+            #define DisplaySetData()            LATAbits.LATA1 = 1
 
-			// Definitions for CS pin
-            #define CS_TRIS_BIT TRISBbits.TRISB15
-            #define CS_LAT_BIT  LATBbits.LATB15
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISBbits.TRISB15 = 0             
+            #define DisplayEnable()             LATBbits.LATB15 = 0
+            #define DisplayDisable()            LATBbits.LATB15 = 1
 
-			// Definitions for FLASH CS pin
-            #define CS_FLASH_LAT_BIT    LATAbits.LATA8
-            #define CS_FLASH_TRIS_BIT   TRISAbits.TRISA8
+            // Definitions for FLASH CS pin
+            #define DisplayFlashConfig()        TRISAbits.TRISA8 = 0        
+            #define DisplayFlashEnable()        LATAbits.LATA8 = 1
+            #define DisplayFlashDisable()       LATAbits.LATA8 = 0
 
-			// Definitions for POWER ON pin
-            #define POWERON_LAT_BIT     LATAbits.LATA10
-            #define POWERON_TRIS_BIT    TRISAbits.TRISA10
+            // Definitions for POWER ON pin
+            #define DisplayPowerConfig()        TRISAbits.TRISA10 = 0
+            #define DisplayPowerOn()            LATAbits.LATA10 = 0
+            #define DisplayPowerOff()           LATAbits.LATA10 = 1
 
         #else
 
-			// Definitions for reset pin
-            #define RST_TRIS_BIT    TRISCbits.TRISC1
-            #define RST_LAT_BIT     LATCbits.LATC1
+            #ifndef __PIC32MX__
+	            // Definitions for reset pin
+                #define DisplayResetConfig()        TRISCbits.TRISC1 = 0    
+                #define DisplayResetEnable()        LATCbits.LATC1 = 0
+                #define DisplayResetDisable()       LATCbits.LATC1 = 1
 
-			// Definitions for RS pin
-            #define RS_TRIS_BIT TRISCbits.TRISC2
-            #define RS_LAT_BIT  LATCbits.LATC2
+	            // Definitions for RS pin
+                #define DisplayCmdDataConfig()      TRISCbits.TRISC2 = 0
+                #define DisplaySetCommand()         LATCbits.LATC2 = 0
+                #define DisplaySetData()            LATCbits.LATC2 = 1
 
-			// Definitions for CS pin
-            #define CS_TRIS_BIT TRISDbits.TRISD10
-            #define CS_LAT_BIT  LATDbits.LATD10
+	            // Definitions for CS pin
+                #define DisplayConfig()             TRISDbits.TRISD10 = 0             
+                #define DisplayEnable()             LATDbits.LATD10 = 0
+                #define DisplayDisable()            LATDbits.LATD10 = 1
 
-			// Definitions for FLASH CS pin
-            #define CS_FLASH_LAT_BIT    LATDbits.LATD1
-            #define CS_FLASH_TRIS_BIT   TRISDbits.TRISD1
+                // Definitions for FLASH CS pin
+                #define DisplayFlashConfig()        TRISDbits.TRISD1 = 0        
+                #define DisplayFlashEnable()        LATDbits.LATD1 = 1
+                #define DisplayFlashDisable()       LATDbits.LATD1 = 0
 
-			// Definitions for POWER ON pin
-            #define POWERON_LAT_BIT     LATCbits.LATC3
-            #define POWERON_TRIS_BIT    TRISCbits.TRISC3
+                // Definitions for POWER ON pin
+                #define DisplayPowerConfig()        TRISCbits.TRISC3 = 0
+                #define DisplayPowerOn()            LATCbits.LATC3 = 0
+                #define DisplayPowerOff()           LATCbits.LATC3 = 1
+            #else
+            /********
+             * PIC32 will use the SET and CLR SFRs for the I/O.
+             * These are atomic settings that are recommended when
+             * modifying SFRs
+             ********/
+	            // Definitions for reset pin
+                #define DisplayResetConfig()        TRISCCLR = _TRISC_TRISC1_MASK    
+                #define DisplayResetEnable()        LATCCLR = _LATC_LATC1_MASK
+                #define DisplayResetDisable()       LATCSET = _LATC_LATC1_MASK
+
+	            // Definitions for RS pin
+                #define DisplayCmdDataConfig()      TRISCCLR = _TRISC_TRISC2_MASK
+                #define DisplaySetCommand()         LATCCLR = _LATC_LATC2_MASK
+                #define DisplaySetData()            LATCSET = _LATC_LATC2_MASK
+
+	            // Definitions for CS pin
+                #define DisplayConfig()             TRISDCLR = _TRISD_TRISD10_MASK
+                #define DisplayEnable()             LATDCLR = _LATD_LATD10_MASK
+                #define DisplayDisable()            LATDSET = _LATD_LATD10_MASK
+
+                // Definitions for FLASH CS pin
+                #define DisplayFlashConfig()        TRISDCLR = _TRISD_TRISD1_MASK     
+                #define DisplayFlashEnable()        LATDCLR = _LATD_LATD1_MASK
+                #define DisplayFlashDisable()       LATDSET = _LATD_LATD1_MASK
+
+                // Definitions for POWER ON pin
+                #define DisplayPowerConfig()        TRISCCLR = _TRISC_TRISC3_MASK
+                #define DisplayPowerOn()            LATCCLR = _LATC_LATC3_MASK 
+                #define DisplayPowerOff()           LATCSET = _LATC_LATC3_MASK
+            #endif
+
         #endif
     #elif (DISPLAY_CONTROLLER == SSD1906)
 
-		// Definitions for reset line
-        #define RST_TRIS_BIT    TRISCbits.TRISC1
-        #define RST_LAT_BIT     LATCbits.LATC1
+            #ifndef __PIC32MX__
+	            // Definitions for reset pin
+                #define DisplayResetConfig()        TRISCbits.TRISC1 = 0    
+                #define DisplayResetEnable()        LATCbits.LATC1 = 0
+                #define DisplayResetDisable()       LATCbits.LATC1 = 1
 
-		// Definitions for RS line
-        #define RS_TRIS_BIT TRISCbits.TRISC2
-        #define RS_LAT_BIT  LATCbits.LATC2
+	            // Definitions for RS pin
+                #define DisplayCmdDataConfig()      TRISCbits.TRISC2 = 0
+                #define DisplaySetCommand()         LATCbits.LATC2 = 0
+                #define DisplaySetData()            LATCbits.LATC2 = 1
 
-		// Definitions for CS line
-        #define CS_TRIS_BIT TRISDbits.TRISD10
-        #define CS_LAT_BIT  LATDbits.LATD10
+	            // Definitions for CS pin
+                #define DisplayConfig()             TRISDbits.TRISD10 = 0             
+                #define DisplayEnable()             LATDbits.LATD10 = 0
+                #define DisplayDisable()            LATDbits.LATD10 = 1
 
-		// Definitions for A0 line
-        #define A0_LAT_BIT  LATDbits.LATD3
-        #define A0_TRIS_BIT TRISDbits.TRISD3
+                // Definitions for FLASH CS pin
+                #define DisplayFlashConfig()        TRISDbits.TRISD1 = 0        
+                #define DisplayFlashEnable()        LATDbits.LATD1 = 1
+                #define DisplayFlashDisable()       LATDbits.LATD1 = 0
 
-		// Definitions for A17 line
-        #define A17_LAT_BIT     LATGbits.LATG14
-        #define A17_TRIS_BIT    TRISGbits.TRISG14
+                // Definitions for POWER ON pin
+                #define DisplayPowerConfig()        TRISCbits.TRISC3 = 0
+                #define DisplayPowerOn()            LATCbits.LATC3 = 1
+                #define DisplayPowerOff()           LATCbits.LATC3 = 0
+
+                // Extended address lines
+                #define DisplayAddr0Config()        TRISDbits.TRISD3 = 0
+                #define DisplaySetAddr0()           LATDbits.LATD3 = 1
+                #define DisplayClearAddr0()         LATDbits.LATD3 = 0
+
+                #define DisplayAddr17Config()       TRISGbits.TRISG14 = 0
+                #define DisplaytSetAddr17()         TRISGbits.TRISG14 = 1
+                #define DisplayClearAddr17()        TRISGbits.TRISG14 = 0
+            #else
+            /********
+             * PIC32 will use the SET and CLR SFRs for the I/O.
+             * These are atomic settings that are recommended when
+             * modifying SFRs
+             ********/
+	            // Definitions for reset pin
+                #define DisplayResetConfig()        TRISCCLR = _TRISC_TRISC1_MASK    
+                #define DisplayResetEnable()        LATCCLR = _LATC_LATC1_MASK
+                #define DisplayResetDisable()       LATCSET = _LATC_LATC1_MASK
+
+	            // Definitions for RS pin
+                #define DisplayCmdDataConfig()      TRISCCLR = _TRISC_TRISC2_MASK
+                #define DisplaySetCommand()         LATCCLR = _LATC_LATC2_MASK
+                #define DisplaySetData()            LATCSET = _LATC_LATC2_MASK
+
+	            // Definitions for CS pin
+                #define DisplayConfig()             TRISDCLR = _TRISD_TRISD10_MASK
+                #define DisplayEnable()             LATDCLR = _LATD_LATD10_MASK
+                #define DisplayDisable()            LATDSET = _LATD_LATD10_MASK
+
+                // Definitions for FLASH CS pin
+                #define DisplayFlashConfig()        TRISDCLR = _TRISD_TRISD1_MASK     
+                #define DisplayFlashEnable()        LATDCLR = _LATD_LATD1_MASK
+                #define DisplayFlashDisable()       LATDSET = _LATD_LATD1_MASK
+
+                // Definitions for POWER ON pin
+                #define DisplayPowerConfig()        TRISCCLR = _TRISC_TRISC3_MASK
+                #define DisplayPowerOn()            LATCSET = _LATC_LATC3_MASK 
+                #define DisplayPowerOff()           LATCCLR = _LATC_LATC3_MASK
+
+                // Extended address lines
+                #define DisplayAddr0Config()        TRISDCLR = _TRISD_TRISD3_MASK
+                #define DisplaySetAddr0()           LATDCLR = _LATD_LATD3_MASK
+                #define DisplayClearAddr0()         LATDSET = _LATD_LATD3_MASK
+
+                #define DisplayAddr17Config()       TRISGCLR = _TRISD_TRISG14_MASK
+                #define DisplaytSetAddr17()         LATGCLR = _LATD_LATG14_MASK
+                #define DisplayClearAddr17()        LATGSET = _LATD_LATG14_MASK
+            #endif
 
     #else
         #error GRAPHICS CONTROLLER IS NOT SUPPORTED
@@ -436,83 +623,161 @@
 #elif defined (GFX_PICTAIL_V3)
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
 
-		// Definitions for reset pin
-        #define RST_TRIS_BIT    TRISAbits.TRISA4
-        #define RST_LAT_BIT     LATAbits.LATA4
+        // Definitions for reset pin
+        #define DisplayResetConfig()        TRISAbits.TRISA4 = 0    
+        #define DisplayResetEnable()        LATAbits.LATA4 = 0
+        #define DisplayResetDisable()       LATAbits.LATA4 = 1
 
-		// Definitions for RS pin
-        #define RS_TRIS_BIT TRISAbits.TRISA1
-        #define RS_LAT_BIT  LATAbits.LATA1
+        // Definitions for RS pin
+        #define DisplayCmdDataConfig()      TRISAbits.TRISA1 = 0
+        #define DisplaySetCommand()         LATAbits.LATA1 = 0
+        #define DisplaySetData()            LATAbits.LATA1 = 1
 
-		// Definitions for CS pin
-        #define CS_TRIS_BIT TRISBbits.TRISB15
-        #define CS_LAT_BIT  LATBbits.LATB15
+        // Definitions for CS pin
+        #define DisplayConfig()             TRISBbits.TRISB15 = 0             
+        #define DisplayEnable()             LATBbits.LATB15 = 0
+        #define DisplayDisable()            LATBbits.LATB15 = 1
+
+        // Definitions for FLASH CS pin
+        #define DisplayFlashConfig()       
+        #define DisplayFlashEnable()       
+        #define DisplayFlashDisable()      
+
+        // Definitions for POWER ON pin
+        #define DisplayPowerConfig()       
+        #define DisplayPowerOn()           
+        #define DisplayPowerOff()          
 
     #else
 
-		// Definitions for reset line
-        #define RST_TRIS_BIT    TRISCbits.TRISC1
-        #define RST_LAT_BIT     LATCbits.LATC1
+        #ifndef __PIC32MX__
+            // Definitions for reset pin
+            #define DisplayResetConfig()        TRISCbits.TRISC1 = 0    
+            #define DisplayResetEnable()        LATCbits.LATC1 = 0
+            #define DisplayResetDisable()       LATCbits.LATC1 = 1
 
-		// Definitions for RS line
-        #define RS_TRIS_BIT TRISCbits.TRISC2
-        #define RS_LAT_BIT  LATCbits.LATC2
+            // Definitions for RS pin
+            #define DisplayCmdDataConfig()      TRISCbits.TRISC2 = 0
+            #define DisplaySetCommand()         LATCbits.LATC2 = 0
+            #define DisplaySetData()            LATCbits.LATC2 = 1
 
-		// Definitions for CS line
-        #define CS_TRIS_BIT TRISDbits.TRISD10
-        #define CS_LAT_BIT  LATDbits.LATD10
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISDbits.TRISD10 = 0             
+            #define DisplayEnable()             LATDbits.LATD10 = 0
+            #define DisplayDisable()            LATDbits.LATD10 = 1
+
+            // Definitions for FLASH CS pin
+            #define DisplayFlashConfig()         
+            #define DisplayFlashEnable()        
+            #define DisplayFlashDisable()       
+
+            // Definitions for POWER ON pin
+            #define DisplayPowerConfig()        
+            #define DisplayPowerOn()            
+            #define DisplayPowerOff()           
+        #else
+        /********
+         * PIC32 will use the SET and CLR SFRs for the I/O.
+         * These are atomic settings that are recommended when
+         * modifying SFRs
+         ********/
+            // Definitions for reset pin
+            #define DisplayResetConfig()        TRISCCLR = _TRISC_TRISC1_MASK    
+            #define DisplayResetEnable()        LATCCLR = _LATC_LATC1_MASK
+            #define DisplayResetDisable()       LATCSET = _LATC_LATC1_MASK
+
+            // Definitions for RS pin
+            #define DisplayCmdDataConfig()      TRISCCLR = _TRISC_TRISC2_MASK
+            #define DisplaySetCommand()         LATCCLR = _LATC_LATC2_MASK
+            #define DisplaySetData()            LATCSET = _LATC_LATC2_MASK
+
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISDCLR = _TRISD_TRISD10_MASK
+            #define DisplayEnable()             LATDCLR = _LATD_LATD10_MASK
+            #define DisplayDisable()            LATDSET = _LATD_LATD10_MASK
+
+            // Definitions for FLASH CS pin
+            #define DisplayFlashConfig()          
+            #define DisplayFlashEnable()        
+            #define DisplayFlashDisable()       
+
+            // Definitions for POWER ON pin
+            #define DisplayPowerConfig()        
+            #define DisplayPowerOn()            
+            #define DisplayPowerOff()           
+        #endif
     #endif
 #elif defined (MULTI_MEDIA_BOARD_DM00123)
-	// Definitions for reset line
-	#define RST_TRIS_BIT       TRISAbits.TRISA10
-	#define RST_LAT_BIT        LATAbits.LATA10
+        #ifndef __PIC32MX__
+            // Definitions for reset pin
+            #define DisplayResetConfig()        TRISAbits.TRISA10 = 0    
+            #define DisplayResetEnable()        LATAbits.LATA10 = 0
+            #define DisplayResetDisable()       LATAbits.LATA10 = 1
 
-	// Definitions for RS line
-	#define RS_TRIS_BIT        AD1PCFGbits.PCFG10 = 1, TRISBbits.TRISB10
-	#define RS_LAT_BIT         LATBbits.LATB10
+            // Definitions for RS pin
+            #define DisplayCmdDataConfig()      TRISBbits.TRISB10 = 0
+            #define DisplaySetCommand()         LATBbits.LATB10 = 0
+            #define DisplaySetData()            LATBbits.LATB10 = 1
 
-	// Definitions for CS line
-	#define CS_TRIS_BIT        TRISGbits.TRISG13
-	#define CS_LAT_BIT         LATGbits.LATG13
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISGbits.TRISG13 = 0             
+            #define DisplayEnable()             LATGbits.LATG13 = 0
+            #define DisplayDisable()            LATGbits.LATG13 = 1
 
-	#define SetWaitDirection()  //(PORTSetPinsDigitalIn(IOPORT_B, BIT_15))
-	#define WaitDataTx()        //while(!PORTReadBits(IOPORT_B, BIT_15))
+            // Definitions for FLASH CS pin
+            #define DisplayFlashConfig()         
+            #define DisplayFlashEnable()        
+            #define DisplayFlashDisable()       
+
+            // Definitions for POWER ON pin
+            #define DisplayPowerConfig()        
+            #define DisplayPowerOn()            
+            #define DisplayPowerOff()           
+        #else
+        /********
+         * PIC32 will use the SET and CLR SFRs for the I/O.
+         * These are atomic settings that are recommended when
+         * modifying SFRs
+         ********/
+            // Definitions for reset pin
+            #define DisplayResetConfig()        TRISACLR = _TRISA_TRISA10_MASK    
+            #define DisplayResetEnable()        LATACLR = _LATA_LATA10_MASK
+            #define DisplayResetDisable()       LATASET = _LATA_LATA10_MASK
+
+            // Definitions for RS pin
+            #define DisplayCmdDataConfig()      AD1PCFGSET = _AD1PCFG_PCFG10_MASK, TRISBCLR = _TRISB_TRISB10_MASK
+            #define DisplaySetCommand()         LATBCLR = _LATB_LATB10_MASK
+            #define DisplaySetData()            LATBSET = _LATB_LATB10_MASK
+
+            // Definitions for CS pin
+            #define DisplayConfig()             TRISGCLR = _TRISG_TRISG13_MASK
+            #define DisplayEnable()             LATGCLR = _LATG_LATG13_MASK
+            #define DisplayDisable()            LATGSET = _LATG_LATG13_MASK
+
+            // Definitions for FLASH CS pin
+            #define DisplayFlashConfig()          
+            #define DisplayFlashEnable()        
+            #define DisplayFlashDisable()       
+
+            // Definitions for POWER ON pin
+            #define DisplayPowerConfig()        
+            #define DisplayPowerOn()            
+            #define DisplayPowerOff()           
+        #endif
 
 #elif defined (PIC24FJ256DA210_DEV_BOARD)
 	
-	// Definitions for DISPLAY POWER ON pin
-	#define POWERON_LAT_BIT     LATAbits.LATA5
-    #define POWERON_TRIS_BIT    TRISAbits.TRISA5
+    // Definitions for POWER ON pin
+    #define DisplayPowerConfig()        TRISAbits.TRISA5 = 0       
+    #define DisplayPowerOn()            LATAbits.LATA5 = 1           
+    #define DisplayPowerOff()           LATAbits.LATA5 = 0
 
-	#if defined (GFX_EPMP_CS1_BASE_ADDRESS)
-		#define EPMPCS1_CS_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS1_WR_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS1_RD_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS1_BE_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS1_DWAITB		0		// chip select 1 data set up before read/write strobe
-		#define EPMPCS1_DWAITM		0		// chip select 1 read/write strobe wait states
-		#define EPMPCS1_DWAITE		0		// chip select 1 data hold after read/write strobe
-		#define EPMPCS1_AMWAIT		0		// chip select 1 Alternate Master wait state 
-	#endif
-
-	#if defined (GFX_EPMP_CS2_BASE_ADDRESS)
-		#define EPMPCS2_CS_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS2_WR_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS2_RD_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS2_BE_POLARITY	GFX_ACTIVE_LOW
-		#define EPMPCS2_DWAITB		0		// chip select 2 data set up before read/write strobe
-		#define EPMPCS2_DWAITM		4		// chip select 2 read/write strobe wait states
-		#define EPMPCS2_DWAITE		0		// chip select 2 data hold after read/write strobe
-		#define EPMPCS2_AMWAIT		3		// chip select 2 Alternate Master wait state 
-	#endif
-
-
-#endif //  defined (GFX_PICTAIL_V1)...
+#endif //  defined (GFX_PICTAIL_V2)...
 
 /*********************************************************************
 * IO FOR THE BEEPER
 *********************************************************************/
-#if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V1)
+#if defined (GFX_PICTAIL_V2) 
 	#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
 		#define BEEP_TRIS_BIT   TRISBbits.TRISB4
 		#define BEEP_LAT_BIT    LATBbits.LATB4
@@ -528,8 +793,11 @@
 /*********************************************************************
 * IOS FOR THE FLASH/EEPROM SPI
 *********************************************************************/
-#if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V1)
-	#define USE_SST25_SPI2
+#if defined (EXPLORER_16)
+	// When using Explorer 16, the on board EEPROM SPI (25LC256) is present 
+	// so we define the chip select signal used. This is needed even 
+	// if the memory is not used. Set to de-asserted state to avoid conflicts
+	// when not used.
     #if  defined(__PIC24F__) || defined(__PIC24H__) || defined(__dsPIC33F__)
         #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
             #define EEPROM_CS_TRIS  TRISAbits.TRISA0
@@ -546,15 +814,23 @@
         #define EEPROM_CS_TRIS  TRISDbits.TRISD12
         #define EEPROM_CS_LAT   LATDbits.LATD12
     #endif
-    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-        #define EEPROM_SCK_TRIS TRISCbits.TRISC2
-        #define EEPROM_SDO_TRIS TRISCbits.TRISC0
-        #define EEPROM_SDI_TRIS TRISCbits.TRISC1
-    #else
-        #define EEPROM_SCK_TRIS TRISGbits.TRISG6
-        #define EEPROM_SDO_TRIS TRISGbits.TRISG8
-        #define EEPROM_SDI_TRIS TRISGbits.TRISG7
-    #endif
+    
+    #if defined (USE_25LC256)
+	    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+	        #define EEPROM_SCK_TRIS TRISCbits.TRISC2
+	        #define EEPROM_SDO_TRIS TRISCbits.TRISC0
+	        #define EEPROM_SDI_TRIS TRISCbits.TRISC1
+	    #else
+	        #define EEPROM_SCK_TRIS TRISGbits.TRISG6
+	        #define EEPROM_SDO_TRIS TRISGbits.TRISG8
+	        #define EEPROM_SDI_TRIS TRISGbits.TRISG7
+	    #endif    
+    #endif // #if defined (USE_25LC256)
+#endif // #if defined (EXPLORER_16)
+
+#if defined (GFX_PICTAIL_V2) 
+	#define USE_SST25_SPI2
+	// IOs used are defined above (see #if defined (EXPLORER_16) above)
 #elif defined (GFX_PICTAIL_V3)
 	#define USE_SST25_SPI2
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
@@ -581,6 +857,7 @@
     #define SST25_SDI_ANS   ANSBbits.ANSB0
     #define SST25_SDO_ANS   ANSBbits.ANSB1
 #elif defined (MULTI_MEDIA_BOARD_DM00123)
+
 	#if defined (PIC32_GP_SK_DM320001) || defined (PIC32_USB_SK_DM320003_1)  
 		#define USE_SST25_SPI2
 	#elif defined (PIC32_USB_SK_DM320003_2)
@@ -591,6 +868,7 @@
 		#error "Please define the starter kit that you are using"
 	#endif
 
+	// define the CPLD SPI selection and chip select
 	#ifdef USE_SST25_SPI2
 		#define SST25_CS_TRIS   TRISGbits.TRISG9
 		#define SST25_CS_LAT    LATGbits.LATG9
@@ -606,21 +884,13 @@
 	#else
 		#error "SPI Channel can't be used for SPI Flash"
 	#endif
+
 #endif
 
 /*********************************************************************
 * IOS FOR THE GRAPHICS PICTAIL PARALLEL FLASH MEMORY
 *********************************************************************/
-#if defined (GFX_PICTAIL_V1)
-	#define SST39_CS_TRIS    TRISDbits.TRISD9
-	#define SST39_CS_LAT     LATDbits.LATD9
-	#define SST39_A18_TRIS   TRISBbits.TRISB11
-	#define SST39_A18_LAT    LATBbits.LATB11
-	#define SST39_A17_TRIS   TRISBbits.TRISB10
-	#define SST39_A17_LAT    LATBbits.LATB10
-	#define SST39_A16_TRIS   TRISDbits.TRISD3
-	#define SST39_A16_LAT    LATDbits.LATD3
-#elif defined(GFX_PICTAIL_V2)
+#if defined(GFX_PICTAIL_V2)
 	#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) 
 		#define SST39_CS_TRIS    TRISAbits.TRISA8
 		#define SST39_CS_LAT     LATAbits.LATA8
@@ -673,30 +943,7 @@
 	#endif
 #endif 
 
-#if defined (GFX_PICTAIL_V1)
-    #ifdef __PIC32MX__
-        #define ADC_XPOS    ADC_CH0_POS_SAMPLEA_AN13
-        #define ADC_YPOS    ADC_CH0_POS_SAMPLEA_AN12
-    #else
-        #define ADC_XPOS    13
-        #define ADC_YPOS    12
-    #endif
-
-	// Y port definitions
-    #define ADPCFG_XPOS AD1PCFGbits.PCFG13
-    #define LAT_XPOS    LATBbits.LATB13
-    #define LAT_XNEG    LATBbits.LATB11
-    #define TRIS_XPOS   TRISBbits.TRISB13
-    #define TRIS_XNEG   TRISBbits.TRISB11
-
-	// X port definitions
-    #define ADPCFG_YPOS AD1PCFGbits.PCFG12
-    #define LAT_YPOS    LATBbits.LATB12
-    #define LAT_YNEG    LATBbits.LATB10
-    #define TRIS_YPOS   TRISBbits.TRISB12
-    #define TRIS_YNEG   TRISBbits.TRISB10
-
-#elif defined (GFX_PICTAIL_V2)
+#if defined (GFX_PICTAIL_V2)
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
         #define ADC_XPOS    5
         #define ADC_YPOS    4
@@ -773,7 +1020,7 @@
         #define LAT_XPOS    LATBbits.LATB11
         #define TRIS_XPOS   TRISBbits.TRISB11
 
-        #if defined(__32MX460F512L__) && !defined (PIC32_USB_SK_DM320003_1)
+        #if defined(_USB) && !defined (PIC32_USB_SK_DM320003_1) && !defined (PIC32_ENET_SK_DM320004)
             #define LAT_XNEG    LATGbits.LATG15
             #define TRIS_XNEG   TRISGbits.TRISG15
         #else
@@ -822,45 +1069,82 @@
 	#define ADPCFG_YPOS AD1PCFGbits.PCFG14
 	#define LAT_YPOS    LATBbits.LATB14
 	#define TRIS_YPOS   TRISBbits.TRISB14
-	#define LAT_YNEG    LATBbits.LATB12
+	#define LAT_YNEG    LATBbits.LATB12 
 	#define TRIS_YNEG   AD1PCFGbits.PCFG12 = 1, TRISBbits.TRISB12
 #endif
 
 /*********************************************************************
 * IOS FOR THE SWITCHES (SIDE BUTTONS)
 *********************************************************************/
+typedef enum
+{
+    HW_BUTTON_PRESS = 0,
+    HW_BUTTON_RELEASE = 1
+}HW_BUTTON_STATE;
 
 #if defined (PIC24FJ256DA210_DEV_BOARD)
     #if defined(__PIC24FJ256DA210__)
-        #define BTN_S1  _RG8
-        #define BTN_S2  _RE9
-        #define BTN_S3  _RB5
-	#endif 
-
+        #define HardwareButtonInit()
+        #define GetHWButtonTouchCal()       (PORTGbits.RG8)
+        #define GetHWButtonProgram()        (PORTEbits.RE9)
+        #define GetHWButtonScanDown()       (HW_BUTTON_RELEASE)
+        #define GetHWButtonScanUp()         (HW_BUTTON_RELEASE) 
+        #define GetHWButtonCR()             (PORTGbits.RG8)
+        #define GetHWButtonFocus()          (PORTEbits.RE9)
+      #endif 
+ 
 #elif defined (MULTI_MEDIA_BOARD_DM00123)
-	#define BTN_S3  1 
-	#define BTN_S4  1
-	#define BTN_S5  1
-	#define BTN_S6  1
-
+    #define HardwareButtonInit()        (AD1PCFGSET = _AD1PCFG_PCFG1_MASK | _AD1PCFG_PCFG0_MASK | _AD1PCFG_PCFG3_MASK | _AD1PCFG_PCFG4_MASK | _AD1PCFG_PCFG15_MASK,\
+                                         CNPUESET = _CNPUE_CNPUE2_MASK | _CNPUE_CNPUE3_MASK | _CNPUE_CNPUE5_MASK | _CNPUE_CNPUE6_MASK | _CNPUE_CNPUE12_MASK)
+    #define GetHWButtonTouchCal()       (PORTBbits.RB15)
+    #define GetHWButtonProgram()        (PORTBbits.RB15)
+    #define GetHWButtonScanDown()       (PORTBbits.RB3)
+    #define GetHWButtonScanUp()         (PORTBbits.RB1)  
+    #define GetHWButtonCR()             (PORTBbits.RB15)
+    #define GetHWButtonFocus()          (PORTBbits.RB0 & PORTBbits.RB4)
 #else
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-        #define BTN_S3  _RA9
-        #define BTN_S4  1
-        #define BTN_S5  1
-        #define BTN_S6  1
+        #define HardwareButtonInit()
+        #define GetHWButtonProgram()    (_RA9)
+        #define GetHWButtonScanDown()   (_RA9)
+        #define GetHWButtonScanUp()		(HW_BUTTON_RELEASE)
+        #define GetHWButtonCR()			(HW_BUTTON_RELEASE)
+        #define GetHWButtonFocus()  	(HW_BUTTON_RELEASE)
       #elif defined (PIC32_USB_SK_DM320003_1) || defined (PIC32_USB_SK_DM320003_2) || defined (PIC32_GP_SK_DM320001) 
-			// cannot use PIC32 Starter kit buttons when 16 bit PMP is enabled.
-			// PMP is using the IO pins 
-	        #define BTN_S3  1 
-			#define BTN_S4  1
-			#define BTN_S5  1
-	        #define BTN_S6  1
-	#else
-        #define BTN_S3  _RD6
-        #define BTN_S4  _RD13
-        #define BTN_S5  _RA7
-        #define BTN_S6  _RD7
+        #ifdef USE_16BIT_PMP
+            #define HardwareButtonInit()
+            #define GetHWButtonProgram()        (HW_BUTTON_RELEASE)
+            #define GetHWButtonTouchCal()       (HW_BUTTON_RELEASE)
+            #define GetHWButtonScanDown()       (HW_BUTTON_RELEASE)
+            #define GetHWButtonScanUp()         (HW_BUTTON_RELEASE)
+            #define GetHWButtonCR()             (HW_BUTTON_RELEASE)
+            #define GetHWButtonFocus()          (HW_BUTTON_RELEASE)
+        #else
+            #define HardwareButtonInit()        (CNPUESET = _CNPUE_CNPUE16_MASK | _CNPUE_CNPUE15_MASK | _CNPUE_CNPUE19_MASK)
+            #define GetHWButtonTouchCal()       (PORTDbits.RD6)
+            #define GetHWButtonProgram()        (HW_BUTTON_RELEASE)
+            #define GetHWButtonScanDown()       (HW_BUTTON_RELEASE)
+            #define GetHWButtonScanUp()         (HW_BUTTON_RELEASE)  
+            #define GetHWButtonCR()             (PORTDbits.RD6)
+            #define GetHWButtonFocus()          (PORTDbits.RD7 & PORTDbits.RD13)
+        #endif
+      #else
+        #define HardwareButtonInit()
+        #ifdef USE_16BIT_PMP
+            #define GetHWButtonTouchCal()       (PORTAbits.RA7)
+            #define GetHWButtonProgram()        (PORTAbits.RA7)
+            #define GetHWButtonScanDown()       (HW_BUTTON_RELEASE)
+            #define GetHWButtonScanUp()         (HW_BUTTON_RELEASE)
+            #define GetHWButtonCR()             (HW_BUTTON_RELEASE)
+            #define GetHWButtonFocus()          (HW_BUTTON_RELEASE)
+        #else
+            #define GetHWButtonTouchCal()       (PORTDbits.RD6)
+            #define GetHWButtonProgram()        (PORTDbits.RD7)
+            #define GetHWButtonScanDown()       (PORTDbits.RD13)
+            #define GetHWButtonScanUp()         (PORTAbits.RA7)  
+            #define GetHWButtonCR()             (PORTDbits.RD6)
+            #define GetHWButtonFocus()          (PORTDbits.RD7)
+        #endif
     #endif
 #endif 
 
@@ -888,7 +1172,39 @@
 	#endif // #if (DISPLAY_PANEL == TFT_G240320LTSW_118W_E)
 #endif // #if defined (DA210_DEV_BOARD)...
 
-#endif //ifdef _GRAPHICS_H
+/*********************************************************************
+* EPMP Settings 
+*********************************************************************/
+#ifdef PIC24FJ256DA210_DEV_BOARD
+
+	#if defined (GFX_EPMP_CS1_BASE_ADDRESS)
+		#define EPMPCS1_CS_POLARITY	GFX_ACTIVE_LOW
+		#define EPMPCS1_WR_POLARITY	GFX_ACTIVE_LOW
+		#define EPMPCS1_RD_POLARITY	GFX_ACTIVE_LOW
+		#define EPMPCS1_BE_POLARITY	GFX_ACTIVE_LOW
+
+		// macros to define the access timing of the parallel device in EPMP CS1
+		#define EPMPCS1_DWAITB		0		// chip select 1 data set up before read/write strobe
+		#define EPMPCS1_DWAITM		0		// chip select 1 read/write strobe wait states
+		#define EPMPCS1_DWAITE		0		// chip select 1 data hold after read/write strobe
+		#define EPMPCS1_AMWAIT		0		// chip select 1 Alternate Master wait state 
+
+	#endif
+
+	#if defined (GFX_EPMP_CS2_BASE_ADDRESS)
+		#define EPMPCS2_CS_POLARITY	GFX_ACTIVE_LOW
+		#define EPMPCS2_WR_POLARITY	GFX_ACTIVE_LOW
+		#define EPMPCS2_RD_POLARITY	GFX_ACTIVE_LOW
+		#define EPMPCS2_BE_POLARITY	GFX_ACTIVE_LOW
+
+		// macros to define the access timing of the parallel device in EPMP CS2
+		#define EPMPCS2_DWAITB		0		// chip select 2 data set up before read/write strobe
+		#define EPMPCS2_DWAITM		4		// chip select 2 read/write strobe wait states
+		#define EPMPCS2_DWAITE		0		// chip select 2 data hold after read/write strobe
+		#define EPMPCS2_AMWAIT		3		// chip select 6 Alternate Master wait state 
+
+	#endif
+#endif
 
 /*********************************************************************
 * IOS FOR THE UART
@@ -907,16 +1223,18 @@
 /*********************************************************************
 * RTCC DEFAULT INITIALIZATION (these are values to initialize the RTCC
 *********************************************************************/
-#define RTCC_DEFAULT_DAY        29      // 29
-#define RTCC_DEFAULT_MONTH      4       // April
+#define RTCC_DEFAULT_DAY        15      // 15th
+#define RTCC_DEFAULT_MONTH      10      // October
 #define RTCC_DEFAULT_YEAR       10      // 2010
-#define RTCC_DEFAULT_WEEKDAY    04      // Thursday
+#define RTCC_DEFAULT_WEEKDAY    05      // Friday
 #define RTCC_DEFAULT_HOUR       10      // 10:10:01
 #define RTCC_DEFAULT_MINUTE     10
 #define RTCC_DEFAULT_SECOND     01
 
 #if defined (MULTI_MEDIA_BOARD_DM00123)
+
 #include <plib.h>
+
 /*********************************************************************
 * Configuration for the CPLD
 *********************************************************************/

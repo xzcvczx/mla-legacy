@@ -73,8 +73,8 @@
  Change History:
    Rev    Description
    ----   ------------------------------------------
-   2.6-   No Change
-   2.7a
+   2.6    No Change
+   2.7b   Added a couple of additional sense key definitions.
 
  ********************************************************************/
 #ifndef MSD_H
@@ -83,7 +83,7 @@
 /** I N C L U D E S **********************************************************/
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
-#include "MDD File System\FSDefs.h"
+#include "MDD File System/FSDefs.h"
 //#include "SD Card/sdcard.h"
 
 /** D E F I N I T I O N S ****************************************************/
@@ -199,6 +199,9 @@
 
 /* ASC ASCQ Codes for Sense Data (only those that we plan to use) */
 // with sense key Illegal request for a command not supported
+#define ASC_NO_ADDITIONAL_SENSE_INFORMATION 0x00
+#define ASCQ_NO_ADDITIONAL_SENSE_INFORMATION 0x00
+
 #define ASC_INVALID_COMMAND_OPCODE 0x20
 #define ASCQ_INVALID_COMMAND_OPCODE 0x00
 

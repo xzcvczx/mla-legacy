@@ -39,7 +39,7 @@
  * Arpan kumar		  06/11/09	  Version 1.0 release
  * PAT				  01/18/10	  Added draw state to redraw only text. 
  ******************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_DIGITALMETER
 
@@ -117,6 +117,10 @@ DIGITALMETER *DmCreate
     pDm->hdr.state = state;
     pDm->NoOfDigits = NoOfDigits;       // number of digits to be displayed
     pDm->DotPos = DotPos;               // position of decimal point
+    pDm->hdr.DrawObj = DmDraw;			// draw function
+    pDm->hdr.MsgObj = DmTranslateMsg;   // message function
+    pDm->hdr.MsgDefaultObj = NULL;		// default message function
+    pDm->hdr.FreeObj = NULL;			// free function
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -154,14 +158,18 @@ void DmSetValue(DIGITALMETER *pDm, DWORD Value)
 }
 
 /*********************************************************************
-* Function: WORD DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg)
+* Function: WORD DmTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Evaluates the message if the object will be affected by the
 *		 message or not.
 *
 **********************************************************************/
-WORD DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg)
+WORD DmTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    DIGITALMETER *pDm;
+
+    pDm = (DIGITALMETER *)pObj;
 
     // Evaluate if the message is for the static text
     // Check if disabled first
@@ -190,12 +198,12 @@ WORD DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD DmDraw(DIGITALMETER *pDm)
+* Function: WORD DmDraw(void *pObj)
 *
 * Notes: This is the state machine to display the changing numbers.
 *
 **********************************************************************/
-WORD DmDraw(DIGITALMETER *pDigMeter)
+WORD DmDraw(void *pObj)
 {
     typedef enum
     {
@@ -213,7 +221,7 @@ WORD DmDraw(DIGITALMETER *pDigMeter)
     SHORT textWidth = 0;
     XCHAR ch = 0, pch = 0;
 
-    pDm = pDigMeter;
+    pDm = (DIGITALMETER *)pObj;
 
     if(IsDeviceBusy())
         return (0);

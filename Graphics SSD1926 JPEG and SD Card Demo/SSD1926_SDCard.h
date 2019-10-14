@@ -39,7 +39,7 @@ Anton Alkhimenok    06_Jun-2009       Ported to PIC24
     #define _SSD_SD_CARD_HEADER_FILE
 
     #include <GenericTypeDefs.h>
-    #include <MDD File System\FSDefs.h>
+    #include <MDD File System/FSDefs.h>
 
 DWORD               SDReadCapacity(void);
 WORD                SDReadSectorSize(void);

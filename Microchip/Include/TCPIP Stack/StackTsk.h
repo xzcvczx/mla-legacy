@@ -121,7 +121,7 @@ typedef struct __attribute__((__packed__))
     #endif
 #endif
 	
-#if defined(STACK_USE_SNMP_SERVER)
+#if defined(STACK_USE_SNMP_SERVER) || defined(STACK_USE_SNMPV3_SERVER)
 	// SNMPv2C Read community names
 	// SNMP_COMMUNITY_MAX_LEN (8) + 1 null termination byte
 	BYTE readCommunity[SNMP_MAX_COMMUNITY_SUPPORT][SNMP_COMMUNITY_MAX_LEN+1]; 
@@ -129,6 +129,8 @@ typedef struct __attribute__((__packed__))
 	// SNMPv2C Write community names
 	// SNMP_COMMUNITY_MAX_LEN (8) + 1 null termination byte
 	BYTE writeCommunity[SNMP_MAX_COMMUNITY_SUPPORT][SNMP_COMMUNITY_MAX_LEN+1];
+
+	UINT32 SnmpEngineBootRcrd;
 #endif
 
 } APP_CONFIG;

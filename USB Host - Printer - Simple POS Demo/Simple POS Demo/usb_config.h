@@ -78,7 +78,7 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 #define USB_MAX_PRINTER_DEVICES 1
 #define USB_PRINTER_TRANSFER_QUEUE_SIZE 1
 #define USB_PRINTER_LANGUAGE_ESCPOS
-#include "USB\usb_printer_pos_epson_tm_t88iv.h"
+#include "USB/usb_printer_pos_epson_tm_t88iv.h"
 #define USE_GRAPHICS_LIBRARY_PRINTER_INTERFACE
 
 // Helpful Macros

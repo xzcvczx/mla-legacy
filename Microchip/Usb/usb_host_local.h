@@ -5,11 +5,11 @@
 This file provides local definitions used by the hardware interface for a USB
 Host application.
 
- File Name:       usb_host_local.h
- Dependencies:    None
- Processor:       PIC24F/PIC32MX
- Compiler:        C30/C32
- Company:         Microchip Technology, Inc.
+* File Name:       usb_host_local.h
+* Dependencies:    None
+* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
+* Compiler:        C30 v2.01/C32 v0.00.18
+* Company:         Microchip Technology, Inc.
 
 Software License Agreement
 

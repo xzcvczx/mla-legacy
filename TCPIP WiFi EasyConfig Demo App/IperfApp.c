@@ -44,7 +44,7 @@
 
  Author				Date		Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- KH                 27 Jan 2010 Updated for RoadRunner
+ KH                 27 Jan 2010 Updated for MRF24WB0M
 ******************************************************************************/
 
 #include <string.h> /* for memcpy */
@@ -56,7 +56,7 @@
 #include "IperfApp.h"
 #include "TCPIP Stack/WFConsole.h"
 
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_IPERF_APP
 #endif
 /*****************************************************************************/

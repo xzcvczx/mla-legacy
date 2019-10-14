@@ -5,13 +5,13 @@
  * FileName:        GOL.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -34,19 +34,23 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok and
- * Paolo A. Tamayo	
- *                      11/12/07	Version 1.0 release
- * PAT 					06/29/09	Added BTN_MSG_STILLPRESSED message for 
- *									button object and EVENT_STILLPRESS for
- *									INPUT_DEVICE_EVENT list.
+ * 11/12/07		Version 1.0 release
+ * 06/29/09		Added BTN_MSG_STILLPRESSED message for 
+ *				button object and EVENT_STILLPRESS for
+ *				INPUT_DEVICE_EVENT list.
+ * 10/04/10		FONTDEFAULT can now be modified by the user without 
+ *              modifying the library files. To replace default font
+ *				(GOLFontDefault found in the library supplied GOLFontDefault.c 
+ *				file) user must add this line in the GraphicsConfig.h file:
+ *					#define FONTDEFAULT	userFont where "userFont" is the
+ *				user supplied font.
  *****************************************************************************/
 #ifndef _GOL_H
     #define _GOL_H
 
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 
 /*********************************************************************
 * Overview: GOL scheme defines the style scheme to be used by an object. 
@@ -54,16 +58,16 @@
 *********************************************************************/
 typedef struct
 {
-    WORD    EmbossDkColor;      // Emboss dark color used for 3d effect.
-    WORD    EmbossLtColor;      // Emboss light color used for 3d effect.
-    WORD    TextColor0;         // Character color 0 used for objects that supports text.
-    WORD    TextColor1;         // Character color 1 used for objects that supports text.
-    WORD    TextColorDisabled;  // Character color used when object is in a disabled state.
-    WORD    Color0;             // Color 0 usually assigned to an Object state.
-    WORD    Color1;             // Color 1 usually assigned to an Object state.
-    WORD    ColorDisabled;      // Color used when an Object is in a disabled state.
-    WORD    CommonBkColor;      // Background color used to hide Objects.
-    void    *pFont;             // Font selected for the scheme.
+    WORD    EmbossDkColor;      	// Emboss dark color used for 3d effect.
+    WORD    EmbossLtColor;      	// Emboss light color used for 3d effect.
+    WORD    TextColor0;         	// Character color 0 used for objects that supports text.
+    WORD    TextColor1;         	// Character color 1 used for objects that supports text.
+    WORD    TextColorDisabled;  	// Character color used when object is in a disabled state.
+    WORD    Color0;             	// Color 0 usually assigned to an Object state.
+    WORD    Color1;             	// Color 1 usually assigned to an Object state.
+    WORD    ColorDisabled;      	// Color used when an Object is in a disabled state.
+    WORD    CommonBkColor;      	// Background color used to hide Objects.
+    void    *pFont;             	// Font selected for the scheme.
 } GOL_SCHEME;
 
 /*********************************************************************
@@ -81,25 +85,25 @@ extern GOL_SCHEME   *_pDefaultGolScheme;
 *********************************************************************/
 typedef enum
 {
-    OBJ_BUTTON,                 // Type defined for Button Object.
-    OBJ_WINDOW,                 // Type defined for Window Object.
-    OBJ_CHECKBOX,               // Type defined for Check Box Object.
-    OBJ_RADIOBUTTON,            // Type defined for Radio Button Object.
-    OBJ_EDITBOX,                // Type defined for Edit Box Object.
-    OBJ_LISTBOX,                // Type defined for List Box Object.
-    OBJ_SLIDER,                 // Type defined for Slider and/or Scroll Bar Object.
-    OBJ_PROGRESSBAR,            // Type defined for Progress Object.
-    OBJ_STATICTEXT,             // Type defined for Static Text Object.
-    OBJ_PICTURE,                // Type defined for Picture or Bitmap Object.
-    OBJ_GROUPBOX,               // Type defined for Group Box Object.
-    OBJ_CUSTOM,                 // Type defined for Custom Object.
-    OBJ_ROUNDDIAL,              // Type defined for Dial Object.
-    OBJ_METER,                  // Type defined for Meter Object.
-    OBJ_GRID,                   // Type defined for Grid Object.
-    OBJ_CHART,                  // Type defined for Chart Object.
-    OBJ_TEXTENTRY,              // Type defined for Text-Entry Object.
-    OBJ_DIGITALMETER,           // Type defined for DIGITALMETER Object.
-    OBJ_UNKNOWN                 // Type is undefined and not supported by the library.
+    OBJ_BUTTON,                 	// Type defined for Button Object.
+    OBJ_WINDOW,                 	// Type defined for Window Object.
+    OBJ_CHECKBOX,               	// Type defined for Check Box Object.
+    OBJ_RADIOBUTTON,            	// Type defined for Radio Button Object.
+    OBJ_EDITBOX,                	// Type defined for Edit Box Object.
+    OBJ_LISTBOX,                	// Type defined for List Box Object.
+    OBJ_SLIDER,                 	// Type defined for Slider and/or Scroll Bar Object.
+    OBJ_PROGRESSBAR,            	// Type defined for Progress Object.
+    OBJ_STATICTEXT,             	// Type defined for Static Text Object.
+    OBJ_PICTURE,                	// Type defined for Picture or Bitmap Object.
+    OBJ_GROUPBOX,               	// Type defined for Group Box Object.
+    OBJ_CUSTOM,                 	// Type defined for Custom Object.
+    OBJ_ROUNDDIAL,              	// Type defined for Dial Object.
+    OBJ_METER,                  	// Type defined for Meter Object.
+    OBJ_GRID,                   	// Type defined for Grid Object.
+    OBJ_CHART,                  	// Type defined for Chart Object.
+    OBJ_TEXTENTRY,              	// Type defined for Text-Entry Object.
+    OBJ_DIGITALMETER,           	// Type defined for DIGITALMETER Object.
+    OBJ_UNKNOWN                 	// Type is undefined and not supported by the library.
 } GOL_OBJ_TYPE;
 
 /*********************************************************************
@@ -225,17 +229,26 @@ typedef enum
 *			library Objects. 
 *
 *********************************************************************/
+typedef WORD(*DRAW_FUNC)(void *);                   		// object draw function pointer typedef
+typedef void(*FREE_FUNC)(void *);                   		// object free function pointer typedef
+typedef WORD(*MSG_FUNC)(void *, GOL_MSG *);         		// object message function pointer typedef
+typedef void(*MSG_DEFAULT_FUNC)(WORD, void *, GOL_MSG *);	// object default message function pointer typedef
+
 typedef struct
 {
-    WORD            ID;                             // Unique id assigned for referencing.
-    void            *pNxtObj;                       // A pointer to the next object.
-    GOL_OBJ_TYPE    type;                           // Identifies the type of GOL object.
-    WORD            state;                          // State of object.
-    SHORT           left;                           // Left position of the Object.
-    SHORT           top;                            // Top position of the Object.
-    SHORT           right;                          // Right position of the Object.
-    SHORT           bottom;                         // Bottom position of the Object.
-    GOL_SCHEME      *pGolScheme;                    // Pointer to the scheme used.
+    WORD                ID;                             	// Unique id assigned for referencing.
+    void                *pNxtObj;                       	// A pointer to the next object.
+    GOL_OBJ_TYPE        type;                           	// Identifies the type of GOL object.
+    WORD                state;                          	// State of object.
+    SHORT               left;                           	// Left position of the Object.
+    SHORT               top;                            	// Top position of the Object.
+    SHORT               right;                          	// Right position of the Object.
+    SHORT               bottom;                         	// Bottom position of the Object.
+    GOL_SCHEME          *pGolScheme;                    	// Pointer to the scheme used.
+    DRAW_FUNC           DrawObj;                        	// function pointer to the object draw function
+    FREE_FUNC           FreeObj;                        	// function pointer to the object free function
+    MSG_FUNC            MsgObj;                         	// function pointer to the object message function
+    MSG_DEFAULT_FUNC    MsgDefaultObj;                  	// function pointer to the object default message function
 } OBJ_HEADER;
 
 /*********************************************************************
@@ -302,15 +315,27 @@ extern OBJ_HEADER   *_pObjectFocused;
     #endif
 
 /*********************************************************************
+* Overview: The default font GOLFontDefault is declared in  
+*           GOLFontDefault.c file included in the Graphics Library. 
+*           To replace this font, add this declaration in the 
+*		    GraphicsConfig.h:
+*				#define FONTDEFAULT yourFont
+*           Then in the project the "yourFont" must be added. 
+*           The Graphics Library will then use the font that the user
+*			supplied.
+*********************************************************************/
+	#ifndef FONTDEFAULT
+		// Use the default GOL font in GOLFontDefault.c
+    	#define FONTDEFAULT GOLFontDefault
+	#endif
+
+	// Default GOL font.
+	extern const FONT_FLASH FONTDEFAULT;
+
+/*********************************************************************
 * Overview: The following are the style scheme default settings.
 *
 *********************************************************************/
-
-// Default GOL font.
-extern const FONT_FLASH GOLFontDefault;
-
-// Default Font assignement.	
-    #define FONTDEFAULT GOLFontDefault
 
 #ifdef USE_PALETTE
 
@@ -319,9 +344,9 @@ extern const FONT_FLASH GOLFontDefault;
 #else
     
 // Brown color scheme
-    #define SADDLEBROWN RGB565CONVERT(139, 69, 19)  // Saddle Color
-    #define SIENNA      RGB565CONVERT(160, 82, 45)  // Sienna Color
-    #define PERU        RGB565CONVERT(205, 133, 63) // Peru Color
+    #define SADDLEBROWN RGB565CONVERT(139, 69, 19)  	// Saddle Color
+    #define SIENNA      RGB565CONVERT(160, 82, 45)  	// Sienna Color
+    #define PERU        RGB565CONVERT(205, 133, 63) 	// Peru Color
     #define BURLYWOOD   RGB565CONVERT(222, 184, 135)    // Burly wood Color
     #define WHEAT       RGB565CONVERT(245, 245, 220)    // Wheat Color
     #define TAN         RGB565CONVERT(210, 180, 140)    // Tan Color
@@ -639,16 +664,10 @@ void        GOLSetFocus(OBJ_HEADER *object);
 *
 *		while(pCurrentObj != NULL){
 *			if(IsObjUpdated(pCurrentObj)){
-*				switch(pCurrentObj->type){
-*					case OBJ_BUTTON:
-*						done = BtnDraw((BUTTON*)pCurrentObj);
-*						break;
-*					case OBJ_WINDOW:
-*						done = WndDraw((WINDOW*)pCurrentObj);
-*						break;
-*				}
-*				// reset state of object if done
-*				if (done)
+*               done = pCurrentObj->draw(pCurrentObj);				
+*                
+*               // reset state of object if done
+*               if (done)
 *					GOLDrawComplete(pCurrentObj)
 *				// Return if not done. This means that BtnDraw()
 *				// was terminated prematurely by device busy status
@@ -703,14 +722,8 @@ void        GOLSetFocus(OBJ_HEADER *object);
 *
 *		while(pCurrentObj != NULL) {
 *			if(IsObjUpdated(pCurrentObj)) {
-*				switch(pCurrentObj->type) {
-*					case OBJ_BUTTON:
-*						done = BtnDraw((BUTTON*)pCurrentObj);
-*						break;
-*					case OBJ_WINDOW:
-*						done = WndDraw((WINDOW*)pCurrentObj);
-*						break;
-*				}
+*				done = pCurrentObj->draw(pCurrentObj);
+*
 *				if(done){
 *					GOLDrawComplete(pCurrentObj);
 *				}else{

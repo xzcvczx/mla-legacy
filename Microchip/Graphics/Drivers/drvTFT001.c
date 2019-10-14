@@ -48,7 +48,7 @@
  * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  * Anton Alkhimenok     06/26/09    16-bit PMP support
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 WORD    _color;
@@ -113,37 +113,37 @@ void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 #ifdef USE_16BIT_PMP
 #define SetAddress(addr)                    \
 	{\
-	DeviceSetCommand();                     \
+	DisplaySetCommand();                     \
     DeviceWrite(0x0020);                    \
-	DeviceSetData();                        \
+	DisplaySetData();                        \
     DeviceWrite((WORD) addr & 0x00ff);      \
-	DeviceSetCommand();                     \
+	DisplaySetCommand();                     \
     DeviceWrite(0x0021);                    \
-	DeviceSetData();                        \
+	DisplaySetData();                        \
     DeviceWrite((WORD) ((DWORD) addr >> 8));\
-	DeviceSetCommand();                     \
+	DisplaySetCommand();                     \
     DeviceWrite(0x0022);                    \
-	DeviceSetData();                        \
+	DisplaySetData();                        \
 	}
 #else
 #define SetAddress(addr)                    \
 	{\
-	DeviceSetCommand();                     \
+	DisplaySetCommand();                     \
     DeviceWrite(0);                         \
     DeviceWrite(0x20);                      \
-	DeviceSetData();                        \
+	DisplaySetData();                        \
 	DeviceWrite(0);                         \
     DeviceWrite(((DWORD_VAL) (DWORD) addr).v[0]);\
-	DeviceSetCommand();                     \
+	DisplaySetCommand();                     \
     DeviceWrite(0);                         \
     DeviceWrite(0x21);                      \
-	DeviceSetData();                        \
+	DisplaySetData();                        \
 	DeviceWrite(((DWORD_VAL) (DWORD) addr).v[2]);\
 	DeviceWrite(((DWORD_VAL) (DWORD) addr).v[1]);\
-	DeviceSetCommand();                     \
+	DisplaySetCommand();                     \
     DeviceWrite(0);                         \
     DeviceWrite(0x22);                      \
-	DeviceSetData();                        \
+	DisplaySetData();                        \
 	}
 #endif
 
@@ -167,21 +167,21 @@ void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void SetReg(WORD index, WORD value)
 {
 #ifdef USE_16BIT_PMP
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(index);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(value);
-    DeviceDeselect();
+    DisplayDisable();
 #else
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(((WORD_VAL)index).v[1]);
 	DeviceWrite(((WORD_VAL)index).v[0]);
-	DeviceSetData();
+	DisplaySetData();
 	DeviceWrite(((WORD_VAL)value).v[1]);
 	DeviceWrite(((WORD_VAL)value).v[0]);
-    DeviceDeselect();
+    DisplayDisable();
 #endif
 }
 
@@ -204,18 +204,16 @@ void SetReg(WORD index, WORD value)
 void ResetDevice(void)
 {
     // Set FLASH CS pin as output
-    CS_FLASH_TRIS_BIT = 0;
+    DisplayFlashConfig();
 
     // Initialize the device
 	DeviceInit();
 
     DelayMs(5);
 
-    #if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V250)
     // Power on LCD
-    POWERON_LAT_BIT = 0;
-    POWERON_TRIS_BIT = 0;
-    #endif
+    DisplayPowerOn();
+    DisplayPowerConfig();
 
     DelayMs(2);
 
@@ -223,10 +221,10 @@ void ResetDevice(void)
 
     /////////////////////////////////////////////////////////
     // Synchronization after reset
-    DeviceSelect();
+    DisplayEnable();
     DeviceWrite(0);
     DeviceWrite(0);
-    DeviceDeselect();
+    DisplayDisable();
 
     // Setup display
     SetReg(0x0010, 0x0628);
@@ -634,10 +632,10 @@ void PutPixel(SHORT x, SHORT y)
     y = GetMaxY() - y;
     address = (long)LINE_MEM_PITCH * x + y;
     #endif
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     SetAddress(address);
     WritePixel(_color);
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -670,7 +668,7 @@ WORD GetPixel(SHORT x, SHORT y)
     y = GetMaxY() - y;
     address = (long)LINE_MEM_PITCH * x + y;
         #endif
-    CS_LAT_BIT = 0;
+    DisplayEnable();
 
     SetAddress(address);
 
@@ -682,7 +680,7 @@ WORD GetPixel(SHORT x, SHORT y)
         #else
             #error Need wait states for the device
         #endif
-    RS_LAT_BIT = 1;
+    DisplaySetData();
 
     // First RD cycle to move data from GRAM to Read Data Latch
     result = PMDIN1;
@@ -695,7 +693,7 @@ WORD GetPixel(SHORT x, SHORT y)
     while(PMMODEbits.BUSY);
 
     // Disable LCD
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 
     // Disable PMP
     PMCONbits.PMPEN = 1;
@@ -730,7 +728,7 @@ WORD GetPixel(SHORT x, SHORT y)
     y = GetMaxY() - y;
     address = (long)LINE_MEM_PITCH * x + y;
         #endif
-    CS_LAT_BIT = 0;
+    DisplayEnable();
 
     SetAddress(address);
 
@@ -742,7 +740,7 @@ WORD GetPixel(SHORT x, SHORT y)
         #else
             #error Need wait states for the device
         #endif
-    RS_LAT_BIT = 1;
+    DisplaySetData();
 
     // First RD cycle to move data from GRAM to Read Data Latch
     result.v[1] = PMDIN1;
@@ -780,7 +778,7 @@ WORD GetPixel(SHORT x, SHORT y)
         #endif
 
     // Disable LCD
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 
     // Disable PMP
     PMCONbits.PMPEN = 1;
@@ -856,7 +854,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
     #if (DISP_ORIENTATION == 0)
     address = (DWORD) LINE_MEM_PITCH * top + left;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = top; y < bottom + 1; y++)
     {
         SetAddress(address);
@@ -868,14 +866,14 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         address += LINE_MEM_PITCH;
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 
     #else
     top = GetMaxY() - top;
     bottom = GetMaxY() - bottom;
     address = (DWORD) LINE_MEM_PITCH * left + top;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = bottom; y < top + 1; y++)
     {
         SetAddress(address);
@@ -887,7 +885,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         address -= 1;
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
     #endif
     return (1);
 }
@@ -912,14 +910,14 @@ void ClearDevice(void)
 {
     DWORD   counter;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     SetAddress(0);
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
         WritePixel(_color);
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -977,7 +975,7 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         case FLASH:
 
             // Image address
-            flashAddress = ((BITMAP_FLASH *)bitmap)->address;
+            flashAddress = ((IMAGE_FLASH *)bitmap)->address;
 
             // Read color depth
             colorDepth = *(flashAddress + 1);
@@ -1074,7 +1072,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1122,7 +1120,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -1177,7 +1175,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1222,7 +1220,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -1277,7 +1275,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1310,7 +1308,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -1356,7 +1354,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *flashAddress;
     flashAddress++;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1389,7 +1387,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
     #endif
@@ -1459,7 +1457,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1502,7 +1500,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1569,7 +1567,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1607,7 +1605,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1668,7 +1666,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1693,7 +1691,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1753,7 +1751,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1778,7 +1776,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                     #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 

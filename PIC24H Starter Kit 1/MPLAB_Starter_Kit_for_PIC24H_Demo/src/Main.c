@@ -67,9 +67,9 @@ volatile DWORD      			tick = 0;
 DWORD               			previousTick = 0;
 int 							slowFlag = 0;
 static void 					*picture;
-extern BITMAP_FLASH 			iconMicrochip;
-extern BITMAP_FLASH 			intro;
-extern BITMAP_FLASH 			introDevice;
+extern IMAGE_FLASH 			    iconMicrochip;
+extern IMAGE_FLASH 			    intro;
+extern IMAGE_FLASH 			    introDevice;
 
 /************************************************************************
  Main																

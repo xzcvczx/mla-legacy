@@ -41,7 +41,7 @@
  *****************************************************************************/
 #include "SST25VF016.h"
 
-#if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) || defined (MULTI_MEDIA_BOARD_DM00123)
+#if defined (USE_SST25VF016)
 
 /************************************************************************
 * Function: SST25Init                                                  
@@ -56,23 +56,17 @@
 void SST25Init(void)
 {
 
+		#if defined (EXPLORER_16)
 /************************************************************************
 * For Explorer 16 RD12 is connected to EEPROM chip select.
 * To prevent a conflict between this EEPROM and SST25 flash
-* RD12 should be pulled up.
+* the chip select of the EEPROM SPI should be pulled up.
 ************************************************************************/
-        #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-
     // Set IOs directions for EEPROM SPI
-    LATAbits.LATA0 = 1;
-    TRISAbits.TRISA0 = 0;
-        #else
-
-    // Set IOs directions for EEPROM SPI
-    LATDbits.LATD12 = 1;
-    TRISDbits.TRISD12 = 0;
-        #endif
-
+    EEPROM_CS_LAT = 1;			// set initial CS value to 1 (not asserted)
+	EEPROM_CS_TRIS = 0;			// set CS pin to output
+		#endif // #if defined (EXPLORER_16)
+		
     // Initialize SPI
         #ifdef __PIC32MX
     SST25_SPISTAT = 0;
@@ -528,4 +522,5 @@ void SST25SectorErase(DWORD address)
     while(SST25IsWriteBusy());
 }
 
-#endif
+#endif // #if defined (USE_SST25VF016)
+

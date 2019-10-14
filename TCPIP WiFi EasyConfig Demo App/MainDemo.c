@@ -3,16 +3,15 @@
  *  Main Application Entry Point and TCP/IP Stack Demo
  *  Module for Microchip TCP/IP Stack
  *   -Demonstrates how to call and use the Microchip TCP/IP stack
- *	 -Reference: AN833
+ *	 -Reference: Microchip TCP/IP Stack Help (TCPIP Stack Help.chm)
  *
  *********************************************************************
  * FileName:        MainDemo.c
  * Dependencies:    TCPIP.h
  * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- * Compiler:        Microchip C32 v1.05 or higher
- *					Microchip C30 v3.12 or higher
- *					Microchip C18 v3.30 or higher
- *					HI-TECH PICC-18 PRO 9.63PL2 or higher
+ * Compiler:        Microchip C32 v1.11b or higher
+ *					Microchip C30 v3.24 or higher
+ *					Microchip C18 v3.36 or higher
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -98,6 +97,10 @@
 // Include functions specific to this stack application
 #include "MainDemo.h"
 
+// Used for Wi-Fi assertions
+#define WF_MODULE_NUMBER   WF_MODULE_MAIN_DEMO
+
+
 #if defined( WF_CONSOLE )
 #include "TCPIP Stack/WFConsole.h"
 #include "IperfApp.h"
@@ -105,6 +108,7 @@
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
+static unsigned short wOriginalAppConfigChecksum;	// Checksum of the ROM defaults for AppConfig
 BYTE AN0String[8];
 
 // Use UART2 instead of UART1 for stdout (printf functions).  Explorer 16 
@@ -121,7 +125,7 @@ static void InitializeBoard(void);
 
 #if defined(WF_CS_TRIS)
     static void WF_Connect(void);
-#endif    
+#endif
 
 //
 // PIC18 Interrupt Service Routines
@@ -235,12 +239,6 @@ static void InitializeBoard(void);
 	}
 #endif
 
-#if defined( WF_CS_TRIS )
-    /* used for WiFi assertions */
-    #ifdef WF_DEBUG
-        #define WF_MODULE_NUMBER   WF_MODULE_MAIN_DEMO
-    #endif
-#endif /* WF_CS_TRIS */
 
 //
 // Main application entry point.
@@ -296,9 +294,11 @@ int main(void)
 				#if defined(EEPROM_CS_TRIS)
 			    XEEBeginWrite(0x0000);
 			    XEEWrite(0xFF);
+			    XEEWrite(0xFF);
 			    XEEEndWrite();
 			    #elif defined(SPIFLASH_CS_TRIS)
 			    SPIFlashBeginWrite(0x0000);
+			    SPIFlashWrite(0xFF);
 			    SPIFlashWrite(0xFF);
 			    #endif
 			    
@@ -359,10 +359,10 @@ int main(void)
     mDNSMulticastFilterRegister();			
 	#endif
 
-    #if defined(WF_CONSOLE)
+	#if defined(WF_CONSOLE)
 	WFConsoleInit();
 	IperfAppInit();
-    #endif
+	#endif
 
 	// Now that all items are initialized, begin the co-operative
 	// multitasking loop.  This infinite loop will continuously 
@@ -410,7 +410,7 @@ int main(void)
                 AppConfig.SecurityMode--; // the calc psk is exactly one below for each passphrase option
                 AppConfig.SecurityKeyLength = 32;                
 
-                SaveAppConfig();
+                SaveAppConfig(&AppConfig);
             }
             
             AppConfig.saveSecurityInfo = FALSE;
@@ -481,7 +481,8 @@ int main(void)
 		//User should use one of the following SNMP demo
 		// This routine demonstrates V1 or V2 trap formats with one variable binding.
 		SNMPTrapDemo();
-		#if defined(SNMP_STACK_USE_V2_TRAP)
+		
+		#if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 		//This routine provides V2 format notifications with multiple (3) variable bindings
 		//User should modify this routine to send v2 trap format notifications with the required varbinds.
 		//SNMPV2TrapDemo();
@@ -553,7 +554,9 @@ static void WF_Connect(void)
     WF_CPCreate(&ConnectionProfileID);
 
     #if defined(STACK_USE_UART)
-    putrsUART("Set SSID\r\n");
+    putrsUART("Set SSID (");
+    putsUART(AppConfig.MySSID);
+    putrsUART(")\r\n");
     #endif
     WF_CPSetSsid(ConnectionProfileID, 
                  AppConfig.MySSID, 
@@ -634,6 +637,12 @@ static void WF_Connect(void)
         WF_PsPollEnable(TRUE);
     }    
 #endif
+
+    #if defined(STACK_USE_UART)
+    putrsUART("Set Beacon Timeout\r\n");
+    #endif
+    WF_CASetBeaconTimeout(40);
+
 
     #if defined(STACK_USE_UART)                     
     putrsUART("Start WiFi Connect\r\n");        
@@ -718,9 +727,7 @@ static void InitializeBoard(void)
 	LED4_TRIS = 0;
 	LED5_TRIS = 0;
 	LED6_TRIS = 0;
-#if !defined(EXPLORER_16)	// Pin multiplexed with a button on EXPLORER_16 
 	LED7_TRIS = 0;
-#endif
 	LED_PUT(0x00);
 
 #if defined(__18CXX)
@@ -1058,117 +1065,151 @@ static ROM BYTE SerializedMACAddress[6] = {MY_DEFAULT_MAC_BYTE1, MY_DEFAULT_MAC_
 
 static void InitAppConfig(void)
 {
-	AppConfig.Flags.bIsDHCPEnabled = TRUE;
-	AppConfig.Flags.bInConfigMode = TRUE;
-	memcpypgm2ram((void*)&AppConfig.MyMACAddr, (ROM void*)SerializedMACAddress, sizeof(AppConfig.MyMACAddr));
-//	{
-//		_prog_addressT MACAddressAddress;
-//		MACAddressAddress.next = 0x157F8;
-//		_memcpy_p2d24((char*)&AppConfig.MyMACAddr, MACAddressAddress, sizeof(AppConfig.MyMACAddr));
-//	}
-	AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2<<8ul | MY_DEFAULT_IP_ADDR_BYTE3<<16ul | MY_DEFAULT_IP_ADDR_BYTE4<<24ul;
-	AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
-	AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | MY_DEFAULT_MASK_BYTE2<<8ul | MY_DEFAULT_MASK_BYTE3<<16ul | MY_DEFAULT_MASK_BYTE4<<24ul;
-	AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
-	AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | MY_DEFAULT_GATE_BYTE2<<8ul | MY_DEFAULT_GATE_BYTE3<<16ul | MY_DEFAULT_GATE_BYTE4<<24ul;
-	AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | MY_DEFAULT_PRIMARY_DNS_BYTE2<<8ul  | MY_DEFAULT_PRIMARY_DNS_BYTE3<<16ul  | MY_DEFAULT_PRIMARY_DNS_BYTE4<<24ul;
-	AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2<<8ul  | MY_DEFAULT_SECONDARY_DNS_BYTE3<<16ul  | MY_DEFAULT_SECONDARY_DNS_BYTE4<<24ul;
-
-
-	// SNMP Community String configuration
-	#if defined(STACK_USE_SNMP_SERVER)
+#if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS)
+	unsigned char vNeedToSaveDefaults = 0;
+#endif
+	
+	while(1)
 	{
-		BYTE i;
-		static ROM char * ROM cReadCommunities[] = SNMP_READ_COMMUNITIES;
-		static ROM char * ROM cWriteCommunities[] = SNMP_WRITE_COMMUNITIES;
-		ROM char * strCommunity;
+		// Start out zeroing all AppConfig bytes to ensure all fields are 
+		// deterministic for checksum generation
+		memset((void*)&AppConfig, 0x00, sizeof(AppConfig));
 		
-		for(i = 0; i < SNMP_MAX_COMMUNITY_SUPPORT; i++)
+		AppConfig.Flags.bIsDHCPEnabled = TRUE;
+		AppConfig.Flags.bInConfigMode = TRUE;
+		memcpypgm2ram((void*)&AppConfig.MyMACAddr, (ROM void*)SerializedMACAddress, sizeof(AppConfig.MyMACAddr));
+//		{
+//			_prog_addressT MACAddressAddress;
+//			MACAddressAddress.next = 0x157F8;
+//			_memcpy_p2d24((char*)&AppConfig.MyMACAddr, MACAddressAddress, sizeof(AppConfig.MyMACAddr));
+//		}
+		AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2<<8ul | MY_DEFAULT_IP_ADDR_BYTE3<<16ul | MY_DEFAULT_IP_ADDR_BYTE4<<24ul;
+		AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
+		AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | MY_DEFAULT_MASK_BYTE2<<8ul | MY_DEFAULT_MASK_BYTE3<<16ul | MY_DEFAULT_MASK_BYTE4<<24ul;
+		AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
+		AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | MY_DEFAULT_GATE_BYTE2<<8ul | MY_DEFAULT_GATE_BYTE3<<16ul | MY_DEFAULT_GATE_BYTE4<<24ul;
+		AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | MY_DEFAULT_PRIMARY_DNS_BYTE2<<8ul  | MY_DEFAULT_PRIMARY_DNS_BYTE3<<16ul  | MY_DEFAULT_PRIMARY_DNS_BYTE4<<24ul;
+		AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2<<8ul  | MY_DEFAULT_SECONDARY_DNS_BYTE3<<16ul  | MY_DEFAULT_SECONDARY_DNS_BYTE4<<24ul;
+	
+	
+		// SNMP Community String configuration
+		#if defined(STACK_USE_SNMP_SERVER)
 		{
-			// Get a pointer to the next community string
-			strCommunity = cReadCommunities[i];
-			if(i >= sizeof(cReadCommunities)/sizeof(cReadCommunities[0]))
-				strCommunity = "";
-
-			// Ensure we don't buffer overflow.  If your code gets stuck here, 
-			// it means your SNMP_COMMUNITY_MAX_LEN definition in TCPIPConfig.h 
-			// is either too small or one of your community string lengths 
-			// (SNMP_READ_COMMUNITIES) are too large.  Fix either.
-			if(strlenpgm(strCommunity) >= sizeof(AppConfig.readCommunity[0]))
-				while(1);
+			BYTE i;
+			static ROM char * ROM cReadCommunities[] = SNMP_READ_COMMUNITIES;
+			static ROM char * ROM cWriteCommunities[] = SNMP_WRITE_COMMUNITIES;
+			ROM char * strCommunity;
 			
-			// Copy string into AppConfig
-			strcpypgm2ram((char*)AppConfig.readCommunity[i], strCommunity);
-
-			// Get a pointer to the next community string
-			strCommunity = cWriteCommunities[i];
-			if(i >= sizeof(cWriteCommunities)/sizeof(cWriteCommunities[0]))
-				strCommunity = "";
-
-			// Ensure we don't buffer overflow.  If your code gets stuck here, 
-			// it means your SNMP_COMMUNITY_MAX_LEN definition in TCPIPConfig.h 
-			// is either too small or one of your community string lengths 
-			// (SNMP_WRITE_COMMUNITIES) are too large.  Fix either.
-			if(strlenpgm(strCommunity) >= sizeof(AppConfig.writeCommunity[0]))
-				while(1);
-
-			// Copy string into AppConfig
-			strcpypgm2ram((char*)AppConfig.writeCommunity[i], strCommunity);
+			for(i = 0; i < SNMP_MAX_COMMUNITY_SUPPORT; i++)
+			{
+				// Get a pointer to the next community string
+				strCommunity = cReadCommunities[i];
+				if(i >= sizeof(cReadCommunities)/sizeof(cReadCommunities[0]))
+					strCommunity = "";
+	
+				// Ensure we don't buffer overflow.  If your code gets stuck here, 
+				// it means your SNMP_COMMUNITY_MAX_LEN definition in TCPIPConfig.h 
+				// is either too small or one of your community string lengths 
+				// (SNMP_READ_COMMUNITIES) are too large.  Fix either.
+				if(strlenpgm(strCommunity) >= sizeof(AppConfig.readCommunity[0]))
+					while(1);
+				
+				// Copy string into AppConfig
+				strcpypgm2ram((char*)AppConfig.readCommunity[i], strCommunity);
+	
+				// Get a pointer to the next community string
+				strCommunity = cWriteCommunities[i];
+				if(i >= sizeof(cWriteCommunities)/sizeof(cWriteCommunities[0]))
+					strCommunity = "";
+	
+				// Ensure we don't buffer overflow.  If your code gets stuck here, 
+				// it means your SNMP_COMMUNITY_MAX_LEN definition in TCPIPConfig.h 
+				// is either too small or one of your community string lengths 
+				// (SNMP_WRITE_COMMUNITIES) are too large.  Fix either.
+				if(strlenpgm(strCommunity) >= sizeof(AppConfig.writeCommunity[0]))
+					while(1);
+	
+				// Copy string into AppConfig
+				strcpypgm2ram((char*)AppConfig.writeCommunity[i], strCommunity);
+			}
 		}
-	}
-	#endif
+		#endif
+	
+		// Load the default NetBIOS Host Name
+		memcpypgm2ram(AppConfig.NetBIOSName, (ROM void*)MY_DEFAULT_HOST_NAME, 16);
+		FormatNetBIOSName(AppConfig.NetBIOSName);
+	
+		#if defined(WF_CS_TRIS)
+			// Load the default SSID Name
+			WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME) <= sizeof(AppConfig.MySSID));
+			memcpypgm2ram(AppConfig.MySSID, (ROM void*)MY_DEFAULT_SSID_NAME, sizeof(MY_DEFAULT_SSID_NAME));
+			AppConfig.SsidLength = sizeof(MY_DEFAULT_SSID_NAME) - 1;
+	        #if defined (EZ_CONFIG_STORE)
+	        AppConfig.SecurityMode = MY_DEFAULT_WIFI_SECURITY_MODE;
+	        AppConfig.networkType = MY_DEFAULT_NETWORK_TYPE;
+	        AppConfig.dataValid = 0;
+	        #endif // EZ_CONFIG_STORE
+		#endif
 
-	// Load the default NetBIOS Host Name
-	memcpypgm2ram(AppConfig.NetBIOSName, (ROM void*)MY_DEFAULT_HOST_NAME, 16);
-	FormatNetBIOSName(AppConfig.NetBIOSName);
+		// Compute the checksum of the AppConfig defaults as loaded from ROM
+		wOriginalAppConfigChecksum = CalcIPChecksum((BYTE*)&AppConfig, sizeof(AppConfig));
 
-	#if defined(WF_CS_TRIS)
-		// Load the default SSID Name
-		WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME) <= sizeof(AppConfig.MySSID));
-		memcpypgm2ram(AppConfig.MySSID, (ROM void*)MY_DEFAULT_SSID_NAME, sizeof(MY_DEFAULT_SSID_NAME));
-        AppConfig.SsidLength = sizeof(MY_DEFAULT_SSID_NAME) - 1;
-        #if defined (EZ_CONFIG_STORE)
-        AppConfig.SecurityMode = WF_SECURITY_OPEN;
-        AppConfig.networkType = WF_ADHOC;
-        AppConfig.dataValid = 0;
-        #endif // EZ_CONFIG_STORE
-	#endif
+		#if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS)
+		{
+			NVM_VALIDATION_STRUCT NVMValidationStruct;
 
-	#if defined(EEPROM_CS_TRIS)
-	{
-		BYTE c;
+			// Check to see if we have a flag set indicating that we need to 
+			// save the ROM default AppConfig values.
+			if(vNeedToSaveDefaults)
+				SaveAppConfig(&AppConfig);
 		
-	    // When a record is saved, first byte is written as 0x61 to indicate
-	    // that a valid record was saved.  Note that older stack versions
-		// used 0x60.  This change has been made to so old EEPROM contents
-		// will get overwritten.  The AppConfig() structure has been changed,
-		// resulting in parameter misalignment if still using old EEPROM
-		// contents.
-		XEEReadArray(0x0000, &c, 1);
-        #if defined (EZ_CONFIG_STORE)
-        if(c == WF_EEPROM_CFG_VER)
-        #else
-	    if(c == 0x61u)
-        #endif // EZ_CONFIG_STORE
-		    XEEReadArray(0x0001, (BYTE*)&AppConfig, sizeof(AppConfig));
-	    else
-	        SaveAppConfig();
+			// Read the NVMValidation record and AppConfig struct out of EEPROM/Flash
+			#if defined(EEPROM_CS_TRIS)
+			{
+				XEEReadArray(0x0000, (BYTE*)&NVMValidationStruct, sizeof(NVMValidationStruct));
+				XEEReadArray(sizeof(NVMValidationStruct), (BYTE*)&AppConfig, sizeof(AppConfig));
+			}
+			#elif defined(SPIFLASH_CS_TRIS)
+			{
+				SPIFlashReadArray(0x0000, (BYTE*)&NVMValidationStruct, sizeof(NVMValidationStruct));
+				SPIFlashReadArray(sizeof(NVMValidationStruct), (BYTE*)&AppConfig, sizeof(AppConfig));
+			}
+			#endif
+	
+			// Check EEPROM/Flash validitity.  If it isn't valid, set a flag so 
+			// that we will save the ROM default values on the next loop 
+			// iteration.
+			if((NVMValidationStruct.wConfigurationLength != sizeof(AppConfig)) ||
+			   (NVMValidationStruct.wOriginalChecksum != wOriginalAppConfigChecksum) ||
+			   (NVMValidationStruct.wCurrentChecksum != CalcIPChecksum((BYTE*)&AppConfig, sizeof(AppConfig))))
+			{
+				// Check to ensure that the vNeedToSaveDefaults flag is zero, 
+				// indicating that this is the first iteration through the do 
+				// loop.  If we have already saved the defaults once and the 
+				// EEPROM/Flash still doesn't pass the validity check, then it 
+				// means we aren't successfully reading or writing to the 
+				// EEPROM/Flash.  This means you have a hardware error and/or 
+				// SPI configuration error.
+				if(vNeedToSaveDefaults)
+				{
+					while(1);
+				}
+				
+				// Set flag and restart loop to load ROM defaults and save them
+				vNeedToSaveDefaults = 1;
+				continue;
+			}
+			
+			// If we get down here, it means the EEPROM/Flash has valid contents 
+			// and either matches the ROM defaults or previously matched and 
+			// was run-time reconfigured by the user.  In this case, we shall 
+			// use the contents loaded from EEPROM/Flash.
+			break;
+		}
+		#endif
+		break;
 	}
-	#elif defined(SPIFLASH_CS_TRIS)
-	{
-		BYTE c;
-		
-		SPIFlashReadArray(0x0000, &c, 1);
-        #if defined (EZ_CONFIG_STORE)
-        if(c == WF_EEPROM_CFG_VER)
-        #else
-		if(c == 0x61u)
-        #endif  // EZ_CONFIG_STORE
-			SPIFlashReadArray(0x0001, (BYTE*)&AppConfig, sizeof(AppConfig));
-		else
-			SaveAppConfig();
-	}
-	#endif
+
 
     #if defined (EZ_CONFIG_STORE)
     // Set configuration for ZG from NVM
@@ -1182,33 +1223,34 @@ static void InitAppConfig(void)
 }
 
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS)
-void SaveAppConfig(void)
+void SaveAppConfig(const APP_CONFIG *ptrAppConfig)
 {
+	NVM_VALIDATION_STRUCT NVMValidationStruct;
+
 	// Ensure adequate space has been reserved in non-volatile storage to 
 	// store the entire AppConfig structure.  If you get stuck in this while(1) 
 	// trap, it means you have a design time misconfiguration in TCPIPConfig.h.
 	// You must increase MPFS_RESERVE_BLOCK to allocate more space.
 	#if defined(STACK_USE_MPFS) || defined(STACK_USE_MPFS2)
-		if(sizeof(AppConfig) > MPFS_RESERVE_BLOCK)
+		if(sizeof(NVMValidationStruct) + sizeof(AppConfig) > MPFS_RESERVE_BLOCK)
 			while(1);
 	#endif
 
+	// Get proper values for the validation structure indicating that we can use 
+	// these EEPROM/Flash contents on future boot ups
+	NVMValidationStruct.wOriginalChecksum = wOriginalAppConfigChecksum;
+	NVMValidationStruct.wCurrentChecksum = CalcIPChecksum((BYTE*)ptrAppConfig, sizeof(APP_CONFIG));
+	NVMValidationStruct.wConfigurationLength = sizeof(APP_CONFIG);
+
+	// Write the validation struct and current AppConfig contents to EEPROM/Flash
 	#if defined(EEPROM_CS_TRIS)
 	    XEEBeginWrite(0x0000);
-        #if defined (EZ_CONFIG_STORE)
-        XEEWrite(WF_EEPROM_CFG_VER);
-        #else
-	    XEEWrite(0x61u);
-        #endif //
-	    XEEWriteArray((BYTE*)&AppConfig, sizeof(AppConfig));
+	    XEEWriteArray((BYTE*)&NVMValidationStruct, sizeof(NVMValidationStruct));
+		XEEWriteArray((BYTE*)ptrAppConfig, sizeof(APP_CONFIG));
     #else
-	    SPIFlashBeginWrite(0x0000);
-        #if defined (EZ_CONFIG_STORE)
-        SPIFlashWrite(WF_EEPROM_CFG_VER);
-        #else
-	    SPIFlashWrite(0x61u);
-        #endif // EZ_CONFIG_STORE
-	    SPIFlashWriteArray((BYTE*)&AppConfig, sizeof(AppConfig));
+		SPIFlashBeginWrite(0x0000);
+		SPIFlashWriteArray((BYTE*)&NVMValidationStruct, sizeof(NVMValidationStruct));
+		SPIFlashWriteArray((BYTE*)ptrAppConfig, sizeof(APP_CONFIG));
     #endif
 }
 #endif
@@ -1221,9 +1263,11 @@ void RestoreWifiConfig(void)
 #if defined(EEPROM_CS_TRIS)
     XEEBeginWrite(0x0000);
     XEEWrite(0xFF);
+    XEEWrite(0xFF);
     XEEEndWrite();
 #elif defined(SPIFLASH_CS_TRIS)
     SPIFlashBeginWrite(0x0000);
+    SPIFlashWrite(0xFF);
     SPIFlashWrite(0xFF);
 #endif
 
@@ -1233,14 +1277,4 @@ void RestoreWifiConfig(void)
     Reset();
 }
 
-void SaveWifiConfig(void)
-{
-    /* Use this chance to make some changes for AppConfig */
-
-    /* Don't commit address it may have changed, it will get restored later in the state machine */
-	memcpypgm2ram((void*)&AppConfig.MyMACAddr, (ROM void*)SerializedMACAddress, sizeof(AppConfig.MyMACAddr));
-
-    SaveAppConfig();
-    return;
-}
 #endif // EZ_CONFIG_STORE

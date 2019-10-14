@@ -35,6 +35,8 @@
   ----  -----------------------------------------
   1.0   Initial release
   1.01  Cleaned up unnecessary variables
+  1.02  Optimized code by removing redundant code in "SCdrv_SetBRG"
+        function.
 ********************************************************************/
 
 #include 	<p18cxxx.h>
@@ -51,6 +53,10 @@ unsigned int initialBaudReg;
 unsigned long scReferenceClock;
 
 unsigned long baudRate;
+unsigned int factorF = 372;
+BYTE factorDNumerator = 1;
+BYTE factorDdenominator = 1;
+BOOL delayLapsedFlag = FALSE;
 
 ////////////////////////////////////////
 // Generate delay in microsec resolution
@@ -74,9 +80,39 @@ void WaitMilliSec( WORD ms )
 		WaitMicroSec( 800 );
 }
 
-///////////////////////////////////
-// precalculate 1 bit time microsec used for Delay counter 
+/*******************************************************************************
+  Function:
+    void SC_Delay(void)
+	
+  Description:
+    This function waits for delay to get completed
 
+  Precondition:
+    None.
+
+  Parameters:
+    unsigned int instructionCount - Number of instruction counts to be waited
+
+  Return Values:
+    None
+	
+  Remarks:
+    None.
+  *****************************************************************************/
+void SC_Delay(unsigned int instructionCount)
+{
+	// Set the Timer Count as per the delay needed
+	SCdrv_SetDelayTimerCnt(0xFFFF - instructionCount);
+
+	// Enable the delay timer
+	SCdrv_EnableDelayTimer();
+
+	// Wait until the delay is elapsed
+	while(!delayLapsedFlag);
+
+	// Clear the delay flag
+	delayLapsedFlag = FALSE;
+}
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -190,73 +226,8 @@ BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 //////////////////////////////////////////////////
 void SCdrv_SetBRG( BYTE speedCode )
 {
-	float factorD = 1;
-	unsigned int factorF = 372;
 	BYTE tempCode;
 	unsigned int baudReg;
-
-	tempCode = speedCode & 0x0F;
-	
-	// Calculate Factor 'D' from TA1 value
-	switch(tempCode)
-	{
-		case 0x00:
-		case 0x07:
-		case 0x01:
-					break;
-
-		case 0x02:
-					factorD = 2;
-					break;
-
-		case 0x03:
-					factorD = 4;
-					break;
-
-		case 0x04:
-					factorD = 8;
-					break;
-
-		case 0x05:
-					factorD = 16;
-					break;
-
-		case 0x06:
-					factorD = 32;
-					break;
-
-		case 0x08:
-					factorD = 12;
-					break;
-
-		case 0x09:
-					factorD = 20;
-					break;
-
-		case 0x0A:
-					factorD = 0.5;
-					break;
-
-		case 0x0B:
-					factorD = 0.25;
-					break;
-
-		case 0x0C:
-					factorD = 0.125;
-					break;
-
-		case 0x0D:
-					factorD = 0.0625;
-					break;
-
-		case 0x0E:
-					factorD = 0.03125;
-					break;
-
-		case 0x0F:
-					factorD = 0.015625;
-					break;
-	}
 
 	// If you are not using internal clock in Smart Card & are 
 	// using external clock to drive Smart Card than calculate 
@@ -265,83 +236,25 @@ void SCdrv_SetBRG( BYTE speedCode )
 
 		tempCode = (speedCode & 0xF0) >> 4;
 		
-	// Calculate Factor 'F' from TA1 value
-		switch(tempCode)
-		{
-			case 0x00:
-			case 0x07:
-			case 0x08:
-			case 0x0E:
-			case 0x0F:
-						break;
-	
-			case 0x01:
-						factorF = 372;
-						break;
-	
-			case 0x02:
-						factorF = 558;
-						break;
-
-			case 0x03:
-						factorF = 744;
-						break;
-	
-			case 0x04:
-						factorF = 1116;
-						break;
-	
-			case 0x05:
-						factorF = 1488;
-						break;
-	
-			case 0x06:
-						factorF = 1860;
-						break;
-	
-			case 0x09:
-						factorF = 512;
-						break;
-	
-			case 0x0A:
-						factorF = 768;
-						break;
-	
-			case 0x0B:
-						factorF = 1024;
-						break;
-	
-			case 0x0C:
-						factorF = 1536;
-						break;
-	
-			case 0x0D:
-						factorF = 2048;
-						break;	
-		}
-
 		if(tempCode == 0x00)	// If internal clock used in Smart Card
 		{
-			baudReg = (unsigned int)(FCY/(9600 * factorD) - 1);
-			SPBRG = (unsigned char)baudReg;
-			SPBRGH = (unsigned char)(baudReg >> 8);
+			baudReg = (unsigned int)((FCY * factorDdenominator)/(unsigned long)(9600 * (unsigned long)factorDNumerator) - 1);
 		}
 		else	// If externa; clock used to drive Smart Card
 		{
-			baudRate = (scReferenceClock * factorD)/factorF;
+			baudRate = (scReferenceClock * factorDNumerator)/(unsigned long)(factorF * (unsigned long)factorDdenominator);
 			baudReg = (unsigned int)((FCY/baudRate) - 1);
-			SPBRG = (unsigned char)baudReg;
-			SPBRGH = (unsigned char)(baudReg >> 8);
 		}
 
 	#else	// If internal clock used in Smart Card
 
-		baudReg = (unsigned char)(FCY/(9600 * factorD) - 1);
-		SPBRG = (unsigned char)baudReg;
-		SPBRGH = (unsigned char)(baudReg >> 8);
+		baudReg = (unsigned char)((FCY * factorDdenominator)/(unsigned long)(9600 * (unsigned long)factorDNumerator) - 1);
 
 	#endif
-	
+
+	SPBRG = (unsigned char)baudReg;
+	SPBRGH = (unsigned char)(baudReg >> 8);
+
 	//recalculate bit time
 	gBitTimeDelay = baudReg;
 	gBitTimeDelay *= bitTime;	//micro sec for 1 bit @ 9.6kbps
@@ -410,6 +323,9 @@ void SCdrv_InitUART(void)
 
 	RCSTAbits.CREN = 1;
 	RCSTAbits.RX9  = 1;
+
+	// Enable Delay Timer Interrupts for future use
+	SCdrv_EnableDelayTimerIntr();
 }
 
 

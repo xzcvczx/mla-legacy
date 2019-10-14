@@ -17,7 +17,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -53,20 +53,19 @@
  ********************************************************************/
 #define __CUSTOMHTTPAPP_C
 
-#include "TCPIP Stack/TCPIP.h"
+#include "TCPIPConfig.h"
 
 #if defined(STACK_USE_HTTP2_SERVER)
+
+#include "TCPIP Stack/TCPIP.h"
 
 extern HTTP_CONN curHTTP;
 extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];
 extern BYTE curHTTPID;
 
 // Access to MainDemo.c functions and variables
-#if defined(MPFS_USE_EEPROM)
-extern void SaveAppConfig(void);
-#endif
-void WriteLCDMenu(void);
-extern APP_CONFIG AppConfig;
+#include "MainDemo.h"
+
 
 // Vending Machine Application Global Variables
 #include "VendingMachine.h"

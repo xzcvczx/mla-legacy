@@ -165,12 +165,12 @@
 *
 ********************************************************************/
 
-//#include "Graphics\LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.h"
-//#include "Graphics\SSD1906.h"   // Driver for Solomon Systech. SSD1906 controller
-//#include "Graphics\SSD1303.h"   // Driver for SSD1303 (monochrome OLED display) controller
-//#include "Graphics\SH1101A.h"   // Driver for the HS1101A (monochrome OLED display) controller
-//#include "Graphics\HIT1270L.h"  // Landscape driver for Densitron HIT1270 controller
-//#include "Graphics\SSD1339.h"   // Driver for Solomon Systech. SSD1339 controller
+//#include "Graphics/LGDP4531_R61505_S6D0129_S6D0139_SPFD5408.h"
+//#include "Graphics/SSD1906.h"   // Driver for Solomon Systech. SSD1906 controller
+//#include "Graphics/SSD1303.h"   // Driver for SSD1303 (monochrome OLED display) controller
+//#include "Graphics/SH1101A.h"   // Driver for the HS1101A (monochrome OLED display) controller
+//#include "Graphics/HIT1270L.h"  // Landscape driver for Densitron HIT1270 controller
+//#include "Graphics/SSD1339.h"   // Driver for Solomon Systech. SSD1339 controller
 #define DISPLAY_CONTROLLER NO_CONTROLLER_DEFINED
 
 #endif // _GRAPHICSCONFIG_H

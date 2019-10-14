@@ -6,13 +6,13 @@
  * FileName:        Button.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
+ * 11/12/07	Version 1.0 release
  *****************************************************************************/
 #ifndef _BUTTON_H
     #define _BUTTON_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
@@ -55,6 +55,7 @@
     #define BTN_TEXTBOTTOM  0x0040  // Bit to indicate text is top aligned.
     #define BTN_TEXTTOP     0x0080  // Bit to indicate text is bottom aligned.
     #define BTN_TWOTONE     0x0100  // Bit to indicate the button is a two tone type.
+    #define BTN_NOPANEL     0x0200  // Bit to indicate the button will be drawn without a panel (for faster drawing when the button image used is larger than the button panel).
 
 // Note that if bits[7:4] are all zero text is centered.
     #define BTN_DRAW_FOCUS  0x2000  // Bit to indicate focus must be redrawn.
@@ -258,7 +259,7 @@ BUTTON  *BtnCreate
         );
 
 /*********************************************************************
-* Function: BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg)
+* Function: BtnTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates the translated 
@@ -278,7 +279,7 @@ BUTTON  *BtnCreate
 *
 * PreCondition: none
 *
-* Input: pB    - The pointer to the object where the message will be
+* Input: pObj  - The pointer to the object where the message will be
 *				 evaluated to check if the message will affect the object.
 *        pMsg  - Pointer to the message struct containing the message from 
 *        		 the user interface.
@@ -304,23 +305,15 @@ BUTTON  *BtnCreate
 *			// If the object must be redrawn
 *			// It cannot accept message
 *			if(!IsObjUpdated(pCurrentObj)){
-*				switch(pCurrentObj->type){
-*					case OBJ_BUTTON:
-*						objMsg = BtnTranslateMsg((BUTTON*)pCurrentObj, pMsg);
-*						if(objMsg == OBJ_MSG_INVALID)
-*							break;
-*						if(GOLMsgCallback(objMsg,pCurrentObj,pMsg))
-*							BtnMsgDefault(objMsg,(BUTTON*)pCurrentObj);
-*						break;
-*					case OBJ_SLIDER:
-*						objMsg = SldTranslateMsg((SLIDER*)pCurrentObj, pMsg);
-*						if(objMsg == OBJ_MSG_INVALID)
-*							break;
-*						if(GOLMsgCallback(objMsg,pCurrentObj,pMsg))
-*							SldMsgDefault(objMsg,(SLIDER*)pCurrentObj);
-*						break;
-*					default: break;	
-*				}
+*               translatedMsg = pCurrentObj->MsgObj(pCurrentObj, pMsg);
+*
+*                if(translatedMsg != OBJ_MSG_INVALID)
+*                {
+*                    if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
+*                        if(pCurrentObj->MsgDefaultObj)
+*                            pCurrentObj->MsgDefaultObj(translatedMsg, pCurrentObj, pMsg);
+*                }
+*
 *			}
 *		}
 *		pCurrentObj = pCurrentObj->pNxtObj;
@@ -330,10 +323,10 @@ BUTTON  *BtnCreate
 * Side Effects: none
 *
 ********************************************************************/
-WORD    BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg);
+WORD    BtnTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG* pMsg)
+* Function: BtnMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: This function performs the actual state change 
 *			based on the translated message given. The following state changes 
@@ -352,7 +345,7 @@ WORD    BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg);
 * PreCondition: none
 *
 * Input: translatedMsg - The translated message.
-*        pB            - The pointer to the object whose state will be modified.
+*        pObj          - The pointer to the object whose state will be modified.
 *        pMsg          - The pointer to the GOL message.
 *        
 * Output: none
@@ -363,10 +356,10 @@ WORD    BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void    BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG *pMsg);
+void    BtnMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: WORD BtnDraw(BUTTON *pB)
+* Function: WORD BtnDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -412,18 +405,8 @@ void    BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG *pMsg);
 *		// this only process Button and Window
 *		while(pCurrentObj != NULL){
 *			// check if object state indicates redrawing
-*			if(pCurrentObj->state&0xFC00) {
-*				switch(pCurrentObj->type){
-*					case OBJ_BUTTON:
-*						done = BtnDraw((BUTTON*)pCurrentObj);
-*						break;
-*					case OBJ_WINDOW:
-*						done = WndDraw((WINDOW*)pCurrentObj);
-*						break;
-*					default: 
-*						done = 1;
-*						break;
-*				}
+*			done = pCurrentObj->draw(pCurrentObj);
+*
 *				if(done){
 *					// reset only the state if drawing was finished
 *					pCurrentObj->state = 0;
@@ -441,5 +424,5 @@ void    BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    BtnDraw(BUTTON *pB);
+WORD BtnDraw(void *pObj);
 #endif // _BUTTON_H

@@ -33,9 +33,9 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author                                    Date                               Comment
+ * Date				Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Pradeep Budagutta                20 Aug 2009                 Initial Version
+ * 20 Aug 2009      Initial Version
  *****************************************************************************/
 #ifndef _PALETTECOLORDEFINES_H
 #define _PALETTECOLORDEFINES_H

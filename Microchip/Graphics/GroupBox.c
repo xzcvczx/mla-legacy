@@ -38,7 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Paolo A. Tamayo		11/12/07	Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_GROUPBOX
 
@@ -70,15 +70,19 @@ GROUPBOX *GbCreate
     if(pGb == NULL)
         return (pGb);
 
-    pGb->hdr.ID = ID;               // unique id assigned for referencing
+    pGb->hdr.ID = ID;					// unique id assigned for referencing
     pGb->hdr.pNxtObj = NULL;
-    pGb->hdr.type = OBJ_GROUPBOX;   // set object type
-    pGb->hdr.left = left;
-    pGb->hdr.top = top;
-    pGb->hdr.right = right;
-    pGb->hdr.bottom = bottom;
-    pGb->hdr.state = state;
-    pGb->pText = pText;
+    pGb->hdr.type = OBJ_GROUPBOX;		// set object type
+    pGb->hdr.left = left;				// left position
+    pGb->hdr.top = top;					// top position
+    pGb->hdr.right = right;				// right position
+    pGb->hdr.bottom = bottom;			// bottom position
+    pGb->hdr.state = state;				// initial state
+    pGb->pText = pText;					// text label used
+    pGb->hdr.DrawObj = GbDraw;			// draw function 	
+    pGb->hdr.MsgObj = GbTranslateMsg;   // message function
+    pGb->hdr.MsgDefaultObj = NULL;		// default message function
+    pGb->hdr.FreeObj = NULL;			// free function
 
     // Set the color scheme and font to be used
     if(pScheme == NULL)
@@ -101,14 +105,18 @@ GROUPBOX *GbCreate
 }
 
 /*********************************************************************
-* Function: WORD GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg)
+* Function: WORD GbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Evaluates the message if the object will be affected by the 
 *		 message or not.
 *
 ********************************************************************/
-WORD GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg)
+WORD GbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    GROUPBOX *pGb;
+
+    pGb = (GROUPBOX *)pObj;
 
     // Evaluate if the message is for the button
     // Check if disabled first
@@ -139,7 +147,7 @@ WORD GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD GbDraw(GROUPBOX *pGb);
+* Function: WORD GbDraw(void *pObj)
 *
 * Notes: This is the state machine to draw the button.
 *
@@ -151,7 +159,7 @@ WORD GbTranslateMsg(GROUPBOX *pGb, GOL_MSG *pMsg)
     #endif
 
 /* */
-WORD GbDraw(GROUPBOX *pGb)
+WORD GbDraw(void *pObj)
 {
     typedef enum
     {
@@ -175,6 +183,10 @@ WORD GbDraw(GROUPBOX *pGb)
 
     static GB_DRAW_STATES state = GB_STATE_IDLE;
     static SHORT textLeft, textRight, top;                      // used to draw lines that start/stops at text.
+    GROUPBOX *pGb;
+
+    pGb = (GROUPBOX *)pObj;
+    
     if(IsDeviceBusy())
         return (0);
 

@@ -67,10 +67,10 @@
 /*==========================================================================*/
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER    WF_MODULE_WF_CONFIG
 #endif
-  
+
 
 /*****************************************************************************
  * FUNCTION: WF_ProcessEvent
@@ -87,7 +87,7 @@
  *           that may need processing by the Host CPU.  
  *
  *           No other WiFi Driver function should be called from this function, with the
- *           exception WF_ASSERT.  It is recommended that if the application wishes to be 
+ *           exception of WF_ASSERT.  It is recommended that if the application wishes to be 
  *           notified of an event that it simply set a flag and let application code in the 
  *           main loop handle the event.  
  *
@@ -97,8 +97,7 @@
  *
  *           For events that the application is not interested in simply leave the
  *           case statement empty.
- *
- *
+  *
  *           Customize this function as needed for your application.
  *****************************************************************************/
 void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
@@ -128,7 +127,7 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
         /*--------------------------------------*/            
         case WF_EVENT_CONNECTION_FAILED:
         /*--------------------------------------*/
-            /* eventInfo will contain value from tWFConnectionFailureReasons */
+            /* eventInfo will contain value from tWFConnectionFailureCodes */
             #if defined(STACK_USE_UART)
             putrsUART("Event: Connection Failed  -- eventInfo = ");
             sprintf(buf, "%d\r\n", eventInfo);
@@ -139,6 +138,7 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
         /*--------------------------------------*/
         case WF_EVENT_CONNECTION_TEMPORARILY_LOST:
         /*--------------------------------------*/
+            /* eventInfo will contain value from tWFConnectionLostCodes */
             #if defined(STACK_USE_UART)
             putrsUART("Event: Connection Temporarily Lost -- eventInfo = ");
             sprintf(buf, "%d\r\n", eventInfo);
@@ -148,23 +148,24 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
             
         /*--------------------------------------*/
         case WF_EVENT_CONNECTION_PERMANENTLY_LOST:            
-        /*--------------------------------------*/        
+        /*--------------------------------------*/
+            /* eventInfo will contain value from tWFConnectionLostCodes */
             #if defined(STACK_USE_UART)       
             putrsUART("Event: Connection Permanently Lost -- eventInfo = ");
             sprintf(buf, "%d\r\n", eventInfo);
             putsUART(buf);
             #endif
             break;
-            
-        /*--------------------------------------*/
+
+        /*--------------------------------------*/    
         case WF_EVENT_CONNECTION_REESTABLISHED:
-        /*--------------------------------------*/            
+        /*--------------------------------------*/
             #if defined(STACK_USE_UART)
             putrsUART("Event: Connection Reestablished\r\n");
             #endif
             break;
             
-        /*--------------------------------------*/    
+        /*--------------------------------------*/
         case WF_EVENT_SCAN_RESULTS_READY:
         /*--------------------------------------*/  
             #if defined(STACK_USE_UART)
@@ -177,11 +178,17 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
             WFScanEventHandler(eventInfo);
 			#endif /* EZ_CONFIG_SCAN */
             break;
-
+            
         /*--------------------------------------*/                            
         case WF_EVENT_RX_PACKET_RECEIVED:
         /*--------------------------------------*/                        
+            #if defined(STACK_USE_UART)
+//            putrsUART("Event: Rx Packet Received - length = ");
+//            sprintf(buf, "%d\r\n", eventInfo);
+//          putsUART(buf);
+			#endif
             break;
+            
 
         default:
             WF_ASSERT(FALSE);  /* unknown event */
@@ -191,7 +198,7 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
     /* Informs the WF driver that we are leaving this function */
     WFSetFuncState(WF_PROCESS_EVENT_FUNC, WF_LEAVING_FUNCTION);
 }    
-    
+
   
 /*
 *********************************************************************************************************
@@ -214,7 +221,7 @@ void WF_ProcessEvent(UINT8 event, UINT16 eventInfo)
 *
 *********************************************************************************************************
 */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
 #define WIFI_ASSERT_STRING "WiFi Assert     M:"
 void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber) 
 {

@@ -1,7 +1,7 @@
 /*$6*/
 BYTE _language = 0;
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Language: Chinese
 // Automatically generated reference arrays for the MainDemoLargeChineseFontFilter.txt  file.

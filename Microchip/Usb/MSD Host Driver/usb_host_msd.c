@@ -83,8 +83,8 @@ Change History:
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "USB\usb.h"
-#include "USB\usb_host_msd.h"
+#include "USB/usb.h"
+#include "USB/usb_host_msd.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE
@@ -1724,7 +1724,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                         break;
 
                     case STATE_WAIT_FOR_CLEAR_IN:
-                        if (errorCode)
+                        if (((HOST_TRANSFER_DATA *)data)->bErrorCode)
                         {
                             //Error recovery here is not explicitly covered in the spec.
                             _USBHostMSD_TerminateTransfer( USB_MSD_RESET_ERROR );
@@ -1737,7 +1737,7 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                         break;
 
                     case STATE_WAIT_FOR_CLEAR_OUT:
-                        if (errorCode)
+                        if (((HOST_TRANSFER_DATA *)data)->bErrorCode)
                         {
                             //Error recovery here is not explicitly covered in the spec.
                             _USBHostMSD_TerminateTransfer( USB_MSD_RESET_ERROR );
@@ -1762,10 +1762,155 @@ BOOL USBHostMSDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
             return TRUE;
             break;
 
+        case EVENT_BUS_ERROR:
+            #if defined( USB_ENABLE_TRANSFER_EVENT )
+            #ifdef DEBUG_MODE
+                UART2PrintString( "MSD: transfer event: " );
+                UART2PutHex( address );
+                UART2PrintString( "\r\n" );
+            #endif
+
+            for (i=0; (i<USB_MAX_MASS_STORAGE_DEVICES) && (deviceInfoMSD[i].deviceAddress != address); i++) {}
+            if (i == USB_MAX_MASS_STORAGE_DEVICES)
+            {
+                #ifdef DEBUG_MODE
+                    UART2PrintString( "MSD: Unknown device\r\n" );
+                #endif
+                return FALSE;
+            }
+
+            #ifdef DEBUG_MODE
+                UART2PrintString( "MSD: Device state: " );
+                UART2PutHex( deviceInfoMSD[i].state );
+                UART2PrintString( "\r\n" );
+            #endif
+            switch (deviceInfoMSD[i].state)
+            {
+                case STATE_WAIT_FOR_MAX_LUN:
+                    #ifdef DEBUG_MODE
+                        UART2PrintString( "MSD: Got Max LUN\r\n" );
+                    #endif
+
+                     // Clear the STALL.  Since it is EP0, we do not have to clear the stall.
+                     USBHostClearEndpointErrors( deviceInfoMSD[i].deviceAddress, 0 );
+
+                    // Tell the media interface layer that we have a MSD attached.
+                    if (usbMediaInterfaceTable.Initialize( deviceInfoMSD[i].deviceAddress, usbMediaInterfaceTable.flags, 0 ))
+                    {
+                        usbMediaInterfaceTable.EventHandler( deviceInfoMSD[i].deviceAddress, EVENT_MSD_MAX_LUN, &(deviceInfoMSD[i].maxLUN), 1 );
+                        deviceInfoMSD[i].state = STATE_RUNNING;
+                    }
+                    else
+                    {
+                        // The media interface layer cannot support the device.
+                        deviceInfoMSD[i].errorCode = USB_MSD_MEDIA_INTERFACE_ERROR;
+                        deviceInfoMSD[i].state     = STATE_HOLDING;
+                    }
+                    return TRUE;
+                    break;
+
+                case STATE_RUNNING:
+                    // Shouldn't get any transfer events here.
+                    return FALSE;
+                    break;
+
+                case STATE_CBW_WAIT:
+                    if (((HOST_TRANSFER_DATA *)data)->bErrorCode)
+                    {
+                        #ifdef DEBUG_MODE
+                            UART2PrintString( "MSD: Error with sending CBW\r\n" );
+                        #endif
+                        _USBHostMSD_TerminateTransfer( ((HOST_TRANSFER_DATA *)data)->bErrorCode );
+                    }
+                    else if (((HOST_TRANSFER_DATA *)data)->dataCount != CBW_SIZE)
+                    {
+                        #ifdef DEBUG_MODE
+                            UART2PrintString( "MSD: CBW size not correct\r\n" );
+                        #endif
+                        _USBHostMSD_TerminateTransfer( USB_MSD_CBW_ERROR );
+                    }
+                    return TRUE;
+                    break;
+
+                case STATE_TRANSFER_WAIT:
+                    if (((HOST_TRANSFER_DATA *)data)->bErrorCode)
+                    {
+                        if (((HOST_TRANSFER_DATA *)data)->bErrorCode == USB_ENDPOINT_STALLED)
+                        {
+                            // Clear the stall, then try to get the CSW.
+                            USBHostClearEndpointErrors( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointDATA );
+                            if (!deviceInfoMSD[i].flags.bfDirection) // OUT
+                            {
+                                deviceInfoMSD[i].flags.bfClearDataOUT = 1;
+                            }
+                            else
+                            {
+                                deviceInfoMSD[i].flags.bfClearDataIN = 1;
+                            }
+                            deviceInfoMSD[i].returnState = STATE_REQUEST_CSW;
+                            _USBHostMSD_ResetStateJump( i );
+
+                        }
+                        else
+                        {
+                            //Error recovery here is not explicitly covered in the spec.
+                            //_USBHostMSD_TerminateTransfer( errorCode );
+                            deviceInfoMSD[i].flags.val |= MARK_RESET_RECOVERY;
+                            deviceInfoMSD[i].returnState = STATE_RUNNING;
+                            _USBHostMSD_ResetStateJump( i );
+                        }
+                    }
+                    break;
+
+                case STATE_CSW_WAIT:
+                    if (((HOST_TRANSFER_DATA *)data)->bErrorCode)
+                    {
+                        deviceInfoMSD[i].attemptsCSW--;
+                        if (deviceInfoMSD[i].attemptsCSW)
+                        {
+                            USBHostClearEndpointErrors( deviceInfoMSD[i].deviceAddress, deviceInfoMSD[i].endpointIN );
+                            deviceInfoMSD[i].flags.bfClearDataIN = 1;
+                            deviceInfoMSD[i].returnState = STATE_REQUEST_CSW;
+                            _USBHostMSD_ResetStateJump( i );
+                        }
+                        else
+                        {
+                            _USBHostMSD_TerminateTransfer( ((HOST_TRANSFER_DATA *)data)->bErrorCode );
+                        }
+                    }
+                    else if ((((HOST_TRANSFER_DATA *)data)->dataCount != CSW_SIZE) |
+                             (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWSignature != USB_MSD_DCSWSIGNATURE) |
+                             (((USB_MSD_CSW *)(deviceInfoMSD[i].blockData))->dCSWTag       != deviceInfoMSD[i].dCBWTag) )
+                    {
+                        _USBHostMSD_TerminateTransfer( USB_MSD_CSW_ERROR );
+                    }
+                    break;
+
+                case STATE_WAIT_FOR_RESET:
+                    //Error recovery here is not explicitly covered in the spec.
+                    _USBHostMSD_TerminateTransfer( USB_MSD_RESET_ERROR );
+                    break;
+
+                case STATE_WAIT_FOR_CLEAR_IN:
+                    //Error recovery here is not explicitly covered in the spec.
+                    _USBHostMSD_TerminateTransfer( USB_MSD_RESET_ERROR );
+                    break;
+
+                case STATE_WAIT_FOR_CLEAR_OUT:
+                    //Error recovery here is not explicitly covered in the spec.
+                    _USBHostMSD_TerminateTransfer( USB_MSD_RESET_ERROR );
+                    break;
+
+                case STATE_HOLDING:
+                    break;
+            }
+            return TRUE;
+            #endif
         default:
             return FALSE;
             break;
     }
+
     return FALSE;
 }
 

@@ -8,7 +8,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33
  * Compiler:        C18/C30
  * Company:         Microchip Technology, Inc.
- * Version:         1.0.0
+ * Version:         1.2.7
  *
  * Software License Agreement
  *
@@ -107,9 +107,10 @@
 // Just increment the time- this will not produce accurate times and dates
 #define INCREMENTTIMESTAMP
 
+
 #ifdef USE_PIC18
 	#ifdef USEREALTIMECLOCK
-		#error The PIC18 architecture does not have a Real-time clock and calander module
+		#error Some PIC18 devices do not have a Real-time clock and calander module
 	#endif
 #endif
 
@@ -204,17 +205,58 @@
     #define MDD_ReadSectorSize      MDD_IntFlash_ReadSectorSize
     #define MDD_ReadCapacity        MDD_IntFlash_ReadCapacity
 
-    //The size (in number of sectors) of the desired data portion drive
-    #define MDD_INTERNAL_FLASH_DRIVE_CAPACITY 10
+    //---------------------------------------------------------------------------------------
+    //The size (in number of sectors) of the desired usable data portion of the MSD volume
+    //---------------------------------------------------------------------------------------
+    //Note: Windows 7 appears to require a minimum capacity of at least 13 sectors.
+    //Note2: Windows will not be able to format a drive if it is too small.  The reason
+    //for this, is that Windows will try to put a "heavyweight" (comparatively) filesystem
+    //on the drive, which will consume ~18kB of overhead for the filesystem.  If the total
+    //drive size is too small to fit the filesystem, then Windows will give an error.    
+    //This also means that formatting the drive will "shrink" the usuable data storage
+    //area, since the default FAT12 filesystem implemented in the Files.c data tables is very
+    //lightweight, with very low overhead.
+    //Note3: It is important to make sure that no part of the MSD volume shares a flash
+    //erase page with the firmware program memory.  This can be done by using a custom
+    //modified linker script, or by carefully selecting the starting address and the 
+    //total size of the MSD volume.  See also below code comments.
+    //Note4: It is also important to make sure that no part of the MSD volume shares
+    //an erase page with the erase page that contains the microcontroller's configuration
+    //bits (for microcontrollers that use flash for storing the configuration bits, 
+    //see device datasheet). This can be accomplished by using a modified linker script,
+    //which protects the flash page with the configuration bits (if applicable), or,
+    //by carefully choosing the FILES_ADDRESS and MDD_INTERNAL_FLASH_DRIVE_CAPACITY,
+    //to make sure the MSD volume does extend into the erase page with the configuration
+    //bits.
+    #define MDD_INTERNAL_FLASH_DRIVE_CAPACITY 14
 
+
+    //--------------------------------------------------------------------------
+    //Starting Address of the MSD Volume.
+    //--------------------------------------------------------------------------
+    //Note: Make certain that this starting address is aligned with the start
+    //of a flash erase block.  It is important to make certain that no part of
+    //the MSD volume overlaps any portion of a flash erase page which is used
+    //for storing firmware program code.  When the host writes a sector to the 
+    //MSD volume, the firmware must erase an entire page of flash in order to
+    //do the write.  If the sector being written happened to share a flash erase
+    //page with this firmware, unpredictable results would occur, since part of
+    //firmware would also end up getting erased during the write to the MSD volume.
+    #define FILES_ADDRESS 0x2000
+
+
+    //--------------------------------------------------------------------------
+    //Maximum files supported
+    //--------------------------------------------------------------------------
     //MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT must be a multiple of 16
+    //Note: Even if MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT is 16, this does not
+    //necessarily mean the drive will always work with 16 files.  The drive will
+    //suppport "up to" 16 files, but other limits could be hit first, even before
+    //the drive is full.  The RootDirectory0[] sector could get full with less
+    //files, especially if the files are using long filenames.  
     #define MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT 16
  
-    #if defined(__C30__)
-        #define FILES_ADDRESS 0x8000
-    #else
-        #define FILES_ADDRESS 0x2000
-    #endif
+
 
     //name and extern definition for the master boot record
     extern ROM BYTE MasterBootRecord[512];

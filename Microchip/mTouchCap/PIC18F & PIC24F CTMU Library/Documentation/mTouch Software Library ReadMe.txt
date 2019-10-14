@@ -10,9 +10,9 @@ This file contains information related to the mTouch Capacitive Touch Software L
     Release Information
 *******************************************************************************
 mTouch Cap Library v1.0       Apr-2010
-MPLAB version:                    8.40 or later
-C18 Compiler Version	  3.34 or later  
-C30 Compiler Version	  3.23 or later
+MPLAB version:                    8.56 or later
+C18 Compiler Version	  3.36 or later  
+C30 Compiler Version	  3.24 or later
 
 
 *******************************************************************************
@@ -48,13 +48,13 @@ C:\Microchip Solutions\Microchip\Help for details on using the mTouch Software L
 	  |	     |------> <<mTouchCap>>
 	  |	     |		|
 	  |	     |		|
-	  |	     |		|------> << PIC16F CSM & CVD Library >>(Core mTouch Capacitive Touch Library files for PIC18F and PIC24F)
+	  |	     |		|------> << PIC32MX CVD Library>>(Core mTouch Capacitive Touch Library files for PIC32)
                |	     |		|
 	  |	     |		|            		
 	  |	     |                   |------> << PIC18F & PIC24F CTMU Library >> (Core mTouch Capacitive Touch Library files for PIC18F and PIC24F)
-	  |	     |		|
-	  |	     |		| 	  
-	  |	     |		|------> << Documentation >> (mTouchSoftwareLibraryReadMe.txt)
+	  |	     |		|		|
+	  |	     |		 	  	|
+	  |	     |				|------> << Documentation >> (mTouchSoftwareLibraryReadMe.txt)
           	  |	     |
  	  |	     |
                |              |------> <<Include>>
@@ -72,30 +72,58 @@ C:\Microchip Solutions\Microchip\Help for details on using the mTouch Software L
 	  |	     |------> <<PIC18F_Demos>>
 	  |	     |		|	   			
 	  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_2Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 2ch slider Demo) 		  	  |	     |		|	    
-	  |	     |		|------> <<mTouchCap_4Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 4ch slider Demo) 			  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_DirectKeyDemo>> (config,hardware and  Demo Source files/MPLAB files for Direct Key Demo) 	        	  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_MatrixKeyDemo>> (config,hardware and Demo Source files/MPLAB files for Matrix Key Demo) 	 		  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_2Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 2ch slider Demo) 		  	  
+	  |	     |		|	    
+	  |	     |		|------> <<mTouchCap_4Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 4ch slider Demo) 			  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_DirectKeyDemo>> (config,hardware and  Demo Source files/MPLAB files for Direct Key Demo) 	        	  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_MatrixKeyDemo>> (config,hardware and Demo Source files/MPLAB files for Matrix Key Demo) 	 		  
+	  |	     |		|	   
 	  |	     |		|------> <<mTouchCap_Combo_Demo>> (config,hardware and Demo Source files/MPLAB files for all demos ) 
 	  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_GUI_Demo>> (config,hardware and GUI related Demo Source files/MPLAB files for all Demos) 	 		  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_GUI_Demo>> (config,hardware and GUI related Demo Source files/MPLAB files for all Demos) 	 		  
+	  |	     |		|	   
 	  |	     |		|------> <<mTouchCap_AppCommonFiles>> (Demo Application related source and header files) 
 	  |	     |		|	   	
 	  |	     |------> <<PIC24F_Demos>>		
 	  |	     |		|
 	  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_2Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 2ch slider Demo) 	  	  	  |	     |		|	    
-	  |	     |		|------> <<mTouchCap_4Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 4ch slider Demo) 			  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_DirectKeyDemo>> (config,hardware and  Demo Source files/MPLAB files for Direct Key Demo) 		 	  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_MatrixKeyDemo>> (config,hardware and Demo Source files/MPLAB files for Matrix Key Demo) 			  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_2Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 2ch slider Demo) 	  	  	  
+	  |	     |		|	    
+	  |	     |		|------> <<mTouchCap_4Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 4ch slider Demo) 			  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_DirectKeyDemo>> (config,hardware and  Demo Source files/MPLAB files for Direct Key Demo) 		 	  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_MatrixKeyDemo>> (config,hardware and Demo Source files/MPLAB files for Matrix Key Demo) 			  
+ 	  |	     |		|	   
 	  |	     |		|------> <<mTouchCap_Combo_Demo>> (config,hardware and Demo Source files/MPLAB files for all Demos ) 
 	  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_GUI_Demo>> (config,hardware and GUI related Demo Source files/MPLAB files for all Demos) 			  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_DA210_GraphicsDemo>> (config,hardware and Demo Source files/MPLAB files for Graphics  			  |	     |		|	   					      Demo)	
+	  |	     |		|------> <<mTouchCap_GUI_Demo>> (config,hardware and GUI related Demo Source files/MPLAB files for all Demos) 			  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_DA210_GraphicsDemo>> (config,hardware and Demo Source files/MPLAB files for Graphics  			  
+	  |	     |		|	   					      Demo)	
 	  |	     |        	|	   
 	  |	     |		|------> <<mTouchCap_GestureDemo>> (config,hardware and Demo Source files/MPLAB files for Gesture Demo ) 
 	  |	     |		|	   
-	  |	     |		|------> <<mTouchCap_ProximityDemo>> (config,hardware and Demo Source files/MPLAB files for Proximity Demo) 	 	 		  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_ProximityDemo>> (config,hardware and Demo Source files/MPLAB files for Proximity Demo) 	 	 		  
+	  |	     |		|
+	  |	     |		|------> <<mTouchCap_LowPowerDemo>> (config,hardware and Demo Source files/MPLAB files for LowPower Demo) 	 	 		  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_AppCommonFiles>> (Demo Application related source and header files) 
+	  |	     |		|
+	  |	     |		|
+	  |	     |------> <<PIC32MX_Demos>>
+	  |	     |		|	   			
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_2Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 2ch slider Demo) 		  	  
+	  |	     |		|	    
+	  |	     |		|------> <<mTouchCap_4Ch_SliderDemo>> (config,hardware and Demo Source files/MPLAB files for 4ch slider Demo) 			  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_DirectKeyDemo>> (config,hardware and  Demo Source files/MPLAB files for Direct Key Demo) 	        	  
+	  |	     |		|	   
+	  |	     |		|------> <<mTouchCap_MatrixKeyDemo>> (config,hardware and Demo Source files/MPLAB files for Matrix Key Demo) 	 		  
+	  |	     |		|	   
 	  |	     |		|------> <<mTouchCap_AppCommonFiles>> (Demo Application related source and header files) 
           	
 	       
@@ -132,7 +160,7 @@ location is: C:\Microchip Solutions\mTouchCapDemos.
 
 *******************************************************************************
 
-The latest release of MPLAB (Version 8.40 or higher) should be used with the 
+The latest release of MPLAB (Version 8.56 or higher) should be used with the 
 mTouch Capaitive Touch Library files. The latest release is available at:
 http://www.microchip.com 
 

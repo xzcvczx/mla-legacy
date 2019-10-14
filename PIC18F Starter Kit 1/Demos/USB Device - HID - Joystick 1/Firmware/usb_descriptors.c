@@ -3,7 +3,7 @@
  Dependencies:	See INCLUDES section
  Processor:		PIC18 or PIC24 USB Microcontrollers
  Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
+ 				hardware platforms: PICDEM™ FS USB Demo Board,
  				PIC18F87J50 FS USB Plug-In Module, or
  				Explorer 16 + PIC24 USB PIM.  The firmware may be
  				modified for use on other USB platforms by editing the
@@ -38,7 +38,7 @@ Filling in the descriptor values in the usb_descriptors.c file:
 -------------------------------------------------------------------
 
 [Device Descriptors]
-The device descriptor is defined as a USB_DEVICE_DESCRIPTOR type.  
+The device descriptor is defined as a USB_DEVICE_DESCRIPTOR type.
 This type is defined in usb_ch9.h  Each entry into this structure
 needs to be the correct length for the data type of the entry.
 
@@ -59,7 +59,7 @@ _SELF tells the USB host that this device is self-powered. The
 _RWU tells the USB host that this device supports Remote Wakeup.
 
 [Endpoint Descriptors]
-Like the configuration descriptor, the endpoint descriptors were 
+Like the configuration descriptor, the endpoint descriptors were
 changed in v2.x of the stack from a structure to a BYTE array.  As
 endpoint descriptors also has a field that are multi-byte entities,
 please be sure to specify both bytes of the field.  For example, for
@@ -142,7 +142,7 @@ is a dummy place holder since configuration 0 is the un-configured
 state according to the definition in the USB specification.
 
 ********************************************************************/
- 
+
 /*********************************************************************
  * Descriptor specific type definitions are defined in:
  * usb_device.h
@@ -186,7 +186,7 @@ ROM BYTE configDescriptor1[]={
     /* Configuration Descriptor */
     0x09,//sizeof(USB_CFG_DSC),    // Size of this descriptor in bytes
     USB_DESCRIPTOR_CONFIGURATION,                // CONFIGURATION descriptor type
-    DESC_CONFIG_WORD(0x0022),   // Total length of data for this cfg
+    DESC_CONFIG_WORD(0x0029),   // Total length of data for this cfg
     1,                      // Number of interfaces in this cfg
     1,                      // Index value of this configuration
     0,                      // Configuration string index
@@ -212,7 +212,7 @@ ROM BYTE configDescriptor1[]={
     HID_NUM_OF_DSC,         // Number of class descriptors, see usbcfg.h
     DSC_RPT,                // Report descriptor type
     DESC_CONFIG_WORD(HID_RPT01_SIZE),   //sizeof(hid_rpt01),      // Size of the report descriptor
-    
+
     /* Endpoint Descriptor */
     0x07,/*sizeof(USB_EP_DSC)*/
     USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor

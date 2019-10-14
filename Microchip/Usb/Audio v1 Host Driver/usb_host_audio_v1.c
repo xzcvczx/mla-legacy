@@ -44,15 +44,9 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
- Change History:
-  Rev     Description
-  -----   -----------
-  2.7     Initial release
-
-  2.7a    Fixed casting issue that could result in incorrect behavior on
-          PIC32 parts.
-
-          Added USBHostAudioV1DataEventHandler() function.
+Author          Date    Comments
+--------------------------------------------------------------------------------
+KO          08-Apr-2009 First release
 
 *******************************************************************************/
 
@@ -61,8 +55,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #include <string.h>
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "USB\usb.h"
-#include "USB\usb_host_audio_v1.h"
+#include "USB/usb.h"
+#include "USB/usb_host_audio_v1.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE

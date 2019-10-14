@@ -185,11 +185,11 @@ SHORT Random(SHORT max)
 #define ballTriangle    food
 #define ballMarking     food
 
-extern const BITMAP_FLASH   ballCircle;
-extern const BITMAP_FLASH   ballSquare;
-extern const BITMAP_FLASH   ballCross;
-extern const BITMAP_FLASH   ballTriangle;
-extern const BITMAP_FLASH   ballMarking;
+extern const IMAGE_FLASH   ballCircle;
+extern const IMAGE_FLASH   ballSquare;
+extern const IMAGE_FLASH   ballCross;
+extern const IMAGE_FLASH   ballTriangle;
+extern const IMAGE_FLASH   ballMarking;
 
 void                        *balls[NUM_BALL_TYPES + 2];
 
@@ -248,9 +248,9 @@ SNAKE_INFO                  snake;
 #define snakeBody   body
 #define snakeFood   food
 
-extern const BITMAP_FLASH   snakeHead;
-extern const BITMAP_FLASH   snakeBody;
-extern const BITMAP_FLASH   snakeFood;
+extern const IMAGE_FLASH   snakeHead;
+extern const IMAGE_FLASH   snakeBody;
+extern const IMAGE_FLASH   snakeFood;
 
 #define SNAKE_HEAD  snake.pieces[0]
 

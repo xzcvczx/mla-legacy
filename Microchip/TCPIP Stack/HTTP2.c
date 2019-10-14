@@ -160,7 +160,13 @@
 	#if defined(__18CXX) && !defined(HI_TECH_C)	
 		#pragma udata HTTP_CONNECTION_STATES
 	#endif
-	HTTP_CONN curHTTP;							// Current HTTP connection state
+	#if defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
+		HTTP_CONN					HTTPControlBlocks[MAX_HTTP_CONNECTIONS];
+		#define HTTPLoadConn(a)		do{curHTTPID = (a);}while(0)
+	#else
+		HTTP_CONN curHTTP;							// Current HTTP connection state
+		static void HTTPLoadConn(BYTE hHTTP);
+	#endif
 	HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];	// HTTP stubs with state machine and socket
 	BYTE curHTTPID;								// ID of the currently loaded HTTP_CONN
 	#if defined(__18CXX) && !defined(HI_TECH_C)	
@@ -185,7 +191,6 @@
 	
 	static void HTTPProcess(void);
 	static BOOL HTTPSendFile(void);
-	static void HTTPLoadConn(BYTE hHTTP);
 
 	#if defined(HTTP_MPFS_UPLOAD)
 	static HTTP_IO_RESULT HTTPMPFSUpload(void);
@@ -222,10 +227,6 @@ void HTTPInit(void)
 {
 	PTR_BASE oldPtr;
 
-	// Make sure the file handles are invalidated
-	curHTTP.file = MPFS_INVALID_HANDLE;
-	curHTTP.offsets = MPFS_INVALID_HANDLE;
-		
     for(curHTTPID = 0; curHTTPID < MAX_HTTP_CONNECTIONS; curHTTPID++)
     {
 		smHTTP = SM_HTTP_IDLE;
@@ -235,9 +236,13 @@ void HTTPInit(void)
 		#endif
 		
 	    // Save the default record (just invalid file handles)
-    	oldPtr = MACSetWritePtr(BASE_HTTPB_ADDR + curHTTPID*sizeof(HTTP_CONN));
-		MACPutArray((BYTE*)&curHTTP, sizeof(HTTP_CONN));
-		MACSetWritePtr(oldPtr);
+		curHTTP.file = MPFS_INVALID_HANDLE;
+		curHTTP.offsets = MPFS_INVALID_HANDLE;
+		#if !defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)		
+	    	oldPtr = MACSetWritePtr(BASE_HTTPB_ADDR + curHTTPID*sizeof(HTTP_CONN));
+			MACPutArray((BYTE*)&curHTTP, sizeof(HTTP_CONN));
+			MACSetWritePtr(oldPtr);
+		#endif
     }
 
 	// Set curHTTPID to zero so that first call to HTTPLoadConn() doesn't write 
@@ -337,6 +342,7 @@ void HTTPServer(void)
   Returns:
   	None
   ***************************************************************************/
+#if !defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
 static void HTTPLoadConn(BYTE hHTTP)
 {
     WORD oldPtr;
@@ -359,6 +365,7 @@ static void HTTPLoadConn(BYTE hHTTP)
 	curHTTPID = hHTTP;
 			
 }
+#endif
 
 /*****************************************************************************
   Function:
@@ -1015,7 +1022,7 @@ static BOOL HTTPSendFile(void)
 	curHTTP.byteCount += numBytes;
 	while(numBytes > 0u)
 	{
-		len = MPFSGetArray(curHTTP.file, data, mMIN(numBytes, 64u));
+		len = MPFSGetArray(curHTTP.file, data, mMIN(numBytes, sizeof(data)));
 		if(len == 0u)
 			return TRUE;
 		else
@@ -1855,7 +1862,7 @@ void HTTPIncFile(ROM BYTE* cFile)
 	wCount = TCPIsPutReady(sktHTTP);
 	while(wCount > 0u)
 	{
-		wLen = MPFSGetArray(fp, data, mMIN(wCount, 64u));
+		wLen = MPFSGetArray(fp, data, mMIN(wCount, sizeof(data)));
 		if(wLen == 0u)
 		{// If no bytes were read, an EOF was reached
 			MPFSClose(fp);

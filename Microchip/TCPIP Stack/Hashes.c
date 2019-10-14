@@ -748,7 +748,7 @@ static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2,
 
 /*****************************************************************************
   Function:
-	void MD5Calculate(HASH_SUM* theSum, BYTE* result)
+	void SHA1Calculate(HASH_SUM* theSum, BYTE* result)
 
   Summary:
 	Calculates a SHA-1 hash

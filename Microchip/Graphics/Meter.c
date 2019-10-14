@@ -40,7 +40,7 @@
  * Albert Z.			07/31/08	Added arc colors options
  * P. A. Tamayo			08/20/08	Added accuracy option for displaying values
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -171,6 +171,10 @@ METER *MtrCreate
     pMtr->value = value;
     pMtr->hdr.state = state;    // state
     pMtr->pText = pText;
+    pMtr->hdr.DrawObj = MtrDraw;				// draw function	
+    pMtr->hdr.MsgObj = MtrTranslateMsg;         // message function
+    pMtr->hdr.MsgDefaultObj = MtrMsgDefault;    // default message function
+    pMtr->hdr.FreeObj = NULL;					// free function
 
     // set the default scale colors
     MtrSetScaleColors(pMtr, LIGHTGREEN, YELLOW, BRIGHTGREEN, BRIGHTBLUE, RED, BRIGHTRED);
@@ -318,14 +322,18 @@ void MtrSetVal(METER *pMtr, SHORT newVal)
 }
 
 /*********************************************************************
-* Function: MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG* pMsg)
+* Function: MtrMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Notes: This the default operation to change the state of the meter.
 *		 Called inside GOLMsg() when GOLMsgCallback() returns a 1.
 *
 ********************************************************************/
-void MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG *pMsg)
+void MtrMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    METER *pMtr;
+
+    pMtr = (METER *)pObj;
+
     if(translatedMsg == MTR_MSG_SET)
     {
         MtrSetVal(pMtr, pMsg->param2);      // set the value	
@@ -334,14 +342,17 @@ void MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg)
+* Function: WORD MtrTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Evaluates the message if the object will be affected by the 
 *		 message or not.
 *
 ********************************************************************/
-WORD MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg)
+WORD MtrTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    METER *pMtr;
+
+    pMtr = (METER *)pObj;
 
     // Evaluate if the message is for the meter
     // Check if disabled first
@@ -363,12 +374,12 @@ WORD MtrTranslateMsg(METER *pMtr, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD MtrDraw(METER *pMtr)
+* Function: WORD MtrDraw(void *pObj)
 *
 * Notes: This is the state machine to draw the meter.
 *
 ********************************************************************/
-WORD MtrDraw(METER *pMtr)
+WORD MtrDraw(void *pObj)
 {
     typedef enum
     {
@@ -395,6 +406,9 @@ WORD MtrDraw(METER *pMtr)
     static XCHAR tempXchar[2] = {'8',0};        // NULL is pre-defined here	
     static float radian;
     static DWORD_VAL dTemp, dRes;
+    METER *pMtr;
+
+    pMtr = (METER *)pObj;
 
     if(IsDeviceBusy())
         return (0);

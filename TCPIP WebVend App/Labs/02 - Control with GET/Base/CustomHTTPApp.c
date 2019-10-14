@@ -17,7 +17,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -53,9 +53,11 @@
  ********************************************************************/
 #define __CUSTOMHTTPAPP_C
 
-#include "TCPIP Stack/TCPIP.h"
+#include "TCPIPConfig.h"
 
 #if defined(STACK_USE_HTTP2_SERVER)
+
+#include "TCPIP Stack/TCPIP.h"
 
 extern HTTP_CONN curHTTP;
 extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];

@@ -78,10 +78,10 @@ extern const FONT_FLASH     Font25;
 extern const FONT_FLASH     Font35;
 
 /////////////////////////////// PICTURES //////////////////////////////////////
-extern const BITMAP_FLASH   flower16bit;
-extern const BITMAP_FLASH   flower8bit;
-extern const BITMAP_FLASH   flower4bit;
-extern const BITMAP_FLASH   flower1bit;
+extern const IMAGE_FLASH   flower16bit;
+extern const IMAGE_FLASH   flower8bit;
+extern const IMAGE_FLASH   flower4bit;
+extern const IMAGE_FLASH   flower1bit;
 
 #define WAIT_UNTIL_FINISH(x)    while(!x)
 #define MIN(x,y)                ((x > y)? y: x)
@@ -133,21 +133,14 @@ extern const BITMAP_FLASH   flower1bit;
     #endif
     #endif
 
-    #if defined (PIC24FJ256DA210_DEV_BOARD)
-    
-    // _ANSG8 = 0; /* S1 */
-    // _ANSE9 = 0; /* S2 */
-    // _ANSB5 = 0; /* S3 */
-        
-    #else
 
     /////////////////////////////////////////////////////////////////////////////
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifdef EXPLORER_16
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
-
     #endif
 
     /////////////////////////////////////////////////////////////////////////////

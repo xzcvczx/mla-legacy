@@ -6,7 +6,7 @@
  * FileName:        Picture.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok 	11/12/07	Version 1.0 release
+ * 11/12/07		Version 1.0 release
  *****************************************************************************/
 #ifndef _PICTURE_H
     #define _PICTURE_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
@@ -165,7 +165,7 @@ PICTURE * PictCreate
     );
 
 /*********************************************************************
-* Function: WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
+* Function: WORD PictTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below 
@@ -193,10 +193,10 @@ PICTURE * PictCreate
 * Side Effects: none
 *
 ********************************************************************/
-WORD    PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg);
+WORD    PictTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: WORD PictDraw(PICTURE *pPict)
+* Function: WORD PictDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -221,5 +221,5 @@ WORD    PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    PictDraw(PICTURE *pPict);
+WORD PictDraw(void *pObj);
 #endif // _PICTURE_H

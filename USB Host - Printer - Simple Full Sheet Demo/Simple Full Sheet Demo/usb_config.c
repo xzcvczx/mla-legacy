@@ -37,10 +37,10 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "USB\usb.h"
-#include "USB\usb_host_printer.h"
-#include "USB\usb_host_printer_postscript.h"
-#include "USB\usb_host_printer_pcl_5.h"
+#include "USB/usb.h"
+#include "USB/usb_host_printer.h"
+#include "USB/usb_host_printer_postscript.h"
+#include "USB/usb_host_printer_pcl_5.h"
 
 // *****************************************************************************
 // USB Embedded Host Printer Client Driver Table of Supported Printer Languages

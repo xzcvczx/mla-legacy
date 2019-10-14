@@ -33,14 +33,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     01/12/10
+ * 01/12/10		...
  *****************************************************************************/
 #ifndef _GFX_EPMP_H_FILE
 #define _GFX_EPMP_H_FILE
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include "Compiler.h"
 
 #ifdef USE_GFX_EPMP
@@ -68,76 +68,64 @@ extern volatile __eds__ BYTE __attribute__((space(eds),address(0x00020000ul),nol
 #define PMPWaitBusy()   while(PMCON2bits.BUSY); 
 
 /*********************************************************************
-* Function:  void DeviceSetCommand()
-*
-* Overview: set RS line to access a control register space
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-extern inline void __attribute__ ((always_inline)) DeviceSetCommand(){
+ * Section: Deprecated Macros
+ ********************************************************************/
+#ifdef RS_LAT_BIT
+
+extern inline void __attribute__ ((always_inline)) DisplaySetCommand()
+{
 	RS_LAT_BIT = 0;
 }
 
-/*********************************************************************
-* Function:  void DeviceSetData()
-*
-* Overview: set RS line to access a data space
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-extern inline void __attribute__ ((always_inline)) DeviceSetData(){
+extern inline void __attribute__ ((always_inline)) DisplaySetData()
+{
 	RS_LAT_BIT = 1;
 }
 
-/*********************************************************************
-* Function:  void DeviceSelect()
-*
-* Overview: asserts the chip select line
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-extern inline void __attribute__ ((always_inline)) DeviceSelect(){
+extern inline void __attribute__ ((always_inline)) DisplayCmdDataConfig()
+{
+	RST_TRIS_BIT = 0;
+}
+
+#endif
+
+#ifdef CS_LAT_BIT
+
+extern inline void __attribute__ ((always_inline)) DisplayEnable()
+{
 	CS_LAT_BIT = 0;
 }
 
-/*********************************************************************
-* Function:  void DeviceDeselect()
-*
-* Overview: puts the chip select line in inactive state
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-extern inline void __attribute__ ((always_inline)) DeviceDeselect(){
+extern inline void __attribute__ ((always_inline)) DisplayDisable()
+{
 	CS_LAT_BIT = 1;
 }
+
+extern inline void __attribute__ ((always_inline)) DisplayConfig()
+{
+	CS_TRIS_BIT = 0;
+}
+
+#endif
+
+#ifdef RST_LAT_BIT
+
+extern inline void __attribute__ ((always_inline)) DisplayResetEnable()
+{
+	RST_LAT_BIT = 0;
+}
+
+extern inline void __attribute__ ((always_inline)) DisplayResetDisable()
+{
+	RST_LAT_BIT = 1;
+}
+
+extern inline void __attribute__ ((always_inline)) DisplayResetConfig()
+{
+	RST_TRIS_BIT = 0;
+}
+
+#endif
 
 /*********************************************************************
 * Macros:  DeviceWrite(data)
@@ -231,11 +219,11 @@ BYTE value;
 
 extern inline void __attribute__ ((always_inline)) DeviceInit(void)
 { 
-	RST_LAT_BIT = 0;            // hold in reset by default
-    RST_TRIS_BIT = 0;           // enable RESET line
-    RS_TRIS_BIT = 0;            // enable RS line
-    CS_LAT_BIT = 1;             // not selected by default
-    CS_TRIS_BIT = 0;            // enable chip select line
+	DisplayResetEnable();            // hold in reset by default
+    DisplayResetConfig();           // enable RESET line
+    DisplayCmdDataConfig();            // enable RS line
+    DisplayDisable();             // not selected by default
+    DisplayConfig();            // enable chip select line
 
 	ANSDbits.ANSD7 = 0;			// PMD15
 	ANSDbits.ANSD6 = 0;			// PMD14
@@ -296,7 +284,7 @@ extern inline void __attribute__ ((always_inline)) DeviceInit(void)
 	PMCON1bits.PMPEN = 1;
 
     DelayMs(40);
-    RST_LAT_BIT = 1;            // release from reset
+    DisplayResetDisable();                         // release from reset
     DelayMs(40);
 }
 

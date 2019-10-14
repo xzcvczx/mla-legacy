@@ -36,7 +36,7 @@ Author                 Date           Comments
 Pradeep Budagutta    03-Mar-2008    First release
 *******************************************************************************/
 
-#include "Image Decoders\ImageDecoder.h"
+#include "Image Decoders/ImageDecoder.h"
 
 #ifdef IMG_SUPPORT_BMP
 

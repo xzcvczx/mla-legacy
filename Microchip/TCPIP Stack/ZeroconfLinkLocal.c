@@ -1,10 +1,10 @@
 /*********************************************************************
  *
- *  Zero Confiruation (Zeroconf) IPV4 Link Local Addressing
+ *  Zero Configuration (Zeroconf) IPV4 Link Local Addressing
  *  Module for Microchip TCP/IP Stack
  *
  *********************************************************************
- * FileName:        ZeroconfLinkLocal.h
+ * FileName:        ZeroconfLinkLocal.c
  * Dependencies:    IP, ARP
  * Processor:       PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
  * Compiler:        Microchip C32 v1.05 or higher

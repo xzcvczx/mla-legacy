@@ -6,7 +6,7 @@
  * FileName:        ProgressBar.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30 MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok 	11/12/07	Version 1.0 release
+ * 11/12/07		Version 1.0 release
  *****************************************************************************/
 #ifndef _PROGRESSBAR_H
     #define _PROGRESSBAR_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
@@ -212,7 +212,7 @@ PROGRESSBAR *PbCreate
 WORD        PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: WORD PbDraw(PROGRESSBAR *pPb)
+* Function: WORD PbDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -241,7 +241,7 @@ WORD        PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD        PbDraw(PROGRESSBAR *pPb);
+WORD PbDraw(void *pObj);
 
 /*********************************************************************
 * Function:  PbSetRange(PROGRESSBAR *pPb, WORD range)

@@ -38,7 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/12/07	Version 1.0 release
 *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_LISTBOX
 
@@ -70,17 +70,21 @@ LISTBOX *LbCreate
     if(pLb == NULL)
         return (pLb);
 
-    pLb->hdr.ID = ID;
-    pLb->hdr.pNxtObj = NULL;
-    pLb->hdr.type = OBJ_LISTBOX;
-    pLb->hdr.left = left;
-    pLb->hdr.top = top;
-    pLb->hdr.right = right;
-    pLb->hdr.bottom = bottom;
-    pLb->hdr.state = state;
-    pLb->pItemList = NULL;
-    pLb->scrollY = 0;
-    pLb->itemsNumber = 0;
+    pLb->hdr.ID         = ID;
+    pLb->hdr.pNxtObj    = NULL;
+    pLb->hdr.type       = OBJ_LISTBOX;
+    pLb->hdr.left       = left;
+    pLb->hdr.top        = top;
+    pLb->hdr.right      = right;
+    pLb->hdr.bottom     = bottom;
+    pLb->hdr.state      = state;
+    pLb->pItemList      = NULL;
+    pLb->scrollY        = 0;
+    pLb->itemsNumber    = 0;
+    pLb->hdr.DrawObj    = LbDraw;			// draw function
+    pLb->hdr.MsgObj     = LbTranslateMsg;   // message function
+    pLb->hdr.MsgDefaultObj = LbMsgDefault;  // default message function
+    pLb->hdr.FreeObj    = LbDelItemsList;	// free function
 
     // Set the style scheme to be used
     if(pScheme == NULL)
@@ -216,7 +220,7 @@ void LbDelItem(LISTBOX *pLb, LISTITEM *pItem)
 }
 
 /*********************************************************************
-* Function: void LbDelItemsList(LISTBOX *pLb)
+* Function: void LbDelItemsList(void *pObj)
 *
 * Input: pLb - the pointer to the object
 *
@@ -225,10 +229,13 @@ void LbDelItem(LISTBOX *pLb, LISTITEM *pItem)
 * Overview: removes all items from list box and frees memory
 *
 ********************************************************************/
-void LbDelItemsList(LISTBOX *pLb)
+void LbDelItemsList(void *pObj)
 {
     LISTITEM    *pCurItem;
     LISTITEM    *pItem;
+    LISTBOX     *pLb;
+
+    pLb = (LISTBOX *)pObj;
 
     pCurItem = pLb->pItemList;
 
@@ -381,13 +388,16 @@ SHORT LbGetFocusedItem(LISTBOX *pLb)
 }
 
 /*********************************************************************
-* Function: WORD LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg)
+* Function: WORD LbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: translates the GOL message for the list box
 *
 ********************************************************************/
-WORD LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg)
+WORD LbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    LISTBOX *pLb;
+
+    pLb = (LISTBOX *)pObj;
 
     // Evaluate if the message is for the list box
     // Check if disabled first
@@ -432,13 +442,18 @@ WORD LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg)
+* Function: void LbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 *
 * Overview: changes the state of the list box by default
 *
 ********************************************************************/
-void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg)
+void LbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+
+    LISTBOX *pLb;
+
+    pLb = (LISTBOX *)pObj;
+
         #ifdef USE_TOUCHSCREEN
 
     SHORT       pos;
@@ -516,7 +531,7 @@ void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD LbDraw(LISTBOX *pLb)
+* Function: WORD LbDraw(void *pObj)
 *
 * Output: returns the status of the drawing
 *		  0 - not completed
@@ -525,7 +540,7 @@ void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg)
 * Overview: draws edit box
 *
 ********************************************************************/
-WORD LbDraw(LISTBOX *pLb)
+WORD LbDraw(void *pObj)
 {
     typedef enum
     {
@@ -540,6 +555,9 @@ WORD LbDraw(LISTBOX *pLb)
     static LB_DRAW_STATES state = LB_STATE_START;
     static LISTITEM *pCurItem;
     static SHORT temp;
+    LISTBOX *pLb;
+
+    pLb = (LISTBOX *)pObj;
 
     switch(state)
     {

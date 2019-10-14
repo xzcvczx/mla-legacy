@@ -39,7 +39,7 @@
 #ifndef GRAPHSHOW_H
     #define GRAPHSHOW_H
 
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 
 ////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED

@@ -60,8 +60,8 @@
 
 #include "TCPIP Stack/TCPIP.h"
 #include "MainDemo.h"
-
-
+#include "TCPIP Stack/SNMP.h"
+#include "TCPIP Stack/SNMPv3.h"
 
 /****************************************************************************
   Section:
@@ -75,18 +75,28 @@ BYTE gOIDCorrespondingSnmpMibID=MICROCHIP;
 BYTE gGenericTrapNotification=ENTERPRISE_SPECIFIC;
 BYTE gSpecificTrapNotification=VENDOR_TRAP_DEFAULT; // Vendor specific trap code
 
-#if defined(SNMP_STACK_USE_V2_TRAP)
+#ifdef STACK_USE_SNMPV3_SERVER
+static BYTE gSnmpv3UserSecurityName[USER_SECURITY_NAME_LEN];
+#endif
+/*
+#if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 //if gSetTrapSendFlag == FALSE then the last varbind variable for 
 //multiple varbind variable pdu structure or if there is only varbind variable send.
 // if gSetTrapSendFlag == TRUE, then v2 trap pdu is expecting more varbind variable.
 BYTE	gSetTrapSendFlag = FALSE;
-#endif /* SNMP_STACK_USE_V2_TRAP */
+#endif 
+*/
+BYTE	gSetTrapSendFlag = FALSE;
 
 /*Initialize trap table with no entries.*/
 TRAP_INFO trapInfo = { TRAP_TABLE_SIZE };
 
 static DWORD SNMPGetTimeStamp(void);
-static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val);
+static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val,UINT8 targetIndex);
+
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+UINT8 	gSendTrapSMstate=0;
+#endif
 
 /****************************************************************************
   ===========================================================================
@@ -100,7 +110,7 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val);
 #if !defined(SNMP_TRAP_DISABLED)
 /****************************************************************************
   Function:
- 	 BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val)
+ 	 BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val,UINT8 targetIndex)
  
   Summary:			
 	Prepare, validate remote node which will receive trap and send trap pdu.
@@ -119,7 +129,7 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val);
      receiverIndex - The index to array where remote ip address is stored.  
      var		   - SNMP var ID that is to be used in notification
 	 val           - Value of var. Only value of BYTE, WORD or DWORD can be sent.
-	 
+	 targetIndex - snmpv3 target index
   Return Values:          
  	 TRUE	-	If notification send is successful.
  	 FALSE	-	If send notification failed.
@@ -127,7 +137,7 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val);
   Remarks:
      None.
  *************************************************************************/
-static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val)
+static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val,UINT8 targetIndex)
 {
     static enum { SM_PREPARE, SM_NOTIFY_WAIT } smState = SM_PREPARE;
     IP_ADDR IPAddress;
@@ -143,7 +153,9 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val)
     switch(smState)
     {
 	    case SM_PREPARE:
-
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+			gSendTrapSMstate = smState;
+#endif
 			tempRxIndex=receiverIndex;			
 			// Convert local to network order.
 			tempIpAddress.v[0] = trapInfo.table[receiverIndex].IPAddress.v[3];
@@ -157,15 +169,33 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val)
 	                          gSpecificTrapNotification,   // Specifc Trap notification code
 	                          SNMPGetTimeStamp());
 	        smState = SM_NOTIFY_WAIT;
-	
+			
 	        break;
 	
 	    case SM_NOTIFY_WAIT:
-				
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+			gSendTrapSMstate = smState;
+#endif
 	        if ( SNMPIsNotifyReady(&IPAddress) )
 	        {
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+				if(targetIndex == (SNMPV3_USM_MAX_USER-1))
+					smState = SM_PREPARE;
+				if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV3_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV3_USM_SECURITY_MODEL))
+			   		Snmpv3Notify(var, val, 0,targetIndex);
+				else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV2C_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV2C_SECURITY_MODEL))
+					SNMPNotify(var, val, 0);
+				else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV1_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV1_SECURITY_MODEL))
+					SNMPNotify(var, val, 0);
+				else 
+					return TRUE;
+#else
 	            smState = SM_PREPARE;
-	            SNMPNotify(var, val, 0);
+				SNMPNotify(var, val, 0);
+#endif
 	            return TRUE;
 	        }
 			/* if trapInfo table address for a perticular index is different comparing to the SM_PREPARE IP address
@@ -181,10 +211,11 @@ static BOOL SendNotification(BYTE receiverIndex, SNMP_ID var, SNMP_VAL val)
 				smState=SM_PREPARE;
 			
     }
+
     return FALSE;
 }
 
-#if defined(SNMP_STACK_USE_V2_TRAP)
+#if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 /**************************************************************************
   Function:
  	void SNMPV2TrapDemo(void)
@@ -233,6 +264,8 @@ void SNMPV2TrapDemo(void)
 	static BYTE potReadLock = FALSE;
 	static BYTE timeLock = FALSE;
 	static BYTE maxTryToSendTrap=0;
+	UINT8		targetIndex = 0;
+	UINT8		retVal = 0;
 	
 	if(timeLock==(BYTE)FALSE)
 	{
@@ -261,7 +294,8 @@ void SNMPV2TrapDemo(void)
 			potReadLock    = TRUE;
 		}
 	
-		if(analogPotVal.word >512u)
+	//	if(analogPotVal.word >512u)
+		if(analogPotVal.word >12u)
 		{
 			/*
 			 * prepare  and send multivarbind pdu using pot meter value. 
@@ -269,54 +303,119 @@ void SNMPV2TrapDemo(void)
 			 * apart from these varbinds, push button and potmeter OID are included
 			 * to this pdu.
 			*/
-			gSpecificTrapNotification = 1; //expecting 1 should be the specific trap.
-			gGenericTrapNotification = ENTERPRISE_SPECIFIC;
-			gSetTrapSendFlag = TRUE;
+			//gSpecificTrapNotification = 1; //expecting 1 should be the specific trap.
+			//gGenericTrapNotification = ENTERPRISE_SPECIFIC;
+			//gSetTrapSendFlag = TRUE;
 			// insert ANALOG_POT0 OID value and OID to the varbind pdu
 			//set global flag gSetTrapSendFlag to TRUE , it signifies that there are more than one 
 			// variable need to be the part of SNMP v2 TRAP. 
 			// if there is  only varbind variable to be the part of SNMP v2 trap, 
 			// then user should set gSetTrapSendFlag to FALSE.
 			//gSetTrapSendFlag = FALSE;
-
-			if(SendNotification(trapIndex,ANALOG_POT0,analogPotVal) == FALSE)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+			for(targetIndex=0;targetIndex<SNMPV3_USM_MAX_USER;targetIndex++)
 			{
-				if(maxTryToSendTrap >= MAX_TRY_TO_SEND_TRAP)
+#endif			
+				gSpecificTrapNotification = 1; //expecting 1 should be the specific trap.
+				gGenericTrapNotification = ENTERPRISE_SPECIFIC;
+				gSetTrapSendFlag = TRUE;
+				retVal =SendNotification(trapIndex,ANALOG_POT0,analogPotVal,targetIndex);
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+				if((gSendTrapSMstate == 0x0) && (retVal == FALSE)) // gSendTrapSMstate == SM_PREPARE
 				{
-					trapIndex++;
-					maxTryToSendTrap = 0;
-					return;
+					retVal = SendNotification(trapIndex, ANALOG_POT0, analogPotVal,targetIndex);
 				}
-				maxTryToSendTrap++;
-				return ;
+				if((retVal==TRUE)&& (targetIndex == (SNMPV3_USM_MAX_USER-1)))
+					trapIndex++;
+				else if(retVal == FALSE)
+#else				
+				if(retVal == FALSE)
+#endif					
+				{
+					if(maxTryToSendTrap >= MAX_TRY_TO_SEND_TRAP)
+					{
+						trapIndex++;
+						maxTryToSendTrap = 0;
+						return;
+					}
+					maxTryToSendTrap++;
+					return ;
+				}
+				//prepare PUSH_BUTTON trap .for the next trap varbind we need to use snmp_notify instead of 
+				// SendNotification(), because we have already prepared SNMP v2 trap header 
+				//and arp has been resolved already.
+				
+				analogPotVal.byte = BUTTON0_IO;
+				
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+				if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV3_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV3_USM_SECURITY_MODEL))
+			   		Snmpv3Notify(PUSH_BUTTON,analogPotVal,0,targetIndex);
+				else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV2C_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV2C_SECURITY_MODEL))
+					SNMPNotify(PUSH_BUTTON,analogPotVal,0);
+				else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV1_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV1_SECURITY_MODEL))
+					SNMPNotify(PUSH_BUTTON,analogPotVal,0);
+				else
+						continue;
+				//Snmpv3Notify(PUSH_BUTTON,analogPotVal,0);
+#else
+				SNMPNotify(PUSH_BUTTON,analogPotVal,0);
+#endif
+				// if this is the last trap variable need to be the part of SNMP v2 Trap,
+				// then we should disable gSetTrapSendFlag to FALSE
+				gSetTrapSendFlag = FALSE;
+				analogPotVal.byte = LED0_IO;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)				
+				//Snmpv3Notify(LED_D5,analogPotVal,0);
+				if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV3_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV3_USM_SECURITY_MODEL))
+					Snmpv3Notify(LED_D5,analogPotVal,0,targetIndex);
+				else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV2C_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV2C_SECURITY_MODEL))
+					SNMPNotify(LED_D5,analogPotVal,0);
+				else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV1_MSG_PROCESSING_MODEL)
+					&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV1_SECURITY_MODEL))
+					SNMPNotify(LED_D5,analogPotVal,0);
+#if 0				
+				if(targetIndex == )
+				{
+					if(maxTryToSendTrap >= MAX_TRY_TO_SEND_TRAP)
+					{
+						trapIndex++;
+						maxTryToSendTrap = 0;
+						return;
+					}
+					maxTryToSendTrap++;
+					return ;
+				}
+#endif				
+#else
+				SNMPNotify(LED_D5,analogPotVal,0);
+#endif
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 			}
-			//prepare PUSH_BUTTON trap .for the next trap varbind we need to use snmp_notify instead of 
-			// SendNotification(), because we have already prepared SNMP v2 trap header 
-			//and arp has been resolved already.
-			
-			analogPotVal.byte = BUTTON0_IO;
-			SNMPNotify(PUSH_BUTTON,analogPotVal,0);
-		
-			// if this is the last trap variable need to be the part of SNMP v2 Trap,
-			// then we should disable gSetTrapSendFlag to FALSE
-			gSetTrapSendFlag = FALSE;
-			analogPotVal.byte = LED0_IO;
-			SNMPNotify(LED_D5,analogPotVal,0);			
+#endif			
 		}
 	}
 
 	//Try for max 5 seconds to send TRAP, do not get block in while()
 	if((TickGet()-tempTimerRead)>(5*TICK_SECOND))
 	{
-//		UDPDiscard();
+		UDPDiscard();
 		potReadLock = FALSE;
 		timeLock = FALSE;
 		trapIndex = 0;
 		analogPotVal.word = 0;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+		gSendTrapSMstate = 0;
+#endif
 		return;
 	}
 }
-#endif /* SNMP_STACK_USE_V2_TRAP */
+
+#endif /* SNMP_STACK_USE_V2_TRAP  || SNMP_V1_V2_TRAP_WITH_SNMPV3 */
 
 /**************************************************************************
   Function:
@@ -355,7 +454,10 @@ void SNMPTrapDemo(void)
 	static BYTE potReadLock=FALSE,buttonLock=FALSE;
 	static BYTE timeLock=FALSE;
 	static BYTE maxTryToSendTrap=0;
-	
+	UINT8		targetIndex;
+	BOOL		retVal=TRUE;
+
+	targetIndex = 0;
 	if(timeLock==(BYTE)FALSE)
 	{
 		TimerRead=TickGet();
@@ -393,23 +495,42 @@ void SNMPTrapDemo(void)
 		}
 		if(trapInfo.table[anaPotNotfyCntr].Flags.bEnabled)
 		{
-			if(analogPotVal.word >512u)
+			if(analogPotVal.word >12u)
 			{
-				gSpecificTrapNotification=POT_READING_MORE_512;
-				gGenericTrapNotification=ENTERPRISE_SPECIFIC;
-				if(SendNotification(anaPotNotfyCntr, ANALOG_POT0, analogPotVal))
-					anaPotNotfyCntr++;
-				else
-				{					
-					if(maxTryToSendTrap>=MAX_TRY_TO_SEND_TRAP)
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+				for(targetIndex=0;targetIndex<SNMPV3_USM_MAX_USER;targetIndex++)
+				{
+#endif			
+					gSpecificTrapNotification=POT_READING_MORE_512;
+					gGenericTrapNotification=ENTERPRISE_SPECIFIC;
+					gSetTrapSendFlag = FALSE;
+					retVal = SendNotification(anaPotNotfyCntr, ANALOG_POT0, analogPotVal,targetIndex);
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+					if((gSendTrapSMstate == 0x0) && (retVal == FALSE)) // gSendTrapSMstate == SM_PREPARE
 					{
-						anaPotNotfyCntr++;
-						maxTryToSendTrap = 0;
-						return;
+						retVal = SendNotification(anaPotNotfyCntr, ANALOG_POT0, analogPotVal,targetIndex);
 					}
-					maxTryToSendTrap++;
-					return ;
+					else if((retVal == TRUE) && (targetIndex == (SNMPV3_USM_MAX_USER-1)))
+						anaPotNotfyCntr++;
+					else if(retVal == FALSE)
+#else
+					if(retVal == TRUE)
+						anaPotNotfyCntr++;
+					else 
+#endif						
+					{					
+						if(maxTryToSendTrap>=MAX_TRY_TO_SEND_TRAP)
+						{
+							anaPotNotfyCntr++;
+							maxTryToSendTrap = 0;
+							return;
+						}
+						maxTryToSendTrap++;
+						return ;
+					}
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 				}
+#endif			
 			}
 		}
 		else
@@ -440,10 +561,27 @@ void SNMPTrapDemo(void)
 		buttonPushval.byte = 0;
 		if ( trapInfo.table[buttonPushNotfyCntr].Flags.bEnabled )
 		{
-			gSpecificTrapNotification=BUTTON_PUSH_EVENT;
-			gGenericTrapNotification=ENTERPRISE_SPECIFIC;
-			if(SendNotification(buttonPushNotfyCntr, PUSH_BUTTON, buttonPushval))
-				buttonPushNotfyCntr++;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+			for(targetIndex=0;targetIndex<SNMPV3_USM_MAX_USER;targetIndex++)
+			{
+#endif			
+				gSpecificTrapNotification=POT_READING_MORE_512;
+				gGenericTrapNotification=ENTERPRISE_SPECIFIC;
+				gSetTrapSendFlag = FALSE;
+				retVal =  SendNotification(buttonPushNotfyCntr, PUSH_BUTTON, buttonPushval,targetIndex);
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+				if((gSendTrapSMstate == 0x0) && (retVal == FALSE)) // gSendTrapSMstate == SM_PREPARE
+				{
+					retVal = SendNotification(anaPotNotfyCntr, ANALOG_POT0, analogPotVal,targetIndex);
+				}
+				if((retVal==TRUE)&& (targetIndex == (SNMPV3_USM_MAX_USER-1)))
+#else
+				if(retVal==TRUE)
+#endif					
+					buttonPushNotfyCntr++;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+			}
+#endif			
 		}
 		else
 			buttonPushNotfyCntr++;
@@ -462,6 +600,9 @@ void SNMPTrapDemo(void)
 		timeLock=FALSE;
 		gSpecificTrapNotification=VENDOR_TRAP_DEFAULT;
 		gGenericTrapNotification=ENTERPRISE_SPECIFIC;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+		gSendTrapSMstate = 0;
+#endif
 		return;
 	}
 
@@ -559,12 +700,31 @@ void SNMPSendTrap(void)
 		case SM_NOTIFY_WAIT:
 			if(SNMPIsNotifyReady(remHostIpAddrPtr))
 			{
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+				UINT8 targetIndex = 0;
+#endif
 				smState = SM_PREPARE;
 		 		val.byte = 0;
 				receiverIndex++;
-
-				//application has to decide on which SNMP var OID to send. Ex. PUSH_BUTTON	
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+				for(targetIndex=0;targetIndex<SNMPV3_USM_MAX_USER;targetIndex++)
+				{
+					if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV3_MSG_PROCESSING_MODEL)
+						&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV3_USM_SECURITY_MODEL))
+						Snmpv3Notify(gOIDCorrespondingSnmpMibID, val, 0,targetIndex);
+					else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV2C_MSG_PROCESSING_MODEL)
+						&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV2C_SECURITY_MODEL))
+						SNMPNotify(gOIDCorrespondingSnmpMibID, val, 0);
+					else if((gSnmpv3TrapConfigData[targetIndex].messageProcessingModelType == SNMPV1_MSG_PROCESSING_MODEL)
+						&& (gSnmpv3TrapConfigData[targetIndex].securityModelType == SNMPV1_SECURITY_MODEL))
+						SNMPNotify(gOIDCorrespondingSnmpMibID, val, 0);
+				}
+				//Snmpv3Notify(PUSH_BUTTON,analogPotVal,0);
+#else
 				SNMPNotify(gOIDCorrespondingSnmpMibID, val, 0);
+#endif
+				//application has to decide on which SNMP var OID to send. Ex. PUSH_BUTTON	
+				//SNMPNotify(gOIDCorrespondingSnmpMibID, val, 0);
             	smState = SM_PREPARE;
 				UDPDiscard();
 				break;
@@ -669,7 +829,7 @@ BYTE SNMPValidateCommunity(BYTE * community)
 
 /*********************************************************************
   Function:
-  	BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len)
+  	BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len,BYTE index)
 
   Summary: 	
 	Validates the set variable data length to data type.
@@ -686,7 +846,7 @@ BYTE SNMPValidateCommunity(BYTE * community)
   Parameters:  
   	var	-	Variable id whose value is to be set
   	len	-	Length value that is to be validated.
- 
+ 	index -   instance of a OID
   Return Values:  
   	TRUE  - if given var can be set to given len
     FALSE - if otherwise.
@@ -696,7 +856,7 @@ BYTE SNMPValidateCommunity(BYTE * community)
   	defined as ASCII_STRING and OCTET_STRING (i.e. data length greater
   	than 4 bytes)
  ********************************************************************/
-BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len)
+BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len,BYTE index)
 {
     switch(var)
     {
@@ -704,7 +864,41 @@ BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len)
         if ( len < (BYTE)TRAP_COMMUNITY_MAX_LEN+1 )
             return TRUE;
         break;
-
+#ifdef STACK_USE_SNMPV3_SERVER			
+	case USER_SECURITY_NAME:
+		if(len <= USER_SECURITY_NAME_LEN)
+		{
+			//snmpV3UserDataBase[index].userNameLength = len;
+			//memset(snmpV3UserDataBase[index].userName,'\0',USER_SECURITY_NAME_LEN);
+			memset(gSnmpv3UserSecurityName,'\0',USER_SECURITY_NAME_LEN);
+			return TRUE;
+		}
+		break;
+	case USM_AUTH_KEY:
+		if(len == AUTH_LOCALIZED_PASSWORD_KEY_LEN)
+		{
+			memset(snmpV3UserDataBase[index].userAuthPswdLoclizdKey,'\0',AUTH_LOCALIZED_PASSWORD_KEY_LEN);
+			return TRUE;
+		}
+		break;
+	case USM_PRIV_KEY:
+		if(len == PRIV_LOCALIZED_PASSWORD_KEY_LEN)
+		{
+			memset(snmpV3UserDataBase[index].userPrivPswdLoclizdKey,'\0',PRIV_LOCALIZED_PASSWORD_KEY_LEN);
+			return TRUE;
+		}
+		break;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)		
+	case SNMP_TARGET_SECURITY_NAME :			// 43.6.1.4.1.17095.5.1.1.4: READWRITE ASCII_STRING.
+		if(len <= USER_SECURITY_NAME_LEN)
+		{
+			//gSnmpv3TrapConfigData[index].userNameLength = len;
+			memset(gSnmpv3UserSecurityName,'\0',USER_SECURITY_NAME_LEN);
+			return TRUE;
+		}
+		break;
+#endif		
+#endif
 #if defined(USE_LCD)
     case LCD_DISPLAY:
         if ( len < sizeof(LCDText)+1 )
@@ -763,6 +957,10 @@ BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len)
 ********************************************************************/
 BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index, BYTE ref, SNMP_VAL val)
 {
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
+	BYTE tempUserNameLen = 0;
+#endif 
+
     switch(var)
     {
     case LED_D5:
@@ -845,7 +1043,175 @@ BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index, BYTE ref, SNMP_VAL val)
             return TRUE;
         }
         break;
+#ifdef STACK_USE_SNMPV3_SERVER	
+	case USM_AUTH_PROT:
+		if(index>SNMPV3_USM_MAX_USER)
+			return FALSE;
+		if(val.byte == hmacMD5Auth)
+		{
+			snmpV3UserDataBase[index].userHashType = SNMPV3_HAMC_MD5;
+		}
+		else if(val.byte == hmacSHAAuth)
+		{
+			snmpV3UserDataBase[index].userHashType = SNMPV3_HMAC_SHA1;
+		}
+		else if(val.byte == noAuthProtocol)
+		{
+			snmpV3UserDataBase[index].userHashType = SNMPV3_NO_HMAC_AUTH;
+		}
+		else
+			return FALSE;
 
+		Snmpv3UsmSnmpEngnAuthPrivPswdLocalization(index);
+		Snmpv3ComputeHMACIpadOpadForAuthLoclzedKey(index);
+		
+		//gSnmpV3USMDataBase[index].userAuthType = val.byte;
+ 		return TRUE;
+		
+	case USER_SECURITY_NAME:
+		/* validate user security length*/
+        // Since this is a ASCII_STRING data type, SNMP will call with
+        // SNMP_END_OF_VAR to indicate no more bytes.
+        // Use this information to determine if we just added new row
+        // or updated an existing one.
+        if ( ref ==  SNMP_END_OF_VAR )
+        {
+			//snmpV3UserDataBase[index].userName[ref] = '\0';
+			// restrict the user security name "initial"
+			if(strncmp(gSnmpv3UserSecurityName,"initial",strlen(gSnmpv3UserSecurityName))== 0)
+				return FALSE;
+			snmpV3UserDataBase[index].userNameLength = strlen(gSnmpv3UserSecurityName);
+			memset(snmpV3UserDataBase[index].userName,'\0',USER_SECURITY_NAME_LEN);
+			strncpy(snmpV3UserDataBase[index].userName,
+				gSnmpv3UserSecurityName,strlen(gSnmpv3UserSecurityName));
+			snmpV3UserDataBase[index].userNameLength = strlen(snmpV3UserDataBase[index].userName);
+            return TRUE;
+        }
+        // Make sure that index is within our range.
+        if ( index < SNMPV3_USM_MAX_USER )
+        {
+            // Copy given value into local buffer.
+            gSnmpv3UserSecurityName[ref]=val.byte;
+            return TRUE;
+        }
+		break;
+	case USM_AUTH_KEY:
+        if ( ref ==  SNMP_END_OF_VAR )
+        {
+			//snmpV3UserDataBase[index].userAuthPswdLoclizdKey[ref] = '\0';
+			Snmpv3ComputeHMACIpadOpadForAuthLoclzedKey(index);
+            return TRUE;
+        }
+        // Make sure that index is within our range.
+        if ( index < SNMPV3_USM_MAX_USER )
+        {
+            // Copy given value into local buffer.
+            snmpV3UserDataBase[index].userAuthPswdLoclizdKey[ref]=val.byte;
+            return TRUE;
+        }
+		break;
+	case USM_PRIV_PROT:
+		if(index>SNMPV3_USM_MAX_USER)
+			return SNMP_WRONG_VALUE;
+		if((snmpV3UserDataBase[index].userHashType == SNMPV3_NO_HMAC_AUTH) 
+			&& (val.byte != noPrivProtocol))
+		{
+			return SNMP_WRONG_VALUE;
+		}
+		if(val.byte == aesPrivProtocol)
+		{
+			snmpV3UserDataBase[index].userPrivType = SNMPV3_AES_PRIV;
+		}
+		else if(val.byte == desPrivProtocol)
+		{
+			snmpV3UserDataBase[index].userPrivType = SNMPV3_DES_PRIV;
+		}
+		else if(val.byte == noPrivProtocol)
+		{
+			snmpV3UserDataBase[index].userPrivType = SNMPV3_NO_PRIV;
+		}
+		else
+			return FALSE;
+		//gSnmpV3USMDataBase[index].userPrivType = val.byte;
+		return TRUE;
+		
+	case USM_PRIV_KEY:
+        if ( ref ==  SNMP_END_OF_VAR )
+        {
+			//snmpV3UserDataBase[index].userPrivPswdLoclizdKey[ref] = '\0';
+            return TRUE;
+        }
+        // Make sure that index is within our range.
+        if ( index < SNMPV3_USM_MAX_USER )
+        {
+            // Copy given value into local buffer.
+            snmpV3UserDataBase[index].userPrivPswdLoclizdKey[ref]=val.byte;
+            return TRUE;
+        }
+		break;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)		
+	case SNMP_TARGET_INDEX_ID : 		// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
+		break;
+	case SNMP_TARGET_MP_MODEL : 		// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+			gSnmpv3TrapConfigData[index].messageProcessingModelType 
+				= val.byte;
+			return TRUE;
+		}
+		break;
+	case  SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
+		{
+			gSnmpv3TrapConfigData[index].securityModelType
+				= val.byte;
+			return TRUE;
+		}
+		break;
+	case SNMP_TARGET_SECURITY_NAME :			// 43.6.1.4.1.17095.5.1.1.4: READWRITE ASCII_STRING.
+        if ( ref ==  SNMP_END_OF_VAR )
+        {
+        	UINT8 userIndex = 0;
+			// restrict the user security name "initial"
+			tempUserNameLen = strlen(gSnmpv3UserSecurityName);
+			if(strncmp(gSnmpv3UserSecurityName,"initial",tempUserNameLen)== 0)
+				return FALSE;
+			// check if the target security name is the part of the user security name table,
+			// if target security name is not present in that table then return FALSE.
+			
+			for(userIndex=0;userIndex<SNMPV3_USM_MAX_USER;userIndex++)
+			{
+				if(strncmp(gSnmpv3UserSecurityName,snmpV3UserDataBase[userIndex].userName,tempUserNameLen)== 0)
+					break;
+			}
+			if(userIndex == SNMPV3_USM_MAX_USER)
+				return FALSE;
+			
+			memset(gSnmpv3TrapConfigData[index].userSecurityName,'\0',USER_SECURITY_NAME_LEN);
+			strncpy(gSnmpv3TrapConfigData[index].userSecurityName,
+				gSnmpv3UserSecurityName,strlen(gSnmpv3UserSecurityName));
+            return TRUE;
+        }
+        // Make sure that index is within our range.
+        if ( index < SNMPV3_USM_MAX_USER )
+        {
+            // Copy given value into local buffer.
+            gSnmpv3UserSecurityName[ref]=val.byte;
+            return TRUE;
+        }
+		break;
+	case SNMP_TARGET_SECURITY_LEVEL :			// 43.6.1.4.1.17095.5.1.1.5: READWRITE BYTE.
+		{
+			if(Snmpv3CmprTrapSecNameAndSecLvlWithUSMDb(index,strlen(gSnmpv3TrapConfigData[index].userSecurityName),
+				gSnmpv3TrapConfigData[index].userSecurityName,
+				(STD_BASED_SNMPV3_SECURITY_LEVEL)val.byte)!= TRUE)
+				return FALSE;
+			gSnmpv3TrapConfigData[index].securityLevelType
+				= val.byte;
+			return TRUE;
+		}
+		break;
+#endif 		
+#endif
 #if defined(USE_LCD)
     case LCD_DISPLAY:
         // Copy all bytes until all bytes are transferred
@@ -867,6 +1233,81 @@ BOOL SNMPSetVar(SNMP_ID var, SNMP_INDEX index, BYTE ref, SNMP_VAL val)
     return FALSE;
 }
 
+
+/*********************************************************************
+  Function:        
+  	BOOL SNMPGetExactIndex(SNMP_ID var,SNMP_INDEX index)
+
+  Summary:
+  	To search for exact index node in case of a Sequence variable.
+	
+  Description:    
+  	This is a callback function called by SNMP module.
+    SNMP user must implement this function in user application and 
+    provide appropriate data when called.  This function will only
+    be called for OID variable of type sequence.
+    
+  PreCondition: 
+  	None
+ 
+  Parameters:
+  	var		-	Variable id as per mib.h (input)
+  	index      -	 Index of variable (input)
+ 
+  Return Values:
+  	TRUE	-	 If the exact index value exists for given variable at given
+                 index.
+    FALSE	-	 Otherwise.
+ 
+  Remarks:
+	  Only sequence index needs to be handled in this function.
+ ********************************************************************/
+BOOL SNMPGetExactIndex(SNMP_ID var, SNMP_INDEX index)
+{
+    
+    switch(var)
+    {
+	    case TRAP_RECEIVER_ID:
+	    case TRAP_RECEIVER_ENABLED:
+		case TRAP_RECEIVER_IP:
+		case TRAP_COMMUNITY:
+	        // There is no next possible index if table itself is empty.
+	        if ( trapInfo.Size == 0u )
+	            return FALSE;
+
+	        if ( index < trapInfo.Size)
+	        {
+	            return TRUE;
+	        }
+	    break;
+	#ifdef STACK_USE_SNMPV3_SERVER		
+		case USM_INDEX_ID:
+		case USM_AUTH_KEY:
+		case USM_AUTH_PROT:
+		case USER_SECURITY_NAME:
+		case USM_PRIV_KEY:
+		case USM_PRIV_PROT:
+	        if ( index < SNMPV3_USM_MAX_USER)
+	        {
+	            return TRUE;
+	        }
+		break;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+		case SNMP_TARGET_INDEX_ID : 		// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
+		case SNMP_TARGET_MP_MODEL : 		// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.
+		case  SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
+		case SNMP_TARGET_SECURITY_NAME :			// 43.6.1.4.1.17095.5.1.1.4: READWRITE ASCII_STRING.
+		case SNMP_TARGET_SECURITY_LEVEL :			// 43.6.1.4.1.17095.5.1.1.5: READWRITE BYTE.
+	        if ( index < SNMPV3_USM_MAX_USER)
+	        {
+	            return TRUE;
+	        }
+		break;
+#endif
+#endif
+    }
+    return FALSE;
+}
 
 
 /*********************************************************************
@@ -906,6 +1347,9 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index)
     switch(var)
     {
     case TRAP_RECEIVER_ID:
+	case TRAP_RECEIVER_ENABLED:
+	case TRAP_RECEIVER_IP:
+	case TRAP_COMMUNITY:
         // There is no next possible index if table itself is empty.
         if ( trapInfo.Size == 0u )
             return FALSE;
@@ -922,10 +1366,180 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index)
             return TRUE;
         }
         break;
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	case USM_INDEX_ID:
+	case USM_AUTH_KEY:
+	case USM_AUTH_PROT:
+	case USER_SECURITY_NAME:
+	case USM_PRIV_KEY:
+	case USM_PRIV_PROT:
+        if ( tempIndex == (BYTE)SNMP_INDEX_INVALID )
+        {
+            *index = 0;
+            return TRUE;
+        }
+        else if ( tempIndex < (SNMPV3_USM_MAX_USER-1) )
+        {
+            *index = tempIndex+1;
+            return TRUE;
+        }
+        break;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+	case SNMP_TARGET_INDEX_ID : 		// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
+	case SNMP_TARGET_MP_MODEL : 		// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.
+	case SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
+	case SNMP_TARGET_SECURITY_NAME :			// 43.6.1.4.1.17095.5.1.1.4: READWRITE ASCII_STRING.
+	case SNMP_TARGET_SECURITY_LEVEL :			// 43.6.1.4.1.17095.5.1.1.5: READWRITE BYTE.
+        if ( tempIndex == (BYTE)SNMP_INDEX_INVALID )
+        {
+            *index = 0;
+            return TRUE;
+        }
+        else if ( tempIndex < (SNMPV3_USM_MAX_USER-1) )
+        {
+            *index = tempIndex+1;
+            return TRUE;
+        }
+	break;
+#endif	
+#endif
     }
     return FALSE;
 }
 
+/*********************************************************************
+  Function:
+  	BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BYTE oidLen)
+                                   
+  Summary:
+  	Used to validate the support of Var ID for A perticular SNMP Version.
+
+  Description:
+ 	This is a callback function called by SNMP module. SNMP user must 
+ 	implement this function as per SNMP version. One need to add the new SNMP
+ 	MIB IDs hereas per SNMP version.
+ 	e.g - SYS_UP_TIME (250) is common for V1/V2/V3
+ 	ENGINE_ID - is the part of V3, So put the all the SNMPv3 var ids within 
+ 	Macro STACK_USE_SNMPV3_SERVER.   	
+  PreCondition:
+  	None
+ 
+  parameters:
+  	var		-	Variable rec whose record id need to be validated
+  	oidValuePtr - OID Value
+  	oidLen - oidValuePtr length
+    
+  Return Values:
+  	TRUE	-	If a Var ID exists .
+    	FALSE 	-	Otherwise.
+ 
+  Remarks:
+ 	None.
+ ********************************************************************/
+BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BYTE oidLen)
+{
+	
+	int i=0,j=0;
+	int len=0;
+	BOOL flag=FALSE;
+	BYTE size=0;
+
+	if(var == NULL)
+		return FALSE;
+	
+	if(!var->nodeInfo.Flags.bIsIDPresent)
+	{
+		if(oidValuePtr == NULL)
+			return FALSE;
+		
+		for(i=0; i< SNMP_MAX_NON_REC_ID_OID; i++)
+		{
+			if((pduPtr->snmpVersion != SNMP_V3) && 
+				(gSnmpNonMibRecInfo[i].version == SNMP_V3))
+				continue;
+			
+			size = strlen(gSnmpNonMibRecInfo[i].oidstr);
+			if( size <= oidLen)
+				len = size;
+			else
+				continue;
+
+			// find the first unmatching byte
+			while(len--)
+			{
+				if(gSnmpNonMibRecInfo[i].oidstr[j] != oidValuePtr[j])
+				{
+					flag = FALSE;
+					j=0;
+					break;
+				}
+				else
+				{
+					flag = TRUE;
+					j++;
+				}
+			}
+			if(flag == TRUE)
+			{
+				return TRUE;
+			}
+		}			
+		return FALSE;
+	}
+	switch(var->id)
+	{
+		case MICROCHIP:
+		case SYS_UP_TIME:
+		case LED_D5:
+	    case LED_D6:
+	    case PUSH_BUTTON:
+	   	case ANALOG_POT0:
+	    case TRAP_RECEIVER_ID:
+	    case TRAP_RECEIVER_ENABLED:
+	    case TRAP_RECEIVER_IP:
+	    case TRAP_COMMUNITY:	
+
+#if defined(USE_LCD)
+		case LCD_DISPLAY:
+#endif
+
+		return TRUE;
+	}
+	
+#ifdef STACK_USE_SNMPV3_SERVER
+	if(pduPtr->snmpVersion == SNMP_V3)
+	{
+		if(!var->nodeInfo.Flags.bIsIDPresent)
+			return TRUE;
+		
+		switch(var->id)
+		{
+
+			case ENGINE_ID:
+			case ENGINE_BOOT:
+			case ENGINE_TIME:
+			case ENGINE_MAX_MSG:
+			case USM_INDEX_ID:
+			case USM_AUTH_PROT:
+			case USM_PRIV_PROT:
+			case USER_SECURITY_NAME:
+			case USM_AUTH_KEY:
+			case USM_PRIV_KEY:
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+			case SNMP_TARGET_INDEX_ID :			// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
+			case SNMP_TARGET_MP_MODEL :			// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.		
+			case  SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
+			case SNMP_TARGET_SECURITY_NAME : 			// 43.6.1.4.1.17095.5.1.1.4: READWRITE ASCII_STRING.
+			case SNMP_TARGET_SECURITY_LEVEL :			// 43.6.1.4.1.17095.5.1.1.5: READWRITE BYTE.
+		
+#endif /*SNMP_V1_V2_TRAP_WITH_SNMPV3 */
+			return TRUE;
+		}
+	}
+#endif /* STACK_USE_SNMPV3_SERVER */
+
+    return FALSE;
+}
 
 /*********************************************************************
   Function:
@@ -1088,7 +1702,166 @@ BOOL SNMPGetVar(SNMP_ID var, SNMP_INDEX index, BYTE* ref, SNMP_VAL* val)
             return TRUE;
         }
         break;
+		#ifdef STACK_USE_SNMPV3_SERVER	
+	case ENGINE_ID:
+		if(snmpEngnIDLength == 0u)
+			*ref = SNMP_END_OF_VAR;
+		else
+		{
+			val->byte = snmpEngineID[myRef];
+			
+			myRef++;
+			
+			if ( myRef == snmpEngnIDLength )
+				*ref = SNMP_END_OF_VAR;
+			else
+				*ref = myRef;
+		}
+		return TRUE;
+	case ENGINE_BOOT:
+		val->dword = (DWORD)snmpEngineBoots;
+		return TRUE;
+		
+	case ENGINE_TIME:
+		val->dword = (DWORD)snmpEngineTime.Val;
+		return TRUE;
+		
+	case ENGINE_MAX_MSG:
+		val->word = (WORD)snmpEngineMaxMessageSize.w[0];
+		return TRUE;
 
+	case USM_INDEX_ID:
+        if ( index < SNMPV3_USM_MAX_USER)
+        {
+            val->byte = index;
+            return TRUE;
+        }
+        break;
+	case USM_AUTH_PROT:
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+			if(snmpV3UserDataBase[index].userHashType == SNMPV3_HAMC_MD5)
+				val->byte = hmacMD5Auth;
+			else if(snmpV3UserDataBase[index].userHashType == SNMPV3_HMAC_SHA1)
+				val->byte = hmacSHAAuth;
+			else
+				val->byte = noAuthProtocol;				
+		}
+		else
+			return FALSE;
+		return TRUE;
+	case USM_PRIV_PROT:
+		// code change is required 
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+			if(snmpV3UserDataBase[index].userPrivType == SNMPV3_AES_PRIV)
+				val->byte = aesPrivProtocol;
+			else if(snmpV3UserDataBase[index].userPrivType == SNMPV3_DES_PRIV)
+				val->byte = desPrivProtocol;
+			else
+				val->byte = noPrivProtocol; 			
+		}
+		else
+			return FALSE;
+		return TRUE;
+	case USER_SECURITY_NAME:
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+            if ( snmpV3UserDataBase[index].userNameLength == 0u )
+                *ref = SNMP_END_OF_VAR;
+            else
+            {
+                val->byte = snmpV3UserDataBase[index].userName[myRef];
+
+                myRef++;
+
+                if ( myRef == snmpV3UserDataBase[index].userNameLength )
+                    *ref = SNMP_END_OF_VAR;
+                else
+                    *ref = myRef;
+            }
+            return TRUE;
+		}
+		break;
+	case USM_AUTH_KEY:
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+            val->byte = snmpV3UserDataBase[index].userAuthPswdLoclizdKey[myRef];
+
+            myRef++;
+
+            if ( myRef == AUTH_LOCALIZED_PASSWORD_KEY_LEN)
+                *ref = SNMP_END_OF_VAR;
+            else
+                *ref = myRef;
+            return TRUE;
+		}
+		break;
+	case USM_PRIV_KEY:
+		// code change is required / for temp- same auth passwd string is returned.
+		if(index < SNMPV3_USM_MAX_USER)
+		{            
+            val->byte = snmpV3UserDataBase[index].userPrivPswdLoclizdKey[myRef];
+
+            myRef++;
+
+            if ( myRef == PRIV_LOCALIZED_PASSWORD_KEY_LEN)
+                *ref = SNMP_END_OF_VAR;
+            else
+                *ref = myRef;
+            return TRUE;
+		}
+		break;
+#if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
+	case SNMP_TARGET_INDEX_ID :			// 43.6.1.4.1.17095.5.1.1.1: READONLY BYTE.
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+			val->byte = index;
+			return TRUE;
+		}
+		break;
+	case SNMP_TARGET_MP_MODEL :			// 43.6.1.4.1.17095.5.1.1.2: READWRITE BYTE.		
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+			val->byte = gSnmpv3TrapConfigData[index].messageProcessingModelType;
+			return TRUE;
+		}
+		break;
+	case  SNMP_TARGET_SECURITY_MODEL :			// 43.6.1.4.1.17095.5.1.1.3: READWRITE BYTE.
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+			val->byte = gSnmpv3TrapConfigData[index].securityModelType;
+			return TRUE;
+		}
+		break;
+	case SNMP_TARGET_SECURITY_NAME : 			// 43.6.1.4.1.17095.5.1.1.4: READWRITE ASCII_STRING.
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+            if ( strlen(gSnmpv3TrapConfigData[index].userSecurityName) == 0u )
+                *ref = SNMP_END_OF_VAR;
+			else
+			{
+	            val->byte = gSnmpv3TrapConfigData[index].userSecurityName[myRef];
+
+	            myRef++;
+
+	            if ( myRef == strlen(gSnmpv3TrapConfigData[index].userSecurityName) )
+	                *ref = SNMP_END_OF_VAR;
+	            else
+	                *ref = myRef;
+			}
+            return TRUE;
+		}
+		break;
+	case SNMP_TARGET_SECURITY_LEVEL :			// 43.6.1.4.1.17095.5.1.1.5: READWRITE BYTE.
+		if(index < SNMPV3_USM_MAX_USER)
+		{
+			val->byte = gSnmpv3TrapConfigData[index].securityLevelType;
+			return TRUE;
+		}
+		break;
+#endif
+#endif
 #if defined(USE_LCD)
     case LCD_DISPLAY:
         if ( LCDText[0] == 0u )

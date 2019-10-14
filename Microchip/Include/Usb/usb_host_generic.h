@@ -53,11 +53,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev   Description
-  ----  -----------------------------------------
-  2.6a- No change
-   2.7a
+Author          Date    Comments
+--------------------------------------------------------------------------------
+BC/KO       25-Dec-2007 First release
+
 *******************************************************************************/
 #ifndef __USBHOSTGENERIC_H__
 #define __USBHOSTGENERIC_H__

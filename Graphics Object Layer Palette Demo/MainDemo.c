@@ -224,21 +224,21 @@ void                        DisplayPullDown(void);          // refresh the scree
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
 // internal flash image
-extern const BITMAP_FLASH   intro;
-extern const BITMAP_FLASH   mchpLogo;
-extern const BITMAP_FLASH   bulbon;
-extern const BITMAP_FLASH   bulboff;
-extern const BITMAP_FLASH   gradientButton;
-extern const BITMAP_FLASH   Engine1;
-extern const BITMAP_FLASH   Engine2;
-extern const BITMAP_FLASH   Engine3;
-extern const BITMAP_FLASH   Engine4;
-extern const BITMAP_FLASH   arrowUp;
-extern const BITMAP_FLASH   arrowDown;
-extern const BITMAP_FLASH   redphone;
-extern const BITMAP_FLASH   greenphone;
-extern const BITMAP_FLASH   mchpIcon0;
-extern const BITMAP_FLASH   mchpIcon;
+extern const IMAGE_FLASH   intro;
+extern const IMAGE_FLASH   mchpLogo;
+extern const IMAGE_FLASH   bulbon;
+extern const IMAGE_FLASH   bulboff;
+extern const IMAGE_FLASH   gradientButton;
+extern const IMAGE_FLASH   Engine1;
+extern const IMAGE_FLASH   Engine2;
+extern const IMAGE_FLASH   Engine3;
+extern const IMAGE_FLASH   Engine4;
+extern const IMAGE_FLASH   arrowUp;
+extern const IMAGE_FLASH   arrowDown;
+extern const IMAGE_FLASH   redphone;
+extern const IMAGE_FLASH   greenphone;
+extern const IMAGE_FLASH   mchpIcon0;
+extern const IMAGE_FLASH   mchpIcon;
 
 extern const PALETTE_FLASH _GOL_Palette_Demo;
 
@@ -256,7 +256,7 @@ extern FONT_RAM	AltGOLFontDefault;
 /////////////////////////////////////////////////////////////////////////////
 //                            COLORS USED
 /////////////////////////////////////////////////////////////////////////////
-#include "Graphics\PaletteColorDefines.h"
+#include "Graphics/PaletteColorDefines.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //                            DEMO STATES
@@ -411,8 +411,10 @@ int main(void)
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
+    #endif
 
     #endif
 
@@ -473,6 +475,7 @@ int main(void)
    	
     TouchInit();                            // Initialize touch screen
     TickInit();
+    HardwareButtonInit();                   // Initialize the hardware buttons
 
     #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
     RTCCInit();                             // Setup the RTCC
@@ -492,19 +495,19 @@ int main(void)
 
     TRISAbits.TRISA9 = 0;
 
-    #elif defined(__PIC24FJ256DA210__)
-
-    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
-    if(BTN_S1 == 0)
-    {
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
-
     #else
 
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    if(BTN_S3 == 0)
+    /**
+     * Force a touchscreen calibration by pressing the switch
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    if(GetHWButtonTouchCal() == HW_BUTTON_PRESS)
     {
         TouchCalibration();
         TouchStoreCalibration();
@@ -1324,10 +1327,10 @@ void StartScreen(void)
 
                 #if (DISP_ORIENTATION == 0)
                 {
-                    GFX_SetSrcAddress((y * DISP_HOR_RESOLUTION) + (x - 1));
-                    GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetRectSize(GetImageWidth((void *) &mchpIcon0), GetImageHeight((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
+                    GFX_RCC_SetSrcOffset((y * DISP_HOR_RESOLUTION) + (x - 1));
+                    GFX_RCC_SetDestOffset((y * DISP_HOR_RESOLUTION) + x);
+                    GFX_RCC_SetSize(GetImageWidth((void *) &mchpIcon0), GetImageHeight((void *) &mchpIcon0));
+                    GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                     DelayMs(1);
                 }
                 #elif (DISP_ORIENTATION == 90)
@@ -1335,10 +1338,10 @@ void StartScreen(void)
                     DWORD t = x;
                     x = y;
                     y = GetMaxX() - t - GetImageWidth((void *) &mchpIcon0);
-                    GFX_SetSrcAddress(((y + 1) * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetRectSize(GetImageHeight((void *) &mchpIcon0), GetImageWidth((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
+                    GFX_RCC_SetSrcOffset(((y + 1) * DISP_HOR_RESOLUTION) + x);
+                    GFX_RCC_SetDestOffset((y * DISP_HOR_RESOLUTION) + x);
+                    GFX_RCC_SetSize(GetImageHeight((void *) &mchpIcon0), GetImageWidth((void *) &mchpIcon0));
+                    GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                     DelayMs(1);
                 }
                 #else
@@ -2989,7 +2992,8 @@ WORD MsgEditBox(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
     id = GetObjID(pObj);
 
     // If number key is pressed
-    if(objMsg == BTN_MSG_PRESSED)
+    if(objMsg == BTN_MSG_RELEASED)
+    {
         if(id >= ID_KEYPAD)
             if(id < ID_KEYPAD + 10)
             {
@@ -3003,111 +3007,81 @@ WORD MsgEditBox(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
                 return (1);
             }
 
-    switch(id)
-    {
-        case ID_CALL:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+	    switch(id)
+	    {
+	        case ID_CALL:
                 pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
-                EbSetText(pEb, CallingStr);
+                EbSetText(pEb, (XCHAR *)CallingStr);
                 SetState(pEb, EB_DRAW);
                 status = 1;
-            }
-
-            return (1);
-
-        case ID_STOPCALL:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+                break;
+	
+	        case ID_STOPCALL:
                 pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                 temp = 0x0000;
                 EbSetText(pEb, &temp);
                 SetState(pEb, EB_DRAW);
                 status = 0;
-            }
-
-            return (1);
-
-        case ID_BACKSPACE:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+                break;
+	
+	        case ID_BACKSPACE:
                 if(!status)
                 {
                     pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                     EbDeleteChar(pEb);
                     SetState(pEb, EB_DRAW);
                 }
-            }
-
-            return (1);
-
-        case ID_HOLD:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+                break;
+	
+	        case ID_HOLD:
                 pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                 if(status == 1)
                 {
-                    EbSetText(pEb, HoldingStr);
+                    EbSetText(pEb, (XCHAR *)HoldingStr);
                     status = 2;
                 }
                 else if(status == 2)
                 {
-                    EbSetText(pEb, CallingStr);
+                    EbSetText(pEb, (XCHAR *)CallingStr);
                     status = 1;
                 }
-
+	
                 SetState(pEb, EB_DRAW);
-            }
-
-            return (1);
-
-        case ID_ASTERISK:
-            if(!status)
-            {
-                if(objMsg == BTN_MSG_PRESSED)
-                {
+                break;
+	
+	        case ID_ASTERISK:
+	            if(!status)
+	            {
                     pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                     EbAddChar(pEb, (XCHAR) '*');
                     SetState(pEb, EB_DRAW);
-                }
-            }
-
-            return (1);
-
-        case ID_POUND:
-            if(!status)
-            {
-                if(objMsg == BTN_MSG_PRESSED)
-                {
+	            }
+                break;
+	
+	        case ID_POUND:
+	            if(!status)
+	            {
                     pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                     EbAddChar(pEb, (XCHAR) '#');
                     SetState(pEb, EB_DRAW);
-                }
-            }
-
-            return (1);
-
-        case ID_BUTTON_NEXT:
-            if(objMsg == BTN_MSG_RELEASED)
-            {
+	            }
+                break;
+	
+	        case ID_BUTTON_NEXT:
                 screenState = CREATE_METER;     // goto meter screen
-            }
-
-            status = 0;
-            return (1);                         // process by default
-
-        case ID_BUTTON_BACK:
-            if(objMsg == BTN_MSG_RELEASED)
-            {
+	            status = 0;
+                break;
+	
+	        case ID_BUTTON_BACK:
                 screenState = CREATE_LISTBOX;   // goto list box screen
-            }
-
-            status = 0;
-            return (1);                         // process by default
-
-        default:
-            return (1);                         // process by default
-    }
+	            status = 0;
+                break;
+	
+	        default:
+                break;
+	    }
+	} 
+	return (1);                         		// process by default
 }
 
 /*********************************************************************************/

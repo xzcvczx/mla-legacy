@@ -59,11 +59,11 @@ Change History:
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "FSconfig.h"
-#include "MDD File System\FSDefs.h"
-#include "MDD File System\FSIO.h"
-#include "USB\usb.h"
-#include "USB\usb_host_msd.h"
-#include "USB\usb_host_msd_scsi.h"
+#include "MDD File System/FSDefs.h"
+#include "MDD File System/FSIO.h"
+#include "USB/usb.h"
+#include "USB/usb_host_msd.h"
+#include "USB/usb_host_msd_scsi.h"
 
 //#define DEBUG_MODE
 #if defined(DEBUG_MODE)

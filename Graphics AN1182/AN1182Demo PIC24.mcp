@@ -57,6 +57,8 @@ file_029=Graphics
 file_030=Board Support Package
 file_031=Board Support Package
 file_032=Board Support Package
+file_033=.
+file_034=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -91,6 +93,8 @@ file_029=no
 file_030=no
 file_031=no
 file_032=no
+file_033=no
+file_034=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -125,6 +129,8 @@ file_029=no
 file_030=no
 file_031=no
 file_032=no
+file_033=yes
+file_034=yes
 [FILE_INFO]
 file_000=Pictures C30.c
 file_001=..\Board Support Package\EEPROM.c
@@ -159,6 +165,8 @@ file_029=..\Microchip\Include\Graphics\DisplayDriverInterface.h
 file_030=..\Board Support Package\TouchScreen.h
 file_031=..\Board Support Package\Beep.h
 file_032=..\Board Support Package\SST25VF016.h
+file_033=Getting Started - Loading a precompiled demo.htm
+file_034=Getting Started - Running the Graphics AN1182 Demo.htm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

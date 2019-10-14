@@ -6,7 +6,7 @@
  * FileName:        Graphics.h
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:        C30 V3.00/C32
+ * Compiler:        MPLAB C30, MPLAB C32
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -33,9 +33,9 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     11/12/07	Version 1.0 release
+ * 11/12/07		Version 1.0 release
  ********************************************************************/
 #ifndef _GRAPHICS_H
     #define _GRAPHICS_H
@@ -78,7 +78,7 @@
 
 /////////////////////// GRAPHICS_LIBRARY_VERSION /////////////////////
 // MSB is version, LSB is subversion
-    #define GRAPHICS_LIBRARY_VERSION    0x0210
+    #define GRAPHICS_LIBRARY_VERSION    0x0211
 
 ////////////////////////////// INCLUDES //////////////////////////////
     #include <stdlib.h>

@@ -92,6 +92,8 @@ file_064=Graphics
 file_065=Board Support Package
 file_066=Board Support Package
 file_067=Board Support Package
+file_068=.
+file_069=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -161,6 +163,8 @@ file_064=no
 file_065=no
 file_066=no
 file_067=no
+file_068=no
+file_069=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -230,6 +234,8 @@ file_064=no
 file_065=no
 file_066=no
 file_067=no
+file_068=yes
+file_069=yes
 [FILE_INFO]
 file_000=Pictures C30.c
 file_001=CustomControlDemo.c
@@ -299,12 +305,14 @@ file_064=..\Microchip\Include\Graphics\PaletteColorDefines.h
 file_065=..\Board Support Package\Beep.h
 file_066=..\Board Support Package\TouchScreen.h
 file_067=..\Board Support Package\SST25VF016.h
+file_068=Getting Started - Loading a precompiled demo.htm
+file_069=Getting Started - Running the Graphics Object Layer Palette Demo.htm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=
 [TOOL_SETTINGS]
 TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -mlarge-code -mlarge-data -mlarge-scalar -Os
+TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-Wall -mlarge-code -mlarge-data -mlarge-scalar -Os
 TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=3000 -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
 TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
 [INSTRUMENTED_TRACE]

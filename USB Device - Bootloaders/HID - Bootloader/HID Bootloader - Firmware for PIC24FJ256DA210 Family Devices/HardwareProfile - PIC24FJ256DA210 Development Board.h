@@ -53,9 +53,9 @@
     #define tris_self_power     TRISAbits.TRISA2    // Input
     #define self_power          1
 
-    #define USE_USB_BUS_SENSE_IO
+    //#define USE_USB_BUS_SENSE_IO
     #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
-    #define USB_BUS_SENSE       U1OTGSTATbits.SESVD 
+    #define USB_BUS_SENSE       U1OTGSTATbits.SESVD // Special considerations required if using SESVD for this purpose.  See documentation.
    
     //Uncomment this to make the output HEX of this project 
     //   to be able to be bootloaded using the HID bootloader
@@ -114,6 +114,11 @@
     #define mLED_2_Toggle()     mLED_2 = !mLED_2;
     #define mLED_3_Toggle()     mLED_3 = !mLED_3;
     #define mLED_4_Toggle()     mLED_4 = !mLED_4;
+
+    #define mSetLED_1(in)       mLED_1 = in   
+    #define mSetLED_2(in)       mLED_2 = in  
+    #define mSetLED_3(in)       mLED_3 = in
+    #define mSetLED_4(in)       mLED_4 = in
     
     /** SWITCH *********************************************************/
     #define mInitSwitch2()      {TRISBbits.TRISB5=1; ANSBbits.ANSB5 = 0;}

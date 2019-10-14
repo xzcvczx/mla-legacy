@@ -55,15 +55,16 @@
 // The structure contains data for the control
 typedef struct
 {
-    WORD            ID;             // instance unique ID
-    void            *pNxtObj;       // a pointer to the next object in the linked list
-    GOL_OBJ_TYPE    type;           // must be set to OBJ_CUSTOM
-    WORD            state;          // state
-    SHORT           left;           // left border
-    SHORT           top;            // top border
-    SHORT           right;          // right border
-    SHORT           bottom;         // bottom border
-    GOL_SCHEME      *pGolScheme;    // the style scheme used
+    OBJ_HEADER  	hdr;        	// Generic header for all Objects (see OBJ_HEADER).
+//    WORD            ID;             // instance unique ID
+//    void            *pNxtObj;       // a pointer to the next object in the linked list
+//    GOL_OBJ_TYPE    type;           // must be set to OBJ_CUSTOM
+//    WORD            state;          // state
+//    SHORT           left;           // left border
+//    SHORT           top;            // top border
+//    SHORT           right;          // right border
+//    SHORT           bottom;         // bottom border
+//    GOL_SCHEME      *pGolScheme;    // the style scheme used
     WORD            pos;            // current position
     WORD            prevPos;        // previous position
 } CUSTOM;
@@ -126,12 +127,12 @@ typedef struct
 CUSTOM * CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME * pScheme);
 
 /*********************************************************************
-* Function: WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
+* Function: WORD CcTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * PreCondition: none
 *
 * Input: pMsg - pointer to the GOL message
-*        pCc - the pointer to the custom control
+*        pObj - the pointer to the custom control
 *
 * Output: translated message for the custom control
 *
@@ -142,15 +143,16 @@ CUSTOM * CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WOR
 * Note: none
 *
 ********************************************************************/
-WORD    CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
+WORD    CcTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg)
+* Function: void CcMsgDefault(void* pObj, GOL_MSG* pMsg)
 *
 * PreCondition: none
 *
-* Input: pMsg -  pointer to the GOL message
-*        pCc - the pointer to the custom control
+* Input: translatedMsg - The translated message.
+*        pObj - the pointer to the custom control
+*        pMsg -  pointer to the GOL message
 *
 * Output: none
 *
@@ -161,14 +163,14 @@ WORD    CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
 * Note: none
 *
 ********************************************************************/
-void    CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg);
+void    CcMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: WORD CcDraw(CUSTOM *pCc)
+* Function: WORD CcDraw(void *pObj)
 *
 * PreCondition: none
 *
-* Input: pCc - pointer to the custom control
+* Input: pObj - pointer to the custom control
 *
 * Output: returns the status of the drawing
 *		  0 - not completed
@@ -181,5 +183,5 @@ void    CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg);
 * Note: none
 *
 ********************************************************************/
-WORD    CcDraw(CUSTOM *pCc);
+WORD    CcDraw(void *pObj);
 #endif // _CUSTOM_H

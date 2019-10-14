@@ -653,7 +653,7 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
 					// into each other, you don't have a lock-step switching 
 					// problem in which both devices swap MDI mode 
 					// simultaneously and never link up.
-					wMDIXTimer = (WORD)TickGetDiv256() + (WORD)(TICK_SECOND/256u) + (WORD)(55ul*TICK_SECOND/256ul/100ul*(DWORD)rand()/(DWORD)RAND_MAX);
+					wMDIXTimer = (WORD)TickGetDiv256() + (WORD)(TICK_SECOND/256u) + (WORD)(55ul*TICK_SECOND/256ul/100ul*(DWORD)LFSRRand()/65535ul);
 
 					//// Restart auto-negotiation
 					//WritePHYReg(PHCON1, PHCON1_ANEN | PHCON1_RENEG);
@@ -702,8 +702,7 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
 	if(header.NextPacketPointer > RXSTOP || ((BYTE_VAL*)(&header.NextPacketPointer))->bits.b0 ||
 	   header.StatusVector.bits.Zero || header.StatusVector.bits.ZeroH || 
 	   header.StatusVector.bits.CRCError ||
-	   header.StatusVector.bits.ByteCount > 1522u ||
-	   !header.StatusVector.bits.ReceiveOk)
+	   header.StatusVector.bits.ByteCount > 1522u)
 	{
 		//ENC100DumpState();
 		Nop();
@@ -1329,7 +1328,7 @@ void MACPowerDown(void)
 /******************************************************************************
  * Function:        void MACEDPowerDown(void)
  *
- * PreCondition:    SPI bus must be initialized (done in MACInit()).
+ * PreCondition:    SPI/PSP bus must be initialized (done in MACInit()).
  *
  * Input:           None
  *
@@ -1340,7 +1339,7 @@ void MACPowerDown(void)
  * Overview:        MACEDPowerDown puts the ENCx24J600 PHY in Energy Detect 
  *					mode. In this mode, the PHY will passively listen for link 
  *					pulses and automatically link up, if detected. This can be 
- *					detected via the MACIsLinkned() function.  This power state 
+ *					detected via the MACIsLinked() function.  This power state 
  *					will save power only when an Ethernet cable is unattached.
  *
  *					To exit energy detect power down, call MACPowerUp().
@@ -1354,14 +1353,8 @@ void MACEDPowerDown(void)
 {
 	// Put the PHY into energy detect mode
 	WritePHYReg(PHCON2, PHCON2_EDPWRDN);		
-
-	// Go into general power down
-	ENC100Flags.CryptoEnabled = 0;
-	if(ReadReg(EIR) & EIR_CRYPTEN)				// Turn off ModdEx/AES clock
-		ToggleCRYPTEN();
-	ENC100Flags.PoweredDown = 1;
-	BFCReg(ECON2, ECON2_ETHEN | ECON2_STRCH);	
 }//end MACEDPowerDown
+
 
 /******************************************************************************
  * Function:        void MACPowerUp(void)
@@ -1491,31 +1484,65 @@ BYTE GetCLKOUT(void)
 /******************************************************************************
  * Function:        void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
  *
- * PreCondition:    SPI bus must be initialized (done in MACInit()).
+ * PreCondition:    SPI/PSP interface must be initialized (done in MACInit()).
  *
  * Input:           DestMACAddr: 6 byte group destination MAC address to allow 
- *								 through the Hash Table Filter
+ *								 through the Hash Table Filter.  If DestMACAddr 
+ *								 is set to 00-00-00-00-00-00, then the hash 
+ *								 table will be cleared of all entries and the 
+ *								 filter will be disabled.
  *
  * Output:          Sets the appropriate bit in the EHT* registers to allow 
- *					packets sent to DestMACAddr to be received if the Hash 
- *					Table receive filter is enabled
+ *					packets sent to DestMACAddr to be received and enables the 
+ *					Hash Table receive filter (if not already).
  *
  * Side Effects:    None
  *
  * Overview:        Calculates a CRC-32 using polynomial 0x4C11DB7 and then, 
  *					using bits 28:23 of the CRC, sets the appropriate bit in 
- *					the EHT* registers
+ *					the EHT1-EHT4 registers.
  *
  * Note:            This code is commented out to save code space on systems 
- *					that do not need this function.  Change the "#if 0" line 
- *					to "#if 1" to uncomment it.
+ *					that do not need this function.  Change the 
+ *					"#if STACK_USE_ZEROCONF_MDNS_SD" line to "#if 1" to 
+ *					uncomment it, assuming you aren't using the Zeroconf module, 
+ *					which requires mutlicast support and enables this function 
+ *					automatically.
+ *
+ *					There is no way to individually unset destination MAC 
+ *					addresses from the hash table since it is possible to have 
+ *					a hash collision and therefore multiple MAC addresses 
+ *					relying on the same hash table bit.  The stack would have 
+ *					to individually store each 6 byte MAC address to support 
+ *					this feature, which would waste a lot of RAM and be 
+ *					unnecessary in most applications.  As a simple compromise, 
+ *					you can call SetRXHashTableEntry() using a 
+ *					00-00-00-00-00-00 destination MAC address, which will clear 
+ *					the entire hash table and disable the hash table filter.  
+ *					This will allow you to then re-add the necessary 
+ *					destination address(es).
  *****************************************************************************/
-#if 0
+#if defined(STACK_USE_ZEROCONF_MDNS_SD)
 void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
 {
 	DWORD_VAL CRC = {0xFFFFFFFF};
 	WORD HTRegister;
 	BYTE i, j;
+
+	// Clear the Hash Table bits and disable the Hash Table Filter if a special 
+	// 00-00-00-00-00-00 destination MAC address is provided.
+	if((DestMACAddr.v[0] | DestMACAddr.v[1] | DestMACAddr.v[2] | DestMACAddr.v[3] | DestMACAddr.v[4] | DestMACAddr.v[5]) == 0x00u)
+	{
+		// Disable the Hash Table receive filter and clear the hash table
+		BFCReg(ERXFCON, ERXFCON_HTEN);
+		WriteReg(EHT1, 0x0000);
+		WriteReg(EHT2, 0x0000);
+		WriteReg(EHT3, 0x0000);
+		WriteReg(EHT4, 0x0000);
+
+		return;
+	}
+
 
 	// Calculate a CRC-32 over the 6 byte MAC address 
 	// using polynomial 0x4C11DB7
@@ -1549,6 +1576,9 @@ void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
 	
 	// Set the proper bit in the Hash Table
 	BFSReg(HTRegister, 1<<i);
+	
+	// Ensure that the Hash Table receive filter is enabled
+	BFSReg(ERXFCON, ERXFCON_HTEN);
 }
 #endif
 
@@ -1688,10 +1718,10 @@ static void SendSystemReset(void)
 		// certain memory ranges to fail.
 
 		// Generate and write random pattern
-		srand(600);
+		LFSRSeedRand(600);
 		for(w = 0; w < ENC100_RAM_SIZE; w += sizeof(wTestWriteData))
 		{
-			wTestWriteData = rand() + rand();
+			wTestWriteData = LFSRRand();
 			WriteMemory(w, (BYTE*)&wTestWriteData, sizeof(wTestWriteData));
 			ReadMemory(w, (BYTE*)&wTestReadData, sizeof(wTestReadData));
 			
@@ -1703,10 +1733,10 @@ static void SendSystemReset(void)
 		}
 		
 		// Read back and verify random pattern
-		srand(600);
+		LFSRSeedRand(600);
 		for(w = 0; w < ENC100_RAM_SIZE; w += sizeof(wTestWriteData))
 		{
-			wTestWriteData = rand() + rand();
+			wTestWriteData = LFSRRand();
 			ReadMemory(w, (BYTE*)&wTestReadData, sizeof(wTestReadData));
 			
 			// See if the data matches.  If your application gets stuck here, 

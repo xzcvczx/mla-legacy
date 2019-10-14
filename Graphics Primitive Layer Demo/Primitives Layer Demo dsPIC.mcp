@@ -73,6 +73,8 @@ file_045=Common
 file_046=.
 file_047=Common
 file_048=Graphics
+file_049=.
+file_050=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -123,6 +125,8 @@ file_045=no
 file_046=no
 file_047=no
 file_048=no
+file_049=no
+file_050=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -173,6 +177,8 @@ file_045=no
 file_046=no
 file_047=no
 file_048=no
+file_049=yes
+file_050=yes
 [FILE_INFO]
 file_000=Font25PixelsHeight.c
 file_001=Font35PixelsHeight.c
@@ -223,6 +229,8 @@ file_045=..\Microchip\Include\GenericTypeDefs.h
 file_046=MainDemo.h
 file_047=..\Microchip\Include\TimeDelay.h
 file_048=..\Microchip\Include\Graphics\DisplayDriverInterface.h
+file_049=Getting Started - Running the Graphics Primitive Layer Demo.htm
+file_050=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

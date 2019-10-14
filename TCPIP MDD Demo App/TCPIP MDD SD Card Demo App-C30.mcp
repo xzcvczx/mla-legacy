@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=Objects - TCPIP MDD Demo App-C30
 dir_sin=
-dir_inc=.;..\Microchip\Include;%PROGRAMFILES%\Microchip\MPLAB C30\include
+dir_inc=.;..\Microchip\Include
 dir_lib=
 dir_lkr=
 [CAT_FILTERS]

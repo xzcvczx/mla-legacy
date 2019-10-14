@@ -56,7 +56,7 @@
 #include "IperfApp.h"
 #include "TCPIP Stack/WFConsole.h"
 
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_IPERF_APP
 #endif
 /*****************************************************************************/

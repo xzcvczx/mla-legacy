@@ -36,6 +36,7 @@
  * Sasha. M	/ Naveen. M			4 May 2009  		Version 1.0 Initial Draft
  * Sasha. M	/ Naveen. M			11 Nov 2009  		Version 1.0 Release
  * Sasha. M	/ Nithin. 			10 April 2010  		Version 1.20 Release
+  * Nithin M						11 Aug 2010	Implemetation of Low Power Demo 
  *****************************************************************************/
 #ifndef _MTOUCH_PIC24_CTMU_PHYSICAL_H
 #define _MTOUCH_PIC24_CTMU_PHYSICAL_H
@@ -44,8 +45,15 @@
 /* ~~~~~~~~~~~~~~~~~~~~~	Includes	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include 		"Config.h"
-#include 		"HardwareProfile.h"		 
-#include 		"mTouchCap_Timers.h"
+#ifdef USE_MTOUCH_AND_GRAPHICS
+	#include 		"mTouchCap_Config.h"
+	#include 		"mTouchCap_HardwareProfile.h"
+#else
+	#include 		"HardwareProfile.h"	
+#endif	 
+#ifndef			USE_MTOUCH_AND_GRAPHICS
+	#include 		"mTouchCap_Timers.h"
+#endif
 #include 		"mTouchCap_Adc.h"
 #include 		"GenericTypeDefs.h"
 
@@ -384,8 +392,11 @@ Remarks     : None.
 #define ADC_PORTB_CONFIG_DEFAULT_VALUE 	0xFFFF
 #define ADC_PORTC_CONFIG_DEFAULT_VALUE 	0x0010
 #define ADC_PORTE_CONFIG_DEFAULT_VALUE 	0x0200
-#define ADC_PORTG_CONFIG_DEFAULT_VALUE 	0x03C0
-
+#ifdef  USE_MTOUCH_AND_GRAPHICS
+	#define ADC_PORTG_CONFIG_DEFAULT_VALUE 	0x0180
+#else
+	#define ADC_PORTG_CONFIG_DEFAULT_VALUE 	0x03C0
+#endif
 
 /*AD1CON1 register definition*/
 #define ADC_MODULE_ON               0x8000 /* A/D Converter on */

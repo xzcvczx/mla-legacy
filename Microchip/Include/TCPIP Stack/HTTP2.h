@@ -197,14 +197,24 @@
 		#endif
 	} HTTP_CONN;
 
-	#define RESERVED_HTTP_MEMORY ( (DWORD)MAX_HTTP_CONNECTIONS * (DWORD)sizeof(HTTP_CONN))
+#if defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
+	#define RESERVED_HTTP_MEMORY 0ul
+#else
+	#define RESERVED_HTTP_MEMORY ((DWORD)MAX_HTTP_CONNECTIONS * (DWORD)sizeof(HTTP_CONN))
+#endif
 
 /****************************************************************************
   Section:
 	Global HTTP Variables
   ***************************************************************************/
 
-extern HTTP_CONN curHTTP;
+#if defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
+	extern HTTP_CONN		HTTPControlBlocks[MAX_HTTP_CONNECTIONS];
+	#define curHTTP			HTTPControlBlocks[curHTTPID]							// Current HTTP connection state
+#else
+	extern HTTP_CONN curHTTP;
+#endif
+
 extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];
 extern BYTE curHTTPID;
 

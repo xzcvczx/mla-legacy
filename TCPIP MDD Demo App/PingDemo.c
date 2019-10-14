@@ -155,7 +155,7 @@ void PingDemo(void)
 				#if defined(USE_LCD)
 				memcpypgm2ram((void*)&LCDText[16], (ROM void *)"Reply: ", 7);
 				uitoa((WORD)TickConvertToMilliseconds((DWORD)ret), &LCDText[16+7]);
-				strcatpgm2ram((char*)&LCDText[16+7], (ROM char*)"ms");
+				strcatpgm2ram((char*)&LCDText[16+7], "ms");
 				LCDUpdate();
 				#endif
 				PingState = SM_HOME;

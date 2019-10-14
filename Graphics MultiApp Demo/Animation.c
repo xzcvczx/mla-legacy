@@ -58,19 +58,19 @@
     /////////////////////////////////////////////////////////////////////////////
     //                     IMAGES USED (the animated image)
     /////////////////////////////////////////////////////////////////////////////
-extern const BITMAP_FLASH   	Engine1;
-extern const BITMAP_FLASH       Engine2;
-extern const BITMAP_FLASH       Engine3;
-extern const BITMAP_FLASH       Engine4;
+extern const IMAGE_FLASH   	   	Engine1;
+extern const IMAGE_FLASH       	Engine2;
+extern const IMAGE_FLASH       	Engine3;
+extern const IMAGE_FLASH       	Engine4;
 
 /////////////////////////////////////////////////////////////////////////////
 //                            STRINGS USED
 /////////////////////////////////////////////////////////////////////////////
-extern XCHAR                    ExitStr[];
-extern XCHAR                    ScaleStr[];
-extern XCHAR                    LeftArrowStr[];
-extern XCHAR                    RightArrowStr[];
-extern XCHAR                    MeterStr[];
+extern XCHAR                   	ExitStr[];
+extern XCHAR                   	ScaleStr[];
+extern XCHAR                   	LeftArrowStr[];
+extern XCHAR                   	RightArrowStr[];
+extern XCHAR                   	MeterStr[];
 
 /////////////////////////////////////////////////////////////////////////////
 //                            GLOBALS

@@ -32,7 +32,6 @@
  Change History:
   Rev   Description
   2.6   Initial release
-  2.7   No Change
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC24F_STARTER_KIT_H

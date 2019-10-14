@@ -202,10 +202,10 @@ void RTCCInit(void)
     RTCCSetBinSec(    RTCC_DEFAULT_SECOND );
     RTCCSetBinMin(    RTCC_DEFAULT_MINUTE );
     RTCCSetBinHour(   RTCC_DEFAULT_HOUR );
-    RTCCSetBinWkDay(  RTCC_DEFAULT_WEEKDAY );
-    RTCCSetBinDay(    RTCC_DEFAULT_DAY );
     RTCCSetBinMonth(  RTCC_DEFAULT_MONTH );
     RTCCSetBinYear(   RTCC_DEFAULT_YEAR );
+    RTCCSetBinDay(    RTCC_DEFAULT_DAY );
+    RTCCSetBinWkDay(  RTCC_DEFAULT_WEEKDAY );
     RTCCSet();
 
 }
@@ -394,9 +394,9 @@ void RTCCSetBinDay(unsigned char Day)
     const char MonthDaymax[] =
                     //jan feb mar apr may jun jul aug sep oct nov dec
                     {  31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    unsigned Daymax;
-    unsigned Month;
-    unsigned Year;
+    static unsigned int Daymax;
+    static unsigned int Month;
+    static unsigned int Year;
 
     Month = RTCCGetBinMonth();
     Year = RTCCGetBinYear();

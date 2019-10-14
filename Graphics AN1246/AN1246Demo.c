@@ -199,8 +199,10 @@ int main(void)
 	    // ADC Explorer 16 Development Board Errata (work around 2)
 	    // RB15 should be output
 	    /////////////////////////////////////////////////////////////////////////////
-	    LATBbits.LATB15 = 0;
-	    TRISBbits.TRISB15 = 0;
+        #ifndef MULTI_MEDIA_BOARD_DM00123
+        LATBbits.LATB15 = 0;
+        TRISBbits.TRISB15 = 0;
+        #endif
 
     #endif
 
@@ -260,6 +262,8 @@ int main(void)
 	// Start tick counter based on a timer. This enables the interrupt that samples the touch screen 
 	TickInit();           
 
+    HardwareButtonInit();           // Initialize the hardware buttons
+
     // Clear screen
     SetColor(WHITE);
     ClearDevice();
@@ -275,23 +279,23 @@ int main(void)
 	        TouchStoreCalibration();
 	    }
 
-    #elif defined(__PIC24FJ256DA210__)
-
-	    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
-	    if(BTN_S1 == 0)
-	    {
-	        TouchCalibration();
-	        TouchStoreCalibration();
-	    }
-
     #else
 
-	    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-	    if(BTN_S3 == 0)
-	    {
-	        TouchCalibration();
-	        TouchStoreCalibration();
-	    }
+    /**
+     * Force a touchscreen calibration by pressing the switch
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    if(GetHWButtonTouchCal() == HW_BUTTON_PRESS)
+    {
+        TouchCalibration();
+        TouchStoreCalibration();
+    }
 
     #endif
     else

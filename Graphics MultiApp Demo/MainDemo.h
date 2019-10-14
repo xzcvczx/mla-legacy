@@ -52,26 +52,27 @@
     #include <stdio.h>
 
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 
     #if defined(__C30__)
         #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
             #include "usb_config.h"
-            #include "USB\usb.h"
-            #include "USB\usb_host_msd.h"
-            #include "USB\usb_host_hid_parser.h"
-            #include "USB\usb_host_hid.h"
+            #include "USB/usb.h"
+            #include "USB/usb_host_msd.h"
+            #include "USB/usb_host_hid_parser.h"
+            #include "USB/usb_host_hid.h"
         #endif
-        #include "MDD File System\FSIO.h"
+        #include "MDD File System/FSIO.h"
     #elif defined(__PIC32MX__)
-        #if defined(__32MX460F512L__) || defined(__32MX795F512L__)
+        #if defined(__32MX460F512L__) || defined(__32MX795F512L__)
+
             #include "usb_config.h"
-            #include "USB\usb.h"
-            #include "USB\usb_host_msd.h"
-            #include "USB\usb_host_hid_parser.h"
-            #include "USB\usb_host_hid.h"
+            #include "USB/usb.h"
+            #include "USB/usb_host_msd.h"
+            #include "USB/usb_host_hid_parser.h"
+            #include "USB/usb_host_hid.h"
         #endif
-        #include "MDD File System\FSIO.h"
+        #include "MDD File System/FSIO.h"
     #endif
     #include "SST39VF040.h"
     #include "SST25VF016.h"
@@ -171,7 +172,7 @@ extern GOL_SCHEME       *graphScheme;   // style scheme for graph demo
 // Screen background color
     #define SCREEN_BACKGROUND_COLOR RGB565CONVERT(103, 195, 231);
 
-WORD    ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *buffer);
+WORD    ExternalMemoryCallback(IMAGE_EXTERNAL *memory, LONG offset, WORD nCount, void *buffer);
 
 /************************************************************************
  Function: void CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, 
@@ -189,7 +190,9 @@ WORD    ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *
 void    CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pTextD);
 
 // Macros to enable demos and features
+#if !defined (__PIC24FJ128GA010__) 		// disable this mode when using PIC24FJ128GA010 because of limited flash space
     #define ENABLE_DEMO_MODE            // enables the automatic demo mode
+#endif    
 	//#define ENABLE_SCREEN_CAPTURE		// capture screen to PC via UART. Cannot be used with USE_FOCUS enabled
     #include "ID.h"
     #include "DemoSelection.h"

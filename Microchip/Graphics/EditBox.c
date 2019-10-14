@@ -1,10 +1,10 @@
 /*****************************************************************************
- *  Module for Microchip Graphics Library 
- *  GOL Layer 
+ *  Module for Microchip Graphics Library
+ *  GOL Layer
  *  Edit Box
  *****************************************************************************
  * FileName:        EditBox.c
- * Dependencies:    None 
+ * Dependencies:    None
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
  * Compiler:       	MPLAB C30 V3.00, C32
  * Linker:          MPLAB LINK30, LINK32
@@ -17,7 +17,7 @@
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
  * product (pursuant to the sublicense terms in the accompanying license
- * agreement).  
+ * agreement).
  *
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
@@ -34,22 +34,27 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     11/12/07	Version 1.0 release
+ * 11/12/07	   	Version 1.0 release
+ * 09/16/10    	Fixed issue on focus. Modified EB_CARET behavior. Caret 
+ *				is now controlled by the EB_CARET state bit. If this bit  
+ * 				is set, focus or manual user set of EB_DRAW_CARET will draw 
+ *				the caret. If this bit is not set, the caret will never 
+ *				be shown.
 *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_EDITBOX
 
 /*********************************************************************
-* Function: EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
+* Function: EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 *							   WORD state , XCHAR *pText, WORD charMax, GOL_SCHEME *pScheme)
 *
 * Notes: Create the EDITBOX Object.
 *
 ********************************************************************/
-EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
+EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 				   WORD state , XCHAR *pText, WORD charMax, GOL_SCHEME *pScheme){
 
 	EDITBOX *pEb = NULL;
@@ -65,24 +70,28 @@ EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 
     if(pText != NULL)
         EbSetText(pEb, pText);
-	
-	pEb->hdr.ID      	= ID;					
-	pEb->hdr.pNxtObj 	= NULL;					
-	pEb->hdr.type    	= OBJ_EDITBOX;		    
-	pEb->hdr.left    	= left;       	    	
-	pEb->hdr.top     	= top;
-	pEb->hdr.right   	= right;     	    	
-	pEb->hdr.bottom  	= bottom;
-	pEb->hdr.state   	= state; 	
+
+	pEb->hdr.ID      	    = ID;
+	pEb->hdr.pNxtObj 	    = NULL;
+	pEb->hdr.type    	    = OBJ_EDITBOX;
+	pEb->hdr.left    	    = left;
+	pEb->hdr.top     	    = top;
+	pEb->hdr.right   	    = right;
+	pEb->hdr.bottom  	    = bottom;
+	pEb->hdr.state   	    = state;
+    pEb->hdr.DrawObj        = EbDraw;		 // draw function
+    pEb->hdr.MsgObj         = EbTranslateMsg;// message function
+    pEb->hdr.MsgDefaultObj  = EbMsgDefault;  // default message function
+    pEb->hdr.FreeObj        = NULL;			 // free function
 
 	// Set the style scheme to be used
 	if (pScheme == NULL)
-		pEb->hdr.pGolScheme = _pDefaultGolScheme; 
-	else 	
-		pEb->hdr.pGolScheme = (GOL_SCHEME *)pScheme; 	
+		pEb->hdr.pGolScheme = _pDefaultGolScheme;
+	else
+		pEb->hdr.pGolScheme = (GOL_SCHEME *)pScheme;
 
     pEb->textHeight = GetTextHeight(pEb->hdr.pGolScheme->pFont);
-  
+
     GOLAddObject((OBJ_HEADER*) pEb);
 	return pEb;
 }
@@ -98,7 +107,7 @@ WORD  ch;
 WORD  length;
 XCHAR* pointerFrom;
 XCHAR* pointerTo;
-  
+
     // Copy and count length
     pointerFrom = pText;
     pointerTo = pEb->pBuffer;
@@ -153,13 +162,17 @@ void EbDeleteChar(EDITBOX* pEb){
 }
 
 /*********************************************************************
-* Function: WORD StTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg)
+* Function: WORD EbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Translates GOL message for the edit box
 *
 ********************************************************************/
-WORD EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg)
+WORD EbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    EDITBOX *pEb;
+
+    pEb = (EDITBOX *)pObj;
+
     // Evaluate if the message is for the edit box
     // Check if disabled first
 	if (GetState(pEb, EB_DISABLED))
@@ -172,44 +185,48 @@ WORD EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg)
 		if( (pEb->hdr.left     < pMsg->param1) &&
 	  	    (pEb->hdr.right    > pMsg->param1) &&
 	   	    (pEb->hdr.top      < pMsg->param2) &&
-	   	    (pEb->hdr.bottom   > pMsg->param2) ) 
+	   	    (pEb->hdr.bottom   > pMsg->param2) )
             return EB_MSG_TOUCHSCREEN;
-           
+
         return OBJ_MSG_INVALID;
 	}
-#endif	
+#endif
 #endif
 
 #ifdef  USE_KEYBOARD
     if(pMsg->type == TYPE_KEYBOARD) {
 
         if(pMsg->uiEvent == EVENT_CHARCODE)
-            return EB_MSG_CHAR;  
+            return EB_MSG_CHAR;
 
         if(pMsg->uiEvent == EVENT_KEYSCAN)
             if(pMsg->param2 == SCAN_BS_PRESSED)
                 return EB_MSG_DEL;
-        
+
 	    return OBJ_MSG_INVALID;
 	}
-#endif	
+#endif
 
 
 	return OBJ_MSG_INVALID;
 }
 
 /*********************************************************************
-* Function: void EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg)
+* Function: void EbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Changes the state of the edit box by default.
 *
 ********************************************************************/
-void EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg){
+void EbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg){
+
+    EDITBOX *pEb;
+
+    pEb = (EDITBOX *)pObj;
 
 #ifdef  USE_FOCUS
 #ifdef  USE_TOUCHSCREEN
     if(pMsg->type == TYPE_TOUCHSCREEN){
-        if(!GetState(pEb,BTN_FOCUSED)){
+        if(!GetState(pEb,EB_FOCUSED)){
                 GOLSetFocus((OBJ_HEADER*)pEb);
         }
     }
@@ -232,12 +249,12 @@ void EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg){
 }
 
 /*********************************************************************
-* Function: WORD EbDraw(EDITBOX *pEb)
+* Function: WORD EbDraw(void *pObj)
 *
 * Notes: This is the state machine to draw the button.
 *
 ********************************************************************/
-WORD EbDraw(EDITBOX *pEb)
+WORD EbDraw(void *pObj)
 {
 typedef enum {
 	EB_STATE_START,
@@ -250,11 +267,13 @@ static EB_DRAW_STATES state = EB_STATE_START;
 static XCHAR* pText;
 SHORT temp;
 SHORT width = 0;
+EDITBOX *pEb;
 
+    pEb = (EDITBOX *)pObj;
 
     if(IsDeviceBusy())
         return 0;
-        
+
     switch(state){
 
         case EB_STATE_START:
@@ -263,19 +282,16 @@ SHORT width = 0;
    	   	        SetColor(pEb->hdr.pGolScheme->CommonBkColor);
     	        if(!Bar(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom)) return 0;
     	        return 1;
-    	    }    
+    	    }
 
             if(GetState(pEb,EB_DISABLED)){
                 temp = pEb->hdr.pGolScheme->ColorDisabled;
                 ClrState(pEb,EB_CARET);
+				SetState(pEb,EB_DRAW_CARET);
 	        }else{
                 temp = pEb->hdr.pGolScheme->Color0;
-                if(GetState(pEb,EB_DRAW)){
-                    if(GetState(pEb,EB_FOCUSED)){
-                        SetState(pEb,EB_CARET);
-                    }else{
-                        ClrState(pEb,EB_CARET);
-                    }
+                if(GetState(pEb,EB_FOCUSED|EB_DRAW_CARET) ==  (EB_FOCUSED|EB_DRAW_CARET)){
+					SetState(pEb,EB_DRAW_CARET);
                 }
             }
 
@@ -311,7 +327,7 @@ SHORT width = 0;
             }else{
                 SetColor(pEb->hdr.pGolScheme->TextColor0);
             }
-  
+
 
             pText = pEb->pBuffer;
             temp = 1;
@@ -321,7 +337,7 @@ SHORT width = 0;
                     temp++;
                 pText++;
             }
-            
+
             pText = pEb->pBuffer;
             MoveTo(GetX(),(pEb->hdr.top+pEb->hdr.bottom-temp*pEb->textHeight)>>1);
 
@@ -340,7 +356,7 @@ do{
             }
 
 		    state = EB_STATE_TEXT;
-			
+
         case EB_STATE_TEXT:
             if(GetState(pEb,EB_DRAW)){
                 if(!OutText(pText))
@@ -350,7 +366,7 @@ do{
             }
             while((XCHAR)*pText>(XCHAR)15)
                 pText++;
-            
+
             if((XCHAR)*pText == (XCHAR)'\n')
             {
                 MoveRel(0, pEb->textHeight);
@@ -362,11 +378,13 @@ do{
 
         case EB_STATE_CARET:
             if(!GetState(pEb,EB_DISABLED)){
-                if(GetState(pEb,EB_CARET)){
+	            
+                if(GetState(pEb,EB_DRAW_CARET) && GetState(pEb,EB_CARET)){
                     SetColor(pEb->hdr.pGolScheme->TextColor0);
                 }else{
                     SetColor(pEb->hdr.pGolScheme->Color0);
                 }
+
                 if(!Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight)) return 0;
             }
 

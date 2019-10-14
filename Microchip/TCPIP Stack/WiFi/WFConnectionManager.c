@@ -60,7 +60,7 @@
 
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER    WF_MODULE_WF_CONNECTION_MANAGER
 #endif
 

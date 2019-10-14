@@ -6,7 +6,7 @@
  * FileName:        SST39VF040.h
  * Dependencies:    None
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/14/08	...
+ * 01/14/08		...
  *****************************************************************************/
 #ifndef _SST39_H
     #define _SST39_H
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef __PIC32MX
 	#define PMDIN1  PMDIN

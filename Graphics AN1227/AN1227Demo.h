@@ -46,7 +46,7 @@
         #include <p24Fxxxx.h>
     #endif
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 	#ifdef MULTI_MEDIA_BOARD_DM00123
         #include "cpld.h"
     #endif    

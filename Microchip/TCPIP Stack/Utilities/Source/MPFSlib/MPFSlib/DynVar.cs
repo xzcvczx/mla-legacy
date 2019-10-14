@@ -74,7 +74,6 @@ namespace Microchip
             "#define __HTTPPRINT_H\r\n\r\n" +
             "#include \"TCPIP Stack/TCPIP.h\"\r\n\r\n" +
             "#if defined(STACK_USE_HTTP2_SERVER)\r\n\r\n" +
-            "extern HTTP_CONN curHTTP;\r\n" +
             "extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];\r\n" +
             "extern BYTE curHTTPID;\r\n\r\n" +
             "void HTTPPrint(DWORD callbackID);\r\n";

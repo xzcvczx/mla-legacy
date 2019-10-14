@@ -33,12 +33,22 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok  and
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
- * Pradeep Budagutta    18/05/2009  Version 1.1 - All Primitive functions have
- *                                  return value(To support 2d-Acceleration)
+ * 11/12/07	   Version 1.0 release
+ * 18/05/2009  Version 1.1 - All Primitive functions have
+ *                           return value(To support 2d-Acceleration)
+ * 05/12/2010  Added sine and cosine functions.
+ * 08/20/2010  Modified TYPE_MEMORY enum for more types
+ *			   and changed the enumeration to GFX_RESOURCE. Also removed 
+ *             unused types. 
+ *             Added new structure GFX_IMAGE_HEADER. 
+ *             Deprecated the following (renamed):
+ *                TYPE_MEMORY     
+ *                EXTDATA         
+ *                BITMAP_FLASH    
+ *                BITMAP_RAM      
+ *                BITMAP_EXTERNAL  
  *****************************************************************************/
 #ifndef _PRIMITIVE_H
     #define _PRIMITIVE_H
@@ -85,8 +95,11 @@ extern SHORT    _lineType;
 extern BYTE     _lineThickness;
 
 // constants used for circle/arc computation
-    #define SIN45   46341   // sin(45) * 2^16)
-    #define ONEP25  81920   // 1.25 * 2^16
+    #define SIN45   	46341   // sin(45) * 2^16)
+    #define ONEP25  	81920   // 1.25 * 2^16
+// constants used to get sine(v) and cosine(v) 
+	#define GETSINE		0x00
+	#define GETCOSINE	0x01
 
 // Current cursor coordinates
 extern SHORT    _cursorX;
@@ -98,9 +111,18 @@ extern BYTE     _fontOrientation;
     #define ORIENT_HOR  0
     #define ORIENT_VER  1
 
-// Character type used
-    #ifdef USE_MULTIBYTECHAR
+/*********************************************************************
+* Overview: This macro sets the data type for the Fonts.
+*			There are three types
+*			- #define XCHAR   unsigned short		// use multibyte characters (0-2^16 range)
+*			- #define XCHAR   unsigned char		// use unsigned char (0-255 range)
+*			- #define XCHAR   char				// use signed char (0-127 range)
+*
+*********************************************************************/
+    #if defined (USE_MULTIBYTECHAR) 
         #define XCHAR   unsigned short
+    #elif defined (USE_UNSIGNED_XCHAR)
+        #define XCHAR   unsigned char
     #else
         #define XCHAR   char
     #endif
@@ -112,16 +134,41 @@ extern BYTE _bevelDrawType;
 	#define DRAWTOPBEVEL  	0xF0 
 	#define DRAWBOTTOMBEVEL 0x0F 
 
-// Memory type enumeration to determine the source of data.
-// Used in interpreting bitmap and font from different memory sources.
+    #ifdef __PIC32MX__
+        // Flash data with 32bit pointers
+        #define FLASH_BYTE  const BYTE
+        #define FLASH_WORD  const WORD
+    #else
+        // Flash data with 24bit pointers
+        #define FLASH_BYTE  char __prog__
+        #define FLASH_WORD  short int __prog__
+    #endif
+
+/*********************************************************************
+* Overview: Memory type enumeration to determine the source of data.
+*           Used in interpreting bitmap and font from different 
+*           memory sources.
+*
+*********************************************************************/
 typedef enum
 {
-    FLASH   = 0,            // internal flash
-    EXTERNAL= 1,            // external memory
-    RAM		= 2,			// RAM
-    VIDEOBUF= 3,            // video buffer
-    EDS		= 4				// EDS memory (RAM, internal PSV Flash, or external EPMP).
-} TYPE_MEMORY;
+	FLASH         = 0x0000, // internal flash
+	EXTERNAL      = 0x0001, // external memory
+	FLASH_JPEG    = 0x0002, // internal flash
+	EXTERNAL_JPEG = 0x0003, // external memory
+	RAM           = 0x0004, // RAM 
+	EDS_EPMP      = 0x0005, // memory in EPMP, base addresses are 
+                        	// are set in the hardware profile
+
+	IMAGE_MBITMAP = 0x0000, // data resource is type Microchip bitmap
+	IMAGE_JPEG    = 0x0100, // data resource is type JPEG
+
+    COMP_NONE     = 0x0000, // no compression  
+	COMP_IPU      = 0x2000, // compressed with DEFLATE (for IPU)
+} GFX_RESOURCE;
+
+#define GFX_COMP_MASK   0xF000
+#define GFX_MEM_MASK    0x000F
 
 /*********************************************************************
 * Overview: This structure is used to describe external memory.
@@ -129,20 +176,20 @@ typedef enum
 *********************************************************************/
 typedef struct
 {
-    TYPE_MEMORY type;       // must be EXTERNAL
-    WORD        ID;         // memory ID
-    DWORD       address;    // bitmap or font image address
-} EXTDATA;
+    GFX_RESOURCE type;       // must be EXTERNAL or EDS_EPMP
+    WORD         ID;         // memory ID, user defined value to differentiate
+                             // between graphics resources of the same type	
+							 //   When using EDS_EPMP the following ID values are
+							 //   reserved and used by the Microchip display driver
+						     //   0 - reserved (do not use)
+							 //   1 - reserved for base address of EPMP CS1
+							 //   2 - reserved for base address of EPMP CS2
+    DWORD        address;    // Data image address (user data, bitmap or font) 
+} GFX_EXTDATA;
 
-    #ifdef __PIC32MX__
-        #define FLASH_BYTE  const BYTE
-        #define FLASH_WORD  const WORD
-    #else
-
-// Flash data with 24bit pointers
-        #define FLASH_BYTE  char __prog__
-        #define FLASH_WORD  short int __prog__
-    #endif
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
+//                         STRUCTURES FOR IMAGES
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
 
 /*********************************************************************
 * Overview: Structure describing the bitmap header.
@@ -150,46 +197,42 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    BYTE    compression;    // Compression setting
-    BYTE    colorDepth;     // Color depth used
-    SHORT   height;         // Image height
-    SHORT   width;          // Image width
+    BYTE    compression;     // Compression setting 
+    BYTE    colorDepth;      // Color depth used
+    SHORT   height;          // Image height
+    SHORT   width;           // Image width
 } BITMAP_HEADER;
 
 /*********************************************************************
-* Overview: Structure for bitmap stored in FLASH memory.
+* Overview: Structure for images stored in FLASH memory.
 *
 *********************************************************************/
 typedef struct
 {
-    TYPE_MEMORY type;       // must be FLASH
-    FLASH_BYTE  *address;   // bitmap image address
-} BITMAP_FLASH;
+    GFX_RESOURCE  type;      // must be FLASH
+    FLASH_BYTE    *address;  // image address in FLASH
+} IMAGE_FLASH;
 
 /*********************************************************************
-* Overview: Structure for bitmap stored in RAM memory.
+* Overview: Structure for images stored in RAM memory.
 *
 *********************************************************************/
 typedef struct
 {
-    TYPE_MEMORY type;       // must be RAM
-    char  		*address;   // bitmap image address in RAM
-} BITMAP_RAM;
+    GFX_RESOURCE  type;      // must be RAM
+    DWORD         *address;  // image address in RAM
+} IMAGE_RAM;
 
 /*********************************************************************
-* Overview: Structure for bitmap stored in EDS memory  (RAM, internal PSV Flash, or external EPMP).
+* Overview: Structure for images stored in EXTERNAL memory space.
+*           (example: External SPI or parallel Flash, EDS_EPMP)
 *
 *********************************************************************/
-typedef struct
-{
-    TYPE_MEMORY		type;       // Must be EDS
-    unsigned long	address;    // Bitmap image address in EDS
-    unsigned long	fileLength;	// Number of bytes in the image
-} BITMAP_EDS;
+typedef GFX_EXTDATA IMAGE_EXTERNAL;
 
-
-// Structure for bitmap stored in EXTERNAL memory
-    #define BITMAP_EXTERNAL EXTDATA
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
+//                         STRUCTURES FOR FONTS
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
 
 /*********************************************************************
 * Overview: Structure describing the font header.
@@ -197,22 +240,29 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    BYTE    fontID;     // User assigned value
-    BYTE    res1   : 4;         // Reserved for future use (must be set to 0).
-    BYTE    orient : 2;         // Orientation
-    BYTE    res2   : 2;         // Reserved for future use (must be set to 0).
-    WORD    firstChar;  // Character code of first character (e.g. 32).
-    WORD    lastChar;   // Character code of last character in font (e.g. 3006).
-    BYTE    height;     // Font characters height in pixels.
-    BYTE    reserved;   // Reserved for future use (must be set to 0).
+    BYTE fontID;             // User assigned value
+    BYTE res1        : 4;    // Reserved for future use (must be set to 0).
+    BYTE orientation : 2;    // Orientation of the character glyphs (0,90,180,270 degrees)
+							 //   00 - Normal
+							 //   01 - Characters rotated 270 degrees clockwise
+							 //   10 - Characters rotated 180 degrees
+							 //   11 - Characters rotated 90 degrees clockwise
+    BYTE res2        : 2;    // Reserved for future use (must be set to 0).
+    WORD firstChar;          // Character code of first character (e.g. 32).
+    WORD lastChar;           // Character code of last character in font (e.g. 3006).
+    BYTE height;             // Font characters height in pixels.
+    BYTE reserved;           // Reserved for future use (must be set to 0).
 } FONT_HEADER;
 
-// Structure describing font glyph entry
+/*********************************************************************
+* Overview: Structure describing the glyph entry.
+*
+*********************************************************************/
 typedef struct
 {
-    BYTE    width;
-    BYTE    offsetLSB;
-    WORD    offsetMSB;
+    BYTE    width;           // width of the glyph
+    BYTE    offsetLSB;       // Least Significant Byte of the glyph location offset 
+    WORD    offsetMSB;       // Most Significant (2) Bytes of the glyph location offset
 } GLYPH_ENTRY;
 
 /*********************************************************************
@@ -221,8 +271,8 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    TYPE_MEMORY type;       // must be FLASH
-    const char  *address;   // font image address
+    GFX_RESOURCE  type;      // must be FLASH
+    const char    *address;  // font image address in FLASH
 } FONT_FLASH;
 
 /*********************************************************************
@@ -231,12 +281,60 @@ typedef struct
 *********************************************************************/
 typedef struct
 {
-    TYPE_MEMORY type;       // must be RAM
-    const char  *address;   // bitmap image address in RAM
+    GFX_RESOURCE  type;      // must be RAM
+    char          *address;  // font image address in RAM
 } FONT_RAM;
 
-// Structure for font stored in EXTERNAL memory
-    #define FONT_EXTERNAL   EXTDATA
+/*********************************************************************
+* Overview: Structure for font stored in EXTERNAL memory space.
+*           (example: External SPI or parallel Flash, EDS_EPMP)
+*
+*********************************************************************/
+typedef GFX_EXTDATA FONT_EXTERNAL;
+
+/*********************************************************************
+* Overview: Structure for images stored in various system memory 
+*           (Flash, External Memory (SPI, Parallel Flash, 
+*           or memory in EPMP).
+*
+*********************************************************************/
+typedef struct
+{
+    GFX_RESOURCE     type;             // Graphics resource type, determines the type and location of data
+    WORD             ID;               // memory ID, user defined value to differentiate
+                                       // between graphics resources of the same type	
+							           //   When using EDS_EPMP the following ID values are
+							           //   reserved and used by the Microchip display driver
+									   //   0 - reserved (do not use)
+							           //   1 - reserved for base address of EPMP CS1
+							           //   2 - reserved for base address of EPMP CS2 
+	union
+	{
+    	DWORD        extAddress;	   // generic address	
+        FLASH_BYTE   *progByteAddress; // for addresses in program section
+        FLASH_WORD   *progWordAddress; // for addresses in program section
+	    const char   *constAddress;    // for addresses in FLASH
+	    char         *ramAddress;      // for addresses in RAM
+#if defined(__PIC24F__) 	    
+	    __eds__ char *edsAddress;      // for addresses in EDS
+#endif	    
+	} LOCATION;
+    
+	WORD             width;            // width of the image 
+	WORD             height;           // height of the image
+    DWORD            param1;           // size of the IPU compressed data
+    DWORD            param2;           // size of the IPU decompressed data
+	WORD             colorDepth;       // color depth of the image
+} GFX_IMAGE_HEADER;
+
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
+//                         DEPRECATED TYPES and VARIABLES
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
+typedef GFX_RESOURCE TYPE_MEMORY     __attribute__ ((deprecated));
+typedef GFX_EXTDATA EXTDATA          __attribute__ ((deprecated));
+typedef IMAGE_FLASH BITMAP_FLASH     __attribute__ ((deprecated));
+typedef IMAGE_RAM BITMAP_RAM         __attribute__ ((deprecated));
+typedef GFX_EXTDATA BITMAP_EXTERNAL  __attribute__ ((deprecated));
 
 /*********************************************************************
 * Overview: This defines the size of the buffer used by font functions
@@ -953,14 +1051,14 @@ SHORT   GetImageWidth(void *bitmap);
 SHORT   GetImageHeight(void *bitmap);
 
 /*********************************************************************
-* Function: WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer)
+* Function: WORD ExternalMemoryCallback(GFX_EXTDATA* memory, LONG offset, WORD nCount, void* buffer)
 *
 * Overview: This function must be implemented in the application. 
 *           The library will call this function each time when
 *           the external memory data will be required. The application
 *           must copy requested bytes quantity into the buffer provided.
 *           Data start address in external memory is a sum of the address
-*           in EXTDATA structure and offset.
+*           in GFX_EXTDATA structure and offset.
 *
 * Input:  memory - Pointer to the external memory bitmap or font structures
 *                  (FONT_EXTERNAL or BITMAP_EXTERNAL).
@@ -976,11 +1074,11 @@ SHORT   GetImageHeight(void *bitmap);
 *   // In this example, ID for memory device used is assumed to be 0.
 *   #define X_MEMORY 0
 *
-*   WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer) {
+*   WORD ExternalMemoryCallback(GFX_EXTDATA* memory, LONG offset, WORD nCount, void* buffer) {
 *   	int i;
 *       long address;
 *
-*		// Address of the requested data is a start address of the object referred by EXTDATA structure plus offset
+*		// Address of the requested data is a start address of the object referred by GFX_EXTDATA structure plus offset
 *		address = memory->address+offset;
 *
 *       if(memory->ID == X_MEMORY){
@@ -1001,5 +1099,71 @@ SHORT   GetImageHeight(void *bitmap);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *buffer);
+WORD    ExternalMemoryCallback(GFX_EXTDATA *memory, LONG offset, WORD nCount, void *buffer);
+
+/*********************************************************************
+* Function:  SHORT Sine(SHORT v)
+*
+* PreCondition: none
+*
+* Input: v - the angle used to calculate the sine value. 
+*			 The angle must be in the range of -360 to 360 degrees.
+*
+* Output: Returns the sine of the given angle.
+*
+* Side Effects: none
+*
+* Overview: This calculates the sine value of the given angle.
+*
+* Note: none
+*
+********************************************************************/
+#define Sine(v)		GetSineCosine(v, GETSINE)
+
+/*********************************************************************
+* Function:  SHORT Cosine(SHORT v)
+*
+* PreCondition: none
+*
+* Input: v - the angle used to calculate the cosine value. 
+*			 The angle must be in the range of -360 to 360 degrees.
+*
+* Output: Returns the cosine of the given angle.
+*
+* Side Effects: none
+*
+* Overview: This calculates the cosine value of the given angle.
+*
+* Note: none
+*
+********************************************************************/
+#define Cosine(v)		GetSineCosine(v, GETCOSINE)
+
+
+/*********************************************************************
+* Function:  WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle)
+*
+* PreCondition: none
+*
+* Input: cx - the location of the center of the arc in the x direction. 
+*	     cy - the location of the center of the arc in the y direction. 		 
+*	     r1 - the smaller radius of the arc. 		 
+*	     r2 - the larger radius of the arc. 		 
+*	     startAngle - start angle of the arc. 		 
+*	     endAngle - end angle of the arc. 		 
+*
+* Output: Returns 1 if the rendering is done, 0 if not yet done.
+*
+* Side Effects: none
+*
+* Overview: This renders an arc with from startAngle to endAngle with the thickness 
+*		    of r2-r1. The function returns 1 when the arc is rendered successfuly
+* 			and returns a 0 when it is not yet finished. The next call to the 
+*			function will continue the rendering.
+*
+* Note: none
+*
+********************************************************************/
+WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle);
+
 #endif // _PRIMITIVE_H

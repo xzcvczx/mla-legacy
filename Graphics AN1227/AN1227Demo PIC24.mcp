@@ -72,6 +72,8 @@ file_044=Common
 file_045=Graphics
 file_046=Common
 file_047=Graphics
+file_048=.
+file_049=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -121,6 +123,8 @@ file_044=no
 file_045=no
 file_046=no
 file_047=no
+file_048=no
+file_049=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -170,6 +174,8 @@ file_044=no
 file_045=no
 file_046=no
 file_047=no
+file_048=yes
+file_049=yes
 [FILE_INFO]
 file_000=AN1227Demo.c
 file_001=..\Microchip\Graphics\Button.c
@@ -219,6 +225,8 @@ file_044=..\Microchip\Include\GenericTypeDefs.h
 file_045=..\Microchip\Include\Graphics\DisplayDriver.h
 file_046=..\Microchip\Include\TimeDelay.h
 file_047=..\Microchip\Include\Graphics\DisplayDriverInterface.h
+file_048=Getting Started - Running the Graphics AN1227 Demo.htm
+file_049=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

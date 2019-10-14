@@ -37,7 +37,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     05/26/09
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 WORD    _color;
@@ -106,23 +106,23 @@ void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 ********************************************************************/
 inline void SetAddress(SHORT x, SHORT y)
 {
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(0x02);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(((WORD_VAL) (WORD) x).v[1]);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(0x03);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(((WORD_VAL) (WORD) x).v[0]);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(0x06);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(((WORD_VAL) (WORD) y).v[1]);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(0x07);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(((WORD_VAL) (WORD) y).v[0]);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(0x22);
 }
 
@@ -145,12 +145,12 @@ inline void SetAddress(SHORT x, SHORT y)
 ********************************************************************/
 void SetReg(BYTE index, BYTE value)
 {
-	DeviceSelect();
-	DeviceSetCommand();
+	DisplayEnable();
+	DisplaySetCommand();
 	DeviceWrite(index);
-	DeviceSetData();
+	DisplaySetData();
 	DeviceWrite(value);
-	DeviceDeselect();
+	DisplayDisable();
 }
 
 /*********************************************************************
@@ -400,10 +400,10 @@ void PutPixel(SHORT x, SHORT y)
             return;
     }
 
-    DeviceSelect;
+    DisplayEnable;
     SetAddress(x, y);
     WritePixel(_color);
-    DeviceDeselect;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -447,7 +447,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
             bottom = _clipBottom;
     }
 
-    DeviceSelect;
+    DisplayEnable;
     for(y = top; y < bottom + 1; y++)
     {
         SetAddress(left, y);
@@ -457,7 +457,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         }
     }
 
-    DeviceDeselect;
+    DisplayDisable();
     return (1);
 }
 
@@ -481,14 +481,14 @@ void ClearDevice(void)
 {
     DWORD   counter;
 
-    DeviceSelect;
+    DisplayEnable;
     SetAddress(0, 0);
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
         WritePixel(_color);
     }
 
-    DeviceDeselect;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -626,7 +626,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    DeviceSelect;
+    DisplayEnable;
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -670,7 +670,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -717,7 +717,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    DeviceSelect;
+    DisplayEnable;
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -755,7 +755,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -802,7 +802,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    DeviceSelect;
+    DisplayEnable;
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -831,7 +831,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -869,7 +869,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *flashAddress;
     flashAddress++;
 
-    DeviceSelect;
+    DisplayEnable;
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -898,7 +898,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect;
+    DisplayDisable();
 }
 
     #endif
@@ -960,7 +960,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DeviceSelect;
+        DisplayEnable;
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -999,7 +999,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        DeviceDeselect;
+        DisplayDisable();
     }
 }
 
@@ -1058,7 +1058,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DeviceSelect;
+        DisplayEnable;
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1092,7 +1092,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        DeviceDeselect;
+        DisplayDisable();
     }
 }
 
@@ -1145,7 +1145,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        DeviceSelect;
+        DisplayEnable;
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1166,7 +1166,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        DeviceDeselect;
+        DisplayDisable();
     }
 }
 
@@ -1218,7 +1218,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DeviceSelect;
+        DisplayEnable;
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1239,7 +1239,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        DeviceDeselect;
+        DisplayDisable();
     }
 }
 

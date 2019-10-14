@@ -35,6 +35,7 @@
   ----  -----------------------------------------
   1.0   Initial release
   1.01  Cleaned up unnecessary variables
+  1.02  Modified to Support PIC24H microcontrollers
 ********************************************************************/
 
 #include 	"string.h"
@@ -47,6 +48,44 @@
 
 unsigned long baudRate;
 unsigned long scReferenceClock; // Smart Card Reference Clock
+unsigned int factorF = 372;
+BYTE factorDNumerator = 1;
+BYTE factorDdenominator = 1;
+BOOL delayLapsedFlag = FALSE;
+
+/*******************************************************************************
+  Function:
+    void SC_Delay(void)
+	
+  Description:
+    This function waits for delay to get completed
+
+  Precondition:
+    None.
+
+  Parameters:
+    unsigned int instructionCount - Number of instruction counts to be waited
+
+  Return Values:
+    None
+	
+  Remarks:
+    None.
+  *****************************************************************************/
+void SC_Delay(unsigned int instructionCount)
+{
+	// Set the Timer Count as per the delay needed
+	SCdrv_SetDelayTimerCnt(0xFFFF - instructionCount);
+
+	// Enable the delay timer
+	SCdrv_EnableDelayTimer();
+
+	// Wait until the delay is elapsed
+	while(!delayLapsedFlag);
+
+	// Clear the delay flag
+	delayLapsedFlag = FALSE;
+}
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -120,8 +159,13 @@ BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 	if( U1STAbits.PERR )	//Parity Error detected
 	{
 		SCdrv_TxPin_Direction(0);  //pull it low to tell the card that there was error receiving data
-		U1MODEbits.RXINV = 1;  //do not recognize this low state as a valid start bit
-					
+
+		#if defined(__PIC24F__)
+			U1MODEbits.RXINV = 1;  //do not recognize this low state as a valid start bit
+		#elif defined(__PIC24H__)	
+			U1MODEbits.URXINV = 1;  //do not recognize this low state as a valid start bit
+		#endif
+				
 		//Read the data from UART to clear the error flag
 		*pDat = U1RXREG;		
 	
@@ -129,7 +173,11 @@ BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 
 		SCdrv_TxPin_Direction(1); //release RD10. Card should retransmit now.
 
-		U1MODEbits.RXINV = 0;
+		#if defined(__PIC24F__)
+			U1MODEbits.RXINV = 0;
+		#elif defined(__PIC24H__)	
+			U1MODEbits.URXINV = 0;
+		#endif
 
 		return SCdrv_GetRxData(pDat, 10000);	//Read the data from retransmission
 	}
@@ -146,72 +194,7 @@ BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
 //////////////////////////////////////////////////
 void SCdrv_SetBRG( BYTE speedCode )
 {
-	float factorD = 1;
-	unsigned int factorF = 372;
 	BYTE tempCode;
-
-	tempCode = speedCode & 0x0F;
-	
-	// Calculate Factor 'D' from TA1 value
-	switch(tempCode)
-	{
-		case 0x00:
-		case 0x07:
-		case 0x01:
-					break;
-
-		case 0x02:
-					factorD = 2;
-					break;
-
-		case 0x03:
-					factorD = 4;
-					break;
-
-		case 0x04:
-					factorD = 8;
-					break;
-
-		case 0x05:
-					factorD = 16;
-					break;
-
-		case 0x06:
-					factorD = 32;
-					break;
-
-		case 0x08:
-					factorD = 12;
-					break;
-
-		case 0x09:
-					factorD = 20;
-					break;
-
-		case 0x0A:
-					factorD = 0.5;
-					break;
-
-		case 0x0B:
-					factorD = 0.25;
-					break;
-
-		case 0x0C:
-					factorD = 0.125;
-					break;
-
-		case 0x0D:
-					factorD = 0.0625;
-					break;
-
-		case 0x0E:
-					factorD = 0.03125;
-					break;
-
-		case 0x0F:
-					factorD = 0.015625;
-					break;
-	}
 
 	// If you are not using internal clock in Smart Card & are 
 	// using external clock to drive Smart Card than calculate 
@@ -219,76 +202,21 @@ void SCdrv_SetBRG( BYTE speedCode )
 	#ifdef ENABLE_SC_EXTERNAL_CLOCK
 
 		tempCode = (speedCode & 0xF0) >> 4;
-		
-		// Calculate Factor 'F' from TA1 value
-		switch(tempCode)
-		{
-			case 0x00:
-			case 0x07:
-			case 0x08:
-			case 0x0E:
-			case 0x0F:
-						break;
-	
-			case 0x01:
-						factorF = 372;
-						break;
-	
-			case 0x02:
-						factorF = 558;
-						break;
-
-			case 0x03:
-						factorF = 744;
-						break;
-	
-			case 0x04:
-						factorF = 1116;
-						break;
-	
-			case 0x05:
-						factorF = 1488;
-						break;
-	
-			case 0x06:
-						factorF = 1860;
-						break;
-	
-			case 0x09:
-						factorF = 512;
-						break;
-	
-			case 0x0A:
-						factorF = 768;
-						break;
-	
-			case 0x0B:
-						factorF = 1024;
-						break;
-	
-			case 0x0C:
-						factorF = 1536;
-						break;
-	
-			case 0x0D:
-						factorF = 2048;
-						break;	
-		}
 
 		if(tempCode == 0x00)	// If internal clock used in Smart Card
 		{
-			U1BRG = (unsigned int)((unsigned long)((unsigned long)FCY/(4 * (unsigned long)9600 * factorD)) - 1);   //Internal clk used in card
+			U1BRG = (unsigned int)((unsigned long)((unsigned long)(FCY * factorDdenominator)/(unsigned long)(4 * 9600 * (unsigned long)factorDNumerator)) - 1);   //Internal clk used in card
 		}
 		else	// If externa; clock used to drive Smart Card
 		{
-			baudRate = (unsigned long long)((unsigned long long)((unsigned long long)scReferenceClock * factorD)/factorF);
+			baudRate = (unsigned long long)((unsigned long long)((unsigned long long)scReferenceClock * factorDNumerator)/(unsigned long)(factorF * (unsigned long)factorDdenominator));
 
 			U1BRG = (unsigned int)((unsigned long)((unsigned long)FCY/(4 * baudRate)) - 1);   //10752bps with 4Mhz clk to card
 		}
 
 	#else	// If internal clock used in Smart Card
 
-		U1BRG = (unsigned int)((unsigned long)((unsigned long)FCY/(4 * (unsigned long)9600 * factorD)) - 1);   //Internal clk used in card
+		U1BRG = (unsigned int)((unsigned long)((unsigned long)(FCY * factorDdenominator)/(unsigned long)(4 * 9600 * (unsigned long)factorDNumerator)) - 1);   //Internal clk used in card
 
 	#endif
 }	
@@ -368,6 +296,9 @@ void SCdrv_InitUART(void)
 	U1MODEbits.PDSEL	= 1;	//8bits + even parity
 	U1MODEbits.STSEL	= 0;	//1 stop bit
 	U1MODEbits.BRGH		= 1;
+
+	// Enable Delay Timer Interrupts for future use
+	SCdrv_EnableDelayTimerIntr();
 }
 
 

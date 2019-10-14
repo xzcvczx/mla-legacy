@@ -16,6 +16,30 @@ This file defines all of the hardware-specific information for the project.
 //#define USE_FRC - incompatible with USB operation
 //#define GO_SLOW - incompatible with USB host operation
 
+
+/*********************************************************************
+* Overview: Defines color depth. 
+********************************************************************/
+#define COLOR_DEPTH						1
+
+/*********************************************************************
+* Overview: Display controller selection.
+*                                          
+********************************************************************/
+#define DISPLAY_CONTROLLER				SH1101A
+
+/*********************************************************************
+* Overview: Horizontal and vertical display resolution
+*                  (from the glass datasheet).
+*********************************************************************/
+#define DISP_HOR_RESOLUTION				128
+#define DISP_VER_RESOLUTION				64
+/*********************************************************************
+* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
+*********************************************************************/
+#define DISP_ORIENTATION				0
+
+
 #if defined( __C30__ )
     #ifdef USE_FRC
         #define GetSystemClock()            32000000UL
@@ -84,13 +108,13 @@ This file defines all of the hardware-specific information for the project.
 
 
 // Define the RTCC default initialization.
-#define RTCC_DEFAULT_DAY        13        // 13
-#define RTCC_DEFAULT_MONTH      11        // November
-#define RTCC_DEFAULT_YEAR       07        // 2007
-#define RTCC_DEFAULT_WEEKDAY    02        // Tuesday
+#define RTCC_DEFAULT_DAY        19        // 19
+#define RTCC_DEFAULT_MONTH      10        // October
+#define RTCC_DEFAULT_YEAR       10        // 2010
+#define RTCC_DEFAULT_WEEKDAY    2         // Tuesday
 #define RTCC_DEFAULT_HOUR       10        // 10:10:01
 #define RTCC_DEFAULT_MINUTE     10
-#define RTCC_DEFAULT_SECOND     01
+#define RTCC_DEFAULT_SECOND     1
 
 #if defined(__PIC24F__)
     #include <p24fxxxx.h>
@@ -154,15 +178,19 @@ This file defines all of the hardware-specific information for the project.
 * IOS FOR THE DISPLAY CONTROLLER
 *********************************************************************/
 // Definitions for reset pin
-#define RST_TRIS_BIT       TRISDbits.TRISD2
-#define RST_LAT_BIT        LATDbits.LATD2
+#define DisplayResetConfig()        TRISDbits.TRISD2 = 0    
+#define DisplayResetEnable()        LATDbits.LATD2 = 0
+#define DisplayResetDisable()       LATDbits.LATD2 = 1
 
-#define CS_TRIS_BIT 	   TRISDbits.TRISD11
-#define CS_LAT_BIT 		   LATDbits.LATD11  
+// Definitions for RS pin
+#define DisplayCmdDataConfig()		TRISBbits.TRISB15 = 0;
+#define DisplaySetCommand()         LATBbits.LATB15 = 0
+#define DisplaySetData()            LATBbits.LATB15 = 1
 
-#define RS_TRIS_BIT 	   TRISBbits.TRISB15
-#define RS_LAT_BIT 		   LATBbits.LATB15  
-
+// Definitions for CS pin
+#define DisplayConfig()             TRISDbits.TRISD11 = 0             
+#define DisplayEnable()             LATDbits.LATD11 = 0
+#define DisplayDisable()            LATDbits.LATD11 = 1
 
 #endif
 

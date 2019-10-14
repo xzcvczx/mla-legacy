@@ -359,7 +359,7 @@ static HTTP_IO_RESULT HTTPPostIndex(void)
 		memcpy((void*)Station.vStationName, (void*)ptr, sizeof(Station.vStationName)-1);
 	*/
 	
-	strcpypgm2ram((char*)curHTTP.data, (ROM void*)"index.htm");
+	strcpypgm2ram((char*)curHTTP.data, "index.htm");
 	curHTTP.httpStatus = HTTP_REDIRECT;
 	
 	return HTTP_IO_DONE;
@@ -374,7 +374,7 @@ static HTTP_IO_RESULT HTTPPostMACAddress(void)
 	ret = HTTPReadPostValue(vBuffer, sizeof(vBuffer));
 	if(ret == HTTP_READ_TRUNCATED)
 	{
-		strcpypgm2ram((char*)curHTTP.data, (ROM void*)"updatemacerror.htm");
+		strcpypgm2ram((char*)curHTTP.data, "updatemacerror.htm");
 		curHTTP.httpStatus = HTTP_REDIRECT;	
 		return HTTP_IO_DONE;
 	}
@@ -406,7 +406,7 @@ static HTTP_IO_RESULT HTTPPostMACAddress(void)
 		// Error out if we didn't find exactly 12 MAC address character after removing non-hex values
 		if(i != 12u)
 		{
-			strcpypgm2ram((char*)curHTTP.data, (ROM void*)"updatemacerror.htm");
+			strcpypgm2ram((char*)curHTTP.data, "updatemacerror.htm");
 			curHTTP.httpStatus = HTTP_REDIRECT;	
 			return HTTP_IO_DONE;
 		}
@@ -426,7 +426,7 @@ static HTTP_IO_RESULT HTTPPostMACAddress(void)
 	}
 	
 	
-	strcpypgm2ram((char*)curHTTP.data, (ROM void*)"updatemacerror.htm");
+	strcpypgm2ram((char*)curHTTP.data, "updatemacerror.htm");
 	curHTTP.httpStatus = HTTP_REDIRECT;	
 	return HTTP_IO_DONE;
 }
@@ -616,7 +616,7 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
         #endif
 		
 		// Set the board to reboot to the new address
-		strcpypgm2ram((char*)curHTTP.data, (ROM char*)"/protect/reboot.htm?");
+		strcpypgm2ram((char*)curHTTP.data, "/protect/reboot.htm?");
 		memcpy((void*)(curHTTP.data+20), (void*)app->NetBIOSName, 16);
 		ptr = curHTTP.data;
 		while(*ptr != ' ' && *ptr != '\0')
@@ -625,7 +625,7 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
 	}
 	else
 	{// Error parsing IP, so don't save to avoid errors
-		strcpypgm2ram((char*)curHTTP.data, (ROM void*)"/protect/config_error.htm");
+		strcpypgm2ram((char*)curHTTP.data, "/protect/config_error.htm");
 	}
 			
 	curHTTP.httpStatus = HTTP_REDIRECT;

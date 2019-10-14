@@ -9,15 +9,15 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-// Interface GUID for Microchip PIC18F4550 family driver
+// Interface GUID for Microchip general purpose USB family driver
 
 // {5354FA28-6D14-4E35-A1F5-75BB54E6030F}
-DEFINE_GUID(GUID_DEVINTERFACE_MCHPUSB, 0x5354fa28L, 0x6d14, 0x4e35, 0xa1, 0xf5, 0x75, 0xbb, 0x54, 0xe6, 0x03, 0x0f);
+
 
 // Suffix strings for forming device names. Take the "device detail" path string
 // returned by a SetupDiXxx enumeration and add on one of these, followed by
 // a zero-based DECIMAL integer denoting the endpoint address. Use the resulting 
-// name string as the first argument in a call to CreateFile. Application 
+// name string as the first argument in a call to CreateFile. Application
 // code should use constructs like this to specify names in either Unicode or 
 // ANSI format: _T(MCHPUSB_PIPE_NAME). Driver code can use TEXT(MCHPUSB_PIPE_NAME), etc.
 // For interrupt endpoints, using the "ASYNC" suffix means that you must use

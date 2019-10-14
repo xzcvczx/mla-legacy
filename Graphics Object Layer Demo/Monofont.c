@@ -49,7 +49,7 @@
 * fonts at gnome dot org.
 *
 *************************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #if (DISP_ORIENTATION == 0) && defined (USE_FONT_RAM) && defined (__PIC24FJ256DA210__)
 extern char L10966[] __attribute__((aligned(2)));

@@ -51,18 +51,15 @@ Change History:
   ----------  ----------------------------------------------------------
   2.6 - 2.6a  No change
 
-  2.7a        Provided macro wrapped versions of malloc() and free()
-              so that a user can override these functions easily.
-
 *******************************************************************************/
 //DOM-IGNORE-END
 
 
 #include <stdlib.h>
 #include <string.h>
-#include "Graphics\Graphics.h"
-#include "USB\usb.h"
-#include "usb\usb_host_printer_primitives.h"
+#include "Graphics/Graphics.h"
+#include "USB/usb.h"
+#include "usb/usb_host_printer_primitives.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE

@@ -38,7 +38,7 @@
  * Anton Alkhimenok     11/17/08
  * PAT					04/05/10	Modified initialization to reduce flicker.
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #define CS  0x01
 #define SCL 0x02
@@ -230,11 +230,11 @@ void TCON_Init(void)
 	GPIO_TCON(0x003B, 0x0500);
 	DelayMs(20);
 
-  #if (DISPLAY_CONTROLLER == MCHP_DA210)
+	#if (DISPLAY_CONTROLLER == MCHP_DA210)
 		CS_TRIS = CS_TRIS_temp;	
 		SCL_TRIS = SCL_TRIS_temp;
-        SDO_TRIS = SDO_TRIS_temp;
-        DC_TRIS = DC_TRIS_temp;
-   #endif
+		SDO_TRIS = SDO_TRIS_temp;
+		DC_TRIS = DC_TRIS_temp;
+	#endif
 
 }

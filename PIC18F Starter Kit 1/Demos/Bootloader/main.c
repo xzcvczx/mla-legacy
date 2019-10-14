@@ -37,7 +37,7 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 #include "GenericTypedefs.h"
 #include "HardwareProfile.h"
 #include "boot.h"
-#include "MDD File System\FSIO.h"
+#include "MDD File System/FSIO.h"
 
 #include "oled.h"
 
@@ -65,7 +65,7 @@ _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_P
      #pragma config IESO = OFF           //Two-Speed Start-up disabled
      #pragma config WDTPS = 32768        //1:32768
      #pragma config DSWDTOSC = INTOSCREF //DSWDT uses INTOSC/INTRC as clock
-     #pragma config RTCOSC = T1OSCREF    //RTCC uses T1OSC/T1CKI as clock
+     #pragma config RTCOSC = INTOSCREF//T1OSCREF    //RTCC uses T1OSC/T1CKI as clock
      #pragma config DSBOREN = OFF        //Zero-Power BOR disabled in Deep Sleep
      #pragma config DSWDTEN = OFF        //Disabled
      #pragma config DSWDTPS = 8192       //1:8,192 (8.5 seconds)
@@ -667,7 +667,7 @@ int main(void)
 
 		oledPutROMString((ROM_STRING)"      Microchip      ", 0, 0);
 		oledPutROMString((ROM_STRING)"  PIC18F Starter Kit ", 1, 0);
-		oledPutROMString((ROM_STRING)"    Bootloader v1.2  ", 1, 0);
+		oledPutROMString((ROM_STRING)"    Bootloader v1.3  ", 1, 0);
 		oledPutROMString((ROM_STRING)"Press the menu button", 3, 0);
 		oledPutROMString((ROM_STRING)" to load a new demo. ", 4, 0);
 

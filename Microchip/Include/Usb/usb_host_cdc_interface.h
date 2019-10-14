@@ -50,18 +50,16 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev   Description
-  ----- --------------------------------------------
-  2.6a  No change
-
-  2.7   Modified the code to allow connection of USB-RS232 dongles that do
-        not fully comply with CDC specifications
-
-        Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
-        more than 256 bytes
-
-  2.7a  No change
+Author          Date    Comments
+--------------------------------------------------------------------------------
+ADG          9-Apr-2008 First release
+********************************************************************************
+ Change History:
+ Revision     Description
+ v2.7         Modified the code to allow connection of USB-RS232 dongles that do
+              not fully comply with CDC specifications
+              Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
+              more than 256 bytes
 *******************************************************************************/
 //DOM-IGNORE-END
 

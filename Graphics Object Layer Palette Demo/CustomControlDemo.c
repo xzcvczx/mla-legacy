@@ -61,22 +61,26 @@ CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD
     if(pCc == NULL)
         return (pCc);
 
-    pCc->ID = ID;
-    pCc->pNxtObj = NULL;
-    pCc->type = OBJ_CUSTOM;
-    pCc->left = left;
-    pCc->top = top;
-    pCc->right = right;
-    pCc->bottom = bottom;
-    pCc->pos = (pCc->top + pCc->bottom) >> 1;       // position
-    pCc->prevPos = pCc->bottom - GOL_EMBOSS_SIZE;   // previos position
-    pCc->state = state;                             // set state
+    pCc->hdr.ID = ID;
+    pCc->hdr.pNxtObj = NULL;
+    pCc->hdr.type = OBJ_CUSTOM;
+    pCc->hdr.left = left;
+    pCc->hdr.top = top;
+    pCc->hdr.right = right;
+    pCc->hdr.bottom = bottom;
+    pCc->pos = (pCc->hdr.top + pCc->hdr.bottom) >> 1;   // position
+    pCc->prevPos = pCc->hdr.bottom - GOL_EMBOSS_SIZE;   // previos position
+    pCc->hdr.state = state;                             // set state
+    pCc->hdr.DrawObj = CcDraw;              			// draw function
+    pCc->hdr.MsgObj = CcTranslateMsg;       			// message function
+    pCc->hdr.MsgDefaultObj = CcMsgDefault;  			// default message function
+    pCc->hdr.FreeObj = NULL;  							// default message function
 
     // Set the style scheme to be used
     if(pScheme == NULL)
-        pCc->pGolScheme = _pDefaultGolScheme;
+        pCc->hdr.pGolScheme = _pDefaultGolScheme;
     else
-        pCc->pGolScheme = (GOL_SCHEME *)pScheme;
+        pCc->hdr.pGolScheme = (GOL_SCHEME *)pScheme;
 
     GOLAddObject((OBJ_HEADER *)pCc);
 
@@ -84,13 +88,16 @@ CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD
 }
 
 /*********************************************************************
-* Function: WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
+* Function: WORD CcTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: translates the GOL message to this control
 *
 ********************************************************************/
-WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
+WORD CcTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    CUSTOM *pCc;
+
+    pCc = (CUSTOM *)pObj;
 
     // Check if disabled first
     if(GetState(pCc, CC_DISABLED))
@@ -103,10 +110,10 @@ WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
         // Check if it falls in the control area
         if
         (
-            (pCc->left + GOL_EMBOSS_SIZE < pMsg->param1) &&
-            (pCc->right - GOL_EMBOSS_SIZE > pMsg->param1) &&
-            (pCc->top + GOL_EMBOSS_SIZE < pMsg->param2) &&
-            (pCc->bottom - GOL_EMBOSS_SIZE > pMsg->param2)
+            (pCc->hdr.left + GOL_EMBOSS_SIZE < pMsg->param1) &&
+            (pCc->hdr.right - GOL_EMBOSS_SIZE > pMsg->param1) &&
+            (pCc->hdr.top + GOL_EMBOSS_SIZE < pMsg->param2) &&
+            (pCc->hdr.bottom - GOL_EMBOSS_SIZE > pMsg->param2)
         )
         {
             return (CC_MSG_SELECTED);
@@ -118,13 +125,17 @@ WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg)
+* Function: void CcMsgDefault(void* pObj, GOL_MSG* pMsg)
 *
 * Overview: changes the state of the object by default
 *
 ********************************************************************/
-void CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg)
+void CcMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    CUSTOM *pCc;
+
+    pCc = (CUSTOM *)pObj;
+	
     pCc->pos = pMsg->param2;
     SetState(pCc, CC_DRAW_BAR);
 }
@@ -139,7 +150,7 @@ void CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg)
 * Overview: draws control
 *
 ********************************************************************/
-WORD CcDraw(CUSTOM *pCc)
+WORD CcDraw(void *pObj)
 {
     typedef enum
     {
@@ -153,14 +164,17 @@ WORD CcDraw(CUSTOM *pCc)
     static CC_DRAW_STATES state = REMOVE;
     static SHORT counter;
     static SHORT delta;
+    CUSTOM *pCc;
+
+	pCc = (CUSTOM*) pObj;
 
     switch(state)
     {
         case REMOVE:
             if(GetState(pCc, CC_HIDE))
             {
-                SetColor(pCc->pGolScheme->CommonBkColor);
-                if(!Bar(pCc->left, pCc->top, pCc->right, pCc->bottom))
+                SetColor(pCc->hdr.pGolScheme->CommonBkColor);
+                if(!Bar(pCc->hdr.left, pCc->hdr.top, pCc->hdr.right, pCc->hdr.bottom))
                     return (0);
                 return (1);
             }
@@ -172,14 +186,14 @@ WORD CcDraw(CUSTOM *pCc)
             {
                 GOLPanelDraw
                 (
-                    pCc->left,
-                    pCc->top,
-                    pCc->right,
-                    pCc->bottom,
+                    pCc->hdr.left,
+                    pCc->hdr.top,
+                    pCc->hdr.right,
+                    pCc->hdr.bottom,
                     0,
-                    pCc->pGolScheme->Color0,
-                    pCc->pGolScheme->EmbossDkColor,
-                    pCc->pGolScheme->EmbossLtColor,
+                    pCc->hdr.pGolScheme->Color0,
+                    pCc->hdr.pGolScheme->EmbossDkColor,
+                    pCc->hdr.pGolScheme->EmbossLtColor,
                     NULL,
                     GOL_EMBOSS_SIZE
                 );
@@ -196,20 +210,20 @@ WORD CcDraw(CUSTOM *pCc)
         case BAR_DRAW:
             if(pCc->prevPos > pCc->pos)
             {
-                SetColor(pCc->pGolScheme->Color1);
-                if(!Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->pos, pCc->right - GOL_EMBOSS_SIZE, pCc->prevPos))
+                SetColor(pCc->hdr.pGolScheme->Color1);
+                if(!Bar(pCc->hdr.left + GOL_EMBOSS_SIZE, pCc->pos, pCc->hdr.right - GOL_EMBOSS_SIZE, pCc->prevPos))
                     return (0);
             }
             else
             {
-                SetColor(pCc->pGolScheme->Color0);
-                if(!Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->prevPos, pCc->right - GOL_EMBOSS_SIZE, pCc->pos))
+                SetColor(pCc->hdr.pGolScheme->Color0);
+                if(!Bar(pCc->hdr.left + GOL_EMBOSS_SIZE, pCc->prevPos, pCc->hdr.right - GOL_EMBOSS_SIZE, pCc->pos))
                     return (0);
             }
 
-            SetColor(pCc->pGolScheme->TextColor0);
+            SetColor(pCc->hdr.pGolScheme->TextColor0);
             counter = 1;
-            delta = (pCc->bottom - pCc->top - (2 * GOL_EMBOSS_SIZE)) >> 3;
+            delta = (pCc->hdr.bottom - pCc->hdr.top - (2 * GOL_EMBOSS_SIZE)) >> 3;
             state = GRID_DRAW;
 
         case GRID_DRAW:
@@ -219,10 +233,10 @@ WORD CcDraw(CUSTOM *pCc)
                 (
                     !Bar
                         (
-                            pCc->left + GOL_EMBOSS_SIZE,
-                            pCc->top + GOL_EMBOSS_SIZE + counter * delta,
-                            pCc->right - GOL_EMBOSS_SIZE,
-                            pCc->top + GOL_EMBOSS_SIZE + counter * delta
+                            pCc->hdr.left + GOL_EMBOSS_SIZE,
+                            pCc->hdr.top + GOL_EMBOSS_SIZE + counter * delta,
+                            pCc->hdr.right - GOL_EMBOSS_SIZE,
+                            pCc->hdr.top + GOL_EMBOSS_SIZE + counter * delta
                         )
                 ) return (0);
                 counter++;

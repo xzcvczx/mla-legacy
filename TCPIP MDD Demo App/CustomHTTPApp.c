@@ -311,7 +311,7 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
 HTTP_IO_RESULT HTTPExecutePost(void)
 {
 	// Resolve which function to use and pass along
-BYTE filename[20];
+	BYTE filename[20];
 	
 	// Load the file name
 	// Make sure BYTE filename[] above is large enough for your longest name
@@ -400,12 +400,12 @@ BYTE filename[20];
 	#else
 
 		#if defined(STACK_USE_SMTP_CLIENT)
-			if(!memcmppgm2ram(filename, "email/index.htm",15))
+			if(!strcmppgm2ram((char*)filename, "email/index.htm"))
 				return HTTPPostEmail();
 		#endif
 			
 		#if defined(STACK_USE_DYNAMICDNS_CLIENT)
-			if(!memcmppgm2ram(filename, "dyndns/index.htm",16))
+			if(!strcmppgm2ram((char*)filename, "dyndns/index.htm"))
 				return HTTPPostDDNSConfig();
 		#endif
 
@@ -504,7 +504,7 @@ static HTTP_IO_RESULT HTTPPostLCD(void)
 			LCDUpdate();
 			
 			// This is the only expected value, so callback is done
-			strcpypgm2ram((char*)curHTTP.data, (ROM void*)"/forms.htm");
+			strcpypgm2ram((char*)curHTTP.data, "/forms.htm");
 			curHTTP.httpStatus = HTTP_REDIRECT;
 			return HTTP_IO_DONE;
 	}
@@ -584,9 +584,9 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
 	
 	// Use current config in non-volatile memory as defaults
 	#if defined(EEPROM_CS_TRIS)
-		XEEReadArray(0x0001, (BYTE*)&newAppConfig, sizeof(AppConfig));
+		XEEReadArray(sizeof(NVM_VALIDATION_STRUCT), (BYTE*)&newAppConfig, sizeof(newAppConfig));
 	#elif defined(SPIFLASH_CS_TRIS)
-		SPIFlashReadArray(0x0001, (BYTE*)&newAppConfig, sizeof(AppConfig));
+		SPIFlashReadArray(sizeof(NVM_VALIDATION_STRUCT), (BYTE*)&newAppConfig, sizeof(newAppConfig));
 	#endif
 	
 	// Start out assuming that DHCP is disabled.  This is necessary since the 
@@ -685,19 +685,11 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
 	}
 
 
-	// All parsing complete!  Save new settings and force a reboot			
-	#if defined(EEPROM_CS_TRIS)
-		XEEBeginWrite(0x0000);
-		XEEWrite(0x60);
-		XEEWriteArray((BYTE*)&newAppConfig, sizeof(AppConfig));
-	#elif defined(SPIFLASH_CS_TRIS)
-		SPIFlashBeginWrite(0x0000);
-		SPIFlashWrite(0x60);
-		SPIFlashWriteArray((BYTE*)&newAppConfig, sizeof(AppConfig));
-	#endif
+	// All parsing complete!  Save new settings and force a reboot
+	SaveAppConfig(&newAppConfig);
 	
 	// Set the board to reboot and display reconnecting information
-	strcpypgm2ram((char*)curHTTP.data, (ROM char*)"/protect/reboot.htm?");
+	strcpypgm2ram((char*)curHTTP.data, "/protect/reboot.htm?");
 	memcpy((void*)(curHTTP.data+20), (void*)newAppConfig.NetBIOSName, 16);
 	curHTTP.data[20+16] = 0x00;	// Force null termination
 	for(i = 20; i < 20u+16u; i++)
@@ -712,7 +704,7 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
 
 ConfigFailure:
 	lastFailure = TRUE;
-	strcpypgm2ram((char*)curHTTP.data, (ROM char*)"/protect/config.htm");
+	strcpypgm2ram((char*)curHTTP.data, "/protect/config.htm");
 	curHTTP.httpStatus = HTTP_REDIRECT;		
 
 	return HTTP_IO_DONE;
@@ -733,7 +725,7 @@ static HTTP_IO_RESULT HTTPPostSNMPCommunity(void)
 			// If all parameters have been read, end
 			if(curHTTP.byteCount == 0u)
 			{
-				SaveAppConfig();
+				SaveAppConfig(&AppConfig);
 				return HTTP_IO_DONE;
 			}
 		
@@ -1320,7 +1312,7 @@ static HTTP_IO_RESULT HTTPPostEmail(void)
 					lastFailure = TRUE;
 									
 				// Redirect to the page
-				strcpypgm2ram((char*)curHTTP.data, (ROM void*)"/email/index.htm");
+				strcpypgm2ram((char*)curHTTP.data, "/email/index.htm");
 				curHTTP.httpStatus = HTTP_REDIRECT;
 				return HTTP_IO_DONE;
 			}
@@ -1451,7 +1443,7 @@ static HTTP_IO_RESULT HTTPPostDDNSConfig(void)
 			
 			// Redirect to prevent POST errors
 			lastSuccess = TRUE;
-			strcpypgm2ram((char*)curHTTP.data, (ROM void*)"/dyndns/index.htm");
+			strcpypgm2ram((char*)curHTTP.data, "/dyndns/index.htm");
 			curHTTP.httpStatus = HTTP_REDIRECT;
 			return HTTP_IO_DONE;				
 	}

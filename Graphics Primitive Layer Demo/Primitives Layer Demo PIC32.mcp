@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC32MX795F512L
+device=PIC32MX360F512L
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -76,6 +76,8 @@ file_048=Graphics
 file_049=Common
 file_050=Graphics
 file_051=Board Support Package
+file_052=.
+file_053=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -129,6 +131,8 @@ file_048=no
 file_049=no
 file_050=no
 file_051=no
+file_052=no
+file_053=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -182,6 +186,8 @@ file_048=no
 file_049=no
 file_050=no
 file_051=no
+file_052=yes
+file_053=yes
 [FILE_INFO]
 file_000=Font35PixelsHeight.c
 file_001=MainDemo.c
@@ -235,6 +241,8 @@ file_048=..\Microchip\Include\Graphics\DisplayDriver.h
 file_049=..\Microchip\Include\TimeDelay.h
 file_050=..\Microchip\Include\Graphics\DisplayDriverInterface.h
 file_051=..\Board Support Package\cpld.h
+file_052=Getting Started - Loading a precompiled demo.htm
+file_053=Getting Started - Running the Graphics Primitive Layer Demo.htm
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

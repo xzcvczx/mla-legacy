@@ -1026,7 +1026,7 @@ void MP3ClientTask(void)
                 oledFillLine(0x00,2);
                 oledFillLine(0x00,3);
 
-                strcpypgm2ram( (char *)stationMessage, (ROM void *)"GET /" );
+                strcpypgm2ram( (char *)stationMessage, "GET /" );
                 strcat( (char *)stationMessage, (char *)stationPath );
                 strcatpgm2ram( (char *)stationMessage, " HTTP/1.0\r\nHost: " );
                 strcat( (char *)stationMessage, (char *)stationHostName );

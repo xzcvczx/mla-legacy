@@ -54,13 +54,6 @@ medium and the ability to read the file.
 These interface routines can be implemented via macros or functions as 
 required.
 *******************************************************************************
-
- Change History:
-  Rev   Description
-  ----  -----------------------------------------
-  2.7   Updated to include the record structure information
-
-********************************************************************************
 */
 
 //*****************************************************************************

@@ -5,7 +5,6 @@
  *   -Implements an example "ToUpper" TCP server on port 9760 and 
  *	  should be used as a basis for creating new TCP server 
  *    applications
- *	 -Reference: None.  Hopefully AN833 in the future.
  *
  *********************************************************************
  * FileName:        GenericTCPServer.c
@@ -52,6 +51,40 @@
  * Author               Date    	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Howard Schlunder     10/19/06	Original
+ * Microchip            08/11/10    Added ability to close session by
+ *                                  pressing the ESCAPE key.
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * Description of how to run the demo:
+ *   1) Connect the ethernet port of the programmed demo board to a 
+ *        computer either directly or through a router.
+ *   2) Determine the IP address of the demo board.  This can be done several
+ *        different ways.
+ *      a) If you are using a demo setup with an LCD display (e.g. Explorer 16
+ *           or PICDEM.net 2), the IP address should be displayed on the second
+ *           line of the display.
+ *      b) Open the Microchip Ethernet Device Discoverer from the start menu.
+ *           Press the "Discover Devices" button to see the addresses and host
+ *           names of all devices with the Announce Protocol enabled on your
+ *           network.  You may have to configure your computer's firewall to 
+ *           prevent it from blocking UDP port 30303 for this solution.
+ *      c) If your board is connected directly with your computer with a
+ *           crossover cable: 
+ *              1) Open a command/DOS prompt and type 'ipconfig'.  Find the 
+ *                   network adaptor that is connected to the board.  The IP
+ *                   address of the board is located in the 'Default Gateway'
+ *                   field
+ *              2) Open up the network status for the network adaptor that
+ *                   connects the two devices.  This can be done by right clicking
+ *                   on the network connection icon in the network settings folder 
+ *                   and select 'status' from the menu. Find the 'Default Gateway'
+ *                   field.
+ *   3) Open a command/DOS prompt.  Type "telnet ip_address 9760" where
+ *        ip_address is the IP address that you got from step 2.
+ *   4) As you type characters, they will be echoed back in your command prompt
+ *        window in UPPER CASE.
+ *   5) Press Escape to end the demo.
+ *
  ********************************************************************/
 #define __GENERICTCPSERVER_C
 
@@ -101,6 +134,7 @@ void GenericTCPServer(void)
 	{
 		SM_HOME = 0,
 		SM_LISTENING,
+        SM_CLOSING,
 	} TCPServerState = SM_HOME;
 
 	switch(TCPServerState)
@@ -150,6 +184,10 @@ void GenericTCPServer(void)
 						i -= ('a' - 'A');
 						AppBuffer[w2] = i;
 					}
+                    else if(i == 0x1B)   //escape
+                    {
+                        TCPServerState = SM_CLOSING;
+                    }
 				}
 				
 				// Transfer the data out of our local processing buffer and into the TCP TX FIFO.
@@ -158,6 +196,13 @@ void GenericTCPServer(void)
 
 			// No need to perform any flush.  TCP data in TX FIFO will automatically transmit itself after it accumulates for a while.  If you want to decrease latency (at the expense of wasting network bandwidth on TCP overhead), perform and explicit flush via the TCPFlush() API.
 
+			break;
+
+		case SM_CLOSING:
+			// Close the socket connection.
+            TCPClose(MySocket);
+
+			TCPServerState = SM_HOME;
 			break;
 	}
 }

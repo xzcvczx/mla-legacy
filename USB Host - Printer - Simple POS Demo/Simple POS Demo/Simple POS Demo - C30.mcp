@@ -47,6 +47,7 @@ file_019=.
 file_020=USB Stack
 file_021=.
 file_022=.
+file_023=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -71,6 +72,7 @@ file_019=no
 file_020=no
 file_021=no
 file_022=no
+file_023=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -95,6 +97,7 @@ file_019=no
 file_020=no
 file_021=no
 file_022=yes
+file_023=yes
 [FILE_INFO]
 file_000=Simple POS Demo.c
 file_001=..\..\Microchip\USB\usb_host.c
@@ -119,6 +122,7 @@ file_019=..\..\Microchip\Include\uart2.h
 file_020=..\..\Microchip\Include\USB\usb_printer_pos_epson_tm_t88iv.h
 file_021=GraphicsConfig.h
 file_022=..\Getting Started - Running the Host - Printer - Simple POS Demo.htm
+file_023=..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

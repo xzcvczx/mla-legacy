@@ -6,7 +6,7 @@
  * FileName:        RoundDial.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,10 +34,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author                           Date            Comment
+ * Date            	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * PAT				  	            11/12/07	    Version 1.0 release
- * Pradeep Budagutta                03 Dec 2009     Added Object Header for Double Buffering Support
+ * 11/12/07	    	Version 1.0 release
+ * 03/12/09	     	Added Object Header for Double Buffering Support
  *****************************************************************************************/
 #ifndef _ROUNDDIAL_H
     #define _ROUNDDIAL_H
@@ -141,7 +141,7 @@ ROUNDDIAL   *RdiaCreate
             );
 
 /*********************************************************************
-* Function: RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
+* Function: RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates the translated 
@@ -200,10 +200,10 @@ ROUNDDIAL   *RdiaCreate
 * Side Effects: none
 *
 ********************************************************************/
-WORD        RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg);
+WORD        RdiaTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG* pMsg)
+* Function: RdiaMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: This function performs the actual state change 
 *			based on the translated message given. The following state changes 
@@ -231,7 +231,7 @@ WORD        RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void        RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG *pMsg);
+void        RdiaMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Macros:  RdiaGetVal(pDia)
@@ -341,7 +341,7 @@ void        RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG *pMsg);
     #define RdiaDecVal(pDia)    RdiaSetVal(pDia, (pDia->pos - pDia->res))
 
 /*********************************************************************
-* Function: RdiaDraw(ROUNDDIAL *pDia)
+* Function: WORD RdiaDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -364,5 +364,5 @@ void        RdiaMsgDefault(WORD translatedMsg, ROUNDDIAL *pDia, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD RdiaDraw(ROUNDDIAL * pDia);
+WORD RdiaDraw(void *pObj);
 #endif // _ROUNDDIAL_H

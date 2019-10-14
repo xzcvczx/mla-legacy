@@ -34,9 +34,10 @@
 Author                 Date           Comments
 --------------------------------------------------------------------------------
 Pradeep Budagutta    03-Mar-2008    First release
+                     03-Sep-2010    Changed paint block to more efficient code.
 *******************************************************************************/
 
-#include "Image Decoders\ImageDecoder.h"
+#include "Image Decoders/ImageDecoder.h"
 
 #ifdef IMG_SUPPORT_JPEG
 
@@ -956,25 +957,34 @@ static BYTE JPEG_bPaintOneBlock(JPEGDECODER *pJpegDecoder)
 
             for(bBlock = 0; bBlock < 4; bBlock++)
             {
-                    psY = &pJpegDecoder->asOneBlock[bBlock][0];
-                    psCb = &pJpegDecoder->asOneBlock[4][bCbCrOffset[bBlock]];
-                    psCr = &pJpegDecoder->asOneBlock[5][bCbCrOffset[bBlock]];
-                    for(wY = 0; wY < 8; wY++)
-                    {
-                            for(wX = 0; wX < 8; wX++)
-                            {
-                                     LONG s1 = ((*psY) + 128)*128;
-                                     LONG s2 = psCb[(wY>>1)*8+(wX>>1)];
-                                     LONG s3 = psCr[(wY>>1)*8+(wX>>1)];
-                                     r = range_limit((s1 + 180*s3)>>7);
-                                     g = range_limit((s1 - 44*s2 - 91*s3)>>7);
-                                     b = range_limit((s1 + 227*s2)>>7);
-                                     IMG_vSetColor(r, g, b);
-                                     IMG_vPutPixel(pJpegDecoder->wPrevX + bOffsetX[bBlock] + wX,
-                                              pJpegDecoder->wPrevY + bOffsetY[bBlock] + wY);
-                                     psY++;
-                            }
-                    }
+                WORD wXPos = pJpegDecoder->wPrevX + bOffsetX[bBlock];
+				WORD wYPos = pJpegDecoder->wPrevY + bOffsetY[bBlock];
+				
+				psY = &pJpegDecoder->asOneBlock[bBlock][0];
+				psCb = &pJpegDecoder->asOneBlock[4][bCbCrOffset[bBlock]];
+				psCr = &pJpegDecoder->asOneBlock[5][bCbCrOffset[bBlock]];
+				for(wY = 0; wY < 8; wY++)
+				{
+					WORD wYPos2 = wYPos + wY;
+					
+					for(wX = 0; wX < 4; wX++)
+					{
+						WORD psCxIndex = (wY>>1)*8 + wX;
+						LONG s2 = psCb[psCxIndex];
+						LONG s3 = psCr[psCxIndex];
+						WORD wX2;
+						
+						for(wX2 = 0; wX2 < 2; wX2++)
+						{
+							LONG s1 = ((*psY++) + 128)*128;
+							r = range_limit((s1 + 180*s3)>>7);
+							g = range_limit((s1 - 44*s2 - 91*s3)>>7);
+							b = range_limit((s1 + 227*s2)>>7);
+							IMG_vSetColor(r, g, b);
+							IMG_vPutPixel(wXPos + wX*2 + wX2, wYPos2);
+						}    
+					}
+				}
             }
 
             pJpegDecoder->wPrevX += 16;

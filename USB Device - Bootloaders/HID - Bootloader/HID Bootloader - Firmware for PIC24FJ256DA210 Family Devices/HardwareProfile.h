@@ -61,18 +61,33 @@
             #elif defined(PIC32_USB_STARTER_KIT)
                 #include "HardwareProfile - PIC32 USB Starter Kit.h"
             #endif
+        #elif defined(__32MX795F512L__)
+            #if defined(PIC32MX795F512L_PIM)
+                #include "HardwareProfile - PIC32MX795F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                //PIC32 USB Starter Kit II
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
         #endif
     #endif
 
     #if defined(__C30__)
         #if defined(__PIC24FJ256GB110__)
             #include "HardwareProfile - PIC24FJ256GB110 PIM.h"
+        #elif defined(__PIC24FJ256GB210__)
+            #include "HardwareProfile - PIC24FJ256GB210 PIM.h"
         #elif defined(__PIC24FJ256GB106__)
             #include "HardwareProfile - PIC24F Starter Kit.h"
         #elif defined(__PIC24FJ64GB004__)
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
         #elif defined(__PIC24FJ256DA210__)
             #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
+        #elif defined(__dsPIC33EP512MU810__)
+            #if defined(DSPIC33EP512MU810_PIM)
+                #include "HardwareProfile - dsPIC33EP512MU810 PIM.h"
+            #elif defined(DSPIC33E_STARTER_KIT)
+                #include "HardwareProfile - dsPIC33E Starter Kit.h"
+            #endif
         #endif
     #endif
 
@@ -89,12 +104,15 @@
             #else
                 #include "HardwareProfile - PIC18F46J50 PIM.h"
             #endif
+        #elif defined(__18F47J53)
+            #include "HardwareProfile - PIC18F47J53 PIM.h"
         #endif
     #endif
 #endif
 
 #if !defined(DEMO_BOARD)
-    #error "Demo board not defined.  Either define DEMO_BOARD for a custom board or select the correct processor for the demo board."
+    #warning "Demo board not defined.  Either define DEMO_BOARD for a custom board or select the correct processor for the demo board."
+    #include "HardwareProfile - Your Demo Board.h"
 #endif
 
 #endif  //HARDWARE_PROFILE_H

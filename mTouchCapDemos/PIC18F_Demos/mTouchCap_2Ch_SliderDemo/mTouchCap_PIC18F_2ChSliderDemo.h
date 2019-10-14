@@ -46,9 +46,9 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #ifdef __PIC24F__
-		#include "\mTouchCap_PIC24_CTMU_Physical.h"
+		#include "/mTouchCap_PIC24_CTMU_Physical.h"
 #else
-		#include "\mTouchCap_PIC18_CTMU_Physical.h"
+		#include "/mTouchCap_PIC18_CTMU_Physical.h"
 #endif
 
 

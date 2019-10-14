@@ -37,13 +37,12 @@
  ********************************************************************/
 #include <plib.h>
 
+#include "HardwareProfile.h"
 
-// Compile only for PIC32MX with Ethernet MAC interface (must not have external ENCX24J600, ENC28J60, or ZG2100M hardware defined)
-#if defined(__PIC32MX__) && defined(_ETH) && !defined(ENC100_INTERFACE_MODE) && !defined(ENC_CS_TRIS) && !defined(ZG_CS_TRIS)
+// Compile only for PIC32MX with Ethernet MAC interface (must not have external ENCX24J600, ENC28J60, or MRF24WB0M hardware defined)
+#if defined(__PIC32MX__) && defined(_ETH) && !defined(ENC100_INTERFACE_MODE) && !defined(ENC_CS_TRIS) && !defined(WF_CS_TRIS)
 
 #include "TCPIP Stack/ETHPIC32ExtPhy.h"
-
-#include "HardwareProfile.h"
 
 #include "TCPIP Stack/ETHPIC32ExtPhySMSC8700.h"
 
@@ -76,7 +75,8 @@ eEthRes EthPhyConfigureMII(eEthPhyCfgFlags cFlags)
 	unsigned short	phyReg;
 	
 	
-	phyReg=EthMIIMReadReg(PHY_REG_SPECIAL_MODE, PHY_ADDRESS)&(_SPECIALMODE_PHYAD_MASK|_SPECIALMODE_MODE_MASK);	// not used bits should be 0
+	EthMIIMReadStart(PHY_REG_SPECIAL_MODE, PHY_ADDRESS);
+	phyReg=EthMIIMReadResult()&(_SPECIALMODE_PHYAD_MASK|_SPECIALMODE_MODE_MASK);	// not used bits should be 0
 	if(cFlags&ETH_PHY_CFG_RMII)
 	{
 		phyReg|=_SPECIALMODE_MIIMODE_MASK;
@@ -85,7 +85,7 @@ eEthRes EthPhyConfigureMII(eEthPhyCfgFlags cFlags)
 	{
 		phyReg&=~_SPECIALMODE_MIIMODE_MASK;
 	}
-	EthMIIMWriteReg(PHY_REG_SPECIAL_MODE, PHY_ADDRESS, phyReg);	// update the Special Modes reg
+	EthMIIMWriteStart(PHY_REG_SPECIAL_MODE, PHY_ADDRESS, phyReg);	// update the Special Modes reg
 	
 
 	return ETH_RES_OK;	
@@ -114,7 +114,8 @@ eEthRes EthPhyConfigureMdix(eEthOpenFlags oFlags)
 {
 	unsigned short	phyReg;
 
-	phyReg=EthMIIMReadReg(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS)&(_SPECIALCTRL_SQEOFF_MASK|_SPECIALCTRL_XPOL_MASK);	// not used bits should be 0
+	EthMIIMReadStart(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS);
+	phyReg=EthMIIMReadResult()&(_SPECIALCTRL_SQEOFF_MASK|_SPECIALCTRL_XPOL_MASK);	// not used bits should be 0
 
 	if(oFlags&ETH_OPEN_MDIX_AUTO)
 	{	// enable Auto-MDIX
@@ -133,7 +134,7 @@ eEthRes EthPhyConfigureMdix(eEthOpenFlags oFlags)
 	       }
 	}
 	
-	EthMIIMWriteReg(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS, phyReg);	
+	EthMIIMWriteStart(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS, phyReg);	
 
 	return ETH_RES_OK;	
 

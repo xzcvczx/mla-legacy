@@ -42,8 +42,10 @@
  * PAT					02/05/10	Fixed GetPixel() bug
  * PAT					03/03/10	Fixed Circle() bug 
  * PAT					03/26/10	Fixed Line2D() bug 
+ * PAT					07/28/10	Add USE_DRV_PUTIMAGE label to PutImage() related functions 
+ *									to fix build error when driver PutImage() is not used.
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 WORD    _color;
@@ -65,7 +67,7 @@ SHORT   _clipBottom;
 void        SetAddress(DWORD address);
 void        SetReg(WORD index, BYTE value);
 BYTE        GetReg(WORD index);
-
+#if defined (USE_DRV_PUTIMAGE)
 void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
@@ -75,7 +77,7 @@ void        PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void        PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void        PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-
+#endif
 #if (DISPLAY_PANEL == TFT_G240320LTSW_118W_E)
     #include "TCON_SSD1289.c"
 
@@ -145,7 +147,7 @@ void SetAddress(DWORD address)
     #ifdef USE_16BIT_PMP
 	WORD_VAL    temp;
 
-    DeviceSetCommand(); // set RS line to low for command
+    DisplaySetCommand(); // set RS line to low for command
 
     temp.v[0] = ((DWORD_VAL) address).v[1];
     temp.v[1] = ((DWORD_VAL) address).v[2] | 0x80;
@@ -154,17 +156,17 @@ void SetAddress(DWORD address)
     temp.v[1] = ((DWORD_VAL) address).v[0];
 	DeviceWrite(temp.Val);
 
-	DeviceSetData();    // set RS line to high for data
+	DisplaySetData();    // set RS line to high for data
 
     #else
 
-    DeviceSetCommand(); // set RS line to low for command
+    DisplaySetCommand(); // set RS line to low for command
 
     DeviceWrite(((DWORD_VAL) address).v[2] | 0x80);
     DeviceWrite(((DWORD_VAL) address).v[1]);
     DeviceWrite(((DWORD_VAL) address).v[0]);
 
-    DeviceSetData();    // set RS line to high for data
+    DisplaySetData();    // set RS line to high for data
 
     #endif
 }
@@ -190,34 +192,34 @@ void SetReg(WORD index, BYTE value)
 {
     #ifdef USE_16BIT_PMP
 
-    DeviceSetCommand(); // set RS line to low for command
-    DeviceSelect();     // enable SSD1926
+    DisplaySetCommand(); // set RS line to low for command
+    DisplayEnable();     // enable SSD1926
 
     DeviceWrite(((WORD_VAL) index).v[1]);
     DeviceWrite(index << 8);
 
-	DeviceSetData();    // set RS line to high for data
+	DisplaySetData();    // set RS line to high for data
 
     if(index & 0x0001)
 		DeviceWrite(value);
     else
 		DeviceWrite(value << 8);
 
-	DeviceDeselect();   // disable SSD1926
+	DisplayDisable();   // disable SSD1926
 
 	#else
 
-    DeviceSetCommand(); // set RS line to low for command
-    DeviceSelect();     // enable SSD1926
+    DisplaySetCommand(); // set RS line to low for command
+    DisplayEnable();     // enable SSD1926
 
     DeviceWrite(0x00);    // register access
     DeviceWrite(((WORD_VAL) index).v[1]);
     DeviceWrite(((WORD_VAL) index).v[0]);
 
-	DeviceSetData();    // set RS line to high for data
+	DisplaySetData();    // set RS line to high for data
 	DeviceWrite(value);
 
-	DeviceDeselect();   // disable SSD1926
+	DisplayDisable();   // disable SSD1926
     #endif
 }
 
@@ -243,18 +245,18 @@ BYTE GetReg(WORD index)
 
 	WORD    value;
 
-    DeviceSetCommand(); // set RS line to low for command
-    DeviceSelect();     // enable SSD1926
+    DisplaySetCommand(); // set RS line to low for command
+    DisplayEnable();     // enable SSD1926
 
     DeviceWrite(((WORD_VAL) index).v[1]);
     DeviceWrite(index << 8);
 
-	DeviceSetData();    // set RS line to high for data
+	DisplaySetData();    // set RS line to high for data
 
 	value = DeviceRead();
 	value = DeviceRead();
 
-	DeviceDeselect();   // disable SSD1926
+	DisplayDisable();   // disable SSD1926
 
     if(index & 0x0001)
         value &= 0x00ff;
@@ -264,19 +266,19 @@ BYTE GetReg(WORD index)
 #else
     BYTE   value;
 
-	DeviceSetCommand(); // set RS line to low for command
-    DeviceSelect();     // enable SSD1926
+	DisplaySetCommand(); // set RS line to low for command
+    DisplayEnable();     // enable SSD1926
 
     DeviceWrite(0x00);    // register access
     DeviceWrite(((WORD_VAL) index).v[1]);
     DeviceWrite(((WORD_VAL) index).v[0]);
 
-	DeviceSetData();    // set RS line to high for data
+	DisplaySetData();    // set RS line to high for data
 
 	value = DeviceRead();
 	value = DeviceRead();
 
-	DeviceDeselect();   // disable SSD1926
+	DisplayDisable();   // disable SSD1926
 #endif
 
 	return (value);
@@ -528,10 +530,10 @@ void PutPixel(SHORT x, SHORT y)
     #else
     address = ((((DWORD) (GetMaxX() + 1)) * y + x) * PaletteBpp) >> 3;
     #endif
-    DeviceSelect();      // enable SSD1926
+    DisplayEnable();      // enable SSD1926
     SetAddress(address);
     WritePixel(_color);
-    DeviceDeselect();    // disable SSD1926
+    DisplayDisable();    // disable SSD1926
 }
 
 /*********************************************************************
@@ -560,20 +562,20 @@ WORD GetPixel(SHORT x, SHORT y)
 
     WORD    value;
 
-    DeviceSelect();
+    DisplayEnable();
 
     SetAddress(address);
     value = DeviceRead();
     value = DeviceRead();
 
-    DeviceDeselect();
+    DisplayDisable();
 
     return (value);
     #else
 
     WORD_VAL    value;
 
-    DeviceSelect();
+    DisplayEnable();
 
     SetAddress(address);
     
@@ -591,7 +593,7 @@ WORD GetPixel(SHORT x, SHORT y)
 	    value.v[1] = DeviceRead();
 	    value.v[0] = DeviceRead();
     #endif
-    DeviceDeselect();
+    DisplayDisable();
 
     return (value.Val);
     #endif
@@ -960,7 +962,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
             #else
     address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
             #endif
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = top; y < bottom + 1; y++)
     {
         SetAddress(address);
@@ -976,7 +978,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
                 #endif
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 
         #else
 
@@ -1194,7 +1196,7 @@ void ClearDevice(void)
 
     DWORD   counter;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     SetAddress(0);
     SetAddress(0);
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
@@ -1202,7 +1204,7 @@ void ClearDevice(void)
         WritePixel(_color);
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 
         #else
     while(GetReg(REG_2D_220) == 0);
@@ -1215,6 +1217,7 @@ void ClearDevice(void)
 
 #endif
 
+#ifdef USE_DRV_PUTIMAGE
 /*********************************************************************
 * Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
 *
@@ -1264,7 +1267,7 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         case FLASH:
 
             // Image address
-            flashAddress = ((BITMAP_FLASH *)bitmap)->address;
+            flashAddress = ((IMAGE_FLASH *)bitmap)->address;
 
             // Read color depth
             colorDepth = *(flashAddress + 1);
@@ -1361,7 +1364,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();      // enable SSD1926
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1427,7 +1430,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -1482,7 +1485,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();      // enable SSD1926
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1545,7 +1548,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -1600,7 +1603,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();      // enable SSD1926
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1642,7 +1645,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -1688,7 +1691,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *flashAddress;
     flashAddress++;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();      // enable SSD1926
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1730,7 +1733,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 #endif
@@ -1801,7 +1804,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
 
-        CS_LAT_BIT = 0;
+        DisplayEnable();      // enable SSD1926
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1862,7 +1865,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1929,7 +1932,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();      // enable SSD1926
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1984,7 +1987,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -2045,7 +2048,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        CS_LAT_BIT = 0;
+        DisplayEnable();      // enable SSD1926
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -2080,7 +2083,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -2140,7 +2143,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();      // enable SSD1926
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -2175,11 +2178,13 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 #endif
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
 #endif
+#endif //#ifdef USE_DRV_PUTIMAGE
+
 #ifdef USE_PALETTE
 
 /*********************************************************************

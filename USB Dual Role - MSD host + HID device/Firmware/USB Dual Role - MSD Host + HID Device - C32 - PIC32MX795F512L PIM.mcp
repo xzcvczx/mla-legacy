@@ -53,8 +53,10 @@ file_025=USB Stack
 file_026=USB Stack
 file_027=.
 file_028=USB Stack
-file_029=.
+file_029=USB Stack
 file_030=.
+file_031=.
+file_032=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -87,6 +89,8 @@ file_027=no
 file_028=no
 file_029=no
 file_030=no
+file_031=no
+file_032=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -117,8 +121,10 @@ file_025=no
 file_026=no
 file_027=no
 file_028=no
-file_029=yes
+file_029=no
 file_030=yes
+file_031=yes
+file_032=yes
 [FILE_INFO]
 file_000=usb_descriptors.c
 file_001=main.c
@@ -149,8 +155,10 @@ file_025=..\..\Microchip\USB\usb_hal_local.h
 file_026=..\..\Microchip\USB\usb_host_local.h
 file_027=HardwareProfile - PIC32MX460F512L PIM.h
 file_028=..\..\Microchip\Include\USB\usb_hal_pic32.h
-file_029=..\Getting Started - Running the Device - HID - Simple Custom Demo.htm
-file_030=..\IMPORTANT README.txt
+file_029=..\..\Microchip\USB\usb_device_local.h
+file_030=..\Getting Started - Running the Device - HID - Simple Custom Demo.htm
+file_031=..\IMPORTANT README.txt
+file_032=..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

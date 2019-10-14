@@ -667,9 +667,9 @@ WORD ProcessMessageTime( WORD translatedMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg )
     RTCCSetBinHour( hour );
     RTCCSetBinMin( minute );
     RTCCSetBinSec( 0 );
-    RTCCSetBinDay( day );
     RTCCSetBinMonth( month );
     RTCCSetBinYear( year );
+    RTCCSetBinDay( day );
     RTCCCalculateWeekDay();
     RTCCSet();                      // Copy the new values to the RTCC registers
     UpdateDateTime();               // Update the display.

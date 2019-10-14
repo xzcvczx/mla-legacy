@@ -78,11 +78,9 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev   Description
-  ----  -----------------------------------------------
-  2.6a- No change
-   2.7a
+Author          Date    Comments
+--------------------------------------------------------------------------------
+ADG          9-Apr-2008 First release
 *******************************************************************************/
 //DOM-IGNORE-END
 

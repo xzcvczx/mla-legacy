@@ -80,7 +80,8 @@
 #endif
 
 #if !defined(DEMO_BOARD)
-    #error "Demo board not defined.  Either define DEMO_BOARD for a custom board or select the correct processor for the demo board."
+    #warning "Demo board not defined.  Either define DEMO_BOARD for a custom board or select the correct processor for the demo board."
+    #include "HardwareProfile - Your Demo Board.h"
 #endif
 
 #endif  //HARDWARE_PROFILE_H

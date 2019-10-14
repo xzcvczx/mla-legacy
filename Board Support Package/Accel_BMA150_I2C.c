@@ -50,6 +50,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <plib.h>
 #include "ACCEL_BMA150Config.h"
 #include <stdint.h>
+
+#if defined (USE_ACCELEROMETER_BMA150)
+
 /********************************************************************
  Section: Communication Interface 
 ********************************************************************/
@@ -888,3 +891,5 @@ ACCEL_RESULT ACCELGetZAxis(ACCEL_DATA *acc_z)
 
     return ACCEL_INVALID;
 }
+
+#endif //#if defined (USE_ACCELEROMETER_BMA150)

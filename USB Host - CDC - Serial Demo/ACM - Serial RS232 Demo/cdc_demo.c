@@ -79,9 +79,9 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #include "HardwareProfile.h"
 #include "usb_config.h"
 #include "LCDBlocking.h"
-#include "USB\usb.h"
-#include "USB\usb_host_cdc.h"
-#include "USB\usb_host_cdc_interface.h"
+#include "USB/usb.h"
+#include "USB/usb_host_cdc.h"
+#include "USB/usb_host_cdc_interface.h"
 
 #if defined( __PIC32MX__ )
 #endif
@@ -171,7 +171,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
     //      Code Protect:                   Disabled
     //      JTAG Port Enable:               Disabled
 
-    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
+    #if defined(__PIC24FJ256GB110__) 
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
     #elif defined(__PIC24FJ64GB004__)
@@ -182,7 +182,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
     #elif defined(__PIC24FJ256GB106__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
-    #elif defined(__PIC24FJ256DA210__)
+    #elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #endif

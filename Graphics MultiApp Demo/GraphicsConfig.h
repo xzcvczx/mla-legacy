@@ -141,9 +141,6 @@
     #define USE_BITMAP_FLASH        // Support for bitmaps located in internal flash
     #define USE_BITMAP_EXTERNAL     // Support for bitmaps located in external memory
 
-// when USB PICtail is used with the graphics PICtail.
-    #define USE_USB_PICTAIL         // Option to enable the switching of LCD controller signals
-
 /*********************************************************************
 * Overview: Define the malloc() and free() for versatility on OS 
 *           based systems. 

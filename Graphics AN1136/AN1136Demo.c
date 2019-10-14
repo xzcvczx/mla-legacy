@@ -105,8 +105,8 @@ void            TickInit(void);                 // starts tick counter
 /////////////////////////////////////////////////////////////////////////////
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
-extern const BITMAP_FLASH redRightArrow;
-extern const BITMAP_FLASH redLeftArrow;
+extern const IMAGE_FLASH redRightArrow;
+extern const IMAGE_FLASH redLeftArrow;
 
 /////////////////////////////////////////////////////////////////////////////
 //                                  MAIN
@@ -131,8 +131,10 @@ int main(void)
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
+    #endif
     #endif
     /////////////////////////////////////////////////////////////////////////////
     #if defined(__dsPIC33F__) || defined(__PIC24H__)
@@ -170,25 +172,25 @@ int main(void)
     CPLDInitialize();
     CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
     CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
-    #endif
-    #endif
+    #endif // #ifdef MULTI_MEDIA_BOARD_DM00123
+    #endif // #if defined(__dsPIC33F__) || defined(__PIC24H__)
 
     GOLInit();                      // initialize graphics library &
+								    // create default style scheme for GOL
 
     #if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
     EEPROMInit();                   // initialize Exp.16 EEPROM SPI
     BeepInit();
     #else
-    SST25Init();                    // initialize GFX3 SST25 flash SPI
+	    #if defined (USE_SST25VF016)
+	    SST25Init();                    // initialize GFX3 SST25 flash SPI
+	    #endif
     #endif
     
     TouchInit();                    // initialize touch screen
-    
-    // create default style scheme for GOL
     TickInit();                     // initialize tick counter (for random number generation)
-    
+    HardwareButtonInit();           // Initialize the hardware buttons
 
-    // create default style scheme for GOL
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
 
     // If S3 button on Explorer 16 board is pressed calibrate touch screen
@@ -201,19 +203,20 @@ int main(void)
     }
 
     TRISAbits.TRISA9 = 0;
-    #elif defined(__PIC24FJ256DA210__)
 
-    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
-    if(BTN_S1 == 0)
-    {
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
-    
     #else
 
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    if(BTN_S3 == 0)
+    /**
+     * Force a touchscreen calibration by pressing the switch
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    if(GetHWButtonTouchCal() == HW_BUTTON_PRESS)
     {
         TouchCalibration();
         TouchStoreCalibration();
@@ -230,12 +233,25 @@ int main(void)
     }
 
     #else
-    if(GRAPHICS_LIBRARY_VERSION != SST25ReadWord(ADDRESS_VERSION))
-    {
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
+	    #if defined (USE_SST25VF016)
+	    if(GRAPHICS_LIBRARY_VERSION != SST25ReadWord(ADDRESS_VERSION))
+	    {
+	        TouchCalibration();
+	        TouchStoreCalibration();
+	    }
+	    #elif defined (USE_SST39LF400)
+		WORD tempArray[12], tempWord = 0x1234;
+		
+		SST39LF400Init(tempArray);
+		tempWord = SST39LF400ReadWord(ADDRESS_VERSION);
+		SST39LF400DeInit(tempArray);
 
+	    if(GRAPHICS_LIBRARY_VERSION != tempWord)
+	    {
+	        TouchCalibration();
+	        TouchStoreCalibration();
+	    }
+	    #endif
     #endif
 
     // Load touch screen calibration parameters from memory

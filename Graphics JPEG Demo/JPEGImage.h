@@ -39,8 +39,8 @@ Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external m
 #ifndef _JPEGIMAGE_H
     #define _JPEGIMAGE_H
 
-    #include "Graphics\Graphics.h"
-    #include "Image Decoders\ImageDecoder.h"
+    #include "Graphics/Graphics.h"
+    #include "Image Decoders/ImageDecoder.h"
 
 // The module uses an external memory driver to get an JPEG image from the external memory.
 // The header file for the driver must be provided HERE:
@@ -128,8 +128,8 @@ Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external m
 
 // JPEG file image structure for external and interanal memories
 // See Primitive.h for BITMAP_FLASH and BITMAP_EXTERNAL info
-    #define JPEG_FLASH      BITMAP_FLASH
-    #define JPEG_EXTERNAL   BITMAP_EXTERNAL
+    typedef IMAGE_FLASH 		JPEG_FLASH;      	
+    typedef IMAGE_EXTERNAL		JPEG_EXTERNAL;
 
 // Valid values of the first field for JPEG_FLASH and JPEG_EXTERNAL structures
     #define FILE_JPEG_FLASH     2   // the JPEG file is located in internal flash

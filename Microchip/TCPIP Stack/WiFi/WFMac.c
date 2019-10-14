@@ -69,7 +69,7 @@
 */
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_WF_MAC
 #endif
 
@@ -244,7 +244,7 @@ static void SyncENCPtrRAWState(UINT8 encPtrId)
             if ( !RawWindowReady[RAW_TX_ID] )
             {
                 /* Before we enter the while loop, get the tick timer count and save it */
-                maxAllowedTicks = TICKS_PER_SECOND / 2;  /* 500 ms timeout */
+                maxAllowedTicks = TICKS_PER_SECOND * 2;  /* 2 second timeout, needed if data traffic and scanning occurring */
                 startTickCount = (UINT32)TickGet();
                 
                 /* Retry until MRF24WB0M has drained it's prior TX pkts -  multiple sockets & flows can load the MRF24W10 */
@@ -334,7 +334,11 @@ static void SyncENCPtrRAWState(UINT8 encPtrId)
             }
 
             // mount the scratch window in the selected raw
-            ScratchMount(rawId);
+            if (ScratchMount(rawId) == 0)
+            {
+                /* work-around, somehow the scratch was already mounted to the other raw window */                
+                rawId = !rawId;
+            }    
         }
 
         /* convert Enc ptr index to raw index */
@@ -534,7 +538,7 @@ void MACInit(void)
 
 void RawInit(void)
 {
-    // By default (on latest B2 firmware) Scratch is mounted to RAW 1 after reset.  In order to mount it on RAW0
+    // By default, Scratch is mounted to RAW 1 after reset.  In order to mount it on RAW0
     // we need to first unmount it from RAW 1.
     ScratchUnmount(RAW_TX_ID);
 
@@ -976,8 +980,8 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
     RawSetIndex(RAW_RX_ID, (ENC_PREAMBLE_OFFSET + WF_RX_PREAMBLE_SIZE));
     
     g_rxBufferSize = len;
-/////    RawWindowReady[RAW_RX_ID] = TRUE;
-/////    SetRawWindowState(RAW_RX_ID, WF_RAW_DATA_MOUNTED);
+    /////    RawWindowReady[RAW_RX_ID] = TRUE;
+    /////SetRawWindowState(RAW_RX_ID, WF_RAW_DATA_MOUNTED);   
     g_encPtrRAWId[ENC_RD_PTR_ID] = RAW_RX_ID;
     g_encIndex[ENC_RD_PTR_ID]    = RXSTART + sizeof(ENC_PREAMBLE);
 

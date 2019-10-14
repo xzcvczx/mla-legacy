@@ -62,7 +62,7 @@ extern SCREEN_STATES       	screenState;
 extern PAGE_INFORMATION    	pageInformation;
 extern int 					orientationFlag;
 extern int 					enableSoundFlag;
-extern BITMAP_FLASH 		iconMicrochip;
+extern IMAGE_FLASH 			iconMicrochip;
 extern int 					maxXValue;
 extern int 					maxYValue;
 extern int 					maxZValue;

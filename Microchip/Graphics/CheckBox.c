@@ -38,7 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/12/07	Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_CHECKBOX
 
@@ -77,7 +77,11 @@ CHECKBOX *CbCreate
     pCb->hdr.bottom = bottom;
     pCb->pText = pText;
     pCb->hdr.state = state;
-
+    pCb->hdr.DrawObj = CbDraw;				// draw function
+    pCb->hdr.MsgObj = CbTranslateMsg;       // message function
+    pCb->hdr.MsgDefaultObj = CbMsgDefault;  // default message function
+    pCb->hdr.FreeObj = NULL;				// free function
+    
     // Set the style scheme
     if(pScheme == NULL)
         pCb->hdr.pGolScheme = _pDefaultGolScheme;
@@ -109,13 +113,17 @@ void CbSetText(CHECKBOX *pCb, XCHAR *pText)
 }
 
 /*********************************************************************
-* Function: CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG* pMsg)
+* Function: CbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: Changes the state of the check box by default.
 *
 ********************************************************************/
-void CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG *pMsg)
+void CbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    CHECKBOX *pCb;
+
+    pCb = (CHECKBOX *)pObj;
+
         #ifdef USE_FOCUS
             #ifdef USE_TOUCHSCREEN
     if(pMsg->type == TYPE_TOUCHSCREEN)
@@ -142,14 +150,18 @@ void CbMsgDefault(WORD translatedMsg, CHECKBOX *pCb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg)
+* Function: WORD CbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: Checks if the check box will be affected by the message
 *           and returns translated message.
 *
 ********************************************************************/
-WORD CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg)
+WORD CbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    CHECKBOX *pCb;
+
+    pCb = (CHECKBOX *)pObj;
 
     // Evaluate if the message is for the check box
     // Check if disabled first
@@ -207,7 +219,7 @@ WORD CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD CbDraw(CHECKBOX *pCb)
+* Function: WORD CbDraw(void *pObj)
 *
 * Output: returns the status of the drawing
 *		  0 - not complete
@@ -216,7 +228,7 @@ WORD CbTranslateMsg(CHECKBOX *pCb, GOL_MSG *pMsg)
 * Overview: Draws check box.
 *
 ********************************************************************/
-WORD CbDraw(CHECKBOX *pCb)
+WORD CbDraw(void *pObj)
 {
     typedef enum
     {
@@ -232,6 +244,9 @@ WORD CbDraw(CHECKBOX *pCb)
     static CB_DRAW_STATES state = REMOVE;
 
     SHORT checkIndent;
+    CHECKBOX *pCb;
+
+    pCb = (CHECKBOX *)pObj;
 
     if(IsDeviceBusy())
         return (0);

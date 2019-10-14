@@ -23,11 +23,11 @@ USB_SUPPORT_INTERRUPT_TRANSFERS must be defined.
 //DOM-IGNORE-BEGIN
 /******************************************************************************
 
-FileName:        usb_client_generic.c
-Dependencies:    None
-Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
-Compiler:        C30/C32
-Company:         Microchip Technology, Inc.
+* FileName:        usb_client_generic.c
+* Dependencies:    None
+* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
+* Compiler:        C30 v2.01/C32 v0.00.18
+* Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -49,10 +49,9 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
- Rev       Description
- -----     -----------
- 2.6-2.7a  No change
+Author          Date    Comments
+--------------------------------------------------------------------------------
+BC/KO       25-Dec-2007 First release
 
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -60,8 +59,8 @@ Change History:
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypeDefs.h"
-#include "USB\usb.h"
-#include "USB\usb_host_generic.h"
+#include "USB/usb.h"
+#include "USB/usb_host_generic.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE

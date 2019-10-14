@@ -39,7 +39,7 @@
  * PAT 					11/12/07	Version 1.0 release
  * PAT					11/12/07	Fixed clipping enabling location
 *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_STATICTEXT
 
@@ -79,6 +79,10 @@ STATICTEXT *StCreate
     pSt->hdr.bottom = bottom;
     pSt->pText = pText;             // location of the text
     pSt->hdr.state = state;
+    pSt->hdr.DrawObj = StDraw;			// draw function
+    pSt->hdr.MsgObj = StTranslateMsg;   // message function
+    pSt->hdr.MsgDefaultObj = NULL;		// default message function
+    pSt->hdr.FreeObj = NULL;			// free function
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -111,14 +115,19 @@ void StSetText(STATICTEXT *pSt, XCHAR *pText)
 }
 
 /*********************************************************************
-* Function: WORD StTranslateMsg(STATICTEXT *pSt, GOL_MSG *pMsg)
+* Function: WORD StTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Evaluates the message if the object will be affected by the 
 *		 message or not.
 *
 ********************************************************************/
-WORD StTranslateMsg(STATICTEXT *pSt, GOL_MSG *pMsg)
+WORD StTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    STATICTEXT *pSt;
+
+    pSt = (STATICTEXT *)pObj;
+
 
     // Evaluate if the message is for the static text
     // Check if disabled first
@@ -147,12 +156,12 @@ WORD StTranslateMsg(STATICTEXT *pSt, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD StDraw(STATICTEXT *pSt)
+* Function: WORD StDraw(void *pObj)
 *
 * Notes: This is the state machine to draw the static text.
 *
 ********************************************************************/
-WORD StDraw(STATICTEXT *pSt)
+WORD StDraw(void *pObj)
 {
     typedef enum
     {
@@ -168,6 +177,9 @@ WORD StDraw(STATICTEXT *pSt)
     static XCHAR *pCurLine = NULL;
     SHORT textWidth;
     XCHAR ch = 0;
+    STATICTEXT *pSt;
+
+    pSt = (STATICTEXT *)pObj;
 
     if(IsDeviceBusy())
         return (0);

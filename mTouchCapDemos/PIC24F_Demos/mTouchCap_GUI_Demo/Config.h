@@ -80,7 +80,7 @@ the appropriate channels to the board as per your application. These are listed 
 * Enable this option to connect the "4-Channel KEY" board to CTMU EVAL BOARD. If enabled, assign
 the appropriate channels to the board as per your application. These are listed below in the section "CHANNEL ASSIGNMENT".
 *****************************************************************************************/
-#define	USE_SLIDER_4CHNL
+//#define	USE_SLIDER_4CHNL
 
 /************/
 

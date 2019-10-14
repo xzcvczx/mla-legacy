@@ -71,6 +71,7 @@ void RestoreIOsettings(void);
 
 
 
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~	PIC24 Constants / Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
 /* ~~~~~~~~~~~~~~~~~~ Define the hardware settings as per your application board ~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -101,13 +102,17 @@ void RestoreIOsettings(void);
 												//LED bar graph, RD6,7,12,13 are wheel LEDs
 #define 	INIT_TRISE_VALUE		0x0000 //0xFC00;		//RE0,1,2,3,4,5,6,7,8 are Num Pad LEDs,
 													//RE9 is Power LED
-#define 	INIT_TRISG_VALUE		0x0000 //0xFF3F;		//RG6 is Wheel center LED, RG7 is Speaker
+#define 	INIT_TRISG_VALUE		0x0080 //0x0000 //0xFF3F;		//RG6 is Wheel center LED, RG7 is Speaker
 #define 	INIT_PORTG_VALUE		0xFFFF
 #define 	INIT_PORTC_VALUE		0xFFFF
 #define 	INIT_PORTD_VALUE		0x30C0
 #define 	INIT_PORTE_VALUE		0xFFFF
 
 
+
+#define		SET_PORT_B_PINS_OUTPUT		0xFFDF;
+#define		SET_PORT_E_PINS_OUTPUT		0xFDFF;
+#define		SET_PORT_G_PINS_OUTPUT		0xFEFF;
 
 
 

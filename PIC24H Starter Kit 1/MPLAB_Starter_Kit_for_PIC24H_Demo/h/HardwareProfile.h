@@ -52,6 +52,28 @@ This file defines all of the hardware-specific information for the project.
 //#define USE_SSD1303
 #define GO_FAST
 
+/*********************************************************************
+* Overview: Defines color depth. 
+********************************************************************/
+#define COLOR_DEPTH						1
+
+/*********************************************************************
+* Overview: Display controller selection.
+*                                          
+********************************************************************/
+#define DISPLAY_CONTROLLER				SH1101A
+
+/*********************************************************************
+* Overview: Horizontal and vertical display resolution
+*                  (from the glass datasheet).
+*********************************************************************/
+#define DISP_HOR_RESOLUTION				128
+#define DISP_VER_RESOLUTION				64
+/*********************************************************************
+* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
+*********************************************************************/
+#define DISP_ORIENTATION				0
+
 #if defined( __C30__ )
     #ifdef USE_FRC
         #define GetSystemClock()            	32000000UL
@@ -149,14 +171,19 @@ This file defines all of the hardware-specific information for the project.
 * IOS FOR THE DISPLAY CONTROLLER
 *********************************************************************/
 // Definitions for reset pin
-#define RST_TRIS_BIT       TRISAbits.TRISA1
-#define RST_LAT_BIT        LATAbits.LATA1
+#define DisplayResetConfig()        TRISAbits.TRISA1 = 0    
+#define DisplayResetEnable()        LATAbits.LATA1 = 0
+#define DisplayResetDisable()       LATAbits.LATA1 = 1
 
-#define CS_TRIS_BIT 	   TRISBbits.TRISB15
-#define CS_LAT_BIT 		   LATBbits.LATB15
+// Definitions for RS pin
+#define DisplayCmdDataConfig()		TRISCbits.TRISC7 = 0;
+#define DisplaySetCommand()         LATCbits.LATC7 = 0
+#define DisplaySetData()            LATCbits.LATC7 = 1
 
-#define RS_TRIS_BIT 	   TRISCbits.TRISC7
-#define RS_LAT_BIT 		   LATCbits.LATC7  
+// Definitions for CS pin
+#define DisplayConfig()             TRISBbits.TRISB15 = 0             
+#define DisplayEnable()             LATBbits.LATB15 = 0
+#define DisplayDisable()            LATBbits.LATB15 = 1
 
 #endif
 

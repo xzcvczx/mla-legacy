@@ -12,12 +12,12 @@ defines constants and data types that are used by multiple files.
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "GraphicsConfig.h"
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include "TouchSense.h"
-#include "MDD File System\FSIO.h"
-#include "USB\usb.h"
-#include "USB\usb_host_msd.h"
-#include "USB\usb_host_msd_scsi.h"
+#include "MDD File System/FSIO.h"
+#include "USB/usb.h"
+#include "USB/usb_host_msd.h"
+#include "USB/usb_host_msd_scsi.h"
 
 #include "Demos.h"
 #include "Flash.h"
@@ -32,7 +32,7 @@ defines constants and data types that are used by multiple files.
 //*****************************************************************************
 //*****************************************************************************
 
-#define VERSION_STRING  "Demo Firmware v1.6"
+#define VERSION_STRING  "Demo Firmware v1.7"
 
 //*****************************************************************************
 //*****************************************************************************

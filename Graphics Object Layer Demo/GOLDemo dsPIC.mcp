@@ -90,6 +90,8 @@ file_062=Board Support Package
 file_063=Board Support Package
 file_064=Board Support Package
 file_065=Board Support Package
+file_066=.
+file_067=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -157,6 +159,8 @@ file_062=no
 file_063=no
 file_064=no
 file_065=no
+file_066=no
+file_067=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -224,6 +228,8 @@ file_062=no
 file_063=no
 file_064=no
 file_065=no
+file_066=yes
+file_067=yes
 [FILE_INFO]
 file_000=ChineseFonts.c
 file_001=CustomControlDemo.c
@@ -291,6 +297,8 @@ file_062=..\Board Support Package\TouchScreen.h
 file_063=..\Board Support Package\SST25VF016.h
 file_064=..\Board Support Package\EEPROM.h
 file_065=..\Board Support Package\Beep.h
+file_066=Getting Started - Running the Graphics Object Layer Demo.htm
+file_067=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

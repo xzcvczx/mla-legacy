@@ -50,7 +50,7 @@ The main purpose of the GUI Demo is to demonstrate the behaviour of the Capaciti
 they are in the pressed state and the released state.It will also help in detemining the various trip 
 threshold levels at different conditions.
 
-After completing the et-up details as mentioned in the above section, a constantly moving vertical bar 
+After completing the set-up details as mentioned in the above section, a constantly moving vertical bar 
 will be displayed in the mTouch Diagnostic Tool which will indicate the channels that are connected 
 to the Demo Board.The Channel data is displayed in a sequence starting from Channel 0 to the maximum 
 channels selected.The Sensor 1 in the Diagnostic tool will correspond to the Channel 0, Sensor 2 will 

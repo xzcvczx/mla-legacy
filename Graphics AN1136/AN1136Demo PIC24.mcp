@@ -55,6 +55,8 @@ file_027=Board Support Package
 file_028=Board Support Package
 file_029=Board Support Package
 file_030=Board Support Package
+file_031=.
+file_032=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -87,6 +89,8 @@ file_027=no
 file_028=no
 file_029=no
 file_030=no
+file_031=no
+file_032=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -119,6 +123,8 @@ file_027=no
 file_028=no
 file_029=no
 file_030=no
+file_031=yes
+file_032=yes
 [FILE_INFO]
 file_000=Pictures C30.c
 file_001=AN1136Demo.c
@@ -151,6 +157,8 @@ file_027=..\Board Support Package\TouchScreen.h
 file_028=..\Board Support Package\Beep.h
 file_029=..\Board Support Package\SST25VF016.h
 file_030=..\Board Support Package\EEPROM.h
+file_031=Getting Started - Running the Graphics AN1136 Demo.htm
+file_032=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

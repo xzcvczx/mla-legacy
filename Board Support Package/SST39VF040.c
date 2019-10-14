@@ -34,15 +34,18 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/14/08	...
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
+ * 01/14/08		...
+ * 06/25/09    	dsPIC & PIC24H support 
+ * 10/14/10		Changed compile switch to device part number (USE_SST39VF040)
  *****************************************************************************/
 #include "SST39VF040.h"
 
-#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
-    #define SST39PMPWaitBusy()  while(PMMODEbits.BUSY);
+#if defined (USE_SST39VF040)
+    
+    
+#define SST39PMPWaitBusy()  while(PMMODEbits.BUSY);
 
 /////////////////////////////////////////////////////////////////////////
 // Local prototypes

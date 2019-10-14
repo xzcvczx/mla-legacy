@@ -60,13 +60,13 @@ $AgentID(MICROCHIP, 255)
 -    microchip.product
 ----------------------------------------------------------------------------
 $DeclareVar(PRODUCT_NAME, ASCII_STRING, SINGLE, READONLY, 43.6.1.4.1.17095.1.1)
-$StaticVar(PRODUCT_NAME, SNMPv2c Agent)
+$StaticVar(PRODUCT_NAME, SNMPv3Agent)
 
 $DeclareVar(PRODUCT_VERSION, ASCII_STRING, SINGLE, READONLY, 43.6.1.4.1.17095.1.2)
-$StaticVar(PRODUCT_VERSION, v5.25)
+$StaticVar(PRODUCT_VERSION, v5.31)
 
 $DeclareVar(VERSION_DATE, ASCII_STRING, SINGLE, READONLY, 43.6.1.4.1.17095.1.3)
-$StaticVar(VERSION_DATE, May 2010)
+$StaticVar(VERSION_DATE, Oct 10)
 
 
 ----------------------------------------------------------------------------
@@ -121,7 +121,98 @@ microchip.control.lcdDisplay
 $DeclareVar(LCD_DISPLAY, ASCII_STRING, SINGLE, READWRITE, 43.6.1.4.1.17095.3.6)
 $DynamicVar(LCD_DISPLAY, 10)
 
+
+****************************************************************************
+*    snmpFrameworkMIBObjects
+****************************************************************************
+$DeclareVar(ENGINE_ID, ASCII_STRING, SINGLE, READONLY, 43.6.1.6.3.10.2.1.1)
+$DynamicVar(ENGINE_ID, 249)
+
+$DeclareVar(ENGINE_BOOT, DWORD, SINGLE, READONLY, 43.6.1.6.3.10.2.1.2)
+$DynamicVar(ENGINE_BOOT, 248)
+
+$DeclareVar(ENGINE_TIME, DWORD, SINGLE, READONLY, 43.6.1.6.3.10.2.1.3)
+$DynamicVar(ENGINE_TIME, 247)
+
+$DeclareVar(ENGINE_MAX_MSG, WORD, SINGLE, READONLY, 43.6.1.6.3.10.2.1.4)
+$DynamicVar(ENGINE_MAX_MSG, 246) 
+
+
+****************************************************************************
+*    END OF SNMP FRAMEWORK MIB
+****************************************************************************
+
+    
+****************************************************************************
+*    SNMP-USER-BASED-SM-MIB 
+****************************************************************************
+User configured USM table where USM_INDEX_ID is used as index
+
+
+$DeclareVar(USM_INDEX_ID, BYTE, SEQUENCE, READONLY, 43.6.1.4.1.17095.4.1.1.1)
+$DynamicVar(USM_INDEX_ID, 11)
+$SequenceVar(USM_INDEX_ID, USM_INDEX_ID)
+
+$DeclareVar(USER_SECURITY_NAME, ASCII_STRING, SEQUENCE, READWRITE, 43.6.1.4.1.17095.4.1.1.2)
+$DynamicVar(USER_SECURITY_NAME, 12)
+$SequenceVar(USER_SECURITY_NAME, USM_INDEX_ID)
+
+$DeclareVar(USM_AUTH_PROT, BYTE, SEQUENCE, READWRITE, 43.6.1.4.1.17095.4.1.1.3)
+$DynamicVar(USM_AUTH_PROT, 13)
+$SequenceVar(USM_AUTH_PROT, USM_INDEX_ID)
+
+$DeclareVar(USM_AUTH_KEY, ASCII_STRING, SEQUENCE, READWRITE, 43.6.1.4.1.17095.4.1.1.4)
+$DynamicVar(USM_AUTH_KEY, 14)
+$SequenceVar(USM_AUTH_KEY, USM_INDEX_ID)
+
+$DeclareVar(USM_PRIV_PROT, BYTE, SEQUENCE, READWRITE, 43.6.1.4.1.17095.4.1.1.5)
+$DynamicVar(USM_PRIV_PROT, 15)
+$SequenceVar(USM_PRIV_PROT, USM_INDEX_ID)
+
+$DeclareVar(USM_PRIV_KEY, ASCII_STRING, SEQUENCE, READWRITE, 43.6.1.4.1.17095.4.1.1.6)
+$DynamicVar(USM_PRIV_KEY, 16)
+$SequenceVar(USM_PRIV_KEY, USM_INDEX_ID)
+
+****************************************************************************
+*    SNMP-TARGET-MIB 
+****************************************************************************
+User configured USM table where SNMP_TARGET_INDEX_ID is used as index
+
+
+$DeclareVar(SNMP_TARGET_INDEX_ID, BYTE, SEQUENCE, READONLY, 43.6.1.4.1.17095.5.1.1.1)
+$DynamicVar(SNMP_TARGET_INDEX_ID, 17)
+$SequenceVar(SNMP_TARGET_INDEX_ID,SNMP_TARGET_INDEX_ID)
+
+$DeclareVar(SNMP_TARGET_MP_MODEL, BYTE, SEQUENCE, READWRITE, 43.6.1.4.1.17095.5.1.1.2)
+$DynamicVar(SNMP_TARGET_MP_MODEL, 18)
+$SequenceVar(SNMP_TARGET_MP_MODEL, SNMP_TARGET_INDEX_ID)
+
+$DeclareVar(SNMP_TARGET_SECURITY_MODEL, BYTE, SEQUENCE, READWRITE, 43.6.1.4.1.17095.5.1.1.3)
+$DynamicVar(SNMP_TARGET_SECURITY_MODEL, 19)
+$SequenceVar(SNMP_TARGET_SECURITY_MODEL, SNMP_TARGET_INDEX_ID)
+
+$DeclareVar(SNMP_TARGET_SECURITY_NAME, ASCII_STRING, SEQUENCE, READWRITE, 43.6.1.4.1.17095.5.1.1.4)
+$DynamicVar(SNMP_TARGET_SECURITY_NAME, 20)
+$SequenceVar(SNMP_TARGET_SECURITY_NAME, SNMP_TARGET_INDEX_ID)
+
+$DeclareVar(SNMP_TARGET_SECURITY_LEVEL, BYTE, SEQUENCE, READWRITE, 43.6.1.4.1.17095.5.1.1.5)
+$DynamicVar(SNMP_TARGET_SECURITY_LEVEL, 21)
+$SequenceVar(SNMP_TARGET_SECURITY_LEVEL, SNMP_TARGET_INDEX_ID)
+
+
+****************************************************************************
+*    END OF USM MIB
+****************************************************************************
+
+
+$DeclareVar(SNMPV3_PVT_VAL, BYTE, SINGLE, READONLY, 43.6.1.4.1.17095.6.1)
+$StaticVar(SNMPV3_PVT_VAL, 10)
+
+****************************************************************************
+*    END OF SNMPV3 PVT MIB
+****************************************************************************
+
+
 ****************************************************************************
 *    END OF MICROCHIP - Demo MIB
 ****************************************************************************
-

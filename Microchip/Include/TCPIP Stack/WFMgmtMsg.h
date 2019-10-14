@@ -277,7 +277,7 @@ kZGMACResultNoStoredBssDesc          // 39
 
 
 
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
 /* this block of defines is used to check illegal reentry when in WF API functions */
 #define WF_ENTERING_FUNCTION    (1)
 #define WF_LEAVING_FUNCTION     (0)
@@ -355,7 +355,7 @@ void WFGetMRF24WB0MVersion(UINT8 *p_version);
 
 
 /* When asserts are enabled, call this function.  When asserts are not enabled compile it out */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     /* if asserts enabled this function will be called */
     void WFSetFuncState(UINT8 func, UINT8 state);
 #else

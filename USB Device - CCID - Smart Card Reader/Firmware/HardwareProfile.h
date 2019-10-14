@@ -64,6 +64,8 @@
         #elif defined(__32MX795F512L__)
             #if defined(PIC32MX795F512L_PIM)
                 #include "HardwareProfile - PIC32MX795F512L PIM.h"
+            #elif defined (PIC32MX460F512L_PIM)
+                #include "HardwareProfile - PIC32MX460F512L PIM.h"
             #elif defined(PIC32_USB_STARTER_KIT)
                 //PIC32 USB Starter Kit II
                 #include "HardwareProfile - PIC32 USB Starter Kit.h"

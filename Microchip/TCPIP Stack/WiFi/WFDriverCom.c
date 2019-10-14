@@ -63,7 +63,7 @@
 */
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER    WF_MODULE_WF_DRIVER_COM
 #endif
 
@@ -192,7 +192,7 @@ static void ProcessInterruptServiceResult(void)
     /* read hostInt register to determine cause of interrupt */
     hostIntRegValue = Read8BitWFRegister(WF_HOST_INTR_REG);
 
-    // or in the saved interrupts during the time when we were waiting for raw complete, set by WFEintHandler()
+    // OR in the saved interrupts during the time when we were waiting for raw complete, set by WFEintHandler()
     hostIntRegValue |= g_HostIntSaved;
     
     // done with the saved interrupts, clear variable
@@ -461,7 +461,6 @@ void WriteWFROMArray(UINT8 regId, ROM UINT8 *p_Buf, UINT16 length)
 #include "TCPIP Stack/TCPIP.h"
 
 
-
 /*****************************************************************************
  * FUNCTION: ChipReset
  *
@@ -473,7 +472,7 @@ void WriteWFROMArray(UINT8 regId, ROM UINT8 *p_Buf, UINT16 length)
  *
  *  NOTES: Performs the necessary SPI operations to cause the MRF24WB0M to reset.
  *      This function also implements a delay so that it will not return until
- *      the MRF24WB0M is ready to receive messages again.  The delay time will
+ *      the WiFi device is ready to receive messages again.  The delay time will
  *      vary depending on the amount of code that must be loaded from serial
  *      flash.
  *****************************************************************************/
@@ -485,37 +484,22 @@ static void ChipReset(void)
     
     timeoutPeriod = TICKS_PER_SECOND;  /* 1000 ms */
 
-#if 0
-    /* THIS WAS OLD RESET CODE, BUT DOES NOT APPEAR TO WORK ON PICTAILS */
-     // Enable regulator
-    XCEN33_IO   = 0;  // Set low to enable regulator
-    XCEN33_TRIS = 0;  // Configure line as ouput
-    DelayMs(10);      // wait a little
-
-    // take MRF24WB0M out of reset
-    WF_RST_IO   = 0;  // put the line in reset state 
-    WF_RST_TRIS = 0;  // configure the I/O as an output 
-    DelayMs(10);      // wait a little
-    WF_RST_IO   = 1;  // take MRF24WB0M out of reset
-    DelayMs(10);      // wait a little
-
-    /* END TEST CODE */
-#endif    
-
     /* needed for Microchip PICTail (chip enable active low) */
     WF_SetCE_N(WF_LOW); /* set low to enable regulator */
 
-    /* remove MRF24WB0M from reset */
+    /* Configure reset pin */
     WF_SetRST_N(WF_HIGH);
 
     /* clear the power bit to disable low power mode on the MRF24WB0M */
     Write16BitWFRegister(WF_PSPOLL_H_REG, 0x0000);
 
-    /* perform hard reset on MRF24WB0M */
-    Write16BitWFRegister(WF_INDEX_ADDR_REG, WF_CONFIG_CTRL0_REG);     
-    Write16BitWFRegister(WF_INDEX_DATA_REG, 0x80ff);
-    Write16BitWFRegister(WF_INDEX_ADDR_REG, WF_CONFIG_CTRL0_REG);     
-    Write16BitWFRegister(WF_INDEX_DATA_REG, 0x0fff);
+
+    /* Set HOST_RESET bit in register to put device in reset */
+    Write16BitWFRegister(WF_HOST_RESET_REG, Read16BitWFRegister(WF_HOST_RESET_REG) | WF_HOST_RESET_MASK);
+
+    /* Clear HOST_RESET bit in register to take device out of reset */
+    Write16BitWFRegister(WF_HOST_RESET_REG, Read16BitWFRegister(WF_HOST_RESET_REG) & ~WF_HOST_RESET_MASK);
+
 
     /* after reset is started poll register to determine when HW reset has completed */
     startTickCount = (UINT32)TickGet();  
@@ -547,6 +531,7 @@ static void ChipReset(void)
     } while (value == 0);
     
 }
+
 
 /*****************************************************************************
  * FUNCTION: HostInterrupt2RegInit

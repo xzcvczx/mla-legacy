@@ -36,8 +36,8 @@ Pradeep Budagutta    25-Jun-2008    First release
 *******************************************************************************/
 
 // Configuration bits
-#include "Graphics\Graphics.h"
-#include "Image Decoders\ImageDecoder.h"
+#include "Graphics/Graphics.h"
+#include "Image Decoders/ImageDecoder.h"
 #include "FlashImage.h"
 #include "cpld.h"
 
@@ -111,8 +111,10 @@ int main (void)
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
+    #endif
 
     #endif
 

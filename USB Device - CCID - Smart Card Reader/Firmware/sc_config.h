@@ -1,11 +1,11 @@
 /********************************************************************
  FileName:		sc_config.h
  Dependencies:	See INCLUDES section
- Processor:		PIC18, PIC24 Microcontrollers
+ Processor:		PIC18,PIC24,PIC32 & dsPIC33F Microcontrollers
  Hardware:		This demo is natively intended to be used on Exp 16, LPC
  				& HPC Exp board. This demo can be modified for use on other hardware
  				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24)
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24 & dsPIC) & C32 (for PIC32) 
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -34,7 +34,9 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  2.7   Initial release
+  1.0   Initial release
+  1.01  Modified to Support T=1 protocol
+  1.02  Modified to Support PIC32,dsPIC33F & PIC24H controllers
 ********************************************************************/
 
 #ifndef SCCFG_H
@@ -708,6 +710,347 @@
 		// Disable Pull up for SMART_CARD_DETECTION & SIM_CARD_DETECTION
 		#define SCdrv_DisbleCardSimPresentPinPullUp()	(INTCON2bits.RBPU = 1)
 
+	#elif defined (PIC32MX795F512L_PIM) || defined (PIC32MX460F512L_PIM)
+
+		#define EXPLORER_16
+
+		// Note : SYS_FREQ denotes the System clock frequency
+		#define SYS_FREQ 16000000UL
+
+		// Note : FCY denotes the instruction cycle clock frequency (SYS_FREQ/2)"
+		#define FCY (SYS_FREQ)
+
+		#include "p32xxxx.h"
+		#include "plib.h"
+		#include <math.h>
+
+		// Enable Port Pin of Micro as Vcc for Smart Card
+		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
+
+		// Provide clock from the Micro to the Smart Card
+		#define  ENABLE_SC_EXTERNAL_CLOCK
+
+		// Set Clock Freq to drive Smart Card
+		#define Scdrv_ClockSet()            (TMR2 = 0,T2CON = 0x00,PR2 = 3,OC2R = 2,OC2RS = 2,TRISDbits.TRISD1 = 0,OC2CON = 0x0006)
+
+		//Enable UART
+		#define SCdrv_EnableUART()	    	(U1MODEbits.UARTEN = 1)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableClock()	    	(OC2CONbits.ON = 1,T2CONbits.ON = 1)
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableClock()	    (OC2CONbits.ON = 0,T2CONbits.ON = 0,TMR2 = 0)
+
+		// Set Clock Freq to drive Smart Card
+		#define SCdrv_EnableDelayTimerIntr()   (IPC1bits.T1IP = 3,IPC1bits.T1IS = 1,IFS0bits.T1IF = 0,T1CON = 0x00,PR1 = 0xFFFF,IEC0bits.T1IE = 1,INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR),INTEnableInterrupts())
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableDelayTimer()	    	(T1CONbits.TON = 1)
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableDelayTimer()	    	(T1CONbits.TON = 0)
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_CIRCUIT_INPUT_CLK    		FCY
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_POWER2_VALUE      		(BYTE)0
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_DIVISOR_VALUE      		(BYTE)PR2
+
+		#define REF_CLOCK_TO_SMART_CARD				(unsigned long)(FCY/(PR2 + 1))
+
+        //#define REF_CLOCK_TO_SMART_CARD     (unsigned long)((unsigned long long)((unsigned long long)FCY * 2)/(pow(2,3)))
+		#define SMART_CARD_CLOCK_IN_KHZ 4000 //this macro used by USB descriptors, SMART_CARD_CLOCK_IN_KHZ =REF_CLOCK_TO_SMART_CARD/1000
+		#define SMART_CARD_DEFAULT_DATA_RATE 10752 //this macro used by USB descriptors, SMART_CARD_DEFAULT_DATA_RATE = REF_CLOCK_TO_SMART_CARD/372
+
+        #define SCdrv_SetClockPinLow() LATDbits.LATD0 = 0;
+        #define SCdrv_SetClockPinHigh() LATDbits.LATD0 = 1;
+        
+        
+		//Turn on 1/off 0 card power
+		#define SCdrv_SetSwitchCardPower(x) 			(LATBbits.LATB9=(x))
+		
+		//set reset state to the value x
+		#define SCdrv_SetSwitchCardReset(x) 			(LATEbits.LATE8=(x))
+		
+		//set tx pin to the value x
+		#define SCdrv_SetTxPinData(x) 					(LATFbits.LATF8=(x))
+		
+		//Get Smart Card Present status
+		#define SCdrv_CardPresent()	      				(PORTBbits.RB0 || !PORTBbits.RB1)
+
+		//Get Rx Pin Data
+		#define SCdrv_GetRxPinData()               		(PORTFbits.RF2)
+		
+		//Set Tx Pin direction
+		#define SCdrv_TxPin_Direction(flag)    			(TRISFbits.TRISF8 = flag)
+		
+		//Set Power Pin direction connected to the smart card
+		#define SCdrv_PowerPin_Direction(flag) 			(TRISBbits.TRISB9 = flag)
+		
+		//Set Reset Pin direction connected to the smart card
+		#define SCdrv_ResetPin_Direction(flag) 			(TRISEbits.TRISE8 = flag)
+		
+		//Set Card Present Pin direction connected to the smart card
+		#define SCdrv_CardPresent_Direction(flag) 		(TRISBbits.TRISB0 = flag)
+		
+		//Set Sim Present Pin direction connected to the smart card
+		#define SCdrv_SimPresent_Direction(flag) 		(TRISBbits.TRISB1 = flag)
+		
+		// Enable Pull up at Tx Pin
+		#define SCdrv_EnableTxPinPullUp()				
+		
+		// Enable Pull up at Rx Pin
+		#define SCdrv_EnableRxPinPullUp()				
+		
+		// Enable Pull up for SMART_CARD_DETECTION
+		#define SCdrv_EnableCardPresentPinPullUp()		(CNPUEbits.CNPUE2 = 1)
+		
+		// Enable Pull up for SIM_CARD_DETECTION
+		#define SCdrv_EnableSimPresentPinPullUp()		(CNPUEbits.CNPUE3 = 1)
+		
+		// Disable Pull up at Tx Pin
+		#define SCdrv_DisableTxPinPullUp()				
+		
+		// Disable Pull up at Rx Pin
+		#define SCdrv_DisableRxPinPullUp()				
+		
+		// MAP UART Rx Pin
+		#define MapUART1RxPin()							
+		
+		// MAP UART Tx Pin
+		#define MapUART1TxPin()							
+
+	#elif defined(__dsPIC33FJ128MC710__)
+
+		#define EXPLORER_16
+
+		// Note : SYS_FREQ denotes the System clock frequency
+		#define SYS_FREQ 32000000UL
+
+		// Note : FCY denotes the instruction cycle clock frequency (SYS_FREQ/2)"
+		#define FCY (SYS_FREQ/2)
+
+		#include "p33Fxxxx.h"
+		#include "libpic30.h"
+		#include <math.h>
+
+		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
+		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
+
+		// Enable Port Pin of Micro as Vcc for Smart Card
+		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
+
+		// Provide clock from the Micro to the Smart Card
+		#define  ENABLE_SC_EXTERNAL_CLOCK
+
+		// Set Clock Freq to drive Smart Card
+		#define Scdrv_ClockSet()            (TMR2 = 0,T2CON = 0x00,PR2 = 3,OC2R = 2,OC2RS = 2,TRISDbits.TRISD1 = 0,OC2CON = 0x0006)
+
+		//Enable UART
+		#define SCdrv_EnableUART()	    	(U1MODEbits.UARTEN = 1)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableClock()	    	(T2CONbits.TON = 1)
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableClock()	    (T2CONbits.TON = 0,TMR2 = 0)
+
+		// Set Clock Freq to drive Smart Card
+		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableDelayTimer()	    	(T1CONbits.TON = 1)
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableDelayTimer()	    	(T1CONbits.TON = 0)
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_CIRCUIT_INPUT_CLK    		FCY
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_POWER2_VALUE      		(BYTE)0
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_DIVISOR_VALUE      		(BYTE)PR2
+
+		#define REF_CLOCK_TO_SMART_CARD     (unsigned long)(FCY/(PR2 + 1))
+
+		//Turn on 1/off 0 card power
+		#define SCdrv_SetSwitchCardPower(x) 			(LATBbits.LATB9=(x))
+		
+		//set reset state to the value x
+		#define SCdrv_SetSwitchCardReset(x) 			(LATEbits.LATE8=(x))
+		
+		//set tx pin to the value x
+		#define SCdrv_SetTxPinData(x) 					(LATFbits.LATF3=(x))
+		
+		//Get Smart Card Present status
+		#define SCdrv_CardPresent()	      				(PORTBbits.RB0 || !PORTBbits.RB1)
+
+		//Get Rx Pin Data
+		#define SCdrv_GetRxPinData()               		(PORTFbits.RF2)
+		
+		//Set Tx Pin direction
+		#define SCdrv_TxPin_Direction(flag)    			(TRISFbits.TRISF3 = flag)
+		
+		//Set Power Pin direction connected to the smart card
+		#define SCdrv_PowerPin_Direction(flag) 			(TRISBbits.TRISB9 = flag)
+		
+		//Set Reset Pin direction connected to the smart card
+		#define SCdrv_ResetPin_Direction(flag) 			(TRISEbits.TRISE8 = flag)
+		
+		//Set Card Present Pin direction connected to the smart card
+		#define SCdrv_CardPresent_Direction(flag) 		(TRISBbits.TRISB0 = flag)
+		
+		//Set Sim Present Pin direction connected to the smart card
+		#define SCdrv_SimPresent_Direction(flag) 		(TRISBbits.TRISB1 = flag)
+		
+		// Enable Pull up at Tx Pin
+		#define SCdrv_EnableTxPinPullUp()				
+		
+		// Enable Pull up at Rx Pin
+		#define SCdrv_EnableRxPinPullUp()				
+		
+		// Enable Pull up for SMART_CARD_DETECTION
+		#define SCdrv_EnableCardPresentPinPullUp()		(_CN2PUE = 1)
+		
+		// Enable Pull up for SIM_CARD_DETECTION
+		#define SCdrv_EnableSimPresentPinPullUp()		(_CN3PUE = 1)
+		
+		// Disable Pull up at Tx Pin
+		#define SCdrv_DisableTxPinPullUp()				
+		
+		// Disable Pull up at Rx Pin
+		#define SCdrv_DisableRxPinPullUp()				
+		
+		// MAP UART Rx Pin
+		#define MapUART1RxPin()							
+		
+		// MAP UART Tx Pin
+		#define MapUART1TxPin()							
+
+	#elif defined(__PIC24HJ256GP610__)
+
+		#define EXPLORER_16
+
+		// Note : SYS_FREQ denotes the System clock frequency
+		#define SYS_FREQ 32000000UL
+
+		// Note : FCY denotes the instruction cycle clock frequency (SYS_FREQ/2)"
+		#define FCY (SYS_FREQ/2)
+
+		#include "p24Hxxxx.h"
+		#include "libpic30.h"
+		#include <math.h>
+
+		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
+		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
+
+		// Enable Port Pin of Micro as Vcc for Smart Card
+		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
+
+		// Provide clock from the Micro to the Smart Card
+		#define  ENABLE_SC_EXTERNAL_CLOCK
+
+		// Set Clock Freq to drive Smart Card
+		#define Scdrv_ClockSet()            (TMR2 = 0,T2CON = 0x00,PR2 = 3,OC2R = 2,OC2RS = 2,TRISDbits.TRISD1 = 0,OC2CON = 0x0006)
+
+		//Enable UART
+		#define SCdrv_EnableUART()	    	(U1MODEbits.UARTEN = 1)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableClock()	    	(T2CONbits.TON = 1)
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableClock()	    (T2CONbits.TON = 0,TMR2 = 0)
+
+		// Set Clock Freq to drive Smart Card
+		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)
+
+		// Enable Clock to drive Smart Card
+		#define SCdrv_EnableDelayTimer()	    	(T1CONbits.TON = 1)
+
+		// Disable Clock used to drive Smart Card
+		#define SCdrv_DisableDelayTimer()	    	(T1CONbits.TON = 0)
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_CIRCUIT_INPUT_CLK    		FCY
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_POWER2_VALUE      		(BYTE)0
+
+		//Reference Clock Circuit - Input Clock
+		#define REF_CLOCK_DIVISOR_VALUE      		(BYTE)PR2
+
+		#define REF_CLOCK_TO_SMART_CARD     (unsigned long)(FCY/(PR2 + 1))
+
+		//Turn on 1/off 0 card power
+		#define SCdrv_SetSwitchCardPower(x) 			(LATBbits.LATB9=(x))
+		
+		//set reset state to the value x
+		#define SCdrv_SetSwitchCardReset(x) 			(LATAbits.LATA12=(x))
+		
+		//set tx pin to the value x
+		#define SCdrv_SetTxPinData(x) 					(LATFbits.LATF3=(x))
+		
+		//Get Smart Card Present status
+		#define SCdrv_CardPresent()	      				(PORTBbits.RB0 || !PORTBbits.RB1)
+
+		//Get Rx Pin Data
+		#define SCdrv_GetRxPinData()               		(PORTFbits.RF2)
+		
+		//Set Tx Pin direction
+		#define SCdrv_TxPin_Direction(flag)    			(TRISFbits.TRISF3 = flag)
+		
+		//Set Power Pin direction connected to the smart card
+		#define SCdrv_PowerPin_Direction(flag) 			(TRISBbits.TRISB9 = flag)
+		
+		//Set Reset Pin direction connected to the smart card
+		#define SCdrv_ResetPin_Direction(flag) 			(TRISAbits.TRISA12 = flag)
+		
+		//Set Card Present Pin direction connected to the smart card
+		#define SCdrv_CardPresent_Direction(flag) 		(TRISBbits.TRISB0 = flag)
+		
+		//Set Sim Present Pin direction connected to the smart card
+		#define SCdrv_SimPresent_Direction(flag) 		(TRISBbits.TRISB1 = flag)
+		
+		// Enable Pull up at Tx Pin
+		#define SCdrv_EnableTxPinPullUp()				
+		
+		// Enable Pull up at Rx Pin
+		#define SCdrv_EnableRxPinPullUp()				
+		
+		// Enable Pull up for SMART_CARD_DETECTION
+		#define SCdrv_EnableCardPresentPinPullUp()		(_CN2PUE = 1)
+		
+		// Enable Pull up for SIM_CARD_DETECTION
+		#define SCdrv_EnableSimPresentPinPullUp()		(_CN3PUE = 1)
+		
+		// Disable Pull up at Tx Pin
+		#define SCdrv_DisableTxPinPullUp()				
+		
+		// Disable Pull up at Rx Pin
+		#define SCdrv_DisableRxPinPullUp()				
+		
+		// MAP UART Rx Pin
+		#define MapUART1RxPin()							
+		
+		// MAP UART Tx Pin
+		#define MapUART1TxPin()							
+		
 	#else
 
 	#endif

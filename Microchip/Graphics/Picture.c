@@ -38,7 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_PICTURE
 
@@ -79,6 +79,10 @@ PICTURE *PictCreate
     pPict->pBitmap = pBitmap;
     pPict->hdr.state = state;
     pPict->scale = scale;
+    pPict->hdr.DrawObj = PictDraw;			// draw function
+    pPict->hdr.MsgObj = PictTranslateMsg;   // message function
+    pPict->hdr.MsgDefaultObj = NULL;		// default message function
+    pPict->hdr.FreeObj = NULL;				// free function
 
     // Set the style scheme to be used
     if(pScheme == NULL)
@@ -92,13 +96,16 @@ PICTURE *PictCreate
 }
 
 /*********************************************************************
-* Function: WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
+* Function: WORD PictTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: translates the GOL message for the picture control
 *
 ********************************************************************/
-WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
+WORD PictTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    PICTURE *pPict;
+
+    pPict = (PICTURE *)pObj;
 
     // Evaluate if the message is for the picture
     // Check if disabled first
@@ -127,7 +134,7 @@ WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD PictDraw(PICTURE *pPict)
+* Function: WORD PictDraw(void *pObj)
 *
 * Output: returns the status of the drawing
 *		  0 - not completed
@@ -136,7 +143,7 @@ WORD PictTranslateMsg(PICTURE *pPict, GOL_MSG *pMsg)
 * Overview: draws picture
 *
 ********************************************************************/
-WORD PictDraw(PICTURE *pPict)
+WORD PictDraw(void *pObj)
 {
     typedef enum
     {
@@ -154,6 +161,9 @@ WORD PictDraw(PICTURE *pPict)
     static SHORT postop;
     static SHORT posright;
     static SHORT posbottom;
+    PICTURE *pPict;
+
+    pPict = (PICTURE *)pObj;
 
     if(IsDeviceBusy())
         return (0);

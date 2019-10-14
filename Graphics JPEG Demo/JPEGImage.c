@@ -87,14 +87,17 @@ size_t JPEGfread(void *ptr, size_t size, size_t n, void *file)
 {
     size_t      index;
     FLASH_BYTE  *pFile;
+    #ifdef USE_JPEG_EXTERNAL
     DWORD       address;
+    #endif
 
     switch(*((SHORT *)file))
     {
-            #ifdef USE_JPEG_FLASH
+    #ifdef USE_JPEG_FLASH
 
         case FILE_JPEG_FLASH:
-            pFile = ((BITMAP_FLASH *)file)->address;
+        case FLASH:
+            pFile = ((IMAGE_FLASH *)file)->address;
 
             BYTE    *bptr = (BYTE *)ptr;
             for(index = 0; index < size * n; index++)
@@ -104,18 +107,19 @@ size_t JPEGfread(void *ptr, size_t size, size_t n, void *file)
             }
 
             break;
-            #endif
-            #ifdef USE_JPEG_EXTERNAL
+    #endif
+    #ifdef USE_JPEG_EXTERNAL
 
         case FILE_JPEG_EXTERNAL:
-            address = _jpegImageIndex + ((BITMAP_EXTERNAL *)file)->address;
+        case EXTERNAL:
+            address = _jpegImageIndex + ((IMAGE_EXTERNAL *)file)->address;
             ReadArray(address, (BYTE *)ptr, size * n);  // macro calling the ReadArray function from the external memory driver
 
             // see JPEGImage.h
             index = size * n;
             _jpegImageIndex += index;
             break;
-            #endif
+    #endif
 
         default:
             return (0);

@@ -50,6 +50,6 @@
         #include <p24Fxxxx.h>
     #endif
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
     #include "cpld.h"
 #endif // _MAINDEMO_H

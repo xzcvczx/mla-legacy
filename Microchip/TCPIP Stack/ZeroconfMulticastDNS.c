@@ -2793,7 +2793,7 @@ void mDNSProcessInternal(mDNSProcessCtx_common *pCtx)
 
 				// Need to choose Random time between 0-MDNS_PROBE_WAIT msec
 
-				pCtx->random_delay = (TICK)((rand()% (MDNS_PROBE_WAIT) * (TICK_SECOND/1000)));
+				pCtx->random_delay = (TICK)((LFSRRand()% (MDNS_PROBE_WAIT) * (TICK_SECOND/1000)));
 				DEBUG_MDNS_MESG(zeroconf_dbg_msg,"MDNS_PROBE_WAIT Random Delay: %ld ticks\r\n",
 					pCtx->random_delay);
 				DEBUG_MDNS_PRINT((char*)zeroconf_dbg_msg);
@@ -3126,8 +3126,18 @@ mDNSMulticastFilterRegister(void)
 	// which is mapped to 01:00:5E:00:00:FB
 
 	UINT8 mcast_addr[6] = {0x01, 0x00, 0x5E, 0x00, 0x00, 0xFB};
-	
-    WF_SetMultiCastFilter(WF_MULTICAST_FILTER_1, mcast_addr);
+
+	#if /* PIC32MX6XX/7XX Internal Ethernet controller */ (defined(__PIC32MX__) && defined(_ETH) && !defined(ENC100_INTERFACE_MODE) && !defined(ENC_CS_TRIS) && !defined(WF_CS_TRIS)) || \
+		/* ENC424J600/624J600 */						  defined(ENC100_INTERFACE_MODE) || \
+		/* ENC28J60 */									  defined(ENC_CS_TRIS) || \
+		/* PIC18F97J60 family internal Ethernet controller with C18 compiler */ (defined(__18F97J60) || defined(__18F96J65) || defined(__18F96J60) || defined(__18F87J60) || defined(__18F86J65) || defined(__18F86J60) || defined(__18F67J60) || defined(__18F66J65) || defined(__18F66J60) || \
+		/* PIC18F97J60 family internal Ethernet controller HI-TECH PICC-18 compiler */ defined(_18F97J60) ||  defined(_18F96J65) ||  defined(_18F96J60) ||  defined(_18F87J60) ||  defined(_18F86J65) ||  defined(_18F86J60) ||  defined(_18F67J60) ||  defined(_18F66J65) ||  defined(_18F66J60))
+		SetRXHashTableEntry(*((MAC_ADDR*)mcast_addr));
+	#elif /* MRF24WB0M */ defined(WF_CS_TRIS)
+	    WF_SetMultiCastFilter(WF_MULTICAST_FILTER_1, mcast_addr);
+	#else
+		#error Must call appropraite API to enable multicast packet reception in the network controller.
+	#endif
 	
     return MDNSD_SUCCESS;
 }

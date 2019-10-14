@@ -42,7 +42,6 @@
  Change History:
   Rev   Description
   2.6   Initial release
-  2.7   No Change
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_H
@@ -77,6 +76,8 @@
             #include "HardwareProfile - PIC24F Starter Kit.h"
         #elif defined(__PIC24FJ64GB004__)
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+        #elif defined(__PIC24FJ256DA210__)
+            #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
         #endif
     #endif
 

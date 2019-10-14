@@ -35,8 +35,9 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  2.6a- No change
-   2.7
+  2.5   Initial release of this demo.
+  2.7b  Improvements to USBCBSendResume(), to make it easier to use.
+
 ********************************************************************/
 
 #ifndef MAIN_C
@@ -167,9 +168,12 @@
         #pragma config EBTRB  = OFF                                                  // CONFIG7H
 
 #elif defined(EXPLORER_16)
-    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
+    #if defined(__PIC24FJ256GB110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+    #elif defined(__PIC24FJ256GB210__)
+        _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
@@ -201,7 +205,7 @@
 #elif defined(PIC24F_STARTER_KIT)
     _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
     _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
-#elif defined(PIC24FJ256DA210_DEV_BOARD)
+#elif defined(PIC24FJ256DA210_DEV_BOARD) || defined(__PIC24FJ256GB210__)
     _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
     _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 #elif defined(PIC32_USB_STARTER_KIT)
@@ -263,6 +267,7 @@ void ProcessIO(void);
 void UserInit(void);
 void YourHighPriorityISRCode();
 void YourLowPriorityISRCode();
+void USBCBSendResume(void);
 WORD_VAL ReadPOT(void);
 
 /** VECTOR REMAPPING ***********************************************/
@@ -431,16 +436,16 @@ int main(void)
 		// Check bus status and service USB interrupts.
         USBDeviceTasks(); // Interrupt or polling method.  If using polling, must call
         				  // this function periodically.  This function will take care
-        				  // of processing and responding to SETUP transactions
+        				  // of processing and responding to SETUP transactions 
         				  // (such as during the enumeration process when you first
         				  // plug in).  USB hosts require that USB devices should accept
         				  // and process SETUP packets in a timely fashion.  Therefore,
-        				  // when using polling, this function should be called
-        				  // frequently (such as once about every 100 microseconds) at any
-        				  // time that a SETUP packet might reasonably be expected to
-        				  // be sent by the host to your device.  In most cases, the
-        				  // USBDeviceTasks() function does not take very long to
-        				  // execute (~50 instruction cycles) before it returns.
+        				  // when using polling, this function should be called 
+        				  // regularly (such as once every 1.8ms or faster** [see 
+        				  // inline code comments in usb_device.c for explanation when
+        				  // "or faster" applies])  In most cases, the USBDeviceTasks() 
+        				  // function does not take very long to execute (ex: <100 
+        				  // instruction cycles) before it returns.
         #endif
 
 
@@ -1120,39 +1125,57 @@ void USBCBInitEP(void)
  *					button on a remote control, it is nice that the
  *					IR receiver can detect this signalling, and then
  *					send a USB "command" to the PC to wake up.
- *
+ *					
  *					The USBCBSendResume() "callback" function is used
- *					to send this special USB signalling which wakes
+ *					to send this special USB signalling which wakes 
  *					up the PC.  This function may be called by
  *					application firmware to wake up the PC.  This
- *					function should only be called when:
- *
+ *					function will only be able to wake up the host if
+ *                  all of the below are true:
+ *					
  *					1.  The USB driver used on the host PC supports
  *						the remote wakeup capability.
  *					2.  The USB configuration descriptor indicates
  *						the device is remote wakeup capable in the
  *						bmAttributes field.
  *					3.  The USB host PC is currently sleeping,
- *						and has previously sent your device a SET
+ *						and has previously sent your device a SET 
  *						FEATURE setup packet which "armed" the
- *						remote wakeup capability.
+ *						remote wakeup capability.   
  *
+ *                  If the host has not armed the device to perform remote wakeup,
+ *                  then this function will return without actually performing a
+ *                  remote wakeup sequence.  This is the required behavior, 
+ *                  as a USB device that has not been armed to perform remote 
+ *                  wakeup must not drive remote wakeup signalling onto the bus;
+ *                  doing so will cause USB compliance testing failure.
+ *                  
  *					This callback should send a RESUME signal that
  *                  has the period of 1-15ms.
  *
- * Note:            Interrupt vs. Polling
- *                  -Primary clock
- *                  -Secondary clock ***** MAKE NOTES ABOUT THIS *******
- *                   > Can switch to primary first by calling USBCBWakeFromSuspend()
-
- *                  The modifiable section in this routine should be changed
+ * Note:            This function does nothing and returns quickly, if the USB
+ *                  bus and host are not in a suspended condition, or are 
+ *                  otherwise not in a remote wakeup ready state.  Therefore, it
+ *                  is safe to optionally call this function regularly, ex: 
+ *                  anytime application stimulus occurs, as the function will
+ *                  have no effect, until the bus really is in a state ready
+ *                  to accept remote wakeup. 
+ *
+ *                  When this function executes, it may perform clock switching,
+ *                  depending upon the application specific code in 
+ *                  USBCBWakeFromSuspend().  This is needed, since the USB
+ *                  bus will no longer be suspended by the time this function
+ *                  returns.  Therefore, the USB module will need to be ready
+ *                  to receive traffic from the host.
+ *
+ *                  The modifiable section in this routine may be changed
  *                  to meet the application needs. Current implementation
  *                  temporary blocks other functions from executing for a
- *                  period of 1-13 ms depending on the core frequency.
+ *                  period of ~3-15 ms depending on the core frequency.
  *
  *                  According to USB 2.0 specification section 7.1.7.7,
  *                  "The remote wakeup device must hold the resume signaling
- *                  for at lest 1 ms but for no more than 15 ms."
+ *                  for at least 1 ms but for no more than 15 ms."
  *                  The idea here is to use a delay counter loop, using a
  *                  common value that would work over a wide range of core
  *                  frequencies.
@@ -1172,15 +1195,54 @@ void USBCBInitEP(void)
 void USBCBSendResume(void)
 {
     static WORD delay_count;
-
-    USBResumeControl = 1;                // Start RESUME signaling
-
-    delay_count = 1800U;                // Set RESUME line for 1-13 ms
-    do
+    
+    //First verify that the host has armed us to perform remote wakeup.
+    //It does this by sending a SET_FEATURE request to enable remote wakeup,
+    //usually just before the host goes to standby mode (note: it will only
+    //send this SET_FEATURE request if the configuration descriptor declares
+    //the device as remote wakeup capable, AND, if the feature is enabled
+    //on the host (ex: on Windows based hosts, in the device manager 
+    //properties page for the USB device, power management tab, the 
+    //"Allow this device to bring the computer out of standby." checkbox 
+    //should be checked).
+    if(USBGetRemoteWakeupStatus() == TRUE) 
     {
-        delay_count--;
-    }while(delay_count);
-    USBResumeControl = 0;
+        //Verify that the USB bus is in fact suspended, before we send
+        //remote wakeup signalling.
+        if(USBIsBusSuspended() == TRUE)
+        {
+            USBMaskInterrupts();
+            
+            //Clock switch to settings consistent with normal USB operation.
+            USBCBWakeFromSuspend();
+            USBSuspendControl = 0; 
+            USBBusIsSuspended = FALSE;  //So we don't execute this code again, 
+                                        //until a new suspend condition is detected.
+
+            //Section 7.1.7.7 of the USB 2.0 specifications indicates a USB
+            //device must continuously see 5ms+ of idle on the bus, before it sends
+            //remote wakeup signalling.  One way to be certain that this parameter
+            //gets met, is to add a 2ms+ blocking delay here (2ms plus at 
+            //least 3ms from bus idle to USBIsBusSuspended() == TRUE, yeilds
+            //5ms+ total delay since start of idle).
+            delay_count = 3600U;        
+            do
+            {
+                delay_count--;
+            }while(delay_count);
+            
+            //Now drive the resume K-state signalling onto the USB bus.
+            USBResumeControl = 1;       // Start RESUME signaling
+            delay_count = 1800U;        // Set RESUME line for 1-13 ms
+            do
+            {
+                delay_count--;
+            }while(delay_count);
+            USBResumeControl = 0;       //Finished driving resume signalling
+
+            USBUnmaskInterrupts();
+        }
+    }
 }
 
 
@@ -1209,14 +1271,8 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
     switch(event)
     {
-        case EVENT_CONFIGURED:
-            USBCBInitEP();
-            break;
-        case EVENT_SET_DESCRIPTOR:
-            USBCBStdSetDscHandler();
-            break;
-        case EVENT_EP0_REQUEST:
-            USBCBCheckOtherReq();
+        case EVENT_TRANSFER:
+            //Add application specific callback task or callback function here if desired.
             break;
         case EVENT_SOF:
             USBCB_SOF_Handler();
@@ -1227,11 +1283,27 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
         case EVENT_RESUME:
             USBCBWakeFromSuspend();
             break;
+        case EVENT_CONFIGURED:
+            USBCBInitEP();
+            break;
+        case EVENT_SET_DESCRIPTOR:
+            USBCBStdSetDscHandler();
+            break;
+        case EVENT_EP0_REQUEST:
+            USBCBCheckOtherReq();
+            break;
         case EVENT_BUS_ERROR:
             USBCBErrorHandler();
             break;
-        case EVENT_TRANSFER:
-            Nop();
+        case EVENT_TRANSFER_TERMINATED:
+            //Add application specific callback task or callback function here if desired.
+            //The EVENT_TRANSFER_TERMINATED event occurs when the host performs a CLEAR
+            //FEATURE (endpoint halt) request on an application endpoint which was 
+            //previously armed (UOWN was = 1).  Here would be a good place to:
+            //1.  Determine which endpoint the transaction that just got terminated was 
+            //      on, by checking the handle value in the *pdata.
+            //2.  Re-arm the endpoint if desired (typically would be the case for OUT 
+            //      endpoints).
             break;
         default:
             break;

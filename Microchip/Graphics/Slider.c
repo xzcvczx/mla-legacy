@@ -43,7 +43,7 @@
  *									  in the SldTranslateMsg() when keyboard
  *									  event is detected.
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_SLIDER
 
@@ -83,14 +83,18 @@ SLIDER *SldCreate
     if(pSld == NULL)
         return (pSld);
 
-    pSld->hdr.ID = ID;                              // unique id assigned for referencing
-    pSld->hdr.pNxtObj = NULL;
-    pSld->hdr.type = OBJ_SLIDER;                    // set object type
-    pSld->hdr.left = left;                          // left and right should be equal when oriented vertically
-    pSld->hdr.top = top;                            // top and bottom should be equal when oriented horizontally
-    pSld->hdr.right = right;
-    pSld->hdr.bottom = bottom;
-    pSld->hdr.state = state;
+    pSld->hdr.ID        = ID;                           // unique id assigned for referencing
+    pSld->hdr.pNxtObj   = NULL;
+    pSld->hdr.type      = OBJ_SLIDER;                   // set object type
+    pSld->hdr.left      = left;                         // left and right should be equal when oriented vertically
+    pSld->hdr.top       = top;                          // top and bottom should be equal when oriented horizontally
+    pSld->hdr.right     = right;
+    pSld->hdr.bottom    = bottom;
+    pSld->hdr.state     = state;
+    pSld->hdr.DrawObj      = SldDraw;     				// draw function
+    pSld->hdr.MsgObj         = SldTranslateMsg;       	// message function
+    pSld->hdr.MsgDefaultObj  = SldMsgDefault;  			// default message function
+    pSld->hdr.FreeObj  = NULL;  						// default free function
 
     // Parameters in the user defined range system (pos, page and range)
     pSld->range = range;                            // range of the slider movement (always measured from 0 to range)
@@ -433,15 +437,19 @@ void SldSetPos(SLIDER *pSld, SHORT newPos)
 }
 
 /*********************************************************************
-* Function: void SldMsgDefault(WORD translatedMsg, SLIDER* pSld, 
+* Function: void SldMsgDefault(WORD translatedMsg, void *pObj, 
 *							   GOL_MSG* pMsg)
 *
 * Notes: This the default operation to change the state of the button.
 *		 Called inside GOLMsg() when GOLMsgCallback() returns a 1.
 *
 ********************************************************************/
-void SldMsgDefault(WORD translatedMsg, SLIDER *pSld, GOL_MSG *pMsg)
+void SldMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    SLIDER *pSld;
+
+    pSld = (SLIDER *)pObj;
+
         #ifdef USE_TOUCHSCREEN
 
     WORD        newPos, minPos, maxPos;
@@ -547,14 +555,18 @@ void SldMsgDefault(WORD translatedMsg, SLIDER *pSld, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg)
+* Function: WORD SldTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Evaluates the message if the object will be affected by the 
 *		 message or not.
 *
 ********************************************************************/
-WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg)
+WORD SldTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    SLIDER *pSld;
+
+    pSld = (SLIDER *)pObj;
 
     // Evaluate if the message is for the slider
     // Check if disabled first
@@ -626,12 +638,12 @@ WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD SldDraw(SLIDER *pSld)
+* Function: WORD SldDraw(void *pObj)
 *
 * Notes: This is the state machine to draw the slider or scrollbar.
 *
 ********************************************************************/
-WORD SldDraw(SLIDER *pSld)
+WORD SldDraw(void *pObj)
 {
     typedef enum
     {
@@ -653,6 +665,9 @@ WORD SldDraw(SLIDER *pSld)
     static WORD left, top, right, bottom;
     static WORD midPoint, thWidth, thHeight;
     static WORD minPos, maxPos;
+    SLIDER *pSld;
+
+    pSld = (SLIDER *)pObj;
 
     if(IsDeviceBusy())
         return (0);

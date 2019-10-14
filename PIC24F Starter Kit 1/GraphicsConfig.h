@@ -41,29 +41,6 @@
 #define _GRAPHICSCONFIG_H
 
 //////////////////// COMPILE OPTIONS AND DEFAULTS ////////////////////
-
-/*********************************************************************
-* Overview: Defines color depth. 
-********************************************************************/
-#define COLOR_DEPTH						1
-
-/*********************************************************************
-* Overview: Display controller selection.
-*                                          
-********************************************************************/
-#define DISPLAY_CONTROLLER				SH1101A
-
-/*********************************************************************
-* Overview: Horizontal and vertical display resolution
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_RESOLUTION				128
-#define DISP_VER_RESOLUTION				64
-/*********************************************************************
-* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
-*********************************************************************/
-#define DISP_ORIENTATION				0
-
 /*********************************************************************
 * Overview: Blocking and Non-Blocking configuration selection. To
 *			enable non-blocking configuration USE_NONBLOCKING_CONFIG

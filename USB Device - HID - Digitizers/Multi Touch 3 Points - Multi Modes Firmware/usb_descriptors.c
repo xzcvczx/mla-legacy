@@ -146,6 +146,7 @@ state according to the definition in the USB specification.
   ----  -----------------------------------------
   2.7   Updated descriptors to fix some WHQL certification related
         issues
+  2.7b  Minor change to enable and demonstrate USB remote wakeup.
 
 ********************************************************************/
  
@@ -197,7 +198,7 @@ ROM BYTE configDescriptor1[]={
     1,                      // Number of interfaces in this cfg
     1,                      // Index value of this configuration
     0,                      // Configuration string index
-    _DEFAULT | _SELF,       // Attributes, see usb_device.h
+    _DEFAULT | _SELF | _RWU,// Attributes, see usb_device.h
     50,                     // Max power consumption (2X mA)
 
     /* Interface Descriptor */

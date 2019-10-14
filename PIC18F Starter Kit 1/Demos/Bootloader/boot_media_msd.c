@@ -37,7 +37,7 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 #include "HardwareProfile.h"
 #include "boot.h"
 #include "Compiler.h"
-#include "MDD File System\FSIO.h"
+#include "MDD File System/FSIO.h"
 #include "flash_memory.h"
 #include "oled.h"
 #include <stdio.h>
@@ -363,11 +363,6 @@ BOOL BLMedia_LoadFile (  char *file_name )
                             totalAddress.word.HW = extendedAddress.Val;
                             totalAddress.word.LW = address.Val;
 
-                            if(totalAddress.Val == 0xD310)
-                            {
-                                Nop();
-                            }
-
                             if(totalAddress.Val < PROGRAM_FLASH_BASE)
                             {
                                 //invalid address - below base - don't program the requested address
@@ -379,36 +374,24 @@ BOOL BLMedia_LoadFile (  char *file_name )
                                 break;
                             }
 			        
-							if (byteCount.Val & 0x01)
-							{
-								/* Odd number of bytes was read! */
-								/* If the previous number of bytes was even, than we need to keep the  
-									last byte for the next line and to decrease byteCount*/
-								if (oddPacketDetected == FALSE)
-								{
-									oddPacketDetected = TRUE;
-								}								
-							}
-							else
-							{
-									oddPacketDetected = FALSE;
-							}
+                            {
+                                unsigned int i;
 
-							for(i=0;byteCount.Val-i>1;i++)
-					        {                        	
-                                if(totalAddress.byte.LB & 0x01)
+                                i = 0;
+
+                                if(totalAddress.Val & 0x01)
                                 {
                                     totalAddress.Val--;
-
+    
     								TBLPTRL = totalAddress.byte.LB;
     								TBLPTRH = totalAddress.byte.HB;
     								TBLPTRU = totalAddress.byte.UB;
-
+    
                 					_asm
                 					tblrd
        								tblwtpostinc
     								_endasm
-    								TABLAT = recordData[i];
+    								TABLAT = recordData[i++];
     								_asm
     								tblwt					//Do not increment TBLPTR on the second write.  See datasheet.
     								_endasm					
@@ -428,22 +411,22 @@ BOOL BLMedia_LoadFile (  char *file_name )
     								EECON1bits.WREN = 0;
     
     								totalAddress.Val = totalAddress.Val + 2;
-
-                                    oddPacketDetected = FALSE;
+    
+                                    byteCount.Val--;
                                 }
-
-                                else
-                                {
+    
+    							while(byteCount.Val > 1)
+    					        {
     								TBLPTRL = totalAddress.byte.LB;
     								TBLPTRH = totalAddress.byte.HB;
     								TBLPTRU = totalAddress.byte.UB;
     
-    								TABLAT = recordData[i];
-    								_asm
-    								tblwtpostinc
+    								TABLAT = recordData[i++];
+                					_asm
+       								tblwtpostinc
     								_endasm
-    								i++;
-    								TABLAT = recordData[i];
+    
+    								TABLAT = recordData[i++];
     								_asm
     								tblwt					//Do not increment TBLPTR on the second write.  See datasheet.
     								_endasm					
@@ -462,29 +445,24 @@ BOOL BLMedia_LoadFile (  char *file_name )
     								//	 future accidental activation of self write/erase operations.
     								EECON1bits.WREN = 0;
     
-    								totalAddress.Val = totalAddress.Val + 2;
-                                }
-							}
-
-                            if(oddPacketDetected)
-                            {
+    								totalAddress.Val += 2;
+    
+                                    byteCount.Val -= 2;
+                                }       
+    
                                 if(byteCount.Val == 1)
                                 {
-                                    totalAddress.Val--;
-
     								TBLPTRL = totalAddress.byte.LB;
     								TBLPTRH = totalAddress.byte.HB;
     								TBLPTRU = totalAddress.byte.UB;
-
+    
+    								TABLAT = recordData[i++];
                 					_asm
-                					tblrd
-                                    _endasm
-
-                                    _asm
        								tblwtpostinc
     								_endasm
-    								TABLAT = recordData[i];
-    								_asm
+    
+                					_asm
+                					tblrd
     								tblwt					//Do not increment TBLPTR on the second write.  See datasheet.
     								_endasm					
     								
@@ -502,39 +480,11 @@ BOOL BLMedia_LoadFile (  char *file_name )
     								//	 future accidental activation of self write/erase operations.
     								EECON1bits.WREN = 0;
     
-    								totalAddress.Val = totalAddress.Val + 1;
-
-                                    oddPacketDetected = FALSE;
-                                }
-                                else
-                                {
-    								TBLPTRL = totalAddress.byte.LB;
-    								TBLPTRH = totalAddress.byte.HB;
-    								TBLPTRU = totalAddress.byte.UB;
+    								totalAddress.Val += 2;
     
-    								TABLAT = recordData[i];
-    								_asm
-    								tblwtpostinc
-    								_endasm
-    								TABLAT = 0xFF;
-    								_asm
-    								tblwt					//Do not increment TBLPTR on the second write.  See datasheet.
-    								_endasm
-    
-    								EECON1 = 0b00100100;	//Word programming mode
-    								INTCONbits.GIE = 0;		//Make certain interrupts disabled for unlock process.
-    								_asm
-    								MOVLW 0x55
-    								MOVWF EECON2, 0
-    								MOVLW 0xAA
-    								MOVWF EECON2, 0
-    								BSF EECON1, 1, 0		//Initiates write operation (halts CPU execution until complete)
-    								_endasm	
-    
-                                    oddPacketDetected = FALSE;
-                                }
-                            }
-
+                                    byteCount.Val--;
+                                }   
+                            }       
 
                             break;
                         case RECORD_TYPE_EOF:

@@ -41,14 +41,6 @@
  *****************************************************************************/
 #include "MainDemo.h"
 
-#ifdef USE_FOCUS
-
-#if defined (PIC24FJ256DA210_DEV_BOARD)
-	#define BTN_S3 BTN_S2 
-    #define BTN_S4 BTN_S2
-    #define BTN_S5 BTN_S2
-    #define BTN_S6 BTN_S1
-#endif
 
 /************************************************************************
 * Function: void SideButtonsMsg(GOL_MSG* msg)
@@ -76,7 +68,14 @@ void SideButtonsMsg(GOL_MSG *msg)
 
     msg->uiEvent = EVENT_INVALID;
 
-    state = BTN_S6;
+    /**
+     * Change Focus button
+     * Explorer 16 + GFX PICTail    - S6 (8 bit PMP)
+     * Starter Kit + GFX PICTail    - S1 or S2 (8 bit PMP)
+     * Multimedia Expansion Board   - left or right
+     * DA210 Developement Board     - S2 or S3
+     **/
+    state = GetHWButtonFocus();
     if(S6 != state)
     {
         if(S6)
@@ -95,7 +94,17 @@ void SideButtonsMsg(GOL_MSG *msg)
         return;
     }
 
-    state = BTN_S5;
+    /**
+     * Carriage Return button
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    state = GetHWButtonCR();
     if(S5 != state)
     {
 
@@ -123,7 +132,12 @@ void SideButtonsMsg(GOL_MSG *msg)
         return;
     }
 
-    state = BTN_S3;
+    /**
+     * Scan down button
+     * Explorer 16 + GFX PICTail    - S4 (8 bit PMP)
+     * Multimedia Expansion Board   - Down joystick Button
+     **/
+    state = GetHWButtonScanDown();
     if(S3 != state)
     {
 
@@ -144,7 +158,12 @@ void SideButtonsMsg(GOL_MSG *msg)
         return;
     }
 
-    state = BTN_S4;
+    /**
+     * Scan up button
+     * Explorer 16 + GFX PICTail    - S5 (8 bit PMP)
+     * Multimedia Expansion Board   - Up joystick Button
+     **/
+    state = GetHWButtonScanUp();
     if(S4 != state)
     {
 
@@ -165,5 +184,3 @@ void SideButtonsMsg(GOL_MSG *msg)
         return;
     }
 }
-
-#endif // #ifdef USE_FOCUS

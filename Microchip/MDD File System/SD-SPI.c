@@ -39,14 +39,14 @@
   Rev     Description
   -----   -----------
   1.2.5   Fixed bug in the calculation of the capacity for v1.0 devices
-  1.2.6   No change   
+          
 ********************************************************************/
 
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
-#include "MDD File System\FSIO.h"
-#include "MDD File System\FSDefs.h"
-#include "MDD File System\SD-SPI.h"
+#include "MDD File System/FSIO.h"
+#include "MDD File System/FSDefs.h"
+#include "MDD File System/SD-SPI.h"
 #include "string.h"
 #include "FSConfig.h"
 #include "HardwareProfile.h"

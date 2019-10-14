@@ -51,7 +51,7 @@
 #ifndef __TCPIP_HITECH_WORKAROUND_H
 #define __TCPIP_HITECH_WORKAROUND_H
 
-#define TCPIP_STACK_VERSION 		"v5.25"		// TCP/IP stack version
+#define TCPIP_STACK_VERSION 		"v5.31"		// TCP/IP stack version
 
 #include <string.h>
 #include <stdlib.h>
@@ -103,11 +103,19 @@
 	#if defined(STACK_USE_HTTP2_SERVER)
 		#define STACK_USE_MPFS2
 	#endif
-	
+
+	#if defined(STACK_USE_SNMPV3_SERVER) && !defined (STACK_USE_SNMP_SERVER)
+		#define STACK_USE_SNMP_SERVER
+	#endif
+
 	#if defined(STACK_USE_SNMP_SERVER) && !defined(STACK_USE_MPFS) && !defined(STACK_USE_MPFS2)
 		#define STACK_USE_MPFS2
 	#endif
 
+	#if defined(STACK_USE_SNMP_SERVER) && defined (STACK_USE_SNMPV3_SERVER)
+		#define STACK_USE_MD5
+		#define STACK_USE_SHA1
+	#endif
 #endif
 	
 	// FTP is not supported in MPFS2 or when MPFS is stored in internal program 

@@ -66,7 +66,7 @@
 */
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER    WF_MODULE_WF_INIT
 #endif
 
@@ -127,11 +127,10 @@ void WF_Init(void)
 
     RawInit();
 
-    WFEnableMRF24WB0MMode();
-        
     WFGetMRF24WB0MVersion(&version);
-    
-    WF_ASSERT(version == EXPECTED_MRF24WB0M_VERSION_NUMBER);
+    WF_ASSERT(version >= EXPECTED_MRF24WB0M_VERSION_NUMBER);
+  
+    WFEnableMRF24WB0MMode();
   
     /* send init messages to MRF24WB0M */
     WF_LibInitialize();

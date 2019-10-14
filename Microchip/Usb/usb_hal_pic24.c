@@ -93,17 +93,13 @@ Description:
            the PIC24F device in the correct state before issuing the sleep
            instruction and returning the device to the correct state after
            exiting sleep. 
-
-  2.7a   Fixed issue where the USBSleepOnSuspend() function would cause
-           the USB communication to fail after being called when _IPL
-           is equal to 0.
 ********************************************************************/
 //DOM-IGNORE-END
 
 #ifndef USB_HAL_PIC24F_C
 #define USB_HAL_PIC24F_C
 
-#include "USB\usb.h"
+#include "USB/usb.h"
 
 
 /*************************************************************************

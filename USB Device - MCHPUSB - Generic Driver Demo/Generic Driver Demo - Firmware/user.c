@@ -76,10 +76,9 @@ BYTE pTemp;                     // Pointer to current logging position, will
 BYTE valid_temp;                // Keeps count of the valid data points
 WORD temp_data[30];             // 30 points of data
 
-USB_HANDLE USBGenericOutHandle = 0;
-USB_HANDLE USBGenericInHandle = 0;
-
-BOOL blinkStatusValid = TRUE;
+USB_HANDLE USBGenericOutHandle;
+USB_HANDLE USBGenericInHandle;
+BOOL blinkStatusValid;
 
 // Timer0 - 1 second interval setup.
 // Fosc/4 = 12MHz
@@ -119,6 +118,8 @@ void UserInit(void)
     #elif defined(__C30__)
     #endif
 
+    USBGenericInHandle = 0;
+    USBGenericOutHandle = 0;
     blinkStatusValid = TRUE;
 }//end UserInit
 

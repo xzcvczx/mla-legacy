@@ -32,9 +32,9 @@
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
 *********************************************************************/
-#include "HardwareProfile.h"
 #include "USB/usb.h"
 #include "USB/usb_function_ccid.h"
+#include "HardwareProfile.h"
 #include "sc_config.h"
 #include "./Smart Card/SClib.h"
 
@@ -725,7 +725,7 @@ void UsbCcidPcToRdrXfrBlock(void)
 		    CardCmd.LE  = pUsbCcidApdu->CCID_BulkOutBuffer[14];
 		    CardCmd.LC  = 0;
 		}
-		else if (pUsbCcidApdu->CCID_BulkOutBuffer[1] == pUsbCcidApdu->CCID_BulkOutBuffer[14]+5) // if dwLength field is eaqual to P3 + Length of (CLA + INS + P1 + P2 + P3)
+		else if (pUsbCcidApdu->CCID_BulkOutBuffer[1] == (BYTE)(pUsbCcidApdu->CCID_BulkOutBuffer[14]+5)) // if dwLength field is eaqual to P3 + Length of (CLA + INS + P1 + P2 + P3)
 		{
 			// case 3: data are to be sent to the ICC:
 		    CardCmd.LC  = pUsbCcidApdu->CCID_BulkOutBuffer[14];

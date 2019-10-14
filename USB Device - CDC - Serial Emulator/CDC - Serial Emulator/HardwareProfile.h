@@ -82,6 +82,13 @@
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
         #elif defined(__PIC24FJ256DA210__)
             #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
+        #elif defined(__dsPIC33EP512MU810__)
+            #if defined(DSPIC33EP512MU810_PIM)
+                #include "HardwareProfile - dsPIC33EP512MU810 PIM.h"
+            #endif
+            #if defined(DSPIC33E_USB_STARTER_KIT)
+                #include "HardwareProfile - dsPIC33E USB Starter Kit.h"
+            #endif
         #endif
     #endif
 
@@ -90,7 +97,9 @@
             #include "HardwareProfile - PICDEM FSUSB.h"
         #elif defined(__18F87J50)
             #include "HardwareProfile - PIC18F87J50 PIM.h"
-        #elif defined(__18F14K50)
+        #elif defined(__18F14K50) 
+            #include "HardwareProfile - Low Pin Count USB Development Kit.h"
+        #elif defined(__18F13K50) 
             #include "HardwareProfile - Low Pin Count USB Development Kit.h"
         #elif defined(__18F46J50)
             #include "HardwareProfile - PIC18F46J50 PIM.h"

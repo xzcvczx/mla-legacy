@@ -59,11 +59,11 @@
 typedef enum
 {
 	// PHY flags, connection flags 
-	ETH_PHY_CFG_RMII		= 0x01,		// check that configuration fuses is RMII
-	ETH_PHY_CFG_MII			= 0x00,		// check that configuration fuses is MII
-	ETH_PHY_CFG_ALTERNATE		= 0x02,		// check that configuration fuses is ALT
-	ETH_PHY_CFG_DEFAULT		= 0x00,		// check that configuration fuses is DEFAULT
-	ETH_PHY_CFG_AUTO		= 0x10		// use the fuses configuration to detect if you are RMII/MII and ALT/DEFAULT configuration
+	ETH_PHY_CFG_RMII        = 0x01,		// check that configuration fuses is RMII
+	ETH_PHY_CFG_MII         = 0x00,		// check that configuration fuses is MII
+	ETH_PHY_CFG_ALTERNATE   = 0x02,		// check that configuration fuses is ALT
+	ETH_PHY_CFG_DEFAULT     = 0x00,		// check that configuration fuses is DEFAULT
+	ETH_PHY_CFG_AUTO        = 0x10		// use the fuses configuration to detect if you are RMII/MII and ALT/DEFAULT configuration
 							// NOTE: - this option does not check the consistency btw the software call and the way the
 							//         fuses are configured. If just assumes that the fuses are properly configured.
 							//       - option is valid for EthPhyInit() call only!
@@ -101,7 +101,27 @@ typedef enum
  *
  * Note:            None
  *****************************************************************************/
-eEthRes __attribute__((weak))		EthPhyInit(eEthOpenFlags oFlags, eEthPhyCfgFlags cFlags, eEthOpenFlags* pResFlags);
+eEthRes 		EthPhyInit(eEthOpenFlags oFlags, eEthPhyCfgFlags cFlags, eEthOpenFlags* pResFlags);
+
+
+/****************************************************************************
+ * Function:        EthPhyGetHwConfigFlags
+ *
+ * PreCondition:    None.
+ *
+ * Input:           None  
+ *
+ * Output:          a eEthPhyCfgFlags value
+ *
+ *
+ * Side Effects:    None
+ *
+ * Overview:        This function returns the current PHY hardware MII/RMII and ALTERNATE/DEFAULT configuration flags.
+ *
+ * Note:            None
+ *****************************************************************************/
+eEthPhyCfgFlags        EthPhyGetHwConfigFlags(void);
+
 
 
 /****************************************************************************
@@ -123,7 +143,7 @@ eEthRes __attribute__((weak))		EthPhyInit(eEthOpenFlags oFlags, eEthPhyCfgFlags 
  *
  * Note:            None
  *****************************************************************************/
-eEthRes __attribute__((weak))		EthPhyRestartNegotiation(void);
+eEthRes 		EthPhyRestartNegotiation(void);
 
 
 /****************************************************************************
@@ -143,7 +163,7 @@ eEthRes __attribute__((weak))		EthPhyRestartNegotiation(void);
  *
  * Note:            None
  *****************************************************************************/
-eEthRes __attribute__((weak))		EthPhyNegotiationComplete(int waitComplete);
+eEthRes 		EthPhyNegotiationComplete(int waitComplete);
 
 
 /****************************************************************************
@@ -163,7 +183,7 @@ eEthRes __attribute__((weak))		EthPhyNegotiationComplete(int waitComplete);
  *
  * Note:            If no negotiation possible/active/failed, most likely the flags are invalid!
  *****************************************************************************/
-eEthLinkStat __attribute__((weak))	EthPhyGetNegotiationResult(eEthOpenFlags* pFlags, eMacPauseType* pPauseType);
+eEthLinkStat 	EthPhyGetNegotiationResult(eEthOpenFlags* pFlags, eEthMacPauseType* pPauseType);
 
 
 /****************************************************************************
@@ -184,7 +204,7 @@ eEthLinkStat __attribute__((weak))	EthPhyGetNegotiationResult(eEthOpenFlags* pFl
  * Note:            This function performs a full MIIM transaction.
  *                  It should not be used when a link scan has been initiated (EthPhyScanLinkStart()).
  *****************************************************************************/
-eEthLinkStat __attribute__((weak))	EthPhyGetLinkStatus(int refresh);
+eEthLinkStat 	EthPhyGetLinkStatus(int refresh);
 
 
 
@@ -206,7 +226,7 @@ eEthLinkStat __attribute__((weak))	EthPhyGetLinkStatus(int refresh);
  *
  * Note:            None
  *****************************************************************************/
-int __attribute__((weak))		EthPhyReset(int waitComplete);
+int 		EthPhyReset(int waitComplete);
 
 
 /****************************************************************************
@@ -228,7 +248,7 @@ int __attribute__((weak))		EthPhyReset(int waitComplete);
  * Note:            Any PHY register can be subject of a scan.
  *                  The application should use the MIIM access functions of the Ethernet plib abd the specific PHY knowledge. 
  *****************************************************************************/
-void __attribute__((weak))		EthPhyScanLinkStart(void);
+void 		EthPhyScanLinkStart(void);
 
 
 /****************************************************************************
@@ -250,7 +270,7 @@ void __attribute__((weak))		EthPhyScanLinkStart(void);
  *
  * Note:            None
  *****************************************************************************/
-eEthLinkStat __attribute__((weak))		EthPhyScanLinkRead(void);
+eEthLinkStat 		EthPhyScanLinkRead(void);
 
 
 /****************************************************************************
@@ -272,7 +292,7 @@ eEthLinkStat __attribute__((weak))		EthPhyScanLinkRead(void);
  *                  Therefore the scan operation should be stopped before initiating another
  *                  normal MIIM transaction
  *****************************************************************************/
-void __attribute__((weak))		EthPhyScanLinkStop(void);
+void 		EthPhyScanLinkStop(void);
 
 
 

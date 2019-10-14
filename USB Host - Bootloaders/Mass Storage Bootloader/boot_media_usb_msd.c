@@ -48,10 +48,10 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 #include "GenericTypedefs.h"
 #include "HardwareProfile.h"
 #include "boot.h"
-#include "MDD File System\FSIO.h"
-#include "USB\usb.h"
-#include "USB\usb_host_msd.h"
-#include "USB\usb_host_msd_scsi.h"
+#include "MDD File System/FSIO.h"
+#include "USB/usb.h"
+#include "USB/usb_host_msd.h"
+#include "USB/usb_host_msd_scsi.h"
 //*****************************************************************************
 //*****************************************************************************
 // Boot Loader TypeDefs and defintions
@@ -436,13 +436,11 @@ BOOL BLMedia_LoadFile (  char *file_name )
     RECORD_STATE    record_state;   // This field specifies which part of the
                                     //   record is currently being read.
     unsigned int    nRemaining;     // Number of bytes remaining to decode
-    unsigned int    Result;         // Result code from "GetFlashBlock" operation
 
     BYTE            *p_file_data;
 
     WORD_VAL        byteCountASCII;
     DWORD_VAL       addressASCII;
-    DWORD_VAL       extendedAddressASCII;
     WORD_VAL        recordTypeASCII;
     WORD_VAL        checksumASCII;
     WORD_VAL        dataByteASCII;
@@ -667,6 +665,11 @@ BOOL BLMedia_LoadFile (  char *file_name )
                             totalAddress.word.HW = extendedAddress.Val;
                             totalAddress.word.LW = current_record.LoadOffset;
     
+                            #if defined(__C30__)
+                                //divide by 2 since the C30 hex file addresses are 2x the actual physical address
+                                totalAddress.Val >>= 1; 
+                            #endif
+
                             if(totalAddress.Val < PROGRAM_FLASH_BASE)
                             {
                                 //invalid address - below base - don't program the requested address

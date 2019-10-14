@@ -5,6 +5,7 @@
 
 This file defines PIC24-specific items.
 
+
 Software License Agreement
 
 The software supplied herewith by Microchip Technology Incorporated
@@ -25,10 +26,9 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev         Description
-  ----------  ----------------------------------------------------------
-  2.6 - 2.7a  No change
+Author          Date    Comments
+--------------------------------------------------------------------------------
+KO/BC       2-20-2008   Initial Creation
 
 *******************************************************************************/
 

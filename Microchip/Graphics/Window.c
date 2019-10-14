@@ -38,7 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_WINDOW
 
@@ -79,6 +79,10 @@ WINDOW *WndCreate
     pW->pBitmap = pBitmap;
     pW->pText = pText;
     pW->hdr.state = state;
+    pW->hdr.DrawObj = WndDraw;			// draw function
+    pW->hdr.MsgObj = WndTranslateMsg;   // message function
+    pW->hdr.MsgDefaultObj = NULL;		// default message function
+    pW->hdr.FreeObj = NULL;				// free function
 
     // Set the style scheme to be used
     if(pScheme == NULL)
@@ -110,13 +114,16 @@ void WndSetText(WINDOW *pW, XCHAR *pText)
 }
 
 /*********************************************************************
-* Function: WORD WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg)
+* Function: WORD WndTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: translates the GOL message for the window
 *
 ********************************************************************/
-WORD WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg)
+WORD WndTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    WINDOW *pW;
+
+    pW = (WINDOW *)pObj;
 
     // Evaluate if the message is for the window
     // Check if disabled first
@@ -157,12 +164,12 @@ WORD WndTranslateMsg(WINDOW *pW, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD WndDraw(WINDOW *pW)
+* Function: WORD WndDraw(void *pObj)
 *
 * Overview: draws window
 *
 ********************************************************************/
-WORD WndDraw(WINDOW *pW)
+WORD WndDraw(void *pObj)
 {
     typedef enum
     {
@@ -176,7 +183,10 @@ WORD WndDraw(WINDOW *pW)
     } WND_DRAW_STATES;
 
     SHORT temp;
+    WINDOW *pW;
     static WND_DRAW_STATES state = WND_REMOVE;
+
+    pW = (WINDOW *)pObj;
 
     while(1)
     {

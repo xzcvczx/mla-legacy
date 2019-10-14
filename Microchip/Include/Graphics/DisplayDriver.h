@@ -33,73 +33,73 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     09/04/08
+ * 09/04/08    ...
  *****************************************************************************/
 #ifndef _DISPLAYDRIVER_H
     #define _DISPLAYDRIVER_H
 
     #if (DISPLAY_CONTROLLER == CUSTOM_CONTROLLER)
-        #include "Graphics\CustomDisplayDriver.h"
+        #include "Graphics/CustomDisplayDriver.h"
 
     #elif (DISPLAY_CONTROLLER == MCHP_DA210)
-        #include "Graphics\MicrochipGraphicsModule.h"
+        #include "Graphics/MicrochipGraphicsModule.h"
 
     #elif (DISPLAY_CONTROLLER == SSD1906)
-        #include "Graphics\SSD1906.h"
+        #include "Graphics/SSD1906.h"
 
     #elif (DISPLAY_CONTROLLER == SSD1926)
-        #include "Graphics\SSD1926.h"
+        #include "Graphics/SSD1926.h"
 
     #elif (DISPLAY_CONTROLLER == S6D0129)
-        #include "Graphics\drvTFT001.h"
+        #include "Graphics/drvTFT001.h"
 
     #elif (DISPLAY_CONTROLLER == S6D0139)
-        #include "Graphics\drvTFT001.h"
+        #include "Graphics/drvTFT001.h"
 
     #elif (DISPLAY_CONTROLLER == LGDP4531)
-        #include "Graphics\drvTFT001.h"
+        #include "Graphics/drvTFT001.h"
 
     #elif (DISPLAY_CONTROLLER == R61505)
-        #include "Graphics\drvTFT001.h"
+        #include "Graphics/drvTFT001.h"
 
     #elif (DISPLAY_CONTROLLER == SPFD5408)
-        #include "Graphics\drvTFT001.h"
+        #include "Graphics/drvTFT001.h"
 
     #elif (DISPLAY_CONTROLLER == SSD1339)
-        #include "Graphics\SSD1339.h"
+        #include "Graphics/SSD1339.h"
 
     #elif (DISPLAY_CONTROLLER == ST7529)
-        #include "Graphics\ST7529.h"
+        #include "Graphics/ST7529.h"
 
     #elif (DISPLAY_CONTROLLER == SH1101A)
-        #include "Graphics\SH1101A_SSD1303.h"
+        #include "Graphics/SH1101A_SSD1303.h"
 
     #elif (DISPLAY_CONTROLLER == SSD1303)
-        #include "Graphics\SH1101A_SSD1303.h"
+        #include "Graphics/SH1101A_SSD1303.h"
 
     #elif (DISPLAY_CONTROLLER == HIT1270)
-        #include "Graphics\HIT1270.h"
+        #include "Graphics/HIT1270.h"
 
     #elif (DISPLAY_CONTROLLER == UC1610)
-        #include "Graphics\UC1610.h"
+        #include "Graphics/UC1610.h"
 
     #elif (DISPLAY_CONTROLLER == ILI9320)
-        #include "Graphics\drvTFT001.h"
+        #include "Graphics/drvTFT001.h"
 
     #elif (DISPLAY_CONTROLLER == HX8347A) || (DISPLAY_CONTROLLER == HX8347D)
-        #include "Graphics\HX8347.h"
+        #include "Graphics/HX8347.h"
 
     #elif (DISPLAY_CONTROLLER == SSD1289)
-        #include "Graphics\drvTFT002.h"
+        #include "Graphics/drvTFT002.h"
 
     #elif (DISPLAY_CONTROLLER == NO_CONTROLLER_DEFINED)
     #elif (DISPLAY_CONTROLLER == R61580)
-        #include "Graphics\drvTFT001.h"
+        #include "Graphics/drvTFT001.h"
 
     #elif (DISPLAY_CONTROLLER == SSD2119)
-        #include "Graphics\drvTFT002.h"
+        #include "Graphics/drvTFT002.h"
 
     #else
         #error GRAPHICS CONTROLLER IS NOT SUPPORTED

@@ -116,9 +116,9 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPD
 /////////////////////////////////////////////////////////////////////////////
 // JPEG Files
 /////////////////////////////////////////////////////////////////////////////
-extern BITMAP_FLASH Logo;
-extern BITMAP_EXTERNAL  Scene02;
-extern BITMAP_EXTERNAL  Scene01;
+extern IMAGE_FLASH Logo;
+extern IMAGE_EXTERNAL  Scene02;
+extern IMAGE_EXTERNAL  Scene01;
 
 #define DELAY_MS    1500
 
@@ -139,8 +139,10 @@ int main(void)
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
+    #endif
 
     #endif
 

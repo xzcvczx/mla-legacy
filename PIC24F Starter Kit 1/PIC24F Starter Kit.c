@@ -136,9 +136,9 @@ KO          14-Feb-2008 First release
 //******************************************************************************
 
 DWORD               displayChangeTime;
-extern BITMAP_FLASH iconMicrochip;
-extern BITMAP_FLASH intro;
-extern BITMAP_FLASH introDevice;
+extern IMAGE_FLASH  iconMicrochip;
+extern IMAGE_FLASH  intro;
+extern IMAGE_FLASH  introDevice;
 PAGE_INFORMATION    pageInformation;
 char                previousSecond;
 DWORD               previousTick    = 0;

@@ -64,7 +64,7 @@
 */
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_WF_POWER_SAVE
 #endif
 
@@ -143,9 +143,9 @@ void WFConfigureLowPowerMode(UINT8 action)
 {
     UINT16 lowPowerStatusRegValue;
 
-    /*--------------------------------------*/
+    /*-----------------------------------------*/
     /* if activating PS-Poll mode on MRF24WB0M */
-    /*--------------------------------------*/
+    /*-----------------------------------------*/
     if (action == WF_LOW_POWER_MODE_ON)
     {
         Write16BitWFRegister(WF_PSPOLL_H_REG, REG_ENABLE_LOW_POWER_MASK);

@@ -49,8 +49,8 @@
  * Howard Schlunder		10/03/06	Original, copied from Compiler.h
  * Ken Hesky            07/01/08    Added ZG2100-specific features
  ********************************************************************/
-#ifndef __HARDWARE_PROFILE_H
-#define __HARDWARE_PROFILE_H
+#ifndef HARDWARE_PROFILE_H
+#define HARDWARE_PROFILE_H
 
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
@@ -116,7 +116,7 @@
 	#define LED5_IO				(LATAbits.LATA5)
 	#define LED6_TRIS			(TRISAbits.TRISA6)	// Ref D9
 	#define LED6_IO				(LATAbits.LATA6)
-	#define LED7_TRIS			(TRISAbits.TRISA7)	// Ref D10	// Note: This is multiplexed with BUTTON1
+	#define LED7_TRIS			(LATAbits.LATA7)	// Ref D10;  Note: This is multiplexed with BUTTON1, so this LED can't be used.  However, it will glow very dimmly due to a weak pull up resistor.
 	#define LED7_IO				(LATAbits.LATA7)
 	#define LED_GET()			(*((volatile unsigned char*)(&LATA)))
 	#define LED_PUT(a)			(*((volatile unsigned char*)(&LATA)) = (a))
@@ -124,7 +124,7 @@
 
 	#define BUTTON0_TRIS		(TRISDbits.TRISD13)	// Ref S4
 	#define	BUTTON0_IO			(PORTDbits.RD13)
-	#define BUTTON1_TRIS		(TRISAbits.TRISA7)	// Ref S5	// Note: This is multiplexed with LED7
+	#define BUTTON1_TRIS		(TRISAbits.TRISA7)	// Ref S5;  Note: This is multiplexed with LED7
 	#define	BUTTON1_IO			(PORTAbits.RA7)
 	#define BUTTON2_TRIS		(TRISDbits.TRISD7)	// Ref S6
 	#define	BUTTON2_IO			(PORTDbits.RD7)
@@ -137,8 +137,8 @@
 	#define UARTRX_IO			(PORTFbits.RF4)
 
 	// ENC28J60 I/O pins
-	#define ENC_CS_TRIS			(TRISDbits.TRISD14)	// Comment this line out if you are using the ENC424J600/624J600, ZeroG ZG2100, or other network controller.
-	#define ENC_CS_IO			(PORTDbits.RD14)
+	#define ENC_CS_TRIS			(TRISDbits.TRISD14)	// Comment this line out if you are using the ENC424J600/624J600, MRF24WB0M, or other network controller.
+	#define ENC_CS_IO			(LATDbits.LATD14)
 	//#define ENC_RST_TRIS		(TRISDbits.TRISD15)	// Not connected by default.  It is okay to leave this pin completely unconnected, in which case this macro should simply be left undefined.
 	//#define ENC_RST_IO			(PORTDbits.RD15)
 	// SPI SCK, SDI, SDO pins are automatically controlled by the 

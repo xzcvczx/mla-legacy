@@ -120,6 +120,11 @@
     #define mLED_2_Toggle()     mLED_2 = !mLED_2;
     #define mLED_3_Toggle()     mLED_3 = !mLED_3;
     #define mLED_4_Toggle()     mLED_4 = !mLED_4;
+
+    #define mSetLED_1(in)         mLED_1 = in
+    #define mSetLED_2(in)         mLED_2 = in
+    #define mSetLED_3(in)         mLED_3 = in
+    #define mSetLED_4(in)         mLED_4 = in
     
     /** SWITCH *********************************************************/
     #define mInitSwitch2()      TRISAbits.TRISA10=1;

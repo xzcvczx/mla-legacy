@@ -6,7 +6,7 @@
  * FileName:        RadioButton.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok 	11/12/07	Version 1.0 release
+ * 11/12/07		Version 1.0 release
  *****************************************************************************/
 #ifndef _RADIOBUTTON_H
     #define _RADIOBUTTON_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
     #define RB_INDENT   2           // Indent for the text from title bar border
 
@@ -258,7 +258,7 @@ RADIOBUTTON *RbCreate
             );
 
 /*********************************************************************
-* Function: WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
+* Function: WORD RbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if 
 *			the message will affect the object or not. The table 
@@ -290,10 +290,10 @@ RADIOBUTTON *RbCreate
 * Side Effects: none
 *
 ********************************************************************/
-WORD        RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg);
+WORD        RbTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG* pMsg)
+* Function: RbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: This function performs the actual state change 
 *			based on the translated message given. The following state changes 
@@ -319,10 +319,10 @@ WORD        RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void        RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG *pMsg);
+void        RbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: WORD RbDraw(RADIOBUTTON *pRb)
+* Function: WORD RbDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 *			the current parameter settings. Location of the object 
@@ -352,5 +352,5 @@ void        RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD        RbDraw(RADIOBUTTON *pRb);
+WORD RbDraw(void *pObj);
 #endif // _RADIOBUTTON_H

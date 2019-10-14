@@ -74,19 +74,12 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev       Description
   ----      -----------
   2.2       Initial Release
-
   2.3-2.5a  No changes
-
   2.5b      Corrected heap allocation issue
-
   2.6-2.6a  No changes
-
   2.7       Fixed issue where deviceInfoHID[i].rptDescriptor was freed
             twice.  The second free results in possible issues in future
             malloc() calls in the C32 compiler.
-
-  2.7a      Provided macro wrapped versions of malloc() and free()
-            so that a user can override these functions easily.
 ********************************************************************/
 
 #include <stdlib.h>
@@ -94,9 +87,9 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "usb_config.h"
-#include "USB\usb.h"
-#include "USB\usb_host_hid.h"
-#include "USB\usb_host_hid_parser.h"
+#include "USB/usb.h"
+#include "USB/usb_host_hid.h"
+#include "USB/usb_host_hid_parser.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE

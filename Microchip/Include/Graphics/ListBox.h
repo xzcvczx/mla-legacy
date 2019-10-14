@@ -6,7 +6,7 @@
  * FileName:        ListBox.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     11/12/07	Version 1.0 release
+ * 11/12/07		Version 1.0 release
  *****************************************************************************/
 #ifndef _LISTBOX_H
     #define _LISTBOX_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
@@ -309,7 +309,7 @@ LISTITEM    *LbAddItem(LISTBOX *pLb, LISTITEM *pPrevItem, XCHAR *pText, void *pB
 void        LbDelItem(LISTBOX *pLb, LISTITEM *pItem);
 
 /*********************************************************************
-* Function: void LbDelItemsList(LISTBOX *pLb)
+* Function: void LbDelItemsList(void *pObj)
 *
 * Overview: This function removes all items from the list box 
 *			and frees the memory used.
@@ -323,7 +323,7 @@ void        LbDelItem(LISTBOX *pLb, LISTITEM *pItem);
 * Side Effects: none
 *
 ********************************************************************/
-void        LbDelItemsList(LISTBOX *pLb);
+void        LbDelItemsList(void *pObj);
 
 /*********************************************************************
 * Function: LISTITEM* LbGetSel(LISTBOX *pLb, LISTITEM *pFromItem)
@@ -504,7 +504,7 @@ SHORT   LbGetFocusedItem(LISTBOX *pLb);
     #define LbGetItemList(pLb)  ((LISTITEM *)pLb->pItemList)
 
 /*********************************************************************
-* Function: WORD LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg)
+* Function: WORD LbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates the translated 
@@ -534,10 +534,10 @@ SHORT   LbGetFocusedItem(LISTBOX *pLb);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg);
+WORD    LbTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: void LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg)
+* Function: void LbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function performs the actual state change 
 *			based on the translated message given. The following state changes 
@@ -563,10 +563,10 @@ WORD    LbTranslateMsg(LISTBOX *pLb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void    LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg);
+void    LbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: WORD LbDraw(LISTBOX *pLb)
+* Function: WORD LbDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -595,5 +595,5 @@ void    LbMsgDefault(WORD translatedMsg, LISTBOX *pLb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    LbDraw(LISTBOX *pLb);
+WORD LbDraw(void *pObj);
 #endif // _LISTBOX_H

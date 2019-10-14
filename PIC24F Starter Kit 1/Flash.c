@@ -104,7 +104,7 @@ typedef struct _VOLUME_INFO
 //******************************************************************************
 //******************************************************************************
 
-extern BITMAP_FLASH     iconFolderSmall;
+extern IMAGE_FLASH      iconFolderSmall;
 BOOL                    mediaPresent;
 LISTBOX                 *pFlashFiles;
 SLIDER                  *pSlider;

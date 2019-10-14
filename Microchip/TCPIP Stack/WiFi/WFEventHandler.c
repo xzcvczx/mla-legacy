@@ -58,7 +58,7 @@
 /*                                  DEFINES                                 */
 /*==========================================================================*/
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_EVENT_HANDLER
 #endif 
 
@@ -70,7 +70,6 @@
 #define WF_EVENT_CONNECTION_LOST_SUBTYPE             (7)
 #define WF_EVENT_CONNECTION_REESTABLISHED_SUBTYPE    (8)
 #define WF_EVENT_KEY_CALCULATION_COMPLETE_SUBTYPE    (9)
-#define WF_EVENT_FLASH_UPDATE_STATUS_SUBTYPE         (10)
 #define WF_EVENT_SCAN_RESULTS_READY_SUBTYPE          (11)
 #define WF_EVENT_SCAN_IE_RESULTS_READY_SUBTYPE       (12)
 
@@ -83,9 +82,6 @@
 #define CONNECTION_PERMANENTLY_LOST      ((UINT8)2)
 #define CONNECTION_REESTABLISHED         ((UINT8)3)   
 
-/* event values for index 2 of WF_EVENT_FLASH_UPDATE_STATUS_SUBTYPE */
-#define FLASH_UPDATE_SUCCESSFUL          ((UINT8)1)
-#define FLASH_UPDATE_FAILED              ((UINT8)2)
 
 
 /*==========================================================================*/
@@ -168,22 +164,6 @@ void WFProcessMgmtIndicateMsg()
             }        
             break;
         
-        /*-----------------------------------------------------------------*/                    
-        case WF_EVENT_FLASH_UPDATE_STATUS_SUBTYPE:        
-        /*-----------------------------------------------------------------*/        
-            /* read index 2 of mgmt indicate to get flash update status */
-            RawRead(RAW_RX_ID, sizeof(tMgmtIndicateHdr), 1, buf);
-            if (buf[0] == FLASH_UPDATE_SUCCESSFUL)
-            {
-                event = WF_EVENT_FLASH_UPDATE_SUCCESSFUL;
-            }
-            else if (buf[0] == FLASH_UPDATE_FAILED)
-            {
-                event = WF_EVENT_FLASH_UPDATE_FAILED;
-            }
-            eventInfo = WF_NO_ADDITIONAL_INFO;
-            break;
-            
         /*-----------------------------------------------------------------*/                    
         case WF_EVENT_SCAN_RESULTS_READY_SUBTYPE:        
         /*-----------------------------------------------------------------*/        
@@ -284,7 +264,7 @@ static BOOL isNotifyApp(UINT8 event)
             break;
             
         case WF_EVENT_CONNECTION_REESTABLISHED:
-            if (isEventNotifyBitSet(notifyMask, WF_NOTIFY_CONNECTION_PERMANENTLY_LOST))      
+            if (isEventNotifyBitSet(notifyMask, WF_NOTIFY_CONNECTION_REESTABLISHED))      
             {
                 notify = TRUE;          
             }    

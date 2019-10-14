@@ -23,6 +23,20 @@ call "CleanUp.bat"
 cd "..\.."
 
 ECHO *****************************************************************************
+ECHO Removing USB Device - Audio - Microphone
+ECHO *****************************************************************************
+cd "USB Device - Audio - Microphone\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO *****************************************************************************
+ECHO Removing USB Device - Audio - Speaker
+ECHO *****************************************************************************
+cd "USB Device - Audio - Speaker\Firmware"
+call "CleanUp.bat"
+cd "..\.."
+
+ECHO *****************************************************************************
 ECHO Removing PIC32 HID bootloader
 ECHO *****************************************************************************
 cd "USB Device - Bootloaders\HID - Bootloader\HID Bootloader - Firmware for PIC32MX460F512L Family Devices"

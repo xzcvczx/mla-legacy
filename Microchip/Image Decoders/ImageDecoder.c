@@ -41,7 +41,7 @@ Pradeep Budagutta    03-Mar-2008    First release
    from project specific information like reading from
    USB drive or from sd card, etc... */
 
-#include "Image Decoders\ImageDecoder.h"
+#include "Image Decoders/ImageDecoder.h"
 
 /**************************/
 /**** GLOBAL VARIABLES ****/

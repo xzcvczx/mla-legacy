@@ -6,7 +6,7 @@
  * FileName:        TextEntry.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Harold Serrano		10/24/08	...
+ * 10/24/08		...
  *****************************************************************************/
 #ifndef _TEXTENTRY_H
     #define _TEXTENTRY_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
@@ -161,7 +161,7 @@ TEXTENTRY   *TeCreate
             );
 
 /*********************************************************************
-* Function: WORD TeDraw(TEXTENTRY *pTe)
+* Function: WORD TeDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 	        the current parameter settings. Location of the object is 
@@ -185,10 +185,10 @@ TEXTENTRY   *TeCreate
 * Side Effects: none.
 *
 ********************************************************************/
-WORD        TeDraw(TEXTENTRY *pTe);
+WORD TeDraw(void *pObj);
 
 /*********************************************************************
-* Function:  WORD TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg)
+* Function:  WORD TeTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *				
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. If the message 
@@ -229,10 +229,10 @@ WORD        TeDraw(TEXTENTRY *pTe);
 * Side Effects: none.
 *
 ********************************************************************/
-WORD        TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg);
+WORD        TeTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG* pMsg)
+* Function: TeMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: This function performs the actual state change 
 *			based on the translated message given. The following state changes 
@@ -273,7 +273,7 @@ WORD        TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void        TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG *pMsg);
+void        TeMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: void TeSetBuffer(TEXTENTRY *pTe, XCHAR *pText, WORD MaxSize)  
@@ -440,7 +440,7 @@ BOOL TeSetKeyText(TEXTENTRY *pTe, WORD index, XCHAR *pText);
 KEYMEMBER   *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[]);
 
 /*********************************************************************
-* Function: void TeDelKeyMembers(TEXTENTRY *pTe)   
+* Function: void TeDelKeyMembers(void *pObj)   
 *				
 * Overview: This function will delete the KEYMEMBER list assigned to 
 *			the object from memory. Pointer to the KEYMEMBER list is 
@@ -455,7 +455,7 @@ KEYMEMBER   *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[]);
 * Side Effects: none.
 *
 ********************************************************************/
-void        TeDelKeyMembers(TEXTENTRY *pTe);
+void        TeDelKeyMembers(void *pObj);
 
 /*********************************************************************
 * Function: void TeSpaceChar(TEXTENTRY *pTe)   

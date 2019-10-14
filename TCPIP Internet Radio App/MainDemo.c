@@ -3,13 +3,13 @@
  *  Main Application Entry Point and TCP/IP Stack Demo
  *  Module for Microchip TCP/IP Stack
  *   -Demonstrates how to call and use the Microchip TCP/IP stack
- *	 -Reference: AN833
+ *	 -Reference: Microchip TCP/IP Stack Help (TCPIP Stack Help.chm)
  *
  *********************************************************************
  * FileName:        MainDemo.c
  * Dependencies:    TCPIP.h
  * Processor:       PIC18F67J60
- * Compiler:        Microchip C18 v3.30 or higher
+ * Compiler:        Microchip C18 v3.36 or higher
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -1177,9 +1177,7 @@ static void InitializeBoard(void)
 	LED4_TRIS = 0;
 	LED5_TRIS = 0;
 	LED6_TRIS = 0;
-#if !defined(EXPLORER_16)	// Pin multiplexed with a button on EXPLORER_16 
 	LED7_TRIS = 0;
-#endif
 	LED_PUT(0x00);
 
 #if defined(__18CXX)

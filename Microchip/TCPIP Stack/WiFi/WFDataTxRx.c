@@ -57,7 +57,7 @@
 #if defined(WF_CS_TRIS) && defined(WF_USE_DATA_TX_RX_FUNCTIONS)
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_WF_DATA_TX_RX
 #endif
 

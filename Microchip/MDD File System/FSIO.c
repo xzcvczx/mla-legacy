@@ -43,18 +43,25 @@
   Rev     Description
   -----   -----------
   1.2.5   Fixed bug that prevented writes to alternate FAT tables
-  1.2.5   Fixed bug that prevented FAT being updated when media is re-inserted
+          Fixed bug that prevented FAT being updated when media is re-inserted
+
   1.2.6   Fixed bug that resulted in a bus error when attempts to read a invalid memory region
-  1.2.6   Fixed bug that prevented the Windows Explorer to show the Date Creation field for directories
+          Fixed bug that prevented the Windows Explorer to show the Date Creation field for directories
+
+  x.x.x   Fixed issue on some USB drives where the information written
+            to the drive is cached in a RAM for 500ms before it is 
+            written to the flash unless the sector is accessed again.
+          Add some error recovery for FAT32 systems when there is
+            corruption in the boot sector.
 ********************************************************************/
 
 #include "Compiler.h"
-#include "MDD File System\FSIO.h"
+#include "MDD File System/FSIO.h"
 #include "GenericTypeDefs.h"
 #include "string.h"
 #include "stdlib.h"
 #include "ctype.h"
-#include "MDD File System\FSDefs.h"
+#include "MDD File System/FSDefs.h"
 
 #ifdef ALLOW_FSFPRINTF
 #include "stdarg.h"
@@ -1025,157 +1032,242 @@ BYTE LoadBootSector(DISK *dsk)
     WORD        BytesPerSec;
     WORD        ReservedSectorCount;
 
+    #if defined(SUPPORT_FAT32)
+    BOOL        TriedSpecifiedBackupBootSec = FALSE;
+    BOOL        TriedBackupBootSecAtAddress6 = FALSE;
+    #endif
     // Get the Boot sector
     if ( MDD_SectorRead( dsk->firsts, dsk->buffer) != TRUE)
     {
-        FSerrno = CE_BAD_SECTOR_READ;
         error = CE_BAD_SECTOR_READ;
     }
     else
     {
         BSec = (BootSec)dsk->buffer;
 
-        //Verify the Boot Sector is valid
-        if((BSec->Signature0 != FAT_GOOD_SIGN_0) || (BSec->Signature1 != FAT_GOOD_SIGN_1))
+        do      //test each possible boot sector (FAT32 can have backup boot sectors)
         {
-            FSerrno = CE_NOT_FORMATTED;
-            error = CE_NOT_FORMATTED;
-        }
-        else
-        {
-            #ifdef __18CXX
 
-                // Load count of sectors per cluster
-                dsk->SecPerClus = BSec->FAT.FAT_16.BootSec_SPC;
-                // Load the sector number of the first FAT sector
-                dsk->fat        = dsk->firsts + BSec->FAT.FAT_16.BootSec_ResrvSec;
-                // Load the count of FAT tables
-                dsk->fatcopy    = BSec->FAT.FAT_16.BootSec_FATCount;
-                // Load the size of the FATs
-                dsk->fatsize = BSec->FAT.FAT_16.BootSec_SPF;
-                if(dsk->fatsize == 0)
-                    dsk->fatsize  = BSec->FAT.FAT_32.BootSec_FATSz32;
-                // Calculate the location of the root sector (for FAT12/16)
-                dsk->root = dsk->fat + (DWORD)(dsk->fatcopy * (DWORD)dsk->fatsize);
-                // Determine the max size of the root (will be 0 for FAT32)
-                dsk->maxroot    = BSec->FAT.FAT_16.BootSec_RootDirEnts;
-
-                // Determine the total number of sectors in the partition
-                if(BSec->FAT.FAT_16.BootSec_TotSec16 != 0)
-                {
-                    TotSec = BSec->FAT.FAT_16.BootSec_TotSec16;
-                }
-                else
-                {
-                    TotSec = BSec->FAT.FAT_16.BootSec_TotSec32;
-                }
-
-                // Calculate the number of bytes in each sector
-                BytesPerSec = BSec->FAT.FAT_16.BootSec_BPS;
-                if( BytesPerSec == 0 || (BytesPerSec & 1) == 1 )
-                {
-                    FSerrno = CE_UNSUPPORTED_SECTOR_SIZE;
-                    return( CE_UNSUPPORTED_SECTOR_SIZE );
-                }
-
-                // Calculate the number of sectors in the root (will be 0 for FAT32)
-                RootDirSectors = ((BSec->FAT.FAT_16.BootSec_RootDirEnts * 32) + (BSec->FAT.FAT_16.BootSec_BPS - 1)) / BSec->FAT.FAT_16.BootSec_BPS;
-                // Calculate the number of data sectors on the card
-                DataSec = TotSec - (dsk->root + RootDirSectors);
-                // Calculate the maximum number of clusters on the card
-                dsk->maxcls = DataSec / dsk->SecPerClus;
-
-            #else // PIC24/30/33
-
-                // Read the count of reserved sectors
-                ReservedSectorCount = ReadWord( dsk->buffer, BSI_RESRVSEC );
-                // Load the count of sectors per cluster
-                dsk->SecPerClus = ReadByte( dsk->buffer, BSI_SPC );
-                // Load the sector number of the first FAT sector
-                dsk->fat = dsk->firsts + ReservedSectorCount;
-                // Load the count of FAT tables
-                dsk->fatcopy    = ReadByte( dsk->buffer, BSI_FATCOUNT );
-                // Load the size of the FATs
-                dsk->fatsize = ReadWord( dsk->buffer, BSI_SPF );
-                if(dsk->fatsize == 0)
-                    dsk->fatsize  = ReadDWord( dsk->buffer, BSI_FATSZ32 );
-                // Calculate the location of the root sector (for FAT12/16)
-                dsk->root = dsk->fat + (DWORD)(dsk->fatcopy * (DWORD)dsk->fatsize);
-                // Determine the max size of the root (will be 0 for FAT32)
-                dsk->maxroot = ReadWord( dsk->buffer, BSI_ROOTDIRENTS );
-
-                // Determine the total number of sectors in the partition
-                TotSec = ReadWord( dsk->buffer, BSI_TOTSEC16 );
-                if( TotSec == 0 )
-                    TotSec = ReadDWord( dsk->buffer, BSI_TOTSEC32 );
-
-                // Calculate the number of bytes in each sector
-                BytesPerSec = ReadWord( dsk->buffer, BSI_BPS );
-                if( BytesPerSec == 0 || (BytesPerSec & 1) == 1 )
-                {
-                    FSerrno = CE_UNSUPPORTED_SECTOR_SIZE;
-                    return( CE_UNSUPPORTED_SECTOR_SIZE );
-                }
-
-                // Calculate the number of sectors in the root (will be 0 for FAT32)
-                RootDirSectors = ((dsk->maxroot * NUMBER_OF_BYTES_IN_DIR_ENTRY) + (BytesPerSec - 1)) / BytesPerSec;
-                // Calculate the number of data sectors on the card
-                DataSec = TotSec - (ReservedSectorCount + (dsk->fatcopy * dsk->fatsize )  + RootDirSectors);
-                // Calculate the maximum number of clusters on the card
-                dsk->maxcls = DataSec / dsk->SecPerClus;
-
-            #endif
-
-            // Determine the file system type based on the number of clusters used
-            if(dsk->maxcls < 4085)
+            //Verify the Boot Sector has a valid signature
+            if(    (BSec->Signature0 != FAT_GOOD_SIGN_0)
+                || (BSec->Signature1 != FAT_GOOD_SIGN_1)
+              )
             {
-                dsk->type = FAT12;
+                error = CE_NOT_FORMATTED;
             }
-            else
+            else   
             {
-                if(dsk->maxcls < 65525)
-                {
-                    dsk->type = FAT16;
-                }
-                else
-                {
-                    #ifdef SUPPORT_FAT32
-                        dsk->type = FAT32;
-                    #else
-                        error = CE_CARDFAT32;
-                        FSerrno = CE_CARDFAT32;
-                    #endif
-                }
-            }
 
-            #ifdef SUPPORT_FAT32
-                if (dsk->type == FAT32)
+                do      //loop just to allow a break to jump out of this section of code
                 {
                     #ifdef __18CXX
-                        FatRootDirClusterValue =  BSec->FAT.FAT_32.BootSec_RootClus;
-                    #else
-                        FatRootDirClusterValue = ReadDWord( dsk->buffer, BSI_ROOTCLUS );
+                    // Load count of sectors per cluster
+                    dsk->SecPerClus = BSec->FAT.FAT_16.BootSec_SPC;
+                    // Load the sector number of the first FAT sector
+                    dsk->fat        = dsk->firsts + BSec->FAT.FAT_16.BootSec_ResrvSec;
+                    // Load the count of FAT tables
+                    dsk->fatcopy    = BSec->FAT.FAT_16.BootSec_FATCount;
+                    // Load the size of the FATs
+                    dsk->fatsize = BSec->FAT.FAT_16.BootSec_SPF;
+                    if(dsk->fatsize == 0)
+                        dsk->fatsize  = BSec->FAT.FAT_32.BootSec_FATSz32;
+                    // Calculate the location of the root sector (for FAT12/16)
+                    dsk->root = dsk->fat + (DWORD)(dsk->fatcopy * (DWORD)dsk->fatsize);
+                    // Determine the max size of the root (will be 0 for FAT32)
+                    dsk->maxroot    = BSec->FAT.FAT_16.BootSec_RootDirEnts;
+    
+                    // Determine the total number of sectors in the partition
+                    if(BSec->FAT.FAT_16.BootSec_TotSec16 != 0)
+                    {
+                        TotSec = BSec->FAT.FAT_16.BootSec_TotSec16;
+                    }
+                    else
+                    {
+                        TotSec = BSec->FAT.FAT_16.BootSec_TotSec32;
+                    }
+    
+                    // Calculate the number of bytes in each sector
+                    BytesPerSec = BSec->FAT.FAT_16.BootSec_BPS;
+                    if( BytesPerSec == 0 || (BytesPerSec & 1) == 1 )
+                    {
+                        error = CE_UNSUPPORTED_SECTOR_SIZE;
+                        break;  //break out of the do while loop
+                    }
+    
+                    // Calculate the number of sectors in the root (will be 0 for FAT32)
+                    RootDirSectors = ((BSec->FAT.FAT_16.BootSec_RootDirEnts * 32) + (BSec->FAT.FAT_16.BootSec_BPS - 1)) / BSec->FAT.FAT_16.BootSec_BPS;
+                    // Calculate the number of data sectors on the card
+                    DataSec = TotSec - (dsk->root + RootDirSectors);
+                    // Calculate the maximum number of clusters on the card
+                    dsk->maxcls = DataSec / dsk->SecPerClus;
+    
+                    #else // PIC24/30/33
+    
+                    // Read the count of reserved sectors
+                    ReservedSectorCount = ReadWord( dsk->buffer, BSI_RESRVSEC );
+                    // Load the count of sectors per cluster
+                    dsk->SecPerClus = ReadByte( dsk->buffer, BSI_SPC );
+                    // Load the sector number of the first FAT sector
+                    dsk->fat = dsk->firsts + ReservedSectorCount;
+                    // Load the count of FAT tables
+                    dsk->fatcopy    = ReadByte( dsk->buffer, BSI_FATCOUNT );
+                    // Load the size of the FATs
+                    dsk->fatsize = ReadWord( dsk->buffer, BSI_SPF );
+                    if(dsk->fatsize == 0)
+                        dsk->fatsize  = ReadDWord( dsk->buffer, BSI_FATSZ32 );
+                    // Calculate the location of the root sector (for FAT12/16)
+                    dsk->root = dsk->fat + (DWORD)(dsk->fatcopy * (DWORD)dsk->fatsize);
+                    // Determine the max size of the root (will be 0 for FAT32)
+                    dsk->maxroot = ReadWord( dsk->buffer, BSI_ROOTDIRENTS );
+    
+                    // Determine the total number of sectors in the partition
+                    TotSec = ReadWord( dsk->buffer, BSI_TOTSEC16 );
+                    if( TotSec == 0 )
+                        TotSec = ReadDWord( dsk->buffer, BSI_TOTSEC32 );
+    
+                    // Calculate the number of bytes in each sector
+                    BytesPerSec = ReadWord( dsk->buffer, BSI_BPS );
+                    if( BytesPerSec == 0 || (BytesPerSec & 1) == 1 )
+                    {
+                        error = CE_UNSUPPORTED_SECTOR_SIZE;
+                        break;
+                    }
+    
+                    // Calculate the number of sectors in the root (will be 0 for FAT32)
+                    RootDirSectors = ((dsk->maxroot * NUMBER_OF_BYTES_IN_DIR_ENTRY) + (BytesPerSec - 1)) / BytesPerSec;
+                    // Calculate the number of data sectors on the card
+                    DataSec = TotSec - (ReservedSectorCount + (dsk->fatcopy * dsk->fatsize )  + RootDirSectors);
+                    // Calculate the maximum number of clusters on the card
+                    dsk->maxcls = DataSec / dsk->SecPerClus;
+    
                     #endif
-                    dsk->data = dsk->root + RootDirSectors;
-                }
-                else
-            #endif
-            {
-                FatRootDirClusterValue = 0;
-                dsk->data = dsk->root + ( dsk->maxroot >> 4);
+    
+                    // Determine the file system type based on the number of clusters used
+                    if(dsk->maxcls < 4085)
+                    {
+                        dsk->type = FAT12;
+                    }
+                    else
+                    {
+                        if(dsk->maxcls < 65525)
+                        {
+                            dsk->type = FAT16;
+                        }
+                        else
+                        {
+                            #ifdef SUPPORT_FAT32
+                                dsk->type = FAT32;
+                            #else
+                                error = CE_CARDFAT32;
+                            #endif
+                        }
+                    }
+        
+                    #ifdef SUPPORT_FAT32
+                        if (dsk->type == FAT32)
+                        {
+                            #ifdef __18CXX
+                                FatRootDirClusterValue =  BSec->FAT.FAT_32.BootSec_RootClus;
+                            #else
+                                FatRootDirClusterValue = ReadDWord( dsk->buffer, BSI_ROOTCLUS );
+                            #endif
+                            dsk->data = dsk->root + RootDirSectors;
+                        }
+                        else
+                    #endif
+                    {
+                        FatRootDirClusterValue = 0;
+                        dsk->data = dsk->root + ( dsk->maxroot >> 4);
+                    }
+    
+                #ifdef __18CXX
+                    if(BSec->FAT.FAT_16.BootSec_BPS > MEDIA_SECTOR_SIZE)
+                #else
+                    if(BytesPerSec > MEDIA_SECTOR_SIZE)
+                #endif
+                    {
+                        error = CE_UNSUPPORTED_SECTOR_SIZE;
+                    }
+
+                }while(0);  // do/while loop designed to allow to break out if
+                            //   there is an error detected without returning
+                            //   from the function.
+
             }
 
-            #ifdef __18CXX
-                if(BSec->FAT.FAT_16.BootSec_BPS > MEDIA_SECTOR_SIZE)
-            #else
-                if(BytesPerSec > MEDIA_SECTOR_SIZE)
-            #endif
+            #if defined(SUPPORT_FAT32)
+            if ((dsk->type == FAT32) || ((error != CE_GOOD) && ((BSec->FAT.FAT_32.BootSec_BootSig == 0x29) || (BSec->FAT.FAT_32.BootSec_BootSig == 0x28))))
+            {
+                //Check for possible errors in the formatting
+                if(    (BSec->FAT.FAT_32.BootSec_TotSec16 != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[0] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[1] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[2] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[3] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[4] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[5] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[6] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[7] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[8] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[9] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[10] != 0)
+                    || (BSec->FAT.FAT_32.BootSec_Reserved[11] != 0)
+                    || ((BSec->FAT.FAT_32.BootSec_BootSig != 0x29) && (BSec->FAT.FAT_32.BootSec_BootSig != 0x28))
+                  )
                 {
-                    error = CE_UNSUPPORTED_SECTOR_SIZE;
-                    FSerrno = CE_UNSUPPORTED_SECTOR_SIZE;
+                    error = CE_NOT_FORMATTED;
                 }
+    
+                //If there were formatting errors then in FAT32 we can try to use
+                //  the backup boot sector
+                if((error != CE_GOOD) && (TriedSpecifiedBackupBootSec == FALSE))
+                {
+                    TriedSpecifiedBackupBootSec = TRUE;
+    
+                    if ( MDD_SectorRead( dsk->firsts + BSec->FAT.FAT_32.BootSec_BkBootSec, dsk->buffer) != TRUE)
+                    {
+                        FSerrno = CE_BAD_SECTOR_READ;
+                        return CE_BAD_SECTOR_READ;
+                    }
+                    else
+                    {
+                        error = CE_GOOD;
+                        continue;
+                    }
+                }
+    
+                if((error != CE_GOOD) && (TriedBackupBootSecAtAddress6 == FALSE))
+                {
+                    TriedBackupBootSecAtAddress6 = TRUE;
+    
+                    //Here we are using the magic number 6 because the FAT32 specification
+                    //  recommends that "No value other than 6 is recommended."  We've
+                    //  already tried using the value specified in the BPB_BkBootSec
+                    //  field and it must have failed
+                    if ( MDD_SectorRead( dsk->firsts + 6, dsk->buffer) != TRUE)
+                    {
+                        FSerrno = CE_BAD_SECTOR_READ;
+                        return CE_BAD_SECTOR_READ;
+                    }
+                    else
+                    {
+                        error = CE_GOOD;
+                        continue;
+                    }
+                }
+
+            }   //type == FAT32
+            #endif  //SUPPORT_FAT32
+            break;
         }
+        while(1);
     }
+
+    if(error != CE_GOOD)
+    {
+        FSerrno = error;
+    }
+
     return(error);
 }
 
@@ -3279,14 +3371,26 @@ int FSfclose(FSFILE   *fo)
     if(fo->flags.write)
     {
         if (gNeedDataWrite)
+        {
             if (flushData())
             {
                 FSerrno = CE_WRITE_ERROR;
                 return EOF;
             }
+        }
 
         // Write the current FAT sector to the disk
         WriteFAT (fo->dsk, 0, 0, TRUE);
+
+        // Invalidate the currently cached FAT entry so that the next read will
+        //   result in an acutal read from the physical media instead of a read
+        //   from the RAM cache.
+        gLastFATSectorRead = 0;
+
+        // Read the FAT entry from the physical media.  This is required because
+        //   some physical media cache the entries in RAM and only write them 
+        //   after a time expires for until the sector is accessed again.
+        ReadFAT (fo->dsk, fo->ccls);
 
         // Get the file entry
         dir = LoadDirAttrib(fo, &fHandle);
@@ -3316,7 +3420,13 @@ int FSfclose(FSFILE   *fo)
 
         // just write the last entry in
         if(Write_File_Entry(fo,&fHandle))
+        {
+            // Read the folder entry from the physical media.  This is required because
+            //   some physical media cache the entries in RAM and only write them 
+            //   after a time expires for until the sector is accessed again.
+            dir = LoadDirAttrib(fo, &fHandle);
             error = 0;
+        }
         else
         {
             FSerrno = CE_WRITE_ERROR;
@@ -3348,8 +3458,6 @@ int FSfclose(FSFILE   *fo)
 
     return(error);
 } // FSfclose
-
-
 
 
 /*******************************************************
@@ -4969,7 +5077,7 @@ int FSattrib (FSFILE * file, unsigned char attributes)
     the device from the specified buffer until the specified amount has been written.
     If the end of a cluster is reached, the next cluster will be loaded, unless
     the end-of-file flag for the specified file has been set.  If it has, a new
-    cluster will be allocated to the file.  Finally, the new position and filezize
+    cluster will be allocated to the file.  Finally, the new position and filesize
     will be stored in the FSFILE object.  The parameters 'size' and 'n' indicate how
     much data to write.  'Size' refers to the size of one object to write (in bytes),
     and 'n' will refer to the number of these objects to write.  The value returned

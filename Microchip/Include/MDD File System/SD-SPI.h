@@ -10,6 +10,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
+ * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -32,21 +33,13 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
-//DOM-IGNORE-BEGIN
-/********************************************************************
- Change History:
-  Rev            Description
-  ----           -----------------------
-  1.2.4 - 1.2.6  No Change
-********************************************************************/
-//DOM-IGNORE-END
 
 #ifndef SDMMC_H
 #define SDMMC_H
 
 #include "GenericTypeDefs.h"
 #include "FSconfig.h"
-#include "MDD File System\FSDefs.h"
+#include "MDD File System/FSDefs.h"
 
 
 #ifdef __18CXX

@@ -43,10 +43,10 @@
 
     #include <p24Fxxxx.h>
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
     #include "EEPROM.h"
     #include "SST25VF016.h"    
-//    #include "TouchScreen.h"
+    #include "ResTouchScreen.h"
 //    #include "Beep.h"
 	#include "Cap-mTouch.h"
 	#include "mTouchCap_DirectKeys.h"
@@ -56,7 +56,7 @@
 
 extern WORD update;
 
-
+void mTouchCapApp_DemoDirectKeys(void);
 
 void CapmTouchGetMsg(GOL_MSG *pMsg);
 

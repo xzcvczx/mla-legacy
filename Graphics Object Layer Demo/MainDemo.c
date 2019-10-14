@@ -249,21 +249,21 @@ void                        DisplayPullDown(void);          // refresh the scree
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
 // iinternal flash image
-extern const BITMAP_FLASH   intro;
-extern const BITMAP_FLASH   mchpLogo;
-extern const BITMAP_FLASH   bulbon;
-extern const BITMAP_FLASH   bulboff;
-extern const BITMAP_FLASH   gradientButton;
-extern const BITMAP_FLASH   Engine1;
-extern const BITMAP_FLASH   Engine2;
-extern const BITMAP_FLASH   Engine3;
-extern const BITMAP_FLASH   Engine4;
-extern const BITMAP_FLASH   arrowUp;
-extern const BITMAP_FLASH   arrowDown;
-extern const BITMAP_FLASH   redphone;
-extern const BITMAP_FLASH   greenphone;
-extern const BITMAP_FLASH   mchpIcon0;
-extern const BITMAP_FLASH   mchpIcon;
+extern const IMAGE_FLASH   intro;
+extern const IMAGE_FLASH   mchpLogo;
+extern const IMAGE_FLASH   bulbon;
+extern const IMAGE_FLASH   bulboff;
+extern const IMAGE_FLASH   gradientButton;
+extern const IMAGE_FLASH   Engine1;
+extern const IMAGE_FLASH   Engine2;
+extern const IMAGE_FLASH   Engine3;
+extern const IMAGE_FLASH   Engine4;
+extern const IMAGE_FLASH   arrowUp;
+extern const IMAGE_FLASH   arrowDown;
+extern const IMAGE_FLASH   redphone;
+extern const IMAGE_FLASH   greenphone;
+extern const IMAGE_FLASH   mchpIcon0;
+extern const IMAGE_FLASH   mchpIcon;
 
 /////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED
@@ -272,8 +272,8 @@ extern const FONT_FLASH     GOLFontDefault;                 // default GOL font
 extern const FONT_FLASH     GOLSmallFont;                   // small font
 extern const FONT_FLASH     monofont;                       // equal width font
 
-const FONT_FLASH            *ptrLargeAsianFont = &GOLFontDefault;
-const FONT_FLASH            *ptrSmallAsianFont = &GOLSmallFont;
+	   const FONT_FLASH     *ptrLargeAsianFont = &GOLFontDefault;
+	   const FONT_FLASH     *ptrSmallAsianFont = &GOLSmallFont;
 
 /////////////////////////////////////////////////////////////////////////////
 //                            COLORS USED
@@ -448,9 +448,10 @@ int main(void)
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
-
+    #endif
     #endif
 
     /////////////////////////////////////////////////////////////////////////////
@@ -508,6 +509,7 @@ int main(void)
 
     TouchInit();                        // Initialize touch screen
     TickInit();                         // Initialize tick counter
+    HardwareButtonInit();               // Initialize the hardware buttons
 
     #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
     RTCCInit();                         // Setup the RTCC
@@ -527,19 +529,19 @@ int main(void)
 
     TRISAbits.TRISA9 = 0;
 
-    #elif defined(__PIC24FJ256DA210__)
-
-    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
-    if(BTN_S1 == 0)
-    {
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
-
     #else
 
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    if(BTN_S3 == 0)
+    /**
+     * Force a touchscreen calibration by pressing the switch
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    if(GetHWButtonTouchCal() == HW_BUTTON_PRESS)
     {
         TouchCalibration();
         TouchStoreCalibration();
@@ -585,12 +587,12 @@ int main(void)
 
     /* for Truly display */
     altScheme->Color0 = RGB565CONVERT(0x4C, 0x8E, 0xFF);
-    altScheme->Color1 = RGB565CONVERT(0xFF, 0xBB, 0x4C);
+    altScheme->Color1 = RGB565CONVERT(255, 102, 0);
     altScheme->EmbossDkColor = RGB565CONVERT(0x1E, 0x00, 0xE5);
     altScheme->EmbossLtColor = RGB565CONVERT(0xA9, 0xDB, 0xEF);
     altScheme->ColorDisabled = RGB565CONVERT(0xD4, 0xE1, 0xF7);
     altScheme->TextColor1 = BRIGHTBLUE;
-    altScheme->TextColor0 = RGB565CONVERT(0xFF, 0xBB, 0x4C);
+    altScheme->TextColor0 = RGB565CONVERT(255, 102, 0);
     altScheme->TextColorDisabled = RGB565CONVERT(0xB8, 0xB9, 0xBC);
 
     altScheme->pFont = (void *)ptrLargeAsianFont;
@@ -665,10 +667,12 @@ int main(void)
             // Drawing is done here, process messages
             TouchGetMsg(&msg);          // Get message from touch screen
             GOLMsg(&msg);               // Process message
+#if defined (USE_FOCUS)                    
             #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
             SideButtonsMsg(&msg);       // Get message from side buttons
             GOLMsg(&msg);               // Process message
             #endif
+#endif //#if defined (USE_FOCUS)
         }
     }
 }
@@ -1441,10 +1445,10 @@ void StartScreen(void)
 
                 #if (DISP_ORIENTATION == 0)
                 {
-                    GFX_SetSrcAddress((y * DISP_HOR_RESOLUTION) + (x - 1));
-                    GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetRectSize(GetImageWidth((void *) &mchpIcon0), GetImageHeight((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
+                    GFX_RCC_SetSrcOffset((y * DISP_HOR_RESOLUTION) + (x - 1));
+                    GFX_RCC_SetDestOffset((y * DISP_HOR_RESOLUTION) + x);
+                    GFX_RCC_SetSize(GetImageWidth((void *) &mchpIcon0), GetImageHeight((void *) &mchpIcon0));
+                    GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                     DelayMs(1);
                 }
                 #elif (DISP_ORIENTATION == 90)
@@ -1452,10 +1456,10 @@ void StartScreen(void)
                     DWORD t = x;
                     x = y;
                     y = GetMaxX() - t - GetImageWidth((void *) &mchpIcon0);
-                    GFX_SetSrcAddress(((y + 1) * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetRectSize(GetImageHeight((void *) &mchpIcon0), GetImageWidth((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
+                    GFX_RCC_SetSrcOffset(((y + 1) * DISP_HOR_RESOLUTION) + x);
+                    GFX_RCC_SetDestOffset((y * DISP_HOR_RESOLUTION) + x);
+                    GFX_RCC_SetSize(GetImageHeight((void *) &mchpIcon0), GetImageWidth((void *) &mchpIcon0));
+                    GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                     DelayMs(1);
                 }
                 #else
@@ -1572,18 +1576,6 @@ void CreatePage(XCHAR *pText)
             navScheme
         );                          // use navigation scheme
 
-/*    StCreate
-    (
-        ID_STATICTEXT4,             // ID
-        145,
-        14,                          // dimensions
-        145 + GetTextWidth((XCHAR *)Language, navScheme->pFont) + 5,
-        14 + GetTextHeight(navScheme->pFont),
-        ST_DRAW,   // will be dislayed, has frame and center aligned
-        (XCHAR *)Language,                            // text is from time value
-        navScheme
-    );                  // alternate scheme
-*/
     #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
     RTCCProcessEvents();            // update the date and time strings
     i = 0;
@@ -1609,19 +1601,15 @@ void CreatePage(XCHAR *pText)
         timeScheme
     );                  // alternate scheme
     #endif
+#if defined (USE_FOCUS)                    
     GOLSetFocus(obj);   // set focus for the button
+#endif    
 }
 
 /* definitions for the pull down menu demo */
 #define BOTTOM_NORMAL   40
 #define BOTTOM_DROPPED  220
 
-/*
-const char ScreenItems[] =
-"Buttons\n" "Checkbox\n" "Radio buttons\n" "Group box\n" "Slider\n" "Progress bar\n" "List box\n" "Edit box\n" "MORE......";
-const char ScreenItems2[] =
-"BACK......\n" "Meter\n" "Dial\n" "Picture\n" "Custom control\n" "Signature\n" "Plotting\n" "ECG"; 
-*/
 #define ScreenItems ScrSelList1
 #define ScreenItems2 ScrSelList2
 
@@ -1898,85 +1886,85 @@ void CreateButtons(void)
     #define BTN_ORIGIN_X    ((GetMaxX() - 258 + 1) / 2)
     #define BTN_ORIGIN_Y    ((40 + GetMaxY() - 177 + 1) / 2)
 
-    GOLFree();                              // free memory for the objects in the previous linked list and start new list
+    GOLFree();                      // free memory for the objects in the previous linked list and start new list
     CreatePage((XCHAR *)ButtonStr);
     BtnCreate
     (
-        ID_BUTTON1,                         // button ID
+        ID_BUTTON1,                 // button ID
         BTN_ORIGIN_X + 0,
         BTN_ORIGIN_Y + 7,
         BTN_ORIGIN_X + 126,
-        BTN_ORIGIN_Y + 57,                  // dimension
-        10,                                 // set radius
-        BTN_DRAW,                           // draw a beveled button
-        NULL,                               // no bitmap
-        (XCHAR *)ButtonStr,                 // "Button",     	// text
+        BTN_ORIGIN_Y + 57,			// dimension
+        10,                         // set radius
+        BTN_DRAW,                   // draw a beveled button
+        NULL,                       // no bitmap
+        (XCHAR *)ButtonStr,         // text
         altScheme
-    );                                      // use alternate scheme
+    );                              // use alternate scheme
     BtnCreate
     (
-        ID_BUTTON2,                         // button ID
+        ID_BUTTON2,                 // button ID
         BTN_ORIGIN_X + 0,
         BTN_ORIGIN_Y + 67,
         BTN_ORIGIN_X + 126,
-        BTN_ORIGIN_Y + 117,                 // dimension
+        BTN_ORIGIN_Y + 117,         // dimension
         0,
-        BTN_DRAW,                           // will be dislayed after creation
-        (void *) &gradientButton,           // use bitmap
-        (XCHAR *)HomeStr,                   // "HOME", 	    // text
+        BTN_DRAW,                   // will be dislayed after creation
+        (void *) &gradientButton,   // use bitmap
+        (XCHAR *)HomeStr,           // text
         altScheme
-    );                                      // alternative GOL scheme
+    );                              // alternative GOL scheme
     BtnCreate
     (
-        ID_BUTTON3,                         // button ID
+        ID_BUTTON3,                 // button ID
         BTN_ORIGIN_X + 135,
         BTN_ORIGIN_Y + 7,
         BTN_ORIGIN_X + 185,
-        BTN_ORIGIN_Y + 117,                 // dimension
-        25,                                 // set radius
-        BTN_DRAW | BTN_TOGGLE,              // draw a vertical capsule button
-        // that has a toggle behavior
-        NULL, // no bitmap
-        (XCHAR *)LowStr,                    // "LO",       	// text
+        BTN_ORIGIN_Y + 117,         // dimension
+        25,                         // set radius
+        BTN_DRAW | BTN_TOGGLE,      // draw a vertical capsule button
+        							// that has a toggle behavior
+        NULL, 						// no bitmap
+        (XCHAR *)LowStr,            // text
         yellowScheme
-    );                          // use alternate scheme
+    );                          	// use alternate scheme
     BtnCreate
     (
-        ID_BUTTON4,             // button ID
+        ID_BUTTON4,             	// button ID
         BTN_ORIGIN_X + 195,
         BTN_ORIGIN_Y + 0,
         BTN_ORIGIN_X + 255,
-        BTN_ORIGIN_Y + 60,      // dimension
-        30,                     // set radius
-        BTN_DRAW,               // draw a vertical capsule button
-        NULL,                   // no bitmap
-        (XCHAR *)OnStr,         // "ON",		// text
+        BTN_ORIGIN_Y + 60,      	// dimension
+        30,                     	// set radius
+        BTN_DRAW,               	// draw a vertical capsule button
+        NULL,                   	// no bitmap
+        (XCHAR *)OnStr,         	// text
         greenScheme
-    );                          // use alternate scheme
+    );                          	// use alternate scheme
     BtnCreate
     (
-        ID_BUTTON5,             // button ID
+        ID_BUTTON5,             	// button ID
         BTN_ORIGIN_X + 195,
         BTN_ORIGIN_Y + 64,
         BTN_ORIGIN_X + 255,
-        BTN_ORIGIN_Y + 124,     // dimension
-        30,                     // set radius
-        BTN_DRAW | BTN_PRESSED, // draw a vertical capsule button
-        // that is initially pressed
-        NULL,  // no bitmap
-        (XCHAR *)OffStr,                    // "OFF",      	// text
+        BTN_ORIGIN_Y + 124,     	// dimension
+        30,                     	// set radius
+        BTN_DRAW | BTN_PRESSED, 	// draw a vertical capsule button
+        							// that is initially pressed
+        NULL,  						// no bitmap
+        (XCHAR *)OffStr,            // text
         redScheme
-    );                      // use alternate scheme 	
+    );                      		// use alternate scheme 	
     BtnCreate
     (
-        ID_BUTTON6,         // button ID
+        ID_BUTTON6,         		// button ID
         BTN_ORIGIN_X + 0,
         BTN_ORIGIN_Y + 127,
         BTN_ORIGIN_X + 126,
-        BTN_ORIGIN_Y + 177, // dimension
+        BTN_ORIGIN_Y + 177, 		// dimension
         0,
-        BTN_DRAW | BTN_TEXTLEFT // will be dislayed after creation with text
-        | BTN_TEXTTOP, // left top position
+        BTN_DRAW | BTN_TEXTLEFT 	// will be dislayed after creation with text
+        | BTN_TEXTTOP, 				// left top position
         (void *) &bulboff,          // use bitmap
         (XCHAR *)OffBulbStr,        // text
         alt2Scheme
@@ -2040,7 +2028,9 @@ WORD MsgButtons(WORD objMsg, OBJ_HEADER *pObj)
                     ClrState(pOtherRbtn, BTN_PRESSED);
                     SetState(pOtherRbtn, BTN_DRAW);
                     SetState(pObj, BTN_PRESSED | BTN_DRAW);
+#if defined (USE_FOCUS)                    
                     GOLSetFocus(pObj);  // set focus for the button
+#endif                    
                 }
             }
 
@@ -2055,7 +2045,9 @@ WORD MsgButtons(WORD objMsg, OBJ_HEADER *pObj)
                     ClrState(pOtherRbtn, BTN_PRESSED);
                     SetState(pOtherRbtn, BTN_DRAW);
                     SetState(pObj, BTN_PRESSED | BTN_DRAW);
+#if defined (USE_FOCUS)                                        
                     GOLSetFocus(pObj);  // set focus for the button
+#endif                    
                 }
             }
 
@@ -2949,12 +2941,12 @@ void CreateEditBox(void)
 
     EbCreate
     (
-        ID_EDITBOX1,    // ID
+        ID_EDITBOX1,    			// ID
         KEYSTARTX,
         KEYSTARTY + 1,
         KEYSTARTX + 4 * KEYSIZEX,
         KEYSTARTY + 1 * KEYSIZEY - GOL_EMBOSS_SIZE, // dimension
-        EB_DRAW | EB_CARET | EB_FOCUSED,            // will be dislayed after creation
+        EB_DRAW | EB_CARET,         // will be dislayed after creation
         NULL,
         MAXCHARSIZE,
         altScheme
@@ -3179,7 +3171,8 @@ WORD MsgEditBox(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
     id = GetObjID(pObj);
 
     // If number key is pressed
-    if(objMsg == BTN_MSG_PRESSED)
+    if(objMsg == BTN_MSG_RELEASED)
+    {
         if(id >= ID_KEYPAD)
             if(id < ID_KEYPAD + 10)
             {
@@ -3193,47 +3186,33 @@ WORD MsgEditBox(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
                 return (1);
             }
 
-    switch(id)
-    {
-        case ID_CALL:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+	    switch(id)
+	    {
+	        case ID_CALL:
                 pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                 EbSetText(pEb, (XCHAR *)CallingStr);
                 SetState(pEb, EB_DRAW);
                 status = 1;
-            }
-
-            return (1);
-
-        case ID_STOPCALL:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+                break;
+	
+	        case ID_STOPCALL:
                 pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                 temp = 0x0000;
                 EbSetText(pEb, &temp);
                 SetState(pEb, EB_DRAW);
                 status = 0;
-            }
-
-            return (1);
-
-        case ID_BACKSPACE:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+                break;
+	
+	        case ID_BACKSPACE:
                 if(!status)
                 {
                     pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                     EbDeleteChar(pEb);
                     SetState(pEb, EB_DRAW);
                 }
-            }
-
-            return (1);
-
-        case ID_HOLD:
-            if(objMsg == BTN_MSG_PRESSED)
-            {
+                break;
+	
+	        case ID_HOLD:
                 pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                 if(status == 1)
                 {
@@ -3245,59 +3224,43 @@ WORD MsgEditBox(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
                     EbSetText(pEb, (XCHAR *)CallingStr);
                     status = 1;
                 }
-
+	
                 SetState(pEb, EB_DRAW);
-            }
-
-            return (1);
-
-        case ID_ASTERISK:
-            if(!status)
-            {
-                if(objMsg == BTN_MSG_PRESSED)
-                {
+                break;
+	
+	        case ID_ASTERISK:
+	            if(!status)
+	            {
                     pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                     EbAddChar(pEb, (XCHAR) '*');
                     SetState(pEb, EB_DRAW);
-                }
-            }
-
-            return (1);
-
-        case ID_POUND:
-            if(!status)
-            {
-                if(objMsg == BTN_MSG_PRESSED)
-                {
+	            }
+                break;
+	
+	        case ID_POUND:
+	            if(!status)
+	            {
                     pEb = (EDITBOX *)GOLFindObject(ID_EDITBOX1);
                     EbAddChar(pEb, (XCHAR) '#');
                     SetState(pEb, EB_DRAW);
-                }
-            }
-
-            return (1);
-
-        case ID_BUTTON_NEXT:
-            if(objMsg == BTN_MSG_RELEASED)
-            {
+	            }
+                break;
+	
+	        case ID_BUTTON_NEXT:
                 screenState = CREATE_METER;     // goto meter screen
-            }
-
-            status = 0;
-            return (1);                         // process by default
-
-        case ID_BUTTON_BACK:
-            if(objMsg == BTN_MSG_RELEASED)
-            {
+	            status = 0;
+                break;
+	
+	        case ID_BUTTON_BACK:
                 screenState = CREATE_LISTBOX;   // goto list box screen
-            }
-
-            status = 0;
-            return (1);                         // process by default
-
-        default:
-            return (1);                         // process by default
-    }
+	            status = 0;
+                break;
+	
+	        default:
+                break;
+	    }
+	} 
+	return (1);                         		// process by default
 }
 
 /*********************************************************************************/

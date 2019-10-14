@@ -75,43 +75,43 @@
 #endif
 
 #ifdef MULTI_MEDIA_BOARD_DM00123
-extern volatile const BITMAP_FLASH      ICON1;
-extern volatile const BITMAP_FLASH      ICON1P;
-extern volatile const BITMAP_FLASH      ICON2;
-extern volatile const BITMAP_FLASH      ICON2P;
-extern volatile const BITMAP_FLASH      ICON3;
-extern volatile const BITMAP_FLASH      ICON3P;
-extern volatile const BITMAP_FLASH      ICON4;
-extern volatile const BITMAP_FLASH      ICON4P;
-extern volatile const BITMAP_FLASH      ICON5;
-extern volatile const BITMAP_FLASH      ICON5P;
-extern volatile const BITMAP_FLASH      ICON6;
-extern volatile const BITMAP_FLASH      ICON6P;
-extern volatile const BITMAP_FLASH      ICON7P;
-extern volatile const BITMAP_FLASH      ICON7;
-extern volatile const BITMAP_FLASH      ICON8P;
-extern volatile const BITMAP_FLASH      ICON8;
-extern volatile const BITMAP_FLASH      ICON9P;
-extern volatile const BITMAP_FLASH      ICON9;
+extern volatile const IMAGE_FLASH      ICON1;
+extern volatile const IMAGE_FLASH      ICON1P;
+extern volatile const IMAGE_FLASH      ICON2;
+extern volatile const IMAGE_FLASH      ICON2P;
+extern volatile const IMAGE_FLASH      ICON3;
+extern volatile const IMAGE_FLASH      ICON3P;
+extern volatile const IMAGE_FLASH      ICON4;
+extern volatile const IMAGE_FLASH      ICON4P;
+extern volatile const IMAGE_FLASH      ICON5;
+extern volatile const IMAGE_FLASH      ICON5P;
+extern volatile const IMAGE_FLASH      ICON6;
+extern volatile const IMAGE_FLASH      ICON6P;
+extern volatile const IMAGE_FLASH      ICON7P;
+extern volatile const IMAGE_FLASH      ICON7;
+extern volatile const IMAGE_FLASH      ICON8P;
+extern volatile const IMAGE_FLASH      ICON8;
+extern volatile const IMAGE_FLASH      ICON9P;
+extern volatile const IMAGE_FLASH      ICON9;
 #else 
-extern BITMAP_EXTERNAL      ICON1;
-extern BITMAP_EXTERNAL      ICON1P;
-extern BITMAP_EXTERNAL      ICON2;
-extern BITMAP_EXTERNAL      ICON2P;
-extern BITMAP_EXTERNAL      ICON3;
-extern BITMAP_EXTERNAL      ICON3P;
-extern BITMAP_EXTERNAL      ICON4;
-extern BITMAP_EXTERNAL      ICON4P;
-extern BITMAP_EXTERNAL      ICON5;
-extern BITMAP_EXTERNAL      ICON5P;
-extern BITMAP_EXTERNAL      ICON6;
-extern BITMAP_EXTERNAL      ICON6P;
-extern BITMAP_EXTERNAL      ICON7P;
-extern BITMAP_EXTERNAL      ICON7;
-extern BITMAP_EXTERNAL      ICON8P;
-extern BITMAP_EXTERNAL      ICON8;
-extern BITMAP_EXTERNAL      ICON9P;
-extern BITMAP_EXTERNAL      ICON9;
+extern IMAGE_EXTERNAL      ICON1;
+extern IMAGE_EXTERNAL      ICON1P;
+extern IMAGE_EXTERNAL      ICON2;
+extern IMAGE_EXTERNAL      ICON2P;
+extern IMAGE_EXTERNAL      ICON3;
+extern IMAGE_EXTERNAL      ICON3P;
+extern IMAGE_EXTERNAL      ICON4;
+extern IMAGE_EXTERNAL      ICON4P;
+extern IMAGE_EXTERNAL      ICON5;
+extern IMAGE_EXTERNAL      ICON5P;
+extern IMAGE_EXTERNAL      ICON6;
+extern IMAGE_EXTERNAL      ICON6P;
+extern IMAGE_EXTERNAL      ICON7P;
+extern IMAGE_EXTERNAL      ICON7;
+extern IMAGE_EXTERNAL      ICON8P;
+extern IMAGE_EXTERNAL      ICON8;
+extern IMAGE_EXTERNAL      ICON9P;
+extern IMAGE_EXTERNAL      ICON9;
 #endif
 
 // strings used

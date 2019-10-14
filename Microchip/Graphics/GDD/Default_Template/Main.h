@@ -3,10 +3,8 @@
  * Graphics Display Designer (GDD) Template
  *****************************************************************************
  * FileName:        Main.h
- * Dependencies:    See INCLUDES section below
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.22, MPLAB C32 V1.05b
- * Linker:          MPLAB LINK30, MPLAB LINK32
+ * Compiler:       	MPLAB C30/C32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -33,7 +31,7 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  *****************************************************************************/
@@ -53,9 +51,11 @@
         #error "Device selected is not supported."
     #endif
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
     #include "EEPROM.h"
-    #include "SST25VF016.h"    
+    #include "SST25VF016.h"
+    #include "SST39LF400.h"
     #include "TouchScreen.h"
     #include "Beep.h"
+	#include "cpld.h"
 #endif

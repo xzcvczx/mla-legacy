@@ -82,6 +82,12 @@
             #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
         #elif defined(__PIC24FJ256DA210__)
             #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
+        #elif defined(__dsPIC33EP512MU810__)
+            #if defined(DSPIC33EP512MU810_PIM)
+                #include "HardwareProfile - dsPIC33EP512MU810 PIM.h"
+            #elif defined(DSPIC33E_STARTER_KIT)
+                #include "HardwareProfile - dsPIC33E Starter Kit.h"
+            #endif
         #endif
     #endif
 

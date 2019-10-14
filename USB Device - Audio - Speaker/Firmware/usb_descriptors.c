@@ -157,6 +157,7 @@ state according to the definition in the USB specification.
 
 #include "./USB/usb.h"
 #include "./USB/usb_function_audio.h"
+#include "HardwareProfile.h"
 
 /** CONSTANTS ******************************************************/
 #if defined(__18CXX)
@@ -293,8 +294,8 @@ ROM BYTE configDescriptor1[] ={
 	0x09,							 // Size of the descriptor, in bytes (bLength)
 	USB_DESCRIPTOR_ENDPOINT,		 // ENDPOINT descriptor (bDescriptorType)
 	0x01,							 // OUT Endpoint 1. (bEndpointAddress)
-	0x01,							 // ?(bmAttributes) Isochronous, Unsynchronized, data endpoint
-	0xC0,0x00,						 // ?(wMaxPacketSize)
+	0x0D,							 // (bmAttributes) Isochronous, Synchronized, data endpoint
+	NO_OF_SAMPLES_IN_A_USB_FRAME,0x00,	// (wMaxPacketSize)
 	0x01,							 // One packet per frame.(bInterval)
 	0x00,							 // Unused. (bRefresh)
 	0x00,							 // Unused. (bSynchAddress)

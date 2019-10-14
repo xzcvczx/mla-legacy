@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC32MX795F512L
+device=PIC32MX360F512L
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -84,6 +84,8 @@ file_056=Board Support Package
 file_057=Board Support Package
 file_058=Board Support Package
 file_059=Board Support Package
+file_060=.
+file_061=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -145,6 +147,8 @@ file_056=no
 file_057=no
 file_058=no
 file_059=no
+file_060=no
+file_061=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -206,6 +210,8 @@ file_056=no
 file_057=no
 file_058=no
 file_059=no
+file_060=yes
+file_061=yes
 [FILE_INFO]
 file_000=..\Board Support Package\EEPROM.c
 file_001=Pictures C32.c
@@ -267,12 +273,15 @@ file_056=..\Board Support Package\TouchScreen.h
 file_057=..\Board Support Package\Beep.h
 file_058=..\Board Support Package\cpld.h
 file_059=..\Board Support Package\SST25VF016.h
+file_060=Getting Started - Running the Graphics AN1182 Demo.htm
+file_061=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=
 [TOOL_SETTINGS]
 TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}=--gdwarf-2
-TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}=-g -mno-float -Os
+TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}=-c -g -Os -Wall -Werror
+TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}_alt=yes
 TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=--defsym=_min_heap_size=4000 --defsym=_min_stack_size=2048 -Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Os
 TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}=
 TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}023=-gdwarf-2

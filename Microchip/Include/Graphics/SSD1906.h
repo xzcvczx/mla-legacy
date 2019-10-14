@@ -33,12 +33,12 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     01/29/08
- * Anton Alkhimenok     01/31/08    combined portrait and landscape, PIC32 support
- * Anton Alkhimenok     08/22/08    driver configuration is simplified,
- *                                  new image rotation modes
+ * 01/29/08
+ * 01/31/08		combined portrait and landscape, PIC32 support
+ * 08/22/08		driver configuration is simplified,
+ *				new image rotation modes
  *****************************************************************************/
 #ifndef _SSD1906_H
     #define _SSD1906_H

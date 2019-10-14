@@ -6,7 +6,7 @@
  * FileName:        EditBox.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,14 +34,18 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     11/12/07	Version 1.0 release
+ * 11/12/07		Version 1.0 release
+ * 09/16/10     Modified use of EB_DRAW_CARET, & EB_CARET. 
+ *				EB_DRAW_CARET when set will draw the caret. EB_DRAW_CARET can
+ *				also be enabled by the EB_FOCUSED bit.
+ *				EB_CARET when set will always draw the caret.
  *****************************************************************************/
 #ifndef _EDITBOX_H
     #define _EDITBOX_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 /*********************************************************************
 * Object States Definition: 
@@ -50,8 +54,10 @@
     #define EB_DISABLED     0x0002  // Bit for disabled state.
     #define EB_RIGHT_ALIGN  0x0004  // Bit to indicate text is left aligned.
     #define EB_CENTER_ALIGN 0x0008  // Bit to indicate text is center aligned.
-    #define EB_CARET        0x0010  // Bit to indicate the cursor will be shown when focused.
-    #define EB_DRAW_CARET   0x2000  // Bit to indicate the cursor must be redrawn.
+    #define EB_CARET        0x0010  // Bit to indicate the cursor will always be shown. 
+    								// This bit can be set when focused and reset when object is disabled. 
+    								// Application can also set and clear the bit through SetState() or ClrState().
+    #define EB_DRAW_CARET   0x2000  // Bit to indicate the cursor caret will be redrawn if the EB_CARET state bit is set.
     #define EB_DRAW         0x4000  // Bit to indicate whole edit box must be redrawn.
     #define EB_HIDE         0x8000  // Bit to remove object from screen.
     #define EB_INDENT       0x02    // Indent for the text from the frame.
@@ -200,7 +206,7 @@ void    EbAddChar(EDITBOX *pEb, XCHAR ch);
 void    EbDeleteChar(EDITBOX *pEb);
 
 /*********************************************************************
-* Function: WORD EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg)
+* Function: WORD EbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates the translated 
@@ -232,10 +238,10 @@ void    EbDeleteChar(EDITBOX *pEb);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg);
+WORD    EbTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: void EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg)
+* Function: void EbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function performs the actual state change 
 *			based on the translated message given. The following state changes 
@@ -261,10 +267,10 @@ WORD    EbTranslateMsg(EDITBOX *pEb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-void    EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg);
+void    EbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: WORD EbDraw(EDITBOX *pEb)
+* Function: WORD EbDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -291,5 +297,5 @@ void    EbMsgDefault(WORD translatedMsg, EDITBOX *pEb, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    EbDraw(EDITBOX *pEb);
+WORD EbDraw(void *pObj);
 #endif // _EDITBOX_H

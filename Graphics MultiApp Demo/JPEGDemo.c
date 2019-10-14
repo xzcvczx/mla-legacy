@@ -42,8 +42,8 @@
 #include "MainDemo.h"
 
 #if defined(ENABLE_USB_MSD_DEMO) || defined(ENABLE_SD_MSD_DEMO)
-    #include "Image Decoders\ImageDecoder.h"
-    #include "MDD File System\FSIO.h"
+    #include "Image Decoders/ImageDecoder.h"
+    #include "MDD File System/FSIO.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //                            MACROS
@@ -105,7 +105,7 @@ SLIDER                      *pSlider;
 
 XCHAR                       *pJPGItemList = NULL;
 
-extern const BITMAP_FLASH   FolderIcon, JpegIcon, BitmapIcon, TextIcon;
+extern const IMAGE_FLASH    FolderIcon, JpegIcon, BitmapIcon, TextIcon;
 extern XCHAR                ExitStr[];
 extern XCHAR                RightArrowStr[];
 extern XCHAR                LeftArrowStr[];

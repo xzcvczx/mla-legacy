@@ -38,7 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_RADIOBUTTON
 
@@ -79,8 +79,12 @@ RADIOBUTTON *RbCreate
     pRb->hdr.right = right;
     pRb->hdr.bottom = bottom;
     pRb->pText = pText;
-    pRb->pNext = NULL;  // last radio button in the list
+    pRb->pNext = NULL;						// last radio button in the list
     pRb->hdr.state = state;
+    pRb->hdr.DrawObj = RbDraw;				// draw function
+    pRb->hdr.MsgObj = RbTranslateMsg;       // message function
+    pRb->hdr.MsgDefaultObj = RbMsgDefault;  // default message function
+    pRb->hdr.FreeObj = NULL;				// free function
 
     if(GetState(pRb, RB_GROUP))
     {
@@ -204,14 +208,17 @@ void RbSetText(RADIOBUTTON *pRb, XCHAR *pText)
 }
 
 /*********************************************************************
-* Function: RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG* pMsg)
+* Function: RbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: changes the state of the radio button by default
 *
 ********************************************************************/
-void RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG *pMsg)
+void RbMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
     RADIOBUTTON *pointer;
+    RADIOBUTTON *pRb;
+
+    pRb = (RADIOBUTTON *)pObj;
 
         #ifdef USE_FOCUS
             #ifdef USE_TOUCHSCREEN
@@ -247,13 +254,17 @@ void RbMsgDefault(WORD translatedMsg, RADIOBUTTON *pRb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
+* Function: WORD RbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: translates the GOL message for the radio button
 *
 ********************************************************************/
-WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
+WORD RbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    RADIOBUTTON *pRb;
+
+    pRb = (RADIOBUTTON *)pObj;
 
     // Evaluate if the message is for the radio button
     // Check if disabled first
@@ -307,7 +318,7 @@ WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD RbDraw(RADIOBUTTON *pRb)
+* Function: WORD RbDraw(void *pObj)
 *
 * Output: returns the status of the drawing
 *		  0 - not completed
@@ -316,7 +327,7 @@ WORD RbTranslateMsg(RADIOBUTTON *pRb, GOL_MSG *pMsg)
 * Overview: draws radio button
 *
 ********************************************************************/
-WORD RbDraw(RADIOBUTTON *pRb)
+WORD RbDraw(void *pObj)
 {
     typedef enum
     {
@@ -339,6 +350,9 @@ WORD RbDraw(RADIOBUTTON *pRb)
     static DWORD_VAL        temp;
 
     WORD                    faceClr;
+    RADIOBUTTON *pRb;
+
+    pRb = (RADIOBUTTON *)pObj;
 
     if(IsDeviceBusy())
         return (0);

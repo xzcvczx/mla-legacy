@@ -39,7 +39,7 @@
 #ifndef MAINDEMOSTRINGS_H
     #define MAINDEMOSTRINGS_H
 
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 
 XCHAR       StaticTextLstStr[] = {0};
 

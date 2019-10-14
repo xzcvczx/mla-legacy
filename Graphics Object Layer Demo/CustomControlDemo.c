@@ -71,6 +71,10 @@
     pCc->pos = (pCc->top + pCc->bottom) >> 1;       // position
     pCc->prevPos = pCc->bottom - GOL_EMBOSS_SIZE;   // previos position
     pCc->state = state;                             // set state
+    pCc->draw = CcDraw;
+    pCc->MsgObj         = CcTranslateMsg;       // message function
+    pCc->MsgDefaultObj  = CcMsgDefault;  // default message function
+    pCc->FreeObj  = NULL;  // default message function
 
     // Set the style scheme to be used
     if(pScheme == NULL)
@@ -84,13 +88,17 @@
 }
 
 /*********************************************************************
-* Function: WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
+* Function: WORD CcTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: translates the GOL message to this control
 *
 ********************************************************************/
-WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
+WORD CcTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    CUSTOM *pCc;
+
+    pCc = (CUSTOM *)pObj;
 
     // Check if disabled first
     if(GetState(pCc, CC_DISABLED))
@@ -118,13 +126,17 @@ WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg)
+* Function: void CcMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 * Overview: changes the state of the object by default
 *
 ********************************************************************/
-void CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg)
+void CcMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    CUSTOM *pCc;
+
+    pCc = (CUSTOM *)pObj;
+
     pCc->pos = pMsg->param2;
     SetState(pCc, CC_DRAW_BAR);
 }
@@ -139,7 +151,7 @@ void CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg)
 * Overview: draws control
 *
 ********************************************************************/
-WORD CcDraw(CUSTOM *pCc)
+WORD CcDraw(void *pObj)
 {
     typedef enum
     {
@@ -153,6 +165,9 @@ WORD CcDraw(CUSTOM *pCc)
     static CC_DRAW_STATES state = REMOVE;
     static SHORT counter;
     static SHORT delta;
+    CUSTOM *pCc;
+
+    pCc = (CUSTOM *)pObj;
 
     switch(state)
     {

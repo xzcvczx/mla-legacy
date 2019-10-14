@@ -44,7 +44,7 @@
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "GraphicsConfig.h"
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include "Accelerometer.h"
 #include "SK_PIC24H.h"
 

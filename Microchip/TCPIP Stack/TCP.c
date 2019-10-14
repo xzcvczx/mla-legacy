@@ -73,8 +73,8 @@
 #define LOCAL_PORT_END_NUMBER   (5000u)
 
 // For debugging only.  Normal applications should never enable these
-//#define DEBUG_GENERATE_TX_LOSS		31129
-//#define DEBUG_GENERATE_RX_LOSS		32113
+//#define DEBUG_GENERATE_TX_LOSS		62257
+//#define DEBUG_GENERATE_RX_LOSS		64225
 
 // A lot of pointer dereference code can be removed if you 
 // locally copy TCBStubs to an absolute memory location.
@@ -2534,6 +2534,13 @@ void TCPTick(void)
 				// caller must detect it and do something.
 				vFlags = SYN;
 				bRetransmit = TRUE;
+
+				// Exponentially increase timeout until we reach TCP_MAX_RETRIES attempts then stay constant
+				if(MyTCB.retryCount >= (TCP_MAX_RETRIES - 1))
+				{
+					MyTCB.retryCount = TCP_MAX_RETRIES - 1;
+					MyTCB.retryInterval = TCP_START_TIMEOUT_VAL<<(TCP_MAX_RETRIES-1);
+				}
 				break;
 	
 			case TCP_SYN_RECEIVED:
@@ -2644,17 +2651,23 @@ void TCPTick(void)
 
 		if(vFlags)
 		{
+			// Transmit all unacknowledged data over again
 			if(bRetransmit)
 			{
 				// Set the appropriate retry time
 				MyTCB.retryCount++;
 				MyTCB.retryInterval <<= 1;
 		
-				// Transmit all unacknowledged data over again
-				// Roll back unacknowledged TX tail pointer to cause retransmit to occur
-				MyTCB.MySEQ -= (LONG)(SHORT)(MyTCB.txUnackedTail - MyTCBStub.txTail);
+				// Calculate how many bytes we have to roll back and retransmit
+				w = MyTCB.txUnackedTail - MyTCBStub.txTail;
 				if(MyTCB.txUnackedTail < MyTCBStub.txTail)
-					MyTCB.MySEQ -= (LONG)(SHORT)(MyTCBStub.bufferRxStart - MyTCBStub.bufferTxStart);
+					w += MyTCBStub.bufferRxStart - MyTCBStub.bufferTxStart;
+				
+				// Perform roll back of local SEQuence counter, remote window 
+				// adjustment, and cause all unacknowledged data to be 
+				// retransmitted by moving the unacked tail pointer.
+				MyTCB.MySEQ -= w;
+				MyTCB.remoteWindow += w;
 				MyTCB.txUnackedTail = MyTCBStub.txTail;		
 				SendTCP(vFlags, 0);
 			}
@@ -2749,7 +2762,7 @@ BOOL TCPProcess(NODE_INFO* remote, IP_ADDR* localIP, WORD len)
 
 #if defined(DEBUG_GENERATE_RX_LOSS)
 	// Throw RX packets away randomly
-	if(rand() > DEBUG_GENERATE_RX_LOSS)
+	if(LFSRRand() > DEBUG_GENERATE_RX_LOSS)
 	{
 		MACDiscardRx();
 		return TRUE;
@@ -2840,7 +2853,6 @@ static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags)
 	TCP_OPTIONS     options;
 	PSEUDO_HEADER   pseudoHeader;
 	WORD 			len;
-	WORD			wEffectiveWindow;
 	
 	SyncTCB();
 
@@ -2876,37 +2888,18 @@ static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags)
 		{
 			// All caught up on data TX, no real data for this packet
 			len = 0;
-
-			// If we are to transmit a FIN, make sure we can put one in this packet
-			if(MyTCBStub.Flags.bTXFIN)
-			{
-				if(MyTCB.remoteWindow)
-					vTCPFlags |= FIN;
-			}
 		}
 		else if(MyTCBStub.txHead > MyTCB.txUnackedTail)
 		{
 			len = MyTCBStub.txHead - MyTCB.txUnackedTail;
-			wEffectiveWindow = MyTCB.remoteWindow;
-			if(MyTCB.txUnackedTail >= MyTCBStub.txTail)
-				wEffectiveWindow -= MyTCB.txUnackedTail - MyTCBStub.txTail;
-			else
-				wEffectiveWindow -= (MyTCBStub.bufferRxStart - MyTCBStub.bufferTxStart) - (MyTCBStub.txTail - MyTCB.txUnackedTail);
 
-			if(len > wEffectiveWindow)
-				len = wEffectiveWindow;
+			if(len > MyTCB.remoteWindow)
+				len = MyTCB.remoteWindow;
 
 			if(len > MyTCB.wRemoteMSS)
 			{
 				len = MyTCB.wRemoteMSS;
 				MyTCBStub.Flags.bTXASAPWithoutTimerReset = 1;
-			}
-
-			// If we are to transmit a FIN, make sure we can put one in this packet
-			if(MyTCBStub.Flags.bTXFIN)
-			{
-				if((len != wEffectiveWindow) && (len != MyTCB.wRemoteMSS))
-					vTCPFlags |= FIN;
 			}
 
 			// Copy application data into the raw TX buffer
@@ -2918,26 +2911,13 @@ static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags)
 			pseudoHeader.Length = MyTCBStub.bufferRxStart - MyTCB.txUnackedTail;
 			len = pseudoHeader.Length + MyTCBStub.txHead - MyTCBStub.bufferTxStart;
 
-			wEffectiveWindow = MyTCB.remoteWindow;
-			if(MyTCB.txUnackedTail >= MyTCBStub.txTail)
-				wEffectiveWindow -= MyTCB.txUnackedTail - MyTCBStub.txTail;
-			else
-				wEffectiveWindow -= (MyTCBStub.bufferRxStart - MyTCBStub.bufferTxStart) - (MyTCBStub.txTail - MyTCB.txUnackedTail);
-				
-			if(len > wEffectiveWindow)
-				len = wEffectiveWindow;
+			if(len > MyTCB.remoteWindow)
+				len = MyTCB.remoteWindow;
 
 			if(len > MyTCB.wRemoteMSS)
 			{
 				len = MyTCB.wRemoteMSS;
 				MyTCBStub.Flags.bTXASAPWithoutTimerReset = 1;
-			}
-
-			// If we are to transmit a FIN, make sure we can put one in this packet
-			if(MyTCBStub.Flags.bTXFIN)
-			{
-				if((len != wEffectiveWindow) && (len != MyTCB.wRemoteMSS))
-					vTCPFlags |= FIN;
 			}
 
 			if(pseudoHeader.Length > len)
@@ -2957,6 +2937,13 @@ static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags)
 			if(MyTCB.txUnackedTail >= MyTCBStub.bufferRxStart)
 				MyTCB.txUnackedTail -= MyTCBStub.bufferRxStart-MyTCBStub.bufferTxStart;
 		}
+
+		// If we are to transmit a FIN, make sure we can put one in this packet
+		if(MyTCBStub.Flags.bTXFIN)
+		{
+			if((len != MyTCB.remoteWindow) && (len != MyTCB.wRemoteMSS))
+				vTCPFlags |= FIN;
+		}
 	}
 
 	// Ensure that all packets with data of some kind are 
@@ -2964,6 +2951,10 @@ static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags)
 	// Pure ACK packets with no data are not ACKed back in TCP
 	if(len || (vTCPFlags & (SYN | FIN)))
 	{
+		// Transmitting data, update remote window variable to reflect smaller 
+		// window.
+		MyTCB.remoteWindow -= len;
+
 		// Push (PSH) all data for enhanced responsiveness on 
 		// the remote end, especially with GUIs
 		if(len)
@@ -3075,7 +3066,7 @@ static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags)
 		options.Length = 0x04;
 
 		// Load MSS and swap to big endian
-		options.MaxSegSize.Val = (((TCP_MAX_SEG_SIZE_RX-4)&0x00FF)<<8) | (((TCP_MAX_SEG_SIZE_RX-4)&0xFF00)>>8);
+		options.MaxSegSize.Val = (((TCP_MAX_SEG_SIZE_RX)&0x00FF)<<8) | (((TCP_MAX_SEG_SIZE_RX)&0xFF00)>>8);
 
 		header.DataOffset.Val   += sizeof(options) >> 2;
 	}
@@ -3101,7 +3092,7 @@ static void SendTCP(BYTE vTCPFlags, BYTE vSendFlags)
 	wVal.Val = CalcIPBufferChecksum(len);
 #if defined(DEBUG_GENERATE_TX_LOSS)
 	// Damage TCP checksums on TX packets randomly
-	if(rand() > DEBUG_GENERATE_TX_LOSS)
+	if(LFSRRand() > DEBUG_GENERATE_TX_LOSS)
 	{
 		wVal.Val++;
 	}
@@ -3400,8 +3391,8 @@ static void CloseSocket(void)
 	MyTCB.flags.bRXNoneACKed1 = 0;
 	MyTCB.flags.bRXNoneACKed2 = 0;
 	MyTCB.txUnackedTail = MyTCBStub.bufferTxStart;
-	((DWORD_VAL*)(&MyTCB.MySEQ))->w[0] = rand();
-	((DWORD_VAL*)(&MyTCB.MySEQ))->w[1] = rand();
+	((DWORD_VAL*)(&MyTCB.MySEQ))->w[0] = LFSRRand();
+	((DWORD_VAL*)(&MyTCB.MySEQ))->w[1] = LFSRRand();
 	MyTCB.sHoleSize = -1;
 	MyTCB.remoteWindow = 1;
 }
@@ -3539,6 +3530,8 @@ static void HandleTCPSeg(TCP_HEADER* h, WORD len)
 	DWORD localSeqNumber;
 	WORD wSegmentLength;
 	BOOL bSegmentAcceptable;
+	WORD wNewWindow;
+
 
 	// Cache a few variables in local RAM.  
 	// PIC18s take a fair amount of code and execution time to 
@@ -3866,27 +3859,31 @@ static void HandleTCPSeg(TCP_HEADER* h, WORD len)
 				else
 				{
 					// "Throw away" FIN byte from our TX FIFO if it has been ACKed
-					if(MyTCB.MySEQ == localAckNumber)
+					if((MyTCB.MySEQ == localAckNumber) && MyTCB.flags.bFINSent)
 					{
 						MyTCBStub.Flags.bTimerEnabled = 0;
 						MyTCBStub.Flags.bTXFIN = 0;
-						MyTCB.flags.bFINSent = 0;	
 					}
 				}
 			}
 
-			// Update the local stored copy of the RemoteWindow
-			// If previously we had a zero window, and now we don't 
-			// immediately send whatever was pending
-			if((MyTCB.remoteWindow == 0u) && h->Window)
+			// The window size advirtised in this packet is adjusted to account 
+			// for any bytes that we have transmitted but haven't been ACKed yet 
+			// by this segment.
+			wNewWindow = h->Window - ((WORD)(MyTCB.MySEQ - localAckNumber));
+
+			// Update the local stored copy of the RemoteWindow.
+			// If previously we had a zero window, and now we don't, then 
+			// immediately send whatever was pending.
+			if((MyTCB.remoteWindow == 0u) && wNewWindow)
 				MyTCBStub.Flags.bTXASAP = 1;
-			MyTCB.remoteWindow = h->Window;
+			MyTCB.remoteWindow = wNewWindow;
 
 			// A couple of states must do all of the TCP_ESTABLISHED stuff, but also a little more
 			if(MyTCBStub.smState == TCP_FIN_WAIT_1)
 			{
 				// Check to see if our FIN has been ACKnowledged
-				if(MyTCB.MySEQ == localAckNumber)
+				if((MyTCB.MySEQ == localAckNumber) && MyTCB.flags.bFINSent)
 				{
 					// Reset our timer for forced closure if the remote node 
 					// doesn't send us a FIN in a timely manner.

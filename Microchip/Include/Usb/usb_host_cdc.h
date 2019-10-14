@@ -81,8 +81,6 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
          Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
          more than 256 bytes
-
-  2.7a   removed freezCDC() function
 ********************************************************************************/
 //DOM-IGNORE-END
 

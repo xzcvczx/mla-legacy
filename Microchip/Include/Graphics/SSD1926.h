@@ -34,11 +34,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     08/27/08
- * Pradeep Budagutta    30/07/09	Added Palette Support
- * PAT    				03/03/10	Enabled accelerated Circle() function.
+ * 08/27/08		...
+ * 30/07/09		Added Palette Support
+ * 03/03/10		Enabled accelerated Circle() function.
  *****************************************************************************/
 #ifndef _SSD1926_H
     #define _SSD1926_H
@@ -60,7 +60,7 @@
     #include "GenericTypeDefs.h"
 
     #ifdef USE_PALETTE
-        #include "Graphics\Palette.h"
+        #include "Graphics/Palette.h"
     #endif
 
 /*********************************************************************

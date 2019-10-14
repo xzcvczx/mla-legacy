@@ -2,7 +2,7 @@
 
 
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 XCHAR   TouchScreenStr[] = "Touch screen to continue!";
 XCHAR   ButtonStr[] = "Buttons";

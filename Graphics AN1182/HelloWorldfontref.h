@@ -2,7 +2,7 @@
 
 
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Automatically generated reference arrays for the HWRussian.txt  file.
 const XCHAR RussianStr[] = {0x0022, 0x0026, 0x0029, 0x0024, 0x0025, 0x002A, 0x002B, 0x0025, 0x002C, 0x0028, 0x0020, 0x0023, 0x0027, 0x0029, 0x0020, 0x0021, 0x0000};    // In Russian
@@ -18,4 +18,5 @@ const XCHAR JapaneseStr[] = {0x0028, 0x0025, 0x0023, 0x0029, 0x0022, 0x0029, 0x0
 
 // Automatically generated reference arrays for the HWChinese.txt  file.
 const XCHAR ChineseStr[] = {0x0023, 0x0024, 0x0022, 0x0025, 0x0021, 0x0000};    // In Chinese
-
+
+

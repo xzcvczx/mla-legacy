@@ -37,7 +37,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     03/20/08	
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 BYTE    _color;
@@ -81,39 +81,39 @@ void ResetDevice(void)
 	DeviceInit();
 
     DelayMs(20);
-    DeviceSelect();
+    DisplayEnable();
 	
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(EXTIN);        //Ext = 0
     DeviceWrite(SLPOUT);       //Sleep Out
     DeviceWrite(OSCON);        //OSC On
     DeviceWrite(PWRCTRL);      //Power Control Set
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x08);        //Booster Must Be On First
     DelayMs(2);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(0x20);         //Power Control Set
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x0B);        //Booster, Regulator, Follower ON
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(VOLCTRL);      //Electronic Control
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x3f);        //Vop=18.0V
     DeviceWrite(0x04);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(DISCTRL);      //Display Control
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x00);        //CL=X1
     DeviceWrite(0x27);        //Duty=160
     DeviceWrite(0x00);        //FR Inverse-Set Value
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(DISNOR);       // Normal Display
     DeviceWrite(COMSCN);       //COM Scan Direction
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x01);        // 0->79 159->80
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(DATSDR);       //Data Scan Direction
-	DeviceSetData();
+	DisplaySetData();
     #if (DISP_ORIENTATION == 180)
     DeviceWrite(0x01);        //Row Reverse
     DeviceWrite(0x00);        //Derect 3 Pixels Arrangement
@@ -122,29 +122,29 @@ void ResetDevice(void)
     DeviceWrite(0x01);        //Inverse 3 Pixels Arrangement
     #endif
     DeviceWrite(0x02);        //3Byte 3Pixel mode
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(LASET);        //Line Address Set(lines from 16 to 144 are used)
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x10);        //Start Line=16
     DeviceWrite(0x8f);        //End Line =144-1
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CASET);        //Column Address Set
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x00);        //Start Column=0
     DeviceWrite(0x54);        //End Column =84 ((84+1)*3 == 255)
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(EXTOUT);       //Ext = 1
     DeviceWrite(ANASET);       //Analog Circuit Set
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x00);        //OSC Frequency =000 (Default)
     DeviceWrite(0x01);        //Booster Efficiency=01(Default)
     DeviceWrite(0x00);        //Bias=1/14
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(SWINT);        //Software Initial
     DeviceWrite(EXTIN);        //Ext = 0
     DeviceWrite(DISON);        //Display On
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
     DelayMs(100);
 }
 
@@ -166,13 +166,13 @@ void ResetDevice(void)
 ********************************************************************/
 void ContrastSet(WORD contrast)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(VOLCTRL); 
-	DeviceSetData();               
+	DisplaySetData();               
     DeviceWrite((((WORD_VAL) contrast).v[0]));
     DeviceWrite((((WORD_VAL) contrast).v[1]));
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -193,11 +193,11 @@ void ContrastSet(WORD contrast)
 ********************************************************************/
 void ContrastUp(void)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(VOLUP);
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -218,11 +218,11 @@ void ContrastUp(void)
 ********************************************************************/
 void ContrastDown(void)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(VOLDOWN);  //Electronic Control
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -243,11 +243,11 @@ void ContrastDown(void)
 ********************************************************************/
 void DisplayOn(void)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(DISON);
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -268,11 +268,11 @@ void DisplayOn(void)
 ********************************************************************/
 void DisplayOff(void)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(DISOFF);
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -293,11 +293,11 @@ void DisplayOff(void)
 ********************************************************************/
 void SleepIn(void)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(SLPIN);
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -318,11 +318,11 @@ void SleepIn(void)
 ********************************************************************/
 void WakeUp(void)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(SLPOUT);
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -356,24 +356,24 @@ void PutPixel(SHORT x, SHORT y)
             return;
     }
 
-    DeviceSelect();
+    DisplayEnable();
 
     // Set Row and Column Address
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(LASET);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(y + 16);
     DeviceWrite(0x8f);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CASET);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(x / 3);
     DeviceWrite(0x54);
 
     // Read Column
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(RMWIN);
-	DeviceSetData();
+	DisplaySetData();
     columnPixel[0] = DeviceRead();    // Dummy reading
     columnPixel[0] = DeviceRead();    // Start reading cycle for pixel 0
     columnPixel[1] = DeviceRead();    // Start reading cycle for pixel 1
@@ -387,10 +387,10 @@ void PutPixel(SHORT x, SHORT y)
     DeviceWrite(columnPixel[1]);
     DeviceWrite(columnPixel[2]);
 
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(RMWOUT);
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -412,32 +412,32 @@ void PutPixel(SHORT x, SHORT y)
 WORD GetPixel(SHORT x, SHORT y)
 {
     BYTE    columnPixel[3];         // 3 Pixels in each column
-    DeviceSelect();
+    DisplayEnable();
 
     // Set Row and Column Address
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(LASET);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(y + 16);
     DeviceWrite(0x8f);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CASET);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(x / 3);
     DeviceWrite(0x54);
 
     // Read Column
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(RMWIN);
-	DeviceSetData();
+	DisplaySetData();
     columnPixel[0] = DeviceRead();    // Dummy
     columnPixel[0] = DeviceRead();    // Start reading cycle for pixel 0
     columnPixel[1] = DeviceRead();    // Start reading cycle for pixel 1
     columnPixel[2] = DeviceRead();    // Start reading cycle for pixel 2
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(RMWOUT);
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 
     return (columnPixel[x % 3]);
 }
@@ -462,26 +462,26 @@ void ClearDevice(void)
 {
     WORD    counter;
 
-    DeviceSelect();
+    DisplayEnable();
 
     // Whole screen
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(LASET);    //Line Address Set(lines from 16 to 144 are used)
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x10);    //Start Line=16
     DeviceWrite(0x8f);    //End Line =144-1
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CASET);    //Column Address Set
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x00);    //Start Column=0
     DeviceWrite(0x54);    //End Column =84 ((84+1)*3 == 255)
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(RAMWR);
-	DeviceSetData();
+	DisplaySetData();
     for(counter = 0; counter < (WORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
         DeviceWrite(_color);
     }
 
-    DeviceDeselect();
+    DisplayDisable();
 }

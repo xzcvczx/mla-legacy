@@ -33,11 +33,11 @@ Transfer of Data Class Interface can be performed with BULK transfers,
 hence USB_SUPPORT_BULK_TRANSFERS must be defined. Data Class Interface can also use
 ISOCHRONOUS transfers,however the CDC client is not tested for ISOCHRONOUS transfers.
 
-FileName:        usb_host_cdc.c
-Dependencies:    None
-Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
-Compiler:        C30 v2.01/C32 v0.00.18
-Company:         Microchip Technology, Inc.
+* FileName:        usb_host_cdc.c
+* Dependencies:    None
+* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
+* Compiler:        C30 v2.01/C32 v0.00.18
+* Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -59,21 +59,20 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
+Author          Date    Comments
+--------------------------------------------------------------------------------
+ADG          15-Sep-2008 First release
+********************************************************************************
  Change History:
  Revision     Description
  v2.6         Removed state machine 'SUBSTATE_SET_CONTROL_LINE_STATE' from normal
               enumeration process.
               Modified code to accommodate CDC devices that do not have distinct
               Communication and Data interfaces.
-
- v2.6a        No change
-
  v2.7         Modified the code to allow connection of USB-RS232 dongles that do
               not fully comply with CDC specifications
               Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
               more than 256 bytes
-
- v2.7a        No change
 ********************************************************************************/
 
 
@@ -82,9 +81,9 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "usb_config.h"
-#include "USB\usb.h"
-#include "USB\usb_host_cdc.h"
-#include "USB\usb_host.h"
+#include "USB/usb.h"
+#include "USB/usb_host_cdc.h"
+#include "USB/usb_host.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE

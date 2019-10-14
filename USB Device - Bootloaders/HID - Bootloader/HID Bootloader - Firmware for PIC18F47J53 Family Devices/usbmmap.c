@@ -160,12 +160,20 @@ byte usb_active_cfg;            // Value of current configuration
 byte usb_alt_intf[MAX_NUM_INT]; // Array to keep track of the current alternate
                                 // setting for each interface ID
 
-/** U S B  F I X E D  L O C A T I O N  V A R I A B L E S *********************/
-#pragma udata usbram4=0x400     //See Linker Script,usb4:0x400-0x4FF(256-byte)
+/** USB FIXED LOCATION VARIABLES ***********************************/
+#if defined(__18CXX)
+    #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
+        #pragma udata USB_BDT=0x200     //See Linker Script, BDT in bank 2 on these devices - usb2:0x200-0x2FF(256-byte)
+    #elif defined(__18F47J53) || defined(__18F46J53) || defined(__18F27J53) || defined(__18F26J53) || defined(__18LF47J53) || defined(__18LF46J53) || defined(__18LF27J53) || defined(__18LF26J53)
+		#pragma udata USB_BDT=0xD00		//BDT in Bank 13 on these devices
+    #else
+        #pragma udata USB_BDT=0x400     //All other PIC18 devices place the BDT in usb4:0x400-0x4FF(256-byte)
+	#endif
+#endif
 
 /******************************************************************************
  * Section A: Buffer Descriptor Table
- * - 0x400 - 0x4FF(max)
+ * - up to 256 bytes (max)
  * - MAX_EP_NUMBER is defined in autofiles\usbcfg.h
  * - BDT data type is defined in system\usb\usbmmap.h
  *****************************************************************************/

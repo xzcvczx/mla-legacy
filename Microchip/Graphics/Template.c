@@ -42,7 +42,7 @@
  *****************************************************************************/
 #ifdef USE_CUSTOM
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 /*********************************************************************
 * Function: CUSTOM* CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -80,6 +80,7 @@ CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD
     pCc->right = right;     // right buttom corner
     pCc->bottom = bottom;
     pCc->state = state;     // set state
+    pCc->draw = CcDraw;
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -170,7 +171,7 @@ void CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg)
 *       GOL.C FILE
 *
 ********************************************************************/
-WORD CcDraw(CUSTOM *pCc)
+WORD CcDraw(void *pObj)
 {
     typedef enum
     {
@@ -180,6 +181,9 @@ WORD CcDraw(CUSTOM *pCc)
     } CC_DRAW_STATES;
 
     static CC_DRAW_STATES state = REMOVE;
+    CUSTOM *pCc;
+
+    pCc = (CUSTOM *)pObj;
 
     switch(state)
     {

@@ -46,6 +46,8 @@ file_018=HardwareProfiles
 file_019=HardwareProfiles
 file_020=HardwareProfiles
 file_021=.
+file_022=USB Stack
+file_023=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -69,6 +71,8 @@ file_018=no
 file_019=no
 file_020=no
 file_021=no
+file_022=no
+file_023=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -92,6 +96,8 @@ file_018=no
 file_019=no
 file_020=no
 file_021=yes
+file_022=no
+file_023=yes
 [FILE_INFO]
 file_000=usb_descriptors.c
 file_001=main.c
@@ -115,6 +121,8 @@ file_018=HardwareProfile - PIC24FJ64GB004 PIM.h
 file_019=HardwareProfile - PIC24FJ256DA210 Development Board.h
 file_020=HardwareProfile - PIC24FJ256GB210 PIM.h
 file_021=..\Getting Started - Running the Device - CDC - Basic Demo.htm
+file_022=..\..\Microchip\USB\usb_device_local.h
+file_023=..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

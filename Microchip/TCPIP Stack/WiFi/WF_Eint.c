@@ -62,7 +62,7 @@
 #if defined(WF_CS_TRIS)
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER  WF_MODULE_WF_EINT
 #endif
 
@@ -99,10 +99,10 @@ BOOL WF_EintIsPending(void)
 void WFEintISR(void)
 {
     // if EINT enabled
-    if ( WF_INT_IE == 1u )
+    if ( WF_INT_IE == 1 )
     {
         // if EINT event occurred
-        if ( WF_INT_IF == 1u )
+        if ( WF_INT_IF == 1 )
         {
             // clear EINT
             WF_INT_IF = 0;

@@ -37,13 +37,12 @@
  ********************************************************************/
 #include <plib.h>
 
+#include "HardwareProfile.h"
 
 // Compile only for PIC32MX with Ethernet MAC interface (must not have external ENCX24J600, ENC28J60, or MRF24WB0M hardware defined)
 #if defined(__PIC32MX__) && defined(_ETH) && !defined(ENC100_INTERFACE_MODE) && !defined(ENC_CS_TRIS) && !defined(WF_CS_TRIS)
 
 #include "TCPIP Stack/ETHPIC32ExtPhy.h"
-
-#include "HardwareProfile.h"
 
 #include "TCPIP Stack/ETHPIC32ExtPhySMSC8720.h"
 
@@ -98,7 +97,8 @@ eEthRes EthPhyConfigureMdix(eEthOpenFlags oFlags)
 {
 	unsigned short	phyReg;
 
-	phyReg=EthMIIMReadReg(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS)&(_SPECIALCTRL_XPOL_MASK);	// mask off not used bits
+	EthMIIMReadStart(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS);
+	phyReg=EthMIIMReadResult()&(_SPECIALCTRL_XPOL_MASK);	// mask off not used bits
 
 	if(oFlags&ETH_OPEN_MDIX_AUTO)
 	{	// enable Auto-MDIX
@@ -117,7 +117,7 @@ eEthRes EthPhyConfigureMdix(eEthOpenFlags oFlags)
 	       }
 	}
 	
-	EthMIIMWriteReg(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS, phyReg);	
+	EthMIIMWriteStart(PHY_REG_SPECIAL_CTRL, PHY_ADDRESS, phyReg);	
 
 	return ETH_RES_OK;	
 

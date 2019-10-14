@@ -50,9 +50,10 @@
         #include <p24Fxxxx.h>
     #endif
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
     #include "EEPROM.h"
-    #include "SST25VF016.h"    
+    #include "SST25VF016.h"   
+	#include "SST39LF400.h"
     #include "TouchScreen.h"
     #include "Beep.h"
     #include "cpld.h"

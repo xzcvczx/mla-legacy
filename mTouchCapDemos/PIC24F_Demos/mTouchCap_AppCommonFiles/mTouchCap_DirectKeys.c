@@ -149,51 +149,51 @@ void mTouchCapApp_DemoDirectKeys(void)
      if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey1))
     {
         // Illuminate Keypad LEDs
-        mTouchCapApp_SetEvalBoardLEDs(LED_8);
+        mTouchCapApp_SetEvalBoardLEDs(LED_1);
     }
     else if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey2))
     {
         // Illuminate Keypad LEDs
-     mTouchCapApp_SetEvalBoardLEDs(LED_9);
+     mTouchCapApp_SetEvalBoardLEDs(LED_2);
     }
     else  if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey3))
     {
 
         // Illuminate Keypad LEDs
-        mTouchCapApp_SetEvalBoardLEDs(LED_10);
+        mTouchCapApp_SetEvalBoardLEDs(LED_3);
     }
     else  if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey4))
     {
 
         // Illuminate Keypad LEDs
-        mTouchCapApp_SetEvalBoardLEDs(LED_11);
+        mTouchCapApp_SetEvalBoardLEDs(LED_4);
     }
     else  if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey5))
     {
 
         // Illuminate Keypad LEDs
-        mTouchCapApp_SetEvalBoardLEDs(LED_12);
+        mTouchCapApp_SetEvalBoardLEDs(LED_5);
     }
 
     else  if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey6))
     {
 
         // Illuminate Keypad LEDs
-        mTouchCapApp_SetEvalBoardLEDs(LED_13);
+        mTouchCapApp_SetEvalBoardLEDs(LED_6);
     }
     
     else  if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey7))
     {
 
         // Illuminate Keypad LEDs
-        mTouchCapApp_SetEvalBoardLEDs(LED_14);
+        mTouchCapApp_SetEvalBoardLEDs(LED_7);
     }
     
    else  if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&DirectKey8))
     {
 
         // Illuminate Keypad LEDs
-        mTouchCapApp_SetEvalBoardLEDs(LED_15);
+        mTouchCapApp_SetEvalBoardLEDs(LED_8);
     }         
    else
    {

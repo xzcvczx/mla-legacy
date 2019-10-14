@@ -38,7 +38,7 @@
  * Paolo A. Tamayo		07/20/07	... 
  *****************************************************************************/
 #include "MainDemo.h"
-#include "MultiFontsDemofontref.h"
+#include "ResourcesInternalFlash C30.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //                            MACROS
@@ -83,14 +83,10 @@ void    InitHWData(void);                               // initialize string str
 void    AnimateText(BYTE inc);                          // refresh the string function
 #define WAIT_UNTIL_FINISH(x)    while(!x)
 
-    /////////////////////////////////////////////////////////////////////////////
-    //                            FONTS USED
-    /////////////////////////////////////////////////////////////////////////////
-    // the other strings are using the default library font
-    extern const FONT_FLASH RussianFont;
-extern const FONT_FLASH     ChineseFont;
-extern const FONT_FLASH     JapaneseFont;
-extern const FONT_FLASH     KoreanFont;
+/////////////////////////////////////////////////////////////////////////////
+//                            FONTS USED
+/////////////////////////////////////////////////////////////////////////////
+// See "ResourcesInternalFlash C30.h" or "ResourcesInternalFlash C32.h" for fonts used.
 
 extern XCHAR                RightArrowStr[];
 extern XCHAR                LeftArrowStr[];

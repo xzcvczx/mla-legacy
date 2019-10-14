@@ -35,6 +35,7 @@
   ----  -----------------------------------------
   1.0   Initial release
   1.01  Cleaned up unnecessary variables
+  1.02  Modified to Support PIC24H microcontrollers
 ********************************************************************/
 
 #ifndef __SC_DRV24_LIB__
@@ -50,7 +51,11 @@
 
 extern unsigned long baudRate;	// Baud Rate of Smart Card Transmission/Reception Data
 extern unsigned long scReferenceClock; // Smart Card Reference Clock
+extern unsigned int factorF;
+extern BYTE factorDNumerator;
+extern BYTE factorDdenominator;
 
+extern void SC_Delay(unsigned int instructionCount);
 extern void SCdrv_InitUART(void);
 extern void SCdrv_CloseUART(void);
 extern void SCdrv_SetBRG( BYTE speedCode );

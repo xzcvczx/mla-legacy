@@ -63,10 +63,10 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\..\\Include
+    ..\\Include
     
     .
-        
+    
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
     would be the following:
@@ -94,13 +94,14 @@
 
          http://www.microchip.com/forums/fb.aspx?m=487397
 
-  2.7a   No change
+  2.8    Minor change to CDCInitEP() to enhance ruggedness in
+         multithreaded usage scenarios.
 
 ********************************************************************/
 
 /** I N C L U D E S **********************************************************/
-#include "USB\usb.h"
-#include "USB\usb_function_cdc.h"
+#include "USB/usb.h"
+#include "USB/usb_function_cdc.h"
 //#include "HardwareProfile.h"
 
 #ifdef USB_USE_CDC
@@ -305,7 +306,6 @@ void CDCInitEP(void)
    	line_coding.bParityType = 0x00;             // None
    	line_coding.bDataBits = 0x08;               // 5,6,7,8, or 16
 
-    cdc_trf_state = CDC_TX_READY;
     cdc_rx_len = 0;
     
     /*
@@ -324,6 +324,8 @@ void CDCInitEP(void)
 
     CDCDataOutHandle = USBRxOnePacket(CDC_DATA_EP,(BYTE*)&cdc_data_rx,sizeof(cdc_data_rx));
     CDCDataInHandle = NULL;
+    
+    cdc_trf_state = CDC_TX_READY;
 }//end CDCInitEP
 
 /**********************************************************************************

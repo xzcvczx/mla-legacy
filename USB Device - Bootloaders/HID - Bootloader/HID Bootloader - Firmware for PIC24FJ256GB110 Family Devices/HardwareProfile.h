@@ -1,15 +1,20 @@
 /********************************************************************
- FileName:     	HardwareProfile.h
- Dependencies:	See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing this
- 				file (HardwareProfile.h).
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
- Company:		Microchip Technology, Inc.
+ FileName:      HardwareProfile.h
+ Dependencies:  See INCLUDES section
+ Processor:     PIC18, PIC24, or PIC32 USB Microcontrollers
+ Hardware:      The code is natively intended to be used on the 
+                  following hardware platforms: 
+                    PICDEM™ FS USB Demo Board
+                    PIC18F46J50 FS USB Plug-In Module
+                    PIC18F87J50 FS USB Plug-In Module
+                    Explorer 16 + PIC24 or PIC32 USB PIMs
+                    PIC24F Starter Kit
+                    Low Pin Count USB Development Kit
+                  The firmware may be modified for use on other USB 
+                    platforms by editing this file (HardwareProfile.h)
+ Compiler:  	Microchip C18 (for PIC18), C30 (for PIC24), 
+                  or C32 (for PIC32)
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
@@ -39,7 +44,8 @@
   1.0   11/19/2004   Initial release
   2.1   02/26/2007   Updated for simplicity and to use common
                      coding style
-
+  2.3   09/15/2008   Broke out each hardware platform into its own
+                     "HardwareProfile - xxx.h" file
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_H
@@ -48,81 +54,65 @@
 //#define DEMO_BOARD USER_DEFINED_BOARD
 
 #if !defined(DEMO_BOARD)
+    #if defined(__C32__)
+        #if defined(__32MX460F512L__)
+            #if defined(PIC32MX460F512L_PIM)
+                #include "HardwareProfile - PIC32MX460F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
+        #elif defined(__32MX795F512L__)
+            #if defined(PIC32MX795F512L_PIM)
+                #include "HardwareProfile - PIC32MX795F512L PIM.h"
+            #elif defined(PIC32_USB_STARTER_KIT)
+                //PIC32 USB Starter Kit II
+                #include "HardwareProfile - PIC32 USB Starter Kit.h"
+            #endif
+        #endif
+    #endif
+
     #if defined(__C30__)
-        #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ64GB108__) || defined(__PIC24FJ64GB106__)
-            #define DEMO_BOARD PIC24FJ256GB110_PIM
-            #define EXPLORER_16
-			#define PIC24FJ256GB110_PIM
-            #define CLOCK_FREQ 32000000
+        #if defined(__PIC24FJ256GB110__)
+            #include "HardwareProfile - PIC24FJ256GB110 PIM.h"
+        #elif defined(__PIC24FJ256GB210__)
+            #include "HardwareProfile - PIC24FJ256GB210 PIM.h"
+        #elif defined(__PIC24FJ256GB106__)
+            #include "HardwareProfile - PIC24F Starter Kit.h"
+        #elif defined(__PIC24FJ64GB004__)
+            #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+        #elif defined(__PIC24FJ256DA210__)
+            #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
+        #elif defined(__dsPIC33EP512MU810__)
+            #if defined(DSPIC33EP512MU810_PIM)
+                #include "HardwareProfile - dsPIC33EP512MU810 PIM.h"
+            #elif defined(DSPIC33E_STARTER_KIT)
+                #include "HardwareProfile - dsPIC33E Starter Kit.h"
+            #endif
         #endif
     #endif
 
     #if defined(__18CXX)
         #if defined(__18F4550)
-            #define DEMO_BOARD PICDEM_FS_USB
-            #define PICDEM_FS_USB
-            #define CLOCK_FREQ 48000000
-        #elif defined(__18F87J50) || defined(__18F85J50)
-            #define DEMO_BOARD PIC18F87J50_PIM
-            #define PIC18F87J50_PIM
-            #define CLOCK_FREQ 48000000
+            #include "HardwareProfile - PICDEM FSUSB.h"
+        #elif defined(__18F87J50)
+            #include "HardwareProfile - PIC18F87J50 PIM.h"
+        #elif defined(__18F14K50)
+            #include "HardwareProfile - Low Pin Count USB Development Kit.h"
+        #elif defined(__18F46J50)
+            #if defined(PIC18F_STARTER_KIT_1)
+                #include "HardwareProfile - PIC18F Starter Kit 1.h"
+            #else
+                #include "HardwareProfile - PIC18F46J50 PIM.h"
+            #endif
+        #elif defined(__18F47J53)
+            #include "HardwareProfile - PIC18F47J53 PIM.h"
         #endif
     #endif
 #endif
 
 #if !defined(DEMO_BOARD)
-    #error "Demo board not defined.  Either define DEMO_BOARD for a custom board or select the correct processor for the demo board."
-#endif
-
-//#define ENABLE_CONSOLE
-
-/** TRIS ***********************************************************/
-#define INPUT_PIN           1
-#define OUTPUT_PIN          0
-
-/** USB ************************************************************/
-#if defined(PIC24FJ256GB110_PIM)
-	//#define USE_SELF_POWER_SENSE_IO
-	//#define USE_USB_BUS_SENSE_IO
-
-    #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
-
-    #define USB_BUS_SENSE       1
-   
-    #define tris_self_power     TRISAbits.TRISA2    // Input
-
-    #define self_power          1
-    
-    /** LED ************************************************************/
-    #define mInitAllLEDs()      LATA &= 0x00; TRISA &= 0xFF00;
-    
-    #define mLED_1              LATAbits.LATA0
-    #define mLED_2              LATAbits.LATA1
-    #define mLED_3              LATAbits.LATA2
-    #define mLED_4              LATAbits.LATA3
-    
-    #define mLED_1_On()         mLED_1 = 1;
-    #define mLED_2_On()         mLED_2 = 1;
-    #define mLED_3_On()         mLED_3 = 1;
-    #define mLED_4_On()         mLED_4 = 1;
-    
-    #define mLED_1_Off()        mLED_1 = 0;
-    #define mLED_2_Off()        mLED_2 = 0;
-    #define mLED_3_Off()        mLED_3 = 0;
-    #define mLED_4_Off()        mLED_4 = 0;
-    
-    #define mLED_1_Toggle()     mLED_1 = !mLED_1;
-    #define mLED_2_Toggle()     mLED_2 = !mLED_2;
-    #define mLED_3_Toggle()     mLED_3 = !mLED_3;
-    #define mLED_4_Toggle()     mLED_4 = !mLED_4;
-    
-    /** SWITCH *********************************************************/
-    #define mInitSwitch2()      TRISDbits.TRISD6=1;
-    #define mInitSwitch3()      TRISDbits.TRISD7=1;
-    #define mInitAllSwitches()  mInitSwitch2();mInitSwitch3();
-    #define sw2                 PORTDbits.RD6
-    #define sw3                 PORTDbits.RD7
-    
+    #warning "Demo board not defined.  Either define DEMO_BOARD for a custom board or select the correct processor for the demo board."
+    #include "HardwareProfile - Your Demo Board.h"
 #endif
 
 #endif  //HARDWARE_PROFILE_H

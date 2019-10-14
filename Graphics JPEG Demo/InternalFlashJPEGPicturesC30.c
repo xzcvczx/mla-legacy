@@ -12,7 +12,7 @@ const struct
     short           mem;
     char __prog__   *ptr;
 }
-Logo = { 2, L5706 };
+Logo = { 0, L5706 };
 asm(".section *,code");
 asm(".global _L5706");
 asm(".align 2");

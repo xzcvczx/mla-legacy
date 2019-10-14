@@ -49,13 +49,44 @@
     //  option carefully and determine which options are desired/required
     //  for your application.
 
+    //--------------------------------------------------------------------------
+    //Uncomment USE_SELF_POWER_SENSE_IO definition if using self/bus power 
+    //sensing feature.  Feature is not needed in purely bus powered USB designs.  
     //#define USE_SELF_POWER_SENSE_IO
-    #define tris_self_power     TRISAbits.TRISA2    // Input
-    #define self_power          1
-
-    #define USE_USB_BUS_SENSE_IO
-    #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
-    #define USB_BUS_SENSE       U1OTGSTATbits.SESVD 
+    #if defined(USE_SELF_POWER_SENSE_IO)
+        //If using the USE_SELF_POWER_SENSE_IO feature, select an I/O pin to configure and use for this purpose.
+        #define tris_self_power     TRISAbits.TRISA2    //(replace with real pin being used in the application for this purpose)
+        #define self_power          PORTAbits.RA2       //(replace with real pin being used in the application for this purpose)
+    #else
+        #define self_power          0   //When 0, makes USB stack always respond to GET_STATUS requests with "bus powered".  See USBStdGetStatusHandler() in usb_device.c.
+    #endif
+    //--------------------------------------------------------------------------
+    
+    
+    //--------------------------------------------------------------------------
+    //Define USE_USB_BUS_SENSE_IO if using USB VBUS presence sensing feature.  
+    //Feature is not needed in purely bus powered USB designs.
+    //In self powered or dual powered designs, it is also not always essential, on PIC24/32
+    //devices, as existing devices have USB hardware sensing of VBUS.  This software 
+    //feature is still useful/necessary however, if the device will consume >100mA 
+    //from VBUS when configured, or if it has other software need to know when the 
+    //USB cable is not attached to the host (or is attached but host is powered down).
+    
+    //#define USE_USB_BUS_SENSE_IO
+    #if defined(USE_USB_BUS_SENSE_IO)
+        #define tris_usb_bus_sense  TRISBbits.TRISB5    //(replace with real pin being used, if other than the internal VBUS comparators)
+        #define USB_BUS_SENSE       U1OTGSTATbits.SESVD //Note: If Using U1OTGSTATbits.SESVD, instead of a port pin (ex: PORTBbits.RB5), see
+                                                        //USB stack usage documentation.  Special application specific considerations and code
+                                                        //are needed when using U1OTGSTATbits.SESVD.
+    #else
+        //Else we aren't using the USE_USB_BUS_SENSE_IO feature.
+        //Assume VBUS is always present.  This is a good/correct assumption in a
+        //purely bus powered design, since VBUS has to be present in order for the
+        //microcontroller to be powered and executing code in the first place.
+        #define USB_BUS_SENSE 1     //Lets firmware assume VBUS is always present
+    #endif
+    //--------------------------------------------------------------------------
+   
    
     //Uncomment this to make the output HEX of this project 
     //   to be able to be bootloaded using the HID bootloader

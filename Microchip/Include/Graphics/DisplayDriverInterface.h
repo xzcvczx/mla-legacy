@@ -33,19 +33,19 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     09/04/08
+ * 09/04/08		...
  *****************************************************************************/
 #ifndef _DISPLAY_DRIVER_INTERFACE
 #define _DISPLAY_DRIVER_INTERFACE
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_GFX_PMP
-#include "Graphics\gfxpmp.h"
+#include "Graphics/gfxpmp.h"
 #else
-#include "Graphics\gfxepmp.h"
+#include "Graphics/gfxepmp.h"
 #endif
 
 #endif

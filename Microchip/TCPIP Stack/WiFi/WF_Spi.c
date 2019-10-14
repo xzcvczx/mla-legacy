@@ -63,7 +63,7 @@
 */
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_WF_SPI
 #endif
 
@@ -187,13 +187,15 @@ void WF_SpiInit(void)
 
 
 /*
+  PIC32 SPI clock speed:
+  ---------------------
     Fsck =        Fpb
            ------------------
            2 * (SPIxBRG + 1)
            
 Note that the maximum possible baud rate is
 Fpb/2 (SPIXBRG = 0) and the minimum possible baud
-rate is FPB /1024.           
+rate is Fpb /1024.           
 */
 
 
@@ -217,9 +219,11 @@ rate is FPB /1024.
   	None
   	
   Remarks:
-	If the SPI bus is shared with other peripherals this function is called
-	each time an SPI transaction occurs by WF_SpiEnableChipSelect.  Otherwise it 
-	is called once during initialization by WF_SpiInit. 
+	1) If the SPI bus is shared with other peripherals this function is called
+	   each time an SPI transaction occurs by WF_SpiEnableChipSelect.  Otherwise it 
+	   is called once during initialization by WF_SpiInit. 
+	   
+	2) Maximum SPI clock rate for the MRF24WB0M is 25MHz.
 *****************************************************************************/
 static void ConfigureSpiMRF24WB0M(void)
 {
@@ -381,7 +385,7 @@ void WFSpiTxRx(UINT8   *p_txBuf,
     #endif    
 
 
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     /* Cannot communicate with MRF24WB0M when it is in hibernate mode */
     {
         static UINT8 state;  /* avoid local vars in functions called from interrupt */

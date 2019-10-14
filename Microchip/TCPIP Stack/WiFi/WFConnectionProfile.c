@@ -58,7 +58,7 @@
 #if defined(WF_CS_TRIS)
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER    WF_MODULE_WF_CONNECTION_PROFILE
 #endif
 
@@ -718,7 +718,11 @@ void WF_CPGetSecurity(UINT8 CpId,
     else
     {
         *p_securityKeyLength = 0;
-    }        
+    }       
+    
+    /* free management buffer */
+    DeallocateMgmtRxBuffer();
+ 
 }    
 
 /*******************************************************************************
@@ -918,10 +922,10 @@ static void LowLevel_CPSetElement(UINT8 CpId,
 /*******************************************************************************
   Function:	
     static void LowLevel_CPGetElement(UINT8 CpId, 
-                                  UINT8 elementId, 
-                                  UINT8 *p_elementData, 
-                                  UINT8 elementDataLength,
-                                  UINT8 dataReadAction)
+                                      UINT8 elementId, 
+                                      UINT8 *p_elementData, 
+                                      UINT8 elementDataLength,
+                                      UINT8 dataReadAction)
 
   Summary:
     Get an element of the connection profile on the MRF24WB0M.

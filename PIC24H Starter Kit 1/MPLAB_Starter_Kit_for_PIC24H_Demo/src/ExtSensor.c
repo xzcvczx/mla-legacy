@@ -82,7 +82,7 @@ extern int 					flag;
   ***************************************************************************/
 void ShowScreenESInfo(void)
 {
-	extern BITMAP_FLASH iconMicrochip;
+	extern IMAGE_FLASH iconMicrochip;
 	
 	GOLFree();
     SetColor(BLACK);        // set color to BLACK

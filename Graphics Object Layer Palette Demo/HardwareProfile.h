@@ -52,7 +52,7 @@
 #if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
 
 	#if defined (__PIC24FJ256DA210__)
-		#include "Alternative Configurations\HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
+		#include "Alternative Configurations/HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
 	#else
 	    #error "Right now, only PIC24FJ256DA210 is supported in this demo"
 	#endif

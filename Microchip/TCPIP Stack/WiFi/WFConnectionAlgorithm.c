@@ -65,7 +65,7 @@
 */
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER    WF_MODULE_WF_CONNECTION_ALGORITHM
 #endif
 
@@ -622,8 +622,8 @@ void WF_CASetRssi(UINT8 rssi)
 void WF_CAGetRssi(UINT8 *p_rssi)
 {
     LowLevel_CAGetElement(WF_CA_ELEMENT_RSSI,      /* Element ID                   */
-                          p_rssi,                   /* pointer to element data      */
-                          1,                        /* number of element data bytes */
+                          p_rssi,                  /* pointer to element data      */
+                          1,                       /* number of element data bytes */
                          TRUE);                    /* read data, free buffer       */
 }          
 
@@ -655,11 +655,11 @@ void WF_CAGetRssi(UINT8 *p_rssi)
 void WF_CASetConnectionProfileList(UINT8 cpList[WF_CP_LIST_LENGTH])
 {
     WF_ASSERT(FALSE);       /* Connection Profile lists are not currently supported */
-    #if 0
+#if 0
     LowLevel_CASetElement(WF_CA_ELEMENT_CP_LIST,   /* Element ID                   */
                           cpList,                  /* pointer to element data      */
                           WF_CP_LIST_LENGTH);      /* number of element data bytes */
-    #endif   
+#endif   
 
 }       
 
@@ -757,7 +757,7 @@ void WF_CAGetListRetryCount(UINT8 *p_listRetryCount)
                           1,                                    /* number of element data bytes */
                           TRUE);                                /* read data, free buffer       */
 }          
-
+      
 /*******************************************************************************
   Function:
     void WF_CASetEventNotificationAction(UINT8 eventNotificationAction)
@@ -791,7 +791,7 @@ void WF_CAGetListRetryCount(UINT8 *p_listRetryCount)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CASetEventNotificationAction(UINT8 eventNotificationAction)
 {    
     /* Remember what events application wants to be notified of.  The MRF24WB0M will inform the WiFi driver    */
@@ -832,7 +832,7 @@ void WF_CASetEventNotificationAction(UINT8 eventNotificationAction)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CAGetEventNotificationAction(UINT8 *p_eventNotificationAction)
 {
     *p_eventNotificationAction = GetEventNotificationMask();
@@ -862,7 +862,7 @@ void WF_CAGetEventNotificationAction(UINT8 *p_eventNotificationAction)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CASetBeaconTimeoutAction(UINT8 beaconTimeoutAction)
 {
     LowLevel_CASetElement(WF_CA_ELEMENT_BEACON_TIMEOUT_ACTION,   /* Element ID                   */
@@ -892,10 +892,10 @@ void WF_CASetBeaconTimeoutAction(UINT8 beaconTimeoutAction)
 
   Returns:
     None.
-  	
+
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CAGetBeaconTimeoutAction(UINT8 *p_beaconTimeoutAction)
 {
     LowLevel_CAGetElement(WF_CA_ELEMENT_BEACON_TIMEOUT_ACTION,           /* Element ID                   */
@@ -930,7 +930,7 @@ void WF_CAGetBeaconTimeoutAction(UINT8 *p_beaconTimeoutAction)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CASetDeauthAction(UINT8 deauthAction)
 {
     LowLevel_CASetElement(WF_CA_ELEMENT_DEAUTH_ACTION,    /* Element ID                   */
@@ -962,7 +962,7 @@ void WF_CASetDeauthAction(UINT8 deauthAction)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CAGetDeauthAction(UINT8 *p_deauthAction)
 {
     LowLevel_CAGetElement(WF_CA_ELEMENT_DEAUTH_ACTION,    /* Element ID                   */
@@ -995,7 +995,7 @@ void WF_CAGetDeauthAction(UINT8 *p_deauthAction)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CASetChannelList(UINT8 *p_channelList, UINT8 numChannels)
 {
     LowLevel_CASetElement(WF_CA_ELEMENT_CHANNEL_LIST,  /* Element ID                   */
@@ -1026,7 +1026,7 @@ void WF_CASetChannelList(UINT8 *p_channelList, UINT8 numChannels)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CAGetChannelList(UINT8 *p_channelList, UINT8 *p_numChannels)
 {
     tCAElementResponseHdr mgmtHdr;
@@ -1046,6 +1046,9 @@ void WF_CAGetChannelList(UINT8 *p_channelList, UINT8 *p_numChannels)
     *p_numChannels = mgmtHdr.elementDataLength;
 
     RawRead(RAW_RX_ID, sizeof(tCAElementResponseHdr), *p_numChannels, p_channelList);
+    
+    /* free management buffer */
+    DeallocateMgmtRxBuffer();
 }
     
 /*******************************************************************************
@@ -1082,7 +1085,7 @@ void WF_CAGetChannelList(UINT8 *p_channelList, UINT8 *p_numChannels)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CASetListenInterval(UINT16 listenInterval)
 {
     /* correct endianness before sending message */
@@ -1125,7 +1128,7 @@ void WF_CASetListenInterval(UINT16 listenInterval)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CAGetListenInterval(UINT16 *p_listenInterval)
 {
     LowLevel_CAGetElement(WF_CA_ELEMENT_LISTEN_INTERVAL,     /* Element ID                   */
@@ -1171,7 +1174,7 @@ void WF_CAGetListenInterval(UINT16 *p_listenInterval)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CASetBeaconTimeout(UINT8 beaconTimeout)
 {
     LowLevel_CASetElement(WF_CA_ELEMENT_BEACON_TIMEOUT,    /* Element ID                   */
@@ -1212,7 +1215,7 @@ void WF_CASetBeaconTimeout(UINT8 beaconTimeout)
   	
   Remarks:
     None.
-  *****************************************************************************/
+ *****************************************************************************/
 void WF_CAGetBeaconTimeout(UINT8 *p_beaconTimeout)
 {
     LowLevel_CAGetElement(WF_CA_ELEMENT_BEACON_TIMEOUT,    /* Element ID                   */
@@ -1245,7 +1248,7 @@ void WF_CAGetBeaconTimeout(UINT8 *p_beaconTimeout)
 
   Precondition:
     MACInit must be called first.
-
+      
   Parameters:
     eventNotificationBitMask - Bit mask defining which events the host will be
                                notified of.
@@ -1313,7 +1316,7 @@ UINT8 GetEventNotificationMask(void)
   Description:
     Low-level function to send the appropriate management message to the
     MRF24WB0M to set the Connection Algorithm element.
-
+    
   Precondition:
     MACInit must be called first.
 
@@ -1324,12 +1327,12 @@ UINT8 GetEventNotificationMask(void)
 
   Returns:
     None.
-  	
+    
   Remarks:
     All Connection Algorithm 'Set Element' functions call this function
     to construct the management message.  The caller must fix up any endian
     issues prior to calling this function.
-  *****************************************************************************/
+ *****************************************************************************/
 static void LowLevel_CASetElement(UINT8 elementId, 
                                   UINT8 *p_elementData, 
                                   UINT8 elementDataLength)
@@ -1377,12 +1380,12 @@ static void LowLevel_CASetElement(UINT8 elementId,
 
   Returns:
     None.
-  	
+
   Remarks:
     All Connection Algorithm 'Get Element' functions call this function to 
     construct the management message.  The caller must fix up any endian issues
     after getting the data from this function.
-  *****************************************************************************/
+ *****************************************************************************/
 static void LowLevel_CAGetElement(UINT8 elementId, 
                                     UINT8 *p_elementData, 
                                     UINT8 elementDataLength,

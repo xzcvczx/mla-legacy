@@ -83,10 +83,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
-  2.6 - 2.7    No change
-
-  2.7a         Provided macro wrapped versions of malloc() and free()
-               so that a user can override these functions easily.     
+  2.6 - 2.7a   No change
 
 *******************************************************************************/
 //DOM-IGNORE-END
@@ -96,9 +93,9 @@ Change History:
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypedefs.h"
-#include "USB\usb.h"
-#include "USB\usb_host_printer.h"
-#include "USB\usb_host_printer_esc_pos.h"
+#include "USB/usb.h"
+#include "USB/usb_host_printer.h"
+#include "USB/usb_host_printer_esc_pos.h"
 
 
 //#define DEBUG_MODE

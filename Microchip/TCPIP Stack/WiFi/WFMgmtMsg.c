@@ -64,7 +64,7 @@
 */
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_WF_MGMT_MSG
 #endif
 
@@ -81,7 +81,9 @@
 static volatile BOOL gMgmtConfirmMsgReceived  = FALSE;
 static BOOL RestoreRxData = FALSE;
 
-#ifdef WF_DEBUG
+UINT8 g_MgmtResponseInProgress = FALSE;
+
+#if defined(WF_DEBUG)
    static UINT8 g_FuncFlags = 0x00;  
 #endif
 
@@ -111,7 +113,7 @@ void SendMgmtMsg(UINT8 *p_header,
     WF_ASSERT(!isInWFProcessEvent())
     
     EnsureWFisAwake();
-
+    
     /* if a Rx Data packet is mounted that has not yet been processed */
     if (GetRawWindowState(RAW_RX_ID) == WF_RAW_DATA_MOUNTED)
     {
@@ -134,7 +136,6 @@ void SendMgmtMsg(UINT8 *p_header,
             /* force flags so WFisTxMgmtReady will return TRUE */
             SetRawWindowState(RAW_TX_ID, WF_RAW_UNMOUNTED);
             RawWindowReady[RAW_TX_ID] = FALSE;
-//            putrsUART(".");
         }    
     }    
 
@@ -184,6 +185,8 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
 {
     tMgmtMsgRxHdr  hdr;
     
+    g_MgmtResponseInProgress = TRUE;
+        
     /* Wait until mgmt response is received */
     while (gMgmtConfirmMsgReceived == FALSE)
     {
@@ -221,7 +224,7 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
         WF_ASSERT(hdr.subtype == expectedSubtype);
 
         /* free mgmt buffer */
-        DeallocateMgmtRxBuffer();        
+        DeallocateMgmtRxBuffer();  
         
         /* if there was a mounted data packet prior to the mgmt tx/rx transaction, then restore it */
         if (RestoreRxData == TRUE)
@@ -230,6 +233,8 @@ void WaitForMgmtResponse(UINT8 expectedSubtype, UINT8 freeAction)
             PopRawWindow(RAW_RX_ID);
             SetRawWindowState(RAW_RX_ID, WF_RAW_DATA_MOUNTED); 
         }          
+        
+        g_MgmtResponseInProgress = FALSE;         
     }   
 }  
 
@@ -288,7 +293,7 @@ void WaitForMgmtResponseAndReadData(UINT8 expectedSubtype,
     }    
     
     /* free the mgmt buffer */    
-    DeallocateMgmtRxBuffer();        
+    DeallocateMgmtRxBuffer();
     
      /* if there was a mounted data packet prior to the mgmt tx/rx transaction, then restore it */    
     if (RestoreRxData == TRUE)
@@ -298,10 +303,12 @@ void WaitForMgmtResponseAndReadData(UINT8 expectedSubtype,
         SetRawWindowState(RAW_RX_ID, WF_RAW_DATA_MOUNTED); 
     }          
         
+    g_MgmtResponseInProgress = FALSE;        
+        
 }
 
 
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
 /*****************************************************************************
  * FUNCTION: WFSetFuncState
  *

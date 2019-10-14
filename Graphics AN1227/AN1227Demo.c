@@ -107,8 +107,10 @@ int main (void)
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
+    #endif
     #endif
 
     /////////////////////////////////////////////////////////////////////////////
@@ -122,11 +124,28 @@ int main (void)
     #endif
     #endif
 
-    // initialize the keyboard’s keys
-    TRISDbits.TRISD6 = 1;               // set port RD6 to be an input
-    previousKey1State = PORTDbits.RD6;  // previous state equals the current state
-    TRISDbits.TRISD13 = 1;              // set port RD13 to be an input
-    previousKey2State = PORTDbits.RD13; // previous state equals the current state
+    HardwareButtonInit();           // Initialize the hardware buttons
+
+    /**
+     * Carriage Return button
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    previousKey1State = GetHWButtonCR();  // previous state equals the current state
+    /**
+     * Change Focus button
+     * Explorer 16 + GFX PICTail    - S6 (8 bit PMP)
+     * Starter Kit + GFX PICTail    - S1 or S2 (8 bit PMP)
+     * Multimedia Expansion Board   - left or right
+     * DA210 Developement Board     - S2 or S3
+     **/
+    previousKey2State = GetHWButtonFocus(); // previous state equals the current state
+
     GOLInit();                          // initialize the graphics library
 
     // create button widgets
@@ -178,11 +197,7 @@ int main (void)
             {
 
                 // check if the button has changed its state
-                #if defined(PIC24FJ256DA210_DEV_BOARD)
-                if(BTN_S1 != previousKey1State)
-                #else
-                if(BTN_S3 != previousKey1State)
-                #endif
+                if(GetHWButtonCR() != previousKey1State)
                 {
                     if(previousKey1State)
                     {
@@ -217,11 +232,7 @@ int main (void)
             }                           // end of if
 
             // check if the button has changed its state
-            #if defined(PIC24FJ256DA210_DEV_BOARD)
-            if(BTN_S2 != previousKey2State)
-            #else
-            if(BTN_S4 != previousKey2State)
-            #endif
+            if(GetHWButtonFocus() != previousKey2State)
             {
                 if(previousKey2State)
                 {

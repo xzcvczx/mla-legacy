@@ -51,7 +51,9 @@
 /* Total count of ADC channel in the PIC controller used */
 #define 	MAX_ADC_CHANNELS			24 //there are 24 ADC channels on PIC24F DA210 controllers
 
+#define __PIC24FJ_DAXXX__
 
+#define	ADC_NEW
 
 
 /** TRIS ***********************************************************/
@@ -78,12 +80,16 @@
 												//LED bar graph, RD6,7,12,13 are wheel LEDs
 #define 	INIT_TRISE_VALUE		0x0000 //0xFC00;		//RE0,1,2,3,4,5,6,7,8 are Num Pad LEDs,
 													//RE9 is Power LED
-#define 	INIT_TRISG_VALUE		0x0000 //0xFF3F;		//RG6 is Wheel center LED, RG7 is Speaker
+#define 	INIT_TRISG_VALUE		0x0080 //0xFF3F;		//RG6 is Wheel center LED, RG7 is Speaker
 #define 	INIT_PORTG_VALUE		0xFFFF
 #define 	INIT_PORTC_VALUE		0xFFFF
 #define 	INIT_PORTD_VALUE		0x30C0
 #define 	INIT_PORTE_VALUE		0xFFFF
 
+
+#define		SET_PORT_B_PINS_OUTPUT		0xFFDF;
+#define		SET_PORT_E_PINS_OUTPUT		0xFDFF;
+#define		SET_PORT_G_PINS_OUTPUT		0xFEFF;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~ SYSTEM CLOCK	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

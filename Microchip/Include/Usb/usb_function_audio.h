@@ -86,8 +86,7 @@
   Rev    Description
   ----   -----------
   2.6    Initial Release
-  2.6a-  No Change
-   2.7a
+
 ********************************************************************/
 
 #ifndef AUDIO_H

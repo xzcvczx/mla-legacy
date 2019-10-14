@@ -46,7 +46,7 @@ TODO: Currently the grid does not support scroll bars. It must fit on the screen
 
 */
 #include <string.h>
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_GRID
     #define CELL_AT(c, r)   ((c * pGrid->numRows) + r)
@@ -99,6 +99,10 @@ GRID *GridCreate
     pGrid->cellHeight = cellHeight;
     pGrid->focusX = 0;
     pGrid->focusY = 0;
+    pGrid->hdr.DrawObj = GridDraw;				// draw function
+    pGrid->hdr.MsgObj = GridTranslateMsg;       // message function
+    pGrid->hdr.MsgDefaultObj = GridMsgDefault;  // default message function
+    pGrid->hdr.FreeObj = GridFreeItems;			// free function
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -123,13 +127,15 @@ GRID *GridCreate
 
 /* */
 
-WORD GridDraw(GRID *pGrid)
+WORD GridDraw(void *pObj)
 {
     SHORT   i;
     SHORT   j;
     SHORT   xText, yText;
+    GRID *pGrid;
 
-
+    pGrid = (GRID *)pObj;
+    
     if
     (
         (pGrid->hdr.state & GRID_DRAW_ITEMS) ||
@@ -143,6 +149,10 @@ WORD GridDraw(GRID *pGrid)
             // Clear the entire region.
             SetColor(pGrid->hdr.pGolScheme->CommonBkColor);
             while(!Bar(pGrid->hdr.left, pGrid->hdr.top, pGrid->hdr.right, pGrid->hdr.bottom));
+            
+            // initialize the global cursor positions to the Grid left top position.
+			_cursorX = pGrid->hdr.left;
+			_cursorY = pGrid->hdr.top;
 
             // Draw the grid lines
             if(pGrid->hdr.state & (GRID_SHOW_LINES | GRID_SHOW_BORDER_ONLY | GRID_SHOW_SEPARATORS_ONLY))
@@ -303,8 +313,12 @@ WORD GridDraw(GRID *pGrid)
 }
 
 /* */
-void GridFreeItems(GRID *pGrid)
+void GridFreeItems(void *pObj)
 {
+    GRID *pGrid;
+
+    pGrid = (GRID *)pObj;
+
     if(pGrid && pGrid->gridObjects)
     {
         GFX_free(pGrid->gridObjects);
@@ -377,8 +391,12 @@ void *GridGetCell(GRID *pGrid, SHORT column, SHORT row, WORD *cellType)
 }
 
 /* */
-void GridMsgDefault(WORD translatedMsg, GRID *pGrid, GOL_MSG *pMsg)
+void GridMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    GRID *pGrid;
+
+    pGrid = (GRID *)pObj;
+
     switch(translatedMsg)
     {
         case GRID_MSG_ITEM_SELECTED:
@@ -442,8 +460,12 @@ void GridMsgDefault(WORD translatedMsg, GRID *pGrid, GOL_MSG *pMsg)
 }
 
 /* */
-WORD GridTranslateMsg(GRID *pGrid, GOL_MSG *pMsg)
+WORD GridTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    GRID *pGrid;
+
+    pGrid = (GRID *)pObj;
 
     // Evaluate if the message is for the check box
     // Check if disabled first

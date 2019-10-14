@@ -37,36 +37,32 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Bruce Bohn			01/17/2010	...
  *****************************************************************************/
+#include "mTouchCap_CtmuAPI.h"
+//#include "mTouchCap_PIC24_CTMU_Physical.h"
 #include "mTouchCap_PIC24F_DA210CapTouchDemo.h"
+//#include "HardwareProfile.h"
+#include "mTouchCap_HardwareProfile.h"
+#include "Config.h"
+#include "softTimers.h"
+
+
 
 // Configuration bits
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-_FOSCSEL(FNOSC_PRI);
-_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
-_FWDT(FWDTEN_OFF);
-#elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
-    #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
-    #pragma config CP = OFF, BWP = OFF, PWP = OFF
-#else
-    #if defined(__PIC24FJ256GB110__)
-_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_OFF)
-    #endif
-    #if defined(__PIC24FJ256GA110__)
-_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
-_CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
-    #endif
-    #if defined(__PIC24FJ128GA010__)
-_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT)     // Primary XT OSC with PLL
-_CONFIG1(JTAGEN_OFF & FWDTEN_OFF)       // JTAG off, watchdog timer off
-    #endif
-	#if defined (__PIC24FJ256DA210__)
+
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
-_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN /*ALTPMP_ALPMPDIS */      & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
-	#endif	        
-#endif
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & ALTPMP_ALTPMPEN /*ALTPMP_ALPMPDIS */      & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+
+
+DirectKey Pad1;
+DirectKey Pad2;
+DirectKey Pad3;
+
+WORD	mTouchKeyStatus[3];
+
+
+
+#define USE_MTOUCH_AND_GRAPHICS
 
 /////////////////////////////////////////////////////////////////////////////
 //                              OBJECT'S IDs
@@ -93,6 +89,12 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN /*ALTPMP_AL
 #define BAR_WIDTH		4
 
 /////////////////////////////////////////////////////////////////////////////
+//                            LOCAL PROTOTYPES
+/////////////////////////////////////////////////////////////////////////////
+void            TickInit(void);                 // starts tick counter
+void	readmTouch(void);
+
+/////////////////////////////////////////////////////////////////////////////
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
 extern const BITMAP_FLASH redRightArrow;
@@ -104,145 +106,76 @@ extern const BITMAP_FLASH redLeftArrow;
 GOL_SCHEME                  *altScheme; // alternative style scheme
 SLIDER                      *pSld;      // pointer to the slider object
 WORD                        update = 0; // variable to update customized graphics
+/////////////////////////////////////////////////////////////////////////////
+//                                  STRUCTURES USED FOR CAP TOUCH
+/////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////// GLOBAL VARIABLES ////////////////////////////
+	int mTouch_ON = 0;
+	int CapmTouchIdle = 0;
+
 
 /* */
 int main(void)
 {
+			//Set up the mTouch Cap Touch Keys
+     mTouchCapAPI_SetUpChannelDirectKey(&Pad1,DIRECTKEY1_CHANNEL,DEFAULT_TRIP_VALUE,DECODE_METHOD_PRESS_ASSERT,FILTER_METHOD_GATEDAVERAGE);	
+     mTouchCapAPI_SetUpChannelDirectKey(&Pad2,DIRECTKEY2_CHANNEL,DEFAULT_TRIP_VALUE,DECODE_METHOD_PRESS_ASSERT,FILTER_METHOD_GATEDAVERAGE);	
+     mTouchCapAPI_SetUpChannelDirectKey(&Pad3,DIRECTKEY3_CHANNEL,DEFAULT_TRIP_VALUE,DECODE_METHOD_PRESS_ASSERT,FILTER_METHOD_GATEDAVERAGE);	
+
     GOL_MSG msg;                    // GOL message structure to interact with GOL
-    
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
     
     _ANSG8 = 0; /* S1 */
     _ANSE9 = 0; /* S2 */
     _ANSB5 = 0; /* S3 */
         
-    #else
-    /////////////////////////////////////////////////////////////////////////////
-    // ADC Explorer 16 Development Board Errata (work around 2)
-    // RB15 should be output
-    /////////////////////////////////////////////////////////////////////////////
-    LATBbits.LATB15 = 0;
-    TRISBbits.TRISB15 = 0;
-    #endif
-    /////////////////////////////////////////////////////////////////////////////
-    #if defined(__dsPIC33F__) || defined(__PIC24H__)
-
-    // Configure Oscillator to operate the device at 40Mhz
-    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-    PLLFBD = 38;                    // M=40
-    CLKDIVbits.PLLPOST = 0;         // N1=2
-    CLKDIVbits.PLLPRE = 0;          // N2=2
-    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
-
-    // Disable Watch Dog Timer
-    RCONbits.SWDTEN = 0;
-
-    // Clock switching to incorporate PLL
-    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
-
-    // Oscillator with PLL (NOSC=0b011)
-    __builtin_write_OSCCONL(0x01);  // Start clock switching
-    while(OSCCONbits.COSC != 0b011);
-
-    // Wait for Clock switch to occur	
-    // Wait for PLL to lock
-    while(OSCCONbits.LOCK != 1)
-    { };
-    
-    // Set PMD0 pin functionality to digital
-    AD1PCFGL = AD1PCFGL | 0x1000;
-    
-    #elif defined(__PIC32MX__)
-    INTEnableSystemMultiVectoredInt();
-    SYSTEMConfigPerformance(GetSystemClock());
-    #endif
-
-//ANSA = 0x0000;
-//ANSC = 0x0000;
-//ANSE = 0x0000;
 
     GOLInit();                      // initialize graphics library &
 
-    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+
+    #if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
     EEPROMInit();                   // initialize Exp.16 EEPROM SPI
     BeepInit();
     #else
     SST25Init();                    // initialize GFX3 SST25 flash SPI
     #endif
     
-//    TouchInit();                    // initialize touch screen
-
-    mTouchCapPhy_Init(); 
+    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
+//    if(BTN_S1 == 0)
+//    {
+//        TouchCalibration();
+//        TouchStoreCalibration();
+//    }
     
-//	TRISEbits.TRISE8 = 0;
-//	LATEbits.LATE8 = 0;
-//
-//	PMCS1CFbits.CSDIS = 1;      // enable CS
-//	PMCS1CFbits.CSPTEN = 0;//1;     // enable CS port
-//
-//
-    // create default style scheme for GOL
-    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
 
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    TRISAbits.TRISA9 = 1;
-    if(PORTAbits.RA9 == 0)
+    // If it's a new board (EEPROM_VERSION byte is not programed) calibrate touch screen
+    #if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+    if(GRAPHICS_LIBRARY_VERSION != EEPROMReadWord(ADDRESS_VERSION))
     {
-        TRISAbits.TRISA9 = 0;
+  		TickInit(); 
         TouchCalibration();
         TouchStoreCalibration();
     }
 
-    TRISAbits.TRISA9 = 0;
-    #elif defined(__PIC24FJ256DA210__)
-
-    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
-    if(BTN_S1 == 0)
-    {
-  //      TouchCalibration();
-  //      TouchStoreCalibration();
-    }
-    
     #else
-
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    if(BTN_S3 == 0)
+    if(GRAPHICS_LIBRARY_VERSION != SST25ReadWord(ADDRESS_VERSION))
     {
+        TickInit(); 
         TouchCalibration();
         TouchStoreCalibration();
     }
 
     #endif
 
-    // If it's a new board (EEPROM_VERSION byte is not programed) calibrate touch screen
-//    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
-//    if(GRAPHICS_LIBRARY_VERSION != EEPROMReadWord(ADDRESS_VERSION))
-//    {
-//        TouchCalibration();
-//        TouchStoreCalibration();
-//    }
-//
-//    #else
-//    if(GRAPHICS_LIBRARY_VERSION != SST25ReadWord(ADDRESS_VERSION))
-//    {
-    //    TouchCalibration();
-    //    TouchStoreCalibration();
-//    }
-
-//    #endif
-
-//	ANSEbits.ANSE9 = 0;
-//	TRISEbits.TRISE9 = 0;
-
-//	while(1);
 
     // Load touch screen calibration parameters from memory
-//    TouchLoadCalibration();
+   	TouchLoadCalibration();
 
     altScheme = GOLCreateScheme();  // create alternative style scheme
     altScheme->TextColor0 = BLACK;
     altScheme->TextColor1 = BRIGHTBLUE;
+
 
     BtnCreate
     (
@@ -287,29 +220,40 @@ int main(void)
         );                          // use default style scheme
 
 
+
+
     update = 1;                     // to initialize the user graphics
+
+
+
+	LATBbits.LATB5 = 0;
+	LATEbits.LATE9 = 0;
+	LATGbits.LATG8 = 0;
+
+    mTouchCapPhy_InitCTMU(); 
+	InitSoftTimers(1);
+    TickInit(); 
+
+    AddSoftTimer(1, RUN, &TouchProcessTouch); 
+    AddSoftTimer(100, RUN, &readmTouch);
+
+	mTouch_ON = 1;
     while(1)
     {
 
         if(dataReadyCTMU == 1)                      // This flag is set by Timer 4 ISR //when all channels have been read
         {
             dataReadyCTMU = 0;  
-
-            Set_ScanTimer_IF_Bit_State(DISABLE);    //Clear timer 4 SHORT flag
-            Set_ScanTimer_IE_Bit_State(DISABLE);    //Disable interrupt
-            Set_ScanTimer_ON_Bit_State(DISABLE);    //Stop timer 4
-
             mTouchCapApp_DemoDirectKeys();
-
-            Set_ScanTimer_IF_Bit_State(DISABLE);    //Clear flag
-            Set_ScanTimer_IE_Bit_State(ENABLE);     //Enable interrupt
-            Set_ScanTimer_ON_Bit_State(ENABLE);     //Run timer
 		}
 
         if(GOLDraw())
         {                           // Draw GOL object
 			CapmTouchGetMsg(&msg);
-
+			if(CapmTouchIdle)
+			{
+				TouchGetMsg(&msg);
+			}
             GOLMsg(&msg);           // Process message
 
         }
@@ -333,6 +277,15 @@ WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 
     objectID = GetObjID(pObj);
 
+	#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+	    #if !defined (__PIC32MX__)
+	    if(objMsg == BTN_MSG_PRESSED)
+	    {
+	        Beep();
+	    }
+		#endif
+	#endif
+	
     if(objectID == ID_BTN1)
     {
         if(objMsg == BTN_MSG_PRESSED)
@@ -505,6 +458,7 @@ void CapmTouchGetMsg(GOL_MSG *pMsg)
 	static float curPosSlider;
 	static WORD lastKeyStatus[3];
 
+
     typedef enum
    	{
        	IDLE,
@@ -521,7 +475,8 @@ void CapmTouchGetMsg(GOL_MSG *pMsg)
 	static TOUCH_STATES padState = IDLE;
 	
     pMsg->type = TYPE_TOUCHSCREEN;
-    pMsg->uiEvent = EVENT_INVALID;
+//    pMsg->uiEvent = EVENT_INVALID;
+	CapmTouchIdle = 0;
 	
 	switch(padState)
 	{
@@ -542,6 +497,10 @@ void CapmTouchGetMsg(GOL_MSG *pMsg)
 		{
 			padState = ZEROBARWAIT;
 			DelayMs(50);
+		}
+		else
+		{
+			CapmTouchIdle = 1;
 		}
 		break;
 
@@ -712,5 +671,182 @@ void CapmTouchGetMsg(GOL_MSG *pMsg)
 		default:
 		break;
 	}	//end switch padState
+//	if(padState == IDLE)
+//	{
+//		CapmTouchIdle = 1;
+//	}
+//	else
+//	{
+//		CapmTouchIdle = 0;
+//	}
+		
 }
+
+/********************************************************************
+ * Function		:    void mTouchCapApp_DemoDirectKeys(void)
+ *
+ * PreCondition	:    None
+ *
+ * Input			:    None
+ *
+ * Output			:    None
+ *
+ * Side Effects		:    None
+ *
+ * Overview		:
+ *
+ *
+ *
+ *
+ *
+ * Note			:
+ *******************************************************************/
+void mTouchCapApp_DemoDirectKeys(void)
+{
+
+    /* Check if the direct key is pressed which is connected at the mentioned channel */
+    if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&Pad1))
+    {
+        // Illuminate LED D1
+		PORTGbits.RG8 = 1;
+		mTouchKeyStatus[0] = 1;
+    }
+	else
+	{
+		PORTGbits.RG8 = 0;
+		mTouchKeyStatus[0] = 0;
+	}
+
+    /* Check if the direct key is pressed which is connected at the mentioned channel */
+    if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&Pad2))
+    {
+        // Illuminate LED D2
+		PORTEbits.RE9 = 1;
+		mTouchKeyStatus[1] =1;
+    }
+	else
+	{
+		PORTEbits.RE9 = 0;
+		mTouchKeyStatus[1] =0;
+	}
+
+    /* Check if the direct key is pressed which is connected at the mentioned channel */
+    if(KEY_PRESSED == mTouchCapAPI_GetStatusDirectButton(&Pad3))
+    {
+
+        // Illuminate LED D3
+		TRISBbits.TRISB5 = 0;
+		PORTBbits.RB5 = 1;
+		mTouchKeyStatus[2] = 1;
+    }
+    else
+   {
+		PORTBbits.RB5 = 0;
+		mTouchKeyStatus[2] = 0;
+   }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Function: Timer3 ISR
+// Input: none
+// Output: none
+// Overview: increments tick counter. Tick is approx. 1 ms.
+/////////////////////////////////////////////////////////////////////////////
+
+#define __T3_ISR    __attribute__((interrupt, shadow, auto_psv))
+
+/* */
+void __T3_ISR _T3Interrupt(void)
+{	
+
+
+    IFS0bits.T3IF = 0;
+	T3CONbits.TON = 0;	//stop the timer while the channel is read
+
+    SOFT_TIMER_DISPATCHER();
+
+	//readmTouch();
+	//TouchProcessTouch();  
+    T3CONbits.TON = 1;	
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Function: void TickInit(void)
+// Input: none
+// Output: none
+// Overview: Initilizes the tick timer.
+/////////////////////////////////////////////////////////////////////////////
+
+/*********************************************************************
+ * Section: Tick Delay
+ *********************************************************************/
+#define SAMPLE_PERIOD       500 // us
+#define TICK_PERIOD			(GetPeripheralClock() * SAMPLE_PERIOD) / 4000000
+
+/* */
+void TickInit(void)
+{
+
+    // Initialize Timer3
+    TMR3 = 0;
+    PR3 = TICK_PERIOD;
+    IFS0bits.T3IF = 0;  //Clear flag
+    IEC0bits.T3IE = 1;  //Enable interrupt
+    T3CONbits.TON = 1;  //Run timer
+}
+
+
+
+
+
+void readmTouch(void)
+{
+	static BYTE mTouchChCount = 0;
+	static BYTE mTouchTimeCount = 0;
+
+	if(mTouch_ON)
+	{
+	 	//if(mTouchTimeCount > 100)
+		//{
+		   
+		//	mTouchTimeCount = 0;
+//			SwitchIOADCVals();
+		if(mTouchChCount >= 2)
+		{
+			//read ch
+			/* Scans the CTMU channel for ADC voltage. It updates the "curRawData" and "actualValue" buffers. */
+	   		mTouchCapPhy_ReadCTMU(ScanChannels[mTouchChCount]);  //NK_DIRKEY
+
+			/* Periodically average the channel data based on User configuration. */
+			mTouchCapPhy_AverageData(ScanChannels[mTouchChCount]); 	//NK_DIRKEY	
+			
+
+			mTouchChCount = 0;
+			dataReadyCTMU = 1;
+		}
+		else
+		{
+			//read ch
+			/* Scans the CTMU channel for ADC voltage. It updates the "curRawData" and "actualValue" buffers. */
+	   		mTouchCapPhy_ReadCTMU(ScanChannels[mTouchChCount]);  //NK_DIRKEY
+
+			/* Periodically average the channel data based on User configuration. */
+			mTouchCapPhy_AverageData(ScanChannels[mTouchChCount]); 	//NK_DIRKEY	
+			
+			mTouchChCount++;
+		}
+	
+		
+	}
+}
+
+
+
+
+
+
+
+
+
 

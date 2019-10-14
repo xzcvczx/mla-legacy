@@ -464,8 +464,6 @@ static BOOL isMacAddress(INT8 *p_string, UINT8 *p_Address)
  *****************************************************************************/
 static void IfconfigDisplayStatus(void)
 {
-    UINT8 p_mac[6];
-
     sprintf( (char *) g_ConsoleContext.txBuf,
               "\tIP addr:  %d.%d.%d.%d",   AppConfig.MyIPAddr.v[0],
                                            AppConfig.MyIPAddr.v[1],
@@ -474,11 +472,13 @@ static void IfconfigDisplayStatus(void)
     WFConsolePrintRamStr( (char *) g_ConsoleContext.txBuf , TRUE);
 
 
-    WF_GetMacAddress(p_mac);
     sprintf( (char *) g_ConsoleContext.txBuf,
-             "\tMAC addr: %02X:%02X:%02X:%02X:%02X:%02X",   p_mac[0], p_mac[1],
-                                                            p_mac[2], p_mac[3],
-                                                            p_mac[4], p_mac[5]);
+             "\tMAC addr: %02X:%02X:%02X:%02X:%02X:%02X",   AppConfig.MyMACAddr.v[0],
+                                                            AppConfig.MyMACAddr.v[1],
+                                                            AppConfig.MyMACAddr.v[2],
+                                                            AppConfig.MyMACAddr.v[3],
+                                                            AppConfig.MyMACAddr.v[4],
+                                                            AppConfig.MyMACAddr.v[5]);
     WFConsolePrintRamStr( (char *) g_ConsoleContext.txBuf , TRUE);
 
 

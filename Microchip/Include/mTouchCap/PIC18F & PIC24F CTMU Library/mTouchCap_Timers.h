@@ -38,6 +38,7 @@
  * Sasha. M	/ Naveen. M				4 June 2009  		Version 0.3 Updates
  * Sasha. M	/ Naveen. M				11 Nov 2009  		Version 1.0 Release
  * Sasha. M	/ Nithin. 				10 April 2010  		Version 1.20 Release
+  * Nithin M						11 Aug 2010	Implemetation of Low Power Demo 
  *
  *****************************************************************************/
 #ifndef _MTOUCH_TIMERS_H
@@ -70,6 +71,11 @@
 
 /** External Variables **/
 extern CHAR 	dataReadyCTMU; //nsc
+#ifdef LOW_POWER_DEMO_ENABLE
+	extern WORD			Timeout_Counter;	//counter for a 10sec timeout
+	extern BYTE Clock_Switch_Enable_Flag;	//FRC clock mode enable
+#endif
+
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~	Function Prototypes  ~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
@@ -109,6 +115,7 @@ void InterruptHandlerHigh (void);
 #endif
 
 
+#define	TIMER_PERIOD_WITH_FRC	125	//PR4 value when the FRC clock is selected 
 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

@@ -204,8 +204,8 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 #include "usb_config.h"
-#include "USB\usb_device.h"
-#include "USB\usb.h"
+#include "USB/usb_device.h"
+#include "USB/usb.h"
 
 #include "HardwareProfile.h"
 

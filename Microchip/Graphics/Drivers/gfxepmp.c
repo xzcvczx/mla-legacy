@@ -38,7 +38,7 @@
  * Anton Alkhimenok     01/12/10
  *****************************************************************************/
 
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include "Compiler.h"
 
 #ifdef USE_GFX_EPMP

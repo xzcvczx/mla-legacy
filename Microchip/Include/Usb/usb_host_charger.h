@@ -116,6 +116,7 @@ typedef struct
     WORD        vid;                    // Vendor ID of the device
     WORD        pid;                    // Product ID of the device
     BYTE        deviceAddress;          // Address of the device on the USB
+    BYTE        clientDriverID;         // Client driver ID for device requests.
 } USB_CHARGING_DEVICE_ID;
 
 
@@ -157,7 +158,7 @@ extern USB_CHARGING_DEVICE   usbChargingDevices[USB_MAX_CHARGING_DEVICES]; // In
 
 /****************************************************************************
   Function:
-    BOOL USBHostChargerInitialize ( BYTE address, DWORD flags )
+    BOOL USBHostChargerInitialize ( BYTE address, DWORD flags, BYTE clientDriverID )
 
   Summary:
     This function is called by the USB Embedded Host layer when a device
@@ -175,6 +176,8 @@ extern USB_CHARGING_DEVICE   usbChargingDevices[USB_MAX_CHARGING_DEVICES]; // In
   Parameters:
     BYTE address    - Device's address on the bus
     DWORD flags     - Initialization flags
+    BYTE clientDriverID - ID to send when issuing a Device Request via
+                            USBHostIssueDeviceRequest() or USBHostSetDeviceConfiguration().
 
   Return Values:
     TRUE    - Initialization was successful
@@ -186,7 +189,7 @@ extern USB_CHARGING_DEVICE   usbChargingDevices[USB_MAX_CHARGING_DEVICES]; // In
     attached device.
   ***************************************************************************/
 
-BOOL USBHostChargerInitialize( BYTE address, DWORD flags );
+BOOL USBHostChargerInitialize( BYTE address, DWORD flags, BYTE clientDriverID );
 
 
 /****************************************************************************

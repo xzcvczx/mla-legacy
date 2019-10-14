@@ -55,8 +55,6 @@
 #define MP_READ                     1
 
 // MAX_NUM_MPUSB_DEV is an abstract limitation.
-// It is very unlikely that a computer system will have more
-// then 127 USB devices attached to it. (single or multiple USB hosts)
 #define MAX_NUM_MPUSB_DEV           127
 
 

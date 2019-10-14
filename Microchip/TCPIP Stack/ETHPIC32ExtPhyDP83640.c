@@ -40,13 +40,12 @@
 
 #include <plib.h>
 
+#include "HardwareProfile.h"
 
-// Compile only for PIC32MX with Ethernet MAC interface (must not have external ENCX24J600, ENC28J60, or ZG2100M hardware defined)
-#if defined(__PIC32MX__) && defined(_ETH) && !defined(ENC100_INTERFACE_MODE) && !defined(ENC_CS_TRIS) && !defined(ZG_CS_TRIS)
+// Compile only for PIC32MX with Ethernet MAC interface (must not have external ENCX24J600, ENC28J60, or MRF24WB0M hardware defined)
+#if defined(__PIC32MX__) && defined(_ETH) && !defined(ENC100_INTERFACE_MODE) && !defined(ENC_CS_TRIS) && !defined(WF_CS_TRIS)
 
 #include "TCPIP Stack/ETHPIC32ExtPhy.h"
-
-#include "HardwareProfile.h"
 
 #include "TCPIP Stack/ETHPIC32ExtPhyDP83640.h"
 
@@ -79,9 +78,10 @@ eEthRes EthPhyConfigureMII(eEthPhyCfgFlags cFlags)
 	unsigned short	phyReg;
 	
 	// RMII_BYPASS is in page 0
-	EthMIIMWriteReg(PHY_REG_PAGESEL, PHY_ADDRESS, 0);
+	EthMIIMWriteStart(PHY_REG_PAGESEL, PHY_ADDRESS, 0);
 	
-	phyReg=EthMIIMReadReg(PHY_REG_RMII_BYPASS, PHY_ADDRESS);
+	EthMIIMReadStart(PHY_REG_RMII_BYPASS, PHY_ADDRESS);
+	phyReg=EthMIIMReadResult();
 	
 	if(cFlags&ETH_PHY_CFG_RMII)
 	{
@@ -93,7 +93,7 @@ eEthRes EthPhyConfigureMII(eEthPhyCfgFlags cFlags)
 		phyReg&=~(_RMIIBYPASS_RMII_MODE_MASK);	// MII
 	}
 	
-	EthMIIMWriteReg(PHY_REG_RMII_BYPASS, PHY_ADDRESS, phyReg);	// update the RMII and Bypass Register
+	EthMIIMWriteStart(PHY_REG_RMII_BYPASS, PHY_ADDRESS, phyReg);	// update the RMII and Bypass Register
 	
 
 	return ETH_RES_OK;	
@@ -123,9 +123,10 @@ eEthRes EthPhyConfigureMdix(eEthOpenFlags oFlags)
 	unsigned short	phyReg;
 
 	// PHY_CTRL is in page 0
-	EthMIIMWriteReg(PHY_REG_PAGESEL, PHY_ADDRESS, 0);	
+	EthMIIMWriteStart(PHY_REG_PAGESEL, PHY_ADDRESS, 0);	
 
-	phyReg=EthMIIMReadReg(PHY_REG_PHY_CTRL, PHY_ADDRESS);
+	EthMIIMReadStart(PHY_REG_PHY_CTRL, PHY_ADDRESS);
+	phyReg=EthMIIMReadResult();
 
 	if(oFlags&ETH_OPEN_MDIX_AUTO)
 	{	// enable Auto-MDIX
@@ -144,7 +145,7 @@ eEthRes EthPhyConfigureMdix(eEthOpenFlags oFlags)
 	       }
 	}
 	
-	EthMIIMWriteReg(PHY_REG_PHY_CTRL, PHY_ADDRESS, phyReg);	
+	EthMIIMWriteStart(PHY_REG_PHY_CTRL, PHY_ADDRESS, phyReg);	
 
 	return ETH_RES_OK;	
 

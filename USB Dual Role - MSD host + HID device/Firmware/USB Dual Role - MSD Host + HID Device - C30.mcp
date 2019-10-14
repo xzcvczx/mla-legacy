@@ -57,8 +57,10 @@ file_029=USB Stack
 file_030=Hardware Profile
 file_031=Hardware Profile
 file_032=Hardware Profile
-file_033=.
+file_033=USB Stack
 file_034=.
+file_035=.
+file_036=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -95,6 +97,8 @@ file_031=no
 file_032=no
 file_033=no
 file_034=no
+file_035=no
+file_036=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -129,8 +133,10 @@ file_029=no
 file_030=no
 file_031=no
 file_032=no
-file_033=yes
+file_033=no
 file_034=yes
+file_035=yes
+file_036=yes
 [FILE_INFO]
 file_000=usb_descriptors.c
 file_001=main.c
@@ -165,8 +171,10 @@ file_029=..\..\Microchip\USB\USB PIC24.h
 file_030=HardwareProfile - PIC24FJ64GB004 PIM.h
 file_031=HardwareProfile - PIC24FJ256DA210 Development Board.h
 file_032=HardwareProfile - PIC24FJ256GB210 PIM.h
-file_033=..\Getting Started - Running the Device - HID - Simple Custom Demo.htm
-file_034=..\IMPORTANT README.txt
+file_033=..\..\Microchip\USB\usb_device_local.h
+file_034=..\Getting Started - Running the Device - HID - Simple Custom Demo.htm
+file_035=..\IMPORTANT README.txt
+file_036=..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

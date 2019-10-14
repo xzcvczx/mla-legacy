@@ -157,6 +157,8 @@
 
 #define WF_HOST_RFIFO_BCNT0_REG     ((UINT16)(0x33)) /* 16-bit register containing number of bytes in read fifo 0 (data rx) */
                                                      /* (LS 12 bits contain the length)                                     */
+#define WF_HOST_RESET_REG           ((UINT16)(0x3c))
+#define WF_HOST_RESET_MASK          ((UINT16)(0x0001))
                                                        
 #define WF_PSPOLL_H_REG             ((UINT16)(0x3d)) /* 16-bit register used to control low power mode                      */
 #define WF_INDEX_ADDR_REG           ((UINT16)(0x3e)) /* 16-bit register to move the data window                             */

@@ -13,13 +13,13 @@
 #endif
 
 #include "GenericTypeDefs.h"
-#include "Graphics\Graphics.h"
-#include "MDD File System\FSDefs.h"
-#include "MDD File System\FSIO.h"
+#include "Graphics/Graphics.h"
+#include "MDD File System/FSDefs.h"
+#include "MDD File System/FSIO.h"
 #include "SSD1926_SDCard.h"
 #include "SSD1926_JPEG.h"
 #if defined (MULTI_MEDIA_BOARD_DM00123)
-	#include "cpld.h"
+#include "cpld.h"
 #endif
 #endif
 

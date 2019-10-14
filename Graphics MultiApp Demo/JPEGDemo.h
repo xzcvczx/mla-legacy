@@ -12,10 +12,10 @@
         #include <p24Fxxxx.h>
     #endif
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 
-    #include "Image Decoders\ImageDecoder.h"
-    #include "MDD File System\FSIO.h"
+    #include "Image Decoders/ImageDecoder.h"
+    #include "MDD File System/FSIO.h"
 
 // Object IDs
     #define ID_JPGLISTBOX   0xFC10                              // List Box ID

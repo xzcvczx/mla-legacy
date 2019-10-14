@@ -32,20 +32,26 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/08/07	...
- * Anton Alkhimenok		06/06/07	Basic calibration and GOL messaging are added
- * Anton Alkhimenok     01/14/08    Graphics PICtail Version 2 support is added
- * Anton Alkhimenok     02/05/08    Portrait orientation is added
- * Sean Justice         02/07/08    PIC32 support is added
- * Anton Alkhimenok     05/27/08    More robust algorithm
- * Anton Alkhimenok     01/07/09    Graphics PICtail Version 3 support is added
+ * 01/08/07		...
+ * 06/06/07		Basic calibration and GOL messaging are added
+ * 01/14/08 	Graphics PICtail Version 2 support is added
+ * 02/05/08    	Portrait orientation is added
+ * 02/07/08    	PIC32 support is added
+ * 05/27/08    	More robust algorithm
+ * 01/07/09    	Graphics PICtail Version 3 support is added
+ * 07/27/10    	Added support for parallel flash 
+ *				(only on PIC24FJ256DA120 Development Board)
+ * 09/30/10    	Added automatic X and Y direction detection based on the display 
+ *				orientation of the two panels:
+ *				- DISPLAY_PANEL == TFT_G240320LTSW_118W_E
+ *				- DISPLAY_PANEL == PH480272T_005_I11Q
  *****************************************************************************/
 #ifndef _TOUCHSCREEN_H
     #define _TOUCHSCREEN_H
 	
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 
     #if defined (GFX_PICTAIL_V1)
 
@@ -62,12 +68,37 @@
         #define FLIP_Y
 
     #elif defined(GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD)
-		
-		#include "SST25VF016.h"
-		
-//#define SWAP_X_AND_Y
-//#define FLIP_X
-//#define FLIP_Y
+		#if defined (USE_SST39LF400)
+			#include "SST39LF400.h"		// used in PIC24FJ256DA210 Development Board only, selectable with SPI Flash
+		#else
+			#include "SST25VF016.h"		// used in GFX_PICTAIL_V3 and PIC24FJ256DA210 Development Board
+		#endif
+
+		#if (DISPLAY_PANEL == TFT_G240320LTSW_118W_E)	
+			#if (DISP_ORIENTATION == 0)	
+				#define SWAP_X_AND_Y
+				#define FLIP_Y
+			#elif (DISP_ORIENTATION == 180)	
+				#define SWAP_X_AND_Y
+				#define FLIP_X
+			#elif (DISP_ORIENTATION == 270)	
+				#define FLIP_X
+				#define FLIP_Y
+			#endif	
+		#endif
+
+		#if (DISPLAY_PANEL == PH480272T_005_I11Q)	
+			#if (DISP_ORIENTATION == 90)	
+				#define SWAP_X_AND_Y
+				#define FLIP_X
+			#elif (DISP_ORIENTATION == 180)	
+				#define FLIP_X
+				#define FLIP_Y
+			#elif (DISP_ORIENTATION == 270)	
+				#define SWAP_X_AND_Y
+				#define FLIP_Y
+			#endif	
+		#endif
     #endif
 
 // Default calibration values
@@ -93,11 +124,23 @@ extern volatile WORD    _calYMax;
     #else
 
 // Addresses for calibration and version values in SPI Flash on Graphics PICtail 3 & PIC24FJ256DA210 Development Board.
-        #define ADDRESS_VERSION (unsigned long)0xFFFFFFFE
-        #define ADDRESS_XMIN    (unsigned long)0xFFFFFFFC
-        #define ADDRESS_XMAX    (unsigned long)0xFFFFFFFA
-        #define ADDRESS_YMIN    (unsigned long)0xFFFFFFF8
-        #define ADDRESS_YMAX    (unsigned long)0xFFFFFFF6
+// Or Addresses for calibration and version values in Parallel Flash on PIC24FJ256DA210 Development Board.
+		#if defined (USE_SST25VF016)
+	        #define ADDRESS_VERSION (unsigned long)0xFFFFFFFE
+	        #define ADDRESS_XMIN    (unsigned long)0xFFFFFFFC
+	        #define ADDRESS_XMAX    (unsigned long)0xFFFFFFFA
+	        #define ADDRESS_YMIN    (unsigned long)0xFFFFFFF8
+	        #define ADDRESS_YMAX    (unsigned long)0xFFFFFFF6
+        #elif defined (USE_SST39LF400)
+	        #define ADDRESS_VERSION (unsigned long)0x0003FFFE
+	        #define ADDRESS_XMIN    (unsigned long)0x0003FFFC
+	        #define ADDRESS_XMAX    (unsigned long)0x0003FFFA
+	        #define ADDRESS_YMIN    (unsigned long)0x0003FFF8
+	        #define ADDRESS_YMAX    (unsigned long)0x0003FFF6
+		#else
+        #endif
+
+        
     #endif
 
 // Current ADC values for X and Y channels and potentiometer R6

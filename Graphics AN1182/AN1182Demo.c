@@ -119,8 +119,8 @@ void TickInit(void);                                // starts tick counter
 
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
-extern const BITMAP_FLASH   redLArrow;              // bitmap used for button 1
-extern const BITMAP_FLASH   redRArrow;              // bitmap used for button 2
+extern const IMAGE_FLASH   redLArrow;              // bitmap used for button 1
+extern const IMAGE_FLASH   redRArrow;              // bitmap used for button 2
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -197,8 +197,10 @@ int main(void)
     // ADC Explorer 16 Development Board Errata (work around 2)
     // RB15 should be output
     /////////////////////////////////////////////////////////////////////////////
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     LATBbits.LATB15 = 0;
     TRISBbits.TRISB15 = 0;
+    #endif
     #endif
     /////////////////////////////////////////////////////////////////////////////
 
@@ -251,6 +253,7 @@ int main(void)
 
     TouchInit();                            // initialize touch screen
     TickInit();                             // initialize tick counter (for random number generation)
+    HardwareButtonInit();                   // Initialize the hardware buttons
 
     // create default style scheme for GOL
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
@@ -265,19 +268,19 @@ int main(void)
     }
 
     TRISAbits.TRISA9 = 0;
-    #elif defined(__PIC24FJ256DA210__)
-
-    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
-    if(BTN_S1 == 0)
-    {
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
-
     #else
 
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    if(BTN_S3 == 0)
+    /**
+     * Force a touchscreen calibration by pressing the switch
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    if(GetHWButtonTouchCal() == HW_BUTTON_PRESS)
     {
         TouchCalibration();
         TouchStoreCalibration();

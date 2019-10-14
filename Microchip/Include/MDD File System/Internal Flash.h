@@ -46,13 +46,16 @@
   Rev            Description
   ----           -----------------------
   1.2.4 - 1.2.6  No Change
+  1.2.7			 Updated several MDD_INTERNAL_FLASH_xxxx definitions.
+  				 Also removed PSV 32kB compiler warning, as this is no
+				 longer a limitation in this release.
 ********************************************************************/
 //DOM-IGNORE-END
 
 
 #include "GenericTypeDefs.h"
 #include "FSconfig.h"
-#include "MDD File System\FSDefs.h"
+#include "MDD File System/FSDefs.h"
 
 #define FALSE	0
 #define TRUE	!FALSE
@@ -91,23 +94,33 @@ BYTE MDD_IntFlash_WriteProtectState(void);
     #define MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT 16
 #endif
 
-//Right now since the number of clusters is limited by the psv window to 32KB,
-//  that means that the maximum number of FAT entries is 32KB/512*1.5 = 96 bytes
-//  This will fit in a single sector of FAT so we will hardcode that value to 1.
-#define MDD_INTERNAL_FLASH_NUM_FAT_SECTORS 1
-#define MDD_INTERNAL_FLASH_NUM_RESERVED_SECTORS 1
+//Note: If only 1 FAT sector is used, assuming 12-bit (1.5 byte) FAT entry size 
+//(ex: FAT12 filesystem), then the total FAT entries that can fit in a single 512 
+//byte FAT sector is (512 bytes) / (1.5 bytes/entry) = 341 entries.  This allows 
+//the FAT table to reference up to 341*512 = ~174kB of space.  Therfore, more 
+//FAT sectors are needed if creating an MSD volume bigger than this.
+#define MDD_INTERNAL_FLASH_NUM_RESERVED_SECTORS 1          
+#define MDD_INTERNAL_FLASH_NUM_VBR_SECTORS 1       
+#define MDD_INTERNAL_FLASH_NUM_FAT_SECTORS 1                
 #define MDD_INTERNAL_FLASH_NUM_ROOT_DIRECTORY_SECTORS ((MDD_INTERNAL_FLASH_MAX_NUM_FILES_IN_ROOT+15)/16) //+15 because the compiler truncates
 #define MDD_INTERNAL_FLASH_OVERHEAD_SECTORS (\
             MDD_INTERNAL_FLASH_NUM_RESERVED_SECTORS + \
+            MDD_INTERNAL_FLASH_NUM_VBR_SECTORS + \
             MDD_INTERNAL_FLASH_NUM_ROOT_DIRECTORY_SECTORS + \
             MDD_INTERNAL_FLASH_NUM_FAT_SECTORS)
 #define MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE (\
             MDD_INTERNAL_FLASH_OVERHEAD_SECTORS + \
             MDD_INTERNAL_FLASH_DRIVE_CAPACITY)
+#define MDD_INTERNAL_FLASH_PARTITION_SIZE (DWORD)(MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE - 1)  //-1 is to exclude the sector used for the MBR 
 
-#if (MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE>=64)
-    #if defined(__C30__)
-        #error "PSV only allows 32KB of memory.  The drive options selected result in more than 32KB of data.  Please reduce MDD internal flash memory usage."
+
+//---------------------------------------------------------
+//Do some build time error checking
+//---------------------------------------------------------
+#if defined(__C30__)
+    #if(MDD_INTERNAL_FLASH_TOTAL_DISK_SIZE % 2)
+        #warning "MSD volume overlaps flash erase page with firmware program memory.  Please change your FSconfig.h settings to ensure the MSD volume cannot share an erase page with the firmware."
+        //See code comments in FSconfig.h, and adjust the MDD_INTERNAL_FLASH_DRIVE_CAPACITY definition until the warning goes away.
     #endif
 #endif
 

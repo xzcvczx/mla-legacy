@@ -115,13 +115,13 @@ CTMU board purpose. This is beacuse the same pins are used as PGD/PGC for Debugg
 //#define PIC24_POWER_ON_LED_SPEED_COUNT		((GetSystemClock()/1000000)*50)
 
 /* loop count to charge the CTMU */
-#define   CTMU_CHARGE_TIME_COUNT	 2    //n29jan2009 count=2	//loop count to charge the CTMU
+#define   CTMU_CHARGE_TIME_COUNT	 5    //n29jan2009 count=2	//loop count to charge the CTMU
 
-#define    NUM_HF_READS     	    		16	 // number of reads in CTMU channel read routine 64 --> 10 
+#define    NUM_HF_READS     	    		4	 // number of reads in CTMU channel read routine 64 --> 10 
                                             				// each read takes 12uS. 1ms timeslice max.
 
 /* PIC 24F related constants */
-#define	KEYTRIPDIV			    		8 		// the divisors define the trip points for
+#define	KEYTRIPDIV			    		15 		// the divisors define the trip points for
 										    	// each type of cap sensor.  The trip point
 										    	// is defined as: trip = average/divisor
 
@@ -130,6 +130,15 @@ CTMU board purpose. This is beacuse the same pins are used as PGD/PGC for Debugg
 
 #define 	NUM_AVG					20		// Defines frequency of average update
 #define	TRIPVAL						0		// Initial Value for startup
+
+/* 75% of ADC Value to achieve on a channel using Auto adjust functionality */
+#define	CTMU_CHARGE_VOLTAGE_TO_ACHIEVE	0x2FF  // (0x2FF = 2^10 * (75/100))  (75% of 10-bit ADC Ref Voltage)
+											   // (0xBFF = 2^12 * (75/100))  (75% of 12-bit ADC Ref Voltage)
+
+/* Allow 8% variations in ADC value to achieve on a channel using Auto adjust functionality */
+#define	AUTO_ADJUST_BAND_PERCENT	8
+
+
 
 #ifdef GUI_USB_INETERFACE
 	#define 	DEFAULT_TRIP_VALUE	    	1024  //500	n30apr09   //default trip value for all channels //NC2
@@ -145,9 +154,9 @@ CTMU board purpose. This is beacuse the same pins are used as PGD/PGC for Debugg
 //*************** Start Direct key (8 channel) Configuration ***********/
     #ifdef USE_DIRECT_KEYS
 
-            #define DIRECTKEY1  CHANNEL_AN19
-            #define DIRECTKEY2  CHANNEL_AN21
-            #define DIRECTKEY3  CHANNEL_AN5
+            #define DIRECTKEY1_CHANNEL  CHANNEL_AN19
+            #define DIRECTKEY2_CHANNEL  CHANNEL_AN21
+            #define DIRECTKEY3_CHANNEL  CHANNEL_AN5
 	 /* If application can reserve all ADC channels, the Direct key configuration can go upto 16 channels (CH0 to CH15) for PIC24 
 	     		and 13 channels (CH0 to CH12) for PIC18. */
     #endif //USE_DIRECT_KEYS

@@ -11,6 +11,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
+ * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -33,37 +34,29 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
-//DOM-IGNORE-BEGIN
-/********************************************************************
- Change History:
-  Rev            Description
-  ----           -----------------------
-  1.2.4 - 1.2.6  No major changes
-********************************************************************/
-//DOM-IGNORE-END
 
 #ifndef  FS_DOT_H
 #define  FS_DOT_H
 
 #include "GenericTypeDefs.h"
 #include "FSconfig.h"
-#include "MDD File System\FSDefs.h" 
+#include "MDD File System/FSDefs.h" 
 #include "stddef.h"
 
 #ifdef USE_SD_INTERFACE_WITH_SPI
-    #include    "MDD File System\SD-SPI.h"
+    #include    "MDD File System/SD-SPI.h"
 #endif
 #ifdef USE_CF_INTERFACE_WITH_PMP
-    #include    "MDD File System\CF-PMP.h"
+    #include    "MDD File System/CF-PMP.h"
 #endif
 #ifdef USE_MANUAL_CF_INTERFACE
-    #include    "MDD File System\CF- Bit transaction.h"
+    #include    "MDD File System/CF- Bit transaction.h"
 #endif
 #ifdef USE_USB_INTERFACE
-    #include    "USB\usb_host_msd_scsi.h"
+    #include    "USB/usb_host_msd_scsi.h"
 #endif
 #ifdef USE_INTERNAL_FLASH
-    #include    "MDD File System\Internal Flash.h"
+    #include    "MDD File System/Internal Flash.h"
 #endif
 
 
@@ -928,7 +921,7 @@ int FSremove (const char * fileName);
     the device from the specified buffer until the specified amount has been written.
     If the end of a cluster is reached, the next cluster will be loaded, unless
     the end-of-file flag for the specified file has been set.  If it has, a new
-    cluster will be allocated to the file.  Finally, the new position and filezize
+    cluster will be allocated to the file.  Finally, the new position and filesize
     will be stored in the FSFILE object.  The parameters 'size' and 'n' indicate how 
     much data to write.  'Size' refers to the size of one object to write (in bytes), 
     and 'n' will refer to the number of these objects to write.  The value returned 

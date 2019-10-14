@@ -41,7 +41,7 @@
  *                                  new image rotation modes
  * PAT					03/26/10    Removed DelayMs() function.
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 WORD    _color;
@@ -110,9 +110,9 @@ void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void SetAddress(DWORD address)
 {
     PMADDR = ((DWORD_VAL) address).w[0];
-    A17_LAT_BIT = 0;
+    DisplayClearAddr17();
     if(((DWORD_VAL) address).w[1])
-        A17_LAT_BIT = 1;
+        DisplaytSetAddr17();
 }
 
 #endif
@@ -137,16 +137,16 @@ void SetAddress(DWORD address)
 ********************************************************************/
 void WriteData(WORD value)
 {
-    RS_LAT_BIT = 1;                         // set RS line to low for register space access
-    A17_LAT_BIT = 0;                        // set address[17]
+    DisplaySetData();                         // set RS line to low for register space access
+    DisplayClearAddr17();                        // set address[17]
     if(((DWORD_VAL) _address).w[1] & 0x0001)
-        A17_LAT_BIT = 1;
+        DisplaytSetAddr17();
     PMADDR = ((DWORD_VAL) _address).w[0];   // set address[16:1]
-    A0_LAT_BIT = 1;                         // set address[0]
+    DisplaySetAddr0();                         // set address[0]
     PMDIN1 = ((WORD_VAL) value).v[0];       // write low byte
     _address++;
     PMPWaitBusy();                          // wait for the transmission end
-    A0_LAT_BIT = 0;                         // set address[0]
+    DisplayClearAddr0();                         // set address[0]
     PMDIN1 = ((WORD_VAL) value).v[1];       // write high byte
     PMPWaitBusy();                          // wait for the transmission end
 }
@@ -176,14 +176,19 @@ void SetReg(WORD index, BYTE value)
     PMMODEbits.MODE16 = 0;          // turn off 16 bit data mode
     PMCONbits.PTBEEN = 0;           // disable BE line for 16-bit access
     #endif
-    RS_LAT_BIT = 0;                 // set RS line to low for register space access
-    CS_LAT_BIT = 0;                 // enable SSD1906
-    A17_LAT_BIT = 0;                // set address[17]
+    DisplaySetCommand();                 // set RS line to low for register space access
+    DisplayEnable();                 // enable SSD1906
+    DisplayClearAddr17();                // set address[17]
     PMADDR = index >> 1;            // set address[16:1]
-    A0_LAT_BIT = index & 0x0001;    // set address[0]
+
+    if(index & 0x0001)
+        DisplaySetAddr0();
+    else
+        DisplayClearAddr0();
+
     PMDIN1 = value;                 // write value
     PMPWaitBusy();                  // wait for the transmission end
-    CS_LAT_BIT = 1;                 // disable SSD1906
+    DisplayDisable();                 // disable SSD1906
     #ifndef __PIC32MX
     PMCONbits.PTBEEN = 1;           // enable BE line for 16-bit access
     PMMODEbits.MODE16 = 1;          // restore 16 bit data mode
@@ -214,14 +219,19 @@ BYTE GetReg(WORD index)
     PMMODEbits.MODE16 = 0;          // turn off 16 bit data mode
     PMCONbits.PTBEEN = 0;           // disable BE line for 16-bit access
     #endif
-    RS_LAT_BIT = 0;                 // set RS line to low for register space access
-    CS_LAT_BIT = 0;                 // enable SSD1906
-    A17_LAT_BIT = 0;                // set address[17]
+    DisplaySetCommand();                 // set RS line to low for register space access
+    DisplayEnable();                 // enable SSD1906
+    DisplayClearAddr17();                // set address[17]
     PMADDR = index >> 1;            // set address[16:1]
-    A0_LAT_BIT = index & 0x0001;    // set address[0]
+
+    if(index & 0x0001)
+        DisplaySetAddr0();
+    else
+        DisplayClearAddr0();
+
     value = PMDIN1;                 // start transmission, read dummy value
     PMPWaitBusy();                  // wait for the transmission end
-    CS_LAT_BIT = 1;                 // disable SSD1906
+    DisplayDisable();                 // disable SSD1906
     PMCONbits.PMPEN = 0;            // suspend PMP
     value = PMDIN1;                 // read value
     PMCONbits.PMPEN = 1;            // resume PMP
@@ -252,13 +262,13 @@ void ResetDevice(void)
 {
     BYTE    bReg;
 
-    RST_LAT_BIT = 0;                        // hold in reset by default
-    RST_TRIS_BIT = 0;                       // enable RESET line
-    A0_TRIS_BIT = 0;                        // enable A0  line for byte access
-    A17_TRIS_BIT = 0;                       // enable A17 line
-    RS_TRIS_BIT = 0;                        // enable RS line
-    CS_LAT_BIT = 1;                         // SSD1906 is not selected by default
-    CS_TRIS_BIT = 0;                        // enable 1906 CS line
+    DisplayResetEnable();                        // hold in reset by default
+    DisplayResetConfig();                       // enable RESET line
+    DisplayAddr0Config();                        // enable A0  line for byte access
+    DisplayAddr17Config();                       // enable A17 line
+    DisplayCmdDataConfig();                        // enable RS line
+    DisplayDisable();                         // SSD1906 is not selected by default
+    DisplayConfig();                        // enable 1906 CS line
 
     // PMP setup
     PMMODE = 0;
@@ -293,7 +303,7 @@ void ResetDevice(void)
     PMCONbits.PTWREN = 1;                   // enable WR line
     PMCONbits.PMPEN = 1;                    // enable PMP
     DelayMs(40);
-    RST_LAT_BIT = 1;                        // release from reset
+    DisplayResetDisable();                        // release from reset
     DelayMs(20);
 
     /////////////////////////////////////////////////////////////////////
@@ -451,9 +461,9 @@ void PutPixel(SHORT x, SHORT y)
 
     address = (DWORD) (GetMaxX() + 1) * y + x;
     SetAddress(address);
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     WriteData(_color);
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -480,22 +490,22 @@ WORD GetPixel(SHORT x, SHORT y)
     address = (long)(GetMaxX() + 1) * y + x;
     SetAddress(address);
 
-    CS_LAT_BIT = 0;                         // enable SSD1906
+    DisplayEnable();                         // enable SSD1906
     #ifdef __PIC32MX
-    A17_LAT_BIT = 0;                        // set address[17]
+    DisplayClearAddr17();                        // set address[17]
     if(((DWORD_VAL) _address).w[1] & 0x0001)
-        A17_LAT_BIT = 1;
+        DisplaytSetAddr17();
     PMADDR = ((DWORD_VAL) _address).w[0];   // set address[16:1]
-    A0_LAT_BIT = 1;                         // set address[0]
+    DisplaySetAddr0();                         // set address[0]
     ((WORD_VAL) value).v[0] = PMDIN;        // start transmission, read dummy value
     PMPWaitBusy();                          // wait for the transmission end
-    A0_LAT_BIT = 0;                         // set address[0]
+    DisplayClearAddr0();                         // set address[0]
     ((WORD_VAL) value).v[0] = PMDIN;        // start transmission, read low byte
     #else
     value = PMDIN1;                         // start transmission, read dummy value
     #endif
     PMPWaitBusy();                          // wait for the transmission end
-    CS_LAT_BIT = 1;                         // disable SSD1906
+    DisplayDisable();                         // disable SSD1906
     PMCONbits.PMPEN = 0;                    // suspend PMP
     #ifdef __PIC32MX
     ((WORD_VAL) value).v[0] = PMDIN;        // read high byte
@@ -554,7 +564,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 
     address = (DWORD) (GetMaxX() + 1) * top + left;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = top; y < bottom + 1; y++)
     {
         SetAddress(address);
@@ -566,7 +576,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         address += (GetMaxX() + 1);
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
     return (1);
 }
 
@@ -591,13 +601,13 @@ void ClearDevice(void)
     DWORD   counter;
 
     SetAddress(0);
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
         WriteData(_color);
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -740,7 +750,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -784,7 +794,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -835,7 +845,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -876,7 +886,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -927,7 +937,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -956,7 +966,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -998,7 +1008,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *flashAddress;
     flashAddress++;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -1027,7 +1037,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 #endif
@@ -1094,7 +1104,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
 
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1133,7 +1143,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             address += (GetMaxX() + 1);
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1196,7 +1206,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1230,7 +1240,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             address += (GetMaxX() + 1);
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1287,7 +1297,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1308,7 +1318,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             address += (GetMaxX() + 1);
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1364,7 +1374,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1385,7 +1395,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             address += (GetMaxX() + 1);
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 

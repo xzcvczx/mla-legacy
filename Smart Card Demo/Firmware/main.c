@@ -1,11 +1,11 @@
 /********************************************************************
  FileName:		main.c
  Dependencies:	See INCLUDES section
- Processor:		PIC18, PIC24 Microcontrollers
+ Processor:		PIC18,PIC24,PIC32 & dsPIC33F Microcontrollers
  Hardware:		This demo is natively intended to be used on Exp 16, LPC
  				& HPC Exp board. This demo can be modified for use on other hardware
  				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24)
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24 & dsPIC), C32(for PIC32)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -36,6 +36,7 @@
   ----  -----------------------------------------
   1.0   Initial release
   1.01  Modified to Support T=1 protocol
+  1.02  Modified to Support PIC32,dsPIC33F & PIC24H controllers
 ********************************************************************/
 
 #include "string.h"
@@ -50,10 +51,33 @@
 		_CONFIG2(IESO_OFF & PLLDIV_DIV2 & FNOSC_PRIPLL & POSCMOD_HS & FCKSM_CSDCMD & OSCIOFNC_OFF & IOL1WAY_OFF & 0xF7FF) 
 		_CONFIG3(WPCFG_WPCFGDIS & WPDIS_WPDIS) 
 	#elif defined(__dsPIC33F__) || defined(__PIC24H__)
-		_FOSCSEL(FNOSC_PRI);
-		_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
+		_FOSCSEL(FNOSC_PRIPLL);
+		_FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_HS);
 		_FWDT(FWDTEN_OFF);
 		_FICD(ICS_PGD1 & JTAGEN_OFF);
+    #elif defined(__32MX795F512L__)
+        #pragma config UPLLEN   = ON        	// USB PLL Enabled
+        #pragma config FPLLMUL  = MUL_16        // PLL Multiplier
+        #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
+        #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
+        #pragma config FPLLODIV = DIV_4         // PLL Output Divider
+        #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
+        #pragma config FWDTEN   = OFF           // Watchdog Timer
+        #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
+        #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
+        #pragma config OSCIOFNC = OFF           // CLKO Enable
+        #pragma config POSCMOD  = HS            // Primary Oscillator
+        #pragma config IESO     = OFF           // Internal/External Switch-over
+        #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
+        #pragma config FNOSC    = PRIPLL        // Oscillator Selection
+        #pragma config CP       = OFF           // Code Protect
+        #pragma config BWP      = OFF           // Boot Flash Write Protect
+        #pragma config PWP      = OFF           // Program Flash Write Protect
+        #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
+        #pragma config DEBUG    = ON            // Background Debugger Enable
+
+		extern void WaitMicroSec(unsigned int);
+		extern void WaitMilliSec(unsigned int);
 	#endif
 #elif defined(HPC_EXPLORER)
     #ifdef __18F46J50 //Defined by MPLAB when using PIC18F46J50 device
@@ -219,6 +243,8 @@ void LowVector (void)
     void LowISR(void)
 #elif defined(__dsPIC30F__) || defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24H__)
 	    void _ISRFAST __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
+#elif defined(__PIC32MX__)
+    void __ISR(_TIMER_1_VECTOR, ipl3) T1Interrupt(void)
 #endif
 {
     #if defined(__18CXX)
@@ -228,13 +254,10 @@ void LowVector (void)
 			SCdrv_DisableDelayTimer();
 	      	delayLapsedFlag = 1;            //indicate timeout
 	  	}
-	#else
-		if(IFS0bits.T1IF)
-		{
-			IFS0bits.T1IF = 0;
-			SCdrv_DisableDelayTimer();
-			delayLapsedFlag = 1;
-		}
+	#elif defined(__PIC24F__) || defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__)
+		IFS0bits.T1IF = 0;
+		SCdrv_DisableDelayTimer();
+		delayLapsedFlag = 1;
 	#endif
 }
 
@@ -267,12 +290,20 @@ int main(void)
         OSCTUNEbits.SPLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
         while(pll_startup_counter--);
     }
-    #endif
+	#elif defined(__dsPIC33F__) || defined(__PIC24H__)
+    {
+		OSCCONbits.NOSC = 0x03;
+		CLKDIVbits.DOZE = 0x00;
+		PLLFBDbits.PLLDIV = 30; // 32MHz, i.e (4Mz * 32)/4
+	}
+	#endif
 
     #if defined(__18CXX)
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif defined(__C30__)
         AD1PCFGL = 0xFFFF;
+    #elif defined(__C32__)
+        AD1PCFG = 0xFFFF;
     #endif
 
 	//Start smart card stack
@@ -336,7 +367,7 @@ int main(void)
 		cardCommand.P1 	= 7;
 		cardCommand.P2  = 0;
 		cardCommand.LC  = 8;	//tx 8 bytes of auth code
-		#if defined(__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
+		#if defined(__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__PIC32MX__)
 			memcpy( apduData, "ACOSTEST", 8 );
 		#elif defined(__18F46J50) || defined(__18F87J50) || defined(__18F14K50) || defined(__18F4550)
 			apduData[0] = 'A';

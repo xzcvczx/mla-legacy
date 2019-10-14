@@ -37,7 +37,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/12/07	Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 WORD_VAL    _color;
@@ -80,13 +80,13 @@ void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 *
 ********************************************************************/
 #define SetAddress(x, y) \
-    DeviceSetCommand(); \
+    DisplaySetCommand(); \
     DeviceWrite(CMD_COL); \
-	DeviceSetData(); \
+	DisplaySetData(); \
     DeviceWrite(x); \
-    DeviceSetCommand(); \
+    DisplaySetCommand(); \
     DeviceWrite(CMD_ROW); \
-	DeviceSetData(); \
+	DisplaySetData(); \
     DeviceWrite(y);
 
 /*********************************************************************
@@ -111,21 +111,21 @@ void ResetDevice(void)
 	DeviceInit();
 
     // Enable LCD
-    DeviceSelect();
+    DisplayEnable();
 
     // Setup display
-	DeviceSetCommand()
+	DisplaySetCommand()
     DeviceWrite(CMD_DISPON);
     DeviceWrite(CMD_MODE);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(0x74);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CMD_SRTLINE);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(128);
 
     // Disable LCD
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -158,14 +158,14 @@ void PutPixel(SHORT x, SHORT y)
             return;
     }
 
-    DeviceSelect();
+    DisplayEnable();
     SetAddress(x, y);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CMD_WRITE);
-	DeviceSetData();
+	DisplaySetData();
     DeviceWrite(_color.v[1]);
     DeviceWrite(_color.v[0]);
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -188,18 +188,18 @@ WORD GetPixel(SHORT x, SHORT y)
 {
     WORD_VAL    result;
 
-    DeviceSelect();
+    DisplayEnable();
 
     SetAddress(x, y);
 
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CMD_READ);
-	DeviceSetData();
+	DisplaySetData();
 
     result.v[0] = DeviceRead();
     result.v[1] = DeviceRead();
 
-    DeviceDeselect();
+    DisplayDisable();
 
     return (result.Val);
 }
@@ -249,14 +249,14 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
             bottom = _clipBottom;
     }
 
-    DeviceSelect();
+    DisplayEnable();
 
     for(y = top; y < bottom + 1; y++)
     {
 		SetAddress(left, top);
-		DeviceSetCommand();
+		DisplaySetCommand();
 		DeviceWrite(CMD_WRITE);
-		DeviceSetData();
+		DisplaySetData();
         for(x = left; x < right + 1; x++)
         {
             DeviceWrite(_color.v[1]);
@@ -264,7 +264,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         }
     }
 
-    DeviceDeselect();
+    DisplayDisable();
     return (1);
 }
 
@@ -288,18 +288,18 @@ void ClearDevice(void)
 {
     DWORD   counter;
 
-    DeviceSelect();
+    DisplayEnable();
     SetAddress(0, 0);
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CMD_WRITE);
-	DeviceSetData();
+	DisplaySetData();
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
         DeviceWrite(_color.v[1]);
         DeviceWrite(_color.v[0]);
     }
 
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -436,7 +436,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    DeviceSelect();
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -444,9 +444,9 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         {
             flashAddress = tempFlashAddress;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             mask = 0;
             for(x = 0; x < sizeX; x++)
             {
@@ -482,7 +482,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -529,7 +529,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    DeviceSelect();
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -537,9 +537,9 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         {
             flashAddress = tempFlashAddress;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             for(x = 0; x < sizeX; x++)
             {
 
@@ -572,7 +572,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -619,7 +619,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    DeviceSelect();
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -627,9 +627,9 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         {
             flashAddress = tempFlashAddress;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             for(x = 0; x < sizeX; x++)
             {
 
@@ -650,7 +650,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -688,7 +688,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *flashAddress;
     flashAddress++;
 
-    DeviceSelect();
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -696,9 +696,9 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         {
             flashAddress = tempFlashAddress;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             for(x = 0; x < sizeX; x++)
             {
 
@@ -719,7 +719,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 #endif
@@ -781,14 +781,14 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DeviceSelect();
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             mask = 0;
             for(x = 0; x < sizeX; x++)
             {
@@ -822,7 +822,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             }
         }
 
-        DeviceDeselect();
+        DisplayDisable();
     }
 }
 
@@ -881,14 +881,14 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DeviceSelect();
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             for(x = 0; x < sizeX; x++)
             {
 
@@ -922,7 +922,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             }
         }
 
-        DeviceDeselect();
+        DisplayDisable();
     }
 }
 
@@ -975,14 +975,14 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        DeviceSelect();
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             for(x = 0; x < sizeX; x++)
             {
 
@@ -1001,7 +1001,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             }
         }
 
-        DeviceDeselect();
+        DisplayDisable();
     }
 }
 
@@ -1053,14 +1053,14 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        DeviceSelect();
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
             SetAddress(left, top + y);
-			DeviceSetCommand();
+			DisplaySetCommand();
             DeviceWrite(CMD_WRITE);
-			DeviceSetData();
+			DisplaySetData();
             for(x = 0; x < sizeX; x++)
             {
 
@@ -1079,7 +1079,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             }
         }
 
-        DeviceDeselect();
+        DisplayDisable();
     }
 }
 

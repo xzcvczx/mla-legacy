@@ -36,15 +36,28 @@
  * Sasha. M	/ Naveen. M			4 May 2009  			Version 1.0 Initial Draft
  * Sasha. M	/ Naveen. M			11 Nov 2009  			Version 1.0 Initial Draft
  * Sasha. M	/ Nithin. 			10 April 2010  			Version 1.20 Release
+  * Nithin M						11 Aug 2010	Implemetation of Low Power Demo 
  *****************************************************************************/
 #ifndef _mTOUCH_CAP_CTMU_API_H
 #define _mTOUCH_CAP_CTMU_API_H
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~	Includes	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~	Includes	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include	"Config.h"	
+#ifdef USE_MTOUCH_AND_GRAPHICS
+	#include	"mTouchCap_Config.h"
+	#include    "mTouchCap_HardwareProfile.h"
+#else
+	#include 	"HardwareProfile.h" 
+#endif
+
 #include 	"GenericTypeDefs.h"
-#include 	"HardwareProfile.h" 
 
 #ifdef __PIC24F__
 		#include "mTouchCap_PIC24_CTMU_Physical.h"

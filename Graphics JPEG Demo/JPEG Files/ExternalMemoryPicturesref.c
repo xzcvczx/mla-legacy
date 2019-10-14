@@ -1,4 +1,4 @@
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
-BITMAP_EXTERNAL Scene02 = {0x0003,0x0000,0x00000000};
-BITMAP_EXTERNAL Scene01 = {0x0003,0x0000,0x00009258};
+IMAGE_EXTERNAL Scene02 = {0x0003,0x0000,0x00000000};
+IMAGE_EXTERNAL Scene01 = {0x0003,0x0000,0x00009258};

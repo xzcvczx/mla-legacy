@@ -34,10 +34,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Rodger Richey		03/10/07	Original
- * Paolo Tamayo			12/20/07	Ported to PIC24 Kit
+ * 03/10/07		Original
+ * 12/20/07		Ported to PIC24 Kit
  *****************************************************************************/
 #ifndef _SH1101A_SSD1303_OLED_H
     #define _SH1101A_SSD1303_OLED_H

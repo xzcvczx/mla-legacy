@@ -131,7 +131,7 @@ void    DeallocateDataTxBuffer(void);
 void    DeallocateDataRxBuffer(void);
 void    RawSendTxBuffer(UINT16 len);
 UINT16  RawMountRxBuffer(void);
-void    RawToRawCopy(UINT8 rawSourceId, UINT16 length);
+void    RawToRawCopy(UINT8 rawdestId, UINT16 length);
 #if 0
     /* Not needed for MCHP */
     void RawSendUntamperedData(UINT8 *pReq, UINT16 len);

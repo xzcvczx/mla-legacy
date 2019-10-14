@@ -71,7 +71,7 @@ int 					tempjetX, tempjetY;
 volatile int 					EMWaveFlag = 0, EMWaveCount = 0;
 int 					prevRadius = 0;
 
-extern BITMAP_FLASH 	iconBomberJet;
+extern IMAGE_FLASH 	iconBomberJet;
 
 // Snake Game Variables
 SHORT               	defaultDirection;
@@ -82,13 +82,13 @@ SHORT               	lastSelectedColumn;
 SHORT               	lastSelectedRow;
 BOOL                	selectionMarked;
 
-extern BITMAP_FLASH 	snakeHead;
-extern BITMAP_FLASH 	snakeBody;
-extern BITMAP_FLASH 	snakeFood;
-extern DWORD            	previousTick;
-extern DWORD               	tick;
-extern SCREEN_STATES       	screenState;
-extern PAGE_INFORMATION    	pageInformation;
+extern IMAGE_FLASH 		snakeHead;
+extern IMAGE_FLASH 		snakeBody;
+extern IMAGE_FLASH 		snakeFood;
+extern DWORD            previousTick;
+extern DWORD            tick;
+extern SCREEN_STATES    screenState;
+extern PAGE_INFORMATION pageInformation;
 
 #define SNAKE_HEAD  snake.pieces[0]
 

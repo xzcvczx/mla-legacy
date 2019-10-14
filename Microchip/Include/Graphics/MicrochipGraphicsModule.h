@@ -2,12 +2,12 @@
  *  Module for Microchip Graphics Library
  *  Custom display controller driver template
  *****************************************************************************
- * FileName:            MicrochipGraphicsModule.h
+ * FileName:        MicrochipGraphicsModule.h
  * Dependencies:    p24Fxxxx.h or plib.h
- * Processor:           PIC24F
+ * Processor:       PIC24F
  * Compiler:       	MPLAB C30
- * Linker:                MPLAB LINK30
- * Company:            Microchip Technology Incorporated
+ * Linker:          MPLAB LINK30
+ * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
@@ -33,10 +33,13 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author                                    Date                               Comment
+ * Date				Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Pradeep Budagutta                20 Aug 2009                 Initial Version
- * Pradeep Budagutta                03 Dec 2009                 Added Double Buffering Support
+ * 08/20/09      	Initial Version
+ * 12/03/09      	Added Double Buffering Support
+ * 04/04/10      	Added block scrolling 
+ * 07/12/10         Added EDS type images
+ * 09/27/10         Added CHRGPU & IPU support
  *****************************************************************************/
 #ifndef _CUSTOM_DISPLAY_DRIVER_H
 #define _CUSTOM_DISPLAY_DRIVER_H
@@ -63,7 +66,7 @@
 
 // Define this to implement Font related functions in the driver.
 #if (DISP_ORIENTATION == 0) 
-//    #define USE_DRV_FONT
+    #define USE_DRV_FONT
 #endif
 
 // Define this to implement Line function in the driver.
@@ -84,20 +87,41 @@
 // Define this to implement PutImage function in the driver.
 #define USE_DRV_PUTIMAGE
 
+// Define this to implement SetFont function in the driver.
+#define USE_DRV_SETFONT
+
+// Define this to implement OutChar function in the driver.
+#define USE_DRV_OUTCHAR
+
+// Define this to implement GetTextWidth function in the driver.
+#define USE_DRV_GETTEXTWIDTH
+
+// Define this to implement GetTextHeight function in the driver.
+#define USE_DRV_GETTEXTHEIGHT
+
+#ifdef USE_DRV_PUTIMAGE
+	// Define this to implement GetImageWidth function in the driver.
+	#define USE_DRV_GETIMAGEWIDTH
+
+	// Define this to implement GetImageHeight function in the driver.
+	#define USE_DRV_GETIMAGEHEIGHT
+#endif
+
+
 #ifndef DISP_HOR_RESOLUTION
-    #error  DISP_HOR_RESOLUTION must be defined in GraphicsConfig.h
+    #error  DISP_HOR_RESOLUTION must be defined in HardwareProfile.h
 #endif
 
 #ifndef DISP_VER_RESOLUTION
-    #error  DISP_VER_RESOLUTION must be defined in GraphicsConfig.h
+    #error  DISP_VER_RESOLUTION must be defined in HardwareProfile.h
 #endif
 
 #ifndef COLOR_DEPTH
-    #error  COLOR_DEPTH must be defined in GraphicsConfig.h
+    #error  COLOR_DEPTH must be defined in HardwareProfile.h
 #endif
 
 #ifndef DISP_ORIENTATION
-    #error  DISP_ORIENTATION must be defined in GraphicsConfig.h
+    #error  DISP_ORIENTATION must be defined in HardwareProfile.h
 #endif
 
 /*********************************************************************
@@ -299,14 +323,40 @@ extern SHORT _clipRight;
 // Bottom clipping region border
 extern SHORT _clipBottom;
 
-#define GFX_LCD_TFT  0x01
-#define GFX_LCD_MSTN 0x02
-#define GFX_LCD_CSTN 0x03
-#define GFX_LCD_OFF  0x00
+extern volatile DWORD _workArea1BaseAddr;
+extern volatile DWORD _workArea2BaseAddr;
 
-#define STN_DISPLAY_WIDTH_4  0x00
-#define STN_DISPLAY_WIDTH_8  0x01
-#define STN_DISPLAY_WIDTH_16 0x02
+/*********************************************************************
+* Overview: Sets the type of display glass used. Define this in the Hardware Profile.
+*			- #define GFX_LCD_TYPE    GFX_LCD_TFT - sets type TFT display
+*			- #define GFX_LCD_TYPE    GFX_LCD_CSTN - sets type color STN display
+*			- #define GFX_LCD_TYPE    GFX_LCD_MSTN - sets type mon STN display
+*			- #define GFX_LCD_TYPE    GFX_LCD_OFF - display is turned off
+*
+*********************************************************************/
+#ifndef GFX_LCD_TYPE
+#define GFX_LCD_TYPE
+#endif
+
+#define GFX_LCD_TFT  0x01			// Type TFT Display 
+#define GFX_LCD_CSTN 0x03			// Type Color STN Display 
+#define GFX_LCD_MSTN 0x02			// Type Mono STN Display 
+#define GFX_LCD_OFF  0x00			// display is turned off
+
+/*********************************************************************
+* Overview: Sets the STN glass data width. Define this in the Hardware Profile.
+*			- #define STN_DISPLAY_WIDTH    STN_DISPLAY_WIDTH_4 - use 4-bit wide interface
+*			- #define STN_DISPLAY_WIDTH    STN_DISPLAY_WIDTH_8 - Use 8-bit wide interface
+*			- #define STN_DISPLAY_WIDTH    STN_DISPLAY_WIDTH_16 - Use 16-bit wide interface
+*
+*********************************************************************/
+#ifndef STN_DISPLAY_WIDTH
+#define STN_DISPLAY_WIDTH
+#endif
+
+#define STN_DISPLAY_WIDTH_4  0x00	// display interface is 4 bits wide
+#define STN_DISPLAY_WIDTH_8  0x01	// display interface is 8 bits wide
+#define STN_DISPLAY_WIDTH_16 0x02	// display interface is 16 bits wide
 
 #define GFX_1_BPP  0x00
 #define GFX_2_BPP  0x01
@@ -343,43 +393,120 @@ extern SHORT _clipBottom;
 #define RCC_COLOR                           0x66000000ul
 #define RCC_STARTCOPY                       0x67000000ul
 
-#define RCC_SOLID_FILL                      0x00000000ul
+/*********************************************************************
+* Overview: Type of Rectangle Copy Operations. Select one of the following
+*			rectangle copy operations and together with the ROP; the source,
+*           destination, current color set and transparency are evaluated
+*           on each pixel and the result written to the destination. 
+*			- RCC_COPY - Copies the source data to the destination address with
+*                        the selected ROP. 
+*			- RCC_SOLID_FILL - Fills the specified rectangle with the current color set. 
+*			- RCC_TRANSPARENT_COPY - Operation is the same as the COPY operation except that
+*									 the source data is compared against the current color 
+*									 set. If the values match, the source data is not 
+*									 written to the destination. The source image is, 
+*									 therefore, transparent at such a location, allowing
+*
+*********************************************************************/
 #define RCC_COPY                            0x00000080ul
+// <COMBINE RCC_COPY>
+#define RCC_SOLID_FILL                      0x00000000ul
+// <COMBINE RCC_COPY>
 #define RCC_TRANSPARENT_COPY                0x00000300ul
 
-#define RCC_ROP_0                           0x00000000ul
-#define RCC_ROP_1                           0x00000008ul
-#define RCC_ROP_2                           0x00000010ul
-#define RCC_ROP_3                           0x00000018ul
-#define RCC_ROP_4                           0x00000020ul
-#define RCC_ROP_5                           0x00000028ul
-#define RCC_ROP_6                           0x00000030ul
-#define RCC_ROP_7                           0x00000038ul
-#define RCC_ROP_8                           0x00000040ul
-#define RCC_ROP_9                           0x00000048ul
-#define RCC_ROP_A                           0x00000050ul
-#define RCC_ROP_B                           0x00000058ul
-#define RCC_ROP_C                           0x00000060ul
-#define RCC_ROP_D                           0x00000068ul
-#define RCC_ROP_E                           0x00000070ul
-#define RCC_ROP_F                           0x00000078ul
+/*********************************************************************
+* Overview: Raster Operation (ROP) option. Select one of the following
+*			16 raster operation options whenever Rectangle Copy
+*			Processing Unit (RCCGPU) is used. The raster operation
+*           is performed on the source (S) and destination (D) data.
+*			and the result written to the destination (D).
+*			- RCC_ROP_0 - 0 (BLACK)
+*			- RCC_ROP_1 - not (S or D)
+*			- RCC_ROP_2 - (not S) and D
+*			- RCC_ROP_3 - not (S)
+*			- RCC_ROP_4 - S and not (D))
+*			- RCC_ROP_5 - not (D)
+*			- RCC_ROP_6 - S xor D
+*			- RCC_ROP_7 - not (S and D)
+*			- RCC_ROP_8 - S and D
+*			- RCC_ROP_9 - not (S xor D)
+*			- RCC_ROP_A - D
+*			- RCC_ROP_B - not (S) or D
+*			- RCC_ROP_C - S
+*			- RCC_ROP_D - S or not (D)
+*			- RCC_ROP_E - S or D
+*			- RCC_ROP_F - 1 (WHITE)
+*
+*********************************************************************/
+#define RCC_ROP_0                           0x00000000ul		
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_1                           0x00000008ul		// not (S or D)
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_2                           0x00000010ul		// (not S) and D
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_3                           0x00000018ul		// not (S)
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_4                           0x00000020ul		// S and not (D)
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_5                           0x00000028ul		// not (D)
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_6                           0x00000030ul		// S xor D
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_7                           0x00000038ul		// not (S and D)
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_8                           0x00000040ul		// S and D
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_9                           0x00000048ul		// not (S xor D)
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_A                           0x00000050ul		// D
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_B                           0x00000058ul		// not (S) or D
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_C                           0x00000060ul		// S 
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_D                           0x00000068ul		// S or not (D)
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_E                           0x00000070ul		// S or D
+// <COMBINE RCC_ROP_0>
+#define RCC_ROP_F                           0x00000078ul		// 1 (WHITE)
+// <COMBINE RCC_ROP_0>
 
-#define RCC_SRC_ADDR_CONTINUOUS             0x00000002ul
-#define RCC_SRC_ADDR_DISCONTINUOUS          0x00000000ul
-#define RCC_DEST_ADDR_CONTINUOUS            0x00000004ul
-#define RCC_DEST_ADDR_DISCONTINUOUS         0x00000000ul
+/*********************************************************************
+* Overview: Source (S) and Destination (D) data type. When performing 
+*           executing commands on the Rectangle Copy Processing Unit 
+*           (RCCGPU). The source and destination data can be treated 
+*           as a continuous block of data in memory or a discontinuous
+*			data in memory. This gives flexibility to the operation
+*           where an copy operation can be performed to data already
+*           present in the display buffer or anywhere else in data memory.
+*           Both source and destination data can be set to 
+*           continuous or discontinuous data. These macros
+*           are only used in RCCGPU operations.
+*			- RCC_SRC_ADDR_CONTINUOUS - source data is continuous
+*			- RCC_SRC_ADDR_DISCONTINUOUS - source data is discontinuous
+*			- RCC_DEST_ADDR_CONTINUOUS - destination data is continuous
+*			- RCC_DEST_ADDR_DISCONTINUOUS - destination data is discontinuous
+*
+*********************************************************************/
+#define RCC_SRC_ADDR_CONTINUOUS             0x00000002ul		
+// <COMBINE RCC_SRC_ADDR_CONTINUOUS>
+#define RCC_SRC_ADDR_DISCONTINUOUS          0x00000000ul		
+// <COMBINE RCC_SRC_ADDR_CONTINUOUS>
+#define RCC_DEST_ADDR_CONTINUOUS            0x00000004ul		
+// <COMBINE RCC_SRC_ADDR_CONTINUOUS>
+#define RCC_DEST_ADDR_DISCONTINUOUS         0x00000000ul		
 
-#define GFX_SetCommand(c)                   { DWORD command = c; G1CMDL = ((DWORD_VAL)(command)).word.LW; G1CMDH = ((DWORD_VAL)(command)).word.HW; Nop(); }
+#define GFX_SetCommand(c)                   { G1CMDL = ((DWORD_VAL)((DWORD)(c))).word.LW; G1CMDH = ((DWORD_VAL)((DWORD)(c))).word.HW; Nop(); }
 
-#define GFX_SetDisplayArea(a)               { DWORD address = a; G1DPADRL = ((DWORD_VAL)(address)).word.LW; G1DPADRH = ((DWORD_VAL)(address)).word.HW; }
-#define GFX_SetWorkArea1(a)                 { DWORD address = a; G1W1ADRL = ((DWORD_VAL)(address)).word.LW; G1W1ADRH = ((DWORD_VAL)(address)).word.HW; }
-#define GFX_SetWorkArea2(a)                 { DWORD address = a; G1W2ADRL = ((DWORD_VAL)(address)).word.LW; G1W2ADRH = ((DWORD_VAL)(address)).word.HW; }
+#define GFX_SetDisplayArea(a)               { G1DPADRL = ((DWORD_VAL)((DWORD)(a))).word.LW; G1DPADRH = ((DWORD_VAL)((DWORD)(a))).word.HW; }
+#define GFX_SetWorkArea1(a)                 { G1W1ADRL = ((DWORD_VAL)((DWORD)(a))).word.LW; G1W1ADRH = ((DWORD_VAL)((DWORD)(a))).word.HW; }
+#define GFX_SetWorkArea2(a)                 { G1W2ADRL = ((DWORD_VAL)((DWORD)(a))).word.LW; G1W2ADRH = ((DWORD_VAL)((DWORD)(a))).word.HW; }
 
-#define GFX_SetSrcAddress(s)                GFX_SetCommand(RCC_SRCADDR | (s));      /* Don't do error checking or error corrections */
-#define GFX_SetDestAddress(d)               GFX_SetCommand(RCC_DESTADDR | (d));     /* Don't do error checking or error corrections */
-#define GFX_SetRectSize(width, height)      GFX_SetCommand(RCC_RECTSIZE | (((DWORD)(width)) << 12) | (DWORD)height)     /* Don't do error checking or error corrections */
-#define GFX_SetColor(color)                 GFX_SetCommand(RCC_COLOR | (color & GFX_COLOR_MASK))       /* Don't do error checking or error corrections */
-#define GFX_StartCopy(type_of_copy, rop, src_addr_type, dest_addr_type)     GFX_SetCommand(RCC_STARTCOPY | type_of_copy | rop | src_addr_type | dest_addr_type)     /* Don't do error checking or error corrections */
+#define GFX_RCC_SetSrcOffset(srcOffset)   	GFX_SetCommand(RCC_SRCADDR | (srcOffset));      /* Don't do error checking or error corrections */           
+#define GFX_RCC_SetDestOffset(dstOffset)  	GFX_SetCommand(RCC_DESTADDR | (dstOffset));     /* Don't do error checking or error corrections */          
+#define GFX_RCC_SetSize(width, height)      GFX_SetCommand(RCC_RECTSIZE | (((DWORD)(width)) << 12) | (DWORD)height)     /* Don't do error checking or error corrections */  
+#define GFX_RCC_SetColor(color)             GFX_SetCommand(RCC_COLOR | (color & GFX_COLOR_MASK))       /* Don't do error checking or error corrections */
+#define GFX_RCC_StartCopy(type_of_copy, rop, src_addr_type, dest_addr_type)      GFX_SetCommand(RCC_STARTCOPY | type_of_copy | rop | src_addr_type | dest_addr_type)     /* Don't do error checking or error corrections */
 
 #define CHR_FGCOLOR                         0x50000000ul
 #define CHR_BGCOLOR                         0x51000000ul
@@ -392,28 +519,31 @@ extern SHORT _clipBottom;
 #define CHR_TRANSPARENT                     0x00800000ul
 #define CHR_OPAQUE                          0x00000000ul
 
-#define GFX_SetCharFgColor(color)           { _chrcolor.Val = color; GFX_SetCommand(CHR_FGCOLOR | color); }
-#define GFX_SetCharBgColor(color)           GFX_SetCommand(CHR_BGCOLOR | color)
-#define GFX_SetFont(fontaddress)            GFX_SetCommand(CHR_FONTBASE | fontaddress)
-#define GFX_SetStartXY(x, y)                GFX_SetCommand(CHR_TEXTAREASTART | ((DWORD)x) << 12 | y)
-#define GFX_SetEndXY(x, y)                  GFX_SetCommand(CHR_TEXTAREAEND | ((DWORD)x) << 12 | y)
-#define GFX_SetPrintXY(x, y)                GFX_SetCommand(CHR_PRINTPOS | ((DWORD)x) << 12 | y)
-#define GFX_PrintChar(character, transparency)      GFX_SetCommand(CHR_PRINTCHAR | transparency | character)
+#define GFX_CHR_SetFgColor(color)           { _chrcolor.Val = color; GFX_SetCommand(CHR_FGCOLOR | color); }
+#define GFX_CHR_SetBgColor(color)           GFX_SetCommand(CHR_BGCOLOR | color)
+#define GFX_CHR_SetFont(fontaddress)        { GFX_SetCommand(CHR_FONTBASE | fontaddress); }
+
+#define GFX_CHR_SetTextAreaStart(x, y)      GFX_SetCommand(CHR_TEXTAREASTART | ((DWORD)x) << 12 | y)
+#define GFX_CHR_SetTextAreaEnd(x, y)        GFX_SetCommand(CHR_TEXTAREAEND | ((DWORD)x) << 12 | y)
+#define GFX_CHR_SetPrintPos(x, y)           GFX_SetCommand(CHR_PRINTPOS | ((DWORD)x) << 12 | y) 
+#define GFX_CHR_PrintChar(character, transparency)   GFX_SetCommand(CHR_PRINTCHAR | transparency | character)   
+
 
 #define IPU_SRCOFFSET                       0x71000000ul
 #define IPU_DSTOFFSET                       0x72000000ul
 #define IPU_DSTSIZE                         0x74000000ul
 
-#define GFX_SetCompressedSource(address)    GFX_SetCommand(IPU_SRCOFFSET | address)
-#define GFX_SetDecompressionDest(address)   GFX_SetCommand(IPU_DSTOFFSET | address)
-#define GFX_SetDecompressSize(bytes)        GFX_SetCommand(IPU_DSTSIZE | bytes)
-#define GFX_FinalBlock()                    (G1IPU & 0x0001)
-#define GFX_DecomperssionDone()             (G1IPU & 0x0002)
-#define GFX_DecompressionError()            (G1IPU & 0x003C)
-#define GFX_WrapAroundError()               (G1IPU & 0x0004)
-#define GFX_BlockLengthError()              (G1IPU & 0x0008)
-#define GFX_UndefinedBlockError()           (G1IPU & 0x0010)
-#define GFX_HuffmannError()                 (G1IPU & 0x0020)
+#define GFX_IPU_SetSrcOffset(offset)   		(GFX_SetCommand(IPU_SRCOFFSET | (DWORD) offset))
+#define GFX_IPU_SetDestOffset(offset)   	(GFX_SetCommand(IPU_DSTOFFSET | (DWORD) offset))
+#define GFX_IPU_Inflate(bytes)            	(GFX_SetCommand(IPU_DSTSIZE   |  bytes     ))
+
+#define GFX_IPU_GetFinalBlock()           	(G1IPU & 0x0001)
+#define GFX_IPU_GetDecompressionDone()    	(G1IPU & 0x0002)
+#define GFX_IPU_GetDecompressionError()   	(G1IPU & 0x003C)
+#define GFX_IPU_GetWrapAroundError()      	(G1IPU & 0x0004)
+#define GFX_IPU_GetBlockLengthError()     	(G1IPU & 0x0008)
+#define GFX_IPU_GetUndefinedBlockError()  	(G1IPU & 0x0010)
+#define GFX_IPU_GetHuffmannError()        	(G1IPU & 0x0020)
 
 #define GFX_GetFreeCommandSpace()       	(GFX_COMMAND_QUEUE_LENGTH - _GCMDCNT)
 #define GFX_WaitForCommandQueue(n)      	while(GFX_GetFreeCommandSpace() < (n));
@@ -555,10 +685,74 @@ void ResetDevice(void);
 #define SetVisualPage(page)
 
 /*********************************************************************
-* Function: WORD MoveBlock(DWORD srcAddr, DWORD dstAddr, 
+* Function: WORD ROPBlock (DWORD srcAddr,   DWORD dstAddr, 
+*						   DWORD srcOffset, DWORD dstOffset, 
+*			               WORD  srcType,   WORD  dstType,  
+*                          WORD  copyOp,    WORD rop, 
+*			               WORD color,      WORD width,  WORD height)
+*
+* Overview: Performs a Raster Operation (ROP) on source and destination.
+*			The type of ROP is decided by the rop and the copyOp parameter.
+*			
+* PreCondition: none
+*
+* Input: srcAddr - the base address of the data to be moved
+*        dstAddr - the base address of the new location of the moved data 
+*        srcOffset - offset of the data to be moved with respect to the 
+*					 source base address.
+*        dstOffset - offset of the new location of the moved data respect 
+*					 to the source base address.
+*        srcType - sets the source type (RCC_SRC_ADDR_CONTINUOUS or RCC_SRC_ADDR_DISCONTINUOUS)
+*        dstType - sets the source type (RCC_DEST_ADDR_CONTINUOUS or RCC_DEST_ADDR_DISCONTINUOUS) 
+*        copyOp - sets the type of copy operation
+*			- RCC_SOLID_FILL: Solid fill of the set color
+*			- RCC_COPY: direct copy of source to destination
+*			- RCC_TRANSPARENT_COPY: copy with transparency. Transparency color is set by color
+*        rop - sets the raster operation equation
+*			- RCC_ROP_0: Solid black color fill 
+*			- RCC_ROP_1: not (Source or Destination)
+*			- RCC_ROP_2: (not Source) and Destination
+*			- RCC_ROP_3: not Source 
+*			- RCC_ROP_4: Source and (not Destination)
+*			- RCC_ROP_5: not Destination
+*			- RCC_ROP_6: Source xor Destination
+*			- RCC_ROP_7: not (Source and Destination) 
+*			- RCC_ROP_8: Source and Destination
+*			- RCC_ROP_9: not (Source xor Destination) 
+*			- RCC_ROP_A: Destination
+*			- RCC_ROP_B: (not Source) or Destination 
+*			- RCC_ROP_C: Source 
+*			- RCC_ROP_D: Source or (not Destination)
+*			- RCC_ROP_E: Source or Destination
+*			- RCC_ROP_F: Solid white color fill 
+*        color - color value used when transparency operation is set or using solid color fill
+*        width - width of the block of data to be moved
+*        height - height of the block of data to be moved
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and operation is not completely performed.
+*         - Returns 1 when the operation is completely performed.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Note: none
+*
+********************************************************************/
+WORD ROPBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, 
+			   WORD srcType, WORD dstType,  WORD copyOp,     WORD rop, 
+			   WORD color, WORD width, WORD height);
+
+/*********************************************************************
+* Function: WORD MoveWindow(DWORD srcAddr, DWORD dstAddr, 
 *						   DWORD srcOffset, DWORD dstOffset, 
 *			               WORD srcType, WORD dstType, 
 *                          WORD width, WORD height)
+*
+* Overview: Moves a block of data from source specified by srcAddr 
+*           and srcOffset to the destination specified by dstAddr 
+*           and dstOffset.
 *
 * PreCondition: none
 *
@@ -568,8 +762,8 @@ void ResetDevice(void);
 *					 source base address.
 *        dstOffset - offset of the new location of the moved data respect 
 *					 to the source base address.
-*        srcType - sets the source type (continuous or discontinuous)
-*        dstType - sets the source type (continuous or discontinuous) 
+*        srcType - sets the source type (RCC_SRC_ADDR_CONTINUOUS or RCC_SRC_ADDR_DISCONTINUOUS)
+*        dstType - sets the source type (RCC_DEST_ADDR_CONTINUOUS or RCC_DEST_ADDR_DISCONTINUOUS) 
 *        width - width of the block of data to be moved
 *        height - height of the block of data to be moved
 *
@@ -577,14 +771,16 @@ void ResetDevice(void);
 *
 * Side Effects: none
 *
-* Overview: puts pixel
-*
 * Note: none
 *
 ********************************************************************/
-WORD MoveBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, 
-			   WORD srcType, WORD dstType, WORD width, WORD height);
-
+#define MoveWindow(srcAddr, dstAddr, srcOffset, dstOffset,  	\
+			   	  srcType, dstType, width,     height)			\
+			   	  												\
+		ROPBlock( srcAddr, dstAddr, srcOffset, dstOffset, 		\
+			      srcType, dstType, RCC_COPY,  RCC_ROP_C,		\
+			      0,       width,   height)
+	   	  			   	  
 /*********************************************************************
 * Function: WORD ScrollLeft(SHORT left, SHORT top,  
 *							SHORT right, SHORT bottom, SHORT delta)
@@ -779,6 +975,7 @@ void SetClip(BYTE control);
 ********************************************************************/
 BYTE Decompress(DWORD SrcAddress, DWORD DestAddress, DWORD nbytes);
 
+
 typedef struct
 {
     WORD X;
@@ -789,7 +986,23 @@ typedef struct
 
 #ifdef USE_DOUBLE_BUFFERING
 
-    #define GFX_MAX_INVALIDATE_AREAS 5
+/*********************************************************************
+* Macros:  GFX_MAX_INVALIDATE_AREAS
+*
+* Overview: Defines the maximum number of invalidated areas. 
+*           If the number of invalidated areas equals GFX_MAX_INVALIDATE_AREAS
+*           the whole frame buffer is invalidated.
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+#define GFX_MAX_INVALIDATE_AREAS 5
 
 extern BYTE blInvalidateAll;
 extern BYTE blEnableDoubleBuffering;
@@ -801,8 +1014,13 @@ extern RectangleArea InvalidatedArea[GFX_MAX_INVALIDATE_AREAS];
 * Macros:  SwitchOnDoubleBuffering()
 *
 * Overview: Switches on the double buffering.
-*           The drawing is done on the draw buffer.
-*           This also causes copying of the frame buffer to draw buffer once.
+*			Double buffering utilizes two buffers. The frame buffer and the
+*           draw buffer. The frame buffer is the buffer that is being displayed
+*			while the draw buffer is used for all rendering. 
+*           When this function is called, it copies the contents of the frame buffer 
+*           to the draw buffer once and all succeeding rendering will be performed on 
+*           the draw buffer. To update the frame buffer with newly drawn 
+*           items on the draw buffer call UpdateDisplayNow() or RequestDisplayUpdate().
 *
 * PreCondition: none
 *
@@ -820,7 +1038,9 @@ extern RectangleArea InvalidatedArea[GFX_MAX_INVALIDATE_AREAS];
 * Macros:  SwitchOffDoubleBuffering()
 *
 * Overview: Switches off the double buffering.
-*           The drawing is done on the display buffer.
+*           All rendering will be performed on the frame buffer. Calls
+*           to UpdateDisplayNow() or RequestDisplayUpdate() will 
+*           have no effect.
 *
 * PreCondition: none
 *
@@ -839,13 +1059,20 @@ extern RectangleArea InvalidatedArea[GFX_MAX_INVALIDATE_AREAS];
 /*********************************************************************
 * Macros:  IsDisplayUpdatePending()
 *
-* Overview: Returns id the display updation is pending.
+* Overview: Returns the status of the display update. A display update is
+*           initiated by RequestDisplayUpdate() or UpdateDisplayNow().
+*			RequestDisplayUpdate() will wait for the Vertical Blanking 
+*           interrupt before the update is performed. While waiting for 
+*           the interrupt, display update will be pending and the status
+*           returned by this macro is 1.
 *
 * PreCondition: none
 *
 * Input: none
 *
-* Output: none
+* Output: Returns the status of the display update 
+*		  - 0 – There is no pending update
+*         - 1 - Update is still pending 
 *
 * Side Effects: none
 *
@@ -855,7 +1082,8 @@ extern RectangleArea InvalidatedArea[GFX_MAX_INVALIDATE_AREAS];
 /*********************************************************************
 * Macros:  InvalidateAll()
 *
-* Overview: Invalidates the whole screen
+* Overview: Invalidates the whole screen and resets the number of
+*           invalidated areas to zero. See also InvalidateRectangle().
 *
 * PreCondition: none
 *
@@ -866,32 +1094,35 @@ extern RectangleArea InvalidatedArea[GFX_MAX_INVALIDATE_AREAS];
 * Side Effects: none
 *
 ********************************************************************/
-#define InvalidateAll()                 blInvalidateAll = 1;
+#define InvalidateAll()                 (blInvalidateAll = 1;)
 
 /*********************************************************************
 * Function:  void InvalidateRectangle(WORD left, WORD top, WORD right, WORD bottom)
 *
-* Overview: Invalidates the specified rectangular area and if the
+* Overview: Invalidates the specified rectangular area. This increments the 
+*           number of invalidated areas and if the number of 
 *           invalidated areas exceed the GFX_MAX_INVALIDATE_AREAS,
-*           whole area is marked as invalidate
+*           the whole frame buffer is invalidated.
 *
 * PreCondition: None
 *
-* Input: left,top - top left corner coordinates,
-*        right,bottom - bottom right corner coordinates
+* Input: left - left position
+*		 top - top position
+*		 right - right position
+*        bottom - bottom position
 *
 * Output: None
 *
-* Side Effects: Only copies back the invalidated areas to the draw -
-*               buffer after the exchange of draw and frame buffers
+* Side Effects: Copies back the invalidated areas only to the draw 
+*               buffer after the exchange of draw and frame buffers.
 *
 ********************************************************************/
-void InvalidateRectangle(WORD x, WORD y, WORD w, WORD h);
+void InvalidateRectangle(WORD left, WORD top, WORD right, WORD bottom);
 
 /*********************************************************************
 * Function:  void UpdateDisplayNow(void)
 *
-* Overview: Synchronizes the draw and frame buffers immediately
+* Overview: Synchronizes the draw and frame buffers immediately. 
 *
 * PreCondition: none
 *
@@ -926,7 +1157,7 @@ void RequestDisplayUpdate(void);
 #define SwitchOffDoubleBuffering()
 #define IsDisplayUpdatePending() 0
 #define InvalidateAll()
-#define InvalidateRectangle(x, y, w, h)
+void InvalidateRectangle(WORD left, WORD top, WORD right, WORD bottom);
 #define ExchangeDrawAndFrameBuffers()
 #define UpdateDisplayNow()
 #define RequestDisplayUpdate()
@@ -934,7 +1165,7 @@ void RequestDisplayUpdate(void);
 #endif //USE_DOUBLE_BUFFERING
 
 #ifdef USE_PALETTE
-    #include "Graphics\Palette.h"
+    #include "Graphics/Palette.h"
 #endif
 
 #endif // _CUSTOM_DISPLAY_DRIVER_H

@@ -1,5 +1,5 @@
 /*$6*/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 extern const char L26089[] __attribute__((aligned(2)));
 //FONT NAME CAN BE CHANGED HERE.

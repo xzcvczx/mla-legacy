@@ -440,3 +440,4 @@ CPLD_SPI_CONFIGURATION CPLDGetSPIConfiguration(void);
   **************************************************************************************/
 CPLD_DEVICE_CONFIGURATION CPLDGetDeviceConfiguration(void);
 #endif
+

@@ -39,7 +39,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     05/29/09
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 WORD    _color;
@@ -105,7 +105,7 @@ void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 ********************************************************************/
 inline void SetAddress(WORD x, WORD y)
 {
-	DeviceSetCommand();
+	DisplaySetCommand();
 
 #ifdef USE_16BIT_PMP
 #if (DISP_ORIENTATION == 0)
@@ -123,7 +123,7 @@ inline void SetAddress(WORD x, WORD y)
 #endif
 #endif
 
-	DeviceSetData();
+	DisplaySetData();
 #ifdef USE_16BIT_PMP
 	DeviceWrite(x);
 #else
@@ -131,7 +131,7 @@ inline void SetAddress(WORD x, WORD y)
 	DeviceWrite(((WORD_VAL)x).v[0]);
 #endif
 
-	DeviceSetCommand();
+	DisplaySetCommand();
 #ifdef USE_16BIT_PMP
 #if (DISP_ORIENTATION == 0)
 	DeviceWrite(0x004f);
@@ -148,7 +148,7 @@ inline void SetAddress(WORD x, WORD y)
 #endif
 #endif
 
-	DeviceSetData();
+	DisplaySetData();
 #ifdef USE_16BIT_PMP
 	DeviceWrite(y);
 #else
@@ -156,14 +156,14 @@ inline void SetAddress(WORD x, WORD y)
 	DeviceWrite(((WORD_VAL)y).v[0]);
 #endif
 
-	DeviceSetCommand();
+	DisplaySetCommand();
 #ifdef USE_16BIT_PMP
 	DeviceWrite(0x0022);
 #else
 	DeviceWrite(0);
 	DeviceWrite(0x22);
 #endif
-	DeviceSetData();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -186,22 +186,22 @@ inline void SetAddress(WORD x, WORD y)
 void SetReg(WORD index, WORD value)
 {
 
-	DeviceSelect();
-	DeviceSetCommand();
+	DisplayEnable();
+	DisplaySetCommand();
 #ifdef USE_16BIT_PMP
 	DeviceWrite(index);
 #else
 	DeviceWrite(((WORD_VAL)index).v[1]);
 	DeviceWrite(((WORD_VAL)index).v[0]);
 #endif
-	DeviceSetData();
+	DisplaySetData();
 #ifdef USE_16BIT_PMP
 	DeviceWrite(value);
 #else
 	DeviceWrite(((WORD_VAL)value).v[1]);
 	DeviceWrite(((WORD_VAL)value).v[0]);
 #endif
-	DeviceDeselect();
+	DisplayDisable();
 }
 
 /*********************************************************************
@@ -361,10 +361,10 @@ void PutPixel(SHORT x, SHORT y)
             return;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     SetAddress(x, y);
     WritePixel(_color);
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -429,7 +429,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
             bottom = _clipBottom;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = top; y < bottom + 1; y++)
     {
         SetAddress(left, y);
@@ -439,7 +439,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
     return (1);
 }
 
@@ -463,14 +463,14 @@ void ClearDevice(void)
 {
     DWORD   counter;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     SetAddress(0, 0);
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
         WritePixel(_color);
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -608,7 +608,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -652,7 +652,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -699,7 +699,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -737,7 +737,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -784,7 +784,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         flashAddress += 2;
     }
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -813,7 +813,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -851,7 +851,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *flashAddress;
     flashAddress++;
 
-    CS_LAT_BIT = 0;
+    DisplayEnable();
     for(y = 0; y < sizeY; y++)
     {
         tempFlashAddress = flashAddress;
@@ -880,7 +880,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
         }
     }
 
-    CS_LAT_BIT = 1;
+    DisplayDisable();
 }
 
     #endif
@@ -942,7 +942,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -981,7 +981,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1040,7 +1040,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1074,7 +1074,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1127,7 +1127,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
         memOffset += sizeX;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1148,7 +1148,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 
@@ -1200,7 +1200,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
-        CS_LAT_BIT = 0;
+        DisplayEnable();
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
@@ -1221,7 +1221,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             top++;
         }
 
-        CS_LAT_BIT = 1;
+        DisplayDisable();
     }
 }
 

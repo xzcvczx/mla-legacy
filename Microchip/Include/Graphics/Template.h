@@ -36,14 +36,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     06/15/07    Beta release 
+ * 06/15/07    Beta release 
  *****************************************************************************/
 #ifndef _CUSTOM_H
     #define _CUSTOM_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 // Control states:
     #define CC_FOCUSED  0x0001  // bit  to indicate the control is focused
@@ -139,5 +139,5 @@ void    CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg);
 *       GOL.C FILE
 *
 ********************************************************************/
-WORD    CcDraw(CUSTOM *pCc);
+WORD CcDraw(void *pObj);
 #endif // _CUSTOM_H

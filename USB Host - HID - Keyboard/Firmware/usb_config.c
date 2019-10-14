@@ -37,8 +37,8 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "USB\usb.h"
-#include "USB\usb_host_hid.h"
+#include "USB/usb.h"
+#include "USB/usb_host_hid.h"
 
 
 // *****************************************************************************

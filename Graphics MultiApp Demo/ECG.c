@@ -81,8 +81,8 @@ typedef enum
 XCHAR                       buffer[6];
 
 // Bitmap used
-extern const BITMAP_FLASH   eheart;
-extern const BITMAP_FLASH   eheart2;
+extern const IMAGE_FLASH   eheart;
+extern const IMAGE_FLASH   eheart2;
 
 // GLOBAL DEFINITIONS AND VARIABLES FOR ECG DEMO
 // Array of ECG points to emulate ECG input

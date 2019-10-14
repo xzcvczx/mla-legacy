@@ -50,6 +50,8 @@ file_022=.
 file_023=.
 file_024=.
 file_025=.
+file_026=USB Stack
+file_027=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -77,6 +79,8 @@ file_022=no
 file_023=no
 file_024=no
 file_025=no
+file_026=no
+file_027=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -104,6 +108,8 @@ file_022=no
 file_023=no
 file_024=no
 file_025=yes
+file_026=no
+file_027=yes
 [FILE_INFO]
 file_000=..\..\Microchip\USB\usb_device.c
 file_001=..\..\Microchip\USB\MSD Device Driver\usb_function_msd.c
@@ -131,6 +137,8 @@ file_022=usb_config.h
 file_023=HardwareProfile - PIC18F46J50 PIM.h
 file_024=rm18f46j50_g.lkr
 file_025=..\Getting Started - Running the Device - Composite - WinUSB + MSD demo.htm
+file_026=..\..\Microchip\USB\usb_device_local.h
+file_027=..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

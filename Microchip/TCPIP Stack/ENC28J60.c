@@ -562,13 +562,7 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
     PacketCount = ReadETHReg((BYTE)EPKTCNT).Val;
     BankSel(ERDPTL);
     if(PacketCount == 0u)
-    {
-	    // Ensure that MARXEN is set
-		BankSel(MACON1);
-	    WriteReg((BYTE)MACON1, MACON1_TXPAUS | MACON1_RXPAUS | MACON1_MARXEN);
-		BankSel(ERDPTL);
         return FALSE;
-    }
 
     // Make absolutely certain that any previous packet was discarded
     if(WasDiscarded == FALSE)
@@ -1851,7 +1845,24 @@ static void WriteReg(BYTE Address, BYTE Data)
     #endif
 
     Dummy = ENC_SSPBUF;
-    ENC_CS_IO = 1;
+
+
+	// For faster processors (dsPIC), delay for a few clock cycles to ensure 
+	// the MAC/MII register write Chip Select hold time minimum of 210ns is met.
+	#if (GetInstructionClock() > 30000000)
+		Nop();
+		Nop();
+	#endif
+	#if (GetInstructionClock() > 40000000)
+		Nop();
+		Nop();
+	#endif
+	#if (GetInstructionClock() > 50000000)
+		Nop();
+		Nop();
+	#endif
+
+	ENC_CS_IO = 1;
 }//end WriteReg
 
 
@@ -2128,65 +2139,104 @@ BYTE GetCLKOUT(void)
 /******************************************************************************
  * Function:        void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
  *
- * PreCondition:    SPI bus must be initialized (done in MACInit()).
+ * PreCondition:    SPI interface must be initialized (done in MACInit()).
  *
- * Input:           DestMACAddr: 6 byte group destination MAC address to allow
- *                               through the Hash Table Filter
+ * Input:           DestMACAddr: 6 byte group destination MAC address to allow 
+ *								 through the Hash Table Filter.  If DestMACAddr 
+ *								 is set to 00-00-00-00-00-00, then the hash 
+ *								 table will be cleared of all entries and the 
+ *								 filter will be disabled.
  *
- * Output:          Sets the appropriate bit in the EHT* registers to allow
- *                  packets sent to DestMACAddr to be received if the Hash
- *                  Table receive filter is enabled
+ * Output:          Sets the appropriate bit in the EHT* registers to allow 
+ *					packets sent to DestMACAddr to be received and enables the 
+ *					Hash Table receive filter (if not already).
  *
  * Side Effects:    None
  *
- * Overview:        Calculates a CRC-32 using polynomial 0x4C11DB7 and then,
- *                  using bits 28:23 of the CRC, sets the appropriate bit in
- *                  the EHT* registers
+ * Overview:        Calculates a CRC-32 using polynomial 0x4C11DB7 and then, 
+ *					using bits 28:23 of the CRC, sets the appropriate bit in 
+ *					the EHT0-EHT7 registers.
  *
- * Note:            This code is commented out to save code space on systems
- *                  that do not need this function.  Change the "#if 0" line
- *                  to "#if 1" to uncomment it.
+ * Note:            This code is commented out to save code space on systems 
+ *					that do not need this function.  Change the 
+ *					"#if STACK_USE_ZEROCONF_MDNS_SD" line to "#if 1" to 
+ *					uncomment it, assuming you aren't using the Zeroconf module, 
+ *					which requires mutlicast support and enables this function 
+ *					automatically.
+ *
+ *					There is no way to individually unset destination MAC 
+ *					addresses from the hash table since it is possible to have 
+ *					a hash collision and therefore multiple MAC addresses 
+ *					relying on the same hash table bit.  The stack would have 
+ *					to individually store each 6 byte MAC address to support 
+ *					this feature, which would waste a lot of RAM and be 
+ *					unnecessary in most applications.  As a simple compromise, 
+ *					you can call SetRXHashTableEntry() using a 
+ *					00-00-00-00-00-00 destination MAC address, which will clear 
+ *					the entire hash table and disable the hash table filter.  
+ *					This will allow you to then re-add the necessary 
+ *					destination address(es).
+ *
+ *					This function is intended to be used when 
+ *					ERXFCON.ANDOR == 0 (OR).
  *****************************************************************************/
-#if 0
+#if defined(STACK_USE_ZEROCONF_MDNS_SD)
 void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
 {
     DWORD_VAL CRC = {0xFFFFFFFF};
     BYTE HTRegister;
     BYTE i, j;
 
-    // Calculate a CRC-32 over the 6 byte MAC address
-    // using polynomial 0x4C11DB7
-    for(i = 0; i < sizeof(MAC_ADDR); i++)
-    {
-        BYTE  crcnext;
+	// Select proper bank for ERXFCON and EHT0-EHT7 register access
+	BankSel(ERXFCON);
 
-        // shift in 8 bits
-        for(j = 0; j < 8; j++)
-        {
-            crcnext = 0;
-            if(((BYTE_VAL*)&(CRC.v[3]))->bits.b7)
-                crcnext = 1;
-            crcnext ^= (((BYTE_VAL*)&DestMACAddr.v[i])->bits.b0);
+	// Clear the Hash Table bits and disable the Hash Table Filter if a special 
+	// 00-00-00-00-00-00 destination MAC address is provided.
+	if((DestMACAddr.v[0] | DestMACAddr.v[1] | DestMACAddr.v[2] | DestMACAddr.v[3] | DestMACAddr.v[4] | DestMACAddr.v[5]) == 0x00u)
+	{
+		// Disable the Hash Table receive filter and clear the hash table
+		BFCReg((BYTE)ERXFCON, ERXFCON_HTEN);
+		for(i = (BYTE)EHT0; i <= (BYTE)EHT7; i++)
+			WriteReg(i, 0x00);
+	}
+	else
+	{
+		// Calculate a CRC-32 over the 6 byte MAC address
+		// using polynomial 0x4C11DB7
+		for(i = 0; i < sizeof(MAC_ADDR); i++)
+		{
+			BYTE  crcnext;
 
-            CRC.Val <<= 1;
-            if(crcnext)
-                CRC.Val ^= 0x4C11DB7;
-            // next bit
-            DestMACAddr.v[i] >>= 1;
-        }
-    }
+			// shift in 8 bits
+			for(j = 0; j < 8; j++)
+			{
+				crcnext = 0;
+				if(((BYTE_VAL*)&(CRC.v[3]))->bits.b7)
+					crcnext = 1;
+				crcnext ^= (((BYTE_VAL*)&DestMACAddr.v[i])->bits.b0);
 
-    // CRC-32 calculated, now extract bits 28:23
-    // Bits 25:23 define where within the Hash Table byte the bit needs to be set
-    // Bits 28:26 define which of the 8 Hash Table bytes that bits 25:23 apply to
-    i = CRC.v[3] & 0x1F;
-    HTRegister = (i >> 2) + (BYTE)EHT0;
-    i = (i << 1) & 0x06;
-    ((BYTE_VAL*)&i)->bits.b0 = ((BYTE_VAL*)&CRC.v[2])->bits.b7;
+				CRC.Val <<= 1;
+				if(crcnext)
+					CRC.Val ^= 0x4C11DB7;
+				// next bit
+				DestMACAddr.v[i] >>= 1;
+			}
+		}
 
-    // Set the proper bit in the Hash Table
-    BankSel(EHT0);
-    BFSReg(HTRegister, 1<<i);
+		// CRC-32 calculated, now extract bits 28:23
+		// Bits 25:23 define where within the Hash Table byte the bit needs to be set
+		// Bits 28:26 define which of the 8 Hash Table bytes that bits 25:23 apply to
+		i = CRC.v[3] & 0x1F;
+		HTRegister = (i >> 2) + (BYTE)EHT0;
+		i = (i << 1) & 0x06;
+		((BYTE_VAL*)&i)->bits.b0 = ((BYTE_VAL*)&CRC.v[2])->bits.b7;
+
+		// Set the proper bit in the Hash Table
+		BFSReg(HTRegister, 1<<i);
+
+		// Ensure that the Hash Table receive filter is enabled
+		BFSReg((BYTE)ERXFCON, ERXFCON_HTEN);
+	}
 
     BankSel(ERDPTL);            // Return to Bank 0
 }

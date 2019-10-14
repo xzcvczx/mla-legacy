@@ -33,15 +33,19 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author                               Date                  Comment
+ * Date                  Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok and
- * PAT			             11/12/07          Version 1.0 release
- * PAT                       06/29/09          Added multi-line support for Buttons.
- * Pradeep Budagutta         03 Dec 2009       Added Double Buffering Support
- * PAT                       04/29/10          Fixed GOLGetFocusNext() issue.
+ * 11/12/07              Version 1.0 release
+ * 06/29/09				Added multi-line support for Buttons.
+ * 03 Dec 2009			Added Double Buffering Support
+ * 04/29/10				Fixed GOLGetFocusNext() issue.
+ * 06/07/10				To save drawing time, add check on panel to skip 
+ * 						drawing the panel face and frame if the bitmap
+ * 						used is greater than area of the panel.
+ * 09/08/10				Removed redundant code in GOLRedrawRec().
+ *                      Added EditBox in GOLCanBeFocused().
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_GOL
 
@@ -227,7 +231,8 @@ WORD GOLCanBeFocused(OBJ_HEADER *object)
         (object->type == OBJ_CHECKBOX) ||
         (object->type == OBJ_RADIOBUTTON) ||
         (object->type == OBJ_LISTBOX) ||
-        (object->type == OBJ_SLIDER)
+        (object->type == OBJ_SLIDER) ||
+        (object->type == OBJ_EDITBOX)
     )
     {
         if(!GetState(object, DISABLED))
@@ -332,22 +337,9 @@ void GOLFree(void)
     {
         pNextObj = (OBJ_HEADER *)pCurrentObj->pNxtObj;
 
-            #ifdef USE_LISTBOX
-        if(pCurrentObj->type == OBJ_LISTBOX)
-            LbDelItemsList((LISTBOX *)pCurrentObj);
-            #endif
-            #ifdef USE_GRID
-        if(pCurrentObj->type == OBJ_GRID)
-            GridFreeItems((GRID *)pCurrentObj);
-            #endif
-            #ifdef USE_CHART
-        if(pCurrentObj->type == OBJ_CHART)
-            ChRemoveDataSeries((CHART *)pCurrentObj, 0);
-            #endif
-            #ifdef USE_TEXTENTRY
-        if(pCurrentObj->type == OBJ_TEXTENTRY)
-            TeDelKeyMembers((TEXTENTRY *)pCurrentObj);
-            #endif
+        if(pCurrentObj->FreeObj)
+            pCurrentObj->FreeObj(pCurrentObj);
+
         GFX_free(pCurrentObj);
         pCurrentObj = pNextObj;
     }
@@ -403,22 +395,9 @@ BOOL GOLDeleteObject(OBJ_HEADER *object)
         prev->pNxtObj = curr->pNxtObj;
     }
 
-        #ifdef USE_LISTBOX
-    if(object->type == OBJ_LISTBOX)
-        LbDelItemsList((LISTBOX *)object);
-        #endif
-        #ifdef USE_GRID
-    if(object->type == OBJ_GRID)
-        GridFreeItems((GRID *)object);
-        #endif
-        #ifdef USE_CHART
-    if(object->type == OBJ_CHART)
-        ChRemoveDataSeries((CHART *)object, 0);
-        #endif
-        #ifdef USE_TEXTENTRY
-    if(object->type == OBJ_TEXTENTRY)
-        TeDelKeyMembers((TEXTENTRY *)object);
-        #endif
+    if(object->FreeObj)
+        object->FreeObj(object);
+
     GFX_free(object);
 
     return (TRUE);
@@ -583,120 +562,7 @@ WORD GOLDraw(void)
     {
         if(IsObjUpdated(pCurrentObj))
         {
-            switch(pCurrentObj->type)
-            {
-                        #if defined(USE_BUTTON) || defined(USE_BUTTON_MULTI_LINE)
-
-                case OBJ_BUTTON:
-                    done = BtnDraw((BUTTON *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_WINDOW
-
-                case OBJ_WINDOW:
-                    done = WndDraw((WINDOW *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_CHECKBOX
-
-                case OBJ_CHECKBOX:
-                    done = CbDraw((CHECKBOX *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_RADIOBUTTON
-
-                case OBJ_RADIOBUTTON:
-                    done = RbDraw((RADIOBUTTON *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_EDITBOX
-
-                case OBJ_EDITBOX:
-                    done = EbDraw((EDITBOX *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_LISTBOX
-
-                case OBJ_LISTBOX:
-                    done = LbDraw((LISTBOX *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_SLIDER
-
-                case OBJ_SLIDER:
-                    done = SldDraw((SLIDER *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_PROGRESSBAR
-
-                case OBJ_PROGRESSBAR:
-                    done = PbDraw((PROGRESSBAR *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_STATICTEXT
-
-                case OBJ_STATICTEXT:
-                    done = StDraw((STATICTEXT *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_DIGITALMETER
-
-                case OBJ_DIGITALMETER:
-                    done = DmDraw((DIGITALMETER *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_PICTURE
-
-                case OBJ_PICTURE:
-                    done = PictDraw((PICTURE *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_GROUPBOX
-
-                case OBJ_GROUPBOX:
-                    done = GbDraw((GROUPBOX *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_ROUNDDIAL
-
-                case OBJ_ROUNDDIAL:
-                    done = RdiaDraw((ROUNDDIAL *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_METER
-
-                case OBJ_METER:
-                    done = MtrDraw((METER *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_CUSTOM
-
-                case OBJ_CUSTOM:
-                    done = CcDraw((CUSTOM *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_GRID
-
-                case OBJ_GRID:
-                    done = GridDraw((GRID *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_CHART
-
-                case OBJ_CHART:
-                    done = ChDraw((CHART *)pCurrentObj);
-                    break;
-                        #endif
-                        #ifdef USE_TEXTENTRY
-
-                case OBJ_TEXTENTRY:
-                    done = TeDraw((TEXTENTRY *)pCurrentObj);
-                    break;
-                        #endif
-
-                default:
-                    break;
-            }
+            done = pCurrentObj->DrawObj(pCurrentObj);
 
             if(done)
             {
@@ -747,25 +613,16 @@ void GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom)
 
     while(pCurrentObj != NULL)
     {
-        if
+		if
         (
-            !(
-                (pCurrentObj->left > right) ||
-                (pCurrentObj->right < left) ||
-                (pCurrentObj->top > bottom) ||
-                (pCurrentObj->bottom < top)
-            )
-        )
-            if
-            (
-                ((pCurrentObj->left >= left) && (pCurrentObj->left <= right)) ||
-                ((pCurrentObj->right >= left) && (pCurrentObj->right <= right)) ||
-                ((pCurrentObj->top >= top) && (pCurrentObj->top <= bottom)) ||
-                ((pCurrentObj->bottom >= top) && (pCurrentObj->bottom <= bottom))
-            )
-            {
-                GOLRedraw(pCurrentObj);
-            }
+        	((pCurrentObj->left >= left) && (pCurrentObj->left <= right)) ||
+            ((pCurrentObj->right >= left) && (pCurrentObj->right <= right)) ||
+            ((pCurrentObj->top >= top) && (pCurrentObj->top <= bottom)) ||
+            ((pCurrentObj->bottom >= top) && (pCurrentObj->bottom <= bottom))
+		)
+		{
+        	GOLRedraw(pCurrentObj);
+        }
 
         pCurrentObj = (OBJ_HEADER *)pCurrentObj->pNxtObj;
     }   //end of while
@@ -799,180 +656,16 @@ void GOLMsg(GOL_MSG *pMsg)
 
     while(pCurrentObj != NULL)
     {
-        switch(pCurrentObj->type)
+        if(pCurrentObj->MsgObj)
         {
-                    #if defined(USE_BUTTON) || defined(USE_BUTTON_MULTI_LINE)
+            translatedMsg = pCurrentObj->MsgObj(pCurrentObj, pMsg);
 
-            case OBJ_BUTTON:
-                translatedMsg = BtnTranslateMsg((BUTTON *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
+            if(translatedMsg != OBJ_MSG_INVALID)
+            {
                 if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    BtnMsgDefault(translatedMsg, (BUTTON *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_WINDOW
-
-            case OBJ_WINDOW:
-                translatedMsg = WndTranslateMsg((WINDOW *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                GOLMsgCallback(translatedMsg, pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_CHECKBOX
-
-            case OBJ_CHECKBOX:
-                translatedMsg = CbTranslateMsg((CHECKBOX *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    CbMsgDefault(translatedMsg, (CHECKBOX *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_RADIOBUTTON
-
-            case OBJ_RADIOBUTTON:
-                translatedMsg = RbTranslateMsg((RADIOBUTTON *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    RbMsgDefault(translatedMsg, (RADIOBUTTON *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_EDITBOX
-
-            case OBJ_EDITBOX:
-                translatedMsg = EbTranslateMsg((EDITBOX *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    EbMsgDefault(translatedMsg, (EDITBOX *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_LISTBOX
-
-            case OBJ_LISTBOX:
-                translatedMsg = LbTranslateMsg((LISTBOX *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    LbMsgDefault(translatedMsg, (LISTBOX *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_SLIDER
-
-            case OBJ_SLIDER:
-                translatedMsg = SldTranslateMsg((SLIDER *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    SldMsgDefault(translatedMsg, (SLIDER *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_GROUPBOX
-
-            case OBJ_GROUPBOX:
-                translatedMsg = GbTranslateMsg((GROUPBOX *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                GOLMsgCallback(translatedMsg, pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_PROGRESSBAR
-
-            case OBJ_PROGRESSBAR:
-                break;
-                    #endif
-                    #ifdef USE_STATICTEXT
-
-            case OBJ_STATICTEXT:
-                translatedMsg = StTranslateMsg((STATICTEXT *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                GOLMsgCallback(translatedMsg, pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_DIGITALMETER
-
-            case OBJ_DIGITALMETER:
-                translatedMsg = DmTranslateMsg((DIGITALMETER *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                GOLMsgCallback(translatedMsg, pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_PICTURE
-
-            case OBJ_PICTURE:
-                translatedMsg = PictTranslateMsg((PICTURE *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                GOLMsgCallback(translatedMsg, pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_ROUNDDIAL
-
-            case OBJ_ROUNDDIAL:
-                translatedMsg = RdiaTranslateMsg((ROUNDDIAL *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    RdiaMsgDefault(translatedMsg, (ROUNDDIAL *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_METER
-
-            case OBJ_METER:
-                translatedMsg = MtrTranslateMsg((METER *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    MtrMsgDefault(translatedMsg, (METER *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_CUSTOM
-
-            case OBJ_CUSTOM:
-                translatedMsg = CcTranslateMsg((CUSTOM *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    CcMsgDefault((CUSTOM *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_GRID
-
-            case OBJ_GRID:
-                translatedMsg = GridTranslateMsg((GRID *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    GridMsgDefault(translatedMsg, (GRID *)pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_CHART
-
-            case OBJ_CHART:
-                translatedMsg = ChTranslateMsg((CHART *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                GOLMsgCallback(translatedMsg, pCurrentObj, pMsg);
-                break;
-                    #endif
-                    #ifdef USE_TEXTENTRY
-
-            case OBJ_TEXTENTRY:
-                translatedMsg = TeTranslateMsg((TEXTENTRY *)pCurrentObj, pMsg);
-                if(translatedMsg == OBJ_MSG_INVALID)
-                    break;
-                if(GOLMsgCallback(translatedMsg, pCurrentObj, pMsg))
-                    TeMsgDefault(translatedMsg, (TEXTENTRY *)pCurrentObj, pMsg);
-                break;
-                    #endif
-
-            default:
-                break;
+                    if(pCurrentObj->MsgDefaultObj)
+                        pCurrentObj->MsgDefaultObj(translatedMsg, pCurrentObj, pMsg);
+            }
         }
 
         pCurrentObj = (OBJ_HEADER *)pCurrentObj->pNxtObj;
@@ -1017,66 +710,78 @@ WORD GOLPanelDrawTsk(void)
 
     WORD    counter;
 
-    if(_rpnlR)
+
+    // check if we need to draw the panels and emboss sides
+    if 	(
+    		(_pRpnlBitmap == NULL) || 
+    		(
+    			((_rpnlX2 - _rpnlX1 + (_rpnlR<<1)) > GetImageWidth((void *)_pRpnlBitmap)) 	&& 
+            	((_rpnlY2 - _rpnlY1 + (_rpnlR<<1)) > GetImageHeight((void *)_pRpnlBitmap))	&&
+    			(_pRpnlBitmap != NULL)	
+			)
+        )
     {
-
-        // draw upper left portion of the embossed area
-        SetColor(_rpnlEmbossLtColor);
-        Arc(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize, _rpnlR, 0xE1);
-
-        // draw lower right portion of the embossed area
-        SetColor(_rpnlEmbossDkColor);
-        Arc(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize, _rpnlR, 0x1E);
-    }
-    else
-    {
-
-        // object is rectangular panel draw the embossed areas
-        counter = 1;
-        SetColor(_rpnlEmbossLtColor);
-        while(counter < _rpnlEmbossSize)
-        {
-            Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY1 + counter);    // draw top
-            Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX1 + counter, _rpnlY2 - counter);    // draw left
-            counter++;
-        }
-
-        counter = 1;
-        SetColor(_rpnlEmbossDkColor);
-        while(counter < _rpnlEmbossSize)
-        {
-            Bar(_rpnlX1 + counter, _rpnlY2 - counter, _rpnlX2 - counter, _rpnlY2 - counter);    // draw bottom
-            Bar(_rpnlX2 - counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY2 - counter);    // draw right	
-            counter++;
-        }
-    }
-
-    // draw the face color
-    SetColor(_rpnlFaceColor);
-    if(_rpnlR)
-        FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize);
-    else
-        Bar(_rpnlX1 + _rpnlEmbossSize, _rpnlY1 + _rpnlEmbossSize, _rpnlX2 - _rpnlEmbossSize, _rpnlY2 - _rpnlEmbossSize);
-
-            #if (COLOR_DEPTH == 1)
-    if(_rpnlFaceColor == BLACK)
-    {
-        SetColor(WHITE);
-        if(_rpnlR)
-            Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1));
-        else
-            Bevel
-            (
-                _rpnlX1 + (_rpnlEmbossSize - 1),
-                _rpnlY1 + (_rpnlEmbossSize - 1),
-                _rpnlX2 - (_rpnlEmbossSize - 1),
-                _rpnlY2 - (_rpnlEmbossSize - 1),
-                0
-            );
-    }
-
-            #endif
-
+	    if(_rpnlR)
+	    {
+	
+	        // draw upper left portion of the embossed area
+	        SetColor(_rpnlEmbossLtColor);
+	        Arc(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize, _rpnlR, 0xE1);
+	
+	        // draw lower right portion of the embossed area
+	        SetColor(_rpnlEmbossDkColor);
+	        Arc(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize, _rpnlR, 0x1E);
+	    }
+	    else
+	    {
+	
+	        // object is rectangular panel draw the embossed areas
+	        counter = 1;
+	        SetColor(_rpnlEmbossLtColor);
+	        while(counter < _rpnlEmbossSize)
+	        {
+	            Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY1 + counter);    // draw top
+	            Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX1 + counter, _rpnlY2 - counter);    // draw left
+	            counter++;
+	        }
+	
+	        counter = 1;
+	        SetColor(_rpnlEmbossDkColor);
+	        while(counter < _rpnlEmbossSize)
+	        {
+	            Bar(_rpnlX1 + counter, _rpnlY2 - counter, _rpnlX2 - counter, _rpnlY2 - counter);    // draw bottom
+	            Bar(_rpnlX2 - counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY2 - counter);    // draw right	
+	            counter++;
+	        }
+	    }
+	
+	    // draw the face color
+	    SetColor(_rpnlFaceColor);
+	    if(_rpnlR)
+	        FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize);
+	    else
+	        Bar(_rpnlX1 + _rpnlEmbossSize, _rpnlY1 + _rpnlEmbossSize, _rpnlX2 - _rpnlEmbossSize, _rpnlY2 - _rpnlEmbossSize);
+	
+	            #if (COLOR_DEPTH == 1)
+	    if(_rpnlFaceColor == BLACK)
+	    {
+	        SetColor(WHITE);
+	        if(_rpnlR)
+	            Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1));
+	        else
+	            Bevel
+	            (
+	                _rpnlX1 + (_rpnlEmbossSize - 1),
+	                _rpnlY1 + (_rpnlEmbossSize - 1),
+	                _rpnlX2 - (_rpnlEmbossSize - 1),
+	                _rpnlY2 - (_rpnlEmbossSize - 1),
+	                0
+	            );
+	    }
+	
+	            #endif
+	} // end of check if we need to draw the panels and emboss sides
+	
     // draw bitmap
     if(_pRpnlBitmap != NULL)
     {
@@ -1135,6 +840,20 @@ WORD GOLPanelDrawTsk(void)
         switch(state)
         {
             case BEGIN:
+
+	           	// check if we need to draw the face and emboss
+                if (_pRpnlBitmap != NULL)
+                {
+                    if 	(
+                        ((_rpnlX2 - _rpnlX1 + (_rpnlR<<1)) <= GetImageWidth((void *)_pRpnlBitmap)) &&
+                        ((_rpnlY2 - _rpnlY1 + (_rpnlR<<1)) <= GetImageHeight((void *)_pRpnlBitmap))
+                    	)
+                	{
+	                	state = DRAW_IMAGE;
+	                	goto rnd_panel_draw_image;
+	                }	
+	            } 
+            
                 if(_rpnlR)
                 {
 
@@ -1260,6 +979,7 @@ WORD GOLPanelDrawTsk(void)
                 break;
 
             case DRAW_IMAGE:
+            	rnd_panel_draw_image : 
                 if(_pRpnlBitmap != NULL)
                 {
                     if

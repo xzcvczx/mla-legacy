@@ -116,13 +116,20 @@ Description:
          U1BDTPx register set, enabling the BDT to be anywhere in RAM.  Previous
          implementation wouldn't work on a large RAM device if the linker 
          decided to place the BDT[] array at an address > 64kB
+		 
+  2.8    Added USTAT_FIELDS typedef and associated macros.		 
 
  *************************************************************************/
 
 #if !defined(USB_HAL_PIC32_H)
-#include "Compiler.h"
-
 #define USB_HAL_PIC32_H
+
+#include "Compiler.h"
+#include "usb_config.h"
+
+#if (USB_PING_PONG_MODE != USB_PING_PONG__FULL_PING_PONG)
+    #error "PIC32 only supports full ping pong mode.  A different mode other than full ping pong is selected in the usb_config.h file."
+#endif
 
 #define USBSetBDTAddress(addr)         {U1BDTP3 = (((DWORD)KVA_TO_PA(addr)) >> 24); U1BDTP2 = (((DWORD)KVA_TO_PA(addr)) >> 16); U1BDTP1 = (((DWORD)KVA_TO_PA(addr)) >> 8);}
 #define USBPowerModule() U1PWRCbits.USBPWR = 1;
@@ -257,12 +264,8 @@ typedef union _POINTER
 #define USB_INTERNAL_TRANSCEIVER 0x00
 #define USB_EXTERNAL_TRANSCEIVER 0x01
 
-#define USB_FULL_SPEED 0x00
+#define USB_FULL_SPEED 0x04
 //USB_LOW_SPEED not currently supported in PIC24F USB products
-
-#if(USB_PING_PONG_MODE != USB_PING_PONG__FULL_PING_PONG)
-    #error "Unsupported ping pong mode for this device"
-#endif
 
 #define ConvertToPhysicalAddress(a) ((DWORD)KVA_TO_PA(a))
 #define ConvertToVirtualAddress(a)  PA_TO_KVA1(a)
@@ -359,7 +362,7 @@ typedef union _POINTER
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
 #if defined(USB_INTERRUPT)
-    #define USBEnableInterrupts() {IEC1bits.USBIE = 1;IPC11CLR=0x0000FF00;IPC11SET=0x00001000;INTEnableSystemMultiVectoredInt(); INTEnableInterrupts();}
+    #define USBEnableInterrupts() {IEC1bits.USBIE = 1;IPC11CLR=0x0000FF00;IPC11SET=0x00001000; INTEnableSystemMultiVectoredInt(); INTEnableInterrupts();}
 #else
     #define USBEnableInterrupts()
 #endif
@@ -443,6 +446,25 @@ typedef union __attribute__ ((packed))__BDT
     WORD            v[4];
     QWORD           Val;
 } BDT_ENTRY;
+
+// USTAT Register Layout
+typedef union __USTAT
+{
+    struct
+    {
+        unsigned char filler1           :2;
+        unsigned char ping_pong         :1;
+        unsigned char direction         :1;
+        unsigned char endpoint_number   :4;
+    };
+    BYTE Val;
+} USTAT_FIELDS;
+
+//Macros for fetching parameters from a USTAT_FIELDS variable.
+#define USBHALGetLastEndpoint(stat)     stat.endpoint_number
+#define USBHALGetLastDirection(stat)    stat.direction
+#define USBHALGetLastPingPong(stat)     stat.ping_pong
+
 
 #if defined(USB_SUPPORT_DEVICE) | defined(USB_SUPPORT_OTG)
 #if !defined(USBDEVICE_C)

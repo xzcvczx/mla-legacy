@@ -6,7 +6,7 @@
  * FileName:        Chart.h
  * Dependencies:    None 
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,15 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo
- * Anton Alkhimenok		4/8/08		...
+ * 4/8/08		...
  *****************************************************************************/
 #ifndef _CHART_H
     #define _CHART_H
 
-    #include <Graphics\GOL.h>
+    #include <Graphics/GOL.h>
 
 /* 
 		Chart Terminologies 
@@ -340,6 +339,34 @@ CHART       *ChCreate
 *
 ********************************************************************/
 DATASERIES  *ChAddDataSeries(CHART *pCh, WORD nSamples, WORD *pData, XCHAR *pName);
+
+/*********************************************************************
+* Function: void ChFreeDataSeries(void *pObj)
+*
+* Overview: This function removes DATASERIES object from the list of 
+*			DATASERIES objects and frees the memory used of that removed object.
+*
+* PreCondition: none
+*
+* Input: pCh - Pointer to the chart object.
+*
+* Output: none.
+*
+*
+* Example:
+*   <CODE> 
+*
+*	void ClearChartData(CHART *pCh) {
+*       if(pCh->pChData != NULL)
+*			// remove the all data series
+*           ChFreeDataSeries(pCh;
+*   }
+*	</CODE> 
+*
+* Side Effects: none.
+*
+********************************************************************/
+void ChFreeDataSeries(void *pObj);
 
 /*********************************************************************
 * Function: ChRemoveDataSeries(CHART *pCh, WORD number)
@@ -961,7 +988,7 @@ void    ChSetSampleRange(CHART *pCh, WORD start, WORD end);
     #define ChGetColorTable(pCh)    (((CHART *)pCh)->prm.pColor)
 
 /*********************************************************************
-* Function: ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg)
+* Function: ChTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates 
@@ -991,10 +1018,10 @@ void    ChSetSampleRange(CHART *pCh, WORD start, WORD end);
 * Side Effects: none
 *
 ********************************************************************/
-WORD    ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg);
+WORD    ChTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: ChDraw(CHART *pCh)
+* Function: WORD ChDraw(void *pObj)
 *
 * Overview: This function renders the object on the screen using 
 * 			the current parameter settings. Location of the object is 
@@ -1024,5 +1051,5 @@ WORD    ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg);
 * Side Effects: none.
 *
 ********************************************************************/
-WORD    ChDraw(CHART *pCh);
+WORD ChDraw(void *pObj);
 #endif // _CHART_H

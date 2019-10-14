@@ -70,11 +70,11 @@ Change History:
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypeDefs.h"
-#include "USB\usb.h"
+#include "USB/usb.h"
 #include "usb_host_local.h"
 #include "usb_hal_local.h"
 #include "HardwareProfile.h"
-//#include "USB\usb_hal.h"
+//#include "USB/usb_hal.h"
 
 #ifndef USB_MALLOC
     #define USB_MALLOC(size) malloc(size)

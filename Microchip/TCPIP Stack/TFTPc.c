@@ -19,7 +19,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -962,6 +962,11 @@ TFTP_RESULT TFTPIsGetReady(void)
             _tftpState = SM_TFTP_WAIT_FOR_DATA;
         }
         break;
+
+	// Suppress compiler warnings on unhandled SM_TFTP_WAIT and 
+	// SM_TFTP_WAIT_FOR_ACK states.
+    default:	
+    	break;
     }
 
 
@@ -1318,6 +1323,12 @@ TFTP_RESULT TFTPIsPutReady(void)
         // is ready to transmit.
         if ( UDPIsPutReady(_tftpSocket) )
             return TFTP_OK;
+
+	// Suppress compiler warnings on unhandled SM_TFTP_WAIT_FOR_DATA, 
+	// SM_TFTP_DUPLICATE_ACK, SM_TFTP_SEND_ACK, SM_TFTP_SEND_LAST_ACK enum 
+	// states.
+    default:	
+    	break;
     }
 
     return TFTP_NOT_READY;

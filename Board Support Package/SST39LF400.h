@@ -6,7 +6,7 @@
  * FileName:        SST39LF400.h
  * Dependencies:    none
  * Processor:       PIC24F
- * Compiler:       	MPLAB C30 V3.00
+ * Compiler:       	MPLAB C30
  * Linker:          MPLAB LINK30
  * Company:         Microchip Technology Incorporated
  *
@@ -34,15 +34,39 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		08/27/09	...
- * PAT					04/12/10	Ported for SST39LF400 
- *****************************************************************************/
-#ifndef _SST39_H
-#define _SST39_H
+ * Date         Comment
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * 4/12/2010	Original, ported from SST39LF400A
+ * 8/11/2010	Removed dependency on Graphics file. 
+ ********************************************************************/
+ 
+#ifndef _SST39LF400_H
+#define _SST39LF400_H
 
-#include "Graphics\Graphics.h"
+    #if defined(__dsPIC33F__)
+        #include <p33Fxxxx.h>
+    #elif defined(__PIC24H__)
+        #include <p24Hxxxx.h>
+    #elif defined(__PIC32MX__)
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+
+	#include "GenericTypeDefs.h"
+	#include "HardwareProfile.h"
+
+ /************************************************************************
+* Function: SST39LF400Init                                                  
+*                                                                       
+* Overview: this function initializes IOs and PMP.
+*                                                                       
+* Input: none                                                          
+*                                                                       
+* Output: none
+*                                                                       
+************************************************************************/
+void SST39LF400Init(WORD *pBuffer);
 
  /************************************************************************
 * Function: SST39LF400Init                                                  
@@ -54,7 +78,7 @@
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39LF400Init(void);
+void SST39LF400DeInit(WORD *pBuffer);
 
 /************************************************************************
 * Function: BYTE SST39LF400WriteWord(DWORD address, WORD data)
@@ -94,7 +118,7 @@ WORD SST39LF400ReadWord(DWORD address);
 * Notes: none
 *                                                                       
 ************************************************************************/
-BYTE SST39WriteArray(DWORD address, WORD *pData, WORD nCount);
+BYTE SST39LF400WriteArray(DWORD address, WORD *pData, WORD nCount);
 
 /************************************************************************
 * Function: void SST39LF400ReadArray(DWORD address, WORD* pData, nCount)
@@ -132,4 +156,30 @@ void SST39LF400WaitProgram(void);
 ************************************************************************/
 void SST39LF400ChipErase(void);
 
-#endif //_SST39_H
+/************************************************************************
+* Function: void SST39LF400SectorErase(DWORD address)                                 
+*
+* Overview: This function erases 2K Word section defined by address
+*
+* Input: address - The address location of the sector to be erased.
+*				   The address is decided by Address[30:11] address lines.
+*            
+* Output: none
+*
+************************************************************************/
+void SST39LF400SectorErase(DWORD address);
+
+/************************************************************************
+* Function: void SST39LF400CheckID(void *pID)  
+*
+* Overview: Reads the product ID 
+*
+* Input: none
+*            
+* Output: none
+*
+************************************************************************/
+//void SST39LF400CheckID();
+WORD SST39LF400CheckID();
+
+#endif //_SST39LF400_H

@@ -79,7 +79,7 @@
         #elif defined(__PIC24FJ256GB106__)
             #include "HardwareProfile - PIC24F Starter Kit.h"
         #elif defined(__PIC24FJ64GB004__)
-            #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
+            #error "The PIC24FJ64GB004 PIM is not currently supported by this demo."
         #elif defined(__PIC24FJ256DA210__)
             #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
         #endif

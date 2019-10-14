@@ -50,6 +50,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <plib.h>
 #include <joystick.h>
 
+#if defined (USE_JOYSTICK_MEB)
 
 /********************************************************************
  Section: Local Variables 
@@ -169,3 +170,5 @@ JOYSTICK_POSITION GetJoystickPosition(void)
     return pos;
 
 }
+
+#endif // #if defined (USE_JOYSTICK_MEB)

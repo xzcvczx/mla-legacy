@@ -54,7 +54,7 @@ Nithin	Mar 1 2010     mTouch Library
 #ifndef __MTOUCHCAP_PIC18F_GUI_TOUCH_H
 #define __MTOUCHCAP_PIC18F_GUI_TOUCH_H
 
-//#include "..\Microchip\Include\CapTouchCTMUEvalBoard\CTMUcapsense.h"
+//#include "../Microchip/Include/CapTouchCTMUEvalBoard/CTMUcapsense.h"
 #include "mTouchCap_PIC18_CTMU_Physical.h"
 
 #ifdef	USE_SLIDER_4CHNL

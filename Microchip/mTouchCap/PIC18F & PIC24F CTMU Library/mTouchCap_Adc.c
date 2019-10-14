@@ -265,9 +265,12 @@ void mTouchCapADC_OpenADC(void)
 		#endif
 		
 		#ifdef ADC_NEW
+		#ifndef USE_MTOUCH_AND_GRAPHICS
+
 		Adc_PortA_Configuration(ADC_PORTA_CONFIG_DEFAULT_VALUE);	// A/D mux must connect to channel for CTMU to drain charge
-		Adc_PortB_Configuration(ADC_PORTB_CONFIG_DEFAULT_VALUE);	// A/D mux must connect to channel for CTMU to drain charge		
 		Adc_PortC_Configuration(ADC_PORTC_CONFIG_DEFAULT_VALUE);	// A/D mux must connect to channel for CTMU to drain charge		
+		#endif
+		Adc_PortB_Configuration(ADC_PORTB_CONFIG_DEFAULT_VALUE);	// A/D mux must connect to channel for CTMU to drain charge		
 		Adc_PortE_Configuration(ADC_PORTE_CONFIG_DEFAULT_VALUE);	// A/D mux must connect to channel for CTMU to drain charge		
 		Adc_PortG_Configuration(ADC_PORTG_CONFIG_DEFAULT_VALUE);	// A/D mux must connect to channel for CTMU to drain charge				
 		#endif	

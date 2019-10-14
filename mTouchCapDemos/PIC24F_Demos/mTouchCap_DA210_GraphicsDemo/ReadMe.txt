@@ -15,7 +15,7 @@ Microchip Graphics Library.
 *******************************************************************************
     Release Information
 *******************************************************************************
-mTouch Cap Library v1.20:    April-2010
+mTouch Cap Library v1.21:    October-2010
 MPLAB version:                    8.40 or later
 C30 Compiler Version:	  3.23 or later  
 
@@ -40,16 +40,16 @@ Development Board.
 
 This Demo is an extension of the "Graphics AN1136" Demo.  Please see application 
 note AN1136 for details of the Graphics Library implementation in this demo.  
-Note that the Touchscreen located on the graphics display is NOT enabled for this demo.
+Note that the Touchscreen located on the graphics display is also enabled for this demo.
 
 *******************************************************************************
   Cap Touch Demonstration
 *******************************************************************************
 The purpose of this demo is to interact with the graphics display objects on the
-display screen, and be able to change the display using the Cap Touch keys located
-on the DA210 Demo Board.
+display screen, and be able to change the display using either the Cap Touch keys
+located on the DA210 Demo Board, or the display screen.
 
-This is done by reading the cap touch keys, and then creating events that are fed 
+Cap Touch input is done by reading the cap touch keys, and then creating events that are fed 
 to the graphics library code to change the display based on the cap touch key pressed.
 
 There are 5 keys on the DA210 Demo Board; Left, Right, Up, Down, and Select.
@@ -97,20 +97,13 @@ sensors.  This would make this type of implementation not practical if a thicker
 overlay was needed to be placed over the cap touch keys.
 
 The DA210 Graphics Cap Touch Demo is intended to show that a graphics display
-may be used without a touchscreen overlay on the display.  This can help with
-applications that are more cost sensitive, or that need a more ruggedized 
-display where resistive type touchscreen overlays are not practical.
+may be used along with a touchscreen overlay on the display.  This can help with
+applications that need both "hard" defined keys as well as "software" defined
+keys (keys created by the display).
 
 *******************************************************************************
   Some Limitations of the DA210 Graphics Cap Touch Demo
 *******************************************************************************
-Note that the mTouch Cap Touch Library files have been copied into the the project 
-folder.  This is due to the fact that there are several files that are hardware
-related that are duplicated in the mTouch Cap Touch Library, and the Graphics
-Library.  The mTouch Cap Touch files were copied to the project directory so that
-they could be altered in order to operate integrated with the Graphics Library.
-This is a limitation of the current libraries.
-
 When detecting the "Up" and "Down" keys, a slight delay may be seen.
 This has been done to insure that a key that is the combination of 2 cap touch
 channels has time to be detected.  There is less sensitivity on the keys that are

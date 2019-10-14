@@ -44,6 +44,7 @@ Anton Alkhimenok    06_Jun-2009       Ported to PIC24
 **************************************************************************/
 extern DWORD Cluster2Sector(DISK * disk, DWORD cluster);
 extern BYTE SDSectorDMARead(DWORD sector_addr, DWORD dma_addr, UINT16 num_blk);
+extern void SetReg(WORD index, BYTE value);
 
 /**************************************************************************
  LOCAL FUNCTIONS PROTOTYPES

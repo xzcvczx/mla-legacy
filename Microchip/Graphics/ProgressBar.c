@@ -38,7 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok 	11/12/07	Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_PROGRESSBAR
 
@@ -106,17 +106,21 @@ PROGRESSBAR *PbCreate
     if(pPb == NULL)
         return (pPb);
 
-    pPb->hdr.ID = ID;
-    pPb->hdr.pNxtObj = NULL;
-    pPb->hdr.type = OBJ_PROGRESSBAR;
-    pPb->hdr.left = left;
-    pPb->hdr.top = top;
-    pPb->hdr.right = right;
-    pPb->hdr.bottom = bottom;
-    pPb->pos = pos;
-    pPb->range = (range == 0) ? 100 : range;
-    pPb->prevPos = 0;
-    pPb->hdr.state = state;
+    pPb->hdr.ID         = ID;
+    pPb->hdr.pNxtObj    = NULL;
+    pPb->hdr.type       = OBJ_PROGRESSBAR;
+    pPb->hdr.left       = left;
+    pPb->hdr.top        = top;
+    pPb->hdr.right      = right;
+    pPb->hdr.bottom     = bottom;
+    pPb->pos            = pos;
+    pPb->range          = (range == 0) ? 100 : range;
+    pPb->prevPos        = 0;
+    pPb->hdr.state      = state;
+    pPb->hdr.DrawObj    = PbDraw;   // draw function
+    pPb->hdr.MsgObj     = NULL;     // message function
+    pPb->hdr.MsgDefaultObj = NULL;  // default message function
+    pPb->hdr.FreeObj    = NULL;		// free function
 
     // Set the style scheme to be used
     if(pScheme == NULL)
@@ -195,7 +199,7 @@ WORD PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD PbDraw(PROGRESSBAR *pPb)
+* Function: WORD PbDraw(void *pObj)
 *
 * Output: returns the status of the drawing
 *		  0 - not complete
@@ -204,7 +208,7 @@ WORD PbTranslateMsg(PROGRESSBAR *pPb, GOL_MSG *pMsg)
 * Overview: draws progress bar
 *
 ********************************************************************/
-WORD PbDraw(PROGRESSBAR *pPb)
+WORD PbDraw(void *pObj)
 {
     typedef enum
     {
@@ -221,6 +225,9 @@ WORD PbDraw(PROGRESSBAR *pPb)
     static DWORD x1;
     volatile DWORD x2;
     static XCHAR text[5] = {'0','0','%',0};
+    PROGRESSBAR *pPb;
+
+    pPb = (PROGRESSBAR *)pObj;
 
     if(IsDeviceBusy())
         return (0);

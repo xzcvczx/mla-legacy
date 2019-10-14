@@ -40,6 +40,7 @@
  * Sasha. M	/ Naveen. M			11 Nov 2009  	Version 1.0 Release
  * Nithin Kumar 	 			02 March 2010   Interfacing the mTouch Library to the mTouch GUI plug-in
  * Sasha. M	/ Nithin. 			10 April 2010  	Version 1.20 Release
+  * Nithin M						11 Aug 2010	Implemetation of Low Power Demo 
  *****************************************************************************/
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -57,6 +58,12 @@ SHORT			tick;
 SHORT 			tickCount =0;
 WORD			channelSelect = 0; 
 CHAR 			dataReadyCTMU = 0;	
+#ifdef LOW_POWER_DEMO_ENABLE
+	BYTE 	Timer4_Period_Clock_Switch_Flag=0;	//Flag to indicate if the timer4 period values are loaded
+	WORD	Timeout_Counter =0;	//counter for a 10sec timeout
+	WORD 	Test_counter;	//testing
+#endif
+
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~	Function Prototypes  ~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
@@ -182,14 +189,47 @@ void mTouchCapPhy_Timer1Set( WORD time)
   ***************************************************************************/
 
 void mTouchCapPhy_TickInit( void )
-{
-    	TMR4 = 0;
-    	PR4 = TIMER_PERIOD;
-    	T4CON = TIMER_ON | TIMER_SOURCE_INTERNAL | GATED_TIME_DISABLED | TIMER_16BIT_MODE | TIMER4_PRESCALER;
- 			
-		Set_ScanTimer_IF_Bit_State(DISABLE);              //Clear flag
-    	Set_ScanTimer_IE_Bit_State(ENABLE);              //Enable interrupt
-    	Set_ScanTimer_ON_Bit_State(ENABLE) ;              //Run timer
+ {
+    TMR4 = 0;
+
+	
+	//If the Low power demo is not enabled
+	#ifndef LOW_POWER_DEMO_ENABLE
+		PR4 = TIMER_PERIOD;
+		T4CON = TIMER_ON | TIMER_SOURCE_INTERNAL | GATED_TIME_DISABLED | TIMER_16BIT_MODE | TIMER4_PRESCALER;
+	
+	//If Low Power demo is enabled
+	#else
+	//If the Primary oscillator is switched to FRC for the Low Power Demo then load PR4 with
+	//the period value which is calculated for FRC
+	// The time period is selected such that the functions mTouchCapPhy_ReadCTMU() and mTouchCapPhy_AverageData()
+	// should be executed within the time period
+	//Clock_Switch_Enable_Flag -- this will indicate that clock is switched from Primary to FRC
+		if(Clock_Switch_Enable_Flag)
+		{	
+			
+			PR4=TIMER_PERIOD_WITH_FRC; //Timer value when FRC is used for  Timer4 interrupt;
+			T4CON = TIMER_ON | TIMER_SOURCE_INTERNAL | GATED_TIME_DISABLED | TIMER_16BIT_MODE | TIMER4_PRESCALER;
+			Timer4_Period_Clock_Switch_Flag =HIGH;	//To indicate that the timer4 init for FRC clock is complete
+
+		}
+		//If the Primary Oscillator is used
+		else	
+		{
+			
+			PR4 = TIMER_PERIOD;
+			T4CON = TIMER_ON | TIMER_SOURCE_INTERNAL | GATED_TIME_DISABLED | TIMER_16BIT_MODE | TIMER4_PRESCALER;
+		}
+
+		
+
+	#endif	//end of #ifndef LOW_POWER_DEMO_ENABLE
+
+    
+ 		
+	Set_ScanTimer_IF_Bit_State(DISABLE);              //Clear flag
+    Set_ScanTimer_IE_Bit_State(ENABLE);              //Enable interrupt
+    Set_ScanTimer_ON_Bit_State(ENABLE) ;              //Run timer
 }
 
 
@@ -219,9 +259,21 @@ void mTouchCapPhy_TickInit( void )
   ***************************************************************************/
 void __attribute__((interrupt, shadow, auto_psv)) _T4Interrupt(void)
 {
+		
 	   /* Check the interrupt Flag */
 	   if (IFS1bits.T4IF == HIGH)
 	   {				
+
+	
+			//if the low power demo is enabled
+			#ifdef LOW_POWER_DEMO_ENABLE
+				Timeout_Counter++;  //increment the counter for 10sec timeout 
+			#endif
+
+			//Toggle the D16 LED
+	//TRISEbits.TRISE7 = 0;
+
+
 			if(channelSelect >= ScanChannelIndex)
 			{
 				/* Count upto MAX ADC channel though the actual scan happen only for channels which are enabled. 
@@ -239,17 +291,17 @@ void __attribute__((interrupt, shadow, auto_psv)) _T4Interrupt(void)
 			else
 			{
 				/* Scans the CTMU channel for ADC voltage. It updates the "curRawData" and "actualValue" buffers. */
-		   		mTouchCapPhy_ReadCTMU(ScanChannels[channelSelect]);  //NK_DIRKEY
-
-				/* Periodically average the channel data based on User configuration. */
-				mTouchCapPhy_AverageData(ScanChannels[channelSelect]); 	//NK_DIRKEY	
+		   		mTouchCapPhy_ReadCTMU(ScanChannels[channelSelect]);  
 				
+				/* Periodically average the channel data based on User configuration. */
+				mTouchCapPhy_AverageData(ScanChannels[channelSelect]); 		
 				/* Set the channel number for scanning */
 				channelSelect++;
 			}
 			
 			/* Clear the interrupt Flag */
 			IFS1bits.T4IF = LOW;
+
 	   	}
 }
 

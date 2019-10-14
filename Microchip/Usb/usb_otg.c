@@ -7,11 +7,11 @@
 //DOM-IGNORE-BEGIN
 /******************************************************************************
 
- File Name:       usb_otg.c
- Dependencies:    None
- Processor:       PIC24F/PIC32MX
- Compiler:        C30/C32
- Company:         Microchip Technology, Inc.
+* File Name:       usb_otg.c
+* Dependencies:    None
+* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
+* Compiler:        C30 v2.01/C32 v0.00.18
+* Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -33,11 +33,9 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev         Description
-  ----------  ----------------------------------------------------------
-  2.6 - 2.7a  No change
-
+Author          Date    Comments
+--------------------------------------------------------------------------------
+MR                      First Release
 *******************************************************************************/
 
 #include "GenericTypeDefs.h"

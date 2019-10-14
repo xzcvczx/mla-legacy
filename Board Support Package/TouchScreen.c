@@ -34,22 +34,36 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/08/07	...
- * Anton Alkhimenok		06/06/07	Basic calibration and GOL messaging are added
- * Anton Alkhimenok     02/05/08    new PICtail support, portrait orientation is added
- * Sean Justice         02/07/08    PIC32 support
- * Anton Alkhimenok     05/27/08    More robust algorithm
- * Anton Alkhimenok     01/07/09    Graphics PICtail Version 3 support is added
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
- * PAT					06/29/09	Added event EVENT_STILLPRESS to support continuous press
- * Microchip			04/15/10	Qualified EVENT_STILLPRESS to be set only when
- *                                  an actual touch is occuring.
- *                                  Removed timer and timer ISR, made the touch detection
- *                                  a function.
+ * 01/08/07		...
+ * 06/06/07		Basic calibration and GOL messaging are added
+ * 02/05/08    	new PICtail support, portrait orientation is added
+ * 02/07/08    	PIC32 support
+ * 05/27/08    	More robust algorithm
+ * 01/07/09    	Graphics PICtail Version 3 support is added
+ * 06/25/09    	dsPIC & PIC24H support 
+ * 06/29/09		Added event EVENT_STILLPRESS to support continuous press
+ * 04/15/10		Qualified EVENT_STILLPRESS to be set only when
+ *              an actual touch is occuring.
+ *              Removed timer and timer ISR, made the touch detection
+ *              a function.
+ * 07/27/10    	Added support for parallel flash 
+ *				(only on PIC24FJ256DA120 Development Board)
  *****************************************************************************/
 #include "TouchScreen.h"
+
+#if defined (USE_RESISTIVE_TOUCH)
+
+#if defined (USE_25LC256)
+	#include "EEPROM.h"
+#elif defined (USE_SST25VF016)	
+	#include "SST25VF016.h"
+#elif defined (USE_SST39LF400)	
+	#include "SST39LF400.h"
+#else
+	#warning "Touchscreen is being used but calibration data will not be saved or retrieved. Enable the memory that will hold the calibration data in the Hardware Peofile."	
+#endif	
 
 //////////////////////// LOCAL PROTOTYPES ////////////////////////////
 void    TouchGetCalPoints(void);
@@ -58,6 +72,7 @@ void    TouchGetCalPoints(void);
 
 //////////////////////// GLOBAL VARIABLES ////////////////////////////
 #define PRESS_THRESHOULD    256 // between 0-0x03ff the lesser this value the lighter the screen must be pressed
+#define CALIBRATION_DELAY   300 // delay between calibration touch points
 
     // Max/Min ADC values for each derection
 volatile WORD   	_calXMin = XMINCAL;
@@ -276,8 +291,6 @@ void TouchProcessTouch(void)
 ********************************************************************/
 void TouchInit(void)
 {
-//    #define TIME_BASE   (GetPeripheralClock() * SAMPLE_PERIOD) / 4000000
-
     // Initialize ADC
     AD1CON1 = 0x080E0;      // Turn on, auto-convert
     AD1CON2 = 0;            // AVdd, AVss, int every conversion, MUXA only
@@ -482,20 +495,36 @@ void TouchGetMsg(GOL_MSG *pMsg)
 ********************************************************************/
 void TouchStoreCalibration(void)
 {
-    #if defined(GFX_PICTAIL_V2)
-    EEPROMWriteWord(_calXMin, ADDRESS_XMIN);
-    EEPROMWriteWord(_calXMax, ADDRESS_XMAX);
-    EEPROMWriteWord(_calYMin, ADDRESS_YMIN);
-    EEPROMWriteWord(_calYMax, ADDRESS_YMAX);
-    EEPROMWriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
-    #else
-    SST25SectorErase(ADDRESS_XMIN); // erase 4K sector
-    SST25WriteWord(_calXMin, ADDRESS_XMIN);
-    SST25WriteWord(_calXMax, ADDRESS_XMAX);
-    SST25WriteWord(_calYMin, ADDRESS_YMIN);
-    SST25WriteWord(_calYMax, ADDRESS_YMAX);
-    SST25WriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
-    #endif
+	#if defined (USE_25LC256)  
+    	EEPROMWriteWord(_calXMin, ADDRESS_XMIN);
+    	EEPROMWriteWord(_calXMax, ADDRESS_XMAX);
+    	EEPROMWriteWord(_calYMin, ADDRESS_YMIN);
+    	EEPROMWriteWord(_calYMax, ADDRESS_YMAX);
+    	EEPROMWriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
+    #elif defined (USE_SST39LF400)
+		WORD tempArray[12];
+		
+		SST39LF400Init(tempArray);
+
+	    SST39LF400SectorErase(ADDRESS_XMIN); // erase 4K sector
+		SST39LF400WriteWord(_calXMin, ADDRESS_XMIN);
+		SST39LF400WriteWord(_calXMax, ADDRESS_XMAX);
+		SST39LF400WriteWord(_calYMin, ADDRESS_YMIN);
+		SST39LF400WriteWord(_calYMax, ADDRESS_YMAX);
+		SST39LF400WriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
+		
+		SST39LF400DeInit(tempArray);
+		
+	#elif defined (USE_SST25VF016)
+		SST25SectorErase(ADDRESS_XMIN); // erase 4K sector
+		SST25WriteWord(_calXMin, ADDRESS_XMIN);
+		SST25WriteWord(_calXMax, ADDRESS_XMAX);
+		SST25WriteWord(_calYMin, ADDRESS_YMIN);
+		SST25WriteWord(_calYMax, ADDRESS_YMAX);
+		SST25WriteWord(GRAPHICS_LIBRARY_VERSION, ADDRESS_VERSION);
+	#else 
+		#error "Touch screen is being used but calibration data cannot be saved!"    
+	#endif
 }
 
 /*********************************************************************
@@ -516,17 +545,31 @@ void TouchStoreCalibration(void)
 ********************************************************************/
 void TouchLoadCalibration(void)
 {
-    #if defined (GFX_PICTAIL_V2)
-    _calXMin = EEPROMReadWord(ADDRESS_XMIN);
-    _calXMax = EEPROMReadWord(ADDRESS_XMAX);
-    _calYMin = EEPROMReadWord(ADDRESS_YMIN);
-    _calYMax = EEPROMReadWord(ADDRESS_YMAX);
-    #else
-    _calXMin = SST25ReadWord(ADDRESS_XMIN);
-    _calXMax = SST25ReadWord(ADDRESS_XMAX);
-    _calYMin = SST25ReadWord(ADDRESS_YMIN);
-    _calYMax = SST25ReadWord(ADDRESS_YMAX);
-    #endif
+	#if defined (USE_25LC256)  
+    	_calXMin = EEPROMReadWord(ADDRESS_XMIN);
+    	_calXMax = EEPROMReadWord(ADDRESS_XMAX);
+    	_calYMin = EEPROMReadWord(ADDRESS_YMIN);
+    	_calYMax = EEPROMReadWord(ADDRESS_YMAX);
+    #elif defined (USE_SST39LF400)
+		WORD tempArray[12];
+		
+		SST39LF400Init(tempArray);
+    
+		_calXMin = SST39LF400ReadWord(ADDRESS_XMIN);
+		_calXMax = SST39LF400ReadWord(ADDRESS_XMAX);
+		_calYMin = SST39LF400ReadWord(ADDRESS_YMIN);
+		_calYMax = SST39LF400ReadWord(ADDRESS_YMAX);
+
+		SST39LF400DeInit(tempArray);
+		
+	#elif defined (USE_SST25VF016)
+	    _calXMin = SST25ReadWord(ADDRESS_XMIN);
+	    _calXMax = SST25ReadWord(ADDRESS_XMAX);
+	    _calYMin = SST25ReadWord(ADDRESS_YMIN);
+	    _calYMax = SST25ReadWord(ADDRESS_YMAX);
+	#else 
+		#error "Touch screen is being used but calibration data is not accessible!"    
+	#endif
 }
 
 /*********************************************************************
@@ -571,31 +614,32 @@ void TouchCalibration(void)
 
     SHORT               textHeight, textStart;
 
-    SetFont((void *) &GOLFontDefault);
-    textHeight = GetTextHeight((void *) &GOLFontDefault);
+    SetFont((void *) &FONTDEFAULT);
+    
+    textHeight = GetTextHeight((void *) &FONTDEFAULT);
     textStart =  (GetMaxY() - (textHeight*8)) >> 1;
 
     SetColor(WHITE);
     ClearDevice();
 
     SetColor(BRIGHTRED);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn1, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn1, (void *) &FONTDEFAULT))>>1,  \
     							 textStart, (XCHAR *)scr1StrLn1));
     SetColor(BLACK);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn2, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn2, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (1*textHeight), (XCHAR *)scr1StrLn2));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (2*textHeight), (XCHAR *)scr1StrLn3));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (3*textHeight), (XCHAR *)scr1StrLn4));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn5, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn5, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (4*textHeight), (XCHAR *)scr1StrLn5));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &FONTDEFAULT))>>1,  \
     							textStart + (5*textHeight), (XCHAR *)scr1StrLn6));
     SetColor(BRIGHTRED);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
     							textStart + (6*textHeight), (XCHAR *)scr1StrLn7));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &FONTDEFAULT))>>1,  \
     							textStart + (7*textHeight), (XCHAR *)scr1StrLn8));
 
     // Wait for touch
@@ -605,7 +649,7 @@ void TouchCalibration(void)
         y = ADCGetY();
     } while((y == -1) || (x == -1));
 
-    DelayMs(500);
+    DelayMs(CALIBRATION_DELAY);
 
     SetColor(WHITE);
     ClearDevice();
@@ -715,18 +759,18 @@ void TouchCalibration(void)
     ClearDevice();
 
     SetColor(BLACK);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn1, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn1, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (1*textHeight), (XCHAR *)scr2StrLn1));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn2, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn2, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (2*textHeight), (XCHAR *)scr2StrLn2));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn3, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn3, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (3*textHeight), (XCHAR *)scr2StrLn3));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn4, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn4, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (4*textHeight), (XCHAR *)scr2StrLn4));
     SetColor(BRIGHTRED);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (6*textHeight), (XCHAR *)scr1StrLn7));
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &GOLFontDefault))>>1,  \
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (7*textHeight), (XCHAR *)scr1StrLn8));
 
     // Wait for touch
@@ -736,7 +780,7 @@ void TouchCalibration(void)
         y = ADCGetY();
     } while((y == -1) || (x == -1));
 
-    DelayMs(500);
+    DelayMs(CALIBRATION_DELAY);
 
     SetColor(BLACK);
     ClearDevice();
@@ -766,7 +810,7 @@ void TouchGetCalPoints(void)
     SHORT               x, y;
     WORD                ax[3], ay[3];
 
-    SetFont((void *) &GOLFontDefault);
+    SetFont((void *) &FONTDEFAULT);
 
     SetColor(BRIGHTRED);
 
@@ -774,8 +818,8 @@ void TouchGetCalPoints(void)
     (
         OutTextXY
             (
-                (GetMaxX() - GetTextWidth((XCHAR *)calStr, (void *) &GOLFontDefault)) >> 1,
-                (GetMaxY() - GetTextHeight((void *) &GOLFontDefault)) >> 1,
+                (GetMaxX() - GetTextWidth((XCHAR *)calStr, (void *) &FONTDEFAULT)) >> 1,
+                (GetMaxY() - GetTextHeight((void *) &FONTDEFAULT)) >> 1,
                 (XCHAR *)calStr
             )
     );
@@ -791,8 +835,8 @@ void TouchGetCalPoints(void)
         (
             OutTextXY
                 (
-                    (GetMaxX() - GetTextWidth(calTouchLeft, (void *) &GOLFontDefault)) >> 1,
-                    (GetMaxY() + GetTextHeight((void *) &GOLFontDefault)) >> 1,
+                    (GetMaxX() - GetTextWidth(calTouchLeft, (void *) &FONTDEFAULT)) >> 1,
+                    (GetMaxY() + GetTextHeight((void *) &FONTDEFAULT)) >> 1,
                     calTouchLeft
                 )
         );
@@ -820,13 +864,13 @@ void TouchGetCalPoints(void)
         (
             OutTextXY
                 (
-                    (GetMaxX() - GetTextWidth(calTouchLeft, (void *) &GOLFontDefault)) >> 1,
-                    (GetMaxY() + GetTextHeight((void *) &GOLFontDefault)) >> 1,
+                    (GetMaxX() - GetTextWidth(calTouchLeft, (void *) &FONTDEFAULT)) >> 1,
+                    (GetMaxY() + GetTextHeight((void *) &FONTDEFAULT)) >> 1,
                     calTouchLeft
                 )
         );
 
-        DelayMs(500);
+        DelayMs(CALIBRATION_DELAY);
     }
 
     for(counter = 0; counter < 3; counter++)
@@ -844,3 +888,6 @@ void TouchGetCalPoints(void)
             _calXMin = ax[counter];
     }
 }
+
+#endif // #if defined (USE_RESISTIVE_TOUCH)
+

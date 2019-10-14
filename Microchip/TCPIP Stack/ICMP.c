@@ -210,7 +210,7 @@ void ICMPProcess(NODE_INFO *remote, WORD len)
  *
  * Input:           dwRemoteIP: IP Address to ping.  Must be stored 
  *								big endian.  Ex. 192.168.0.1 should be
- *								passed as 0xC0A80001.
+ *								passed as 0x0100A8C0.
  *
  * Output:          Begins the process of transmitting an ICMP echo 
  *					request.  This normally involves an ARP 

@@ -1188,11 +1188,11 @@ void TranslateMessageBlaster( GOL_MSG *pMsg )
 // Global Variables
 //******************************************************************************
 
-extern BITMAP_FLASH ballCircle;
-extern BITMAP_FLASH ballCross;
-extern BITMAP_FLASH ballMarking;
-extern BITMAP_FLASH ballSquare;
-extern BITMAP_FLASH ballTriangle;
+extern IMAGE_FLASH  ballCircle;
+extern IMAGE_FLASH  ballCross;
+extern IMAGE_FLASH  ballMarking;
+extern IMAGE_FLASH  ballSquare;
+extern IMAGE_FLASH  ballTriangle;
 void *              balls[NUM_BALL_TYPES+2];
 SHORT               ballsRemoved;
 SHORT               columnsRemoved;
@@ -1881,9 +1881,9 @@ typedef struct _SNAKE_INFO
 SHORT               defaultDirection;
 FIELD_INFO          field[SNAKE_COLUMNS][SNAKE_ROWS];
 SNAKE_INFO          snake;
-extern BITMAP_FLASH snakeHead;
-extern BITMAP_FLASH snakeBody;
-extern BITMAP_FLASH snakeFood;
+extern IMAGE_FLASH  snakeHead;
+extern IMAGE_FLASH  snakeBody;
+extern IMAGE_FLASH  snakeFood;
 
 
 #define SNAKE_HEAD  snake.pieces[0]

@@ -62,7 +62,7 @@
 #define DEBUG_ZCLL_MESG     sprintf
 #else
 #define DEBUG_ZCLL_PRINT(x)
-#define DEBUG_ZCLL_MESG(x,y...) 
+#define DEBUG_ZCLL_MESG(x,y,...) 
 #endif
 
 // For less verbose debugging
@@ -71,7 +71,7 @@
 #define INFO_ZCLL_MESG     sprintf
 #else
 #define INFO_ZCLL_PRINT(x)
-#define INFO_ZCLL_MESG(x,y...) 
+#define INFO_ZCLL_MESG(x,y,...) 
 #endif
 
 // For warnings, errors, and other exceptions
@@ -80,7 +80,7 @@
 #define WARN_ZCLL_MESG     sprintf
 #else
 #define WARN_ZCLL_PRINT(x)
-#define WARN_ZCLL_MESG(x,y...) 
+#define WARN_ZCLL_MESG(x,y,...) 
 #endif
 
 // Always print

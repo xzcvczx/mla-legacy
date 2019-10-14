@@ -6,7 +6,7 @@
  * FileName:        Button.c
  * Dependencies:    Button.h
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 Version 3.00, C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -34,17 +34,20 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * PAT					11/12/07	Version 1.0 release
- * PAT					06/26/09	Added message ID BTN_MSG_STILLPRESSED 
- *									to signify that a continuous touch on 
- *									the button through touch screen.
- * PAT					06/29/09	Added multi-line text support on buttons
- *									must set USE_BUTTON_MULTI_LINE in 
- *									GraphicsConfig.h file.
+ * 11/12/07		Version 1.0 release
+ * 06/26/09		Added message ID BTN_MSG_STILLPRESSED 
+ *				to signify that a continuous touch on 
+ *				the button through touch screen.
+ * 06/29/09		Added multi-line text support on buttons
+ *				must set USE_BUTTON_MULTI_LINE in 
+ *				GraphicsConfig.h file.
+ * 10/04/10     Added BTN_NOPANEL property state bit to make the buttons with
+ *              bitmaps that is of the same size or larger than the button
+ *              dimension to skip drawing of the panel. 
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #if defined(USE_BUTTON) || defined(USE_BUTTON_MULTI_LINE)
 
@@ -78,17 +81,21 @@ BUTTON *BtnCreate
     if(pB == NULL)
         return (NULL);
 
-    pB->hdr.ID = ID;            // unique id assigned for referencing
-    pB->hdr.pNxtObj = NULL;     // initialize pointer to NULL
-    pB->hdr.type = OBJ_BUTTON;  // set object type
-    pB->hdr.left = left;        // left position
-    pB->hdr.top = top;          // top position
-    pB->hdr.right = right;      // right position
-    pB->hdr.bottom = bottom;    // bottom position
-    pB->radius = radius;        // radius
-    pB->pBitmap = pBitmap;      // location of bitmap
-    pB->pText = pText;          // location of the text
-    pB->hdr.state = state;      // state
+    pB->hdr.ID = ID;                        // unique id assigned for referencing
+    pB->hdr.pNxtObj = NULL;                 // initialize pointer to NULL
+    pB->hdr.type = OBJ_BUTTON;              // set object type
+    pB->hdr.left = left;                    // left position
+    pB->hdr.top = top;                      // top position
+    pB->hdr.right = right;                  // right position
+    pB->hdr.bottom = bottom;                // bottom position
+    pB->radius = radius;                    // radius
+    pB->pBitmap = pBitmap;                  // location of bitmap
+    pB->pText = pText;                      // location of the text
+    pB->hdr.state = state;                  // state
+    pB->hdr.DrawObj = BtnDraw;              // draw function
+    pB->hdr.MsgObj = BtnTranslateMsg;       // message function
+    pB->hdr.MsgDefaultObj = BtnMsgDefault;  // default message function
+    pB->hdr.FreeObj = NULL;  				// free function
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -168,15 +175,20 @@ void BtnSetText(BUTTON *pB, XCHAR *pText)
 }
 
 /*********************************************************************
-* Function: BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG* pMsg)
+* Function: BtnMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 *
 * Notes: This the default operation to change the state of the button.
 *		 Called inside GOLMsg() when GOLMsgCallback() returns a 1.
 *
 ********************************************************************/
-void BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG *pMsg)
+void BtnMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+
+    BUTTON *pB;
+
+    pB = (BUTTON *)pObj;
+
         #ifdef USE_FOCUS
             #ifdef USE_TOUCHSCREEN
     if(pMsg->type == TYPE_TOUCHSCREEN)
@@ -210,15 +222,19 @@ void BtnMsgDefault(WORD translatedMsg, BUTTON *pB, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg)
+* Function: WORD BtnTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 *
 * Notes: Evaluates the message if the object will be affected by the 
 *		 message or not.
 *
 ********************************************************************/
-WORD BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg)
+WORD BtnTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+    BUTTON *pB;
+
+    pB = (BUTTON *)pObj;
+
 
     // Evaluate if the message is for the button
     // Check if disabled first
@@ -325,13 +341,13 @@ WORD BtnTranslateMsg(BUTTON *pB, GOL_MSG *pMsg)
 }
 
 /*********************************************************************
-* Function: WORD BtnDraw(BUTTON *pB)
+* Function: WORD BtnDraw(void *pObj)
 *
 *
 * Notes: This is the state machine to draw the button.
 *
 ********************************************************************/
-WORD BtnDraw(BUTTON *pB)
+WORD BtnDraw(void *pObj)
 {
     typedef enum
     {
@@ -356,6 +372,9 @@ WORD BtnDraw(BUTTON *pB)
     XCHAR ch = 0;
         #endif
     WORD faceClr, embossLtClr, embossDkClr, xText, yText;
+    BUTTON *pB;
+    
+    pB = (BUTTON *)pObj;
 
     if(IsDeviceBusy())
         return (0);
@@ -388,7 +407,14 @@ WORD BtnDraw(BUTTON *pB)
             radius = pB->radius;    // get radius
             width = (pB->hdr.right - pB->hdr.left) - (radius * 2);  // get width
             height = (pB->hdr.bottom - pB->hdr.top) - (radius * 2); // get height
-            state = BEVEL_DRAW;
+
+			if (GetState(pB, BTN_NOPANEL))
+			{
+	           	state = RNDBUTTON_DRAW;
+                goto rnd_button_draw;
+	  		}         	
+	        else   	
+	           	state = BEVEL_DRAW;
 
         case BEVEL_DRAW:
             if(!GetState(pB, BTN_DISABLED))
@@ -431,19 +457,42 @@ WORD BtnDraw(BUTTON *pB)
             state = RNDBUTTON_DRAW;
 
         case RNDBUTTON_DRAW:
-        	if (GetState(pB, BTN_TWOTONE))
-        	{
-            	if(!GOLTwoTonePanelDrawTsk())
-            	{
-                	return (0);
-            	}
-        	}	
-        	else
-        	{
-	            if(!GOLPanelDrawTsk())
-	            {
-	                return (0);
-	            }									
+			rnd_button_draw : 
+			if (GetState(pB, BTN_NOPANEL))
+            {
+	        	// check if there is an image to be drawn
+	        	if (pB->pBitmap != NULL)
+	        	{
+                	if
+                    (
+                        !PutImage
+                            (
+                                ((pB->hdr.right + pB->hdr.left - GetImageWidth((void *)pB->pBitmap)) >> 1) + 1,
+                                ((pB->hdr.top + pB->hdr.bottom - GetImageHeight((void *)pB->pBitmap)) >> 1) + 1,
+                                pB->pBitmap,IMAGE_NORMAL
+                            )
+                    )
+                    {
+                        return (0);
+                    }
+          		}  
+    		}
+    		else
+    		{      
+               	if (GetState(pB, BTN_TWOTONE))
+	        	{
+	            	if(!GOLTwoTonePanelDrawTsk())
+	            	{
+	                	return (0);
+	            	}
+	        	}	
+	        	else
+	        	{
+		            if(!GOLPanelDrawTsk())
+		            {
+		                return (0);
+		            }									
+				}
 			}
 
                 #ifdef USE_BUTTON_MULTI_LINE

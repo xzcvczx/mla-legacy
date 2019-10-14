@@ -59,7 +59,7 @@
 
 
 /* used for assertions */
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
     #define WF_MODULE_NUMBER   WF_MODULE_WF_DRIVER_RAW
 #endif
 
@@ -202,9 +202,10 @@ UINT16 RawMountRxBuffer(void)
 } 
 
 /* Copies from source raw window to destination raw window, each from their current indexes. */
-void RawToRawCopy(UINT8 rawSourceId, UINT16 length)
+void RawToRawCopy(UINT8 rawDestId, UINT16 length)
 {
-     RawMove(rawSourceId, RAW_COPY, TRUE, length);
+     RawMove(rawDestId, RAW_COPY, TRUE, length);
+ 
 }          
 
 
@@ -255,9 +256,9 @@ void PushRawWindow(UINT8 rawId)
 UINT16 PopRawWindow(UINT8 rawId)
 {
     UINT16 byteCount;
-    
+
     byteCount = RawMove(rawId, RAW_STACK_MEM, TRUE, 0);
-    
+
     return byteCount;
 }
         
@@ -282,10 +283,16 @@ UINT16 PopRawWindow(UINT8 rawId)
 UINT16 ScratchMount(UINT8 rawId)
 {
     UINT16 byteCount;
-
-    byteCount = RawMove(rawId, RAW_SCRATCH_POOL, TRUE, 0);
-    WF_ASSERT(byteCount > 0);  /* scratch mount should always return value > 0 */
     
+    byteCount = RawMove(rawId, RAW_SCRATCH_POOL, TRUE, 0);
+    if (byteCount == 0)
+    {
+        /* work-around, somehow the scratch was already mounted to the other raw window */
+        rawId = !rawId;
+        //   WF_ASSERT(byteCount > 0);  /* scratch mount should always return value > 0 */
+    }    
+
+
     SetRawWindowState(rawId, WF_SCRATCH_MOUNTED);
     return byteCount;
 }    
@@ -390,9 +397,9 @@ void RawWrite(UINT8 rawId, UINT16 startIndex, UINT16 length, UINT8 *p_src)
  *  NOTES: Performs a RAW move operation between a RAW engine and a MRF24WB0M object
  *****************************************************************************/
  static UINT16 RawMove(UINT16   rawId,           
-                           UINT16   srcDest,         
-                           BOOL       rawIsDestination,  
-                           UINT16   size)              
+                       UINT16   srcDest,         
+                       BOOL     rawIsDestination,  
+                       UINT16   size)              
 {
     UINT16 byteCount;
     UINT8 regId;
@@ -493,7 +500,7 @@ UINT16 RawGetIndex(UINT16 rawId)
 
 
 //#define OUTPUT_RAW_TX_RX   
-
+extern UINT8 g_MgmtResponseInProgress;
 /*****************************************************************************
  * FUNCTION: RawGetByte
  *
@@ -513,12 +520,16 @@ void RawGetByte(UINT16 rawId, UINT8 *pBuffer, UINT16 length)
     UINT16 i;
 #endif
 
-    // if RAW index previously set out of range and caller is trying to do illegal read
-    if ( (rawId==RAW_RX_ID)         && 
-          g_rxIndexSetBeyondBuffer  && 
-          (GetRawWindowState(RAW_RX_ID) == WF_RAW_DATA_MOUNTED) ) 
+    /* if reading a data message do following check */
+    if (!g_MgmtResponseInProgress)
     {
-        WF_ASSERT(FALSE);  /* attempting to read past end of RAW buffer */
+        // if RAW index previously set out of range and caller is trying to do illegal read
+        if ( (rawId==RAW_RX_ID)         && 
+              g_rxIndexSetBeyondBuffer  && 
+              (GetRawWindowState(RAW_RX_ID) == WF_RAW_DATA_MOUNTED) ) 
+        {
+            WF_ASSERT(FALSE);  /* attempting to read past end of RAW buffer */
+        }
     }
 
     regId = (rawId==RAW_ID_0)?RAW_0_DATA_REG:RAW_1_DATA_REG;

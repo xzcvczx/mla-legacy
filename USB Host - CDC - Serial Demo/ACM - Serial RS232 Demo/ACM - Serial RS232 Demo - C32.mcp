@@ -48,6 +48,7 @@ file_020=Common
 file_021=Common
 file_022=.
 file_023=.
+file_024=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -73,6 +74,7 @@ file_020=no
 file_021=no
 file_022=no
 file_023=no
+file_024=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -98,6 +100,7 @@ file_020=no
 file_021=no
 file_022=no
 file_023=yes
+file_024=yes
 [FILE_INFO]
 file_000=usb_config.c
 file_001=..\..\Microchip\USB\usb_host.c
@@ -123,6 +126,7 @@ file_020=..\..\Microchip\Include\LCDBlocking.h
 file_021=..\..\Microchip\Include\Compiler.h
 file_022=Delay.h
 file_023=..\Getting Started - Running the Host - CDC - Serial Demo.htm
+file_024=..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
 suite_state=

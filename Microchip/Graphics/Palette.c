@@ -37,10 +37,11 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Pradeep Budagutta    11/06/09    Version 1.0 release
  *****************************************************************************/
-#include "Graphics\Palette.h"
+#include "Graphics/Palette.h"
 
 #ifdef USE_PALETTE
 
+extern void StartVBlankInterrupt(void);
 BYTE    PaletteBpp;
 BYTE    blPaletteChangeError;
 void    *pPendingPalette;

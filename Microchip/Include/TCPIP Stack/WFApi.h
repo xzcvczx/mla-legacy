@@ -50,6 +50,9 @@
 #ifndef __WF_API_H_
 #define __WF_API_H_
 
+#include "GenericTypeDefs.h"
+
+
 /*
 *********************************************************************************************************
 *                                           DEFINES                               
@@ -766,7 +769,7 @@ typedef struct
 /*------------------------*/
 /* if asserts are enabled */
 /*------------------------*/
-#ifdef WF_DEBUG
+#if defined(WF_DEBUG)
 
     /*---------------------------------------------------------*/    
     /* Module numbers that will be used in the WF_ASSERT macro */

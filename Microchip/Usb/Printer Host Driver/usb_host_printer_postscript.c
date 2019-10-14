@@ -57,9 +57,6 @@ Change History:
 
   2.7         Changed the interface to _SetCurrentPosition to be able to
               take in the printer number as a parameter.
-
-  2.7a        Provided macro wrapped versions of malloc() and free()
-              so that a user can override these functions easily.
 *******************************************************************************/
 //DOM-IGNORE-END
 
@@ -67,9 +64,9 @@ Change History:
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypedefs.h"
-#include "USB\usb.h"
-#include "USB\usb_host_printer.h"
-#include "USB\usb_host_printer_postscript.h"
+#include "USB/usb.h"
+#include "USB/usb_host_printer.h"
+#include "USB/usb_host_printer_postscript.h"
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE

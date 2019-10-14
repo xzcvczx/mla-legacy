@@ -51,6 +51,8 @@ file_023=Hardware Profile
 file_024=Hardware Profile
 file_025=Hardware Profile
 file_026=.
+file_027=USB Stack
+file_028=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -79,6 +81,8 @@ file_023=no
 file_024=no
 file_025=no
 file_026=no
+file_027=no
+file_028=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -107,6 +111,8 @@ file_023=no
 file_024=no
 file_025=no
 file_026=yes
+file_027=no
+file_028=yes
 [FILE_INFO]
 file_000=main.c
 file_001=Files.c
@@ -135,6 +141,8 @@ file_023=HardwareProfile - PIC24FJ64GB004 PIM.h
 file_024=HardwareProfile - PIC24FJ256DA210 Development Board.h
 file_025=HardwareProfile - PIC24FJ256GB210 PIM.h
 file_026=..\Getting Started - Running the Device - Mass Storage - Internal Flash.htm
+file_027=..\..\Microchip\USB\usb_device_local.h
+file_028=..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

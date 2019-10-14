@@ -51,7 +51,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 /********************************************************************
  This code is specific to the MultiMedia Developement Board. 
 ********************************************************************/
-#ifdef MULTI_MEDIA_BOARD_DM00123
+#if defined (USE_XC2C64A)
+
 
 #include <stdint.h>
 #include <plib.h>
@@ -175,4 +176,4 @@ CPLD_DEVICE_CONFIGURATION CPLDGetDeviceConfiguration(void)
     return -1;
 }
 
-#endif
+#endif //#if defined (USE_XC2C64A)

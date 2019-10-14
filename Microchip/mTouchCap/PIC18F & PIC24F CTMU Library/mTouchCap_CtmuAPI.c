@@ -36,6 +36,7 @@
  * Bruce Bohn					10 Nov 2009  		Version 0.3 Updates
  * Sasha. M	/ Naveen. M			11 Nov 2009  		Version 1.0 Release
  * Sasha. M	/ Nithin. 			10 April 2010  		Version 1.20 Release
+  * Nithin M						11 Aug 2010	Implemetation of Low Power Demo 
  *****************************************************************************/
  #ifndef _MTOUCHCAP_CTMU_API_C
 #define  _MTOUCHCAP_CTMU_API_C
@@ -49,7 +50,8 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~	Variables	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-CHAR	trimbitsReady;
+WORD CapTouchkey_pressed_status =0;	//stores the count of the keys that were pressed
+BYTE	trimbitsReady;
 // array to store the active channel numbers that will be scanned in ISR
 #ifdef __PIC24F__
 WORD ScanChannels[MAX_ADC_CHANNELS]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF}; 
@@ -60,7 +62,10 @@ BYTE ScanChannelIndex =0;  // store the index of the channels that has to be sca
 BYTE Previous_Pressed_Channel_Num =0; //stores the channel number of the previous key that was pressed	
 BYTE Decode_Method_Used=DECODE_METHOD_PRESS_ASSERT;
 
-	
+#ifdef LOW_POWER_DEMO_ENABLE
+	extern BYTE Clock_Switch_Enable_Flag;	//FRC clock mode enable
+
+#endif	
 	
 				 
 
@@ -292,7 +297,11 @@ CHAR  mTouchCapAPI_AutoAdjustChannel (WORD ChannelNum, WORD AdcValueToAchieve)
 
 	
 	Trim_Value = 0;
-	Currrent_range_value = CURRENT_RANGE_100XBASE_CURRENT;
+
+
+		Currrent_range_value = CURRENT_RANGE_100XBASE_CURRENT;
+
+	
 	/* Check for valid channel number being passed */
 	if (! ( (ChannelNum >= CHANNEL_AN0) &&  (ChannelNum < MAX_ADC_CHANNELS)) )
 	{
@@ -305,7 +314,7 @@ CHAR  mTouchCapAPI_AutoAdjustChannel (WORD ChannelNum, WORD AdcValueToAchieve)
 			do {
 
 				mTouchCapAPI_CTMU_SetupCurrentSource(Currrent_range_value,Trim_Value);
-				for (DelayLoop=0; DelayLoop<= 20; DelayLoop++)
+ 				for (DelayLoop=0; DelayLoop<= 20; DelayLoop++)
 				{
 					Nop();	 
 					Nop();
@@ -482,6 +491,11 @@ WORD mTouchCapAPI_ScanChannelIterative (WORD ChannelNum, BYTE SampleCount)
 	DWORD total = 0;
 	BYTE sample;
 
+		//testing
+//	AD1PCFGLbits.PCFG8 = 1;
+//	TRISBbits.TRISB8 = 0;
+
+
 	/* Check for valid channel number being passed */
 	if (! ( (ChannelNum >= CHANNEL_AN0) &&  (ChannelNum < MAX_ADC_CHANNELS)) )
 	{
@@ -587,7 +601,9 @@ BYTE mTouchCapAPI_getChannelTouchStatus(WORD ChIndex, BYTE Decode_Method)
 									{
 				                     	   if ( curRawData[ChIndex] > curRawData[ScanChannels[temp]])    
 			                               TouchStatus = KEY_NOT_PRESSED;
-			                       			                    
+											//status of the key press for the low power demo
+											CapTouchkey_pressed_status  = TouchStatus; 
+			                       				                    
 				                    }               
 			                    }           
 			               } 
@@ -605,6 +621,8 @@ BYTE mTouchCapAPI_getChannelTouchStatus(WORD ChIndex, BYTE Decode_Method)
 					if (unpressedCount[ChIndex] > DEBOUNCECOUNT)
 					{ 	
 						TouchStatus = KEY_NOT_PRESSED;
+						//status of the key press for the low power demo
+						CapTouchkey_pressed_status  = TouchStatus; 
 					}
 
 				}
@@ -659,7 +677,8 @@ BYTE mTouchCapAPI_getChannelTouchStatus(WORD ChIndex, BYTE Decode_Method)
 									//store the pressed key channel number so that it can be used in the application
 									// to store the status of the channel of the pressed key
 									Previous_Pressed_Channel_Num = ChIndex;
-									
+									//status of the key press for the low power demo
+									CapTouchkey_pressed_status  =TouchStatus; 
 									Decode_Method_Used=DECODE_METHOD_PRESS_AND_RELEASE;
 						}
 					  }
@@ -688,6 +707,10 @@ BYTE mTouchCapAPI_getChannelTouchStatus(WORD ChIndex, BYTE Decode_Method)
 					{
 					   TouchStatus = KEY_PRESSED;
 					   Decode_Method_Used=DECODE_METHOD_PRESS_ASSERT;
+					//the variable  CapTouchkey_pressed_status will give the status of the keys
+					//which will be used in the 10sec timeout logic which will reset the timeout and restart the timeout 
+					//process
+					CapTouchkey_pressed_status  = TouchStatus ; 
 								
 					}
 				}else

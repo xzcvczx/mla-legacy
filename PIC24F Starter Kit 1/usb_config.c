@@ -37,9 +37,9 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "USB\usb.h"
-#include "USB\usb_host_msd.h"
-#include "USB\usb_host_msd_scsi.h"
+#include "USB/usb.h"
+#include "USB/usb_host_msd.h"
+#include "USB/usb_host_msd_scsi.h"
 
 // *****************************************************************************
 // Media Interface Function Pointer Table for the Mass Storage client driver

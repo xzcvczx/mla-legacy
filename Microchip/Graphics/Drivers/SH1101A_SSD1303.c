@@ -40,7 +40,7 @@
  * Paolo Tamayo			12/20/07	Ported to PIC24 Kit
  * PAT					3/26/10		Fixed error on PutPixel() timing (PMP timing).
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 BYTE    _color;
@@ -73,11 +73,11 @@ SHORT   _clipBottom;
 *
 ********************************************************************/
 #define SetAddress(page, lowerAddr, higherAddr) \
-	DeviceSetCommand(); \
+	DisplaySetCommand(); \
     DeviceWrite(page); \
     DeviceWrite(lowerAddr); \
     DeviceWrite(higherAddr); \
-	DeviceSetData();
+	DisplaySetData();
 
 
 /*********************************************************************
@@ -101,8 +101,8 @@ void ResetDevice(void)
 	// Initialize the device
 	DeviceInit();
 
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
 
     #if (DISPLAY_CONTROLLER == SH1101A)
 
@@ -228,8 +228,8 @@ void ResetDevice(void)
     #else
         #error The controller is not supported.
     #endif
-    DeviceDeselect();
-	DeviceSetData();
+    DisplayDisable();
+	DisplaySetData();
 }
 
 /*********************************************************************
@@ -293,7 +293,7 @@ void PutPixel(SHORT x, SHORT y)
     add <<= 3;                      // Multiply by 8
     add = y - add;                  // Calculate bit position
     mask = 1 << add;                // Left shift 1 by bit position
-    DeviceSelect();
+    DisplayEnable();
 
     SetAddress(page, lAddr, hAddr); // Set the address (sets the page,
 
@@ -313,7 +313,7 @@ void PutPixel(SHORT x, SHORT y)
 
     // lower and higher column address pointers)
     DeviceWrite(display);             // restore the byte with manipulated bit
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -377,7 +377,7 @@ BYTE GetPixel(SHORT x, SHORT y)
     temp <<= 3;                     // Multiply by 8
     temp = y - temp;                // Calculate bit position
     mask = 1 << temp;               // Left shift 1 by bit position
-    DeviceSelect();
+    DisplayEnable();
 
     SetAddress(page, lAddr, hAddr); // Set the address (sets the page,
 
@@ -385,7 +385,7 @@ BYTE GetPixel(SHORT x, SHORT y)
     display = SingleDeviceRead();	// Read to initiate Read transaction on PMP
                                     // Dummy Read (requirement for data synchronization in the controller)
     display = DeviceRead();         // Read data from display buffer
-    DeviceDeselect();
+    DisplayDisable();
 
     return (display & mask);        // mask all other bits and return the result	
 }
@@ -409,7 +409,7 @@ BYTE GetPixel(SHORT x, SHORT y)
 void ClearDevice(void)
 {
     BYTE    i, j;
-    DeviceSelect();
+    DisplayEnable();
     for(i = 0xB0; i < 0xB8; i++)
     {       // Go through all 8 pages
         SetAddress(i, 0x00, 0x10);
@@ -419,5 +419,5 @@ void ClearDevice(void)
         }
     }
 
-    DeviceDeselect();
+    DisplayDisable();
 }

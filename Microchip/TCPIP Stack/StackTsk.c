@@ -70,12 +70,12 @@
 
 #if defined( WF_CS_TRIS )
     #if defined( WF_CONFIG_CONSOLE )
-        #include "TCPIP Stack\WFConsole.h"
+        #include "TCPIP Stack/WFConsole.h"
     #endif
     #if defined( STACK_USE_EZ_CONFIG ) || defined( EZ_CONFIG_SCAN )
-        #include "TCPIP Stack\WFEasyConfig.h"
+        #include "TCPIP Stack/WFEasyConfig.h"
     #endif
-	#include "TCPIP Stack\WFApi.h"
+	#include "TCPIP Stack/WFApi.h"
 #endif
 
 // Stack FSM states.
@@ -122,8 +122,8 @@ void StackInit(void)
 
 #endif
 
-	// Seed the rand() function
-	srand(GenerateRandomDWORD());
+	// Seed the LFSRRand() function
+	LFSRSeedRand(GenerateRandomDWORD());
 
     MACInit();
 

@@ -33,7 +33,7 @@
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "FSConfig.h"
-#include "MDD File System\Internal Flash.h"
+#include "MDD File System/Internal Flash.h"
 
 #if defined(__18CXX)
     #pragma romdata Files=FILES_ADDRESS

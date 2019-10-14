@@ -53,9 +53,9 @@
     #define tris_self_power     TRISAbits.TRISA2    // Input
     #define self_power          1
 
-    #define USE_USB_BUS_SENSE_IO
+    //#define USE_USB_BUS_SENSE_IO
     #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
-    #define USB_BUS_SENSE       U1OTGSTATbits.SESVD 
+    #define USB_BUS_SENSE       U1OTGSTATbits.SESVD // Special considerations required if using SESVD for this purpose.  See documentation.
    
     //Uncomment this to make the output HEX of this project 
     //   to be able to be bootloaded using the HID bootloader

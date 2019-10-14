@@ -303,7 +303,7 @@ void HTTPExecCmd(BYTE** argv, BYTE argc)
         }
 		
 		// Save any changes to non-volatile memory
-      	SaveAppConfig();
+      	SaveAppConfig(&AppConfig);
 
 
 		// Return the same CONFIG.CGI file as a result.

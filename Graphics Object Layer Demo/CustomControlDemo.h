@@ -64,6 +64,10 @@ typedef struct
     SHORT           right;          // right border
     SHORT           bottom;         // bottom border
     GOL_SCHEME      *pGolScheme;    // the style scheme used
+    DRAW_FUNC       draw;
+    FREE_FUNC           FreeObj;                        // function pointer to the object free function
+    MSG_FUNC            MsgObj;                         // function pointer to the object message function
+    MSG_DEFAULT_FUNC    MsgDefaultObj;                  // function pointer to the object default message function
     WORD            pos;            // current position
     WORD            prevPos;        // previous position
 } CUSTOM;
@@ -126,7 +130,7 @@ typedef struct
 CUSTOM * CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME * pScheme);
 
 /*********************************************************************
-* Function: WORD CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg)
+* Function: WORD CcTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * PreCondition: none
 *
@@ -142,10 +146,10 @@ CUSTOM * CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WOR
 * Note: none
 *
 ********************************************************************/
-WORD    CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
+WORD    CcTranslateMsg(void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
-* Function: void CcMsgDefault(CUSTOM* pCc, GOL_MSG* pMsg)
+* Function: void CcMsgDefault(void *pObj, GOL_MSG* pMsg)
 *
 * PreCondition: none
 *
@@ -161,7 +165,7 @@ WORD    CcTranslateMsg(CUSTOM *pCc, GOL_MSG *pMsg);
 * Note: none
 *
 ********************************************************************/
-void    CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg);
+void    CcMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg);
 
 /*********************************************************************
 * Function: WORD CcDraw(CUSTOM *pCc)
@@ -181,5 +185,5 @@ void    CcMsgDefault(CUSTOM *pCc, GOL_MSG *pMsg);
 * Note: none
 *
 ********************************************************************/
-WORD    CcDraw(CUSTOM *pCc);
+WORD CcDraw(void *pObj);
 #endif // _CUSTOM_H

@@ -73,6 +73,11 @@ Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
   2.6 - 2.7a  No change
+  2.7b		  Improved error case checking, error case recovery, and 
+			  sense key/status reporting to the host.
+  			  Implemented adjustable read/write failure retry feature.
+			  Fixed minor bug that would have interfered with supporting 
+			  more than 7 LUNs simultaneously.
 
 ********************************************************************/
  
@@ -93,11 +98,11 @@ Change History:
 
 #if defined(__C30__) || defined(__C32__)
     #if defined(USE_INTERNAL_FLASH)
-        #include "MDD File System\Internal Flash.h"
+        #include "MDD File System/Internal Flash.h"
     #endif
 
     #if defined(USE_SD_INTERFACE_WITH_SPI)
-        #include "MDD File System\SD-SPI.h"
+        #include "MDD File System/SD-SPI.h"
     #endif
 
     extern LUN_FUNCTIONS LUN[MAX_LUN + 1];
@@ -110,11 +115,11 @@ Change History:
     #define LUNSectorRead(bLBA,pSrc)            LUN[LUN_INDEX].SectorRead(bLBA, pSrc)
 #else
     #if defined(USE_INTERNAL_FLASH)
-        #include "MDD File System\Internal Flash.h"
+        #include "MDD File System/Internal Flash.h"
     #endif
 
     #if defined(USE_SD_INTERFACE_WITH_SPI)
-        #include "MDD File System\SD-SPI.h"
+        #include "MDD File System/SD-SPI.h"
     #endif
 
     #define LUNMediaInitialize()                MDD_MediaInitialize()
@@ -126,9 +131,16 @@ Change History:
     #define LUNSectorRead(bLBA,pSrc)            MDD_SectorRead(bLBA, pSrc)
 #endif
 
+//Adjustable user options
+#define MSD_FAILED_READ_MAX_ATTEMPTS  (BYTE)100u    //Used for error case handling
+#define MSD_FAILED_WRITE_MAX_ATTEMPTS (BYTE)100u    //Used for error case handling
+
 /** V A R I A B L E S ************************************************/
 #pragma udata
 BYTE MSD_State;			// Takes values MSD_WAIT, MSD_DATA_IN or MSD_DATA_OUT
+BYTE MSDReadState;
+BYTE MSDWriteState;
+BYTE MSDRetryAttempt;
 USB_MSD_CBW gblCBW;	
 BYTE gblCBWLength;
 RequestSenseResponse gblSenseData[MAX_LUN + 1];
@@ -197,7 +209,10 @@ void USBMSDInit(void)
 {
     USBMSDInHandle = 0;
     USBMSDOutHandle = USBRxOnePacket(MSD_DATA_OUT_EP,(BYTE*)&msd_cbw,MSD_OUT_EP_SIZE);
-    MSD_State=MSD_WAIT;
+    MSD_State = MSD_WAIT;
+    MSDCommandState = MSD_COMMAND_WAIT;
+    MSDReadState = MSD_READ10_WAIT;
+    MSDWriteState = MSD_WRITE10_WAIT;
     gblNumBLKS.Val = 0;
     gblBLKLen.Val = 0;
 
@@ -217,7 +232,7 @@ void USBMSDInit(void)
             {
                 //if the media was present and successfully initialized
                 //  then mark and indicator that the media is ready
-                gblMediaPresent |= (1<<gblCBW.bCBWLUN);
+                gblMediaPresent |= ((WORD)1<<gblCBW.bCBWLUN);
             }
         }
         ResetSenseData();
@@ -270,6 +285,16 @@ void USBCheckMSDRequest(void)
 	switch(SetupPkt.bRequest)
     {
 	    case MSD_RESET:
+	        //Host would typically issue this after a STALL event on an MSD
+	        //bulk endpoint.  The MSD reset should re-initialize status
+	        //so as to prepare for a new CBW.  Any currently ongoing command
+	        //block should be aborted, but the STALL and DTS states need to be
+	        //maintained (host will re-initialize these seperately using 
+	        //CLEAR_FEATURE, endpoint halt).
+            MSD_State = MSD_WAIT;
+            MSDCommandState = MSD_COMMAND_WAIT;
+            MSDReadState = MSD_READ10_WAIT;
+            MSDWriteState = MSD_WRITE10_WAIT;
 	    	break;
 	    case GET_MAX_LUN:
             //If the host asks for the maximum number of logical units
@@ -376,6 +401,24 @@ BYTE MSDTasks(void)
                     	msd_csw.dCSWTag=gblCBW.dCBWTag;
                     	msd_csw.dCSWSignature=0x53425355;
                     	
+                    	//Keep track of retry attempts, in case of temporary failures
+                    	//during processing of a command.
+                    	MSDRetryAttempt = 0;
+                    	
+                    	//Check the command.  With the exception of the REQUEST_SENSE
+                    	//command, we should reset the sense key info for each new command block.
+                    	//Assume the command will get processed successfully (and hence "NO SENSE" 
+                    	//response, which is used for success cases), unless handler code
+                    	//later on detects some kind of error.  If it does, it should
+                    	//update the sense keys to reflect the type of error detected,
+                    	//prior to sending the CSW.
+                    	if(gblCBW.CBWCB[0] != MSD_REQUEST_SENSE)
+                    	{
+                      		gblSenseData[LUN_INDEX].SenseKey=S_NO_SENSE;
+        			        gblSenseData[LUN_INDEX].ASC=ASC_NO_ADDITIONAL_SENSE_INFORMATION;
+        			        gblSenseData[LUN_INDEX].ASCQ=ASCQ_NO_ADDITIONAL_SENSE_INFORMATION;
+    			        }
+                    	
         				/* If direction is device to host*/
         				if (gblCBW.bCBWFlags==0x80)
         				{
@@ -427,6 +470,12 @@ BYTE MSDTasks(void)
         
            	MSD_State=MSD_WAIT;
             break;
+            
+        default:
+            //Illegal condition that should not happen, but might occur if the
+            //device firmware incorrectly calls MSDTasks() prior to calling
+            //USBMSDInit() during the set-configuration portion of enumeration.
+            MSD_State=MSD_WAIT;
     }
     
     return MSD_State;
@@ -711,17 +760,17 @@ BYTE MSDProcessCommand(void)
 {   
   	if(LUNMediaDetect() == FALSE || SoftDetach[gblCBW.bCBWLUN] == TRUE)
     {
-        gblMediaPresent &= ~(1<<gblCBW.bCBWLUN);
+        gblMediaPresent &= ~((WORD)1<<gblCBW.bCBWLUN);
 
         MSDProcessCommandMediaAbsent();
    	}
     else
     {
-        if((gblMediaPresent & (1<<gblCBW.bCBWLUN)) == 0)
+        if((gblMediaPresent & ((WORD)1<<gblCBW.bCBWLUN)) == 0)
         {
             if(LUNMediaInitialize())
             {
-                gblMediaPresent |= (1<<gblCBW.bCBWLUN);
+                gblMediaPresent |= ((WORD)1<<gblCBW.bCBWLUN);
 
         		gblSenseData[LUN_INDEX].SenseKey=S_UNIT_ATTENTION;
         		gblSenseData[LUN_INDEX].ASC=0x28;
@@ -770,8 +819,6 @@ BYTE MSDProcessCommand(void)
 
 BYTE MSDReadHandler(void)
 {
-    static BYTE MSDReadState = MSD_READ10_WAIT;
-    
     switch(MSDReadState)
     {
         case MSD_READ10_WAIT:
@@ -782,7 +829,9 @@ BYTE MSDReadHandler(void)
         	
         	TransferLength.v[1]=gblCBW.CBWCB[7];
         	TransferLength.v[0]=gblCBW.CBWCB[8];
-        	
+
+            //Assume success initially, msd_csw.bCSWStatus will get set to 0x01 
+            //or 0x02 later if an error is detected during the actual read sequence.        	
         	msd_csw.bCSWStatus=0x0;
         	msd_csw.dCSWDataResidue=0x0;
         	
@@ -804,21 +853,37 @@ BYTE MSDReadHandler(void)
             {
                 break;
             }
-
+            
+            //Try to read a sector worth of data from the media, but check for
+            //possible errors.
     		if(LUNSectorRead(LBA.Val, (BYTE*)&msd_buffer[0]) != TRUE)
     		{
-				msd_csw.bCSWStatus=0x01;			// Error 0x01 Refer page#18
+				if(MSDRetryAttempt < MSD_FAILED_READ_MAX_ATTEMPTS)
+				{
+				    MSDRetryAttempt++;
+                    break;
+				}
+				else
+				{  
+    				//Too many consecutive failed reads have occurred.  Need to
+    				//give up and abandon the sector read attempt; something must
+    				//be wrong and we don't want to get stuck in an infinite loop.
+    				//Need to indicate to the host that a device error occurred.
+    				//However, we can't send the CSW immediately, since the host
+    				//still expects to receive sector read data on the IN endpoint 
+    				//first.  Therefore, we still send dummy bytes, before
+    				//we send the CSW with the failed status in it.
+    				msd_csw.bCSWStatus=0x01;		// Error 0x01 Refer page#18
                                                     // of BOT specifications
-				/* Don't read any more data*/
-				msd_csw.dCSWDataResidue=0x0;
-              
-                MSD_State = MSD_DATA_IN;
-        		break;
-            }
+                    //Set error status sense keys, so the host can check them later
+                    //to determine how to proceed.
+                    gblSenseData[LUN_INDEX].SenseKey=S_MEDIUM_ERROR;
+			        gblSenseData[LUN_INDEX].ASC=ASC_NO_ADDITIONAL_SENSE_INFORMATION;
+			        gblSenseData[LUN_INDEX].ASCQ=ASCQ_NO_ADDITIONAL_SENSE_INFORMATION;
+                }
+            }//else we successfully read a sector worth of data from our media
 
             LBA.Val++;
-            
-			msd_csw.bCSWStatus=0x00;			// success
 			msd_csw.dCSWDataResidue=BLOCKLEN_512;//in order to send the
                                                  //512 bytes of data read
                                                  
@@ -838,23 +903,29 @@ BYTE MSDReadHandler(void)
             //Fall through to MSD_READ10_TX_PACKET
             
         case MSD_READ10_TX_PACKET:
-        	if ((msd_csw.bCSWStatus==0x00)&&(msd_csw.dCSWDataResidue>=MSD_IN_EP_SIZE)) 
+    		/* Write next chunk of data to EP Buffer and send */
+            
+            //Make sure the endpoint is available before using it.
+            if(USBHandleBusy(USBMSDInHandle))
             {
-        		/* Write next chunk of data to EP Buffer and send */
-                if(USBHandleBusy(USBMSDInHandle))
-                {
-                    break;
-                }
-                
-                USBMSDInHandle = USBTxOnePacket(MSD_DATA_IN_EP,ptrNextData,MSD_IN_EP_SIZE);
-                
-  			    MSDReadState = MSD_READ10_TX_SECTOR;
+                break;
+            }
+            //Prepare the USB module to send an IN transaction worth of data to the host.
+            USBMSDInHandle = USBTxOnePacket(MSD_DATA_IN_EP,ptrNextData,MSD_IN_EP_SIZE);
+            
+ 			MSDReadState = MSD_READ10_TX_SECTOR;
 
-        		gblCBW.dCBWDataTransferLength-=	MSD_IN_EP_SIZE;
-        		msd_csw.dCSWDataResidue-=MSD_IN_EP_SIZE;
-        		ptrNextData+=MSD_IN_EP_SIZE;
-        	}
+    		gblCBW.dCBWDataTransferLength-=	MSD_IN_EP_SIZE;
+    		msd_csw.dCSWDataResidue-=MSD_IN_EP_SIZE;
+    		ptrNextData+=MSD_IN_EP_SIZE;
             break;
+        
+        default:
+            //Illegal condition, should never occur.  In the event that it ever
+            //did occur anyway, try to notify the host of the error.
+            msd_csw.bCSWStatus=0x02;  //indicate "Phase Error"
+            //Advance state machine
+            MSDReadState = MSD_READ10_WAIT;
     }
     
     return MSDReadState;
@@ -886,8 +957,6 @@ BYTE MSDReadHandler(void)
  *****************************************************************************/
 BYTE MSDWriteHandler(void)
 {
-    static BYTE MSDWriteState = MSD_WRITE10_WAIT;
-    
     switch(MSDWriteState)
     {
         case MSD_WRITE10_WAIT:
@@ -901,6 +970,8 @@ BYTE MSDWriteHandler(void)
         	TransferLength.v[1]=gblCBW.CBWCB[7];
         	TransferLength.v[0]=gblCBW.CBWCB[8];
         
+        	//Initially assume success, unless handler code later encounters an
+        	//error condition and sets the status to 0x01 or 0x02.
         	msd_csw.bCSWStatus=0x0;	
         	
         	MSD_State = MSD_WRITE10_BLOCK;
@@ -934,18 +1005,22 @@ BYTE MSDWriteHandler(void)
       	    }
       	    else
       	    {
+          		//We finished receiving a sector worth of data from the host.
+          		//Check if the media is write protected before deciding what
+          		//to do with the data.
           		if(LUNWriteProtectState()) 
                 {
+                    //The device appears to be write protected.
+              	    //Let host know error occurred.  The bCSWStatus flag is also used by
+              	    //the write handler, to know not to even attempt the write sequence.
+              	    msd_csw.bCSWStatus=0x01;    
+              	    
+                    //Set sense keys so the host knows what caused the error.
               	    gblSenseData[LUN_INDEX].SenseKey=S_NOT_READY;
               	    gblSenseData[LUN_INDEX].ASC=ASC_WRITE_PROTECTED;
               	    gblSenseData[LUN_INDEX].ASCQ=ASCQ_WRITE_PROTECTED;
-              	    msd_csw.bCSWStatus=0x01;
-              	    //TODO: (DF) - what state should I return to?
               	}
-              	else
-              	{
-      			    MSDWriteState = MSD_WRITE10_SECTOR;     
-      			}
+   			    MSDWriteState = MSD_WRITE10_SECTOR;     
       			break;
           	}
         }
@@ -964,22 +1039,51 @@ BYTE MSDWriteHandler(void)
             break;
         case MSD_WRITE10_SECTOR:
         {
-      		if(LUNSectorWrite(LBA.Val, (BYTE*)&msd_buffer[0], (LBA.Val==0)?TRUE:FALSE) != TRUE)
+            //Make sure that no error has been detected, before performing the write
+            //operation.  If there was an error, skip the write operation, but allow
+            //the TransferLength to continue decrementing, so that we can eventually
+            //receive all OUT bytes that the host is planning on sending us.  Only
+            //after that is complete will the host send the IN token for the CSW packet,
+            //which will contain the bCSWStatus letting it know an error occurred.
+      		if(msd_csw.bCSWStatus == 0x00)
       		{
-          		break;
+          		if(LUNSectorWrite(LBA.Val, (BYTE*)&msd_buffer[0], (LBA.Val==0)?TRUE:FALSE) != TRUE)
+          		{
+              		//The write operation failed for some reason.  Keep track of retry
+              		//attempts and abort if repeated write attempts also fail.
+    				if(MSDRetryAttempt < MSD_FAILED_WRITE_MAX_ATTEMPTS)
+    				{
+    				    MSDRetryAttempt++;
+                        break;
+    				}
+    				else
+    				{  
+        				//Too many consecutive failed write attempts have occurred. 
+        				//Need to give up and abandon the write attempt.
+        				msd_csw.bCSWStatus=0x01;		// Error 0x01 Refer page#18
+                                                        // of BOT specifications
+                        //Set error status sense keys, so the host can check them later
+                        //to determine how to proceed.
+                        gblSenseData[LUN_INDEX].SenseKey=S_MEDIUM_ERROR;
+    			        gblSenseData[LUN_INDEX].ASC=ASC_NO_ADDITIONAL_SENSE_INFORMATION;
+    			        gblSenseData[LUN_INDEX].ASCQ=ASCQ_NO_ADDITIONAL_SENSE_INFORMATION;
+                    }              		
+          		}
       		}
       
-    //		if (status) {
-    //			msd_csw.bCSWStatus=0x01;
-    //			/* add some sense keys here*/
-    //		}
-      
-      		LBA.Val++;				// One LBA is written. Write the next LBA
-      		TransferLength.Val--;
-      
+            //One LBA is written (unless an error occurred).  Advance state
+            //variables so we can eventually finish handling the CBW request.
+      		LBA.Val++;				
+      		TransferLength.Val--;      
             MSDWriteState = MSD_WRITE10_BLOCK;
             break;
         } 
+        
+        default:
+            //Illegal condition which should not occur.  If for some reason it
+            //does, try to let the host know know an error has occurred.
+            msd_csw.bCSWStatus=0x02;    //Phase Error
+            MSDWriteState = MSD_WRITE10_WAIT;            
     }
     
     return MSDWriteState;

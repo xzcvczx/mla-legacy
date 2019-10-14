@@ -141,6 +141,10 @@
 
 //#define USE_BITMAP_EXTERNAL		// Support for bitmaps located in external memory
 
+#ifdef __PIC24FJ256DA210__
+	#define USE_COMP_IPU	
+#endif	
+
 /*********************************************************************
 * Overview: Define the malloc() and free() for versatility on OS 
 *           based systems. 

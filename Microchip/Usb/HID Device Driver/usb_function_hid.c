@@ -33,6 +33,12 @@
     CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
   File Description:
+    
+    Change History:
+     Rev   Date         Description
+     1.0   11/19/2004   Initial release
+     2.1   02/26/2007   Updated for simplicity and to use common
+                        coding style
 
   Summary:
     This file contains all of functions, macros, definitions, variables,
@@ -40,9 +46,10 @@
     driver. This file should be included in projects that use the HID
     \function driver.
     
+    
+    
     This file is located in the "\<Install Directory\>\\Microchip\\USB\\HID
     Device Driver" directory.
-
   Description:
     USB HID Function Driver File
     
@@ -64,9 +71,15 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
+    ..\\Include
+    
+    ..\\..\\Include
+    
     ..\\..\\Microchip\\Include
     
-    .
+    ..\\..\\\<Application Folder\>
+    
+    ..\\..\\..\\\<Application Folder\>
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -75,15 +88,6 @@
     C:\\Microchip Solutions\\Microchip\\Include
     
     C:\\Microchip Solutions\\My Demo Application  
-   
-  Change History:
-    Rev       Description
-    -------   -----------------------------------------------------
-    1.0       Initial release
-    2.1       Updated for simplicity and to use common coding style
-    2.1-2.6   No change
-    2.6a      Updated the handling of the physical descriptor
-    2.7-2.7a  No change
 *******************************************************************/
 
 #ifndef USB_FUNCTION_HID_C

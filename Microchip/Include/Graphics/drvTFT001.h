@@ -40,11 +40,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date			Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok     01/29/08
- * Sean Justice         01/31/08	combined portrait and landscape, PIC32 support
- * Anton Alkhimenok     06/26/09    16-bit PMP support
+ * 01/29/08
+ * 01/31/08		combined portrait and landscape, PIC32 support
+ * 06/26/09		16-bit PMP support
  *****************************************************************************/
 #ifndef _DRVTFT001_H
     #define _DRVTFT001_H

@@ -37,7 +37,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     02/25/09	
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 // Color
 BYTE    _color;
@@ -79,9 +79,9 @@ void ResetDevice(void)
 	// Initialize the device
 	DeviceInit();
 
-	DeviceSelect();
+	DisplayEnable();
 
-	DeviceSetCommand();
+	DisplaySetCommand();
     // set Vbias
     DeviceWrite(CMD_BIAS_RATIO_12);
     DeviceWrite(CMD_CONTRAST);
@@ -123,9 +123,9 @@ void ResetDevice(void)
 
     DeviceWrite(CMD_DISPLAY_ON);
 
-	DeviceSetData();
+	DisplaySetData();
 
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -146,12 +146,12 @@ void ResetDevice(void)
 ********************************************************************/
 void ContrastSet(BYTE contrast)
 {
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(CMD_CONTRAST);
     DeviceWrite(contrast);
-	DeviceSetData(0;
-    DeviceDeselect();
+	DisplaySetData();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -188,14 +188,14 @@ void PutPixel(SHORT x, SHORT y)
 
     x += DISP_START_COLUMN;
 
-    DeviceSelect();
+    DisplayEnable();
 
     // set address
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CMD_COLUMN_ADDR_LSB | (x & 0x0f));
     DeviceWrite(CMD_COLUMN_ADDR_MSB | ((x >> 4) & 0x0f));
     DeviceWrite(CMD_PAGE_ADDR | (DISP_START_PAGE + (y >> 2)));
-	DeviceSetData();
+	DisplaySetData();
 
     // read 4 pixels
     value = DeviceRead();
@@ -211,16 +211,16 @@ void PutPixel(SHORT x, SHORT y)
     }
 
     // set address
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CMD_COLUMN_ADDR_LSB | (x & 0x0f));
     DeviceWrite(CMD_COLUMN_ADDR_MSB | ((x >> 4) & 0x0f));
     DeviceWrite(CMD_PAGE_ADDR | (DISP_START_PAGE + (y >> 2)));
-	DeviceSetData();
+	DisplaySetData();
 
     // write 4 pixels back
     WriteData(value);
 
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************
@@ -245,20 +245,20 @@ WORD GetPixel(SHORT x, SHORT y)
 
     x += DISP_START_COLUMN;
 
-    DeviceSelect();
+    DisplayEnable();
 
     // set address
-	DeviceSetCommand();
+	DisplaySetCommand();
     DeviceWrite(CMD_COLUMN_ADDR_LSB | (x & 0x0f));
     DeviceWrite(CMD_COLUMN_ADDR_MSB | ((x >> 4) & 0x0f));
     DeviceWrite(CMD_PAGE_ADDR | (DISP_START_PAGE + (y >> 2)));
-	DeviceSetData();
+	DisplaySetData();
 
     // read 4 pixels
     value = DeviceRead();
     value = DeviceRead();
 
-    DeviceDeselect();
+    DisplayDisable();
 
     // get pixel
     switch(y & 0x03)
@@ -298,19 +298,19 @@ void ClearDevice(void)
     pattern |= pattern << 2;
     pattern |= pattern << 4;
 
-    DeviceSelect();
-	DeviceSetCommand();
+    DisplayEnable();
+	DisplaySetCommand();
     DeviceWrite(CMD_COLUMN_ADDR_LSB | (DISP_START_COLUMN & 0x0f));
     DeviceWrite(CMD_COLUMN_ADDR_MSB | ((DISP_START_COLUMN >> 4) & 0x0f));
     DeviceWrite(CMD_PAGE_ADDR | DISP_START_PAGE);
-	DeviceSetData();
+	DisplaySetData();
 
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1) / 4; counter++)
     {
         WriteData(pattern);
     }
 
-    DeviceDeselect();
+    DisplayDisable();
 }
 
 /*********************************************************************

@@ -42,7 +42,7 @@ Pradeep Budagutta    06-Jun-2008    First release
 *******************************************************************************/
 
 /* This is used to configure the image decoder */
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
 
 /************* User configuration start *************/
 

@@ -175,6 +175,7 @@ image file to memory.
 
 // These macros define the maximum size of a Flash block.
 
+//512KB PIC32 variants
 #if defined(__32MX460F512L__) || \
     defined(__32MX440F512H__) || \
     defined(__32MX775F512L__) || \
@@ -192,7 +193,7 @@ image file to memory.
 
     //This set of options will only work with optimazation setting -Os
     //  Address of main application's Startup code
-    #define APPLICATION_ADDRESS         0x9D00E000
+    #define APPLICATION_ADDRESS         0x9D00F000
     //  Base address and length of user flash block
     #define PROGRAM_FLASH_BASE          0x1D00E000          // Physical address
     #define PROGRAM_FLASH_LENGTH        0x00072000          // Length in bytes
@@ -211,6 +212,7 @@ image file to memory.
 //    #define PROGRAM_FLASH_BASE          0x1D017000          // Physical address
 //    #define PROGRAM_FLASH_LENGTH        0x00069000          // Length in bytes
 
+//256KB PIC32 variants
 #elif defined(__32MX460F256L__) || \
       defined(__32MX440F256H__) || \
       defined(__32MX775F256L__) || \
@@ -224,7 +226,7 @@ image file to memory.
 
     //This set of options will only work with optimazation setting -Os
     //  Address of main application's Startup code
-    #define APPLICATION_ADDRESS         0x9D00E000
+    #define APPLICATION_ADDRESS         0x9D00F000
     //  Base address and length of user flash block
     #define PROGRAM_FLASH_BASE          0x1D00E000          // Physical address
     #define PROGRAM_FLASH_LENGTH        0x00032000          // Length in bytes
@@ -243,14 +245,16 @@ image file to memory.
 //    #define PROGRAM_FLASH_BASE          0x1D010000          // Physical address
 //    #define PROGRAM_FLASH_LENGTH        0x00030000          // Length in bytes
 
+//128KB PIC32 variants
 #elif defined(__32MX440F128H__) || \
-      defined(__32MX440F128L__)
+      defined(__32MX440F128L__) || \
+      defined(__32MX764F128L__)
 
     #define FLASH_BLOCK_SIZE            (1024 * 4)          // Size in bytes
 
     //This set of options will only work with optimazation setting -Os
     //  Address of main application's Startup code
-    #define APPLICATION_ADDRESS         0x9D00E000
+    #define APPLICATION_ADDRESS         0x9D00F000
     //  Base address and length of user flash block
     #define PROGRAM_FLASH_BASE          0x1D00E000          // Physical address
     #define PROGRAM_FLASH_LENGTH        0x00012000          // Length in bytes
@@ -269,20 +273,60 @@ image file to memory.
 //    #define PROGRAM_FLASH_BASE          0x1D017000          // Physical address
 //    #define PROGRAM_FLASH_LENGTH        0x00009000          // Length in bytes
 
+//245KB PIC24F variants
+#elif   defined(__PIC24FJ256GB110__) || \
+        defined(__PIC24FJ256GB108__) || \
+        defined(__PIC24FJ256GB106__) || \
+        defined(__PIC24FJ256DA210__) || \
+        defined(__PIC24FJ256DA206__) || \
+        defined(__PIC24FJ256DA110__) || \
+        defined(__PIC24FJ256DA106__) || \
+        defined(__PIC24FJ256GB210__) || \
+        defined(__PIC24FJ256GB206__)
 
-#elif defined(__PIC24F__)
+		#define APPLICATION_ADDRESS         0xA000ul
 
-#define APPLICATION_ADDRESS         0xA000
+		// These macros define the maximum size of a Flash block.
+		#define PROGRAM_FLASH_BASE          0xA000ul          // Physical address
+		//#define PROGRAM_FLASH_LENGTH        0x00020C00ul          // Length in bytes - this includes the configuration words
+		#define PROGRAM_FLASH_LENGTH        0x00020800ul          // Length in bytes - this does not include the configuration words
+		
+		#define FLASH_BLOCK_SIZE            (1024)          // Size in bytes
 
-// These macros define the maximum size of a Flash block.
-#define PROGRAM_FLASH_BASE          0x0000A000          // Physical address
-//#define PROGRAM_FLASH_LENGTH        0x00020C00          // Length in bytes - this includes the configuration words
-#define PROGRAM_FLASH_LENGTH        0x00020800          // Length in bytes - this does not include the configuration words
+//192KB PIC24F variants
+#elif defined(__PIC24FJ192GB110__) || \
+      defined(__PIC24FJ192GB108__) || \
+      defined(__PIC24FJ192GB106__)
 
-#define FLASH_BLOCK_SIZE            (1024)          // Size in bytes
+		#define APPLICATION_ADDRESS         0xA000ul
 
+		// These macros define the maximum size of a Flash block.
+		#define PROGRAM_FLASH_BASE          0xA000ul          // Physical address
+		//#define PROGRAM_FLASH_LENGTH        0x16400ul          // Length in bytes - this includes the configuration words
+		#define PROGRAM_FLASH_LENGTH        0x16000ul         // Length in bytes - this does not include the configuration words
+		
+		#define FLASH_BLOCK_SIZE            (1024)          // Size in bytes
+
+//128KB PIC24F variants
+#elif defined(__PIC24FJ128GB110__) || \
+      defined(__PIC24FJ128GB108__) || \
+      defined(__PIC24FJ128GB106__) || \
+      defined(__PIC24FJ128DA106__) || \
+      defined(__PIC24FJ128DA110__) || \
+      defined(__PIC24FJ128DA206__) || \
+      defined(__PIC24FJ128DA210__) || \
+      defined(__PIC24FJ128GB210__) || \
+      defined(__PIC24FJ128GB206__)
+		#define APPLICATION_ADDRESS         0xA000ul
+
+		// These macros define the maximum size of a Flash block.
+		#define PROGRAM_FLASH_BASE          0xA000ul          // Physical address
+		//#define PROGRAM_FLASH_LENGTH        0xB400ul          // Length in bytes - this includes the configuration words
+		#define PROGRAM_FLASH_LENGTH        0xB000ul         // Length in bytes - this does not include the configuration words
+		
+		#define FLASH_BLOCK_SIZE            (1024)          // Size in bytes
 #else
-    #error "Device currently supported"
+    #error "Device currently not supported"
 #endif
 
 // Optional Record Type Support (Necessary if EXTENDED_HEXFILE_SUPPORT is defined)

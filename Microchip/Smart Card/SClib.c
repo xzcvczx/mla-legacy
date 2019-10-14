@@ -1,11 +1,11 @@
 /********************************************************************
  FileName:		SClib.c
  Dependencies:	See INCLUDES section
- Processor:		PIC18, PIC24 Microcontrollers
+ Processor:		PIC18,PIC24,PIC32 & dsPIC33F Microcontrollers
  Hardware:		This demo is natively intended to be used on Exp 16, LPC
  				& HPC Exp board. This demo can be modified for use on other hardware
  				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24)
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24 & dsPIC) & C32 (for PIC32) 
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -37,16 +37,19 @@
   1.0   Initial release
   1.01  Cleaned up unnecessary variables,supported T=1 protocol
         and improvments in T=0 functions following the coding standards
+  1.02  Disciplined the code. No functional changes made.
 ********************************************************************/
 
 #include <string.h>
 #include "./Smart Card/SClib.h"
 #include "sc_config.h"
 
-#if defined(__PIC24F__)
+#if defined(__PIC24F__) || defined(__PIC24H__)
 	#include "./Smart Card/SCpic24.h"
 #elif defined(__PIC32MX__)
 	#include "./Smart Card/SCpic32.h"
+#elif defined(__dsPIC33F__)
+	#include "./Smart Card/SCdspic33f.h"
 #else
 	#ifdef __18CXX
 	#include "./Smart Card/SCpic18.h"
@@ -78,14 +81,11 @@ SC_STATUS gCardState = UNKNOWN;
 SC_ERROR scLastError = SC_ERR_NONE;
 
 // Work Wait time for T=0 Protocol in units of etu's
-unsigned long cgtETU;
 unsigned long cgt;
 unsigned long t0WWTetu;
 unsigned long t0WWT;	
-BOOL delayLapsedFlag = FALSE;
 
 static void SC_WaitTime(void);
-static void SC_Delay(unsigned int instructionCount);
 
 #ifdef SC_PROTO_T1
 
@@ -115,6 +115,9 @@ static void SC_Delay(unsigned int instructionCount);
 	static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffer,unsigned long blockWaitTime);
 
 #endif
+
+// Character Guard Time for T=0 & T=1 Protocol
+BYTE cgtETU;
 
 // CLA set to '00' = no command chaining, 
 //                   no secure messaging, 
@@ -213,7 +216,11 @@ BOOL SC_PowerOnATR()
 	scLastError = SC_ERR_NONE;
 	scATRLength = 0;
 //	t0WWT = (9600UL * (FCY/baudRate))/4;
+	
+	// Wait count for maximum of 40,000 to 45,000 smard card clock cycles 
+	// to get an ATR from card
 	atrDelayCnt = 40000UL * (FCY/scReferenceClock);
+	
 	WaitMilliSec(2);
 
 	SCdrv_EnableUART();
@@ -323,7 +330,6 @@ BOOL SC_PowerOnATR()
 		scATR_HistoryBuffer = (scATR_HistoryLength)?(&scCardATR[atrIdx]):NULL;
 		SC_WaitTime();
 		gCardState = ATR_ON;
-		SCdrv_EnableDelayTimerIntr();
 		return TRUE;
 	}
 	else
@@ -474,13 +480,15 @@ void SC_Shutdown()
   *****************************************************************************/
 static void SC_WaitTime(void)
 {
-	float factorD = 1;
-	unsigned int factorF = 372;
 	BYTE ta1Code,tb2Code,index;
-	unsigned int tempVariable;
+	BYTE tempVariable1;
+	unsigned int tempVariable2 = 1;
 	
 	ta1Code = scTA1 & 0x0F;
-	
+
+	factorDNumerator = 1;
+	factorDdenominator = 1;
+
 	// Calculate Factor 'D' from TA1 value
 	switch(ta1Code)
 	{
@@ -490,55 +498,55 @@ static void SC_WaitTime(void)
 					break;
 
 		case 0x02:
-					factorD = 2;
+					factorDNumerator = 2;
 					break;
 
 		case 0x03:
-					factorD = 4;
+					factorDNumerator = 4;
 					break;
 
 		case 0x04:
-					factorD = 8;
+					factorDNumerator = 8;
 					break;
 
 		case 0x05:
-					factorD = 16;
+					factorDNumerator = 16;
 					break;
 
 		case 0x06:
-					factorD = 32;
+					factorDNumerator = 32;
 					break;
 
 		case 0x08:
-					factorD = 12;
+					factorDNumerator = 12;
 					break;
 
 		case 0x09:
-					factorD = 20;
+					factorDNumerator = 20;
 					break;
 
 		case 0x0A:
-					factorD = 0.5;
+					factorDdenominator = 2;
 					break;
 
 		case 0x0B:
-					factorD = 0.25;
+					factorDdenominator = 4;
 					break;
 
 		case 0x0C:
-					factorD = 0.125;
+					factorDdenominator = 8;
 					break;
 
 		case 0x0D:
-					factorD = 0.0625;
+					factorDdenominator = 16;
 					break;
 
 		case 0x0E:
-					factorD = 0.03125;
+					factorDdenominator = 32;
 					break;
 
 		case 0x0F:
-					factorD = 0.015625;
+					factorDdenominator = 64;
 					break;
 	}
 
@@ -599,6 +607,11 @@ static void SC_WaitTime(void)
 					break;	
 	}
 	
+	if(scTC1 != 0xFF)
+	{
+		cgtETU = 12 + (BYTE)((unsigned long)((unsigned long)(factorF * (unsigned long)factorDdenominator * scTC1)/factorDNumerator)/scReferenceClock);
+	}
+
 	// Check whether T=0 or T=1 protocol ?
 	switch(scTD1 & 0x0F)
 	{
@@ -606,11 +619,7 @@ static void SC_WaitTime(void)
 					// Calculate Character Guard Time in ETU's for T=1 Protocol
 					if(scTC1 == 0xFF)
 					{
-						cgtETU = 11;
-					}
-					else
-					{
-						cgtETU = 12 + (unsigned long)((float)((float)(factorF * scTC1)/factorD)/scReferenceClock);
+						cgtETU = (BYTE)11;
 					}
 		
 					#ifdef SC_PROTO_T1
@@ -619,68 +628,57 @@ static void SC_WaitTime(void)
 						{
 							tb2Code = scTB2 & 0x0F;
 						
-							tempVariable = 1;
-							for(index = 0;index < tb2Code;index++)
-								tempVariable = tempVariable * 2;
-							// Calculate Character Wait Time in ETU's for T=1 Protocol as set in the card
-							t1CWTetu = 11 + tempVariable;
-						
-							tb2Code = (scTB2 & 0xF0) >> 4;
-
-							tempVariable = 1;
-							for(index = 0;index < tb2Code;index++)
-								tempVariable = tempVariable * 2;
-
-							// Calculate Block Wait Time in ETU's for T=1 Protocol as set in the card						
-							t1BWTetu = 11 + (unsigned int)((unsigned long)(tempVariable * 35712UL)/(scReferenceClock/10));
+							tempVariable1 = (scTB2 & 0xF0) >> 4;
 						}
 						else
 						{
-							for(index = 0;index < SC_CWI;index++)
-								tempVariable = tempVariable * 2;
+							tb2Code = SC_CWI;
 
-							// Calculate default value of Character Wait Time in ETU's for T=1 Protocol.
-							t1CWTetu = 11 + tempVariable;
+							tempVariable1 = SC_BWI;
 
-							tempVariable = 1;
-							for(index = 0;index < SC_BWI;index++)
-								tempVariable = tempVariable * 2;
-
-							// Calculate default value of Block Wait Time in ETU's for T=1 Protocol.
-							t1BWTetu = 11 + (unsigned int)((unsigned long)(tempVariable * 357120UL)/scReferenceClock);
 						}
 
+						for(index = 0;index < tb2Code;index++)
+							tempVariable2 = tempVariable2 * 2;
+
+						// Calculate Character Wait Time in ETU's for T=1 Protocol as set in the card
+						t1CWTetu = 11 + tempVariable2;
+						
+						tempVariable2 = 1;
+
+						for(index = 0;index < tempVariable1;index++)
+							tempVariable2 = tempVariable2 * 2;
+
+						// Calculate Block Wait Time in ETU's for T=1 Protocol as set in the card						
+						t1BWTetu = 11 + (unsigned int)((unsigned long)(tempVariable2 * 35712UL)/(scReferenceClock/10));
+					
 					#endif
 
 					break;
 		case 0 :
 		default :
-					// If scTC2 is transmitted by the card then calculate work wait time
-					// or else use default value
-					if(scTD1 & 0x40)
-					{
-						t0WWTetu = (unsigned long)(scTC2 * factorD * 960);
-					}
-					else
-					{
-						t0WWTetu = (unsigned long)(SC_WI * factorD * 960);
-					}
 
 					// Calculate Character Guard Time in ETU's for T=1 Protocol		
 					if(scTC1 == 0xFF)
 					{
-						cgtETU = 12;
+						cgtETU = (BYTE)12;
+					}
+
+					// If scTC2 is transmitted by the card then calculate work wait time
+					// or else use default value
+					if(scTD1 & 0x40)
+					{
+						tempVariable1 = scTC2;
 					}
 					else
 					{
-						cgtETU = 12 + (unsigned long)((float)((float)(factorF * scTC1)/factorD)/scReferenceClock);
+						tempVariable1 = SC_WI;
 					}
-	
+
+					t0WWTetu = (unsigned long)(tempVariable1 * (unsigned long)factorDNumerator * 960)/factorDdenominator;
+
 					break;
 	}
-
-	if(t0WWTetu <= cgtETU)
-		t0WWTetu = cgtETU * 100;	
 
 	// Calculate Character Guard Time in number of Instruction Counts for T=0/T=1 Protocol		
 	cgt = cgtETU * (FCY/baudRate);
@@ -689,12 +687,6 @@ static void SC_WaitTime(void)
 	t0WWT = t0WWTetu * (FCY/baudRate);
 
 	#ifdef SC_PROTO_T1
-
-		if(t1BWTetu <= t1BGTetu)
-			t1BWTetu = t1BGTetu * 100;
-
-		if(t1CWTetu <= cgtETU)
-			t1CWTetu = cgtETU * 100;
 
 		// Calculate Character Wait Time in number of Instruction Counts for T=1 Protocol
 		t1CWT = t1CWTetu * (FCY/baudRate);
@@ -862,40 +854,6 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 	apduResponse->RXDATALEN = leLength;
 
 	return TRUE;
-}
-
-/*******************************************************************************
-  Function:
-    void SC_Delay(void)
-	
-  Description:
-    This function waits for delay to get completed
-
-  Precondition:
-    None.
-
-  Parameters:
-    unsigned int instructionCount - Number of instruction counts to be waited
-
-  Return Values:
-    None
-	
-  Remarks:
-    None.
-  *****************************************************************************/
-static void SC_Delay(unsigned int instructionCount)
-{
-	// Set the Timer Count as per the delay needed
-	SCdrv_SetDelayTimerCnt(0xFFFF - instructionCount);
-
-	// Enable the delay timer
-	SCdrv_EnableDelayTimer();
-
-	// Wait until the delay is elapsed
-	while(!delayLapsedFlag);
-
-	// Clear the delay flag
-	delayLapsedFlag = FALSE;
 }
 
 #ifdef SC_PROTO_T1

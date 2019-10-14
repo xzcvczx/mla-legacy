@@ -37,8 +37,10 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok and
  * Paolo A. Tomayo      11/12/07    Version 1.0 release
+ * PAT					05/11/10    Added dynamic Arc() where start and end
+ *									angle can be specified.
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #define USE_PRIMITIVE_BEVEL
 
@@ -86,6 +88,22 @@ SHORT   _fontHeight;
 BYTE _bevelDrawType; 
 
 
+#define COSINETABLEENTRIES	90
+// Cosine table used to calculate angles when rendering circular objects and  arcs  
+// Make cosine values * 256 instead of 100 for easier math later
+SHORT   _CosineTable[COSINETABLEENTRIES+1] = 
+						{	
+							256, 256, 256, 256, 255, 255, 255, 254, 254, 253,
+							252, 251, 250, 249, 248, 247, 246, 245, 243, 242,
+							241, 239, 237, 236, 234, 232, 230, 228, 226, 224,
+							222, 219, 217, 215, 212, 210, 207, 204, 202, 199,
+							196, 193, 190, 187, 184, 181, 178, 175, 171, 168,
+							165, 161, 158, 154, 150, 147, 143, 139, 136, 132,
+							128, 124, 120, 116, 112, 108, 104, 100, 96,  92,
+							88,  83,  79,  75,  71,  66,  62,  58,  53,  49,
+							44,  40,  36,  31,  27,  22,  18,  13,  9,   4, 
+							0 
+						};
 /*********************************************************************
 * Function:  void InitGraph(void)
 *
@@ -1483,7 +1501,7 @@ void ClearDevice(void)
 
 #endif
 
-#ifndef USE_DRV_FONT
+#ifndef USE_DRV_SETFONT
 /*********************************************************************
 * Function: void SetFont(void* font)
 *
@@ -1515,14 +1533,16 @@ void SetFont(void *font)
         case FLASH:
             pHeader = (FONT_HEADER *) ((FONT_FLASH *)font)->address;
             break;
-                #endif
-                #ifdef USE_FONT_EXTERNAL
 
+				#endif // USE_FONT_FLASH
+                #ifdef USE_FONT_EXTERNAL
+				
         case EXTERNAL:
             pHeader = &header;
             ExternalMemoryCallback(font, 0, sizeof(FONT_HEADER), pHeader);
             break;
-                #endif
+
+				#endif // USE_FONT_EXTERNAL
 
         default:
             return;
@@ -1532,8 +1552,7 @@ void SetFont(void *font)
     _fontLastChar = pHeader->lastChar;
     _fontHeight = pHeader->height;
 }
-
-#endif
+#endif //#ifndef USE_DRV_SETFONT
 
 /*********************************************************************
 * Function: WORD OutText(XCHAR* textString)
@@ -1623,7 +1642,7 @@ WORD OutTextXY(SHORT x, SHORT y, XCHAR *textString)
     #endif
 }
 
-#ifndef USE_DRV_FONT
+#ifndef USE_DRV_OUTCHAR
 /*********************************************************************
 * Function: WORD OutChar(XCHAR ch)
 *
@@ -1688,7 +1707,7 @@ WORD OutChar(XCHAR ch)
             break;
                 #endif
                 #ifdef USE_FONT_EXTERNAL
-
+			
         case EXTERNAL:
 
             // get glyph entry
@@ -1788,9 +1807,10 @@ WORD OutChar(XCHAR ch)
 
     return (1);
 }
+#endif //#ifndef USE_DRV_OUTCHAR
 
-#endif
 
+#ifndef USE_DRV_GETTEXTWIDTH
 /*********************************************************************
 * Function: SHORT GetTextWidth(XCHAR* textString, void* font)
 *
@@ -1897,7 +1917,9 @@ SHORT GetTextWidth(XCHAR *textString, void *font)
             return (0);
     }
 }
+#endif //#ifndef USE_DRV_GETTEXTWIDTH
 
+#ifndef USE_DRV_GETTEXTHEIGHT
 /*********************************************************************
 * Function: SHORT GetTextHeight(void* font)
 *
@@ -1942,7 +1964,9 @@ SHORT GetTextHeight(void *font)
             return (0);
     }
 }
+#endif //#ifndef USE_DRV_GETTEXTHEIGHT
 
+#ifndef USE_DRV_GETIMAGEWIDTH
 /*********************************************************************
 * Function: SHORT GetImageWidth(void* bitmap)
 *
@@ -1970,7 +1994,7 @@ SHORT GetImageWidth(void *bitmap)
             #ifdef USE_BITMAP_FLASH
 
         case FLASH:
-            return (*((FLASH_WORD *) ((BITMAP_FLASH *)bitmap)->address + 2));
+            return (*((FLASH_WORD *) ((IMAGE_FLASH *)bitmap)->address + 2));
             #endif
             #ifdef USE_BITMAP_EXTERNAL
 
@@ -1983,7 +2007,9 @@ SHORT GetImageWidth(void *bitmap)
             return (0);
     }
 }
+#endif //#ifndef USE_DRV_GETIMAGEWIDTH
 
+#ifndef USE_DRV_GETIMAGEHEIGHT
 /*********************************************************************
 * Function: SHORT GetImageHeight(void* bitmap)
 *
@@ -2011,19 +2037,21 @@ SHORT GetImageHeight(void *bitmap)
             #ifdef USE_BITMAP_FLASH
 
         case FLASH:
-            return (*((FLASH_WORD *) ((BITMAP_FLASH *)bitmap)->address + 1));
+            return (*((FLASH_WORD *) ((IMAGE_FLASH *)bitmap)->address + 1));
             #endif
             #ifdef USE_BITMAP_EXTERNAL
-
+            
         case EXTERNAL:
             ExternalMemoryCallback(bitmap, 2, 2, &height);
             return (height);
             #endif
 
+
         default:
             return (0);
     }
 }
+#endif //#ifndef USE_DRV_GETIMAGEHEIGHT
 
 #ifndef USE_DRV_PUTIMAGE
 
@@ -2074,7 +2102,7 @@ WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         case FLASH:
 
             // Image address
-            flashAddress = ((BITMAP_FLASH *)bitmap)->address;
+            flashAddress = ((IMAGE_FLASH *)bitmap)->address;
 
             // Read color depth
             colorDepth = *(flashAddress + 1);
@@ -2871,3 +2899,115 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         #endif
     #endif
 #endif // USE_DRV_PUTIMAGE
+/*********************************************************************
+* Function:  SHORT GetSineCosine(SHORT v, WORD type)
+*
+* PreCondition: none
+*
+* Input: v - the angle used to calculate the sine or cosine value. 
+*			 The angle must be in the range of -360 to 360 degrees.
+*		 type - sets if the angle calculation is for a sine or cosine
+*				- GETSINE (0) - get the value of sine(v).
+*				- GETCOSINE (1) - return the value of cosine(v).
+*
+* Output: Returns the sine or cosine of the angle given.
+*
+* Side Effects: none
+*
+* Overview: This calculates the sine or cosine value of the given angle.
+*
+* Note: none
+*
+********************************************************************/
+SHORT GetSineCosine(SHORT v, WORD type)
+{
+	// if angle is neg, convert to pos equivalent
+    if (v < 0) 
+    	v += 360;   					
+    //v /= DEGREECOUNT;                 // convert into ticks from degrees, tick = 3 deg
+           
+    if(v >= COSINETABLEENTRIES * 3)
+    {
+        v -= COSINETABLEENTRIES * 3;
+        return ((type == GETSINE) ? -(_CosineTable[v]) : (_CosineTable[COSINETABLEENTRIES - v]));
+    }
+    else if(v >= COSINETABLEENTRIES * 2)
+    {
+        v -= COSINETABLEENTRIES * 2;
+        return ((type == GETSINE) ? -(_CosineTable[(COSINETABLEENTRIES - v)]) : -(_CosineTable[v]));
+    }
+    else if(v >= COSINETABLEENTRIES)
+    {
+        v -= COSINETABLEENTRIES;
+        return ((type == GETSINE) ? (_CosineTable[v]) : -(_CosineTable[COSINETABLEENTRIES - v]));
+    }
+    else
+    {
+        return ((type == GETSINE) ? (_CosineTable[COSINETABLEENTRIES - v]) : (_CosineTable[v]));
+    }
+
+
+}
+
+/*********************************************************************
+* Function:  WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle)
+*
+* PreCondition: none
+*
+* Input: cx - the location of the center of the arc in the x direction. 
+*	     cy - the location of the center of the arc in the y direction. 		 
+*	     r1 - the smaller radius of the arc. 		 
+*	     r2 - the larger radius of the arc. 		 
+*	     startAngle - start angle of the arc. 		 
+*	     endAngle - end angle of the arc. 		 
+*
+* Output: Returns 1 if the rendering is done, 0 if not yet done.
+*
+* Side Effects: none
+*
+* Overview: This renders an arc with from startAngle to endAngle with the thickness 
+*		    of r2-r1. The function returns 1 when the arc is rendered successfuly
+* 			and returns a 0 when it is not yet finished. The next call to the 
+*			function will continue the rendering.
+*
+* Note: none
+*
+********************************************************************/
+WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle)
+{
+
+	SHORT i;
+	SHORT x1,y1,x2,y2;
+
+	for (i=startAngle; i <= endAngle; i++)
+	{
+		// get inner arc x,y position
+		y1 = (r1*Sine(i))/256;
+		x1 = (r1*Cosine(i))/256;
+
+		// get outer arc x,y position
+		if (r1 != r2)
+		{
+			y2 = (r2*Sine(i))/256;
+			x2 = (r2*Cosine(i))/256;
+
+			// check if we need to double the line to cover all pixels
+			if ((x1 == x2) || (y1 == y2))
+			{
+				SetLineThickness(NORMAL_LINE);
+			}	
+			else
+			{
+				SetLineThickness(THICK_LINE);
+			}	
+			// draw the lines to fill the arc
+			while(!Line(cx+x1, cy+y1, cx+x2, cy+y2));
+		}
+		else 
+		{	
+			PutPixel(cx+x1, cy+y1);
+		}	
+		
+	}
+	return 1;	
+}	

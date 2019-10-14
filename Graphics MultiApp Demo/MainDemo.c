@@ -72,7 +72,6 @@
         #pragma config BWP = OFF            // Boot Flash Write Protect
         #pragma config PWP = OFF            // Program Flash Write Protect
         #pragma config ICESEL = ICS_PGx2    // ICE/ICD Comm Channel Select
-        #pragma config DEBUG = ON           // Background Debugger Enable
     #endif
     #if defined(__32MX360F512L__)
         #pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_20, FPLLIDIV = DIV_1, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
@@ -202,13 +201,13 @@ void                    TickInit(void);
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
 #ifdef MULTI_MEDIA_BOARD_DM00123
-extern volatile const BITMAP_FLASH  intro;      // the following images are taken from
-extern volatile const BITMAP_FLASH  mchpLogo;   // the external flash memory
-extern volatile const BITMAP_FLASH  mchpIcon0;
+extern volatile const IMAGE_FLASH  intro;      // the following images are taken from
+extern volatile const IMAGE_FLASH  mchpLogo;   // the external flash memory
+extern volatile const IMAGE_FLASH  mchpIcon0;
 #else
-extern BITMAP_EXTERNAL  intro;      // the following images are taken from
-extern BITMAP_EXTERNAL  mchpLogo;   // the external flash memory
-extern BITMAP_EXTERNAL  mchpIcon0;
+extern IMAGE_EXTERNAL  intro;      // the following images are taken from
+extern IMAGE_EXTERNAL  mchpLogo;   // the external flash memory
+extern IMAGE_EXTERNAL  mchpIcon0;
 #endif
 /////////////////////////////////////////////////////////////////////////////
 //                       GLOBAL VARIABLES FOR DEMO
@@ -265,8 +264,10 @@ int main(void)
 	    // ADC Explorer 16 Development Board Errata (work around 2)
 	    // RB15 should be output
 	    /////////////////////////////////////////////////////////////////////////////
-	    LATBbits.LATB15 = 0;
-	    TRISBbits.TRISB15 = 0;
+        #ifndef MULTI_MEDIA_BOARD_DM00123
+        LATBbits.LATB15 = 0;
+        TRISBbits.TRISB15 = 0;
+        #endif
 		     
     #else
 		#if defined (__PIC24FJ256GB210__)
@@ -297,33 +298,34 @@ int main(void)
 	#endif    
 
 
-    #if defined(__32MX460F512L__) || defined(__24FJ256DA210__)
+   	#if defined (GFX_PICTAIL_V2)
+   		// Use beeper only when applicable 
+   		//    not used if using 32MX460F512L due to pin incompatibilities in hardware
+   		//    not used if using 32MX360F512L since we are enabling the SD Card PICtail (Beep is in conflict with the PICtail)
+   		//    not used if using 24FJ256DA210 since hardware do not have beeper
+   		#if !defined(__32MX460F512L__) && !defined(__32MX360F512L__) && !defined(__24FJ256DA210__)
+   			BeepInit();                         // Initialize beeper
+   		#endif	
+   	#endif	
 
-    // do not use beeper if using 32MX460F512L
-    #else
-    	#if defined (GFX_PICTAIL_V2)
-    		BeepInit();                         // Initialize beeper
-    	#endif	
-    #endif
-
+    HardwareButtonInit();           // Initialize the hardware buttons
 
     // Programming the flash is not possible when using the PIC32 STK since the hardware 
     // does not support it (no serial port) so we skip this check if using the STKs
 	#if !defined (PIC32_USB_SK_DM320003_1) && !defined (PIC32_GP_SK_DM320001)
-	    // If S6 button on Explorer 16 board is pressed erase memory
-	    // display uses the same signals as the external flash memory so we cannot
-	    // use the display while programming the flash.
-	    #if defined (PIC24FJ256DA210_DEV_BOARD)
-	    if(BTN_S2 == 0)
-	    #else
-	    if(BTN_S6 == 0)
-	    #endif
+        /**
+         * Force a flash chip program
+         * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+         * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+         * DA210 Developement Board     - S1
+         **/
+	    if(GetHWButtonProgram() == HW_BUTTON_PRESS)
 	    {
 				ProgramFlash();
 	    }
 	#endif	//	#if !defined (PIC32_USB_STK) && !defined (PIC32_STK)
 
-    #if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V250)
+    #if defined (GFX_PICTAIL_V2) 
         #if defined(ENABLE_SD_MSD_DEMO)
 
     /************************************************************************
@@ -346,12 +348,17 @@ int main(void)
     UARTInit();
     #endif
 
-    #if defined (PIC24FJ256DA210_DEV_BOARD)
-    if(BTN_S1 == 0)
-    #else
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    if(BTN_S3 == 0)
-    #endif
+    /**
+     * Force a touchscreen calibration by pressing the switch
+     * Explorer 16 + GFX PICTail    - S3 (8 bit PMP)
+     * Explorer 16 + GFX PICTail    - S5 (16 bit PMP)
+     * Starter Kit + GFX PICTail    - S0 (8 bit PMP)
+     * Multimedia Expansion Board   - Fire Button
+     * DA210 Developement Board     - S1
+     * NOTE:    Starter Kit + GFX PICTail will switches are shared
+     *          with the 16 bit PMP data bus.
+     **/
+    if(GetHWButtonTouchCal() == HW_BUTTON_PRESS)
     {
         TouchCalibration();
         TouchStoreCalibration();
@@ -563,9 +570,8 @@ WORD GOLDrawCallback(void)
 {
     static DWORD    prevTick = 0;                   // keeps previous value of tick
 
-    //static DWORD prevTime  = 0;  		// keeps previous value of time tick
     #ifdef ENABLE_SCREEN_CAPTURE
-    if(PORTDbits.RD6 == 0)
+    if(GetHWButtonTouchCal() == HW_BUTTON_PRESS)
     {                                               // used to capture screen to PC through UART.
         GetBMP();
     }
@@ -773,7 +779,7 @@ void StartScreen(void)
                     width = GetImageHeight((void *) &mchpIcon0);
 				}
 				#endif
-				WAIT_UNTIL_FINISH(MoveBlock(GFX_DISPLAY_BUFFER_START_ADDRESS, GFX_DISPLAY_BUFFER_START_ADDRESS, \
+				WAIT_UNTIL_FINISH(MoveWindow(GFX_DISPLAY_BUFFER_START_ADDRESS, GFX_DISPLAY_BUFFER_START_ADDRESS, \
 											srcOffset, dstOffset, 												\
 											RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS,			\
 											width, height));
@@ -1234,7 +1240,7 @@ void TickInit(void)
 
 /* */
 
-WORD ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *buffer)
+WORD ExternalMemoryCallback(IMAGE_EXTERNAL *memory, LONG offset, WORD nCount, void *buffer)
 {
     if(memory->ID == SST39_MEMORY)
     {

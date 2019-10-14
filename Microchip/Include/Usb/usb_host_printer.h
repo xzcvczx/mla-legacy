@@ -91,12 +91,9 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev           Description
   ----------    -----------
   2.6 - 2.6A    No chance except stack revision number
-
   2.7           Minor updates to USBHostPrinterGetStatus() header
                 to better describe the function requirements and
                 operation.
-
-  2.7a          No change
 ********************************************************************/
 //DOM-IGNORE-END
 

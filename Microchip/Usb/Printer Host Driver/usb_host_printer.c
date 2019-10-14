@@ -84,16 +84,12 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev           Description
   ----------    -----------
   2.6 - 2.6a    No chance except stack revision number
-
   2.7           Minor updates to USBHostPrinterGetStatus() header
                 to better describe the function requirements and
                 operation.
 
                 Changed how transfer queues are handled to do a peek
                 now before removing the item from the queue.
-
-  2.7a          Provided macro wrapped versions of malloc() and free()
-                so that a user can override these functions easily.
 ********************************************************************/
 
 //DOM-IGNORE-END
@@ -104,15 +100,15 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #include "GenericTypeDefs.h"
 #include "usb_config.h"
 #include "struct_queue.h"
-#include "USB\usb.h"
-#include "USB\usb_host_printer.h"
+#include "USB/usb.h"
+#include "USB/usb_host_printer.h"
 
 #ifdef USB_PRINTER_LANGUAGE_PCL_5
-    #include "USB\usb_host_printer_pcl_5.h"
+    #include "USB/usb_host_printer_pcl_5.h"
 #endif
 
 #ifdef USB_PRINTER_LANGUAGE_POSTSCRIPT
-    #include "USB\usb_host_printer_postscript.h"
+    #include "USB/usb_host_printer_postscript.h"
 #endif
 
 #ifndef USB_MALLOC

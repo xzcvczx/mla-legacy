@@ -50,7 +50,6 @@ _GEN_EXCPT_ADDR          = _ebase_address + 0x180;
  *************************************************************************/
 MEMORY
 {
-  /* kseg0_program_mem    (rx)  : ORIGIN = 0x9FC00680, LENGTH = 0x2880 */
   kseg0_program_mem    (rx)  : ORIGIN = 0x9D000000, LENGTH = 0x3000
   kseg0_boot_mem             : ORIGIN = 0x9FC00490, LENGTH = 0x1F0
   exception_mem              : ORIGIN = 0x9FC00680, LENGTH = 0x0

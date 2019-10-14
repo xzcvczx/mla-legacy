@@ -176,7 +176,7 @@ ReadIPConfig:
 		    case '0':
 			    bQuit = TRUE;
 				#if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS)
-		        	SaveAppConfig();
+		        	SaveAppConfig(&AppConfig);
 					putrsUART("Settings saved.\r\n");
 				#else
 					putrsUART("External EEPROM/Flash not present -- settings will be lost at reset.\r\n");

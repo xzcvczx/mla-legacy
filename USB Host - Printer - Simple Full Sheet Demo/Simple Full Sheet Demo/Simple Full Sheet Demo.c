@@ -52,10 +52,10 @@ printer.
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "uart2.h"
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include "usb_config.h"
-#include "USB\usb.h"
-#include "USB\usb_host_printer.h"
+#include "USB/usb.h"
+#include "USB/usb_host_printer.h"
 
 
 // *****************************************************************************
@@ -94,7 +94,7 @@ printer.
     //      Write Protect:                  Disabled
     //      Code Protect:                   Disabled
     //      JTAG Port Enable:               Disabled
-    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
+    #if defined(__PIC24FJ256GB110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
     #elif defined(__PIC24FJ64GB004__)
@@ -105,7 +105,7 @@ printer.
     #elif defined(__PIC24FJ256GB106__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
-    #elif defined(__PIC24FJ256DA210__)
+    #elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #else
@@ -197,7 +197,7 @@ char                            businessCard[8][24]    =   {   "PIC24FJ256GB1 / 
                                                                 "     * PostScript",
                                                                 "     * ESC/POS" };
 USB_PRINTER_IMAGE_INFO          imageInfo;
-extern const BITMAP_FLASH       logoMCHP;
+extern const IMAGE_FLASH       logoMCHP;
 char                            notes[4][20]           =   {    "Bitmapped Image",
                                                                 "Text - Helvetica",
                                                                 "Text - Avant Garde",

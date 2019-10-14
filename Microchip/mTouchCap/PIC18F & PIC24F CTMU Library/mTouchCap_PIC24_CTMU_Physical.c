@@ -36,6 +36,7 @@
  * Sasha. M	/ Naveen. M			4 May 2009  	  Version 0.2 Updates
  * Sasha. M	/ Naveen. M			11 Nov 2009  	  Version 1.0 Release
  * Sasha. M	/ Nithin. 			10 April 2010  	  Version 1.20 Release
+ * Nithin M						11 Aug 2010		Implemetation of Low Power Demo 
  *****************************************************************************/
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -61,13 +62,16 @@ WORD	channel_IRNG_value	[MAX_ADC_CHANNELS];	// actual raw A/D counts for each ch
 BYTE	chFilterType	[MAX_ADC_CHANNELS];	// Channel filter type
 BYTE    Press_State [MAX_ADC_CHANNELS];
 BYTE 	Channel_Pressed_Status[MAX_ADC_CHANNELS];
-extern  CHAR	trimbitsReady;
-
+extern  	BYTE	trimbitsReady;
 SHORT	startupCount;				// variable to 'discard' first N samples
 WORD	currentADCValue;			// current button value
 WORD	scaledBigValue;				// current button bigval
 SHORT	loopCount = CTMU_CHARGE_TIME_COUNT;
-
+#ifdef LOW_POWER_DEMO_ENABLE
+	 WORD Counter[MAX_ADC_CHANNELS] ;
+	extern 	BYTE trimbitsReady_with_FRC;	//status of the trimbits calulated using the FRC clock
+	extern 	BYTE Default_RawData_with_FRC_Flag; //load the Current Raw data to the Average Data array when FRC is selected
+#endif
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~	Function Prototypes  ~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -230,9 +234,12 @@ void mTouchCapPhy_ChannelSetup(WORD ChannelNum)
 		#endif
 		
 		#ifdef ADC_NEW
+		#ifndef USE_MTOUCH_AND_GRAPHICS
+
 		Adc_PortA_Configuration(MAKE_ALL_PINS_DIGITAL);	// A/D mux must connect to channel for CTMU to drain charge
-		Adc_PortB_Configuration(MAKE_ALL_PINS_DIGITAL);	// A/D mux must connect to channel for CTMU to drain charge		
 		Adc_PortC_Configuration(MAKE_ALL_PINS_DIGITAL);	// A/D mux must connect to channel for CTMU to drain charge		
+		#endif
+		Adc_PortB_Configuration(MAKE_ALL_PINS_DIGITAL);	// A/D mux must connect to channel for CTMU to drain charge		
 		Adc_PortE_Configuration(MAKE_ALL_PINS_DIGITAL);	// A/D mux must connect to channel for CTMU to drain charge		
 		Adc_PortG_Configuration(MAKE_ALL_PINS_DIGITAL);	// A/D mux must connect to channel for CTMU to drain charge				
 		#endif
@@ -248,6 +255,30 @@ void mTouchCapPhy_ChannelSetup(WORD ChannelNum)
 		#endif
 
 		#ifdef ADC_NEW	
+		#ifdef USE_MTOUCH_AND_GRAPHICS
+
+//		TRISA = TRISA & !(0x00C0); 			
+		TRISB = TRISB & SET_PORT_B_PINS_OUTPUT; 	
+//		TRISC = TRISC & !(0x0010); 			
+		TRISE = TRISE & SET_PORT_E_PINS_OUTPUT; 			
+		TRISG = TRISG & SET_PORT_G_PINS_OUTPUT; 	
+
+//		LATA = LATA & !(0x00C0); 			
+//		LATB = LATB & !(0xFFFF); 	
+		LATBbits.LATB5 = 0;
+//		LATC = LATC & !(0x0010); 			
+//		LATE = LATE & !(0x0200); 			
+		LATEbits.LATE9 = 0;
+//		LATG = LATG & !(0x03C0); 	
+		LATGbits.LATG8 = 0;
+				
+//		PORTA = PORTA & !(0x00C0); 			
+//		PORTB = PORTB & !(0xFFFF); 	
+//		PORTC = PORTC & !(0x0010); 			
+//		PORTE = PORTE & !(0x0200); 			
+//		PORTG = PORTG & !(0x03C0); 	
+		
+		#else
 			
 		TRISA = TRISA & !(0x00C0); 			
 		TRISB = TRISB & !(0xFFFF); 	
@@ -267,6 +298,7 @@ void mTouchCapPhy_ChannelSetup(WORD ChannelNum)
 		PORTE = PORTE & !(0x0200); 			
 		PORTG = PORTG & !(0x03C0); 	
 		
+		#endif
 		#endif
 		Nop();    Nop();    Nop();    Nop();    Nop();    Nop();    Nop();    Nop();
 
@@ -544,13 +576,48 @@ void	mTouchCapPhy_Charge_Current (void)
 		Disbl_CTMUEdge2;
 		Enble_CTMUEdge1;
 
-		if (0 != loopCount) //n:ref
-		{		
-			/* When we require to enaable EDGE1 or EDGE2, should we pass as a param*/
-			for (loopIndex = 0; loopIndex < loopCount; loopIndex++) 
-			Nop();	 // Delay for CTMU charge time  // PIC18 - 4 TCY to execute Nop(); //PIC24 - 2 TCY to execute Nop();
-		}
-   		Disbl_CTMUEdge1;
+		
+		#ifndef CLOCK_SWITCH_DURING_SLEEP_ENABLE
+			if (0 != loopCount) 
+			{		
+				/* When we require to enaable EDGE1 or EDGE2, should we pass as a param*/
+				for (loopIndex = 0; loopIndex < loopCount; loopIndex++) 
+				Nop();	 // Delay for CTMU charge time  // PIC18 - 4 TCY to execute Nop(); //PIC24 - 2 TCY to execute Nop();
+			}
+		
+		//when the primary clock is switched to FRC after device wakes from sleep, 
+		//the loopcount used for charging the CTMU current source has to be changed based on FRC selection
+		#else
+			//If the Low power is enabled
+			if(Clock_Switch_Enable_Flag) //if the system clock is switched
+			{
+				// The below NOP() is the time required to charge the CTMU channels when the system
+				//clock is switched from Primary clock to FRC.
+				// The number of Nop() can be varied based on the system clock
+			   	Nop();
+
+		
+			}
+			
+			else
+			{
+				//when the flag is disabled, the system clock is switched from FRC clock 
+				//to Primary clock settings. hence restore the loop count value for primary clock
+				loopCount = CTMU_CHARGE_TIME_COUNT;
+				if (0 != loopCount)
+				{		
+					/* When we require to enable EDGE1 or EDGE2, should we pass as a param*/
+					for (loopIndex = 0; loopIndex < loopCount; loopIndex++) 
+					{
+						Nop();	 // Delay for CTMU charge time  // PIC18 - 4 TCY to execute Nop(); //PIC24 - 2 TCY to execute Nop();
+					}
+				}//end of if (0 != loopCount) //n:ref	
+			}
+		
+		#endif
+
+   		
+		Disbl_CTMUEdge1;
 	
 }
 
@@ -622,6 +689,7 @@ void mTouchCapPhy_InitCTMU(void)
 	/* Initialize ADC  */
 	mTouchCapPhy_AdcSetup();
 
+
 	Set_Adc_Enable_State(ENABLE);
 
 	Enable_ADC_Sampling;
@@ -691,6 +759,8 @@ void mTouchCapPhy_ChargeTimeInit(void)
 void mTouchCapPhy_ReadCTMU(WORD ChannelNumber) 
 {
 
+
+
 #ifdef DETAILED_CALCULATION
 	DWORD total = 0;
 	SHORT chrd;
@@ -730,7 +800,29 @@ void mTouchCapPhy_ReadCTMU(WORD ChannelNumber)
 		Read the channel Rawdata in an iterative fashion for the mentioned sample count using the 
 		API "mTouchCapAPI_ScanChannelIterative". 
 	***************************************************************************/
-	currentADCValue = mTouchCapAPI_ScanChannelIterative(ChannelNumber,NUM_HF_READS);
+	
+	#ifndef CLOCK_SWITCH_DURING_SLEEP_ENABLE
+		currentADCValue = mTouchCapAPI_ScanChannelIterative(ChannelNumber,NUM_HF_READS);
+
+	#else
+		//if the Low power demo is enabled
+		if(Clock_Switch_Enable_Flag)	//If the system clock is switched to FRC
+		{
+			//The sample count is reduced since the system clock is switched from
+			//Primary to FRC
+			currentADCValue = mTouchCapAPI_ScanChannelIterative(ChannelNumber,NUM_HF_READS_SWITCHED_CLOCK);
+		}		
+		else
+		{
+			//if the system clock is the Primary Clock
+			currentADCValue = mTouchCapAPI_ScanChannelIterative(ChannelNumber,NUM_HF_READS);
+		}	
+	
+
+	#endif
+	
+
+
 #endif
 
 	//For debug - channels 6&7 are not enabled. They are clk & data lines for ICSP. use dummy values
@@ -750,6 +842,7 @@ void mTouchCapPhy_ReadCTMU(WORD ChannelNumber)
 
 	curRawData[ChannelNumber] = scaledBigValue;								// curRawData array holds the most recent BIGVAL values
 	actualValue[ChannelNumber] = currentADCValue;
+
 	
 } //end ReadCTMU()
 
@@ -775,11 +868,32 @@ void mTouchCapPhy_ReadCTMU(WORD ChannelNumber)
 void CTMU_Current_trim_config(int channel_no)
 {
 
+	//BYTE ChannelIndex;
+	
+	//The current range and the trim bits will be changed based on the frequency of the system clock
+	#ifndef CLOCK_SWITCH_DURING_SLEEP_ENABLE	
 	if(trimbitsReady)
 	{
 		mTouchCapAPI_CTMU_SetupCurrentSource(channel_IRNG_value[channel_no],channel_TRIM_value[channel_no]);
 	}
+	#else			
+		//if the Low power demo is enabled
+		if(Clock_Switch_Enable_Flag)	//If the system clock is switched to FRC
+		{
+//			//After the clock is switched from Primary to FRC, the current range and trim bits should also be
+//			//changed to work with the lower clock.
+		
+			mTouchCapAPI_CTMU_SetupCurrentSource(CURRENT_RANGE_100XBASE_CURRENT,channel_TRIM_value[channel_no]);
 
+		}
+		else
+		{
+			if(trimbitsReady)
+			{
+				mTouchCapAPI_CTMU_SetupCurrentSource(channel_IRNG_value[channel_no],channel_TRIM_value[channel_no]);
+			}
+		} //end of if(Clock_Switch_Enable_Flag)
+	#endif //end of CLOCK_SWITCH_DURING_SLEEP_ENABLE
 }  
 
 /********************************************************************
@@ -803,6 +917,7 @@ void mTouchCapPhy_AverageData(WORD Index)
 {
 
      BYTE Filter_type; 
+	
 
 	 /* Filtering based on channel specefic filter type */
 	Filter_type = chFilterType[Index];
@@ -819,7 +934,39 @@ void mTouchCapPhy_AverageData(WORD Index)
 	   case FILTER_METHOD_SLOWAVERAGE:
 			// 7. Average in the new value (channel based delay)
 					// Always Average (all buttons one after the other in a loop)
-	
+
+			//When Low Power Demo is selected
+			#ifdef LOW_POWER_DEMO_ENABLE
+			//Default_RawData_with_FRC_Flag --> flag set after FRC clock is selected
+			// When the System clock is switched from the Primary to the FRC, the averageData[Index] should
+			// be updated with the latest raw values which is calculated using the FRC
+			//This is required because the curRawData[Index] value calculated using the Primary clock and the
+			// FRC clock will be different.
+				if(Default_RawData_with_FRC_Flag)
+				{
+
+					// Debounce logic
+					if(Counter[Index] <DEBOUNCECOUNT_FRC)
+					{
+						Counter[Index] ++;
+						averageData[Index] = curRawData[Index];
+					}
+					else
+					{
+						// If the debounce logic is applied for all the keys, then the subsequent raw values 
+						//can be considered as stable.
+						Counter[Index]  = 0;
+						if(Index >= (ScanChannels[ScanChannelIndex-1]))
+						{				
+							Default_RawData_with_FRC_Flag = 0;
+						
+						}
+					} //end of if(Counter[Index] <4)
+				}//end of 	if(Default_RawData_with_FRC_Flag)
+
+				
+			#endif	//end of #ifdef LOW_POWER_DEMO_ENABLE
+			
 			if (curRawData[Index]  > averageData[Index])
 			{
 				averageData[Index] = curRawData[Index];				// If curRawData is above Average, reset to high average.
@@ -846,7 +993,32 @@ void mTouchCapPhy_AverageData(WORD Index)
 
 	  case FILTER_METHOD_GATEDAVERAGE:
 			//Filter Method CASE: Gated Average
-			// 7. Average in the new value (channel based delay)
+
+			/* The latest current raw data would be the latest average data */
+			//When Low Power Demo is selected
+			#ifdef LOW_POWER_DEMO_ENABLE
+			//Default_RawData_with_FRC_Flag --> flag set after FRC clock is selected
+				if(Default_RawData_with_FRC_Flag)
+				{
+					//Counter[Index] ++;
+					//averageData[Index] = curRawData[Index];
+					if(Counter[Index] <DEBOUNCECOUNT_FRC)
+					{
+						Counter[Index] ++;
+						averageData[Index] = curRawData[Index];
+					}
+					else
+					{
+						Counter[Index]  = 0;
+						if(Index >= (ScanChannels[ScanChannelIndex-1]))
+						{				
+							Default_RawData_with_FRC_Flag = 0;
+						
+						}
+					} //end of if(Counter[Index] <4)
+				}//end of 	if(Default_RawData_with_FRC_Flag)
+			#endif	//end of #ifdef LOW_POWER_DEMO_ENABLE
+			//  Average in the new value (channel based delay)
 			// Always Average (all buttons one after the other in a loop)
 	
 			if(avg_delay[Index] < NUM_AVG)
@@ -872,6 +1044,29 @@ void mTouchCapPhy_AverageData(WORD Index)
 
 	case FILTER_METHOD_FASTAVERAGE:
 			/* The latest current raw data would be the latest average data */
+					//When Low Power Demo is selected
+			#ifdef LOW_POWER_DEMO_ENABLE
+			//Default_RawData_with_FRC_Flag --> flag set after FRC clock is selected
+				if(Default_RawData_with_FRC_Flag)
+				{
+					//Counter[Index] ++;
+					//averageData[Index] = curRawData[Index];
+					if(Counter[Index] <DEBOUNCECOUNT_FRC)
+					{
+						Counter[Index] ++;
+						averageData[Index] = curRawData[Index];
+					}
+					else
+					{
+						Counter[Index]  = 0;
+						if(Index >= (ScanChannels[ScanChannelIndex-1]))
+						{				
+							Default_RawData_with_FRC_Flag = 0;
+						
+						}
+					} //end of if(Counter[Index] <4)
+				}//end of 	if(Default_RawData_with_FRC_Flag)
+			#endif	//end of #ifdef LOW_POWER_DEMO_ENABLE
 		if (curRawData[Index]  > averageData[Index])
 		{
 			averageData[Index] = curRawData[Index];				// If curRawData is above Average, reset to high average.
@@ -908,8 +1103,30 @@ void DynamicTripValueCalculation(WORD Index)
 {
     #ifndef USE_STATIC_TRIP_VALUE
 
-    tripValue[Index] = (averageData[Index] / KEYTRIPDIV);
-    hystValue[Index] = (tripValue[Index] / HYSTERESIS_VALUE);
+    	#ifndef LOW_POWER_DEMO_ENABLE
+			tripValue[Index] = (averageData[Index] / KEYTRIPDIV);
+		 hystValue[Index] = (tripValue[Index] / HYSTERESIS_VALUE);
+	
+		#else
+			//If the low power demo is selected, then the keytrip value will be different 
+			//because of the switching of the clocks	
+			if(Clock_Switch_Enable_Flag)
+			{
+				//if the clock is switched from Primary to FRC, then change the trip value to suit 
+				//the lower clock frequency
+				tripValue[Index] = (averageData[Index] / KEYTRIPDIV_FRC);
+				 hystValue[Index] = (tripValue[Index] / HYSTERESIS_VALUE_FRC);
+			}
+			else
+			{
+				// If the Primary clock is selected, restore the Trip value.
+   				tripValue[Index] = (averageData[Index] / KEYTRIPDIV);
+				hystValue[Index] = (tripValue[Index] / HYSTERESIS_VALUE);
+
+			}
+				
+		#endif
+   
     
     #endif
 }

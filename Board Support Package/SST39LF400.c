@@ -34,17 +34,17 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		08/27/09	...
- * PAT					04/12/10	Ported for SST39LF400 
- *****************************************************************************/
+ * Date         Comment
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * 4/12/2010	Original, ported from SST39LF400A
+ * 8/11/2010	Removed dependency on Graphics file. 
+ ********************************************************************/
 #include "SST39LF400.h"
 
-#if defined (PIC24FJ256DA210_DEV_BOARD)
+#if defined (USE_SST39LF400)
 
-#define  	CS2_BASE_ADDRESS   		0x00030000ul 
-#define 	SST39LF400_FLASH_SIZE	0x00040000ul
+#define  	CS2_BASE_ADDRESS   		GFX_EPMP_CS2_BASE_ADDRESS  
+#define 	SST39LF400_FLASH_SIZE	0x00400000ul
 
 
 /************************************************************************
@@ -55,32 +55,60 @@ WORD lRead16(DWORD address);
 
 
 /************************************************************************
-* Function:SST39LF400Init                                                  
+* Function:SST39LF400Init(WORD *pBuffer)                                                 
 *                                                                       
-* Overview: this function initializes IOs and PMP
+* Overview: This function initializes IOs and EPMP. Before it
+*           programs the EPMP port, it stores the current
+*			EPMP SFR registers and saves it to the supplied 
+*           array space.
+*           
 *                                                                       
-* Input: none                                                          
+* Input: Address of the array for the current EPMP SFR register
+*		 contents. 
 *                                                                       
 * Output: none
 *                                                                       
 ************************************************************************/
-void SST39LF400Init(void)
+void SST39LF400Init(WORD *pBuffer)
 {
+	// if using PIC24FJ256DA210 Development Board, save the EPMP registers to the  
+	// buffer so we can revert back when access to the parallel flash is done
+	if (pBuffer != NULL)
+	{
+		// before modifying the registers, save the contents of the SFR first
+		*pBuffer++ = PMCON2;
+		*pBuffer++ = PMCON3;
+		*pBuffer++ = PMCON4;
+		*pBuffer++ = PMCS1CF;
+		*pBuffer++ = PMCS1BS;
+		*pBuffer++ = PMCS1MD;
+		*pBuffer++ = PMCS2CF;
+		*pBuffer++ = PMCS2BS;
+		*pBuffer++ = PMCS2MD;
+		*pBuffer++ = IFS2;
+		*pBuffer++ = IEC2;
+		*pBuffer = PMCON1;
+	}
+	
+	// now that the SFR contents are saved, program the SFRs for the new values.
 	PMCON1bits.PMPEN = 0;
 
-	ANSDbits.ANSD7 = 0;   // PMD15
-	ANSDbits.ANSD6 = 0;   // PMD14
-	ANSFbits.ANSF0 = 0;   // PMD11
+	PMCS1CFbits.CSDIS = 1;      // disable CS1 functionality  
+	PMCS2CFbits.CSDIS = 1;      // disable CS2 functionality  
 
-	ANSBbits.ANSB15 = 0;  // PMA0
-	ANSBbits.ANSB14 = 0;  // PMA1
-	ANSGbits.ANSG9  = 0;  // PMA2
-	ANSBbits.ANSB13 = 0;  // PMA10
-	ANSBbits.ANSB12 = 0;  // PMA11
-	ANSBbits.ANSB11 = 0;  // PMA12
-	ANSBbits.ANSB10 = 0;  // PMA13
-	ANSAbits.ANSA7 = 0;   // PMA17
-	ANSGbits.ANSG6 = 0;   // PMA18	
+	ANSDbits.ANSD7 = 0;   		// PMD15
+	ANSDbits.ANSD6 = 0;   		// PMD14
+	ANSFbits.ANSF0 = 0;   		// PMD11
+
+	ANSBbits.ANSB15 = 0;  		// PMA0
+	ANSBbits.ANSB14 = 0;  		// PMA1
+	ANSGbits.ANSG9  = 0;  		// PMA2
+	ANSBbits.ANSB13 = 0;  		// PMA10
+	ANSBbits.ANSB12 = 0;  		// PMA11
+	ANSBbits.ANSB11 = 0;  		// PMA12
+	ANSBbits.ANSB10 = 0;  		// PMA13
+	ANSAbits.ANSA7 = 0;   		// PMA17
+	ANSGbits.ANSG6 = 0;   		// PMA18	
 
 	PMCON1bits.ADRMUX = 0;	    // address is not multiplexed
 	PMCON1bits.MODE = 3;        // master mode
@@ -89,16 +117,14 @@ void SST39LF400Init(void)
 	PMCON1bits.ALMODE = 0;      // "smart" address strobes are not used
 	PMCON1bits.BUSKEEP = 0;     // bus keeper is not used
 	
-	PMCS1BSbits.BASE = 0x02;    // CS1 start address , don't care , not used
-	//PMCS2BSbits.BASE = (CS2_BASE_ADDRESS>>16)&0x00ff; // set CS1 end address and CS2 start address
+	// CS1 is not used 
+	// set CS2 start Address (this is where the parallel flash is connected on 
+	// the PIC24FJ256DA210 Board
+	PMCS2BS = (CS2_BASE_ADDRESS >> 8);				
 
-	PMCS2BS = (CS2_BASE_ADDRESS >> 8);				// CS2 start address
-	
-	
-	
 	PMCON2bits.RADDR = 0xff;    // set CS2 end address
 
-	PMCON2bits.MSTSEL = 0;
+	PMCON2bits.MSTSEL = 0;		// set CPU as Master
 
 	PMCON3bits.PTWREN = 1;      // enable write strobe port
 	PMCON3bits.PTRDEN = 1;      // enable read strobe port
@@ -108,28 +134,62 @@ void SST39LF400Init(void)
 	PMCON3bits.AWAITE = 0;      // set address hold time to 1/4 Tcy
 
 	PMCON4 = 0xFFFF;            // PMA0 - PMA15 address lines are enabled
-	PMCON3 |= 0x0007;           // PMA16 address line is enabled
-
-	PMCS1CFbits.CSDIS = 1;       // disable CS1 functionality  
-	PMCS2CFbits.CSDIS = 1;       // disable CS2 functionality  
+	PMCON3bits.PTEN16 = 1;		// enable PMA16
+	PMCON3bits.PTEN17 = 1;		// enable PMA17
 
 	PMCS2CFbits.CSDIS = 0;      // enable CS
-	PMCS2CFbits.CSP = 0;        // CS active low (for 61/62WV51216ALL)
+	PMCS2CFbits.CSP = 0;        // CS active low (for SST39VF400A)
 	PMCS2CFbits.CSPTEN = 1;     // enable CS port
-	PMCS2CFbits.BEP = 0;        // byte enable active low (for 61/62WV51216ALL)
-	PMCS2CFbits.WRSP = 0;       // write strobe active low (for 61/62WV51216ALL)
-	PMCS2CFbits.RDSP = 0;       // read strobe active low (for 61/62WV51216ALL)
+	PMCS2CFbits.BEP = 0;        // byte enable active low (for SST39VF400A)
+	PMCS2CFbits.WRSP = 0;       // write strobe active low (for SST39VF400A)
+	PMCS2CFbits.RDSP = 0;       // read strobe active low (for SST39VF400A)
 	PMCS2CFbits.SM = 0;         // read and write strobes on separate lines 
 	PMCS2CFbits.PTSZ = 2;       // data bus width is 16-bit 
 
 	PMCS2MDbits.ACKM = 0;        // PMACK is not used
-	PMCS2MDbits.DWAITB = 0;      // access time 1 Tcy
-	PMCS2MDbits.DWAITM = 4;
-	PMCS2MDbits.DWAITE = 0;
-	PMCS2MDbits.AMWAIT = 5;
+	
+	PMCS2MDbits.DWAITB = EPMPCS2_DWAITB;      				
+	PMCS2MDbits.DWAITM = EPMPCS2_DWAITM;
+	PMCS2MDbits.DWAITE = EPMPCS2_DWAITE;
+	
+	// Note: adjust this delay for slower devices 
+	PMCS2MDbits.AMWAIT = EPMPCS2_AMWAIT;					
 
 	PMCON1bits.PMPEN = 1;
 }
+
+/************************************************************************
+* Function:SST39LF400DeInit(WORD *pBuffer)                                                 
+*                                                                       
+* Overview: This function de-initializes IOs and EPMP to recover from 
+*           from the previous state. The SFR programmed values are 
+*           supplied by the initialized array.
+*           
+*                                                                       
+* Input: Address of the array for the current EPMP SFR register
+*		 contents. 
+*                                                                       
+* Output: none
+*                                                                       
+************************************************************************/
+void SST39LF400DeInit(WORD *pBuffer)
+{
+	// before modifying the registers, save the contents of the SFR first
+	PMCON2 = *pBuffer++;
+	PMCON3 = *pBuffer++;
+	PMCON4 = *pBuffer++; 
+	PMCS1CF = *pBuffer++;
+	PMCS1BS = *pBuffer++;
+	PMCS1MD = *pBuffer++;
+	PMCS2CF = *pBuffer++;
+	PMCS2BS = *pBuffer++;
+	PMCS2MD = *pBuffer++;
+	IFS2    = *pBuffer++;
+	IEC2    = *pBuffer++;
+	PMCON1  = *pBuffer;
+	
+}
+
 
 /************************************************************************
 * Function: BYTE SST39LV400WriteWord(DWORD address, WORD data)
@@ -146,12 +206,12 @@ void SST39LF400Init(void)
 BYTE SST39LF400WriteWord(DWORD address, WORD data)
 {
 	WORD temp;
-
+	
     lWrite16(0x000005555,0x00aa);
     lWrite16(0x000002aaa,0x0055);
     lWrite16(0x000005555,0x00a0);
     lWrite16(address,data);
-
+    
     SST39LF400WaitProgram();
 
     if((temp = SST39LF400ReadWord(address)) == data)
@@ -248,7 +308,8 @@ void SST39LF400ReadArray(DWORD address, WORD *pData, WORD nCount)
 /************************************************************************
 * Function: void SST39LF400WaitProgram()
 *                                                                       
-* Overview: this function waits for program/erase operation completion
+* Overview: this function waits for program/erase operation completion 
+*			using the Toggle Bit wait option.
 *                                                                       
 * Input: none                                                          
 *                                                                       
@@ -297,6 +358,60 @@ void SST39LF400ChipErase(void)
 }
 
 /************************************************************************
+* Function: void SST39LF400SectorErase(DWORD address)                                 
+*
+* Overview: This function erases 2K Word section defined by address
+*
+* Input: address - The address location of the sector to be erased.
+*				   The address is decided by Address[30:11] address lines.
+*            
+* Output: none
+*
+************************************************************************/
+void SST39LF400SectorErase(DWORD address)
+{
+    lWrite16(0x000005555,0x00aa);
+    lWrite16(0x000002aaa,0x0055);
+    lWrite16(0x000005555,0x0080);
+    lWrite16(0x000005555,0x00aa);
+    lWrite16(0x000002aaa,0x0055);
+    lWrite16((address>>11),0x0030);
+
+    SST39LF400WaitProgram();
+}
+
+/************************************************************************
+* Function: WORD SST39LF400CheckID()  
+*
+* Overview: Reads the product ID 
+*
+* Input: none
+*            
+* Output: Returns 1 if the expected product ID is read correctly
+*         else it returns 0.
+*
+************************************************************************/
+WORD SST39LF400CheckID()
+{
+	WORD testArray[2] = {0,0};
+	
+    lWrite16(0x000005555,0x00aa);
+    lWrite16(0x000002aaa,0x0055);
+    lWrite16(0x000005555,0x0090);
+    testArray[0] = lRead16 (0x000000000);
+    testArray[1] = lRead16 (0x000000001);
+
+    // exit the query mode 
+    lWrite16(0x000005555,0x00F0);
+    
+   	if ((testArray[0] == 0x00BF) && (testArray[1] == 0x2780))
+   		return 1;
+	else
+		return 0;   		
+}
+
+
+/************************************************************************
 ************************************************************************/
 void lWrite16(DWORD address, WORD data)
 {
@@ -312,6 +427,7 @@ WORD temp;
 		*((WORD*)pointer) = data;
 		while(PMCON2bits.BUSY);
         DSWPAG = temp;
+
 }
 
 /************************************************************************
@@ -319,7 +435,7 @@ WORD temp;
 WORD lRead16(DWORD address)
 {
 WORD pointer;
-WORD data;
+volatile WORD data;
 WORD temp;
 		address <<= 1;
 		address += CS2_BASE_ADDRESS;
@@ -333,6 +449,7 @@ WORD temp;
 		data = PMDIN1;
 		DSRPAG = temp;
 		return data;
+
 }
 
-#endif
+#endif //USE_SST39LF400

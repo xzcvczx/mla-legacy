@@ -7,7 +7,7 @@
  * FileName:        SST25VF016.h
  * Dependencies:    Graphics.h
  * Processor:       PIC24F, PIC24H, dsPIC, PIC32
- * Compiler:       	MPLAB C30 V3.00, MPLAB C32
+ * Compiler:       	MPLAB C30, MPLAB C32
  * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
@@ -35,14 +35,26 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/07/09	...
+ * 01/07/09	   	...
  *****************************************************************************/
 #ifndef _SST25VF016_H
     #define _SST25VF016_H
 
-    #include "Graphics\Graphics.h"
+    #if defined(__dsPIC33F__)
+        #include <p33Fxxxx.h>
+    #elif defined(__PIC24H__)
+        #include <p24Hxxxx.h>
+    #elif defined(__PIC32MX__)
+        #include <plib.h>
+    #else
+        #include <p24Fxxxx.h>
+    #endif
+
+	#include "GenericTypeDefs.h"
+	#include "HardwareProfile.h"
+	#include "TimeDelay.h"
 
 /************************************************************************
 * SST25 SPI Channel                                                       

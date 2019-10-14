@@ -50,7 +50,7 @@
         #include <p24Fxxxx.h>
     #endif
     #include "GenericTypeDefs.h"
-    #include "Graphics\Graphics.h"
+    #include "Graphics/Graphics.h"
     #include "SST25VF016.h"
     #include "SST39VF040.h"
     #include "JPEGImage.h"

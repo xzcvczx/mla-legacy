@@ -331,18 +331,17 @@ void BarHS2(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot)
 	pg=ptop;
 	wd=ybot-ytop+1;
 
-	CS_LAT_BIT=0;
-
+	DisplayEnable();
+	
 	if(masktop!=0xff||wd<8) //kick in if bar width less than 8 and skip full byte write part
 	{
-
 		if(wd<8) masktop=masktop&maskval[(ytop&0x07)+wd];
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xB0+pg);
 		DeviceWrite(lAddr);
 		DeviceWrite(hAddr);
 		DeviceWrite(0xE0);
-		DeviceSetData();
+		DisplaySetData();
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
 			display = DeviceRead();
@@ -351,18 +350,18 @@ void BarHS2(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot)
 			display=display|(masktop&_color); //set bits with patern
 			DeviceWrite(display);
 		}
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xEE);
 		pg++;
 	}
 
 	if(wd>7) for(;pg<pbot;pg++)
 	{
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xB0+pg);
 		DeviceWrite(lAddr);
 		DeviceWrite(hAddr);
-		DeviceSetData();
+		DisplaySetData(); 
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
 			DeviceWrite(_color);
@@ -372,12 +371,12 @@ void BarHS2(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot)
 	if(maskbot!=0xff&&ptop!=pbot)
 	{
 
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xB0+pg);
 		DeviceWrite(lAddr);
 		DeviceWrite(hAddr);
 		DeviceWrite(0xE0);
-		DeviceSetData();
+		DisplaySetData(); 
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
 			display = DeviceRead();
@@ -386,12 +385,12 @@ void BarHS2(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot)
 			display=display|(maskbot&_color);
 			DeviceWrite(display);
 		}
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xEE);
-		DeviceSetData();
+		DisplaySetData(); 
 	}
 
-	CS_LAT_BIT=1;
+	DisplayDisable(); 
 
 }
 
@@ -457,18 +456,18 @@ void BarHSP(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot, SHORT pat, SHORT xo)
 	pg=ptop;
 	wd=ybot-ytop+1;
 
-	CS_LAT_BIT=0;
+	DisplayEnable(); 
 
 	if(masktop!=0xff||wd<8) //kick in if bar width less than 8 and skip full byte write part
 	{
 
 		if(wd<8) masktop=masktop&maskval[(ytop&0x07)+wd];
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xB0+pg);
 		DeviceWrite(lAddr);
 		DeviceWrite(hAddr);
 		DeviceWrite(0xE0);
-		DeviceSetData();
+		DisplaySetData(); 
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
 			display = DeviceRead();
@@ -478,18 +477,18 @@ void BarHSP(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot, SHORT pat, SHORT xo)
 			DeviceWrite(display);
 			pat^=xo;
 		}
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xEE);
 		pg++;
 	}
 
 	if(wd>7) for(;pg<pbot;pg++)
 	{
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xB0+pg);
 		DeviceWrite(lAddr);
 		DeviceWrite(hAddr);
-		DeviceSetData();
+		DisplaySetData(); 
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
 			DeviceWrite(pat);
@@ -499,12 +498,12 @@ void BarHSP(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot, SHORT pat, SHORT xo)
 
 	if(maskbot!=0xff&&ptop!=pbot)
 	{
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xB0+pg);
 		DeviceWrite(lAddr);
 		DeviceWrite(hAddr);
 		DeviceWrite(0xE0);
-		DeviceSetData();
+		DisplaySetData(); 
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
 			display = DeviceRead();
@@ -514,12 +513,12 @@ void BarHSP(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot, SHORT pat, SHORT xo)
 			DeviceWrite(display);
 			pat^=xo;
 		}
-		DeviceSetCommand();
+		DisplaySetCommand(); 
 		DeviceWrite(0xEE);
-		DeviceSetData();
+		DisplaySetData(); 
 	}
 
-	CS_LAT_BIT=1;
+	DisplayDisable(); 
 
 }
 

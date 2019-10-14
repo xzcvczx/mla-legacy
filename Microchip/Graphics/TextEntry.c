@@ -40,7 +40,7 @@
  * PAT					07/01/09	Updated for 2D accelerated primitive support.
  * PAT					04/15/10	Corrected TeSetBuffer() issue on string max size.
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
 #ifdef USE_TEXTENTRY
 
@@ -79,17 +79,21 @@ TEXTENTRY *TeCreate
     pTe->hdr.ID = ID;
     pTe->hdr.pNxtObj = NULL;
     pTe->hdr.type = OBJ_TEXTENTRY;              // set object type
-    pTe->hdr.left = left;                       //left parameter of the text-entry
-    pTe->hdr.top = top;                         //top parameter of the text-entry
-    pTe->hdr.right = right;                     //right parameter of the text-entry
-    pTe->hdr.bottom = bottom;                   //bottom parameter of the text-entry
-    pTe->hdr.state = state;                     //State of the Text-Entry
-    pTe->horizontalKeys = horizontalKeys;       //number of horizontal keys
-    pTe->verticalKeys = verticalKeys;           //number of vertical keys
-    pTe->CurrentLength = 0;                     //current length of text
+    pTe->hdr.left = left;                       // left parameter of the text-entry
+    pTe->hdr.top = top;                         // top parameter of the text-entry
+    pTe->hdr.right = right;                     // right parameter of the text-entry
+    pTe->hdr.bottom = bottom;                   // bottom parameter of the text-entry
+    pTe->hdr.state = state;                     // State of the Text-Entry
+    pTe->horizontalKeys = horizontalKeys;       // number of horizontal keys
+    pTe->verticalKeys = verticalKeys;           // number of vertical keys
+    pTe->CurrentLength = 0;                     // current length of text
     pTe->pHeadOfList = NULL;
-    TeSetBuffer(pTe, pBuffer, bufferLength);    //set the text to be displayed buffer length is also initialized in this call
+    TeSetBuffer(pTe, pBuffer, bufferLength);    // set the text to be displayed buffer length is also initialized in this call
     pTe->pActiveKey = NULL;
+    pTe->hdr.DrawObj = TeDraw;					// draw function
+    pTe->hdr.MsgObj = TeTranslateMsg;			// message function
+    pTe->hdr.MsgDefaultObj = TeMsgDefault;		// default message function
+    pTe->hdr.FreeObj = TeDelKeyMembers;			// free function
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -121,12 +125,12 @@ TEXTENTRY *TeCreate
 }   //end TeCreate()
 
 /*********************************************************************
-* Function: TeDraw(TEXTENTRY *pTe)
+* Function: WORD TeDraw(void *pObj)
 *
 * Notes: This function draws the keys with their appropriate text
 *
 ********************************************************************/
-WORD TeDraw(TEXTENTRY *pTe)
+WORD TeDraw(void *pObj)
 {
     static WORD         faceClr, embossLtClr, embossDkClr, xText, yText;
     static XCHAR        XcharTmp;
@@ -155,6 +159,9 @@ WORD TeDraw(TEXTENTRY *pTe)
     } TE_DRAW_STATES;
 
     static TE_DRAW_STATES state = TE_START;
+    TEXTENTRY *pTe;
+
+    pTe = (TEXTENTRY *)pObj;
 
     if(IsDeviceBusy())
         return (0);
@@ -521,7 +528,7 @@ WORD TeDraw(TEXTENTRY *pTe)
             // this is manually doing the OutText() function but with the capability to replace the
             // characters to the * character when hide echo is enabled.							
             XcharTmp = *((pTe->pTeOutput) + counter);
-            if(XcharTmp < (unsigned XCHAR)15)
+            if(XcharTmp < (XCHAR)15)
             {
 
                 // update is done time to return to start and exit with success
@@ -549,15 +556,18 @@ WORD TeDraw(TEXTENTRY *pTe)
 }                           //end TeDraw()
 
 /*********************************************************************
-* Function: TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg)
+* Function: TeTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Function to check which key was pressed/released
 *
 ********************************************************************/
-WORD TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg)
+WORD TeTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
     SHORT       NumberOfKeys, param1, param2;
     KEYMEMBER   *pKeyTemp = NULL;
+    TEXTENTRY *pTe;
+
+    pTe = (TEXTENTRY *)pObj;
 
     // Check if disabled first
     if(GetState(pTe, TE_DISABLED))
@@ -705,15 +715,19 @@ WORD TeTranslateMsg(TEXTENTRY *pTe, GOL_MSG *pMsg)
 }               //end TeTranslateMsg()
 
 /*********************************************************************
-* Function: TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG* pMsg)
+* Function: TeMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG* pMsg)
 *
 *
 * Notes: This the default operation to change the state of the key.
 *		 Called inside GOLMsg() when GOLMsgCallback() returns a 1.
 *
 ********************************************************************/
-void TeMsgDefault(WORD translatedMsg, TEXTENTRY *pTe, GOL_MSG *pMsg)
+void TeMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 {
+    TEXTENTRY *pTe;
+
+    pTe = (TEXTENTRY *)pObj;
+
     switch(translatedMsg)
     {
         case TE_MSG_DELETE:
@@ -1008,14 +1022,17 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[])
 }
 
 /*********************************************************************
-* Function: void TeDelKeyMembers(TEXTENTRY *pTe)
+* Function: void TeDelKeyMembers(void *pObj)
 *
 * Notes: This function will delete the members of the list
 ********************************************************************/
-void TeDelKeyMembers(TEXTENTRY *pTe)
+void TeDelKeyMembers(void *pObj)
 {
     KEYMEMBER   *pCurItem;
     KEYMEMBER   *pItem;
+    TEXTENTRY *pTe;
+
+    pTe = (TEXTENTRY *)pObj;
 
     pCurItem = pTe->pHeadOfList;
 

@@ -34,14 +34,14 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		07/10/07	...
- * Anton Alkhimenok     02/07/08    PIC32 support
+ * 07/10/07		...
+ * 02/07/08    	PIC32 support
  *****************************************************************************/
 #include "Beep.h"
 
-#if defined (GFX_PICTAIL_V2)
+#if defined (USE_GFX_PICTAIL_V2_BEEPER)
 
 volatile WORD   pulseCounter;
 

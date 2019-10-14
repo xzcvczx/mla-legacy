@@ -69,7 +69,7 @@
 #define DEBUG_MDNS_MESG     sprintf
 #else
 #define DEBUG_MDNS_PRINT(x)
-#define DEBUG_MDNS_MESG(x,y...)      
+#define DEBUG_MDNS_MESG(x,y,...)      
 #endif
 
 // For less verbose debugging
@@ -78,7 +78,7 @@
 #define INFO_MDNS_MESG     sprintf
 #else
 #define INFO_MDNS_PRINT(x)
-#define INFO_MDNS_MESG(x,y...)      
+#define INFO_MDNS_MESG(x,y,...)      
 #endif
 
 // For warnings, errors, and other exceptions
@@ -87,7 +87,7 @@
 #define WARN_MDNS_MESG     sprintf
 #else
 #define WARN_MDNS_PRINT(x)
-#define WARN_MDNS_MESG(x,y...)      
+#define WARN_MDNS_MESG(x,y,...)      
 #endif
 
 // Always print
@@ -107,12 +107,12 @@ void mDNSFillHostRecord(void);
 
 //void DisplayHostName(BYTE *HostName);
 
-typedef enum _MDNSD_ERR_CODE {
+typedef enum {
     MDNSD_SUCCESS =  0,
     MDNSD_ERR_BUSY =     1, /* Already Being used for another Service */
     MDNSD_ERR_CONFLICT = 2, /* Name Conflict */
     MDNSD_ERR_INVAL =    3, /* Invalid Parameter */
-}MDNSD_ERR_CODE;
+} MDNSD_ERR_CODE;
 
 /* DNS-Service Discovery APIs */
 MDNSD_ERR_CODE mDNSServiceRegister(

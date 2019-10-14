@@ -199,7 +199,7 @@ static int WFEasyConfigProcess(void)
     }
  
     #if defined (EZ_CONFIG_STORE)
-    SaveWifiConfig();
+    SaveAppConfig(&AppConfig);
     #endif
 
     /* Set wlan mode */

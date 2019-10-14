@@ -139,13 +139,6 @@ cfg01, cfg02,.., to the look-up table USB_CD_Ptr. USB_CD_Ptr[0]
 is a dummy place holder since configuration 0 is the un-configured
 state according to the definition in the USB specification.
 
-********************************************************************
-
- Change History:
-  Rev   Description
-  ----  -----------------------------------------
-  2.7   Updated to fix WHQL compliance issues
-
 ********************************************************************/
  
 /*********************************************************************
@@ -196,7 +189,7 @@ ROM BYTE configDescriptor1[]={
     1,                      // Number of interfaces in this cfg
     1,                      // Index value of this configuration
     0,                      // Configuration string index
-    _DEFAULT | _SELF,       // Attributes, see usb_device.h
+    _DEFAULT | _SELF | _RWU,// Attributes, see usb_device.h
     50,                     // Max power consumption (2X mA)
 
     /* Interface Descriptor */

@@ -46,7 +46,7 @@
  *									when equal or greater than.
  * PAT					6/29/09		Modified Draw Sector function to be state based.
  *****************************************************************************/
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include <math.h>
 
 #ifdef USE_CHART
@@ -105,6 +105,11 @@ CHART *ChCreate
     pCh->hdr.right = right;     // right position
     pCh->hdr.bottom = bottom;   // bottom position
     pCh->hdr.state = state;     // state
+    pCh->hdr.DrawObj = ChDraw;				// draw function
+    pCh->hdr.MsgObj = ChTranslateMsg;   	// message function
+    pCh->hdr.MsgDefaultObj = NULL;  		// default message function
+    pCh->hdr.FreeObj = ChFreeDataSeries;  	// free function
+    
     if(pParam != NULL)
     {
         pCh->prm.pTitle = pParam->pTitle;
@@ -160,14 +165,18 @@ CHART *ChCreate
 }
 
 /*********************************************************************
-* Function: WORD ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg)
+* Function: WORD ChTranslateMsg(void *pObj, GOL_MSG *pMsg)
 *
 * Notes: Evaluates the message if the object will be affected by the 
 *		 message or not.
 *
 ********************************************************************/
-WORD ChTranslateMsg(CHART *pCh, GOL_MSG *pMsg)
+WORD ChTranslateMsg(void *pObj, GOL_MSG *pMsg)
 {
+
+    CHART *pCh;
+
+    pCh = (CHART *)pObj;
 
     // Evaluate if the message is for the static text
     // Check if disabled first
@@ -322,7 +331,7 @@ WORD GetColorShade(WORD color, BYTE shade)
 }
 
 /*********************************************************************
-* Function: WORD ChDraw(CHART *pCh)
+* Function: WORD ChDraw(void *pObj)
 *
 *
 * Notes: This is the state machine to draw the button.
@@ -333,7 +342,7 @@ WORD GetColorShade(WORD color, BYTE shade)
 
 /* */
 
-WORD ChDraw(CHART *pCh)
+WORD ChDraw(void *pObj)
 {
     typedef enum
     {
@@ -413,6 +422,10 @@ WORD ChDraw(CHART *pCh)
     static WORD pieLabelYPos, pieLabelYPos2, pieLabelYPos3;
     static WORD pieSectorXPos;
     static WORD pieSectorYPos;
+
+    CHART *pCh;
+
+    pCh = (CHART *)pObj;
 
     if(IsDeviceBusy())
         return (0);
@@ -2354,7 +2367,7 @@ WORD ChDraw(CHART *pCh)
                 h += 1; // adjust h
                 tempStr[STR_CHAR_CNT - h] = 'A' + (ChGetSampleStart(pCh) - 1 + k);
                     #endif
-                SetColor(BLACK);
+                SetColor(pCh->hdr.pGolScheme->EmbossLtColor);
 
                 m = j;
 
@@ -2623,7 +2636,7 @@ WORD ChDraw(CHART *pCh)
         case PIE_DRAW_SECTOR_LOOP_STRINGS_RUN:
 
             // now draw the strings of the values and/or percentages
-            SetColor(BLACK);
+			SetColor(pCh->hdr.pGolScheme->EmbossLtColor);
             SetFont(pVarFont);
 
             if(!OutText(&tempStr[STR_CHAR_CNT - h]))
@@ -2723,6 +2736,45 @@ DATASERIES *ChAddDataSeries(CHART *pCh, WORD nSamples, WORD *pData, XCHAR *pName
     // update the variable count before exiting
     pCh->prm.seriesCount++;
     return (DATASERIES *)pVar;
+}
+/*********************************************************************
+* Function: void ChFreeDataSeries(void *pObj)
+*
+*
+* Notes: Removes a data series structure in the linked list 
+*		 of data series. 
+*
+********************************************************************/
+void ChFreeDataSeries(void *pObj)
+{
+    DATASERIES  *pVar = NULL, *pPrevVar = NULL;
+    CHART *pCh;
+
+    pCh = (CHART *)pObj;
+
+    pVar = pCh->pChData;
+
+    // check if the list is empty
+    if(pVar == NULL)
+        return;
+
+    // check if there is only one entry
+    if(pVar->pNextData == NULL)
+    {
+        GFX_free(pVar);
+        pCh->pChData = NULL;
+        return;
+    }
+
+    // remove all
+    while(pVar != NULL)
+    {
+        pPrevVar = pVar;
+        pVar = pVar->pNextData;
+
+        // free the memory used by the item
+        GFX_free(pPrevVar);
+    }
 }
 
 /*********************************************************************

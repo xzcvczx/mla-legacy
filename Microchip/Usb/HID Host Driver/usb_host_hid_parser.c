@@ -50,19 +50,13 @@ Change History:
   ----------  ----------------------------------------------------------
   2.6 - 2.7   No change
 
-  2.7a        Provided macro wrapped versions of malloc() and free()
-              so that a user can override these functions easily.
-
-              Fixed initialization issue where HID parse result information
-              wasn't cleared before loading with new parse result data.
-
 *******************************************************************************/
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "usb_config.h"
-#include "USB\usb.h"
-#include "USB\usb_host_hid.h"
-#include "USB\usb_host_hid_parser.h"
+#include "USB/usb.h"
+#include "USB/usb_host_hid.h"
+#include "USB/usb_host_hid_parser.h"
 #include <stdlib.h>
 #include <string.h>
 

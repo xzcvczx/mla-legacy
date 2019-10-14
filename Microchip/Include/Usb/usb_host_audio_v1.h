@@ -77,9 +77,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev    Description
   ----   -----------
   2.7    Initial Release
-  
-  2.7a   added USBHostAudioV1DataEventHandler()
-         renamed EVENT_AUDIO_RECEIVE_STREAM to EVENT_AUDIO_STREAM_RECEIVED
+
 *******************************************************************************/
 //DOM-IGNORE-END
 

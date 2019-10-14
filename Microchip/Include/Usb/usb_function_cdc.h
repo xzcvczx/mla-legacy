@@ -89,9 +89,10 @@
   2.3    Decricated the mUSBUSARTIsTxTrfReady() macro.  It is 
          replaced by the USBUSARTIsTxTrfReady() function.
 
-  2.6    Minor defintion changes
-  2.6a-  No change
-   2.7a
+  2.6    Minor definition changes
+
+  2.6a   No Changes
+
 ********************************************************************/
 
 #ifndef CDC_H
@@ -99,7 +100,7 @@
 
 /** I N C L U D E S **********************************************************/
 #include "GenericTypeDefs.h"
-#include "USB\usb.h"
+#include "USB/usb.h"
 #include "usb_config.h"
 
 /** D E F I N I T I O N S ****************************************************/
