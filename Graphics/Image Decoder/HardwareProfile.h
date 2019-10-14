@@ -98,7 +98,7 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-		#include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
+		//#include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
 		//#include "Configs/HWP_GFXv3_EX16_16PMP_QVGAv1.h"
 
     /*********************************************************************
@@ -116,7 +116,7 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
+	#include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
 	//#include "Configs/HWP_GFXv3_PIC_SK_16PMP_QVGAv1.h"
 
     /*********************************************************************

@@ -4,7 +4,7 @@
     Dependencies:   See INCLUDES section
     Processor:      PIC18 or PIC24 USB Microcontrollers
     Hardware:       The code is natively intended to be used on the following
-                    hardware platforms: PICDEM™ FS USB Demo Board,
+                    hardware platforms: PICDEM(TM) FS USB Demo Board,
                     PIC18F87J50 FS USB Plug-In Module, or
                     Explorer 16 + PIC24 USB PIM.  The firmware may be
                     modified for use on other USB platforms by editing the
@@ -15,7 +15,7 @@
     Software License Agreement:
 
     The software supplied herewith by Microchip Technology Incorporated
-    (the “Company”) for its PIC® Microcontroller is intended and
+    (the "Company") for its PIC(R) Microcontroller is intended and
     supplied to you, the Company’s customer, for use solely and
     exclusively on Microchip PIC Microcontroller products. The
     software is owned by the Company and/or its supplier, and is
@@ -25,7 +25,7 @@
     civil liability for the breach of the terms and conditions of this
     license.
 
-    THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+    THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
     WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
     TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
     PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -110,7 +110,6 @@
 
 /** V A R I A B L E S ********************************************************/
 #if defined(__18CXX)
-    #pragma udata
     //The cdc_data_rx[] and cdc_data_tx[] arrays and associated variables are used 
     //as USB packet buffers in this firmware.  Therefore, they must be located in
     //a USB module accessible portion of microcontroller RAM.
@@ -127,10 +126,69 @@
         #pragma udata
     #endif
 #endif
-volatile FAR CDC_NOTICE cdc_notice;
-volatile FAR unsigned char cdc_data_rx[CDC_DATA_OUT_EP_SIZE];
-volatile FAR unsigned char cdc_data_tx[CDC_DATA_IN_EP_SIZE];
-LINE_CODING line_coding;    // Buffer to store line coding information
+
+#if defined(__XC8)
+    #if defined(_18F14K50) || defined(_18F13K50) || defined(_18LF14K50) || defined(_18LF13K50)
+        #define IN_DATA_BUFFER_ADDRESS 0x260
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + CDC_DATA_IN_EP_SIZE)
+        #define LINE_CODING_ADDRESS (OUT_DATA_BUFFER_ADDRESS + CDC_DATA_OUT_EP_SIZE)
+        #define NOTICE_ADDRESS (LINE_CODING_ADDRESS + LINE_CODING_LENGTH)
+
+        #define IN_DATA_BUFFER_ADDRESS_TAG  @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+        #define LINE_CODING_ADDRESS_TAG     @LINE_CODING_ADDRESS
+        #define NOTICE_ADDRESS_TAG          @NOTICE_ADDRESS
+    #elif  defined(_18F2455)   || defined(_18F2550)   || defined(_18F4455)  || defined(_18F4550)\
+        || defined(_18F2458)   || defined(_18F2453)   || defined(_18F4558)  || defined(_18F4553)\
+        || defined(_18LF24K50) || defined(_18F24K50)  || defined(_18LF25K50)\
+        || defined(_18F25K50)  || defined(_18LF45K50) || defined(_18F45K50)
+        #define IN_DATA_BUFFER_ADDRESS 0x500
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + CDC_DATA_IN_EP_SIZE)
+        #define LINE_CODING_ADDRESS (OUT_DATA_BUFFER_ADDRESS + CDC_DATA_OUT_EP_SIZE)
+        #define NOTICE_ADDRESS (LINE_CODING_ADDRESS + LINE_CODING_LENGTH)
+
+        #define IN_DATA_BUFFER_ADDRESS_TAG  @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+        #define LINE_CODING_ADDRESS_TAG     @LINE_CODING_ADDRESS
+        #define NOTICE_ADDRESS_TAG          @NOTICE_ADDRESS
+#elif defined(_18F4450) || defined(_18F2450)
+        #define IN_DATA_BUFFER_ADDRESS 0x480
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + CDC_DATA_IN_EP_SIZE)
+        #define LINE_CODING_ADDRESS (OUT_DATA_BUFFER_ADDRESS + CDC_DATA_OUT_EP_SIZE)
+        #define NOTICE_ADDRESS (LINE_CODING_ADDRESS + LINE_CODING_LENGTH)
+
+        #define IN_DATA_BUFFER_ADDRESS_TAG  @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+        #define LINE_CODING_ADDRESS_TAG     @LINE_CODING_ADDRESS
+        #define NOTICE_ADDRESS_TAG          @NOTICE_ADDRESS
+    #elif defined(_16F1459)
+        #define IN_DATA_BUFFER_ADDRESS 0x2140
+        #define OUT_DATA_BUFFER_ADDRESS 0x2190
+        #define LINE_CODING_ADDRESS 0x20A0
+        #define NOTICE_ADDRESS (LINE_CODING_ADDRESS + LINE_CODING_LENGTH)
+
+        #define IN_DATA_BUFFER_ADDRESS_TAG  @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+        #define LINE_CODING_ADDRESS_TAG     @LINE_CODING_ADDRESS
+        #define NOTICE_ADDRESS_TAG          @NOTICE_ADDRESS
+#else
+        #define IN_DATA_BUFFER_ADDRESS_TAG
+        #define OUT_DATA_BUFFER_ADDRESS_TAG
+        #define LINE_CODING_ADDRESS_TAG
+        #define NOTICE_ADDRESS_TAG
+    #endif
+#else
+    #define IN_DATA_BUFFER_ADDRESS_TAG
+    #define OUT_DATA_BUFFER_ADDRESS_TAG
+    #define LINE_CODING_ADDRESS_TAG
+    #define NOTICE_ADDRESS_TAG
+#endif
+
+volatile FAR unsigned char cdc_data_tx[CDC_DATA_IN_EP_SIZE] IN_DATA_BUFFER_ADDRESS_TAG;
+volatile FAR unsigned char cdc_data_rx[CDC_DATA_OUT_EP_SIZE] OUT_DATA_BUFFER_ADDRESS_TAG;
+
+LINE_CODING line_coding LINE_CODING_ADDRESS_TAG;    // Buffer to store line coding information
+volatile FAR CDC_NOTICE cdc_notice NOTICE_ADDRESS_TAG;
 
 #if defined(USB_CDC_SUPPORT_DSR_REPORTING)
     SERIAL_STATE_NOTIFICATION SerialStatePacket;

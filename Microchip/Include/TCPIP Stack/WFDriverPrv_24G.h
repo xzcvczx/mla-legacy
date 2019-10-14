@@ -100,16 +100,18 @@
 
 
 #define WF_SetCE_N(level)                                           \
-    /* configure I/O as ouput         */                            \
-    WF_HIBERNATE_TRIS = 0;                                          \
     /* set pin to desired level       */                            \
-    WF_HIBERNATE_IO   = level    
+    WF_HIBERNATE_IO   = level;                                      \
+                                                                    \
+    /* configure I/O as ouput         */                            \
+    WF_HIBERNATE_TRIS = 0
 
 #define WF_SetRST_N(level)                                          \
-    /* configure the I/O as an output   */                          \
-    WF_RESET_TRIS = 0;                                              \
     /* set pin to desired level         */                          \
-    WF_RESET_IO   = level    
+    WF_RESET_IO   = level;                                          \
+                                                                    \
+    /* configure the I/O as an output   */                          \
+    WF_RESET_TRIS = 0
 
 
 /* SPI Tx Message Types */

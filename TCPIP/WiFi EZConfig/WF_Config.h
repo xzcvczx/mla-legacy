@@ -98,13 +98,15 @@
 /* else if starting this demo in SoftAP mode */
 /*------------------------------------------*/
 #elif MY_DEFAULT_NETWORK_TYPE == CFG_WF_SOFT_AP
-/* Please note that this demo is only for demoing SoftAP function, but full "EasyConfig" function. 
+/* Please note that this demo is only for demoing SoftAP function, not full "EasyConfig" function. 
 * Your STA can connect to the SoftAP as a client, get the DHCP IP, run ping, and run web browser to connect to Web Server
 * of SoftAP. But unlike Adhoc mode above it may not direct you to connect to another AP in infrastructure mode.
 * The reason this demo sits here is simply A) borrow DHCP server; B) borrow HTTP server.
 *
 * Also note that this is a very simplified SoftAP. So its function is limited as , A) no routing supported; B) only 1 client allowed
 * at a time.  And security wise currently it only supports open mode.
+*
+* SoftAP's default IP is 192.168.1.1 and its Network Mask is 255.255.0.0
 */
 #if defined (MRF24WG)
 	#define MY_DEFAULT_WIFI_SECURITY_MODE				WF_SECURITY_OPEN			/* only open security supported */

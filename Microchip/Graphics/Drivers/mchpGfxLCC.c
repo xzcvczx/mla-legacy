@@ -261,7 +261,7 @@ void ResetDevice(void)
     #ifdef USE_PALETTE
     DmaChnSetTxfer(1, &GraphicsFrame[0], (void*)&PMDIN, HBackPorch, 2, 2); 
     #else
-    DmaChnSetTxfer(1, &GraphicsFrame[0], (void*)&PMDIN, HBackPorch, 1, 2); 
+    DmaChnSetTxfer(1, &GraphicsFrame[0], (void*)&PMDIN, HBackPorch, 1, 1); 
     #endif
     #else    
     #if defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)

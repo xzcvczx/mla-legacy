@@ -1039,6 +1039,16 @@ static void InitAppConfig(void)
 //			MACAddressAddress.next = 0x157F8;
 //			_memcpy_p2d24((char*)&AppConfig.MyMACAddr, MACAddressAddress, sizeof(AppConfig.MyMACAddr));
 //		}
+
+#if MY_DEFAULT_NETWORK_TYPE == WF_SOFT_AP
+		AppConfig.MyIPAddr.Val = 192ul | 168ul<<8ul | 1ul<<16ul | 1ul<<24ul;
+		AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
+		AppConfig.MyMask.Val = 255ul | 255ul<<8ul | 0ul<<16ul | 0ul<<24ul;
+		AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
+		AppConfig.MyGateway.Val = AppConfig.MyIPAddr.Val;
+		AppConfig.PrimaryDNSServer.Val = AppConfig.MyIPAddr.Val;
+		AppConfig.SecondaryDNSServer.Val = AppConfig.MyIPAddr.Val;
+#else
 		AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2<<8ul | MY_DEFAULT_IP_ADDR_BYTE3<<16ul | MY_DEFAULT_IP_ADDR_BYTE4<<24ul;
 		AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
 		AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | MY_DEFAULT_MASK_BYTE2<<8ul | MY_DEFAULT_MASK_BYTE3<<16ul | MY_DEFAULT_MASK_BYTE4<<24ul;
@@ -1046,7 +1056,7 @@ static void InitAppConfig(void)
 		AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | MY_DEFAULT_GATE_BYTE2<<8ul | MY_DEFAULT_GATE_BYTE3<<16ul | MY_DEFAULT_GATE_BYTE4<<24ul;
 		AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | MY_DEFAULT_PRIMARY_DNS_BYTE2<<8ul  | MY_DEFAULT_PRIMARY_DNS_BYTE3<<16ul  | MY_DEFAULT_PRIMARY_DNS_BYTE4<<24ul;
 		AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2<<8ul  | MY_DEFAULT_SECONDARY_DNS_BYTE3<<16ul  | MY_DEFAULT_SECONDARY_DNS_BYTE4<<24ul;
-	
+#endif
 	
 		// SNMP Community String configuration
 		#if defined(STACK_USE_SNMP_SERVER)

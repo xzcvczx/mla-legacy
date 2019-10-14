@@ -297,17 +297,9 @@ void WaitForMgmtResponseAndReadData(UINT8 expectedSubtype,
     /* if made it here then received a management message */
     RawRead(RAW_RX_ID, 0, (UINT16)(sizeof(tMgmtMsgRxHdr)), (UINT8 *)&hdr);
 
-    /* check header result field */
-    if (hdr.result != WF_SUCCESS)
-    {
-        WF_ASSERT(FALSE);
-    }    
-
-    /* make sure mgmt response is the expected one */
-    if (hdr.subtype != expectedSubtype)
-    {
-        WF_ASSERT(FALSE);
-    }   
+    /* check header result and subtype fields */
+    WF_ASSERT(hdr.result  == WF_SUCCESS || hdr.result == WF_ERROR_NO_STORED_BSS_DESCRIPTOR);
+    WF_ASSERT(hdr.subtype == expectedSubtype);
 
     /* if caller wants to read data from this mgmt response */
     if (numDataBytes > 0) 

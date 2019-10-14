@@ -144,8 +144,8 @@
 #elif MY_DEFAULT_NETWORK_TYPE == CFG_WF_P2P
 #if defined (MRF24WG)
 	/* 
-	* Wi-Fi Direct has been validated with Samsung Galaxy Tab 2 7.0 ( Android 4.0.3, Ice cream Sandwitch)
-	* and a flag-ship Android device Galaxy-Nexus. We can connect to GO as a GC.
+	* Wi-Fi Direct has been validated with Samsung Galaxy Tab 2 7.0 ( Android 4.0.3, Ice cream Sandwitch), 
+	* a flag-ship Android device Galaxy-Nexus and Galaxy S III(Android 4.04). We can connect to GO as a GC.
 	* To test this on console demo please install "ping" utility on tablet, and run it to the device.
 	*/
     #define MY_DEFAULT_WIFI_SECURITY_MODE              	WF_SECURITY_WPS_PUSH_BUTTON

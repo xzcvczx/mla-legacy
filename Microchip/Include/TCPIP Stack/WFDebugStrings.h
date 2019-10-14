@@ -23,10 +23,6 @@
 /*---------------------------*/
 /* Compile-time Error Checks */
 /*---------------------------*/
-#if defined(WF_TCPIP_DEMO) && (MY_DEFAULT_NETWORK_TYPE == WF_ADHOC )
-    #error "MY_DEFAULT_NETWORK_TYPE must be set to WF_INFRASTRUCTURE or WF_P2P for this demo (see WF_Config.h)"
-#endif
-
 #if defined(WF_EASY_CONFIG_DEMO) 
     #if (MY_DEFAULT_NETWORK_TYPE != WF_ADHOC) && (MY_DEFAULT_NETWORK_TYPE != WF_SOFT_AP)
         #error "MY_DEFAULT_NETWORK_TYPE must be set to WF_ADHOC for this demo (see WF_Config.h)"

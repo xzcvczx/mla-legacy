@@ -11,7 +11,7 @@
     <NAME>Microchip Application Libraries</NAME>
     <SHORT_NAME>MAL</SHORT_NAME>
     <VERSION>
-      <STRING>2012-07-18</STRING>
+      <STRING>2012-08-22</STRING>
     </VERSION>
   </INFO>
 
@@ -32,7 +32,7 @@
       <NAME>Microchip Full Speed USB Library</NAME>
       <SHORT_NAME>MCHPFSUSB</SHORT_NAME>
       <VERSION>
-        <STRING>2.9f</STRING>
+        <STRING>2.9g</STRING>
       </VERSION>
     </LIBRARY>
 
@@ -52,7 +52,7 @@
       <VERSION>
         <MAJOR>5</MAJOR>
         <MINOR>42</MINOR>
-        <DOT>00</DOT>
+        <DOT>02</DOT>
       </VERSION>
     </LIBRARY>
 
@@ -92,7 +92,7 @@
       <VERSION>
         <MAJOR>1</MAJOR>
         <MINOR>01</MINOR>
-        <DOT>03</DOT>
+        <DOT>04</DOT>
       </VERSION>
     </LIBRARY>
 

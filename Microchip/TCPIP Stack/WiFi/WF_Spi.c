@@ -239,10 +239,10 @@ static void ConfigureSpiMRF24W(void)
     /* data is sampled on rising edge   */
     /* set the clock divider            */
     #if defined(__18CXX)
-        WF_SPICON1 = 0x30;      // SSPEN bit is set, SPI in master mode, (0x30 is for FOSC/4),
-                                //   IDLE state is high level (0x32 is for FOSC/64)
-        WF_SPISTATbits.CKE = 0; // Transmit data on falling edge of clock
-        WF_SPISTATbits.SMP = 1; // Input sampled at end? of data output time
+        WF_SPICON1 = 0x20;      // SSPEN bit is set, SPI in master mode, (0x30 is for FOSC/4),
+                                //   IDLE state is low level (0x32 is for FOSC/64)
+        WF_SPISTATbits.CKE = 1; // Transmit data on falling edge of clock
+        WF_SPISTATbits.SMP = 1; // Input sampled at end of data output time
     #elif defined(__C30__)
         WF_SPICON1 = 0x027B;    // Fcy Primary prescaler 1:1, secondary prescaler 2:1, CKP=1, CKE=0, SMP=1
         WF_SPICON2 = 0x0000;

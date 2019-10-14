@@ -469,7 +469,7 @@ file_108=mTouchKeys.h
 file_109=mTouchConfig.h
 [SUITE_INFO]
 suite_guid={9BCCB495-CD65-480A-BA76-63D8E78B117F}
-suite_state=
+suite_state=-omf=elf
 [TOOL_SETTINGS]
 TS{8493B2ED-D539-4951-86C9-24D5331F0393}=-g
 TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -Os -fno-ivopts

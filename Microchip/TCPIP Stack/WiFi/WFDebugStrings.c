@@ -939,7 +939,7 @@ void WF_AssertionFailed(UINT8 moduleNumber, UINT16 lineNumber)
     
     putrsUART("Line Number = ");
     
-    sprintf(buf, "%d", lineNumber);
+    sprintf(buf, "%d\r\n", lineNumber);
     putsUART(buf);
 #endif /* STACK_USE_UART */
     

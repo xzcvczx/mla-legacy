@@ -599,11 +599,12 @@ void WriteWFROMArray(UINT8 regId, ROM UINT8 *p_Buf, UINT16 length)
  *      N/A
  *
  *
- *  NOTES: Performs the necessary SPI operations to cause the MRF24W to reset.
- *      This function also implements a delay so that it will not return until
- *      the WiFi device is ready to receive messages again.  The delay time will
- *      vary depending on the amount of code that must be loaded from serial
- *      flash.
+ *  NOTES: Performs the necessary SPI operations to cause the MRF24W to do a soft
+ *         reset.
+ *
+ *         This function waits for the MRF24WG to complete its initialization before
+ *         returning to the caller.  The largest part of the wait is for the MRF24WG
+ *         to download any patch code in FLASH into its RAM.
  *****************************************************************************/
 static void ChipReset(void)
 {
@@ -611,22 +612,6 @@ static void ChipReset(void)
     UINT32 timeoutPeriod;
     UINT32 startTickCount;
 
-#if 0
-    putrsUART("         **** Bypass chip reset\r\n");
-    return;
-#endif
-    
-    timeoutPeriod = TICKS_PER_SECOND * 3;  /* 3000 ms */
-
-    /* needed for Microchip PICTail (chip enable active low) */
-    WF_SetCE_N(WF_LOW); /* set low to enable regulator */
-
-    /* Configure reset pin */
-    WF_SetRST_N(WF_HIGH);
-
-    /* Let SPI lines settle before first SPI transaction */
-    DelayMs(1);
-    
     /* clear the power bit to disable low power mode on the MRF24W */
     Write16BitWFRegister(WF_PSPOLL_H_REG, 0x0000);
 
@@ -636,8 +621,8 @@ static void ChipReset(void)
     /* Clear HOST_RESET bit in register to take device out of reset */
     Write16BitWFRegister(WF_HOST_RESET_REG, Read16BitWFRegister(WF_HOST_RESET_REG) & ~WF_HOST_RESET_MASK);
 
-
     /* after reset is started poll register to determine when HW reset has completed */
+    timeoutPeriod = TICKS_PER_SECOND * 3;  /* 3000 ms */
     startTickCount = (UINT32)TickGet();  
     do
     {
@@ -896,16 +881,21 @@ void WFHardwareInit(void)
     RawMoveState.rawInterrupt  = 0;
     RawMoveState.waitingForRawMoveCompleteInterrupt = FALSE;   /* not waiting for RAW move complete */
 
-    /* needed for Microchip PICTail (chip enable active low) */
-    WF_SetCE_N(WF_LOW); /* set low to enable regulator */
-
-
     /* initialize the SPI interface */
     WF_SpiInit();
     
-    ResetPll();  // needed until PLL fix made in A2 silicon
+    /* Toggle the module into and then out of hibernate */
+    WF_SetCE_N(WF_HIGH); /* disable module */
+    WF_SetCE_N(WF_LOW);  /* enable module  */
 
-    /* Reset the MRF24W (using SPI bus to write/read MRF24W registers */
+    /* Toggle the module into and out of reset */
+    WF_SetRST_N(WF_LOW);            // put module into reset
+    WF_SetRST_N(WF_HIGH);           // take module out of of reset
+
+    /* Silicon work-around -- needed for A1 silicon to initialize PLL values correctly */
+    ResetPll(); 
+
+    /* Soft reset the MRF24W (using SPI bus to write/read MRF24W registers */
     ChipReset();
     
     /* disable the interrupts gated by the 16-bit host int register */

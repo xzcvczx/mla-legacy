@@ -805,6 +805,10 @@ BOOL AndroidAppEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
                     if(j >= (sizeof(protocolVersions)/sizeof(ANDROID_PROTOCOL_VERSION)))
                     {
                         //If we don't support that protocol version, use the next best version
+
+                        //Override the protocol version specified by the device
+                        devices[i].protocol = protocolVersions[j-1].versionNumber;
+
                         devices[i].state = READY;
                         devices[i].protocolHandle = protocolVersions[j-1].init(devices[i].address, devices[i].flags, devices[i].clientDriverID);
                     }

@@ -82,18 +82,23 @@
 //   WF_SECURITY_WPS_PIN		   		   : WPS PIN method
 
 #define CFG_WF_INFRASTRUCTURE 1
+#define CFG_WF_ADHOC          2
 #define CFG_WF_P2P            3 	
 
-#define MY_DEFAULT_NETWORK_TYPE             CFG_WF_INFRASTRUCTURE   /* CFG_WF_INFRASTRUCTURE, CFG_WF_P2P */ 
+#define MY_DEFAULT_NETWORK_TYPE             CFG_WF_INFRASTRUCTURE  /* CFG_WF_INFRASTRUCTURE, CFG_WF_ADHOC, CFG_WF_P2P */ 
 #define MY_DEFAULT_DOMAIN                   WF_DOMAIN_FCC
 #define MY_DEFAULT_LIST_RETRY_COUNT         WF_RETRY_FOREVER            /* Number of times to try to connect to the SSID when using Infrastructure network type */
 
-#if MY_DEFAULT_NETWORK_TYPE == CFG_WF_INFRASTRUCTURE
-    #define MY_INFRASTRUCTURE_SSID              "MicrochipDemoAP"           /* if WF_SECURITY_WPS_PUSH_BUTTON must be "" (empty string) */
+#if MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC
+#undef MY_DEFAULT_LIST_RETRY_COUNT
+#define MY_DEFAULT_LIST_RETRY_COUNT         3
+#endif
+
+#if MY_DEFAULT_NETWORK_TYPE == CFG_WF_INFRASTRUCTURE || MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC
     #define MY_DEFAULT_WIFI_SECURITY_MODE       WF_SECURITY_OPEN
     #define MY_DEFAULT_SCAN_TYPE                WF_ACTIVE_SCAN              /* WF_ACTIVE_SCAN or WF_PASSIVE_SCAN */
     #define MY_DEFAULT_BEACON_TIMEOUT           (40)                        /* Number of beacon periods          */
-    #define MY_DEFAULT_SSID_NAME                MY_INFRASTRUCTURE_SSID    
+    #define MY_DEFAULT_SSID_NAME                "MicrochipDemoAP"           /* if WF_SECURITY_WPS_PUSH_BUTTON must be "" (empty string) */   
     #define MY_DEFAULT_CHANNEL_LIST         {1,2,3,4,5,6,7,8,9,10,11}   /* Default channel list for FCC */
 
     /* Select Infrastructure Power Save Mode */
@@ -128,7 +133,7 @@
 #if defined (MRF24WG)
 	/* 
 	* Wi-Fi Direct has been validated with Samsung Galaxy Tab 2 7.0 ( Android 4.0.3, Ice cream Sandwitch)
-	* and a flag-ship Android device Galaxy-Nexus. We can connect to a GO as a GC.
+	* a flag-ship Android device Galaxy-Nexus and Galaxy S III(Android 4.04). We can connect to a GO as a GC.
 	* This demo runs a HTTP server, so you can connect to our device via a web browser in your Android device.
 	*/
     #define MY_DEFAULT_WIFI_SECURITY_MODE              	WF_SECURITY_WPS_PUSH_BUTTON

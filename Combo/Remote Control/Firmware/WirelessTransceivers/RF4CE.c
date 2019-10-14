@@ -41,7 +41,7 @@
 
 /************************ HEADERS **********************************/
 
-#warning The Remote control demo source code does not include RF4CE source code. To evaluate RF4CE demo, please program the PIC with the pre-programmed HEX file ‘Remote Control-C30-PIC24FJ256DA210-RCB-RF4CE.hex’ located in the Pre-compiled Hex folder. To develop your application with RF4CE stack, please contact local Microchip Sales to request the RF4CE source code (RF4CE.c; MRF24J40_RF4CE.c). 
+#warning The Remote control demo source code does not include RF4CE source code. To evaluate RF4CE demo, please program the PIC with the pre-programmed HEX file ‘Combo - Remote Control PIC24_DA210_RCB_RF4CE.hex’ located in the Pre-compiled Hex folder. To develop your application with RF4CE stack, please contact local Microchip Sales to request the RF4CE source code (RF4CE.c; MRF24J40_RF4CE.c). 
 
 #include "ConfigApp.h"
 

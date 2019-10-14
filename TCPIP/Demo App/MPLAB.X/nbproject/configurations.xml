@@ -11072,6 +11072,8 @@
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
       </C30Global>
+      <HI-TECH-COMP>
+      </HI-TECH-COMP>
       <ICD3PlatformTool>
       </ICD3PlatformTool>
     </conf>
@@ -12443,8 +12445,16 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
-            ex="true"
+            ex="false"
             overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETH97J60.c"
             ex="true"
@@ -13142,8 +13152,16 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
-            ex="true"
+            ex="false"
             overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETH97J60.c"
             ex="true"
@@ -15947,8 +15965,16 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
-            ex="true"
+            ex="false"
             overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETH97J60.c"
             ex="true"
@@ -16646,8 +16672,16 @@
         </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
-            ex="true"
+            ex="false"
             overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/ETH97J60.c"
             ex="true"
@@ -16860,7 +16894,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -18064,7 +18098,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -19264,7 +19298,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -20016,7 +20050,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -20038,6 +20072,14 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/BigInt_helper_elf.a"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
             overriding="false">
@@ -20172,7 +20214,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -21270,7 +21312,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -22462,7 +22504,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -23652,7 +23694,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -24393,7 +24435,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -24415,6 +24457,14 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/BigInt_helper_elf.a"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
             overriding="false">
@@ -24530,7 +24580,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -25722,7 +25772,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -26914,7 +26964,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -27655,7 +27705,7 @@
         <targetHeader></targetHeader>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -27677,6 +27727,14 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../../../Microchip/TCPIP Stack/BigInt_helper_coff.a"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../../../Microchip/TCPIP Stack/BigInt_helper_elf.a"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
             overriding="false">

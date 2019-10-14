@@ -62,24 +62,24 @@
 * Overview: Horizontal and vertical screen size.
 *********************************************************************/
     #if (DISP_HOR_RESOLUTION != 240)
-        #error This driver doesn't supports this resolution. Horisontal resolution must be 240 pixels.
+        #error "This driver doesn't supports this resolution. Horizontal resolution must be 240 pixels."
     #endif
     #if (DISP_VER_RESOLUTION != 320)
-        #error This driver doesn't supports this resolution. Vertical resolution must be 320 pixels.
+        #error "This driver doesn't supports this resolution. Vertical resolution must be 320 pixels."
     #endif
 
 /*********************************************************************
 * Overview: Display orientation.
 *********************************************************************/
     #if (DISP_ORIENTATION != 0) && (DISP_ORIENTATION != 90)
-        #error This driver doesn't support this orientation.
+        #error "This driver doesn't support this orientation."
     #endif
 
 /*********************************************************************
 * Overview: Color depth.
 *********************************************************************/
     #if (COLOR_DEPTH != 16)
-        #error This driver doesn't support this color depth. It should be 16.
+        #error "This driver doesn't support this color depth. It should be 16."
     #endif
 
 /*********************************************************************

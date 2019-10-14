@@ -1392,7 +1392,7 @@ void MACMemCopyAsync(PTR_BASE destAddr, PTR_BASE sourceAddr, WORD len)
     if ((destAddr >= BASE_TCB_ADDR) && (sourceAddr >= BASE_TCB_ADDR) )
     {
         bytesLeft = len;
-
+		rawScratchId = RAW_SCRATCH_ID; 
         /* save the current RAW index in this scratch window */
         origRawIndex = RawGetIndex(RAW_SCRATCH_ID);
         
