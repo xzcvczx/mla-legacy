@@ -70,7 +70,7 @@ public:
     bool hasConfigAsFlash(void);
     bool hasConfigAsFuses(void);
 
-    unsigned int GetDeviceAddressFromHexAddress(unsigned int hexAddress,  unsigned char& type, bool& includedInProgrammableRange, bool& addressWasEndofRange, unsigned int& bytesPerAddressAndType, unsigned int& endDeviceAddressofRegion);
+    unsigned int GetDeviceAddressFromHexAddress(unsigned int hexAddress, DeviceData* pData, unsigned char& type, bool& includedInProgrammableRange, bool& addressWasEndofRange, unsigned int& bytesPerAddressAndType, unsigned int& endDeviceAddressofRegion, unsigned char*& pPCRAMBuffer);
 
 protected:
     DeviceData *deviceData;

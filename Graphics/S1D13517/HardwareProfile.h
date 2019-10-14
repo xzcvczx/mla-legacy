@@ -138,13 +138,13 @@
  * 8 or 16-bit PMP
  * QVGA or WQVGA
  ********************************************************************/
-#elif defined(CFG_INCLUDE_GFXv3e_PIC32_SK_8PMP_VGAv1)
+#elif defined(CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_VGAv1)
     #include "Configs/HWP_GFXv3e_PIC_SK_8PMP_VGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3e_PIC32_SK_16PMP_VGAv1)
+#elif defined(CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_VGAv1)
     #include "Configs/HWP_GFXv3e_PIC_SK_16PMP_VGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3e_PIC32_SK_8PMP_WVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_WVGAv1)
     #include "Configs/HWP_GFXv3e_PIC_SK_8PMP_WVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3e_PIC32_SK_16PMP_WVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_WVGAv1)
     #include "Configs/HWP_GFXv3e_PIC_SK_16PMP_WVGAv1.h"
 #else
 #error "Please make sure that you have a CFG_INCLUDE_xxxx as a compile preprocessor define in the MPLAB X configuration."

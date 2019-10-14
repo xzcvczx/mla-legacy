@@ -34,9 +34,11 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  1.0   Initial release
-  1.01  Cleaned up unnecessary variables,supported T=1 protocol
-        and improvments in T=0 functions following the coding standards
+  1.0      Initial release
+  1.01     Cleaned up unnecessary variables,supported T=1 protocol
+           and improvments in T=0 functions following the coding standards
+  1.02.2   Modifed PPS functionality API.
+           Modified the code in more structured way.
 ********************************************************************/
 
 // Smart Card Library
@@ -201,8 +203,16 @@ extern BYTE* scATR_HistoryBuffer;
 // Number of Historical bytes present
 extern BYTE  scATR_HistoryLength;
 
-// Status of required delay elapsed
-extern BOOL delayLapsedFlag;
+// Length of PPS Response
+extern BYTE scPPSresponseLength;
+
+// PPS Response Bytes
+extern BYTE scPPSresponse[7];
+
+// SmartCard States
+#define	SC_STATE_CARD_NOT_PRESENT	10	// No Card Detected
+#define	SC_STATE_CARD_ACTIVE		20	// Card is powered and ATR received
+#define	SC_STATE_CARD_INACTIVE		30	// Card present but not powered
 
 // Longitudnal Redundancy Check(LRC) type is used for EDC in Epilogue Field
 #define	SC_LRC_TYPE_EDC				(BYTE)0
@@ -245,9 +255,9 @@ typedef struct
 /////////// SmartCard APDU Response structure 7816-4
 typedef struct
 {
-  WORD RXDATALEN;		// Recieved Data
-  BYTE SW1;          	// Trailer Response status 1
-  BYTE SW2;          	// Trailer Response status 2
+  WORD RXDATALEN;		// Recieved Data length from smart card(excluding SW1 and SW2 bytes)
+  BYTE SW1;          	// Status byte 1
+  BYTE SW2;          	// Status byte 2
 } SC_APDU_RESPONSE;
 
 //// Prologue Field for T=1 Protocol
@@ -258,28 +268,6 @@ typedef struct
   BYTE LENGTH;			// LENGTH of I-Field
 }SC_T1_PROLOGUE_FIELD;	
 
-// SmartCard States
-#define	SC_STATE_CARD_NOT_PRESENT	10	// No Card Detected
-#define	SC_STATE_CARD_ACTIVE		20	// Card is powered and ATR received
-#define	SC_STATE_CARD_INACTIVE		30	// Card present but not powered
-
-// Longitudnal Redundancy Check(LRC) type is used for EDC in Epilogue Field
-#define	SC_LRC_TYPE_EDC				(BYTE)0
-
-// Cyclic Redundancy Check(CRC) type is used for EDC in Epilogue Field
-#define	SC_CRC_TYPE_EDC				(BYTE)1
-
-// PCB byte for Resync Request of T1 Protocol
-#define	SC_RESYNC_REQ				(BYTE)0xC0
-
-// PCB byte for Abort Response of T1 Protocol
-#define	SC_ABORT_RESPONSE			(BYTE)0xE2
-
-// PCB byte for IFS Response of T1 Protocol
-#define	SC_IFS_RESPONSE				(BYTE)0xE1
-
-// PCB byte for Wait Time Extension Response of T1 Protocol
-#define	SC_WAIT_TIME_EXT_RESPONSE	(BYTE)0xE3
 
 // Smart Card Lib API //////////////////
 
@@ -302,7 +290,7 @@ typedef struct
   Remarks:
     None
   *****************************************************************************/
-void SC_Initialize(void);
+extern void SC_Initialize(void);
 
 
 /*******************************************************************************
@@ -324,7 +312,7 @@ void SC_Initialize(void);
   Remarks:
     None
   *****************************************************************************/
-BOOL SC_CardPresent(void);
+extern BOOL SC_CardPresent(void);
 
 
 /*******************************************************************************
@@ -348,7 +336,7 @@ BOOL SC_CardPresent(void);
   Remarks:
     None
   *****************************************************************************/
-int SC_GetCardState(void);
+extern int SC_GetCardState(void);
 
 /*******************************************************************************
   Function:
@@ -370,63 +358,56 @@ int SC_GetCardState(void);
   Remarks:
     None
   *****************************************************************************/
-BOOL SC_PowerOnATR(void);
+extern BOOL SC_PowerOnATR(void);
 
 /*******************************************************************************
   Function:
-	BOOL SC_DoPPS(void)	
+	BOOL SC_DoPPS(BYTE *ppsPtr)
   
   Description:
-    This function configures the baud rate of the PIC UART to match with
-	Answer-to-Reset data after doing PPS to the card.
+    This function does the PPS exchange with the smart card & configures the baud 
+    rate of the PIC UART module as per the PPS response from the smart card.
 
   Precondition:
     SC_PowerOnATR was success
 
   Parameters:
-    None
+    Input is pointer to PPS string
 
   Return Values:
-    TRUE if Baud rate is supported by the PIC
+    TRUE if PPS exchange is successful
 	
   Remarks:
-    This function is called when SC_PowerOnATR() returns TRUE.  If the Baud 
-	rate configration file inside the card is changed, these function should 
-	be called again for the new baud to take effect.
+    This function is called when SC_PowerOnATR() returns TRUE.
   *****************************************************************************/
-BOOL SC_DoPPS(void);
-
+extern BOOL SC_DoPPS(BYTE *ppsPtr);
 
 /*******************************************************************************
   Function:
 	BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse, BYTE* apduDataBuffer)	
   
   Description:
-    This function Sends the ISO 7816-3/4 compaliant T=0 commands to the card.  
-	It also receive the expected response from the card as defined by the 
-	command data.
+    This function Sends/recieves the ISO 7816-4 compaliant APDU commands to the card.
 
   Precondition:
-    SC_DoPPS was success
+    SC_DoPPS was success or SC_DoPPS functionality not called
 
   Parameters:
     SC_APDU_COMMAND* apduCommand	- Pointer to APDU Command Structure 
 	SC_APDU_RESPONSE* pResp - Pointer to APDU Response structure
-	BYTE* apduDataBuffer - Pointer to the Command/Response Data buffer
+			BYTE* pResp - Pointer to the Command/Response Data buffer
 
   Return Values:
     TRUE if transaction was success, and followed the ISO 7816-4 protocol. 
 	
   Remarks:
-    In the APDU command structure, the LC field defines the number of bytes to 
-	transmit from the APDUdat array.  This array can hold max 256 bytes, which 
+    In the APDU command structure, the LC field defines the number of data bytes to 
+	be transmitted to the card. This array can hold max of 256 bytes, which 
 	can be redefined by the user.  The LE field in APDU command defines the number
-	of bytes to receive from the card.  This array can hold max 256 bytes, which 
-	can be redefined by the user.
-	
+	of bytes expected to be received from the card.  This array can hold max 256 bytes,
+	which can be redefined by the user.	
   *****************************************************************************/
-BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse, BYTE* apduDataBuffer);
-
+extern BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse, BYTE* apduDataBuffer);
 
 /*******************************************************************************
   Function:
@@ -447,7 +428,7 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
   Remarks:
     None
   *****************************************************************************/
-void SC_Shutdown(void);
+extern void SC_Shutdown(void);
 
 #ifdef SC_PROTO_T1
 
@@ -456,9 +437,7 @@ void SC_Shutdown(void);
 	BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* apduResponse)
   
   Description:
-    This function Sends the ISO 7816-3/4 compaliant T=1 commands to the card.
-	It also receive the expected response from the card as defined by the 
-	command data.
+    This function Sends/recieves the ISO 7816-4 compaliant T = 1 commands to the card.  
 
   Precondition:
     SC_DoPPS was success

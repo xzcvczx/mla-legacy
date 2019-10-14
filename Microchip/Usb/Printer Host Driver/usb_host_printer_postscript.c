@@ -63,7 +63,7 @@ Change History:
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "GenericTypedefs.h"
+#include "GenericTypeDefs.h"
 #include "USB/usb.h"
 #include "USB/usb_host_printer.h"
 #include "USB/usb_host_printer_postscript.h"

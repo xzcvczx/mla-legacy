@@ -75,11 +75,11 @@ typedef struct
     void        *pFont;             // Font selected for the scheme.
 
     #ifdef USE_ALPHABLEND
-    BYTE 	AlphaValue;				// Alpha value used for alpha blending.	
+    BYTE 	AlphaValue;				// Alpha value used for alpha blending, this is available only when USE_ALPHABLEND is defined in the GraphicsConfig.h.	
     #endif
      
     #ifdef USE_GRADIENT
-    GFX_GRADIENT_STYLE gradientScheme;   //Gradient Scheme for widgets
+    GFX_GRADIENT_STYLE gradientScheme;   // Gradient Scheme for widgets, this is available only when USE_GRADIENT is defined in the GraphicsConfig.h.
     #endif
 } GOL_SCHEME;
 
@@ -758,6 +758,9 @@ void        GOLSetFocus(OBJ_HEADER *object);
 *
 * Overview: This function creates a new style scheme object 
 *			and initializes the parameters to default values.
+*           Default values are based on the GOLSchemeDefault 
+*           defined in GOLSchemeDefault.c file. Application code
+*           can override this initialization, See GOLSchemeDefault.
 *
 * PreCondition: none
 *

@@ -211,13 +211,26 @@ void ResetDevice(void);
 *
 * Overview: Sets current transparent color.
 *
+* Description: 
+*        <img name="TransparencyColorExample.jpg" />
+*
 * PreCondition: none
 *
-* Input: color - Color value chosen.
+* Input: color - Chosen transparent color.
 *
 * Output: none
 *
-* Side Effects: none
+* Example:
+*   <CODE> 
+*   #define YOURSETTRANSPARENT_COLOR RGBConvert(0x0D,0x0D,0x0D)
+*
+*   TransparentColorEnable(YOURSETTRANSPARENT_COLOR);
+*   PutImage(0,0, (void*)&ScreenBackground);
+*   PutImage(0,0, (void*)&RibbonIcon);
+*	</CODE> 
+*
+* Side Effects: PutImage() will not render pixels that matches the 
+*               set transparent color.
 *
 ********************************************************************/
 void TransparentColorEnable(GFX_COLOR color);
@@ -241,20 +254,19 @@ void TransparentColorEnable(GFX_COLOR color);
 /*********************************************************************
 * Macros:  GetTransparentColorStatus()
 *
-* Overview: Returns the current transparent color function status.
+* Overview: Returns the current transparent color function enable status.
 *
 * PreCondition: none
 *
 * Input: none
 *
-* Output: Returns the current transparent color function status
+* Output: Returns the current transparent color function enable status
 *	<CODE> 
 *          0 – Transparent color function is disabled.
 *          1 – Transparent color function is enabled.
 *	</CODE>	
 *
-* Side Effects: PutImage() will not render pixels with the transparent
-*               color.
+* Side Effects: None
 *
 ********************************************************************/
 #define GetTransparentColorStatus() _colorTransparentEnable

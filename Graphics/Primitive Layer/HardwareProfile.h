@@ -149,11 +149,11 @@
      * MultiMedia Development Board
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-      //#include "Configs/HWP_MEB_PIC32_STK_8PMP.h"
+      //#include "Configs/HWP_MEB_PIC32_GP_SK_8PMP.h"
       //#include "Configs/HWP_MEB_PIC32_USB_SK_8PMP.h"
       //#include "Configs/HWP_MEB_PIC32_ETH_SK_8PMP.h"
 
-      //#include "Configs/HWP_MEB_PIC32_STK_16PMP.h"
+      //#include "Configs/HWP_MEB_PIC32_GP_SK_16PMP.h"
       //#include "Configs/HWP_MEB_PIC32_USB_SK_16PMP.h"
       //#include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP.h"
 
@@ -198,14 +198,14 @@
  * 8 or 16-bit PMP
  * QVGA or WQVGA
  ********************************************************************/
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_QVGAv1)
-    #include "Configs/HWP_GFXv3_PIC32_SK_8PMP_QVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_QVGAv1)
-    #include "Configs/HWP_GFXv3_PIC32_SK_16PMP_QVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_WQVGAv1)
-    #include "Configs/HWP_GFXv3_PIC32_SK_8PMP_WQVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_WQVGAv1)
-    #include "Configs/HWP_GFXv3_PIC32_SK_16PMP_WQVGAv1.h"
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_8PMP_QVGAv1)
+    #include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_16PMP_QVGAv1)
+    #include "Configs/HWP_GFXv3_PIC_SK_16PMP_QVGAv1.h"
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_8PMP_WQVGAv1)
+    #include "Configs/HWP_GFXv3_PIC_SK_8PMP_WQVGAv1.h"
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_16PMP_WQVGAv1)
+    #include "Configs/HWP_GFXv3_PIC_SK_16PMP_WQVGAv1.h"
 /*********************************************************************
  * Hardware Configuration for
  * Multimedia Expasion Board 

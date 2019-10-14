@@ -2,7 +2,7 @@
  *  © 2011 Microchip Technology Inc.                                       
  *  
  *  Project Name:    mTouch CVD Framework v1.1
- *  FileName:        main_example.c
+ *  FileName:        main.c
  *  Dependencies:    mTouchCVD.h
  *  Processor:       
  *  Compiler:        HI-TECH Ver. 9.81 or later
@@ -57,12 +57,12 @@
  * THESE TERMS.
  *************************************************************************/
  
-/** @file main_example.c
+/** @file main.c
 * @brief An example implementation of the mTouch CVD Framework's API calls
 */
 /// @cond
 
-#include "includes/mTouchCVD.h"              // Required Include
+#include <includes/mTouchCVD.h>              // Required Include
 
 // CONFIGURATION SETTINGS
 #if   defined(_16F193x)
@@ -96,6 +96,9 @@ __CONFIG(FOSC_INTOSCIO & WDTE_OFF & PWRTE_OFF & MCLRE_OFF & CP_OFF & IOSCFS_8MHZ
 // PROTOTYPES
 void Example_System_Init(void);
 
+unsigned char pressCounter;
+unsigned char pressIndex;
+
 void main(void)
 {
     
@@ -119,14 +122,7 @@ void main(void)
             // The mTouch framework does not have an automated, board-level output system yet. 
             // All system responses to sensor state changes must be programmed by you.
             
-            // #define LED0 GP4
-            // #define LED1 GP5
-    
-            // #define LED_ON  1
-            // #define LED_OFF 0
-    
-            // if (CVD_GetButtonState(0) < CVD_PRESSED) { LED0 = LED_OFF; } else { LED0 = LED_ON; } // Sensor0
-            // if (CVD_GetButtonState(1) < CVD_PRESSED) { LED1 = LED_OFF; } else { LED1 = LED_ON; } // Sensor1
+            
         }
     }
 }

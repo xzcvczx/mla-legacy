@@ -1,13 +1,13 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'Settings.h'
 **
-** Created: Wed Jun 15 13:36:21 2011
+** Created: Wed Jul 6 16:33:16 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../HIDBoot/Bootloader/Settings.h"
+#include "../Settings.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'Settings.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 62

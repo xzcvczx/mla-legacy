@@ -322,7 +322,7 @@ void ProcessCCID()
 					SC_Initialize();
 					if( SC_PowerOnATR() ) //Get ATR
 					{
-						SC_DoPPS();	//switch baud rate based on ATR setting					
+//						SC_DoPPS();	//switch baud rate based on ATR setting					
 						card_st.Val 		= 0;
 						card_st.ICC_Status	= GetCardStatus();
 						card_st.CmdStatus	= 0; //processed without error
@@ -461,7 +461,8 @@ void ProcessCCID()
 			        scTA1 = DEFAULT_FI_DI;
 			        scTC1 = DEFAULT_GUARD_TIME;
 			        scTC2 = DEFAULT_WI;
-			        USB_CCID_ResetParameters();
+//			        USB_CCID_ResetParameters();
+//			        SC_PowerOnATR();
 			        card_st.Val 		= 0;
 					card_st.ICC_Status	= GetCardStatus();
 					card_st.CmdStatus	= 0; //processed without error
@@ -510,7 +511,7 @@ void ProcessCCID()
     					scTC1 = pUsbCcidApdu->CCID_BulkOutBuffer[12]; // Read Guard Time
     					scTC2 = pUsbCcidApdu->CCID_BulkOutBuffer[13]; // Read WI
     					ccid_clockstatus = pUsbCcidApdu->CCID_BulkOutBuffer[14]; // Read Clock Stop Status
-    					USB_CCID_SetParameters();
+ //   					USB_CCID_SetParameters();
     				    
     				    card_st.Val 		= 0;
     					card_st.ICC_Status	= GetCardStatus();
@@ -807,7 +808,7 @@ void UsbCcidPcToRdrXfrBlock(void)
             else
 			    pUsbCcidApdu->CCID_BulkInBuffer[10+temp] = pUsbCcidApdu->CCID_BulkOutBuffer[15+temp];
 	    }
-   		pUsbCcidApdu->CCID_BulkInBuffer[10+CardResp.RXDATALEN]   = CardResp.SW1;
+	    pUsbCcidApdu->CCID_BulkInBuffer[10+CardResp.RXDATALEN]   = CardResp.SW1;
 		pUsbCcidApdu->CCID_BulkInBuffer[10+CardResp.RXDATALEN+1] = CardResp.SW2;
 		USBCCIDSendDataToHost(pUsbCcidApdu->CCID_BulkInBuffer, 10+CardResp.RXDATALEN+2);
     }

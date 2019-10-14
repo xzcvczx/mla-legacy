@@ -41,7 +41,7 @@
  *                                  Removed "m" macro designations
  *                                  Null terminated strings
  *****************************************************************************/
-#include "GenericTypedefs.h"
+#include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "rtcc.h"
 

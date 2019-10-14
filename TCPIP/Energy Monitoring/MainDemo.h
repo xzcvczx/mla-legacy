@@ -51,7 +51,6 @@
 #define _MAINDEMO_H
 
 #include "TCPIP Stack/TCPIP.h"
-#include "gqueue.h"
 
 #define BAUD_RATE       (9600)		// bps
 #if !defined(THIS_IS_STACK_APPLICATION)

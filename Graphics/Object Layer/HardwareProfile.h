@@ -224,13 +224,13 @@
  * 8 or 16-bit PMP
  * QVGA or WQVGA
  ********************************************************************/
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_QVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_8PMP_QVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_QVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_16PMP_QVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_16PMP_QVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_WQVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_8PMP_WQVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_8PMP_WQVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_WQVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_16PMP_WQVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_16PMP_WQVGAv1.h"
 /*********************************************************************
  * Hardware Configuration for

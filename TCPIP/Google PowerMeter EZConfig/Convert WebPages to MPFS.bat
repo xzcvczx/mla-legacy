@@ -1,1 +1,0 @@
-"..\..\Microchip\TCPIP Stack\Utilities\MPFS2.jar" /mpfs2 ".\WebPages2" "." "MPFSImg2.bin"

@@ -34,10 +34,14 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  1.0   Initial release
-  1.01  Cleaned up unnecessary variables,supported T=1 protocol
-        and improvments in T=0 functions following the coding standards
-  1.02  Disciplined the code. No functional changes made.
+  1.0      Initial release
+  1.01     Cleaned up unnecessary variables,supported T=1 protocol
+           and improvments in T=0 functions following the coding standards
+  1.02     Disciplined the code. No functional changes made.
+  1.02.2   Added F and D calculation function.
+           Modifed PPS functionality.
+           Fixed BWT (Block Wait Time) and WT (Wait Time) calculation issues.
+           Modified the code to make it well structured and organized.
 ********************************************************************/
 
 #include <string.h>
@@ -60,6 +64,11 @@
 
 #define MAX_ATR_LEN			(BYTE)33
 
+
+unsigned int factorF = 372;
+BYTE factorDNumerator = 1;
+BYTE factorDdenominator = 1;
+
 BYTE scCardATR[MAX_ATR_LEN];
 BYTE scATRLength = 0;
 
@@ -71,6 +80,9 @@ BYTE scTD1, scTD2, scTD3;
 BYTE* scATR_HistoryBuffer = NULL;
 BYTE  scATR_HistoryLength = 0;
 
+BYTE scPPSresponseLength;
+BYTE scPPSresponse[7];
+
 typedef enum
 {
 	UNKNOWN,
@@ -81,11 +93,10 @@ SC_STATUS gCardState = UNKNOWN;
 SC_ERROR scLastError = SC_ERR_NONE;
 
 // Work Wait time for T=0 Protocol in units of etu's
-unsigned long cgt;
 unsigned long t0WWTetu;
-unsigned long t0WWT;	
 
-static void SC_WaitTime(void);
+static void SC_FindFDvalues(BYTE tA1Type);
+static void SC_CalculateWaitTime(void);
 
 #ifdef SC_PROTO_T1
 
@@ -97,9 +108,6 @@ static void SC_WaitTime(void);
 	#define S_BIT_CLR				(BYTE)0xBF
 	#define S_BIT_POSITION			(BYTE)0x40
 
-	unsigned long t1BWT;
-	unsigned long t1CWT;
-	unsigned long t1BGT;
 	unsigned int t1BWTetu;
 	unsigned int t1CWTetu;
 
@@ -118,6 +126,7 @@ static void SC_WaitTime(void);
 
 // Character Guard Time for T=0 & T=1 Protocol
 BYTE cgtETU;
+unsigned int cgtInMicroSeconds;
 
 // CLA set to '00' = no command chaining, 
 //                   no secure messaging, 
@@ -147,8 +156,10 @@ void SC_Initialize()
 	//Initialize the low level driver
 	SCdrv_InitUART();
 
+	#ifdef SC_PROTO_T1
 	// Initialize smart card library variables
 	txSbit = TRUE;
+	#endif
 }
 
 /*******************************************************************************
@@ -197,20 +208,24 @@ BOOL SC_CardPresent()
   *****************************************************************************/
 BOOL SC_PowerOnATR()
 {
-	unsigned long atrDelayCnt;
+	unsigned long atrDelayETUs;
 
-	if( !SCdrv_CardPresent() )  //check card present
+	 //check whether card is present before doing power on reset to the card
+	if( !SCdrv_CardPresent() )
 	{
 		gCardState = UNKNOWN;
 		return FALSE;
 	}
 		
-	SCdrv_SetSwitchCardReset(0);  //make sure card in reset
+	//make sure card is in reset
+	SCdrv_SetSwitchCardReset(0);
 	memset( scCardATR, 0xFF, sizeof scCardATR );
-	WaitMilliSec(2);	
 
+	WaitMilliSec(2);
+
+	//Turn on power to the card
 	#ifdef ENABLE_SC_POWER_THROUGH_PORT_PIN
-		SCdrv_SetSwitchCardPower(1);	//Turn on power
+		SCdrv_SetSwitchCardPower(1);
 	#endif
 
 	scATR_HistoryLength = 0;
@@ -218,36 +233,40 @@ BOOL SC_PowerOnATR()
 	gCardState = UNKNOWN;
 	scLastError = SC_ERR_NONE;
 	scATRLength = 0;
-//	t0WWT = (9600UL * (FCY/baudRate))/4;
 	
-	// Wait count for maximum of 40,000 to 45,000 smard card clock cycles 
-	// to get an ATR from card
-	atrDelayCnt = 40000UL * (FCY/scReferenceClock);
-	
+	// Wait for maximum of 40,000 to 45,000 smard card clock cycles 
+	// to get an ATR from card.The number of clock cycles is converted
+	// into etu's for easier usage in the code.
+	atrDelayETUs = (unsigned short int)((45000UL * baudRate)/scReferenceClock);
+
 	WaitMilliSec(2);
 
+	// Enable UART
 	SCdrv_EnableUART();
 
 	WaitMilliSec(2);
 
 	//Start the clock
-	SCdrv_EnableClock();	
+	SCdrv_EnableClock();
 
 	// Wait for atleast 400 Clock Cycles after applying reference clock to card.
 	WaitMilliSec(2);
 
-	SCdrv_SetSwitchCardReset(1);  //Release card reset line. set to high state
+	//Release card reset line. set to high state
+	SCdrv_SetSwitchCardReset(1);
 
-	while(1)  ///////////////// Read Answer to RESET
+	// Read Answer to RESET
+	while(1)
 	{
-		if( SCdrv_GetRxData( &scCardATR[scATRLength], atrDelayCnt ) ) //wait for data byte from CARD
+		//wait for data byte from CARD
+		if( SCdrv_GetRxData( &scCardATR[scATRLength], atrDelayETUs ) )
 		{
 			scATRLength++;
 
 			if( scATRLength == MAX_ATR_LEN )
 				break;
-//			else
-//				atrDelayCnt = t0WWT;
+			else
+				atrDelayETUs = (unsigned short int)9600;
 		}
 		else
 			break;	//no data
@@ -331,7 +350,8 @@ BOOL SC_PowerOnATR()
 		
 		scATR_HistoryLength = T0 & 0x0F;
 		scATR_HistoryBuffer = (scATR_HistoryLength)?(&scCardATR[atrIdx]):NULL;
-		SC_WaitTime();
+		// Calculate the protocol wait times for default values
+		SC_CalculateWaitTime();
 		gCardState = ATR_ON;
 		return TRUE;
 	}
@@ -348,56 +368,123 @@ BOOL SC_PowerOnATR()
 
 /*******************************************************************************
   Function:
-	BOOL SC_DoPPS(void)	
+	BOOL SC_DoPPS(BYTE *ppsPtr)
   
   Description:
-    This function does the PPS to the card & configures the baud rate of the PIC UART
-	to match with Answer-to-Reset data from smartcard.
+    This function does the PPS exchange with the smart card & configures the baud 
+    rate of the PIC UART module as per the PPS response from the smart card.
 
   Precondition:
     SC_PowerOnATR was success
 
   Parameters:
-    None
+    Input is pointer to PPS string
 
   Return Values:
-    TRUE if Baud rate is supported by the PIC
+    TRUE if PPS exchange is successful
 	
   Remarks:
-    This function is called when SC_PowerOnATR() returns TRUE.  If the Baud 
-	rate configration file inside the card is changed, these function should 
-	be called again for the new baud to take effect.
+    This function is called when SC_PowerOnATR() returns TRUE.
   *****************************************************************************/
-BOOL SC_DoPPS()
+BOOL SC_DoPPS(BYTE *ppsPtr)
 {
-	if( !SCdrv_CardPresent() || gCardState != ATR_ON )
-		return FALSE;
-	
-	if( scTA1 == 0x11 )	//card using 9600 baud.  no need to configure
-		return TRUE;
+	BYTE ppsn[3] = {0,0,0};
+	BYTE index1,index2 = 0x10,index3 = 2,ppsStrLength = 3,pckByte = 0x00;
 
-	// If TA2 is absent & TD1 is present
-	if(!(scTD1 & 0x10) && (scCardATR[1] & 0x80) && !(scTD1 & 0x0F))	
+	// Calculate the length of PPS request and store PPS1, PPS2 and PPS3
+	// in local variables for future calculations
+	for(index1 = 0;index1 < 3;index1++)
 	{
-		SCdrv_SendTxData( 0xFF ); // PPSS Byte = 0xFF always
-
-		if(scCardATR[1] & 0x10)
-		{	
-			SCdrv_SendTxData( 0x10 );	// PPS0
-			SCdrv_SendTxData( scTA1 );	// PPS1
-			SCdrv_SendTxData( 0xFF ^ 0x10 ^ scTA1 );	// PCK
-
-			SCdrv_SetBRG( scTA1 );	//tell the driver to configure baud rate
-			SC_WaitTime();
-		}
-		else
+		if(ppsPtr[1] & index2)
 		{
-			SCdrv_SendTxData( 0x00 );	// PPS0
-			SCdrv_SendTxData( 0xFF);	// PCK
-		}		
+			ppsStrLength++;
+			ppsn[index1] = ppsPtr[index3];
+			index3++;
+		}
+		index2 = index2 << 1;
 	}
 
-	return TRUE;
+	// Check for the conditions whether PPS can be done to the card...
+	scPPSresponseLength = 0;
+	if(!SCdrv_CardPresent() || (gCardState != ATR_ON) || (scTD1 & 0x10))
+		return FALSE;
+
+	// Send PPS request to the card
+	index1 = 0;
+	while(ppsStrLength--)
+		SCdrv_SendTxData( ppsPtr[index1++] );
+
+	// Recieve PPS response from the smart card
+	index1 = 0;
+	while (1)
+	{
+		//wait for data byte from CARD
+		if(SCdrv_GetRxData( &scPPSresponse[index1], 9600 ) )
+		{
+			if(++index1 == 7)
+				return FALSE;
+		}	
+		else
+			break;
+	}
+
+	// If PPS response length is greater or equal to 3 bytes and PPSS byte is 0xFF and lower 
+	// nibble of PPS0 byte of PPS response matches with the PPS request then proceed for 
+	// further calculation or else exit...
+	if((index1 > 2) && (scPPSresponse[0] == 0xFF) && ((ppsPtr[1] & 0x0F) == (scPPSresponse[1] & 0x0F)))
+	{
+		index2 = 2;
+		if(scPPSresponse[1] & 0x10)
+		{
+			// Check PPS1 Response is identical to PPS1 Request.
+			if(scPPSresponse[index2] != ppsn[0])
+				return FALSE;
+			index2++;
+		}
+
+		if(scPPSresponse[1] & 0x20)
+		{
+			// Check PPS1 Response is identical to PPS1 Request.
+			if(scPPSresponse[index2] != ppsn[1])
+				return FALSE;
+			index2++;
+		}
+
+		if(scPPSresponse[1] & 0x40)
+		{
+			// Check PPS1 Response is identical to PPS1 Request.
+			if(scPPSresponse[index2] != ppsn[2])
+				return FALSE;
+		}
+
+		// Calculate PCK for the PPS response and ex-or it with recieved PCK byte
+		pckByte = 0x00;
+		for(index2 = 0;index2 < index1;index2++)
+			pckByte = pckByte ^ scPPSresponse[index2];
+
+		// If the final vaue is non-zero then exit...
+		if(pckByte)
+			return FALSE;
+		
+		// If baud rate modification request has been accepted by the smart card,
+		// change the UART baud rate and other wait time constants
+		if(scPPSresponse[1] & 0x10)
+		{
+			SC_FindFDvalues(scPPSresponse[2]);
+			// Calculate the new baud rate
+			baudRate = (unsigned long long)((unsigned long long)((unsigned long long)scReferenceClock * factorDNumerator)/(unsigned long)(factorF * (unsigned long)factorDdenominator));
+			// Configure UART for new baud rate
+			SCdrv_SetBRG();
+			SC_CalculateWaitTime();
+		}
+
+		// Store the PPS response length in global variable
+		scPPSresponseLength = index1;
+
+		return TRUE;
+	}
+	else
+		return FALSE;
 }
 
 /*******************************************************************************
@@ -452,11 +539,20 @@ int SC_GetCardState()
   *****************************************************************************/
 void SC_Shutdown()
 {
-	SCdrv_SetSwitchCardReset(0);	//bring reset line low
+	//Bring reset line low
+	SCdrv_SetSwitchCardReset(0);
+
 	WaitMilliSec(1);
-	SCdrv_CloseUART();			//shut down UART and remove any pullups
+
+	// Turn off external Clock given to the card
+	SCdrv_DisableClock();
+	
+	// Shut down UART and remove any pullups
+	SCdrv_CloseUART();
+	
+	// Turn Off Card Power
 	#ifdef ENABLE_SC_POWER_THROUGH_PORT_PIN
-		SCdrv_SetSwitchCardPower(0);   //Turn Off Card Power
+		SCdrv_SetSwitchCardPower(0);
 	#endif
 	gCardState = UNKNOWN;
 }
@@ -464,35 +560,32 @@ void SC_Shutdown()
 
 /*******************************************************************************
   Function:
-    void SC_WaitTime(void)
+    void SC_FindFDvalues(BYTE tA1Type)
 	
   Description:
-    This function calculates the work wait time for T=0 Protocol
+    This function finds the clock rate and baud rate adjustment integers(F,D)
 
   Precondition:
     SC_PowerOnATR is called.
 
   Parameters:
-    None
+    Input byte as encoded in TA1 character
 
   Return Values:
     None
 	
   Remarks:
-    This function is planned to calculate CWT & BWT for T=1 protocol in future.
   *****************************************************************************/
-static void SC_WaitTime(void)
+static void SC_FindFDvalues(BYTE tA1Type)
 {
-	BYTE ta1Code,tb2Code,index;
-	BYTE tempVariable1;
-	unsigned int tempVariable2 = 1;
-	
-	ta1Code = scTA1 & 0x0F;
+	BYTE ta1Code;
+
+	ta1Code = tA1Type & 0x0F;
 
 	factorDNumerator = 1;
 	factorDdenominator = 1;
 
-	// Calculate Factor 'D' from TA1 value
+	// Calculate Factor 'D' from TA1 value as per ISO 7816-3 specifications
 	switch(ta1Code)
 	{
 		case 0x00:
@@ -553,9 +646,11 @@ static void SC_WaitTime(void)
 					break;
 	}
 
-	ta1Code = (scTA1 & 0xF0) >> 4;
+	ta1Code = (tA1Type & 0xF0) >> 4;
 		
-	// Calculate Factor 'F' from TA1 value
+	factorF = 372;
+
+	// Calculate Factor 'F' from TA1 value as per ISO 7816-3 specifications
 	switch(ta1Code)
 	{
 		case 0x00:
@@ -563,12 +658,9 @@ static void SC_WaitTime(void)
 		case 0x08:
 		case 0x0E:
 		case 0x0F:
-					break;
-	
 		case 0x01:
-					factorF = 372;
 					break;
-	
+
 		case 0x02:
 					factorF = 558;
 					break;
@@ -609,7 +701,36 @@ static void SC_WaitTime(void)
 					factorF = 2048;
 					break;	
 	}
+}
+
+
+/*******************************************************************************
+  Function:
+    void SC_CalculateWaitTime(void)
 	
+  Description:
+    This function calculates the wait time values for T=0 and T=1 Protocol
+
+  Precondition:
+    SC_PowerOnATR is called.
+
+  Parameters:
+    None
+
+  Return Values:
+    None
+	
+  Remarks:
+  *****************************************************************************/
+static void SC_CalculateWaitTime()
+{
+	BYTE tempVariable1;
+	#ifdef SC_PROTO_T1
+	BYTE tb2Code,index;
+	unsigned int tempVariable2 = 1;
+	#endif
+
+	// Calculate Character Guard Time ETU
 	if(scTC1 != 0xFF)
 	{
 		cgtETU = 12 + (BYTE)((unsigned long)((unsigned long)(factorF * (unsigned long)factorDdenominator * scTC1)/factorDNumerator)/scReferenceClock);
@@ -618,6 +739,7 @@ static void SC_WaitTime(void)
 	// Check whether T=0 or T=1 protocol ?
 	switch(scTD1 & 0x0F)
 	{
+		// For T = 1 protocol
 		case 1 :
 					// Calculate Character Guard Time in ETU's for T=1 Protocol
 					if(scTC1 == 0xFF)
@@ -653,15 +775,17 @@ static void SC_WaitTime(void)
 							tempVariable2 = tempVariable2 * 2;
 
 						// Calculate Block Wait Time in ETU's for T=1 Protocol as set in the card						
-						t1BWTetu = 11 + (unsigned int)((unsigned long)(tempVariable2 * 35712UL)/(scReferenceClock/10));
+						t1BWTetu = 11 + (unsigned int)((unsigned long)(tempVariable2 * (unsigned long)(357120UL/(scReferenceClock/1000000UL)))/(unsigned long)(1000000UL/baudRate));
 					
 					#endif
 
 					break;
+		
+		// For T = 0 Protocol
 		case 0 :
 		default :
 
-					// Calculate Character Guard Time in ETU's for T=1 Protocol		
+					// Calculate Character Guard Time in ETU's for T=0 Protocol		
 					if(scTC1 == 0xFF)
 					{
 						cgtETU = (BYTE)12;
@@ -678,42 +802,26 @@ static void SC_WaitTime(void)
 						tempVariable1 = SC_WI;
 					}
 
-					t0WWTetu = (unsigned long)(tempVariable1 * (unsigned long)factorDNumerator * 960)/factorDdenominator;
+					// Calculate Wait Time used for T = 0 protocol
+					t0WWTetu = (unsigned long)((unsigned long)(tempVariable1 * baudRate * 960)/scReferenceClock) * factorF;
 
 					break;
 	}
 
-	// Calculate Character Guard Time in number of Instruction Counts for T=0/T=1 Protocol		
-	cgt = cgtETU * (FCY/baudRate);
-
-	// Calculate Work Wait Time in number of Instruction Counts for T=0 Protocol
-	t0WWT = t0WWTetu * (FCY/baudRate);
-
-	#ifdef SC_PROTO_T1
-
-		// Calculate Character Wait Time in number of Instruction Counts for T=1 Protocol
-		t1CWT = t1CWTetu * (FCY/baudRate);
-
-		// Calculate Block Guard Time in number of Instruction Counts for T=1 Protocol
-		t1BGT = t1BGTetu * (FCY/baudRate);
-
-		// Calculate Block Wait Time in number of Instruction Counts for T=1 Protocol
-		t1BWT = t1BWTetu * (FCY/baudRate);
-
-	#endif
+	// Convert CGT etu value in terms of microseconds
+	cgtInMicroSeconds = (cgtETU * 1000000UL)/baudRate;
 }	
+
 
 /*******************************************************************************
   Function:
 	BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse, BYTE* apduDataBuffer)	
   
   Description:
-    This function Sends the ISO 7816-4 compaliant APDU commands to the card.  
-	It also receive the expected response from the card as defined by the 
-	command data.
+    This function Sends/recieves the ISO 7816-4 compaliant APDU commands to the card.
 
   Precondition:
-    SC_DoPPS was success
+    SC_DoPPS was success or SC_DoPPS functionality not called
 
   Parameters:
     SC_APDU_COMMAND* apduCommand	- Pointer to APDU Command Structure 
@@ -724,12 +832,11 @@ static void SC_WaitTime(void)
     TRUE if transaction was success, and followed the ISO 7816-4 protocol. 
 	
   Remarks:
-    In the APDU command structure, the LC field defines the number of bytes to 
-	transmit from the APDUdat array.  This array can hold max 256 bytes, which 
+    In the APDU command structure, the LC field defines the number of data bytes to 
+	be transmitted to the card. This array can hold max of 256 bytes, which 
 	can be redefined by the user.  The LE field in APDU command defines the number
-	of bytes to receive from the card.  This array can hold max 256 bytes, which 
-	can be redefined by the user.
-	
+	of bytes expected to be received from the card.  This array can hold max 256 bytes,
+	which can be redefined by the user.	
   *****************************************************************************/
 BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse, BYTE* apduDataBuffer)
 {
@@ -737,7 +844,8 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 	BYTE index,lc = apduCommand->LC,le = apduCommand->LE,ins = apduCommand->INS;
 	BYTE rx_char;
 	BYTE lcLength = 0,leLength = 0;
-	unsigned int txDelay;
+
+	t0WWTetu = 10752;
 
 	// Return False if there is no Card inserted in the Slot
 	if( !SCdrv_CardPresent() || gCardState != ATR_ON )
@@ -751,13 +859,12 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 	
 	apduCommandBuffer = (BYTE*)apduCommand;
 	
-	txDelay = cgt/8;
 
 	//Send the Command Bytes: CLA INS P1 P2
 	for( index = 0; index < 4; index++ )
 	{
 		SCdrv_SendTxData( apduCommandBuffer[index] );
-		SC_Delay(txDelay);
+		WaitMicroSec(cgtInMicroSeconds);
 	}	
 	
 	//Now transmit LE or LC field if non zero
@@ -769,7 +876,7 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 	while (1)
 	{
     	// Get Procedure byte
-		if(!SCdrv_GetRxData( &rx_char, t0WWT ) ) //wait for data byte from CARD
+		if(!SCdrv_GetRxData( &rx_char, t0WWTetu ) ) //wait for data byte from CARD
 		{
 			scLastError = SC_ERR_CARD_NO_RESPONSE;
 			return FALSE;	//no response received
@@ -786,8 +893,10 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 			apduResponse->SW1 = rx_char; //save SW1
 			
 			//now receive SW2
-			if( SCdrv_GetRxData( &rx_char, t0WWT ) ) //wait for data byte from CARD
+			if( SCdrv_GetRxData( &rx_char, t0WWTetu ) ) //wait for data byte from CARD
+			{
 				apduResponse->SW2 = rx_char;
+            }	    
 			else
 			{
 				scLastError = SC_ERR_CARD_NO_RESPONSE;
@@ -801,13 +910,12 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 			// Send all remaining bytes
 			if( lcLength < lc)		//transmit app data if any
 			{
-				WaitMicroSec( 700 );	//cannot send the message data right away after the initial response
-				SC_Delay(txDelay);
+				WaitMicroSec(cgtInMicroSeconds);
 
 				for(;lcLength < lc; lcLength++ )
 				{	
 					SCdrv_SendTxData( apduDataBuffer[lcLength] );
-					SC_Delay(txDelay);
+					WaitMicroSec(cgtInMicroSeconds);
 				}
 			}
 			else
@@ -815,7 +923,7 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 				// Recive all remaining bytes
 				for(;leLength < le; leLength++ )
 				{	
-					if( SCdrv_GetRxData( &rx_char, t0WWT ) ) //wait for data byte from CARD
+					if( SCdrv_GetRxData( &rx_char, t0WWTetu ) ) //wait for data byte from CARD
 						apduDataBuffer[leLength] = rx_char;	
 					else
 					{
@@ -830,14 +938,14 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
         	// ACK, send one byte if remaining
     		if (lcLength < lc)
       		{
-				SC_Delay(txDelay);
+				WaitMicroSec(cgtInMicroSeconds);
 
 				SCdrv_SendTxData( apduDataBuffer[lcLength++] );
       		}
       		else
       		{
 				//wait for data byte from CARD or timeout
-				if( SCdrv_GetRxData( &rx_char, t0WWT ) ) 
+				if( SCdrv_GetRxData( &rx_char, t0WWTetu ) ) 
 					apduDataBuffer[leLength++] = rx_char;	
 				else
 				{
@@ -852,7 +960,7 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 		}
 	}
 
-	// Store the number of recieved data bytes other than the
+	// Store the number of recieved data bytes including the
 	// status codes to make the life of Smart Card Reader easier
 	apduResponse->RXDATALEN = leLength;
 
@@ -1043,28 +1151,28 @@ static void SC_SendT1Block(BYTE nad,BYTE pcb,WORD length,BYTE *buffer)
   Remarks:
     None
 *****************************************************************************/
-static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffer,unsigned long blockWaitTime)
+static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffer,unsigned long blockWaitTimeEtu)
 {
 	WORD edc;
 	WORD index;
 	BYTE expectedLength;
 
   	// Get NAD
-	if(!SCdrv_GetRxData( rxNAD, blockWaitTime ))
+	if(!SCdrv_GetRxData( rxNAD, blockWaitTimeEtu ))
 	{
 		scLastError = SC_ERR_CARD_NO_RESPONSE;
 		return FALSE;
 	}
 
   	// Get PCB
-	if(!SCdrv_GetRxData( rxPCB, t1CWT ))
+	if(!SCdrv_GetRxData( rxPCB, t1CWTetu ))
 	{
 		scLastError = SC_ERR_CARD_NO_RESPONSE;
 		return FALSE;
 	}
 
   	// Get Length	
-	if(!SCdrv_GetRxData( rxLength, t1CWT ))
+	if(!SCdrv_GetRxData( rxLength, t1CWTetu ))
 	{
 		scLastError = SC_ERR_CARD_NO_RESPONSE;
 		return FALSE;
@@ -1080,7 +1188,7 @@ static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffe
 	// Get all the data bytes plus EDC (1 or 2 bytes at end)
 	for (index = 0;index < expectedLength;)
 	{
-		if(!SCdrv_GetRxData( buffer + index, t1CWT ))
+		if(!SCdrv_GetRxData( buffer + index, t1CWTetu ))
 		{
 			scLastError = SC_ERR_CARD_NO_RESPONSE;
 			return FALSE;
@@ -1089,16 +1197,17 @@ static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffe
 		++index;
 	}
 
-	// Check the LRC or CRC Error
+	// Check for the LRC Error
 	if (edcType == SC_LRC_TYPE_EDC)
 	{
 		edc = 0;
-		SC_UpdateEDC(*rxNAD,&edc);
-		SC_UpdateEDC(*rxPCB,&edc);
-		SC_UpdateEDC(*rxLength,&edc);
+		edc = edc ^ *rxNAD;
+		edc = edc ^ *rxPCB;
+		edc = edc ^ *rxLength;
+
 		for (index = 0;index < expectedLength;)
 		{
-			SC_UpdateEDC(*(buffer + index),&edc);
+			edc = edc ^ buffer[index];
 			++index;
 		}
 
@@ -1108,15 +1217,16 @@ static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffe
 			return FALSE;
 		}
 	}
-	else // EDC is CRC
+	else // // Check for the CRC Error
 	{
 		edc = 0xFFFF;
-		SC_UpdateEDC(*rxNAD,&edc);
-		SC_UpdateEDC(*rxPCB,&edc);
-		SC_UpdateEDC(*rxLength,&edc);
+		edc = SC_UpdateCRC(*rxNAD,edc);
+		edc = SC_UpdateCRC(*rxPCB,edc);
+		edc = SC_UpdateCRC(*rxLength,edc);
+
 		for (index = 0;index < (expectedLength-2);)
 		{
-			SC_UpdateEDC(*(buffer + index),&edc);
+			edc = SC_UpdateCRC(buffer[index],edc);
 			++index;
 		}
 
@@ -1136,9 +1246,7 @@ static BOOL SC_ReceiveT1Block(BYTE *rxNAD,BYTE *rxPCB,BYTE *rxLength,BYTE *buffe
 	BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* apduResponse)
   
   Description:
-    This function Sends the ISO 7816-4 compaliant APDU commands to the card.  
-	It also receive the expected response from the card as defined by the 
-	command data.
+    This function Sends/recieves the ISO 7816-4 compaliant T = 1 commands to the card.  
 
   Precondition:
     SC_DoPPS was success
@@ -1164,10 +1272,13 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 	BYTE*	rxField = iField;
 	BYTE*	txField = iField;
 	BYTE*	initialField = iField;
-	unsigned long currT1BWT = t1BWT;
+	unsigned long currT1BWTetu = t1BWTetu;
 	T1BLOCK_TYPE t1TxBlockType,currentT1RxBlockType;
 
 	iFieldLength = initialLength;
+
+	// Initialize the recieved data length packet to zero
+	apduResponse->RXDATALEN = 0;
 
 	// Determine which type of block is to be transmitted to the card
 	if((txPCB & 0x80) == 0x00)
@@ -1214,6 +1325,7 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 								{
 									txMbit = FALSE;
 
+									// Set/Reset the M bit appropriately
 									if(iFieldLength > maxSegmentLength)
 									{
 										txLength = maxSegmentLength;
@@ -1233,7 +1345,7 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 								SC_SendT1Block(pfield->NAD,txPCB,txLength,txField);
 								
 								// Recieve the Block
-								if(SC_ReceiveT1Block(&rxNAD,&rxPCB,&rxLEN,rxField,currT1BWT))
+								if(SC_ReceiveT1Block(&rxNAD,&rxPCB,&rxLEN,rxField,currT1BWTetu))
 								{
 									// Determine the type of Block recieved from the card
 									if((rxPCB & 0x80) == 0x00)
@@ -1281,7 +1393,7 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 									currentT1RxBlockType = INVALID_BLOCK;
 								}
 						
-								currT1BWT = t1BWT;
+								currT1BWTetu = t1BWTetu;
 								
 								switch(currentT1RxBlockType)
 								{
@@ -1357,7 +1469,7 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 														}
 														else if((rxPCB & 0x3F) == 0x03) // Request Wait time Extension
 														{
-															currT1BWT = t1BWT * *rxField;
+															currT1BWTetu = t1BWTetu * *rxField;
 															txPCB = SC_WAIT_TIME_EXT_RESPONSE;
 															txLength = 1;
 															txField = rxField;
@@ -1497,7 +1609,7 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 								SC_SendT1Block(pfield->NAD,txPCB,0,txField);
 
 								// Recieve the Block	
-								if(SC_ReceiveT1Block(&rxNAD,&rxPCB,&rxLEN,rxField,currT1BWT))
+								if(SC_ReceiveT1Block(&rxNAD,&rxPCB,&rxLEN,rxField,currT1BWTetu))
 								{
 									// Determine the type of Block recieved from the card
 									if((rxPCB & 0x80) == 0x00)

@@ -36,7 +36,7 @@
 #ifndef _FS_DEF_
 
 #include "Compiler.h"
-#include "GenericTypedefs.h"
+#include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 
 /***************************************************************************/

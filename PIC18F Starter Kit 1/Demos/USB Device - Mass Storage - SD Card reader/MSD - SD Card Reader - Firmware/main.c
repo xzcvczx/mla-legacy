@@ -42,7 +42,7 @@
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
-#include "USB/USB.h"
+#include "USB/usb.h"
 #include "HardwareProfile.h"
 #include "MDD File System/SD-SPI.h"
 #include "./USB/usb_function_msd.h"

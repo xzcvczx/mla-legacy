@@ -146,7 +146,7 @@ static BYTE vBytesInBuffer;
 #elif defined(__dsPIC33F__) || defined(__PIC24H__) || defined (__dsPIC33E__)|| defined(__PIC24E__)
     #define PROPER_SPICON1  (0x0003 | 0x0120)   /* 1:1 primary prescale, 8:1 secondary prescale, CKE=1, MASTER mode */
 #elif defined(__PIC32MX__)
-    #define PROPER_SPICON1  (_SPI2CON_ON_MASK | _SPI2CON_FRZ_MASK | _SPI2CON_CKE_MASK | _SPI2CON_MSTEN_MASK)
+    #define PROPER_SPICON1  (_SPI2CON_ON_MASK | _SPI2CON_CKE_MASK | _SPI2CON_MSTEN_MASK)
 #else
     #define PROPER_SPICON1  (0x21)      /* SSPEN bit is set, SPI in master mode, FOSC/16, IDLE state is low level */
 #endif

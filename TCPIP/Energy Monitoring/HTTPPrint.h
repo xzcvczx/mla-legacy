@@ -18,17 +18,12 @@ extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];
 extern BYTE curHTTPID;
 
 void HTTPPrint(DWORD callbackID);
-void HTTPPrint_manu(void);
-void HTTPPrint_model(void);
-void HTTPPrint_devid(void);
-void HTTPPrint_status(void);
 void HTTPPrint_cumulativePower(void);
 void HTTPPrint_instPower(void);
 void HTTPPrint_apparentPower(void);
 void HTTPPrint_volts(void);
 void HTTPPrint_amps(void);
 void HTTPPrint_reactivePower(void);
-void HTTPPrint_time(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -39,21 +34,6 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000033:
 			HTTPIncFile((ROM BYTE*)"header.inc");
-			break;
-        case 0x0000004a:
-			HTTPPrint_manu();
-			break;
-        case 0x0000004b:
-			HTTPPrint_model();
-			break;
-        case 0x0000004c:
-			HTTPPrint_devid();
-			break;
-        case 0x00000052:
-			HTTPPrint_status();
-			break;
-        case 0x00000056:
-			HTTPIncFile((ROM BYTE*)"gpmintro.inc");
 			break;
         case 0x00000059:
 			HTTPPrint_cumulativePower();
@@ -72,9 +52,6 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x0000005e:
 			HTTPPrint_reactivePower();
-			break;
-        case 0x0000005f:
-			HTTPPrint_time();
 			break;
 		default:
 			// Output notification for undefined values

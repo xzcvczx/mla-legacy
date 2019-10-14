@@ -71,7 +71,7 @@
    
 
    
-#define CVD_NUMBER_SENSORS          2       // Number of CVD Sensor Inputs
+#define CVD_NUMBER_SENSORS          4       // Number of CVD Sensor Inputs
 
     #define CVD_SENSOR0             AN0
 /// @cond    
@@ -155,11 +155,11 @@
                                             
                                             
                                             //====================================================
-#define THRESHOLD_PRESS_SENSOR0         30  // These values determine how far away from             
+#define THRESHOLD_PRESS_SENSOR0         15  // These values determine how far away from             
 /// @cond
-#define THRESHOLD_PRESS_SENSOR1         30  // the average the current reading must be in
-#define THRESHOLD_PRESS_SENSOR2         30  // order to trigger a press.
-#define THRESHOLD_PRESS_SENSOR3         30  //
+#define THRESHOLD_PRESS_SENSOR1         15  // the average the current reading must be in
+#define THRESHOLD_PRESS_SENSOR2         15  // order to trigger a press.
+#define THRESHOLD_PRESS_SENSOR3         15  //
 #define THRESHOLD_PRESS_SENSOR4         30  // Allowable Range :: [ 1 to 65535 ]
 #define THRESHOLD_PRESS_SENSOR5         30  //
 #define THRESHOLD_PRESS_SENSOR6         30  
@@ -212,17 +212,17 @@
 //**********************************************
 
                                             //====================================================
-//#define CVD_DEBUG 1                       // Enable CVD Data Logging through RS232, comment 
+#define CVD_DEBUG 1                       // Enable CVD Data Logging through RS232, comment 
                                             //   this out to disable RS232 output.
                                             
     //#define CVD_DEBUG_OUTPUT_HEX          // Enabled: Output in Hex notation
                                             // Disabled: Output in Decimal notation
                                             
     #define CVD_DEBUG_SPEED     115200      // 115200 or 9600
-    #define CVD_DEBUG_PIN       GP2         // Not currently implemented. Will be used for software-UART implementations.
+    #define CVD_DEBUG_PIN       GP5         // Not currently implemented. Will be used for software-UART implementations.
 
     #define CVD_DEBUG_OUTPUT_RAW            // You may output the raw sensor values, the sensor average
-    //#define CVD_DEBUG_OUTPUT_AVG          // values, or both. Simply uncomment/comment one or more options.
+    #define CVD_DEBUG_OUTPUT_AVG          // values, or both. Simply uncomment/comment one or more options.
                                                 
                                                 //====================================================
                                                 // System Version Control
@@ -379,7 +379,7 @@
                                             //   Allowable Range :: [ 1 to 255 ]                                            
 
                                             
-#define NEGATIVE_CAPACITANCE        0       //====================================================
+#define NEGATIVE_CAPACITANCE        1       //====================================================
                                             // This option determines the method used to handle
                                             //   a negative capacitance shift. In other words, how
                                             //   the system will respond to a reading value shift
@@ -424,7 +424,7 @@
 //
 //**********************************************
                                             
-#define CVD_SETTLING_DELAY          15      //====================================================
+#define CVD_SETTLING_DELAY          4      //====================================================
                                             // The larger this value is, the more susceptible to
                                             //   noise the application will be. However, there is
                                             //   a minimum amount of time required to get full
@@ -449,7 +449,7 @@
                                             //   for your application.
 
 
-#define CVD_CHOLD_CHARGE_DELAY      15      //====================================================
+#define CVD_CHOLD_CHARGE_DELAY      3      //====================================================
                                             // The correct value for this delay is dependant on
                                             //   the reference source used to charge the internal 
                                             //   ADC capacitor.
@@ -476,4 +476,4 @@
                                             //
                                             // Also, increase CVD_CHOLD_CHARGE_DELAY until the
                                             //   voltage change during the balancing step of the
-                                            //   scan is maximized.
+                                           //   scan is maximized.

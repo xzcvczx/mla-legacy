@@ -8,28 +8,16 @@
         <itemPath>../../../Microchip/Include/Compiler.h</itemPath>
         <itemPath>../../../Microchip/Include/GenericTypeDefs.h</itemPath>
       </logicalFolder>
-      <logicalFolder name="Google" displayName="Google" projectFiles="true">
-        <itemPath>../gcapture.h</itemPath>
-        <itemPath>../gcounter.h</itemPath>
-        <itemPath>../ginsu.h</itemPath>
-        <itemPath>../gpubkey.h</itemPath>
-        <itemPath>../gqueue.h</itemPath>
-        <itemPath>../gsend.h</itemPath>
-        <itemPath>../gstatus.h</itemPath>
-        <itemPath>../gutility.h</itemPath>
-      </logicalFolder>
       <logicalFolder name="f1" displayName="HW Config" projectFiles="true">
         <itemPath>../Configs/HWP EX16_ENC28 C30.h</itemPath>
         <itemPath>../Configs/HWP EX16_ENC624 C30.h</itemPath>
         <itemPath>../Configs/HWP EX16_MRF24WB C30.h</itemPath>
       </logicalFolder>
       <logicalFolder name="TCPIP Stack" displayName="TCPIP Stack" projectFiles="true">
-        <itemPath>../../../Microchip/Include/TCPIP Stack/ARCFOUR.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/ARP.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/Announce.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/AutoIP.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/BerkeleyAPI.h</itemPath>
-        <itemPath>../../../Microchip/Include/TCPIP Stack/BigInt.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/DHCP.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/DNS.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/Delay.h</itemPath>
@@ -47,7 +35,6 @@
         <itemPath>../../../Microchip/Include/TCPIP Stack/MAC.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/MPFS2.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/NBNS.h</itemPath>
-        <itemPath>../../../Microchip/Include/TCPIP Stack/RSA.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/Random.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/Reboot.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/SMTP.h</itemPath>
@@ -77,7 +64,6 @@
         <itemPath>../../../Microchip/Include/TCPIP Stack/WFMgmtMsg.h</itemPath>
         <itemPath>../../../Microchip/Include/TCPIP Stack/WFRaw.h</itemPath>
       </logicalFolder>
-      <itemPath>../HTTPTime.h</itemPath>
       <itemPath>../HardwareProfile.h</itemPath>
       <itemPath>../MainDemo.h</itemPath>
       <itemPath>../TCPIPConfig.h</itemPath>
@@ -86,7 +72,6 @@
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
                    projectFiles="true">
-      <itemPath>../../../Microchip/TCPIP Stack/BigInt_helper_elf.a</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -99,23 +84,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <logicalFolder name="Google" displayName="Google" projectFiles="true">
-        <itemPath>../gcapture.c</itemPath>
-        <itemPath>../gcounter.c</itemPath>
-        <itemPath>../ginsu.c</itemPath>
-        <itemPath>../gpubkey.c</itemPath>
-        <itemPath>../gqueue.c</itemPath>
-        <itemPath>../gsend.c</itemPath>
-        <itemPath>../gstatus.c</itemPath>
-        <itemPath>../gutility.c</itemPath>
-      </logicalFolder>
       <logicalFolder name="TCPIP Stack" displayName="TCPIP Stack" projectFiles="true">
-        <itemPath>../../../Microchip/TCPIP Stack/ARCFOUR.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/ARP.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/Announce.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/AutoIP.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/BerkeleyAPI.c</itemPath>
-        <itemPath>../../../Microchip/TCPIP Stack/BigInt.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/DHCP.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/DHCPs.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/DNS.c</itemPath>
@@ -132,7 +105,6 @@
         <itemPath>../../../Microchip/TCPIP Stack/LCDBlocking.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/MPFS2.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/NBNS.c</itemPath>
-        <itemPath>../../../Microchip/TCPIP Stack/RSA.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/Random.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/Reboot.c</itemPath>
         <itemPath>../../../Microchip/TCPIP Stack/SMTP.c</itemPath>
@@ -173,7 +145,6 @@
         <itemPath>../../../Microchip/TCPIP Stack/WiFi/WF_Spi.c</itemPath>
       </logicalFolder>
       <itemPath>../CustomHTTPApp.c</itemPath>
-      <itemPath>../HTTPTime.c</itemPath>
       <itemPath>../MainDemo.c</itemPath>
       <itemPath>../WF_Config.c</itemPath>
     </logicalFolder>
@@ -207,318 +178,102 @@
       <item path="../../../Microchip/Include/TCPIP Stack/WFApi.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFDriverPrv.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFEasyConfig.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFMac.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFMgmtMsg.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFRaw.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFConnectionAlgorithm.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFConnectionManager.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFConnectionProfile.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDataTxRx.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverRaw.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFEasyConfig.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFEventHandler.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFInit.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFMac.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFMgmtMsg.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFParamMsg.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFPowerSave.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFScan.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFTxPower.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WF_Eint.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WF_Spi.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../Configs/HWP EX16_ENC624 C30.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../Configs/HWP EX16_MRF24WB C30.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../WF_Config.c" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../WF_Config.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <C30>
         <property key="scalar-model" value="default"/>
@@ -545,8 +300,8 @@
         <property key="extra-include-directories-for-assembler" value=".."/>
         <property key="preprocessor-macros" value=""/>
         <property key="list-file" value=""/>
-        <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
         <property key="relax" value="false"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
@@ -556,7 +311,7 @@
         <property key="keep-locals" value="false"/>
         <property key="false-conditionals" value="false"/>
         <property key="expand-macros" value="false"/>
-        <property key="assembler-symbols" value="CFG_INCLUDE_EX16_ENC28=1"/>
+        <property key="assembler-symbols" value=""/>
       </C30-AS>
       <C30-LD>
         <property key="preprocessor-macros" value=""/>
@@ -574,18 +329,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="true"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories" value=".."/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories" value=".."/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -611,318 +366,102 @@
       <item path="../../../Microchip/Include/TCPIP Stack/WFApi.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFDriverPrv.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFEasyConfig.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFMac.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFMgmtMsg.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/Include/TCPIP Stack/WFRaw.h"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFConnectionAlgorithm.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFConnectionManager.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFConnectionProfile.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDataTxRx.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverCom.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFDriverRaw.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFEasyConfig.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFEventHandler.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFInit.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFMac.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFMgmtMsg.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFParamMsg.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFPowerSave.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFScan.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WFTxPower.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WF_Eint.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../../../Microchip/TCPIP Stack/WiFi/WF_Spi.c"
             ex="true"
             overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../Configs/HWP EX16_ENC28 C30.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../Configs/HWP EX16_MRF24WB C30.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../WF_Config.c" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../WF_Config.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <C30>
         <property key="scalar-model" value="default"/>
@@ -946,11 +485,11 @@
       </C30>
       <C30-AS>
         <property key="omit-debug-dirs" value="false"/>
-        <property key="extra-include-directories-for-assembler" value=".."/>
+        <property key="extra-include-directories-for-assembler" value="..;"/>
         <property key="preprocessor-macros" value=""/>
         <property key="list-file" value=""/>
-        <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
         <property key="relax" value="false"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
@@ -960,7 +499,7 @@
         <property key="keep-locals" value="false"/>
         <property key="false-conditionals" value="false"/>
         <property key="expand-macros" value="false"/>
-        <property key="assembler-symbols" value="CFG_INCLUDE_EX16_ENC624=1"/>
+        <property key="assembler-symbols" value=""/>
       </C30-AS>
       <C30-LD>
         <property key="preprocessor-macros" value=""/>
@@ -978,18 +517,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="true"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories" value=".."/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories" value="..;"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -1013,29 +552,13 @@
         </linkerTool>
       </compileType>
       <item path="../Configs/HWP EX16_ENC28 C30.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <item path="../Configs/HWP EX16_ENC624 C30.h" ex="true" overriding="false">
-        <C30>
-        </C30>
-        <C30-AS>
-        </C30-AS>
-        <C30-LD>
-        </C30-LD>
-        <C30Global>
-        </C30Global>
       </item>
       <C30>
         <property key="scalar-model" value="default"/>
         <property key="extra-include-directories"
-                  value="..;../../Microchip/Include;../../../Microchip/Include;../../../Microchip/Include/TCPIP Stack;../Configs"/>
+                  value="..;../../Microchip/Include;../../../Microchip/Include;../../../Microchip/Include/TCPIP Stack;../Configs;"/>
         <property key="preprocessor-macros" value="CFG_INCLUDE_EX16_MRF24WB"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="true"/>
@@ -1054,11 +577,11 @@
       </C30>
       <C30-AS>
         <property key="omit-debug-dirs" value="false"/>
-        <property key="extra-include-directories-for-assembler" value=".."/>
+        <property key="extra-include-directories-for-assembler" value="..;"/>
         <property key="preprocessor-macros" value=""/>
         <property key="list-file" value=""/>
-        <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
         <property key="relax" value="false"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
@@ -1068,7 +591,7 @@
         <property key="keep-locals" value="false"/>
         <property key="false-conditionals" value="false"/>
         <property key="expand-macros" value="false"/>
-        <property key="assembler-symbols" value="CFG_INCLUDE_EX16_MRF24WB=1"/>
+        <property key="assembler-symbols" value=""/>
       </C30-AS>
       <C30-LD>
         <property key="preprocessor-macros" value=""/>
@@ -1086,18 +609,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="true"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories" value=".."/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories" value="..;"/>
       </C30-LD>
       <C30Global>
       </C30Global>

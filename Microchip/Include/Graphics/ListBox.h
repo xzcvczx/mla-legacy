@@ -159,6 +159,7 @@ typedef struct
 * 		 top - Top most position of the Object. 
 *		 right - Right most position of the Object.
 *		 bottom - Bottom most position of the Object.
+*        state - Sets the initial state of the object.
 *        pText - Pointer to the initialization text for the items.
 *        pScheme - Pointer to the style scheme.
 *

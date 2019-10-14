@@ -38,7 +38,7 @@
  * Section: Includes
  *****************************************************************************/
 #include "GenericTypeDefs.h"
-#include "uart.h"
+#include "UART.h"
 #include "MainDemo.h"
 #include "comm_pkt.h"
 

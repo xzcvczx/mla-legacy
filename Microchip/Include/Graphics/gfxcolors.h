@@ -53,15 +53,19 @@
 #endif
 
 /*********************************************************************
-* Overview: Data type that defines the color data.
+* Overview: Data type that defines the color data. This type is dependent 
+*           on the COLOR_DEPTH setting. See COLOR_DEPTH.
+*           - GFX_COLOR is type BYTE  if COLOR_DEPTH <= 8   
+*           - GFX_COLOR is type WORD if COLOR_DEPTH = 16
+*           - GFX_COLOR is type DWORD if COLOR_DEPTH = 24  
 *
 *********************************************************************/
 #if (COLOR_DEPTH <= 8)
-    typedef BYTE GFX_COLOR; 
+    typedef BYTE GFX_COLOR;   
 #elif (COLOR_DEPTH == 16)
-    typedef WORD GFX_COLOR; 
+    typedef WORD GFX_COLOR;   
 #elif (COLOR_DEPTH == 24)
-    typedef DWORD GFX_COLOR;
+    typedef DWORD GFX_COLOR;  
 #endif
 
 // color depths 1, 2 or 4 are usually for monochrome format so we are not defining

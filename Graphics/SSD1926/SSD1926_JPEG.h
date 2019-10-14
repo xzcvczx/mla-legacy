@@ -39,7 +39,7 @@ Anton Alkhimenok    06_Jun-2009       Ported to PIC24
     #define _SSD_JPEG_DECODER_HEADER_FILE
 
 // Include
-    #include <GenericTypedefs.h>
+    #include <GenericTypeDefs.h>
 
 // JPEG FIFO Size and Location
     #define SSD_JPEG_FIFO_BLK_SIZE      (DWORD) (4 * 1024)

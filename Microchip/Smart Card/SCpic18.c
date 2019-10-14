@@ -33,10 +33,12 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  1.0   Initial release
-  1.01  Cleaned up unnecessary variables
-  1.02  Optimized code by removing redundant code in "SCdrv_SetBRG"
-        function.
+  1.0     Initial release
+  1.01    Cleaned up unnecessary variables
+  1.02    Optimized code by removing redundant code in "SCdrv_SetBRG"
+          function.
+  1.02.2  Removed recursive function calls and added delay functions.
+          Modified the code in more structured way.
 ********************************************************************/
 
 #include 	<Compiler.h>
@@ -50,62 +52,40 @@
 #include	"Smart Card/SCpic18.h"
 #include    "sc_config.h"
 
-unsigned int gBitTimeDelay;
-unsigned int bitTime;
-unsigned int initialBaudReg;
-unsigned long scReferenceClock;
 
 unsigned long baudRate;
-unsigned int factorF = 372;
-BYTE factorDNumerator = 1;
-BYTE factorDdenominator = 1;
+unsigned long scReferenceClock;
+unsigned short int rxETUtimeDivisorFactor;
+unsigned short int oneETUtimeinMicroSeconds;
 BOOL delayLapsedFlag = FALSE;
-
-////////////////////////////////////////
-// Generate delay in microsec resolution
-// 0 - 2  us
-// 1 - 3 us
-// 10 - 12 us
-// ...
-////////////////////////////////////////
-void WaitMicroSec( WORD microSec )
-{
-	while( microSec )
-	{
-		Nop();
-		microSec--;
-	}
-}	
-
-void WaitMilliSec( WORD ms )
-{
-	while( ms-- )
-		WaitMicroSec( 800 );
-}
 
 /*******************************************************************************
   Function:
-    void SC_Delay(void)
+    void WaitMicroSec(void)
 	
   Description:
-    This function waits for delay to get completed
+    This function provides the approximate delay in microseconds.The delay
+    sometimes may not be exact delay as per 'microsec' input value, but
+    is approximately the same. This approximatation is sufficient for
+    smart card stack requirement.
 
   Precondition:
-    None.
+    None
 
   Parameters:
-    unsigned int instructionCount - Number of instruction counts to be waited
+    microSec - Number of microseconds delay required
 
   Return Values:
     None
 	
   Remarks:
-    None.
+    This function supports upto 10000's and more of micro seconds delay. 
+    For higher time values use 'WaitMilliSec' function.
   *****************************************************************************/
-void SC_Delay(unsigned int instructionCount)
+void WaitMicroSec( unsigned long int microSec )
 {
 	// Set the Timer Count as per the delay needed
-	SCdrv_SetDelayTimerCnt(0xFFFF - instructionCount);
+	SCdrv_SetDelayTimerCnt(0xFFFF - microSec/TIMER0_SINGLE_COUNT_MICRO_SECONDS);
 
 	// Enable the delay timer
 	SCdrv_EnableDelayTimer();
@@ -117,53 +97,89 @@ void SC_Delay(unsigned int instructionCount)
 	delayLapsedFlag = FALSE;
 }
 
-////////////////////////////////////////////////////
-////////////////////////////////////////////////////
+/*******************************************************************************
+  Function:
+    void WaitMilliSec(void)
+	
+  Description:
+    This function provides the approximate delay in milliseconds.The delay
+    sometimes may not be exact delay as per 'ms' input value, but is
+    approximately the same. This approximatation is sufficient for
+    smart card stack requirement.
+
+  Precondition:
+    None
+
+  Parameters:
+    ms - Number of milliseconds delay required
+
+  Return Values:
+    None
+	
+  Remarks:
+    None
+  *****************************************************************************/
+void WaitMilliSec( unsigned long int ms )
+{
+	while(ms--)
+		WaitMicroSec(1000);
+}
+
+/*******************************************************************************
+  Function:
+    void SCdrv_SendTxData(BYTE data)
+	
+  Description:
+    This function transmits one byte of data as per ISO-7816 standard
+
+  Precondition:
+    None.
+
+  Parameters:
+    data - Data byte to be transmitted
+
+  Return Values:
+    None
+	
+  Remarks:
+    None.
+  *****************************************************************************/
 void SCdrv_SendTxData( BYTE data )
 {
-	BYTE txRetryCounter = 0;
-	BOOL noError = TRUE;
+	BYTE txRetryCounter;
 
-	//calculate parity
-	_asm
-     swapf    data,0,0  //reducing byte to nibble
-     xorwf    data,0,0
-     addlw    0x41    // bit 1 becomes B0^B1 and bit 7 becomes B6^B7
-     iorlw    0x7C    // for carry propagation from bit 1 to bit 7
-     addlw    2       // Done! the parity bit is bit 7 of W
-	_endasm
-	
-	TXSTAbits.TX9D = WREG >> 7; //copy calc parity bit to the transmitter
-	
-	TXREG = data;
-	TXSTAbits.TXEN = 1;
-
-	while( !TXSTAbits.TRMT ) //wait for Tx Complete
+	// Try to trasmit the byte for 5 times before giving up...
+	for(txRetryCounter = 0;txRetryCounter < 5;txRetryCounter++)
 	{
-		Nop();
-	}	
-	
-	TXSTAbits.TXEN = 0;
+		//calculate parity
+		_asm
+	     swapf    data,0,0  //reducing byte to nibble
+	     xorwf    data,0,0
+	     addlw    0x41    // bit 1 becomes B0^B1 and bit 7 becomes B6^B7
+	     iorlw    0x7C    // for carry propagation from bit 1 to bit 7
+	     addlw    2       // Done! the parity bit is bit 7 of W
+		_endasm
+		
+		TXSTAbits.TX9D = WREG >> 7; //copy calc parity bit to the transmitter
+		
+		TXREG = data;
+		TXSTAbits.TXEN = 1;
 
-	//turn off uart
-	RCSTAbits.SPEN = 0;
+		while( !TXSTAbits.TRMT ) //wait for Tx Complete
+			Nop();
+		
+		TXSTAbits.TXEN = 0;
 
-	if( !SCdrv_GetRxPinData() )  // The Receiver did not like our data. it is pulling line low 
-	{					  // to indicate PE or FR errors
-		noError = FALSE;
-	
-		RCSTAbits.SPEN = 1;
-						
-		//now retransmit the data
-		if( txRetryCounter < 5 )
-		{
-			txRetryCounter++;
-			SCdrv_SendTxData(data);
-		}
+		//turn off uart
+		RCSTAbits.SPEN = 0;
+
+		// Receiver pulls Tx line low, to indicate PE or FR errors. If Such a
+		// scenario occurs then try to retransmit the byte(maximum of 5 trys allowed).
+		if(SCdrv_GetRxPinData())
+			break;
+		else
+			RCSTAbits.SPEN = 1;
 	}
-	
-	if( noError ) //no error detected
-		txRetryCounter = 0;
 
 	RCSTAbits.SPEN = 1;
 	
@@ -185,100 +201,190 @@ void SCdrv_SendTxData( BYTE data )
 	}	
 }
 
-/////////////////////////////////////////////
-/////////////////////////////////////////////
-BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys )
-{
-	//wait for data byte
-	while( !(PIR1 & 0x20) )
-	{
-		if( nTrys-- == 0 )
-			return FALSE;
-	}
+/*******************************************************************************
+  Function:
+    BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long int timeOutInMicroSeconds)
 	
-	//calculate parity
-	_asm
-     swapf    RCREG,0,0  //reducing byte to nibble
-     xorwf    RCREG,0,0
-     addlw    0x41    // bit 1 becomes B0^B1 and bit 7 becomes B6^B7
-     iorlw    0x7C    // for carry propagation from bit 1 to bit 7
-     addlw    2       // Done! the parity bit is bit 7 of W
-     RLNCF    WREG,0,0		//rotate left W reg
-     xorwf    RCSTA,0,0
-	_endasm
+  Description:
+    This function recieves one byte of data as per ISO-7816 standard
 
-	if( WREG & 1 )	//Parity Error detected
+  Precondition:
+    None.
+
+  Parameters:
+    pDat - pointer to Data byte to be recieved
+    timeOutETUs - maximum etu time within which the data byte is
+                  is expected to be recieved
+
+  Return Values:
+    None
+	
+  Remarks:
+    None.
+  *****************************************************************************/
+BOOL SCdrv_GetRxData( BYTE* pDat, unsigned short int timeOutETUs)
+{
+	unsigned long int tmrCntDifference = timeOutETUs * rxETUtimeDivisorFactor;
+	unsigned short int timerCountValue;
+	BYTE rxRetryCounter;
+
+	delayLapsedFlag = TRUE;
+	
+	// If any error occured while recieving the byte, give chance to smart card
+	// to send the corrected byte within 5 attempts
+	for(rxRetryCounter = 0;rxRetryCounter < 5;rxRetryCounter++)
 	{
-		RCSTAbits.SPEN = 0;
-		SCdrv_TxPin_Direction(0);  //pull it low to tell the card that there was error receiving data
+		//wait for data byte
+		while( !(PIR1 & 0x20) )
+		{
+			if( delayLapsedFlag )
+			{
+				delayLapsedFlag = FALSE;
+				
+				if(tmrCntDifference)
+				{
+					if(tmrCntDifference > 0xFFFF)
+					{
+						timerCountValue = 0;
+						tmrCntDifference = tmrCntDifference - 0xFFFF;
+					}
+					else
+					{
+						timerCountValue = (unsigned short int)tmrCntDifference;
+						tmrCntDifference = 0;
+					}
+
+					// Set the Timer Count as per the delay needed
+					SCdrv_SetDelayTimerCnt(0xFFFF - timerCountValue);
+
+					// Enable the delay timer
+					SCdrv_EnableDelayTimer();
+				}
+				else
+					return FALSE;
+			}
+		}
 		
-		WaitMicroSec(gBitTimeDelay );
-				
-		SCdrv_TxPin_Direction(1); //release line. Card should retransmit now.
-				
-		RCSTAbits.SPEN = 1;
-		return SCdrv_GetRxData( pDat, nTrys );	//Read the data from retransmission 
+		SCdrv_DisableDelayTimer();
+		
+		delayLapsedFlag = FALSE;
+
+		//calculate parity
+		_asm
+	     swapf    RCREG,0,0  //reducing byte to nibble
+	     xorwf    RCREG,0,0
+	     addlw    0x41    // bit 1 becomes B0^B1 and bit 7 becomes B6^B7
+	     iorlw    0x7C    // for carry propagation from bit 1 to bit 7
+	     addlw    2       // Done! the parity bit is bit 7 of W
+	     RLNCF    WREG,0,0		//rotate left W reg
+	     xorwf    RCSTA,0,0
+		_endasm
+
+		if( WREG & 1 )	//Parity Error detected
+		{
+			RCSTAbits.SPEN = 0;
+			SCdrv_TxPin_Direction(0);  //pull it low to tell the card that there was error receiving data
+			
+			WaitMicroSec(oneETUtimeinMicroSeconds);
+					
+			SCdrv_TxPin_Direction(1); //release line. Card should retransmit now.
+					
+			RCSTAbits.SPEN = 1;
+		}
+		else
+		{
+			*pDat = RCREG;
+			return TRUE;
+		}
 	}
 
-	*pDat = RCREG;
-	return TRUE;
+	return FALSE;
 }
 
 
-///////////////////////////////////////////////////
-//////////////////////////////////////////////////
-void SCdrv_SetBRG( BYTE speedCode )
+/*******************************************************************************
+  Function:
+    void SCdrv_SetBRG()
+	
+  Description:
+    This function sets the UART baud rate as per the speed code used in ISO 7816
+    standard communication.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Return Values:
+    None
+	
+  Remarks:
+    None
+  *****************************************************************************/
+void SCdrv_SetBRG(void)
 {
-	BYTE tempCode;
 	unsigned int baudReg;
-
-	// If you are not using internal clock in Smart Card & are 
-	// using external clock to drive Smart Card than calculate 
-	// factor 'F' from TA1 value
-	#ifdef ENABLE_SC_EXTERNAL_CLOCK
-
-		tempCode = (speedCode & 0xF0) >> 4;
-		
-		if(tempCode == 0x00)	// If internal clock used in Smart Card
-		{
-			baudReg = (unsigned int)((FCY * factorDdenominator)/(unsigned long)(9600 * (unsigned long)factorDNumerator) - 1);
-		}
-		else	// If externa; clock used to drive Smart Card
-		{
-			baudRate = (scReferenceClock * factorDNumerator)/(unsigned long)(factorF * (unsigned long)factorDdenominator);
-			baudReg = (unsigned int)((FCY/baudRate) - 1);
-		}
-
-	#else	// If internal clock used in Smart Card
-
-		baudReg = (unsigned char)((FCY * factorDdenominator)/(unsigned long)(9600 * (unsigned long)factorDNumerator) - 1);
-
-	#endif
+	
+	baudReg = (unsigned int)((FCY/baudRate) - 1);
 
 	SPBRG = (unsigned char)baudReg;
 	SPBRGH = (unsigned char)(baudReg >> 8);
 
-	//recalculate bit time
-	gBitTimeDelay = baudReg;
-	gBitTimeDelay *= bitTime;	//micro sec for 1 bit @ 9.6kbps
-	gBitTimeDelay /= initialBaudReg; 		
+	// Calculate the recieve ETU divisor which will be used to calculate the timeouts
+	// while recieving the data bytes. This calculation is done here because baudrate
+	// of ISO 7816 communication is recalculated here.
+	oneETUtimeinMicroSeconds = (unsigned short int)(1000000UL/baudRate);
+	rxETUtimeDivisorFactor = oneETUtimeinMicroSeconds / TIMER0_SINGLE_COUNT_MICRO_SECONDS;
 }	
 
-///////////////////////////////////////////////////
-//////////////////////////////////////////////////
+/*******************************************************************************
+  Function:
+    void SCdrv_CloseUART(void)
+	
+  Description:
+    This function closes the UART used for ISO 7816 standard communication
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Return Values:
+    None
+	
+  Remarks:
+    None
+  *****************************************************************************/
 void SCdrv_CloseUART(void)
 {
-	SCdrv_DisableClock();	//turn off Clock
 	RCSTAbits.SPEN = 0;		//turn off UART
 	RCSTAbits.CREN = 0;
 }
 
+/*******************************************************************************
+  Function:
+    void SCdrv_InitUART(void)
+	
+  Description:
+    This function initializes the UART used for ISO 7816 standard communication
 
-///////////////////////////////////////////////////
-//////////////////////////////////////////////////
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Return Values:
+    None
+	
+  Remarks:
+    None
+  *****************************************************************************/
 void SCdrv_InitUART(void)
 {
-	unsigned int power2Value = 1;
+	unsigned int tempCalculationVariable = 1;
 	BYTE power2temp;
 
 	SCdrv_PowerPin_Direction(0);	//set RB0 as output to power the Smart Card
@@ -299,25 +405,27 @@ void SCdrv_InitUART(void)
 	// Dont enable the clock,only set it.
 	Scdrv_ClockSet();
 
+	// Initial Baud Rate of Smart Card for external Clock
 	power2temp = REF_CLOCK_POWER2_VALUE;
 
 	while(power2temp--)
 	{
-		power2Value = power2Value * (BYTE)2;
+		tempCalculationVariable = tempCalculationVariable * (BYTE)2;
 	}
 
-	scReferenceClock = REF_CLOCK_CIRCUIT_INPUT_CLK/(power2Value + REF_CLOCK_DIVISOR_VALUE);
+	scReferenceClock = REF_CLOCK_CIRCUIT_INPUT_CLK/(tempCalculationVariable + REF_CLOCK_DIVISOR_VALUE);
 
 	baudRate = scReferenceClock/(unsigned int)372;
 
-	initialBaudReg = ((FCY/baudRate) - 1);
-	SPBRG = (unsigned char)initialBaudReg;
-	SPBRGH = (unsigned char)(initialBaudReg >> 8);
-	bitTime = (1000000UL)/baudRate + 1;
+	// Calculate the recieve ETU divisor which will be used to calculate the timeouts
+	// while recieving the data bytes. This calculation is done here because baudrate
+	// of ISO 7816 communication is calculated here.
+	oneETUtimeinMicroSeconds = (unsigned short int)(1000000UL/baudRate);
+	rxETUtimeDivisorFactor = oneETUtimeinMicroSeconds / TIMER0_SINGLE_COUNT_MICRO_SECONDS;
 
-	gBitTimeDelay = initialBaudReg;
-	gBitTimeDelay *= bitTime;	//micro sec for 9.6k baud
-	gBitTimeDelay /= initialBaudReg;  
+	tempCalculationVariable = ((FCY/baudRate) - 1);
+	SPBRG = (unsigned char)tempCalculationVariable;
+	SPBRGH = (unsigned char)(tempCalculationVariable >> 8);
 
 	TXSTAbits.TX9  = 1; //select 9 bit transmission
 	TXSTAbits.SYNC = 0; //Async mode	

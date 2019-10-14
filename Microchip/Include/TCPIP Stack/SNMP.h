@@ -156,10 +156,7 @@ feasible.*/
 #define AGENT_NOTIFY_PORT   (0xfffe)
 
 
-/* Update the Non record id OID value 
-   which is part of CustomSnmpDemo.c file
-*/
-#define SNMP_MAX_NON_REC_ID_OID  3
+
 
 /****************************************************************************
   Section:

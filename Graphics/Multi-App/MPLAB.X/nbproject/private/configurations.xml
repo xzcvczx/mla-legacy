@@ -363,7 +363,7 @@
         </environment>
       </runprofile>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_8PMP_QVGAv1_USBMSD" type="2">
+    <conf name="PIC_SK_GFXv3_8PMP_QVGAv1_USBMSD" type="2">
       <platformToolSN></platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\MPLAB C32\bin</languageToolchainDir>
       <mdbdebugger version="1">
@@ -381,7 +381,7 @@
         </environment>
       </runprofile>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_8PMP_WQVGAv1_USBMSD" type="2">
+    <conf name="PIC_SK_GFXv3_8PMP_WQVGAv1_USBMSD" type="2">
       <platformToolSN></platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\MPLAB C32\bin</languageToolchainDir>
       <mdbdebugger version="1">
@@ -399,7 +399,7 @@
         </environment>
       </runprofile>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_16PMP_QVGAv1_USBMSD" type="2">
+    <conf name="PIC_SK_GFXv3_16PMP_QVGAv1_USBMSD" type="2">
       <platformToolSN></platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\MPLAB C32\bin</languageToolchainDir>
       <mdbdebugger version="1">
@@ -417,7 +417,7 @@
         </environment>
       </runprofile>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_16PMP_WQVGAv1_USBMSD" type="2">
+    <conf name="PIC_SK_GFXv3_16PMP_WQVGAv1_USBMSD" type="2">
       <platformToolSN></platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\MPLAB C32\bin</languageToolchainDir>
       <mdbdebugger version="1">

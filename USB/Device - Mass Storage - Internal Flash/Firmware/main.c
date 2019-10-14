@@ -51,7 +51,7 @@
 #include "USB/usb_function_msd.h"
 
 #include "HardwareProfile.h"
-#include "MDD File System/internal flash.h"
+#include "MDD File System/Internal Flash.h"
 
 /** CONFIGURATION **************************************************/
 #if defined(PICDEM_FS_USB)      // Configuration bits for PICDEM FS USB Demo Board (based on PIC18F4550)

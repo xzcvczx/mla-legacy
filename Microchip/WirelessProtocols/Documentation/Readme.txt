@@ -1,3 +1,6 @@
+MiWi DE 4.2.2
+Add out-of-box support for MRF24J40MC module
+
 MiWi DE 4.2
 MiWi DE 4.2 is latest release with Microchip Applicaiton Libraries. There is no difference between version 4.2 and version 4.1.2Beta release directly from Microchip MiWi docking page, except some minor bug fixes.
 

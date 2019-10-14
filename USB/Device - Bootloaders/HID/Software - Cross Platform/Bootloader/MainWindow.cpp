@@ -23,12 +23,13 @@
 * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE
 * OF THESE TERMS.
 *
-* Author        Date        Comment
+* Author        Date        Ver   Comment
 *************************************************************************
-* E. Schlunder  2009/05/07  CRC verify added.
-* E. Schlunder  2009/04/14  Initial code ported from VB app.
-* T. Lawrence   2011/01/14  Initial implementation of USB version of this
-*                           bootloader application.
+* E. Schlunder  2009/04/14  0.01  Initial code ported from VB app.
+* T. Lawrence   2011/01/14  2.90  Initial implementation of USB version of this
+*                                 bootloader application.
+* F. Schlunder  2011/07/06  2.90a Small update to support importing of hex files
+*                                 with "non-monotonic" line address ordering.
 ************************************************************************/
 
 #include <QTextStream>
@@ -331,7 +332,7 @@ void MainWindow::VerifyDevice()
                                    device->bytesPerAddressFLASH,
                                    device->bytesPerWordFLASH,
                                    deviceRange.end,
-                                   deviceRange.data);
+                                   deviceRange.pDataBuffer);
 
             if(result != Comm::Success)
             {
@@ -355,7 +356,7 @@ void MainWindow::VerifyDevice()
                         for(j = 0; j < device->bytesPerAddressFLASH; j++)
                         {
                             //Check if the device response data matches the data we parsed from the original input .hex file.
-                            if(deviceRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j] != hexRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j])
+                            if(deviceRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j] != hexRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j])
                             {
                                 //A mismatch was detected.
 
@@ -375,11 +376,11 @@ void MainWindow::VerifyDevice()
                                     //here this means we found a true verify failure.
                                     if(device->family == Device::PIC24)
                                     {
-                                        qWarning("Device: 0x%x Hex: 0x%x", *(unsigned short int*)&deviceRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j], *(unsigned short int*)&hexRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j]);
+                                        qWarning("Device: 0x%x Hex: 0x%x", *(unsigned short int*)&deviceRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j], *(unsigned short int*)&hexRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j]);
                                     }
                                     else
                                     {
-                                        qWarning("Device: 0x%x Hex: 0x%x", deviceRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j], hexRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j]);
+                                        qWarning("Device: 0x%x Hex: 0x%x", deviceRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j], hexRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j]);
                                     }
                                     qWarning("Failed verify at address 0x%x", i);
                                     emit IoWithDeviceCompleted("Verifying Program Memory", Comm::Fail, ((double)elapsed.elapsed()) / 1000);
@@ -402,7 +403,7 @@ void MainWindow::VerifyDevice()
                                    device->bytesPerAddressEEPROM,
                                    device->bytesPerWordEEPROM,
                                    deviceRange.end,
-                                   deviceRange.data);
+                                   deviceRange.pDataBuffer);
 
             if(result != Comm::Success)
             {
@@ -427,10 +428,10 @@ void MainWindow::VerifyDevice()
                         for(j = 0; j < device->bytesPerAddressEEPROM; j++)
                         {
                             //Check if the device response data matches the data we parsed from the original input .hex file.
-                            if(deviceRange.data[((i - deviceRange.start) * device->bytesPerAddressEEPROM)+j] != hexRange.data[((i - deviceRange.start) * device->bytesPerAddressEEPROM)+j])
+                            if(deviceRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressEEPROM)+j] != hexRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressEEPROM)+j])
                             {
                                 //A mismatch was detected.
-                                qWarning("Device: 0x%x Hex: 0x%x", deviceRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j], hexRange.data[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j]);
+                                qWarning("Device: 0x%x Hex: 0x%x", deviceRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j], hexRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressFLASH)+j]);
                                 qWarning("Failed verify at address 0x%x", i);
                                 emit IoWithDeviceCompleted("Verifying EEPROM Memory", Comm::Fail, ((double)elapsed.elapsed()) / 1000);
                                 return;
@@ -451,7 +452,7 @@ void MainWindow::VerifyDevice()
                                    device->bytesPerAddressConfig,
                                    device->bytesPerWordConfig,
                                    deviceRange.end,
-                                   deviceRange.data);
+                                   deviceRange.pDataBuffer);
 
             if(result != Comm::Success)
             {
@@ -478,7 +479,7 @@ void MainWindow::VerifyDevice()
                             arrayIndex = ((i - deviceRange.start) * device->bytesPerAddressConfig)+j;
 
                             //Check if the device response data matches the data we parsed from the original input .hex file.
-                            if(deviceRange.data[arrayIndex] != hexRange.data[arrayIndex])
+                            if(deviceRange.pDataBuffer[arrayIndex] != hexRange.pDataBuffer[arrayIndex])
                             {
                                 //A mismatch was detected.  Perform additional checks to make sure it was a real/unexpected verify failure.
 
@@ -503,11 +504,11 @@ void MainWindow::VerifyDevice()
                                     //here this means we found a true verify failure.
                                     if(device->family == Device::PIC24)
                                     {
-                                        qWarning("Device: 0x%x Hex: 0x%x", *(unsigned short int*)&deviceRange.data[((i - deviceRange.start) * device->bytesPerAddressConfig)+j], *(unsigned short int*)&hexRange.data[((i - deviceRange.start) * device->bytesPerAddressConfig)+j]);
+                                        qWarning("Device: 0x%x Hex: 0x%x", *(unsigned short int*)&deviceRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressConfig)+j], *(unsigned short int*)&hexRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressConfig)+j]);
                                     }
                                     else
                                     {
-                                        qWarning("Device: 0x%x Hex: 0x%x", deviceRange.data[((i - deviceRange.start) * device->bytesPerAddressConfig)+j], hexRange.data[((i - deviceRange.start) * device->bytesPerAddressConfig)+j]);
+                                        qWarning("Device: 0x%x Hex: 0x%x", deviceRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressConfig)+j], hexRange.pDataBuffer[((i - deviceRange.start) * device->bytesPerAddressConfig)+j]);
                                     }
                                     qWarning("Failed verify at address 0x%x", i);
                                     emit IoWithDeviceCompleted("Verifying Config Bit Memory", Comm::Fail, ((double)elapsed.elapsed()) / 1000);
@@ -569,7 +570,7 @@ void MainWindow::WriteDevice(void)
                                    device->bytesPerWordFLASH,
                                    device->family,
                                    hexRange.end,
-                                   hexRange.data);
+                                   hexRange.pDataBuffer);
         }
         else if(writeEeprom && (hexRange.type ==  EEPROM_MEMORY))
         {
@@ -582,7 +583,7 @@ void MainWindow::WriteDevice(void)
                                        device->bytesPerWordEEPROM,
                                        device->family,
                                        hexRange.end,
-                                       hexRange.data);
+                                       hexRange.pDataBuffer);
         }
         else if(writeConfig && (hexRange.type == CONFIG_MEMORY))
         {
@@ -595,7 +596,7 @@ void MainWindow::WriteDevice(void)
                                    device->bytesPerWordConfig,
                                    device->family,
                                    hexRange.end,
-                                   hexRange.data);
+                                   hexRange.pDataBuffer);
         }
         else
         {
@@ -638,7 +639,7 @@ void MainWindow::BlankCheckDevice(void)
                                    device->bytesPerAddressFLASH,
                                    device->bytesPerWordFLASH,
                                    deviceRange.end,
-                                   deviceRange.data);
+                                   deviceRange.pDataBuffer);
 
 
             if(result != Comm::Success)
@@ -650,10 +651,10 @@ void MainWindow::BlankCheckDevice(void)
 
             for(unsigned int i = 0; i < ((deviceRange.end - deviceRange.start) * device->bytesPerAddressFLASH); i++)
             {
-                if((deviceRange.data[i] != 0xFF) && !((device->family == Device::PIC24) && ((i % 4) == 3)))
+                if((deviceRange.pDataBuffer[i] != 0xFF) && !((device->family == Device::PIC24) && ((i % 4) == 3)))
                 {
                     qWarning("Failed blank check at address 0x%x", deviceRange.start + i);
-                    qWarning("The value was 0x%x", deviceRange.data[i]);
+                    qWarning("The value was 0x%x", deviceRange.pDataBuffer[i]);
                     emit IoWithDeviceCompleted("Blank Check", Comm::Fail, ((double)elapsed.elapsed()) / 1000);
                     return;
                 }
@@ -669,7 +670,7 @@ void MainWindow::BlankCheckDevice(void)
                                    device->bytesPerAddressEEPROM,
                                    device->bytesPerWordEEPROM,
                                    deviceRange.end,
-                                   deviceRange.data);
+                                   deviceRange.pDataBuffer);
 
 
             if(result != Comm::Success)
@@ -681,10 +682,10 @@ void MainWindow::BlankCheckDevice(void)
 
             for(unsigned int i = 0; i < ((deviceRange.end - deviceRange.start) * device->bytesPerWordEEPROM); i++)
             {
-                if(deviceRange.data[i] != 0xFF)
+                if(deviceRange.pDataBuffer[i] != 0xFF)
                 {
                     qWarning("Failed blank check at address 0x%x + 0x%x", deviceRange.start, i);
-                    qWarning("The value was 0x%x", deviceRange.data[i]);
+                    qWarning("The value was 0x%x", deviceRange.pDataBuffer[i]);
                     emit IoWithDeviceCompleted("Blank Check", Comm::Fail, ((double)elapsed.elapsed()) / 1000);
                     return;
                 }
@@ -758,7 +759,31 @@ void MainWindow::LoadFile(QString newFileName)
     HexImporter::ErrorCode result;
     Comm::ErrorCode commResultCode;
 
+    hexData->ranges.clear();
+
+    //Print some debug info to the debug window.
+    qDebug(QString("Total Programmable Regions Reported by Device: " + QString::number(deviceData->ranges.count(), 10)).toLatin1());
+
+    //First duplicate the deviceData programmable region list and
+    //allocate some RAM buffers to hold the hex data that we are about to import.
+    foreach(DeviceData::MemoryRange range, deviceData->ranges)
+    {
+        //Allocate some RAM for the hex file data we are about to import.
+        //Initialize all bytes of the buffer to 0xFF, the default unprogrammed memory value,
+        //which is also the "assumed" value, if a value is missing inside the .hex file, but
+        //is still included in a programmable memory region.
+        range.pDataBuffer = new unsigned char[range.dataBufferLength];
+        memset(range.pDataBuffer, 0xFF, range.dataBufferLength);
+        hexData->ranges.append(range);
+
+        //Print info regarding the programmable memory region to the debug window.
+        qDebug(QString("Device Programmable Region: [" + QString::number(range.start, 16).toUpper() + " - " +
+                   QString::number(range.end, 16).toUpper() +")").toLatin1());
+    }
+
+    //Import the hex file data into the hexData->ranges[].pDataBuffer buffers.
     result = import.ImportHexFile(newFileName, hexData, device);
+    //Based on the result of the hex file import operation, decide how to proceed.
     switch(result)
     {
         case HexImporter::Success:
@@ -766,13 +791,13 @@ void MainWindow::LoadFile(QString newFileName)
 
         case HexImporter::CouldNotOpenFile:
             QApplication::restoreOverrideCursor();
-            stream << "Could not open file: " << nfi.fileName() << "\n";
+            stream << "Error: Could not open file " << nfi.fileName() << "\n";
             ui->plainTextEdit->appendPlainText(msg);
             return;
 
         case HexImporter::NoneInRange:
             QApplication::restoreOverrideCursor();
-            stream << "No address within range in file: " << nfi.fileName() << "\n";
+            stream << "No address within range in file: " << nfi.fileName() << ".  Verify the correct firmware image was specified and is designed for your device.\n";
             ui->plainTextEdit->appendPlainText(msg);
             return;
 
@@ -1002,21 +1027,23 @@ void MainWindow::GetQuery()
         if(bootInfo.memoryRegions[i].type == PROGRAM_MEMORY)
         {
             range.type = PROGRAM_MEMORY;
-            //range.data = new unsigned char[bootInfo.memoryRegions[i].size * device->bytesPerWordFLASH];
-            range.data = new unsigned char[bootInfo.memoryRegions[i].size * device->bytesPerAddressFLASH];
-            memset(&range.data[0], 0xFF, bootInfo.memoryRegions[i].size * device->bytesPerAddressFLASH);
+            range.dataBufferLength = bootInfo.memoryRegions[i].size * device->bytesPerAddressFLASH;
+            range.pDataBuffer = new unsigned char[range.dataBufferLength];
+            memset(&range.pDataBuffer[0], 0xFF, range.dataBufferLength);
         }
         else if(bootInfo.memoryRegions[i].type == EEPROM_MEMORY)
         {
             range.type = EEPROM_MEMORY;
-            range.data = new unsigned char[bootInfo.memoryRegions[i].size * device->bytesPerAddressEEPROM];
-            memset(&range.data[0], 0xFF, bootInfo.memoryRegions[i].size * device->bytesPerAddressEEPROM);
+            range.dataBufferLength = bootInfo.memoryRegions[i].size * device->bytesPerAddressEEPROM;
+            range.pDataBuffer = new unsigned char[range.dataBufferLength];
+            memset(&range.pDataBuffer[0], 0xFF, range.dataBufferLength);
         }
         else if(bootInfo.memoryRegions[i].type == CONFIG_MEMORY)
         {
             range.type = CONFIG_MEMORY;
-            range.data = new unsigned char[bootInfo.memoryRegions[i].size * device->bytesPerAddressConfig];
-            memset(&range.data[0], 0xFF, bootInfo.memoryRegions[i].size * device->bytesPerAddressConfig);
+            range.dataBufferLength = bootInfo.memoryRegions[i].size * device->bytesPerAddressConfig;
+            range.pDataBuffer = new unsigned char[range.dataBufferLength];
+            memset(&range.pDataBuffer[0], 0xFF, range.dataBufferLength);
         }
 
         //Notes regarding range.start and range.end: The range.start is defined as the starting address inside

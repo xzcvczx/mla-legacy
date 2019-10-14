@@ -366,13 +366,18 @@ extern SHORT    _fontHeight;
 * Function: WORD Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, 
 *					 SHORT r1, SHORT r2, BYTE octant)
 *
-* Overview: Draws the octant arc of a beveled figure with given centers, radii
-*			and octant mask. When r1 is zero and r2 has some value, a filled 
-*			circle is drawn; when the radii have values, an arc of
-*			thickness (r2-r1) is drawn; when octant = 0xFF, a full ring 
-*			is drawn. When r1 and r2 are zero, a rectangular object is drawn, where
-*			xL, yT specifies the left top corner; xR, yB specifies the right bottom
-*			corner.
+* Overview: Draws the octant arc of the beveled figure with the given centers, 
+*           radii and octant mask.
+*           When octant = 0xFF and the following are true:
+*           1. xL = xR, yT = yB , r1 = 0 and r2 = z, a filled circle is drawn with a radius of z.
+*           2. radii have values (where r1 < r2), a full ring with thickness of (r2-r1) is drawn.
+*           3. xL != xR, yT != yB , r1 = 0 and r2 = 0 (where xR > xL and yB > yT) a rectangle is 
+*              drawn. xL, yT specifies the left top corner and xR, yB specifies the right bottom corner.
+*           When octant != 0xFF the figure drawn is the subsection of the 8 section figure where 
+*           each non-zero bit of the octant value specifies the octants that will be drawn.
+*
+* Description: 
+*          <img name="Arc.jpg" />
 *
 * PreCondition: none
 *
@@ -831,8 +836,12 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
 * Function: WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 *
 * Overview: Draws a beveled figure on the screen. 
-*           For a pure circular object x1 = x2 and y1 = y2. 
-*           For a rectangular object radius = 0.
+*           When x1 = x2 and y1 = y2, a circular object is drawn. 
+*           When x1 < x2 and y1 < y2 and rad (radius) = 0, a rectangular 
+*           object is drawn.
+*
+* Description: 
+*        <img name="Bevel.jpg" />
 *
 * Input: x1 - x coordinate position of the upper left center of the circle that 
 *			  draws the rounded corners.
@@ -862,6 +871,9 @@ WORD    Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad);
 * Overview: Draws a filled beveled figure on the screen. 
 *           For a filled circular object x1 = x2 and y1 = y2. 
 *           For a filled rectangular object radius = 0.
+*
+* Description: 
+*        <img name="FillBevel.jpg" />
 *
 * Input: x1 - x coordinate position of the upper left center of the circle that 
 *			  draws the rounded corners.
@@ -1166,6 +1178,11 @@ SHORT GetSineCosine(SHORT v, WORD type);
 /*********************************************************************
 * Function:  WORD DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT startAngle, SHORT endAngle)
 *
+* Overview: This renders an arc with from startAngle to endAngle with the thickness 
+*		    of r2-r1. The function returns 1 when the arc is rendered successfuly
+* 			and returns a 0 when it is not yet finished. The next call to the 
+*			function will continue the rendering.
+*
 * PreCondition: none
 *
 * Input: cx - the location of the center of the arc in the x direction. 
@@ -1179,11 +1196,6 @@ SHORT GetSineCosine(SHORT v, WORD type);
 *
 * Side Effects: none
 *
-* Overview: This renders an arc with from startAngle to endAngle with the thickness 
-*		    of r2-r1. The function returns 1 when the arc is rendered successfuly
-* 			and returns a 0 when it is not yet finished. The next call to the 
-*			function will continue the rendering.
-*
 * Note: none
 *
 ********************************************************************/
@@ -1194,7 +1206,15 @@ void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
 #ifdef USE_GRADIENT
 
 /*********************************************************************
-* Function:  BarGradient(short left, short top, short right, short bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+* Function:  WORD BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, 
+*                        GFX_COLOR color1, GFX_COLOR color2, DWORD length, 
+*                        BYTE direction);
+*
+* Overview: This renders a bar onto the screen, but instead of one color a gradient is drawn
+* depending on the direction (GFX_GRADIENT_TYPE), length, and colors chosen
+*
+* Description: 
+*        <img name="BarGradient.jpg" />
 *
 * PreCondition: none
 *
@@ -1206,48 +1226,79 @@ void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
 *        color2 - end color for the gradient
 *        length - From 0-100%. How much of a gradient is wanted
 *        direction - Gradient Direction	
+*
 * Output: Returns 1 if the rendering is done, 0 if not yet done.
 *
-* Side Effects: none
+* Example:
+*   <CODE> 
+*   // draw a full screen gradient background
+*   // with color transitioning from BRIGHTRED to 
+*   // BLACK in the upward direction.  
 *
-* Overview: This renders a bar onto the screen, but instead of one color a gradient is drawn
-* depending on the direction, length, and colors chosen
+*   GFX_GRADIENT_STYLE  gradScheme;
+*
+*   gradScheme.gradientType         = GRAD_UP; 
+*   gradScheme.gradientStartColor   = BRIGHTRED;
+*   gradScheme.gradientEndColor     = BLACK;
+* 
+*    BarGradient(0,                                         //left position 
+*                0,                                         //top position
+*                GetMaxX(),                                 //right position
+*                GetMaxY(),                                 //bottom position
+*                0,                                         // no radius, since full screen
+*                gradScheme.gradientStartColor,
+*                gradScheme.gradientEndColor,
+*                50,                                        // at the halfway point (50%) of the rectangular area 
+*                                                           // defined by the first 4 parameters (full screen), 
+*                                                           // the color becomes BLACK and BLACK color is used until 
+*                                                           // the rectangle defined is filled up 
+*                gradScheme.gradientType);                  // gradient direction is bottom->top
+*	</CODE> 
+*
+* Side Effects: none
 *
 * Note: none
 *
 ********************************************************************/
-void        BarGradient(short left, short top, short right, short bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+WORD        BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
 
 /*********************************************************************
-* Function:  BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+* Function:  BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, 
+*                          SHORT rad, GFX_COLOR color1, GFX_COLOR color2, 
+*                          DWORD length, BYTE direction);
+*
+* Overview: This renders a gradient on the screen. It works the same as the fillbevel function, 
+* except a gradient out of color1 and color2 is drawn depending on the direction (GFX_GRADIENT_TYPE).
+*
+* Description: 
+*        <img name="BevelGradient.jpg" />
 *
 * PreCondition: none
 *
-* Input: x1 - x coordinate position of the upper left center of the circle that 
+* Input: left - x coordinate position of the upper left center of the circle that 
 *			  draws the rounded corners.
-*		 y1 - y coordinate position of the upper left center of the circle that 
+*		 top - y coordinate position of the upper left center of the circle that 
 *			  draws the rounded corners.
-*		 x2 - x coordinate position of the lower right center of the circle that 
+*		 right - x coordinate position of the lower right center of the circle that 
 *			  draws the rounded corners.
-*		 y2 - y coordinate position of the lower right center of the circle that 
+*		 bottom - y coordinate position of the lower right center of the circle that 
 *			  draws the rounded corners.
-*        rad - defines the redius of the circle, that draws the rounded corners. 
+*        rad - defines the redius of the circle, that draws the rounded corners. When 
+*              rad = 0, the object drawn is a rectangular gradient.
 *	     color1 - start color for the gradient
 *        color2 - end color for the gradient
 *        length - From 0-100%. How much of a gradient is wanted
 *        direction - Gradient Direction		 
 *
-* Output: none
+* Output: Returns 1 if the rendering is done, 0 if not yet done.
 *
 * Side Effects: none
-*
-* Overview: This renders a gradient on the screen. It works the same as the fillbevel function, 
-* except a gradient out of color1 and color2 is drawn depending on the direction.
 *
 * Note: none
 *
 ********************************************************************/
-WORD        BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+WORD        BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction);
+
 /*********************************************************************
 * Overview: Enumeration for gradient type
 *********************************************************************/

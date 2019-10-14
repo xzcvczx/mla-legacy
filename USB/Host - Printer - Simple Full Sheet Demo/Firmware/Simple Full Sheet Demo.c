@@ -391,7 +391,7 @@ void InitializeVbusMonitor( void )
 {
     #if defined( __C30__)
         // Set up the A/D converter
-        #if !defined(__PIC24FJ256DA210__) 
+        #if defined(__PIC24FJ256DA210__) 
         #elif defined(__PIC24FJ256GB210__)
             ANSBbits.ANSB8 = 1;
         #else
@@ -574,21 +574,27 @@ int main (void)
             RPOR9bits.RP19R = 10;
             OSCCON = 0x3302;    // Enable secondary oscillator
             CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
-    #endif
-   #if defined(__PIC24FJ64GB004__)
-	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
-	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
-	//This allows the device to power up at a lower initial operating frequency, which can be
-	//advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
-	//operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
-	//power up the PLL.
-    {
-        unsigned int pll_startup_counter = 600;
-        CLKDIVbits.PLLEN = 1;
-        while(pll_startup_counter--);
-    }
-
-    //Device switches over automatically to PLL output after PLL is locked and ready.
+        #elif defined(__PIC24FJ64GB004__)
+            //On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
+            //by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+            //This allows the device to power up at a lower initial operating frequency, which can be
+            //advantageous when powered from a source which is not gauranteed to be adequate for 32MHz
+            //operation.  On these devices, user firmware needs to manually set the CLKDIV<PLLEN> bit to
+            //power up the PLL.
+            {
+                unsigned int pll_startup_counter = 600;
+                CLKDIVbits.PLLEN = 1;
+                while(pll_startup_counter--);
+            }
+            
+            //Device switches over automatically to PLL output after PLL is locked and ready.
+        #elif defined(__PIC24FJ256DA210__)
+            //TX RF3 RP16
+            //RX RD0 RP11
+            // Configure U2RX - put on RP11
+            RPINR19bits.U2RXR = 11;
+            // Configure U2TX - put on RP16
+            RPOR8bits.RP16R = 5;
         #endif
 
     #elif defined(__PIC32MX__)

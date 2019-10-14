@@ -455,17 +455,17 @@
         </linkerTool>
       </compileType>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="..;..\..\..\Board Support Package;..\..\..\Microchip\Include"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -500,17 +500,17 @@
         </linkerTool>
       </compileType>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="..;..\..\..\Board Support Package;..\..\..\Microchip\Include"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_16PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -618,97 +618,7 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_GP_SK_GFXv3_8PMP_QVGAv1" type="2">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX360F512L</targetDevice>
-        <targetHeader></targetHeader>
-        <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
-        <platform>3</platform>
-      </toolsSet>
-      <compileType>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
-      </compileType>
-      <C32>
-        <property key="extra-include-directories"
-                  value="..;..\..\..\Board Support Package;..\..\..\Microchip\Include"/>
-        <property key="additional-warnings" value="false"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_QVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
-        <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="optimization-level" value="-Os"/>
-        <property key="place-data-into-section" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
-      </C32>
-      <C32-AS>
-      </C32-AS>
-      <C32-LD>
-      </C32-LD>
-      <C32Global>
-      </C32Global>
-      <RealICEPlatformTool>
-      </RealICEPlatformTool>
-    </conf>
-    <conf name="PIC32_GP_SK_GFXv3_16PMP_QVGAv1" type="2">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX360F512L</targetDevice>
-        <targetHeader></targetHeader>
-        <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
-        <platform>3</platform>
-      </toolsSet>
-      <compileType>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
-      </compileType>
-      <C32>
-        <property key="extra-include-directories"
-                  value="..;..\..\..\Board Support Package;..\..\..\Microchip\Include"/>
-        <property key="additional-warnings" value="false"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_QVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
-        <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="optimization-level" value="-Os"/>
-        <property key="place-data-into-section" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
-      </C32>
-      <C32-AS>
-      </C32-AS>
-      <C32-LD>
-      </C32-LD>
-      <C32Global>
-      </C32Global>
-      <RealICEPlatformTool>
-      </RealICEPlatformTool>
-    </conf>
-    <conf name="PIC32_USB_SK_GFXv3_8PMP_QVGAv1" type="2">
+    <conf name="PIC_SK_GFXv3_8PMP_QVGAv1" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
@@ -725,11 +635,11 @@
         </linkerTool>
       </compileType>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="..;..\..\..\Board Support Package;..\..\..\Microchip\Include"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_QVGAv1"/>
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_8PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
@@ -753,7 +663,7 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_16PMP_QVGAv1" type="2">
+    <conf name="PIC_SK_GFXv3_16PMP_QVGAv1" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
@@ -770,11 +680,11 @@
         </linkerTool>
       </compileType>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="..;..\..\..\Board Support Package;..\..\..\Microchip\Include"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_QVGAv1"/>
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_16PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>

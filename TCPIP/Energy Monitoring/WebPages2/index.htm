@@ -13,10 +13,6 @@ This demo will display power being drawn by the device connected to the Energy M
 <tr><td>RMS Current: </td><td><span id="amps" style="font-weight:normal">?</span></td> <td> A</td></tr>
 </table>
 
-<br />
-
-SNTP Timestamp: <span id="time" style="font-weight:normal">?</span>
-
 </div>
 
 <script type="text/javascript">
@@ -28,7 +24,6 @@ function updateStatus(xmlData) {
 	document.getElementById('rPower').innerHTML = getXMLValue(xmlData, 'rPower');
 	document.getElementById('volts').innerHTML = getXMLValue(xmlData, 'volts');
 	document.getElementById('amps').innerHTML = getXMLValue(xmlData, 'amps');
-	document.getElementById('time').innerHTML = getXMLValue(xmlData, 'time');
 }
 setTimeout("newAJAXCommand('vars.xml', updateStatus, true)",500);
 </script>

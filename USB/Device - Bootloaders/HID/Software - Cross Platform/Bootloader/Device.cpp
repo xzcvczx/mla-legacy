@@ -90,23 +90,36 @@ bool Device::hasConfig(void)
 //to the very last byte of the last address of the programmable memory region that the hexAddress
 //corresponded to.  Otherwise this value returns false.  This provides an easy check later to
 //know when an end of a region has been completed during hex file parsing.
-unsigned int Device::GetDeviceAddressFromHexAddress(unsigned int hexAddress,  unsigned char& type, bool& includedInProgrammableRange, bool& addressWasEndofRange, unsigned int& bytesPerAddressAndType, unsigned int& endDeviceAddressofRegion)
+unsigned int Device::GetDeviceAddressFromHexAddress(unsigned int hexAddress,  DeviceData* pData, unsigned char& type, bool& includedInProgrammableRange, bool& addressWasEndofRange, unsigned int& bytesPerAddressAndType, unsigned int& endDeviceAddressofRegion, unsigned char*& pPCRAMBuffer)
 {
     DeviceData::MemoryRange range;
     unsigned int flashAddress = hexAddress / bytesPerAddressFLASH;
     unsigned int eepromAddress = hexAddress / bytesPerAddressEEPROM;
     unsigned int configAddress = hexAddress / bytesPerAddressConfig;
+    unsigned char* pRAMDataBuffer;
+    unsigned int byteOffset;
 
 
     //Loop for each of the previously identified programmable regions, based on the results of the
     //previous Query device response packet.
-    foreach(range, deviceData->ranges)
+    foreach(range, pData->ranges)
     {
         //Find what address range the hex address seems to contained within (if any, could be none, in
         //the case the .hex file contains info that is not part of the bootloader re-programmable region of flash).
         if((range.type == PROGRAM_MEMORY) && (flashAddress >= range.start) && (flashAddress < range.end))
         {
             includedInProgrammableRange = true;
+            if(range.start != 0)
+            {
+                byteOffset = ((flashAddress - range.start) * bytesPerAddressFLASH) + (hexAddress % bytesPerAddressFLASH);
+                pRAMDataBuffer = range.pDataBuffer + byteOffset;
+                pPCRAMBuffer = pRAMDataBuffer;
+            }
+            else
+            {
+                pPCRAMBuffer = 0;
+            }
+
             type = PROGRAM_MEMORY;
             bytesPerAddressAndType = bytesPerAddressFLASH;
             endDeviceAddressofRegion = range.end;
@@ -126,6 +139,16 @@ unsigned int Device::GetDeviceAddressFromHexAddress(unsigned int hexAddress,  un
         if((range.type == EEPROM_MEMORY) && (eepromAddress >= range.start) && (eepromAddress < range.end))
         {
             includedInProgrammableRange = true;
+            if(range.start != 0)
+            {
+                byteOffset = ((eepromAddress - range.start) * bytesPerAddressEEPROM)  + (hexAddress % bytesPerAddressEEPROM);
+                pRAMDataBuffer = range.pDataBuffer + byteOffset;
+                pPCRAMBuffer = pRAMDataBuffer;
+            }
+            else
+            {
+                pPCRAMBuffer = 0;
+            }
             type = EEPROM_MEMORY;
             bytesPerAddressAndType = bytesPerAddressEEPROM;
             endDeviceAddressofRegion = range.end;
@@ -145,6 +168,16 @@ unsigned int Device::GetDeviceAddressFromHexAddress(unsigned int hexAddress,  un
         if((range.type == CONFIG_MEMORY) && (configAddress >= range.start) && (configAddress < range.end))
         {
             includedInProgrammableRange = true;
+            if(range.start != 0)
+            {
+                byteOffset = ((configAddress - range.start) * bytesPerAddressConfig) + (hexAddress % bytesPerAddressConfig);
+                pRAMDataBuffer = range.pDataBuffer + byteOffset;
+                pPCRAMBuffer = pRAMDataBuffer;
+            }
+            else
+            {
+                pPCRAMBuffer = 0;
+            }
             type = CONFIG_MEMORY;
             bytesPerAddressAndType = bytesPerAddressConfig;
             endDeviceAddressofRegion = range.end;
@@ -166,5 +199,6 @@ unsigned int Device::GetDeviceAddressFromHexAddress(unsigned int hexAddress,  un
     //device's reported programmable memory regions.
     includedInProgrammableRange = false;
     addressWasEndofRange = false;
+    pPCRAMBuffer = 0;
     return 0;
 }

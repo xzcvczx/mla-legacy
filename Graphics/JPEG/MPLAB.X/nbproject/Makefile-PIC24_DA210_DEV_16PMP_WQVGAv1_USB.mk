@@ -38,7 +38,7 @@ ASFLAGS=
 LDLIBSOPTIONS=
 
 # Path to java used to run MPLAB X when this makefile was created
-MP_JAVA_PATH=C:\\Program\ Files\\Java\\jdk1.6.0_20\\jre/bin/
+MP_JAVA_PATH=C:\\Program\ Files\\Java\\jdk1.6.0_18\\jre/bin/
 OS_ORIGINAL="MINGW32_NT-5.1"
 OS_CURRENT="$(shell uname -s)"
 ############# Tool locations ##########################################
@@ -47,17 +47,17 @@ OS_CURRENT="$(shell uname -s)"
 # If you open this project with MPLAB X in the new host, this         #
 # makefile will be regenerated and the paths will be corrected.       #
 #######################################################################
-MP_CC=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin\\pic30-gcc.exe
+MP_CC=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-gcc.exe
 # MP_BC is not defined
-MP_AS=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin\\pic30-as.exe
-MP_LD=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin\\pic30-ld.exe
-MP_AR=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin\\pic30-ar.exe
+MP_AS=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-as.exe
+MP_LD=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-ld.exe
+MP_AR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin\\pic30-ar.exe
 # MP_BC is not defined
-MP_CC_DIR=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin
+MP_CC_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
 # MP_BC_DIR is not defined
-MP_AS_DIR=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin
-MP_LD_DIR=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin
-MP_AR_DIR=C:\\Program\ Files\\Microchip\\MPLAB\ C30\\bin
+MP_AS_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
+MP_LD_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
+MP_AR_DIR=C:\\Program\ Files\\Microchip\\mplabc30\\v3.25\\bin
 # MP_BC_DIR is not defined
 .build-conf: ${BUILD_SUBPROJECTS}
 ifneq ($(OS_CURRENT),$(OS_ORIGINAL))

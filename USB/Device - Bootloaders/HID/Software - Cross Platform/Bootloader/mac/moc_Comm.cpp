@@ -1,13 +1,13 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'Comm.h'
 **
-** Created: Wed Jun 15 13:36:25 2011
+** Created: Wed Jul 6 16:33:20 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.0)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../HIDBoot/Bootloader/Comm.h"
+#include "../Comm.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'Comm.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 62

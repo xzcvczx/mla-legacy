@@ -34,8 +34,12 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  1.0   Initial release
-  1.01  Modified to Support T=1 protocol
+  1.0      Initial release
+  1.01     Modified to Support T=1 protocol
+  1.02.2   Modified the usage of PPS functionality.
+           Moved timer interrupts (used by smart card stack) to ISO 7816 hardware
+           driver files.
+           Cleaned unwanted stuff in the file.
 ********************************************************************/
 
 #include "string.h"
@@ -75,8 +79,6 @@
         #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
         #pragma config DEBUG    = ON            // Background Debugger Enable
 
-		extern void WaitMicroSec(unsigned int);
-		extern void WaitMilliSec(unsigned int);
 	#endif
 #elif defined(HPC_EXPLORER)
     #ifdef __18F46J50 //Defined by MPLAB when using PIC18F46J50 device
@@ -104,8 +106,6 @@
 	    #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
 	    #pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored 
 
-		extern void WaitMicroSec(WORD);
-		extern void WaitMilliSec(WORD);
 	#elif defined(__18F87J50)				// Configuration bits for PIC18F87J50 FS USB Plug-In Module board
         #pragma config XINST    = ON   		// Extended instruction set
         #pragma config STVREN   = ON      	// Stack overflow reset
@@ -126,8 +126,6 @@
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT
 
-		extern void WaitMicroSec(WORD);
-		extern void WaitMilliSec(WORD);   
 	#endif
 #elif defined(LOW_PIN_COUNT_USB_DEVELOPMENT_KIT)
 	// PIC18F14K50
@@ -159,8 +157,6 @@
         #pragma config EBTR1  = OFF
         #pragma config EBTRB  = OFF 
 
-		extern void WaitMicroSec(WORD);
-		extern void WaitMilliSec(WORD);        
 #elif defined(PICDEM_FS_USB)      // Configuration bits for PICDEM FS USB Demo Board (based on PIC18F4550)
         #pragma config PLLDIV   = 5         // (20 MHz crystal on PICDEM FS USB board)
         #pragma config CPUDIV   = OSC1_PLL2   
@@ -201,17 +197,25 @@
 //      #pragma config EBTR3    = OFF
         #pragma config EBTRB    = OFF
 
-		extern void WaitMicroSec(WORD);
-		extern void WaitMilliSec(WORD);
 #else
  	#error No hardware board defined, see "sc_config.h"
 #endif
+
+extern void WaitMilliSec(unsigned long int ms);
 
 // APDU Command to the Card
 SC_APDU_COMMAND cardCommand;
 
 // APDU Response from the Card
 SC_APDU_RESPONSE cardResponse;
+
+// PPS Request to the card
+BYTE ppsString[3] = 
+{
+	0xFF,	// PPSS byte
+	0x00,	// PPS0 byte
+	0xFF	// PCK byte
+};
 
 #ifdef SC_PROTO_T1
 	// T=1, Prologue Field
@@ -220,45 +224,16 @@ SC_APDU_RESPONSE cardResponse;
 
 // Store the APDU Command/Response Data in a 256 bytes register bank(RAM)
 #if defined(__18CXX)
+	extern BOOL delayLapsedFlag;
+	void LowISR();
 	#pragma udata apdu_data
 		BYTE apduData[SC_APDU_BUFF_SIZE];
 	#pragma udata
+
 #else
 	BYTE apduData[SC_APDU_BUFF_SIZE];
 #endif
 
-#if defined(__18CXX)
-void LowISR();
-#pragma code lowhVector=0x18
-void LowVector (void)
-{
-    _asm goto LowISR _endasm
-}
-#pragma code
-#endif
-
-#if defined(__18CXX)
-    #pragma interruptlow LowISR
-    void LowISR(void)
-#elif defined(__dsPIC30F__) || defined(__dsPIC33F__) || defined(__PIC24F__) || defined(__PIC24H__)
-	    void _ISRFAST __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
-#elif defined(__PIC32MX__)
-    void __ISR(_TIMER_1_VECTOR, ipl3) T1Interrupt(void)
-#endif
-{
-    #if defined(__18CXX)
-		if (INTCONbits.TMR0IF)
-	  	{                                   //check for TMR0 overflow
-	      	INTCONbits.TMR0IF = 0;           //clear interrupt flag
-			SCdrv_DisableDelayTimer();
-	      	delayLapsedFlag = 1;            //indicate timeout
-	  	}
-	#elif defined(__PIC24F__) || defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__)
-		IFS0bits.T1IF = 0;
-		SCdrv_DisableDelayTimer();
-		delayLapsedFlag = 1;
-	#endif
-}
 
 ///////////////////////////////////////////////////
 //////////////////////////////////////////////////
@@ -318,15 +293,9 @@ int main(void)
 			breakPoint++;
 		}
 
-	//configure protocol type selection and select configured baud rate
-	if( !SC_DoPPS() )
-		while(1)
-		{
-			breakPoint++;
-		}
-
 	WaitMilliSec(20);
 
+	// If T = 1 protocol supported
 	if(SC_T1ProtocolType())
 	{
 		// If T=1 is defined
@@ -337,7 +306,7 @@ int main(void)
 			prologueField.PCB = 0;
 			prologueField.LENGTH = 5;
 
-			// Write the APDU command in I field array
+			// Write the APDU command in I field array (Get CPLC Data Command)
 			apduData[0] = 0x80;
 			apduData[1] = 0xCA;
 			apduData[2] = 0x9F;
@@ -354,8 +323,23 @@ int main(void)
 		#endif
 	}
 
+	// If T = 0 protocol supported
 	if(SC_T0ProtocolType())
 	{
+		// Note :- T =1 & T = 0 cards stop responding if any unsucessful PPS
+		// exchange happens between interfacing device and the smart card. Some of 
+		// the T = 0 and T = 1 cards wont support PPS exchange. If unsuccesful
+		// PPS exchange happens then we need to shutdown the smart card. So it is
+		// better not to do PPS if you are not sure. For demo purpose PPS request 
+		// is transmitted to T = 0 cards.
+		if( !SC_DoPPS(ppsString) )
+			while(1)
+			{
+				breakPoint++;
+			}
+
+		WaitMilliSec(10);
+
 		//Execute Card Commands ///////////////////////
 		// ACOS3 Smart Card from Advanced Card Systems Ltd. is used for testing the
 		// Smart Card library.
@@ -388,13 +372,6 @@ int main(void)
 				breakPoint++;
 			}
 
-		//make sure Submit-Code was success		
-		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
-			while(1)
-			{
-				breakPoint++;
-			}
-			
 		WaitMilliSec(10);
 
 		// Select File ///////////////
@@ -413,13 +390,6 @@ int main(void)
 				breakPoint++;
 			}
 
-		//make sure Select-File was success		
-		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
-			while(1)
-			{
-				breakPoint++;
-			}
-		
 		WaitMilliSec(10);
 
 		//Write record to selected file
@@ -444,15 +414,8 @@ int main(void)
 				breakPoint++;
 			}
 
-		//make sure operation was success		
-		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
-			while(1)
-			{
-				breakPoint++;
-			}
-		
 		WaitMilliSec(10);
-		
+
 		//Readback the contents to verify write data
 		cardCommand.CLA = 0x80;
 		cardCommand.INS = SC_READ_RECORD;
@@ -467,28 +430,7 @@ int main(void)
 				breakPoint++;
 			}
 
-		//make sure operation was success		
-		if( !(cardResponse.SW1 == 0x90 && cardResponse.SW2 == 0x00) ) //90 and 00 are success codes
-			while(1)
-			{
-				breakPoint++;
-			}
-		
-		//verify record write
-		if( !(	apduData[0] == 0 &&
-				apduData[1] == 10 &&
-				apduData[2] == 20 &&
-				apduData[3] == 35 &&
-				apduData[4] == 45 &&
-				apduData[5] == 58 &&
-				apduData[6] == 68 &&
-				apduData[7] == 0 ) )
-				
-			while(1)
-			{
-				breakPoint++;
-			}
- 	}
+	}
 
 	// Shut Down the Card when dont need anything to do with it
 	SC_Shutdown();
@@ -503,3 +445,57 @@ int main(void)
     #endif
 }
 
+#if defined(__18CXX)
+/*********************************************************************
+ * Function:        void LowVector (void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        Instruction at Low Interrupt Vector Address location
+ *
+ * Note:            None
+ ********************************************************************/
+
+#pragma code lowhVector=0x18
+void LowVector (void)
+{
+    _asm goto LowISR _endasm
+}
+#pragma code
+
+/*********************************************************************
+ * Function:        void LowISR(void)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        Low Priority Interrupts jump to this location.
+ *                  Timer 0 overflow flag is checked.
+ *
+ * Note:            None
+ ********************************************************************/
+
+#pragma interruptlow LowISR
+void LowISR(void)
+{
+	//check for TMR0 overflow
+	if (INTCONbits.TMR0IF)
+	{
+		INTCONbits.TMR0IF = 0; //clear interrupt flag
+		SCdrv_DisableDelayTimer();
+		delayLapsedFlag = 1; //indicate timeout
+	}
+}
+
+#endif

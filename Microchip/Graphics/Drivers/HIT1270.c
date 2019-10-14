@@ -59,7 +59,7 @@
 
 // Unsupported Graphics Library Features
 #ifdef USE_TRANSPARENT_COLOR
-    #warning "This driver does not support the transparent feature on PutImage(). Build will use the PutImage() functions defind in the Primitive.c"
+    #warning "This driver does not support the transparent feature on PutImage(). Build will use the PutImage() functions defined in the Primitive.c"
 #endif    
 
 #define SETCOLOR_LOWBYTE(color) (((WORD_VAL) color).v[0] & 0x1c)

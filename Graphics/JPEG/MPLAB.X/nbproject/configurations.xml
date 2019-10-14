@@ -1674,9 +1674,9 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
@@ -2465,7 +2465,7 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_8PMP_QVGAv1_USB" type="2">
+    <conf name="PIC_SK_GFXv3_8PMP_QVGAv1_USB" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
@@ -2514,11 +2514,11 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_QVGAv1"/>
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_8PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
@@ -2542,7 +2542,7 @@
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_8PMP_WQVGAv1_USB" type="2">
+    <conf name="PIC_SK_GFXv3_8PMP_WQVGAv1_USB" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
@@ -2591,11 +2591,11 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_WQVGAv1"/>
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_8PMP_WQVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
@@ -2615,11 +2615,13 @@
       <C32-LD>
       </C32-LD>
       <C32Global>
+        <property key="legacy-libc" value="false"/>
+        <property key="no-start-files" value="false"/>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_16PMP_QVGAv1_USB" type="2">
+    <conf name="PIC_SK_GFXv3_16PMP_QVGAv1_USB" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
@@ -2668,11 +2670,11 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_QVGAv1"/>
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_16PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
@@ -2692,11 +2694,13 @@
       <C32-LD>
       </C32-LD>
       <C32Global>
+        <property key="legacy-libc" value="false"/>
+        <property key="no-start-files" value="false"/>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32_USB_SK_GFXv3_16PMP_WQVGAv1_USB" type="2">
+    <conf name="PIC_SK_GFXv3_16PMP_WQVGAv1_USB" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX795F512L</targetDevice>
@@ -2745,11 +2749,11 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_WQVGAv1"/>
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_16PMP_WQVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
@@ -2769,6 +2773,8 @@
       <C32-LD>
       </C32-LD>
       <C32Global>
+        <property key="legacy-libc" value="false"/>
+        <property key="no-start-files" value="false"/>
       </C32Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>

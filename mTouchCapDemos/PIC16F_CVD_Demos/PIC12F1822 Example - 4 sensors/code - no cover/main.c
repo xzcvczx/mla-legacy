@@ -2,7 +2,7 @@
  *  © 2011 Microchip Technology Inc.                                       
  *  
  *  Project Name:    mTouch CVD Framework v1.1
- *  FileName:        main_example.c
+ *  FileName:        main.c
  *  Dependencies:    mTouchCVD.h
  *  Processor:       
  *  Compiler:        HI-TECH Ver. 9.81 or later
@@ -57,7 +57,7 @@
  * THESE TERMS.
  *************************************************************************/
  
-/** @file main_example.c
+/** @file main.c
 * @brief An example implementation of the mTouch CVD Framework's API calls
 */
 /// @cond

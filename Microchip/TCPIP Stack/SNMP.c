@@ -157,17 +157,7 @@ static ROM DATA_TYPE_INFO dataTypeTable[] =
     { ASN_OID,           0xff    }  //OID_VAL           
 };
 
-/*
- Below oidStr is the collection of OID variables which are not part of MIB.h file
-*/
-SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[SNMP_MAX_NON_REC_ID_OID] =
-{
-#ifdef STACK_USE_SNMPV3_SERVER		
-	{{43,6,1,4,1,0x81,0x85,0x47,0x1,6},SNMP_V3},  /* SNMPv3 PVT test MIB OID is not part of mib.h file */
-#endif			
-	{{43,6,1,2,1,1},SNMP_V2C}, /* Max matching Subids of the MIB2.system tree*/	
-	{{43,6,1,4,1,0x81,0x85,0x47,0x1,1},SNMP_V2C}, /*Max matching Subids of the microchip.product tree*/			
-};
+
 
 /****************************************************************************
   ===========================================================================
@@ -2574,11 +2564,12 @@ BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
     static SNMP_VAL v;
     static BYTE varDataType;
     static BYTE indexBytes;
+	BYTE idLen = 1;
 	#ifdef STACK_USE_SNMPV3_SERVER	
 	SNMPV3MSGDATA	*dynPduBuf=NULL;
 	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
 	#endif
-	BYTE idLen = 1;
+	
 	
     lbNextLeaf = FALSE;
     temp.v[0] = 0;
@@ -2605,6 +2596,14 @@ BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
 		{
 			if(!GetNextLeaf(rec))
 				return FALSE;
+			else
+			{
+				// Get complete OID string from oid record.
+			    if ( !GetOIDStringByAddr(rec, OIDValue, &OIDLen))
+				{	
+			        return FALSE;
+				}
+			}
 		}
 		else
 		{
@@ -2899,11 +2898,12 @@ BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* s
     WORD prevOffset;	
 	WORD_VAL temp;
 	static SNMP_VAL v;
+	BYTE idLen=1;
 	#ifdef STACK_USE_SNMPV3_SERVER	
 	SNMPV3MSGDATA	*dynPduBuf=NULL;
 	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
 	#endif
-	BYTE idLen=1;
+	
 	
 	/* intialize the local variables to 0 */
 	OIDLen=0;
@@ -2970,6 +2970,12 @@ BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* s
 		{
 			if(!GetNextLeaf(rec))
 				return FALSE;
+			else
+			{
+				// Get complete OID string from oid record.
+			    if(!GetOIDStringByAddr(rec, oidValuePtr, &OIDLen))
+			        return FALSE;
+			}
 		}
 		else
 		{

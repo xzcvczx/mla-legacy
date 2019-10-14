@@ -3432,7 +3432,7 @@ WORD __attribute__((weak)) DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT
 #define GetBlue(color)      (((color) & 0x001F) << 3)
 #endif
 
-void BarGradient(short left, short top, short right, short bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction)
+WORD BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction)
 {
 
     WORD startRed, startBlue, startGreen;
@@ -3483,7 +3483,7 @@ void BarGradient(short left, short top, short right, short bottom, GFX_COLOR col
         break; 
 
     default: 
-        return;
+        return 1;
     }
 
     startRed    = GetRed(color1);
@@ -3611,10 +3611,10 @@ void BarGradient(short left, short top, short right, short bottom, GFX_COLOR col
         }
 
     }
-
+    return 1;
 }
 
-WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction)
+WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, GFX_COLOR color1, GFX_COLOR color2, DWORD length, BYTE direction)
 {
     WORD i;
     WORD sred,sblue,sgreen;
@@ -3628,24 +3628,24 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
     {
     case GRAD_UP:
     case GRAD_DOWN:
-        length = length * (y2 - y1 +(rad << 1));
+        length = length * (bottom - top +(rad << 1));
         length /= 100;
         steps = length;
         break;
 
     case GRAD_RIGHT:
     case GRAD_LEFT:
-        length = length * (x2 - x1 +(rad << 1));
+        length = length * (right - left +(rad << 1));
         length /= 100;
         steps = length;
         break;
 
     case GRAD_DOUBLE_VER:
-        steps = (x2 - x1 +(rad << 1)) >> 1;
+        steps = (right - left +(rad << 1)) >> 1;
         break;
 
     case GRAD_DOUBLE_HOR:
-        steps = (y2 - y1 +(rad << 1)) >> 1;
+        steps = (bottom - top +(rad << 1)) >> 1;
         break; 
 
     default: 
@@ -3726,7 +3726,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                     break;
                 }
 
-                // y1New records the last y position
+                // New records the last y position
                 yNew = yPos;
 
                 // calculate the next value of x and y
@@ -3748,9 +3748,9 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
 	            	//if (_bevelDrawType & DRAWBOTTOMBEVEL) 
 	            	{ 
                         if(direction == GRAD_DOUBLE_VER || direction == GRAD_DOUBLE_HOR)
-                            i = (y1 - yCur) - y1 + rad;
+                            i = (top - yCur) - top + rad;
                         else
-                            i = (y2 + yCur) - y1 + rad;
+                            i = (bottom + yCur) - top + rad;
                 
                         ered = sred + ((rdiff*i) >> 8);
                         egreen = sgreen + ((gdiff*i) >> 8);
@@ -3764,7 +3764,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                         {
                            case GRAD_LEFT:
                                if(i>length) SetColor(EndColor);
-                               if(Bar(x1 - yNew, y1 - xCur, x1 - yCur, y2 + xCur) == 0) return (0);
+                               if(Bar(left - yNew, top - xCur, left - yCur, bottom + xCur) == 0) return (0);
                                 break;
                            
                            case GRAD_RIGHT:                     
@@ -3772,7 +3772,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                                 if(i>length) 
                                     SetColor(EndColor);
                                 
-                                if(Bar(x2 + yCur, y1 - xCur, x2 + yNew, y2 + xCur) == 0)
+                                if(Bar(right + yCur, top - xCur, right + yNew, bottom + xCur) == 0)
                                     return (0);           
                                 break;
                            
@@ -3780,7 +3780,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                                 if(i>length) 
                                     SetColor(EndColor);
                                 
-                                if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0) 
+                                if(Bar(left - xCur, top - yNew, right + xCur, top - yCur) == 0) 
                                     return (0);
                                 break;
 
@@ -3788,7 +3788,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                            case GRAD_DOUBLE_HOR:
                                 if(i>length) 
                                     SetColor(EndColor);
-                                if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0)
+                                if(Bar(left - xCur, bottom + yCur, right + xCur, bottom + yNew) == 0)
                                     return (0);
                            
                            default: 
@@ -3808,11 +3808,11 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
             	//if (_bevelDrawType & DRAWBOTTOMBEVEL) 
             	{ 
                     if(direction == GRAD_DOUBLE_VER || direction == GRAD_DOUBLE_HOR)
-                    i = y1 + xPos - y1 + rad;
+                    i = top + xPos - top + rad;
                     else
 
 	                // 5th octant to 4th octant
-                    i = (y2 + xPos) - y1 + rad ;
+                    i = (bottom + xPos) - top + rad ;
 
                     //Calculate the starting RGB values
                     ered = sred + ((rdiff*i) >> 8);
@@ -3827,7 +3827,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_LEFT:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(x1 - xCur, y1 - yNew, x1 - xPos, y2 + yNew) == 0) 
+                           if(Bar(left - xCur, top - yNew, left - xPos, bottom + yNew) == 0) 
                                return (0);
                             break;
                        
@@ -3835,14 +3835,14 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_DOUBLE_VER:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(x2 + xPos, y1 - yNew, x2 + xCur, y2 + yNew) == 0)
+                           if(Bar(right + xPos, top - yNew, right + xCur, bottom + yNew) == 0)
                                return (0);           
                             break;
                        
                        case GRAD_UP:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0) 
+                            if(Bar(left - yNew, top - xCur, right + yNew, top - xPos) == 0) 
                                 return (0);
                             break;
 
@@ -3850,7 +3850,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_DOUBLE_HOR:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0)
+                            if(Bar(left - yNew, bottom + xPos, right + yNew, bottom + xCur) == 0)
                                 return (0);
                        default: 
                            break;
@@ -3865,7 +3865,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                 // 8th octant to 1st octant
 	            //if (_bevelDrawType & DRAWTOPBEVEL) 
 				{
-                    i = (y1 - xCur) - y1 + rad;
+                    i = (top - xCur) - top + rad;
 
                     //Calculate the starting RGB values
                     ered = sred + ((rdiff*i) >> 8);
@@ -3880,7 +3880,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_LEFT:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(x2 + xPos, y1 - yNew, x2 + xCur, y2 + yNew) == 0) 
+                           if(Bar(right + xPos, top - yNew, right + xCur, bottom + yNew) == 0) 
                                return (0);
                             break;
                        
@@ -3888,14 +3888,14 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_DOUBLE_VER:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(x1 - xCur, y1 - yNew, x1 - xPos, y2 + yNew) == 0) 
+                           if(Bar(left - xCur, top - yNew, left - xPos, bottom + yNew) == 0) 
                                return (0);           
                             break;
                        
                        case GRAD_UP:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0) 
+                            if(Bar(left - yNew, bottom + xPos, right + yNew, bottom + xCur) == 0) 
                                 return (0);
                             break;
 
@@ -3903,7 +3903,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_DOUBLE_HOR:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0)
+                            if(Bar(left - yNew, top - xCur, right + yNew, top - xPos) == 0)
                                 return (0);
                             break;
                        
@@ -3920,7 +3920,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                 // 7th octant to 2nd octant
 	            //if (_bevelDrawType & DRAWTOPBEVEL) 
 				{             
-                    i = (y1 - yNew) - y1 + rad;
+                    i = (top - yNew) - top + rad;
 
                     //Calculate the starting RGB values
                     ered = sred + ((rdiff*i) >> 8);
@@ -3936,7 +3936,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_LEFT:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(x2 + yCur, y1 - xCur, x2 + yNew, y2 + xCur) == 0) 
+                           if(Bar(right + yCur, top - xCur, right + yNew, bottom + xCur) == 0) 
                                return (0);
                             break;
                        
@@ -3944,14 +3944,14 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_DOUBLE_VER:
                            if(i>length) 
                                SetColor(EndColor);
-                           if(Bar(x1 - yNew, y1 - xCur, x1 - yCur, y2 + xCur) == 0) 
+                           if(Bar(left - yNew, top - xCur, left - yCur, bottom + xCur) == 0) 
                                return (0);           
                             break;
                        
                        case GRAD_UP:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0) 
+                            if(Bar(left - xCur, bottom + yCur, right + xCur, bottom + yNew) == 0) 
                                 return (0);
                             break;
 
@@ -3959,7 +3959,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                        case GRAD_DOUBLE_HOR:
                             if(i>length) 
                                 SetColor(EndColor);
-                            if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0) 
+                            if(Bar(left - xCur, top - yNew, right + xCur, top - yCur) == 0) 
                                 return (0);
                             break;
                        
@@ -3977,9 +3977,9 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
  
 
             case FACE:
-                if((x2 - x1) || (y2 - y1))
+                if((right - left) || (bottom - top))
                 {
-                i = (y1) - y1 + rad;
+                i = (top) - top + rad;
                 //Calculate the starting RGB values
                 ered = sred + ((rdiff*i) >> 8);
                 egreen = sgreen + ((gdiff*i) >> 8);
@@ -3990,7 +3990,7 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
                 if(i>length) 
                     color1 = EndColor;  
 
-                i = (y2) - y1 + rad;
+                i = (bottom) - top + rad;
                 //Calculate the ending RGB values
                 ered = sred + ((rdiff*i) >> 8);
                 egreen = sgreen + ((gdiff*i) >> 8);
@@ -4005,29 +4005,29 @@ WORD BevelGradient(short x1, short y1, short x2, short y2,SHORT rad, GFX_COLOR c
               
                 if(direction == GRAD_UP || direction == GRAD_DOWN || direction == GRAD_DOUBLE_HOR)
                 {
-                   if(length>= y2-y1)
+                   if(length>= bottom-top)
                    {
                        length = 100;
                    }
                    else
                    {
                        length *= 100;
-                       length /= (y2 -y1);
+                       length /= (bottom -top);
                    }               
-                   BarGradient(x1-rad, y1, x2+rad, y2,color1,color2,length,direction);
+                   BarGradient(left-rad, top, right+rad, bottom,color1,color2,length,direction);
                 }
                 else
                 {
-                  if(length>=x2-x1)
+                  if(length>=right-left)
                   {
                       length = 100;
                   }
                   else
                   {
                        length *= 100;
-                       length /= (x2 -x1);
+                       length /= (right - left);
                   }
-                   BarGradient(x1, y1-rad, x2, y2+rad,color1,color2,length,direction);
+                   BarGradient(left, top-rad, right, bottom+rad,color1,color2,length,direction);
                 }
             
                     state = WAITFORDONE;

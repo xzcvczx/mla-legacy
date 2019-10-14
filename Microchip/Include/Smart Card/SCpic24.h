@@ -33,9 +33,12 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  1.0   Initial release
-  1.01  Cleaned up unnecessary variables
-  1.02  Modified to Support PIC24H microcontrollers
+  1.0      Initial release
+  1.01     Cleaned up unnecessary variables
+  1.02     Modified to Support PIC24H microcontrollers
+  1.02.2   Modified to support WaitMicroSec & WaitMilliSec functions.
+           The way the UART baud rate is set, is changed( function : SCdrv_SetBRG()).
+           Removed extern declarations of "factorD" & "factorF" variables.
 ********************************************************************/
 
 #if defined(__PIC24F__) || defined(__PIC24H__)
@@ -53,16 +56,16 @@
 
 extern unsigned long baudRate;	// Baud Rate of Smart Card Transmission/Reception Data
 extern unsigned long scReferenceClock; // Smart Card Reference Clock
-extern unsigned int factorF;
-extern BYTE factorDNumerator;
-extern BYTE factorDdenominator;
 
-extern void SC_Delay(unsigned int instructionCount);
+
 extern void SCdrv_InitUART(void);
 extern void SCdrv_CloseUART(void);
-extern void SCdrv_SetBRG( BYTE speedCode );
-extern BOOL SCdrv_GetRxData( BYTE* pDat, unsigned long nTrys );
+extern void SCdrv_SetBRG(void);
+extern BOOL SCdrv_GetRxData( BYTE* pDat, unsigned short int timeOutETUs);
 extern void SCdrv_SendTxData( BYTE data );
+
+extern void WaitMicroSec(unsigned long int microSec);
+extern void WaitMilliSec(unsigned long int ms);
 
 #endif
 

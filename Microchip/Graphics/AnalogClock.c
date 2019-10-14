@@ -93,11 +93,11 @@ ANALOGCLOCK *AcCreate
     pAc->prev_valueH = pAc->valueH-1;
     pAc->centerx = (left + ((right-left)>>1)); 
     pAc->centery = (top + ((bottom-top)>>1));
-    pAc->pBitmap = pBitmap;      // location of bitmap
-    pAc->hdr.state = state;      // state
+    pAc->pBitmap = pBitmap;             // location of bitmap
+    pAc->hdr.state = state;             // state
     pAc->hdr.DrawObj = AcDraw;			// draw function
-    pAc->hdr.MsgObj = NULL;//StTranslateMsg;   // message function
-    pAc->hdr.MsgDefaultObj = NULL;		// default message function
+    pAc->hdr.MsgObj = NULL;             // no message function
+    pAc->hdr.MsgDefaultObj = NULL;		// no default message function
     pAc->hdr.FreeObj = NULL;
  
     // Set the color scheme to be used
@@ -109,83 +109,6 @@ ANALOGCLOCK *AcCreate
     GOLAddObject((OBJ_HEADER *)pAc);
 
     return (pAc);
-}
-
-
-/*********************************************************************
-* Function: AcMsgDefault(WORD translatedMsg, ANALOGCLOCK *pAc, GOL_MSG* pMsg)
-*
-*
-* Notes: This the default operation to change the state of the clock.
-*		 Called inside GOLMsg() when GOLMsgCallback() returns a 1.
-*
-********************************************************************/
-void AcMsgDefault(WORD translatedMsg, ANALOGCLOCK *pAc, GOL_MSG *pMsg)
-{
-
-    switch(translatedMsg)
-    {
-        case AC_MSG_PRESSED:
-            SetState(pAc, AC_PRESSED | AC_DRAW);   // set pressed and redraw
-            break;
-
-        case AC_MSG_RELEASED:
-            ClrState(pAc, AC_PRESSED);              // reset pressed
-            SetState(pAc, AC_DRAW);                 // redraw
-            break;
-
-        default:
-
-            // catch all for clock messages added by users and
-            // behavior defined by users in message callback
-            break;
-    }
-}
-
-/*********************************************************************
-* Function: WORD AcTranslateMsg(ANALOGCLOCK *pAc, GOL_MSG *pMsg)
-*
-*
-* Notes: Evaluates the message if the object will be affected by the 
-*		 message or not.
-*
-********************************************************************/
-WORD AcTranslateMsg(ANALOGCLOCK *pAc, GOL_MSG *pMsg)
-{
-
-    // Evaluate if the message is for the clock
-    // Check if disabled first
-    if(GetState(pAc, AC_DISABLED))
-        return (OBJ_MSG_INVALID);
-
-        #ifdef USE_TOUCHSCREEN
-    if(pMsg->type == TYPE_TOUCHSCREEN)
-    {
-
-        // Check if it falls in the clock's face
-        if
-        (
-            (pAc->hdr.left < pMsg->param1) &&
-            (pAc->hdr.right > pMsg->param1) &&
-            (pAc->hdr.top < pMsg->param2) &&
-            (pAc->hdr.bottom > pMsg->param2)
-        )
-        {
-
-                if(pMsg->uiEvent == EVENT_RELEASE)
-                    return (AC_MSG_RELEASED);
-
-                if(!GetState(pAc, AC_PRESSED))
-                    return (AC_MSG_PRESSED);
-            
-        }
-
-        return (OBJ_MSG_INVALID);
-    }
-
-        #endif
-
-    return (OBJ_MSG_INVALID);
 }
 
 /*********************************************************************

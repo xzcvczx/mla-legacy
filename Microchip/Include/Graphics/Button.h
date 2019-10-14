@@ -271,10 +271,10 @@ BUTTON  *BtnCreate
 *     	##################     ############	    #######################     ##################################################################################################################################################################
 *     	BTN_MSG_PRESSED        Touch Screen     EVENT_PRESS, EVENT_MOVE    	If events occurs and the x,y position falls in the face of the button while the button is not pressed.
 *     					       Keyboard         EVENT_KEYSCAN  				If event occurs and parameter1 passed matches the object’s ID and parameter 2 passed matches SCAN_CR_PRESSED or SCAN_SPACE_PRESSED while the button is not pressed.
-*		BTN_MSG_STILLPRESSED   Touch Screen     EVENT_STILLPRESS				If event occurs and and the x,y position falls in the face of the button. Current state of the button is not checked.  				
+*		BTN_MSG_STILLPRESSED   Touch Screen     EVENT_STILLPRESS			If event occurs and the x,y position does not change from the previous press position in the face of the button.  				
 *		BTN_MSG_RELEASED	   Touch Screen     EVENT_RELEASE  				If the event occurs and the x,y position falls in the face of the button while the button is pressed.     					      			   
 *							   Keyboard         EVENT_KEYSCAN  				If event occurs and parameter1 passed matches the object’s ID and parameter 2 passed matches SCAN_CR_RELEASED or SCAN_SPACE_RELEASED while the button is pressed.     					      			   
-*		BTN_MSG_CANCELPRESS	   Touch Screen     EVENT_MOVE  					If the event occurs outside the face of the button and the button is currently pressed.     					      			   
+*		BTN_MSG_CANCELPRESS	   Touch Screen     EVENT_MOVE  				If the event occurs outside the face of the button and the button is currently pressed.     					      			   
 *		OBJ_MSG_INVALID		   Any		        Any			  				If the message did not affect the object.							 
 *	</TABLE>
 *

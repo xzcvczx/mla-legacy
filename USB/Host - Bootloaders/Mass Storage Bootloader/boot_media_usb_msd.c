@@ -45,7 +45,7 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
 
 #include "Compiler.h"
-#include "GenericTypedefs.h"
+#include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "boot.h"
 #include "MDD File System/FSIO.h"

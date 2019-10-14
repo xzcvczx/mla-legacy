@@ -23,10 +23,13 @@
 * MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE
 * OF THESE TERMS.
 *
-* Author        Date        Comment
+* Author        Date        Ver   Comment
 *************************************************************************
-* E. Schlunder  2009/04/29  Code ported from PicKit2 pk2cmd source code.
-* F. Schlunder  2011/06/13  Some changes for USB HID Bootloader use.
+* E. Schlunder  2009/04/29  0.01  Code ported from PicKit2 pk2cmd source code.
+* F. Schlunder  2011/06/13  2.90  Some changes for USB HID Bootloader use.
+* F. Schlunder  2011/07/06  2.90a Updated ImportHexFile() function so it can
+*                                 support importing of hex files with
+*                                 "non-monotonic" line address ordering.
 *************************************************************************/
 
 #include <QFile>
@@ -57,6 +60,10 @@ HexImporter::~HexImporter(void)
     the EDC device database might indicate, the HEX file has to start EEPROM data at 0x2000 + 0x2100 = 0x4100,
     to avoid overlapping with the HEX file's FLASH addresses.
 */
+
+//This function reads in Intel 32-bit .hex file formatted firmware image files and stores the
+//parsed data into buffers in the PC system RAM, so that it is in a format more suitable for directly
+//programming into the target microcontroller.
 HexImporter::ErrorCode HexImporter::ImportHexFile(QString fileName, DeviceData* pData, Device* device)
 {
     QFile hexfile(fileName);
@@ -64,14 +71,13 @@ HexImporter::ErrorCode HexImporter::ImportHexFile(QString fileName, DeviceData* 
     hasEndOfFileRecord = false;
     fileExceedsFlash = false;
 
+    //Open the user specified .hex file.
     if (!hexfile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         return CouldNotOpenFile;
     }
 
-
     bool ok;
-    bool betweenProgrammableRegions = true;
     bool includedInProgrammableRange;
     bool addressWasEndofRange;
     unsigned int segmentAddress = 0;
@@ -79,60 +85,22 @@ HexImporter::ErrorCode HexImporter::ImportHexFile(QString fileName, DeviceData* 
     unsigned int lineAddress;
     unsigned int deviceAddress;
     unsigned int i;
-    unsigned int ramArrayIndex = 0;
-    unsigned int lastParsedHexAddress = 0;
-    unsigned int numBytesInProgrammableRange;
     unsigned int endDeviceAddressofRegion;
     unsigned int bytesPerAddressAndType;
 
-    unsigned char* pHexFileBinaryDataBufferStart = NULL;
-    unsigned char* pHexFileBinaryDataBuffer = NULL;
-    unsigned int sizeOfDataBuffer;
-    unsigned char* pNewBiggerDataBuffer;
-    bool firstDataRecordFound = false;
-
+    unsigned char* pPCRAMBuffer = 0;
+    bool importedAtLeastOneByte = false;
 
     unsigned char type;
-
 
     HEX32_RECORD recordType;
 
     QString hexByte;
     unsigned int wordByte;
-
-    DeviceData::MemoryRange range;
-    range.start = 0;
-    range.end = 0;
-    pData->ranges.clear();
-    rawimport.clear();
     hasConfigBits = false;
 
 
-    //Allocate ourselves some RAM to hold the parsed binary hex file data that we extract from the user supplied .hex file.
-    pHexFileBinaryDataBufferStart = (unsigned char*)malloc(hexfile.size());
-    //Make sure the memory allocation worked
-    if(pHexFileBinaryDataBufferStart == NULL)
-    {
-        //The user must not have enough RAM on their PC.  They should close other apps and try again.
-        if(hexfile.isOpen())
-            hexfile.close();
-        return InsufficientMemory;
-    }
-    else
-    {
-        sizeOfDataBuffer = hexfile.size();
-        //Initialize the entire RAM buffer to 0xFF, which is the default/erased flash value.
-        pHexFileBinaryDataBuffer = pHexFileBinaryDataBufferStart;
-        for(i = 0; i < sizeOfDataBuffer; i++)
-        {
-            *pHexFileBinaryDataBuffer = 0xFF;
-            pHexFileBinaryDataBuffer++;
-        }
-        pHexFileBinaryDataBuffer = pHexFileBinaryDataBufferStart;
-    }
-
-
-    //Now parse the entire hex file, line by line.
+    //Parse the entire hex file, line by line.
     while (!hexfile.atEnd())
     {
         //Fetch a line of ASCII text from the .hex file.
@@ -147,11 +115,6 @@ HexImporter::ErrorCode HexImporter::ImportHexFile(QString fileName, DeviceData* 
             //abort the operation and force the user to supply a properly formatted hex file.
             if(hexfile.isOpen())
                 hexfile.close();
-            //Done with the RAM buffer.  Release RAM to avoid memory leakage.
-            if(pHexFileBinaryDataBufferStart != NULL)
-            {
-                free(pHexFileBinaryDataBufferStart);
-            }
             return ErrorInHexFile;
         }
 
@@ -195,11 +158,6 @@ HexImporter::ErrorCode HexImporter::ImportHexFile(QString fileName, DeviceData* 
             //abort the operation and force the user to supply a properly formatted hex file.
             if(hexfile.isOpen())
                 hexfile.close();
-            //Done with the RAM buffer.  Release RAM to avoid memory leakage.
-            if(pHexFileBinaryDataBufferStart != NULL)
-            {
-                free(pHexFileBinaryDataBufferStart);
-            }
             return ErrorInHexFile;
         }
 
@@ -239,11 +197,6 @@ HexImporter::ErrorCode HexImporter::ImportHexFile(QString fileName, DeviceData* 
                 //abort the operation and force the user to supply a properly formatted hex file.
                 if(hexfile.isOpen())
                     hexfile.close();
-                //Done with the RAM buffer.  Release RAM to avoid memory leakage.
-                if(pHexFileBinaryDataBufferStart != NULL)
-                {
-                    free(pHexFileBinaryDataBufferStart);
-                }
                 return ErrorInHexFile;
             }
 
@@ -257,317 +210,73 @@ HexImporter::ErrorCode HexImporter::ImportHexFile(QString fileName, DeviceData* 
                 //abort the operation and force the user to supply a proper hex file.
                 if(hexfile.isOpen())
                     hexfile.close();
-                //Done with the RAM buffer.  Release RAM to avoid memory leakage.
-                if(pHexFileBinaryDataBufferStart != NULL)
-                {
-                    free(pHexFileBinaryDataBufferStart);
-                }
                 return ErrorInHexFile;
             }
-            //We found a DATA record type in the hex file.
-            //If the DATA recrod was the very first one, initialize some stuff.
-            if(firstDataRecordFound != true)
-            {
-                firstDataRecordFound = true;
-                lastParsedHexAddress = lineAddress - 1; //We didn't actually parse anything yet, but this is to make the below code work right on the first iteration.
-            }
-
-
-            //Check if there was a hex file address discontinuity.  This can happen if the hex file skips
-            //an address range.  In this case we need to "fill the void" with the default unprogrammed/blank value.
-            //We also need to check to see if the end of a programmable region was "contained" inside the void
-            //region.  If so, we need to close the region.
-            while(lastParsedHexAddress != (lineAddress - 1))
-            {
-                lastParsedHexAddress++;
-
-                //Check if we have an already started region open.  If so, we need to fill the discontinuity void with 0xFF.
-                //If we find the end of the open region, we also need to close the region.
-                if(betweenProgrammableRegions == false)
-                {
-                    ramArrayIndex++; //"puts" 0xFF in the location, since the array was already initialized to all 0xFF
-
-                    //Need to make sure we don't overflow our malloc'ed RAM region.
-                    //This could potentially happen if the hex file contained a large
-                    //block of "blank" addresses, which we must fill with 0xFF (unprogrammed value).  This could cause
-                    //the required RAM to be larger than the total size of the .hex file.  We don't know this ahead of
-                    //time however, and can only detect this condition now (as we are busy parsing the .hex file).
-                    if(ramArrayIndex >= sizeOfDataBuffer)
-                    {
-                        pNewBiggerDataBuffer = NULL;
-                        pNewBiggerDataBuffer = (unsigned char*)malloc(ramArrayIndex + 50000);   //Give ourselves an extra ~50kB of RAM each time we find we need more.
-                        if(pNewBiggerDataBuffer == NULL)
-                        {
-                            //The user must not have enough RAM on their PC.  They should close other apps and try again.
-                            free(pHexFileBinaryDataBufferStart);
-                            if(hexfile.isOpen())
-                                hexfile.close();
-                            return InsufficientMemory;
-                        }
-                        else
-                        {
-                            //Initialize the new RAM buffer to 0xFF, the default/blank/unprogrammed value
-                            memset(pNewBiggerDataBuffer, 0xFF, (ramArrayIndex + 50000));
-                            //Now move our previously bufferred data from pHexFileBinaryDataBufferStart into our new, bigger buffer.
-                            memcpy(pNewBiggerDataBuffer, pHexFileBinaryDataBufferStart, sizeOfDataBuffer);
-                            sizeOfDataBuffer = ramArrayIndex + 50000;   //Update variable to reflect the new size of our new buffer.
-                            free(pHexFileBinaryDataBufferStart);        //Free up/release the previously allocated RAM buffer.  We no longer need it since we have a new bigger one now.
-                            pHexFileBinaryDataBufferStart = pNewBiggerDataBuffer;   //Update the pHexFileBinaryDataBufferStart pointer to point to the new buffer.
-                        }
-                    }
-
-
-                    //Do a check to see if we are at the end of the opened region.
-                    device->GetDeviceAddressFromHexAddress(lastParsedHexAddress, type, includedInProgrammableRange, addressWasEndofRange, bytesPerAddressAndType, endDeviceAddressofRegion);
-                    if(addressWasEndofRange == true)
-                    {
-                        //We just found the true end (we just parsed and saved the very last byte) of a contiguous
-                        //progammable memory region.
-                        //Save the temporary buffer to the global buffer for use later during programming and verify.
-                        numBytesInProgrammableRange = (range.end - range.start)* bytesPerAddressAndType;
-                        range.data = new unsigned char[numBytesInProgrammableRange];
-                        //Copy the data from the parsed .hex file results, into the RAM buffer that will get programmed into the device.
-                        memcpy(&range.data[0], pHexFileBinaryDataBufferStart, numBytesInProgrammableRange);
-                        pData->ranges.append(range);    //Save to global buffer used for programming the device.
-                        //Iniitalize all elements to 0xFF (default unprogrammed value, so we don't have to do this later if we detect hex file address discontinuities).
-                        memset(pHexFileBinaryDataBufferStart, 0xFF, sizeOfDataBuffer);
-                        ramArrayIndex = 0;
-                        betweenProgrammableRegions = true;  //We are no longer in a contiguous programmable region.  We should begin looking again for the start of a new programmable section.
-                    }
-                }
-            }
-
 
 
             //For each data payload byte we find in the hex file line, check if it is contained within
             //a progammable region inside the microcontroller.  If so save it.  If not, discard it.
             for(i = 0; i < byteCount; i++)
             {
-                //Use the hex file linear byte address, to compute the address this corresponds
-                //to in the microcontroller.  For PIC18, there is a 1:1 correspondence of program memory addresses.
-                //For PIC24, the flash memory is organized as a 16-bit word array, so the hex file
-                //byte address isn't directly equivalent to the flash memory word address.
-                deviceAddress = device->GetDeviceAddressFromHexAddress(lineAddress + i, type, includedInProgrammableRange, addressWasEndofRange, bytesPerAddressAndType, endDeviceAddressofRegion);
-                //We can now decide what to do with the new hex file line data bytes.
-                if(betweenProgrammableRegions == true)
+                //Use the hex file linear byte address, to compute other imformation about the
+                //byte/location.  The GetDeviceAddressFromHexAddress() function gives us a pointer to
+                //the PC RAM buffer byte that will get programmed into the microcontroller, which corresponds
+                //to the specified .hex file extended address.
+                //The function also returns a boolean letting us know if the address is part of a programmable memory region on the device.
+                deviceAddress = device->GetDeviceAddressFromHexAddress(lineAddress + i, pData, type, includedInProgrammableRange, addressWasEndofRange, bytesPerAddressAndType, endDeviceAddressofRegion, pPCRAMBuffer);
+                //Check if the just parsed hex byte was included in one of the microcontroller reported programmable memory regions.
+                //If so, save the byte into the proper location in the PC RAM buffer, so it can be programmed later.
+                if((includedInProgrammableRange == true) && (pPCRAMBuffer != 0)) //Make sure pPCRAMBuffer pointer is valid before using it.
                 {
-                    if(includedInProgrammableRange == true)
+                    //Print debug output text to debug window
+                    if(i == 0)
                     {
-                        //We found the first byte of a new programmable region.
-                        betweenProgrammableRegions = false;
-                        range.start = deviceAddress;
-                        range.end = endDeviceAddressofRegion;
-                        range.type = type;
-                        ramArrayIndex = 0;
-                        //Fetch ASCII encoded payload byte from .hex file and save the byte to our temporary RAM buffer.
-                        hexByte = line.mid(9 + (2 * i), 2);  //Fetch two ASCII data payload bytes from the .hex file
-                        wordByte = hexByte.toInt(&ok, 16);   //Re-format the above two ASCII bytes into a single binary encoded byte (0x00-0xFF)
-
-                        //Save the parsed byte from the hex file into our RAM buffer.
-                        //However need to make sure we don't overflow our malloc'ed RAM region.  If we need more RAM,
-                        //make sure to allocate more first.  This could potentially happen if the hex file contained a large
-                        //block of "blank" addresses, which we must fill with 0xFF (unprogrammed value).  This could cause
-                        //the required RAM to be larger than the total size of the .hex file.  We don't know this ahead of
-                        //time however, and can only detect this condition now (as we are busy parsing the .hex file).
-                        if(ramArrayIndex >= sizeOfDataBuffer)
-                        {
-                            pNewBiggerDataBuffer = NULL;
-                            pNewBiggerDataBuffer = (unsigned char*)malloc(ramArrayIndex + 50000);   //Give ourselves an extra ~50kB of RAM each time we find we need more.
-                            if(pNewBiggerDataBuffer == NULL)
-                            {
-                                //The user must not have enough RAM on their PC.  They should close other apps and try again.
-                                free(pHexFileBinaryDataBufferStart);
-                                if(hexfile.isOpen())
-                                    hexfile.close();
-                                return InsufficientMemory;
-                            }
-                            else
-                            {
-                                //Initialize the new RAM buffer to 0xFF, the default/blank/unprogrammed value
-                                memset(pNewBiggerDataBuffer, 0xFF, (ramArrayIndex + 50000));
-                                //Now move our previously bufferred data from pHexFileBinaryDataBufferStart into our new, bigger buffer.
-                                memcpy(pNewBiggerDataBuffer, pHexFileBinaryDataBufferStart, sizeOfDataBuffer);
-                                sizeOfDataBuffer = ramArrayIndex + 50000;   //Update variable to reflect the new size of our new buffer.
-                                free(pHexFileBinaryDataBufferStart);        //Free up/release the previously allocated RAM buffer.  We no longer need it since we have a new bigger one now.
-                                pHexFileBinaryDataBufferStart = pNewBiggerDataBuffer;   //Update the pHexFileBinaryDataBufferStart pointer to point to the new buffer.
-                            }
-                        }
-                        //Now we can finally save the byte, now that we are certain we have enough RAM available in the pHexFileBinaryDataBufferStart buffer.
-                        *(pHexFileBinaryDataBufferStart + ramArrayIndex) = (unsigned char)wordByte; //Save the byte
-                        ramArrayIndex++;
-
-                        //Check if this was a config bit memory region.  If so, set flag later so we know the hex file had config bit info in it.
-                        //This way, we can prevent the user from trying to re-program config bits, when their supplied hex file doesn't contain
-                        //any config bit data in it.
-                        if (range.type == CONFIG_MEMORY)
-                        {
-                            hasConfigBits = true;
-                        }
-
-                        //Although this was the first bytes of a programmable region, we still also need to check to see if
-                        //this was also the end of a programmable memory region (ex: a 1 byte region, which is potentially
-                        //legal for some types of memory).
-                        //First, check if the device address corresponded the to the last address (not necessarily last
-                        //byte) of a programmable memory region.
-                        if(addressWasEndofRange == true)
-                        {
-                            //We just found the true end (we just parsed and saved the very last byte) of a contiguous
-                            //progammable memory region.
-                            //Save the temporary buffer to the global buffer for use later during programming and verify.
-                            numBytesInProgrammableRange = (range.end - range.start)* bytesPerAddressAndType;
-                            range.data = new unsigned char[numBytesInProgrammableRange];
-                            //Copy the data from the parsed .hex file results, into the RAM buffer that will get programmed into the device.
-                            memcpy(&range.data[0], pHexFileBinaryDataBufferStart, numBytesInProgrammableRange);
-                            pData->ranges.append(range);    //Save to global buffer used for programming the device.
-                            //Iniitalize all elements to 0xFF (default unprogrammed value, so we don't have to do this later if we detect hex file address discontinuities).
-                            memset(pHexFileBinaryDataBufferStart, 0xFF, sizeOfDataBuffer);
-                            betweenProgrammableRegions = true;  //We are no longer in a contiguous programmable region.  We should begin looking again for the start of a new programmable section.
-                        }
-
-                    }//if(includedInProgrammableRange == true)
-                    else
-                    {
-                        //In this case the .hex file data byte was not included in any of the device's reported
-                        //programmable memory regions (ex: because it was part of the occupied bootloader firmware
-                        //program memory space for instance).  Therefore, we simply discard the byte, since we won't
-                        //be programming it into the device at all.
+                        qDebug(QString("Importing .hex file line with device address: 0x" + QString::number(deviceAddress, 16)).toLatin1());
                     }
-                }//if(betweenProgrammableRegions == true)
-                else
+
+                    //Fetch ASCII encoded payload byte from .hex file and save the byte to our temporary RAM buffer.
+                    hexByte = line.mid(9 + (2 * i), 2);  //Fetch two ASCII data payload bytes from the .hex file
+                    wordByte = hexByte.toInt(&ok, 16);   //Re-format the above two ASCII bytes into a single binary encoded byte (0x00-0xFF)
+
+                    *pPCRAMBuffer = (unsigned char)wordByte;    //Save the .hex file data byte into the PC RAM buffer that holds the data to be programmed
+                    importedAtLeastOneByte = true;       //Set flag so we know we imported something successfully.
+
+                    //Check if we just parsed a config bit byte.  If so, set flag so the user is no longer locked out
+                    //of programming the config bits section.
+                    if(type == CONFIG_MEMORY)
+                    {
+                        hasConfigBits = true;
+                    }
+                }
+                else if((includedInProgrammableRange == true) && (pPCRAMBuffer == 0))
                 {
-                    //We have already started a programmable region.
-
-                    //Check if the byte just parsed from the hex file was contained in the
-                    //programmable memory region that we already started
-                    if(includedInProgrammableRange == true)
-                    {
-                        //Save the byte to our temporary RAM buffer.
-                        hexByte = line.mid(9 + (2 * i), 2);  //Fetch two ASCII data payload bytes from the .hex file
-                        wordByte = hexByte.toInt(&ok, 16);   //Re-format the above two ASCII bytes into a single binary encoded byte (0x00-0xFF)
-
-                        //Save the parsed byte from the hex file into our RAM buffer.
-                        //However need to make sure we don't overflow our malloc'ed RAM region.
-                        //This could potentially happen if the hex file contained a large
-                        //block of "blank" addresses, which we must fill with 0xFF (unprogrammed value).  This could cause
-                        //the required RAM to be larger than the total size of the .hex file.  We don't know this ahead of
-                        //time however, and can only detect this condition now (as we are busy parsing the .hex file).
-                        if(ramArrayIndex >= sizeOfDataBuffer)
-                        {
-                            pNewBiggerDataBuffer = NULL;
-                            pNewBiggerDataBuffer = (unsigned char*)malloc(ramArrayIndex + 50000);   //Give ourselves an extra ~50kB of RAM each time we find we need more.
-                            if(pNewBiggerDataBuffer == NULL)
-                            {
-                                //The user must not have enough RAM on their PC.  They should close other apps and try again.
-                                free(pHexFileBinaryDataBufferStart);
-                                if(hexfile.isOpen())
-                                    hexfile.close();
-                                return InsufficientMemory;
-                            }
-                            else
-                            {
-                                //Initialize the new RAM buffer to 0xFF, the default/blank/unprogrammed value
-                                memset(pNewBiggerDataBuffer, 0xFF, (ramArrayIndex + 50000));
-                                //Now move our previously bufferred data from pHexFileBinaryDataBufferStart into our new, bigger buffer.
-                                memcpy(pNewBiggerDataBuffer, pHexFileBinaryDataBufferStart, sizeOfDataBuffer);
-                                sizeOfDataBuffer = ramArrayIndex + 50000;   //Update variable to reflect the new size of our new buffer.
-                                free(pHexFileBinaryDataBufferStart);        //Free up/release the previously allocated RAM buffer.  We no longer need it since we have a new bigger one now.
-                                pHexFileBinaryDataBufferStart = pNewBiggerDataBuffer;   //Update the pHexFileBinaryDataBufferStart pointer to point to the new buffer.
-                            }
-                        }
-                        //Now we can finally save the byte, now that we are certain we have enough RAM available in the pHexFileBinaryDataBufferStart buffer.
-                        *(pHexFileBinaryDataBufferStart + ramArrayIndex) = (unsigned char)wordByte; //Save the byte
-                        ramArrayIndex++;
-
-                        //Check to see if this is the end of a programmable memory region.  First, check if the device address
-                        //corresponded the to the last address (not necessarily last byte) of a programmable memory region.
-                        if(addressWasEndofRange == true)
-                        {
-                            //Check if this was the very last byte of the programmable memory region.  (which can be determined
-                            //if the ramArrayIndex is an exact integer multiple of the bytesPerAddressAndType).
-                            if((ramArrayIndex % bytesPerAddressAndType) == 0)
-                            {
-                                //We just found the true end (we just parsed and saved the very last byte) of a contiguous
-                                //progammable memory region.
-                                //Save the temporary buffer to the global buffer for use later during programming and verify.
-                                numBytesInProgrammableRange = (range.end - range.start)* bytesPerAddressAndType;
-                                range.data = new unsigned char[numBytesInProgrammableRange];
-                                //Copy the data from the parsed .hex file results, into the RAM buffer that will get programmed into the device.
-                                memcpy(&range.data[0], pHexFileBinaryDataBufferStart, numBytesInProgrammableRange);
-                                pData->ranges.append(range);    //Save to global buffer used for programming the device.
-
-                                //Iniitalize all elements to 0xFF (default unprogrammed value, so we don't have to do this later if we detect hex file address discontinuities).
-                                memset(pHexFileBinaryDataBufferStart, 0xFF, sizeOfDataBuffer);
-                                betweenProgrammableRegions = true;  //We are no longer in a contiguous programmable region.  We should begin looking again for the start of a new programmable section.
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //If we get to here, that means that we already started a programmable memory region, but
-                        //have not closed it yet, and yet somehow the most recently parsed byte wasn't included in the
-                        //region.
-                        //We should never get to this else, unless there is some error in the hex file addresses (ex: they go
-                        //out of order, not purely increasing address, but instead something else, ex: increase, then decreasing, then increasing again).
-
-                        //If an error is detected in the hex file formatting, the safest approach is to
-                        //abort the operation and force the user to supply a proper hex file.
-                        if(hexfile.isOpen())
-                            hexfile.close();
-                        //Done with the RAM buffer.  Release RAM to avoid memory leakage.
-                        if(pHexFileBinaryDataBufferStart != NULL)
-                        {
-                            free(pHexFileBinaryDataBufferStart);
-                        }
-                        return ErrorInHexFile;
-                    }
-                }//end of else (of if(betweenProgrammableRegions == true))
-
-                lastParsedHexAddress = lineAddress + i;    //Save this.  We need to check this later so we can detect hex file address discontinuities.
+                    //Previous memory allocation must have failed, or otherwise pPCRAMBuffer would not be = 0.
+                    //Since the memory allocation failed, we should bug out and let the user know.
+                    if(hexfile.isOpen())
+                        hexfile.close();
+                    return InsufficientMemory;
+                }
             }//for(i = 0; i < byteCount; i++)
         } // end else if (recordType == DATA)
     }//while (!hexfile.atEnd())
 
+    //If we get to here, that means we reached the end of the hex file, or we found a END_OF_FILE record in the .hex file.
     if(hexfile.isOpen())
     {
-        //Make one last check.  The end of file may have been reached while we were
-        //still saving data from a contiguous programmable region.  If so, need to save this
-        //data.
-        if(betweenProgrammableRegions == false)
-        {
-            //We are at the end of the contiguous progammable memory region.
-            //Save the temporary buffer to the global buffer for use later.
-            numBytesInProgrammableRange = (range.end - range.start)* bytesPerAddressAndType;
-            range.data = new unsigned char[numBytesInProgrammableRange];
-            //Copy the data from the parsed .hex file results, into the RAM buffer that will get programmed into the device.
-            memcpy(&range.data[0], pHexFileBinaryDataBufferStart, numBytesInProgrammableRange);
-            pData->ranges.append(range);    //Save to global buffer used for programming the device.
-        }
-
         hexfile.close();
     }
 
-    //Done with the RAM buffer.  Release RAM to avoid memory leakage.
-    if(pHexFileBinaryDataBufferStart != NULL)
+    //Check if we imported any data from the .hex file.
+    if(importedAtLeastOneByte == true)
     {
-        free(pHexFileBinaryDataBufferStart);
-    }
-
-
-    if(pData->ranges.count())
-    {
-        //Print some debug info, showing the memory ranges that we successfully imported
-        //from the hex file (that was also in common with the device's reported programmable region(s).
-        qDebug("Hex Import Address Ranges:");
-        for(int i = 0; i < pData->ranges.count(); i++)
-        {
-            qDebug(QString("  [" + QString::number(pData->ranges[i].start, 16).toUpper() + " - " +
-                           QString::number(pData->ranges[i].end, 16).toUpper() +")").toLatin1());
-        }
-
+        qDebug(QString("Hex File imported successfully.").toLatin1());
         return Success;
     }
     else
     {
+        //If we get to here, we didn't import anything.  The hex file must have been empty or otherwise didn't
+        //contain any data that overlaps a device programmable region.  We should let the user know they should
+        //supply a better hex file designed for their device.
         return NoneInRange;
     }
 }

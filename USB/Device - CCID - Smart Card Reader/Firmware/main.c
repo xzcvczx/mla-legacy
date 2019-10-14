@@ -274,6 +274,7 @@ void BlinkUSBStatus(void);
 	//usb_config.h file and comment out the following defines:
 	//#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
 	//#define PROGRAMMABLE_WITH_USB_LEGACY_CUSTOM_CLASS_BOOTLOADER
+    extern BOOL delayLapsedFlag; // Needed only for PIC18
 
 	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
 		#define REMAPPED_RESET_VECTOR_ADDRESS			0x1000
@@ -390,23 +391,9 @@ void BlinkUSBStatus(void);
 //        	asm("goto %0"::"i"(&_T2Interrupt));  //T2Interrupt's address
 //        }
     #endif
-	void _ISRFAST __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
-	{
-		if(IFS0bits.T1IF)
-		{
-			IFS0bits.T1IF = 0;
-			SCdrv_DisableDelayTimer();
-			delayLapsedFlag = 1;
-		}
-	}
+	
 #elif defined (__C32__)
-    void __ISR(_TIMER_1_VECTOR, ipl3) T1Interrupt(void)
-    {
-			IFS0bits.T1IF = 0;
-			SCdrv_DisableDelayTimer();
-			delayLapsedFlag = 1;
-    
-    }    	
+      	
 	
 #endif
 

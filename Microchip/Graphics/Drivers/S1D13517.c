@@ -132,7 +132,7 @@ GFX_COLOR    pixelWindow[8] =
 };
 
 
-	
+//Internal S1D13517 Driver functions	
 DWORD 		GFXGetPageOriginAddress(SHORT pageNumber);
 DWORD 		GFXGetPageXYAddress(SHORT pageNumber, WORD x, WORD y);
 DWORD 		GFXGetWindowOriginAddress(GFX_WINDOW_INFO* GFXWindowInfo);

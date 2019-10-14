@@ -78,6 +78,72 @@ BYTE gSpecificTrapNotification=VENDOR_TRAP_DEFAULT; // Vendor specific trap code
 #ifdef STACK_USE_SNMPV3_SERVER
 static BYTE gSnmpv3UserSecurityName[USER_SECURITY_NAME_LEN];
 #endif
+
+/*
+*  Default STACK_USE_SMIV2 is enabled . For Stack V5.31,  STACK_USE_SMIV2 should be disabled.
+*/
+#define STACK_USE_SMIV2
+
+/* Update the Non record id OID value 
+   which is part of CustomSnmpDemo.c file
+*/
+#define SNMP_MAX_NON_REC_ID_OID  3
+
+/*
+* gSnmpNonMibRecInfo[] is the list of static variable Parent OIDs which are not part of MIB.h file. 
+* This structure is used to restrict access to static variables of SNMPv3 OIDs from SNMPv2c and SNMPv1 version. 
+* With SNMPv3 all the OIDs accessible but when we are using SNMPv2c version , static variables of the SNMPv3 
+* cannot be accessible with SNMPversion v2c.
+* With V5.31 there was no MODULE-IDENTITY number in the SNMP.mib file. Now onwards we have supported SMIv2 
+* standard and SNMP.mib has been updated with respect to SMIV2 standard and it also includes 
+* MODULE-IDENTITY ( number 1)after ENTERPRISE-ID.
+*/
+
+/*
+* This structure has been moved from snmp.c file to here. 
+*/
+#ifdef STACK_USE_SMIV2
+/*
+* With SMIv2 standard which includes MODULE-IDENTITY number with the existing OID string.
+* For New snmp.mib file with SMIv2 standard
+*/
+/*
+* ENTERPRISEID - 17095(Microchip) as per BER encoding standard 0x81,0x85,0x47
+* Need to be modified with respect to customer enterprise ID 
+*/
+
+SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[SNMP_MAX_NON_REC_ID_OID] =
+{
+#ifdef STACK_USE_SNMPV3_SERVER		
+	/* SNMPv3 Static Variable OID string which is not part of mib.h file */
+#endif			
+	{{43,6,1,2,1,1},SNMP_V2C}, /* Max matching Subids of the iso+org (43),dod(6),internet(1),mgmt(2),MIB2(1),system(1) tree*/	
+	{{43,6,1,4,1,0x81,0x85,0x47,0x1,1},SNMP_V2C}, 
+	/*Max matching Subids of the iso+org (43),dod(6),internet(1),private(4),ENTERPRISE(17095),MODULE-IDENTITY(1),product tree*/			
+	
+};
+/*
+ * if snmp.mib file doesnot have MODULE-IDENTITY number then this is the following structure should be used
+ */
+
+#else 
+/*
+* OLD snmp.mib file with SMIv1 standard 
+*/
+
+SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[SNMP_MAX_NON_REC_ID_OID] =
+{
+#ifdef STACK_USE_SNMPV3_SERVER		
+	{{43,6,1,4,1,0x81,0x85,0x47,6},SNMP_V3},  /* SNMPv3 PVT test MIB OID is not part of mib.h file */
+#endif			
+	{{43,6,1,2,1,1},SNMP_V2C}, /* Max matching Subids of the iso+org (43),dod(6),internet(1),mgmt(2),MIB2(1),system(1) tree*/	
+	{{43,6,1,4,1,0x81,0x85,0x47,0x1},SNMP_V2C}, 
+	/*Max matching Subids of the iso+org (43),dod(6),internet(1),private(4),ENTERPRISE(17095),product tree*/			
+	
+};
+
+#endif /* STACK_USE_SMIV2 */
+
 /*
 #if defined(SNMP_STACK_USE_V2_TRAP) || defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)
 //if gSetTrapSendFlag == FALSE then the last varbind variable for 
@@ -689,6 +755,11 @@ void SNMPSendTrap(void)
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3)	
 	static BYTE userIndex=0;
 #endif
+	static enum 
+	{
+		SM_PREPARE,
+		SM_NOTIFY_WAIT 
+	} smState = SM_PREPARE;
 
 #if defined(SNMP_V1_V2_TRAP_WITH_SNMPV3) || defined(SNMP_STACK_USE_V2_TRAP)
 	/*
@@ -701,11 +772,6 @@ void SNMPSendTrap(void)
 	SNMPNotifyInfo.trapIDVar = SNMP_DEMO_TRAP;
 #endif
 
-	static enum 
-	{
-		SM_PREPARE,
-		SM_NOTIFY_WAIT 
-	} smState = SM_PREPARE;
 
 
 
@@ -1464,7 +1530,7 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index)
   	BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BYTE oidLen)
                                    
   Summary:
-  	Used to validate the support of Var ID for A perticular SNMP Version.
+  	Used to Restrict the access dynamic and non dynamic OID string for A perticular SNMP Version.
 
   Description:
  	This is a callback function called by SNMP module. SNMP user must 
@@ -1472,7 +1538,8 @@ BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index)
  	MIB IDs hereas per SNMP version.
  	e.g - SYS_UP_TIME (250) is common for V1/V2/V3
  	ENGINE_ID - is the part of V3, So put the all the SNMPv3 var ids within 
- 	Macro STACK_USE_SNMPV3_SERVER.   	
+ 	Macro STACK_USE_SNMPV3_SERVER.   
+ 	
   PreCondition:
   	None
  
@@ -1511,6 +1578,8 @@ BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValuePtr,BY
 				continue;
 			
 			size = strlen((char*)gSnmpNonMibRecInfo[i].oidstr);
+			if(size == 0)
+				continue;
 			if( size <= oidLen)
 				len = size;
 			else

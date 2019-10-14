@@ -1,3 +1,3 @@
-Please contact Microchip support at (support.microchip.com) or your 
-nearest Microchip Field/Sales office to obtain the PIC32 USB HID 
-bootloader.
+The PIC32MX HID Device Bootloader is a part of Microchip Application Note AN1388. The
+application note can be downloaded from the following link:
+http://www.microchip.com/stellent/idcplg?IdcService=SS_GET_PAGE&nodeId=1824&appnote=en554836

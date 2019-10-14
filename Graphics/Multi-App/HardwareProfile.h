@@ -264,13 +264,13 @@
  * QVGA or WQVGA
  * USB MSD
  ********************************************************************/
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_USBMSD_QVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_8PMP_USBMSD_QVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_8PMP_USBMSD_QVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_USBMSD_QVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_16PMP_USBMSD_QVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_16PMP_USBMSD_QVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_8PMP_USBMSD_WQVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_8PMP_USBMSD_WQVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_8PMP_USBMSD_WQVGAv1.h"
-#elif defined(CFG_INCLUDE_GFXv3_PIC32_SK_16PMP_USBMSD_WQVGAv1)
+#elif defined(CFG_INCLUDE_GFXv3_PIC_SK_16PMP_USBMSD_WQVGAv1)
     #include "Configs/HWP_GFXv3_PIC_SK_16PMP_USBMSD_WQVGAv1.h"
 /*********************************************************************
  * Hardware Configuration for

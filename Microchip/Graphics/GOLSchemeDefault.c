@@ -44,9 +44,13 @@
 
 #ifdef USE_GOL
 /*****************************************************************************
- * This defines a default GOL scheme that gets populated when an application
- * calls the GOLCreateScheme().  The application is able to define a default 
- * GOL scheme in GraphicsConfig header file.
+ * Overview: This defines a default GOL scheme that gets populated when an 
+ *           application calls the GOLCreateScheme().  The application can 
+ *           override this definition by defining the macro GFX_SCHEMEDEFAULT 
+ *           in the GraphicsConfig.h header file and defining GOLSchemeDefault 
+ *           structure in the application code. It is important to use the same
+ *           structure name since the library assumes that this object exists 
+ *           and assigns the default style scheme pointer to this object.
  *****************************************************************************/
 const GOL_SCHEME GOLSchemeDefault =
 {

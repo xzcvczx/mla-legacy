@@ -46,6 +46,8 @@
           API functions.  These are non-blocking, state machine based read/write
           handlers capable of considerably improved data throughput, particularly
           for multi-block reads and multi-block writes.
+  1.3.2   Modified MDD_SDSPI_AsyncWriteTasks() so pre-erase command only gets
+          used for multi-block write scenarios.   
 ********************************************************************/
 
 #include "Compiler.h"
@@ -1336,24 +1338,24 @@ BYTE MDD_SDSPI_AsyncWriteTasks(ASYNC_IO* info)
             else
             {
                 command = WRITE_MULTI_BLOCK;
+                
+                //Compute the number of blocks that we are going to be writing in this multi-block write operation.
+                preEraseBlockCount = (ioInfo.dwBytesRemaining >> 9); //Divide by 512 to get the number of blocks to write
+                //Always need to erase at least one block.
+                if(preEraseBlockCount == 0)
+                {
+                    preEraseBlockCount++;   
+                } 
+    
+                //Should send CMD55/ACMD23 to let the media know how many blocks it should 
+                //pre-erase.  This isn't essential, but it allows for faster multi-block 
+                //writes, and probably also reduces flash wear on the media.
+                response = SendMMCCmd(APP_CMD, 0x00000000);    //Send CMD55
+                if(response.r1._byte == 0x00)   //Check if successful.
+                {
+                    SendMMCCmd(SET_WR_BLK_ERASE_COUNT , preEraseBlockCount);    //Send ACMD23        
+                }
             }    
-
-            //Compute the number of blocks that we are going to be writing in this multi-block write operation.
-            preEraseBlockCount = (ioInfo.dwBytesRemaining >> 9); //Divide by 512 to get the number of blocks to write
-            //Always need to erase at least one block.
-            if(preEraseBlockCount == 0)
-            {
-                preEraseBlockCount++;   
-            } 
-
-            //Should send CMD55/ACMD23 to let the media know how many blocks it should 
-            //pre-erase.  This isn't essential, but it allows for faster multi-block 
-            //writes, and probably also reduces flash wear on the media.
-            response = SendMMCCmd(APP_CMD, 0x00000000);    //Send CMD55
-            if(response.r1._byte == 0x00)   //Check if successful.
-            {
-                SendMMCCmd(SET_WR_BLK_ERASE_COUNT , preEraseBlockCount);    //Send ACMD23        
-            }
 
             //The info->dwAddress parameter is the block address.
             //For standard capacity SD cards, the card expects a complete byte address.

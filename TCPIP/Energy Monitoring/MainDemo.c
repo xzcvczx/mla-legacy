@@ -69,15 +69,13 @@
 
 // Include functions specific to this stack application
 #include "MainDemo.h"
-#include "ginsu.h"
-#include "HTTPTime.h"
 
 
 // Declare AppConfig structure
 APP_CONFIG AppConfig;
 static unsigned short wOriginalAppConfigChecksum;	// Checksum of the ROM defaults for AppConfig
 // Declare a variable to hold the stack's relative start time
-DWORD StackStartTime = 0;
+//DWORD StackStartTime = 0;
 // Declare POWER_METER_PREFERENCES structure to contain required settings
 POWER_METER_PREFERENCES gPowerMeterPreferences;
 // Declare an INT64 to contain the cumulative power consumption of
@@ -226,8 +224,9 @@ int main(void)
 {
 	static DWORD t = 0;
 	static DWORD dwLastIP = 0;
-    DWORD SNTPTimeTimeout = 0;
+//    DWORD SNTPTimeTimeout = 0;
     DWORD cumulativePowerSampleTimer = 0;
+    DWORD cumulativePowerTimer = 0;
 
 	// Initialize application specific hardware
 	InitializeBoard();
@@ -327,11 +326,10 @@ int main(void)
     mDNSMulticastFilterRegister();			
 	#endif
 
-    StackStartTime = 0;
-
-    GInitForWork();
+//    StackStartTime = 0;
 
     cumulativePowerSampleTimer = TickGet() + (TICK_SECOND * 30);
+    cumulativePowerTimer = TickGet() + (TICK_SECOND * 600);
 
 	// Now that all items are initialized, begin the co-operative
 	// multitasking loop.  This infinite loop will continuously 
@@ -353,7 +351,10 @@ int main(void)
         // If we can't get a reasonable SNTP time within a certain timeout,
         // try to parse the time from an HTTP packet with the HTTPTime
         // application module
-        if (StackStartTime < 1248245820)
+
+        // NOTE: This code section is no longer necessary, as this code no
+        // longer needs the absolute time
+/*        if (StackStartTime < 1248245820)
         {
             StackStartTime = SNTPGetUTCSeconds();
             if (SNTPTimeTimeout == 0)
@@ -369,6 +370,7 @@ int main(void)
                 StackStartTime = HTTPTimeGetUTCSeconds();
             }
         }
+*/
 
         // Blink LED0 (right most one) every second.
         if(TickGet() - t >= TICK_SECOND/2ul)
@@ -419,8 +421,15 @@ int main(void)
             cumulativePowerSampleTimer = TickGet() + (TICK_SECOND * 30);
         }
 
-        if (*(gPowerMeterPreferences.auth_token) && StackStartTime > 124824582)
-            GPollForWork();
+        // This code has been moved here from the GetCumulativePower function in the Google PowerMeter
+        // interface code.  It will update the current cumulative energy consumption, in watt-hours
+        // from the finer-precision sampling value.
+        if (TickGet() > cumulativePowerTimer)
+        {
+            gCumulativePower += gCumulativePowerInSamplingPeriod / 10000;
+        
+            gCumulativePowerInSamplingPeriod %= 10000;
+        }
 
         // If the local IP address has changed (ex: due to DHCP lease change)
         // write the new IP address to the LCD display, UART, and Announce 
@@ -449,8 +458,8 @@ int main(void)
 			#endif
 		}
 
-        if (IsHTTPTimeStateMachineRunning())
-            HTTPTimeTask();
+//        if (IsHTTPTimeStateMachineRunning())
+//            HTTPTimeTask();
 	}
 }
 
@@ -1565,5 +1574,3 @@ unsigned int ReadUART1(void)
     else
         return (U1RXREG & 0xFF);
 }
-
-

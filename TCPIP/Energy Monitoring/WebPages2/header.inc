@@ -4,8 +4,7 @@
 <head>
 <title>Microchip's Energy Monitoring PICtail Demo App</title>
 <link href="/mchp.css" rel="stylesheet" type="text/css" />
-<script src="/mchp.js" type="text/javascript"></script>
-<script src="/popup.js" type="text/javascript"></script>
+<script src="/mchp.js" type="text/javascript"></script>\
 </head>
 
 <body>
@@ -15,8 +14,3 @@
 <div style="padding:0 0 5px 5px"><img src="/mchp.gif" alt="Microchip" /></div>
 
 <div id="title"><div class="right">TCP/IP Stack Demo Application</div><span id="hello">&nbsp;</span></div>
-
-<div id="menu">
-<a href="/index.htm">Home</a>
-<a href="/terms.htm?">Google PowerMeter</a>
-</div>

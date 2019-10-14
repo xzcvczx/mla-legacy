@@ -48,7 +48,7 @@
  #include "WirelessProtocols/SymbolTime.h"
  #include "HardwareProfile.h"
  #include "WirelessProtocols/Console.h"
- #include "LCDDisplay.h"
+ #include "LcdDisplay.h"
  #include "WirelessProtocols/MSPI.h"
  #include "TimeDelay.h"
  

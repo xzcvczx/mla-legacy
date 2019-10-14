@@ -39,7 +39,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC16F1937</targetDevice>
         <targetHeader></targetHeader>
-        <platformTool>ICD3PlatformTool</platformTool>
+        <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>hi-tech-picc</languageToolchain>
         <languageToolchainVersion>9.81</languageToolchainVersion>
         <platform>3</platform>
@@ -119,8 +119,8 @@
         <property key="linker-interrupts-number-of-vectors" value="single"/>
         <property key="linker-interrupts-disable-usage" value="false"/>
       </HI-TECH-LINK>
-      <ICD3PlatformTool>
-      </ICD3PlatformTool>
+      <PICkit3PlatformTool>
+      </PICkit3PlatformTool>
     </conf>
   </confs>
 </configurationDescriptor>

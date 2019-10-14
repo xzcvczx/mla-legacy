@@ -66,14 +66,11 @@
 		#include "libpic30.h"
 		#include <math.h>
 
-		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
-		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
+//		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
+//		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
-
-		// Provide clock from the Micro to the Smart Card
-		#define  ENABLE_SC_EXTERNAL_CLOCK
 
 		// Set Clock Freq to drive Smart Card
 		#define Scdrv_ClockSet()            (REFOCON = 0x0300)
@@ -88,7 +85,10 @@
 		#define SCdrv_DisableClock()	    (REFOCONbits.ROON = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0x0030,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+
+		// One count of timer 1 corresponds to how much micro seconds...
+		#define TIMER1_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(256/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)
@@ -187,14 +187,11 @@
 		#include "libpic30.h"
 		#include <math.h>
 
-		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
-		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
+//		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
+//		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
-
-		// Provide clock from the Micro to the Smart Card
-		#define  ENABLE_SC_EXTERNAL_CLOCK
 
 		// Set Clock Freq to drive Smart Card
 		#define Scdrv_ClockSet()            (REFOCON = 0x0300)
@@ -220,7 +217,10 @@
 		#define SCdrv_DisableClock()	    (OC1R = 0)
 		
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0x0030,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+
+		// One count of timer 1 corresponds to how much micro seconds...
+		#define TIMER1_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(256/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)
@@ -323,9 +323,6 @@
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
 
-		// Provide clock from the Micro to the Smart Card
-		#define  ENABLE_SC_EXTERNAL_CLOCK
-
 		// Set Clock Freq to drive Smart Card
 		#define Scdrv_ClockSet()            (REFOCON = 0x04)
 
@@ -339,10 +336,13 @@
 		#define SCdrv_DisableClock()	    (REFOCONbits.ROON = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0x86,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+
+		// One count of timer 0 corresponds to how much micro seconds...
+		#define TIMER0_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(128/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
-		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0H = (count) >> 8,TMR0L = (count) & 0x00FF)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_EnableDelayTimer()	    	(T0CONbits.TMR0ON = 1)
@@ -445,10 +445,13 @@
 		#define SCdrv_DisableClock()	    (REFOCONbits.ROON = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0x86,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+
+		// One count of timer 0 corresponds to how much micro seconds...
+		#define TIMER0_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(128/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
-		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0H = (count) >> 8,TMR0L = (count) & 0x00FF)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_EnableDelayTimer()	    	(T0CONbits.TMR0ON = 1)
@@ -549,10 +552,13 @@
 		#define SCdrv_DisableClock()	    (CCP1CON = 0x00,T2CONbits.TMR2ON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0x86,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+
+		// One count of timer 0 corresponds to how much micro seconds...
+		#define TIMER0_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(128/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
-		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0H = (count) >> 8,TMR0L = (count) & 0x00FF)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_EnableDelayTimer()	    	(T0CONbits.TMR0ON = 1)
@@ -651,10 +657,13 @@
 		#define SCdrv_DisableClock()	    (CCP1CON = 0x00,T2CONbits.TMR2ON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0x86,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+
+		// One count of timer 0 corresponds to how much micro seconds...
+		#define TIMER0_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(128/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
-		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0H = (count) >> 8,TMR0L = (count) & 0x00FF)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_EnableDelayTimer()	    	(T0CONbits.TMR0ON = 1)
@@ -753,10 +762,13 @@
 		#define SCdrv_DisableClock()	    (CCP1CON = 0x00,T2CONbits.TMR2ON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (T0CON = 0x86,INTCON2bits.TMR0IP = 0,RCONbits.IPEN = 1,INTCONbits.PEIE = 1,INTCONbits.TMR0IE = 1,INTCONbits.GIEH = 1)
+
+		// One count of timer 0 corresponds to how much micro seconds...
+		#define TIMER0_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(128/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
-		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0L = (count) & 0x00FF,TMR0H = (count) >> 8)
+		#define SCdrv_SetDelayTimerCnt(count)	    (TMR0H = (count) >> 8,TMR0L = (count) & 0x00FF)
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_EnableDelayTimer()	    	(T0CONbits.TMR0ON = 1)
@@ -851,7 +863,10 @@
 		#define SCdrv_DisableClock()	    (OC2CONbits.ON = 0,T2CONbits.ON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (IPC1bits.T1IP = 3,IPC1bits.T1IS = 1,IFS0bits.T1IF = 0,T1CON = 0x00,PR1 = 0xFFFF,IEC0bits.T1IE = 1,INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR),INTEnableInterrupts())
+		#define SCdrv_EnableDelayTimerIntr()   (IPC1bits.T1IP = 3,IPC1bits.T1IS = 1,IFS0bits.T1IF = 0,T1CON = 0x0030,PR1 = 0xFFFF,IEC0bits.T1IE = 1,INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR),INTEnableInterrupts())
+
+		// One count of timer 1 corresponds to how much micro seconds...
+		#define TIMER1_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(256/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)
@@ -949,8 +964,8 @@
 		#include "libpic30.h"
 		#include <math.h>
 
-		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
-		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
+//		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
+//		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -971,7 +986,10 @@
 		#define SCdrv_DisableClock()	    (T2CONbits.TON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0x0030,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+
+		// One count of timer 1 corresponds to how much micro seconds...
+		#define TIMER1_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(256/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)
@@ -1061,8 +1079,8 @@
 		#include "libpic30.h"
 		#include <math.h>
 
-		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
-		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
+//		#define  WaitMicroSec(MicroSec)    __delay_us(MicroSec)
+//		#define  WaitMilliSec(Waitms)      __delay_ms(Waitms)
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -1083,7 +1101,10 @@
 		#define SCdrv_DisableClock()	    (T2CONbits.TON = 0,TMR2 = 0)
 
 		// Set Clock Freq to drive Smart Card
-		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+		#define SCdrv_EnableDelayTimerIntr()   (IPC0bits.T1IP = 4,IFS0bits.T1IF = 0,T1CON = 0x0030,PR1 = 0xFFFF,IEC0bits.T1IE = 1)
+
+		// One count of timer 1 corresponds to how much micro seconds...
+		#define TIMER1_SINGLE_COUNT_MICRO_SECONDS	(BYTE)(256/(FCY/1000000UL))
 
 		// Enable Clock to drive Smart Card
 		#define SCdrv_SetDelayTimerCnt(count)	    (TMR1 = count)

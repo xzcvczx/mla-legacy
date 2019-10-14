@@ -41,7 +41,7 @@
 #include "HardwareProfile.h"
 #include "comm_pkt.h"
 #ifdef USE_COMM_PKT_MEDIA_SERIAL_PORT
-#include "uart.h"
+#include "UART.h"
 #endif
 #ifdef USE_COMM_PKT_MEDIA_USB
 #include "USB/usb.h"

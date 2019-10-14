@@ -49,7 +49,8 @@ class DeviceData
             unsigned char type;
             unsigned int start;
             unsigned int end;
-            unsigned char *data;
+            unsigned int dataBufferLength;
+            unsigned char* pDataBuffer;
         };
 
         QList<DeviceData::MemoryRange> ranges;
