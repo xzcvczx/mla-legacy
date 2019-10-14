@@ -69,7 +69,7 @@ void UARTInit(void)
     RPOR1bits.RP3R = 5;     // assign RP3 to TX
     #endif
 
-    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__)
+    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined(__PIC24FJ256GB210__)
 	    __builtin_write_OSCCONL(OSCCON & 0xbf);
 	    RPINR19bits.U2RXR = 10; // assign RP10 to RX
     	RPOR8bits.RP17R = 5;    // assign RP17 to TX
@@ -77,16 +77,12 @@ void UARTInit(void)
     #endif
     #if defined(__PIC24FJ256DA210__)
 	    __builtin_write_OSCCONL(OSCCON & 0xbf);
-		//PPSIn(RPI37, U2RX_FUNC);	// Bring RX2 Input to RPI37/RC14
-		_U2RXR = 37;				// Bring RX2 Input to RPI37/RC14			
-		//PPSOut(RP16, U2TX_FUNC);	// Bring TX2 output on RP16/RF3
+		_U2RXR = 11;				// Bring RX2 Input to RP11/RD0			
 		_RP16R = 5; 				// Bring TX2 output on RP16/RF3
 		__builtin_write_OSCCONL(OSCCON | 0x40); 
 		
  			OSCCON = 0x3302;    // Enable secondary oscillator
             CLKDIV = 0x0020;    // Set PLL prescaler (1:1), PLLEN = 1
-
-            TRISD = 0x00C0;		
 		
 	#endif    
  

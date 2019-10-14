@@ -88,8 +88,7 @@
     #if defined(__PIC24F__) || defined(__PIC24H__) || defined(__dsPIC33F__)
         #define GetPeripheralClock()    (GetSystemClock() / 2)
     #elif defined(__PIC32MX__)
-        //#define GetPeripheralClock()    (GetSystemClock() / (1 << OSCCONbits.PBDIV))
-        #define GetPeripheralClock()    (GetSystemClock() / 2)
+        #define GetPeripheralClock()    (GetSystemClock() / (1 << OSCCONbits.PBDIV))
     #endif
 
 /*********************************************************************
@@ -104,8 +103,7 @@
     #if defined(__PIC24F__) || defined(__PIC24H__) || defined(__dsPIC33F__)
         #define GetInstructionClock()   (GetSystemClock() / 2)
     #elif defined(__PIC32MX__)
-        //#define GetInstructionClock()   (GetSystemClock() / PFMWSbits.CHECON)
-        #define GetInstructionClock()   (GetSystemClock()) 
+        #define GetInstructionClock()   (GetSystemClock() / CHECONbits.PFMWS)
     #endif
 
 /*********************************************************************
@@ -148,6 +146,14 @@
 /*********************************************************************
 * DISPLAY SETTINGS 
 ********************************************************************/
+	// EPMP is exclusive to GB210 devices and PMP to some devices
+	#if defined (__PIC24FJ256DA210__)
+		// EPMP is used by graphics controller
+	#elif defined (__PIC24FJ256GB210__)
+		#define USE_GFX_EPMP
+	#else
+		#define USE_GFX_PMP
+	#endif
 
 // Error Checking
 	#ifndef GRAPHICS_HARDWARE_PLATFORM
@@ -446,6 +452,7 @@
             #define SST25_SCK_TRIS  TRISGbits.TRISG6
             #define SST25_SDO_TRIS  TRISGbits.TRISG8
             #define SST25_SDI_TRIS  TRISGbits.TRISG7
+			#define SST25_SDI_ANS   ANSGbits.ANSG7
         #endif
     #elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
         #define SST25_CS_TRIS   TRISAbits.TRISA14
@@ -713,7 +720,7 @@
         #define RX_TRIS TRISCbits.TRISC0
 	#elif defined(__PIC24FJ256DA210__)    
         #define TX_TRIS TRISFbits.TRISF3
-        #define RX_TRIS TRISCbits.TRISC14
+        #define RX_TRIS TRISDbits.TRISD0
     #else
         #define TX_TRIS TRISFbits.TRISF5
         #define RX_TRIS TRISFbits.TRISF4
@@ -938,7 +945,7 @@
 		// Description: The TRIS bit for the SDO pin
 		#define SPIOUT  TRISBbits.TRISB0
 
-	#elif defined (__PIC24FJ256GB110__) 
+	#elif defined (__PIC24FJ256GB110__) || defined (__PIC24FJ256GB210__)
 		
 		// Description: SD-SPI Chip Select Output bit
 		#define SD_CS   PORTBbits.RB1

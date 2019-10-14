@@ -67,11 +67,11 @@
 
 #elif defined (__PIC32MX__) 
 
-	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
+	#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
 
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
-	#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_PH480272T_005_I11Q.h"
+	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_PH480272T_005_I11Q.h"
 
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
 

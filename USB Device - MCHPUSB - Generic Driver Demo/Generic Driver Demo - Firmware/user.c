@@ -239,7 +239,7 @@ WORD_VAL ReadPOT(void)
         w.v[1] = ADRESH;
 
     #elif defined(__C30__) || defined(__C32__)
-        #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
+        #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD) || defined(PIC24FJ256GB210_PIM)
             AD1CHS = 0x5;           //MUXA uses AN5
 
             // Get an ADC sample
@@ -359,7 +359,7 @@ void ServiceRequests(void)
                 break;
 
             case UPDATE_LED:
-                #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM)
+                #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F47J53_PIM)
                     blinkStatusValid = FALSE;
                 #endif
                 // LED1 & LED2 are used as USB event indicators.

@@ -154,76 +154,6 @@ extern SHORT    _clipRight;
 extern SHORT    _clipBottom;
 
 /*********************************************************************
-* Macros:  PMPWaitBusy()
-*
-* Overview: Delays execution for PMP cycle time.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define PMPWaitBusy()   while(PMMODEbits.BUSY);
-
-/*********************************************************************
-* Macros:  WriteData(byte1, byte0)
-*
-* PreCondition: none
-*
-* Input: byte1,byte0 - data bytes
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: writes S6D0129 data
-*
-* Note: none
-*
-********************************************************************/
-    #define WriteData(byte1, byte0) \
-    PMADDR = 0x0000;                \
-    PMDIN1 = SRAM_WRITE;            \
-    PMPWaitBusy();                  \
-    PMADDR = 0x0001;                \
-    PMDIN1 = byte0;                 \
-    PMPWaitBusy();                  \
-    PMDIN1 = byte1;                 \
-    PMPWaitBusy();
-
-/*********************************************************************
-* Macros:  SetAddress(addr2,addr1,addr0)
-*
-* PreCondition: none
-*
-* Input: addr0,addr1,addr2 - address bytes
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: writes S6D0129 address pointer
-*
-* Note: none
-*
-********************************************************************/
-    #define SetAddress(addr2, addr1, addr0) \
-    PMADDR = 0x0000;                        \
-    PMDIN1 = SET_DATA_POINTER;              \
-    PMPWaitBusy();                          \
-    PMADDR = 0x0001;                        \
-    PMDIN1 = addr0;                         \
-    PMPWaitBusy();                          \
-    PMDIN1 = addr1;                         \
-    PMPWaitBusy();                          \
-    PMDIN1 = addr2;                         \
-    PMPWaitBusy();
-
-/*********************************************************************
 * Function:  void ResetDevice()
 *
 * PreCondition: none
@@ -537,21 +467,4 @@ void    PutPixel(SHORT x, SHORT y);
 ********************************************************************/
     #define SetPalette(colorNum, color)
 
-/*********************************************************************
-* Function:  void  DelayMs(WORD time)
-*
-* PreCondition: none
-*
-* Input: time - delay in ms
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: delays execution on time specified in ms
-*
-* Note: delay is defined for 16MIPS
-*
-********************************************************************/
-void    DelayMs(WORD time);
 #endif // HIT1270L.h

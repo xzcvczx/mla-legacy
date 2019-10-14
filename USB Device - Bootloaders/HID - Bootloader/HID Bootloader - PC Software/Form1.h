@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                Microchip USB HID Bootloader Version 2.6
+ *                Microchip USB HID Bootloader
  *
  *********************************************************************
  * FileName:        Form1.h
@@ -29,15 +29,19 @@
  ********************************************************************
 
  Change History:
-  Rev   Date(M/D/Y)  Description
-  1.0   05/21/2008   Initial release: PIC18 devices supported
-  2.2	06/10/2008	 Update to add PIC24F USB device support
-  2.3	08/11/2008	 Update to add PIC32MX USB device support.  
-					 Minor TryToFindHIDDeviceFromVIDPID() update
-					 for improved error handling.  Updated to fix
-				     error programming non-J flash PIC18 devices.
-  2.6	10/08/2009	 Added additional error checking and handling code 
-					 for greater application robustness.
+  Rev   Description
+  ----- -------------------------------------------------------
+  1.0   Initial release: PIC18 devices supported
+  2.2	Update to add PIC24F USB device support
+  2.3	Update to add PIC32MX USB device support.  
+			Minor TryToFindHIDDeviceFromVIDPID() update
+			for improved error handling.  Updated to fix
+			error programming non-J flash PIC18 devices.
+  2.6	Added additional error checking and handling code 
+			for greater application robustness.
+  2.6a  Removed the requirement to remap the reset vector in the PC
+			software.  This is now handled by modified linker files
+			in the application firmware projects
  ********************************************************************/
 
 #pragma once
@@ -819,7 +823,7 @@ namespace HIDBootLoader {
 			this->Controls->Add(this->btn_ProgramVerify);
 			this->Controls->Add(this->listBox1);
 			this->Name = L"Form1";
-			this->Text = L"Microchip USB HID Bootloader v2.6";
+			this->Text = L"Microchip USB HID Bootloader v2.6a";
 			this->SizeChanged += gcnew System::EventHandler(this, &Form1::Form1_SizeChanged);
 			this->ResumeLayout(false);
 			this->PerformLayout();
@@ -2502,144 +2506,6 @@ namespace HIDBootLoader {
 									//  we are on the fourth byte of an address
 									//  we can ignore this byte
 								}
-								#if !defined(ENCRYPTED_BOOTLOADER)
-								else if((bytesPerAddress == 2) && (myResponse.GetDataResults.Address == PIC24_RESET_REMAP_OFFSET))
-								{
-									unsigned char k;
-									unsigned char *tempPtr;
-
-									for(k=0;k<memoryRegionsDetected;k++)
-									{
-										if(memoryRegions[k].Address == PIC24_RESET_REMAP_OFFSET)
-										{
-											tempPtr = getMemoryRegion(k);
-										}
-									}
-
-									switch(i)
-									{
-										case 0:
-											if(tempData2==*tempPtr)
-											{
-												break;
-											}
-											//Fall-through
-										case 1:
-											if(tempData2==*(tempPtr+1))
-											{
-												break;
-											}
-											//Fall-through
-										case 2:
-											if(tempData2==*(tempPtr+2))
-											{
-												break;
-											}
-										case 3:
-											if(tempData2==*(tempPtr+3))
-											{
-												break;
-											}
-										case 4:
-											if(tempData2==*(tempPtr+4))
-											{
-												break;
-											}
-										case 5:
-											if(tempData2==*(tempPtr+5))
-											{
-												break;
-											}
-											//Fall-through
-										default:
-											//Any instruction other than 0x1400 that is different is an error
-											#if defined(DEBUG_THREADS) //&& defined(DEBUG_USB)
-												DEBUG_OUT("<< Failing IN packet");
-												printBuffer(myResponse.PacketData.Data,64);
-												DEBUG_OUT("");
-											#endif
-
-											#if defined(DEBUG_THREADS)
-												DEBUG_OUT("---- Failing Address Information ----");
-												DEBUG_OUT(String::Concat(" Address = 0x",HexToString(myResponse.GetDataResults.Address+i,4)," Expected = 0x",HexToString(tempData,1)," Got = 0x",HexToString(tempData2,1)));
-												DEBUG_OUT("");
-											#endif
-
-											ENABLE_PRINT();
-											VerifyThreadResults = VERIFY_MISMATCH_FAILURE;
-											foundError = true;
-											progressStatus = 100;
-											CloseHandle(AsyncWriteHandleToMyDevice);
-											CloseHandle(AsyncReadHandleToMyDevice);
-											return;
-											break;
-									}
-								}
-								else if((bytesPerAddress == 2) && (myResponse.GetDataResults.Address = 0x00))
-								{
-									switch(i)
-									{
-										case 0:
-											if(tempData2==0x00)
-											{
-												break;
-											}
-											//Fall-through
-										case 1:
-											if(tempData2==0x04)
-											{
-												break;
-											}
-											//Fall-through
-										case 2:
-											if(tempData2==0x04)
-											{
-												break;
-											}
-											//Fall-through
-										case 3:
-											if(tempData2==0x00)
-											{
-												break;
-											}
-											//Fall-through
-										case 4:
-											if(tempData2==0x00)
-											{
-												break;
-											}
-											//Fall-through
-										case 5:
-											if(tempData2==0x00)
-											{
-												break;
-											}
-											//Fall-through
-										default:
-											//Any instruction other than 0x1400 that is different is an error
-											#if defined(DEBUG_THREADS) //&& defined(DEBUG_USB)
-												DEBUG_OUT("<< Failing IN packet");
-												printBuffer(myResponse.PacketData.Data,64);
-												DEBUG_OUT("");
-											#endif
-
-											#if defined(DEBUG_THREADS)
-												DEBUG_OUT("---- Failing Address Information ----");
-												DEBUG_OUT(String::Concat(" Address = 0x",HexToString(myResponse.GetDataResults.Address+i,4)," Expected = 0x",HexToString(tempData,1)," Got = 0x",HexToString(tempData2,1)));
-												DEBUG_OUT("");
-											#endif
-
-											ENABLE_PRINT();
-											VerifyThreadResults = VERIFY_MISMATCH_FAILURE;
-											foundError = true;
-											progressStatus = 100;
-											CloseHandle(AsyncWriteHandleToMyDevice);
-											CloseHandle(AsyncReadHandleToMyDevice);
-											return;
-											break;
-									}
-								}
-								#endif
 								else
 								{
 									#if defined(DEBUG_THREADS) //&& defined(DEBUG_USB)
@@ -2933,6 +2799,7 @@ namespace HIDBootLoader {
 							{
 								//then error out of the function
 								DEBUG_OUT("ERROR: Checksum error");
+								PRINT_STATUS("ERROR: There is a checksum error in the hex file.");
 								hexFileError = true;
 							}
 
@@ -2987,71 +2854,8 @@ namespace HIDBootLoader {
 													{
 														break;
 													}
-													if(bytesPerAddress == 2)
-													{
-														#if !defined(ENCRYPTED_BOOTLOADER)
-														if((totalAddress + j) < 0x6)
-														{
-															unsigned char k;
-															unsigned char *userResetVectorPtr;
 
-															switch((totalAddress+j))
-															{
-																case 0:
-																	*pData = 0x00;
-																	break;
-																case 1:
-																case 2:
-																	*(pData + j) = 0x04;
-																	break;
-																case 3:
-																case 4:
-																case 5:
-																	*(pData + j) = 0x00;
-																default:
-																	*pData = (unsigned char)(data);
-																	break;
-															}
-
-															for(k=0;k<memoryRegionsDetected;k++)
-															{
-																if(memoryRegions[k].Address == PIC24_RESET_REMAP_OFFSET)
-																{
-																	pData = getMemoryRegion(k);
-																	userResetVectorPtr = (unsigned char*)(pData + totalAddress+j);
-																	*userResetVectorPtr = (unsigned char)(data);
-																	pData = getMemoryRegion(i);
-																}
-															}
-														}
-														else if((totalAddress+j)==(PIC24_RESET_REMAP_OFFSET*2))
-														{
-														}
-														else if((totalAddress+j)==((PIC24_RESET_REMAP_OFFSET*2)+1))
-														{
-														}
-														else if((totalAddress+j)==((PIC24_RESET_REMAP_OFFSET*2)+2))
-														{
-														}
-														else if((totalAddress+j)==((PIC24_RESET_REMAP_OFFSET*2)+3))
-														{
-														}
-														else if((totalAddress+j)==((PIC24_RESET_REMAP_OFFSET*2)+4))
-														{
-														}
-														else if((totalAddress+j)==((PIC24_RESET_REMAP_OFFSET*2)+5))
-														{
-														}
-														else
-														#endif
-														{
-															*p = (unsigned char)(data);
-														}
-													}
-													else
-													{
-														*p = (unsigned char)(data);
-													}
+													*p = (unsigned char)(data);
 												}
 												break;
 											}
@@ -4671,7 +4475,7 @@ namespace HIDBootLoader {
 							//If the unlock process was a failure, then let's send a message
 							//  to the status box saying it was a failure
 							ENABLE_PRINT();
-							PRINT_STATUS("Unabled to unlock\\lock the configuration bits");
+							PRINT_STATUS("Unable to unlock\\lock the configuration bits");
 
 							//Set the bootloader and unlock config thread states to idle
 							bootloaderState = BOOTLOADER_IDLE;

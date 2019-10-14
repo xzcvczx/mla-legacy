@@ -1,14 +1,13 @@
 /********************************************************************
  FileName:     main.c
  Dependencies: See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
+ Processor:		PIC24 USB Microcontrollers
  Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
+ 				hardware platforms: 
+ 				Explorer 16 + PIC24FJ256DA110 PIM.  The firmware may be
  				modified for use on other USB platforms by editing the
  				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
+ Complier:  	Microchip C30 (for PIC24)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -35,12 +34,23 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  1.0   04/30/2008   Initial Release
-  					 Adapted from PIC18F87J50 HID Bootloader Firmware
-  					 as basis for BootApplication().  The rest of the
-  					 code was taken from the Simple HID Demo in 
-  					 MCHPFSUSB v2.1.
+
+  Rev   Description
+  ----- ---------------------------------------------
+  v2.2  Adapted from PIC18F87J50 HID Bootloader Firmware
+        as basis for BootApplication().  The rest of the
+        code was taken from the Simple HID Demo in 
+        MCHPFSUSB v2.2.
+
+  v2.6a Fixed race condition where an OUT packet could potentially
+        clear the prior IN packet depending on the bus communication
+        order.
+
+        Removed ability to reflash the interrupt vectors.  This has
+        been depricated for a interrupt remapping scheme documented
+        in the migration notes and in the getting started for the HID
+        bootloader.
+
 ********************************************************************/
 
 #ifndef USBMOUSE_C
@@ -55,6 +65,8 @@
 
 #if defined(PIC24FJ256DA210_DEV_BOARD)
     #ifdef __PIC24FJ256DA210__ //Defined by MPLAB when using 24FJ256GB110 device
+    _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 
     #else
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__
@@ -366,7 +378,6 @@ static void InitializeSystem(void)
 void  __attribute__((address(0x1400))) jumpBack()
 {
     RCON &= ~0x83;
-    while(1){}
     __asm__("goto 0x400");
 }
 
@@ -528,22 +539,32 @@ void BootApplication(void)
 	unsigned int j;
 	DWORD_VAL FlashMemoryValue;
 
-	if(BootState == IdleState)
-	{
-	    if(!USBHandleBusy(USBOutHandle))		//Did we receive a command?
-		{
-            for(i = 0; i < TotalPacketSize; i++)
+    if(BootState == IdleState)
+    {
+        //Are we done sending the last response.  We need to be before we 
+        //  receive the next command because we clear the PacketToPC buffer
+        //  once we receive a command
+        if(!USBHandleBusy(USBInHandle))
+        {
+            if(!USBHandleBusy(USBOutHandle))		//Did we receive a command?
             {
-                PacketFromPC.Contents[i] = PacketFromPCBuffer.Contents[i];
+                for(i = 0; i < TotalPacketSize; i++)
+                {
+                    PacketFromPC.Contents[i] = PacketFromPCBuffer.Contents[i];
+                }
+                
+                USBOutHandle = USBRxOnePacket(HID_EP,(BYTE*)&PacketFromPCBuffer,64);
+                BootState = NotIdleState;
+                
+                //Prepare the next packet we will send to the host, by initializing the entire packet to 0x00.	
+                for(i = 0; i < TotalPacketSize; i++)
+                {
+                    //This saves code space, since we don't have to do it independently in the QUERY_DEVICE and GET_DATA cases.
+                    PacketToPC.Contents[i] = 0;	
+                }
             }
-
-	        USBOutHandle = USBRxOnePacket(HID_EP,(BYTE*)&PacketFromPCBuffer,64);
-			BootState = NotIdleState;
-			
-			for(i = 0; i < TotalPacketSize; i++)		//Prepare the next packet we will send to the host, by initializing the entire packet to 0x00.
-				PacketToPC.Contents[i] = 0;				//This saves code space, since we don't have to do it independently in the QUERY_DEVICE and GET_DATA cases.
-		}
-	}
+        }
+    }
 	else //(BootState must be in NotIdleState)
 	{	
 		switch(PacketFromPC.Command)
@@ -563,14 +584,10 @@ void BootApplication(void)
 
 				if(ConfigsProtected == UNLOCKCONFIG)						
 				{
-    				PacketToPC.Type2 = (unsigned char)TypeProgramMemory;				//Overwrite the 0xFF end of list indicator if we wish to program the Vectors.
-                    PacketToPC.Address2 = (unsigned long)VectorsStart;
-                    PacketToPC.Length2 = (unsigned long)(VectorsEnd - VectorsStart);	//Size of program memory area
-
-                    PacketToPC.Type3 = (unsigned char)TypeConfigWords;
-                    PacketToPC.Address3 = (unsigned long)ConfigWordsStartAddress;
-                    PacketToPC.Length3 = (unsigned long)(ConfigWordsStopAddress - ConfigWordsStartAddress);
-                    PacketToPC.Type4 = (unsigned char)TypeEndOfTypeList;
+                    PacketToPC.Type2 = (unsigned char)TypeConfigWords;
+                    PacketToPC.Address2 = (unsigned long)ConfigWordsStartAddress;
+                    PacketToPC.Length2 = (unsigned long)(ConfigWordsStopAddress - ConfigWordsStartAddress);
+                    PacketToPC.Type3 = (unsigned char)TypeEndOfTypeList;
 				}
 				
 				//Init pad bytes to 0x00...  Already done after we received the QUERY_DEVICE command (just after calling HIDRxPacket()).
@@ -607,15 +624,6 @@ void BootApplication(void)
 					USBDeviceTasks(); 	//Call USBDriverService() periodically to prevent falling off the bus if any SETUP packets should happen to arrive.
 				}
 
-                if(ConfigsProtected == UNLOCKCONFIG)
-                {
-                    //Erase the Vectors separately
-    				TBLPAG = 0x0000;
-    				__builtin_tblwtl(0x0000, 0xFFFF);
-    				asm("DISI #12");					//Disable interrupts for next few instructions for unlock sequence
-    				__builtin_write_NVM();
-                }
-				
                 NVMCONbits.WREN = 0;		//Good practice to clear WREN bit anytime we are not expecting to do erase/write operations, further reducing probability of accidental activation.
 				BootState = IdleState;				
 			}
@@ -663,7 +671,7 @@ void BootApplication(void)
 					
 					for(i = 0; i < (PacketFromPC.Size/2); i=i+2)
 					{
-						FlashMemoryValue = (DWORD_VAL)ReadProgramMemory(PacketFromPC.Address + i);
+						FlashMemoryValue.Val = ReadProgramMemory(PacketFromPC.Address + i);
 						PacketToPC.Data[RequestDataBlockSize/WORDSIZE + i - PacketFromPC.Size/WORDSIZE] = FlashMemoryValue.word.LW;		//Low word, pure 16-bits of real data
 						FlashMemoryValue.byte.MB = 0x00;	//Set the "phantom byte" = 0x00, since this is what is in the .HEX file generatd by MPLAB.  
 															//Needs to be 0x00 so as to match, and successfully verify, even though the actual table read yeilded 0xFF for this phantom byte.
@@ -700,7 +708,7 @@ void BootApplication(void)
 void EraseFlash(void)
 {
 	DWORD_VAL MemAddressToErase = {0x00000000};
-	MemAddressToErase = (DWORD_VAL)(((DWORD)ErasePageTracker) << 10);
+	MemAddressToErase.Val = (((DWORD)ErasePageTracker) << 10);
 
 	NVMCON = 0x4042;				//Erase page on next WR
 
@@ -724,7 +732,7 @@ void WriteFlashSubBlock(void)		//Use word writes to write code chunks less than 
 
 	while(BufferedDataIndex > 0)		//While data is still in the buffer.
 	{
-		Address = (DWORD_VAL)(ProgrammedPointer - BufferedDataIndex);
+		Address.Val = ProgrammedPointer - BufferedDataIndex;
 		TBLPAG = Address.word.HW;
 		
 		__builtin_tblwtl(Address.word.LW, ProgrammingBuffer[i]);		//Write the low word to the latch

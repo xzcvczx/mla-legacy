@@ -25,9 +25,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-KO/BC       2-20-2008   Initial Creation
+Change History:
+  Rev         Description
+  ----------  ----------------------------------------------------------
+  2.6 - 2.6a  No change
 
 *******************************************************************************/
 

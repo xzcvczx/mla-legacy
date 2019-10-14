@@ -10,7 +10,6 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33
  * Compiler:        C18/C30
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -33,13 +32,20 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
-
-
 /*************************************************************************/
 /*  Note:  This file is included as a template of a header file for      */
 /*         a new physical layer. It is designed to go with               */
 /*         "FS Phys Interface Template.c"                               */
 /*************************************************************************/
+
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ Change History:
+  Rev            Description
+  ----           -----------------------
+  1.2.4 - 1.2.5  No Change
+********************************************************************/
+//DOM-IGNORE-END
 
 
 #include "GenericTypeDefs.h"

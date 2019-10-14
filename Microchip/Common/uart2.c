@@ -17,6 +17,8 @@ KO                 11-Oct-2006  v1.0
 Anton Alkhimenok   18-Oct-2005
 Anton Alkhimenok   17-Feb-2009  Added UART2Char2Hex(), UART2Hex2Char(), 
 									  UART2ClearError(), UART2DataReceived()
+PAT				   27-Jan-2010  Added UART2GetBaudError() for dynamic checking
+								of baud rate percentage error.
 
 ********************************************************************************
 Software License Agreement
@@ -70,14 +72,42 @@ BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
     #error Cannot calculate actual baud rate
 #endif    
 
-#define BAUD_ERROR              ((BAUD_ACTUAL > BAUDRATE2) ? BAUD_ACTUAL-BAUDRATE2 : BAUDRATE2-BAUD_ACTUAL)
-#define BAUD_ERROR_PRECENT      ((BAUD_ERROR*100+BAUDRATE2/2)/BAUDRATE2)
 
-#if (BAUD_ERROR_PRECENT > 3)
-    #error UART frequency error is worse than 3%
-#elif (BAUD_ERROR_PRECENT > 2)
-    #warning UART frequency error is worse than 2%
-#endif
+	#define BAUD_ERROR              ((BAUD_ACTUAL > BAUDRATE2) ? BAUD_ACTUAL-BAUDRATE2 : BAUDRATE2-BAUD_ACTUAL)
+	#define BAUD_ERROR_PERCENT      ((BAUD_ERROR*100+BAUDRATE2/2)/BAUDRATE2)
+	
+#if defined (__C30__)
+
+	#if (BAUD_ERROR_PERCENT > 3)
+	    #error UART frequency error is worse than 3%
+	#elif (BAUD_ERROR_PERCENT > 2)
+	    #warning UART frequency error is worse than 2%
+	#endif
+
+#endif // #if defined (__C30__)
+
+/*******************************************************************************
+Function: UART2GetBaudError()
+
+Precondition:
+    None.
+
+Overview:
+    This routine checks the UART baud rate error percentage and returns it.
+
+Input: None.
+
+Output: Returns the baud rate error in percent.
+
+*******************************************************************************/
+char UART2GetBaudError()
+{
+    unsigned int errorPercent = 0;
+
+	errorPercent = ((BAUD_ERROR*100+BAUDRATE2/2)/BAUDRATE2);
+    return (char)errorPercent;
+}
+
 
 /*******************************************************************************
 Function: UART2GetChar()

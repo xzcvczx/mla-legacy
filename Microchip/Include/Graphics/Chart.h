@@ -181,6 +181,12 @@ typedef struct
 *	- The following macroses defines the default colors used when 
 *	  rendering chart data.  
 *********************************************************************/
+#ifdef USE_PALETTE
+
+    #include "PaletteColorDefines.h"
+
+#else
+
     #define CH_CLR0     BRIGHTBLUE      // Bright Blue
     #define CH_CLR1     BRIGHTRED       // Bright Red
     #define CH_CLR2     BRIGHTGREEN     // Bright Green
@@ -197,6 +203,9 @@ typedef struct
     #define CH_CLR13    RGB565CONVERT(255, 255, 150)    // Light Yellow
     #define CH_CLR14    RGB565CONVERT(255, 200, 0)      // Light Orange
     #define CH_CLR15    RGB565CONVERT(255, 215, 0)      // Gold
+
+#endif
+
 SHORT       ChSetDataSeries(CHART *pCh, WORD seriesNum, BYTE status);
 
 /*********************************************************************

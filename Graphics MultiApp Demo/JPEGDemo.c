@@ -868,7 +868,7 @@ void MonitorDriveMedia(void)
 void Configure_SDSPI_PPS(void)
 {
             #if defined(__C30__)
-                #if defined(__PIC24FJ256GB110__) 
+                #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
 
     // Although there are other SPI channels SPI 1 is chosen since USB PICtail does not
     // allow the use of the SD/MMC PICtail to be used with SPI2.

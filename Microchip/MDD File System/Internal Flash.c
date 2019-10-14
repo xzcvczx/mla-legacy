@@ -1,39 +1,46 @@
 /******************************************************************************
- *
- *               Microchip Memory Disk Drive File System
- *
- ******************************************************************************
- * FileName:        FS Phys Interface Template.c
- * Dependencies:    TEMPLATEFILE.h
- *					string.h
- *                  FSIO.h
- *                  FSDefs.h
- * Processor:       None
- * Compiler:        None
- * Company:         Microchip Technology, Inc.
- * Version:         1.2.4
- *
- * Software License Agreement
- *
- * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PICmicro® Microcontroller is intended and
- * supplied to you, the Company’s customer, for use solely and
- * exclusively on Microchip PICmicro Microcontroller products. The
- * software is owned by the Company and/or its supplier, and is
- * protected under applicable copyright laws. All rights are reserved.
- * Any use in violation of the foregoing restrictions may subject the
- * user to criminal sanctions under applicable laws, as well as to
- * civil liability for the breach of the terms and conditions of this
- * license.
- *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
- * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
- * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
- * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
- * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
- *
+ 
+                Microchip Memory Disk Drive File System
+ 
+ *****************************************************************************
+  FileName:        FS Phys Interface Template.c
+  Dependencies:    TEMPLATEFILE.h
+ 					string.h
+                   FSIO.h
+                   FSDefs.h
+  Processor:       None
+  Compiler:        None
+  Company:         Microchip Technology, Inc.
+ 
+  Software License Agreement
+ 
+  The software supplied herewith by Microchip Technology Incorporated
+  (the “Company”) for its PICmicro® Microcontroller is intended and
+  supplied to you, the Company’s customer, for use solely and
+  exclusively on Microchip PICmicro Microcontroller products. The
+  software is owned by the Company and/or its supplier, and is
+  protected under applicable copyright laws. All rights are reserved.
+  Any use in violation of the foregoing restrictions may subject the
+  user to criminal sanctions under applicable laws, as well as to
+  civil liability for the breach of the terms and conditions of this
+  license.
+ 
+  THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
+  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
+  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
+  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ 
 *****************************************************************************/
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ Change History:
+  Rev    Description
+  -----  -----------
+  1.2.5  Fixed bug where sector address was calculated incorrectly
+********************************************************************/
+//DOM-IGNORE-END
 
 #include "Compiler.h"
 #include "MDD File System\FSIO.h"
@@ -208,18 +215,19 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
             || defined(__PIC24FJ256DA110__) \
             || defined(__PIC24FJ128DA110__) \
             || defined(__PIC24FJ256DA106__) \
-            || defined(__PIC24FJ128DA106__)
+            || defined(__PIC24FJ128DA106__) \
+            || defined(__PIC24FJ256GB210__)
             WORD DSRPageSave;
             DSRPageSave = DSRPAG;
-    
-            DSRPAG = (FILES_ADDRESS + sector_addr)/0x8000 + 0x0200;
+
+            DSRPAG = (FILES_ADDRESS + sector_addr * MEDIA_SECTOR_SIZE)/0x8000 + 0x0200;
 
         #else
             WORD PSVPageSave;
     
             PSVPageSave = PSVPAG;
     
-            PSVPAG = (FILES_ADDRESS + sector_addr)/0x8000;
+            PSVPAG = (FILES_ADDRESS + sector_addr * MEDIA_SECTOR_SIZE)/0x8000;
         #endif
     #endif
 
@@ -238,7 +246,8 @@ BYTE MDD_IntFlash_SectorRead(DWORD sector_addr, BYTE* buffer)
             || defined(__PIC24FJ256DA110__) \
             || defined(__PIC24FJ128DA110__) \
             || defined(__PIC24FJ256DA106__) \
-            || defined(__PIC24FJ128DA106__)
+            || defined(__PIC24FJ128DA106__) \
+            || defined(__PIC24FJ256GB210__)
             DSRPAG = DSRPageSave;
         #else
             PSVPAG = PSVPageSave;
@@ -311,18 +320,19 @@ BYTE MDD_IntFlash_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteTo
                 || defined(__PIC24FJ256DA110__) \
                 || defined(__PIC24FJ128DA110__) \
                 || defined(__PIC24FJ256DA106__) \
-                || defined(__PIC24FJ128DA106__)
+                || defined(__PIC24FJ128DA106__) \
+                || defined(__PIC24FJ256GB210__)
                 WORD DSRPageSave;
                 DSRPageSave = DSRPAG;
         
-                DSRPAG = (FILES_ADDRESS + sector_addr)/0x8000 + 0x0200;
+                DSRPAG = (FILES_ADDRESS + sector_addr * MEDIA_SECTOR_SIZE)/0x8000 + 0x0200;
     
             #else
                 WORD PSVPageSave;
         
                 PSVPageSave = PSVPAG;
         
-                PSVPAG = (FILES_ADDRESS + sector_addr)/0x8000;
+                PSVPAG = (FILES_ADDRESS + sector_addr * MEDIA_SECTOR_SIZE)/0x8000;
             #endif
         #endif
 
@@ -459,7 +469,8 @@ BYTE MDD_IntFlash_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteTo
                 || defined(__PIC24FJ256DA110__) \
                 || defined(__PIC24FJ128DA110__) \
                 || defined(__PIC24FJ256DA106__) \
-                || defined(__PIC24FJ128DA106__)
+                || defined(__PIC24FJ128DA106__) \
+                || defined(__PIC24FJ256GB210__)
                 DSRPAG = DSRPageSave;
             #else
                 PSVPAG = PSVPageSave;

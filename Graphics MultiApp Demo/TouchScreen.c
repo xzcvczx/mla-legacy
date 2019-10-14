@@ -319,7 +319,7 @@ void TouchInit(void)
     AD1PCFGLbits.PCFG11 = AD1PCFGLbits.PCFG12 = 1;
     #else
     AD1CHS = ADC_POT;
-    #if !defined(__PIC24FJ256DA210__) 
+    #if !(defined(__PIC24FJ256DA210__)) && !(defined(__PIC24FJ256GB210__))
     AD1PCFG = 0;            // All inputs are analog
     #endif
     #endif
@@ -593,24 +593,32 @@ void TouchLoadCalibration(void)
 void TouchCalibration(void)
 {
     static const XCHAR  scr1StrLn1[] = {'I','M','P','O','R','T','A','N','T','.',0};
-    static const XCHAR  scr1StrLn2[] = {'N','o','w',' ','t','o','u','c','h',' ','s','c','r','e','e','n',' ','c','a','l','i','b','r','a','t','i','o','n',0};
-    static const XCHAR  scr1StrLn3[] = {'w','i','l','l',' ','b','e',' ','p','e','r','f','o','m','e','d','.',' ','T','o','u','c','h',' ','p','o','i','n','t','s',0};
-    static const XCHAR  scr1StrLn4[] = {'E','X','A','C','T','L','Y',' ','a','t',' ','t','h','e',' ','p','o','s','i','t','i','o','n','s',0};
-    static const XCHAR  scr1StrLn5[] = {'s','h','o','w','n',' ','b','y',' ','a','r','r','o','w','s','.',0};
-    static const XCHAR  scr1StrLn6[] = {'T','o','u','c','h',' ','s','c','r','e','e','n',' ','t','o',' ','c','o','n','t','i','n','u','e','.',0};
+    static const XCHAR  scr1StrLn2[] = {'P','e','r','f','o','r','m','i','n','g',' ','t','o','u','c','h',0};
+    static const XCHAR  scr1StrLn3[] = {'s','c','r','e','e','n',' ','c','a','l','i','b','r','a','t','i','o','n','.',0};
+    static const XCHAR  scr1StrLn4[] = {'T','o','u','c','h','p','o','i','n','t','s',' ','E','X','A','C','T','L','Y',0};
+    static const XCHAR  scr1StrLn5[] = {'a','t',' ','t','h','e',' ','p','o','s','i','t','i','o','n','s',' ','s','h','o','w','n',0};
+    static const XCHAR  scr1StrLn6[] = {'b','y',' ','a','r','r','o','w','s','.',0};
+    static const XCHAR  scr1StrLn7[] = {'T','o','u','c','h',' ','s','c','r','e','e','n',' ','t','o',0};
+    static const XCHAR  scr1StrLn8[] = {'c','o','n','t','i','n','u','e','.',0};
 
-    static const XCHAR  scr2StrLn1[] = {'H','o','l','d',' ','S','3',' ','b','u','t','t','o','n',' ','a','n','d',0};
-    static const XCHAR  scr2StrLn2[] = {'p','r','e','s','s',' ','M','C','L','R',' ','r','e','s','e','t','(','S','1',')',0};
-    static const XCHAR  scr2StrLn3[] = {'t','o',' ','R','E','P','E','A','T',' ','t','h','e',' ','c','a','l','i','b','r','a','t','i','o','n',0};
+#if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    static const XCHAR  scr2StrLn1[] = {'H','o','l','d',' ','S','1',' ','b','u','t','t','o','n',' ','a','n','d',0};
+    static const XCHAR  scr2StrLn2[] = {'p','r','e','s','s',' ','M','C','L','R',' ','r','e','s','e','t',' ','t','o',0};
+    static const XCHAR  scr2StrLn3[] = {'R','E','P','E','A','T',' ','t','h','e',' ','c','a','l','i','b','r','a','t','i','o','n',0};
     static const XCHAR  scr2StrLn4[] = {'p','r','o','c','e','d','u','r','e','.',0};
-
+#else
+    static const XCHAR  scr2StrLn1[] = {'H','o','l','d',' ','S','3',' ','b','u','t','t','o','n',' ','a','n','d',0};
+    static const XCHAR  scr2StrLn2[] = {'p','r','e','s','s',' ','M','C','L','R',' ','r','e','s','e','t','(','S','1',')',' ','t','o',0};
+    static const XCHAR  scr2StrLn3[] = {'R','E','P','E','A','T',' ','t','h','e',' ','c','a','l','i','b','r','a','t','i','o','n',0};
+    static const XCHAR  scr2StrLn4[] = {'p','r','o','c','e','d','u','r','e','.',0};
+#endif	
     SHORT               x, y;
 
     SHORT               textHeight, textStart;
 
     SetFont((void *) &GOLFontDefault);
     textHeight = GetTextHeight((void *) &GOLFontDefault);
-    textStart =  (GetMaxY() - (textHeight*7)) >> 1;
+    textStart =  (GetMaxY() - (textHeight*8)) >> 1;
 
     SetColor(WHITE);
     ClearDevice();
@@ -627,9 +635,13 @@ void TouchCalibration(void)
     							 textStart + (3*textHeight), (XCHAR *)scr1StrLn4));
     WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn5, (void *) &GOLFontDefault))>>1,  \
     							 textStart + (4*textHeight), (XCHAR *)scr1StrLn5));
-    SetColor(BRIGHTRED);
     WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &GOLFontDefault))>>1,  \
-    							textStart + (6*textHeight), (XCHAR *)scr1StrLn6));
+    							textStart + (5*textHeight), (XCHAR *)scr1StrLn6));
+    SetColor(BRIGHTRED);
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &GOLFontDefault))>>1,  \
+    							textStart + (6*textHeight), (XCHAR *)scr1StrLn7));
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &GOLFontDefault))>>1,  \
+    							textStart + (7*textHeight), (XCHAR *)scr1StrLn8));
 
     // Wait for touch
     do
@@ -759,8 +771,10 @@ void TouchCalibration(void)
     WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn4, (void *) &GOLFontDefault))>>1,  \
     							 textStart + (4*textHeight), (XCHAR *)scr2StrLn4));
     SetColor(BRIGHTRED);
-    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &GOLFontDefault))>>1,  \
-    							 textStart + (6*textHeight), (XCHAR *)scr1StrLn6));
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &GOLFontDefault))>>1,  \
+    							 textStart + (6*textHeight), (XCHAR *)scr1StrLn7));
+    WAIT_UNTIL_FINISH(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn8, (void *) &GOLFontDefault))>>1,  \
+    							 textStart + (7*textHeight), (XCHAR *)scr1StrLn8));
 
     // Wait for touch
     do

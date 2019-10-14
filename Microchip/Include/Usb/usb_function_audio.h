@@ -32,10 +32,6 @@
     IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
     CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-    Change History:
-     Rev   Date         Description
-     0.1   2/June/2009	Draft
-
   Summary:
     This file contains all of functions, macros, definitions, variables,
     datatypes, etc. that are required for usage with the AUDIO function
@@ -90,6 +86,7 @@
   Rev    Description
   ----   -----------
   2.6    Initial Release
+  2.6a   No Change
 
 ********************************************************************/
 

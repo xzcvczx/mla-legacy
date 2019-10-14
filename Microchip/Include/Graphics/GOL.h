@@ -308,6 +308,15 @@ extern OBJ_HEADER   *_pObjectFocused;
 // Default GOL font.
 extern const FONT_FLASH GOLFontDefault;
 
+// Default Font assignement.	
+    #define FONTDEFAULT GOLFontDefault
+
+#ifdef USE_PALETTE
+
+    #include "PaletteColorDefines.h"
+
+#else
+    
 // Brown color scheme
     #define SADDLEBROWN RGB565CONVERT(139, 69, 19)  // Saddle Color
     #define SIENNA      RGB565CONVERT(160, 82, 45)  // Sienna Color
@@ -349,9 +358,6 @@ extern const FONT_FLASH GOLFontDefault;
 // Common background color default value.	
         #define COMMONBACKGROUNDCOLORDEFAULT    0x00
 
-// Default Font assignement.	
-        #define FONTDEFAULT GOLFontDefault
-
     #else
         #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V1)
 
@@ -384,9 +390,6 @@ extern const FONT_FLASH GOLFontDefault;
 // Common background color default value.	
             #define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xEF, 0xFE, 0xFF)
 
-// Default Font assignement.	
-            #define FONTDEFAULT GOLFontDefault
-
         #else
 
 /* default settings for TRULY display */
@@ -418,10 +421,9 @@ extern const FONT_FLASH GOLFontDefault;
 // Common background color default value.
             #define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xD4, 0xED, 0xF7)
 
-// Default Font assignement.
-            #define FONTDEFAULT GOLFontDefault
         #endif // GRAPHICS_HARDWARE_PLATFORM
     #endif // USE_MONOCHROME
+#endif
 
 /*********************************************************************
 * Function: WORD GOLCanBeFocused(OBJ_HEADER* object)
@@ -1319,7 +1321,7 @@ void    GOLRedrawRec(SHORT left, SHORT top, SHORT right, SHORT bottom);
 * Side Effects: none
 *
 ********************************************************************/
-    #define GOLRedraw(pObj) ((OBJ_HEADER *)pObj)->state |= 0x7c00
+    #define GOLRedraw(pObj) ((OBJ_HEADER *)pObj)->state |= 0x7c00;
 
 /*********************************************************************
 * Function: void GOLMsg(GOL_MSG *pMsg)

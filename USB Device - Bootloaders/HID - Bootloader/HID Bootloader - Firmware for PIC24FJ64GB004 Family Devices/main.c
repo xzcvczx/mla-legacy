@@ -1,14 +1,13 @@
 /********************************************************************
  FileName:     main.c
  Dependencies: See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
+ Processor:		PIC24 USB Microcontrollers
  Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
+ 				hardware platforms: 
+ 				Explorer 16 + PIC24FJ64GB004 PIM.  The firmware may be
  				modified for use on other USB platforms by editing the
  				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
+ Complier:  	Microchip C30 (for PIC24)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -35,12 +34,23 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  1.0   04/30/2008   Initial Release
-  					 Adapted from PIC18F87J50 HID Bootloader Firmware
-  					 as basis for BootApplication().  The rest of the
-  					 code was taken from the Simple HID Demo in 
-  					 MCHPFSUSB v2.1.
+
+  Rev   Description
+  ----- ---------------------------------------------
+  v2.2  Adapted from PIC18F87J50 HID Bootloader Firmware
+        as basis for BootApplication().  The rest of the
+        code was taken from the Simple HID Demo in 
+        MCHPFSUSB v2.2.
+
+  v2.6a Fixed race condition where an OUT packet could potentially
+        clear the prior IN packet depending on the bus communication
+        order.
+
+        Removed ability to reflash the interrupt vectors.  This has
+        been depricated for a interrupt remapping scheme documented
+        in the migration notes and in the getting started for the HID
+        bootloader.
+
 ********************************************************************/
 
 #ifndef USBMOUSE_C
@@ -210,115 +220,6 @@ unsigned long ProgrammedPointer;
 unsigned char ConfigsProtected;
 
 
-/** VECTOR REMAPPING ***********************************************/
-#if defined(__18CXX)
-	//On PIC18 devices, addresses 0x00, 0x08, and 0x18 are used for
-	//the reset, high priority interrupt, and low priority interrupt
-	//vectors.  However, the current Microchip USB bootloader 
-	//examples are intended to occupy addresses 0x00-0x7FF or
-	//0x00-0xFFF depending on which bootloader is used.  Therefore,
-	//the bootloader code remaps these vectors to new locations
-	//as indicated below.  This remapping is only necessary if you
-	//wish to program the hex file generated from this project with
-	//the USB bootloader.  If no bootloader is used, edit the
-	//usb_config.h file and comment out the following defines:
-	//#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
-	//#define PROGRAMMABLE_WITH_USB_LEGACY_CUSTOM_CLASS_BOOTLOADER
-	
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x1000
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x1008
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x1018
-	#elif defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)	
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x800
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x808
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x818
-	#else	
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x00
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x08
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x18
-	#endif
-	
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)
-	extern void _startup (void);        // See c018i.c in your C18 compiler dir
-	#pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS
-	void _reset (void)
-	{
-	    _asm goto _startup _endasm
-	}
-	#endif
-	#pragma code REMAPPED_HIGH_INTERRUPT_VECTOR = REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS
-	void Remapped_High_ISR (void)
-	{
-	     _asm goto YourHighPriorityISRCode _endasm
-	}
-	#pragma code REMAPPED_LOW_INTERRUPT_VECTOR = REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS
-	void Remapped_Low_ISR (void)
-	{
-	     _asm goto YourLowPriorityISRCode _endasm
-	}
-	
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)
-	//Note: If this project is built while one of the bootloaders has
-	//been defined, but then the output hex file is not programmed with
-	//the bootloader, addresses 0x08 and 0x18 would end up programmed with 0xFFFF.
-	//As a result, if an actual interrupt was enabled and occured, the PC would jump
-	//to 0x08 (or 0x18) and would begin executing "0xFFFF" (unprogrammed space).  This
-	//executes as nop instructions, but the PC would eventually reach the REMAPPED_RESET_VECTOR_ADDRESS
-	//(0x1000 or 0x800, depending upon bootloader), and would execute the "goto _startup".  This
-	//would effective reset the application.
-	
-	//To fix this situation, we should always deliberately place a 
-	//"goto REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS" at address 0x08, and a
-	//"goto REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS" at address 0x18.  When the output
-	//hex file of this project is programmed with the bootloader, these sections do not
-	//get bootloaded (as they overlap the bootloader space).  If the output hex file is not
-	//programmed using the bootloader, then the below goto instructions do get programmed,
-	//and the hex file still works like normal.  The below section is only required to fix this
-	//scenario.
-	#pragma code HIGH_INTERRUPT_VECTOR = 0x08
-	void High_ISR (void)
-	{
-	     _asm goto REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS _endasm
-	}
-	#pragma code LOW_INTERRUPT_VECTOR = 0x18
-	void Low_ISR (void)
-	{
-	     _asm goto REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS _endasm
-	}
-	#endif	//end of "#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_LEGACY_CUSTOM_CLASS_BOOTLOADER)"
-
-	#pragma code
-	
-	
-	//These are your actual interrupt handling routines.
-	#pragma interrupt YourHighPriorityISRCode
-	void YourHighPriorityISRCode()
-	{
-		//Check which interrupt flag caused the interrupt.
-		//Service the interrupt
-		//Clear the interrupt flag
-		//Etc.
-	
-	}	//This return will be a "retfie fast", since this is in a #pragma interrupt section 
-	#pragma interruptlow YourHighPriorityISRCode
-	void YourLowPriorityISRCode()
-	{
-		//Check which interrupt flag caused the interrupt.
-		//Service the interrupt
-		//Clear the interrupt flag
-		//Etc.
-	
-	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
-//end of the PIC18 vector remapping section
-#elif defined(__C30__)
-
-#endif
-
-
-
-
-
 /** DECLARATIONS ***************************************************/
 #pragma code
 
@@ -402,11 +303,7 @@ int main(void)
  *******************************************************************/
 static void InitializeSystem(void)
 {
-    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
-        ADCON1 |= 0x0F;                 // Default all pins to digital
-    #elif defined(__C30__)
         AD1PCFGL = 0xFFFF;
-    #endif
 
    #if defined(PIC24FJ64GB004_PIM)
 	//On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
@@ -487,10 +384,6 @@ void UserInit(void)
     USBInHandle = 0;
 
     blinkStatusValid = TRUE;
-
-	#if defined(PIC18F87J50_FS_USB_PIM)
-    mInitAllLEDs();		//Init them off.
-	#endif
 
 	//Initialize bootloader state variables
 	MaxPageToErase = MaxPageToEraseNoConfigs;		//Assume we will not allow erase/programming of config words (unless host sends override command)
@@ -635,22 +528,32 @@ void BootApplication(void)
 	unsigned int j;
 	DWORD_VAL FlashMemoryValue;
 
-	if(BootState == IdleState)
-	{
-	    if(!USBHandleBusy(USBOutHandle))		//Did we receive a command?
-		{
-            for(i = 0; i < TotalPacketSize; i++)
+    if(BootState == IdleState)
+    {
+        //Are we done sending the last response.  We need to be before we 
+        //  receive the next command because we clear the PacketToPC buffer
+        //  once we receive a command
+        if(!USBHandleBusy(USBInHandle))
+        {
+            if(!USBHandleBusy(USBOutHandle))		//Did we receive a command?
             {
-                PacketFromPC.Contents[i] = PacketFromPCBuffer.Contents[i];
+                for(i = 0; i < TotalPacketSize; i++)
+                {
+                    PacketFromPC.Contents[i] = PacketFromPCBuffer.Contents[i];
+                }
+                
+                USBOutHandle = USBRxOnePacket(HID_EP,(BYTE*)&PacketFromPCBuffer,64);
+                BootState = NotIdleState;
+                
+                //Prepare the next packet we will send to the host, by initializing the entire packet to 0x00.	
+                for(i = 0; i < TotalPacketSize; i++)
+                {
+                    //This saves code space, since we don't have to do it independently in the QUERY_DEVICE and GET_DATA cases.
+                    PacketToPC.Contents[i] = 0;	
+                }
             }
-
-	        USBOutHandle = USBRxOnePacket(HID_EP,(BYTE*)&PacketFromPCBuffer,64);
-			BootState = NotIdleState;
-			
-			for(i = 0; i < TotalPacketSize; i++)		//Prepare the next packet we will send to the host, by initializing the entire packet to 0x00.
-				PacketToPC.Contents[i] = 0;				//This saves code space, since we don't have to do it independently in the QUERY_DEVICE and GET_DATA cases.
-		}
-	}
+        }
+    }
 	else //(BootState must be in NotIdleState)
 	{	
 		switch(PacketFromPC.Command)
@@ -670,14 +573,10 @@ void BootApplication(void)
 
 				if(ConfigsProtected == UNLOCKCONFIG)						
 				{
-    				PacketToPC.Type2 = (unsigned char)TypeProgramMemory;				//Overwrite the 0xFF end of list indicator if we wish to program the Vectors.
-                    PacketToPC.Address2 = (unsigned long)VectorsStart;
-                    PacketToPC.Length2 = (unsigned long)(VectorsEnd - VectorsStart);	//Size of program memory area
-
-                    PacketToPC.Type3 = (unsigned char)TypeConfigWords;
-                    PacketToPC.Address3 = (unsigned long)ConfigWordsStartAddress;
-                    PacketToPC.Length3 = (unsigned long)(ConfigWordsStopAddress - ConfigWordsStartAddress);
-                    PacketToPC.Type4 = (unsigned char)TypeEndOfTypeList;
+                    PacketToPC.Type2 = (unsigned char)TypeConfigWords;
+                    PacketToPC.Address2 = (unsigned long)ConfigWordsStartAddress;
+                    PacketToPC.Length2 = (unsigned long)(ConfigWordsStopAddress - ConfigWordsStartAddress);
+                    PacketToPC.Type3 = (unsigned char)TypeEndOfTypeList;
 				}
 				
 				//Init pad bytes to 0x00...  Already done after we received the QUERY_DEVICE command (just after calling HIDRxPacket()).
@@ -714,15 +613,6 @@ void BootApplication(void)
 					USBDeviceTasks(); 	//Call USBDriverService() periodically to prevent falling off the bus if any SETUP packets should happen to arrive.
 				}
 
-                if(ConfigsProtected == UNLOCKCONFIG)
-                {
-                    //Erase the Vectors separately
-    				TBLPAG = 0x0000;
-    				__builtin_tblwtl(0x0000, 0xFFFF);
-    				asm("DISI #12");					//Disable interrupts for next few instructions for unlock sequence
-    				__builtin_write_NVM();
-                }
-				
                 NVMCONbits.WREN = 0;		//Good practice to clear WREN bit anytime we are not expecting to do erase/write operations, further reducing probability of accidental activation.
 				BootState = IdleState;				
 			}
@@ -770,7 +660,7 @@ void BootApplication(void)
 					
 					for(i = 0; i < (PacketFromPC.Size/2); i=i+2)
 					{
-						FlashMemoryValue = (DWORD_VAL)ReadProgramMemory(PacketFromPC.Address + i);
+						FlashMemoryValue.Val = ReadProgramMemory(PacketFromPC.Address + i);
 						PacketToPC.Data[RequestDataBlockSize/WORDSIZE + i - PacketFromPC.Size/WORDSIZE] = FlashMemoryValue.word.LW;		//Low word, pure 16-bits of real data
 						FlashMemoryValue.byte.MB = 0x00;	//Set the "phantom byte" = 0x00, since this is what is in the .HEX file generatd by MPLAB.  
 															//Needs to be 0x00 so as to match, and successfully verify, even though the actual table read yeilded 0xFF for this phantom byte.
@@ -807,7 +697,7 @@ void BootApplication(void)
 void EraseFlash(void)
 {
 	DWORD_VAL MemAddressToErase = {0x00000000};
-	MemAddressToErase = (DWORD_VAL)(((DWORD)ErasePageTracker) << 10);
+	MemAddressToErase.Val = (((DWORD)ErasePageTracker) << 10);
 
 	NVMCON = 0x4042;				//Erase page on next WR
 
@@ -831,7 +721,7 @@ void WriteFlashSubBlock(void)		//Use word writes to write code chunks less than 
 
 	while(BufferedDataIndex > 0)		//While data is still in the buffer.
 	{
-		Address = (DWORD_VAL)(ProgrammedPointer - BufferedDataIndex);
+		Address.Val = ProgrammedPointer - BufferedDataIndex;
 		TBLPAG = Address.word.HW;
 		
 		__builtin_tblwtl(Address.word.LW, ProgrammingBuffer[i]);		//Write the low word to the latch

@@ -79,6 +79,9 @@
   ----   -----------
   2.6    Added USBCancelIO() function.  Moved and some stack
          defintions to be more consistant with the host stack.
+  2.6a   Fixed issue where a SET_CONFIGURATION received could cause
+         inability to transmit on an endpoint if using ping-pong
+         and an odd number of packets had been sent on that endpoint 
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -664,7 +667,7 @@ void USBDeviceInit(void)
     U1ADDR = 0x00;                   
 
     //Clear all of the endpoint control registers
-    memset((void*)&U1EP1,0x00,(USB_MAX_EP_NUMBER-1));
+    DisableNonZeroEndpoints(USB_MAX_EP_NUMBER);
 
     //Stop trying to reset ping pong buffer pointers
     USBPingPongBufferReset = 0;
@@ -1598,7 +1601,7 @@ void USBStdFeatureReqHandler(void)
     #if defined(__C32__)
         DWORD* pUEP;
     #else
-        unsigned int* pUEP;             
+        unsigned char* pUEP;             
     #endif
 #ifdef	USB_SUPPORT_OTG
     if ((SetupPkt.bFeature == OTG_FEATURE_B_HNP_ENABLE)&&
@@ -1672,7 +1675,7 @@ void USBStdFeatureReqHandler(void)
                 pUEP = (DWORD*)(&U1EP0);
                 pUEP += (SetupPkt.EPNum*4);
             #else
-                pUEP = (unsigned int*)(&U1EP0+SetupPkt.EPNum);
+                pUEP = (unsigned char*)(&U1EP0+SetupPkt.EPNum);
             #endif
 
 			//Clear the STALL bit in the UEP register
@@ -2200,14 +2203,34 @@ void USBCtrlTrfRxService(void)
  *******************************************************************/
 void USBStdSetCfgHandler(void)
 {
+    BYTE i;
+
     // This will generate a zero length packet
     inPipes[0].info.bits.busy = 1;            
 
-    //disable all endpoints except endpoint 0
-    memset((void*)&U1EP1,0x00,(USB_MAX_EP_NUMBER-1));
+    //Clear all of the endpoint control registers
+    DisableNonZeroEndpoints(USB_MAX_EP_NUMBER);
+
+    //Clear all of the BDT entries
+    for(i=0;i<(sizeof(BDT)/sizeof(BDT_ENTRY));i++)
+    {
+        BDT[i].Val = 0x00;
+    }
+
+    // Assert reset request to all of the Ping Pong buffer pointers
+    USBPingPongBufferReset = 1;                                   
 
     //clear the alternate interface settings
     memset((void*)&USBAlternateInterface,0x00,USB_MAX_NUM_INT);
+
+    //Stop trying to reset ping pong buffer pointers
+    USBPingPongBufferReset = 0;
+
+    pBDTEntryIn[0] = (volatile BDT_ENTRY*)&BDT[EP0_IN_EVEN];
+
+	//Set the next out to the current out packet
+    pBDTEntryEP0OutCurrent = (volatile BDT_ENTRY*)&BDT[EP0_OUT_EVEN];
+    pBDTEntryEP0OutNext = pBDTEntryEP0OutCurrent;
 
     //set the current configuration
     USBActiveConfiguration = SetupPkt.bConfigurationValue;

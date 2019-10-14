@@ -63,9 +63,14 @@ _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
     #endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
-	#endif	     
+	#endif	  
+	#if defined (__PIC24FJ256GB210__)
+_CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+	#endif
 #endif
 
 ///////////////////////////////// FONTS ///////////////////////////////////////
@@ -147,6 +152,25 @@ extern const BITMAP_FLASH   flower1bit;
 
     while(1)
     {
+	    #if defined(__PIC24FJ256DA210__) 
+	    	_DPTEST = 2;
+	        DelayMs(4000);
+	    	_DPTEST = 3;
+	        DelayMs(4000);
+	    	_DPTEST = 0;
+	    
+	    #else
+	        SetColor(BRIGHTRED);
+	        WAIT_UNTIL_FINISH(Line(0,0,GetMaxX(),0));
+	        SetColor(BRIGHTYELLOW);
+	        WAIT_UNTIL_FINISH(Line(GetMaxX(),0,GetMaxX(),GetMaxY()));
+	        SetColor(BRIGHTGREEN);
+	        WAIT_UNTIL_FINISH(Line(0,GetMaxY(),GetMaxX(),GetMaxY()));
+	        SetColor(BRIGHTBLUE);
+	        WAIT_UNTIL_FINISH(Line(0,0,0,GetMaxY()));
+	        DelayMs(4000);
+	    #endif    
+
         SetColor(WHITE);
 
         for(counter = 0; counter < GetMaxX(); counter += 20)

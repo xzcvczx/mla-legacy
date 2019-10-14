@@ -33,12 +33,12 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Author                               Date                  Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok and
- * Paolo A. Tamayo
- *                      11/12/07    Version 1.0 release
- * PAT					06/29/09	Added multi-line support for Buttons.
+ * PAT			             11/12/07          Version 1.0 release
+ * PAT                       06/29/09          Added multi-line support for Buttons.
+ * Pradeep Budagutta         03 Dec 2009       Added Double Buffering Support
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -528,13 +528,29 @@ WORD GOLDraw(void)
     static OBJ_HEADER   *pCurrentObj = NULL;
     SHORT               done;
 
+    #ifdef USE_DOUBLE_BUFFERING
+    static BYTE         DisplayUpdated = 0;
+    if(IsDisplayUpdatePending())
+    {
+        return 0;
+    }
+    #endif // USE_DOUBLE_BUFFERING
+
     if(pCurrentObj == NULL)
     {
         if(GOLDrawCallback())
         {
-
             // It's last object jump to head
             pCurrentObj = _pGolObjects;
+
+            #ifdef USE_DOUBLE_BUFFERING
+            if(DisplayUpdated)
+            {
+                RequestDisplayUpdate();
+                DisplayUpdated = 0;
+                return(0);
+            }
+            #endif //USE_DOUBLE_BUFFERING
         }
         else
         {
@@ -665,6 +681,15 @@ WORD GOLDraw(void)
             if(done)
             {
                 GOLDrawComplete(pCurrentObj);
+
+			#ifdef USE_DOUBLE_BUFFERING
+
+			    InvalidateRectangle(pCurrentObj->left, pCurrentObj->top,
+			                        pCurrentObj->right, pCurrentObj->bottom);
+                DisplayUpdated = 1;
+
+			#endif //USE_DOUBLE_BUFFERING
+
             }
             else
             {

@@ -127,7 +127,7 @@ void BeepInit(void)
     T2CONbits.TCKPS = 1;
 
     #ifdef __PIC32MX__
-    ConfigIntTimer2(T2_INT_ON | T2_INT_PRIOR_2);
+    ConfigIntTimer2(T2_INT_ON | T2_INT_PRIOR_1);
     #else
     IFS0bits.T2IF = 0;  //clear flag
     IEC0bits.T2IE = 1;  //enable interrupt

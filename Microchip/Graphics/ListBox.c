@@ -324,6 +324,10 @@ void LbSetFocusedItem(LISTBOX *pLb, SHORT index)
 
     // Look for item to be focused
     pCurItem = pLb->pItemList;
+
+	if(pCurItem == NULL)
+		return;
+
     while(pCurItem->pNextItem != NULL)
     {
         if(index <= 0)

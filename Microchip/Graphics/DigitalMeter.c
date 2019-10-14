@@ -37,7 +37,8 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Arpan kumar		  06/11/09	  Version 1.0 release
-*****************************************************************************/
+ * PAT				  01/18/10	  Added draw state to redraw only text. 
+ ******************************************************************************/
 #include "Graphics\Graphics.h"
 
 #ifdef USE_DIGITALMETER
@@ -199,6 +200,7 @@ WORD DmDraw(DIGITALMETER *pDigMeter)
     typedef enum
     {
         DM_STATE_IDLE,
+        DM_STATE_FRAME,
         DM_STATE_INIT,
         DM_STATE_SETALIGN,
         DM_STATE_DRAWTEXT
@@ -221,19 +223,20 @@ WORD DmDraw(DIGITALMETER *pDigMeter)
         case DM_STATE_IDLE:
             SetClip(CLIP_DISABLE);
 
-            if(GetState(pDm, DM_HIDE))
+            if(GetState(pDm, DM_HIDE) || GetState(pDm, DM_DRAW))
             {
-                SetColor(pDm->hdr.pGolScheme->CommonBkColor);
-                if(Bar(pDm->hdr.left, pDm->hdr.top, pDm->hdr.right, pDm->hdr.bottom) == 0)
-                    return (0);
+	            SetColor(pDm->hdr.pGolScheme->CommonBkColor);
+	            if(Bar(pDm->hdr.left, pDm->hdr.top, pDm->hdr.right, pDm->hdr.bottom) == 0)
+	            	return (0);
+			}
+            // if the draw state was to hide then state is still IDLE STATE so no need to change state
+            if (GetState(pDm, DM_HIDE))
+            	return (1);
+            state = DM_STATE_FRAME;	
 
-                // State is still IDLE STATE so no need to set
-                return (1);
-            }
-
-            if(GetState(pDm, DM_FRAME))
+        case DM_STATE_FRAME:
+			if(GetState(pDm, DM_DRAW | DM_FRAME) == (DM_DRAW | DM_FRAME))
             {
-
                 // show frame if specified to be shown
                 SetLineType(SOLID_LINE);
                 SetLineThickness(NORMAL_LINE);
@@ -323,11 +326,20 @@ WORD DmDraw(DIGITALMETER *pDigMeter)
                     return (0);         // device is busy return
                 }
 
-                if(pch != ch)
-                {
+	            if(GetState(pDm, DM_DRAW))
+    	        {
                     SetColor(pDm->hdr.pGolScheme->CommonBkColor);
                     if(Bar(GetX(), pDm->hdr.top + 1, GetX() + textWidth, pDm->hdr.bottom - 1) == 0)
                         return (0);
+	    	    }
+	    	    else if(GetState(pDm, DM_UPDATE))
+	    	    { 
+	                if(pch != ch)
+	                {
+	                    SetColor(pDm->hdr.pGolScheme->CommonBkColor);
+	                    if(Bar(GetX(), pDm->hdr.top + 1, GetX() + textWidth, pDm->hdr.bottom - 1) == 0)
+	                        return (0);
+	                }        
                 }
 
                 SetColor(pDm->hdr.pGolScheme->TextColor0);

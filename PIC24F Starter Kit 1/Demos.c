@@ -337,50 +337,58 @@ void BarHS2(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot)
 	{
 
 		if(wd<8) masktop=masktop&maskval[(ytop&0x07)+wd];
-		WriteCommand(0xB0+pg);
-		WriteCommand(lAddr);
-		WriteCommand(hAddr);
-		WriteCommand(0xE0);
+		DeviceSetCommand();
+		DeviceWrite(0xB0+pg);
+		DeviceWrite(lAddr);
+		DeviceWrite(hAddr);
+		DeviceWrite(0xE0);
+		DeviceSetData();
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
-			ReadData(display);
-			ReadData(display); //dummy read still necessary because of the write between them reads
-			ReadData(display);
+			display = DeviceRead();
+			display = DeviceRead();
 			display=display&(~masktop); //clear bits included in zone
 			display=display|(masktop&_color); //set bits with patern
-			WriteData(display);
+			DeviceWrite(display);
 		}
-		WriteCommand(0xEE);
+		DeviceSetCommand();
+		DeviceWrite(0xEE);
 		pg++;
 	}
 
 	if(wd>7) for(;pg<pbot;pg++)
 	{
-		WriteCommand(0xB0+pg);
-		WriteCommand(lAddr);
-		WriteCommand(hAddr);
+		DeviceSetCommand();
+		DeviceWrite(0xB0+pg);
+		DeviceWrite(lAddr);
+		DeviceWrite(hAddr);
+		DeviceSetData();
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
-			WriteData(_color);
+			DeviceWrite(_color);
 		}
 	}
 
 	if(maskbot!=0xff&&ptop!=pbot)
 	{
-		WriteCommand(0xB0+pg);
-		WriteCommand(lAddr);
-		WriteCommand(hAddr);
-		WriteCommand(0xE0);
+
+		DeviceSetCommand();
+		DeviceWrite(0xB0+pg);
+		DeviceWrite(lAddr);
+		DeviceWrite(hAddr);
+		DeviceWrite(0xE0);
+		DeviceSetData();
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
-			ReadData(display);
-			ReadData(display);
-			ReadData(display);
+			display = DeviceRead();
+			display = DeviceRead();
 			display=display&(~maskbot);
 			display=display|(maskbot&_color);
-			WriteData(display);
+			DeviceWrite(display);
 		}
-		WriteCommand(0xEE);
+		DeviceSetCommand();
+		DeviceWrite(0xEE);
+		DeviceSetData();
 	}
 
 	CS_LAT_BIT=1;
@@ -455,53 +463,60 @@ void BarHSP(SHORT xtop, SHORT ytop,SHORT xbot, SHORT ybot, SHORT pat, SHORT xo)
 	{
 
 		if(wd<8) masktop=masktop&maskval[(ytop&0x07)+wd];
-		WriteCommand(0xB0+pg);
-		WriteCommand(lAddr);
-		WriteCommand(hAddr);
-		WriteCommand(0xE0);
+		DeviceSetCommand();
+		DeviceWrite(0xB0+pg);
+		DeviceWrite(lAddr);
+		DeviceWrite(hAddr);
+		DeviceWrite(0xE0);
+		DeviceSetData();
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
-			ReadData(display);
-			ReadData(display); //dummy read still necessary because of the write between them reads
-			ReadData(display);
+			display = DeviceRead();
+			display = DeviceRead(); 
 			display=display&(~masktop); //clear bits included in zone
 			display=display|(masktop&pat); //set bits with patern
-			WriteData(display);
+			DeviceWrite(display);
 			pat^=xo;
 		}
-		WriteCommand(0xEE);
+		DeviceSetCommand();
+		DeviceWrite(0xEE);
 		pg++;
 	}
 
 	if(wd>7) for(;pg<pbot;pg++)
 	{
-		WriteCommand(0xB0+pg);
-		WriteCommand(lAddr);
-		WriteCommand(hAddr);
+		DeviceSetCommand();
+		DeviceWrite(0xB0+pg);
+		DeviceWrite(lAddr);
+		DeviceWrite(hAddr);
+		DeviceSetData();
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
-			WriteData(pat);
+			DeviceWrite(pat);
 			pat^=xo;
 		}
 	}
 
 	if(maskbot!=0xff&&ptop!=pbot)
 	{
-		WriteCommand(0xB0+pg);
-		WriteCommand(lAddr);
-		WriteCommand(hAddr);
-		WriteCommand(0xE0);
+		DeviceSetCommand();
+		DeviceWrite(0xB0+pg);
+		DeviceWrite(lAddr);
+		DeviceWrite(hAddr);
+		DeviceWrite(0xE0);
+		DeviceSetData();
 		for(aa=0;aa<xbot-xtop+1;aa++)
 		{
-			ReadData(display);
-			ReadData(display);
-			ReadData(display);
+			display = DeviceRead();
+			display = DeviceRead();
 			display=display&(~maskbot);
 			display=display|(maskbot&pat);
-			WriteData(display);
+			DeviceWrite(display);
 			pat^=xo;
 		}
-		WriteCommand(0xEE);
+		DeviceSetCommand();
+		DeviceWrite(0xEE);
+		DeviceSetData();
 	}
 
 	CS_LAT_BIT=1;

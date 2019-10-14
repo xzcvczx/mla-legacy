@@ -31,10 +31,10 @@ DriverVer=08/24/2009,1.0.0.2
 ; the INF, try removing some of the VIDs/PIDs.
 ;------------------------------------------------------------------------------
 [MyDevice_WinUSB.NTx86]
-%DESCRIPTION% =USB_Install, USB\VID_04d8&PID_0053, USB\VID_04d8&PID_0052
+%DESCRIPTION% =USB_Install, USB\VID_04d8&PID_005F&MI_01,USB\VID_04d8&PID_0053,USB\VID_04d8&PID_0052
 
 [MyDevice_WinUSB.NTamd64]
-%DESCRIPTION% =USB_Install, USB\VID_04d8&PID_0053, USB\VID_04d8&PID_0052
+%DESCRIPTION% =USB_Install, USB\VID_04d8&PID_005F&MI_01,USB\VID_04d8&PID_0053,USB\VID_04d8&PID_0052
 
 
 ;=========================================================================================

@@ -20,11 +20,11 @@ an event on completion of transfer request otherwise application can poll the st
 of transfer using function USBHostCDC_ApiTransferIsComplete. This file also provides
 interface routine for ACM class specific requests in function USBHostCDC_Api_ACM_Request.
 
-* FileName:        usb_host_cdc_interface.c
-* Dependencies:    None
-* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
-* Compiler:        C30 v2.01/C32 v0.00.18
-* Company:         Microchip Technology, Inc.
+FileName:        usb_host_cdc_interface.c
+Dependencies:    None
+Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
+Compiler:        C30 v2.01/C32 v0.00.18
+Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -46,9 +46,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-ADG          15-Sep-2008 First release
+ Change History:
+  Rev    Description
+  -----  -----------
+  v2.6a  No change
 *******************************************************************************/
 #include <stdlib.h>
 #include <string.h>

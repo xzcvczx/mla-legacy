@@ -27,31 +27,33 @@ w\:* {behavior:url(#default#VML);}
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
  name="country-region"/>
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
- name="place"/>
+ name="PlaceType"/>
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
  name="PlaceName"/>
 <o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
- name="PlaceType"/>
+ name="place"/>
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:Author>C12109</o:Author>
-  <o:LastAuthor>Abhay</o:LastAuthor>
-  <o:Revision>115</o:Revision>
-  <o:TotalTime>307</o:TotalTime>
+  <o:LastAuthor>Microchip</o:LastAuthor>
+  <o:Revision>116</o:Revision>
+  <o:TotalTime>310</o:TotalTime>
   <o:Created>2008-03-29T21:04:00Z</o:Created>
-  <o:LastSaved>2009-11-12T08:26:00Z</o:LastSaved>
+  <o:LastSaved>2009-11-20T22:35:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>2565</o:Words>
-  <o:Characters>14626</o:Characters>
+  <o:Words>2487</o:Words>
+  <o:Characters>14179</o:Characters>
   <o:Company>Microchip Technology Inc</o:Company>
-  <o:Lines>121</o:Lines>
-  <o:Paragraphs>34</o:Paragraphs>
-  <o:CharactersWithSpaces>17157</o:CharactersWithSpaces>
+  <o:Lines>118</o:Lines>
+  <o:Paragraphs>33</o:Paragraphs>
+  <o:CharactersWithSpaces>16633</o:CharactersWithSpaces>
   <o:Version>11.9999</o:Version>
  </o:DocumentProperties>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <w:WordDocument>
   <w:Zoom>90</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
   <w:PunctuationKerning/>
   <w:ValidateAgainstSchemas/>
   <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
@@ -85,8 +87,7 @@ st1\:*{behavior:url(#ieooui) }
 	mso-pagination:widow-orphan;
 	font-size:12.0pt;
 	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
+	mso-fareast-font-family:"Times New Roman";}
 h1
 	{mso-style-next:Normal;
 	margin-top:12.0pt;
@@ -132,8 +133,7 @@ p.MsoToc1, li.MsoToc1, div.MsoToc1
 	mso-pagination:widow-orphan;
 	font-size:12.0pt;
 	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
+	mso-fareast-font-family:"Times New Roman";}
 p.MsoToc2, li.MsoToc2, div.MsoToc2
 	{mso-style-update:auto;
 	mso-style-noshow:yes;
@@ -146,8 +146,7 @@ p.MsoToc2, li.MsoToc2, div.MsoToc2
 	mso-pagination:widow-orphan;
 	font-size:12.0pt;
 	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
+	mso-fareast-font-family:"Times New Roman";}
 p.MsoToc3, li.MsoToc3, div.MsoToc3
 	{mso-style-update:auto;
 	mso-style-noshow:yes;
@@ -160,8 +159,7 @@ p.MsoToc3, li.MsoToc3, div.MsoToc3
 	mso-pagination:widow-orphan;
 	font-size:12.0pt;
 	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";
-	mso-bidi-font-family:"Times New Roman";}
+	mso-fareast-font-family:"Times New Roman";}
 a:link, span.MsoHyperlink
 	{color:blue;
 	text-decoration:underline;
@@ -205,6 +203,12 @@ span.PlainTextChar
 	mso-ansi-language:EN-US;
 	mso-fareast-language:EN-US;
 	mso-bidi-language:AR-SA;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
 @page Section1
 	{size:8.5in 11.0in;
 	margin:1.0in 65.95pt 1.0in 65.95pt;
@@ -235,7 +239,7 @@ div.Section1
 	mso-bidi-language:#0400;}
 </style>
 <![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="37890"/>
+ <o:shapedefaults v:ext="edit" spidmax="38914"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext="edit">
   <o:idmap v:ext="edit" data="1"/>
@@ -262,10 +266,9 @@ class=MsoHyperlink><span style='mso-no-proof:yes'><a href="#_Toc245096757">Requi
 Hardware:<span style='color:windowtext;display:none;mso-hide:screen;text-decoration:
 none;text-underline:none'><span style='mso-tab-count:1 dotted'> </span></span><!--[if supportFields]><span
 style='color:windowtext;display:none;mso-hide:screen;text-decoration:none;
-text-underline:none'><span style='mso-element:field-begin'></span> PAGEREF
-_Toc245096757 \h </span><span style='color:windowtext;text-decoration:none;
-text-underline:none'><span style='display:none;mso-hide:screen'><span
-style='mso-element:field-separator'></span></span></span><![endif]--><span
+text-underline:none'><span style='mso-element:field-begin'></span> PAGEREF _Toc245096757
+\h </span><span style='color:windowtext;text-decoration:none;text-underline:
+none'><span style='display:none;mso-hide:screen'><span style='mso-element:field-separator'></span></span></span><![endif]--><span
 style='color:windowtext;display:none;mso-hide:screen;text-decoration:none;
 text-underline:none'>1<!--[if gte mso 9]><xml>
  <w:data>08D0C9EA79F9BACE118C8200AA004BA90B02000000080000000E0000005F0054006F0063003200340035003000390036003700350037000000</w:data>
@@ -628,7 +631,7 @@ href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM240001">Explo
 <p class=MsoPlainText><span style='font-family:Arial'><span style='mso-tab-count:
 1'>            </span><a
 href="http://www.microchipdirect.com/productsearch.aspx?Keywords=AC164131">USB
-PICtail™ Plus Daughter Card</a> (AC164131)<o:p></o:p></span></p>
+PICtail™ <span class=GramE>Plus</span> Daughter Card</a> (AC164131)<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><span style='mso-tab-count:
 1'>            </span>And one of the following PIMs<o:p></o:p></span></p>
@@ -651,12 +654,13 @@ lang=DE style='mso-ansi-language:DE'>PIC32MX USB Plug-In-Module (PIM)</span></a>
 lang=DE style='font-family:Arial;mso-ansi-language:DE'> (MA320002)<o:p></o:p></span></p>
 
 <h3><span lang=DE style='mso-ansi-language:DE'><span
-style='mso-spacerun:yes'>    </span></span><a name="_Toc245096761"></a><a
-name="_Toc200532837"><span style='mso-bookmark:_Toc245096761'>Configuration 4:
+style='mso-spacerun:yes'>    </span></span><a name="_Toc200532837"></a><a
+name="_Toc245096761"><span style='mso-bookmark:_Toc200532837'>Configuration 4:
 Low Pin Count USB Development Kit</span></a></h3>
 
 <p class=MsoPlainText style='text-indent:.5in'><span style='font-family:Arial'>Low
-Pin Count USB Development Kit with PICKit 2 Debugger/Programmer (<a
+Pin Count USB Development Kit with <span class=SpellE>PICKit</span> 2
+Debugger/Programmer (<a
 href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DV164126">DV164126</a>)
 or without Debugger/Programmer (<a
 href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM164127">DM164127</a>)<o:p></o:p></span></p>
@@ -669,8 +673,8 @@ PIC24F Starter Kit 1</span></a></h3>
 href="http://www.microchipdirect.com/productsearch.aspx?Keywords=PIC24F+starter">PIC24F
 Starter Kit 1</a> (DM240011)<o:p></o:p></span></p>
 
-<h3><span style='mso-spacerun:yes'>    </span><a name="_Toc245096763"></a><a
-name="_Toc207767006"><span style='mso-bookmark:_Toc245096763'>Configuration 6:
+<h3><span style='mso-spacerun:yes'>    </span><a name="_Toc207767006"></a><a
+name="_Toc245096763"><span style='mso-bookmark:_Toc207767006'>Configuration 6:
 PIC18F46J50 Full Speed USB Demo Board</span></a></h3>
 
 <p class=MsoPlainText style='text-indent:.5in'><span style='font-family:Arial'><a
@@ -678,8 +682,8 @@ href="http://www.microchipdirect.com/productsearch.aspx?Keywords=MA180024">PIC18
 Full Speed USB Demo Board</a> (MA180024)<o:p></o:p></span></p>
 
 <h3><a name="_Toc229910187"><span style='mso-spacerun:yes'>    </span></a><a
-name="_Toc245096764"></a><a name="_Toc231699768"><span style='mso-bookmark:
-_Toc245096764'><span style='mso-bookmark:_Toc229910187'>Configuration 7: PIC32
+name="_Toc231699768"></a><a name="_Toc245096764"><span style='mso-bookmark:
+_Toc231699768'><span style='mso-bookmark:_Toc229910187'>Configuration 7: PIC32
 USB Starter Board</span></span></a></h3>
 
 <p class=MsoPlainText style='text-indent:.5in'><span lang=DE style='font-family:
@@ -727,7 +731,7 @@ href="#_Configuration_7:_PIC32">Configuration 7: PIC32MX USB Starter Board</a><o
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <h3 style='text-indent:.5in'><span style='mso-spacerun:yes'> </span><a
-name="_Toc245096766"></a><a name="config_1"><span style='mso-bookmark:_Toc245096766'>Configuration
+name="config_1"></a><a name="_Toc245096766"><span style='mso-bookmark:config_1'>Configuration
 1: PICDEM FS USB</span></a></h3>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>1)
@@ -780,8 +784,8 @@ src="../images/PIC18F87J50%20PIM%20JP5.JPG"><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
-<h3 style='text-indent:.5in'><a name="_Toc245096768"></a><a name="config_3"><span
-style='mso-bookmark:_Toc245096768'>Configuration 3: Explorer 16</span></a></h3>
+<h3 style='text-indent:.5in'><a name="config_3"></a><a name="_Toc245096768"><span
+style='mso-bookmark:config_3'>Configuration 3: Explorer 16</span></a></h3>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>1)
 Before attaching the PIC24FJ256GB110 PIM to the Explorer 16 board, insure that
@@ -826,9 +830,9 @@ src="../images/pic24fj64gb004_pim_switch.jpg"><span style='font-family:Arial'><o
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>4)<span
-style='mso-spacerun:yes'>  </span>On the USB PICTail Plus board, short jumper
-JP1.<span style='mso-spacerun:yes'>  </span>Remove all other shorts on the
-board.<o:p></o:p></span></p>
+style='mso-spacerun:yes'>  </span>On the USB <span class=SpellE>PICTail</span>
+Plus board, short jumper JP1.<span style='mso-spacerun:yes'>  </span>Remove all
+other shorts on the board.<o:p></o:p></span></p>
 
 <p class=MsoNormal style='text-indent:.5in'><span style='font-family:Arial'><img
 border=0 width=365 height=499 id="_x0000_i1032"
@@ -837,23 +841,23 @@ src="../images/USB%20PICTail+%20(Device%20Enabled).JPG"><o:p></o:p></span></p>
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>5)<span
-style='mso-spacerun:yes'>  </span>Connect the USB PICTail Plus board to either
-of the female PICTail Plus connectors or on the card edge connector (J9) at the
-edge of the Explorer 16 board.<o:p></o:p></span></p>
+style='mso-spacerun:yes'>  </span>Connect the USB <span class=SpellE>PICTail</span>
+Plus board to either of the female <span class=SpellE>PICTail</span> Plus
+connectors or on the card edge connector (J9) at the edge of the Explorer 16
+board.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-size:12.0pt;
 font-family:Arial'>Note: When using the HID bootloader for PIC32, it is
 important to modify the procdefs.ld file to relocate the sections of code that
-will hold the bootloader and those sections that will hold the user
-application.<span style='mso-spacerun:yes'>  </span>Example modified
-procdefs.ld files have been provided with each project.<span
-style='mso-spacerun:yes'>  </span>This file is currently named
-“Procdefs.ld.boot”.<span style='mso-spacerun:yes'>  </span>When using the
-example project with the bootloader it is required to remove the “.boot”
-section of the file.<span style='mso-spacerun:yes'>  </span>This will allow
-MPLAB to use this file instead of the default linker file.<span
+will hold the bootloader and those sections that will hold the user application.<span
+style='mso-spacerun:yes'>  </span>Example modified procdefs.ld files have been
+provided with each project.<span style='mso-spacerun:yes'>  </span>This file is
+currently named “Procdefs.ld.boot”.<span style='mso-spacerun:yes'>  </span>When
+using the example project with the bootloader it is required to remove the
+“.boot” section of the file.<span style='mso-spacerun:yes'>  </span>This will
+allow MPLAB to use this file instead of the default linker file.<span
 style='mso-spacerun:yes'>  </span>Once the linker file is renamed, however, the
 project will no longer work without the bootloader.<span
 style='mso-spacerun:yes'>  </span>Please rename the file in order to get the
@@ -876,8 +880,8 @@ id="_x0000_i1033" src="../images/LPCDK-J14.jpg"><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-size:10.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
-<h3 style='text-indent:.5in'><a name="config_5"></a><a name="_Toc245096770"></a><a
-name="_Toc207092147"><span style='mso-bookmark:_Toc245096770'><span
+<h3 style='text-indent:.5in'><a name="config_5"></a><a name="_Toc207092147"></a><a
+name="_Toc245096770"><span style='mso-bookmark:_Toc207092147'><span
 style='mso-bookmark:config_5'>Configuration 5: PIC24F Starter Kit 1</span></span></a><span
 style='mso-bookmark:config_5'></span></h3>
 
@@ -885,9 +889,9 @@ style='mso-bookmark:config_5'></span></h3>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='font-size:10.0pt;
 font-family:Arial'>The PIC24F Starter Kit does not require any hardware setup
-to run this demo.<span style='mso-spacerun:yes'>  </span>This demo does, however,
-require the user to change the default selected device in the project before
-compiling the demo.<o:p></o:p></span></p>
+to run this demo.<span style='mso-spacerun:yes'>  </span>This demo does,
+however, require the user to change the default selected device in the project
+before compiling the demo.<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-size:10.0pt;font-family:Arial'><span
 style='mso-tab-count:1'>            </span>1) Open the associated project file
@@ -904,8 +908,8 @@ normal'><u>06</u></b>”<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-size:10.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
-<h3 style='text-indent:.5in'><a name="config_6"></a><a name="_Toc245096771"></a><a
-name="_Toc207767013"><span style='mso-bookmark:_Toc245096771'><span
+<h3 style='text-indent:.5in'><a name="config_6"></a><a name="_Toc207767013"></a><a
+name="_Toc245096771"><span style='mso-bookmark:_Toc207767013'><span
 style='mso-bookmark:config_6'>Configuration 6: PIC18F46J50 Full Speed USB Demo
 Board</span></span></a><span style='mso-bookmark:config_6'></span></h3>
 
@@ -933,23 +937,22 @@ demo.<o:p></o:p></span></p>
 font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoNormal style='text-indent:.5in'><span style='font-size:10.0pt;
-font-family:Arial'><img border=0 width=207 height=209 id="_x0000_i1036"
+font-family:Arial'><img border=0 width=207 height=209 id="_x0000_i1035"
 src="../images/pic32_starter_kit_top.jpg"><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
-<p class=MsoPlainText><a name="_Toc245096773"></a><a name=firmware><span
-style='mso-bookmark:_Toc245096773'><span class=Heading2Char><span
-style='font-size:14.0pt'>Firmware</span></span></span></a><span
-style='mso-bookmark:_Toc245096773'></span><span style='mso-bookmark:firmware'></span><span
-style='font-family:Arial'>:<o:p></o:p></span></p>
+<p class=MsoPlainText><a name=firmware></a><a name="_Toc245096773"><span
+style='mso-bookmark:firmware'><span class=Heading2Char><span style='font-size:
+14.0pt'>Firmware</span></span></span></a><span style='mso-bookmark:firmware'></span><span
+style='mso-bookmark:_Toc245096773'></span><span style='font-family:Arial'>:<o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>To
 run this project, you will need to load the corresponding firmware into the
 microcontroller.<span style='mso-spacerun:yes'>  </span>Precompiled Demos are
-available in the “&lt;Install Directory&gt;\USB Precompiled Demos” folders.<span
-style='mso-spacerun:yes'>  </span>Each demo hex filename should include
-information regarding the hardware platform it is compiled for.<span
+available in the “&lt;Install Directory&gt;\USB Precompiled Demos”
+folders.<span style='mso-spacerun:yes'>  </span>Each demo hex filename should
+include information regarding the hardware platform it is compiled for.<span
 style='mso-spacerun:yes'>  </span>For this demo, select the appropriate “WinUSB
 – Generic Driver Demo” hex files that matches the hardware configuration that
 you plan to use.<o:p></o:p></span></p>
@@ -957,8 +960,8 @@ you plan to use.<o:p></o:p></span></p>
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>For
-more information about how to load a precompiled project, please see the “Getting
-Started – Loading a precompiled demo” guide.<o:p></o:p></span></p>
+more information about how to load a precompiled project, please see the
+“Getting Started – Loading a precompiled demo” guide.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -990,8 +993,9 @@ left corner of that window, select the desired device.<o:p></o:p></span></p>
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>For
-more help on how to compile and program projects, please refer to the MPLAB® IDE
-help available through the help menu of MPLAB (Help-&gt;Topics…-&gt;MPLAB IDE).<o:p></o:p></span></p>
+more help on how to compile and program projects, please refer to the MPLAB®
+IDE help available through the help menu of MPLAB (Help-&gt;Topics…-&gt;MPLAB
+IDE).<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -999,10 +1003,10 @@ help available through the help menu of MPLAB (Help-&gt;Topics…-&gt;MPLAB IDE).<
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
-<p class=MsoPlainText><a name="_Toc245096774"></a><a name="running_the_demo"><span
-style='mso-bookmark:_Toc245096774'><span class=Heading2Char><span
+<p class=MsoPlainText><a name="running_the_demo"></a><a name="_Toc245096774"><span
+style='mso-bookmark:running_the_demo'><span class=Heading2Char><span
 style='font-size:14.0pt'>Running the Demo</span></span></span></a><span
-style='mso-bookmark:_Toc245096774'></span><span style='mso-bookmark:running_the_demo'></span><span
+style='mso-bookmark:running_the_demo'></span><span style='mso-bookmark:_Toc245096774'></span><span
 style='font-family:Arial'>:<o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>This
@@ -1071,7 +1075,7 @@ like that shown below should appear:<o:p></o:p></span></p>
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'><img
-border=0 width=370 height=150 id="_x0000_i1035"
+border=0 width=370 height=150 id="_x0000_i1036"
 src="../images/SimpleHIDGenericDemo.PNG"><o:p></o:p></span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
@@ -1087,11 +1091,11 @@ style='mso-spacerun:yes'>  </span>Please install it and try again.<o:p></o:p></s
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:Arial'>In
 order to begin sending/receiving packets to the device, you must first find and
 “connect” to the device.<span style='mso-spacerun:yes'>  </span>As configured
-by default, the application is looking for HID class USB devices with VID =
-0x04D8 and PID = 0x003F.<span style='mso-spacerun:yes'>  </span>The device
-descriptor in the firmware project meant to be used with this demo uses the
-same VID/PID.<span style='mso-spacerun:yes'>  </span>If you plug in a USB
-device programmed with the correct precompiled .hex file, and hit the “Connect”
+by default, the application is looking for USB devices with VID = 0x04D8 and
+PID = 0x0053.<span style='mso-spacerun:yes'>  </span>The device descriptor in
+the firmware project meant to be used with this demo uses the same
+VID/PID.<span style='mso-spacerun:yes'>  </span>If you plug in a USB device
+programmed with the correct precompiled .hex file, and hit the “Connect”
 button, the other pushbuttons should become enabled.<span
 style='mso-spacerun:yes'>  </span>If hitting the connect button has no effect,
 it is likely the USB device is either not connected, or has not been programmed
@@ -1197,9 +1201,9 @@ w:st="on"><st1:country-region w:st="on">U.S.A.</st1:country-region></st1:place>
 and other countries.<o:p></o:p></span></i></p>
 
 <p class=MsoNormal><i><span style='font-size:10.0pt;font-family:Arial;
-color:black'>PICDEM and PICTail are trademarks of Microchip Technology
-Incorporated in the <st1:country-region w:st="on"><st1:place w:st="on">U.S.A.</st1:place></st1:country-region>
-and other countries.<o:p></o:p></span></i></p>
+color:black'>PICDEM and <span class=SpellE>PICTail</span> are trademarks of
+Microchip Technology Incorporated in the <st1:country-region w:st="on"><st1:place
+ w:st="on">U.S.A.</st1:place></st1:country-region> and other countries.<o:p></o:p></span></i></p>
 
 <p class=MsoNormal><i><span style='font-size:10.0pt;font-family:Arial;
 color:black'>Microsoft, Windows, Visual Studio, Visual C++, and Windows Vista

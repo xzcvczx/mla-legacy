@@ -3,8 +3,8 @@
 */
 
 OUTPUT_ARCH("24FJ64GB004")
-EXTERN(__resetPRI)
-EXTERN(__resetALT)
+CRT0_STARTUP(crt0_standard.o)
+CRT1_STARTUP(crt1_standard.o)
 
 OPTIONAL(-lpPIC24Fxxx)
 
@@ -13,11 +13,11 @@ OPTIONAL(-lpPIC24Fxxx)
 */
 MEMORY
 {
-  data  (a!xr) : ORIGIN = 0x800,         LENGTH = 0x2000
+  data  (a!xr) : ORIGIN = 0x800,         LENGTH = 0x1FFF
   reset        : ORIGIN = 0x0,           LENGTH = 0x4
   ivt          : ORIGIN = 0x4,           LENGTH = 0xFC
   aivt         : ORIGIN = 0x104,         LENGTH = 0xFC
-  program (xr) : ORIGIN = 0x400,         LENGTH = 0xA7F8
+  program (xr) : ORIGIN = 0x400,         LENGTH = 0x1000
   CONFIG4      : ORIGIN = 0xABF8,        LENGTH = 0x2
   CONFIG3      : ORIGIN = 0xABFA,        LENGTH = 0x2
   CONFIG2      : ORIGIN = 0xABFC,        LENGTH = 0x2
@@ -29,10 +29,12 @@ __CONFIG3 = 0xABFA;
 __CONFIG2 = 0xABFC;
 __CONFIG1 = 0xABFE;
 
+__NO_HANDLES = 1;          /* Suppress handles on this device  */
+
 __IVT_BASE  = 0x4;
 __AIVT_BASE = 0x104;
 __DATA_BASE = 0x800;
-__CODE_BASE = 0x200;
+__CODE_BASE = 0x400;
 
 
 /*
@@ -84,6 +86,47 @@ SECTIONS
         *(.libc) *(.libm) *(.libdsp);  /* keep together in this order */
         *(.lib*);
   } >program
+
+
+  /*
+  ** User-Defined Section in Program Memory
+  **
+  ** note: can specify an address using
+  **       the following syntax:
+  **
+  **       usercode 0x1234 :
+  **         {
+  **           *(usercode);
+  **         } >program
+  */
+  usercode :
+  {
+        *(usercode);
+  } >program
+
+
+  /*
+  ** User-Defined Constants in Program Memory
+  **
+  ** For PSV type sections, the Load Memory Address (LMA)
+  ** should be specified as follows:
+  **
+  **       userconst : AT(0x1234)
+  **         {
+  **           *(userconst);
+  **         } >program
+  **
+  ** Note that mapping PSV sections in linker scripts
+  ** is not generally recommended.
+  **
+  ** Because of page alignment restrictions, memory is
+  ** often used more efficiently when PSV sections
+  ** do not appear in the linker script.
+  **
+  ** For more information on memory allocation,
+  ** please refer to chapter 10, 'Linker Processing'
+  ** in the Assembler, Linker manual (DS51317).
+  */
 
 
   /*
@@ -168,259 +211,132 @@ SECTIONS
 */
 .ivt __IVT_BASE :
   {
-    LONG( DEFINED(__ReservedTrap0)    ? ABSOLUTE(__ReservedTrap0)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__OscillatorFail)    ? ABSOLUTE(__OscillatorFail)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__AddressError)    ? ABSOLUTE(__AddressError)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__StackError)    ? ABSOLUTE(__StackError)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__MathError)    ? ABSOLUTE(__MathError)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__ReservedTrap5)    ? ABSOLUTE(__ReservedTrap5)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__ReservedTrap6)    ? ABSOLUTE(__ReservedTrap6)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__ReservedTrap7)    ? ABSOLUTE(__ReservedTrap7)    :
-         ABSOLUTE(__DefaultInterrupt));
-
-    LONG( DEFINED(__INT0Interrupt)    ? ABSOLUTE(__INT0Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__IC1Interrupt)    ? ABSOLUTE(__IC1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__OC1Interrupt)    ? ABSOLUTE(__OC1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__T1Interrupt)    ? ABSOLUTE(__T1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt4)    ? ABSOLUTE(__Interrupt4)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__IC2Interrupt)    ? ABSOLUTE(__IC2Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__OC2Interrupt)    ? ABSOLUTE(__OC2Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__T2Interrupt)    ? ABSOLUTE(__T2Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__T3Interrupt)    ? ABSOLUTE(__T3Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__SPI1ErrInterrupt)    ? ABSOLUTE(__SPI1ErrInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__SPI1Interrupt)    ? ABSOLUTE(__SPI1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__U1RXInterrupt)    ? ABSOLUTE(__U1RXInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__U1TXInterrupt)    ? ABSOLUTE(__U1TXInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__ADC1Interrupt)    ? ABSOLUTE(__ADC1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt14)    ? ABSOLUTE(__Interrupt14)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt15)    ? ABSOLUTE(__Interrupt15)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__SI2C1Interrupt)    ? ABSOLUTE(__SI2C1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__MI2C1Interrupt)    ? ABSOLUTE(__MI2C1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__CompInterrupt)    ? ABSOLUTE(__CompInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__CNInterrupt)    ? ABSOLUTE(__CNInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__INT1Interrupt)    ? ABSOLUTE(__INT1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt21)    ? ABSOLUTE(__Interrupt21)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt22)    ? ABSOLUTE(__Interrupt22)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt23)    ? ABSOLUTE(__Interrupt23)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt24)    ? ABSOLUTE(__Interrupt24)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__OC3Interrupt)    ? ABSOLUTE(__OC3Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__OC4Interrupt)    ? ABSOLUTE(__OC4Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__T4Interrupt)    ? ABSOLUTE(__T4Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__T5Interrupt)    ? ABSOLUTE(__T5Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__INT2Interrupt)    ? ABSOLUTE(__INT2Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__U2RXInterrupt)    ? ABSOLUTE(__U2RXInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__U2TXInterrupt)    ? ABSOLUTE(__U2TXInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__SPI2ErrInterrupt)    ? ABSOLUTE(__SPI2ErrInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__SPI2Interrupt)    ? ABSOLUTE(__SPI2Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt34)    ? ABSOLUTE(__Interrupt34)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt35)    ? ABSOLUTE(__Interrupt35)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt36)    ? ABSOLUTE(__Interrupt36)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__IC3Interrupt)    ? ABSOLUTE(__IC3Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__IC4Interrupt)    ? ABSOLUTE(__IC4Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__IC5Interrupt)    ? ABSOLUTE(__IC5Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt40)    ? ABSOLUTE(__Interrupt40)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__OC5Interrupt)    ? ABSOLUTE(__OC5Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt42)    ? ABSOLUTE(__Interrupt42)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt43)    ? ABSOLUTE(__Interrupt43)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt44)    ? ABSOLUTE(__Interrupt44)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__PMPInterrupt)    ? ABSOLUTE(__PMPInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt46)    ? ABSOLUTE(__Interrupt46)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt47)    ? ABSOLUTE(__Interrupt47)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt48)    ? ABSOLUTE(__Interrupt48)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__SI2C2Interrupt)    ? ABSOLUTE(__SI2C2Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__MI2C2Interrupt)    ? ABSOLUTE(__MI2C2Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt51)    ? ABSOLUTE(__Interrupt51)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt52)    ? ABSOLUTE(__Interrupt52)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt53)    ? ABSOLUTE(__Interrupt53)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt54)    ? ABSOLUTE(__Interrupt54)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt55)    ? ABSOLUTE(__Interrupt55)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt56)    ? ABSOLUTE(__Interrupt56)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt57)    ? ABSOLUTE(__Interrupt57)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt58)    ? ABSOLUTE(__Interrupt58)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt59)    ? ABSOLUTE(__Interrupt59)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt60)    ? ABSOLUTE(__Interrupt60)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt61)    ? ABSOLUTE(__Interrupt61)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__RTCCInterrupt)    ? ABSOLUTE(__RTCCInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt63)    ? ABSOLUTE(__Interrupt63)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt64)    ? ABSOLUTE(__Interrupt64)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__U1ErrInterrupt)    ? ABSOLUTE(__U1ErrInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__U2ErrInterrupt)    ? ABSOLUTE(__U2ErrInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__CRCInterrupt)    ? ABSOLUTE(__CRCInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt68)    ? ABSOLUTE(__Interrupt68)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt69)    ? ABSOLUTE(__Interrupt69)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt70)    ? ABSOLUTE(__Interrupt70)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt71)    ? ABSOLUTE(__Interrupt71)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__LVDInterrupt)    ? ABSOLUTE(__LVDInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt73)    ? ABSOLUTE(__Interrupt73)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt74)    ? ABSOLUTE(__Interrupt74)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt75)    ? ABSOLUTE(__Interrupt75)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt76)    ? ABSOLUTE(__Interrupt76)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__CTMUInterrupt)    ? ABSOLUTE(__CTMUInterrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt78)    ? ABSOLUTE(__Interrupt78)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt79)    ? ABSOLUTE(__Interrupt79)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt80)    ? ABSOLUTE(__Interrupt80)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt81)    ? ABSOLUTE(__Interrupt81)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt82)    ? ABSOLUTE(__Interrupt82)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt83)    ? ABSOLUTE(__Interrupt83)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt84)    ? ABSOLUTE(__Interrupt84)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt85)    ? ABSOLUTE(__Interrupt85)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__USB1Interrupt)    ? ABSOLUTE(__USB1Interrupt)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt87)    ? ABSOLUTE(__Interrupt87)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt88)    ? ABSOLUTE(__Interrupt88)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt89)    ? ABSOLUTE(__Interrupt89)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt90)    ? ABSOLUTE(__Interrupt90)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt91)    ? ABSOLUTE(__Interrupt91)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt92)    ? ABSOLUTE(__Interrupt92)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt93)    ? ABSOLUTE(__Interrupt93)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt94)    ? ABSOLUTE(__Interrupt94)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt95)    ? ABSOLUTE(__Interrupt95)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt96)    ? ABSOLUTE(__Interrupt96)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt97)    ? ABSOLUTE(__Interrupt97)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt98)    ? ABSOLUTE(__Interrupt98)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt99)    ? ABSOLUTE(__Interrupt99)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt100)    ? ABSOLUTE(__Interrupt100)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt101)    ? ABSOLUTE(__Interrupt101)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt102)    ? ABSOLUTE(__Interrupt102)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt103)    ? ABSOLUTE(__Interrupt103)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt104)    ? ABSOLUTE(__Interrupt104)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt105)    ? ABSOLUTE(__Interrupt105)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt106)    ? ABSOLUTE(__Interrupt106)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt107)    ? ABSOLUTE(__Interrupt107)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt108)    ? ABSOLUTE(__Interrupt108)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt109)    ? ABSOLUTE(__Interrupt109)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt110)    ? ABSOLUTE(__Interrupt110)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt111)    ? ABSOLUTE(__Interrupt111)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt112)    ? ABSOLUTE(__Interrupt112)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt113)    ? ABSOLUTE(__Interrupt113)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt114)    ? ABSOLUTE(__Interrupt114)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt115)    ? ABSOLUTE(__Interrupt115)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt116)    ? ABSOLUTE(__Interrupt116)    :
-         ABSOLUTE(__DefaultInterrupt));
-    LONG( DEFINED(__Interrupt117)    ? ABSOLUTE(__Interrupt117)    :
-         ABSOLUTE(__DefaultInterrupt));
+    LONG( ABSOLUTE(0x1404)); /* __ReservedTrap0 */
+    LONG( ABSOLUTE(0x1408)); /* __OscillatorFail */
+    LONG( ABSOLUTE(0x140C)); /* __AddressError */
+    LONG( ABSOLUTE(0x1410)); /* __StackError */
+    LONG( ABSOLUTE(0x1414)); /* __MathError */
+    LONG( ABSOLUTE(0x1404)); /* __ReservedTrap5 */
+    LONG( ABSOLUTE(0x1404)); /* __ReservedTrap6 */
+    LONG( ABSOLUTE(0x1404)); /* __ReservedTrap7 */
+    LONG( ABSOLUTE(0x1418)); /* __INT0Interrupt */
+    LONG( ABSOLUTE(0x141C)); /* __IC1Interrupt */
+    LONG( ABSOLUTE(0x1420)); /* __OC1Interrupt */
+    LONG( ABSOLUTE(0x1424)); /* __T1Interrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt4 */
+    LONG( ABSOLUTE(0x1428)); /* __IC2Interrupt */
+    LONG( ABSOLUTE(0x142C)); /* __OC2Interrupt */
+    LONG( ABSOLUTE(0x1430)); /* __T2Interrupt */
+    LONG( ABSOLUTE(0x1434)); /* __T3Interrupt */
+    LONG( ABSOLUTE(0x1438)); /* __SPI1ErrInterrupt */
+    LONG( ABSOLUTE(0x143C)); /* __SPI1Interrupt */
+    LONG( ABSOLUTE(0x1440)); /* __U1RXInterrupt */
+    LONG( ABSOLUTE(0x1444)); /* __U1TXInterrupt */
+    LONG( ABSOLUTE(0x1448)); /* __ADC1Interrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt14 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt15 */
+    LONG( ABSOLUTE(0x144C)); /* __SI2C1Interrupt */
+    LONG( ABSOLUTE(0x1450)); /* __MI2C1Interrupt */
+    LONG( ABSOLUTE(0x1454)); /* __CompInterrupt */
+    LONG( ABSOLUTE(0x1458)); /* __CNInterrupt */
+    LONG( ABSOLUTE(0x145C)); /* __INT1Interrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt21 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt22 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt23 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt24 */
+    LONG( ABSOLUTE(0x1460)); /* __OC3Interrupt */
+    LONG( ABSOLUTE(0x1464)); /* __OC4Interrupt */
+    LONG( ABSOLUTE(0x1468)); /* __T4Interrupt */
+    LONG( ABSOLUTE(0x146C)); /* __T5Interrupt */
+    LONG( ABSOLUTE(0x1470)); /* __INT2Interrupt */
+    LONG( ABSOLUTE(0x1474)); /* __U2RXInterrupt */
+    LONG( ABSOLUTE(0x1478)); /* __U2TXInterrupt */
+    LONG( ABSOLUTE(0x147C)); /* __SPI2ErrInterrupt */
+    LONG( ABSOLUTE(0x1480)); /* __SPI2Interrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt34 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt35 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt36 */
+    LONG( ABSOLUTE(0x1484)); /* __IC3Interrupt */
+    LONG( ABSOLUTE(0x1488)); /* __IC4Interrupt */
+    LONG( ABSOLUTE(0x148C)); /* __IC5Interrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt40 */
+    LONG( ABSOLUTE(0x1490)); /* __OC5Interrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt42 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt43 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt44 */
+    LONG( ABSOLUTE(0x1494)); /* __PMPInterrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt46 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt47 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt48 */
+    LONG( ABSOLUTE(0x1498)); /* __SI2C2Interrupt */
+    LONG( ABSOLUTE(0x149C)); /* __MI2C2Interrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt51 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt52 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt53 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt54 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt55 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt56 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt57 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt58 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt59 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt60 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt61 */
+    LONG( ABSOLUTE(0x14A0)); /* __RTCCInterrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt63 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt64 */
+    LONG( ABSOLUTE(0x14A4)); /* __U1ErrInterrupt */
+    LONG( ABSOLUTE(0x14A8)); /* __U2ErrInterrupt */
+    LONG( ABSOLUTE(0x14AC)); /* __CRCInterrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt68 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt69 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt70 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt71 */
+    LONG( ABSOLUTE(0x14B0)); /* __LVDInterrupt */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt73 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt74 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt75 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt76 */
+    LONG( ABSOLUTE(0x14B4)); /* __CTMUInterrupt*/
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt78 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt79 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt80 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt81 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt82 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt83 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt84 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt85 */
+    LONG( ABSOLUTE(0x14B8)); /* __USB1Interrupt*/
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt87 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt88 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt89 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt90 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt91 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt92 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt93 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt94 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt95 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt96 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt97 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt98 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt99 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt100 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt101 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt102 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt103 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt104 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt105 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt106 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt107 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt108 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt109 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt110 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt111 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt112 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt113 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt114 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt115 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt116 */
+    LONG( ABSOLUTE(0x1404)); /* __Interrupt117 */
   } >ivt
 
 
@@ -868,24 +784,18 @@ _CORCON       = 0x44;
 _CORCONbits   = 0x44;
  DISICNT      = 0x52;
 _DISICNT      = 0x52;
- CNPD1        = 0x54;
-_CNPD1        = 0x54;
-_CNPD1bits    = 0x54;
- CNPD2        = 0x56;
-_CNPD2        = 0x56;
-_CNPD2bits    = 0x56;
  CNEN1        = 0x60;
 _CNEN1        = 0x60;
 _CNEN1bits    = 0x60;
  CNEN2        = 0x62;
 _CNEN2        = 0x62;
 _CNEN2bits    = 0x62;
- CNPU1        = 0x6C;
-_CNPU1        = 0x6C;
-_CNPU1bits    = 0x6C;
- CNPU2        = 0x6E;
-_CNPU2        = 0x6E;
-_CNPU2bits    = 0x6E;
+ CNPU1        = 0x68;
+_CNPU1        = 0x68;
+_CNPU1bits    = 0x68;
+ CNPU2        = 0x6A;
+_CNPU2        = 0x6A;
+_CNPU2bits    = 0x6A;
  INTCON1      = 0x80;
 _INTCON1      = 0x80;
 _INTCON1bits  = 0x80;
@@ -1174,8 +1084,10 @@ _U1STA        = 0x222;
 _U1STAbits    = 0x222;
  U1TXREG      = 0x224;
 _U1TXREG      = 0x224;
+_U1TXREGbits  = 0x224;
  U1RXREG      = 0x226;
 _U1RXREG      = 0x226;
+_U1RXREGbits  = 0x226;
  U1BRG        = 0x228;
 _U1BRG        = 0x228;
  U2MODE       = 0x230;
@@ -1186,8 +1098,10 @@ _U2STA        = 0x232;
 _U2STAbits    = 0x232;
  U2TXREG      = 0x234;
 _U2TXREG      = 0x234;
+_U2TXREGbits  = 0x234;
  U2RXREG      = 0x236;
 _U2RXREG      = 0x236;
+_U2RXREGbits  = 0x236;
  U2BRG        = 0x238;
 _U2BRG        = 0x238;
  SPI1STAT     = 0x240;
@@ -1458,41 +1372,51 @@ _RTCVAL       = 0x624;
  RCFGCAL      = 0x626;
 _RCFGCAL      = 0x626;
 _RCFGCALbits  = 0x626;
- CMSTAT       = 0x630;
-_CMSTAT       = 0x630;
-_CMSTATbits   = 0x630;
- CVRCON       = 0x632;
-_CVRCON       = 0x632;
-_CVRCONbits   = 0x632;
- CM1CON       = 0x634;
-_CM1CON       = 0x634;
-_CM1CONbits   = 0x634;
- CM2CON       = 0x636;
-_CM2CON       = 0x636;
-_CM2CONbits   = 0x636;
- CM3CON       = 0x638;
-_CM3CON       = 0x638;
-_CM3CONbits   = 0x638;
+ CRCCON       = 0x640;
+_CRCCON       = 0x640;
+_CRCCONbits   = 0x640;
  CRCCON1      = 0x640;
 _CRCCON1      = 0x640;
 _CRCCON1bits  = 0x640;
  CRCCON2      = 0x642;
 _CRCCON2      = 0x642;
 _CRCCON2bits  = 0x642;
+ CRCXOR       = 0x644;
+_CRCXOR       = 0x644;
+_CRCXORbits   = 0x644;
  CRCXORL      = 0x644;
 _CRCXORL      = 0x644;
 _CRCXORLbits  = 0x644;
  CRCXORH      = 0x646;
 _CRCXORH      = 0x646;
 _CRCXORHbits  = 0x646;
+ CRCDAT       = 0x648;
+_CRCDAT       = 0x648;
  CRCDATL      = 0x648;
 _CRCDATL      = 0x648;
  CRCDATH      = 0x64A;
 _CRCDATH      = 0x64A;
+ CRCWDAT      = 0x64C;
+_CRCWDAT      = 0x64C;
  CRCWDATL     = 0x64C;
 _CRCWDATL     = 0x64C;
  CRCWDATH     = 0x64E;
 _CRCWDATH     = 0x64E;
+ CMSTAT       = 0x650;
+_CMSTAT       = 0x650;
+_CMSTATbits   = 0x650;
+ CVRCON       = 0x652;
+_CVRCON       = 0x652;
+_CVRCONbits   = 0x652;
+ CM1CON       = 0x654;
+_CM1CON       = 0x654;
+_CM1CONbits   = 0x654;
+ CM2CON       = 0x65C;
+_CM2CON       = 0x65C;
+_CM2CONbits   = 0x65C;
+ CM3CON       = 0x664;
+_CM3CON       = 0x664;
+_CM3CONbits   = 0x664;
  RPINR0       = 0x680;
 _RPINR0       = 0x680;
 _RPINR0bits   = 0x680;

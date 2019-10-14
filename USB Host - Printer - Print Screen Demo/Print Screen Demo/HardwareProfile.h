@@ -65,6 +65,16 @@
 #define	GetPeripheralClock()		(GetSystemClock()/2)
 #define	GetInstructionClock()		(GetSystemClock()/2)
 
+// EPMP is exclusive to GB210 devices and PMP to some devices
+#if defined (__PIC24FJ256DA210__)
+    // EPMP is used by graphics controller
+#elif defined (__PIC24FJ256GB210__)
+    #define USE_GFX_EPMP
+#else
+    #define USE_GFX_PMP
+#endif
+
+
 #elif defined(__PIC32MX__)
 	// PIC32MX processor
 #define	GetSystemClock()            (72000000ul)         // 8 MHz/2 x 18 PLL

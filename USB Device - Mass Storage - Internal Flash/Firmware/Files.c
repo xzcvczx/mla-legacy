@@ -108,10 +108,10 @@ ROM BYTE MBR_ATTRIBUTES MasterBootRecord[MEDIA_SECTOR_SIZE] =
 //Entry 1                                                                                       //0x01BE
 0x80,                   //Status - 0x80 (bootable), 0x00 (not bootable), other (error)
 0x01, 0x01, 0x00,       //Cylinder-head-sector address of first sector in partition
-0x01,                   //Partition type - 0x06 = FAT16 32MB+
+0x06,                   //Partition type - 0x06 = FAT16 32MB+
 0x07, 0xFF, 0xE6,       //Cylinder-head-sector address of last sector in partition
 0x01, 0x00, 0x00, 0x00, //Logical block address of first sector in partition
-0x10, 0x00, 0x00, 0x00, //Length of partition in sectors
+MDD_INTERNAL_FLASH_DRIVE_CAPACITY, 0x00, 0x00, 0x00, //Length of partition in sectors
 //Entry 2
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //0x01CE
 //Entry 3

@@ -2,7 +2,37 @@
 xmlns:o="urn:schemas-microsoft-com:office:office"
 xmlns:w="urn:schemas-microsoft-com:office:word"
 xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns:p="urn:schemas-microsoft-com:office:powerpoint"
+xmlns:a="urn:schemas-microsoft-com:office:access"
 xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"
+xmlns:s="uuid:BDC6E3F0-6DA3-11d1-A2A3-00AA00C14882"
+xmlns:rs="urn:schemas-microsoft-com:rowset" xmlns:z="#RowsetSchema"
+xmlns:b="urn:schemas-microsoft-com:office:publisher"
+xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+xmlns:c="urn:schemas-microsoft-com:office:component:spreadsheet"
+xmlns:odc="urn:schemas-microsoft-com:office:odc"
+xmlns:oa="urn:schemas-microsoft-com:office:activation"
+xmlns:html="http://www.w3.org/TR/REC-html40"
+xmlns:q="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:rtc="http://microsoft.com/officenet/conferencing" xmlns:D="DAV:"
+xmlns:Repl="http://schemas.microsoft.com/repl/"
+xmlns:mt="http://schemas.microsoft.com/sharepoint/soap/meetings/"
+xmlns:x2="http://schemas.microsoft.com/office/excel/2003/xml"
+xmlns:ppda="http://www.passport.com/NameSpace.xsd"
+xmlns:ois="http://schemas.microsoft.com/sharepoint/soap/ois/"
+xmlns:dir="http://schemas.microsoft.com/sharepoint/soap/directory/"
+xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+xmlns:dsp="http://schemas.microsoft.com/sharepoint/dsp"
+xmlns:udc="http://schemas.microsoft.com/data/udc"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:sub="http://schemas.microsoft.com/sharepoint/soap/2002/1/alerts/"
+xmlns:ec="http://www.w3.org/2001/04/xmlenc#"
+xmlns:sp="http://schemas.microsoft.com/sharepoint/"
+xmlns:sps="http://schemas.microsoft.com/sharepoint/soap/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:udcs="http://schemas.microsoft.com/data/udc/soap"
+xmlns:udcxf="http://schemas.microsoft.com/data/udc/xmlfile"
+xmlns:udcp2p="http://schemas.microsoft.com/data/udc/parttopart" xmlns:st="&#1;"
 xmlns:st1="urn:schemas-microsoft-com:office:smarttags"
 xmlns="http://www.w3.org/TR/REC-html40">
 
@@ -32,18 +62,18 @@ demo</title>
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:Author>C12109</o:Author>
-  <o:LastAuthor>Microchip</o:LastAuthor>
-  <o:Revision>109</o:Revision>
-  <o:TotalTime>724</o:TotalTime>
+  <o:LastAuthor>C12109</o:LastAuthor>
+  <o:Revision>111</o:Revision>
+  <o:TotalTime>746</o:TotalTime>
   <o:Created>2008-03-29T21:04:00Z</o:Created>
-  <o:LastSaved>2009-07-10T02:45:00Z</o:LastSaved>
+  <o:LastSaved>2010-01-28T21:21:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>3857</o:Words>
-  <o:Characters>21991</o:Characters>
+  <o:Words>3835</o:Words>
+  <o:Characters>21864</o:Characters>
   <o:Company>Microchip Technology Inc</o:Company>
-  <o:Lines>183</o:Lines>
+  <o:Lines>182</o:Lines>
   <o:Paragraphs>51</o:Paragraphs>
-  <o:CharactersWithSpaces>25797</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>25648</o:CharactersWithSpaces>
   <o:Version>11.9999</o:Version>
  </o:DocumentProperties>
 </xml><![endif]--><!--[if gte mso 9]><xml>
@@ -406,7 +436,7 @@ ul
 	mso-bidi-language:#0400;}
 </style>
 <![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="25602"/>
+ <o:shapedefaults v:ext="edit" spidmax="26626"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext="edit">
   <o:idmap v:ext="edit" data="1"/>
@@ -423,18 +453,14 @@ style='font-size:18.0pt;font-family:Arial'>Getting Started: Using the “USB
 Device – Bootloaders”</span></u></b></a><b style='mso-bidi-font-weight:normal'><u><span
 style='font-size:18.0pt;font-family:Arial'><o:p></o:p></span></u></b></p>
 
-<p class=MsoPlainText><span style='font-size:16.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
 <h1><span style='font-size:18.0pt'>Overview:<o:p></o:p></span></h1>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>In many
-types of applications, it is often desirable to be able to field update the
-firmware used on the flash microcontroller, such as to perform bug fixes, or to
-provide new features.<span style='mso-spacerun:yes'>  </span>Microchip’s flash
-memory based USB microcontrollers have self programming capability, and are
-therefore able to perform self updates of application firmware.<span
+types of applications, it is often desirable to be able to field update the firmware
+used on the flash microcontroller, such as to perform bug fixes, or to provide
+new features.<span style='mso-spacerun:yes'>  </span>Microchip’s flash memory
+based USB microcontrollers have self programming capability, and are therefore
+able to perform self updates of application firmware.<span
 style='mso-spacerun:yes'>  </span>This can be achieved by downloading a new
 firmware image (.hex file) through the USB port, and using the
 microcontroller’s self programming ability to update the flash memory.<o:p></o:p></span></p>
@@ -517,8 +543,8 @@ one PC application is needed to update any of the microcontroller devices.<o:p><
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
-<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>The “MCHPUSB
-Bootloader” is a custom device class (requires driver installation)
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>The
+“MCHPUSB Bootloader” is a custom device class (requires driver installation)
 bootloader.<span style='mso-spacerun:yes'>  </span>The HID Bootloader is
 superior in a number of ways, and if developing a new application, it is
 recommended to consider developing with the HID bootloader instead.<span
@@ -536,9 +562,9 @@ PIC18F4553, PIC18F4458, PIC18F2553, PIC18F2458, PIC18F4450, <span class=GramE>PI
 bootloader related source code can be found in the following location
 “&lt;install directory&gt;\USB Device - Bootloaders\HID - Bootloader”.<span
 style='mso-spacerun:yes'>  </span>The bootloader relies on the HID class
-protocol.<span style='mso-spacerun:yes'>  </span>Therefore, no driver installation
-is necessary, as common operating systems ship with HID class USB drivers built
-in.<o:p></o:p></span></p>
+protocol.<span style='mso-spacerun:yes'>  </span>Therefore, no driver
+installation is necessary, as common operating systems ship with HID class USB
+drivers built in.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -550,9 +576,8 @@ configured by default, the bootloader has the following characteristics:<o:p></o
 <p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><span
 style='font-size:12.0pt;font-family:Arial'>Two USB Stacks Approach:</span></b><span
 style='font-size:12.0pt;font-family:Arial'> The bootloader firmware contains
-all of the code needed for self programming, as well as all of the necessary
-code to enumerate as a HID class USB device.<span style='mso-spacerun:yes'> 
-</span><o:p></o:p></span></p>
+all of the code needed for self programming, as well as all of the necessary code
+to enumerate as a HID class USB device.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -562,9 +587,9 @@ style='mso-spacerun:yes'>  </span>The “main application” firmware should be a
 separate MPLAB IDE based project altogether.<span style='mso-spacerun:yes'> 
 </span>The main application firmware is intended to be entirely independent of
 the bootloader.<span style='mso-spacerun:yes'>  </span>This requires that the
-main application should also contain a fully functional and complete USB
-stack.<span style='mso-spacerun:yes'>  </span>However, only one of the USB
-stacks is used at any given time.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+main application should also contain a fully functional and complete USB stack.<span
+style='mso-spacerun:yes'>  </span>However, only one of the USB stacks is used
+at any given time. <span style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -587,15 +612,15 @@ style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
 memory in address range 0x00-0xFFF (on PIC18 devices, different for PIC24 and
 PIC32 devices).<span style='mso-spacerun:yes'>  </span>Almost immediately after
 coming out of reset, the bootloader firmware checks an I/O pin.<span
-style='mso-spacerun:yes'>  </span>If the I/O pin reads logic low, the
-microcontroller will enter the bootloader firmware.<span
-style='mso-spacerun:yes'>  </span>If the I/O pin is logic high, the bootloader
-will immediately exit the bootloader and go to the main application firmware
-“reset vector”.<span style='mso-spacerun:yes'>  </span>The specific I/O pin
-that will be checked is different for the various versions of the firmware
-projects.<span style='mso-spacerun:yes'>  </span>As configured by default, when
-used with one of the Microchip USB related demonstration boards/platforms, the
-I/O pin that is checked will have a pushbutton attached to it.<o:p></o:p></span></p>
+style='mso-spacerun:yes'>  </span>If the I/O pin reads logic low, the microcontroller
+will enter the bootloader firmware.<span style='mso-spacerun:yes'>  </span>If
+the I/O pin is logic high, the bootloader will immediately exit the bootloader
+and go to the main application firmware “reset vector”.<span
+style='mso-spacerun:yes'>  </span>The specific I/O pin that will be checked is
+different for the various versions of the firmware projects.<span
+style='mso-spacerun:yes'>  </span>As configured by default, when used with one
+of the Microchip USB related demonstration boards/platforms, the I/O pin that
+is checked will have a pushbutton attached to it.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -667,35 +692,43 @@ style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></b></p>
 <p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><span
 style='font-size:12.0pt;font-family:Arial'>Vector Remapping:</span></b><span
 style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
-</span>As currently configured, the bootloader occupies the address range 0x00-0xFFF
-(on PIC18), which means it occupies the PIC18 reset, high priority, and low <span
-class=GramE>priority interrupt</span> vector locations.<span
+</span><o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><u><span
+style='font-size:12.0pt;font-family:Arial'>PIC18:</span></u></b><span
+style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
+</span>As currently configured, the bootloader occupies the address range
+0x00-0xFFF (on PIC18), which means it occupies the PIC18 reset, high priority,
+and low <span class=GramE>priority interrupt</span> vector locations.<span
 style='mso-spacerun:yes'>  </span>The bootloader firmware itself does not
 enable or use interrupts.<span style='mso-spacerun:yes'>  </span>In order to
 make interrupts available for use by the main application firmware, the
-interrupt vectors are effectively “remapped” by placing goto instructions at
-the actual vector locations.<span style='mso-spacerun:yes'>  </span>In other
-words:<o:p></o:p></span></p>
+interrupt vectors are effectively “remapped” by placing <span class=SpellE>goto</span>
+instructions at the actual vector locations.<span style='mso-spacerun:yes'> 
+</span>In other words:<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>Address
-0x08 (high priority interrupt vector), contains a “goto 0x1008”.<o:p></o:p></span></p>
+0x08 (high priority interrupt vector), contains a “<span class=SpellE>goto</span>
+0x1008”.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>Address
-0x18 (low priority interrupt vector), contains a “goto 0x1018”.<o:p></o:p></span></p>
+0x18 (low priority interrupt vector), contains a “<span class=SpellE>goto</span>
+0x1018”.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>For
-example, if a high priority interrupt is enabled and used in the main
-application firmware, the following will occur:<o:p></o:p></span></p>
+example, if a high priority interrupt is enabled and used in the main application
+firmware, the following will occur:<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>1.<span
-style='mso-spacerun:yes'>  </span>Main application enables the interrupt
-source.<o:p></o:p></span></p>
+style='mso-spacerun:yes'>  </span>Main application enables the interrupt source.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>2.<span
 style='mso-spacerun:yes'>  </span>Sometime later, the interrupt event occurs.<o:p></o:p></span></p>
@@ -704,14 +737,78 @@ style='mso-spacerun:yes'>  </span>Sometime later, the interrupt event occurs.<o:
 style='mso-spacerun:yes'>  </span>Microcontroller PC jumps to 0x08.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>4.<span
-style='mso-spacerun:yes'>  </span>Microcontroller executes a “goto 0x1008”.<o:p></o:p></span></p>
+style='mso-spacerun:yes'>  </span>Microcontroller executes a “<span
+class=SpellE>goto</span> 0x1008”.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>5.<span
 style='mso-spacerun:yes'>  </span>Microcontroller executes the main application
 interrupt handler routine, which has an entry point at address 0x1008.<span
 style='mso-spacerun:yes'>  </span>(Note: The interrupt handler routine itself
-is not required to be at address 0x1008, instead another bra/goto may
-optionally be located at 0x1008 to get to the real handler routine)<o:p></o:p></span></p>
+is not required to be at address 0x1008, instead another bra/<span
+class=SpellE>goto</span> may optionally be located at 0x1008 to get to the real
+handler routine)<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><u><span
+style='font-size:12.0pt;font-family:Arial'>PIC24F:</span></u></b><span
+style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
+</span>As currently configured, the bootloader occupies the address range
+0x0000 – 0x1400, which means it occupies the PIC24F reset, interrupt, and
+alternate interrupt vector locations. <span style='mso-spacerun:yes'> </span>The
+bootloader firmware itself does not enable or use interrupts. <span
+style='mso-spacerun:yes'> </span>In order to make interrupts available for use
+by the main application firmware, the interrupt vectors are effectively “remapped”
+by placing <span class=SpellE>goto</span> instructions at the actual vector
+locations. <span style='mso-spacerun:yes'> </span>In other words:<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>Address
+0x0006 (<span class=SpellE>OscillatorFailure</span> interrupt vector), contains
+a “<span class=SpellE>goto</span> 0x1408”.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>Address
+0x0008 (<span class=SpellE>AddressError</span> interrupt vector), contains a “<span
+class=SpellE>goto</span> 0x140C”.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>Etc.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>For
+example, if <span class=GramE>a</span> <span class=SpellE>OscillatorFailure</span>
+interrupt is enabled and used by the main application firmware, the following
+will occur:<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>1. Main
+application enables the interrupt source.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>2.
+Sometime later, the interrupt event occurs.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>3.
+Microcontroller jumps to 0x0006.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>4. Microcontroller
+executes a “<span class=SpellE>goto</span> 0x1408”<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>5.
+Microcontroller executes a “<span class=SpellE>goto</span> _<span class=SpellE>OscillatorFailure</span>”
+instruction that will jump to the appropriately defined interrupt handler (or
+the <span class=SpellE>DefaultInterrupt</span> if the interrupt handler is not
+defined. <span style='mso-spacerun:yes'> </span>This jump is located in the
+modified linker (.<span class=SpellE>gld</span>) file that is used with the
+application.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>In order
+to appropriately remap the interrupts, the appropriate *.<span class=SpellE>gld</span>
+file must be copied from the “Application Linker Files” folder to the project
+folder and attach it to the project.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -721,8 +818,8 @@ PIC32 only (not applicable to other devices), it is important to modify the
 procdefs.ld file to relocate the sections of code that will hold the bootloader
 and those sections that will hold the user application.</span><span
 style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
-</span>Example modified procdefs.ld files have been provided with each
-project.<span style='mso-spacerun:yes'>  </span>This file is currently named
+</span>Example modified procdefs.ld files have been provided with each project.<span
+style='mso-spacerun:yes'>  </span>This file is currently named
 “Procdefs.ld.boot”.<span style='mso-spacerun:yes'>  </span>When using the
 example project with the bootloader it is required to remove the “.boot”
 section of the file.<span style='mso-spacerun:yes'>  </span>This will allow
@@ -738,12 +835,12 @@ project working again with PIC32.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><span
 style='font-size:12.0pt;font-family:Arial'>Memory Map Summary (PIC18):</span></b><span
-style='font-size:12.0pt;font-family:Arial'> As configured by default, the HID
-bootloader firmware uses the below memory mapping.<span
-style='mso-spacerun:yes'>  </span>The memory map can readily be modified by
-editing the HID bootloader firmware project.<span style='mso-spacerun:yes'> 
-</span>It should not be necessary to modify the PC application source code to
-change the memory map.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+style='font-size:12.0pt;font-family:Arial'> As configured by default, the HID bootloader
+firmware uses the below memory mapping.<span style='mso-spacerun:yes'> 
+</span>The memory map can readily be modified by editing the HID bootloader
+firmware project.<span style='mso-spacerun:yes'>  </span>It should not be
+necessary to modify the PC application source code to change the memory
+map.<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -791,11 +888,11 @@ address 0x1000, to allow the C initializer to run<o:p></o:p></span></p>
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><span
-style='font-size:12.0pt;font-family:Arial'>Using the HID Bootloader PC Application:</span></b><span
-style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
-</span>All variants of the HID Bootloader firmware are intended to interface
-with the “HIDBootLoader.exe” PC application.<span style='mso-spacerun:yes'> 
-</span><o:p></o:p></span></p>
+style='font-size:12.0pt;font-family:Arial'>Using the HID Bootloader PC
+Application:</span></b><span style='font-size:12.0pt;font-family:Arial'><span
+style='mso-spacerun:yes'>  </span>All variants of the HID Bootloader firmware
+are intended to interface with the “HIDBootLoader.exe” PC application.<span
+style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -803,10 +900,10 @@ with the “HIDBootLoader.exe” PC application.<span style='mso-spacerun:yes'> 
 you can run the HIDBootLoader.exe executable, you will need to have the
 Microsoft® .NET Framework Version 2.0 Redistributable Package (later versions
 probably okay, but not tested) installed on your computer.<span
-style='mso-spacerun:yes'>  </span>Programs which were built in the Visual
-Studio® .NET languages require the .NET redistributable package in order to
-run.<span style='mso-spacerun:yes'>  </span>The redistributable package can be
-freely downloaded from Microsoft’s website.<span style='mso-spacerun:yes'> 
+style='mso-spacerun:yes'>  </span>Programs which were built in the Visual Studio®
+.NET languages require the .NET redistributable package in order to run.<span
+style='mso-spacerun:yes'>  </span>The redistributable package can be freely
+downloaded from Microsoft’s website.<span style='mso-spacerun:yes'> 
 </span>Users of Windows Vista® and Windows 7 operating systems will not need to
 install the .NET framework, as it comes pre-installed as part of the operating
 system.<o:p></o:p></span></p>
@@ -829,17 +926,17 @@ development environment.<span style='mso-spacerun:yes'>  </span><o:p></o:p></spa
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>It is
 not necessary to install either Microsoft Visual C++ 2005 or the Platform SDK
-in order to use the HID Bootloader.<span style='mso-spacerun:yes'> 
-</span>These are only required in order to modify or recompile the PC software
-source code.<o:p></o:p></span></p>
+in order to use the HID Bootloader. <span
+style='mso-spacerun:yes'> </span>These are only required in order to modify or
+recompile the PC software source code.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>To run
 the application, simply double click on the executable, which can be found in
-the following directory: “&lt;Install Directory&gt;\USB USB Device -
-Bootloaders\HID – Bootloader”.<span style='mso-spacerun:yes'>  </span>Upon
-launching the application, a window like that shown below should appear:<o:p></o:p></span></p>
+the following directory: “&lt;Install Directory&gt;\USB USB Device - Bootloaders\HID
+– Bootloader”.<span style='mso-spacerun:yes'>  </span>Upon launching the
+application, a window like that shown below should appear:<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -943,8 +1040,8 @@ example of how this can be done.<span style='mso-spacerun:yes'>  </span><o:p></o
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>By
 default, most of the pre-compiled demo .hex files (except for PIC32) are
-pre-configured to be useable with the HID Bootloader.<span
-style='mso-spacerun:yes'>  </span>Therefore, the pre-compiled demo firmware
+pre-configured to be useable with the HID Bootloader. <span
+style='mso-spacerun:yes'> </span>Therefore, the pre-compiled demo firmware
 files, such as the “USB Device - HID - Mouse - C18 - PIC18F87J50 PIM.hex” can
 be directly programmed with the bootloader.<o:p></o:p></span></p>
 
@@ -963,19 +1060,19 @@ The “USB Device - Mass Storage - SD Card reader” and “USB Device - Mass Storage
 - SD Card data logger” demos make use of the SD Card PICtail™ Daughter Board
 (Microchip Direct: AC164122).<span style='mso-spacerun:yes'>  </span>This
 PICtail uses the RB4 I/O pin for the card detect (CD) signal when used with the
-PIC18F87J50 FS USB Demo Board (PIM), and is actively driven by the PICtail.<span
-style='mso-spacerun:yes'>  </span>The active drive overpowers the pull up
-resistor on the RB4 pushbutton (on the PIC18F87J50 FS USB Demo Board).<span
-style='mso-spacerun:yes'>  </span>As a result, if the PIC18F87J50 is programmed
-with the HID bootloader, and an SD Card is installed in the socket when the
-microcontroller comes out of reset, the firmware will immediately enter the
-bootloader (irrespective of the RB4 pushbutton state).<span
-style='mso-spacerun:yes'>   </span>To exit the bootloader firmware, remove the
-SD Card from the SD Card socket, and tap the MCLR button.<span
-style='mso-spacerun:yes'>  </span>When the SD Card is not plugged in, the
-PICtail will drive the card detect signal (which is connected to RB4) logic
-high, which will enable the bootloader to exit to the main application after
-coming out of reset.<span style='mso-spacerun:yes'>  </span>Once the main
+PIC18F87J50 FS USB Demo Board (PIM), and is actively driven by the
+PICtail.<span style='mso-spacerun:yes'>  </span>The active drive overpowers the
+pull up resistor on the RB4 pushbutton (on the PIC18F87J50 FS USB Demo
+Board).<span style='mso-spacerun:yes'>  </span>As a result, if the PIC18F87J50
+is programmed with the HID bootloader, and an SD Card is installed in the
+socket when the microcontroller comes out of reset, the firmware will
+immediately enter the bootloader (irrespective of the RB4 pushbutton
+state).<span style='mso-spacerun:yes'>   </span>To exit the bootloader
+firmware, remove the SD Card from the SD Card socket, and tap the MCLR
+button.<span style='mso-spacerun:yes'>  </span>When the SD Card is not plugged
+in, the PICtail will drive the card detect signal (which is connected to RB4)
+logic high, which will enable the bootloader to exit to the main application
+after coming out of reset.<span style='mso-spacerun:yes'>  </span>Once the main
 application firmware is operating, the SD Card can be plugged in.<span
 style='mso-spacerun:yes'>  </span>The SD Card is “hot-swappable” and should be
 recognized by the host upon insertion.<span style='mso-spacerun:yes'> 
@@ -1029,72 +1126,34 @@ configuration words).<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
-<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>On
-currently supported PIC24FJ devices, the first page of flash memory contains
-the vector table, and the last page contains the configuration words.<span
-style='mso-spacerun:yes'>  </span>Since updating the vectors page also entails
-some application risk, similar to updating the configuration words, the “Allow
-Configuration Word Programming” check box is used to simultaneously allow or
-disallow re-programming of both the first page (vector table) and last page
-(configuration words) of implemented flash memory.<span
-style='mso-spacerun:yes'>  </span>In order to update the vector table and
-configuration words, the “Allow Configuration Word Programming” check box will
-need to be checked. <span style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
-
-<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial;
-background:yellow;mso-highlight:yellow'>Note: When using the HID Bootloader for
-<span class=GramE>PIC24,</span> and interrupts are enabled and used in the
-application project, it is important to check the “Allow Configuration Word
-Programming” in order to properly program the hex file. <span
-style='mso-spacerun:yes'> </span>If this check box is not checked, the
-interrupt vector table will not get updated, and interrupts, such as the USB
-interrupts, will not work as intended.<span style='mso-spacerun:yes'>  </span>In
-order to program a hex file without checking the “Allow Configuration Word
-Programming” checkbox, but that will be using interrupts, it is necessary to remap
-the interrupt vectors (like done by default in the PIC18 example projects).<span
-style='mso-spacerun:yes'>  </span>By default, some (not necessarily all) of the
-pre-compiled hex files that are distributed in the MCHPFSUSB framework may be
-using USB interrupts, but may not be using vector remapping. <span
-style='mso-spacerun:yes'> </span>In order to use these pre-compiled demos
-directly, make sure to check the “Allow Configuration Word Programming”
-checkbox before programming the hex file.</span><span style='font-size:12.0pt;
-font-family:Arial'><o:p></o:p></span></p>
-
-<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial;
-background:yellow;mso-highlight:yellow'>Important note concerning VID and PID:<span
-style='mso-spacerun:yes'>  </span>When commercializing a product</span><span
-style='font-size:12.0pt;font-family:Arial'> that will be using a USB bootloader,
-always make sure to use a unique VID and PID combination. <span
-style='mso-spacerun:yes'> </span>Do not use the default VID/PID combination
+background:yellow;mso-highlight:yellow'>Important note concerning VID and
+PID:<span style='mso-spacerun:yes'>  </span>When commercializing a product</span><span
+style='font-size:12.0pt;font-family:Arial'> that will be using a USB
+bootloader, always make sure to use a unique VID and PID combination.<span
+style='mso-spacerun:yes'>  </span>Do not use the default VID/PID combination
 (from the bootloader firmware and PC application) in your commercialized product.<span
 style='mso-spacerun:yes'>  </span>If a PC has two devices, both containing the
 same bootloader with VID/PID = 0x04D8/0x003C, one made by manufacturer A (ex: a
 keyboard), and another device made by manufacturer B (ex: a CDC serial
 emulation device), then it is not certain which device the HID Bootloader PC
-application will connect to. <span style='mso-spacerun:yes'> </span>The HID
+application will connect to.<span style='mso-spacerun:yes'>  </span>The HID
 Bootloader PC application will search the system for any devices attached with
-matching VID/PID, but if there is more than one simultaneously attached, it
-will connect to the first one it finds. <span
-style='mso-spacerun:yes'> </span>This could potentially lead to inadvertent flash
-updating of the wrong product, leading to unexpected and undesired
-consequences.<span style='mso-spacerun:yes'>  </span>By using a unique VID/PID
-for each product line of a given type, this ensures that the HID bootloader PC
-application will only find the correct device. <span
-style='mso-spacerun:yes'> </span>To change the VID and PID in the bootloader
-firmware, simply change the USB device descriptor and rebuild the firmware.<span
-style='mso-spacerun:yes'>  </span>To change the HID Bootloader PC application, change
-the “MY_DEVICE_ID” string at the top of Form1.h, so that the VID/PID matches
-the firmware and then rebuild the project.<span style='mso-spacerun:yes'> 
-</span>The PC application is built in Microsoft Visual C++ 2005 .NET express
-edition. <span style='mso-spacerun:yes'> </span>Microsoft currently distributes
-the express editions of Visual Studio languages for free download on their
-website.<o:p></o:p></span></p>
+matching VID/PID, but if there is more than one simultaneously attached, it will
+connect to the first one it finds.<span style='mso-spacerun:yes'>  </span>This
+could potentially lead to inadvertent flash updating of the wrong product,
+leading to unexpected and undesired consequences.<span
+style='mso-spacerun:yes'>  </span>By using a unique VID/PID for each product
+line of a given type, this ensures that the HID bootloader PC application will
+only find the correct device.<span style='mso-spacerun:yes'>  </span>To change
+the VID and PID in the bootloader firmware, simply change the USB device
+descriptor and rebuild the firmware.<span style='mso-spacerun:yes'>  </span>To
+change the HID Bootloader PC application, change the “MY_DEVICE_ID” string at
+the top of Form1.h, so that the VID/PID matches the firmware and then rebuild
+the project.<span style='mso-spacerun:yes'>  </span>The PC application is built
+in Microsoft Visual C++ 2005 .NET express edition.<span
+style='mso-spacerun:yes'>  </span>Microsoft currently distributes the express
+editions of Visual Studio languages for free download on their website.<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -1112,8 +1171,8 @@ previous MCHPFSUSB v1.x distributions.<span style='mso-spacerun:yes'> 
 PIC18F4553 family of USB microcontrollers.<span style='mso-spacerun:yes'>  
 </span>However, this bootloader is not recommended for new designs.<span
 style='mso-spacerun:yes'>  </span>It is recommended to use the HID Bootloader
-instead, as the HID Bootloader is superior in many ways. <span
-style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
+instead, as the HID Bootloader is superior in many ways.<span
+style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -1143,8 +1202,8 @@ mchpusb.sys custom driver).<span style='mso-spacerun:yes'>  </span><o:p></o:p></
 MCHPUSB bootloader firmware is an entirely stand alone MPLAB IDE based
 project.<span style='mso-spacerun:yes'>  </span>The “main application” firmware
 should be a separate MPLAB IDE based project altogether.<span
-style='mso-spacerun:yes'>  </span>The main application firmware is intended to be
-entirely independent of the bootloader.<span style='mso-spacerun:yes'> 
+style='mso-spacerun:yes'>  </span>The main application firmware is intended to
+be entirely independent of the bootloader.<span style='mso-spacerun:yes'> 
 </span>This requires that the main application should also contain a fully
 functional and complete USB stack.<span style='mso-spacerun:yes'> 
 </span>However, only one of the USB stacks is used at any given time.<span
@@ -1169,12 +1228,12 @@ style='font-size:12.0pt;font-family:Arial'>Bootloader Entry Method:</span></b><s
 style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
 </span>As currently configured, the bootloader firmware resides in program
 memory in address range 0x00-0x7FF.<span style='mso-spacerun:yes'> 
-</span>Almost immediately after coming out of reset, the bootloader firmware
-checks I/O pin RB4 (which happens to have a pushbutton attached to it on the
-PICDEM™ FS USB Demo Board).<span style='mso-spacerun:yes'>  </span>If the
-pushbutton is not pressed, the bootloader will immediately exit the bootloader
-and go to the main application firmware “reset vector”.<span
-style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+</span>Almost immediately after coming out of reset, the bootloader firmware checks
+I/O pin RB4 (which happens to have a pushbutton attached to it on the PICDEM™
+FS USB Demo Board).<span style='mso-spacerun:yes'>  </span>If the pushbutton is
+not pressed, the bootloader will immediately exit the bootloader and go to the
+main application firmware “reset vector”.<span style='mso-spacerun:yes'> 
+</span><o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -1217,9 +1276,14 @@ USB bootloader project.<o:p></o:p></span></p>
 <p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><span
 style='font-size:12.0pt;font-family:Arial'>Vector Remapping:</span></b><span
 style='font-size:12.0pt;font-family:Arial'><span style='mso-spacerun:yes'> 
-</span>As currently configured, the bootloader occupies the address range
-0x00-0x7FF, which means it occupies the PIC18 reset, high priority, and low
-priority interrupt vector locations.<span style='mso-spacerun:yes'>  </span>The
+</span><o:p></o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'>As
+currently configured, the bootloader occupies the address range 0x00-0x7FF,
+which means it occupies the PIC18 reset, high priority, and low priority
+interrupt vector locations.<span style='mso-spacerun:yes'>  </span>The
 bootloader firmware itself does not enable or use interrupts.<span
 style='mso-spacerun:yes'>  </span>In order to make interrupts available for use
 by the main application firmware, the interrupt vectors are effectively
@@ -1262,7 +1326,9 @@ style='mso-spacerun:yes'>  </span>(Note: The interrupt handler routine itself
 might not be at address 0x808, but another bra/goto may be located at 0x808 to
 get to the real routine)<o:p></o:p></span></p>
 
-<p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+<p class=MsoPlainText><b style='mso-bidi-font-weight:normal'><u><span
+style='font-size:12.0pt;font-family:Arial'><o:p><span style='text-decoration:
+ none'>&nbsp;</span></o:p></span></u></b></p>
 
 <p class=MsoPlainText><span style='font-size:12.0pt;font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
@@ -1277,24 +1343,15 @@ directory: “&lt;install directory&gt;\USB Tools\<span class=SpellE>Pdfsusb</span
 style='mso-spacerun:yes'>  </span>Documentation describing how to use this tool
 is found in chapter 3 of the PICDEM FS USB Demo Board User’s Guide
 (DS51526).<span style='mso-spacerun:yes'>  </span>This document can be found in
-the following directory, “&lt;install
-directory&gt;\Microchip\USB\Documentation\Board Information\51526b.pdf”.<span
-style='mso-spacerun:yes'>  </span>(Note: A newer version of this document may
-exist, please check the Microchip website.<span style='mso-spacerun:yes'> 
-</span>The 51526<b style='mso-bidi-font-weight:normal'>b</b>.pdf version of the
-document is written with the assumption that the user is working with MCHPFSUSB
-v1.x, which uses a somewhat different directory structure compared to that of
-MCHPFSUSB v2.2)<o:p></o:p></span></p>
+the following directory, “&lt;install directory&gt;\Microchip\USB\Documentation\Board
+Information\51526b.pdf”.<span style='mso-spacerun:yes'>  </span>(Note: A newer
+version of this document may exist, please check the Microchip website.<span
+style='mso-spacerun:yes'>  </span>The 51526<b style='mso-bidi-font-weight:normal'>b</b>.pdf
+version of the document is written with the assumption that the user is working
+with MCHPFSUSB v1.x, which uses a somewhat different directory structure compared
+to that of MCHPFSUSB v2.2)<o:p></o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoPlainText><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
 

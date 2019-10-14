@@ -54,7 +54,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_8
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -67,14 +67,19 @@ _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
 _CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
     #endif
     #if defined(__PIC24FJ128GA010__)
-_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT)                     // Primary XT OSC with PLL
-_CONFIG1(JTAGEN_OFF & FWDTEN_OFF)                       // JTAG off, watchdog timer off
+_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
+_CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
     #endif
+	#if defined (__PIC24FJ256GB210__)
+_CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+	#endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
-_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
-	#endif	        
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+	#endif	
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
@@ -427,10 +432,14 @@ int main(void)
     
     #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD) && defined(USE_KEYBOARD)
     
-    _ANSG8 = 0; /* S1 */
-    _ANSE9 = 0; /* S2 */
-    // Used by Potentiometer   _ANSB5 = 0; /* S3 */
-        
+     ANSA = 0x0000;
+     ANSB = 0x0020;		// RB5 as potentiometer input
+     ANSC = 0x0010;		// RC4 as touch screen X+, RC14 as external source of secondary oscillator
+     ANSD = 0x0000;
+     ANSE = 0x0000;		// RE9 used as S2
+     ANSF = 0x0000;
+     ANSG = 0x0080;		// RG8 used as S1, RG7 as touch screen Y+
+	     
     #else
 
     /////////////////////////////////////////////////////////////////////////////
@@ -844,14 +853,16 @@ WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 WORD GOLDrawCallback(void)
 {
     static DWORD    prevTick = 0;                           // keeps previous value of tick
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
     static DWORD    prevTime = 0;                           // keeps previous value of time tick
+    WORD            i;
+#endif
     static BYTE     direction = 1;                          // direction switch for progress bar
     static BYTE     arrowPos = 0;                           // arrows pictures position for custom control demo
     static BYTE     pBDelay = 40;                           // progress bar delay variable
     OBJ_HEADER      *pObj;                                  // used to change text in Window
     SLIDER          *pSld;                                  // used when updating date and time
     LISTBOX         *pLb;                                   // used when updating date and time
-    WORD            i;
 
     #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
 
@@ -897,6 +908,34 @@ WORD GOLDrawCallback(void)
 	} // if (GOLFindObject(ID_STATICTEXT1) != NULL) ...     
 
     #endif
+    
+    #ifdef USE_DOUBLE_BUFFERING
+    switch(screenState)
+    {
+    
+        case CREATE_BUTTONS:
+        case CREATE_CHECKBOXES:
+        case CREATE_RADIOBUTTONS:
+        case CREATE_STATICTEXT:
+        case CREATE_PICTURE:
+        case CREATE_SLIDER:
+        case CREATE_PROGRESSBAR:
+        case CREATE_LISTBOX:
+        case CREATE_EDITBOX:
+        case CREATE_METER:
+        case CREATE_DIAL:
+        case CREATE_DATETIME:
+                                    SwitchOnDoubleBuffering();
+                                    break;
+        case CREATE_CUSTOMCONTROL:
+        case CREATE_SIGNATURE:
+        case CREATE_POT:
+        case CREATE_ECG:
+                                    SwitchOffDoubleBuffering();
+                                    break;
+    }
+    #endif
+
     switch(screenState)
     {
         case CREATE_BUTTONS:
@@ -1226,6 +1265,13 @@ WORD GOLDrawCallback(void)
                 WAIT_UNTIL_FINISH(PutImage(CC_ORIGIN_X + 180 - SX_ARROW, CC_ORIGIN_Y + 60 - SY_ARROW - arrowPos, (void *) &arrowUp, 1));
                 WAIT_UNTIL_FINISH(PutImage(CC_ORIGIN_X + 180 - SX_ARROW, CC_ORIGIN_Y + 60 + arrowPos, (void *) &arrowDown, 1));
                 prevTick = tick;
+                
+                #ifdef USE_DOUBLE_BUFFERING
+                    InvalidateRectangle(CC_ORIGIN_X, CC_ORIGIN_Y, CC_ORIGIN_X + SX_ARROW, CC_ORIGIN_Y + 120);
+                    InvalidateRectangle(CC_ORIGIN_X + 180 - SX_ARROW, CC_ORIGIN_Y, CC_ORIGIN_X + 180, CC_ORIGIN_Y + 120);
+                    UpdateDisplayNow();
+                #endif
+
             }
 
             return (1);                         // redraw objects if needed
@@ -1348,7 +1394,7 @@ void StartScreen(void)
                     GFX_SetSrcAddress((y * DISP_HOR_RESOLUTION) + (x - 1));
                     GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
                     GFX_SetRectSize(GetImageWidth((void *) &mchpIcon0), GetImageHeight((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTUNUOUS, RCC_DEST_ADDR_DISCONTUNUOUS);
+                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                     DelayMs(1);
                 }
                 #elif (DISP_ORIENTATION == 90)
@@ -1359,7 +1405,7 @@ void StartScreen(void)
                     GFX_SetSrcAddress(((y + 1) * DISP_HOR_RESOLUTION) + x);
                     GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
                     GFX_SetRectSize(GetImageHeight((void *) &mchpIcon0), GetImageWidth((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTUNUOUS, RCC_DEST_ADDR_DISCONTUNUOUS);
+                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                     DelayMs(1);
                 }
                 #else
@@ -1430,7 +1476,9 @@ void StartScreen(void)
 void CreatePage(XCHAR *pText)
 {
     OBJ_HEADER  *obj;
+#if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__))
     SHORT       i;
+#endif
 
     WndCreate
     (
@@ -2363,6 +2411,10 @@ void DrawSliderCursor(WORD color)
     WAIT_UNTIL_FINISH(Bar(x - CUR_BAR_SIZE, y - CUR_BAR_SIZE, x + CUR_BAR_SIZE, y + CUR_BAR_SIZE));
     WAIT_UNTIL_FINISH(Line(x, CUR_BRD_TOP, x, CUR_BRD_BOTTOM));
     WAIT_UNTIL_FINISH(Line(CUR_BRD_LEFT, y, CUR_BRD_RIGHT, y));
+
+#ifdef USE_DOUBLE_BUFFERING
+    InvalidateAll();
+#endif
 }
 
 // Process messages for slider screen

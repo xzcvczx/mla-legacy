@@ -92,6 +92,7 @@ Description:
   ----   -----------
   2.6    Changed the inplementation of the interrupt clearing macro
          to be more efficient.  
+  2.6a   Added DisableNonZeroEndpoints() function
 
  *************************************************************************/
 
@@ -290,6 +291,36 @@ typedef union _POINTER
  *******************************************************************/
 #define USBClearInterruptFlag(reg_name, if_flag_offset)	(reg_name = (1 << if_flag_offset))	
 
+/********************************************************************
+    Function:
+        void DisableNonZeroEndpoints(UINT8 last_ep_num)
+        
+    Summary:
+        Clears the control registers for the specified non-zero endpoints
+        
+    PreCondition:
+        None
+        
+    Parameters:
+        UINT8 last_ep_num - the last endpoint number to clear.  This
+        number should include all endpoints used in any configuration.
+        
+    Return Values:
+        None
+        
+    Remarks:
+        None
+ 
+ *******************************************************************/
+#define DisableNonZeroEndpoints(last_ep_num)          {\
+            UINT8 i;\
+            UINT32 *p = (UINT32*)&U1EP1;\
+            for(i=0;i<last_ep_num;i++)\
+            {\
+                *p = 0;\
+                p += 4;\
+            }\
+        }
 
 #define USBClearUSBInterrupt() IFS1bits.USBIF = 0;
 #if defined(USB_DISABLE_SOF_HANDLER)

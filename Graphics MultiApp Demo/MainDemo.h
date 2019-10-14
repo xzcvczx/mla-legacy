@@ -55,7 +55,7 @@
     #include "Graphics\Graphics.h"
 
     #if defined(__C30__)
-        #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256DA210__)
+        #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
             #include "usb_config.h"
             #include "USB\usb.h"
             #include "USB\usb_host_hid_parser.h"

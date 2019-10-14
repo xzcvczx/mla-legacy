@@ -39,6 +39,7 @@
  * Anton Alkhimenok     08/27/08
  * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  * Pradeep Budagutta	07/30/09	Added Palette Support
+ * PAT					02/05/10	Fixed GetPixel() bug
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -85,6 +86,7 @@ void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 #else
     #include "TCON_Custom.c"
 #endif
+
 #ifdef USE_PALETTE
 extern void *_palette;
 static BYTE PaletteBpp = 16;
@@ -95,88 +97,29 @@ extern WORD PendingLength;
 #endif
 
 /*********************************************************************
-* Function:  void  DelayMs(WORD time)
+* Macro:  WritePixel(color)
 *
 * PreCondition: none
 *
-* Input: time - delay in ms
+* Input: color 
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: delays execution on time specified in ms
+* Overview: writes pixel at the current address
 *
-* Note: delay is defined for 16MIPS
+* Note: chip select should be enabled
 *
 ********************************************************************/
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-    #define DELAY_1MS   40000 / 5   // for 40MIPS
-
-/* */
-void DelayMs(WORD time)
-{
-    unsigned    delay;
-    while(time--)
-        for(delay = 0; delay < DELAY_1MS; delay++);
-}
-
-#elif defined(__PIC32MX__)
-
-/* */
-void DelayMs(WORD time)
-{
-    while(time--)
-    {
-        unsigned int    int_status;
-
-        int_status = INTDisableInterrupts();
-        OpenCoreTimer(GetSystemClock() / 2000); // core timer is at 1/2 system clock
-        mCTClearIntFlag();
-        INTRestoreInterrupts(int_status);
-
-        while(!mCTGetIntFlag());
-    }
-
-    mCTClearIntFlag();
-}
-
+#ifdef USE_16BIT_PMP
+#define WritePixel(color)	DeviceWrite(color)
 #else
-    #define DELAY_1MS   16000 / 5               // for 16MIPS
-
-/* */
-void DelayMs(WORD time)
-{
-    unsigned    delay;
-    while(time--)
-        for(delay = 0; delay < DELAY_1MS; delay++);
-}
-
+#ifdef USE_PALETTE
+#define WritePixel(color)	DeviceWrite(color)
+#else
+#define WritePixel(color)	{ DeviceWrite(((WORD_VAL)color).v[1]); DeviceWrite(((WORD_VAL)color).v[0]);}
 #endif
-
-/*********************************************************************
-* Macros:  PMPWaitBusy()
-*
-* Overview: waits for PMP cycle end.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-#if defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__)
-    #define PMPWaitBusy()   while(PMMODEbits.BUSY);
-#elif defined(__PIC24F__)
-    #define PMPWaitBusy() \
-    Nop();                \
-    Nop();                \
-    Nop();
-#else
-    #error CONTROLLER IS NOT SUPPORTED
 #endif
 
 /*********************************************************************
@@ -198,78 +141,31 @@ void DelayMs(WORD time)
 void SetAddress(DWORD address)
 {
     #ifdef USE_16BIT_PMP
+	WORD_VAL    temp;
 
-    WORD_VAL    temp;
+    DeviceSetCommand(); // set RS line to low for command
 
-    RS_LAT_BIT = 0; // set RS line to low for command
     temp.v[0] = ((DWORD_VAL) address).v[1];
     temp.v[1] = ((DWORD_VAL) address).v[2] | 0x80;
-    PMDIN1 = temp.Val;
-    PMPWaitBusy();  // wait for the transmission end
-    temp.v[0] = 0x01;
+	DeviceWrite(temp.Val);
+	temp.v[0] = 0x01;
     temp.v[1] = ((DWORD_VAL) address).v[0];
-    PMDIN1 = temp.Val;
-    PMPWaitBusy();  // wait for the transmission end
-    RS_LAT_BIT = 1; // set RS line to high for data
+	DeviceWrite(temp.Val);
+
+	DeviceSetData();    // set RS line to high for data
+
     #else
-    RS_LAT_BIT = 0; // set RS line to low for command
-    PMDIN1 = ((DWORD_VAL) address).v[2] | 0x80;
-    PMPWaitBusy();  // wait for the transmission end
-    PMDIN1 = ((DWORD_VAL) address).v[1];
-    PMPWaitBusy();  // wait for the transmission end
-    PMDIN1 = ((DWORD_VAL) address).v[0];
-    PMPWaitBusy();  // wait for the transmission end
-    RS_LAT_BIT = 1; // set RS line to high for data
+
+    DeviceSetCommand(); // set RS line to low for command
+
+    DeviceWrite(((DWORD_VAL) address).v[2] | 0x80);
+    DeviceWrite(((DWORD_VAL) address).v[1]);
+    DeviceWrite(((DWORD_VAL) address).v[0]);
+
+    DeviceSetData();    // set RS line to high for data
+
     #endif
 }
-
-/*********************************************************************
-* Macros:  WriteData(data)
-*
-* PreCondition:  SetAddress(...) must be called before
-*
-* Input: data - 16 bit value to be written to RAM
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: writes data into controller's RAM
-*
-* Note: chip select should be enabled
-*
-********************************************************************/
-#ifdef USE_16BIT_PMP
-    #define WriteData(data) \
-    {                       \
-        PMDIN1 = data;      \
-        PMPWaitBusy();      \
-    }
-
-#else
-    #ifndef USE_PALETTE
-        #define WriteData(data)          \
-    {                                    \
-        PMDIN1 = ((WORD_VAL) data).v[1]; \
-        PMPWaitBusy();                   \
-        PMDIN1 = ((WORD_VAL) data).v[0]; \
-        PMPWaitBusy();                   \
-    }
-
-    #else
-        #define WriteData(data)              \
-    {                                        \
-        PMDIN1 = ((WORD_VAL) data).v[0];     \
-        PMPWaitBusy();                       \
-        if(PaletteBpp == 16)                 \
-        {                                    \
-            PMDIN1 = ((WORD_VAL) data).v[1]; \
-            PMPWaitBusy();                   \
-        }                                    \
-    }
-
-    #endif
-#endif
 
 /*********************************************************************
 * Function:  void  SetReg(WORD index, BYTE value)
@@ -291,35 +187,35 @@ void SetAddress(DWORD address)
 void SetReg(WORD index, BYTE value)
 {
     #ifdef USE_16BIT_PMP
-    RS_LAT_BIT = 0; // set RS line to low for command
-    CS_LAT_BIT = 0; // enable SSD1926
-    PMPWaitBusy();  // wait for the transmission end
-    PMDIN1 = ((WORD_VAL) index).v[1];
-    PMPWaitBusy();  // wait for the transmission end
-    PMDIN1 = index << 8;
-    PMPWaitBusy();  // wait for the transmission end
-    RS_LAT_BIT = 1; // set RS line to high for data
-    if(index & 0x0001)
-        PMDIN1 = value;
-    else
-        PMDIN1 = value << 8;
 
-    PMPWaitBusy();  // wait for the transmission end
-    CS_LAT_BIT = 1; // disable SSD1926
-    #else
-    RS_LAT_BIT = 0; // set RS line to low for command
-    CS_LAT_BIT = 0; // enable SSD1926
-    PMPWaitBusy();  // wait for the transmission end
-    PMDIN1 = 0x00;  // register access
-    PMPWaitBusy();  // wait for the transmission end
-    PMDIN1 = ((WORD_VAL) index).v[1];
-    PMPWaitBusy();  // wait for the transmission end
-    PMDIN1 = ((WORD_VAL) index).v[0];
-    PMPWaitBusy();  // wait for the transmission end
-    RS_LAT_BIT = 1; // set RS line to high for data
-    PMDIN1 = value;
-    PMPWaitBusy();  // wait for the transmission end
-    CS_LAT_BIT = 1; // disable SSD1926
+    DeviceSetCommand(); // set RS line to low for command
+    DeviceSelect();     // enable SSD1926
+
+    DeviceWrite(((WORD_VAL) index).v[1]);
+    DeviceWrite(index << 8);
+
+	DeviceSetData();    // set RS line to high for data
+
+    if(index & 0x0001)
+		DeviceWrite(value);
+    else
+		DeviceWrite(value << 8);
+
+	DeviceDeselect();   // disable SSD1926
+
+	#else
+
+    DeviceSetCommand(); // set RS line to low for command
+    DeviceSelect();     // enable SSD1926
+
+    DeviceWrite(0x00);    // register access
+    DeviceWrite(((WORD_VAL) index).v[1]);
+    DeviceWrite(((WORD_VAL) index).v[0]);
+
+	DeviceSetData();    // set RS line to high for data
+	DeviceWrite(value);
+
+	DeviceDeselect();   // disable SSD1926
     #endif
 }
 
@@ -341,50 +237,47 @@ void SetReg(WORD index, BYTE value)
 ********************************************************************/
 BYTE GetReg(WORD index)
 {
-    WORD    value;
+#ifdef USE_16BIT_PMP
 
-    #ifdef USE_16BIT_PMP
-    RS_LAT_BIT = 0;         // set RS line to low for command
-    CS_LAT_BIT = 0;         // enable SSD1926
-    PMPWaitBusy();          // wait for the transmission end
-    PMDIN1 = ((WORD_VAL) index).v[1];
-    PMPWaitBusy();          // wait for the transmission end
-    PMDIN1 = index << 8;
-    PMPWaitBusy();          // wait for the transmission end
-    RS_LAT_BIT = 1;         // set RS line to high for data
-    value = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    value = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    CS_LAT_BIT = 1;         // disable SSD1926
-    PMCONbits.PMPEN = 0;    // suspend PMP
-    value = PMDIN1;         // read value
-    PMCONbits.PMPEN = 1;    // resume PMP
+	WORD    value;
+
+    DeviceSetCommand(); // set RS line to low for command
+    DeviceSelect();     // enable SSD1926
+
+    DeviceWrite(((WORD_VAL) index).v[1]);
+    DeviceWrite(index << 8);
+
+	DeviceSetData();    // set RS line to high for data
+
+	value = DeviceRead();
+	value = DeviceRead();
+
+	DeviceDeselect();   // disable SSD1926
+
     if(index & 0x0001)
         value &= 0x00ff;
     else
         value = (value >> 8) & 0x00ff;
-    #else
-    RS_LAT_BIT = 0;         // set RS line to low for command
-    CS_LAT_BIT = 0;         // enable SSD1926
-    PMPWaitBusy();          // wait for the transmission end
-    PMDIN1 = 0x00;          // register access
-    PMPWaitBusy();          // wait for the transmission end
-    PMDIN1 = ((WORD_VAL) index).v[1];
-    PMPWaitBusy();          // wait for the transmission end
-    PMDIN1 = ((WORD_VAL) index).v[0];
-    PMPWaitBusy();          // wait for the transmission end
-    RS_LAT_BIT = 1;         // set RS line to high for data
-    value = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    value = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    CS_LAT_BIT = 1;         // disable SSD1926
-    PMCONbits.PMPEN = 0;    // suspend PMP
-    value = PMDIN1;         // read value
-    PMCONbits.PMPEN = 1;    // resume PMP
-    #endif
-    return (value);
+
+#else
+    BYTE   value;
+
+	DeviceSetCommand(); // set RS line to low for command
+    DeviceSelect();     // enable SSD1926
+
+    DeviceWrite(0x00);    // register access
+    DeviceWrite(((WORD_VAL) index).v[1]);
+    DeviceWrite(((WORD_VAL) index).v[0]);
+
+	DeviceSetData();    // set RS line to high for data
+
+	value = DeviceRead();
+	value = DeviceRead();
+
+	DeviceDeselect();   // disable SSD1926
+#endif
+
+	return (value);
 }
 
 /*********************************************************************
@@ -405,36 +298,10 @@ BYTE GetReg(WORD index)
 ********************************************************************/
 void ResetDevice(void)
 {
-    RST_LAT_BIT = 0;                        // hold in reset by default
-    RST_TRIS_BIT = 0;                       // enable RESET line
-    RS_TRIS_BIT = 0;                        // enable RS line
-    CS_LAT_BIT = 1;                         // SSD1926 is not selected by default
-    CS_TRIS_BIT = 0;                        // enable 1926 CS line
-
-    // PMP setup
-    PMMODE = 0;
-    PMAEN = 0;
-    PMCON = 0;
-    PMMODEbits.MODE = 2;                    // Intel 80 master interface
-    PMMODEbits.WAITB = 0;
-    #if defined(__PIC32MX__) || defined(__dsPIC33F__) || defined(__PIC24H__)
-    PMMODEbits.WAITM = 3;
-    #else
-    PMMODEbits.WAITM = 2;
-    #endif
-    PMMODEbits.WAITE = 0;
-
-    #ifdef USE_16BIT_PMP
-    PMMODEbits.MODE16 = 1;                  // 16 bit mode
-    #else
-    PMMODEbits.MODE16 = 0;                  // 8 bit mode
-    #endif
-    PMCONbits.PTRDEN = 1;                   // enable RD line
-    PMCONbits.PTWREN = 1;                   // enable WR line
-    PMCONbits.PMPEN = 1;                    // enable PMP
-    DelayMs(40);
-    RST_LAT_BIT = 1;                        // release from reset
-    DelayMs(400);
+    /////////////////////////////////////////////////////////////////////
+    // Initialize the device
+    /////////////////////////////////////////////////////////////////////
+	DeviceInit();
 
     /////////////////////////////////////////////////////////////////////
     // PLL SETUP
@@ -447,7 +314,6 @@ void ResetDevice(void)
     SetReg(REG_PLL_CONFIG_0, 0x8a);         // enable PLL
     
     /////////////////////////////////////////////////////////////////////
-
     // VIDEO BUFFER MEMORY CLOCK SETUP
     // Memory frequency = PLL frequency / (MCLK + 1)
     /////////////////////////////////////////////////////////////////////
@@ -618,7 +484,6 @@ void ResetDevice(void)
     SetReg(REG_GPIO_STATUS_CONTROL1, 0x80); // release the glass from reset
     
     /////////////////////////////////////////////////////////////////////
-
     // Panel TCON Programming
     /////////////////////////////////////////////////////////////////////
     TCON_Init();
@@ -661,10 +526,10 @@ void PutPixel(SHORT x, SHORT y)
     #else
     address = ((((DWORD) (GetMaxX() + 1)) * y + x) * PaletteBpp) >> 3;
     #endif
-    CS_LAT_BIT = 0;
+    DeviceSelect();      // enable SSD1926
     SetAddress(address);
-    WriteData(_color);
-    CS_LAT_BIT = 1;
+    WritePixel(_color);
+    DeviceDeselect();    // disable SSD1926
 }
 
 /*********************************************************************
@@ -693,37 +558,39 @@ WORD GetPixel(SHORT x, SHORT y)
 
     WORD    value;
 
-    CS_LAT_BIT = 0;
+    DeviceSelect();
+
     SetAddress(address);
+    value = DeviceRead();
+    value = DeviceRead();
 
-    value = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    value = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    CS_LAT_BIT = 1;
+    DeviceDeselect();
 
-    PMCONbits.PMPEN = 0;    // suspend PMP
-    value = PMDIN1;         // read value
-    PMCONbits.PMPEN = 1;    // resume PMP
     return (value);
     #else
 
     WORD_VAL    value;
 
-    CS_LAT_BIT = 0;
+    DeviceSelect();
+
     SetAddress(address);
+    
+    #if defined(USE_GFX_PMP)
+	    // this first two reads are a dummy reads
+	    value.Val = SingleDeviceRead();
+	    value.Val = SingleDeviceRead();
+	    // these are the reads that will get the actual pixel data
+	    value.v[1] = SingleDeviceRead();
+	    value.v[0] = SingleDeviceRead();
+    #endif
+    
+    #if defined(USE_GFX_EPMP)
+	    value.Val = DeviceRead();
+	    value.v[1] = DeviceRead();
+	    value.v[0] = DeviceRead();
+    #endif
+    DeviceDeselect();
 
-    value.Val = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    value.Val = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    value.v[1] = PMDIN1;
-    PMPWaitBusy();          // wait for the transmission end
-    CS_LAT_BIT = 1;
-
-    PMCONbits.PMPEN = 0;    // suspend PMP
-    value.v[0] = PMDIN1;
-    PMCONbits.PMPEN = 1;    // resume PMP
     return (value.Val);
     #endif
 }
@@ -888,17 +755,13 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
         {
             if(steep)
             {
-                if(!Line2D(x1 + 1, y1, x2 + 1, y2))
-                    return (0);
-                if(!Line2D(x1 - 1, y1, x2 - 1, y2))
-                    return (0);
+                while(!Line2D(x1 + 1, y1, x2 + 1, y2));
+                while(!Line2D(x1 - 1, y1, x2 - 1, y2));
             }
             else
             {
-                if(!Line2D(x1, y1 + 1, x2, y2 + 1))
-                    return (0);
-                if(!Line2D(x1, y1 - 1, x2, y2 - 1))
-                    return (0);
+                while(!Line2D(x1, y1 + 1, x2, y2 + 1));
+                while(!Line2D(x1, y1 - 1, x2, y2 - 1));
             }
         }
 
@@ -1101,7 +964,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         SetAddress(address);
         for(x = left; x < right + 1; x++)
         {
-            WriteData(_color);
+            WritePixel(_color);
         }
 
                 #ifndef USE_PALETTE
@@ -1333,14 +1196,14 @@ void ClearDevice(void)
     SetAddress(0);
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
-        WriteData(_color);
+        WritePixel(_color);
     }
 
     CS_LAT_BIT = 1;
 
         #else
     while(GetReg(REG_2D_220) == 0);
-    Bar(0, 0, GetMaxX(), GetMaxY());
+    while(!Bar(0, 0, GetMaxX(), GetMaxY()));
     while(GetReg(REG_2D_220) == 0);
 
     /* Ready */
@@ -1373,8 +1236,10 @@ void ClearDevice(void)
 ********************************************************************/
 WORD PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 {
+#if defined (USE_BITMAP_FLASH) || defined (USE_BITMAP_EXTERNAL)
     FLASH_BYTE  *flashAddress;
     BYTE        colorDepth;
+#endif
     WORD        colorTemp;
 
     #ifndef USE_NONBLOCKING_CONFIG
@@ -1544,7 +1409,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
 
                 // Shift to the next pixel
@@ -1662,7 +1527,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
 
                 // Shift to the next pixel
@@ -1762,7 +1627,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -1850,7 +1715,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -1980,7 +1845,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
 
                 // Shift to the next pixel
@@ -2105,7 +1970,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -2201,7 +2066,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -2296,7 +2161,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 

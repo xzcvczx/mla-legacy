@@ -85,6 +85,7 @@ Description:
   2.6    Removed many of the device specific information to the
          HAL layer files.  Moved many of the CH9 defintions to the
          CH9 file.
+  2.6a   No Change
 
 ********************************************************************/
 

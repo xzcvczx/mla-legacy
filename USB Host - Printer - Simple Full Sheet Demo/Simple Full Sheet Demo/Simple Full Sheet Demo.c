@@ -38,10 +38,6 @@ printer.
 * Compiler:         C30 v3.10b/C32 v1.02
 * Company:          Microchip Technology, Inc.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-KO          ??-???-2008 First release
-
 *******************************************************************************/
 
 #include <stdlib.h>
@@ -92,9 +88,9 @@ KO          ??-???-2008 First release
     //      Write Protect:                  Disabled
     //      Code Protect:                   Disabled
     //      JTAG Port Enable:               Disabled
-    #if defined(__PIC24FJ256GB110__)
-        _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
-        _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
+    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
@@ -104,8 +100,8 @@ KO          ??-???-2008 First release
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
     #elif defined(__PIC24FJ256DA210__)
-        //_CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
-        //_CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+        _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #else
         #warning "No configuration bits set for this project.  USB needs specific configuration settings.  Please verify that the configuration bits are set correctly."
     #endif
@@ -382,7 +378,12 @@ void InitializeVbusMonitor( void )
 {
     #if defined( __C30__)
         // Set up the A/D converter
-        AD1PCFGL    = 0xFEFF;       // Disable digital input on AN8
+        #if !defined(__PIC24FJ256DA210__) 
+        #elif defined(__PIC24FJ256GB210__)
+            ANSBbits.ANSB8 = 1;
+        #else
+            AD1PCFGL    = 0xFEFF;       // Disable digital input on AN8
+        #endif
         AD1CSSL     = 0x0000;       // No scan
         AD1CHS      = 0x0008;       // Mux A uses AN8
         AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 5*Tcy
@@ -544,7 +545,7 @@ int main (void)
 {
 
     #if defined (__C30__)
-        #if defined( __PIC24FJ256GB110__ )
+        #if defined( __PIC24FJ256GB110__ ) || defined(__PIC24FJ256GB210__)
             // Configure U2RX - put on pin 49 (RP10)
             RPINR19bits.U2RXR = 10;
             // Configure U2TX - put on pin 50 (RP17)

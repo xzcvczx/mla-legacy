@@ -1,14 +1,14 @@
 /********************************************************************
   File Information:
-    FileName:     	usb_function_hid.c
+    FileName:       usb_function_hid.c
     Dependencies:   See INCLUDES section
     Processor:      PIC18 or PIC24 USB Microcontrollers
     Hardware:       The code is natively intended to be used on the following
-    				hardware platforms: PICDEM™ FS USB Demo Board, 
-    				PIC18F87J50 FS USB Plug-In Module, or
-    				Explorer 16 + PIC24 USB PIM.  The firmware may be
-    				modified for use on other USB platforms by editing the
-    				HardwareProfile.h file.
+                    hardware platforms: PICDEM™ FS USB Demo Board, 
+                    PIC18F87J50 FS USB Plug-In Module, or
+                    Explorer 16 + PIC24 USB PIM.  The firmware may be
+                    modified for use on other USB platforms by editing the
+                    HardwareProfile.h file.
     Complier:  	    Microchip C18 (for PIC18) or C30 (for PIC24)
     Company:        Microchip Technology, Inc.
     
@@ -33,12 +33,6 @@
     CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
   File Description:
-    
-    Change History:
-     Rev   Date         Description
-     1.0   11/19/2004   Initial release
-     2.1   02/26/2007   Updated for simplicity and to use common
-                        coding style
 
   Summary:
     This file contains all of functions, macros, definitions, variables,
@@ -46,10 +40,9 @@
     driver. This file should be included in projects that use the HID
     \function driver.
     
-    
-    
     This file is located in the "\<Install Directory\>\\Microchip\\USB\\HID
     Device Driver" directory.
+
   Description:
     USB HID Function Driver File
     
@@ -71,15 +64,9 @@
     folder (like the current demo folders), then the following include
     paths need to be added to the application's project:
     
-    ..\\Include
-    
-    ..\\..\\Include
-    
     ..\\..\\Microchip\\Include
     
-    ..\\..\\\<Application Folder\>
-    
-    ..\\..\\..\\\<Application Folder\>
+    .
     
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -88,6 +75,15 @@
     C:\\Microchip Solutions\\Microchip\\Include
     
     C:\\Microchip Solutions\\My Demo Application  
+   
+  Change History:
+    Rev       Description
+    -------   -----------------------------------------------------
+    1.0       Initial release
+    2.1       Updated for simplicity and to use common coding style
+    2.1-2.6   No change
+    2.6a      Updated the handling of the physical descriptor
+
 *******************************************************************/
 
 #ifndef USB_FUNCTION_HID_C
@@ -171,16 +167,16 @@ void USBCheckHIDRequest(void)
     {
         switch(SetupPkt.bDescriptorType)
         {
-            case DSC_HID:           
+            case DSC_HID: //HID Descriptor          
                 if(USBActiveConfiguration == 1)
                 {
                     USBEP0SendROMPtr(
-                        (ROM BYTE*)&configDescriptor1 + 18,
+                        (ROM BYTE*)&configDescriptor1 + 18,		//18 is a magic number.  It is the offset from start of the configuration descriptor to the start of the HID descriptor.
                         sizeof(USB_HID_DSC)+3,
                         USB_EP0_INCLUDE_ZERO);
                 }
                 break;
-            case DSC_RPT:             
+            case DSC_RPT:  //Report Descriptor           
                 if(USBActiveConfiguration == 1)
                 {
                     USBEP0SendROMPtr(
@@ -189,8 +185,18 @@ void USBCheckHIDRequest(void)
                         USB_EP0_INCLUDE_ZERO);
                 }
                 break;
-            case DSC_PHY:
-                USBEP0Transmit(USB_EP0_NO_DATA);
+            case DSC_PHY:  //Physical Descriptor
+                //Note: The below placeholder code is commented out.  HID Physical Descriptors are optional and are not used
+                //in many types of HID applications.  If an application does not have a physical descriptor,
+                //then the device should return STALL in response to this request (stack will do this automatically
+                //if no-one claims ownership of the control transfer).
+                //If an application does implement a physical descriptor, then make sure to declare
+                //hid_phy01 (rom structure containing the descriptor data), and hid_phy01 (the size of the descriptors in bytes),
+                //and then uncomment the below code.
+                //if(USBActiveConfiguration == 1)
+                //{
+                //    USBEP0SendROMPtr((ROM BYTE*)&hid_phy01, sizeof(hid_phy01), USB_EP0_INCLUDE_ZERO);
+                //}
                 break;
         }//end switch(SetupPkt.bDescriptorType)
     }//end if(SetupPkt.bRequest == GET_DSC)

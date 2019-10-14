@@ -1,71 +1,52 @@
-/*********************************************************************
- *
- *            ZG2100 registers/bits
- *
- *********************************************************************
- * FileName:        ZG2100.h
- * Description:     Include file for ZG2100 control registers
- * Company:         ZeroG Wireless, Inc.
- *
- * Software License Agreement
+/******************************************************************************
 
-Copyright © 2009 Microchip Technology Inc.  All rights reserved.
+ ZG2100 Driver registers/bits
+ Module for Microchip TCP/IP Stack
+  -Provides access to ZG2100 WiFi controller
+  -Reference: ZG2100 Data sheet, IEEE 802.11 Standard
 
-Microchip licenses to you the right to use, modify, copy and distribute
-Software only when embedded on a Microchip microcontroller or digital signal
-controller that is integrated into your product or third party product
-(pursuant to the sublicense terms in the accompanying license agreement).
+*******************************************************************************
+ FileName:		ZG2100.h
+ Dependencies:	TCP/IP Stack header files
+ Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:		Microchip C32 v1.10b or higher
+				Microchip C30 v3.22 or higher
+				Microchip C18 v3.34 or higher
+ Company:		Microchip Technology, Inc.
 
-You should refer to the license agreement accompanying this Software for
-additional information regarding your rights and obligations.
+ Software License Agreement
 
-SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND,
-EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF
-MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
-IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER
-CONTRACT, NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR
-OTHER LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
-INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
-CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
-SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
-(INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+ Copyright (C) 2002-2010 Microchip Technology Inc.  All rights reserved.
 
- * Copyright © 2002-2007 ZeroG Wireless Inc.  All rights
- * reserved.
- *
- * ZeroG licenses to you the right to use, modify, copy, and
- * distribute:
- * (i)  the Software when embedded on a Microchip microcontroller or
- *      digital signal controller product (“Device”) which is
- *      integrated into Licensee’s product; or
- * (ii) ONLY the Software driver source files ZG2100.c and
- *      ZG2100.h ported to a non-Microchip device used in
- *      conjunction with a Microchip ethernet controller for the
- *      sole purpose of interfacing with the ethernet controller.
- *
- * You should refer to the license agreement accompanying this
- * Software for additional information regarding your rights and
- * obligations.
- *
- * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT
- * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
- * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
- * MICROCHIP BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
- * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
- * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
- * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
- * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
- * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
- * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
+ Microchip licenses to you the right to use, modify, copy, and distribute:
+ (i)  the Software when embedded on a Microchip microcontroller or digital 
+      signal controller product ("Device") which is integrated into 
+      Licensee's product; or
+ (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+      ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
+	  conjunction with a Microchip ethernet controller for the sole purpose 
+	  of interfacing with the ethernet controller.
 
-Author               Date        Comment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Michael Palladino   10/13/07    Original
-KO                  31 Oct 2008 Port to PIC24F and PIC32 for TCP/IP stack v4.52
+ You should refer to the license agreement accompanying this Software for 
+ additional information regarding your rights and obligations.
 
-*******************************************************************************/
+ THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+ NON-INFRINGEMENT. IN NO EVENT SHALL MICROCHIP BE LIABLE FOR ANY INCIDENTAL,
+ SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST
+ OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS BY
+ THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), ANY CLAIMS
+ FOR INDEMNITY OR CONTRIBUTION, OR OTHER SIMILAR COSTS, WHETHER ASSERTED ON
+ THE BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR
+ OTHERWISE.
 
+
+ Author				Date		Comment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Michael Palladino	10/13/07	Original
+ KO					31 Oct 2008	Port to PIC24F and PIC32 for TCP/IP stack v4.52
+******************************************************************************/
 #ifndef __ZG2100_H
 #define __ZG2100_H
 

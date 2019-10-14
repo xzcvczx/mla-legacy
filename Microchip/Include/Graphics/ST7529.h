@@ -73,7 +73,7 @@
     #define USE_DRV_CLEARDEVICE
 
 // Define this to implement PutImage function in the driver.
-    #define USE_DRV_PUTIMAGE
+//    #define USE_DRV_PUTIMAGE
 
     #ifdef USE_16BIT_PMP
         #error This driver doesn't support 16-bit PMP (remove USE_16BIT_PMP option from GHardwareProfile.h)
@@ -209,78 +209,7 @@ extern SHORT    _clipRight;
 // Bottom clipping region border
 extern SHORT    _clipBottom;
 
-/*********************************************************************
-* Macros:  PMPWaitBusy()
-*
-* Overview: Delays execution for PMP cycle time.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define PMPWaitBusy()   while(PMMODEbits.BUSY);
-
-/*********************************************************************
-* Macros:  WriteCmd(command)
-*
-* Overview: Writes a command.
-*
-* PreCondition: none
-*
-* Input: command
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define WriteCmd(command) \
-    RS_LAT_BIT = 0;           \
-    PMDIN1 = command;         \
-    PMPWaitBusy();            \
-    RS_LAT_BIT = 1;
-
-/*********************************************************************
-* Macros:  WriteData(data)
-*
-* Overview: Writes data.
-*
-* PreCondition: none
-*
-* Input: data
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define WriteData(data) \
-    PMDIN1 = data;          \
-    PMPWaitBusy();
-
-/*********************************************************************
-* Macros:  ReadData()
-*
-* Overview: Reads data.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: data
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define ReadData() \
-    PMDIN1;            \
-    PMPWaitBusy();
-
+/
 /*********************************************************************
 * Function:  void ResetDevice()
 *
@@ -565,23 +494,6 @@ WORD    GetPixel(SHORT x, SHORT y);
 *
 ********************************************************************/
     #define SetPalette(colorNum, color)
-
-/*********************************************************************
-* Function:  void  DelayMs(WORD time)
-*
-* Overview: Delays execution on time specified in milliseconds.
-*           The delay is correct only for 16MIPS.
-*
-* PreCondition: none
-*
-* Input: time - Delay in milliseconds.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void    DelayMs(WORD time);
 
 /*********************************************************************
 * Function: void ContrastSet(WORD contrast)

@@ -54,11 +54,11 @@
 //DOM-IGNORE-BEGIN
 /******************************************************************************
 
-* FileName:        usb_host_printer_esc_pos.h
-* Dependencies:    None
-* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
-* Compiler:        C30 v3.10b/C32 v1.02
-* Company:         Microchip Technology, Inc.
+ FileName:        usb_host_printer_esc_pos.h
+ Dependencies:    None
+ Processor:       PIC24F/PIC32MX
+ Compiler:        C30/C32
+ Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -80,9 +80,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-KO         ??-???-2008 First release
+Change History:
+  Rev         Description
+  ----------  ----------------------------------------------------------
+  2.6 - 2.6a  No change
 
 *******************************************************************************/
 //DOM-IGNORE-END

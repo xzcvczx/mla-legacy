@@ -4,13 +4,11 @@
 
 This file contains local definitions used by the HAL.
 
- * Filename:        usb_hal_local.h
- * Dependancies:    See included files, below
- * Processor:       PIC32MX
- * Hardware:        PIC32MX
- * Assembler:       pic32
- * Linker:          pic32
- * Company:         Microchip Technology, Inc.
+  Filename:        usb_hal_local.h
+  Dependancies:    See included files, below
+  Processor:       PIC32MX
+  Hardware:        PIC32MX
+  Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -32,10 +30,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-BC           11-10-2006 Initial Creation
-BC           04-18-2008 Merged core into HAL
+Change History:
+  Rev         Description
+  ----------  ----------------------------------------------------------
+  2.6 - 2.6a  No change
 
 *******************************************************************************/
 

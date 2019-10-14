@@ -156,101 +156,6 @@ extern SHORT    _clipBottom;
     #define CMD_RECT        0x84
 
 /*********************************************************************
-* Macros:  PMPWaitBusy()
-*
-* Overview: Delays execution for PMP cycle time.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define PMPWaitBusy()   while(PMMODEbits.BUSY);
-
-/*********************************************************************
-* Macros:  WriteCommand(cmd)
-*
-* PreCondition: none
-*
-* Input: cmd - controller command
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: writes command
-*
-* Note: none
-*
-********************************************************************/
-    #define WriteCommand(cmd) \
-    PMADDR = 0x0000;          \
-    PMDIN1 = cmd;             \
-    PMPWaitBusy();
-
-/*********************************************************************
-* Macros:  WriteData(data)
-*
-* PreCondition: none
-*
-* Input: data - data byte
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: writes data byte
-*
-* Note: none
-*
-********************************************************************/
-    #define WriteData(data) \
-    PMADDR = 0x0001;        \
-    PMDIN1 = data;          \
-    PMPWaitBusy();
-
-/*********************************************************************
-* Macros:  SetPointer(sx,sy,ex,ey)
-*
-* PreCondition: none
-*
-* Input: sx,sy - start x,y position
-*        ex,ey - x,y access borders
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: sets pointer to to write/read operations
-*
-* Note: none
-*
-********************************************************************/
-    #define SetPointer(sx, sy, ex, ey) \
-    PMADDR = 0x0000;                   \
-    PMDIN1 = CMD_COL;                  \
-    PMPWaitBusy();                     \
-    PMADDR = 0x0001;                   \
-    PMDIN1 = sx;                       \
-    PMPWaitBusy();                     \
-    PMADDR = 0x0001;                   \
-    PMDIN1 = ex;                       \
-    PMPWaitBusy();                     \
-    PMADDR = 0x0000;                   \
-    PMDIN1 = CMD_ROW;                  \
-    PMPWaitBusy();                     \
-    PMADDR = 0x0001;                   \
-    PMDIN1 = sy;                       \
-    PMPWaitBusy();                     \
-    PMADDR = 0x0001;                   \
-    PMDIN1 = ey;                       \
-    PMPWaitBusy();
-
-/*********************************************************************
 * Function:  void ResetDevice()
 *
 * PreCondition: none
@@ -565,21 +470,5 @@ WORD    GetPixel(SHORT x, SHORT y);
 ********************************************************************/
     #define SetPalette(colorNum, color)
 
-/*********************************************************************
-* Function:  void  DelayMs(WORD time)
-*
-* PreCondition: none
-*
-* Input: time - delay in ms
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: delays execution on time specified in ms
-*
-* Note: delay is defined for 16MIPS
-*
-********************************************************************/
-void    DelayMs(WORD time);
+
 #endif // _SSD1339_H

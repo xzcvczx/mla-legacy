@@ -10,6 +10,8 @@ This file defines all of the hardware-specific information for the project.
 #define _HARDWARE_PROFILE_H_
 
 #define USE_SH1101A
+#define USE_GFX_PMP
+#define USE_8BIT_PMP
 //#define USE_SSD1303
 //#define USE_FRC - incompatible with USB operation
 //#define GO_SLOW - incompatible with USB host operation
@@ -157,6 +159,10 @@ This file defines all of the hardware-specific information for the project.
 
 #define CS_TRIS_BIT 	   TRISDbits.TRISD11
 #define CS_LAT_BIT 		   LATDbits.LATD11  
+
+#define RS_TRIS_BIT 	   TRISBbits.TRISB15
+#define RS_LAT_BIT 		   LATBbits.LATB15  
+
 
 #endif
 

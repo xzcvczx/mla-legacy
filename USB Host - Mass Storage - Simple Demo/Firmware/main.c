@@ -1,3 +1,43 @@
+/********************************************************************
+ FileName:     main.c
+ Dependencies: See INCLUDES section
+ Processor:		PIC18, PIC24, and PIC32 USB Microcontrollers
+ Hardware:		This demo is natively intended to be used on Microchip USB demo
+ 				boards supported by the MCHPFSUSB stack.  See release notes for
+ 				support matrix.  This demo can be modified for use on other hardware
+ 				platforms.
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
+ Company:		Microchip Technology, Inc.
+
+ Software License Agreement:
+
+ The software supplied herewith by Microchip Technology Incorporated
+ (the “Company”) for its PIC® Microcontroller is intended and
+ supplied to you, the Company’s customer, for use solely and
+ exclusively on Microchip PIC Microcontroller products. The
+ software is owned by the Company and/or its supplier, and is
+ protected under applicable copyright laws. All rights are reserved.
+ Any use in violation of the foregoing restrictions may subject the
+ user to criminal sanctions under applicable laws, as well as to
+ civil liability for the breach of the terms and conditions of this
+ license.
+
+ THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
+ TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
+ IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
+ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+
+********************************************************************
+ File Description:
+
+ Change History:
+  Rev   Description
+  1.0   Initial release
+  2.1   Updated for simplicity and to use common
+                     coding style
+********************************************************************/
 #include "USB/usb.h"
 #include "USB/usb_host_msd.h"
 #include "USB/usb_host_msd_scsi.h"
@@ -32,7 +72,7 @@
     //      Code Protect:                   Disabled
     //      JTAG Port Enable:               Disabled
 
-    #if defined(__PIC24FJ256GB110__)
+    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
     #elif defined(__PIC24FJ64GB004__)
@@ -43,6 +83,9 @@
     #elif defined(__PIC24FJ256GB106__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    #elif defined(__PIC24FJ256DA210__)
+        _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #endif
 #elif defined( __PIC32MX__ )
     #pragma config UPLLEN   = ON            // USB PLL Enabled

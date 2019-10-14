@@ -8,7 +8,6 @@
  * Processor:       PIC18
  * Compiler:        C18
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.0
  *
  * Software License Agreement
  *
@@ -30,7 +29,7 @@
  * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
-*****************************************************************************/
+ ****************************************************************************/
 
 
 /*****************************************************************************
@@ -38,6 +37,16 @@
            functions in this library work.  Prototypes for these functions,
            along with more information about them, can be found in FSIO.h
 *****************************************************************************/
+
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ Change History:
+  Rev            Description
+  ----           -----------------------
+  1.2.4 - 1.2.5  No Change
+********************************************************************/
+//DOM-IGNORE-END
+
 
 #include "FSIO.h"
 

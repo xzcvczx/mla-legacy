@@ -42,6 +42,15 @@
 #include "MainDemo.h"
 #include "MainDemoStrings.h"
 
+// Check device if allowed
+// This check is used to check the project of the demo used. 
+#ifdef CHECK_PIC24F_DEVICE_ON_GMAP 
+	#if !defined (__PIC24FJ128GA010__) && !defined (__PIC24FJ256GA110__)
+		#error This project of Graphics Multi Application (GMAP) Demo can only run on PIC24FJ128GA010 device. Please run the other GMAP projects for other devices
+	#endif	
+#endif //CHECK_PIC24F_DEVICE_ON_GMAP 
+
+
 // Configuration bits
 #ifdef __PIC32MX__
     #if defined(__32MX460F512L__)
@@ -83,10 +92,15 @@ _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)           // JTAG off, watchdog timer off
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2)
 _CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IOL1WAY_OFF)
     #endif
+#if defined (__PIC24FJ256GB210__)
+_CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+	#endif
 	#if defined (__PIC24FJ256DA210__)
 _CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
-_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
-_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
 	#endif	         
 #endif
 
@@ -233,15 +247,24 @@ int main(void)
    
     #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
 	     //All pins to digital except those that are used as analog signals
-	     ANSA = 0x0000;
-	     ANSB = 0x0020;		// RB5 as potentiometer input
-	     ANSC = 0x4000;		// RC4 as touch screen X+
-	     ANSD = 0x0000;
-	     ANSE = 0x0000;
-	     ANSF = 0x0000;
-	     ANSG = 0x0080;		// RG7 as touch screen Y+
+		ANSA = 0x0000;
+	    ANSB = 0x0020;		// RB5 as potentiometer input
+	    ANSC = 0x0010;		// RC4 as touch screen X+, RC14 as Rx
+	    ANSD = 0x0000;
+	    ANSE = 0x0000;
+	    ANSF = 0x0000;
+	    ANSG = 0x0080;		// RG7 as touch screen Y+
 	     
     #else
+		#if defined (__PIC24FJ256GB210__)
+			ANSA = 0x0000;
+		    ANSB = 0x002C;		// RB3 & RB2 are touch screen inputs RB5 as potentiometer input
+		    ANSC = 0x0000;		
+		    ANSD = 0x0000;
+		    ANSE = 0x0000;
+		    ANSF = 0x0000;
+		    ANSG = 0x0000;		
+		#endif
 
     /////////////////////////////////////////////////////////////////////////////
     // ADC Explorer 16 Development Board Errata (work around 2)
@@ -251,6 +274,7 @@ int main(void)
     //TRISBbits.TRISB15 = 0;
 
     #endif
+	
 
     ///////////////////////////////////////////////
     Init_CPUClocks();
@@ -278,17 +302,21 @@ int main(void)
     #endif
 
 
-    // If S6 button on Explorer 16 board is pressed erase memory
-    // display uses the same signals as the external flash memory so we cannot
-    // use the display while programming the flash.
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
-    if(BTN_S2 == 0)
-    #else
-    if(BTN_S6 == 0)
-    #endif
-    {
-        ProgramFlash();
-    }
+    // Programming the flash is not possible when using the PIC32 STK since the hardware 
+    // does not support it (no serial port) so we skip this check if using the STKs
+	#if !defined (PIC32_USB_STK) && !defined (PIC32_STK)
+	    // If S6 button on Explorer 16 board is pressed erase memory
+	    // display uses the same signals as the external flash memory so we cannot
+	    // use the display while programming the flash.
+	    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+	    if(BTN_S2 == 0)
+	    #else
+	    if(BTN_S6 == 0)
+	    #endif
+	    {
+				ProgramFlash();
+	    }
+	#endif	//	#if !defined (PIC32_USB_STK) && !defined (PIC32_STK)
 
     #if ((GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2) || (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V250))
         #if defined(ENABLE_SD_MSD_DEMO)
@@ -344,7 +372,7 @@ int main(void)
     // after calibration is done permanently disable the chip select of
     // the Explorer 16 EEPROM
         #if defined(__PIC24FJ256DA210__)
-        #elif defined(__PIC24FJ256GB110__) 
+        #elif defined(__PIC24FJ256GB110__)  || defined(__PIC24FJ256GB210__)
 
     // This PIM has RD12 rerouted to RA15
     LATGbits.LATG0 = 1;
@@ -360,7 +388,7 @@ int main(void)
     #ifdef ENABLE_SD_MSD_DEMO
 
     int temp;
-        #if defined(__32MX360F512L__) || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined(__PIC24FJ256DA210__)
+        #if defined(__32MX360F512L__) || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
     Configure_SDSPI_PPS();
         #endif
     MDD_SDSPI_InitIO();
@@ -381,6 +409,7 @@ int main(void)
     #ifdef ENABLE_DEMO_MODE
     InitDemoMode();
     #endif
+    
     StartScreen();                      // Show intro screen and wait for touch
 
     // create the the style schemes
@@ -698,8 +727,6 @@ void StartScreen(void)
     SHORT               counter;
     static const XCHAR  text[] = {'W','e','l','c','o','m','e','!',0};
     WORD                i, j, k;
-
-    //WORD m;
     WORD                ytemp, xtemp, srRes = 0x0001;
 
     SetColor(WHITE);
@@ -707,7 +734,7 @@ void StartScreen(void)
 
     WAIT_UNTIL_FINISH(PutImage(0, 0, (void *) &mchpLogo, IMAGE_NORMAL));
     WAIT_UNTIL_FINISH(PutImage(SS_ORIGIN_X,SS_ORIGIN_Y, (void *) &intro, IMAGE_X2));
-
+    
     for(counter = 0; counter < (GetMaxX()+1) - 32; counter++)
     {   // move Microchip icon
         #ifdef __PIC24FJ256DA210__
@@ -717,35 +744,34 @@ void StartScreen(void)
             }
             else
             {
+				DWORD srcOffset, dstOffset;
                 DWORD x = counter;
                 DWORD y = GetMaxY() - 34;
-                
-                GFX_WaitForCommandQueue(4);
-                GFX_SetWorkArea1(GFX_DISPLAY_BUFFER_START_ADDRESS);
-                GFX_SetWorkArea2(GFX_DISPLAY_BUFFER_START_ADDRESS);
+                WORD  width, height;
 
                 #if (DISP_ORIENTATION == 0)
                 {
-                    GFX_SetSrcAddress((y * DISP_HOR_RESOLUTION) + (x - 1));
-                    GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetRectSize(GetImageWidth((void *) &mchpIcon0), GetImageHeight((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTUNUOUS, RCC_DEST_ADDR_DISCONTUNUOUS);
-                    DelayMs(1);
-                }
+                    srcOffset = ((DWORD)(y * DISP_HOR_RESOLUTION) + (x - 1));
+                    dstOffset = ((DWORD)(y * DISP_HOR_RESOLUTION) + x);
+                    width = GetImageWidth((void *) &mchpIcon0);
+                    height = GetImageHeight((void *) &mchpIcon0);
+				}
                 #elif (DISP_ORIENTATION == 90)
                 {
                     DWORD t = x;
                     x = y;
                     y = GetMaxX() - t - GetImageWidth((void *) &mchpIcon0);
-                    GFX_SetSrcAddress(((y + 1) * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetDestAddress((y * DISP_HOR_RESOLUTION) + x);
-                    GFX_SetRectSize(GetImageHeight((void *) &mchpIcon0), GetImageWidth((void *) &mchpIcon0));
-                    GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_DISCONTUNUOUS, RCC_DEST_ADDR_DISCONTUNUOUS);
-                    DelayMs(1);
-                }
-                #else
-                    WAIT_UNTIL_FINISH(PutImage(counter, GetMaxY() - 34, (void *) &mchpIcon0, IMAGE_NORMAL));
-                #endif
+                    srcOffset = (((DWORD)(y + 1) * DISP_HOR_RESOLUTION) + x);
+                    dstOffset = ((DWORD)(y * DISP_HOR_RESOLUTION) + x);
+                    height = GetImageWidth((void *) &mchpIcon0);
+                    width = GetImageHeight((void *) &mchpIcon0);
+				}
+				#endif
+				WAIT_UNTIL_FINISH(MoveBlock(GFX_DISPLAY_BUFFER_START_ADDRESS, GFX_DISPLAY_BUFFER_START_ADDRESS, \
+											srcOffset, dstOffset, 												\
+											RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS,			\
+											width, height));
+				DelayMs(1);
             }
         #else
             WAIT_UNTIL_FINISH(PutImage(counter, GetMaxY() - 34, (void *) &mchpIcon0, IMAGE_NORMAL));

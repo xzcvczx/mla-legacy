@@ -11,7 +11,6 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -34,6 +33,14 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ Change History:
+  Rev            Description
+  ----           -----------------------
+  1.2.4 - 1.2.5  No major changes
+********************************************************************/
+//DOM-IGNORE-END
 
 #ifndef  FS_DOT_H
 #define  FS_DOT_H
@@ -54,6 +61,9 @@
 #endif
 #ifdef USE_USB_INTERFACE
     #include    "USB\usb_host_msd_scsi.h"
+#endif
+#ifdef USE_INTERNAL_FLASH
+    #include    "MDD File System\Internal Flash.h"
 #endif
 
 
@@ -786,8 +796,22 @@ int FSfeof( FSFILE * stream );
     erased.  If the user has specified a volumeID parameter, a 
     VOLUME attribute entry will be created in the root directory
     to name the device.
+
+    FAT12, FAT16 and FAT32 formatting are supported.
+
+    Based on the number of sectors, the format function automatically
+    compute the smallest possible value for the cluster size in order to
+    accommodate the physical size of the media. In this case, if a media 
+    with a big capacity is formatted, the format function may take a very
+    long time to write all the FAT tables. 
+
+    Therefore, the FORMAT_SECTORS_PER_CLUSTER macro may be used to 
+    specify the exact cluster size (in multiples of sector size). This 
+    macro can be defined in FSconfig.h
+
   Remarks:
-    FAT12 and FAT16 formatting is supported.                        
+    Only devices with a sector size of 512 bytes are supported by the 
+    format function                      
   *******************************************************************/
 
 int FSformat (char mode, long int serialNumber, char * volumeID);

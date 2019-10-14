@@ -37,6 +37,7 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Arpan kumar		06/11/09	  Version 1.0 release
+ * PAT				01/18/10	  Added draw state to redraw only text.
  *****************************************************************************/
 #ifndef _DIGITALMETER_H
     #define _DIGITALMETER_H
@@ -51,6 +52,7 @@
     #define DM_CENTER_ALIGN 0x0008  // Bit to indicate value is center aligned.
     #define DM_FRAME        0x0010  // Bit to indicate frame is displayed.
     #define DM_DRAW         0x4000  // Bit to indicate object must be redrawn.
+    #define DM_UPDATE       0x2000  // Bit to indicate that only text must be redrawn.
     #define DM_HIDE         0x8000  // Bit to remove object from screen.
 
 /* Indent constant for the text used in the frame. */
@@ -108,40 +110,38 @@ typedef struct
 void    DmSetValue(DIGITALMETER *pDm, DWORD Value);
 
 /*********************************************************************
-* Macros:  DmIncVal(pDm, value)
+* Macros:  DmIncVal(pDm, deltaValue)
 *
 * Overview: This macro is used to directly increment the value. 
-*			The delta change used is always the resolution setting (page).
 *
 * PreCondition: none
 *
 * Input: pDm - Pointer to the object.
-*		 value - Number to be added to the current <link Digital Meter> value.
+*		 deltaValue - Number to be added to the current <link Digital Meter> value.
 *
 * Output: none
 *
 * Side Effects: none
 *
 ********************************************************************/
-    #define DmIncVal(pDm, value)    DmSetValue(pDm, (pDm->Cvalue + value))
+    #define DmIncVal(pDm, deltaValue)    DmSetValue(pDm, (pDm->Cvalue + deltaValue))
 
 /*********************************************************************
-* Macros:  DmDecVal(pDm, value)
+* Macros:  DmDecVal(pDm, deltaValue)
 *
 * Overview: This macro is used to directly decrement the value. 
-*			The delta change used is always the resolution setting (page).
 *
 * PreCondition: none
 *
 * Input: pDm - Pointer to the object.
-*        value - Number to be subtracted to the current <link Digital Meter> value.
+*        deltaValue - Number to be subtracted to the current <link Digital Meter> value.
 *
 * Output: none
 *
 * Side Effects: none
 *
 ********************************************************************/
-    #define DmDecVal(pDm, value)    DmSetValue(pDm, (pDm->Cvalue - value))
+    #define DmDecVal(pDm, deltaValue)    DmSetValue(pDm, (pDm->Cvalue - deltaValue))
 
 /*********************************************************************
 * Function: DIGITALMETER  *DmCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, 
@@ -265,5 +265,5 @@ WORD            DmTranslateMsg(DIGITALMETER *pDm, GOL_MSG *pMsg);
 * Side Effects: none
 *
 ********************************************************************/
-WORD            DmDraw(DIGITALMETER *pDm);
+WORD            DmDraw(DIGITALMETER *pDm); 
 #endif // _DIGITALMETER_H

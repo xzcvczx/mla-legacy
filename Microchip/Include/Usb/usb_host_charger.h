@@ -47,10 +47,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-BC/KO       25-Dec-2007 First release
-
+Change History:
+  Rev    Description
+  -----  ----------------------------------
+  2.6a   No change
 *******************************************************************************/
 #ifndef __USBHOSTCHARGER_H__
 #define __USBHOSTCHARGER_H__

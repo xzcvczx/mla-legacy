@@ -21,11 +21,11 @@ Summary:
 //DOM-IGNORE-BEGIN
 /******************************************************************************
 
-* FileName:        usb_host_charger.c
-* Dependencies:    None
-* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
-* Compiler:        C30 v2.01/C32 v0.00.18
-* Company:         Microchip Technology, Inc.
+FileName:        usb_host_charger.c
+Dependencies:    None
+Processor:       PIC24/PIC32MX
+Compiler:        C30, C32
+Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -47,9 +47,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-KO          ??-???-200? First release
+ Change History:
+  Rev        Description
+  -----      -----------
+  2.6-2.6a   No change
 
 *******************************************************************************/
 //DOM-IGNORE-END

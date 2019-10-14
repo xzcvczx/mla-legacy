@@ -107,3 +107,4 @@ f. Pictures
 ---------------------
         10/24/2008 - Initial Release of the Code Example
 	07/06/2009 - Updated to release with Microchip Graphics Library
+	02/12/2010 - Ported to Microchip Graphics Library Version 2.01

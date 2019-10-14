@@ -94,9 +94,11 @@ BYTE SetPalette(void *pPalette, WORD startEntry, WORD length)
 {
     BYTE            status = -1;
     PALETTE_FLASH   *pPaletteFlash;
+#ifdef USE_PALETTE_EXTERNAL
     WORD            i;
     PALETTE_ENTRY   paletteEntry;
     PALETTE_HEADER  header;
+#endif
 
     switch(*((SHORT *)pPalette))
     {

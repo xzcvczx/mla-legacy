@@ -95,7 +95,8 @@ Description:
   Rev    Description
   ----   -----------
   2.6    Changed the inplementation of the interrupt clearing macro
-         to be more efficient.  
+         to be more efficient. 
+  2.6a   Added DisableNonZeroEndpoints() function 
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -288,6 +289,29 @@ typedef union _POINTER
  *******************************************************************/
 #define USBClearInterruptFlag(reg_name, if_flag_offset)	(reg_name = (1 << if_flag_offset))	
 
+/********************************************************************
+    Function:
+        void DisableNonZeroEndpoints(UINT8 last_ep_num)
+        
+    Summary:
+        Clears the control registers for the specified non-zero endpoints
+        
+    PreCondition:
+        None
+        
+    Parameters:
+        UINT8 last_ep_num - the last endpoint number to clear.  This
+        number should include all endpoints used in any configuration.
+        
+    Return Values:
+        None
+        
+    Remarks:
+        None
+ 
+ *******************************************************************/
+#define DisableNonZeroEndpoints(last_ep_num) memset((void*)&U1EP1,0x00,(last_ep_num * 2));
+
 #define USBClearUSBInterrupt() IFS5bits.USB1IF = 0;
 #if defined(USB_INTERRUPT)
     #define USBMaskInterrupts() {IEC5bits.USB1IE = 0;}
@@ -334,9 +358,16 @@ typedef union _POINTER
 
     #define USB_STALL_ENDPOINT      0x02
 
+    #if (USB_PULLUP_OPTION == USB_PULLUP_ENABLE) || !defined(USB_PULLUP_OPTION)
+        #define PullUpConfiguration() U1OTGCONbits.OTGEN = 0;
+    #else
+	    #define PullUpConfiguration() U1OTGCONbits.OTGEN = 1; U1OTGCON &= 0xFF0F;
+    #endif
+
         #define SetConfigurationOptions()   {\
                                                 U1CNFG1 = USB_PING_PONG_MODE;\
-                                                U1CNFG2 = USB_TRANSCEIVER_OPTION | USB_SPEED_OPTION | USB_PULLUP_OPTION;\
+                                                U1CNFG2 = USB_TRANSCEIVER_OPTION;\
+                                                PullUpConfiguration();\
                                                 U1EIE = 0x9F;\
                                                 U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;\
                                             } 

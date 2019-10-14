@@ -659,7 +659,7 @@ void DrawBlaster( void )
                 bullet.updateInterval = UPDATE_BULLET;
 
                 // Erase the old bullet
-                SetColor( pShip->pGolScheme->CommonBkColor );
+                SetColor( pShip->hdr.pGolScheme->CommonBkColor );
                 Bar( bullet.positionX-BULLET_SIZE, bullet.positionY-BULLET_SIZE, bullet.positionX+BULLET_SIZE, bullet.positionY+BULLET_SIZE );
 
                 if (bullet.status.terminate)
@@ -685,7 +685,7 @@ void DrawBlaster( void )
                     else
                     {
                         //PutImage( bullet.positionX, bullet.positionY, &bullet, IMAGE_NORMAL );
-                        SetColor( pShip->pGolScheme->TextColor0 );
+                        SetColor( pShip->hdr.pGolScheme->TextColor0 );
                         Circle( bullet.positionX, bullet.positionY, BULLET_SIZE );
 
                         // Redraw the ship, in case our bullet messed it up
@@ -767,7 +767,7 @@ void DrawBlaster( void )
                     asteroid[i].updateInterval = asteroid[i].speed;
 
                     // Erase the old bullet
-                    SetColor( pShip->pGolScheme->CommonBkColor );
+                    SetColor( pShip->hdr.pGolScheme->CommonBkColor );
                     Bar( asteroid[i].positionX-asteroid[i].size, asteroid[i].positionY-asteroid[i].size, asteroid[i].positionX+asteroid[i].size, asteroid[i].positionY+asteroid[i].size );
 
                     if (asteroid[i].status.terminate)
@@ -793,7 +793,7 @@ void DrawBlaster( void )
                         else
                         {
                             //PutImage( bullet.positionX, bullet.positionY, &bullet, IMAGE_NORMAL );
-                            SetColor( pShip->pGolScheme->TextColor0 );
+                            SetColor( pShip->hdr.pGolScheme->TextColor0 );
                             FillCircle( asteroid[i].positionX, asteroid[i].positionY, asteroid[i].size );
 
                             // We don't need to redraw the ship in case the asteroid messed it up, because then the pilot loses!

@@ -47,6 +47,8 @@ This file defines all of the hardware-specific information for the project.
 #define _HARDWARE_PROFILE_H_
 
 #define USE_SH1101A
+#define USE_GFX_PMP
+#define USE_8BIT_PMP
 //#define USE_SSD1303
 #define GO_FAST
 
@@ -152,6 +154,9 @@ This file defines all of the hardware-specific information for the project.
 
 #define CS_TRIS_BIT 	   TRISBbits.TRISB15
 #define CS_LAT_BIT 		   LATBbits.LATB15
+
+#define RS_TRIS_BIT 	   TRISCbits.TRISC7
+#define RS_LAT_BIT 		   LATCbits.LATC7  
 
 #endif
 

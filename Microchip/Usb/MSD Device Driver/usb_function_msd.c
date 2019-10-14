@@ -68,6 +68,12 @@
     C:\\Microchip Solutions\\Microchip\\Include
     
     C:\\Microchip Solutions\\My Demo Application
+
+Change History:
+  Rev         Description
+  ----------  ----------------------------------------------------------
+  2.6 - 2.6a  No change
+
 ********************************************************************/
  
 /** I N C L U D E S **************************************************/

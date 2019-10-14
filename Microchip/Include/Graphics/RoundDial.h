@@ -34,10 +34,11 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Author                           Date            Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
- *****************************************************************************/
+ * PAT				  	            11/12/07	    Version 1.0 release
+ * Pradeep Budagutta                03 Dec 2009     Added Object Header for Double Buffering Support
+ *****************************************************************************************/
 #ifndef _ROUNDDIAL_H
     #define _ROUNDDIAL_H
 
@@ -65,15 +66,11 @@ SHORT           RdiaSine(SHORT v);
 *********************************************************************/
 typedef struct
 {
-    WORD            ID;             // A Unique id assigned for referencing.
-    void            *pNxtObj;       // A pointer to the next object.
-    GOL_OBJ_TYPE    type;           // Identifies the type of GOL object.
-    WORD            state;          // Dial states.
+    OBJ_HEADER      hdr;        // Generic header for all Objects (see OBJ_HEADER).
     SHORT           xCenter;        // x coordinate center position.
     SHORT           yCenter;        // y coordinate center position.
     SHORT           radius;         // Radius of the dial.
     SHORT           value;          // Initial value of the dial.
-    GOL_SCHEME      *pGolScheme;    // Style scheme used.
     WORD            max;            // Maximum value of variable value (maximum = 65535).
 
     // Minimum is always zero.
@@ -148,7 +145,7 @@ ROUNDDIAL   *RdiaCreate
 *
 * Overview: This function evaluates the message from a user if the 
 *			message will affect the object or not. The table below enumerates the translated 
-*			messages for each event of the touch screen and keyboard inputs.
+*			messages for each event of the touch screen inputs.
 *
 *	<TABLE>
 *    	Translated Message      Input Source  Events        Description

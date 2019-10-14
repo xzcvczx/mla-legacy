@@ -69,13 +69,11 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-ADG          15-Sep-2008 First release
-********************************************************************************
  Change History:
- Revision     Description
- v2.6         Changed format of 'bcdCDC' from word to array of byte.
+ Rev     Description
+ ----    ------------------------------------------------
+ 2.6     Changed format of 'bcdCDC' from word to array of byte.
+ 2.6a    No change
 ********************************************************************************/
 //DOM-IGNORE-END
 

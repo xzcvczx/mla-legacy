@@ -34,9 +34,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Author                           Date            Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
+ * PAT				  	            11/12/07	    Version 1.0 release
+ * Pradeep Budagutta                03 Dec 2009     Added Object Header for Double Buffering Support
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 #include <math.h>
@@ -73,24 +74,29 @@ ROUNDDIAL *RdiaCreate
     if(pDia == NULL)
         return (NULL);
 
-    pDia->ID = ID;              // unique id assigned for referencing
-    pDia->pNxtObj = NULL;       // initialize pointer to NULL
-    pDia->type = OBJ_ROUNDDIAL; // set object type
+    pDia->hdr.ID = ID;              // unique id assigned for referencing
+    pDia->hdr.pNxtObj = NULL;       // initialize pointer to NULL
+    pDia->hdr.type = OBJ_ROUNDDIAL; // set object type
     pDia->xCenter = x;          // x coordinate of center
     pDia->yCenter = y;          // y coordinate of center
     pDia->radius = radius;      // radius of dial
     pDia->res = res;
     pDia->value = value;
     pDia->max = max;
-    pDia->state = state;        // state
+    pDia->hdr.state = state;        // state
     pDia->curr_xPos = x + radius * 2 / 3;
     pDia->curr_yPos = y;
 
+    pDia->hdr.left = x - radius;        // left position
+    pDia->hdr.top = y - radius;          // top position
+    pDia->hdr.right = x + radius;      // right position
+    pDia->hdr.bottom = y + radius;    // bottom position
+
     // Set the color scheme to be used
     if(pScheme == NULL)
-        pDia->pGolScheme = _pDefaultGolScheme;
+        pDia->hdr.pGolScheme = _pDefaultGolScheme;
     else
-        pDia->pGolScheme = (GOL_SCHEME *)pScheme;
+        pDia->hdr.pGolScheme = (GOL_SCHEME *)pScheme;
 
     GOLAddObject((OBJ_HEADER *)pDia);
 
@@ -310,7 +316,7 @@ WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
     }
 
         #endif
-        #ifdef USE_KEYBOARD
+       #ifdef USE_KEYBOARD
 
     SHORT   newValue;
 
@@ -319,7 +325,7 @@ WORD RdiaTranslateMsg(ROUNDDIAL *pDia, GOL_MSG *pMsg)
     if(GetState(pDia, RDIA_DISABLED))
         return (OBJ_MSG_INVALID);
 
-    if((pMsg->type == TYPE_KEYBOARD) && (pMsg->param1 == pDia->ID) && (pMsg->uiEvent == EVENT_KEYSCAN))
+    if((pMsg->type == TYPE_KEYBOARD) && (pMsg->param1 == pDia->hdr.ID) && (pMsg->uiEvent == EVENT_KEYSCAN))
     {
         if(pMsg->param2 == SCAN_RIGHT_PRESSED)
         {
@@ -382,7 +388,7 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
 
             if(GetState(pDia, RDIA_HIDE))
             {   // Hide the dial (remove from screen)
-                SetColor(pDia->pGolScheme->CommonBkColor);
+                SetColor(pDia->hdr.pGolScheme->CommonBkColor);
                 if
                 (
                     !Bar
@@ -409,11 +415,11 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
         case RND_PANEL_DRAW:
             if(!GetState(pDia, RDIA_DISABLED))
             {
-                faceClr = pDia->pGolScheme->Color0;
+                faceClr = pDia->hdr.pGolScheme->Color0;
             }
             else
             {
-                faceClr = pDia->pGolScheme->ColorDisabled;
+                faceClr = pDia->hdr.pGolScheme->ColorDisabled;
             }
 
             SetLineThickness(NORMAL_LINE);
@@ -426,8 +432,8 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
                 pDia->yCenter,
                 pDia->radius,
                 faceClr,
-                pDia->pGolScheme->EmbossLtColor,
-                pDia->pGolScheme->EmbossDkColor,
+                pDia->hdr.pGolScheme->EmbossLtColor,
+                pDia->hdr.pGolScheme->EmbossDkColor,
                 NULL,
                 GOL_EMBOSS_SIZE
             );
@@ -443,7 +449,7 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
             goto draw_current_pos;
 
         case ERASE_POSITION:
-            erase_current_pos : SetColor(pDia->pGolScheme->Color0);
+            erase_current_pos : SetColor(pDia->hdr.pGolScheme->Color0);
             if
             (
                 !Bar
@@ -469,8 +475,7 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
                 if(pDia->value < 0)
                     pDia->value = 0;
             }
-
-                #elif defined USE_KEYBOARD
+               #elif defined USE_KEYBOARD
             if(GetState(pDia, RDIA_ROT_CW))
             {
                 pDia->value = pDia->value + pDia->res;
@@ -487,7 +492,6 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
                     pDia->value += (pDia->max + 1);
                 }
             }
-
                 #endif
 
             // else do not update counter yet
@@ -503,12 +507,12 @@ WORD RdiaDraw(ROUNDDIAL *pDia)
         case DRAW_POSITION:
             draw_current_pos : if(IsDeviceBusy()) return (0);
 
-            SetColor(pDia->pGolScheme->EmbossLtColor);
+            SetColor(pDia->hdr.pGolScheme->EmbossLtColor);
             SetLineThickness(NORMAL_LINE);
             SetLineType(SOLID_LINE);
             if(!Circle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius))
                 return (0);
-            SetColor(pDia->pGolScheme->EmbossDkColor);
+            SetColor(pDia->hdr.pGolScheme->EmbossDkColor);
             if(!FillCircle(pDia->curr_xPos, pDia->curr_yPos, dimpleRadius - 1))
                 return (0);
 

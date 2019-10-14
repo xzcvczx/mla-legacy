@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=./Objects\USB OTG - Generic Demo\firmware
 dir_sin=
-dir_inc=..\..\..\USB OTG - MCHPUSB - Generic Driver Demo\firmware;..\..\USB OTG - MCHPUSB - Generic Driver Demo\firmware;..\..\Microchip\Include;..\..\..\Include;..\..\Include;..\Include;.
+dir_inc=..\..\Microchip\Include;.
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]

@@ -43,7 +43,6 @@
 //////////////////// COMPILE OPTIONS AND DEFAULTS ////////////////////
 
 ///////////// GRAPHICS CONTROLLERS CODES FOR DRIVER LAYER ////////////
-    #define CUSTOM_CONTROLLER       0
     #define SSD1906                 1
     #define SSD1926                 2
     #define S6D0129                 3
@@ -59,11 +58,12 @@
     #define UC1610                  13
     #define ILI9320                 14
     #define SSD1289                 15
-    #define HX8347                  16
+    #define HX8347A                 16
     #define R61580                  17
     #define SSD2119                 18
-    #define MCHP_DA210            	100
-    #define NO_CONTROLLER_DEFINED   - 1
+	#define MCHP_DA210            	100
+	#define CUSTOM_CONTROLLER       -1
+    #define NO_CONTROLLER_DEFINED   -2
 
 ////////////// GRAPHICS DISPLAYS CODES FOR DRIVER LAYER //////////////
     #define TFT_G240320LTSW_118W_E      0
@@ -85,13 +85,15 @@
 
 /////////////////////// GRAPHICS_LIBRARY_VERSION /////////////////////
 // MSB is version, LSB is subversion
-    #define GRAPHICS_LIBRARY_VERSION    0x0200
+    #define GRAPHICS_LIBRARY_VERSION    0x0201
 
 ////////////////////////////// INCLUDES //////////////////////////////
     #include <stdlib.h>
     #include "GenericTypeDefs.h"
     #include "GraphicsConfig.h"
     #include "HardwareProfile.h"
+	#include "TimeDelay.h"
+	#include "DisplayDriverInterface.h"
     #include "DisplayDriver.h"  // Display driver layer
     #include "Primitive.h"      // Graphic primitives layer
     #include "ScanCodes.h"      // Scan codes for AT keyboard

@@ -39,9 +39,7 @@
     \function driver.  This file should also be included into the 
     usb_descriptors.c file and any other user file that requires access to the
     CDC interface.
-    
-    
-    
+       
     This file is located in the "\<Install Directory\>\\Microchip\\Include\\USB"
     directory.
 
@@ -90,6 +88,7 @@
          replaced by the USBUSARTIsTxTrfReady() function.
 
   2.6    Minor defintion changes
+  2.6a   No change
 
 ********************************************************************/
 

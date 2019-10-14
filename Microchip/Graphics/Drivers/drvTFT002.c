@@ -66,54 +66,105 @@ void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 
 /*********************************************************************
-* Function:  void  DelayMs(WORD time)
+* Macro:  WritePixel(color)
 *
 * PreCondition: none
 *
-* Input: time - delay in ms
+* Input: color 
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: delays execution on time specified in ms
+* Overview: writes pixel at the current address
 *
-* Note: none
+* Note: chip select should be enabled
 *
 ********************************************************************/
-#ifdef __PIC32MX
-
-/* */
-void DelayMs(WORD time)
-{
-    while(time--)
-    {
-        unsigned int    int_status;
-
-        int_status = INTDisableInterrupts();
-        OpenCoreTimer(GetSystemClock() / 2000); // core timer is at 1/2 system clock
-        INTRestoreInterrupts(int_status);
-
-        mCTClearIntFlag();
-
-        while(!mCTGetIntFlag());
-    }
-
-    mCTClearIntFlag();
-}
-
+#ifdef USE_16BIT_PMP
+#define WritePixel(color)	DeviceWrite(color)
 #else
-    #define DELAY_1MS   16000 / 5               // for 16MIPS
-
-/* */
-void DelayMs(WORD time)
-{
-    unsigned    delay;
-    while(time--)
-        for(delay = 0; delay < DELAY_1MS; delay++);
-}
-
+#define WritePixel(color)	{ DeviceWrite(((WORD_VAL)color).v[1]); DeviceWrite(((WORD_VAL)color).v[0]);}
 #endif
+
+/*********************************************************************
+* Macros:  SetAddress(addr2,addr1,addr0)
+*
+* Overview: Writes address pointer.
+*
+* PreCondition: none
+*
+* Input: addr0 - Lower byte of the address.
+*		 addr1 - Middle byte of the address.
+*		 addr2 - Upper byte of the address.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+inline void SetAddress(WORD x, WORD y)
+{
+	DeviceSetCommand();
+
+#ifdef USE_16BIT_PMP
+#if (DISP_ORIENTATION == 0)
+	DeviceWrite(0x004e);
+#else
+	DeviceWrite(0x004f);
+#endif
+#else
+#if (DISP_ORIENTATION == 0)
+	DeviceWrite(0);
+	DeviceWrite(0x4e);
+#else
+	DeviceWrite(0);
+	DeviceWrite(0x4f);
+#endif
+#endif
+
+	DeviceSetData();
+#ifdef USE_16BIT_PMP
+	DeviceWrite(x);
+#else
+	DeviceWrite(((WORD_VAL)x).v[1]);
+	DeviceWrite(((WORD_VAL)x).v[0]);
+#endif
+
+	DeviceSetCommand();
+#ifdef USE_16BIT_PMP
+#if (DISP_ORIENTATION == 0)
+	DeviceWrite(0x004f);
+#else
+	DeviceWrite(0x004e);
+#endif
+#else
+#if (DISP_ORIENTATION == 0)
+	DeviceWrite(0);
+	DeviceWrite(0x4f);
+#else
+	DeviceWrite(0);
+	DeviceWrite(0x4e);
+#endif
+#endif
+
+	DeviceSetData();
+#ifdef USE_16BIT_PMP
+	DeviceWrite(y);
+#else
+	DeviceWrite(((WORD_VAL)y).v[1]);
+	DeviceWrite(((WORD_VAL)y).v[0]);
+#endif
+
+	DeviceSetCommand();
+#ifdef USE_16BIT_PMP
+	DeviceWrite(0x0022);
+#else
+	DeviceWrite(0);
+	DeviceWrite(0x22);
+#endif
+	DeviceSetData();
+}
 
 /*********************************************************************
 * Function:  void  SetReg(BYTE index, WORD value)
@@ -134,10 +185,23 @@ void DelayMs(WORD time)
 ********************************************************************/
 void SetReg(WORD index, WORD value)
 {
-    CS_LAT_BIT = 0;
-    SetIndex(index);
-    WriteData(value);
-    CS_LAT_BIT = 1;
+
+	DeviceSelect();
+	DeviceSetCommand();
+#ifdef USE_16BIT_PMP
+	DeviceWrite(index);
+#else
+	DeviceWrite(((WORD_VAL)index).v[1]);
+	DeviceWrite(((WORD_VAL)index).v[0]);
+#endif
+	DeviceSetData();
+#ifdef USE_16BIT_PMP
+	DeviceWrite(value);
+#else
+	DeviceWrite(((WORD_VAL)value).v[1]);
+	DeviceWrite(((WORD_VAL)value).v[0]);
+#endif
+	DeviceDeselect();
 }
 
 /*********************************************************************
@@ -159,48 +223,9 @@ void SetReg(WORD index, WORD value)
 void ResetDevice(void)
 {
 
-    // Hold in reset
-    RST_LAT_BIT = 0;
+    // Initialize the device
+	DeviceInit();
 
-    // Set reset pin as output
-    RST_TRIS_BIT = 0;
-
-    // Enable data access
-    RS_LAT_BIT = 1;
-
-    // Set RS pin as output
-    RS_TRIS_BIT = 0;
-
-    // Disable LCD
-    CS_LAT_BIT = 1;
-
-    // Set LCD CS pin as output
-    CS_TRIS_BIT = 0;
-
-    DelayMs(200);
-
-    // PMP setup
-    PMMODE = 0;
-    PMAEN = 0;
-    PMCON = 0;
-    PMMODEbits.MODE = 2;    // Master 2
-    PMMODEbits.WAITB = 0;
-    PMMODEbits.WAITM = 1;
-    PMMODEbits.WAITE = 0;
-    #ifdef USE_16BIT_PMP
-    PMMODEbits.MODE16 = 1;  // 16 bit mode
-    #else
-    PMMODEbits.MODE16 = 0;  // 8 bit mode
-    #endif
-    PMCONbits.CSF = 0;
-    PMCONbits.PTRDEN = 1;
-    PMCONbits.PTWREN = 1;
-    PMCONbits.PMPEN = 1;
-
-    // Release from reset
-    RST_LAT_BIT = 1;
-
-    DelayMs(20);
 
     // Setup display
     #if (DISPLAY_CONTROLLER == SSD1289)
@@ -338,7 +363,7 @@ void PutPixel(SHORT x, SHORT y)
 
     CS_LAT_BIT = 0;
     SetAddress(x, y);
-    WriteData(_color);
+    WritePixel(_color);
     CS_LAT_BIT = 1;
 }
 
@@ -410,7 +435,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         SetAddress(left, y);
         for(x = left; x < right + 1; x++)
         {
-            WriteData(_color);
+            WritePixel(_color);
         }
     }
 
@@ -442,7 +467,7 @@ void ClearDevice(void)
     SetAddress(0, 0);
     for(counter = 0; counter < (DWORD) (GetMaxX() + 1) * (GetMaxY() + 1); counter++)
     {
-        WriteData(_color);
+        WritePixel(_color);
     }
 
     CS_LAT_BIT = 1;
@@ -616,7 +641,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
 
                 // Shift to the next pixel
@@ -704,7 +729,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -780,7 +805,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -847,7 +872,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -946,7 +971,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
 
                 // Shift to the next pixel
@@ -1042,7 +1067,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -1116,7 +1141,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 
@@ -1189,7 +1214,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WriteData(_color);
+                    WritePixel(_color);
                 }
             }
 

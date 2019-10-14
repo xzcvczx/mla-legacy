@@ -5,11 +5,11 @@
 This file provides local definitions used by the hardware interface for a USB
 Host application.
 
-* File Name:       usb_host_local.h
-* Dependencies:    None
-* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
-* Compiler:        C30 v2.01/C32 v0.00.18
-* Company:         Microchip Technology, Inc.
+ File Name:       usb_host_local.h
+ Dependencies:    None
+ Processor:       PIC24F/PIC32MX
+ Compiler:        C30/C32
+ Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -31,6 +31,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
+Change History:
+  Rev         Description
+  ----------  ----------------------------------------------------------
+  2.6a        Removed extraneous definition
 *******************************************************************************/
 
 #ifndef _USB_HOST_LOCAL_
@@ -291,7 +295,6 @@ HOLDING state machine values
 #define USB_MONITOR_OE                      0x40    // U1CFG1 - nOE signal active
 #define USB_FREEZE_IN_DEBUG_MODE            0x20    // U1CFG1 - Freeze on halt when in debug mode
 #define USB_STOP_IN_IDLE_MODE               0x10    // U1CFG1 - Stop module in idle mode
-#define USB_SUSPEND                         0x08    // U1CFG1 - !@#$% missing from FRM
 #define USB_PING_PONG__ALL_BUT_EP0          0x03    // U1CFG1 - Ping-pong on all endpoints except EP0
 #define USB_PING_PONG__FULL_PING_PONG       0x02    // U1CFG1 - Ping-pong on all endpoints
 #define USB_PING_PONG__EP0_OUT_ONLY         0x01    // U1CFG1 - Ping-pong on EP 0 out only

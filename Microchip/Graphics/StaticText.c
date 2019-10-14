@@ -36,7 +36,8 @@
  *
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
+ * PAT 					11/12/07	Version 1.0 release
+ * PAT					11/12/07	Fixed clipping enabling location
 *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -188,12 +189,13 @@ WORD StDraw(STATICTEXT *pSt)
 
             if(GetState(pSt, ST_DRAW))
             {
+                // show frame if specified to be shown
+                SetLineType(SOLID_LINE);
+                SetLineThickness(NORMAL_LINE);
+
                 if(GetState(pSt, ST_FRAME))
                 {
 
-                    // show frame if specified to be shown
-                    SetLineType(SOLID_LINE);
-                    SetLineThickness(NORMAL_LINE);
                     if(!GetState(pSt, ST_DISABLED))
                     {
 
@@ -211,11 +213,16 @@ WORD StDraw(STATICTEXT *pSt)
                             return (0);
                     }
                 }
+                else
+                {
+                    // show enabled color
+                    SetColor(pSt->hdr.pGolScheme->CommonBkColor);
+                    if(!Rectangle(pSt->hdr.left, pSt->hdr.top, pSt->hdr.right, pSt->hdr.bottom))
+                    	return (0);
+	                
+	            } 
             }
 
-            // set clipping area, text will only appear inside the static text area.
-            SetClip(CLIP_ENABLE);
-            SetClipRgn(pSt->hdr.left + ST_INDENT, pSt->hdr.top, pSt->hdr.right - ST_INDENT, pSt->hdr.bottom);
             state = ST_STATE_CLEANAREA;
 
         case ST_STATE_CLEANAREA:
@@ -224,6 +231,10 @@ WORD StDraw(STATICTEXT *pSt)
             SetColor(pSt->hdr.pGolScheme->CommonBkColor);
             if(!Bar(pSt->hdr.left + 1, pSt->hdr.top + 1, pSt->hdr.right - 1, pSt->hdr.bottom - 1))
                 return (0);
+
+            // set clipping area, text will only appear inside the static text area.
+            SetClip(CLIP_ENABLE);
+            SetClipRgn(pSt->hdr.left + ST_INDENT, pSt->hdr.top, pSt->hdr.right - ST_INDENT, pSt->hdr.bottom);
             state = ST_STATE_INIT;
 
         case ST_STATE_INIT:

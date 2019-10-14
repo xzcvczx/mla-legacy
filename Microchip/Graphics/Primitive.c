@@ -1883,7 +1883,7 @@ SHORT GetTextHeight(void *font)
                 
                 #ifdef USE_FONT_EXTERNAL
         case EXTERNAL:
-            ExternalMemoryCallback(font, sizeof(FONT_HEADER) - 1, 1, &height);
+            ExternalMemoryCallback(font, sizeof(FONT_HEADER) - 2, 1, &height);
             return (height);
                 #endif
 
@@ -2158,11 +2158,21 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Set color
                 if(mask & temp)
                 {
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(1);
+                #else
                     SetColor(pallete[1]);
+                #endif                
                 }
                 else
                 {
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(0);
+                #else
                     SetColor(pallete[0]);
+                #endif
                 }
 
                 // Write pixel to screen
@@ -2244,7 +2254,12 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 {
 
                     // second pixel in byte
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp >> 4);
+                #else
                     SetColor(pallete[temp >> 4]);
+                #endif
                 }
                 else
                 {
@@ -2252,7 +2267,12 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                     flashAddress++;
 
                     // first pixel in byte
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp & 0x0f);
+                #else
                     SetColor(pallete[temp & 0x0f]);
+                #endif
                 }
 
                 // Write pixel to screen
@@ -2333,7 +2353,11 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 flashAddress++;
 
                 // Set color
+            #ifdef USE_PALETTE
+                SetColor(temp);
+            #else
                 SetColor(pallete[temp]);
+            #endif
 
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
@@ -2498,11 +2522,21 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 // Set color
                 if(mask & temp)
                 {
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(1);
+                #else
                     SetColor(pallete[1]);
+                #endif
                 }
                 else
                 {
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(0);
+                #else
                     SetColor(pallete[0]);
+                #endif
                 }
 
                 // Write pixel to screen
@@ -2592,14 +2626,24 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 {
 
                     // second pixel in byte
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp >> 4);
+                #else
                     SetColor(pallete[temp >> 4]);
+                #endif
                 }
                 else
                 {
                     temp = *pData++;
 
                     // first pixel in byte
+                // Set color
+                #ifdef USE_PALETTE
+                    SetColor(temp & 0x0f);
+                #else
                     SetColor(pallete[temp & 0x0f]);
+                #endif
                 }
 
                 // Write pixel to screen
@@ -2677,7 +2721,12 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
             for(x = 0; x < sizeX; x++)
             {
                 temp = *pData++;
+                // Set color
+            #ifdef USE_PALETTE
+                SetColor(temp);
+            #else
                 SetColor(pallete[temp]);
+            #endif
 
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)

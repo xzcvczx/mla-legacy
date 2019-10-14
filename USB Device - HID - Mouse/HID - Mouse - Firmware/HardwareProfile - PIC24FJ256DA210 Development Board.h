@@ -1,8 +1,8 @@
 /********************************************************************
  FileName:     	HardwareProfile - PIC24FJ256DA210 Development Board.h
  Dependencies:  See INCLUDES section
- Processor:     PIC24FJ256GB110
- Hardware:      PIC24FJ256GB110 PIM
+ Processor:     PIC24FJ256DA210
+ Hardware:      PIC24FJ256DA210 Development Board
  Compiler:      Microchip C30
  Company:       Microchip Technology, Inc.
 
@@ -30,8 +30,8 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  ?.?   09/15/2008   Initial revision
+  Rev   Description
+  2.6   Initial revision
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC24FJ256DA210_DEV_BOARD_H
@@ -121,9 +121,6 @@
     #define mInitAllSwitches()  mInitSwitch2();mInitSwitch3();
     #define sw2                 PORTBbits.RB5
     #define sw3                 PORTBbits.RB5
-
-    /** POT ************************************************************/
-    #define mInitPOT()  {ANSBbits.ANSB5 = 0;    AD1CON2bits.VCFG = 0x0;    AD1CON3bits.ADCS = 0xFF;    AD1CON1bits.SSRC = 0x0;    AD1CON3bits.SAMC = 0b10000;    AD1CON1bits.FORM = 0b00;    AD1CON2bits.SMPI = 0x0;    AD1CON1bits.ADON = 1;}
 
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1

@@ -73,10 +73,10 @@
 // Define this to implement Line function in the driver.
     #ifndef USE_PALETTE
         #define USE_DRV_LINE
+    #endif
 
 // Define this to implement Circle function in the driver.
 //        #define USE_DRV_CIRCLE
-    #endif
 
 // Define this to implement FillCircle function in the driver.
 //#define USE_DRV_FILLCIRCLE
@@ -154,7 +154,12 @@
 /*********************************************************************
 * Overview: Some basic colors definitions.
 *********************************************************************/
-    #ifndef USE_PALETTE
+    #ifdef USE_PALETTE
+    
+        #include "PaletteColorDefines.h"
+    
+    #else
+        
         #define BLACK           RGB565CONVERT(0, 0, 0)
         #define BRIGHTBLUE      RGB565CONVERT(0, 0, 255)
         #define BRIGHTGREEN     RGB565CONVERT(0, 255, 0)
@@ -184,36 +189,7 @@
         #define GRAY4           RGB565CONVERT(96, 96, 96)
         #define GRAY5           RGB565CONVERT(64, 64, 64)
         #define GRAY6           RGB565CONVERT(32, 32, 32)
-    #else
-        #define BLACK           0
-        #define BRIGHTBLUE      1
-        #define BRIGHTGREEN     2
-        #define BRIGHTCYAN      3
-        #define BRIGHTRED       4
-        #define BRIGHTMAGENTA   5
-        #define BRIGHTYELLOW    6
-        #define BLUE            7
-        #define GREEN           8
-        #define CYAN            9
-        #define RED             10
-        #define MAGENTA         11
-        #define BROWN           12
-        #define LIGHTGRAY       13
-        #define DARKGRAY        14
-        #define LIGHTBLUE       15
-        #define LIGHTGREEN      16
-        #define LIGHTCYAN       17
-        #define LIGHTRED        18
-        #define LIGHTMAGENTA    19
-        #define YELLOW          20
-        #define WHITE           21
-        #define GRAY0           22
-        #define GRAY1           23
-        #define GRAY2           24
-        #define GRAY3           25
-        #define GRAY4           26
-        #define GRAY5           27
-        #define GRAY6           28
+
     #endif
 
 /*********************************************************************
@@ -550,23 +526,6 @@ WORD    GetPixel(SHORT x, SHORT y);
 *
 ********************************************************************/
     #define IsDeviceBusy()  ((GetReg(REG_2D_220) & 0x01) == 0)
-
-/*********************************************************************
-* Function:  void  DelayMs(WORD time)
-*
-* Overview: Delays execution on time specified in milliseconds.
-*           The delay is correct only for 16MIPS.
-*
-* PreCondition: none
-*
-* Input: time - Delay in milliseconds.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void    DelayMs(WORD time);
 
 /*********************************************************************
 * Overview: SSD1926 registers definitions.

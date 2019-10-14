@@ -46,7 +46,7 @@ Anton Alkhimenok    06_Jun-2009       Ported to PIC24
         #define SetDataPortReg0(data)   SetReg(0x1120, data)
         #define SetTransferMode(mode)   SetReg(0x110C, mode)
 
-        /******************************************************************************
+/******************************************************************************
  * Helper Functions
  *****************************************************************************/
         inline void __attribute__ ((always_inline))
@@ -99,6 +99,7 @@ void ReadCmdResponse(DWORD *rsp, UINT size)
 DWORD               finalLBA;
 WORD                sectorSize;
 DWORD               maxBusClock;
+BYTE 				hcMode;
 MEDIA_INFORMATION   mediaInformation;
 
 /******************************************************************************
@@ -396,7 +397,8 @@ BYTE SDWriteProtectState(void)
 BYTE SDInit(void)
 {
     DWORD   timeout;
-    DWORD   responseVoltage;
+	DWORD   response;
+    DWORD   voltage;
     DWORD   CSD_C_SIZE;
     DWORD   CSD_C_SIZE_MULT;
     DWORD   CSD_RD_BL_LEN;
@@ -406,29 +408,22 @@ BYTE SDInit(void)
     if(!SDSendCommand(CMD_RESET, SSD_NO_RESPONSE, 0xFFFFFFFF))
         return (FALSE);
 
-    // ask card send OCR back
-    if(!SDSendAppCommand(ACMD_SEND_OCR, SSD_RESPONSE_48, 0, 0))
-        return (FALSE);
 
-    DelayMs(100);
+	if(!SDSendCommand(CMD_SEND_IF_COND, SSD_RESPONSE_48 | SSD_CMD_CRC_CHK | SSD_CMD_IDX_CHK, 0x000001AA))
+		return (FALSE);
+	
+	response = GetCommandResponse(0);
 
-    responseVoltage = GetCommandResponse(0);
+	if(response == 0x000001AA)
+	{
+	    voltage = 0x40200000;
+		hcMode = 1;
+	}else{
+	    voltage = 0x00200000;
+		hcMode = 0;
+	}
 
-    // check if card supports 3.0V, 3.3V and/or 1.8V operation.
-    if(responseVoltage & 0x001F8000)        //3.0V
-    {
-        responseVoltage = 0x00040000;
-    }
-    else if(responseVoltage & 0x00FC0000)   //3.3V
-    {
-        responseVoltage = 0x00200000;
-    }
-    else                    //non-supported voltage
-    {
-        return (FALSE);
-    }
-
-    timeout = 10;
+	timeout = 10;
     do
     {
         if(!timeout--)
@@ -436,11 +431,16 @@ BYTE SDInit(void)
             return (FALSE);
         }
 
-        SDReset(SSD_RESET_DATA | SSD_RESET_CMD);
-        if(!SDSendAppCommand(ACMD_SEND_OCR, SSD_RESPONSE_48, 0, responseVoltage))
+		SDReset(SSD_RESET_DATA|SSD_RESET_CMD);
+        if(!SDSendAppCommand(ACMD_SEND_OCR, SSD_RESPONSE_48, 0, voltage))
             return (FALSE); // ask card send OCR back
-        DelayMs(150);
-    } while(GetReg(0x1113) != (BYTE) 0x80);
+		DelayMs(150);
+		response = GetCommandResponse(0);
+    } while((response&0x80000000) == 0);
+	
+	if((response&0x40000000L) == 0){
+		hcMode = 0;
+	}
 
     if(!SDSendCommand(CMD_SEND_ALL_CID, SSD_RESPONSE_136 | SSD_CMD_CRC_CHK, 0xFFFFFFFF))
         return (FALSE);
@@ -473,6 +473,8 @@ BYTE SDInit(void)
     //CMD7 Select Card
     if(!SDSendCommand(CMD_SELECT_CARD, SSD_RESPONSE_48_BUSY | SSD_CMD_CRC_CHK | SSD_CMD_IDX_CHK, RCA))
         return (FALSE);
+
+	sectorSize = 512L;	
 
     //CMD16 Set the block size.
     if(!SDSendCommand(CMD_SET_BLKLEN, SSD_RESPONSE_48 | SSD_CMD_CRC_CHK | SSD_CMD_IDX_CHK, sectorSize))
@@ -617,6 +619,11 @@ MEDIA_INFORMATION *SDInitialize(void)
  *****************************************************************************/
 BYTE SDSectorRead(DWORD sector_addr, BYTE *buffer)
 {
+	if(!hcMode)
+	{
+		sector_addr *= sectorSize;
+	}
+
     CheckDataInhibit();
 
     SDReset(SSD_RESET_DATA);
@@ -646,7 +653,7 @@ BYTE SDSectorRead(DWORD sector_addr, BYTE *buffer)
             (
                 CMD_RD_SINGLE,
                 SSD_RESPONSE_48 | SSD_DATA_PRESENT | SSD_CMD_CRC_CHK | SSD_CMD_IDX_CHK,
-                sector_addr * sectorSize
+                sector_addr
             )
     ) return (FALSE);
 
@@ -700,6 +707,11 @@ BYTE SDSectorDMARead(DWORD sector_addr, DWORD dma_addr, UINT16 num_blk)
     DWORD   dma_size;
     BYTE    boundary;
 
+	if(!hcMode)
+	{
+		sector_addr *= sectorSize;
+	}
+
     CheckDataInhibit();
     SDReset(SSD_RESET_DATA);
 
@@ -750,7 +762,7 @@ BYTE SDSectorDMARead(DWORD sector_addr, DWORD dma_addr, UINT16 num_blk)
             (
                 CMD_RD_MULTIPLE,
                 SSD_RESPONSE_48 | SSD_DATA_PRESENT | SSD_CMD_CRC_CHK | SSD_CMD_IDX_CHK,
-                sector_addr * sectorSize
+                sector_addr
             )
     ) return (FALSE);
 
@@ -803,6 +815,11 @@ BYTE SDSectorWrite(DWORD sector_addr, BYTE *buffer, BYTE allowWriteToZero)
 {
     UINT16  i;
 
+	if(!hcMode)
+	{
+		sector_addr *= sectorSize;
+	}
+
     CheckDataInhibit();
     SDReset(SSD_RESET_DATA);
     SetTransferMode(0);
@@ -826,7 +843,7 @@ BYTE SDSectorWrite(DWORD sector_addr, BYTE *buffer, BYTE allowWriteToZero)
             (
                 CMD_WR_SINGLE,
                 SSD_RESPONSE_48 | SSD_DATA_PRESENT | SSD_CMD_CRC_CHK | SSD_CMD_IDX_CHK,
-                sector_addr * sectorSize
+                sector_addr
             )
     ) return (FALSE);
 

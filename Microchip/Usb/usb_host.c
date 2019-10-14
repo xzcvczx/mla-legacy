@@ -22,11 +22,11 @@ USB_INTERRUPT_T1MSECIF equals 0x40.
 //DOM-IGNORE-BEGIN
 /******************************************************************************
 
-* File Name:       usb_host.c
-* Dependencies:    None
-* Processor:       PIC24/dsPIC30/dsPIC33/PIC32MX
-* Compiler:        C30 v2.01/C32 v0.00.18
-* Company:         Microchip Technology, Inc.
+ File Name:       usb_host.c
+ Dependencies:    None
+ Processor:       PIC24F/PIC32MX
+ Compiler:        C30/C32
+ Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -48,9 +48,10 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Author          Date    Comments
---------------------------------------------------------------------------------
-KO/BC       15-Oct-2007 First release
+Change History:
+  Rev         Description
+  ----------  ----------------------------------------------------------
+  2.6 - 2.6a  No change
 
 *******************************************************************************/
 
@@ -3990,68 +3991,72 @@ BOOL _USB_FindServiceEndpoint( BYTE transferType )
 
     while (pInterface)
     {
-        if ((pEndpoint) && (pEndpoint->bmAttributes.bfTransferType == transferType))
+        if (pEndpoint != NULL)
         {
-            switch (transferType)
-            {
-                case USB_TRANSFER_TYPE_CONTROL:
-                    if (!pEndpoint->status.bfTransferComplete)
-                    {
-                        pCurrentEndpoint = pEndpoint;
-                        return TRUE;
-                    }
-                    break;
+			if (pEndpoint->bmAttributes.bfTransferType == transferType)
+			{
+				switch (transferType)
+				{
+					case USB_TRANSFER_TYPE_CONTROL:
+						if (!pEndpoint->status.bfTransferComplete)
+						{
+							pCurrentEndpoint = pEndpoint;
+							return TRUE;
+						}
+						break;
 
-                #ifdef USB_SUPPORT_ISOCHRONOUS_TRANSFERS
-                case USB_TRANSFER_TYPE_ISOCHRONOUS:
-                #endif
-                #ifdef USB_SUPPORT_INTERRUPT_TRANSFERS
-                case USB_TRANSFER_TYPE_INTERRUPT:
-                #endif
-                #if defined( USB_SUPPORT_ISOCHRONOUS_TRANSFERS ) || defined( USB_SUPPORT_INTERRUPT_TRANSFERS )
-                    if (pEndpoint->status.bfTransferComplete)
-                    {
-                        // The endpoint doesn't need servicing.  If the interval count
-                        // has reached 0 and the user has not initiated another transaction,
-                        // reset the interval count for the next interval.
-                        if (pEndpoint->wIntervalCount == 0)
-                        {
-                            // Reset the interval count for the next packet.
-                            pEndpoint->wIntervalCount = pEndpoint->wInterval;
-                        }
-                    }
-                    else
-                    {
-                        pCurrentEndpoint = pEndpoint;
-                        return TRUE;
-                    }
-                    break;
-                #endif
+					#ifdef USB_SUPPORT_ISOCHRONOUS_TRANSFERS
+					case USB_TRANSFER_TYPE_ISOCHRONOUS:
+					#endif
+					#ifdef USB_SUPPORT_INTERRUPT_TRANSFERS
+					case USB_TRANSFER_TYPE_INTERRUPT:
+					#endif
+					#if defined( USB_SUPPORT_ISOCHRONOUS_TRANSFERS ) || defined( USB_SUPPORT_INTERRUPT_TRANSFERS )
+						if (pEndpoint->status.bfTransferComplete)
+						{
+							// The endpoint doesn't need servicing.  If the interval count
+							// has reached 0 and the user has not initiated another transaction,
+							// reset the interval count for the next interval.
+							if (pEndpoint->wIntervalCount == 0)
+							{
+								// Reset the interval count for the next packet.
+								pEndpoint->wIntervalCount = pEndpoint->wInterval;
+							}
+						}
+						else
+						{
+							pCurrentEndpoint = pEndpoint;
+							return TRUE;
+						}
+						break;
+					#endif
 
-                #ifdef USB_SUPPORT_BULK_TRANSFERS
-                case USB_TRANSFER_TYPE_BULK:
-                    #ifdef ALLOW_MULTIPLE_NAKS_PER_FRAME
-                    if (!pEndpoint->status.bfTransferComplete)
-                    #else
-                    if (!pEndpoint->status.bfTransferComplete &&
-                        !pEndpoint->status.bfLastTransferNAKd)
-                    #endif
-                    {
-                        usbBusInfo.countBulkTransactions ++;
-                        if (usbBusInfo.countBulkTransactions > usbBusInfo.lastBulkTransaction)
-                        {
-                            usbBusInfo.lastBulkTransaction  = usbBusInfo.countBulkTransactions;
-                            pCurrentEndpoint                = pEndpoint;
-                            return TRUE;
-                        }
-                    }
-                    break;
-                #endif
-            }
+					#ifdef USB_SUPPORT_BULK_TRANSFERS
+					case USB_TRANSFER_TYPE_BULK:
+						#ifdef ALLOW_MULTIPLE_NAKS_PER_FRAME
+						if (!pEndpoint->status.bfTransferComplete)
+						#else
+						if (!pEndpoint->status.bfTransferComplete &&
+							!pEndpoint->status.bfLastTransferNAKd)
+						#endif
+						{
+							usbBusInfo.countBulkTransactions ++;
+							if (usbBusInfo.countBulkTransactions > usbBusInfo.lastBulkTransaction)
+							{
+								usbBusInfo.lastBulkTransaction  = usbBusInfo.countBulkTransactions;
+								pCurrentEndpoint                = pEndpoint;
+								return TRUE;
+							}
+						}
+						break;
+					#endif
+				}
+			}
+
+	        // Go to the next endpoint.
+            pEndpoint = pEndpoint->next;
         }
 
-        // Go to the next endpoint.
-        pEndpoint = pEndpoint->next;
         if (pEndpoint == NULL)
         {
             // Go to the next interface.

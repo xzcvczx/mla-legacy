@@ -36,9 +36,10 @@
  *
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
+ * PAT					11/12/07	Version 1.0 release
  * Albert Z.			07/31/08	Added arc colors options
- * P. A. Tamayo			08/20/08	Added accuracy option for displaying values
+ * PAT					08/20/08	Added accuracy option for displaying values
+ * PAT					01/18/10	Fixed MtrIncVal() and MtrDecVal() macros
  *****************************************************************************/
 #ifndef _METER_H
     #define _METER_H
@@ -347,40 +348,38 @@ void    MtrMsgDefault(WORD translatedMsg, METER *pMtr, GOL_MSG *pMsg);
 void    MtrSetVal(METER *pMtr, SHORT newVal);
 
 /*********************************************************************
-* Macros:  MtrIncVal(pMtr, value)
+* Macros:  MtrIncVal(pMtr, deltaValue)
 *
 * Overview: This macro is used to directly increment the value. 
-*			The delta change used is always the resolution setting (page).
 *
 * PreCondition: none
 *
 * Input: pMtr - Pointer to the object.
-*		 value - Number to be added to the current Meter value.
+*		 deltaValue - Number to be added to the current Meter value.
 *
 * Output: none
 *
 * Side Effects: none
 *
 ********************************************************************/
-    #define MtrIncVal(pMtr, value)  MtrSetVal(pMtr, (pMtr->val + value))
+    #define MtrIncVal(pMtr, deltaValue)  MtrSetVal(pMtr, ((pMtr)->value + deltaValue))
 
 /*********************************************************************
-* Macros:  MtrDecVal(pMtr)
+* Macros:  MtrDecVal(pMtr, deltaValue)
 *
 * Overview: This macro is used to directly decrement the value. 
-*			The delta change used is always the resolution setting (page).
 *
 * PreCondition: none
 *
 * Input: pMtr - Pointer to the object.
-*        value - Number to be subtracted to the current Meter value.
+*        deltaValue - Number to be subtracted to the current Meter value.
 *
 * Output: none
 *
 * Side Effects: none
 *
 ********************************************************************/
-    #define MtrDecVal(pMtr, value)  MtrSetVal(pMtr, (pMtr->pos - value))
+    #define MtrDecVal(pMtr, deltaValue)  MtrSetVal(pMtr, ((pMtr)->value - deltaValue))
 
 /*********************************************************************
 * Macros:  MtrSetScaleColors(pMtr, arc1, arc2, arc3, arc4, arc5, arc6)	

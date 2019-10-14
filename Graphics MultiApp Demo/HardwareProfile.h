@@ -58,6 +58,13 @@
 		#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
 		//#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_USBMSD_HID_PH480272T_005_I11Q.h"
 
+	#elif defined (__PIC24FJ256GB210__)
+		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_PH480272T_005_I11Q.h"
+
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_USBMSD_HID_PH480272T_005_I11Q.h"
+
 	#elif defined (__PIC24FJ256GB110__)
 
 		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
@@ -71,7 +78,11 @@
 		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_TFT_G240320LTSW_118W_E.h"
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_PH480272T_005_I11Q.h"
 
-		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531_SDMSD.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
+
+
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
 
 	#else // (for __PIC24FJ128GA010__)
 
@@ -88,6 +99,9 @@
 
 		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_USBMSD_HID_PH480272T_005_I11Q.h"
+
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_SDMSD_TFT_G240320LTSW_118W_E.h"
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_SDMSD_PH480272T_005_I11Q.h"
 		
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_USBMSD_HID_TFT_G240320LTSW_118W_E.h"
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_USBMSD_HID_PH480272T_005_I11Q.h"
@@ -96,7 +110,7 @@
 	
 		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_TFT_G240320LTSW_118W_E.h"
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_SDMSD_PH480272T_005_I11Q.h"
-
+		
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_SDMSD_TFT_G240320LTSW_118W_E.h"
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_SDMSD_PH480272T_005_I11Q.h"
 

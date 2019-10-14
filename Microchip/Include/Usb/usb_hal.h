@@ -77,7 +77,8 @@ Description:
  Change History:
   Rev    Description
   ----   -----------
-  2.6    No Change
+  2.6-   No Change
+  2.6a   
 ********************************************************************/
 
 #ifndef _USB_HAL_H_

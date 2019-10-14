@@ -185,8 +185,8 @@ BYTE SDFile2JPEGFIFO(DWORD fifoAddress, DWORD byteSize, FSFILE *stream)
                 return (FALSE);
             }
 
-            sec_sel = (WORD) Cluster2Sector(dsk, (DWORD) stream->ccls);
-            sec_sel += (WORD) stream->sec;  // add the sector number to it
+            sec_sel = (DWORD) Cluster2Sector(dsk, (DWORD) stream->ccls);
+            sec_sel += (DWORD) stream->sec;  // add the sector number to it
         }
 
         if(((DWORD) (stream->sec) + (DWORD) len) > (DWORD) (dsk->SecPerClus))

@@ -90,9 +90,9 @@ Description:
  File Description:
 
  Change History:
-  Rev    Description
-  ----   -----------
-  2.6    Changed MCHPFSUSB stack revision number
+  Rev           Description
+  ----------    -----------
+  2.6 - 2.6A    No chance except stack revision number
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -137,7 +137,7 @@ Description:
 
 #define USB_MAJOR_VER   2       // Firmware version, major release number.
 #define USB_MINOR_VER   6       // Firmware version, minor release number.
-#define USB_DOT_VER     0       // Firmware version, dot release number.
+#define USB_DOT_VER     1       // Firmware version, dot release number.
 
 #endif // _USB_H_
 /*************************************************************************

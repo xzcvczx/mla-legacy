@@ -11,7 +11,6 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.2.4
  *
  * Software License Agreement
  *
@@ -33,7 +32,15 @@
  * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
-*****************************************************************************/
+*****************************************************************************
+ File Description:
+
+ Change History:
+  Rev     Description
+  -----   -----------
+  1.2.5   Fixed bug in the calculation of the capacity for v1.0 devices
+          
+********************************************************************/
 
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
@@ -1179,6 +1186,7 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
 	BYTE count, index;
 	DWORD c_size;
 	BYTE c_size_mult;
+	BYTE block_len;
  
 	#if defined __C30__ || defined __C32__
     	WORD spiconvalue = 0x0003;
@@ -1509,13 +1517,17 @@ MEDIA_INFORMATION *  MDD_SDSPI_MediaInitialize(void)
 			
 			//Extract the C_SIZE_MULT field from the response.  It is a 3-bit number in bit position 49:47.
 			c_size_mult = ((WORD)((CSDResponse[9] & 0x03) << 1)) | ((WORD)((CSDResponse[10] & 0x80) >> 7));
+
+            //Extract the BLOCK_LEN field from the response. It is a 4-bit number in bit position 83:80.
+            block_len = CSDResponse[5] & 0x0F;
+
+            block_len = 1 << (block_len - 9); //-9 because we report the size in sectors of 512 bytes each
 			
 			//Calculate the MDD_SDSPI_finalLBA (see SD card physical layer simplified spec 2.0, section 5.3.2).
 			//In USB mass storage applications, we will need this information to 
 			//correctly respond to SCSI get capacity requests (which will cause MDD_SDSPI_ReadCapacity() to get called).
-			MDD_SDSPI_finalLBA = ((DWORD)(c_size + 1) * (WORD)((WORD)1 << (c_size_mult + 2))) - 1;	//-1 on end is correction factor, since LBA = 0 is valid.		
+			MDD_SDSPI_finalLBA = ((DWORD)(c_size + 1) * (WORD)((WORD)1 << (c_size_mult + 2)) * block_len) - 1;	//-1 on end is correction factor, since LBA = 0 is valid.		
 		}	
-		
 
         // Turn off CRC7 if we can, might be an invalid cmd on some cards (CMD59)
         response = SendMMCCmd(CRC_ON_OFF,0x0);

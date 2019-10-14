@@ -5,8 +5,7 @@
  *
  * The demo works with 8-bit and 16-bit(PIC32 only) PMP interface. To use 16-bit bus
  * the USE_16BIT_PMP compile time option must be uncommented in GraphicsConfig.h.
- * All display orientations are supported. Currently high capacity cards are not supported
- * (SD should be less than 2GB). Resolution of the images must be less than 2560x1920
+ * All display orientations are supported. Resolution of the images must be less than 2560x1920
  * (maximum scale down factor is 8).
  *
  * FUNCTIONS IMPLEMENTED:
@@ -83,7 +82,18 @@ _CONFIG2(IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & IO
 _CONFIG2(FNOSC_PRIPLL & POSCMOD_XT) // Primary XT OSC with PLL
 _CONFIG1(JTAGEN_OFF & FWDTEN_OFF)   // JTAG off, watchdog timer off
     #endif
+	#if defined (__PIC24FJ256GB210__)
+_CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+	#endif
+	#if defined (__PIC24FJ256DA210__)
+_CONFIG1( WDTPS_PS32768 & FWPSA_PR128 & ALTVREF_ALTVREDIS & WINDIS_OFF & FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF) 
+_CONFIG2( POSCMOD_HS & IOL1WAY_OFF & OSCIOFNC_OFF & OSCIOFNC_OFF & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+_CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM) 
+	#endif	
 #endif
+
 int main (void)
 {
     #if defined(__dsPIC33F__) || defined(__PIC24H__)

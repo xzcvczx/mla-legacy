@@ -52,6 +52,17 @@
 ********************************************************************/
     #define USE_NONBLOCKING_CONFIG  // Comment this line to use blocking configuration
 
+#if defined(__PIC24FJ256DA210__)
+/*********************************************************************
+* Overview: Use of double buffering scheme can be enabled/disabled here.
+*			If enabled, updated screen areas will vissibly update at once
+*			but some continuous updates requiring an update of a 
+*			large area every time may slow down.
+*
+********************************************************************/
+//    #define USE_DOUBLE_BUFFERING  // Comment this line to disable the use of double buffering
+#endif
+
 /*********************************************************************
 * Overview: Using Palettes, different colors can be used with the same
 *			bit depth.
@@ -127,7 +138,7 @@
 *********************************************************************/
     #define USE_FONT_FLASH          // Support for fonts located in internal flash
     
-	#define USE_FONT_RAM			// Support for fonts located in RAM
+//	#define USE_FONT_RAM			// Support for fonts located in RAM
 //#define USE_FONT_EXTERNAL		// Support for fonts located in external memory
 
 /*********************************************************************

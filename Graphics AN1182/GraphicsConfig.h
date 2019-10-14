@@ -50,7 +50,7 @@
 *			configuration is assumed.
 *
 ********************************************************************/
-//    #define USE_NONBLOCKING_CONFIG  // Comment this line to use blocking configuration
+    #define USE_NONBLOCKING_CONFIG  // Comment this line to use blocking configuration
 
 /*********************************************************************
 * Overview: Using Palettes, different colors can be used with the same

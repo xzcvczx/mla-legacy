@@ -837,7 +837,7 @@ void DrawJet(void)
                         }
                         else
                         {                      
-                            SetColor( pShip->pGolScheme->TextColor0 );
+                            SetColor( pShip->hdr.pGolScheme->TextColor0 );
                             SetColor(WHITE);
                             FillCircle( asteroid[i].positionX, asteroid[i].positionY, asteroid[i].size );
                         }
@@ -900,7 +900,7 @@ void DrawJet(void)
 	                    }
 	                    else
 	                    {
-	                        SetColor( pShip->pGolScheme->TextColor0 );
+	                        SetColor( pShip->hdr.pGolScheme->TextColor0 );
 	                        SetColor(WHITE);
 	                        Circle( alienmissile[i].positionX, alienmissile[i].positionY, MISSILE_SIZE );
 	                    }

@@ -131,10 +131,15 @@ void ProgramFlash(void)
     TRISA = 0xFFF3;                 // set IO pins (2:3) to output mode
     LATA = 0x0000;                  // initialize all to be off
     SetLED(LED_ON, 0x08);
+#elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)    
+    // USE Explorer 16 LEDs as status
+    TRISAbits.TRISA7 = 0;           // set IO pins (A7) to output mode
+    LATA = 0;                  // initialize all to be off
+    SetLED(LED_ON, 0x08);
 #endif
 
 
-#if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined (__PIC24FJ256DA210__)
+#if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined (__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
     SetPPSPorts();
 #endif
 
@@ -189,6 +194,12 @@ void ProgramFlash(void)
             {
                 // set LED to signify waiting
                 SetLED(LED_ON, LED_SHIFT_INIT);
+            }
+#elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD )   
+            if((tick - waitTick) >= WAIT_TICK_COUNT)
+            {
+                // set LED to signify waiting
+                SetLED(LED_ON, 0x08);
             }
 #endif            
         }
@@ -376,7 +387,7 @@ BYTE ProcessRecord(BYTE *pBuffer, DWORD_VAL *pAddr)
 /* */
 void SetPPSPorts(void)
 {
-#if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) 
+#if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined(__PIC24FJ256GB210__) 
     __builtin_write_OSCCONL(OSCCON & 0xbf);
 
     RPINR19bits.U2RXR = 10; // assign RP10 to RX
@@ -386,7 +397,7 @@ void SetPPSPorts(void)
 
 #if defined(__PIC24FJ256DA210__)
 	__builtin_write_OSCCONL(OSCCON & 0xbf);
-	_U2RXR = 37;			// Bring RX2 Input to RPI37/RC14
+	_U2RXR = 11;			// Bring RX2 Input to RP11/RD0
 	_RP16R = 5;
 	__builtin_write_OSCCONL(OSCCON | 0x40); 
 #endif    

@@ -1,14 +1,12 @@
 /********************************************************************
  FileName:     main.c
  Dependencies: See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing the
- 				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
+ Processor:		PIC18, PIC24, and PIC32 USB Microcontrollers
+ Hardware:		This demo is natively intended to be used on Microchip USB demo
+ 				boards supported by the MCHPFSUSB stack.  See release notes for
+ 				support matrix.  This demo can be modified for use on other hardware
+ 				platforms.
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -35,9 +33,9 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  1.0   11/19/2004   Initial release
-  2.1   02/26/2007   Updated for simplicity and to use common
+  Rev   Description
+  1.0   Initial release
+  2.1   Updated for simplicity and to use common
                      coding style
 ********************************************************************/
 
@@ -81,7 +79,7 @@
     //      Code Protect:                   Disabled
     //      JTAG Port Enable:               Disabled
 
-    #if defined(__PIC24FJ256GB110__)
+    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
     #elif defined(__PIC24FJ64GB004__)
@@ -92,6 +90,9 @@
     #elif defined(__PIC24FJ256GB106__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    #elif defined(__PIC24FJ256DA210__)
+        _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+        _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #endif
 
 #elif defined( __PIC32MX__ )
@@ -370,7 +371,7 @@ int main(void)
 static void InitializeSystem(void)
 {
     #if defined(__C30__)
-    	#if defined(__PIC24FJ256DA210__)
+    	#if defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
     		ANSA = 0x0000;
     		ANSB = 0x0000;
     		ANSC = 0x0000;
@@ -587,7 +588,7 @@ WORD_VAL ReadPOT(void)
         w.v[1] = ADRESH;
 
     #elif defined(__C30__) || defined(__C32__)
-        #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
+        #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD) || defined(PIC24FJ256GB210_PIM)
             AD1CHS = 0x5;           //MUXA uses AN5
 
             // Get an ADC sample

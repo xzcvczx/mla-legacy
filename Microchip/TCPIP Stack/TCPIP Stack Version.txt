@@ -7,6 +7,22 @@ Note: Please file bug-reports/bug-fixes at http://support.microchip.com/ or post
       Look for stack updates at http://www.microchip.com/tcpip/
 
 ********
+v5.20b 		18 November 2009
+********
+Changes:
+1.  Removed ZeroG license agreement and replaced license stubs at the top of 
+    all ZG2100 WiFi driver files.  ZeroG Wireless, Inc. has been acquired by 
+    Microchip Technology.
+
+Fixes: 
+1.  None
+
+Known Problems: 
+1.  See v5.20 release notes.  Stack v5.20b does not contain any code changes 
+    relative to v5.20.
+
+
+********
 v5.20 		18 November 2009
 ********
 Changes:

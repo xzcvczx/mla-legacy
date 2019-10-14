@@ -1,76 +1,55 @@
-/*******************************************************************************
+/******************************************************************************
 
-ZeroG Driver Header File for the Microchip TCP/IP Stack
+ ZG2100 Driver link library header file.  This file implements a set of
+   XMacros. Please refer to http://www.ddj.com/cpp/184401387 or
+   http://en.wikipedia.org/wiki/C_preprocessor .  These XMacros allow an
+   application to be compiled to use function pointers, or switch/case blks.
+   Compiling with function pointers reduces code size but requires the host
+   MCU & toolchain to support re-entrancy - some don't.  The application
+   program should not need to modify this file.
+ Module for Microchip TCP/IP Stack
 
-Copyright © 2009 Microchip Technology Inc.  All rights reserved.
+*******************************************************************************
+ FileName:		ZGLibIface.h
+ Dependencies:	TCP/IP Stack header files
+ Processor:		PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
+ Compiler:		Microchip C32 v1.10b or higher
+				Microchip C30 v3.22 or higher
+				Microchip C18 v3.34 or higher
+ Company:		Microchip Technology, Inc.
 
-Microchip licenses to you the right to use, modify, copy and distribute
-Software only when embedded on a Microchip microcontroller or digital signal
-controller that is integrated into your product or third party product
-(pursuant to the sublicense terms in the accompanying license agreement).
+ Software License Agreement
 
-You should refer to the license agreement accompanying this Software for
-additional information regarding your rights and obligations.
+ Copyright (C) 2002-2010 Microchip Technology Inc.  All rights reserved.
 
-SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND,
-EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF
-MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
-IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER
-CONTRACT, NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR
-OTHER LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
-INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
-CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
-SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
-(INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+ Microchip licenses to you the right to use, modify, copy, and distribute:
+ (i)  the Software when embedded on a Microchip microcontroller or digital 
+      signal controller product ("Device") which is integrated into 
+      Licensee's product; or
+ (ii) ONLY the Software driver source files ENC28J60.c, ENC28J60.h,
+      ENCX24J600.c and ENCX24J600.h ported to a non-Microchip device used in 
+	  conjunction with a Microchip ethernet controller for the sole purpose 
+	  of interfacing with the ethernet controller.
 
-*******************************************************************************/
+ You should refer to the license agreement accompanying this Software for 
+ additional information regarding your rights and obligations.
 
-/*********************************************************************
- *
- *  The ZeroG link library header file.  This file implements a set of
- *  XMacros. Please refer to  http://www.ddj.com/cpp/184401387  or
- *  http://en.wikipedia.org/wiki/C_preprocessor .  These XMacros allow
- *  allow an application to be compiled to use function pointers, or
- *  switch/case blks. Compiling with function pointers reduces code size
- *  but requires the host MCU & toolchain to support re-entrancy - some
- *  don't.  The application program should not need to modify this file.
- *********************************************************************
- * FileName:        ZGLibIface.h
- * Dependencies:    None
- * Company:         ZeroG Wireless, Inc.
- *
- * Software License Agreement
- *
- * Copyright © 2009 ZeroG Wireless Inc.  All rights
- * reserved.
- *
- * ZeroG licenses to you the right to use, modify, copy,
- * distribute, and port the Software driver source files ZGLibIface.h
- * when used in conjunction with the ZeroG ZG2100 for
- * the sole purpose of interfacing with the ZeroG ZG2100.
- *
- * You should refer to the license agreement accompanying this
- * Software for additional information regarding your rights and
- * obligations.
- *
- * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT
- * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT
- * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL
- * ZEROG BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR
- * CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF
- * PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
- * BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE
- * THEREOF), ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER
- * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
- * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
- *
- *
- * Author               Date   		Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * SG                  12/12/08
-********************************************************************/
+ THE SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+ NON-INFRINGEMENT. IN NO EVENT SHALL MICROCHIP BE LIABLE FOR ANY INCIDENTAL,
+ SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST
+ OF PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS BY
+ THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), ANY CLAIMS
+ FOR INDEMNITY OR CONTRIBUTION, OR OTHER SIMILAR COSTS, WHETHER ASSERTED ON
+ THE BASIS OF CONTRACT, TORT (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR
+ OTHERWISE.
 
+
+ Author				Date		Comment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ SG					12/12/08
+******************************************************************************/
 #ifndef _ZGLIBIFACE_H_
 #define _ZGLIBIFACE_H_
 

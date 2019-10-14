@@ -1,14 +1,12 @@
 /********************************************************************
- FileName:     main.c
- Dependencies: See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing the
- 				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
+ FileName:      main.c
+ Dependencies:  See INCLUDES section
+ Processor:		PIC18, PIC24, and PIC32 USB Microcontrollers
+ Hardware:		This demo is natively intended to be used on Microchip USB demo
+ 				boards supported by the MCHPFSUSB stack.  See release notes for
+ 				support matrix.  This demo can be modified for use on other hardware
+ 				platforms.
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
@@ -35,10 +33,12 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  1.0   11/19/2004   Initial release
-  2.1   02/26/2007   Updated for simplicity and to use common
+  Rev   Description
+  ----  -----------------------------------------
+  1.0   Initial release
+  2.1   Updated for simplicity and to use common
                      coding style
+  2.6A  Added button debouncing using Start-of-Frame packets
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -109,7 +109,7 @@
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT   
 
-#elif defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
+#elif defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
      #pragma config STVREN = ON            //stack overflow/underflow reset enabled
@@ -117,8 +117,8 @@
      #pragma config CPUDIV = OSC1        //No CPU system clock divide
      #pragma config CP0 = OFF            //Program memory is not code-protected
      #pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
-     #pragma config T1DIG = ON           //Sec Osc clock source may be selected
-     #pragma config LPT1OSC = OFF        //high power Timer1 mode
+     //#pragma config T1DIG = ON           //Sec Osc clock source may be selected
+     //#pragma config LPT1OSC = OFF        //high power Timer1 mode
      #pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
      #pragma config IESO = OFF           //Two-Speed Start-up disabled
      #pragma config WDTPS = 32768        //1:32768
@@ -165,8 +165,8 @@
         #pragma config EBTRB  = OFF       
 
 #elif defined(EXPLORER_16)
-    #ifdef __PIC24FJ256GB110__ //Defined by MPLAB when using 24FJ256GB110 device
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
+    #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
@@ -200,8 +200,8 @@
     _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
     _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
 #elif defined(PIC24FJ256DA210_DEV_BOARD)
-    //_CONFIG1(FWDTEN_OFF & ICS_PGx2 & COE_OFF & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
-    //_CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
+    _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
+    _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
 #elif defined(PIC32_USB_STARTER_KIT)
     #pragma config UPLLEN   = ON        // USB PLL Enabled
     #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
@@ -242,7 +242,8 @@ char USB_In_Buffer[64];
 char USB_Out_Buffer[64];
 
 BOOL stringPrinted;
-
+volatile BOOL buttonPressed;
+volatile BYTE buttonCount;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 static void InitializeSystem(void);
@@ -464,12 +465,22 @@ static void InitializeSystem(void)
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif defined(__C30__)
-        AD1PCFGL = 0xFFFF;
+    	#if defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
+    		ANSA = 0x0000;
+    		ANSB = 0x0000;
+    		ANSC = 0x0000;
+    		ANSD = 0x0000;
+    		ANSE = 0x0000;
+    		ANSF = 0x0000;
+    		ANSG = 0x0000;
+        #else
+            AD1PCFGL = 0xFFFF;
+        #endif
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
     #endif
 
-    #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
+    #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
 	//On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
 	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
 	//This allows the device to power up at a lower initial operating frequency, which can be
@@ -494,7 +505,7 @@ static void InitializeSystem(void)
     WDTCONbits.ADSHR = 0;			// Select normal SFR locations
     #endif
 
-    #if defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1)
+    #if defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
 	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
 	//use the ANCONx registers to control this, which is different from other devices which
 	//use the ADCON1 register for this purpose.
@@ -583,10 +594,15 @@ static void InitializeSystem(void)
  *****************************************************************************/
 void UserInit(void)
 {
+    //Initialize all of the debouncing variables
+    buttonCount = 0;
+    buttonPressed = FALSE;
     stringPrinted = TRUE;
-    //Initialize all of the LED pins
 
+    //Initialize all of the LED pins
 	mInitAllLEDs();
+
+    //Initialize the pushbuttons
     mInitAllSwitches();
 }//end UserInit
 
@@ -616,7 +632,7 @@ void ProcessIO(void)
     // User Application USB tasks
     if((USBDeviceState < CONFIGURED_STATE)||(USBSuspendControl==1)) return;
 
-    if(sw2 == 0)
+    if(buttonPressed)
     {
         if(stringPrinted == FALSE)
         {
@@ -911,6 +927,30 @@ void USBCB_SOF_Handler(void)
 {
     // No need to clear UIRbits.SOFIF to 0 here.
     // Callback caller is already doing that.
+
+    //This is reverse logic since the pushbutton is active low
+    if(buttonPressed == sw2)
+    {
+        if(buttonCount != 0)
+        {
+            buttonCount--;
+        }
+        else
+        {
+            //This is reverse logic since the pushbutton is active low
+            buttonPressed = !sw2;
+
+            //Wait 100ms before the next press can be generated
+            buttonCount = 100;
+        }
+    }
+    else
+    {
+        if(buttonCount != 0)
+        {
+            buttonCount--;
+        }
+    }
 }
 
 /*******************************************************************

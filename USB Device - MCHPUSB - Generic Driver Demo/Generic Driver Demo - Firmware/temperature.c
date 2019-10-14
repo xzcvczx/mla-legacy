@@ -145,6 +145,16 @@ BOOL AcquireTemperature(void)
     		AD1CON1bits.SAMP = 0;           //Start sampling
     		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
     		while(!AD1CON1bits.DONE);       //Wait for conversion to complete
+        #elif defined(PIC24FJ256GB210_PIM)
+    		AD1CHS = 0x4;           //MUXA uses AN4
+    		ANSBbits.ANSB4 = 1; 
+    		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay
+    		// Get an ADC sample
+    		AD1CON1bits.SAMP = 1;           //Start sampling
+    		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
+    		AD1CON1bits.SAMP = 0;           //Start sampling
+    		for(tempADClong=0;tempADClong<1000;tempADClong++); //Sample delay, conversion start automatically
+    		while(!AD1CON1bits.DONE);       //Wait for conversion to complete
         #elif defined(PIC24FJ64GB004_PIM)
     		AD1CHS = 0x6;           //MUXA uses AN6
     		AD1PCFGLbits.PCFG6 = 0;
@@ -176,21 +186,6 @@ BOOL AcquireTemperature(void)
             AD1CON1CLR = 0x0002; // start Converting
             while (!(AD1CON1 & 0x0001));// conversion done?
         #endif
-   
-//		//convert the results to a float
-//		temp = (float)ADC1BUF0;
-//
-//		// voltage = A2D_reading * 3.3v / 1024
-//		temp *= 3.3;
-//		temp /= 1024;
-//
-//		// align to 0C (subtracting -.65v)
-//		temp -= .55;
-//
-//		//convert to TC77 style output and store to temperature
-//		temp *= 12800;
-//		temperature.Val = (WORD)temp;
-//		temperature.Val |= 0x7;
 
     	tempADC = (signed int)(ADC1BUF0 - 155);
             //At 0 deg C, TC1047A outputs ~500mV, which at Vdd/Vss 
@@ -224,7 +219,7 @@ BOOL AcquireTemperature(void)
     #elif defined(LOW_PIN_COUNT_USB_DEVELOPMENT_KIT)
         temperature.Val = 0x0000;
         return TRUE;
-    #elif defined(PIC18F46J50_PIM)
+    #elif defined(PIC18F46J50_PIM) || defined(PIC18F47J53_PIM)
 		//Create temp variables to store the conversion data
 		unsigned int tempADC;
 		unsigned long int tempADClong;

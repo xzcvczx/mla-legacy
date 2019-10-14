@@ -53,66 +53,31 @@ SHORT   _clipTop;
 SHORT   _clipRight;
 SHORT   _clipBottom;
 
+
 /*********************************************************************
-* Function:  void  DelayMs(WORD time)
+* Macros:  SetAddress(lowerAddr,higherAddr)
+*
+* Overview: Sets the page and the lower and higher address pointer
+*			of the display buffer. All parameters should be pre-calculated.
 *
 * PreCondition: none
 *
-* Input: time - delay in ms
+* Input: page - Page value for the address.
+*		 lowerAddr - Lower column address.
+*		 higherAddr - Higher column address.
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: delays execution on time specified in ms
-*
-* Note: delay is defined for 16MIPS
-*
 ********************************************************************/
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-    #define DELAY_1MS   40000 / 5   // for 40MIPS
+#define SetAddress(page, lowerAddr, higherAddr) \
+	DeviceSetCommand(); \
+    DeviceWrite(page); \
+    DeviceWrite(lowerAddr); \
+    DeviceWrite(higherAddr); \
+	DeviceSetData();
 
-/* */
-static void DelayMs(WORD time)
-{
-    unsigned    delay;
-    while(time--)
-        for(delay = 0; delay < DELAY_1MS; delay++);
-}
-
-#elif defined(__PIC32MX__)
-
-/* */
-static void DelayMs(WORD time)
-{
-    while(time--)
-    {
-        unsigned int    int_status;
-
-        int_status = INTDisableInterrupts();
-        OpenCoreTimer(GetSystemClock() / 2000); // core timer is at 1/2 system clock
-        INTRestoreInterrupts(int_status);
-
-        mCTClearIntFlag();
-
-        while(!mCTGetIntFlag());
-    }
-
-    mCTClearIntFlag();
-}
-
-#else
-    #define DELAY_1MS   16000 / 5               // for 16MIPS
-
-/* */
-static void DelayMs(WORD time)
-{
-    unsigned    delay;
-    while(time--)
-        for(delay = 0; delay < DELAY_1MS; delay++);
-}
-
-#endif
 
 /*********************************************************************
 * Function:  void ResetDevice()
@@ -132,173 +97,138 @@ static void DelayMs(WORD time)
 ********************************************************************/
 void ResetDevice(void)
 {
+	// Initialize the device
+	DeviceInit();
 
-    // Set reset pin as output
-    RST_TRIS_BIT = 0;
-
-    // Hold in reset
-    RST_LAT_BIT = 0;
-
-    // Set up chip select signal to be IO controlled
-    CS_TRIS_BIT = 0;
-    CS_LAT_BIT = 1;
-
-    #if defined(__dsPIC33F__) || defined(__PIC24H__)
-
-    // PMP setup
-    PMMODEbits.MODE = 0b10;        // Master 2, controller pins should be set BS0=0,BS1=1,BS2=1 on board
-    PMMODEbits.WAITB = 0b01;       // 1 tcy data set up
-    PMMODEbits.WAITM = 0b0011;     // 3 tcy additional wait
-    PMMODEbits.WAITE = 0b00;       // 0 tcy data hold
-    #else
-
-    // PMP setup
-    PMMODEbits.MODE = 0b10;        // Master 2, controller pins should be set BS0=0,BS1=1,BS2=1 on board
-    PMMODEbits.WAITB = 0b01;       // 1 tcy data set up
-    PMMODEbits.WAITM = 0b0010;     // 2 tcy additional wait
-    PMMODEbits.WAITE = 0b00;       // 0 tcy data hold
-    #endif
-    PMAENbits.PTEN0 = 1;            // Address line 0 is enabled
-    PMAENbits.PTEN14 = 0;           // Address line 14 is used as an IO port
-    PMCONbits.PTRDEN = 1;           // enable read strobe
-    PMCONbits.PTWREN = 1;           // enable write strobe
-    PMCONbits.PMPEN = 1;            // enable PMP module
-
-    // Reset controller
-    RST_LAT_BIT = 1;
-    DelayMs(20);
-    RST_LAT_BIT = 0;
-    DelayMs(20);
-    RST_LAT_BIT = 1;
-    DelayMs(20);
-
-    CS_LAT_BIT = 0;
+    DeviceSelect();
+	DeviceSetCommand();
 
     #if (DISPLAY_CONTROLLER == SH1101A)
 
     // Setup Display
-    WriteCommand(0xAE);             // turn off the display (AF=ON, AE=OFF)
-    WriteCommand(0xDB);             // set  VCOMH
-    WriteCommand(0x23);
-    WriteCommand(0xD9);             // set  VP
-    WriteCommand(0x22);
+    DeviceWrite(0xAE);             // turn off the display (AF=ON, AE=OFF)
+    DeviceWrite(0xDB);             // set  VCOMH
+    DeviceWrite(0x23);
+    DeviceWrite(0xD9);             // set  VP
+    DeviceWrite(0x22);
 
     // Re-map
-    WriteCommand(0xA1);             // [A0]:column address 0 is map to SEG0
+    DeviceWrite(0xA1);             // [A0]:column address 0 is map to SEG0
 
     // [A1]:column address 131 is map to SEG0
     // COM Output Scan Direction
-    WriteCommand(0xC8);             // C0 is COM0 to COMn, C8 is COMn to COM0
+    DeviceWrite(0xC8);             // C0 is COM0 to COMn, C8 is COMn to COM0
 
     // COM Pins Hardware Configuration
-    WriteCommand(0xDA);             // set pins hardware configuration
-    WriteCommand(0x12);
+    DeviceWrite(0xDA);             // set pins hardware configuration
+    DeviceWrite(0x12);
 
     // Multiplex Ratio
-    WriteCommand(0xA8);             // set multiplex ratio
-    WriteCommand(0x3F);             // set to 64 mux
+    DeviceWrite(0xA8);             // set multiplex ratio
+    DeviceWrite(0x3F);             // set to 64 mux
 
     // Display Clock Divide
-    WriteCommand(0xD5);             // set display clock divide
-    WriteCommand(0xA0);             // set to 100Hz
+    DeviceWrite(0xD5);             // set display clock divide
+    DeviceWrite(0xA0);             // set to 100Hz
 
     // Contrast Control Register
-    WriteCommand(0x81);             // Set contrast control
-    WriteCommand(0x60);             // display 0 ~ 127; 2C
+    DeviceWrite(0x81);             // Set contrast control
+    DeviceWrite(0x60);             // display 0 ~ 127; 2C
 
     // Display Offset
-    WriteCommand(0xD3);             // set display offset
-    WriteCommand(0x00);             // no offset
+    DeviceWrite(0xD3);             // set display offset
+    DeviceWrite(0x00);             // no offset
 
     //Normal or Inverse Display
-    WriteCommand(0xA6);             // Normal display
-    WriteCommand(0xAD);             // Set DC-DC
-    WriteCommand(0x8B);             // 8B=ON, 8A=OFF
+    DeviceWrite(0xA6);             // Normal display
+    DeviceWrite(0xAD);             // Set DC-DC
+    DeviceWrite(0x8B);             // 8B=ON, 8A=OFF
 
     // Display ON/OFF
-    WriteCommand(0xAF);             // AF=ON, AE=OFF
+    DeviceWrite(0xAF);             // AF=ON, AE=OFF
     DelayMs(150);
 
     // Entire Display ON/OFF
-    WriteCommand(0xA4);             // A4=ON
+    DeviceWrite(0xA4);             // A4=ON
 
     // Display Start Line
-    WriteCommand(0x40);             // Set display start line
+    DeviceWrite(0x40);             // Set display start line
 
     // Lower Column Address
-    WriteCommand(0x00 + OFFSET);    // Set lower column address
+    DeviceWrite(0x00 + OFFSET);    // Set lower column address
 
     // Higher Column Address
-    WriteCommand(0x10);             // Set higher column address
+    DeviceWrite(0x10);             // Set higher column address
     DelayMs(1);
     #elif (DISPLAY_CONTROLLER == SSD1303)
 
     // Setup Display
-    WriteCommand(0xAE);             // turn off the display (AF=ON, AE=OFF)
-    WriteCommand(0xDB);             // set  VCOMH
-    WriteCommand(0x23);
-    WriteCommand(0xD9);             // set  VP
-    WriteCommand(0x22);
-    WriteCommand(0xAD);             // Set DC-DC
-    WriteCommand(0x8B);             // 8B=ON, 8A=OFF
+    DeviceWrite(0xAE);             // turn off the display (AF=ON, AE=OFF)
+    DeviceWrite(0xDB);             // set  VCOMH
+    DeviceWrite(0x23);
+    DeviceWrite(0xD9);             // set  VP
+    DeviceWrite(0x22);
+    DeviceWrite(0xAD);             // Set DC-DC
+    DeviceWrite(0x8B);             // 8B=ON, 8A=OFF
     DelayMs(1);
 
     // Display ON/OFF
-    WriteCommand(0xAF);             // AF=ON, AE=OFF
+    DeviceWrite(0xAF);             // AF=ON, AE=OFF
 
     // Init OLED display using SSD1303 driver
     // Display Clock Divide
-    WriteCommand(0xD5);             // set display clock divide
-    WriteCommand(0xA0);             // set to 100Hz
+    DeviceWrite(0xD5);             // set display clock divide
+    DeviceWrite(0xA0);             // set to 100Hz
 
     // Display Offset
-    WriteCommand(0xD3);             // set display offset
-    WriteCommand(0x00);             // no offset
+    DeviceWrite(0xD3);             // set display offset
+    DeviceWrite(0x00);             // no offset
 
     // Multiplex Ratio
-    WriteCommand(0xA8);             // set multiplex ratio
-    WriteCommand(0x3F);             // set to 64 mux
+    DeviceWrite(0xA8);             // set multiplex ratio
+    DeviceWrite(0x3F);             // set to 64 mux
 
     // Display Start Line
-    WriteCommand(0x40);             // Set display start line
+    DeviceWrite(0x40);             // Set display start line
 
     // Re-map
-    WriteCommand(0xA0);             // [A0]:column address 0 is map to SEG0
+    DeviceWrite(0xA0);             // [A0]:column address 0 is map to SEG0
 
     // [A1]:column address 131 is map to SEG0
     // COM Output Scan Direction
-    WriteCommand(0xC8);             // C0 is COM0 to COMn, C8 is COMn to COM0
+    DeviceWrite(0xC8);             // C0 is COM0 to COMn, C8 is COMn to COM0
 
     // COM Pins Hardware Configuration
-    WriteCommand(0xDA);             // set pins hardware configuration
-    WriteCommand(0x12);
+    DeviceWrite(0xDA);             // set pins hardware configuration
+    DeviceWrite(0x12);
 
     // Contrast Control Register
-    WriteCommand(0x81);             // Set contrast control
-    WriteCommand(0x60);             // display 0 ~ 127; 2C
+    DeviceWrite(0x81);             // Set contrast control
+    DeviceWrite(0x60);             // display 0 ~ 127; 2C
 
     // Entire Display ON/OFF
-    WriteCommand(0xA4);             // A4=ON
+    DeviceWrite(0xA4);             // A4=ON
 
     //Normal or Inverse Display
-    WriteCommand(0xA6);             // Normal display
+    DeviceWrite(0xA6);             // Normal display
 
 #ifdef DISABLE_DC_DC_CONVERTER
-	WriteCommand(0x8A);
+	DeviceWrite(0x8A);
 #else
-    WriteCommand(0x8B);             // 8B=ON, 8A=OFF 
+    DeviceWrite(0x8B);             // 8B=ON, 8A=OFF 
 #endif
 
     // Lower Column Address
-    WriteCommand(0x00 + OFFSET);    // Set lower column address
+    DeviceWrite(0x00 + OFFSET);    // Set lower column address
 
     // Higher Column Address
-    WriteCommand(0x10);             // Set higher column address
+    DeviceWrite(0x10);             // Set higher column address
     DelayMs(1);
     #else
         #error The controller is not supported.
     #endif
-    CS_LAT_BIT = 1;
+    DeviceDeselect();
+	DeviceSetData();
 }
 
 /*********************************************************************
@@ -362,16 +292,16 @@ void PutPixel(SHORT x, SHORT y)
     add <<= 3;                      // Multiply by 8
     add = y - add;                  // Calculate bit position
     mask = 1 << add;                // Left shift 1 by bit position
-    CS_LAT_BIT = 0;
+    DeviceSelect();
 
     SetAddress(page, lAddr, hAddr); // Set the address (sets the page,
 
+	
     // lower and higher column address pointers)
-    ReadData(display);              // Read to initiate Read transaction on PMP and dummy read
+    display = SingleDeviceRead();	// Read to initiate Read transaction on PMP and dummy read
+    								// (requirement for data synchronization in the controller)
+    display = DeviceRead();       	// Read actual data from from display buffer
 
-    // (requirement for data synchronization in the controller)
-    ReadData(display);              // Read actual data from from display buffer
-    ReadData(display);              // Read data from PMP register
     if(_color > 0)                  // If non-zero for pixel on
         display |= mask;            // or in mask
     else
@@ -380,8 +310,8 @@ void PutPixel(SHORT x, SHORT y)
     SetAddress(page, lAddr, hAddr); // Set the address (sets the page,
 
     // lower and higher column address pointers)
-    WriteData(display);             // restore the byte with manipulated bit
-    CS_LAT_BIT = 1;
+    DeviceWrite(display);             // restore the byte with manipulated bit
+    DeviceDeselect();
 }
 
 /*********************************************************************
@@ -445,15 +375,15 @@ BYTE GetPixel(SHORT x, SHORT y)
     temp <<= 3;                     // Multiply by 8
     temp = y - temp;                // Calculate bit position
     mask = 1 << temp;               // Left shift 1 by bit position
-    CS_LAT_BIT = 0;
+    DeviceSelect();
 
     SetAddress(page, lAddr, hAddr); // Set the address (sets the page,
 
     // lower and higher column address pointers)
-    ReadData(display);              // Read to initiate Read transaction on PMP
-    ReadData(display);              // Dummy Read (requirement for data synchronization in the controller)
-    ReadData(display);              // Read data from display buffer
-    CS_LAT_BIT = 1;
+    display = SingleDeviceRead();	// Read to initiate Read transaction on PMP
+                                    // Dummy Read (requirement for data synchronization in the controller)
+    display = DeviceRead();         // Read data from display buffer
+    DeviceDeselect();
 
     return (display & mask);        // mask all other bits and return the result	
 }
@@ -477,15 +407,15 @@ BYTE GetPixel(SHORT x, SHORT y)
 void ClearDevice(void)
 {
     BYTE    i, j;
-    CS_LAT_BIT = 0;
+    DeviceSelect();
     for(i = 0xB0; i < 0xB8; i++)
     {       // Go through all 8 pages
         SetAddress(i, 0x00, 0x10);
         for(j = 0; j < 132; j++)
         {   // Write to all 132 bytes
-            WriteData(_color);
+            DeviceWrite(_color);
         }
     }
 
-    CS_LAT_BIT = 1;
+    DeviceDeselect();
 }

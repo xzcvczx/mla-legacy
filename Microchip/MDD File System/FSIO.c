@@ -15,7 +15,6 @@
 * Processor:          PIC18/PIC24/dsPIC30/dsPIC33/PIC32
 * Compiler:           C18/C30/C32
 * Company:            Microchip Technology, Inc.
-* Version:            1.2.4
 *
 * Software License Agreement
 *
@@ -37,7 +36,15 @@
 * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 *
-*****************************************************************************/
+********************************************************************
+ File Description:
+
+ Change History:
+  Rev     Description
+  -----   -----------
+  1.2.5   Fixed bug that prevented writes to alternate FAT tables
+  1.2.5   Fixed bug that prevented FAT being updated when media is re-inserted
+********************************************************************/
 
 #include "Compiler.h"
 #include "MDD File System\FSIO.h"
@@ -324,6 +331,9 @@ int FSInit(void)
 #endif
 
     gBufferZeroed = FALSE;
+    gNeedFATWrite = FALSE;             
+    gLastFATSectorRead = 0xFFFFFFFF;       
+    gLastDataSectorRead = 0xFFFFFFFF;  
 
     MDD_InitIO();
 
@@ -1358,14 +1368,28 @@ int FSCreateMBR (unsigned long firstSector, unsigned long numSectors)
     erased.  If the user has specified a volumeID parameter, a
     VOLUME attribute entry will be created in the root directory
     to name the device.
+
+    FAT12, FAT16 and FAT32 formatting are supported.
+
+    Based on the number of sectors, the format function automatically
+    compute the smallest possible value for the cluster size in order to
+    accommodate the physical size of the media. In this case, if a media 
+    with a big capacity is formatted, the format function may take a very
+    long time to write all the FAT tables. 
+
+    Therefore, the FORMAT_SECTORS_PER_CLUSTER macro may be used to 
+    specify the exact cluster size (in multiples of sector size). This 
+    macro can be defined in FSconfig.h
+
   Remarks:
-    FAT12 and FAT16 formatting is supported.
+    Only devices with a sector size of 512 bytes are supported by the 
+    format function
   *******************************************************************/
 
 int FSformat (char mode, long int serialNumber, char * volumeID)
 {
     PT_MBR   masterBootRecord;
-    DWORD    secCount, FAT16DataClusters, RootDirSectors;
+    DWORD    secCount, DataClusters, RootDirSectors;
     BootSec   BSec;
     DISK   d;
     DISK * disk = &d;
@@ -1379,6 +1403,11 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
 #endif
 
     FSerrno = CE_GOOD;
+
+    gBufferZeroed = FALSE;
+    gNeedFATWrite = FALSE;             
+    gLastFATSectorRead = 0xFFFFFFFF;       
+    gLastDataSectorRead = 0xFFFFFFFF;  
 
     disk->buffer = gDataBuffer;
 
@@ -1418,6 +1447,9 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
             BSec->FAT.FAT_16.BootSec_BootSig == 0x29)
 #endif
         {
+            /* Mark that we do not have a MBR; 
+                this is not actualy used - is here only to remove a compilation warning */
+            masterBootRecord = (PT_MBR) NULL;
             switch (mode)
             {
                 case 1:
@@ -1443,6 +1475,12 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
             masterBootRecord = (PT_MBR) &gDataBuffer;
             disk->firsts = masterBootRecord->Partition0.PTE_FrstSect;
         }
+    }
+    else
+    {
+        /* If the signature is not correct, this is neither a MBR, nor a VBR */
+        FSerrno = CE_BAD_PARTITION;
+        return EOF;
     }
 
     switch (mode)
@@ -1482,6 +1520,17 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
 
                 // Last digit of file system name (FAT12   )
                 gDataBuffer[58] = '2';
+
+                // Calculate the size of the FAT
+                fatsize = (secCount - 0x21  + (2*disk->SecPerClus));
+                test =   (341 * disk->SecPerClus) + 2;
+                fatsize = (fatsize + (test-1)) / test;
+    
+                disk->fatcopy = 0x02;
+                disk->maxroot = 0x200;
+    
+                disk->fatsize = fatsize;
+
             }
             else if (secCount <= 0x3FFD5F)
             {
@@ -1494,13 +1543,13 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
                     return EOF;
                 }
 
-                FAT16DataClusters = secCount - 0x218;
+                DataClusters = secCount - 0x218;
                 // Figure out how many sectors per cluster we need
                 disk->SecPerClus = 1;
-                while (FAT16DataClusters > 0xFFED)
+                while (DataClusters > 0xFFED)
                 {
                     disk->SecPerClus *= 2;
-                    FAT16DataClusters /= 2;
+                    DataClusters /= 2;
                 }
                 // This shouldnt happen
                 if (disk->SecPerClus > 128)
@@ -1514,25 +1563,74 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
 
                 // Last digit of file system name (FAT16   )
                 gDataBuffer[58] = '6';
+
+                // Calculate the size of the FAT
+                fatsize = (secCount - 0x21  + (2*disk->SecPerClus));
+                test =    (256  * disk->SecPerClus) + 2;
+                fatsize = (fatsize + (test-1)) / test;
+    
+                disk->fatcopy = 0x02;
+                disk->maxroot = 0x200;
+    
+                disk->fatsize = fatsize;
             }
             else
             {
-                // Cannot format; too many sectors
-                FSerrno = CE_NONSUPPORTED_SIZE;
-                return EOF;
+                disk->type = FAT32;
+                // Format to FAT32
+                masterBootRecord->Partition0.PTE_FSDesc = 0x0B;
+                if (MDD_SectorWrite (0x00, gDataBuffer, TRUE) == FALSE)
+                {
+                    FSerrno = CE_WRITE_ERROR;
+                    return EOF;
+                }
+
+                #ifdef FORMAT_SECTORS_PER_CLUSTER
+                    disk->SecPerClus = FORMAT_SECTORS_PER_CLUSTER;
+                    DataClusters = secCount / disk->SecPerClus;
+
+                    /* FAT32: 65526 < Number of clusters < 4177918 */
+                    if ((DataClusters <= 65526) || (DataClusters >= 4177918))
+                    {
+                        FSerrno = CE_BAD_PARTITION;
+                        return EOF;
+                    }
+                #else               
+                    /*  FAT32: 65526 < Number of clusters < 4177918 */
+                    DataClusters = secCount;
+                    // Figure out how many sectors per cluster we need
+                    disk->SecPerClus = 1;
+                    while (DataClusters > 0x3FBFFE)
+                    {
+                        disk->SecPerClus *= 2;
+                        DataClusters /= 2;
+                    }
+                #endif
+                // Check the cluster size: FAT32 supports 512, 1024, 2048, 4096, 8192, 16K, 32K, 64K
+                if (disk->SecPerClus > 128)
+                {
+                    FSerrno = CE_BAD_PARTITION;
+                    return EOF;
+                }
+
+                // Prepare a boot sector
+                memset (gDataBuffer, 0x00, MEDIA_SECTOR_SIZE);
+
+               // Calculate the size of the FAT
+                fatsize = (secCount - 0x20);
+                test =    (128  * disk->SecPerClus) + 1;
+                fatsize = (fatsize + (test-1)) / test;
+    
+                disk->fatcopy = 0x02;
+                disk->maxroot = 0x200;
+    
+                disk->fatsize = fatsize;
             }
 
-            // Calculate the size of the FAT
-            fatsize = (secCount - 0x21  + (2*disk->SecPerClus));
-            if (disk->type == FAT12)
-                test =   (341 * disk->SecPerClus) + 2;
-            else
-                test =    (256  * disk->SecPerClus) + 2;
-            fatsize = (fatsize + (test-1)) / test;
             // Non-file system specific values
             gDataBuffer[0] = 0xEB;         //Jump instruction
             gDataBuffer[1] = 0x3C;
-            gDataBuffer[2] =  0x90;
+            gDataBuffer[2] = 0x90;
             gDataBuffer[3] =  'M';         //OEM Name "MCHP FAT"
             gDataBuffer[4] =  'C';
             gDataBuffer[5] =  'H';
@@ -1541,70 +1639,204 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
             gDataBuffer[8] =  'F';
             gDataBuffer[9] =  'A';
             gDataBuffer[10] = 'T';
-            gDataBuffer[11] = disk->sectorSize & 0xFF;
-            gDataBuffer[12] = disk->sectorSize >> 8;
+
+            gDataBuffer[11] = 0x00;             //Sector size 
+            gDataBuffer[12] = 0x02;
+
             gDataBuffer[13] = disk->SecPerClus;   //Sectors per cluster
-            gDataBuffer[14] = 0x08;         //Reserved sector count
-            gDataBuffer[15] = 0x00;
-            disk->fat = 0x08 + disk->firsts;
-            gDataBuffer[16] = 0x02;         //number of FATs
-            disk->fatcopy = 0x02;
-            gDataBuffer[17] = 0x00;          //Max number of root directory entries - 512 files allowed
-            gDataBuffer[18] = 0x02;
-            disk->maxroot = 0x200;
-            gDataBuffer[19] = 0x00;         //total sectors
-            gDataBuffer[20] = 0x00;
-            gDataBuffer[21] = 0xF8;         //Media Descriptor
-            gDataBuffer[22] = fatsize & 0xFF;         //Sectors per FAT
-            gDataBuffer[23] = (fatsize >> 8) & 0xFF;
-            disk->fatsize = fatsize;
-            gDataBuffer[24] = 0x3F;           //Sectors per track
-            gDataBuffer[25] = 0x00;
-            gDataBuffer[26] = 0xFF;         //Number of heads
-            gDataBuffer[27] = 0x00;
-            // Hidden sectors = sectors between the MBR and the boot sector
-            gDataBuffer[28] = (BYTE)(disk->firsts & 0xFF);
-            gDataBuffer[29] = (BYTE)((disk->firsts / 0x100) & 0xFF);
-            gDataBuffer[30] = (BYTE)((disk->firsts / 0x10000) & 0xFF);
-            gDataBuffer[31] = (BYTE)((disk->firsts / 0x1000000) & 0xFF);
-            // Total Sectors = same as sectors in the partition from MBR
-            gDataBuffer[32] = (BYTE)(secCount & 0xFF);
-            gDataBuffer[33] = (BYTE)((secCount / 0x100) & 0xFF);
-            gDataBuffer[34] = (BYTE)((secCount / 0x10000) & 0xFF);
-            gDataBuffer[35] = (BYTE)((secCount / 0x1000000) & 0xFF);
-            gDataBuffer[36] = 0x00;         // Physical drive number
-            gDataBuffer[37] = 0x00;         // Reserved (current head)
-            gDataBuffer[38] = 0x29;         // Signature code
-            gDataBuffer[39] = (BYTE)(serialNumber & 0xFF);
-            gDataBuffer[40] = (BYTE)((serialNumber / 0x100) & 0xFF);
-            gDataBuffer[41] = (BYTE)((serialNumber / 0x10000) & 0xFF);
-            gDataBuffer[42] = (BYTE)((serialNumber / 0x1000000) & 0xFF);
-            // Volume ID
-            if (volumeID != NULL)
+
+            if (disk->type == FAT12 || disk->type == FAT16)
             {
-                for (Index = 0; (*(volumeID + Index) != 0) && (Index < 11); Index++)
+                gDataBuffer[14] = 0x08;         //Reserved sector count
+                gDataBuffer[15] = 0x00;
+                disk->fat = 0x08 + disk->firsts;
+
+                gDataBuffer[16] = 0x02;         //number of FATs
+
+                gDataBuffer[17] = 0x00;          //Max number of root directory entries - 512 files allowed
+                gDataBuffer[18] = 0x02;
+
+                gDataBuffer[19] = 0x00;         //total sectors
+                gDataBuffer[20] = 0x00;
+
+                gDataBuffer[21] = 0xF8;         //Media Descriptor
+
+                gDataBuffer[22] = fatsize & 0xFF;         //Sectors per FAT
+                gDataBuffer[23] = (fatsize >> 8) & 0xFF;
+
+                gDataBuffer[24] = 0x3F;           //Sectors per track
+                gDataBuffer[25] = 0x00;
+    
+                gDataBuffer[26] = 0xFF;         //Number of heads
+                gDataBuffer[27] = 0x00;
+    
+                // Hidden sectors = sectors between the MBR and the boot sector
+                gDataBuffer[28] = (BYTE)(disk->firsts & 0xFF);
+                gDataBuffer[29] = (BYTE)((disk->firsts / 0x100) & 0xFF);
+                gDataBuffer[30] = (BYTE)((disk->firsts / 0x10000) & 0xFF);
+                gDataBuffer[31] = (BYTE)((disk->firsts / 0x1000000) & 0xFF);
+    
+                // Total Sectors = same as sectors in the partition from MBR
+                gDataBuffer[32] = (BYTE)(secCount & 0xFF);
+                gDataBuffer[33] = (BYTE)((secCount / 0x100) & 0xFF);
+                gDataBuffer[34] = (BYTE)((secCount / 0x10000) & 0xFF);
+                gDataBuffer[35] = (BYTE)((secCount / 0x1000000) & 0xFF);
+
+                gDataBuffer[36] = 0x00;         // Physical drive number
+
+                gDataBuffer[37] = 0x00;         // Reserved (current head)
+
+                gDataBuffer[38] = 0x29;         // Signature code
+
+                gDataBuffer[39] = (BYTE)(serialNumber & 0xFF);
+                gDataBuffer[40] = (BYTE)((serialNumber / 0x100) & 0xFF);
+                gDataBuffer[41] = (BYTE)((serialNumber / 0x10000) & 0xFF);
+                gDataBuffer[42] = (BYTE)((serialNumber / 0x1000000) & 0xFF);
+
+                // Volume ID
+                if (volumeID != NULL)
                 {
-                    gDataBuffer[Index + 43] = *(volumeID + Index);
+                    for (Index = 0; (*(volumeID + Index) != 0) && (Index < 11); Index++)
+                    {
+                        gDataBuffer[Index + 43] = *(volumeID + Index);
+                    }
+                    while (Index < 11)
+                    {
+                        gDataBuffer[43 + Index++] = 0x20;
+                    }
                 }
-                while (Index < 11)
+                else
                 {
-                    gDataBuffer[43 + Index++] = 0x20;
+                    for (Index = 0; Index < 11; Index++)
+                    {
+                        gDataBuffer[Index+43] = 0;
+                    }
                 }
+
+                gDataBuffer[54] = 'F';
+                gDataBuffer[55] = 'A';
+                gDataBuffer[56] = 'T';
+                gDataBuffer[57] = '1';
+                gDataBuffer[59] = ' ';
+                gDataBuffer[60] = ' ';
+                gDataBuffer[61] = ' ';
+
             }
-            else
+            else //FAT32
             {
-                for (Index = 0; Index < 11; Index++)
+                gDataBuffer[14] = 0x20;         //Reserved sector count
+                gDataBuffer[15] = 0x00;
+                disk->fat = 0x20 + disk->firsts;
+
+                gDataBuffer[16] = 0x02;         //number of FATs
+
+                gDataBuffer[17] = 0x00;          //Max number of root directory entries - 512 files allowed
+                gDataBuffer[18] = 0x00;
+
+                gDataBuffer[19] = 0x00;         //total sectors
+                gDataBuffer[20] = 0x00;
+
+                gDataBuffer[21] = 0xF8;         //Media Descriptor
+
+                gDataBuffer[22] = 0x00;         //Sectors per FAT
+                gDataBuffer[23] = 0x00;
+
+                gDataBuffer[24] = 0x3F;         //Sectors per track
+                gDataBuffer[25] = 0x00;
+    
+                gDataBuffer[26] = 0xFF;         //Number of heads
+                gDataBuffer[27] = 0x00;
+    
+                // Hidden sectors = sectors between the MBR and the boot sector
+                gDataBuffer[28] = (BYTE)(disk->firsts & 0xFF);
+                gDataBuffer[29] = (BYTE)((disk->firsts / 0x100) & 0xFF);
+                gDataBuffer[30] = (BYTE)((disk->firsts / 0x10000) & 0xFF);
+                gDataBuffer[31] = (BYTE)((disk->firsts / 0x1000000) & 0xFF);
+    
+                // Total Sectors = same as sectors in the partition from MBR
+                gDataBuffer[32] = (BYTE)(secCount & 0xFF);
+                gDataBuffer[33] = (BYTE)((secCount / 0x100) & 0xFF);
+                gDataBuffer[34] = (BYTE)((secCount / 0x10000) & 0xFF);
+                gDataBuffer[35] = (BYTE)((secCount / 0x1000000) & 0xFF);
+
+                gDataBuffer[36] = fatsize & 0xFF;         //Sectors per FAT
+                gDataBuffer[37] = (fatsize >>  8) & 0xFF;
+                gDataBuffer[38] = (fatsize >> 16) & 0xFF;         
+                gDataBuffer[39] = (fatsize >> 24) & 0xFF;
+
+                gDataBuffer[40] = 0x00;         //Active FAT
+                gDataBuffer[41] = 0x00;
+
+                gDataBuffer[42] = 0x00;         //File System version  
+                gDataBuffer[43] = 0x00;
+
+                gDataBuffer[44] = 0x02;         //First cluster of the root directory
+                gDataBuffer[45] = 0x00;
+                gDataBuffer[46] = 0x00;
+                gDataBuffer[47] = 0x00;
+
+                gDataBuffer[48] = 0x01;         //FSInfo
+                gDataBuffer[49] = 0x00;
+
+                gDataBuffer[50] = 0x00;         //Backup Boot Sector
+                gDataBuffer[51] = 0x00;
+
+                gDataBuffer[52] = 0x00;         //Reserved for future expansion
+                gDataBuffer[53] = 0x00;
+                gDataBuffer[54] = 0x00;                   
+                gDataBuffer[55] = 0x00;
+                gDataBuffer[56] = 0x00;                   
+                gDataBuffer[57] = 0x00;
+                gDataBuffer[58] = 0x00;                   
+                gDataBuffer[59] = 0x00;
+                gDataBuffer[60] = 0x00;                   
+                gDataBuffer[61] = 0x00;
+                gDataBuffer[62] = 0x00;                   
+                gDataBuffer[63] = 0x00;
+
+                gDataBuffer[64] = 0x00;         // Physical drive number
+
+                gDataBuffer[65] = 0x00;         // Reserved (current head)
+
+                gDataBuffer[66] = 0x29;         // Signature code
+
+                gDataBuffer[67] = (BYTE)(serialNumber & 0xFF);
+                gDataBuffer[68] = (BYTE)((serialNumber / 0x100) & 0xFF);
+                gDataBuffer[69] = (BYTE)((serialNumber / 0x10000) & 0xFF);
+                gDataBuffer[70] = (BYTE)((serialNumber / 0x1000000) & 0xFF);
+
+                // Volume ID
+                if (volumeID != NULL)
                 {
-                    gDataBuffer[Index+43] = 0;
+                    for (Index = 0; (*(volumeID + Index) != 0) && (Index < 11); Index++)
+                    {
+                        gDataBuffer[Index + 71] = *(volumeID + Index);
+                    }
+                    while (Index < 11)
+                    {
+                        gDataBuffer[71 + Index++] = 0x20;
+                    }
                 }
+                else
+                {
+                    for (Index = 0; Index < 11; Index++)
+                    {
+                        gDataBuffer[Index+71] = 0;
+                    }
+                }
+
+                gDataBuffer[82] = 'F';
+                gDataBuffer[83] = 'A';
+                gDataBuffer[84] = 'T';
+                gDataBuffer[85] = '3';
+                gDataBuffer[86] = '2';
+                gDataBuffer[87] = ' ';
+                gDataBuffer[88] = ' ';
+                gDataBuffer[89] = ' ';
+
+
             }
-            gDataBuffer[54] = 'F';
-            gDataBuffer[55] = 'A';
-            gDataBuffer[56] = 'T';
-            gDataBuffer[57] = '1';
-            gDataBuffer[59] = ' ';
-            gDataBuffer[60] = ' ';
-            gDataBuffer[61] = ' ';
+
 #ifdef __18CXX
             // C18 can't reference a value greater than 256
             // using an array name pointer
@@ -1638,66 +1870,140 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
 
     // Erase the FAT
     memset (gDataBuffer, 0x00, MEDIA_SECTOR_SIZE);
-    gDataBuffer[0] = 0xF8;
-    gDataBuffer[1] = 0xFF;
-    gDataBuffer[2] = 0xFF;
-    if (disk->type == FAT16)
+
+    if (disk->type == FAT32)
+    {
+        gDataBuffer[0] = 0xF8;          //BPB_Media byte value in its low 8 bits, and all other bits are set to 1
+        gDataBuffer[1] = 0xFF;
+        gDataBuffer[2] = 0xFF;
         gDataBuffer[3] = 0xFF;
 
-    for (j = disk->fatcopy - 1; j != 0xFFFF; j--)
-    {
-        if (MDD_SectorWrite (disk->fat + (j * disk->fatsize), gDataBuffer, FALSE) == FALSE)
-            return EOF;
-    }
+        gDataBuffer[4] = 0x00;          //Disk is clean and no read/write errors were encountered
+        gDataBuffer[5] = 0x00;
+        gDataBuffer[6] = 0x00;
+        gDataBuffer[7] = 0x0C;
 
-    memset (gDataBuffer, 0x00, 4);
+        gDataBuffer[8]  = 0xFF;         //Root Directory EOF  
+        gDataBuffer[9]  = 0xFF;
+        gDataBuffer[10] = 0xFF;
+        gDataBuffer[11] = 0xFF;
 
-    for (Index = disk->fat + 1; Index < (disk->fat + disk->fatsize); Index++)
-    {
         for (j = disk->fatcopy - 1; j != 0xFFFF; j--)
         {
-            if (MDD_SectorWrite (Index + (j * disk->fatsize), gDataBuffer, FALSE) == FALSE)
+            if (MDD_SectorWrite (disk->fat + (j * disk->fatsize), gDataBuffer, FALSE) == FALSE)
                 return EOF;
         }
-    }
-
-    // Erase the root directory
-    RootDirSectors = ((disk->maxroot * 32) + (disk->sectorSize - 1)) / disk->sectorSize;
-
-    for (Index = 1; Index < RootDirSectors; Index++)
-    {
-        if (MDD_SectorWrite (disk->root + Index, gDataBuffer, FALSE) == FALSE)
-            return EOF;
-    }
-
-    if (volumeID != NULL)
-    {
-        // Create a drive name entry in the root dir
-        Index = 0;
-        while ((*(volumeID + Index) != 0) && (Index < 11))
+    
+        memset (gDataBuffer, 0x00, 12);
+    
+        for (Index = disk->fat + 1; Index < (disk->fat + disk->fatsize); Index++)
         {
-            gDataBuffer[Index] = *(volumeID + Index);
-            Index++;
+            for (j = disk->fatcopy - 1; j != 0xFFFF; j--)
+            {
+                if (MDD_SectorWrite (Index + (j * disk->fatsize), gDataBuffer, FALSE) == FALSE)
+                    return EOF;
+            }
         }
-        while (Index < 11)
+    
+        // Erase the root directory
+        for (Index = 1; Index < disk->SecPerClus; Index++)
         {
-            gDataBuffer[Index++] = ' ';
+            if (MDD_SectorWrite (disk->root + Index, gDataBuffer, FALSE) == FALSE)
+                return EOF;
         }
-        gDataBuffer[11] = 0x08;
-        gDataBuffer[17] = 0x11;
-        gDataBuffer[19] = 0x11;
-        gDataBuffer[23] = 0x11;
-
-        if (MDD_SectorWrite (disk->root, gDataBuffer, FALSE) == FALSE)
-            return EOF;
+    
+        if (volumeID != NULL)
+        {
+            // Create a drive name entry in the root dir
+            Index = 0;
+            while ((*(volumeID + Index) != 0) && (Index < 11))
+            {
+                gDataBuffer[Index] = *(volumeID + Index);
+                Index++;
+            }
+            while (Index < 11)
+            {
+                gDataBuffer[Index++] = ' ';
+            }
+            gDataBuffer[11] = 0x08;
+            gDataBuffer[17] = 0x11;
+            gDataBuffer[19] = 0x11;
+            gDataBuffer[23] = 0x11;
+    
+            if (MDD_SectorWrite (disk->root, gDataBuffer, FALSE) == FALSE)
+                return EOF;
+        }
+        else
+        {
+            if (MDD_SectorWrite (disk->root, gDataBuffer, FALSE) == FALSE)
+                return EOF;
+        }
+    
+        return 0;
     }
     else
     {
-        if (MDD_SectorWrite (disk->root, gDataBuffer, FALSE) == FALSE)
-            return EOF;
+        gDataBuffer[0] = 0xF8;
+        gDataBuffer[1] = 0xFF;
+        gDataBuffer[2] = 0xFF;
+        if (disk->type == FAT16)
+            gDataBuffer[3] = 0xFF;
+    
+        for (j = disk->fatcopy - 1; j != 0xFFFF; j--)
+        {
+            if (MDD_SectorWrite (disk->fat + (j * disk->fatsize), gDataBuffer, FALSE) == FALSE)
+                return EOF;
+        }
+    
+        memset (gDataBuffer, 0x00, 4);
+    
+        for (Index = disk->fat + 1; Index < (disk->fat + disk->fatsize); Index++)
+        {
+            for (j = disk->fatcopy - 1; j != 0xFFFF; j--)
+            {
+                if (MDD_SectorWrite (Index + (j * disk->fatsize), gDataBuffer, FALSE) == FALSE)
+                    return EOF;
+            }
+        }
+    
+        // Erase the root directory
+        RootDirSectors = ((disk->maxroot * 32) + (disk->sectorSize - 1)) / disk->sectorSize;
+    
+        for (Index = 1; Index < RootDirSectors; Index++)
+        {
+            if (MDD_SectorWrite (disk->root + Index, gDataBuffer, FALSE) == FALSE)
+                return EOF;
+        }
+    
+        if (volumeID != NULL)
+        {
+            // Create a drive name entry in the root dir
+            Index = 0;
+            while ((*(volumeID + Index) != 0) && (Index < 11))
+            {
+                gDataBuffer[Index] = *(volumeID + Index);
+                Index++;
+            }
+            while (Index < 11)
+            {
+                gDataBuffer[Index++] = ' ';
+            }
+            gDataBuffer[11] = 0x08;
+            gDataBuffer[17] = 0x11;
+            gDataBuffer[19] = 0x11;
+            gDataBuffer[23] = 0x11;
+    
+            if (MDD_SectorWrite (disk->root, gDataBuffer, FALSE) == FALSE)
+                return EOF;
+        }
+        else
+        {
+            if (MDD_SectorWrite (disk->root, gDataBuffer, FALSE) == FALSE)
+                return EOF;
+        }
+    
+        return 0;
     }
-
-    return 0;
 }
 #endif
 #endif
@@ -1819,14 +2125,14 @@ BYTE FAT_erase_cluster_chain (DWORD cluster, DISK * dsk)
             c2 =  LAST_CLUSTER_FAT32;
             break;
 #endif
-        case FAT16:
-            ClusterFailValue = CLUSTER_FAIL_FAT16;
-            c2 =  LAST_CLUSTER_FAT16;
-            break;
-
         case FAT12:
             ClusterFailValue = CLUSTER_FAIL_FAT16; // FAT16 value itself
             c2 =  LAST_CLUSTER_FAT12;
+            break;
+        case FAT16:
+        default:
+            ClusterFailValue = CLUSTER_FAIL_FAT16;
+            c2 =  LAST_CLUSTER_FAT16;
             break;
     }
 
@@ -1934,6 +2240,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
 #endif
         case FAT12:
         case FAT16:
+        default:
             // if its the root its not cluster based
             if(cluster != 0)
                 offset2  = offset2 % (dsk->SecPerClus);   // figure out the offset
@@ -2701,12 +3008,13 @@ DWORD FATfindEmptyCluster(FILEOBJ fo)
             ClusterFailValue = CLUSTER_FAIL_FAT32;
             break;
 #endif
-        case FAT16:
-            EndClusterLimit = END_CLUSTER_FAT16;
-            ClusterFailValue = CLUSTER_FAIL_FAT16;
-            break;
         case FAT12:
             EndClusterLimit = END_CLUSTER_FAT12;
+            ClusterFailValue = CLUSTER_FAIL_FAT16;
+            break;
+        case FAT16:
+        default:
+            EndClusterLimit = END_CLUSTER_FAT16;
             ClusterFailValue = CLUSTER_FAIL_FAT16;
             break;
     }
@@ -4563,6 +4871,7 @@ DWORD Cluster2Sector(DISK * dsk, DWORD cluster)
 #endif
         case FAT12:
         case FAT16:
+        default:
             // The root dir takes up cluster 0 and 1
             if(cluster == 0 ||cluster == 1)
                 sector = dsk->root + cluster;
@@ -5679,7 +5988,7 @@ DWORD ReadFAT (DISK *dsk, DWORD ccls)
 {
     BYTE q;
     DWORD p, l;  // "l" is the sector Address
-    DWORD c, d, ClusterFailValue,LastClusterLimit;   // ClusterEntries
+    DWORD c = 0, d, ClusterFailValue,LastClusterLimit;   // ClusterEntries
 
     gBufferZeroed = FALSE;
 
@@ -5689,6 +5998,7 @@ DWORD ReadFAT (DISK *dsk, DWORD ccls)
 #ifdef SUPPORT_FAT32 // If FAT32 supported.
         case FAT32:
             p = (DWORD)ccls * 4;
+            q = 0; // "q" not used for FAT32, only initialized to remove a warning
             ClusterFailValue = CLUSTER_FAIL_FAT32;
             LastClusterLimit = LAST_CLUSTER_FAT32;
             break;
@@ -5700,9 +6010,10 @@ DWORD ReadFAT (DISK *dsk, DWORD ccls)
             ClusterFailValue = CLUSTER_FAIL_FAT16;
             LastClusterLimit = LAST_CLUSTER_FAT12;
             break;
-        default:
         case FAT16:
+        default:
             p = (DWORD)ccls *2;     // Mulby 2 to find cluster pos in FAT
+            q = 0; // "q" not used for FAT16, only initialized to remove a warning
             ClusterFailValue = CLUSTER_FAIL_FAT16;
             LastClusterLimit = LAST_CLUSTER_FAT16;
             break;
@@ -5866,8 +6177,9 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
             ClusterFailValue = CLUSTER_FAIL_FAT32;
             break;
 #endif
-        case FAT16:
         case FAT12:
+        case FAT16:
+        default:
             ClusterFailValue = CLUSTER_FAIL_FAT16;
             break;
     }
@@ -5879,8 +6191,12 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
     if (forceWrite)
     {
         for (i = 0, li = gLastFATSectorRead; i < dsk->fatcopy; i++, li += dsk->fatsize)
-            if (!MDD_SectorWrite (gLastFATSectorRead, gFATBuffer, FALSE))
+        {
+            if (!MDD_SectorWrite (li, gFATBuffer, FALSE))
+            {
                 return ClusterFailValue;
+            }
+        }
 
         gNeedFATWrite = FALSE;
 
@@ -5893,6 +6209,7 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
 #ifdef SUPPORT_FAT32 // If FAT32 supported.
         case FAT32:
             p = (DWORD)ccls *4;   // "p" is the position in "gFATBuffer" for corresponding cluster.
+            q = 0;      // "q" not used for FAT32, only initialized to remove a warning
             break;
 #endif
         case FAT12:
@@ -5900,9 +6217,10 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
             q = p & 1;   // Odd or even?
             p >>= 1;
             break;
-        default:
         case FAT16:
+        default:
             p = (DWORD) ccls *2;   // "p" is the position in "gFATBuffer" for corresponding cluster.
+            q = 0;      // "q" not used for FAT16, only initialized to remove a warning
             break;
     }
 
@@ -5916,8 +6234,12 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
         if (gNeedFATWrite)
         {
             for (i = 0, li = gLastFATSectorRead; i < dsk->fatcopy; i++, li += dsk->fatsize)
-                if (!MDD_SectorWrite (gLastFATSectorRead, gFATBuffer, FALSE))
+            {
+                if (!MDD_SectorWrite (li, gFATBuffer, FALSE))
+                {
                     return ClusterFailValue;
+                }
+            }
 
             gNeedFATWrite = FALSE;
         }
@@ -5929,20 +6251,23 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
             return ClusterFailValue;
         }
         else
+        {
             gLastFATSectorRead = l;
+        }
     }
 
 #ifdef SUPPORT_FAT32 // If FAT32 supported.
     if (dsk->type == FAT32)  // Refer page 16 of FAT requirement.
     {
-        RAMwrite (gFATBuffer, p,   ((value&0x000000ff)));         // lsb,1st byte of cluster value
-        RAMwrite (gFATBuffer, p+1, ((value&0x0000ff00) >> 8));
-        RAMwrite (gFATBuffer, p+2, ((value&0x00ff0000) >> 16));
-        RAMwrite (gFATBuffer, p+3, ((value&0x0f000000) >> 24));   // the MSB nibble is supposed to be "0" in FAT32. So mask it.
+        RAMwrite (gFATBuffer, p,   ((value & 0x000000ff)));         // lsb,1st byte of cluster value
+        RAMwrite (gFATBuffer, p+1, ((value & 0x0000ff00) >> 8));
+        RAMwrite (gFATBuffer, p+2, ((value & 0x00ff0000) >> 16));
+        RAMwrite (gFATBuffer, p+3, ((value & 0x0f000000) >> 24));   // the MSB nibble is supposed to be "0" in FAT32. So mask it.
     }
     else
+    
 #endif
-
+    {
         if (dsk->type == FAT16)
         {
             RAMwrite (gFATBuffer, p, value);            //lsB
@@ -5971,6 +6296,7 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
                 // call this function to update the FAT on the card
                 if (WriteFAT (dsk, 0,0,TRUE))
                     return ClusterFailValue;
+
                 // Load the next sector
                 if (!MDD_SectorRead (l +1, gFATBuffer))
                 {
@@ -5978,7 +6304,9 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
                     return ClusterFailValue;
                 }
                 else
+                {
                     gLastFATSectorRead = l + 1;
+                }
             }
 
             // Get the second byte of the table entry
@@ -5993,7 +6321,7 @@ DWORD WriteFAT (DISK *dsk, DWORD ccls, DWORD value, BYTE forceWrite)
             }
             RAMwrite (gFATBuffer, p, c);
         }
-
+    }
     gNeedFATWrite = TRUE;
 
     return 0;

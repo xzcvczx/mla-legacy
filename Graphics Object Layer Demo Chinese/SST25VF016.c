@@ -74,7 +74,7 @@ void SST25Init(void)
         #endif
 
     // Initialize SPI
-    #ifdef __PIC32MX
+        #ifdef __PIC32MX
     SPI2STAT = 0;
     SPI2CON = 0;
     SPI2BRG = 0;
@@ -84,8 +84,7 @@ void SST25Init(void)
     SPI2CONbits.SMP = 0;
     SPI2BRG = 1;
     SPI2CONbits.ON = 1;
-    #else
-        #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3)
+        #elif (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3)
     SPI2STAT = 0;
     SPI2CON1 = 0x001b;
     SPI2CON1bits.MSTEN = 1;
@@ -95,7 +94,7 @@ void SST25Init(void)
     SPI2CON1bits.CKP = 1;
     SPI2CON1bits.SMP = 1;
     SPI2STATbits.SPIEN = 1;
-        #elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+        #elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD) 
     SPI2STAT = 0;
 	SPI2CON1bits.SPRE = 7;
 	SPI2CON1bits.PPRE = 0;
@@ -107,15 +106,18 @@ void SST25Init(void)
     SPI2CON1bits.SMP = 1;
     SPI2STATbits.SPIEN = 1;
         #endif
-	#endif
     // Set IOs directions for SST25 SPI
-    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3)
+        #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3)
     SST25_CS_LAT = 1;
     SST25_CS_TRIS = 0;
     SST25_SCK_TRIS = 0;
     SST25_SDO_TRIS = 0;
     SST25_SDI_TRIS = 1;
-	#elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+	#if defined(__PIC24FJ256GB210__)
+		SST25_SDI_ANS = 0;
+	#endif
+
+        #elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD) 
     SST25_CS_LAT = 1;
     SST25_CS_TRIS = 0;
 	SST25_SDI_ANS = 0;
@@ -123,14 +125,14 @@ void SST25Init(void)
     SST25_SCK_TRIS = 0;
     SST25_SDO_TRIS = 0;
     SST25_SDI_TRIS = 1;
-	#endif
+	    #endif
 
         #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
     AD1PCFGL = 0xFFFF;
     RPOR9bits.RP18R = 11;                   // assign RP18 for SCK2
     RPOR8bits.RP16R = 10;                   // assign RP16 for SDO2
     RPINR22bits.SDI2R = 17;                 // assign RP17 for SDI2	
-        #elif defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__)
+        #elif defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__)|| defined(__PIC24FJ256GB210__)
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
     RPOR10bits.RP21R = 11;                  // assign RP21 for SCK2
     RPOR9bits.RP19R = 10;                   // assign RP19 for SDO2

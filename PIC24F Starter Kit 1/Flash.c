@@ -198,8 +198,11 @@ void FlashDisplayDirectory( void )
     FlashDisplayFiles( FILENAME_IS_FILE );
 
     // Focus and select the first item in the list, and set the range and position of the slider.
-    LbSetFocusedItem( pFlashFiles, 1 );
-    LbSetSel( pFlashFiles, pFlashFiles->pItemList );  // This does reverse video
+    if(pFlashFiles->pItemList != NULL)
+    {
+        LbSetFocusedItem( pFlashFiles, 1 );
+        LbSetSel( pFlashFiles, pFlashFiles->pItemList );  // This does reverse video
+    }
 
     SldSetRange( pSlider, LbGetCount(pFlashFiles) );
     SldSetPos(   pSlider, LbGetCount(pFlashFiles)-1 );

@@ -453,7 +453,7 @@ BOOL BLMedia_LoadFile (  char *file_name )
         numSectorsRead = 0;
         numRecordsProcessed = 0;
 
-        for(totalAddress.Val=PROGRAM_FLASH_BASE;(totalAddress.Val/1)<(PROGRAM_FLASH_BASE+PROGRAM_FLASH_LENGTH);totalAddress.Val+=(FLASH_BLOCK_SIZE))
+        for(totalAddress.Val=PROGRAM_FLASH_BASE;(totalAddress.Val/1)<((unsigned long)PROGRAM_FLASH_BASE+(unsigned long)PROGRAM_FLASH_LENGTH);totalAddress.Val+=(FLASH_BLOCK_SIZE))
         {
         	NVMCON = 0x4042;				//Erase page on next WR
     
@@ -589,7 +589,7 @@ BOOL BLMedia_LoadFile (  char *file_name )
                                 break;
                             }
 
-                            if(totalAddress.Val >= (PROGRAM_FLASH_BASE + PROGRAM_FLASH_LENGTH))
+                            if(totalAddress.Val >= ((unsigned long)PROGRAM_FLASH_BASE + (unsigned long)PROGRAM_FLASH_LENGTH))
                             {
                                 break;
                             }

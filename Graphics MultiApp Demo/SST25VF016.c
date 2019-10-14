@@ -103,7 +103,7 @@ void SST25Init(void)
         #elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
     SPI2STAT = 0;
 	SPI2CON1bits.SPRE = 7;
-	SPI2CON1bits.PPRE = 2;
+	SPI2CON1bits.PPRE = 3;
     SPI2CON1bits.MSTEN = 1;
     SPI2CON2 = 0;
     SPI2CON1bits.MODE16 = 0;
@@ -136,8 +136,8 @@ void SST25Init(void)
     RPOR9bits.RP18R = 11;                   // assign RP18 for SCK2
     RPOR8bits.RP16R = 10;                   // assign RP16 for SDO2
     RPINR22bits.SDI2R = 17;                 // assign RP17 for SDI2	
-        #elif defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__)
-    __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
+        #elif defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined(__PIC24FJ256GB210__) 
+    __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS 
     RPOR10bits.RP21R = 11;                  // assign RP21 for SCK2
     RPOR9bits.RP19R = 10;                   // assign RP19 for SDO2
     RPINR22bits.SDI2R = 26;                 // assign RP26 for SDI2

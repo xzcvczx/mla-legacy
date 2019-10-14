@@ -86,6 +86,10 @@ echo Removing *.ncb files...
 del *.ncb /f /q /s
 echo.
 
+echo Removing *.suo files...
+del *.suo /f /q /s
+echo.
+
 echo Removing *.MCHP-MAIN.* files...
 del *.MCHP-MAIN.* /f /q /s
 echo.
@@ -93,6 +97,8 @@ echo.
 rd Objects /S /Q
 
 rd Debug /S /Q
+
+rd Release /S /Q
 
 echo Removing *.suo files...
 del *.suo /f /q /s

@@ -661,20 +661,5 @@ WORD    GetPixel(SHORT x, SHORT y);
 ********************************************************************/
     #define SetPalette(colorNum, color)
 
-/*********************************************************************
-* Function:  void  DelayMs(WORD time)
-*
-* Overview: Delays execution on time specified in milliseconds.
-*           The delay is correct only for 16MIPS.
-*
-* PreCondition: none
-*
-* Input: time - Delay in milliseconds.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void    DelayMs(WORD time);
+
 #endif // _SSD1906_H

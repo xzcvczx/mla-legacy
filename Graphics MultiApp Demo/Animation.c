@@ -293,7 +293,7 @@ WORD MsgAnimation(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
                 if(GetState((BUTTON *)GOLFindObject(ID_BUTTON_C), BTN_PRESSED))
                 {
                     value = MtrGetVal(pMeter);      // get current value
-                    MtrSetVal(pMeter, value - 1);
+                    MtrDecVal(pMeter, 1);
                     SetState(pMeter, MTR_DRAW_UPDATE);
                 }
 
@@ -303,7 +303,7 @@ WORD MsgAnimation(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
                 if(GetState((BUTTON *)GOLFindObject(ID_BUTTON_D), BTN_PRESSED))
                 {
                     value = MtrGetVal(pMeter);      // get current value
-                    MtrSetVal(pMeter, value + 1);
+                    MtrIncVal(pMeter, 1);
                     SetState(pMeter, MTR_DRAW_UPDATE);
                 }
 

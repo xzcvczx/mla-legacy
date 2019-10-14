@@ -42,6 +42,7 @@ Author                 Date           Comments
 Pradeep Budagutta    25-Jun-2008    First release
 *******************************************************************************/
     #include "GenericTypeDefs.h"
+    #include "TimeDelay.h"
     #include "FlashImageData.h"
 
 size_t  FlashImage_fread(void *ptr, size_t size, size_t n, void *stream);

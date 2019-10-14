@@ -65,7 +65,6 @@
             #if defined(PIC32MX795F512L_PIM)
                 #include "HardwareProfile - PIC32MX795F512L PIM.h"
             #elif defined(PIC32_USB_STARTER_KIT)
-                //PIC32 USB Starter Kit II
                 #include "HardwareProfile - PIC32 USB Starter Kit.h"
             #endif
         #endif
@@ -96,6 +95,8 @@
             #else
                 #include "HardwareProfile - PIC18F46J50 PIM.h"
             #endif
+        #elif defined(__18F47J53)
+            #include "HardwareProfile - PIC18F47J53 PIM.h"
         #endif
     #endif
 #endif

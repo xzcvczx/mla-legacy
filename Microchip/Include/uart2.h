@@ -14,9 +14,10 @@ Author                Date      Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Anton Alkhimenok   18-Oct-2005
 KO                 11-Oct-2006  v1.0
-Paolo Tamayo	   17-Feb-2009  Added UART2Char2Hex(), UART2Hex2Char(), 
+Anton Alkhimenok   17-Feb-2009  Added UART2Char2Hex(), UART2Hex2Char(), 
 									  UART2ClearError(), UART2DataReceived()
-
+PAT				   27-Jan-2010  Added UART2GetBaudError() for dynamic checking
+								of baud rate percentage error.
 ********************************************************************************
 Software License Agreement
 
@@ -46,6 +47,22 @@ BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 //******************************************************************************
 // Function Prototypes
 //******************************************************************************
+
+/*******************************************************************************
+Function: UART2GetBaudError()
+
+Precondition:
+    None.
+
+Overview:
+    This routine checks the UART baud rate error percentage and returns it.
+
+Input: None.
+
+Output: Returns the baud rate error in percent.
+
+*******************************************************************************/
+char UART2GetBaudError();
 
 /*********************************************************************
 Function: char UART2GetChar()

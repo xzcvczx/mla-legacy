@@ -37,11 +37,11 @@ Description:
 //DOM-IGNORE-BEGIN
 /*******************************************************************************
 
-* FileName:        usb_common.h
-* Dependencies:    See included files, below.
-* Processor:       PIC18/PIC24/PIC32MX microcontrollers with USB module
-* Compiler:        C18 v3.13+/C30 v2.01+/C32 v0.00.18+
-* Company:         Microchip Technology, Inc.
+ FileName:        usb_common.h
+ Dependencies:    See included files, below.
+ Processor:       PIC18/PIC24/PIC32MX microcontrollers with USB module
+ Compiler:        C18 v3.13+/C30 v2.01+/C32 v0.00.18+
+ Company:         Microchip Technology, Inc.
 
 Software License Agreement
 
@@ -72,6 +72,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev    Description
   ----   -----------
   2.6    Moved many of the USB events
+  2.6a   Changed the limit of USB_EVENT from UINT_MAX to INT_MAX
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -347,7 +348,7 @@ typedef enum
 
     // There was a transfer error on the USB.  The data associated with this
     // event is of data type HOST_TRANSFER_DATA.
-    EVENT_BUS_ERROR     = UINT_MAX  
+    EVENT_BUS_ERROR     = INT_MAX  
 
 } USB_EVENT;
 

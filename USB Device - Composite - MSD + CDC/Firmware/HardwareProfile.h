@@ -96,6 +96,8 @@
             #else
                 #include "HardwareProfile - PIC18F46J50 PIM.h"
             #endif
+        #elif defined(__18F47J53)
+            #include "HardwareProfile - PIC18F47J53 PIM.h"
         #endif
     #endif
 #endif
