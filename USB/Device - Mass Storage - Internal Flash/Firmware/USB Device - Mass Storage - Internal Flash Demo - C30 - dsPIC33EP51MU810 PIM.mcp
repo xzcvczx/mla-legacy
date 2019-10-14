@@ -45,8 +45,10 @@ file_017=USB Stack
 file_018=USB Stack
 file_019=USB Stack
 file_020=USB Stack
-file_021=.
+file_021=USB Stack
 file_022=.
+file_023=.
+file_024=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -71,6 +73,8 @@ file_019=no
 file_020=no
 file_021=no
 file_022=no
+file_023=no
+file_024=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -93,8 +97,10 @@ file_017=no
 file_018=no
 file_019=no
 file_020=no
-file_021=yes
-file_022=yes
+file_021=no
+file_022=no
+file_023=yes
+file_024=yes
 [FILE_INFO]
 file_000=main.c
 file_001=Files.c
@@ -117,8 +123,10 @@ file_017=..\..\..\Microchip\Include\USB\usb_common.h
 file_018=..\..\..\Microchip\Include\USB\usb_device.h
 file_019=..\..\..\Microchip\Include\USB\usb_function_msd.h
 file_020=..\..\..\Microchip\USB\usb_device_local.h
-file_021=..\Getting Started - Running the Device - Mass Storage - Internal Flash.htm
-file_022=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
+file_021=..\..\..\Microchip\Include\USB\usb_hal_dspic33e.h
+file_022=HardwareProfile - dsPIC33EP512MU810 PIM.h
+file_023=..\Getting Started - Running the Device - Mass Storage - Internal Flash.htm
+file_024=..\..\..\Microchip\Help\MCHPFSUSB Library Help.chm
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

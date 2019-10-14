@@ -787,15 +787,34 @@ looking for USB devices with VID = 0x04D8 and PID = 0x0204.&nbsp; The device
 descriptor in the firmware project meant to be used with this demo uses the
 same VID/PID.&nbsp; To run the demo program the USB device with the correct
 precompiled .hex file.&nbsp; If you are connecting the device for the first
-time, Windows pops up a window asking you to install the driver for the
-device.&nbsp; When asked for the driver point it to the inf file provided along
-with the demo.&nbsp; Windows takes while to install the driver for the USB
-device that is just plugged in.&nbsp; Open the Device manager and ensure that
-the USB device is listed under the ‘Libusb Demo Devices’.&nbsp; Once the driver
-is installed hit the “Connect” button, the other pushbuttons should become
-enabled.&nbsp; If hitting the connect button has no effect, it is likely the
-USB device is either not connected, or has not been programmed with the correct
-firmware.</span></p>
+time, Windows XP and Vista pop up a window asking you to install the driver for
+the device. For Windows 7, the device will be listed as an unknown USB device
+in the device manager and will need its driver updated.&nbsp; When asked for
+the driver or updating through the device manager, point it to the inf file
+provided along with the demo.&nbsp; Windows takes a while to install the driver
+for the USB device that is just plugged in.&nbsp; Make sure the Device manager lists
+the USB device under the ‘Libusb Demo Devices’.<o:p></o:p></span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'><span
+style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>If
+a different VID/PID combination from the default is desired, then the descriptors
+in the firmware must be changed as well as the inf file. The easiest way to
+change the inf file is to use the utility provided with the LibUSB download for
+windows on the LibUSB <a href="http://www.libusb.org/wiki/libusb-win32">website</a>.
+This utility can create a new inf file based on a connected device. So make sure to
+change the VID/PID combination first in the firmware, connect the device, and
+then run the inf file creator utility. After completing the utility, a new
+signed driver with inf file is created.<o:p></o:p></span></p>
+
+<p class=MsoPlainText><o:p>&nbsp;</o:p></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>Once
+the driver is installed hit the “Connect” button, the other pushbuttons should
+become enabled.&nbsp; If hitting the connect button has no effect, it is likely
+the USB device is either not connected, or has not been programmed with the
+correct firmware.</span></p>
 
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 

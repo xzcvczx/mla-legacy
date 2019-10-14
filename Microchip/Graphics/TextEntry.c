@@ -34,11 +34,13 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Harold Serrano		10/24/08	...
- * PAT					07/01/09	Updated for 2D accelerated primitive support.
- * PAT					04/15/10	Corrected TeSetBuffer() issue on string max size.
+ * 10/24/08	    ...
+ * 07/01/09	    Updated for 2D accelerated primitive support.
+ * 04/15/10	    Corrected TeSetBuffer() issue on string max size.
+ * 12/02/11     Fix memory leak issue when TeCreateKeyMembers fails to allocate
+ *              memory for all keys.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -112,7 +114,7 @@ TEXTENTRY *TeCreate
     {
 
         //create the key members, return null if not successful
-        if(TeCreateKeyMembers(pTe, pText) == 0)
+        if(TeCreateKeyMembers(pTe, pText) == NULL)
         {
             GFX_free(pTe);
             return (NULL);
@@ -234,16 +236,16 @@ WORD TeDraw(void *pObj)
             //Draw the editbox
             GOLPanelDraw
             (
-            pTe->hdr.left,
-            pTe->hdr.top,
-            pTe->hdr.right,
-            pTe->hdr.top + GetTextHeight(pTe->pDisplayFont) + (GOL_EMBOSS_SIZE << 1),
-            0,
-            pTe->hdr.pGolScheme->Color1; ,
-        pTe->hdr.pGolScheme->EmbossDkColor,
-        pTe->hdr.pGolScheme->EmbossLtColor,
-        NULL,
-        GOL_EMBOSS_SIZE
+                pTe->hdr.left,
+                pTe->hdr.top,
+                pTe->hdr.right,
+                pTe->hdr.top + GetTextHeight(pTe->pDisplayFont) + (GOL_EMBOSS_SIZE << 1),
+                0,
+                pTe->hdr.pGolScheme->Color1,
+                pTe->hdr.pGolScheme->EmbossDkColor,
+                pTe->hdr.pGolScheme->EmbossLtColor,
+                NULL,
+                GOL_EMBOSS_SIZE
             );
 
             state = TE_DRAW_EDITBOX;
@@ -254,9 +256,7 @@ WORD TeDraw(void *pObj)
             state = TE_DRAW_KEY_INIT;
 
         /* ********************************************************************* */
-
         /*                  Update the keys                                      */
-
         /* ********************************************************************* */
         case TE_DRAW_KEY_INIT:
             te_draw_key_init_st : embossLtClr = pTe->hdr.pGolScheme->EmbossLtColor;
@@ -266,8 +266,7 @@ WORD TeDraw(void *pObj)
             // if the active key update flag is set, only one needs to be redrawn
             if((GetState(pTe, TE_DRAW) != TE_DRAW) && (pTe->pActiveKey->update == TRUE))
             {
-                CountOfKeys = (pTe->horizontalKeys * pTe->verticalKeys) -
-                1;
+                CountOfKeys = (pTe->horizontalKeys * pTe->verticalKeys) - 1;
                 pKeyTemp = pTe->pActiveKey;
             }
             else
@@ -345,10 +344,8 @@ WORD TeDraw(void *pObj)
             pKeyTemp->update = FALSE;
 
             //set the text coordinates of the drawn key
-            xText = ((pKeyTemp->left) + (pKeyTemp->right) - (pKeyTemp->textWidth)) >>
-            1;
-            yText = ((pKeyTemp->bottom) + (pKeyTemp->top) - (pKeyTemp->textHeight)) >>
-            1;
+            xText = ((pKeyTemp->left) + (pKeyTemp->right) - (pKeyTemp->textWidth)) >> 1;
+            yText = ((pKeyTemp->bottom) + (pKeyTemp->top) - (pKeyTemp->textHeight)) >> 1;
 
             //set color of text
             // if the object is disabled, draw the disabled colors
@@ -392,9 +389,7 @@ WORD TeDraw(void *pObj)
             goto te_draw_key_set_panel_st;
 
         /* ********************************************************************* */
-
         /*                  Update the displayed string                          */
-
         /* ********************************************************************* */
         case TE_UPDATE_STRING_INIT:
             te_update_string_init_st :
@@ -576,8 +571,7 @@ WORD TeTranslateMsg(void *pObj, GOL_MSG *pMsg)
         #ifdef USE_TOUCHSCREEN
 
     //find the total number of keys
-    NumberOfKeys = (pTe->horizontalKeys) *
-    (pTe->verticalKeys);
+    NumberOfKeys = (pTe->horizontalKeys) * (pTe->verticalKeys);
     param1 = pMsg->param1;
     param2 = pMsg->param2;
 
@@ -950,14 +944,11 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[])
     KEYMEMBER   *pTail = NULL;
 
     // determine starting positions of the keys
-    keyTop = pTe->hdr.top +
-    GetTextHeight(pTe->pDisplayFont) +
-    (GOL_EMBOSS_SIZE << 1);
-    keyLeft = pTe->hdr.left;    // + GOL_EMBOSS_SIZE;
+    keyTop = pTe->hdr.top + GetTextHeight(pTe->pDisplayFont) + (GOL_EMBOSS_SIZE << 1);
+    keyLeft = pTe->hdr.left;    
 
     //calculate the total number of keys, and width and height of each key
-    NumberOfKeys = pTe->horizontalKeys *
-    pTe->verticalKeys;
+    NumberOfKeys = pTe->horizontalKeys * pTe->verticalKeys;
     width = (pTe->hdr.right - keyLeft + 1) / pTe->horizontalKeys;
     height = (pTe->hdr.bottom - keyTop + 1) / pTe->verticalKeys;
 
@@ -972,7 +963,10 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[])
             //get storage for new entry
             pKl = (KEYMEMBER *)GFX_malloc(sizeof(KEYMEMBER));
             if(pKl == NULL)
+			{
+				TeDelKeyMembers(pTe);
                 return (NULL);
+			}	
             if(pTe->pHeadOfList == NULL)
                 pTe->pHeadOfList = pKl;
             if(pTail == NULL)
@@ -1012,9 +1006,9 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[])
                 // Calculate the text width & height
                 pKl->textWidth = GetTextWidth(pKl->pKeyName, pTe->hdr.pGolScheme->pFont);
                 pKl->textHeight = GetTextHeight(pTe->hdr.pGolScheme->pFont);
-            }                   //end if
-        }                       //end for	
-    }                           //end for	
+            } //end if
+        } //end for	
+    } //end for	
 
     pTail->pNextKey = NULL;
 

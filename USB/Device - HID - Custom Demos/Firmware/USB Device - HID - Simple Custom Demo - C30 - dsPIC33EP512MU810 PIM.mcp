@@ -90,7 +90,7 @@ file_011=..\..\..\Microchip\Include\USB\usb_common.h
 file_012=..\..\..\Microchip\Include\USB\usb_device.h
 file_013=..\..\..\Microchip\Include\USB\usb_function_hid.h
 file_014=..\..\..\Microchip\Include\USB\usb_hal.h
-file_015=C:\Microchip Solutions\Microchip\Include\USB\usb_hal_dspic33E.h
+file_015=..\..\..\Microchip\Include\USB\usb_hal_dspic33e.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

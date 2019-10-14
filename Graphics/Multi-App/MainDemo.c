@@ -1039,7 +1039,7 @@ void Init_CPUClocks(void)
 *
 ********************************************************************/
 #ifdef __PIC32MX__
-    #define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl4)
+    #define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl7)
 #else
     #define __T3_ISR    __attribute__((interrupt, shadow, auto_psv))
 #endif
@@ -1107,7 +1107,7 @@ void TickInit(void)
     // Initialize Timer4
     #ifdef __PIC32MX__
     OpenTimer3(T3_ON | T3_PS_1_8, TICK_PERIOD);  // enable timer to run for approximately 100 us
-    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_1); // Enable interrupt
+    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_7); // Enable interrupt
     #else
     TMR3 = 0;
     PR3 = TICK_PERIOD;							//(for approximately 100 us)

@@ -135,6 +135,7 @@ typedef struct
 *		  horizontalKeys - Number of horizontal keys 
 *		  verticalKeys	 - Number of vertical keys
 *		  pText			 - array of pointer to the custom "text" assigned by the user.
+*         pBuffer        - pointer to the buffer that holds the text to be displayed.
 *		  bufferLength	 - length of the buffer assigned by the user.
 *	      pDisplayFont   - pointer to the font image to be used on the editbox
 *	      pScheme- Pointer to the style scheme used.

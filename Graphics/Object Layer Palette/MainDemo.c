@@ -5047,7 +5047,7 @@ void ErrorTrap(XCHAR *message)
 *
 ********************************************************************/
 #ifdef __PIC32MX__
-    #define __T4_ISR    __ISR(_TIMER_4_VECTOR, ipl1)
+    #define __T4_ISR    __ISR(_TIMER_4_VECTOR, ipl7)
 #else
     #define __T4_ISR    __attribute__((interrupt, shadow, auto_psv))
 #endif
@@ -5097,7 +5097,7 @@ void TickInit(void)
     // Initialize Timer4
     #ifdef __PIC32MX__
     OpenTimer4(T4_ON | T4_PS_1_8, TICK_PERIOD);
-    ConfigIntTimer4(T4_INT_ON | T4_INT_PRIOR_1);
+    ConfigIntTimer4(T4_INT_ON | T4_INT_PRIOR_7);
     #else
     TMR4 = 0;
     PR4 = TICK_PERIOD;

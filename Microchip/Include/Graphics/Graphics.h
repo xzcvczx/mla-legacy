@@ -50,7 +50,7 @@
 
 /////////////////////// GRAPHICS_LIBRARY_VERSION /////////////////////
 // MSB is version, LSB is subversion
-    #define GRAPHICS_LIBRARY_VERSION    0x0302
+    #define GRAPHICS_LIBRARY_VERSION    0x0303
 
 ////////////////////////////// INCLUDES //////////////////////////////
     #include <stdlib.h>             // needed because of malloc()

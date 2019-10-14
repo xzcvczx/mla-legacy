@@ -441,6 +441,8 @@ typedef union __attribute__ ((packed))__BDT
     QWORD           Val;
 } BDT_ENTRY;
 
+extern volatile BDT_ENTRY *pBDTEntryOut[];
+
 // USTAT Register Layout
 typedef union __USTAT
 {

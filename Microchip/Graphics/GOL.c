@@ -562,7 +562,7 @@ WORD GOLDraw(void)
         	#ifdef USE_TRANSITION_EFFECTS
                 if(TransitionPendingStatus)
                 {
-                    #ifdef PIC24FJ256DA210_DEV_BOARD
+                    #ifdef GFX_USE_DISPLAY_CONTROLLER_MCHP_DA210
                     TransitionPendingStatus = 0;
 	                while(IsDisplayUpdatePending());
                    	GFXExecutePendingTransition(_drawbuffer, (_drawbuffer == GFX_BUFFER1)? GFX_BUFFER2: GFX_BUFFER1);

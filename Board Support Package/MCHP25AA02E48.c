@@ -36,7 +36,7 @@
  * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 06/27/11	    ...
- * 
+ * 11/30/11     Renamed DRVSPIxxx() to SPIxxx().
  *****************************************************************************/
 #include "HardwareProfile.h"
 
@@ -81,25 +81,25 @@ void MCHP25AA02E48WriteByte(BYTE data, WORD address)
 {
     MCHP25AA02E48WriteEnable();
 
-    while(!DRVSPILock(eepromInitData.channel))
+    while(!SPILock(eepromInitData.channel))
         ;
 
     DRV_SPI_Initialize(eepromInitData.channel, (DRV_SPI_INIT_DATA *)&eepromInitData);
 
     MCHP25AA02E48CSLow();
 
-    DRVSPIPut(eepromInitData.channel, EEPROM_CMD_WRITE);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, EEPROM_CMD_WRITE);
+    SPIGet(eepromInitData.channel);
 
-    DRVSPIPut(eepromInitData.channel, ((WORD_VAL) address).v[0]);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, ((WORD_VAL) address).v[0]);
+    SPIGet(eepromInitData.channel);
 
-    DRVSPIPut(eepromInitData.channel, data);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, data);
+    SPIGet(eepromInitData.channel);
 
     MCHP25AA02E48CSHigh();
 
-    DRVSPIUnLock(eepromInitData.channel);
+    SPIUnLock(eepromInitData.channel);
 
     // Wait for write end
     while(MCHP25AA02E48ReadStatus().Bits.WIP);
@@ -120,24 +120,24 @@ BYTE MCHP25AA02E48ReadByte(WORD address)
     BYTE    temp;
     
     
-    while(!DRVSPILock(eepromInitData.channel))
+    while(!SPILock(eepromInitData.channel))
         ;
 
     DRV_SPI_Initialize(eepromInitData.channel, (DRV_SPI_INIT_DATA *)&eepromInitData);
 
     MCHP25AA02E48CSLow();
 
-    DRVSPIPut(eepromInitData.channel, EEPROM_CMD_READ);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, EEPROM_CMD_READ);
+    SPIGet(eepromInitData.channel);
 
-    DRVSPIPut(eepromInitData.channel, ((WORD_VAL) address).v[0]);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, ((WORD_VAL) address).v[0]);
+    SPIGet(eepromInitData.channel);
 
-    DRVSPIPut(eepromInitData.channel, 0);
-    temp = DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, 0);
+    temp = SPIGet(eepromInitData.channel);
 
     MCHP25AA02E48CSHigh();
-    DRVSPIUnLock(eepromInitData.channel);
+    SPIUnLock(eepromInitData.channel);
 
     return (temp);
 }
@@ -194,17 +194,17 @@ WORD MCHP25AA02E48ReadWord(DWORD address)
 ************************************************************************/
 void MCHP25AA02E48WriteEnable(void)
 {
-    while(!DRVSPILock(eepromInitData.channel))
+    while(!SPILock(eepromInitData.channel))
         ;
 
     DRV_SPI_Initialize(eepromInitData.channel, (DRV_SPI_INIT_DATA *)&eepromInitData);
 
     MCHP25AA02E48CSLow();
-    DRVSPIPut(eepromInitData.channel, EEPROM_CMD_WREN);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, EEPROM_CMD_WREN);
+    SPIGet(eepromInitData.channel);
     MCHP25AA02E48CSHigh();
     
-    DRVSPIUnLock(eepromInitData.channel);
+    SPIUnLock(eepromInitData.channel);
 }
 
 /************************************************************************
@@ -221,19 +221,19 @@ union _MCHP25AA02E48Status_ MCHP25AA02E48ReadStatus(void)
 {
     BYTE    temp;
 
-    while(!DRVSPILock(eepromInitData.channel))
+    while(!SPILock(eepromInitData.channel))
         ;
 
     DRV_SPI_Initialize(eepromInitData.channel, (DRV_SPI_INIT_DATA *)&eepromInitData);
 
     MCHP25AA02E48CSLow();
-    DRVSPIPut(eepromInitData.channel, EEPROM_CMD_RDSR);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, EEPROM_CMD_RDSR);
+    SPIGet(eepromInitData.channel);
 
-    DRVSPIPut(eepromInitData.channel, 0);
-    temp = DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, 0);
+    temp = SPIGet(eepromInitData.channel);
     MCHP25AA02E48CSHigh();
-    DRVSPIUnLock(eepromInitData.channel);
+    SPIUnLock(eepromInitData.channel);
 
     return (union _MCHP25AA02E48Status_)temp;
 }
@@ -260,23 +260,23 @@ BYTE MCHP25AA02E48WriteArray(DWORD address, BYTE *pData, WORD nCount)
     // WRITE
     MCHP25AA02E48WriteEnable();
     
-    while(!DRVSPILock(eepromInitData.channel))
+    while(!SPILock(eepromInitData.channel))
         ;
 
     DRV_SPI_Initialize(eepromInitData.channel, (DRV_SPI_INIT_DATA *)&eepromInitData);
 
     MCHP25AA02E48CSLow();
 
-    DRVSPIPut(eepromInitData.channel, EEPROM_CMD_WRITE);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, EEPROM_CMD_WRITE);
+    SPIGet(eepromInitData.channel);
 
-    DRVSPIPut(eepromInitData.channel, addr.v[0]);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, addr.v[0]);
+    SPIGet(eepromInitData.channel);
 
     for(counter = 0; counter < nCount; counter++)
     {
-        DRVSPIPut(eepromInitData.channel, *pD++);
-        DRVSPIGet(eepromInitData.channel);
+        SPIPut(eepromInitData.channel, *pD++);
+        SPIGet(eepromInitData.channel);
         addr.Val++;
 
         // check for page rollover
@@ -291,16 +291,16 @@ BYTE MCHP25AA02E48WriteArray(DWORD address, BYTE *pData, WORD nCount)
             MCHP25AA02E48WriteEnable();
             MCHP25AA02E48CSLow();
 
-            DRVSPIPut(eepromInitData.channel, EEPROM_CMD_WRITE);
-            DRVSPIGet(eepromInitData.channel);
+            SPIPut(eepromInitData.channel, EEPROM_CMD_WRITE);
+            SPIGet(eepromInitData.channel);
 
-            DRVSPIPut(eepromInitData.channel, addr.v[0]);
-            DRVSPIGet(eepromInitData.channel);
+            SPIPut(eepromInitData.channel, addr.v[0]);
+            SPIGet(eepromInitData.channel);
         }
     }
 
     MCHP25AA02E48CSHigh();
-    DRVSPIUnLock(eepromInitData.channel);
+    SPIUnLock(eepromInitData.channel);
 
     // Wait for write end
     while(MCHP25AA02E48ReadStatus().Bits.WIP);
@@ -327,27 +327,27 @@ BYTE MCHP25AA02E48WriteArray(DWORD address, BYTE *pData, WORD nCount)
 ************************************************************************/
 void MCHP25AA02E48ReadArray(WORD address, BYTE *pData, WORD nCount)
 {
-    while(!DRVSPILock(eepromInitData.channel))
+    while(!SPILock(eepromInitData.channel))
         ;
 
     DRV_SPI_Initialize(eepromInitData.channel, (DRV_SPI_INIT_DATA *)&eepromInitData);
 
     MCHP25AA02E48CSLow();
 
-    DRVSPIPut(eepromInitData.channel, EEPROM_CMD_READ);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, EEPROM_CMD_READ);
+    SPIGet(eepromInitData.channel);
 
-    DRVSPIPut(eepromInitData.channel, ((WORD_VAL) address).v[0]);
-    DRVSPIGet(eepromInitData.channel);
+    SPIPut(eepromInitData.channel, ((WORD_VAL) address).v[0]);
+    SPIGet(eepromInitData.channel);
 
     while(nCount--)
     {
-        DRVSPIPut(eepromInitData.channel, 0);
-        *pData++ = DRVSPIGet(eepromInitData.channel);
+        SPIPut(eepromInitData.channel, 0);
+        *pData++ = SPIGet(eepromInitData.channel);
     }
 
     MCHP25AA02E48CSHigh();
-    DRVSPIUnLock(eepromInitData.channel);
+    SPIUnLock(eepromInitData.channel);
 }
 /************************************************************************
 * Function: DWORD MCHP25AA02E48GetEUI48NodeAddress(BYTE *eui48NodeAddr)

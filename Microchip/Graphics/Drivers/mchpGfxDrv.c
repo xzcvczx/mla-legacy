@@ -9,7 +9,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -19,7 +19,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -69,6 +69,11 @@
  *                 - EPMP should not be enabled when not used.
  * 10/07/11        Modified GetImageHeight() and GetImageWidth() to support RLE
  *                 compressed images.
+ * 12/2/11         Fixed issues on the following when palette is enabled
+ *                 - PutImage4BppExt() 
+ *                 - PutImage4Bpp() 
+ *                 - PutImage1BppExt() 
+ *                 - PutImage1Bpp() 
  *****************************************************************************/
 #include "HardwareProfile.h"
    
@@ -679,7 +684,7 @@ void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
 * Note: none
 *
 ********************************************************************/
-extern inline WORD __attribute__ ((always_inline)) ROPBlockInline(DWORD srcAddr,   DWORD dstAddr,   \
+inline WORD __attribute__ ((always_inline)) ROPBlockInline(DWORD srcAddr,   DWORD dstAddr,   \
                                                                   DWORD srcOffset, DWORD dstOffset, \
 			                                                      WORD srcType,    WORD dstType,    \
                                                                   WORD copyOp,     WORD rop,        \
@@ -2424,11 +2429,20 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 	
     WORD            	lineBuffer[(GetMaxX() + (DWORD) 1)];
     WORD            	*pData; 
-    #ifdef USE_PALETTE
+#ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; // To supress warning
-    #endif
+#if (DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90)   
+#if (COLOR_DEPTH == 4) 
+    BYTE nibblePos;
+#endif
+#if (COLOR_DEPTH == 1)
+    BYTE bitPos;
+#endif
+#endif
+#endif
 
     CHAR                testStretch = (stretch == IMAGE_NORMAL) ? 0x00 : 0x01;
+
 
     // Move pointer to size information
     flashAddress = image + 2;
@@ -2486,8 +2500,6 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     {
 
         // get flash address location of current line being processed
-        //flashAddress = tempFlashAddress;
-
         flashAddress = tempFlashAddress;
         mask = 0;
 
@@ -2508,24 +2520,34 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             {
                 pByteData = (BYTE *)lineBuffer;
 
-                #if COLOR_DEPTH == 8
+                #if (COLOR_DEPTH == 8)
                     pByteData += outputSize;
+                    pByteData--;
                 #endif
 
-                #if COLOR_DEPTH == 4
+                #if (COLOR_DEPTH == 4)
+
                     pByteData += outputSize / 2;
+                    nibblePos = (outputSize & 0x01);
+                    if(nibblePos == 0)
+                    {
+                        pByteData--;
+                    }
                 #endif
 
-                #if COLOR_DEPTH == 1
-                    pByteData += outputSize / 8;
-                    if(outputSize & 0x07)
+                #if (COLOR_DEPTH == 1)
+
+                    pByteData += (outputSize / 8) ;
+                    bitPos = (outputSize & 0x07);
+                    if(bitPos != 0)
+                        bitPos -= 1;  // why -1, since bit position starts at 0 (or first bit is at 0 position)    
+                    else
                     {
-                        pByteData++;
-                    }    
-                    pByteData++;
+                        bitPos = 7;
+                        pByteData--;
+                    }
                 #endif
                 
-                pByteData--;
             }
 			#endif
 		#endif
@@ -2582,11 +2604,11 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
                         *pByteData++ = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
+                        #if (COLOR_DEPTH == 4)
                         if(x & 0x01)
                         {
                             *pByteData++ |= color << 4;
@@ -2596,7 +2618,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                         }
                         #endif
 
-                        #if COLOR_DEPTH == 1
+                        #if (COLOR_DEPTH == 1)
                         {
                             BYTE pos = (BYTE)x & 0x07;
                             
@@ -2621,32 +2643,37 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
     	          	    *pByteData-- = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
-                        if(x & 0x01)
+                        #if (COLOR_DEPTH == 4)
+                        if (nibblePos == 1)
                         {
-                            *pByteData-- |= color & 0x0F;
+                            *pByteData = ((*pByteData & 0xF0) | (color & 0x0F));
+                            pByteData--;
+                            nibblePos = 0;
                         }else
                         {
                             *pByteData = color << 4;
+                            nibblePos = 1;
                         }
                         #endif
                         
-                        #if COLOR_DEPTH == 1
+                        #if (COLOR_DEPTH == 1)
                         {
-                            BYTE pos = (BYTE)x & 0x07;
-                            pos = 7 - pos;
-                            
-                            if(pos == 7)
-                                *pByteData = color << pos;
-                            else
-                                *pByteData |= color << pos;
+                            *pByteData &= ~(1 << bitPos);
+                            *pByteData |= (color << bitPos);
 
-                            if(pos == 0)
-                                *pByteData--;
+                            if (bitPos == 0)
+                            {
+                                bitPos = 7;
+                                pByteData--;
+                            }
+                            else
+                            {
+                                bitPos--;
+                            }
                         }
                         #endif
     	          	}
@@ -2746,9 +2773,12 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     WORD            	lineBuffer[(GetMaxX() + (DWORD) 1)];
     WORD            	*pData; 
 
-    #ifdef USE_PALETTE
+#ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; // To supress warning 
-    #endif
+#if (COLOR_DEPTH == 4) && ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+    BYTE nibblePos;
+#endif
+#endif
 
     CHAR                testStretch = (stretch == IMAGE_NORMAL) ? 0x01 : 0x03;
 
@@ -2830,19 +2860,20 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             {
                 pByteData = (BYTE*)lineBuffer;
 
-                #if COLOR_DEPTH == 8
+                #if (COLOR_DEPTH == 8)
                     pByteData += outputSize;
+                    pByteData--;
                 #endif
 
-                #if COLOR_DEPTH == 4
+                #if (COLOR_DEPTH == 4)
+
                     pByteData += outputSize / 2;
-                    if(outputSize & 0x01)
+					nibblePos = (outputSize & 0x01);	
+                    if(nibblePos == 0)
                     {
-                        pByteData++;
-                    }    
+                        pByteData--;
+                    }
                 #endif
-
-                pByteData--;
             }
 			#endif
 
@@ -2872,15 +2903,15 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
                         *pByteData++ = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
+                        #if (COLOR_DEPTH == 4)
                         if(x & 0x01)
                         {
                             *pByteData++ |= color << 4;
-                        }else
+                        } else
                         {
                             *pByteData = color & 0x0F;
                         }
@@ -2897,17 +2928,20 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
     	          	    *pByteData-- = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
-                        if(x & 0x01)
+                        #if (COLOR_DEPTH == 4)
+                        if (nibblePos == 1)
                         {
-                            *pByteData-- |= color & 0x0F;
+                            *pByteData = ((*pByteData & 0xF0) | (color & 0x0F));
+                            pByteData--;
+                            nibblePos = 0;
                         }else
                         {
                             *pByteData = color << 4;
+                            nibblePos = 1;
                         }
                         #endif
     	          	}
@@ -3405,9 +3439,17 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     WORD            x, y;
     WORD            yc;
     BYTE            stretchY;
-    #ifdef USE_PALETTE
-    BYTE            	*pByteData; 
-    #endif
+#ifdef USE_PALETTE
+    BYTE            	*pByteData = NULL; 
+#if (DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90)   
+#if (COLOR_DEPTH == 4) 
+    BYTE nibblePos;
+#endif
+#if (COLOR_DEPTH == 1)
+    BYTE bitPos;
+#endif
+#endif
+#endif
 
     CHAR            testStretch = (stretch == IMAGE_NORMAL) ? 0x00 : 0x01;
 
@@ -3477,30 +3519,48 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 		// get the location of the line buffer 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
           	pData2 = lineBuffer2;
+            #ifdef USE_PALETTE
+	            if(IsPaletteEnabled())
+    	        {
+        	        pByteData = (BYTE*)lineBuffer2;
+            	}
+            #endif
         #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
            	pData2 = &lineBuffer2[outputSize-1];
-
+           	
             #ifdef USE_PALETTE
             if(IsPaletteEnabled())
             {
                 pByteData = (BYTE *)lineBuffer2;
 
-                #if COLOR_DEPTH == 8
-                pByteData += outputSize;
+                #if (COLOR_DEPTH == 8)
+                    pByteData += outputSize;
+                    pByteData--;
                 #endif
 
-                #if COLOR_DEPTH == 4
-                pByteData += outputSize / 2;
+                #if (COLOR_DEPTH == 4)
+
+                    pByteData += outputSize / 2;
+					nibblePos = (outputSize & 0x01);
+                    if(nibblePos == 0)
+                    {
+                        pByteData--;
+                    }
                 #endif
 
-                #if COLOR_DEPTH == 1
-                pByteData += outputSize / 8;
-                
-                if(outputSize & 0x07)
-                    pByteData++;
+                #if (COLOR_DEPTH == 1)
+
+                    pByteData += (outputSize / 8) ;
+                    bitPos = (outputSize & 0x07);
+                    if(bitPos != 0)
+                        bitPos -= 1;  // why -1, since bit position starts at 0 (or first bit is at 0 position)    
+                    else
+                    {
+                        bitPos = 7;
+                        pByteData--;
+                    }				
                 #endif
                 
-                pByteData--;
             }
 			#endif
         #endif
@@ -3543,11 +3603,11 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
                         *pByteData++ = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
+                        #if (COLOR_DEPTH == 4)
                         if(x & 0x01)
                         {
                             *pByteData++ |= color << 4;
@@ -3557,7 +3617,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                         }
                         #endif
 
-                        #if COLOR_DEPTH == 1
+                        #if (COLOR_DEPTH == 1)
                         {
                             BYTE pos = (BYTE)x & 0x07;
                             
@@ -3582,32 +3642,37 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
     	          	    *pByteData-- = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
-                        if(x & 0x01)
+                        #if (COLOR_DEPTH == 4)
+                        if (nibblePos == 1)
                         {
-                            *pByteData-- |= color & 0x0F;
+                            *pByteData = ((*pByteData & 0xF0) | (color & 0x0F));
+                            pByteData--;
+                            nibblePos = 0;
                         }else
                         {
                             *pByteData = color << 4;
+                            nibblePos = 1;
                         }
                         #endif
                         
-                        #if COLOR_DEPTH == 1
+                        #if (COLOR_DEPTH == 1)
                         {
-                            BYTE pos = (BYTE)x & 0x07;
-                            pos = 7 - pos;
-                            
-                            if(pos == 7)
-                                *pByteData = color << pos;
-                            else
-                                *pByteData |= color << pos;
+                            *pByteData &= ~(1 << bitPos);
+                            *pByteData |= (color << bitPos);
 
-                            if(pos == 0)
-                                *pByteData--;
+                            if (bitPos == 0)
+                            {
+                                bitPos = 7;
+                                pByteData--;
+                            }
+                            else
+                            {
+                                bitPos--;
+                            }
                         }
                         #endif
     	          	}
@@ -3704,9 +3769,12 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     WORD            yc;
     BYTE            stretchY;
 
-    #ifdef USE_PALETTE
-    BYTE            	*pByteData; 
-    #endif
+#ifdef USE_PALETTE
+    BYTE            	*pByteData = NULL; 
+#if (COLOR_DEPTH == 4) && ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+    BYTE nibblePos;
+#endif
+#endif
 
     CHAR                testStretch = (stretch == IMAGE_NORMAL) ? 0x01 : 0x03;
 
@@ -3777,26 +3845,35 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
           	pData2 = lineBuffer2;
+            #ifdef USE_PALETTE
+            	if(IsPaletteEnabled())
+            	{
+            	    pByteData = (BYTE*)lineBuffer2;
+            	}    
+            #endif
         #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
            	pData2 = &lineBuffer2[outputSize-1];
 
             #ifdef USE_PALETTE
             if(IsPaletteEnabled())
             {
-                pByteData = lineBuffer;
+                pByteData = (BYTE*)lineBuffer2;
 
-                #if COLOR_DEPTH == 8
-                pByteData += outputSize;
+                #if (COLOR_DEPTH == 8)
+                    pByteData += outputSize;
+                    pByteData--;
                 #endif
 
-                #if COLOR_DEPTH == 4
-                pByteData += outputSize / 2;
+                #if (COLOR_DEPTH == 4)
 
-                if(outputSize & 0x01)
-                    pByteData++;
-                #endif
+                    pByteData += outputSize / 2;
+					nibblePos = (outputSize & 0x01);
+                    if(nibblePos == 0)
+					{
+                        pByteData--;
+					}
+				#endif
 
-                pByteData--;
             }
 			#endif
 
@@ -3824,11 +3901,11 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
                         *pByteData++ = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
+                        #if (COLOR_DEPTH == 4)
                         if(x & 0x01)
                         {
                             *pByteData++ |= color << 4;
@@ -3849,17 +3926,20 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
-                        #if COLOR_DEPTH == 8
+                        #if (COLOR_DEPTH == 8)
     	          	    *pByteData-- = (BYTE)color;
                         #endif
 
-                        #if COLOR_DEPTH == 4
-                        if(x & 0x01)
+                        #if (COLOR_DEPTH == 4)
+						if (nibblePos == 1)
                         {
-                            *pByteData-- |= color & 0x0F;
+                            *pByteData = ((*pByteData & 0xF0) | (color & 0x0F));
+                            pByteData--;
+                            nibblePos = 0;
                         }else
                         {
                             *pByteData = color << 4;
+                            nibblePos = 1;
                         }
                         #endif
     	          	}
@@ -3955,7 +4035,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     BYTE            stretchY;
 
     #ifdef USE_PALETTE
-    BYTE            	*pByteData; 
+    BYTE            	*pByteData = NULL; 
     #endif
 
     // Get image header
@@ -5799,7 +5879,8 @@ BYTE Decompress(DWORD SrcAddress, DWORD DestAddress, DWORD nbytes)
 *
 * Output: none
 *
-* Side Effects: Sets the error flag blPaletteChangeError
+* Side Effects: Sets the error flag blPaletteChangeError when using palette
+*               and there is a pending palette change.
 *
 ********************************************************************/
 void __attribute__((interrupt, shadow, no_auto_psv)) _GFX1Interrupt(void)

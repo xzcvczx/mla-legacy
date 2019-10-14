@@ -567,6 +567,7 @@ public class USBAccessoryManager {
 				while (tries-- > 0) {
 					try {
 						outputStream.write(data);
+						return;
 					} catch (IOException e) {
 						Log.d(TAG,
 								"USBAccessoryManager:write():IOException: "

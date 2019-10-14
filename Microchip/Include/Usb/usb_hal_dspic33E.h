@@ -233,6 +233,8 @@ typedef union _POINTER
 #define ConvertToPhysicalAddress(a) ((WORD)(a))   
 #define ConvertToVirtualAddress(a)  ((void *)(a))
 
+
+
 /********************************************************************
 Function:
     BOOL USBSleepOnSuspend(void)
@@ -435,6 +437,8 @@ typedef union __attribute__ ((packed))__BDT
     WORD            v[4];
     QWORD           Val;
 } BDT_ENTRY;
+
+extern volatile BDT_ENTRY *pBDTEntryOut[];
 
 // USTAT Register Layout
 typedef union __USTAT

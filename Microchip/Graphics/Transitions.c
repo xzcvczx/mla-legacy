@@ -34,9 +34,13 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date                    Comment
+ * Date                     Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Microchip	        24/12/2010	    		Initial version
+ * 24/12/2010	    		Initial version
+ * 11/23/2011               Fix ExpandRectangle() issue where the edge shows 
+ *                          garbage data. 
+ * 11/29/2011               Fix ContractRectangle() issue where one line 
+ *                          is not copied correctly. 
  *****************************************************************************************/
 #include "Graphics/Transitions.h"
 #include "HardwareProfile.h"
@@ -244,11 +248,11 @@ void ExpandRectangle(void)
     
     for(i = 0; i <= den; i += blocksize)
     {
+        x = (Width / 2) - ((i * xpitch) / SCALE);
+        y = (Height / 2) - ((i * ypitch) / SCALE);
         CopyBlock(_srcpageaddr, _destpageaddr, ((DWORD)(Starty + y) * DISP_HOR_RESOLUTION) + Startx + x, ((DWORD)(Starty + y) * DISP_HOR_RESOLUTION) + Startx + x, 2 * xpitch * i / SCALE, 2 * ypitch * i / SCALE);
         DelayMs(_delay_ms);
         while(IsDeviceBusy());
-        x = (Width / 2) - ((i * xpitch) / SCALE);
-        y = (Height / 2) - ((i * ypitch) / SCALE);
     }
     PlainCopyRectangle();
 }
@@ -291,9 +295,9 @@ void ContractRectangle(void)
         x = (i * xpitch) / SCALE;
         y = (i * ypitch) / SCALE;
         CopyBlock(_srcpageaddr, _destpageaddr, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx, x, Height);
-        CopyBlock(_srcpageaddr, _destpageaddr, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx + Width - x - 1, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx + Width - x - 1, x, Height);
+        CopyBlock(_srcpageaddr, _destpageaddr, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx + Width - x, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx + Width - x, x, Height);
         CopyBlock(_srcpageaddr, _destpageaddr, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx, ((DWORD)Starty * DISP_HOR_RESOLUTION) + Startx, Width, y);
-        CopyBlock(_srcpageaddr, _destpageaddr, ((DWORD)(Starty + Height - y - 1) * DISP_HOR_RESOLUTION) + Startx, ((DWORD)(Starty + Height - y - 1) * DISP_HOR_RESOLUTION) + Startx, Width, y);
+        CopyBlock(_srcpageaddr, _destpageaddr, ((DWORD)(Starty + Height - y) * DISP_HOR_RESOLUTION) + Startx, ((DWORD)(Starty + Height - y) * DISP_HOR_RESOLUTION) + Startx, Width, y);
         DelayMs(_delay_ms);
         while(IsDeviceBusy());
     }

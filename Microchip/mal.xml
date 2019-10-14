@@ -11,7 +11,7 @@
     <NAME>Microchip Application Libraries</NAME>
     <SHORT_NAME>MAL</SHORT_NAME>
     <VERSION>
-      <STRING>2011-10-18</STRING>
+      <STRING>2011-12-05</STRING>
     </VERSION>
   </INFO>
 
@@ -22,15 +22,15 @@
       <SHORT_NAME>GFX</SHORT_NAME>
       <VERSION>
         <MAJOR>3</MAJOR>
-        <MINOR>02</MINOR>
+        <MINOR>03</MINOR>
       </VERSION>
     </LIBRARY>
 
     <LIBRARY>
       <NAME>Microchip Full Speed USB Library</NAME>
-      <SHORT_NAME>MPFSUSB</SHORT_NAME>
+      <SHORT_NAME>MCHPFSUSB</SHORT_NAME>
       <VERSION>
-        <STRING>2.9b</STRING>
+        <STRING>2.9c</STRING>
       </VERSION>
     </LIBRARY>
 
@@ -89,8 +89,8 @@
       <SHORT_NAME>Android</SHORT_NAME>
       <VERSION>
         <MAJOR>1</MAJOR>
-        <MINOR>1</MINOR>
-        <DOT>0</DOT>
+        <MINOR>01</MINOR>
+        <DOT>01</DOT>
       </VERSION>
     </LIBRARY>
 

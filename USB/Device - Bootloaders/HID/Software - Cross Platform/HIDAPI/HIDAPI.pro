@@ -12,7 +12,7 @@ HEADERS += hidapi.h
 # -------------------------------------------------
 macx:  SOURCES += mac/hid.c
 unix: !macx:  SOURCES += linux/hid-libusb.c
-win32: SOURCES += windows/hid.c
+win32: SOURCES += windows/hid.cpp
 
 # -------------------------------------------------
 # Make sure output directory for object file and

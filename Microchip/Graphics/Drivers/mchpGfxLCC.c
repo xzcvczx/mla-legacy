@@ -271,7 +271,7 @@ PIXELCLOCK =0;
     #endif 
     #endif
 
-	INTSetVectorPriority(INT_VECTOR_DMA(1), INT_PRIORITY_LEVEL_7);		        // set INT controller priority
+	INTSetVectorPriority(INT_VECTOR_DMA(1), INT_PRIORITY_LEVEL_6);		        // set INT controller priority
 	INTSetVectorSubPriority(INT_VECTOR_DMA(1), INT_SUB_PRIORITY_LEVEL_3);		// set INT controller sub-priority
 
     DmaChnSetEvEnableFlags(1, DMA_EV_BLOCK_DONE);	// enable the transfer done interrupt, when all buffer transferred
@@ -299,7 +299,7 @@ PIXELCLOCK =0;
 #ifdef LCC_EXTERNAL_MEMORY
 
 // handler for the DMA channel 1 interrupt
-void __ISR(_DMA1_VECTOR, ipl7) DmaHandler1(void)
+void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
 {
   static WORD remaining=0;
   static short line =0;
@@ -469,7 +469,7 @@ void __ISR(_DMA1_VECTOR, ipl7) DmaHandler1(void)
 #endif
 #ifdef LCC_INTERNAL_MEMORY
 
-void __ISR(_DMA1_VECTOR, ipl7) DmaHandler1(void)
+void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
 {
   static BYTE GraphicsState = 1;
   static short line =0;

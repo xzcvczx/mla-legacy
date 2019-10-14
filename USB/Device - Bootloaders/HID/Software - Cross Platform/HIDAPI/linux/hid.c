@@ -35,7 +35,6 @@
 #include <sys/ioctl.h>
 #include <sys/utsname.h>
 #include <fcntl.h>
-#include <poll.h>
 
 /* Linux */
 #include <linux/hidraw.h>
@@ -43,15 +42,6 @@
 #include <libudev.h>
 
 #include "hidapi.h"
-
-/* Definitions from linux/hidraw.h. Since these are new, some distros
-   may not have header files which contain them. */
-#ifndef HIDIOCSFEATURE
-#define HIDIOCSFEATURE(len)    _IOC(_IOC_WRITE|_IOC_READ, 'H', 0x06, len)
-#endif
-#ifndef HIDIOCGFEATURE
-#define HIDIOCGFEATURE(len)    _IOC(_IOC_WRITE|_IOC_READ, 'H', 0x07, len)
-#endif
 
 struct hid_device_ {
 	int device_handle;
@@ -195,31 +185,21 @@ static int get_device_string(hid_device *dev, const char *key, wchar_t *string, 
 	}
 
 end:
-	udev_device_unref(udev_dev);
-	// parent doesn't need to be (and can't be) unref'd.
-	// I'm not sure why, but it'll throw double-free() errors.
+	udev_device_unref(parent);
+	// udev_dev doesn't need unref'd. Not sure why, but
+	// it'll throw "double free" errors.
 	udev_unref(udev);
 
 	return ret;
 }
 
-int HID_API_EXPORT hid_init(void)
-{
-	/* Nothing to do for this in the Linux/hidraw implementation. */
-	return 0;
-}
-
-int HID_API_EXPORT hid_exit(void)
-{
-	/* Nothing to do for this in the Linux/hidraw implementation. */
-	return 0;
-}
 
 struct hid_device_info  HID_API_EXPORT *hid_enumerate(unsigned short vendor_id, unsigned short product_id)
 {
 	struct udev *udev;
 	struct udev_enumerate *enumerate;
 	struct udev_list_entry *devices, *dev_list_entry;
+	struct udev_device *dev;
 	
 	struct hid_device_info *root = NULL; // return object
 	struct hid_device_info *cur_dev = NULL;
@@ -244,26 +224,23 @@ struct hid_device_info  HID_API_EXPORT *hid_enumerate(unsigned short vendor_id, 
 		const char *sysfs_path;
 		const char *dev_path;
 		const char *str;
-		struct udev_device *hid_dev; // The device's HID udev node.
-		struct udev_device *dev; // The actual hardware device.
-		struct udev_device *intf_dev; // The device's interface (in the USB sense).
 		unsigned short dev_vid;
 		unsigned short dev_pid;
 		
 		/* Get the filename of the /sys entry for the device
 		   and create a udev_device object (dev) representing it */
 		sysfs_path = udev_list_entry_get_name(dev_list_entry);
-		hid_dev = udev_device_new_from_syspath(udev, sysfs_path);
-		dev_path = udev_device_get_devnode(hid_dev);
+		dev = udev_device_new_from_syspath(udev, sysfs_path);
+		dev_path = udev_device_get_devnode(dev);
 		
-		/* The device pointed to by hid_dev contains information about
+		/* The device pointed to by dev contains information about
 		   the hidraw device. In order to get information about the
 		   USB device, get the parent device with the
 		   subsystem/devtype pair of "usb"/"usb_device". This will
 		   be several levels up the tree, but the function will find
 		   it.*/
 		dev = udev_device_get_parent_with_subsystem_devtype(
-		       hid_dev,
+		       dev,
 		       "usb",
 		       "usb_device");
 		if (!dev) {
@@ -318,31 +295,12 @@ struct hid_device_info  HID_API_EXPORT *hid_enumerate(unsigned short vendor_id, 
 			/* VID/PID */
 			cur_dev->vendor_id = dev_vid;
 			cur_dev->product_id = dev_pid;
-
-			/* Release Number */
-			str = udev_device_get_sysattr_value(dev, "bcdDevice");
-			cur_dev->release_number = (str)? strtol(str, NULL, 16): 0x0;
-			
-			/* Interface Number */
-			cur_dev->interface_number = -1;
-			/* Get a handle to the interface's udev node. */
-			intf_dev = udev_device_get_parent_with_subsystem_devtype(
-				   hid_dev,
-				   "usb",
-				   "usb_interface");
-			if (intf_dev) {
-				str = udev_device_get_sysattr_value(intf_dev, "bInterfaceNumber");
-				cur_dev->interface_number = (str)? strtol(str, NULL, 16): -1;
-			}
 		}
 		else
 			goto next;
 
 	next:
-		udev_device_unref(hid_dev);
-		/* dev and intf_dev don't need to be (and can't be)
-		   unref()d.  It will cause a double-free() error.  I'm not
-		   sure why.  */
+		udev_device_unref(dev);
 	}
 	/* Free the enumerator and udev objects. */
 	udev_enumerate_unref(enumerate);
@@ -471,25 +429,9 @@ int HID_API_EXPORT hid_write(hid_device *dev, const unsigned char *data, size_t 
 }
 
 
-int HID_API_EXPORT hid_read_timeout(hid_device *dev, unsigned char *data, size_t length, int milliseconds)
+int HID_API_EXPORT hid_read(hid_device *dev, unsigned char *data, size_t length)
 {
 	int bytes_read;
-
-	if (milliseconds != 0) {
-		/* milliseconds is -1 or > 0. In both cases, we want to
-		   call poll() and wait for data to arrive. -1 means
-		   INFINITE. */
-		int ret;
-		struct pollfd fds;
-
-		fds.fd = dev->device_handle;
-		fds.events = POLLIN;
-		fds.revents = 0;
-		ret = poll(&fds, 1, milliseconds);
-		if (ret == -1 || ret == 0)
-			/* Error or timeout */
-			return ret;
-	}
 
 	bytes_read = read(dev->device_handle, data, length);
 	if (bytes_read < 0 && errno == EAGAIN)
@@ -504,11 +446,6 @@ int HID_API_EXPORT hid_read_timeout(hid_device *dev, unsigned char *data, size_t
 	}
 
 	return bytes_read;
-}
-
-int HID_API_EXPORT hid_read(hid_device *dev, unsigned char *data, size_t length)
-{
-	return hid_read_timeout(dev, data, length, (dev->blocking)? -1: 0);
 }
 
 int HID_API_EXPORT hid_set_nonblocking(hid_device *dev, int nonblock)
