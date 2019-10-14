@@ -178,8 +178,8 @@
          * Graphics PicTail v3  (GFXv3)
          * Display PH480272T-005-I11Q
          ********************************************************************/
-     //   #include "Configs/HWP_GFXv3_PIC_SK_8PMP_USBMSD_WQVGAv1.h"
-    //	#include "Configs/HWP_GFXv3_PIC_SK_16PMP_USBMSD_WQVGAv1.h"
+        //#include "Configs/HWP_GFXv3_PIC_SK_8PMP_USBMSD_WQVGAv1.h"
+        //#include "Configs/HWP_GFXv3_PIC_SK_16PMP_USBMSD_WQVGAv1.h"
     
         /*********************************************************************
          * Hardware Configuration for 
@@ -193,7 +193,7 @@
         //#include "Configs/HWP_MEB_PIC32_USB_SK_8PMP_USBMSD.h"
         //#include "Configs/HWP_MEB_PIC32_USB_SK_16PMP_USBMSD.h"
     
-      //  #include "Configs/HWP_MEB_PIC32_ETH_SK_8PMP_USBMSD.h"
+        //#include "Configs/HWP_MEB_PIC32_ETH_SK_8PMP_USBMSD.h"
         //#include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP_USBMSD.h"
 
         /*********************************************************************
@@ -204,7 +204,7 @@
          ********************************************************************/
 
         #include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_QVGAv1.h"
-     //   #include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_WQVGAv1.h"
+        //#include "Configs/HWP_LCC_PIC_SK_EXT_USBMSD_WQVGAv1.h"
 
 #endif
 #else

@@ -6,7 +6,7 @@ LIBPATH .
 
 FILES c018i.o
 FILES clib.lib
-FILES p18f14k50.lib
+FILES p18F14K50.lib
 
 // Bootloader
 CODEPAGE   NAME=vectors    START=0x0            END=0x29           PROTECTED

@@ -59,6 +59,10 @@
 /////////////////////////////////////////////////////////////////////////////
 #define ICON_DISTANCE_START_TO_START (ICON_WIDTH + ICON_SPACING)
 
+#define PIC24F_DEMO_CRC_MARKER_SIZE 8
+#define PIC24F_DEMO_MCHP_CRC_PREFIX 0x5048434Dul  // this spells "MCHP"
+
+
 /////////////////////////////////////////////////////////////////////////////
 //                            LOCAL PROTOTYPES
 /////////////////////////////////////////////////////////////////////////////
@@ -79,19 +83,13 @@ void            TouchPressIcon(GOL_MSG *pMsg);
 void            DA210DEVBOARD_SST39LF400WriteWord(WORD data, DWORD address);
 WORD            DA210DEVBOARD_SST39LF400ReadWord(DWORD address);
 void            DA210DEVBOARD_SST39LF400SectorErase(DWORD address);
+void            DA210DEVBOARD_SST39LF400ArrayWord(DWORD address, BYTE *pData, WORD nCount);
+void            ProgramCheckExternalFlashHex();
 
 /////////////////////////////////////////////////////////////////////////////
-//                            IMAGES USED
+//                            IMAGES AND FONTS USED
 /////////////////////////////////////////////////////////////////////////////
 // see IconData.c (h) and DemoFlashResource.c (h)
-
-/////////////////////////////////////////////////////////////////////////////
-//                            FONTS USED
-/////////////////////////////////////////////////////////////////////////////
-extern const FONT_FLASH     monofont;				
-extern const FONT_FLASH     GOLMediumFont;
-extern const FONT_FLASH     GOLSmallFont;
-extern const FONT_FLASH		monofontsmall;
 
 /////////////////////////////////////////////////////////////////////////////
 //                            GLOBAL VARIABLES
@@ -158,6 +156,7 @@ int main(void)
 	    InitGraph();                      	// initialize graphics library &
 		CreateError("Parallel Flash is not accessible");
 	}	
+    ProgramCheckExternalFlashHex();
 
 	/* =============================================== */
 
@@ -174,23 +173,6 @@ int main(void)
 
     // set the default screen to icon number (range is 0 - (ICON_MAX_COUNT-1)
     iconMgr.IconSelected = 3;
-
-	// check if programming is prompted    
-    if(GetHWButtonSelect() == HW_BUTTON_PRESS)
-    {
-	    SetColor(BRIGHTRED);
-	    while(!OutTextXY(0,0, "Entering Parallel Flash Programming"));
-	    
-    	while(GetHWButtonSelect() == HW_BUTTON_PRESS);
-        
-        // before entering programming mode, set the EPMP master to be CPU
-    	SST39LF400Init();	
-
-	    // The ProgramFlash() function will not return. 
-	    // Application must be reset after programming.
-	    ProgramFlash();
-        GOLInit();                      // Initialize GOL
-	} 
 
     // initialize the timer that manages the tick counter
     TickInit();                         
@@ -724,6 +706,11 @@ void DrawSelectedIcon(void)
     
     // draw the selected icon 
     PutImage(CENTER_IN_X-(ICON_LARGE_WIDTH>>1), CENTER_IN_Y-(ICON_LARGE_HEIGHT>>1), (void*)iconMgr.pIconsLarge[iconMgr.IconSelected], 1); 
+    
+  	// make sure the GPUs are done before exiting
+    GFX_WaitForCommandQueue(16);
+    GFX_WaitForGpu();
+
 
 }    
 
@@ -733,7 +720,7 @@ void DrawDeSelectedIcon(void)
     SetColor(SCREEN_BACKGROUND_COLOR);
     Bar(CENTER_IN_X-(ICON_LARGE_WIDTH>>1), CENTER_IN_Y-(ICON_LARGE_HEIGHT>>1), CENTER_IN_X+(ICON_LARGE_WIDTH>>1), CENTER_IN_Y+(ICON_LARGE_HEIGHT>>1));
 
-  	// make sure the GPUs are done before exiting
+  	// make sure the GPUs are done before rendering the image
 	GFX_WaitForCommandQueue(16);
 	GFX_WaitForGpu();
 
@@ -1206,6 +1193,101 @@ WORD DA210DEVBOARD_SST39LF400ReadWord(DWORD address)
     return readWord;
 
 }    
+
+/************************************************************************************
+* Function: void DA210DEVBOARD_SST39LF400ArrayWord(DWORD address, BYTE *pData, WORD nCount)
+*
+* Notes: Reads the array of data from the parallel flash located in the given address.  
+*        The graphics module is locked out during this function but
+*        since this function occurs fast enough and only called when 
+*        calibrating the touch screen, it will not be noticeable.
+*
+*************************************************************************************/
+void DA210DEVBOARD_SST39LF400ArrayWord(DWORD address, BYTE *pData, WORD nCount)
+{
+    // this function locks out the graphics module from accessing
+    // external memory until the MSTSEL is reset back to Graphics
+
+    // to minimize effects on the screen refresh 
+    // wait until the VSYNC starts
+    while(!_VMRGN); 
+
+  	PMCON2bits.MSTSEL = 0;		// set CPU as Master
+    SST39LF400ReadArray(address, pData, nCount);
+  	PMCON2bits.MSTSEL = 3;		// set Graphics as Master
+    
+}    
+
+
+/*****************************************************************************
+* void ProgramCheckExternalFlashHex()
+* Notes: Checks if the user promtps for flash programming.
+*        If not then checks if the hex data is is valid.
+*        If invalid, prompts for flash programming.
+*****************************************************************************/
+void ProgramCheckExternalFlashHex()
+{
+    UINT64_VAL mchpMarkerData, readMarkerData;
+    WORD textHeight;
+    BOOL forceProgramHex = FALSE;
+    void *pFont = (void* )&GOLFontDefault;
+ 
+    // check if the CRC matches the data stored in the external flash memory
+    // if it is not there chances are the icons are not programmed so prompt to 
+    // program the flash memory
+    // NOTE: This assumes that the External Flash has already been initialized.
+    //       If Flash is not initialized the check on the signature will always
+    //       fail and flash programming will always come up after reset.
+
+    InitGraph();                      	// initialize graphics library 
+
+	SetFont(pFont);
+    textHeight = GetTextHeight(pFont);  // get the text height
+    SetColor(BRIGHTYELLOW);
+
+	// check if programming is prompted    
+    if(GetHWButtonSelect() == HW_BUTTON_PRESS)
+    {
+        forceProgramHex = TRUE;
+        OutTextXY(10,(textHeight*2),"Entering Parallel Flash"); 
+        OutTextXY(10,(textHeight*3),"Programming Mode.");        // wait until press is released.
+    	while(GetHWButtonSelect() == HW_BUTTON_PRESS);
+	} 
+
+    if (forceProgramHex == FALSE)
+    {
+        // create the full marker string
+        mchpMarkerData.d[0] = PIC24F_DEMO_MCHP_CRC_PREFIX;
+        mchpMarkerData.d[1] = GRC_CRC32_EXTERNAL_MARKER;
+        
+        // check if data is valid then, proceed to programming flash if not valid
+        DA210DEVBOARD_SST39LF400ArrayWord(GRC_CRC32_EXTERNAL_ADDR, (BYTE *)&readMarkerData.Val, PIC24F_DEMO_CRC_MARKER_SIZE);
+        if (readMarkerData.Val != mchpMarkerData.Val)
+        {
+            forceProgramHex = TRUE;
+   	    	OutTextXY(10,(textHeight*0),"Invalid External Flash Data.");
+            OutTextXY(10,(textHeight*2),"Entering Parallel Flash"); 
+            OutTextXY(10,(textHeight*3),"Programming Mode.");
+        }
+    }
+
+    if (forceProgramHex == TRUE)
+    {
+        SetColor(WHITE);
+        OutTextXY(10,(textHeight*5),"Press 'S2' to continue");
+        OutTextXY(10,(textHeight*6),"then send hex data.");
+        
+        // wait for user to be ready      		
+        while(GetHWButtonSelect() == HW_BUTTON_RELEASE);
+        DelayMs(500);
+        
+     	SST39LF400Init();	
+  	    // Call the external flash programming routine
+   	    ProgramFlash();        
+        DelayMs(500);
+        Reset();    
+    }
+}	
 
 //  Create Error Flash (Blue Screen)
 void CreateError(char* string)

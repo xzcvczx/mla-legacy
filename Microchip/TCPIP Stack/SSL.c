@@ -47,12 +47,6 @@
  * SIMILAR COSTS, WHETHER ASSERTED ON THE BASIS OF CONTRACT, TORT
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE.
  *
- *
- * Author               Date        Comment
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Elliott Wood			6/20/07		Original
- * Elliott Wood			12/17/07	Rewritten to integrate with TCP
- *									 and support both client & server
  ********************************************************************/
 #define __SSL_C
 
@@ -308,7 +302,7 @@ void SSLPeriodic(TCP_SOCKET hTCP, BYTE id)
 			{
 				// Copy over the pre-master secret
 				SSLSessionSync(sslStub.idSession);
-				memcpy((void*)sslSession.masterSecret, (void*)&sslBuffer.full[16], 48);
+				memcpy((void*)sslSession.masterSecret, (void*)&sslBuffer.full[(SSL_RSA_KEY_SIZE/8)-48], 48);
 												
 				// Generate the Master Secret
 				SSLKeysSync(sslStubID);
@@ -1457,6 +1451,9 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 {
 	WORD len;
 	BYTE i, e[3];
+	WORD data_length;   // number of key bytes read from certificate
+	BYTE length_bytes;  // decoded length value
+	BYTE index;         // temp index
 	
 	// Verify handshake message sequence
 	if(!sslStub.Flags.bServerHello || sslStub.Flags.bServerCertificate)
@@ -1505,30 +1502,41 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 		
 		case RX_SERVER_CERT_FIND_N:
 			// Make sure tag and length bytes are ready, plus one more
-			if(TCPIsGetReady(hTCP) < 4u)
+			if(TCPIsGetReady(hTCP) < 8u)
 				return;
-
-			// Read 0x02 (integer identifier)
-			HSGet(hTCP, NULL);
-			
+            // Read until 0x02
+            i = 0;
+            while(i != 2)
+    			HSGet(hTCP, &i);
 			// Read 1 or 2 length bytes to sslStub.dwTemp.v[1]
+			// The next byte tells us how many bytes are in the length structure if it's MSB is set
 			HSGet(hTCP, &i);
-			if(i > 0x80)
-				HSGet(hTCP, &i);
-			sslStub.dwTemp.v[1] = i;
-			
+			data_length = 0;
+			if(i & 0x80)
+			{
+    			length_bytes = i & 0x7F;
+    			for(index=0;index<length_bytes;index++)
+    			{
+    				HSGet(hTCP, &i);
+    				data_length = (data_length<<8)+i;
+    			}
+            }
+            else
+   				data_length = i;
+            
+			sslStub.dwTemp.w[1] = data_length;
 			// If there's one odd byte, it's a leading zero that we don't need
-			if(sslStub.dwTemp.v[1] & 0x01)
+			if(sslStub.dwTemp.w[1] & 0x01)
 			{
 				HSGet(hTCP, NULL);
-				sslStub.dwTemp.v[1]--;
+				sslStub.dwTemp.w[1]--;
 			}
-			
-			// The max modulus we support is 1024 bits
-			if(sslStub.dwTemp.v[1] > 0x80)
+			// The max modulus we support is 2048 bits
+			if(sslStub.dwTemp.w[1] > SSL_RSA_CLIENT_SIZE/8)
 			{
 				TCPRequestSSLMessage(hTCP, SSL_ALERT_HANDSHAKE_FAILURE);
-				sslStub.dwTemp.v[1] = 0x80;
+				sslStub.dwTemp.w[1] = SSL_RSA_CLIENT_SIZE/8;
+				// Need to determine a graceful way to abort
 			}
 
 			// Increment and continue
@@ -1536,7 +1544,7 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 		
 		case RX_SERVER_CERT_READ_N:
 			// Make sure sslStub.dwTemp.v[1] bytes are ready
-			if(TCPIsGetReady(hTCP) < sslStub.dwTemp.v[1])
+			if(TCPIsGetReady(hTCP) < sslStub.dwTemp.w[1])
 				return;
 			
 			// N will be stored in sslBuffer, which is currently in use
@@ -1550,19 +1558,19 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 				return;
 				
 			// Make sure we can claim RSA Engine
-			if(!RSABeginEncrypt(sslStub.dwTemp.v[1]))
+			if(!RSABeginEncrypt(sslStub.dwTemp.w[1]))
 				return;
 			sslRSAStubID = sslStubID;
 			
 			// Read N to proper location
-			for(i = 0; i < 128u - sslStub.dwTemp.v[1]; i++)
-				sslBuffer.full[i] = 0x00;
-			HSGetArray(hTCP, sslBuffer.full, sslStub.dwTemp.v[1]);
+//			for(i = 0; i < 128u - sslStub.dwTemp.v[1]; i++)
+//				sslBuffer.full[i] = 0x00;
+			HSGetArray(hTCP, sslBuffer.full, sslStub.dwTemp.w[1]);
 			
             if (sslStub.supplementaryDataType == SSL_SUPPLEMENTARY_DATA_CERT_PUBLIC_KEY)
             {
                 SSL_PKEY_INFO * tmpPKeyPtr = ((SSL_PKEY_INFO *)sslStub.supplementaryBuffer);
-                tmpPKeyPtr->pub_size_bytes = sslStub.dwTemp.v[1];
+                tmpPKeyPtr->pub_size_bytes = sslStub.dwTemp.w[1];
                 if (tmpPKeyPtr->pub_size_bytes <= sizeof (tmpPKeyPtr->pub_key))
                     memcpy (&tmpPKeyPtr->pub_key[0], sslBuffer.full, tmpPKeyPtr->pub_size_bytes);
             }
@@ -1570,9 +1578,9 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 
 			// Hash what we just read
 			SSLHashSync(sslStub.idSHA1);
-			HashAddData(&sslHash, sslBuffer.full, sslStub.dwTemp.v[1]);
+			HashAddData(&sslHash, sslBuffer.full, sslStub.dwTemp.w[1]);
 			SSLHashSync(sslStub.idMD5);
-			HashAddData(&sslHash, sslBuffer.full, sslStub.dwTemp.v[1]);
+			HashAddData(&sslHash, sslBuffer.full, sslStub.dwTemp.w[1]);
 			
 			// Generate { SSL_VERSION rand[46] } as pre-master secret & save
 			SSLSessionSync(sslStub.idSession);
@@ -1585,7 +1593,7 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 			// Set RSA engine to use this data and key
 			RSASetData(sslSession.masterSecret, 48, RSA_BIG_ENDIAN);
 			RSASetN(sslBuffer.full, RSA_BIG_ENDIAN);
-			RSASetResult(sslBuffer.full+128, RSA_BIG_ENDIAN);
+			RSASetResult(sslBuffer.full+sslStub.dwTemp.w[1], RSA_BIG_ENDIAN);
 			
 			// Start a new hash
 			HSStart();
@@ -1803,10 +1811,10 @@ static void SSLTxServerHelloDone(TCP_SOCKET hTCP)
 #if defined(STACK_USE_SSL_CLIENT)
 static void SSLTxClientKeyExchange(TCP_SOCKET hTCP)
 {
-	BYTE len;
+	WORD len;
 	
 	// Load length of modulus from RxServerCertificate
-	len = sslStub.dwTemp.v[1];
+	len = sslStub.dwTemp.w[1];
 	
 	// Make sure there's len+9 bytes free
 	if(TCPIsPutReady(hTCP) < len + 9)
@@ -1818,15 +1826,15 @@ static void SSLTxClientKeyExchange(TCP_SOCKET hTCP)
 	// Send handshake message header (hashed)
 	HSPut(hTCP, SSL_CLIENT_KEY_EXCHANGE);
 	HSPut(hTCP, 0x00);				
-	HSPut(hTCP, 0x00);				// Message length is (length of key) bytes
-	HSPut(hTCP, len);
+	HSPut(hTCP, (len>>8)&0xFF);				// Message length is (length of key) bytes
+	HSPut(hTCP, len&0xFF);
 	
 	// Suspend the handshake hasher and load the buffer
 	HSEnd();
 	SSLBufferSync(sslStub.idRxBuffer);	
 
 	// Send encrypted pre-master secret
-	TCPPutArray(hTCP, (BYTE*) sslBuffer.full + 0x80, len);
+	TCPPutArray(hTCP, (BYTE*) sslBuffer.full + len, len);
 	
 	// Free the RSA Engine
 	RSAEndUsage();
@@ -1834,9 +1842,9 @@ static void SSLTxClientKeyExchange(TCP_SOCKET hTCP)
 
 	// Hash what we just sent
 	SSLHashSync(sslStub.idSHA1);
-	HashAddData(&sslHash, sslBuffer.full + 0x80, len);
+	HashAddData(&sslHash, sslBuffer.full + len, len);
 	SSLHashSync(sslStub.idMD5);
-	HashAddData(&sslHash, sslBuffer.full + 0x80, len);
+	HashAddData(&sslHash, sslBuffer.full + len, len);
 	
 	// Generate the Master Secret
 	SSLKeysSync(sslStubID);
@@ -3271,7 +3279,7 @@ static WORD HSGetArray(TCP_SOCKET skt, BYTE *data, WORD len)
 		for(i = 0; i < len; )
 		{
 			// Determine how much we can read
-			rem = (sslBuffer.full + 255) - ptrHS;
+			rem = (sslBuffer.full + 256) - ptrHS;
 			if(rem > len - i)
 				rem = len - i;
 
@@ -3324,7 +3332,7 @@ static WORD HSGetArray(TCP_SOCKET skt, BYTE *data, WORD len)
 	sslStub.wRxBytesRem -= len;
 	sslStub.wRxHsBytesRem -= len;
 	
-	if(ptrHS > sslBuffer.full + 128)
+	if(ptrHS > sslBuffer.full + (sizeof(sslBuffer.full)/2))
 	{
 		HSEnd();
 		HSStart();

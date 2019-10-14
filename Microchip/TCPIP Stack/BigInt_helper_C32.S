@@ -52,9 +52,11 @@
 #define __COMPILER_H
 #include "HardwareProfile.h"
 #include "TCPIPConfig.h"
-#if (defined(STACK_USE_SSL_SERVER) || defined(STACK_USE_SSL_CLIENT)) && !defined(ENC100_INTERFACE_MODE)
+#include "TCPIP Stack/SSLClientSize.h"
 
-#include "TCPIP Stack/regdef.h" 
+#if (defined(STACK_USE_SSL_SERVER) || defined(STACK_USE_SSL_CLIENT)) && (!defined(ENC100_INTERFACE_MODE) || (SSL_RSA_CLIENT_SIZE > 1024))
+
+#include <p32xxxx.h> 
 
 #define  MAX_UNSIGNED_INT_VALUE     0xFFFFFFFF
 
@@ -147,7 +149,7 @@ AddCarry:
     nop
 
 addDone:
-    jr     $ra                # return to function from where you are called
+    jr     ra                # return to function from where you are called
     nop
 
  .end _addBI
@@ -217,7 +219,7 @@ SubBorrow:
     nop
 
 subDone:
-    jr     $ra
+    jr     ra
     nop
 
  .end _subBI
@@ -257,7 +259,7 @@ zDoZero:
     addiu  t1, t1, 4
     bne    t0, t1, zDoZero
     nop
-    jr      $ra
+    jr      ra
     nop
 
  .end _zeroBI
@@ -303,7 +305,7 @@ msbLoop:
 
 msbDone:
     sw     t0, 0(t2)
-    jr     $ra
+    jr     ra
     nop
 
  .end _msbBI
@@ -399,7 +401,7 @@ mContinue:
     addiu t6, t6, 4
 
 mDone:
-    jr      $ra
+    jr      ra
     nop
 
  .end _mulBI
@@ -546,7 +548,7 @@ mSubBorrow:
     nop
 
 masDone:
-    jr     $ra
+    jr     ra
     nop
  
  .end _masBI
@@ -598,7 +600,7 @@ cLoop:
     addiu  t1, t1, 4
     bne    t1,t0, cLoop
     nop
-    jr      $ra
+    jr      ra
     nop
 
 cZeroLoop:
@@ -610,7 +612,7 @@ cZeroLoopTest:
     nop
 
 cend:
-    jr      $ra
+    jr      ra
     nop
  
  .end _copyBI

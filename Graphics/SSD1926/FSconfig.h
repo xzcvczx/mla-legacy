@@ -153,7 +153,8 @@
             #define FS_free     free
         #endif
     #endif
-    #define INCLUDEFILE         < SSD1926_SDCard.h >
+
+    #include "SSD1926_SDCard.h"
 
     #define MDD_MediaInitialize SDInitialize
 

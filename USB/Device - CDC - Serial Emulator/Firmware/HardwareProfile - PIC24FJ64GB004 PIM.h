@@ -139,4 +139,17 @@
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
 
+    //These definitions are only relevant if the respective functions are enabled
+    //in the usb_config.h file.
+    //Make sure these definitions match the GPIO pins being used for your hardware
+    //setup.
+    #define UART_DTS PORTAbits.RA10
+    #define UART_DTR LATBbits.LATB2
+    #define UART_RTS LATCbits.LATC7
+    #define UART_CTS PORTBbits.RB14
+    
+    #define mInitRTSPin() {TRISCbits.TRISC7 = 0;}   //Configure RTS as a digital output.  
+    #define mInitCTSPin() {TRISBbits.TRISB14 = 1;}   //Configure CTS as a digital input.  (Make sure pin is digital if ANxx functions is present on the pin)
+    #define mInitDTSPin() {TRISAbits.TRISA10 = 1;}   //Configure DTS as a digital input.  (Make sure pin is digital if ANxx functions is present on the pin)
+    #define mInitDTRPin() {TRISBbits.TRISB2 = 0;}   //Configure DTR as a digital output.
 #endif  //HARDWARE_PROFILE_PIC24FJ64GB004_PIM_H

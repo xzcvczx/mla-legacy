@@ -4,22 +4,18 @@
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=Generator content="Microsoft Word 12 (filtered)">
 <title>Getting Started: Running the “Graphics MultiApp” demo</title>
-
 <style>
 <!--
  /* Font Definitions */
  @font-face
-	{font-family:"MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-@font-face
 	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Cambria;
 	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
-@font-face
-	{font-family:"\@MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin:0in;
@@ -114,30 +110,6 @@ p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
 	margin-bottom:.0001pt;
 	font-size:12.0pt;
 	font-family:"Times New Roman","serif";}
-p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
-	{margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
-	{margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
-	{margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
 span.Heading1Char
 	{mso-style-name:"Heading 1 Char";
 	mso-style-link:"Heading 1";
@@ -167,11 +139,44 @@ span.BalloonTextChar
 	{mso-style-name:"Balloon Text Char";
 	mso-style-link:"Balloon Text";
 	font-family:"Tahoma","sans-serif";}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
 p.element10, li.element10, div.element10
 	{mso-style-name:element10;
 	margin-right:0in;
 	margin-left:0in;
 	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0in;
+	margin-left:0in;
+	font-size:10.0pt;
 	font-family:"Times New Roman","serif";}
 .MsoChpDefault
 	{font-size:10.0pt;}
@@ -180,11 +185,6 @@ p.element10, li.element10, div.element10
 	margin:1.0in 65.95pt 1.0in 65.95pt;}
 div.Section1
 	{page:Section1;}
- /* List Definitions */
- ol
-	{margin-bottom:0in;}
-ul
-	{margin-bottom:0in;}
 -->
 </style>
 
@@ -211,8 +211,8 @@ Compatibility Matrix</a></h2>
 
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
-<p class=MsoPlainText><a name="_Toc276094098"></a><a name="running_the_demo"><span
-class=Heading2Char><span style='font-size:14.0pt'>Running the Demo</span></span></a><span
+<p class=MsoPlainText><a name="running_the_demo"></a><a name="_Toc276094098"></a><span
+class=Heading2Char><span style='font-size:14.0pt'>Running the Demo</span></span><span
 style='font-family:"Arial","sans-serif"'>:</span></p>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='font-size:10.0pt;
@@ -221,7 +221,12 @@ style='font-size:10.0pt;font-family:"Arial","sans-serif"'>ResourcesExternalSPIFl
 file in &quot;Graphic Resources” folder must be programmed into external flash
 memory installed on the selected hardware. Please refer to the <a
 href="Getting%20Started%20-%20Programming%20Memory%20on%20Graphics%20PICtail%20Daughter%20and%20Demo%20Boards.htm">Getting
-Started - Programming Memory on Graphics PICtail Daughter and Demo Boards.htm</a>.</span></p>
+Started - Programming Memory on Graphics PICtail Daughter and Demo Boards.htm</a>.
+To enable the programming mode of this demo refer to the flash <a
+href="#flash_programming_instructions">programming instructions</a> on this
+document.</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>The
 demo runs from two main menu screens, with Figure on top appearing on power-up
@@ -235,52 +240,56 @@ lower left of any of the demos, returns to the menu screen.</span></p>
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoPlainText style='page-break-after:avoid'><span style='font-family:
-"Arial","sans-serif"'>            </span><span style='font-family:"Arial","sans-serif"'><img
-border=0 width=468 height=649 src="images/GMAP%20Demo.jpg"></span></p>
+"Arial","sans-serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='font-family:"Arial","sans-serif"'><img border=0 width=468
+height=649 src="images/GMAP%20Demo.jpg"></span></p>
 
-<p class=MsoNormal><a name="_Toc195786561"></a><a name="_Toc195786501"></a><a
-name="_Toc195786411"><b>            </b></a></p>
+<p class=MsoNormal><a name="_Toc195786411"></a><a name="_Toc195786561"></a><a
+name="_Toc195786501"></a><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</b></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>The
 demos available on the first screen are:</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Lighting: this
-demonstrates a lighting control terminal application. Using the touch screen,
-sliders and buttons are provided to vary the red, green and blue lighting
-colors.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Lighting: this demonstrates a lighting
+control terminal application. Using the touch screen, sliders and buttons are
+provided to vary the red, green and blue lighting colors.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Language: this
-shows how multiple languages can be integrated into one application. Text
-examples in Roman, Cyrillic, simplified Chinese, Japanese and Korean alphabets
-are shown.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Language: this shows how multiple
+languages can be integrated into one application. Text examples in Roman,
+Cyrillic, simplified Chinese, Japanese and Korean alphabets are shown.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Game: this is a
-simple, interactive adaptation of a “snake” video game. Its operation is
-self-explanatory.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Game: this is a simple, interactive
+adaptation of a “snake” video game. Its operation is self-explanatory.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Animation: this
-shows animation of stored graphics, along with image scaling and interactivity.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Animation: this shows animation of
+stored graphics, along with image scaling and interactivity.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Drawing: this demo
-implements free-hand drawing with a selectable color palette using the touch
-screen.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Drawing: this demo implements
+free-hand drawing with a selectable color palette using the touch screen.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>ECG: this simulates
-an electrocardiogram display, demonstrating how analog data can be used to
-produce a graphic output. The “Ext” option switches between the fixed ECG
-display and a graphing display based on the potentiometer’s position.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>ECG: this simulates an
+electrocardiogram display, demonstrating how analog data can be used to produce
+a graphic output. The “Ext” option switches between the fixed ECG display and a
+graphing display based on the potentiometer’s position.</span></p>
 
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
@@ -288,35 +297,40 @@ display and a graphing display based on the potentiometer’s position.</span></p>
 demos available from the second screen are:</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Clock: this is a
-simple numeric date and time display, based on the microcontroller’s RTCC.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Clock: this is a simple numeric date
+and time display, based on the microcontroller’s RTCC.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Graph Demo: this
-demo uses the Chart widget from the Microchip Graphics Library to generate a
-wide range of bar and pie charts based on a fixed set of data.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Graph Demo: this demo uses the Chart
+widget from the Microchip Graphics Library to generate a wide range of bar and
+pie charts based on a fixed set of data.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>External Flash:
-this demo shows images or pictures stored in the on-board Flash memory.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>External Flash: this demo shows images
+or pictures stored in the on-board Flash memory.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Thumb Drive</span><span
-style='font-family:"Arial","sans-serif"'>: This portion is enabled when using
-the PIC devices with USB module. The demo uses the USB Host interface to read a
-thumb drive connected to the USB port and scan it for graphics files (JPEG or
-BMP formats only). The application then produces a directory of graphics
-images, and displays the corresponding file when selected.</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Thumb Drive: This portion is enabled
+when using the PIC devices with USB module. The demo uses the USB Host
+interface to read a thumb drive connected to the USB port and scan it for
+graphics files (JPEG or BMP formats only). The application then produces a
+directory of graphics images, and displays the corresponding file when
+selected.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>SD Card Demo: This
-portion is enabled when using the PIC devices with no USB module. The demo uses
-the MDD File System to read an SD Card connected to a SD &amp; MMC PICtail Plus<sup>TM</sup>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>SD Card Demo: This portion is enabled
+when using the PIC devices with no USB module. The demo uses the MDD File
+System to read an SD Card connected to a SD &amp; MMC PICtail Plus<sup>TM</sup>
 Daughter Board (AC164122) and scan it for graphics files (JPEG or BMP formats
 only). The application then produces a directory of graphics images, and
 displays the corresponding file when selected.</span></p>
@@ -325,10 +339,14 @@ displays the corresponding file when selected.</span></p>
 
 <p class=MsoPlainText><a
 href="Getting%20Started%20-%20Programming%20External%20Memory.htm"><b><i><span
-style='font-size:14.0pt;font-family:"Arial","sans-serif"'>Setting up the External
-Memory Programming Mode</span></i></b></a></p>
+style='font-size:14.0pt;font-family:"Arial","sans-serif"'>Setting up the
+External Memory Programming Mode</span></i></b></a></p>
 
-<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+<p class=MsoPlainText>&nbsp;</p>
+
+<p class=MsoPlainText style='margin-left:.5in'><a
+name="flash_programming_instructions"><b><span style='font-family:"Arial","sans-serif"'>Flash
+Programming Instructions</span></b></a><span style='font-family:"Arial","sans-serif"'>:</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>With
 the exceptions of all PIC32 Starter Kit based projects (which do not use
@@ -342,19 +360,22 @@ program the external memory:</span></p>
 PIC24FJ256DA210 Development Board</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:"Arial","sans-serif"'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Hold down MCLR and
-S2 switches on the board</span></p>
+style='font-family:"Arial","sans-serif"'>1.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Hold down MCLR and S2 switches on the
+board</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:"Arial","sans-serif"'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Release MCLR while
-holding down S2. This will place the board on programming mode.</span></p>
+style='font-family:"Arial","sans-serif"'>2.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Release MCLR while holding down S2.
+This will place the board on programming mode.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:"Arial","sans-serif"'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Send the hex data
-from the External Memory Programmer utility.</span></p>
+style='font-family:"Arial","sans-serif"'>3.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Send the hex data from the External
+Memory Programmer utility.</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
@@ -362,19 +383,22 @@ from the External Memory Programmer utility.</span></p>
 Explorer 16 Board</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:"Arial","sans-serif"'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Hold down MCLR and
-S6 switches on the board</span></p>
+style='font-family:"Arial","sans-serif"'>1.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Hold down MCLR and S6 switches on the
+board</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:"Arial","sans-serif"'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Release MCLR while
-holding down S6. This will place the board on programming mode.</span></p>
+style='font-family:"Arial","sans-serif"'>2.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Release MCLR while holding down S6.
+This will place the board on programming mode.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
-style='font-family:"Arial","sans-serif"'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Send the hex data
-from the External Memory Programmer utility.</span></p>
+style='font-family:"Arial","sans-serif"'>3.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Send the hex data from the External
+Memory Programmer utility.</span></p>
 
 <p class=MsoNormal><b>&nbsp;</b></p>
 
@@ -384,8 +408,8 @@ from the External Memory Programmer utility.</span></p>
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;
 font-family:"Arial","sans-serif";color:black'>The Microchip name and logo, the
-Microchip logo, MPLAB, and PIC are registered trademarks of Microchip
-Technology Incorporated in the U.S.A. and other countries.</span></i></p>
+Microchip logo, MPLAB, and PIC are registered trademarks of Microchip Technology
+Incorporated in the U.S.A. and other countries.</span></i></p>
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;
 font-family:"Arial","sans-serif";color:black'>PICDEM and PICTail are trademarks

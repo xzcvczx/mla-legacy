@@ -88,7 +88,11 @@ echo.
 
 rd .\Objects /S /Q
 
-rd .\"Object - MDD File System-SD Data Logger-PIC24" /S /Q
+rd .\"Object - MDD File System-SD Data Logger-PIC24F" /S /Q
+
+rd .\"Object - MDD File System-SD Data Logger-dsPIC33E" /S /Q
+
+rd .\"Object - MDD File System-SD Data Logger-PIC24E" /S /Q
 
 rd .\"Object - MDD File System-SD Data Logger-PIC32" /S /Q
 

@@ -43,6 +43,7 @@
  * 04/30/10	    Fixed problem on polypoints when at the 
  *				edge of the screen.
  * 05/31/11     removed USB HID implementation
+ * 10/13/11     Edit Boxes should be created with no EB_CARET state set.
  *****************************************************************************/
 #include "MainDemo.h"
 
@@ -419,7 +420,7 @@ void CreateRGBDemo(void)
         EB1YPOS,
         EBXPOS + EBWIDTH,
         EB1YPOS + EBHEIGHT,         // dimension
-        EB_DRAW | EB_CARET | EB_CENTER_ALIGN,   // will be dislayed after creation
+        EB_DRAW | EB_CENTER_ALIGN,   // will be dislayed after creation
         redValue,
         MAXCHARSIZE,
         RGBRedScheme
@@ -432,7 +433,7 @@ void CreateRGBDemo(void)
         EB2YPOS,
         EBXPOS + EBWIDTH,
         EB2YPOS + EBHEIGHT, // dimension
-        EB_DRAW | EB_CARET | EB_CENTER_ALIGN,   // will be dislayed after creation
+        EB_DRAW | EB_CENTER_ALIGN,   // will be dislayed after creation
         greenValue,
         MAXCHARSIZE,
         RGBGreenScheme
@@ -445,7 +446,7 @@ void CreateRGBDemo(void)
         EB3YPOS,
         EBXPOS + EBWIDTH,
         EB3YPOS + EBHEIGHT, // dimension
-        EB_DRAW | EB_CARET | EB_CENTER_ALIGN,   // will be dislayed after creation
+        EB_DRAW | EB_CENTER_ALIGN,   // will be dislayed after creation
         blueValue,
         MAXCHARSIZE,
         RGBBlueScheme

@@ -41,7 +41,7 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="PIC24FJ128GA010_PIM" type="2">
+    <conf name="PIC24FJ128GA010_PIM_Exp_16_Board" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ128GA010</targetDevice>
@@ -58,32 +58,33 @@
         </linkerTool>
       </compileType>
       <C30>
-        <property key="scalar-model" value="default"/>
+        <property key="optimization-level" value="0"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-short-double" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../Include;../../Include/MDD File System;../../Microchip/Include;../../Microchip/Include/MDD File System;../../../MDD File System-SD Data Logger"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="data-model" value="default"/>
-        <property key="enable-all-warnings" value="true"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="0"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="data-model" value="default"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-ansi-std" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="default"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="scalar-model" value="default"/>
       </C30>
       <C30-AS>
         <property key="omit-debug-dirs" value="false"/>
         <property key="extra-include-directories-for-assembler" value=".."/>
         <property key="preprocessor-macros" value=""/>
         <property key="list-file" value=""/>
-        <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
         <property key="relax" value="false"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
@@ -101,6 +102,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value="100"/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -111,25 +113,79 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="true"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
-        <property key="enable-check-sections" value="true"/>
+        <property key="enable-check-sections" value="false"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories" value=".."/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories" value=".."/>
       </C30-LD>
       <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="legacy-libc" value="false"/>
       </C30Global>
       <RealICEPlatformTool>
+        <property key="UART 2" value="true"/>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="UART 1" value="true"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.id" value="false"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="tracecontrol.portselect" value="0"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="INPUT CAPTURE 5" value="true"/>
+        <property key="INPUT CAPTURE 4" value="true"/>
+        <property key="INPUT CAPTURE 3" value="true"/>
+        <property key="INPUT CAPTURE 2" value="true"/>
+        <property key="INPUT CAPTURE 1" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="ADC 1" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="OUTPUT COMPARE 5" value="true"/>
+        <property key="OUTPUT COMPARE 4" value="true"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="OUTPUT COMPARE 3" value="true"/>
+        <property key="OUTPUT COMPARE 2" value="true"/>
+        <property key="OUTPUT COMPARE 1" value="true"/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="memories.programmemory.end" value="0x157fb"/>
+        <property key="TIMER5" value="true"/>
+        <property key="TIMER4" value="true"/>
+        <property key="SPI 2" value="true"/>
+        <property key="TIMER3" value="true"/>
+        <property key="SPI 1" value="true"/>
+        <property key="TIMER2" value="true"/>
+        <property key="tracecontrol.spiselect" value="0"/>
+        <property key="TIMER1" value="true"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="CRC" value="true"/>
+        <property key="I2C2" value="true"/>
+        <property key="memories.aux" value="false"/>
+        <property key="I2C1" value="true"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="tracecontrol.medium" value="0"/>
+        <property key="programoptions.preserveprogramrange.end" value="0xff"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC32MX360F512L_PIM" type="2">
+    <conf name="PIC32MX360F512L_PIM_Exp_16_Board" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX360F512L</targetDevice>
@@ -146,16 +202,16 @@
         </linkerTool>
       </compileType>
       <C32>
+        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="..;..\..\Include;..\..\Include\MDD File System;..\..\Microchip\Include;..\..\Microchip\Include\MDD File System;..\..\..\MDD File System-SD Data Logger"/>
-        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros" value=""/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -165,6 +221,22 @@
         <property key="isolate-each-function" value="false"/>
       </C32>
       <C32-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
       </C32-AS>
       <C32-LD>
         <property key="exclude-floating-point-library" value="false"/>

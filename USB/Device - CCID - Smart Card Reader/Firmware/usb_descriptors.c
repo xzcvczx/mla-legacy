@@ -171,7 +171,7 @@ ROM USB_DEVICE_DESCRIPTOR device_dsc=
     0x12,                   // Size of this descriptor in bytes
     USB_DESCRIPTOR_DEVICE,  // DEVICE descriptor type
     0x0200,                 // USB Spec Release Number in BCD format
-    0x0B,                   // Class Code
+    0x00,                   // Class Code
     0x00,                   // Subclass code
     0x00,                   // Protocol code
     USB_EP0_BUFF_SIZE,          // Max packet size for EP0, see usb_config.h

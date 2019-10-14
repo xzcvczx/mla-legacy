@@ -291,7 +291,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Microsoft Sans Serif" size="11" style="0"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="mpfsimage"/>
+            <Property name="text" type="java.lang.String" value="MPFSImg2"/>
             <Property name="toolTipText" type="java.lang.String" value="File name for the image you&apos;d like to create."/>
           </Properties>
           <AuxValues>
@@ -575,6 +575,9 @@
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="jPanel6">
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+      </AuxValues>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
         <Property name="useNullLayout" type="boolean" value="false"/>
@@ -636,6 +639,9 @@
               <Dimension value="[16, 16]"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+          </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
               <AbsoluteConstraints x="10" y="50" width="173" height="20"/>
@@ -646,9 +652,12 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="[Generator Idle]"/>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="9"/>
+          </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="190" y="50" width="420" height="20"/>
+              <AbsoluteConstraints x="190" y="50" width="410" height="20"/>
             </Constraint>
           </Constraints>
         </Component>

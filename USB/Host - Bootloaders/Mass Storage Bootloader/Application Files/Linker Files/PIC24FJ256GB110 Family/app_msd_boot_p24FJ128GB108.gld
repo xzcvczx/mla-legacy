@@ -18,8 +18,7 @@ MEMORY
   ivt            : ORIGIN = 0x4,           LENGTH = 0xFC
   aivt           : ORIGIN = 0x104,         LENGTH = 0xFC
   app_ivt        : ORIGIN = 0xA800,        LENGTH = 0x110
-  program (xr)   : ORIGIN = 0xA910,        LENGTH = 0xACE8
-  config4        : ORIGIN = 0x157F8,       LENGTH = 0x2
+  program (xr)   : ORIGIN = 0xA910,        LENGTH = 0xAEE6
   config3        : ORIGIN = 0x157FA,       LENGTH = 0x2
   config2        : ORIGIN = 0x157FC,       LENGTH = 0x2
   config1        : ORIGIN = 0x157FE,       LENGTH = 0x2
@@ -60,6 +59,16 @@ SECTIONS
         SHORT((ABSOLUTE(__reset) >> 16) & 0x7F);
         SHORT(0);
   } >reset
+
+
+  /*
+  ** Interrupt Vector Tables
+  **
+  ** The primary and alternate tables are loaded
+  ** here, between sections .reset and .text.
+  ** Vector table source code appears below.
+  */
+
 
   /*
   ** User Code and Library Code
@@ -495,8 +504,6 @@ _CNPD4bits    = 0x5A;
  CNPD5        = 0x5C;
 _CNPD5        = 0x5C;
 _CNPD5bits    = 0x5C;
- CNPD6        = 0x5E;
-_CNPD6        = 0x5E;
  CNEN1        = 0x60;
 _CNEN1        = 0x60;
 _CNEN1bits    = 0x60;
@@ -512,8 +519,6 @@ _CNEN4bits    = 0x66;
  CNEN5        = 0x68;
 _CNEN5        = 0x68;
 _CNEN5bits    = 0x68;
- CNEN6        = 0x6A;
-_CNEN6        = 0x6A;
  CNPU1        = 0x6C;
 _CNPU1        = 0x6C;
 _CNPU1bits    = 0x6C;
@@ -529,8 +534,6 @@ _CNPU4bits    = 0x72;
  CNPU5        = 0x74;
 _CNPU5        = 0x74;
 _CNPU5bits    = 0x74;
- CNPU6        = 0x76;
-_CNPU6        = 0x76;
  INTCON1      = 0x80;
 _INTCON1      = 0x80;
 _INTCON1bits  = 0x80;
@@ -639,6 +642,9 @@ _IPC22bits    = 0xD0;
  IPC23        = 0xD2;
 _IPC23        = 0xD2;
 _IPC23bits    = 0xD2;
+ INTTREG      = 0xE0;
+_INTTREG      = 0xE0;
+_INTTREGbits  = 0xE0;
  TMR1         = 0x100;
 _TMR1         = 0x100;
  PR1          = 0x102;
@@ -1211,12 +1217,6 @@ _U1TOKbits    = 0x49E;
  U1SOF        = 0x4A0;
 _U1SOF        = 0x4A0;
 _U1SOFbits    = 0x4A0;
- U1BDTP2      = 0x4A2;
-_U1BDTP2      = 0x4A2;
-_U1BDTP2bits  = 0x4A2;
- U1BDTP3      = 0x4A4;
-_U1BDTP3      = 0x4A4;
-_U1BDTP3bits  = 0x4A4;
  U1CNFG1      = 0x4A6;
 _U1CNFG1      = 0x4A6;
 _U1CNFG1bits  = 0x4A6;
@@ -1490,7 +1490,7 @@ _PMD5bits     = 0x778;
 _PMD6         = 0x77A;
 _PMD6bits     = 0x77A;
 /*
-** ======= Base Addresses for Various Peripherals ======
+** ======= Base Addresses for Various Peripherals and ACC ======
 */
 
  IC1          = 0x144;

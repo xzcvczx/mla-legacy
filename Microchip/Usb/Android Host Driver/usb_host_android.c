@@ -596,8 +596,9 @@ BOOL AndroidAppInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
             {
                 devices[i].countDown = 0;
                 devices[i].protocolHandle = protocolVersions[0].init(devices[i].address, devices[i].flags, devices[i].clientDriverID);
+                return TRUE;
             }
-            return TRUE;
+            return FALSE;
         }
     }
 
@@ -606,10 +607,23 @@ BOOL AndroidAppInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
     {
         if(devices[i].state == NO_DEVICE)
         {
-            devices[i].state = DEVICE_ATTACHED;
-            devices[i].address = address;
-            devices[i].flags = flags;
-            devices[i].clientDriverID = clientDriverID;
+            if( (flags & ANDROID_INIT_FLAG_BYPASS_PROTOCOL) == ANDROID_INIT_FLAG_BYPASS_PROTOCOL)
+            {
+                devices[i].protocol = 1;
+                devices[i].countDown = 0;
+                devices[i].flags = flags;
+                devices[i].state = READY;
+                devices[i].clientDriverID = clientDriverID;
+                devices[i].address = address;
+                devices[i].protocolHandle = protocolVersions[0].init(devices[i].address, devices[i].flags, devices[i].clientDriverID);
+            }
+            else
+            {
+                devices[i].state = DEVICE_ATTACHED;
+                devices[i].address = address;
+                devices[i].flags = flags;
+                devices[i].clientDriverID = clientDriverID;
+            }
 
             return TRUE;
         }

@@ -102,13 +102,13 @@ This file defines all of the hardware-specific information for the project.
 
 
 // Define the RTCC default initialization.
-#define RTCC_DEFAULT_DAY        13        // Date
-#define RTCC_DEFAULT_MONTH      05        // Month
+#define RTCC_DEFAULT_DAY        18        // Date
+#define RTCC_DEFAULT_MONTH      10        // Month
 #define RTCC_DEFAULT_YEAR       11        // Year
-#define RTCC_DEFAULT_WEEKDAY    5         // Day
+#define RTCC_DEFAULT_WEEKDAY    2         // Day
 #define RTCC_DEFAULT_HOUR       10        // hour
 #define RTCC_DEFAULT_MINUTE     10        // Minute
-#define RTCC_DEFAULT_SECOND     1         // Second
+#define RTCC_DEFAULT_SECOND     10        // Second
 
 #if defined(__PIC24F__)
     #include <p24fxxxx.h>

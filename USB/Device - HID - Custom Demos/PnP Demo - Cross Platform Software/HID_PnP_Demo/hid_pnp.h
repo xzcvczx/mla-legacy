@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
-#include "./HIDAPI/hidapi.h"
+#include "../HIDAPI/hidapi.h"
 
 #include <wchar.h>
 #include <string.h>

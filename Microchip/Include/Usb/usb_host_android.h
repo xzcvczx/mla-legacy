@@ -52,6 +52,14 @@ Change History
    start and this error is returned to the user. */
 #define USB_ERROR_BUFFER_TOO_SMALL      USB_ERROR_CLASS_DEFINED + 0
 
+/* This defintion is used in the usbClientDrvTable[] in the flags field in order to
+   bypass the Android accessory initialization phase.  This should be used only when
+   a device is known to already be in accessory mode (in protocol v1 if the VID/PID
+   are already matching the accessory mode VID/PID).  In some cases an Android device
+   doesn't exit accessory mode and thus those other protocol commands will not work.
+   This flag must be used to save those devices */
+#define ANDROID_INIT_FLAG_BYPASS_PROTOCOL           0x00000001
+
 
 #ifndef ANDROID_BASE_OFFSET
     /* Defines the event offset for the Android specific events.  If not defined, then a default of 0 is used. */

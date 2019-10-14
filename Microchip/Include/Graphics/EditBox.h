@@ -41,6 +41,10 @@
  *				EB_DRAW_CARET when set will draw the caret. EB_DRAW_CARET can
  *				also be enabled by the EB_FOCUSED bit.
  *				EB_CARET when set will always draw the caret.
+ * 08/05/11     EB_CARET will indicate that the cursor caret will always be drawn.
+ *              Cursor caret drawing will also serve as focus indicator. EB_DRAW_CARET 
+ *              with EB_FOCUSED set will draw the cursor caret regardless of EB_CARET 
+ *              state.
  *****************************************************************************/
 #ifndef _EDITBOX_H
     #define _EDITBOX_H
@@ -51,14 +55,12 @@
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-    #define EB_FOCUSED      0x0001  // Bit for focused state.
+    #define EB_FOCUSED      0x0001  // Bit for focused state. Cursor caret will be drawn when EB_DRAW_CARET is also set.
     #define EB_DISABLED     0x0002  // Bit for disabled state.
     #define EB_RIGHT_ALIGN  0x0004  // Bit to indicate text is left aligned.
     #define EB_CENTER_ALIGN 0x0008  // Bit to indicate text is center aligned.
-    #define EB_CARET        0x0010  // Bit to indicate the cursor will always be shown. 
-    								// This bit can be set when focused and reset when object is disabled. 
-    								// Application can also set and clear the bit through SetState() or ClrState().
-    #define EB_DRAW_CARET   0x2000  // Bit to indicate the cursor caret will be redrawn if the EB_CARET state bit is set.
+    #define EB_CARET        0x0010  // Bit to indicate the cursor caret will always be shown. 
+    #define EB_DRAW_CARET   0x2000  // Bit to indicate the cursor caret will be drawn if EB_FOCUSED state bit is set and erase when EB_FOCUSED state bit is not set. 
     #define EB_DRAW         0x4000  // Bit to indicate whole edit box must be redrawn.
     #define EB_HIDE         0x8000  // Bit to remove object from screen.
     #define EB_INDENT       0x02    // Indent for the text from the frame.

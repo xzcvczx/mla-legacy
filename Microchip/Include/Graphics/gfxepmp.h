@@ -56,9 +56,9 @@
 #ifdef USE_GFX_EPMP
 
 #ifdef USE_16BIT_PMP
-extern volatile __eds__ WORD __attribute__((space(eds),noload)) epmp_data;
+extern volatile __eds__ WORD __attribute__((eds,noload)) epmp_data;
 #else
-extern volatile __eds__ BYTE __attribute__((space(eds),noload)) epmp_data;
+extern volatile __eds__ BYTE __attribute__((eds,noload)) epmp_data;
 #endif
 
 // Note:

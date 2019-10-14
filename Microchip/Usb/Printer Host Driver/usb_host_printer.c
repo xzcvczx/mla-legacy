@@ -1062,7 +1062,7 @@ BYTE USBHostPrinterGetStatus( BYTE deviceAddress, BYTE *status )
 
 /****************************************************************************
   Function:
-    void USBHostPrinterRead( BYTE deviceAddress, BYTE *buffer, DWORD length,
+    BYTE USBHostPrinterRead( BYTE deviceAddress, BYTE *buffer, DWORD length,
                 BYTE transferFlags )
 
   Description:

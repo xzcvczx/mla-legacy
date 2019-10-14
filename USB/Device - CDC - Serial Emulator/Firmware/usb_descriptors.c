@@ -233,8 +233,8 @@ ROM BYTE configDescriptor1[]={
     USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
     _EP01_IN,            //EndpointAddress
     _INTERRUPT,                       //Attributes
-    0x08,0x00,                  //size
-    0x02,                       //Interval
+    0x0A,0x00,                  //size
+    0x01,                       //Interval
 
     /* Interface Descriptor */
     9,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes

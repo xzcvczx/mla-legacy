@@ -173,7 +173,7 @@
     !defined (MEB_BOARD) &&                 \
     !defined (GFX_PICTAIL_LCC) &&           \
 	!defined (MIKRO_BOARD)
-	#error "Error: Graphics Hardware Platform is not defined! One of the following boards (GFX_PICTAIL_V3, GFX_PICTAIL_V3E, GFX_PICTAIL_V2, PIC24FJ256DA210_DEV_BOARD, MEB_BOARD, GFX_PICTAIL_LCC, MIKRO_BOARD) must be defined.
+	#error "Error: Graphics Hardware Platform is not defined! One of the following boards (GFX_PICTAIL_V3, GFX_PICTAIL_V3E, GFX_PICTAIL_V2, PIC24FJ256DA210_DEV_BOARD, MEB_BOARD, GFX_PICTAIL_LCC, MIKRO_BOARD) must be defined."
 #endif
 
 /*
@@ -558,7 +558,7 @@
 	#endif // #if defined (GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E) || defined (GFX_USE_DISPLAY_PANEL_TFT2N0369_E) ||....
 	
 // Using TFT_G320240DTSW_69W_TP_E Display Panel
-	#if defined (GFX_USE_DISPLAY_PANEL_TFT_G320240DTSW_69W_TP_E) || defined (GFX_USE_DISPLAY_PANEL_35QVW0T)  
+	#if defined (GFX_USE_DISPLAY_PANEL_TFT_G320240DTSW_69W_TP_E) 
 		#define DISP_ORIENTATION		0
         #define DISP_HOR_RESOLUTION		320
         #define DISP_VER_RESOLUTION		240
@@ -570,7 +570,36 @@
         #define DISP_VER_BACK_PORCH     7
         #define DISP_VER_FRONT_PORCH    5
     	#define GFX_LCD_TYPE            GFX_LCD_TFT
-	#endif // #if defined (GFX_USE_DISPLAY_PANEL_TFT_G320240DTSW_69W_TP_E) || defined (GFX_USE_DISPLAY_PANEL_35QVW0T) 
+
+	#endif // #if defined (GFX_USE_DISPLAY_PANEL_TFT_G320240DTSW_69W_TP_E) 
+
+// Using TFT_35QVW0T Display Panel
+	#if defined (GFX_USE_DISPLAY_PANEL_35QVW0T)  
+		#define DISP_ORIENTATION		0
+        #define DISP_HOR_RESOLUTION		320
+        #define DISP_VER_RESOLUTION		240
+        #define DISP_DATA_WIDTH			18
+        #define DISP_HOR_PULSE_WIDTH    18 
+        #define DISP_HOR_BACK_PORCH     50 
+        #define DISP_HOR_FRONT_PORCH    20 
+        #define DISP_VER_PULSE_WIDTH    8
+        #define DISP_VER_BACK_PORCH     10 
+        #define DISP_VER_FRONT_PORCH    4 
+    	#define GFX_LCD_TYPE            GFX_LCD_TFT
+
+        #if defined (GFX_USE_DISPLAY_CONTROLLER_MCHP_DA210)
+            #define GFX_DISPLAYENABLE_ENABLE
+            #define GFX_HSYNC_ENABLE
+            #define GFX_VSYNC_ENABLE
+            #define GFX_DISPLAYPOWER_ENABLE
+            #define GFX_CLOCK_POLARITY                  GFX_ACTIVE_LOW
+            #define GFX_DISPLAYENABLE_POLARITY          GFX_ACTIVE_HIGH
+            #define GFX_HSYNC_POLARITY                  GFX_ACTIVE_LOW
+            #define GFX_VSYNC_POLARITY                  GFX_ACTIVE_LOW
+            #define GFX_DISPLAYPOWER_POLARITY           GFX_ACTIVE_HIGH
+        #endif //#if (GFX_USE_DISPLAY_CONTROLLER_MCHP_DA210)
+	#endif // #if defined (GFX_USE_DISPLAY_PANEL_35QVW0T)  
+
 
 // Using PH480272T_005_I06Q Display Panel
 	#if defined (GFX_USE_DISPLAY_PANEL_PH480272T_005_I06Q) 
@@ -688,8 +717,8 @@
     #define USE_TCON_SSD1289
     #define USE_TCON_MODULE
     
-#elif defined (GFX_USE_DISPLAY_PANEL_TFT_G320240DTSW_69W_TP_E)
-    #define GFX_USE_TCON_HX8238
+#elif defined (GFX_USE_DISPLAY_PANEL_TFT_G320240DTSW_69W_TP_E) || defined (GFX_USE_DISPLAY_PANEL_35QVW0T)
+    #define USE_TCON_HX8238
     #define USE_TCON_MODULE
 
 #else
@@ -764,7 +793,7 @@
         #define PMP_DATA_HOLD_TIME                 (0)    
 
     #else
-        #error "USE_GFX_PMP is defined but no timing values are defined for the selected hardware inteface"
+        #error "USE_GFX_PMP is defined but no timing values are defined for the selected hardware interface. Define the following timing paraters: PMP_DATA_SETUP_TIME, PMP_DATA_WAIT_TIME, PMP_DATA_HOLD_TIME."
     #endif
 
 #endif //#if defined (USE_GFX_PMP) 
@@ -824,7 +853,8 @@
 		#define EPMPCS2_DATA_HOLD_TIME		        (0)     // bsaed on OE to data high-Z output 
     
     #else
-        #error "USE_GFX_PMP is defined but no timing values are defined for the selected hardware inteface"
+        #error "USE_GFX_EPMP is defined but no timing values are defined for the selected hardware interface. Define the following timing paraters: EPMPCSx_DATA_SETUP_TIME, EPMPCSx_DATA_WAIT_TIME, EPMPCSx_DATA_HOLD_TIME, where x is the chip select number (1 or 2)."
+
     #endif
     
 #endif //#if defined (USE_GFX_PMP) || defined (USE_GFX_EPMP)
@@ -972,6 +1002,9 @@
     #elif defined (GFX_USE_DISPLAY_PANEL_TFT_640480_8_E)    
         #define BACKLIGHT_ENABLE_LEVEL      0
         #define BACKLIGHT_DISABLE_LEVEL     1
+    #elif defined (GFX_USE_DISPLAY_PANEL_35QVW0T)
+        #define BACKLIGHT_ENABLE_LEVEL      0
+        #define BACKLIGHT_DISABLE_LEVEL     1
     #else
         // default setting is logic low  
         #define BACKLIGHT_ENABLE_LEVEL      0
@@ -1098,7 +1131,7 @@
 
     #else
     
-        #error "Selected Device is not supported"
+        #error "Selected PIC Device is not supported"
         
     #endif
 
@@ -1762,14 +1795,14 @@
             #define ADC_XPOS    13
             #define ADC_YPOS    12
 
-	        // Y port definitions
+	        // X port definitions
             #define ADPCFG_XPOS AD1PCFGbits.PCFG13
             #define LAT_XPOS    LATBbits.LATB13
             #define TRIS_XPOS   TRISBbits.TRISB13
             #define LAT_XNEG    LATBbits.LATB11
             #define TRIS_XNEG   TRISBbits.TRISB11
  
-        	// X port definitions
+        	// Y port definitions
             #define ADPCFG_YPOS AD1PCFGbits.PCFG12
             #define LAT_YPOS    LATBbits.LATB12
             #define TRIS_YPOS   TRISBbits.TRISB12
@@ -1824,8 +1857,22 @@
 		  defined (PIC24FJ256DA210_DEV_BOARD)   || \
 	      defined (MEB_BOARD) 
 	/* ----------------------------------------- */
-		#if defined (GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E) ||     \
-            defined (GFX_USE_DISPLAY_PANEL_TFT_640480_8_E)	       ||     \
+		#if defined (GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E) 
+
+			#if (DISP_ORIENTATION == 0)	
+				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
+				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
+			#elif (DISP_ORIENTATION == 180)	
+				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
+                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   5     
+			#elif (DISP_ORIENTATION == 270)	
+				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
+                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   5     
+			#endif	
+
+        #endif
+
+		#if defined (GFX_USE_DISPLAY_PANEL_TFT_640480_8_E)	       ||     \
             defined (GFX_USE_DISPLAY_PANEL_TFT_800480_33_E)	
 
 			#if (DISP_ORIENTATION == 0)	
@@ -1833,10 +1880,10 @@
 				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
 			#elif (DISP_ORIENTATION == 180)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-				#define TOUCHSCREEN_RESISTIVE_FLIP_X
+                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   5     
 			#elif (DISP_ORIENTATION == 270)	
-				#define TOUCHSCREEN_RESISTIVE_FLIP_X
 				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
+                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR   4     
 			#endif	
 
         #endif
@@ -1846,10 +1893,10 @@
 
             #if (DISP_ORIENTATION == 90)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
-				#define TOUCHSCREEN_RESISTIVE_FLIP_X
+                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR    6
 			#elif (DISP_ORIENTATION == 180)	
-				#define TOUCHSCREEN_RESISTIVE_FLIP_X
 				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
+                #define TOUCHSCREEN_RESISTIVE_CALIBRATION_SCALE_FACTOR    5
 			#elif (DISP_ORIENTATION == 270)	
 				#define TOUCHSCREEN_RESISTIVE_SWAP_XY
 				#define TOUCHSCREEN_RESISTIVE_FLIP_Y
@@ -2119,7 +2166,7 @@
 				#define SST25_SDI_LAT    LATGbits.LATG7      // SPI data in,  I/O pin latch.
 				#define SST25_SDI_ANS    ANSELGbits.ANSG7    // SPI data in, I/O pin analog/digital selection.
 			#else
-				#error "SPI Channel can't be used for SPI Flash"
+				#error "When using dsPIC33E or PIC24E starter kits, MultiMedia Expansion Board (MEB) needs to use SPI channel 2 (SST25_SPI_CHANNEL == 2) for for SPI Flash"
 			#endif
 			
 		#else
@@ -2136,7 +2183,7 @@
 	    		#define SST25_CS_LAT        LATFbits.LATF12
 	    		#define SPI_FLASH_CHANNEL   CPLD_SPI3A
 	    	#else
-	    		#error "SPI Channel can't be used for SPI Flash"
+				#error "MultiMedia Expansion Board (MEB) needs to use SPI channels 2,3 or 4 (SST25_SPI_CHANNEL == 2, 3 or 4) for for SPI Flash"
 	    	#endif
 	    #endif
 
@@ -2244,7 +2291,7 @@
 
 	/* ----------------------------------------- */
 	#if defined (PIC24FJ256DA210_DEV_BOARD) 
-		#if defined (GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
+		#if defined (GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E) || defined (GFX_USE_DISPLAY_PANEL_35QVW0T)
 	/* ----------------------------------------- */
 		
 		#define TCON_CS_LAT      LATAbits.LATA0   //_RA0
@@ -2271,20 +2318,30 @@
 		#if defined (GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
 	/* ----------------------------------------- */
 		
-		#define TCON_CS_LAT      LATCbits.LATC2   //_RA0
-		#define TCON_CS_TRIS     TRISCbits.TRISC2 //_TRISA0
+		#define TCON_CS_LAT      LATCbits.LATC2   
+		#define TCON_CS_TRIS     TRISCbits.TRISC2 
 		#define TCON_CS_DIG()
-	    
-		#define TCON_SCL_LAT     LATDbits.LATD10   //_RD8
-		#define TCON_SCL_TRIS    TRISDbits.TRISD10 //_TRISD8
+
+	      #if defined(__32MX795F512L__) 
+		#define TCON_SCL_LAT     LATDbits.LATD10   
+		#define TCON_SCL_TRIS    TRISDbits.TRISD10 
 		#define TCON_SCL_DIG()
 	    
-		#define TCON_SDO_LAT     LATDbits.LATD0   //_RD0
-		#define TCON_SDO_TRIS    TRISDbits.TRISD0 //_TRISB1
+		#define TCON_SDO_LAT     LATDbits.LATD0   
+		#define TCON_SDO_TRIS    TRISDbits.TRISD0 
 		#define TCON_SDO_DIG()   1;
+	      #else
+		#define TCON_SCL_LAT     LATFbits.LATF6   
+		#define TCON_SCL_TRIS    TRISFbits.TRISF6 
+		#define TCON_SCL_DIG()
 	    
-		#define TCON_DC_LAT      LATBbits.LATB3   //_RB0
-		#define TCON_DC_TRIS     TRISBbits.TRISB3 //_TRISB0
+		#define TCON_SDO_LAT     LATFbits.LATF8   
+		#define TCON_SDO_TRIS    TRISFbits.TRISF8 
+		#define TCON_SDO_DIG()   1;
+            #endif   
+
+		#define TCON_DC_LAT      LATBbits.LATB3   
+		#define TCON_DC_TRIS     TRISBbits.TRISB3 
 		#define TCON_DC_DIG()    1;
 		
 		#endif // #if defined (GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
@@ -2339,7 +2396,10 @@
         #define GFX_IPU_TEMP_DATA_TRANSFER_ARRAY_SIZE   (1024)
 
 	#else
-		#warning "EPMP CS1 Base Address not defined. If you are using IPU make sure that the GFX_COMPRESSED_DATA_RAM_ADDRESS & GFX_DECOMPRESSED_DATA_RAM_ADDRESS are allocated properly in internal memory."                   
+        // a check if the buffer start address is mapped outside the PIC24FJ256DA210
+        #if (GFX_DISPLAY_BUFFER_START_ADDRESS >= 0x00017700ul)
+		    #warning "EPMP CS1 or CS2 Base Addresses are not defined. If you are using IPU make sure that the GFX_COMPRESSED_DATA_RAM_ADDRESS & GFX_DECOMPRESSED_DATA_RAM_ADDRESS are allocated properly in internal memory."                   
+        #endif
     #endif
 
 #endif //#if defined (PIC24FJ256DA210_DEV_BOARD)
@@ -2452,10 +2512,10 @@ typedef enum
 /*********************************************************************
 * RTCC DEFAULT INITIALIZATION (these are values to initialize the RTCC
 *********************************************************************/
-#define RTCC_DEFAULT_DAY        02      // 2nd
-#define RTCC_DEFAULT_MONTH      06      // June
+#define RTCC_DEFAULT_DAY        18      // 18th
+#define RTCC_DEFAULT_MONTH      10      // October
 #define RTCC_DEFAULT_YEAR       11      // 2011
-#define RTCC_DEFAULT_WEEKDAY    05      // Friday
+#define RTCC_DEFAULT_WEEKDAY    02      // Tuesday
 #define RTCC_DEFAULT_HOUR       10      // 10:10:01
 #define RTCC_DEFAULT_MINUTE     10
 #define RTCC_DEFAULT_SECOND     01
@@ -2661,6 +2721,7 @@ typedef enum
 #endif // #ifdef (MEB_BOARD)
 
 #endif // __HARDWARE_PROFILE_H
+
 
 
 

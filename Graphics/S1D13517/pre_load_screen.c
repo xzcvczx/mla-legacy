@@ -55,8 +55,6 @@ void PreLoadDrawProgress(void);
 #define PRE_LOAD_NUM_ANIMATION_CIRCLES  (5)
 #define PRE_LOAD_AMINATION_CIRCLE_X_DELTA (GetMaxX() / (PRE_LOAD_NUM_ANIMATION_CIRCLES + 1))
 
-#define ORANGE  RGBConvert(255, 140, 0)
-
 #define GFX_BlockUntilFinished(function)   while(!function)
 /*****************************************************************************
  * SECTION: Variables
@@ -91,8 +89,8 @@ void CreatePreLoadScreen(void)
     if(preLoadBackGroundScheme == PRE_LOAD_BACKGROUND_SCHEME_RAINBOW)
     {     
         //Rainbow Background
-        BarGradient(0,0,GetMaxX()>>2,GetMaxY(),BRIGHTRED,ORANGE,100,GRAD_RIGHT);
-        BarGradient(GetMaxX()>>2,0,GetMaxX()>>1,GetMaxY(),ORANGE,BRIGHTGREEN,100,GRAD_RIGHT);
+        BarGradient(0,0,GetMaxX()>>2,GetMaxY(),BRIGHTRED,DARKORANGE,100,GRAD_RIGHT);
+        BarGradient(GetMaxX()>>2,0,GetMaxX()>>1,GetMaxY(),DARKORANGE,BRIGHTGREEN,100,GRAD_RIGHT);
         BarGradient(GetMaxX()>>1,0,(GetMaxX()*3)>>2,GetMaxY(),BRIGHTGREEN,BRIGHTBLUE,100,GRAD_RIGHT);
         BarGradient((GetMaxX()*3)>>2,0,GetMaxX(),GetMaxY(),BRIGHTBLUE,RGBConvert(128,0,255),100,GRAD_RIGHT);
     }  

@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.3.0
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.8.17
  *****************************************************************************/
 
 /*****************************************************************************
@@ -52,7 +52,7 @@ IMAGE_EXTERNAL icon5 =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x00000000 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x00000008 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -63,7 +63,7 @@ IMAGE_EXTERNAL icon5_large =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x00001390 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x000013A0 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -74,7 +74,7 @@ IMAGE_EXTERNAL icon6 =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x000039E0 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x000039F0 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -85,7 +85,7 @@ IMAGE_EXTERNAL icon6_large =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x00004D70 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x00004D80 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -96,7 +96,7 @@ IMAGE_EXTERNAL icon1 =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x000073C0 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x000073D0 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -107,7 +107,7 @@ IMAGE_EXTERNAL icon1_large =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x00008750 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x00008760 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -118,7 +118,7 @@ IMAGE_EXTERNAL icon2 =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x0000ADA0 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x0000ADB0 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -129,7 +129,7 @@ IMAGE_EXTERNAL icon2_large =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x0000C130 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x0000C140 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -140,7 +140,7 @@ IMAGE_EXTERNAL icon3 =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x0000E780 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x0000E790 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -151,7 +151,7 @@ IMAGE_EXTERNAL icon3_large =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x0000FB10 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x0000FB20 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -162,7 +162,7 @@ IMAGE_EXTERNAL icon4 =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x00012160 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x00012170 + GFX_EPMP_CS2_BASE_ADDRESS)
 };
 /*********************************
  * Bitmap Structure
@@ -173,5 +173,5 @@ IMAGE_EXTERNAL icon4_large =
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
-    (0x000134F0 + GFX_EPMP_CS2_BASE_ADDRESS)
+    (0x00013500 + GFX_EPMP_CS2_BASE_ADDRESS)
 };

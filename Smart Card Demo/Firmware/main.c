@@ -40,6 +40,7 @@
            Moved timer interrupts (used by smart card stack) to ISO 7816 hardware
            driver files.
            Cleaned unwanted stuff in the file.
+  1.02.4   Removed 'COE_OFF' from _CONFIG1 settings of PIC24FJ256GB110 part.
 ********************************************************************/
 
 #include "string.h"
@@ -50,7 +51,7 @@
 
 #if defined(EXPLORER_16)
     #ifdef __PIC24FJ256GB110__ //Defined by MPLAB when using 24FJ256GB110 device
-		_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & BKBUG_OFF & COE_OFF & ICS_PGx2 & FWDTEN_OFF & WINDIS_OFF & FWPSA_PR32 & WDTPS_PS1);
+		_CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & BKBUG_OFF & ICS_PGx2 & FWDTEN_OFF & WINDIS_OFF & FWPSA_PR32 & WDTPS_PS1);
 		_CONFIG2(IESO_OFF & PLLDIV_DIV2 & FNOSC_PRIPLL & POSCMOD_HS & FCKSM_CSDCMD & OSCIOFNC_OFF & IOL1WAY_OFF & 0xF7FF) 
 		_CONFIG3(WPCFG_WPCFGDIS & WPDIS_WPDIS) 
 	#elif defined(__dsPIC33F__) || defined(__PIC24H__)

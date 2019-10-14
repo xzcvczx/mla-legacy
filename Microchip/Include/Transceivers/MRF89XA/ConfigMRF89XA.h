@@ -53,9 +53,12 @@
     // band for Microchip MRF89XA. One and only one of the frequency
     // band must be defined 
     /*********************************************************************/
-    //#define BAND_902
-    //#define BAND_915
-    #define BAND_863
+    //#define BAND_902      //Choose BAND_902 and BAND_915 for FCC and IC
+                            //Supports frequencies between 902 - 915MHz
+    //#define BAND_915      //Supports frequencies between 915 - 928MHz
+
+    #define BAND_863        //Choose this for Europe ETSI 868MHz Frequency band
+                            //Supports frequencies between 863MHz - 870MHz
     
     /*********************************************************************/
     // DATA_RATE_5, DATA_RATE_10, DATA_RATE_20, 

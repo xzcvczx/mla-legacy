@@ -205,6 +205,17 @@ the GraphicsConfig.h included in the application. Stored data in the external
 memory will be accessed using the ExternalMemoryCallback() function also
 defined in the application. </span></p>
 
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>ExternalMemoryCallback()
+is an application defined function that will fetch data from the external
+memory module. This function will be called by the PutImage() or OutChar()
+(also in OutText() and OutTextXY()) when the image or font is located in the
+external memory. Application code must supply the correct external memory
+driver that will do the actual communication to the external memory device. </span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'>&nbsp;</p>
+
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoPlainText><span class=Heading2Char><span style='font-size:14.0pt;
@@ -358,8 +369,8 @@ Memory Programmer utility.</span></p>
 name="_Toc195786501"></a><b>Trademarks:</b></p>
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;
-font-family:"Arial","sans-serif";color:black'>The Microchip name and logo, the
-Microchip logo, MPLAB, and PIC are registered trademarks of Microchip Technology
+font-family:"Arial","sans-serif";color:black'>The Microchip name and logo, the Microchip
+logo, MPLAB, and PIC are registered trademarks of Microchip Technology
 Incorporated in the U.S.A. and other countries.</span></i></p>
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;

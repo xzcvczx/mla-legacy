@@ -121,6 +121,7 @@ void TickInit(void)
 ********************************************************************/
 void __TIMER_TICK_ISR TimerTickInterrupt(void)
 {
+    TMR3 = 0;
 	if (tickscaler > TIMER_TICK_PRESCALER)
 	{
     	tickscaler = 0;

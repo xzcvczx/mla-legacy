@@ -218,6 +218,7 @@ WORD GOLDrawCallback(void)
 /* */
 void __T3_ISR _T3Interrupt(void)
 {
+    TMR3 = 0;
     // Clear flag
     #ifdef __PIC32MX__
     mT3ClearIntFlag();

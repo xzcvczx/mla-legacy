@@ -41,6 +41,8 @@
  * 12/21/10     Fixed bug on the list count to rest back to zero when 
  *              LbDelItemsList() is used to clear the list. 
  * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
+ * 08/05/11     Modified drawing state to isolate primitive calls in case
+ *              the primitive function is hardware accelerated.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -551,8 +553,13 @@ WORD LbDraw(void *pObj)
     {
         LB_STATE_START,
         LB_STATE_PANEL,
+        LB_STATE_DRAW_ITEMS,
+        LB_STATE_DRAW_CURRENT_ITEMS,
+        LB_STATE_SET_ERASEITEM,
         LB_STATE_ERASEITEM,
+        LB_STATE_SET_ITEMFOCUS,
         LB_STATE_ITEMFOCUS,
+        LB_STATE_GET_NEXTITEM,
         LB_STATE_BITMAP,
         LB_STATE_TEXT
     } LB_DRAW_STATES;
@@ -564,179 +571,217 @@ WORD LbDraw(void *pObj)
 
     pLb = (LISTBOX *)pObj;
 
-    switch(state)
+    while(1)
     {
+        if(IsDeviceBusy())
+            return (0);
 
-        /////////////////////////////////////////////////////////////////////
-        // REMOVE FROM SCREEN
-        /////////////////////////////////////////////////////////////////////
-        case LB_STATE_START:
-            if(GetState(pLb, LB_HIDE))
-            {
-                SetColor(pLb->hdr.pGolScheme->CommonBkColor);
-                if(!Bar(pLb->hdr.left, pLb->hdr.top, pLb->hdr.right, pLb->hdr.bottom))
-                    return (0);
-                return (1);
-            }
-
-            if(GetState(pLb, LB_DRAW_FOCUS))
-            {
-                if(pLb->pFocusItem != NULL)
-                    ((LISTITEM *)pLb->pFocusItem)->status |= LB_STS_REDRAW;
-                SetState(pLb, LB_DRAW_ITEMS);
-            }
-
-            /////////////////////////////////////////////////////////////////////
-            // DRAW PANEL
-            /////////////////////////////////////////////////////////////////////
-            if(GetState(pLb, LB_DRAW))
-            {
-                if(GetState(pLb, LB_DISABLED))
-                {
-                    temp = pLb->hdr.pGolScheme->ColorDisabled;
-                }
-                else
-                {
-                    temp = pLb->hdr.pGolScheme->Color0;
-                }
-
-                GOLPanelDraw
-                (
-                    pLb->hdr.left,
-                    pLb->hdr.top,
-                    pLb->hdr.right,
-                    pLb->hdr.bottom,
-                    0,
-                    temp,
-                    pLb->hdr.pGolScheme->EmbossDkColor,
-                    pLb->hdr.pGolScheme->EmbossLtColor,
-                    NULL,
-                    GOL_EMBOSS_SIZE
-                );
-
-                state = LB_STATE_PANEL;
-
+        switch(state)
+        {
+            // location of this case is strategic so the partial redraw 
+            // of the ListBox will be faster        
             case LB_STATE_PANEL:
                 if(!GOLPanelDrawTsk())
                     return (0);
-            }
 
-            /////////////////////////////////////////////////////////////////////
-            // DRAW ITEMS
-            /////////////////////////////////////////////////////////////////////
-    L_LB_DRAW:
-            SetClip(CLIP_ENABLE);
+                state = LB_STATE_DRAW_ITEMS;
+                break;
 
-            SetClipRgn
-            (
-                pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT,
-                pLb->hdr.top + GOL_EMBOSS_SIZE + LB_INDENT,
-                pLb->hdr.right - GOL_EMBOSS_SIZE - LB_INDENT,
-                pLb->hdr.bottom - GOL_EMBOSS_SIZE - LB_INDENT
-            );
+            case LB_STATE_START:
+                /////////////////////////////////////////////////////////////////////
+                // REMOVE FROM SCREEN
+                /////////////////////////////////////////////////////////////////////
+                if(GetState(pLb, LB_HIDE))
+                {
+                    SetColor(pLb->hdr.pGolScheme->CommonBkColor);
+                    if(!Bar(pLb->hdr.left, pLb->hdr.top, pLb->hdr.right, pLb->hdr.bottom))
+                        return (0);
+                    return (1);
+                }
+    
+                if(GetState(pLb, LB_DRAW_FOCUS))
+                {
+                    if(pLb->pFocusItem != NULL)
+                        ((LISTITEM *)pLb->pFocusItem)->status |= LB_STS_REDRAW;
+                    SetState(pLb, LB_DRAW_ITEMS);
+                }
+    
+                /////////////////////////////////////////////////////////////////////
+                // DRAW PANEL
+                /////////////////////////////////////////////////////////////////////
+                if(GetState(pLb, LB_DRAW))
+                {
+                    if(GetState(pLb, LB_DISABLED))
+                    {
+                        temp = pLb->hdr.pGolScheme->ColorDisabled;
+                    }
+                    else
+                    {
+                        temp = pLb->hdr.pGolScheme->Color0;
+                    }
+    
+                    GOLPanelDraw
+                    (
+                        pLb->hdr.left,
+                        pLb->hdr.top,
+                        pLb->hdr.right,
+                        pLb->hdr.bottom,
+                        0,
+                        temp,
+                        pLb->hdr.pGolScheme->EmbossDkColor,
+                        pLb->hdr.pGolScheme->EmbossLtColor,
+                        NULL,
+                        GOL_EMBOSS_SIZE
+                    );
+    
+                    state = LB_STATE_PANEL;
+                    break;
+                }
+                else
+                {
+                    state = LB_STATE_DRAW_ITEMS;
+                }
+            
+            case LB_STATE_DRAW_ITEMS:
+    
+                /////////////////////////////////////////////////////////////////////
+                // DRAW ITEMS
+                /////////////////////////////////////////////////////////////////////
+                SetClip(CLIP_ENABLE);
+    
+                SetClipRgn
+                (
+                    pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT,
+                    pLb->hdr.top + GOL_EMBOSS_SIZE + LB_INDENT,
+                    pLb->hdr.right - GOL_EMBOSS_SIZE - LB_INDENT,
+                    pLb->hdr.bottom - GOL_EMBOSS_SIZE - LB_INDENT
+                );
+    
+                SetFont(pLb->hdr.pGolScheme->pFont);
+    
+                // Set graphics cursor
+                MoveTo(pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT, pLb->hdr.top + GOL_EMBOSS_SIZE + LB_INDENT + pLb->scrollY);
+    
+                pCurItem = pLb->pItemList;
+                state = LB_STATE_DRAW_CURRENT_ITEMS;
+    
+            case LB_STATE_DRAW_CURRENT_ITEMS:
 
-            SetFont(pLb->hdr.pGolScheme->pFont);
+                /////////////////////////////////////////////////////////////////////
+                // DRAW CURRENT ITEM
+                /////////////////////////////////////////////////////////////////////
 
-            // Set graphics cursor
-            MoveTo(pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT, pLb->hdr.top + GOL_EMBOSS_SIZE + LB_INDENT + pLb->scrollY);
-
-            pCurItem = pLb->pItemList;
-
-            /////////////////////////////////////////////////////////////////////
-            // DRAW CURRENT ITEM
-            /////////////////////////////////////////////////////////////////////
-    L_LB_DRAWITEM:
-            if(pCurItem == NULL)
-            {
-                state = LB_STATE_START;
-                SetClip(CLIP_DISABLE);
-                return (1);
-            }
-
-            /////////////////////////////////////////////////////////////////////
-            if(GetY() < pLb->hdr.bottom - GOL_EMBOSS_SIZE - LB_INDENT)
+                // check if at the end of the list of items
+                // this is the exit from the drawing state machine
+                if(pCurItem == NULL)
+                {
+                    state = LB_STATE_START;
+                    SetClip(CLIP_DISABLE);
+                    return (1);
+                }
+    
+                /////////////////////////////////////////////////////////////////////
+                // pCurItem is a valid item, check first if within the bounds
+                /////////////////////////////////////////////////////////////////////
+                if(GetY() >= pLb->hdr.bottom - GOL_EMBOSS_SIZE - LB_INDENT)
+                {
+                    state = LB_STATE_SET_ITEMFOCUS;
+                    break;
+                }
+                // yes, still within bounds process the item
                 if((GetY() + pLb->textHeight) >= (pLb->hdr.top + GOL_EMBOSS_SIZE + LB_INDENT))
                 {
                     if(!GetState(pLb, LB_DRAW))
                         if(!(pCurItem->status & LB_STS_REDRAW))
-                            goto L_LB_NEXTITEM;
-
+                        {
+                            state = LB_STATE_SET_ITEMFOCUS;
+                            break;
+                        }   
+    
                     pCurItem->status &= ~LB_STS_REDRAW;
+                    state = LB_STATE_SET_ERASEITEM;
+                }
+                else
+                {
+                    state = LB_STATE_SET_ITEMFOCUS;
+                    break;
+                }
+    
+            case LB_STATE_SET_ERASEITEM:
 
-                    state = LB_STATE_ERASEITEM;
-
-                case LB_STATE_ERASEITEM:
-                    if(IsDeviceBusy())
-                        return (0);
-
-                    if(GetState(pLb, LB_DISABLED))
-                    {
-                        SetColor(pLb->hdr.pGolScheme->ColorDisabled);
-                    }
-                    else
-                    {
-                        SetColor(pLb->hdr.pGolScheme->Color0);
-                        if(pCurItem != NULL)
-                            if(pCurItem->status & LB_STS_SELECTED)
-                            {
-                                SetColor(pLb->hdr.pGolScheme->Color1);
-                            }
-                    }
-
-                    if
-                    (
-                        !Bar
-                            (
-                                pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT,
-                                GetY(),
-                                pLb->hdr.right - GOL_EMBOSS_SIZE - LB_INDENT,
-                                GetY() + pLb->textHeight
-                            )
-                    ) return (0);
-
-                    if(!GetState(pLb, LB_CENTER_ALIGN | LB_RIGHT_ALIGN))
-                    {
-                        MoveTo(pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT, GetY());
-                    }
-                    else
-                    {
-                        temp = GetTextWidth(pCurItem->pText, pLb->hdr.pGolScheme->pFont);
-                        if(pCurItem->pBitmap != NULL)
-                        {
-                            temp += GetImageWidth(pCurItem->pBitmap) + LB_INDENT;
-                        }
-
-                        if(GetState(pLb, LB_RIGHT_ALIGN))
-                        {
-                            MoveTo(pLb->hdr.right - temp - LB_INDENT - GOL_EMBOSS_SIZE, GetY());
-                        }
-                        else
-                        {
-                            MoveTo((pLb->hdr.left + pLb->hdr.right - temp) >> 1, GetY());
-                        }
-                    }
-
-                    if(GetState(pLb, LB_DISABLED))
-                    {
-                        SetColor(pLb->hdr.pGolScheme->TextColorDisabled);
-                    }
-                    else
-                    {
+                if(GetState(pLb, LB_DISABLED))
+                {
+                    SetColor(pLb->hdr.pGolScheme->ColorDisabled);
+                }
+                else
+                {
+                    SetColor(pLb->hdr.pGolScheme->Color0);
+                    if(pCurItem != NULL)
                         if(pCurItem->status & LB_STS_SELECTED)
                         {
-                            SetColor(pLb->hdr.pGolScheme->TextColor1);
+                            SetColor(pLb->hdr.pGolScheme->Color1);
                         }
-                        else
-                        {
-                            SetColor(pLb->hdr.pGolScheme->TextColor0);
-                        }
-                    }
+                }
+                state = LB_STATE_ERASEITEM;
 
-                    state = LB_STATE_BITMAP;
+            case LB_STATE_ERASEITEM:
+                if
+                (
+                    !Bar
+                        (
+                            pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT,
+                            GetY(),
+                            pLb->hdr.right - GOL_EMBOSS_SIZE - LB_INDENT,
+                            GetY() + pLb->textHeight
+                        )
+                ) return (0);
 
-                case LB_STATE_BITMAP:
+                if(!GetState(pLb, LB_CENTER_ALIGN | LB_RIGHT_ALIGN))
+                {
+                    MoveTo(pLb->hdr.left + GOL_EMBOSS_SIZE + LB_INDENT, GetY());
+                }
+                else
+                {
+                    temp = GetTextWidth(pCurItem->pText, pLb->hdr.pGolScheme->pFont);
                     if(pCurItem->pBitmap != NULL)
                     {
+                        temp += GetImageWidth(pCurItem->pBitmap) + LB_INDENT;
+                    }
+
+                    if(GetState(pLb, LB_RIGHT_ALIGN))
+                    {
+                        MoveTo(pLb->hdr.right - temp - LB_INDENT - GOL_EMBOSS_SIZE, GetY());
+                    }
+                    else
+                    {
+                        MoveTo((pLb->hdr.left + pLb->hdr.right - temp) >> 1, GetY());
+                    }
+                }
+
+                if(GetState(pLb, LB_DISABLED))
+                {
+                    SetColor(pLb->hdr.pGolScheme->TextColorDisabled);
+                }
+                else
+                {
+                    if(pCurItem->status & LB_STS_SELECTED)
+                    {
+                        SetColor(pLb->hdr.pGolScheme->TextColor1);
+                    }
+                    else
+                    {
+                        SetColor(pLb->hdr.pGolScheme->TextColor0);
+                    }
+                }
+
+                state = LB_STATE_BITMAP;
+                // break here to force check of IsDeviceBusy() in case the last Bar() function call
+                // is still being rendered.
+                break;
+    
+            case LB_STATE_BITMAP:
+                if(pCurItem->pBitmap != NULL)
+                {
 	                    // check if the image will go beyond the list box (bottom check only)
 	                    if ((GetY() + GetImageHeight(pCurItem->pBitmap)) < pLb->hdr.bottom)
 	                    {
@@ -750,39 +795,48 @@ WORD LbDraw(void *pObj)
 	                                    1
 	                                )
 	                        ) return (0);
-                     	}   
+                 	}   
 
-                        MoveRel(GetImageWidth(pCurItem->pBitmap) + LB_INDENT, 0);
-                    }
-
-                    state = LB_STATE_TEXT;
-
-                case LB_STATE_TEXT:
-                    if(!OutText(pCurItem->pText))
-                        return (0);
+                    MoveRel(GetImageWidth(pCurItem->pBitmap) + LB_INDENT, 0);
                 }
 
-            /////////////////////////////////////////////////////////////////////
-    L_LB_NEXTITEM:
-            state = LB_STATE_ITEMFOCUS;
-
-        case LB_STATE_ITEMFOCUS:
-            if(pLb->pFocusItem == pCurItem)
-            {
-                if(IsDeviceBusy())
+                state = LB_STATE_TEXT;
+                // break here to force IsDeviceBusy() check in case the last PutImage() is still being rendered
+                break;
+    
+            case LB_STATE_TEXT:
+                if(!OutText(pCurItem->pText))
                     return (0);
-
-                if(GetState(pLb, LB_FOCUSED))
+                state = LB_STATE_SET_ITEMFOCUS;
+    
+                /////////////////////////////////////////////////////////////////////
+    
+            case LB_STATE_SET_ITEMFOCUS:
+                if(pLb->pFocusItem == pCurItem)
                 {
-                    SetColor(pLb->hdr.pGolScheme->TextColor1);
+                    if(IsDeviceBusy())
+                        return (0);
+    
+                    if(GetState(pLb, LB_FOCUSED))
+                    {
+                        SetColor(pLb->hdr.pGolScheme->TextColor1);
+                    }
+                    else
+                    {
+                        SetColor(pLb->hdr.pGolScheme->TextColor0);
+                    }
+    
+                    SetLineType(FOCUS_LINE);
+                    temp = GetY();
+                    state = LB_STATE_ITEMFOCUS;
                 }
                 else
                 {
-                    SetColor(pLb->hdr.pGolScheme->TextColor0);
+                    state = LB_STATE_GET_NEXTITEM;
+                    break;
                 }
 
-                SetLineType(FOCUS_LINE);
-                temp = GetY();
+            case LB_STATE_ITEMFOCUS:
                 if
                 (
                     !Rectangle
@@ -793,6 +847,7 @@ WORD LbDraw(void *pObj)
                             GetY() + pLb->textHeight - 1
                         )
                 ) return (0);
+
                 MoveTo(0, temp);
                 SetLineType(SOLID_LINE);
 
@@ -801,24 +856,29 @@ WORD LbDraw(void *pObj)
                 {
                     pLb->scrollY += (pLb->hdr.top + GOL_EMBOSS_SIZE + LB_INDENT) - GetY();
                     SetState(pLb, LB_DRAW);
-                    goto L_LB_DRAW;
+                    state = LB_STATE_DRAW_ITEMS;
+                    break;
                 }
 
                 if((GetY() + pLb->textHeight) > (pLb->hdr.bottom - GOL_EMBOSS_SIZE - LB_INDENT))
                 {
                     pLb->scrollY += pLb->hdr.bottom - GetY() - pLb->textHeight - GOL_EMBOSS_SIZE - LB_INDENT;
                     SetState(pLb, LB_DRAW);
-                    goto L_LB_DRAW;
+                    state = LB_STATE_DRAW_ITEMS;
+                    break;
                 }
-            }
+                state = LB_STATE_GET_NEXTITEM;
+    
+            case LB_STATE_GET_NEXTITEM:
 
-            pCurItem = (LISTITEM *)pCurItem->pNextItem;
-            MoveRel(0, pLb->textHeight);
+                pCurItem = (LISTITEM *)pCurItem->pNextItem;
+                MoveRel(0, pLb->textHeight);
 
-            goto L_LB_DRAWITEM;
-    }   // end of switch
+                state = LB_STATE_DRAW_CURRENT_ITEMS;
+                break;    
 
-    return (1);
+        }   // end of switch
+    } // end of while(1)
 }
 
 #endif // USE_LISTBOX

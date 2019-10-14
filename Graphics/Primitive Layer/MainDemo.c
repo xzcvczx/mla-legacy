@@ -411,8 +411,8 @@ int main(void)
         ClearDevice();
 
         /* RLE Demonstration starts here */
-        width = GetImageWidth((void *) &Sun8bit);
-        height = GetImageHeight((void *) &Sun8bit);
+        width = GetImageWidth((void *) &Sun8bit_RLE);
+        height = GetImageHeight((void *) &Sun8bit_RLE);
 
         SetColor(WHITE);
         SetFont((void *) &Font25);

@@ -180,7 +180,8 @@ void ResetDevice(void);
 *
 * PreCondition: none
 *
-* Input: color - Color coded in 5:6:5 RGB format.
+* Input: color - Color coding is based on GFX_COLOR definition. GFX_COLOR  
+*                definition is based on the color depth (COLOR_DEPTH) used. 
 *
 * Output: none
 *
@@ -198,7 +199,8 @@ void ResetDevice(void);
 *
 * Input: none
 *
-* Output: Color coded in 5:6:5 RGB format.
+* Output: Color where coding is based on GFX_COLOR definition. GFX_COLOR 
+*         definition is based on the color depth (COLOR_DEPTH) used.
 *
 * Side Effects: none
 *
@@ -207,9 +209,12 @@ void ResetDevice(void);
 
 #ifdef USE_TRANSPARENT_COLOR
 /*********************************************************************
-* Function:  void TransparentColorEnable(GRFX_COLOR color)
+* Function:  void TransparentColorEnable(GFX_COLOR color)
 *
-* Overview: Sets current transparent color.
+* Overview: Sets current transparent color. PutImage() will not render
+*           pixels that matches the set transparent color. To enable 
+*           Transparent Color feature, define the macro USE_TRANSPARENT_COLOR 
+*           in the GraphicsConfig.h file. 
 *
 * Description: 
 *        <img name="TransparencyColorExample.jpg" />
@@ -222,16 +227,12 @@ void ResetDevice(void);
 *
 * Example:
 *   <CODE> 
-*   #define YOURSETTRANSPARENT_COLOR RGBConvert(0x0D,0x0D,0x0D)
-*
-*   TransparentColorEnable(YOURSETTRANSPARENT_COLOR);
+*   TransparentColorEnable(BLACK);
 *   PutImage(0,0, (void*)&ScreenBackground);
 *   PutImage(0,0, (void*)&RibbonIcon);
 *	</CODE> 
 *
-* Side Effects: PutImage() will not render pixels that matches the 
-*               set transparent color.
-*
+* Side Effects: None
 ********************************************************************/
 void TransparentColorEnable(GFX_COLOR color);
 
@@ -446,8 +447,8 @@ void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom);
 * PreCondition: none
 *
 * Input: control - Enables or disables the clipping.
-*			- 0: Disable clipping
-*			- 1: Enable clipping
+*			- CLIP_DISABLE: Disable clipping
+*			- CLIP_ENABLE: Enable clipping
 *
 * Output: none
 *
@@ -572,9 +573,7 @@ WORD CopyWindow( DWORD srcAddr, DWORD dstAddr,          \
 * Note: none
 *
 ********************************************************************/
-extern WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height); 
-
-#ifdef GFX_DRV_PAGE_COUNT
+WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height); 
 
 /*********************************************************************
 * Macros: GetPageAddress(page)
@@ -627,13 +626,11 @@ extern WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOf
 * Side Effects: none
 *
 ********************************************************************/
-extern WORD CopyPageWindow( BYTE srcPage, BYTE dstPage,     \
+void CopyPageWindow( BYTE srcPage, BYTE dstPage,     \
                      WORD srcX, WORD srcY,                  \
                      WORD dstX, WORD dstY,                  \
                      WORD width, WORD height);          
                                                          
-
-#endif //#ifdef GFX_DRV_PAGE_COUNT
 
 #ifdef USE_DOUBLE_BUFFERING
 

@@ -217,9 +217,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -236,8 +236,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -262,18 +262,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -370,9 +370,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -389,8 +389,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -415,18 +415,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -523,9 +523,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -542,8 +542,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -568,18 +568,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -676,9 +676,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -695,8 +695,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -721,18 +721,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -829,9 +829,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -848,8 +848,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -874,18 +874,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -982,9 +982,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1001,8 +1001,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1027,18 +1027,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -1135,9 +1135,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1154,8 +1154,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1180,18 +1180,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -1288,9 +1288,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1307,8 +1307,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1333,18 +1333,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -1409,9 +1409,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1428,8 +1428,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1454,18 +1454,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -1530,9 +1530,9 @@
         <property key="enable-all-warnings" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="s"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -1549,8 +1549,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="warning-level" value="emit-warnings"/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -1575,18 +1575,18 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
-        <property key="report-memory-usage" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
         <property key="enable-check-sections" value="true"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="secure-eeprom" value="no_eeprom"/>
         <property key="extra-lib-directories" value=".."/>
+        <property key="secure-eeprom" value="no_eeprom"/>
       </C30-LD>
       <C30Global>
       </C30Global>
@@ -1674,17 +1674,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_EX16_8PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1792,8 +1792,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -1901,8 +1901,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2010,8 +2010,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2119,8 +2119,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2228,8 +2228,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2337,8 +2337,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2446,8 +2446,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2514,17 +2514,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_8PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2591,17 +2591,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_8PMP_WQVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2670,17 +2670,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_16PMP_QVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2749,17 +2749,17 @@
         </C32Global>
       </item>
       <C32>
-        <property key="additional-warnings" value="false"/>
         <property key="extra-include-directories"
                   value="../;../../common;../../../Microchip/Include;../../../Board Support Package"/>
+        <property key="additional-warnings" value="false"/>
         <property key="preprocessor-macros"
                   value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3_PIC_SK_16PMP_WQVGAv1"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
+        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2837,8 +2837,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2914,8 +2914,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -2991,8 +2991,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
@@ -3068,8 +3068,8 @@
         <property key="make-warnings-into-errors" value="false"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>

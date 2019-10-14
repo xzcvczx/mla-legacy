@@ -115,11 +115,11 @@ extern BYTE     _fontOrientation;
     #define ORIENT_VER  1
 
 /*********************************************************************
-* Overview: This macro sets the data type for the Fonts.
+* Overview: This macro sets the data type for the strings and characters.
 *			There are three types
-*			- #define XCHAR   unsigned short		// use multibyte characters (0-2^16 range)
-*			- #define XCHAR   unsigned char		// use unsigned char (0-255 range)
-*			- #define XCHAR   char				// use signed char (0-127 range)
+*			- #define XCHAR   unsigned short     // use multibyte characters (0-2^16 range)
+*			- #define XCHAR   unsigned char      // use unsigned char (0-255 range)
+*			- #define XCHAR   char               // use signed char (0-127 range)
 *
 *********************************************************************/
     #if defined (USE_MULTIBYTECHAR) 
@@ -144,9 +144,9 @@ extern BYTE _bevelDrawType;
         #define FLASH_DWORD const DWORD
     #else
         // Flash data with 24bit pointers
-        #define FLASH_BYTE  char __prog__
-        #define FLASH_WORD  short int __prog__
-        #define FLASH_DWORD unsigned long __prog__
+        #define FLASH_BYTE  __prog__ char
+        #define FLASH_WORD  __prog__ short int
+        #define FLASH_DWORD __prog__ unsigned long
     #endif
 
 /*********************************************************************
@@ -328,8 +328,12 @@ typedef struct
     
 	WORD             width;            // width of the image 
 	WORD             height;           // height of the image
-    DWORD            param1;           // size of the IPU compressed data
-    DWORD            param2;           // size of the IPU decompressed data
+    DWORD            param1;           // Parameters used for the GFX_RESOURCE. Depending on the GFX_RESOURCE type 
+                                       // definition of param1 can change. For IPU and RLE compressed images, param1 
+                                       // indicates the compressed size of the image.
+    DWORD            param2;           // Parameters used for the GFX_RESOURCE. Depending on the GFX_RESOURCE type 
+                                       // definition of param2 can change. For IPU and RLE compressed images, param2 
+                                       // indicates the uncompressed size of the image.
 	WORD             colorDepth;       // color depth of the image
 } GFX_IMAGE_HEADER;
 
@@ -347,10 +351,14 @@ typedef GFX_EXTDATA  BITMAP_EXTERNAL __attribute__ ((deprecated));
 *			to retrieve font data from the external memory. The buffer 
 *			size can be increased to accommodate large font sizes. 
 *			The user must be aware of the expected glyph sizes of the 
-*			characters stored in the font table.
+*			characters stored in the font table. 
+*           To modify the size used, declare this macro in the 
+*           GraphicsConfig.h file with the desired size.
 *
 ********************************************************************/
+#ifndef EXTERNAL_FONT_BUFFER_SIZE
     #define EXTERNAL_FONT_BUFFER_SIZE   600
+#endif
 
 // Pointer to the current font image
 extern void     *_font;
@@ -508,27 +516,64 @@ void            InitGraph(void);
 /*********************************************************************
 * Macro: SetFontOrientation(orient)
 *
-* Overview: This macro sets font orientation vertical or horizontal.
+* Overview: Sets font orientation vertical or horizontal.
 *
 * PreCondition: none
 *
-* Input: orient - should be non-zero if the font orientation is vertical
+* Input: orient - sets font orientation when rendering characters and strings.
+*        - 1 when font orientation is vertical
+*        - 0 when font orientation is horizontal
 *
 * Output: none
 *
+* Example:
+*   See GetFontOrientation() example.
+
 ********************************************************************/
     #define SetFontOrientation(orient)  _fontOrientation = orient;
 
 /*********************************************************************
 * Macro: GetFontOrientation()
 *
-* Overview: This macro returns font orientation (0 == horizontal, 1 == vertical).
+* Overview: Returns font orientation.
 *
 * PreCondition: none
 *
 * Input: none
 *
-* Output: font orientation (0 == horizontal, 1 == vertical)
+* Output: Return the current font orientation. 
+*         - 1 when font orientation is vertical
+*         - 0 when font orientation is horizontal
+*
+* Example:
+*   <CODE> 
+*	void PlaceText(SHORT x, SHORT y, WORD space, XCHAR *pString)
+*	{
+*		SHORT width;
+*		
+*		SetColor(BRIGHTRED);                // set color
+*		SetFont(pMyFont);                   // set to use global font 
+*		
+*		// get string width
+*		width = GetTextWidth(pString, pMyFont);
+*
+*       // check if it fits
+*       if (space < width)
+*       {
+*           if (GetFontOrientation() == 0)
+*               // reset the orientation to vertical 
+*               SetFontOrientation(1);
+*       }
+*       else
+*       {
+*           if (GetFontOrientation() == 1)
+*               // reset the orientation to horizontal
+*               SetFontOrientation(0);
+*       }
+*		// place string in the middle of the screen
+*		OutTextXY(x, y, pString);
+*	}
+*	</CODE> 
 *
 ********************************************************************/
     #define GetFontOrientation()    _fontOrientation
@@ -550,6 +595,20 @@ void            InitGraph(void);
 *         For Blocking configuration:
 *         - Always return 1.
 *
+* Example:
+*   <CODE> 
+*   static WORD counter = 0;
+*   XCHAR   ch;
+*
+*   // render characters until null character
+*   while((XCHAR)(ch = *(textString + counter)) != 0)
+*   {
+*       if(OutChar(ch) == 0)
+*           return (0);
+*       counter++;
+*   }
+*
+* </CODE>
 *
 * Side Effects: After the function is completed, the graphic cursor 
 *			    position is moved in the horizontal direction by the 
@@ -580,6 +639,15 @@ WORD    OutChar(XCHAR ch);
 *         - Returns 1 when string is outputted completely.
 *         For Blocking configuration:
 *         - Always return 1.
+*
+* Example:
+*   <CODE> 
+*       SetFont(pMyFont);
+*       SetColor(WHITE);
+*       // place the string at the upper left corner of the screen        
+*       MoveTo(0, 0);
+*       OutText("Test String!");
+*  </CODE>
 *
 * Side Effects: Current horizontal graphic cursor position will be moved 
 *				to the end of the text. The vertical graphic cursor 
@@ -719,7 +787,9 @@ void    SetFont(void *font);
 *
 * Overview: This macro sets sets line thickness to 1 pixel or 3 pixels.
 *
-* Input: lnThickness - Line thickness code (0 - 1 pixel; 1 - 3 pixels)
+* Input: lnThickness - Line thickness code 
+*           - NORMAL_LINE : 1 pixel
+*           - THICK_LINE : 3 pixels
 *
 * Output: none
 *
@@ -1210,13 +1280,13 @@ void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
 *                        GFX_COLOR color1, GFX_COLOR color2, DWORD length, 
 *                        BYTE direction);
 *
-* Overview: This renders a bar onto the screen, but instead of one color a gradient is drawn
+* Overview: This renders a bar onto the screen, but instead of one color, a gradient is drawn
 * depending on the direction (GFX_GRADIENT_TYPE), length, and colors chosen
 *
 * Description: 
 *        <img name="BarGradient.jpg" />
 *
-* PreCondition: none
+* PreCondition: USE_GRADIENT macro must be defined (in GraphicsConfig.h)
 *
 * Input: left - x position of the left top corner.
 *		 top - y position of the left top corner.
@@ -1245,14 +1315,13 @@ void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
 *                0,                                         //top position
 *                GetMaxX(),                                 //right position
 *                GetMaxY(),                                 //bottom position
-*                0,                                         // no radius, since full screen
 *                gradScheme.gradientStartColor,
 *                gradScheme.gradientEndColor,
 *                50,                                        // at the halfway point (50%) of the rectangular area 
 *                                                           // defined by the first 4 parameters (full screen), 
 *                                                           // the color becomes BLACK and BLACK color is used until 
 *                                                           // the rectangle defined is filled up 
-*                gradScheme.gradientType);                  // gradient direction is bottom->top
+*                gradScheme.gradientType);                  // see GFX_GRADIENT_TYPE
 *	</CODE> 
 *
 * Side Effects: none
@@ -1273,7 +1342,7 @@ WORD        BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_CO
 * Description: 
 *        <img name="BevelGradient.jpg" />
 *
-* PreCondition: none
+* PreCondition: USE_GRADIENT macro must be defined (in GraphicsConfig.h)
 *
 * Input: left - x coordinate position of the upper left center of the circle that 
 *			  draws the rounded corners.
@@ -1288,7 +1357,7 @@ WORD        BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_CO
 *	     color1 - start color for the gradient
 *        color2 - end color for the gradient
 *        length - From 0-100%. How much of a gradient is wanted
-*        direction - Gradient Direction		 
+*        direction - see GFX_GRADIENT_TYPE	 
 *
 * Output: Returns 1 if the rendering is done, 0 if not yet done.
 *

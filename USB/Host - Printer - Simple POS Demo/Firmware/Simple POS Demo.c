@@ -64,38 +64,17 @@ full sheet printer.
 // *****************************************************************************
 
 #ifdef __C30__
-    #define PLL_96MHZ_OFF   0xFFFF
-    #define PLL_96MHZ_ON    0xF7FF
-
-    // Configuration Bit settings  for an Explorer 16 with USB PICtail Plus
-    //      Primary Oscillator:             HS
-    //      Internal USB 3.3v Regulator:    Disabled
-    //      IOLOCK:                         Set Once
-    //      Primary Oscillator Output:      Digital I/O
-    //      Clock Switching and Monitor:    Both disabled
-    //      Oscillator:                     Primary with PLL
-    //      USB 96MHz PLL Prescale:         Divide by 2
-    //      Internal/External Switch Over:  Enabled
-    //      WDT Postscaler:                 1:32768
-    //      WDT Prescaler:                  1:128
-    //      WDT Window:                     Non-window Mode
-    //      Comm Channel:                   EMUC2/EMUD2
-    //      Clip on Emulation Mode:         Reset into Operation Mode
-    //      Write Protect:                  Disabled
-    //      Code Protect:                   Disabled
-    //      JTAG Port Enable:               Disabled
-
     #if defined(__PIC24FJ256GB110__)
-        _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
+        _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
-        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__PIC24FJ256GB106__)
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
     #elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)

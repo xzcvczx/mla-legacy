@@ -66,7 +66,7 @@ void CreatePerformanceScreen(void)
 
     currentScheme = GFX_SchemeGetCurrentScheme();
 
-   	SetColor(RGB565CONVERT(0xFF, 0xBB, 0x4C));        // Orange
+   	SetColor(ORANGE);                       // Orange
    	Bar((GetMaxX() >> 2), 0 , (GetMaxX() >> 2) + 2, GetMaxY());
 
     SetColor(currentScheme->Color0);

@@ -381,6 +381,6 @@ void GfxTconInit(void)
     TCON_CLKLow();        
 }
 
-#endif // #ifdef USE_TCON_SSD1289 
+#endif // #if defined (USE_TCON_SSD1289)
 
 

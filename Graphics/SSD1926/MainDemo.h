@@ -18,6 +18,7 @@
 #include "MDD File System/FSIO.h"
 #include "SSD1926_SDCard.h"
 #include "SSD1926_JPEG.h"
+#include "TimeDelay.h"
 #if defined (MEB_BOARD)
 #include "cpld.h"
 #endif

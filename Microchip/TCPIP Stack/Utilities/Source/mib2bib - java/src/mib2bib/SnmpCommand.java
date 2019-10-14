@@ -1198,7 +1198,7 @@ void DeleteMIBTree(OID_NODE root)
 class declareVar //extends SnmpCommand
 {
     public boolean lbIsAlreadyWarned = false;
-    boolean HandleDeclareVar(List pList, File file, int line)
+    boolean HandleDeclareVar(List<String> pList, File file, int line)
     {
         OID_NODE r;
         DATA_TYPE dataType;
@@ -1219,28 +1219,28 @@ class declareVar //extends SnmpCommand
         }
 
         // Is this a valid name?
-        if ( IsValidName((String)pList.get(1)) == false )
+        if ( IsValidName(pList.get(1)) == false )
         {
             mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.INVALID_OID_NAME);
             return false;
         }
 
 
-        dataType = GetDataType((String)pList.get(2));
+        dataType = GetDataType(pList.get(2));
         if ( dataType == DATA_TYPE.DATA_TYPE_UNKNOWN )
         {
             mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.UNKNOWN_DATA_TYPE);
             return false;
         }
 
-        oidType = GetNodeType((String)pList.get(3));
+        oidType = GetNodeType(pList.get(3));
         if ( oidType == OID_TYPE.OID_TYPE_UNKNOWN )
         {
             mainMib2bib.ShowError(file, line,mib2bib.FILE_ERROR_CODE.UNKNOWN_OID_TYPE);
             return false;
         }
 
-        oidAccess = GetOIDAccess((String)pList.get(4));
+        oidAccess = GetOIDAccess(pList.get(4));
         if ( oidAccess == OID_ACCESS.OID_ACCESS_UNKNOWN )
         {
             mainMib2bib.ShowError(file, line,mib2bib.FILE_ERROR_CODE.UNKNOWN_OID_ACCESS);
@@ -1249,8 +1249,8 @@ class declareVar //extends SnmpCommand
 
 
         // Remember OID string so that we can use that in mib.h file.
-        String tempString =(String)pList.get(5);
-        oidLen = ParseOIDString((String)pList.get(5), oidBytes, oidLen);
+        String tempString =pList.get(5);
+        oidLen = ParseOIDString(pList.get(5), oidBytes, oidLen);
         if ( oidLen == 0 )
         {
             mainMib2bib.ShowError(file, line, mib2bib.FILE_ERROR_CODE.INVALID_OID_LEN);
@@ -1259,7 +1259,7 @@ class declareVar //extends SnmpCommand
 
 
         // Is this name already defined?
-        if ( LookupOIDName(mibRoot, (String)pList.get(1)) == null)
+        if ( LookupOIDName(mibRoot,pList.get(1)) == null)
         {
             r = AddNode(pList.get(1).toString(), dataType, oidType, oidAccess, oidBytes, oidLen);
             if ( r == null )
@@ -1301,7 +1301,7 @@ class dynamicVar //extends SnmpCommand
 {
     //final int MAX_DYNAMIC_OID_COUNT =  (256);
     public int DynamicOIDCount=0;
-    boolean HandleDynamicVar(List pList,File file, int line)
+    boolean HandleDynamicVar(List<String> pList,File file, int line)
     {
         OID_NODE matchingNode;
         OID_NODE duplicateIDRec;
@@ -1382,7 +1382,7 @@ class dynamicVar //extends SnmpCommand
 // $StaticVar(<NodeName>, <Value>)
 class staticVar //extends SnmpCommand
 {
-    boolean HandleStaticVar(List pList, File file, int line)
+    boolean HandleStaticVar(List<String> pList, File file, int line)
     {
         OID_NODE matchingNode;
         long i, j, b1, b2, b3, b4;
@@ -1642,7 +1642,7 @@ class agentID //extends SnmpCommand
 
         return 0;
     }
-    boolean HandleAgentID(List pList, File file, int line)
+    boolean HandleAgentID(List<String> pList, File file, int line)
     {
         OID_NODE matchingNode;
         OID_NODE duplicateIDRec;
@@ -1725,7 +1725,7 @@ class agentID //extends SnmpCommand
 class sequenceVar //extends SnmpCommand
 {
     public int MAX_NO_OF_INDEX = 1;
-    boolean HandleSequenceVar(List pList, File file, int line)
+    boolean HandleSequenceVar(List<String> pList, File file, int line)
     {
         OID_NODE matchingNode;
         OID_NODE matchingIndex;

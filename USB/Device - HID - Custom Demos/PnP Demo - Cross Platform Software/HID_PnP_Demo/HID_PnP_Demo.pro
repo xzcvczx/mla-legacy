@@ -21,9 +21,9 @@ FORMS    += demoapp.ui
 # Add the Signal11's hidapi library that was
 # created
 #-------------------------------------------------
-macx: LIBS += -L./HIDAPI/mac -lHIDAPI
-win32: LIBS += -L./HIDAPI/windows -lHIDAPI
-unix: !macx: LIBS += -L./HIDAPI/linux -lHIDAPI
+macx: LIBS += -L../HIDAPI/mac -lHIDAPI
+win32: LIBS += -L../HIDAPI/windows -lHIDAPI
+unix: !macx: LIBS += -L../HIDAPI/linux -lHIDAPI
 
 #-------------------------------------------------
 # Make sure to add the required libraries or

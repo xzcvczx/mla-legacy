@@ -59,7 +59,7 @@
 								// that use EP0 IN or OUT for sending large amounts of
 								// application related data.
 									
-#define USB_MAX_NUM_INT     	1   // For tracking Alternate Setting
+#define USB_MAX_NUM_INT     	2   // For tracking Alternate Setting
 
 //Device descriptor - if these two definitions are not defined then
 //  a ROM USB_DEVICE_DESCRIPTOR variable by the exact name of device_dsc
@@ -164,7 +164,7 @@
 /* CDC */
 #define CDC_COMM_INTF_ID        0x0
 #define CDC_COMM_EP              1
-#define CDC_COMM_IN_EP_SIZE      8
+#define CDC_COMM_IN_EP_SIZE      10
 
 #define CDC_DATA_INTF_ID        0x01
 #define CDC_DATA_EP             2

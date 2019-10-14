@@ -3468,7 +3468,7 @@ static void ToggleCRYPTEN(void)
   Section:
 	Global RSA Variables
   ***************************************************************************/
-#if defined(STACK_USE_SSL_SERVER) || defined(STACK_USE_SSL_CLIENT)
+#if (defined(STACK_USE_SSL_SERVER) || defined(STACK_USE_SSL_CLIENT)) && (SSL_RSA_CLIENT_SIZE <= 1024)
 
 static SM_RSA smRSA;					// State machine variable
 static BYTE keyLength;					// Length of the input key
@@ -3495,11 +3495,11 @@ void RSAInit(void)
 
 /*****************************************************************************
   Function:
-	BOOL RSABeginUsage(RSA_OP op, BYTE vKeyByteLen)
+	BOOL RSABeginUsage(RSA_OP op, WORD vKeyByteLen)
 
 Same
   ***************************************************************************/
-BOOL RSABeginUsage(RSA_OP op, BYTE vKeyByteLen)
+BOOL RSABeginUsage(RSA_OP op, WORD vKeyByteLen)
 {
 	if(smRSA != SM_RSA_IDLE)
 		return FALSE;
@@ -3572,11 +3572,11 @@ void RSAEndUsage(void)
 
 /*****************************************************************************
   Function:
-	void RSASetData(BYTE* data, BYTE len, RSA_DATA_FORMAT format)
+	void RSASetData(BYTE* data, WORD len, RSA_DATA_FORMAT format)
 
 Replaced
   ***************************************************************************/
-void RSASetData(BYTE* data, BYTE len, RSA_DATA_FORMAT format)
+void RSASetData(BYTE* data, WORD len, RSA_DATA_FORMAT format)
 {
 	WORD oldPtr;
 	BYTE i;

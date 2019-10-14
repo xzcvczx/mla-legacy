@@ -112,10 +112,7 @@ extern const PALETTE_FLASH _ColorPalette;
 /////////////////////////////////////////////////////////////////////////////
 //                            FONTS USED
 /////////////////////////////////////////////////////////////////////////////
-extern const FONT_FLASH     monofont;				
-extern const FONT_FLASH     GOLMediumFont;
-extern const FONT_FLASH     GOLSmallFont;
-extern const FONT_FLASH		monofontsmall;
+// see DemoFlashResource.c (h)
 
 /////////////////////////////////////////////////////////////////////////////
 //                       GLOBAL VARIABLES FOR DEMO

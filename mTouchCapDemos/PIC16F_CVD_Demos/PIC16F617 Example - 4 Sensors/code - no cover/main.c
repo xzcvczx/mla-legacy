@@ -62,42 +62,20 @@
 */
 /// @cond
 
-#include <includes/mTouchCVD.h>              // Required Include
+#include "mTouchCVD.h"              // Required Include
 
 // CONFIGURATION SETTINGS
-#if   defined(_16F193x)
-  #ifdef __DEBUG
-    __CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_OFF & MCLRE_OFF & CP_OFF & CPD_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-    __CONFIG(WRT_OFF & PLLEN_ON & STVREN_OFF & BORV_25 & LVP_OFF);
-  #else
-    __CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & CPD_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-    __CONFIG(WRT_OFF & PLLEN_ON & STVREN_OFF & BORV_25 & LVP_OFF);
-  #endif
-//__CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & CPD_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-//__CONFIG(WRT_OFF & PLLEN_ON & STVREN_OFF & BORV_25 & LVP_OFF);
-#elif defined(_16F1823)
-__CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & CPD_OFF & BOREN_OFF & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-__CONFIG(WRT_OFF & PLLEN_ON & STVREN_OFF & BORV_25 & LVP_OFF);
-#elif defined(_16F182x)
-__CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & CPD_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-__CONFIG(WRT_OFF & PLLEN_ON & STVREN_OFF & BORV_25 & LVP_OFF);
-#elif defined(_16F152x)
-__CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-__CONFIG(WRT_OFF & VCAPEN_OFF & STVREN_OFF & BORV_25 & ULPBOR_OFF & LVP_OFF);
-#elif defined(_16F194x)
-__CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & CPD_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-__CONFIG(WRT_OFF & VCAPEN_OFF & PLLEN_ON & STVREN_OFF & BORV_25 & LVP_OFF);
-#elif defined(_12F617)
-__CONFIG(FOSC_INTOSCIO & WDTE_OFF & PWRTE_OFF & MCLRE_ON & CP_OFF & IOSCFS_8MHZ & BOREN_OFF & WRT_OFF);
-#elif defined(_12F615) || defined(_12HV615)
-__CONFIG(FOSC_INTOSCIO & WDTE_OFF & PWRTE_OFF & MCLRE_OFF & CP_OFF & IOSCFS_8MHZ & BOREN_OFF);
-#endif
+#include "generic_processorConfigBits.h"        // Provided for ease-of-development. 
+                                                // Should not be used in an actual 
+                                                // application.
+
+    // TIP: Valid configuration bit labels can be found in Hi-Tech's folder.
+    //      C:\Program Files\HI-TECH Software\<COMPILER NAME>\<VERSION NUMBER>\include
+    //      Open the 'pic' header file that corresponds to your microcontroller.
+    //      Ex: 'pic16f1937.h'  --  NOT 'as16f1937.h' or 'cas16f1937.h'
 
 // PROTOTYPES
 void Example_System_Init(void);
-
-unsigned char pressCounter;
-unsigned char pressIndex;
 
 void main(void)
 {

@@ -44,6 +44,11 @@
 
 #ifdef USE_TRANSITION_EFFECTS
 
+/* Local Function Prototypes            */
+void        PushRectangle(void);
+void        PlainCopyRectangle(void);
+/****************************************/
+
 WORD _transitionpending, _left, _top, _right, _bottom, _type, _delay_ms, _param1, _param2;
 DWORD _srcpageaddr, _destpageaddr;
 

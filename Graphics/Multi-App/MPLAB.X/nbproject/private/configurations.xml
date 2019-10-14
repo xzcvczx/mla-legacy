@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="62">
   <projectmakefile>Makefile</projectmakefile>
-  <defaultConf>24</defaultConf>
+  <defaultConf>20</defaultConf>
   <confs>
     <conf name="PIC24_GA110_GFXv3_EX16_8PMP_QVGAv1_SDMSD" type="2">
       <platformToolSN></platformToolSN>

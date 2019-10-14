@@ -951,7 +951,10 @@ BOOL MiApp_ProtocolInit(BOOL bNetworkFreezer)
             nvmPutConnMode(&ConnMode);
             nvmPutConnectionTable(ConnectionTable);
         }
-        
+    #else
+        #if defined(IEEE_802_15_4)
+            myPANID.Val = MY_PAN_ID; 
+        #endif
     #endif
     
     initValue.PAddress = myLongAddress;

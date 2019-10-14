@@ -35,8 +35,8 @@ Description:
     paths need to be added to the application's project:
     
     .
-
-    ..\\..\\MicrochipInclude
+    
+    ..\\..\\Microchip\\Include
         
     If a different directory structure is used, modify the paths as
     required. An example using absolute paths instead of relative paths
@@ -65,8 +65,8 @@ Description:
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PICmicro® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PICmicro(R) Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PICmicro Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -75,26 +75,17 @@ Description:
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
- *************************************************************************/
-
-//DOM-IGNORE-BEGIN
-/********************************************************************
  Change History:
   Rev    Description
   ----   -----------
-  2.7    Created USBSleepOnSuspend() function to simply process of putting
-           the PIC24E device in the correct state before issuing the sleep
-           instruction and returning the device to the correct state after
-           exiting sleep. 
-********************************************************************/
-//DOM-IGNORE-END
+ *************************************************************************/
 
 #ifndef USB_HAL_PIC24E_C
 #define USB_HAL_PIC24E_C
@@ -102,22 +93,31 @@ Description:
 #include "USB/usb.h"
 
 
-/*************************************************************************
-  Function:
+/********************************************************************
+Function:
     BOOL USBSleepOnSuspend(void)
-  Summary:
-    Places the PIC24E devices in sleep after enabling the USB activity flag to
-    wake it back up.
-  Conditions:
+    
+Summary:
+    Places the PIC24F core into sleep and sets up the USB module
+    to wake up the device on USB activity.
+    
+PreCondition:
     IPL (in the SR register) must be non-zero.
-  Input:
+    
+Parameters:
     None
-  Return:
+    
+Return Values:
     TRUE  - if entered sleep successfully
     FALSE - if there was an error entering sleep
-  Remarks:
-    None                                                                  
-  *************************************************************************/
+    
+Remarks:
+    Please note that before calling this function that it is the
+    responsibility of the application to place all of the other
+    peripherals or board features into a lower power state if
+    required.
+
+*******************************************************************/
 BOOL USBSleepOnSuspend(void)
 {
     unsigned int U1EIE_save, U1IE_save, U1OTGIE_save;

@@ -34,17 +34,16 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo
- * Anton Alkhimenok		4/8/08		...
- * PAT					8/8/08		Centered values displayed on bar charts
- *									Removed line drawn on pie chart when no slices 
- *									are present.
- * PAT					9/30/08		3-D bar depth is now equal to chart depth.
- *									Flushed 2-D Bars to equal max height of chart
- *									when equal or greater than.
- * PAT					6/29/09		Modified Draw Sector function to be state based.
+ * 4/8/08       ...
+ * 8/8/08       Centered values displayed on bar charts
+ *              Removed line drawn on pie chart when no slices 
+ *              are present.
+ * 9/30/08      3-D bar depth is now equal to chart depth.
+ *              Flushed 2-D Bars to equal max height of chart
+ *              when equal or greater than.
+ * 6/29/09      Modified Draw Sector function to be state based.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 #include <math.h>
@@ -54,17 +53,20 @@
 // internal functions and macros
 WORD        word2xchar(WORD pSmple, XCHAR *xcharArray, WORD cnt);
 void        GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y);
-WORD        DrawSector(SHORT cx, SHORT cy, SHORT radius, SHORT angleFrom, SHORT angleTo, WORD outLineColor);
-WORD        GetColorShade(WORD color, BYTE shade);
+WORD        DrawSector(SHORT cx, SHORT cy, SHORT outRadius, SHORT angleFrom, SHORT angleTo, GFX_COLOR outLineColor);
+GFX_COLOR   GetColorShade(GFX_COLOR color, BYTE shade);
 WORD        ChParseShowData(DATASERIES *pData);
 DATASERIES  *ChGetNextShowData(DATASERIES *pData);
 SHORT       ChSetDataSeries(CHART *pCh, WORD seriesNum, BYTE status);
 
 // array used to define the default colors used to draw the bars or sectors of the chart
-const WORD  ChartVarClr[16] = {  CH_CLR0, CH_CLR1, CH_CLR2, CH_CLR3,
-    CH_CLR4, CH_CLR5, CH_CLR6, CH_CLR7,
-    CH_CLR8, CH_CLR9, CH_CLR10,CH_CLR11,
-    CH_CLR12,CH_CLR13,CH_CLR14,CH_CLR15};
+const GFX_COLOR  ChartVarClr[16] =  
+            {  
+                CH_CLR0, CH_CLR1, CH_CLR2, CH_CLR3,
+                CH_CLR4, CH_CLR5, CH_CLR6, CH_CLR7,
+                CH_CLR8, CH_CLR9, CH_CLR10,CH_CLR11,
+                CH_CLR12,CH_CLR13,CH_CLR14,CH_CLR15
+            };
 
 /*********************************************************************
 * Function: CHART  *ChCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
@@ -74,7 +76,8 @@ const WORD  ChartVarClr[16] = {  CH_CLR0, CH_CLR1, CH_CLR2, CH_CLR3,
 *
 * Notes: Creates a CHART object and adds it to the current active list.
 *        If the creation is successful, the pointer to the created Object 
-*        is returned. If not successful, NULL is returned.
+*        is returned. If not successful, NULL is returned. Chart is not
+*        supporting the use of Palette when rendering 3-D bar charts. 
 *
 ********************************************************************/
 CHART *ChCreate
@@ -135,7 +138,7 @@ CHART *ChCreate
         pCh->prm.valMin = 0;
 
         // use the default color table
-        pCh->prm.pColor = (WORD *)ChartVarClr;
+        pCh->prm.pColor = (GFX_COLOR *)ChartVarClr;
         pCh->prm.pTitleFont = _pDefaultGolScheme->pFont;
         pCh->prm.pAxisLabelsFont = _pDefaultGolScheme->pFont;
         pCh->prm.pGridLabelsFont = _pDefaultGolScheme->pFont;
@@ -287,7 +290,7 @@ WORD word2xchar(WORD pSmple, XCHAR *xcharArray, WORD cnt)
     do
     {
         *pXchar = (z % 10) + '0';
-        *pXchar--;
+        pXchar--;
         if((z /= 10) == 0)
             break;
         j++;
@@ -296,38 +299,89 @@ WORD word2xchar(WORD pSmple, XCHAR *xcharArray, WORD cnt)
 }
 
 /*********************************************************************
-* Function: WORD GetColorShade(WORD color, BYTE shade)
+* Function: GFX_COLOR GetColorShade(GFX_COLOR color, BYTE shade)
 *
-*
-* Notes: This function gets the given color in 5-6-5 (RGB) format
-* 		 and computes the shade of the same color by shifting 
+* Notes: This function generates the shades required to draw the 
+*        3-D bar chart. The color given color will be in the format  
+*        for the given COLOR_DEPTH setting. The r, g and b colors
+*        are extracted from the composite GFX_COLOR value and 
+* 		 computes the shade of the same color by shifting 
 *		 the rgb values depending on the shade value.
 *		 The idea here is to get the given r,g and b colors and 
 *		 make them approach the gray color by shifting the each value
 *		 closer to 128. If rgb values are > 128 we subtract and add 
 *		 if < 128 we add.
+*        For color depth of 1bpp the returned color is the same 
+*        as the given color.
 *
 ********************************************************************/
-WORD GetColorShade(WORD color, BYTE shade)
+GFX_COLOR GetColorShade(GFX_COLOR color, BYTE shade)
 {
-    WORD    newColor;
-    BYTE    rgb[3];
+    GFX_COLOR   newColor;
+    BYTE        rgb[3];
+    BYTE        i, limit;
+    BYTE        midValue;
 
-    rgb[0] = ((color >> 11) << 3);  // red
-    rgb[1] = ((color >> 5) << 2);   // green
-    rgb[2] = ((color) << 3);        // blue
-    BYTE    i;
+#if (COLOR_DEPTH == 1)
+    
+    return color;
 
-    for(i = 0; i < 3; i++)
+#elif (COLOR_DEPTH == 4)
+
+    // from: #define RGBConvert(red, green, blue) (GFX_COLOR) (((GFX_COLOR)(red) & 0xE0) | (((GFX_COLOR)(green) & 0xE0) >> 3) | (((GFX_COLOR)(blue)) >> 6))
+    rgb[0] = (BYTE)(color & 0x0F);          // red
+
+#elif (COLOR_DEPTH == 8)
+    
+    // from: #define RGBConvert(red, green, blue) (GFX_COLOR) (((GFX_COLOR)(red) & 0xE0) | (((GFX_COLOR)(green) & 0xE0) >> 3) | (((GFX_COLOR)(blue)) >> 6))
+    rgb[0] = (BYTE)(color & 0xE0);          // red
+    rgb[1] = (BYTE)(color << 3);            // green
+    rgb[2] = (BYTE)(color << 6);            // blue
+    
+#elif (COLOR_DEPTH == 16)
+
+    // from: #define RGBConvert(red, green, blue)    (GFX_COLOR) (((((GFX_COLOR)(red) & 0xF8) >> 3) << 11) | ((((GFX_COLOR)(green) & 0xFC) >> 2) << 5) | (((GFX_COLOR)(blue) & 0xF8) >> 3))                                               
+    rgb[0] = (BYTE)((color >> 11) << 3);    // red
+    rgb[1] = (BYTE)((color >> 5) << 2);     // green
+    rgb[2] = (BYTE)((color) << 3);          // blue
+
+#elif (COLOR_DEPTH == 24)
+
+    // from: #define RGBConvert(red, green, blue)    (GFX_COLOR) (((GFX_COLOR)(red) << 16) | ((GFX_COLOR)(green) << 8) | (GFX_COLOR)(blue))
+    rgb[0] = (BYTE)((GFX_COLOR)(color & ((GFX_COLOR)0x00FF0000ul)) >> 16);  // red
+    rgb[1] = (BYTE)((GFX_COLOR)(color & ((GFX_COLOR)0x0000FF00ul)) >> 8);   // green
+    rgb[2] = (BYTE)((GFX_COLOR)(color & ((GFX_COLOR)0x000000FFul)));        // blue
+
+    
+#endif
+
+#if (COLOR_DEPTH == 4)
+    midValue = 7;
+    limit = 1;
+#else
+    midValue = 128;
+    limit = 3;
+#endif
+
+#if (COLOR_DEPTH != 1)
+
+    for(i = 0; i < limit; i++)
     {
-        if(rgb[i] > 128)
-            rgb[i] = rgb[i] - ((rgb[i] - 128) >> (shade));
+        if(rgb[i] > midValue)
+            rgb[i] = rgb[i] - ((rgb[i] - midValue) >> (shade));
         else
-            rgb[i] = rgb[i] + ((128 - rgb[i]) >> (shade));
+            rgb[i] = rgb[i] + ((midValue - rgb[i]) >> (shade));
     }
 
-    newColor = RGB565CONVERT(rgb[0], rgb[1], rgb[2]);
+#if (COLOR_DEPTH == 4)
+    newColor = rgb[0];
+#else
+    newColor = RGBConvert(rgb[0], rgb[1], rgb[2]);
+#endif
     return (newColor);
+
+#endif
+
 }
 
 /*********************************************************************
@@ -3031,7 +3085,7 @@ WORD DrawSector(SHORT cx, SHORT cy, SHORT outRadius, SHORT angleFrom, SHORT angl
 
     static SHORT x1, y1, x2, y2, x3, y3;
     static SHORT angleMid;
-    static WORD tempColor;
+    static GFX_COLOR tempColor;
     LONG temp;
 
     static DRAW_SECTOR_STATES sectorState = SEC_DRAW_IDLE;

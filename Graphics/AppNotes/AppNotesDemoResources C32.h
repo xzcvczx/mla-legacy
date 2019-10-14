@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.2.12
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.8.17
  *****************************************************************************/
 
 #ifndef APPNOTESDEMORESOURCES_C32_H_FILE
@@ -45,9 +45,10 @@
 /*****************************************************************************
  * This is an error check for the color depth
  *****************************************************************************/
-#if (COLOR_DEPTH != 16)
+#if (COLOR_DEPTH > 16)
 #error "Color Depth needs to be 16 to correctly use these resources"
 #endif
+
 
 
 /*****************************************************************************
@@ -86,11 +87,11 @@ extern const IMAGE_FLASH Back_4bpp_16x16;
  *****************************************************************************/
 
 /*********************************
- * Font Structure
+ * Font File Structure
  * Label: Gentium_16
- * Description:  Heigth: 19 pixels, range: ' ' to '~'
+ * Description:  Heigth: 18 pixels, range: ' ' to '~'
  ***********************************/
 extern const FONT_FLASH Gentium_16;
-#define Gentium_16_SIZE    (2668)
+#define Gentium_16_SIZE    (2458)
 #endif
 

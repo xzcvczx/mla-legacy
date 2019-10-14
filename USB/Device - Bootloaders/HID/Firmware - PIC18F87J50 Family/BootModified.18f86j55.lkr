@@ -5,7 +5,7 @@ LIBPATH .
 
 // FILES c018i.o	//Manually including a modified version of the contents of this file in the main.c file instead
 FILES clib.lib
-FILES p18f86j55.lib
+FILES p18F86J55.lib
 
 //Modified linker script to be used with the USB HID Bootloader firmware.
 CODEPAGE   NAME=vectors    START=0x0            END=0x29           PROTECTED

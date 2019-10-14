@@ -11,7 +11,7 @@ LIBPATH .
 
 FILES c018i.o
 FILES clib.lib
-FILES p18f4550.lib
+FILES p18F4550.lib
 
 CODEPAGE   NAME=Bootloader START=0x0            END=0x7FF      					//For use by this bootloader firmware.    
 CODEPAGE   NAME=page       START=0x800          END=0x7FFF			PROTECTED	//For use by the application to get programmed.

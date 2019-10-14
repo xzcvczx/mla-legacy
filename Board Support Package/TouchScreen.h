@@ -33,6 +33,8 @@
  * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 01/19/11		Ported from TouchScreen.h. 
+ * 10/03/11     Modified TouchDetectPosition() to return status of touch
+ *              sampling.
  *****************************************************************************/
 
 /*****************************************************************************
@@ -65,13 +67,14 @@ typedef void (*NVM_WRITE_FUNC)(WORD, DWORD);    // typedef for write function po
 typedef void (*NVM_SECTORERASE_FUNC)(DWORD);    // typedef for sector erase function pointer
 
 /*********************************************************************
-* Function: void TouchDetectPosition(void)
+* Function: SHORT TouchDetectPosition(void)
 *
 * PreCondition: none
 *
 * Input: none
 *
-* Output: none
+* Output: Returns 1 if touch sampling is done.
+*         Returns 0 if the touch sampling is not finished.  
 *
 * Side Effects: none
 *
@@ -80,8 +83,7 @@ typedef void (*NVM_SECTORERASE_FUNC)(DWORD);    // typedef for sector erase func
 * Note: none
 *
 ********************************************************************/
-void TouchDetectPosition(void);
-
+SHORT TouchDetectPosition(void);
 
 /*********************************************************************
 * Function: void TouchInit(NVM_WRITE_FUNC pWriteFunc, NVM_READ_FUNC pReadFunc, NVM_SECTORERASE_FUNC pSectorErase, void *initValues)
@@ -213,6 +215,26 @@ void TouchGetMsg(GOL_MSG *pMsg);
 *
 ********************************************************************/
 void TouchCalibration(void);
+
+
+/*********************************************************************
+* Function: void Touch_ADCInit(void)
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Initializes the ADC for the touch detection.
+*
+* Note: none
+*
+********************************************************************/
+void Touch_ADCInit(void);
+
 
 // macro to draw repeating text
 #define TouchShowMessage(pStr, color, x, y)             \

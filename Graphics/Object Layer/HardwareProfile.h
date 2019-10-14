@@ -77,7 +77,7 @@
 			 * MIKRO MMB for PIC24
 			 * only selectable when using PIC24FJ256GB110
 			 ********************************************************************/
-			//#include "Configs/HWP_MIKRO.h"
+			//#include "Configs/HWP_MIKRO_8PMP.h"
 			
 		#endif	
 	
@@ -126,7 +126,7 @@
      * Graphics PicTail v3
      * Display PH480272T-005-I11Q
      ********************************************************************/
-//	#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
+    //#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
 	//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
 
     /*********************************************************************
@@ -143,7 +143,7 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-//	#include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
+    //#include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
 	//#include "Configs/HWP_GFXv3_PIC_SK_16PMP_QVGAv1.h"
 
     /*********************************************************************
@@ -162,12 +162,12 @@
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
     //#include "Configs/HWP_MEB_PIC32_STK_8PMP.h"
-   // #include "Configs/HWP_MEB_PIC32_USB_SK_8PMP.h"
-   //#include "Configs/HWP_MEB_PIC32_ETH_SK_8PMP.h"
+    //#include "Configs/HWP_MEB_PIC32_USB_SK_8PMP.h"
+    //#include "Configs/HWP_MEB_PIC32_ETH_SK_8PMP.h"
 
     //#include "Configs/HWP_MEB_PIC32_GP_SK_16PMP.h"
     //#include "Configs/HWP_MEB_PIC32_USB_SK_16PMP.h"
-   // #include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP.h"
+    //#include "Configs/HWP_MEB_PIC32_ETH_SK_16PMP.h"
     
     //#include "Configs/HWP_MEB_dsPIC33E_SK_8PMP.h"
 
@@ -177,12 +177,12 @@
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
      //#include "Configs/HWP_LCC_EX16_INT_QVGAv1.h"
-   //  #include "Configs/HWP_LCC_EX16_EXT_QVGAv1.h"
-      // #include "Configs/HWP_LCC_EX16_EXT_WQVGAv1.h"
+     //#include "Configs/HWP_LCC_EX16_EXT_QVGAv1.h"
+     //#include "Configs/HWP_LCC_EX16_EXT_WQVGAv1.h"
 
-    // #include "Configs/HWP_LCC_PIC_SK_INT_QVGAv1.h"
-    // #include "Configs/HWP_LCC_PIC_SK_EXT_QVGAv1.h"
-    // #include "Configs/HWP_LCC_PIC_SK_EXT_WQVGAv1.h"
+     //#include "Configs/HWP_LCC_PIC_SK_INT_QVGAv1.h"
+     //#include "Configs/HWP_LCC_PIC_SK_EXT_QVGAv1.h"
+     //#include "Configs/HWP_LCC_PIC_SK_EXT_WQVGAv1.h"
      //#include "Configs/HWP_LCC_PIC_SK_EXT_VGAv1.h"
 
 #endif

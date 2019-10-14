@@ -5,14 +5,13 @@
  *****************************************************************************
  * FileName:        S1D13517.c
  * Dependencies:    Graphics.h
- * Processor:       PIC32
- * Compiler:       	MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
+ * Processor:       PIC24, dsPIC, PIC32
+ * Compiler:       	MPLAB C30, C32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -22,7 +21,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -52,6 +51,10 @@
 #elif defined (USE_GFX_EPMP)
     #include "Graphics/gfxepmp.h"
 #endif  
+
+#if ((COLOR_DEPTH != 16) && (COLOR_DEPTH != 24))
+    #error "The S1D13517 driver can currently support the COLOR_DEPTH of 16 and 24 only."
+#endif
 
 
 // Current Page
@@ -2318,251 +2321,6 @@ void PutImage24BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 
 #endif
 
-#ifdef USE_PALETTE
-
-/*********************************************************************
-* Function: void PaletteInit(void)
-*
-* Overview: Initializes the CLUT.
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: Drawing mode will change to support palettes
-*
-********************************************************************/
-void PaletteInit(void)
-{
-    PaletteBpp = 16;
-    blPaletteChangeError = 0;
-    pPendingPalette = NULL;
-    PendingStartEntry = 0;
-    PendingLength = 0;
-}
-
-/*********************************************************************
-* Function: BYTE SetPaletteBpp(BYTE bpp)
-*
-* Overview: Sets the CLUT's number of valid entries.
-*
-* PreCondition: PaletteInit() must be called before.
-*
-* Input: bpp -> Bits per pixel
-*
-* Output: Status: Zero -> Success, Non-zero -> Error.
-*
-* Side Effects: Drawing mode will change to support palettes
-*
-********************************************************************/
-BYTE SetPaletteBpp(BYTE bpp)
-{
-    switch(bpp)
-    {
-        /*case 1: SetReg(REG_DISPLAY_MODE,0x00);
-                break;
-
-        case 2: SetReg(REG_DISPLAY_MODE,0x01);
-                break;
-
-        case 4: SetReg(REG_DISPLAY_MODE,0x02);
-                break;*/
-        case 8:     SetReg(REG_DISPLAY_MODE, 0x03); break;
-        case 16:    SetReg(REG_DISPLAY_MODE, 0x04); break;
-        default:    SetReg(REG_DISPLAY_MODE, 0x04); PaletteBpp = 16; return (-1);
-    }
-
-    PaletteBpp = bpp;
-
-    /////////////////////////////////////////////////////////////////////
-    // ROTATION MODE
-    /////////////////////////////////////////////////////////////////////
-        #if (DISP_ORIENTATION == 0)
-            #define WIN_START_ADDR  0ul
-            #define ROTATION        0
-
-        #elif (DISP_ORIENTATION == 90)
-            #ifndef USE_PALETTE
-                #define WIN_START_ADDR  ((((DWORD) GetMaxX() + 1) >> 1) - 1)
-            #else
-                #define WIN_START_ADDR  (((((DWORD) GetMaxX() + 1) * PaletteBpp) >> 5) - 1)
-            #endif
-            #define ROTATION    1
-
-        #elif (DISP_ORIENTATION == 180)
-            #ifndef USE_PALETTE
-                #define WIN_START_ADDR  (((((DWORD) GetMaxX() + 1) * (GetMaxY() + 1)) >> 1) - 1)
-            #else
-                #define WIN_START_ADDR  (((((DWORD) GetMaxX() + 1) * (GetMaxY() + 1) * PaletteBpp) >> 5) - 1)
-            #endif
-            #define ROTATION    2
-
-        #elif (DISP_ORIENTATION == 270)
-            #ifndef USE_PALETTE
-                #define WIN_START_ADDR  ((((DWORD) GetMaxX() + 1) * GetMaxY()) >> 1)
-            #else
-                #define WIN_START_ADDR  ((((DWORD) GetMaxX() + 1) * GetMaxY() * PaletteBpp) >> 5)
-            #endif
-            #define ROTATION    3
-        #endif
-
-    /////////////////////////////////////////////////////////////////////
-    // Special Effects Register (reg 71h)
-    /////////////////////////////////////////////////////////////////////
-        #ifndef USE_PALETTE
-    SetReg(REG_SPECIAL_EFFECTS, 0x40 | ROTATION);
-        #else
-    SetReg(REG_SPECIAL_EFFECTS, 0x00 | ROTATION);
-        #endif
-
-    /////////////////////////////////////////////////////////////////////
-    // Main Window Display Start Address (regs 74h, 75h, 76h)
-    /////////////////////////////////////////////////////////////////////
-    SetReg(REG_MAIN_WIN_DISP_START_ADDR0, WIN_START_ADDR & 0x00FF);
-    SetReg(REG_MAIN_WIN_DISP_START_ADDR1, (WIN_START_ADDR >> 8) & 0x00FF);
-    SetReg(REG_MAIN_WIN_DISP_START_ADDR2, (WIN_START_ADDR >> 16) & 0x00FF);
-
-    /////////////////////////////////////////////////////////////////////
-    // Main Window Display Offset (regs 78h, 79h)
-    /////////////////////////////////////////////////////////////////////
-        #ifndef USE_PALETTE
-            #define WIN_OFFSET  ((GetMaxX() + 1) >> 1)
-        #else
-            #define WIN_OFFSET  (((GetMaxX() + 1) * PaletteBpp) >> 5)
-        #endif
-    SetReg(REG_MAIN_WIN_ADDR_OFFSET0, WIN_OFFSET & 0x00FF);
-    SetReg(REG_MAIN_WIN_ADDR_OFFSET1, (WIN_OFFSET >> 8) & 0x00FF);
-
-    return (0);
-}
-
-/*********************************************************************
-* Function: void EnablePalette(void)
-*
-* Overview: Enables the Palette mode
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects:
-*
-********************************************************************/
-void EnablePalette(void)
-{
-    SetPaletteBpp(PaletteBpp);
-}
-
-/*********************************************************************
-* Function: void DisablePalette(void)
-*
-* Overview: Disables the Palette mode
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects:
-*
-********************************************************************/
-void DisablePalette(void)
-{
-    SetPaletteBpp(16);
-}
-
-/*********************************************************************
-* Function: BYTE IsPaletteEnabled(void)
-*
-* Overview: Returns if the Palette mode is enabled or not
-*
-* PreCondition: none
-*
-* Input: none
-*
-* Output: Enabled -> 1, Disabled -> 0
-*
-* Side Effects:
-*
-********************************************************************/
-BYTE IsPaletteEnabled(void)
-{
-    return ((PaletteBpp == 16) ? 0 : 1);
-}
-
-/*********************************************************************
-* Function: void StartVBlankInterrupt(void)
-*
-* Overview: Sets up the Vertical Blanking Interrupt
-*
-* PreCondition: Interrupts must be enabled
-*
-* Input: none
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void StartVBlankInterrupt(void)
-{
-
-    /* We don't use Vertical Blanking Interrupt in SSD1926 */
-    if(pPendingPalette != NULL)
-    {
-        blPaletteChangeError = SetPalette(pPendingPalette, PendingStartEntry, PendingLength);
-        if(!blPaletteChangeError)
-        {
-            _palette = pPendingPalette;
-        }
-    }
-}
-
-/*********************************************************************
-* Function: BYTE SetPaletteFlash(PALETTE_ENTRY *pPaletteEntry, WORD startEntry, WORD length)
-*
-* Overview: Loads the palettes from the flash immediately.
-*
-* PreCondition: PaletteInit() must be called before.
-*
-* Input: pPaletteEntry   - Pointer to the palette table in ROM
-*        startEntry      - Start entry to load (inclusive)
-*        length          - Number of entries
-*
-* Output: Status: Zero -> Success, Non-zero -> Error.
-*
-* Side Effects: There may be a slight flicker when the Palette entries
-*               are getting loaded one by one.
-*
-********************************************************************/
-BYTE SetPaletteFlash(PALETTE_ENTRY *pPaletteEntry, WORD startEntry, WORD length)
-{
-    WORD    counter;
-
-    if((pPaletteEntry == NULL) || ((startEntry + length) > 256))
-    {
-        return (-1);
-    }
-
-    for(counter = 0; counter < length; counter++)
-    {
-        SetReg(REG_LUT_RED_WRITE_DATA, RED8(pPaletteEntry[counter].value));
-        SetReg(REG_LUT_GREEN_WRITE_DATA, GREEN8(pPaletteEntry[counter].value));
-        SetReg(REG_LUT_BLUE_WRITE_DATA, BLUE8(pPaletteEntry[counter].value));
-        SetReg(REG_LUT_WRITE_ADDR, startEntry + counter);
-    }
-
-    return (0);
-}
-
-#endif
-
-
 /*********************************************************************
 * Function: void DisplayBrightness(WORD level)
 ********************************************************************/
@@ -2602,9 +2360,7 @@ void DisplayBrightness(WORD level)
   
 }
 
-
 #define BUFFER_SIZE 0x140000l  //WVGA
-
 
 /*********************************************************************
 * Function: DWORD GFXGetPageOriginAddress(SHORT pageNumber)
@@ -2645,11 +2401,10 @@ DWORD GFXGetWindowXYAddress(GFX_WINDOW_INFO* GFXWindowInfo, WORD relX, WORD relY
     return (0);
 }
 
-
+ #ifdef USE_ALPHABLEND
 
 #define 	NO_ALPHA_BLENDING 	0
 
- #ifdef USE_ALPHABLEND
 /*********************************************************************
 * Function: void AlphaBlendWindow(DWORD foregroundWindowAddr, DWORD backgroundWindowAddr,
 					  DWORD destinationWindowAddr,		            
@@ -2703,41 +2458,6 @@ void CopyPageWindow( BYTE srcPage, BYTE dstPage,
 }
 
 #endif
-#ifdef USE_TRANSITION_EFFECTS
-/*********************************************************************
-* Function: WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height)
-*
-* Overview: Moves a block of data from source specified by srcAddr 
-*           and srcOffset to the destination specified by dstAddr 
-*           and dstOffset.
-*
-* PreCondition: none
-*
-* Input: srcAddr - the base address of the data to be moved
-*        dstAddr - the base address of the new location of the moved data 
-*        srcOffset - offset of the data to be moved with respect to the 
-*                    source base address.
-*        dstOffset - offset of the new location of the moved data respect 
-*                    to the source base address.
-*        width - width of the block of data to be moved
-*        height - height of the block of data to be moved
-*
-* Output: none
-* Side Effects: none
-* Note: none
-********************************************************************/
-WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height)
-{
-
-    DWORD source = srcAddr + 3*srcOffset;
-    DWORD destination = dstAddr + 3*dstOffset;
-    
-    
-    AlphaBlendWindow(source, source, destination, width, height,                               
-                                 NO_ALPHA_BLENDING);
-
-    return (0);
-}
 
 /*********************************************************************
 * Function:  SetActivePage(page)
@@ -2779,13 +2499,53 @@ void SetVisualPage(WORD page)
 }  
 
 #ifdef USE_TRANSITION_EFFECTS
+
+extern void PlainCopyRectangle(void);
+
 extern WORD _transitionpending, _left, _top, _right, _bottom, _type, _delay_ms, _param1, _param2;
 extern DWORD _srcpageaddr, _destpageaddr;
-
 extern WORD Startx;
 extern WORD Starty;
 extern WORD Width;
 extern WORD Height;
+
+/*********************************************************************
+* Function: WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height)
+*
+* Overview: Moves a block of data from source specified by srcAddr 
+*           and srcOffset to the destination specified by dstAddr 
+*           and dstOffset.
+*
+* PreCondition: none
+*
+* Input: srcAddr - the base address of the data to be moved
+*        dstAddr - the base address of the new location of the moved data 
+*        srcOffset - offset of the data to be moved with respect to the 
+*                    source base address.
+*        dstOffset - offset of the new location of the moved data respect 
+*                    to the source base address.
+*        width - width of the block of data to be moved
+*        height - height of the block of data to be moved
+*
+* Output: none
+* Side Effects: none
+* Note: none
+********************************************************************/
+WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height)
+{
+
+    DWORD source = srcAddr + 3*srcOffset;
+    DWORD destination = dstAddr + 3*dstOffset;
+    
+    
+    AlphaBlendWindow(source, source, destination, width, height,                               
+                                 NO_ALPHA_BLENDING);
+
+    return (0);
+}
+
+
+
 /*********************************************************************
 * Function: void PushRectangle(void)
 *
@@ -2936,6 +2696,5 @@ long shift;
     SetReg(REG50_DISPLAY_CONTROL,0x80);                    //Refresh must be callsed after swapping screens 
 
 }
-#endif
 #endif
 #endif //GFX_USE_DISPLAY_CONTROLLER_S1D13517

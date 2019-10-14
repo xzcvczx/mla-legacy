@@ -30,7 +30,15 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
-
+/********************************************************************
+ Change History:
+  Rev            Description
+  ----           -----------------------
+  1.3.4          Added support for PIC18F8722,PIC24FJ256DA210,
+                 dsPIC33E & PIC24E microcontrollers.
+                 Added macro "SPI_INTERRUPT_FLAG_ASM" for PIC18F
+                 microcontrollers to support SD card SPI driver.
+********************************************************************/
 
 #ifndef _HARDWAREPROFILE_H_
 #define _HARDWAREPROFILE_H_
@@ -42,18 +50,20 @@
     #if defined(__18F87J50)
         #define DEMO_BOARD PIC18F87J50_PIM
         #define PIC18F87J50_PIM
+        #define GetSystemClock()        48000000                        // System clock frequency (Hz)
     #elif defined(__18F46J50)
         #define DEMO_BOARD PIC18F46J50_PIM
         #define PIC18F46J50_PIM
+        #define GetSystemClock()        48000000                        // System clock frequency (Hz)
+    #elif defined(__18F8722)
+        #define GetSystemClock()        40000000                        // System clock frequency (Hz)
     #endif
 
-
-    #define GetSystemClock()        48000000                        // System clock frequency (Hz)
     #define GetPeripheralClock()    GetSystemClock()                // Peripheral clock freq.
-    #define GetInstructionClock()   (GetSystemClock()/4)            // Instruction clock freq.
+    #define GetInstructionClock()   (GetSystemClock() / 4)          // Instruction clock freq.
 
 // Sample clock speed for a 16-bit processor
-#elif defined (__C30__)
+#elif defined (__PIC24F__)
 
     #define GetSystemClock()        32000000
     #define GetPeripheralClock()    GetSystemClock()
@@ -63,6 +73,17 @@
     #define MILLISECONDS_PER_TICK       10                      // Definition for use with a tick timer
     #define TIMER_PRESCALER             TIMER_PRESCALER_8       // Definition for use with a tick timer
     #define TIMER_PERIOD                20000                   // Definition for use with a tick timer
+
+#elif defined (__dsPIC33E__) || defined (__PIC24E__)
+
+    #define GetSystemClock()        120000000
+    #define GetPeripheralClock()    (GetSystemClock() / 2)
+    #define GetInstructionClock()   (GetSystemClock() / 2)
+
+    // Clock values
+    #define MILLISECONDS_PER_TICK       10                      // Definition for use with a tick timer
+    #define TIMER_PRESCALER             TIMER_PRESCALER_64      // Definition for use with a tick timer
+    #define TIMER_PERIOD                9375                    // Definition for use with a tick timer
 
 // Sample clock speed for a 32-bit processor
 #elif defined (__PIC32MX__)
@@ -98,7 +119,6 @@
     #define TIMER_PRESCALER             TIMER_PRESCALER_8   // Definition for use with a tick timer
     #define TIMER_PERIOD                37500               // Definition for use with a tick timer
 #endif
-    
 
 // Select your interface type
 // This library currently only supports a single physical interface layer at a time
@@ -126,6 +146,69 @@
 
 #ifdef USE_SD_INTERFACE_WITH_SPI
     #ifdef PIC18F87J50_PIM
+    
+        #define USE_PIC18
+        #define USE_SD_INTERFACE_WITH_SPI
+    
+        #define INPUT_PIN           1
+        #define OUTPUT_PIN          0
+    
+        // Chip Select Signal
+        #define SD_CS               LATBbits.LATB3
+        #define SD_CS_TRIS          TRISBbits.TRISB3
+        
+        // Card detect signal
+        #define SD_CD               PORTBbits.RB4
+        #define SD_CD_TRIS          TRISBbits.TRISB4
+        
+        // Write protect signal
+        #define SD_WE               PORTAbits.RA4
+        #define SD_WE_TRIS          TRISAbits.TRISA4
+        
+        // Registers for the SPI module you want to use
+
+        // Description: The main SPI control register
+        #define SPICON1             SSP1CON1
+        // Description: The SPI status register
+        #define SPISTAT             SSP1STAT
+        // Description: The SPI buffer
+        #define SPIBUF              SSP1BUF
+        // Description: The receive buffer full bit in the SPI status register
+        #define SPISTAT_RBF         SSP1STATbits.BF
+        // Description: The bitwise define for the SPI control register (i.e. _____bits)
+        #define SPICON1bits         SSP1CON1bits
+        // Description: The bitwise define for the SPI status register (i.e. _____bits)
+        #define SPISTATbits         SSP1STATbits
+
+        // Description: The interrupt flag for the SPI module
+        #define SPI_INTERRUPT_FLAG  PIR1bits.SSPIF   
+		#define SPI_INTERRUPT_FLAG_ASM  PIR1, 3
+
+        // Description: The enable bit for the SPI module
+        #define SPIENABLE           SSPCON1bits.SSPEN
+    
+        // Defines for the HPC Explorer board
+        #define SPICLOCK            TRISCbits.TRISC3
+        #define SPIIN               TRISCbits.TRISC4
+        #define SPIOUT              TRISCbits.TRISC5
+    
+        // Latch pins for SCK/SDI/SDO lines
+        #define SPICLOCKLAT         LATCbits.LATC3
+        #define SPIINLAT            LATCbits.LATC4
+        #define SPIOUTLAT           LATCbits.LATC5
+    
+        // Port pins for SCK/SDI/SDO lines
+        #define SPICLOCKPORT        PORTCbits.RC3
+        #define SPIINPORT           PORTCbits.RC4
+        #define SPIOUTPORT          PORTCbits.RC5
+    
+
+
+        // Will generate an error if the clock speed is too low to interface to the card
+        #if (GetSystemClock() < 400000)
+            #error System clock speed must exceed 400 kHz
+        #endif
+	#elif defined(__18F8722)
     
         #define USE_PIC18
         #define USE_SD_INTERFACE_WITH_SPI
@@ -172,10 +255,13 @@
     
         #define SPIENABLE           SSPCON1bits.SSPEN
 
+		#define SPI_INTERRUPT_FLAG_ASM  PIR1, 3
+
         // Will generate an error if the clock speed is too low to interface to the card
         #if (GetSystemClock() < 400000)
             #error System clock speed must exceed 400 kHz
         #endif
+	//PM
     #elif defined PIC18F46J50_PIM
         #define USE_PIC18
         #define USE_SD_INTERFACE_WITH_SPI
@@ -229,6 +315,7 @@
         #define SPI_INTERRUPT_FLAG  PIR3bits.SSP2IF 
         #define SPIENABLE           SSP2CON1bits.SSPEN
     
+		#define SPI_INTERRUPT_FLAG_ASM  PIR1, 3
         
         // Will generate an error if the clock speed is too low to interface to the card
         #if (GetSystemClock() < 400000)
@@ -237,51 +324,202 @@
 
     #elif defined __PIC24F__
 
-        // Description: SD-SPI Chip Select Output bit
-        #define SD_CS				LATBbits.LATB1
-        // Description: SD-SPI Chip Select TRIS bit
-        #define SD_CS_TRIS			TRISBbits.TRISB1
-        
-        // Description: SD-SPI Card Detect Input bit
-        #define SD_CD               PORTFbits.RF0
-        // Description: SD-SPI Card Detect TRIS bit
-        #define SD_CD_TRIS          TRISFbits.TRISF0
-        
-        // Description: SD-SPI Write Protect Check Input bit
-        #define SD_WE               PORTFbits.RF1
-        // Description: SD-SPI Write Protect Check TRIS bit
-        #define SD_WE_TRIS          TRISFbits.TRISF1
-        
-        // Registers for the SPI module you want to use
+		#if defined (__PIC24FJ128GA010__)
 
-        // Description: The main SPI control register
-        #define SPICON1             SPI1CON1
-        // Description: The SPI status register
-        #define SPISTAT             SPI1STAT
-        // Description: The SPI Buffer
-        #define SPIBUF              SPI1BUF
-        // Description: The receive buffer full bit in the SPI status register
-        #define SPISTAT_RBF         SPI1STATbits.SPIRBF
-        // Description: The bitwise define for the SPI control register (i.e. _____bits)
-        #define SPICON1bits         SPI1CON1bits
-        // Description: The bitwise define for the SPI status register (i.e. _____bits)
-        #define SPISTATbits         SPI1STATbits
-        // Description: The enable bit for the SPI module
-        #define SPIENABLE           SPISTATbits.SPIEN
+	        // Description: SD-SPI Chip Select Output bit
+	        #define SD_CS				LATBbits.LATB1
+	        // Description: SD-SPI Chip Select TRIS bit
+	        #define SD_CS_TRIS			TRISBbits.TRISB1
+	        
+	        // Description: SD-SPI Card Detect Input bit
+	        #define SD_CD               PORTFbits.RF0
+	        // Description: SD-SPI Card Detect TRIS bit
+	        #define SD_CD_TRIS          TRISFbits.TRISF0
+	        
+	        // Description: SD-SPI Write Protect Check Input bit
+	        #define SD_WE               PORTFbits.RF1
+	        // Description: SD-SPI Write Protect Check TRIS bit
+	        #define SD_WE_TRIS          TRISFbits.TRISF1
+	        
+	        // Registers for the SPI module you want to use
 
-        // Tris pins for SCK/SDI/SDO lines
+	        // Description: The main SPI control register
+	        #define SPICON1             SPI1CON1
+	        // Description: The SPI status register
+	        #define SPISTAT             SPI1STAT
+	        // Description: The SPI Buffer
+	        #define SPIBUF              SPI1BUF
+	        // Description: The receive buffer full bit in the SPI status register
+	        #define SPISTAT_RBF         SPI1STATbits.SPIRBF
+	        // Description: The bitwise define for the SPI control register (i.e. _____bits)
+	        #define SPICON1bits         SPI1CON1bits
+	        // Description: The bitwise define for the SPI status register (i.e. _____bits)
+	        #define SPISTATbits         SPI1STATbits
+	        // Description: The enable bit for the SPI module
+	        #define SPIENABLE           SPISTATbits.SPIEN
 
-        // Description: The TRIS bit for the SCK pin
-        #define SPICLOCK            TRISFbits.TRISF6
-        // Description: The TRIS bit for the SDI pin
-        #define SPIIN               TRISFbits.TRISF7
-        // Description: The TRIS bit for the SDO pin
-        #define SPIOUT              TRISFbits.TRISF8
+	        // Tris pins for SCK/SDI/SDO lines
+
+	        // Description: The TRIS bit for the SCK pin
+	        #define SPICLOCK            TRISFbits.TRISF6
+	        // Description: The TRIS bit for the SDI pin
+	        #define SPIIN               TRISFbits.TRISF7
+	        // Description: The TRIS bit for the SDO pin
+	        #define SPIOUT              TRISFbits.TRISF8
+
+		#elif defined (__PIC24FJ256GB110__)
+
+	        // Description: SD-SPI Chip Select Output bit
+	        #define SD_CS				LATBbits.LATB1
+	        // Description: SD-SPI Chip Select TRIS bit
+	        #define SD_CS_TRIS			TRISBbits.TRISB1
+	        
+	        // Description: SD-SPI Card Detect Input bit
+	        #define SD_CD               PORTFbits.RF0
+	        // Description: SD-SPI Card Detect TRIS bit
+	        #define SD_CD_TRIS          TRISFbits.TRISF0
+	        
+	        // Description: SD-SPI Write Protect Check Input bit
+	        #define SD_WE               PORTFbits.RF1
+	        // Description: SD-SPI Write Protect Check TRIS bit
+	        #define SD_WE_TRIS          TRISFbits.TRISF1
+	        
+	        // Registers for the SPI module you want to use
+
+	        // Description: The main SPI control register
+	        #define SPICON1             SPI1CON1
+	        // Description: The SPI status register
+	        #define SPISTAT             SPI1STAT
+	        // Description: The SPI Buffer
+	        #define SPIBUF              SPI1BUF
+	        // Description: The receive buffer full bit in the SPI status register
+	        #define SPISTAT_RBF         SPI1STATbits.SPIRBF
+	        // Description: The bitwise define for the SPI control register (i.e. _____bits)
+	        #define SPICON1bits         SPI1CON1bits
+	        // Description: The bitwise define for the SPI status register (i.e. _____bits)
+	        #define SPISTATbits         SPI1STATbits
+	        // Description: The enable bit for the SPI module
+	        #define SPIENABLE           SPISTATbits.SPIEN
+
+	        // Tris pins for SCK/SDI/SDO lines
+
+	        // Description: The TRIS bit for the SCK pin
+	        #define SPICLOCK            TRISBbits.TRISB0
+	        // Description: The TRIS bit for the SDI pin
+	        #define SPIIN               TRISDbits.TRISD2
+	        // Description: The TRIS bit for the SDO pin
+	        #define SPIOUT              TRISFbits.TRISF8
+
+		#elif defined(__PIC24FJ256DA210__)
+
+			// Description: SD-SPI Chip Select Output bit
+			#define SD_CS   PORTGbits.RG6
+
+			// Description: SD-SPI Chip Select TRIS bit
+			#define SD_CS_TRIS  TRISGbits.TRISG6
+
+			// Description: SD-SPI Card Detect Input bit
+			#define SD_CD   PORTAbits.RA15
+
+			// Description: SD-SPI Card Detect TRIS bit
+			#define SD_CD_TRIS  TRISAbits.TRISA15
+
+			// Description: SD-SPI Write Protect Check Input bit
+			#define SD_WE   PORTCbits.RC13   //SD_WE   PORTAbits.RA7
+
+			// Description: SD-SPI Write Protect Check TRIS bit
+			#define SD_WE_TRIS  TRISCbits.TRISC13  //SD_WE_TRIS  TRISAbits.TRISA7
+
+			// Registers for the SPI module you want to use
+			// Description: The main SPI control register
+			#define SPICON1 SPI1CON1
+
+			// Description: The SPI status register
+			#define SPISTAT SPI1STAT
+
+			// Description: The SPI Buffer
+			#define SPIBUF  SPI1BUF
+
+			// Description: The receive buffer full bit in the SPI status register
+			#define SPISTAT_RBF SPI1STATbits.SPIRBF
+
+			// Description: The bitwise define for the SPI control register (i.e. _____bits)
+			#define SPICON1bits SPI1CON1bits
+
+			// Description: The bitwise define for the SPI status register (i.e. _____bits)
+			#define SPISTATbits SPI1STATbits
+
+			// Description: The enable bit for the SPI module
+			#define SPIENABLE   SPISTATbits.SPIEN
+
+    	    #define SPICON2  SPI2CON2
+
+			// Tris pins for SCK/SDI/SDO lines
+
+			// Description: The TRIS bit for the SCK pin
+			#define SPICLOCK    TRISDbits.TRISD8
+			// Description: The TRIS bit for the SDI pin
+			#define SPIIN       TRISBbits.TRISB0
+			// Description: The TRIS bit for the SDO pin
+			#define SPIOUT      TRISBbits.TRISB1
+
+		#endif
 
         // Will generate an error if the clock speed is too low to interface to the card
         #if (GetSystemClock() < 100000)
             #error Clock speed must exceed 100 kHz
         #endif    
+
+    #elif defined (__dsPIC33E__) || defined (__PIC24E__)
+
+            // Description: SD-SPI Chip Select Output bit
+            #define SD_CS               LATBbits.LATB9
+            // Description: SD-SPI Chip Select TRIS bit
+            #define SD_CS_TRIS          TRISBbits.TRISB9
+
+		    // Description: SD-SPI Analog/Digital Select ANSEL bit
+            #define SD_CS_ANSEL			ANSELBbits.ANSB9
+            
+            // Description: SD-SPI Card Detect Input bit
+            #define SD_CD               PORTGbits.RG0
+            // Description: SD-SPI Card Detect TRIS bit
+            #define SD_CD_TRIS          TRISGbits.TRISG0
+
+            // Description: SD-SPI Write Protect Check Input bit
+            #define SD_WE               PORTGbits.RG1
+            // Description: SD-SPI Write Protect Check TRIS bit
+            #define SD_WE_TRIS          TRISGbits.TRISG1
+
+		    // Description: SD-SPI Analog/Digital Select ANSEL bit
+            #define SD_SCK_ANSEL	ANSELGbits.ANSG6
+            #define SD_SDI_ANSEL	ANSELGbits.ANSG7
+            #define SD_SDO_ANSEL	ANSELGbits.ANSG8
+            
+            // Description: The main SPI control register
+            #define SPICON1             SPI2CON1
+            // Description: The SPI status register
+            #define SPISTAT             SPI2STAT
+            // Description: The SPI Buffer
+            #define SPIBUF              SPI2BUF
+            // Description: The receive buffer full bit in the SPI status register
+            #define SPISTAT_RBF         SPI2STATbits.SPIRBF
+            // Description: The bitwise define for the SPI control register (i.e. _____bits)
+            #define SPICON1bits         SPI2CON1bits
+            // Description: The bitwise define for the SPI status register (i.e. _____bits)
+            #define SPISTATbits         SPI2STATbits
+            // Description: The enable bit for the SPI module
+            #define SPIENABLE           SPI2STATbits.SPIEN
+            // Description: The definition for the SPI baud rate generator register
+            #define SPIBRG			    SPI2BRG
+
+            // Tris pins for SCK/SDI/SDO lines
+
+            // Description: The TRIS bit for the SCK pin
+            #define SPICLOCK            TRISGbits.TRISG6
+            // Description: The TRIS bit for the SDI pin
+            #define SPIIN               TRISGbits.TRISG7
+            // Description: The TRIS bit for the SDO pin
+            #define SPIOUT              TRISGbits.TRISG8
 
     #elif defined (__PIC32MX__)
         // Registers for the SPI module you want to use
@@ -329,6 +567,8 @@
             #define SPIBRG			    SPI1BRG
 
             // Tris pins for SCK/SDI/SDO lines
+
+            // Tris pins for SCK/SDI/SDO lines
 			#if defined(__32MX460F512L__)
             	// Description: The TRIS bit for the SCK pin
             	#define SPICLOCK            TRISDbits.TRISD10
@@ -345,7 +585,7 @@
             	#define SPIOUT              TRISFbits.TRISF8
 			#endif
 
-            	//SPI library functions
+            //SPI library functions
             #define putcSPI             putcSPI1
             #define getcSPI             getcSPI1
             #define OpenSPI(config1, config2)   OpenSPI1(config1, config2)
@@ -430,7 +670,7 @@
         // Description: The TRIS bit for the CF card detect signal
         #define CF_PMP_CD1DIR	    _TRISC4
     
-    #elif defined __dsPIC33F__
+    #elif defined (__dsPIC33F__) || defined (__PIC24H__) || defined (__dsPIC33E__) || defined (__PIC24E__)
     
         // Sample dsPIC33 defines
 
@@ -577,7 +817,7 @@
         // Description: The CF card detect signal TRIS bit
         #define CF_BT_CD1DIR            _TRISC4
 
-    #elif defined __dsPIC33F__
+    #elif defined (__dsPIC33F__) || defined (__PIC24H__) || defined (__dsPIC33E__) || defined (__PIC24E__)
 
         // Address lines
 

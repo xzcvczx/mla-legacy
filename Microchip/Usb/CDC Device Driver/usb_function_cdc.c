@@ -96,13 +96,15 @@
 
   2.8    Minor change to CDCInitEP() to enhance ruggedness in
          multithreaded usage scenarios.
+  
+  2.9b   Updated to implement optional support for DTS reporting.
 
 ********************************************************************/
 
 /** I N C L U D E S **********************************************************/
 #include "USB/usb.h"
 #include "USB/usb_function_cdc.h"
-//#include "HardwareProfile.h"
+#include "HardwareProfile.h"
 
 #ifdef USB_USE_CDC
 
@@ -123,6 +125,10 @@ volatile FAR unsigned char cdc_data_rx[CDC_DATA_OUT_EP_SIZE];
 volatile FAR unsigned char cdc_data_tx[CDC_DATA_IN_EP_SIZE];
 LINE_CODING line_coding;    // Buffer to store line coding information
 
+#if defined(USB_CDC_SUPPORT_DSR_REPORTING)
+    SERIAL_STATE_NOTIFICATION SerialStatePacket;
+#endif
+
 #pragma udata
 BYTE cdc_rx_len;            // total rx length
 
@@ -140,6 +146,12 @@ CONTROL_SIGNAL_BITMAP control_signal_bitmap;
 DWORD BaudRateGen;			// BRG value calculated from baudrate
 extern BYTE  i;
 extern BYTE_VAL *pDst;
+
+#if defined(USB_CDC_SUPPORT_DSR_REPORTING)
+    BM_SERIAL_STATE SerialStateBitmap;
+    BM_SERIAL_STATE OldSerialStateBitmap;
+    USB_HANDLE CDCNotificationInHandle;
+#endif
 
 /**************************************************************************
   SEND_ENCAPSULATED_COMMAND and GET_ENCAPSULATED_RESPONSE are required
@@ -166,11 +178,14 @@ void USBCDCSetLineCoding(void);
  		void USBCheckCDCRequest(void)
  
  	Description:
- 		This routine checks the setup data packet to see if it
- 		knows how to handle it
+ 		This routine checks the most recently received SETUP data packet to 
+ 		see if the request is specific to the CDC class.  If the request was
+ 		a CDC specific request, this function will take care of handling the
+ 		request and responding appropriately.
  		
  	PreCondition:
- 		None
+ 		This function should only be called after a control transfer SETUP
+ 		packet has arrived from the host.
 
 	Parameters:
 		None
@@ -179,8 +194,8 @@ void USBCDCSetLineCoding(void);
 		None
 		
 	Remarks:
-		None
-		 
+		This function does not change status or do anything if the SETUP packet
+		did not contain a CDC class specific request.		 
   *****************************************************************************/
 void USBCheckCDCRequest(void)
 {
@@ -235,8 +250,37 @@ void USBCheckCDCRequest(void)
 
         case SET_CONTROL_LINE_STATE:
             control_signal_bitmap._byte = (BYTE)SetupPkt.W_Value.v[0];
-            CONFIGURE_RTS(control_signal_bitmap.CARRIER_CONTROL);
-            CONFIGURE_DTR(control_signal_bitmap.DTE_PRESENT);
+            //------------------------------------------------------------------            
+            //One way to control the RTS pin is to allow the USB host to decide the value
+            //that should be output on the RTS pin.  Although RTS and CTS pin functions
+            //are technically intended for UART hardware based flow control, some legacy
+            //UART devices use the RTS pin like a "general purpose" output pin 
+            //from the PC host.  In this usage model, the RTS pin is not related
+            //to flow control for RX/TX.
+            //In this scenario, the USB host would want to be able to control the RTS
+            //pin, and the below line of code should be uncommented.
+            //However, if the intention is to implement true RTS/CTS flow control
+            //for the RX/TX pair, then this application firmware should override
+            //the USB host's setting for RTS, and instead generate a real RTS signal,
+            //based on the amount of remaining buffer space available for the 
+            //actual hardware UART of this microcontroller.  In this case, the 
+            //below code should be left commented out, but instead RTS should be 
+            //controlled in the application firmware reponsible for operating the 
+            //hardware UART of this microcontroller.
+            //---------            
+            //CONFIGURE_RTS(control_signal_bitmap.CARRIER_CONTROL);  
+            //------------------------------------------------------------------            
+            
+            #if defined(USB_CDC_SUPPORT_DTR_SIGNALING)
+                if(control_signal_bitmap.DTE_PRESENT == 1)
+                {
+                    UART_DTR = USB_CDC_DTR_ACTIVE_LEVEL;
+                }
+                else
+                {
+                    UART_DTR = (USB_CDC_DTR_ACTIVE_LEVEL ^ 1);
+                }        
+            #endif
             inPipes[0].info.bits.busy = 1;
             break;
         #endif
@@ -244,19 +288,20 @@ void USBCheckCDCRequest(void)
         #if defined(USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D2)
         case SEND_BREAK:                        // Optional
             inPipes[0].info.bits.busy = 1;
-			if (SetupPkt.wValue == 0xFFFF)
+			if (SetupPkt.wValue == 0xFFFF)  //0xFFFF means send break indefinitely until a new SEND_BREAK command is received
 			{
-				UART_ENABLE = 0;  // turn off USART
-				UART_TRISTx = 0;   // Make TX pin an output
-				UART_Tx = 0;   // make it low
+				UART_Tx = 0;       // Prepare to drive TX low (for break signalling)
+				UART_TRISTx = 0;   // Make sure TX pin configured as an output
+				UART_ENABLE = 0;   // Turn off USART (to relinquish TX pin control)
 			}
-			else if (SetupPkt.wValue == 0x0000)
+			else if (SetupPkt.wValue == 0x0000) //0x0000 means stop sending indefinite break 
 			{
-				UART_ENABLE = 1;  // turn on USART
+    			UART_ENABLE = 1;   // turn on USART
 				UART_TRISTx = 1;   // Make TX pin an input
 			}
 			else
 			{
+                //Send break signalling on the pin for (SetupPkt.wValue) milliseconds
                 UART_SEND_BREAK();
 			}
             break;
@@ -275,7 +320,8 @@ void USBCheckCDCRequest(void)
     
   Summary:
     This function initializes the CDC function driver. This function should
-    be called after the SET_CONFIGURATION command.
+    be called after the SET_CONFIGURATION command (ex: within the context of
+    the USBCBInitEP() function).
   Description:
     This function initializes the CDC function driver. This function sets
     the default line coding (baud rate, bit parity, number of data bits,
@@ -324,20 +370,98 @@ void CDCInitEP(void)
 
     CDCDataOutHandle = USBRxOnePacket(CDC_DATA_EP,(BYTE*)&cdc_data_rx,sizeof(cdc_data_rx));
     CDCDataInHandle = NULL;
+
+    #if defined(USB_CDC_SUPPORT_DSR_REPORTING)
+      	CDCNotificationInHandle = NULL;
+        mInitDTSPin();  //Configure DTS as a digital input
+      	SerialStateBitmap.byte = 0x00;
+      	OldSerialStateBitmap.byte = !SerialStateBitmap.byte;    //To force firmware to send an initial serial state packet to the host.
+        //Prepare a SerialState notification element packet (contains info like DSR state)
+        SerialStatePacket.bmRequestType = 0xA1; //Always 0xA1 for this type of packet.
+        SerialStatePacket.bNotification = SERIAL_STATE;
+        SerialStatePacket.wValue = 0x0000;  //Always 0x0000 for this type of packet
+        SerialStatePacket.wIndex = CDC_COMM_INTF_ID;  //Interface number  
+        SerialStatePacket.SerialState.byte = 0x00;
+        SerialStatePacket.Reserved = 0x00;
+        SerialStatePacket.wLength = 0x02;   //Always 2 bytes for this type of packet    
+        CDCNotificationHandler();
+  	#endif
+  	
+  	#if defined(USB_CDC_SUPPORT_DTR_SIGNALING)
+  	    mInitDTRPin();
+  	#endif
+  	
+  	#if defined(USB_CDC_SUPPORT_HARDWARE_FLOW_CONTROL)
+  	    mInitRTSPin();
+  	    mInitCTSPin();
+  	#endif
     
     cdc_trf_state = CDC_TX_READY;
 }//end CDCInitEP
+
+
+/**************************************************************************
+  Function: void CDCNotificationHandler(void)
+  Summary: Checks for changes in DSR status and reports them to the USB host.
+  Description: Checks for changes in DSR pin state and reports any changes
+               to the USB host. 
+  Conditions: CDCInitEP() must have been called previously, prior to calling
+              CDCNotificationHandler() for the first time.
+  Remarks:
+    This function is only implemented and needed when the 
+    USB_CDC_SUPPORT_DSR_REPORTING option has been enabled.  If the function is
+    enabled, it should be called periodically to sample the DSR pin and feed
+    the information to the USB host.  This can be done by calling 
+    CDCNotificationHandler() by itself, or, by calling CDCTxService() which
+    also calls CDCNotificationHandler() internally, when appropriate.
+  **************************************************************************/
+#if defined(USB_CDC_SUPPORT_DSR_REPORTING)
+void CDCNotificationHandler(void)
+{
+    //Check the DTS I/O pin and if a state change is detected, notify the 
+    //USB host by sending a serial state notification element packet.
+    if(UART_DTS == USB_CDC_DSR_ACTIVE_LEVEL) //UART_DTS must be defined to be an I/O pin in the hardware profile to use the DTS feature (ex: "PORTXbits.RXY")
+    {
+        SerialStateBitmap.bits.DSR = 1;
+    }  
+    else
+    {
+        SerialStateBitmap.bits.DSR = 0;
+    }        
+    
+    //If the state has changed, and the endpoint is available, send a packet to
+    //notify the hUSB host of the change.
+    if((SerialStateBitmap.byte != OldSerialStateBitmap.byte) && (!USBHandleBusy(CDCNotificationInHandle)))
+    {
+        //Copy the updated value into the USB packet buffer to send.
+        SerialStatePacket.SerialState.byte = SerialStateBitmap.byte;
+        //We don't need to write to the other bytes in the SerialStatePacket USB
+        //buffer, since they don't change and will always be the same as our
+        //initialized value.
+
+        //Send the packet over USB to the host.
+        CDCNotificationInHandle = USBTransferOnePacket(CDC_COMM_EP, IN_TO_HOST, (BYTE*)&SerialStatePacket, sizeof(SERIAL_STATE_NOTIFICATION));
+        
+        //Save the old value, so we can detect changes later.
+        OldSerialStateBitmap.byte = SerialStateBitmap.byte;
+    }    
+}//void CDCNotificationHandler(void)    
+#else
+    #define CDCNotificationHandler() {}
+#endif
+
 
 /**********************************************************************************
   Function:
     BOOL USBCDCEventHandler(USB_EVENT event, void *pdata, WORD size)
     
   Summary:
-    Handles events from the USB stack.
+    Handles events from the USB stack, which may have an effect on the CDC 
+    endpoint(s).
 
   Description:
-    Handles events from the USB stack.  This function should be called when there
-    is a USB event that needs to be processed by the CDC driver.
+    Handles events from the USB stack.  This function should be called when 
+    there is a USB event that needs to be processed by the CDC driver.
     
   Conditions:
     Value of input argument 'len' should be smaller than the maximum
@@ -722,7 +846,12 @@ void putrsUSBUSART(const ROM char *data)
   Description:
     CDCTxService handles device-to-host transaction(s). This function
     should be called once per Main Program loop after the device reaches
-    the configured state.
+    the configured state (after the CDCIniEP() function has already executed).
+    This function is needed, in order to advance the internal software state 
+    machine that takes care of sending multiple transactions worth of IN USB
+    data to the host, associated with CDC serial data.  Failure to call 
+    CDCTxService() perioidcally will prevent data from being sent to the
+    USB host, over the CDC serial data interface.
     
     Typical Usage:
     <code>
@@ -751,7 +880,8 @@ void putrsUSBUSART(const ROM char *data)
     }
     </code>
   Conditions:
-    None
+    CDCIniEP() function should have already executed/the device should be
+    in the CONFIGURED_STATE.
   Remarks:
     None                                                                 
   ************************************************************************/
@@ -762,6 +892,9 @@ void CDCTxService(void)
     BYTE i;
     
     USBMaskInterrupts();
+    
+    CDCNotificationHandler();
+    
     if(USBHandleBusy(CDCDataInHandle)) 
     {
         USBUnmaskInterrupts();
@@ -847,6 +980,7 @@ void CDCTxService(void)
         CDCDataInHandle = USBTxOnePacket(CDC_DATA_EP,(BYTE*)&cdc_data_tx,byte_to_send);
 
     }//end if(cdc_tx_sate == CDC_TX_BUSY)
+    
     USBUnmaskInterrupts();
 }//end CDCTxService
 

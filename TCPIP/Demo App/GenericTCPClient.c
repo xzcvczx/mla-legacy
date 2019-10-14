@@ -65,7 +65,13 @@
 static BYTE ServerName[] =	"www.google.com";
 
 // Defines the port to be accessed for this application
-static WORD ServerPort = 80;
+#if defined(STACK_USE_SSL_CLIENT)
+    static WORD ServerPort = HTTPS_PORT;
+	// Note that if HTTPS is used, the ServerName and URL 
+	// must change to an SSL enabled server.
+#else
+    static WORD ServerPort = HTTP_PORT;
+#endif
 
 // Defines the URL to be requested by this HTTP client
 static ROM BYTE RemoteURL[] = "/search?as_q=Microchip&as_sitesearch=microchip.com";
@@ -109,6 +115,9 @@ void GenericTCPClient(void)
 	{
 		SM_HOME = 0,
 		SM_SOCKET_OBTAINED,
+		#if defined(STACK_USE_SSL_CLIENT)
+    	SM_START_SSL,
+    	#endif
 		SM_PROCESS_RESPONSE,
 		SM_DISCONNECT,
 		SM_DONE
@@ -149,6 +158,26 @@ void GenericTCPClient(void)
 			}
 
 			Timer = TickGet();
+			
+    #if defined (STACK_USE_SSL_CLIENT)
+            if(!TCPStartSSLClient(MySocket,(void *)"thishost"))
+                break;
+			GenericTCPExampleState++;
+			break;
+
+        case SM_START_SSL:
+            if (TCPSSLIsHandshaking(MySocket)) 
+            {
+				if(TickGet()-Timer > 10*TICK_SECOND)
+				{
+					// Close the socket so it can be used by other modules
+					TCPDisconnect(MySocket);
+					MySocket = INVALID_SOCKET;
+					GenericTCPExampleState=SM_HOME;
+				}
+                break;
+            }
+    #endif
 
 			// Make certain the socket can be written to
 			if(TCPIsPutReady(MySocket) < 125u)

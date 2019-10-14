@@ -184,7 +184,7 @@
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #elif defined(PIC24FJ64GB004_PIM)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
-        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__32MX460F512L__) || defined(__32MX795F512L__)
@@ -215,8 +215,8 @@
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__
     #endif
 #elif defined(PIC24F_STARTER_KIT)
-    _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-    _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+    _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
+    _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
 #elif defined(PIC24FJ256DA210_DEV_BOARD)
     _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
     _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
@@ -830,9 +830,6 @@ void ProcessIO(void)
 		 	//to the endpoint.  Once a data packet addressed to this endpoint is 
 		 	//received from the host, the endpoint will no longer be busy, and the 
 		 	//application can read the data which will be sitting in the buffer.
-		    Nop();
-		    Nop();
-		    
 		    EP1OUTEvenHandle = USBTransferOnePacket(1, OUT_FROM_HOST,(BYTE*)&EP1OUTEvenBuffer,64);
 			EP1OUTEvenNeedsServicingNext = FALSE;
 		}
@@ -843,9 +840,6 @@ void ProcessIO(void)
 		{   
 		   	//Insert code here that would do something useful with the data, according to the needs of
 		   	//the application.
-
-			Nop();
-			Nop();
 
 		    //Re-arm the EP1OUTOdd BDT entry so the EP1OUTOddBuffer[] can receive
 		    //the second to next data packet sent by the host.

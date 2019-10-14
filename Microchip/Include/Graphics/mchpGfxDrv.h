@@ -413,6 +413,48 @@ extern volatile DWORD _workArea2BaseAddr;
 ********************************************************************/
 void            DisplayBrightness(WORD level);
 
+
+/*********************************************************************
+* Function: WORD DrvMemCopy(DWORD srcAddr,   DWORD dstAddr, 
+*						    DWORD srcOffset, DWORD dstOffset, 
+*			                DWORD width,     DWORD height, 
+*                           WORD copyType)
+*
+* Overview: Performs a memory copy from source to destination with
+*           the parameters given.
+*
+* PreCondition: none
+*
+* Input: srcAddr - the base address of the data to be moved
+*        dstAddr - the base address of the new location of the moved data 
+*        srcOffset - offset of the data to be moved with respect to the 
+*					 source base address.
+*        dstOffset - offset of the new location of the moved data respect 
+*					 to the source base address.
+*        width - width of the block of data to be moved when copyType != 0, 
+*                if copyType = 0 then this is the size of data to be transferred.
+*        height - height of the block of data to be moved when copyType != 0,
+*                if copyType = 0 then this parameter is ignored.
+*        copyType - sets the source and destination data types
+					0 - Source data is continuous, destination data is continuous
+					1 - Source data is discontinuous, destination data is continuous
+					2 - Source data is continuous, destination data is discontinuous
+					3 - Source data is discontinuous, destination data is discontinuous
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and operation is not completely performed.
+*         - Returns 1 when the operation is completely performed.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Note: none
+*
+********************************************************************/
+WORD DrvMemCopy(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, 
+			    DWORD width,   DWORD height,   WORD copyType);
+
 /*********************************************************************
 * Function: WORD ROPBlock (DWORD srcAddr,   DWORD dstAddr, 
 *						   DWORD srcOffset, DWORD dstOffset, 
@@ -472,41 +514,6 @@ void            DisplayBrightness(WORD level);
 WORD ROPBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, 
 			   WORD srcType, WORD dstType,  WORD copyOp,     WORD rop, 
 			   WORD color, WORD width, WORD height);
-
-
-/*********************************************************************
-* Function: WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, 
-*						   DWORD srcOffset, DWORD dstOffset, 
-*                          WORD width, WORD height)
-*
-* Overview: Copies a block of data from source specified by srcAddr 
-*           and srcOffset to the destination specified by dstAddr 
-*           and dstOffset.
-*
-* PreCondition: none
-*
-* Input: srcAddr - the base address of the data to be moved
-*        dstAddr - the base address of the new location of the moved data 
-*        srcOffset - offset of the data to be moved with respect to the 
-*					 source base address.
-*        dstOffset - offset of the new location of the moved data respect 
-*					 to the source base address.
-*        width - width of the block of data to be moved
-*        height - height of the block of data to be moved
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Note: none
-*
-********************************************************************/
-#define CopyBlock(srcAddr, dstAddr, srcOffset, dstOffset, width, height)        \
-			   	  												                \
-		ROPBlock( srcAddr, dstAddr, srcOffset, dstOffset, 		                \
-                  (RCC_SRC_ADDR_DISCONTINUOUS), (RCC_DEST_ADDR_DISCONTINUOUS),  \
-                  RCC_COPY,  RCC_ROP_C,                                         \
-			      0,  width, height)
 
 /*********************************************************************
 * Function: WORD Scroll(SHORT left, SHORT top,  

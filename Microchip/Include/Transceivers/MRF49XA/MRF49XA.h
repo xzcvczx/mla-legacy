@@ -369,11 +369,13 @@
     
     
         #if RX_PACKET_SIZE > 126
+            #warning "RX\_BUFFER\_SIZE RX_BUFFER_SIZE may be defined too big"
             #undef RX_PACKET_SIZE
             #define RX_PACKET_SIZE 126
         #endif
         
         #if TX_PACKET_SIZE > 126
+            #warning "TX\_BUFFER\_SIZE TX_BUFFER_SIZE may be defined too big"
             #undef TX_PACKET_SIZE
             #define TX_PACKET_SIZE 126
         #endif

@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.3.0
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.8.17
  *****************************************************************************/
 
 #ifndef DEMOFLASHRESOURCE_H_FILE
@@ -55,6 +55,7 @@
 #if (COLOR_DEPTH > 16)
 #error "Color Depth needs to be 16 to correctly use these resources"
 #endif
+
 
 
 /*****************************************************************************
@@ -133,5 +134,19 @@ extern const FONT_FLASH GOLSmallFont;
  ***********************************/
 extern const FONT_FLASH GOLMediumFont;
 #define GOLMediumFont_SIZE    (2668)
+/*********************************
+ * Font File Structure
+ * Label: VeraMono_28
+ * Description:  Heigth: 33 pixels, range: '.' to '9'
+ ***********************************/
+extern const FONT_FLASH VeraMono_28;
+#define VeraMono_28_SIZE    (1244)
+/*********************************
+ * Font File Structure
+ * Label: VeraMono_17
+ * Description:  Heigth: 20 pixels, range: '.' to '9'
+ ***********************************/
+extern const FONT_FLASH VeraMono_17;
+#define VeraMono_17_SIZE    (536)
 #endif
 

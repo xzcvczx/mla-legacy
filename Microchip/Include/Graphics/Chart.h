@@ -76,32 +76,19 @@ Value Range - The scale for the value axis.
 /*********************************************************************
 * Object States Definition: 
 *********************************************************************/
-    #define CH_DISABLED 0x0002          // Bit for disabled state.
-    #define CH_LEGEND   0x0001          // Bit to indicate that legend is to be shown. Usable only when seriesCount > 1.
-    #define CH_VALUE    0x0004          // Bit to indicate that the values of the bar chart data or pie chart
-
-// data are to be shown
+    #define CH_DISABLED 	0x0002      // Bit for disabled state.
+    #define CH_LEGEND   	0x0001      // Bit to indicate that legend is to be shown. Usable only when seriesCount > 1.
+    #define CH_VALUE    	0x0004      // Bit to indicate that the values of the bar chart data or pie chart data are to be shown
     #define CH_3D_ENABLE    0x0008      // Bit to indicate that bar charts are to be drawn with 3-D effect
-    #define CH_PIE          0x0100      // Bit to indicate the chart is type pie. If both PIE and BAR types
-
-// are set BAR type has higher priority.
-    #define CH_BAR  0x0200              // Bit to indicate the chart is type bar. If both PIE and BAR types
-
-// are set BAR type has higher priority.
-    #define CH_PERCENT  0x0010          // Bit to indicate that the pie chart will be drawn with percentage
-
-// values shown for the sample data. For bar chart, if CH_VALUE is set,
-// it toggles the value shown to percentage.
-    #define CH_BAR_HOR  0x0240          // These bits (with CH_BAR bit set), sets the bar chart to
-
-// be drawn horizontally.
-    #define CH_DONUT    0x0140          // These bits (with CH_PIE bit set), sets the pie chart to
-
-// be drawn in a donut shape.
-    #define CH_NUMERIC  0x0080          // This bit is used only for bar charts. If this bit is set, it indicates that the
-
-// bar chart labels for variables are numeric. If this bit is not set, it indicates
-// that the bar chart labels for variables are alphabets.
+    #define CH_PIE          0x0100      // Bit to indicate the chart is type pie. If both PIE and BAR types are set BAR type has higher priority.
+    #define CH_BAR  		0x0200      // Bit to indicate the chart is type bar. If both PIE and BAR types are set BAR type has higher priority.
+    #define CH_PERCENT  	0x0010      // Bit to indicate that the pie chart will be drawn with percentage values shown for the sample data. 
+										// For bar chart, if CH_VALUE is set, it toggles the value shown to percentage.
+    #define CH_BAR_HOR  	0x0240      // These bits (with CH_BAR bit set), sets the bar chart to be drawn horizontally.
+    #define CH_DONUT    	0x0140      // These bits (with CH_PIE bit set), sets the pie chart to be drawn in a donut shape.
+    #define CH_NUMERIC  	0x0080      // This bit is used only for bar charts. If this bit is set, it indicates that the
+										// bar chart labels for variables are numeric. If this bit is not set, it indicates
+										// that the bar chart labels for variables are alphabets.
     #define CH_DRAW_DATA    0x2000      // Bit to indicate data portion of the chart must be redrawn.
     #define CH_DRAW         0x4000      // Bit to indicate chart must be redrawn.
     #define CH_HIDE         0x8000      // Bit to indicate chart must be removed from screen.
@@ -152,17 +139,17 @@ typedef struct
 
     // if the bar chart is drawn vertically or horizontally, the
     // location of the sample will be in the x-axis or y-axis.
-    SHORT   seriesCount;        // Number of data series that will be displayed when chart is drawn.
-    WORD    smplStart;          // Start point of data sample range to be displayed (minimum/default value = 1)
-    WORD    smplEnd;            // End point of data sample range to be displayed.
-    WORD    valMax;             // Maximum value of a sample that can be displayed.
-    WORD    valMin;             // Minimum value of a sample that can be displayed.
-    WORD    perMax;             // Maximum value of the percentage range that can be displayed.
-    WORD    perMin;             // Minimum value of the percentage range that can be displayed.
-    WORD    *pColor;            // Pointer to the color table used to draw the chart data.
-    void    *pTitleFont;        // Pointer to the font used for the title label of the chart.
-    void    *pAxisLabelsFont;   // Pointer to the font used for X and Y axis labels.
-    void    *pGridLabelsFont;   // Pointer to the font used for X and Y axis grid labels.
+    SHORT       seriesCount;        // Number of data series that will be displayed when chart is drawn.
+    WORD        smplStart;          // Start point of data sample range to be displayed (minimum/default value = 1)
+    WORD        smplEnd;            // End point of data sample range to be displayed.
+    WORD        valMax;             // Maximum value of a sample that can be displayed.
+    WORD        valMin;             // Minimum value of a sample that can be displayed.
+    WORD        perMax;             // Maximum value of the percentage range that can be displayed.
+    WORD        perMin;             // Minimum value of the percentage range that can be displayed.
+    GFX_COLOR   *pColor;            // Pointer to the color table used to draw the chart data.
+    void        *pTitleFont;        // Pointer to the font used for the title label of the chart.
+    void        *pAxisLabelsFont;   // Pointer to the font used for X and Y axis labels.
+    void        *pGridLabelsFont;   // Pointer to the font used for X and Y axis grid labels.
 } CHARTPARAM;
 
 /*********************************************************************
@@ -187,23 +174,66 @@ typedef struct
 
 #else
 
+#if(COLOR_DEPTH >= 8)
     #define CH_CLR0     BRIGHTBLUE      // Bright Blue
     #define CH_CLR1     BRIGHTRED       // Bright Red
     #define CH_CLR2     BRIGHTGREEN     // Bright Green
     #define CH_CLR3     BRIGHTYELLOW    // Bright Yellow
-    #define CH_CLR4     RGBConvert(0xFF, 0xBB, 0x4C) // Orange
-    #define CH_CLR5     BLUE                            // Blue
-    #define CH_CLR6     RED                             // Red
-    #define CH_CLR7     GREEN                           // Green
-    #define CH_CLR8     YELLOW                          // Yellow
-    #define CH_CLR9     RGBConvert(255, 140, 0)      // Dark Orange
-    #define CH_CLR10    LIGHTBLUE                       // Light Orange
-    #define CH_CLR11    LIGHTRED                        // Light Red
-    #define CH_CLR12    LIGHTGREEN                      // Light Green
-    #define CH_CLR13    RGBConvert(255, 255, 150)    // Light Yellow
-    #define CH_CLR14    RGBConvert(255, 200, 0)      // Light Orange
-    #define CH_CLR15    RGBConvert(255, 215, 0)      // Gold
+    #define CH_CLR4     ORANGE          // Orange
+    #define CH_CLR5     BLUE            // Blue
+    #define CH_CLR6     RED             // Red
+    #define CH_CLR7     GREEN           // Green
+    #define CH_CLR8     YELLOW          // Yellow
+    #define CH_CLR9     DARKORANGE      // Dark Orange
+    #define CH_CLR10    LIGHTBLUE       // Light Blur
+    #define CH_CLR11    LIGHTRED        // Light Red
+    #define CH_CLR12    LIGHTGREEN      // Light Green
+    #define CH_CLR13    LIGHTYELLOW     // Light Yellow
+    #define CH_CLR14    LIGHTORANGE     // Light Orange
+    #define CH_CLR15    GOLD            // Gold
+#endif
 
+#if(COLOR_DEPTH == 4)
+    #define CH_CLR0     BLACK
+    #define CH_CLR1     GRAY001
+    #define CH_CLR2     GRAY002
+    #define CH_CLR3     GRAY003
+    #define CH_CLR4     GRAY004
+    #define CH_CLR5     GRAY005
+    #define CH_CLR6     GRAY006
+    #define CH_CLR7     GRAY007
+    #define CH_CLR8     GRAY008
+    #define CH_CLR9     GRAY009
+    #define CH_CLR10    GRAY010
+    #define CH_CLR11    GRAY011
+    #define CH_CLR12    GRAY012
+    #define CH_CLR13    GRAY013
+    #define CH_CLR14    GRAY014
+    #define CH_CLR15    WHITE
+#endif
+
+#if(COLOR_DEPTH == 1)
+    #define CH_CLR0     WHITE
+    #define CH_CLR1     BLACK
+    #define CH_CLR2     WHITE
+    #define CH_CLR3     BLACK
+    #define CH_CLR4     WHITE
+    #define CH_CLR5     BLACK
+    #define CH_CLR6     WHITE
+    #define CH_CLR7     BLACK
+    #define CH_CLR8     WHITE
+    #define CH_CLR9     BLACK
+    #define CH_CLR10    WHITE
+    #define CH_CLR11    BLACK
+    #define CH_CLR12    WHITE
+    #define CH_CLR13    BLACK
+    #define CH_CLR14    WHITE
+    #define CH_CLR15    BLACK
+#endif
+
+	
+	
+	
 #endif
 
 SHORT       ChSetDataSeries(CHART *pCh, WORD seriesNum, BYTE status);

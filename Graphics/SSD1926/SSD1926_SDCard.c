@@ -36,6 +36,7 @@ Sean Justice        15_Sept-2008      First release
 Anton Alkhimenok    06_Jun-2009       Ported to PIC24
 *******************************************************************************/
 #include "MainDemo.h"
+#include "Graphics/SSD1926.h"
 
 /******************************************************************************
  * Helper Function for the SSD1926 driver file

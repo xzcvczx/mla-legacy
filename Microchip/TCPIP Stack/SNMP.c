@@ -120,19 +120,19 @@ extern void Snmpv3InitializeUserDataBase(void);
   Section:
 	Global Variables
   ***************************************************************************/
-WORD SNMPTxOffset;	//Snmp udp buffer tx offset
-static WORD SNMPRxOffset;	//Snmp udp buffer rx offset		
+WORD SNMPTxOffset=0;	//Snmp udp buffer tx offset
+static WORD SNMPRxOffset=0;	//Snmp udp buffer rx offset		
 static SNMP_STATUS SNMPStatus;	//MIB file access status
 static UDP_SOCKET SNMPAgentSocket = INVALID_UDP_SOCKET;	//Snmp udp socket
 MPFS_HANDLE hMPFS;	//MPFS file handler
 extern TRAP_INFO trapInfo;	//trap information
 WORD msgSecrtyParamLenOffset;
 /* This variable is used for gext next request for zero instance  */
-BOOL getZeroInstance;
+BOOL getZeroInstance=FALSE;
 
-BYTE appendZeroToOID;//global flag to modify OID by appending zero 	
+BYTE appendZeroToOID=FALSE;//global flag to modify OID by appending zero 	
 reqVarErrStatus snmpReqVarErrStatus; //vars	from req list processing err status	
-WORD msgSecrtyParamLenOffset;
+WORD msgSecrtyParamLenOffset=0;
 
 
 
@@ -235,7 +235,7 @@ void SNMPInit(void)
  ***************************************************************************/
 BOOL SNMPTask(void)
 {
-    char community[SNMP_COMMUNITY_MAX_LEN];
+    char community[SNMP_COMMUNITY_MAX_LEN+1];
     BYTE communityLen;
   	PDU_INFO pduInfoDB; //received pdu information database
     BOOL lbReturn=TRUE;
@@ -536,6 +536,8 @@ BYTE *getSnmpV2GenTrapOid(BYTE generic_trap_code,BYTE *len)
 
         Generic Trap OID is used as the varbind for authentication failure.
 
+        For ASCII STR trap VAL(argument) contains the pointer address of the string variable.
+
   Precondition:
  	SNMPIsNotifyReady() is already called and returned TRUE.
 
@@ -835,15 +837,23 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 		//where dataTypeInfo.asnLen=0xff
 		if ( dataTypeInfo.asnLen == 0xff )
 		{
-			dataTypeInfo.asnLen=0x4;
-			val.dword=0;
+			UINT8 *asciiStr= (UINT8 *)(PTR_BASE) val.dword;
+			int k=0;
+			dataTypeInfo.asnLen=strlen((char *)asciiStr);
+			len = dataTypeInfo.asnLen;
+			_SNMPPut(len);
+			for(k=0;k<len;k++)
+				_SNMPPut(asciiStr[k]);
 		}
-		len = dataTypeInfo.asnLen;
-
-		_SNMPPut(len);
-		while( len-- )
-			_SNMPPut(val.v[len]);
-	  
+		else
+		{
+			len = dataTypeInfo.asnLen;
+	
+			_SNMPPut(len);
+			while( len-- )
+				_SNMPPut(val.v[len]);
+		}
+	
 		trapVarBindLen.Val = dataTypeInfo.asnLen	// data bytes count
 			 + 1					// Length byte
 			 + 1					// Data type byte
@@ -925,7 +935,8 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
        | time-stamp | varbind-list |
 
        The v1 enterprise is mapped directly to SNMPv2TrapOID.0
-       
+
+       For ASCII STR trap VAL(argument) contains the pointer address of the string variable.
   Precondition:
 	SNMPIsNotifyReady() is already called and returned TRUE.
 
@@ -1099,14 +1110,22 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 	//where dataTypeInfo.asnLen=0xff
 	if ( dataTypeInfo.asnLen == 0xff )
 	{
-		dataTypeInfo.asnLen=0x4;
-		val.dword=0;
+		UINT8 *asciiStr= (UINT8 *)(PTR_BASE) val.dword;
+		int k=0;
+		dataTypeInfo.asnLen=strlen((char *)asciiStr);
+		len = dataTypeInfo.asnLen;
+		_SNMPPut(len);
+		for(k=0;k<len;k++)
+			_SNMPPut(asciiStr[k]);
 	}
-
-    len = dataTypeInfo.asnLen;
-    _SNMPPut(len);
-    while( len-- )
-        _SNMPPut(val.v[len]);
+	else
+	{
+		len = dataTypeInfo.asnLen;
+	
+		_SNMPPut(len);
+		while( len-- )
+			_SNMPPut(val.v[len]);
+	}
 
     len = dataTypeInfo.asnLen           // data bytes count
          + 1                            // Length byte
@@ -1195,7 +1214,7 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 static SNMP_ACTION ProcessHeader(PDU_INFO* pduDbPtr, char* community, BYTE* len)
 {
     DWORD_VAL tempLen; 
-	SNMP_ACTION pdu=0;   
+	SNMP_ACTION pdu=SNMP_ACTION_UNKNOWN;   
 	UINT8 snmpMsgBuf[7];/* 0x30,0x81/0x82/length,0xlen,0xlen,0x02,0x01,0x03(Snmp Version)*/
 	WORD_VAL snmpMsgLen;
 	WORD retlen,tempCntr=0;
@@ -1271,7 +1290,7 @@ static SNMP_ACTION ProcessHeader(PDU_INFO* pduDbPtr, char* community, BYTE* len)
 
 		gSnmpV3InPduWholeMsgBuf.wholeMsgHead=(UINT8*)(malloc((size_t)gSnmpV3InPduWholeMsgBuf.wholeMsgLen.Val+extraMemReqdFor16BytesBlocks+16));
 		if(gSnmpV3InPduWholeMsgBuf.wholeMsgHead == NULL)
-			return FALSE;
+			return SNMP_ACTION_UNKNOWN;
 		gSnmpV3InPduWholeMsgBuf.snmpMsgHead=gSnmpV3InPduWholeMsgBuf.wholeMsgHead+tempCntr+3/*snmp Version info 0x02,0x01,0x03*/;
 		gSnmpV3InPduWholeMsgBuf.snmpMsgLen.Val=snmpMsgLen.Val-3/*snmp Version info 0x02,0x01,0x03*/;
 
@@ -1294,9 +1313,12 @@ static SNMP_ACTION ProcessHeader(PDU_INFO* pduDbPtr, char* community, BYTE* len)
 	
 		}
 		
-		pdu=Snmpv3MsgProcessingModelProcessPDU(SNMP_REQUEST_PDU);
-		pdu=Snmpv3UserSecurityModelProcessPDU(SNMP_REQUEST_PDU);
-		pdu=Snmpv3ScopedPduProcessing(SNMP_REQUEST_PDU);
+		if(Snmpv3MsgProcessingModelProcessPDU(SNMP_REQUEST_PDU) != SNMP_NO_ERR)
+			pdu = SNMP_ACTION_UNKNOWN;
+		if(Snmpv3UserSecurityModelProcessPDU(SNMP_REQUEST_PDU) != SNMP_NO_ERR)
+			pdu = SNMP_ACTION_UNKNOWN;
+		if(Snmpv3ScopedPduProcessing(SNMP_REQUEST_PDU)!= SNMP_NO_ERR)
+			pdu = SNMP_ACTION_UNKNOWN;
 
 
 		//Complete SNMPv3 data payload (Encrypted or as plain text) is received

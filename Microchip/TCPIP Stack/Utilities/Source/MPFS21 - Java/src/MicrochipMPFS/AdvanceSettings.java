@@ -214,7 +214,7 @@ public class AdvanceSettings extends javax.swing.JDialog {
         reserveBlock= Integer.parseInt(txtResvBlk.getText());
          *
          */
-        mainMpfs.txtProjectImageName.setText("MPFSImg2");
+       // mainMpfs.txtProjectImageName.setText("MPFSImg2");
     }
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {
@@ -258,7 +258,7 @@ private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
 
         lblTcpIpHelp.setText("(Reserve block is only " +
                             "configured in TCPIPConfig.)");
-        mainMpfs.txtProjectImageName.setText("MPFSImg2");
+        //mainMpfs.txtProjectImageName.setText("MPFSImg2");
         /*
         //commonFalse();
         if(radBtnMPFS2.isSelected())

@@ -48,8 +48,8 @@
  *****************************************************************************/
 #include "SystemProfile.h"
 #include "Compiler.h"
-#include "WirelessProtocols\Console.h"
-#include "WirelessProtocols\LCDBlocking.h"
+#include "WirelessProtocols/Console.h"
+#include "WirelessProtocols/LCDBlocking.h"
 #include "TimeDelay.h"
 #include "HardwareProfile.h"
 

@@ -41,7 +41,8 @@
 #include "HardwareProfile.h"
 #include "Graphics/Graphics.h"
 #include "AN1182Demo.h"
-#include "HelloWorldfontref.h"
+#include "HelloWorldFonts.h"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //                              OBJECT'S IDs
@@ -58,7 +59,7 @@
 #define STXWIDTH    GetMaxX()-40                        // static text width
 #define STXHEIGHT   40                                  // static text height
 #define STXXPOS     20                                  // static text left/top pos
-#define STXYPOS     80
+#define STXYPOS     ((GetMaxY()-STXHEIGHT-ARROWHEIGHT+3) >> 1)
 
 // string select buttons dimensions
 #define SELBTNYPOS  STXYPOS + STXHEIGHT + 3             // button left/top pos

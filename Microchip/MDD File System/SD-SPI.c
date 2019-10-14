@@ -48,16 +48,24 @@
           for multi-block reads and multi-block writes.
   1.3.2   Modified MDD_SDSPI_AsyncWriteTasks() so pre-erase command only gets
           used for multi-block write scenarios.   
+  1.3.4   1) Added support for dsPIC33E & PIC24E controllers.
+          2) #include "HardwareProfile.h" is moved up in the order.
+          3) "SPI_INTERRUPT_FLAG_ASM" macro has to be defined in "HardwareProfile.h" file
+             for PIC18 microcontrollers.Or else an error is generated while building
+             the code.
+                       "#define SPI_INTERRUPT_FLAG_ASM  PIR1, 3" is removed from SD-SPI.c
+          4) Replaced "__C30" usage with "__C30__" .
+
 ********************************************************************/
 
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
+#include "HardwareProfile.h"
 #include "MDD File System/FSIO.h"
 #include "MDD File System/FSDefs.h"
 #include "MDD File System/SD-SPI.h"
 #include "string.h"
 #include "FSConfig.h"
-#include "HardwareProfile.h"
 
 /******************************************************************************
  * Global Variables
@@ -403,6 +411,13 @@ void MDD_SDSPI_InitIO (void)
     SD_CS = 1;                     //Initialize Chip Select line
     SD_CS_TRIS = OUTPUT;           //Card Select - output
     SD_WE_TRIS = INPUT;            //Write Protect - input
+
+#if defined	(__dsPIC33E__) || defined (__PIC24E__)
+    SD_CS_ANSEL = 0;
+    SD_SCK_ANSEL = 0;
+    SD_SDI_ANSEL = 0;
+    SD_SDO_ANSEL = 0;
+#endif    
 }
 
 
@@ -1122,7 +1137,11 @@ static void PIC18_Optimized_SPI_Read_Packet(void)
     //Make sure the SPI_INTERRUPT_FLAG_ASM has been correctly defined, for the SPI
     //module that is actually being used in the hardware.
     #ifndef SPI_INTERRUPT_FLAG_ASM
-        #define SPI_INTERRUPT_FLAG_ASM  PIR1, 3  
+        #error "Please define SPI_INTERRUPT_FLAG_ASM.  Double click this message for more info."
+        //In the HardwareProfile - [platform name].h file for your project, please
+        //add a "#define SPI_INTERRUPT_FLAG_ASM  PIRx, y" definition, where
+        //PIRx is the PIR register holding the SSPxIF flag for the SPI module being used
+        //to interface with the SD/MMC card, and y is the bit number for the SSPxIF bit (ex: 0-7).
     #endif
 
     //Make sure at least one byte needs to be read.
@@ -1198,7 +1217,7 @@ ASMSPIReadLoopEntryPoint:
   Summary:
     Speed optimized, non-blocking, state machine based write function that writes
     data from the user specified buffer, onto the media, at the specified 
-    address block address.
+    media block address.
   Pre-Conditions:
     The ASYNC_IO structure must be initialized correctly, prior to calling
     this function for the first time.  Certain parameters, such as the user
@@ -1256,7 +1275,7 @@ ASMSPIReadLoopEntryPoint:
     used by any other function until the read operation has either completed
     successfully, or returned with the ASYNC_WRITE_ERROR condition.
   Description:
-    Speed optimized, non-blocking, state machine based read function that writes 
+    Speed optimized, non-blocking, state machine based write function that writes 
     data packets to the media, from a user specified RAM buffer.
     This function uses either the single block or multi-block write command 
     to perform fast writes of the data.  The total amount of data that will be 
@@ -1621,15 +1640,15 @@ static void PIC18_Optimized_SPI_Write_Packet(void)
         #error Please add "#define SPI_INTERRUPT_FLAG_ASM  PIRx, Y" to your hardware profile.  Replace x and Y with appropriate numbers for your SPI module interrupt flag.
     #endif
     
-    //Context save C compiler managed registers.
-    FSR0Save = FSR0; 
-    PRODSave = PROD;
-    
     //Make sure at least one byte needs copying.
     if(ioInfo.wNumBytes == 0)
     {
         return;
     }    
+
+    //Context save C compiler managed registers.
+    FSR0Save = FSR0; 
+    PRODSave = PROD;
     
     //Using PRODH and PRODL as 16 bit loop counter.  These are convenient since
     //they are always in the access bank.
@@ -1971,7 +1990,7 @@ void OpenSPIM( unsigned int sync_mode)
         #endif
         SPICON1bits.CKP = 1;
         SPICON1bits.CKE = 0;
-    #elif defined __C30 //must be PIC24 or dsPIC device
+    #elif defined __C30__ //must be PIC24 or dsPIC device
         SPICON1 = 0x0000;              // power on state
         SPICON1 |= sync_mode;          // select serial mode 
         SPICON1bits.CKP = 1;

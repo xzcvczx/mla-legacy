@@ -19,7 +19,6 @@ MEMORY
   aivt         : ORIGIN = 0x104,         LENGTH = 0xFC
   app_ivt        : ORIGIN = 0xA800,        LENGTH = 0x110
   program (xr) : ORIGIN = 0x200,         LENGTH = 0xA600
-  config4      : ORIGIN = 0x157F8,       LENGTH = 0x2
   config3      : ORIGIN = 0x157FA,       LENGTH = 0x2
   config2      : ORIGIN = 0x157FC,       LENGTH = 0x2
   config1      : ORIGIN = 0x157FE,       LENGTH = 0x2
@@ -61,6 +60,16 @@ SECTIONS
         SHORT(0);
   } >reset
 
+
+  /*
+  ** Interrupt Vector Tables
+  **
+  ** The primary and alternate tables are loaded
+  ** here, between sections .reset and .text.
+  ** Vector table source code appears below.
+  */
+
+
   /*
   ** User Code and Library Code
   **
@@ -79,6 +88,47 @@ SECTIONS
         *(.libc) *(.libm) *(.libdsp);  /* keep together in this order */
         *(.lib*);
   } >program
+
+
+  /*
+  ** User-Defined Section in Program Memory
+  **
+  ** note: can specify an address using
+  **       the following syntax:
+  **
+  **       usercode 0x1234 :
+  **         {
+  **           *(usercode);
+  **         } >program
+  */
+  usercode :
+  {
+        *(usercode);
+  } >program
+
+
+  /*
+  ** User-Defined Constants in Program Memory
+  **
+  ** For PSV type sections, the Load Memory Address (LMA)
+  ** should be specified as follows:
+  **
+  **       userconst : AT(0x1234)
+  **         {
+  **           *(userconst);
+  **         } >program
+  **
+  ** Note that mapping PSV sections in linker scripts
+  ** is not generally recommended.
+  **
+  ** Because of page alignment restrictions, memory is
+  ** often used more efficiently when PSV sections
+  ** do not appear in the linker script.
+  **
+  ** For more information on memory allocation,
+  ** please refer to chapter 10, 'Linker Processing'
+  ** in the Assembler, Linker manual (DS51317).
+  */
 
 
   /*
@@ -969,6 +1019,9 @@ _IPC22bits    = 0xD0;
  IPC23        = 0xD2;
 _IPC23        = 0xD2;
 _IPC23bits    = 0xD2;
+ INTTREG      = 0xE0;
+_INTTREG      = 0xE0;
+_INTTREGbits  = 0xE0;
  TMR1         = 0x100;
 _TMR1         = 0x100;
  PR1          = 0x102;
@@ -1529,12 +1582,6 @@ _U1TOKbits    = 0x49E;
  U1SOF        = 0x4A0;
 _U1SOF        = 0x4A0;
 _U1SOFbits    = 0x4A0;
- U1BDTP2      = 0x4A2;
-_U1BDTP2      = 0x4A2;
-_U1BDTP2bits  = 0x4A2;
- U1BDTP3      = 0x4A4;
-_U1BDTP3      = 0x4A4;
-_U1BDTP3bits  = 0x4A4;
  U1CNFG1      = 0x4A6;
 _U1CNFG1      = 0x4A6;
 _U1CNFG1bits  = 0x4A6;

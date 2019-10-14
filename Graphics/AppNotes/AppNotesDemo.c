@@ -529,8 +529,6 @@ WORD GOLDrawCallback(void)
 
         case CREATE_AN1246:
             GOLFree();
-            
-//            CreateBackButton();
             CreateAN1246();
             
             screenState = DISPLAY_AN1246;         // switch to next state
@@ -564,7 +562,8 @@ void __T3_ISR _T3Interrupt(void)
 {
     tick++;
 
-    // Clear flag
+    TMR3 = 0; 
+	// Clear flag
     #ifdef __PIC32MX__
     mT3ClearIntFlag();
     #else

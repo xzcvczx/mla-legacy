@@ -75,7 +75,7 @@ typedef enum _SSD_JPEG_ERR
 
 /**************************************************************************
   Function:
-    void JPEGSetRGB(void)
+    void SSD1926SetRGB(void)
   Conditions:
     None.
   Input:
@@ -89,11 +89,11 @@ typedef enum _SSD_JPEG_ERR
   Remarks:
     This mode is used by the graphics library.
   **************************************************************************/
-void JPEGSetRGB(void);
+void SSD1926SetRGB(void);
 
 /**************************************************************************
   Function:
-    void JPEGSetYUV(void)
+    void SSD1926SetYUV(void)
   Conditions:
     None.
   Input:
@@ -107,14 +107,14 @@ void JPEGSetRGB(void);
   Remarks:
     Usually JPEG files use YUV format.
   **************************************************************************/
-void JPEGSetYUV(void);
+void SSD1926SetYUV(void);
 
 /**************************************************************************
   Function:
     void JPEGPutImage(char* filename)
   Conditions:
     FSInit() file system initialization must be done, 
-    JPEGSetYUV() YUV mode must be set.
+    SSD1926SetYUV() YUV mode must be set.
   Input:
     filename - pointer to the file name string.
   Return:

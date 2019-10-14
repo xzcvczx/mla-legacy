@@ -135,14 +135,24 @@
     #define UART_TRISRx   TRISBbits.TRISB5
     #define UART_Tx       PORTBbits.RB7
     #define UART_Rx       PORTBbits.RB5
-    #define UART_TRISRTS  TRISBbits.TRISB4
-    #define UART_RTS      PORTBbits.RB4
-    #define UART_TRISDTR  TRISBbits.TRISB6
-    #define UART_DTR      PORTBbits.RB6
-    #define UART_ENABLE RCSTAbits.SPEN
+    #define UART_ENABLE   RCSTAbits.SPEN
 
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
 
+    //These definitions are only relevant if the respective functions are enabled
+    //in the usb_config.h file.
+    //Make sure these definitions match the GPIO pins being used for your hardware
+    //setup.
+    #define UART_DTS PORTAbits.RA3
+    #define UART_DTR LATCbits.LATC3
+    #define UART_RTS LATBbits.LATB4
+    #define UART_CTS PORTBbits.RB6
+    
+    #define mInitRTSPin() {TRISBbits.TRISB4 = 0;}   //Configure RTS as a digital output.  
+    #define mInitCTSPin() {TRISBbits.TRISB6 = 1;}   //Configure CTS as a digital input.  (Make sure pin is digital if ANxx functions is present on the pin)
+    #define mInitDTSPin() {}//{TRISAbits.TRISA3 = 1;}   //Configure DTS as a digital input.  (Make sure pin is digital if ANxx functions is present on the pin)
+    #define mInitDTRPin() {TRISCbits.TRISC3 = 0;}   //Configure DTR as a digital output.
+	
 #endif  //HARDWARE_PROFILE_LOW_PIN_COUNT_USB_DEVELOPMENT_KIT_H

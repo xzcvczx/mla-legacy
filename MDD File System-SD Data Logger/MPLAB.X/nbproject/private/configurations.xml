@@ -3,7 +3,7 @@
   <projectmakefile>Makefile</projectmakefile>
   <defaultConf>1</defaultConf>
   <confs>
-    <conf name="PIC24FJ128GA010_PIM" type="2">
+    <conf name="PIC24FJ128GA010_PIM_Exp_16_Board" type="2">
       <platformToolSN></platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\mplabc30\v3.25\bin</languageToolchainDir>
       <mdbdebugger version="1">
@@ -21,7 +21,7 @@
         </environment>
       </runprofile>
     </conf>
-    <conf name="PIC32MX360F512L_PIM" type="2">
+    <conf name="PIC32MX360F512L_PIM_Exp_16_Board" type="2">
       <platformToolSN></platformToolSN>
       <languageToolchainDir>C:\Program Files\Microchip\MPLAB C32\bin</languageToolchainDir>
       <mdbdebugger version="1">

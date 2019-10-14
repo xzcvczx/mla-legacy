@@ -1,6 +1,6 @@
 /******************************************************************************
 
-  USB Host HID Device Driver
+  USB Host Human Interface Device Driver
 
 This is the Human Interface Device Class driver file for a USB Embedded Host
 device. This file should be used in a project with usb_host.c to provided the
@@ -28,15 +28,15 @@ the next layer. Generating these events requires a small amount of extra ROM,
 but no extra RAM.  The layer above this driver must be configured to receive
 and respond to the events.  If HID transfer events are going to be
 sent to the next layer, USB_HID_ENABLE_TRANSFER_EVENT should be defined. If
-HID transfer status is going to be polled, USB_HID_ENABLE_TRANSFER_EVENT
+HID transfer status is going to be polled, USB_HID_ENABLE_TRANSFER_EVENT 
 should not be defined. In any case transfer event EVENT_HID_RPT_DESC_PARSED
 will be sent to interface layer. Application must provide a function
 to collect the report descriptor information. Report descriptor information will
 be overwritten with new report descriptor(in case multiple interface are present)
-information when cotrol returns to HID driver . This is done to avoid using
+information when cotrol returns to HID driver . This is done to avoid using 
 extra RAM.
 
-Since HID transfers are performed with interrupt taransfers,
+Since HID transfers are performed with interrupt taransfers, 
 USB_SUPPORT_INTERRUPT_TRANSFERS must be defined.
 
 FileName:        usb_host_hid.c
@@ -65,6 +65,9 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
+Author          Date    Comments
+--------------------------------------------------------------------------------
+ADG          9-Apr-2008 First release
 *******************************************************************************/
 
 /********************************************************************
@@ -200,7 +203,7 @@ Currently this must be set to 1, due to limitations in the USB Host layer.
 
 #define USB_HID_INPUT_REPORT    (0x01)  //
 #define USB_HID_OUTPUT_REPORT   (0x02)  //
-#define USB_HID_FEATURE_REPORT  (0x00)  //
+#define USB_HID_FEATURE_REPORT  (0x03)  //
 
 
 //******************************************************************************
@@ -413,11 +416,12 @@ BOOL USBHostHIDDeviceDetect( BYTE deviceAddress )
                                           device is not an HID
     USB_HID_INITIALIZING               -  HID is attached and in the
                                           process of initializing
-    USB_PROCESSING_REPORT_DESCRIPTOR   -  HID device is detected and report
+    USB_PROCESSING_REPORT_DESCRIPTOR   -  HID device is detected and report 
                                           descriptor is being parsed
-    USB_HID_NORMAL_RUNNING             -  HID Device is running normal,
-                                          ready to send and receive reports
-    USB_HID_DEVICE_HOLDING             -
+    USB_HID_NORMAL_RUNNING             -  HID Device is running normal, 
+                                          ready to send and receive reports 
+    USB_HID_DEVICE_HOLDING             -  Driver has encountered error and
+                                          could not recover
     USB_HID_DEVICE_DETACHED            -  HID detached.
 
   Remarks:
@@ -498,6 +502,38 @@ BYTE    USBHostHIDDeviceStatus( BYTE deviceAddress )
         #endif
     }
 }
+
+/*******************************************************************************
+  Function:
+    BYTE USBHostHIDRead( BYTE deviceAddress,BYTE reportid, BYTE interface, 
+                BYTE size, BYTE *data)
+
+  Summary:
+     This function starts a Get report transfer reuest from the device,
+     utilizing the function USBHostHIDTransfer();
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE deviceAddress      - Device address
+    BYTE reportid           - Report ID of the requested report
+    BYTE interface          - Interface number
+    BYTE size               - Byte size of the data buffer
+    BYTE *data              - Pointer to the data buffer
+
+  Return Values:
+    USB_SUCCESS                 - Request started successfully
+    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
+    USB_HID_DEVICE_BUSY         - Device not in proper state for
+                                  performing a transfer
+    Others                      - Return values from USBHostRead()
+
+  Remarks:
+    None
+*******************************************************************************/
+ // Implemented as a macro. See usb_host_hid.h
+
 
 /*******************************************************************************
   Function:
@@ -628,7 +664,7 @@ BYTE USBHostHIDResetDeviceWithWait( BYTE deviceAddress  )
     USBHostHIDInitialize() has been called.
 
   Parameters:
-    None - None
+    None
 
   Returns:
     None
@@ -1002,15 +1038,15 @@ BYTE USBHostHIDTerminateTransfer( BYTE deviceAddress, BYTE direction, BYTE inter
     
 /*******************************************************************************
   Function:
-    USBHostHIDTransfer( BYTE deviceAddress, BYTE direction, BYTE reportid,
-                        BYTE size, BYTE *data)
+    USBHostHIDTransfer( BYTE deviceAddress, BYTE direction, BYTE interfaceNum, 
+                BYTE reportid, BYTE size, BYTE *data)
 
   Summary:
     This function starts a HID transfer.
 
   Description:
-    This function starts a HID transfer. A read/write wrapper is provided in
-    application interface file to access this function.
+    This function starts a HID transfer. A read/write wrapper is provided in application
+    interface file to access this function.
 
   Preconditions:
     None
@@ -1018,7 +1054,7 @@ BYTE USBHostHIDTerminateTransfer( BYTE deviceAddress, BYTE direction, BYTE inter
   Parameters:
     BYTE deviceAddress      - Device address
     BYTE direction          - 1=read, 0=write
-    BYTE interfaceNum       - Interface number of the device
+    BYTE interfaceNum       - Interface number
     BYTE reportid           - Report ID of the requested report
     BYTE size               - Byte size of the data buffer
     BYTE *data              - Pointer to the data buffer
@@ -1209,6 +1245,37 @@ BOOL USBHostHIDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE *by
     }
 }
 
+/*******************************************************************************
+  Function:
+    BYTE USBHostHIDWrite( BYTE deviceAddress,BYTE reportid, BYTE interface,
+                BYTE size, BYTE *data)
+
+  Summary:
+    This function starts a Set report transfer request to the device,
+    utilizing the function USBHostHIDTransfer();
+
+  Precondition:
+    None
+
+  Parameters:
+    BYTE deviceAddress      - Device address
+    BYTE reportid           - Report ID of the requested report
+    BYTE interface          - Interface number
+    BYTE size               - Byte size of the data buffer
+    BYTE *data              - Pointer to the data buffer
+
+  Return Values:
+    USB_SUCCESS                 - Request started successfully
+    USB_HID_DEVICE_NOT_FOUND    - No device with specified address
+    USB_HID_DEVICE_BUSY         - Device not in proper state for
+                                  performing a transfer
+    Others                      - Return values from USBHostIssueDeviceRequest(),
+                                    and USBHostWrite()
+                                    
+  Remarks:
+    None
+*******************************************************************************/
+ // Implemented as a macro. See usb_host_hid.h
 
 /*******************************************************************************
   Function:
@@ -1242,7 +1309,7 @@ BOOL USBHostHIDTransferIsComplete( BYTE deviceAddress, BYTE *errorCode, BYTE *by
 
   Remarks:
     Application event handler with event 'EVENT_HID_RPT_DESC_PARSED' is called.
-    Application is suppose to fill in data details structure 'HID_DATA_DETAILS'
+    Application is suppose to fill in data details in structure 'HID_DATA_DETAILS'.
     This function can be used to the get the details of the required usages.
 *******************************************************************************/
 BOOL USBHostHID_ApiFindBit(WORD usagePage,WORD usage,HIDReportTypeEnum type,BYTE* Report_ID,
@@ -1381,8 +1448,7 @@ BOOL USBHostHID_ApiFindValue(WORD usagePage,WORD usage,HIDReportTypeEnum type,BY
     None
 
   Parameters:
-    BYTE *errorCode     - Error code from last transfer
-    DWORD *byteCount    - Number of bytes transferred
+    None
 
   Return Values:
     TRUE    - Transfer is complete, errorCode is valid
@@ -1395,6 +1461,50 @@ BYTE USBHostHID_ApiGetCurrentInterfaceNum(void)
 {
     return(deviceRptInfo.interfaceNumber);
 }
+
+/****************************************************************************
+  Function:
+    BYTE* USBHostHID_GetCurrentReportInfo(void)
+
+  Description:
+    This function returns a pointer to the current report info structure.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    BYTE * - Pointer to the report Info structure.
+
+  Remarks:
+    None
+  ***************************************************************************/
+ // Implemented as a macro. See usb_host_hid.h
+
+
+/****************************************************************************
+  Function:
+    BYTE* USBHostHID_GetItemListPointers()
+
+  Description:
+    This function returns a pointer to list of item pointers stored in a
+    structure.
+
+  Precondition:
+    None
+
+  Parameters:
+    None
+
+  Returns:
+    BYTE * - Pointer to list of item pointers structure.
+
+  Remarks:
+    None
+  ***************************************************************************/
+ // Implemented as a macro. See usb_host_hid.h
 
 
 /*******************************************************************************
@@ -1859,8 +1969,8 @@ BOOL USBHostHIDEventHandler( BYTE address, USB_EVENT event, void *data, DWORD si
 
   Description:
     This function is the initialization routine for this client driver.  It
-    is called by the host layer when the USB device is being enumerated.For a
-    HID device we need to look into HID descriptor, interface descriptor and
+    is called by the host layer when the USB device is being enumerated.For a 
+    HID device we need to look into HID descriptor, interface descriptor and 
     endpoint descriptor.
 
   Precondition:

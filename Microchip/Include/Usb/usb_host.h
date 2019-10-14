@@ -619,6 +619,7 @@ BOOL    USBHostDeviceSpecificClientDriver( BYTE deviceAddress );
     USB_HOLDING_PROCESSING_CAPACITY     - Processing requirement excessive
     USB_HOLDING_POWER_REQUIREMENT       - Power requirement excessive
     USB_HOLDING_CLIENT_INIT_ERROR       - Client driver failed to initialize
+    USB_DEVICE_SUSPENDED                - Device is suspended
     Other                               - Device is holding in an error
                                             state. The return value
                                             indicates the error.

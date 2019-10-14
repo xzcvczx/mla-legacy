@@ -2662,12 +2662,12 @@ void CreateEditBox(void)
 
     EbCreate
     (
-        ID_EDITBOX1,    // ID
+        ID_EDITBOX1,                // ID
         KEYSTARTX,
         KEYSTARTY + 1,
         KEYSTARTX + 4 * KEYSIZEX,
         KEYSTARTY + 1 * KEYSIZEY - GOL_EMBOSS_SIZE, // dimension
-        EB_DRAW | EB_CARET | EB_FOCUSED,            // will be dislayed after creation
+        EB_DRAW,                    // will be dislayed after creation
         NULL,
         MAXCHARSIZE,
         altScheme
@@ -2890,6 +2890,13 @@ WORD MsgEditBox(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
     XCHAR       temp;
     static char status = 0; // status to check if calling, holding or not
     id = GetObjID(pObj);
+
+    // ignore all touch screen messages to the edit box
+    // since we do not want the caret to show up
+    if ((id == ID_EDITBOX1) && (pMsg->type == TYPE_TOUCHSCREEN))
+    {
+        return 0;
+    }
 
     // If number key is pressed
     if(objMsg == BTN_MSG_RELEASED)
@@ -3640,9 +3647,18 @@ WORD MsgDateTime(WORD objMsg, OBJ_HEADER *pObj)
     WORD    btnID;
     WORD    ebID = 0, i;
 
-    //static XCHAR  tempString[3];
     switch(btnID = GetObjID(pObj))
     {
+        // ignore all touch screen messages to all edit boxes
+        // since we do not want the caret to show up
+        case ID_EB_MONTH:
+        case ID_EB_DAY:
+        case ID_EB_YEAR:
+        case ID_EB_HOUR:  
+        case ID_EB_MINUTE:
+        case ID_EB_SECOND:
+            return 0;
+
         case ID_BUTTON4:                    // exit setting of date and time
             if(objMsg == BTN_MSG_RELEASED)
             {
@@ -4631,10 +4647,10 @@ WORD PanelPotentiometer(void)
 // Returns zero if samples number in the buffer is less than defined by parameter
 WORD GetPotSamples(WORD number)
 {
+#ifdef ADC_POT
     static BYTE     counter = 0;
     volatile SHORT  temp=0;
 
-#ifdef ADC_POT
     temp = ADCGetPot() >> 3;
     if((temp + POTGR_TOP) > POTGR_BOTTOM)
         temp = POTGR_BOTTOM - POTGR_TOP;
@@ -5041,6 +5057,7 @@ void __T4_ISR _T4Interrupt(void)
 {
     tick++;
 
+    TMR4 = 0;
     // Clear flag
     #ifdef __PIC32MX__
     mT4ClearIntFlag();

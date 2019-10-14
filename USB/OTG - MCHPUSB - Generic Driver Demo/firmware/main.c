@@ -62,11 +62,8 @@
 /** CONFIGURATION **************************************************/
 #if defined(EXPLORER_16)
     #ifdef __PIC24FJ256GB110__ //Defined by MPLAB when using 24FJ256GB110 device
-        //_CONFIG1( 0xFF7F & JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2 & IOL1WAY_ON) 
-        //_CONFIG2( FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2)
-        _CONFIG1(0x367F);
-        _CONFIG2(0x13BE);
-        _CONFIG3(0xFFFF);
+        _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
+        _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
 
      #elif __PIC32MX__
         #pragma config UPLLEN   = ON            // USB PLL Enabled

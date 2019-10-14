@@ -548,10 +548,10 @@ WORD    LbTranslateMsg(void *pObj, GOL_MSG *pMsg);
 *    	Translated Message   Input Source  Set/Clear State Bit		Description
 *     	##################   ############  ######     				###########
 *     	LB_MSG_TOUCHSCREEN   Touch Screen  Set LB_FOCUSED,  	   	If focus is enabled, the focus state bit LB_FOCUSED will be set. LB_DRAW_FOCUS draw state bit will force 
-*											Set LB_DRAW_FOCUS		 the List Box to be redrawn with focus.
-*										    Set LB_DRAW_ITEMS		List Box will redrawn with selected item(s).
-*		LB_MSG_MOVE	 		 KeyBoard	   Set LB_DRAW_ITEMS		List Box will redrawn with focus on one item.
-*		LB_MSG_SEL			 KeyBoard	   Set LB_DRAW_ITEMS		List Box will redrawn with selection on the current item focused.
+*										   Set LB_DRAW_FOCUS		the List Box to be redrawn with focus.
+*										   Set LB_DRAW_ITEMS		List Box will be redrawn with selected item(s).
+*		LB_MSG_MOVE	 		 KeyBoard	   Set LB_DRAW_ITEMS		List Box will be redrawn with focus on one item.
+*		LB_MSG_SEL			 KeyBoard	   Set LB_DRAW_ITEMS		List Box will be redrawn with selection on the current item focused.
 *	</TABLE>
 *
 * PreCondition: none

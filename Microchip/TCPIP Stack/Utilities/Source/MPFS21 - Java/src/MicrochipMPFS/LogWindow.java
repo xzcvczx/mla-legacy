@@ -113,7 +113,8 @@ public class LogWindow extends javax.swing.JDialog {
         // TODO add your handling code here:
         dispose();
     }
-    public void setListArray(List log)
+ @SuppressWarnings("unchecked")
+    public void setListArray(List<String> log)
     {
         utilityLog.setListData(log.toArray());
     }

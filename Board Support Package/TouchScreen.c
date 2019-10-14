@@ -35,6 +35,7 @@
  * Date        	Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 01/19/11		Ported from TouchScreen driver.
+ * 10/03/11     Modified calibration screen.
  *****************************************************************************/
 #include "GraphicsConfig.h"
 
@@ -60,18 +61,18 @@ void 	TouchCheckForCalibration(void);
 // Calibration Inset = ( CALIBRATIONINSET / 2 ) % , Range of 0–20% with 0.5% resolution
 // Example with CALIBRATIONINSET == 20, the calibration points are measured
 // 10% from the corners.
-#define CALIBRATIONINSET   20       // range 0 <= CALIBRATIONINSET <= 40 
+#define CALIBRATIONINSET   20                               // range 0 <= CALIBRATIONINSET <= 40 
 
 #define CAL_X_INSET    (((GetMaxX()+1)*(CALIBRATIONINSET>>1))/100)
 #define CAL_Y_INSET    (((GetMaxY()+1)*(CALIBRATIONINSET>>1))/100)
 
 //////////////////////// FUNCTION POINTERS ///////////////////////////
-NVM_READ_FUNC           pCalDataRead = NULL;                  // function pointer to data read
-NVM_WRITE_FUNC          pCalDataWrite = NULL;                // function pointer to data write
-NVM_SECTORERASE_FUNC    pCalDataSectorErase = NULL;    // function pointer to data sector erase
+NVM_READ_FUNC           pCalDataRead = NULL;                // function pointer to data read
+NVM_WRITE_FUNC          pCalDataWrite = NULL;               // function pointer to data write
+NVM_SECTORERASE_FUNC    pCalDataSectorErase = NULL;         // function pointer to data sector erase
 
 //////////////////////// GLOBAL VARIABLES ////////////////////////////
-#define CALIBRATION_DELAY   300				// delay between calibration touch points
+#define CALIBRATION_DELAY   300                             // delay between calibration touch points
 
 
 /*********************************************************************
@@ -285,18 +286,16 @@ void TouchCheckForCalibration(void)
 ********************************************************************/
 void TouchCalibration(void)
 {
-    static const XCHAR  scr1StrLn1[] = {'I','M','P','O','R','T','A','N','T','.',0};
-    static const XCHAR  scr1StrLn2[] = {'P','e','r','f','o','r','m','i','n','g',' ','t','o','u','c','h',0};
-    static const XCHAR  scr1StrLn3[] = {'s','c','r','e','e','n',' ','c','a','l','i','b','r','a','t','i','o','n','.',0};
-    static const XCHAR  scr1StrLn4[] = {'P','r','e','s','s',' ','&',' ','h','o','l','d',' ','t','h','e',' ','c','e','n','t','e','r',0};
-    static const XCHAR  scr1StrLn5[] = {'o','f',' ','t','h','e',' ','f','i','l','l','e','d',' ','c','i','r','c','l','e',0};
-    static const XCHAR  scr1StrLn6[] = {'T','o','u','c','h',' ','s','c','r','e','e','n',' ','t','o',0};
-    static const XCHAR  scr1StrLn7[] = {'c','o','n','t','i','n','u','e','.',0};
+    static const XCHAR  scr1StrLn1[] = {'P','e','r','f','o','r','m','i','n','g',' ','t','o','u','c','h',0};
+    static const XCHAR  scr1StrLn2[] = {'s','c','r','e','e','n',' ','c','a','l','i','b','r','a','t','i','o','n','.',0};
+    static const XCHAR  scr1StrLn3[] = {'T','o','u','c','h',' ','s','c','r','e','e','n',' ','t','o',0};
+    static const XCHAR  scr1StrLn4[] = {'c','o','n','t','i','n','u','e','.',0};
 
-    static const XCHAR  scr2StrLn1[] = {'H','o','l','d',' ','s','c','r','e','e','n',' ','f','o','r',' ','1',' ','s','e','c',0};
-    static const XCHAR  scr2StrLn2[] = {'a','f','t','e','r',' ','s','y','s','t','e','m',' ','r','e','s','e','t',' ','t','o',0};
-    static const XCHAR  scr2StrLn3[] = {'R','E','P','E','A','T',' ','t','h','e',' ','c','a','l','i','b','r','a','t','i','o','n',0};
-    static const XCHAR  scr2StrLn4[] = {'p','r','o','c','e','d','u','r','e','.',0};
+    static const XCHAR  scr2StrLn1[] = {'T','o',' ','R','E','P','E','A','T',' ','c','a','l','i','b','r','a','t','i','o','n',',',0};
+    static const XCHAR  scr2StrLn2[] = {'r','e','s','e','t',' ','t','h','e',' ','b','o','a','r','d',' ','w','h','i','l','e',0};
+    static const XCHAR  scr2StrLn3[] = {'p','r','e','s','s','i','n','g',' ','o','n',' ','t','h','e',' ','s','c','r','e','e','e','n',0};
+    static const XCHAR  scr2StrLn4[] = {'u','n','t','i','l',' ','t','h','e',' ','c','a','l','i','b','r','a','t','i','o','n',0}; 
+    static const XCHAR  scr2StrLn5[] = {'p','r','o','m','p','t',' ','a','p','p','e','a','r','s','.',0};
 
     SHORT               x, y;
     SHORT               textHeight, textStart;
@@ -311,22 +310,15 @@ void TouchCalibration(void)
 
     SetColor(BRIGHTRED);
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn1, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart, (XCHAR *)scr1StrLn1)));
-    SetColor(BLACK);
+    							 textStart + (textHeight), (XCHAR *)scr1StrLn1)));
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn2, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (1*textHeight), (XCHAR *)scr1StrLn2)));
-    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (2*textHeight), (XCHAR *)scr1StrLn3)));
-    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (3*textHeight), (XCHAR *)scr1StrLn4)));
-    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn5, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (4*textHeight), (XCHAR *)scr1StrLn5)));
+    							 textStart + (2*textHeight), (XCHAR *)scr1StrLn2)));
 
     SetColor(BRIGHTRED);
-    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &FONTDEFAULT))>>1,  \
-    							textStart + (6*textHeight), (XCHAR *)scr1StrLn6)));
-    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
-    							textStart + (7*textHeight), (XCHAR *)scr1StrLn7)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
+    							textStart + (4*textHeight), (XCHAR *)scr1StrLn3)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
+    							textStart + (5*textHeight), (XCHAR *)scr1StrLn4)));
 
     // Wait for release
     do
@@ -365,11 +357,13 @@ void TouchCalibration(void)
     							 textStart + (3*textHeight), (XCHAR *)scr2StrLn3)));
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn4, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (4*textHeight), (XCHAR *)scr2StrLn4)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn5, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (5*textHeight), (XCHAR *)scr2StrLn5)));
     SetColor(BRIGHTRED);
-    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn6, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (6*textHeight), (XCHAR *)scr1StrLn6)));
-    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn7, (void *) &FONTDEFAULT))>>1,  \
-    							 textStart + (7*textHeight), (XCHAR *)scr1StrLn7)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (6*textHeight), (XCHAR *)scr1StrLn3)));
+    while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
+    							 textStart + (7*textHeight), (XCHAR *)scr1StrLn4)));
 
     // Wait for touch
     do

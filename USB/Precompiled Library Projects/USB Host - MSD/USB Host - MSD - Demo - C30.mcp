@@ -34,10 +34,10 @@ file_000=no
 file_001=no
 [FILE_INFO]
 file_000=main.c
-file_001=USB Host - MSD - Library - C30.a
+file_001=USB Host - MSD - Library - C30-elf.a
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
-suite_state=
+suite_state=-omf=elf
 [TOOL_SETTINGS]
 TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g
 TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall

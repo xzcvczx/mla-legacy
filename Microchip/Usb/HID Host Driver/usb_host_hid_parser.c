@@ -1,10 +1,11 @@
 /******************************************************************************
 
-  USB Host HID Parser
+  USB Host Human Interface Device Parser
 
-This is the Human Interface Device Class report parser file for a USB
-Embedded Host device. This file should be used in a project with usb_host_hid.c
-to provided the functional interface.
+Summary:
+    This is the Human Interface Device Class report parser file for a USB
+    Embedded Host device. This file should be used in a project with usb_host_hid.c
+    to provided the functional interface.
 
 Acronyms/abbreviations used by this class:
     * HID - Human Interface Device
@@ -1002,8 +1003,8 @@ static void _USBHostHID_ConvertDataToSigned(HID_ITEM_INFO* item)
 
 /****************************************************************************
   Function:
-    BOOL USBHostHID_HasUsage(HID_REPORTITEM *reportItem,WORD usagePage,
-                                          WORD usage,WORD *pindex)
+    BOOL USBHostHID_HasUsage(HID_REPORTITEM *reportItem, WORD usagePage,
+                                          WORD usage, WORD *pindex, BYTE* count)
 
   Description:
     This function is used to locate the usage in a report descriptor.
@@ -1020,6 +1021,7 @@ static void _USBHostHID_ConvertDataToSigned(HID_ITEM_INFO* item)
     WORD usage                 - Application needs to pass the usageto be
                                  searched
     WORD *pindex               - returns index to the usage item requested.
+    BYTE* count                - returns the remaining number of reports
 
   Return Values:
     BOOL                       - FALSE - If requested usage is not found
@@ -1027,7 +1029,7 @@ static void _USBHostHID_ConvertDataToSigned(HID_ITEM_INFO* item)
   Remarks:
     None
 ***************************************************************************/
-BOOL USBHostHID_HasUsage(HID_REPORTITEM *reportItem,WORD usagePage, WORD usage,WORD *pindex,BYTE* count)
+BOOL USBHostHID_HasUsage(HID_REPORTITEM *reportItem,WORD usagePage, WORD usage,WORD *pindex, BYTE* count)
 {
     HID_USAGEITEM *hidUsageItem;
     WORD usageIndex;

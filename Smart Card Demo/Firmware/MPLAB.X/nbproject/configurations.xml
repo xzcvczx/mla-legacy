@@ -67,7 +67,803 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="PIC24FJ256GB110_PIM" type="2">
+    <conf name="PIC18F46J50_PIM_PIC18_Explorer_Board" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F46J50</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.38</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic24.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic32.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f4550_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="storage-class" value="sca"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="code-model" value="mS"/>
+        <property key="warning-level" value="2"/>
+        <property key="extra-include-directories"
+                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include;../../Microchip/Include/Smart Card"/>
+        <property key="enable-ow" value="true"/>
+        <property key="verbose" value="false"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="data-model" value="Oa-"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-ob" value="true"/>
+      </C18>
+      <C18-AS>
+        <property key="default.radix" value="HEX"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="enable.case.sensitivity" value="false"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+        <property key="cross.reference.file" value=""/>
+      </C18-AS>
+      <C18-LD>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="cod-file" value="false"/>
+        <property key="map-file" value=""/>
+        <property key="extra-lib-directories" value=""/>
+      </C18-LD>
+      <C18LanguageToolchain>
+      </C18LanguageToolchain>
+      <RealICEPlatformTool>
+        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
+        <property key="memories.id" value="false"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="tracecontrol.spiselect" value="0"/>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.programmemory.end" value="0xfff7"/>
+        <property key="tracecontrol.portselect" value="0"/>
+        <property key="memories.aux" value="false"/>
+        <property key="tracecontrol.medium" value="0"/>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC18F87J50_PIM_PIC18_Explorer_Board" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F87J50</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.38</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic24.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic32.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f4550_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="storage-class" value="sca"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="code-model" value="mS"/>
+        <property key="warning-level" value="2"/>
+        <property key="extra-include-directories"
+                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include"/>
+        <property key="enable-ow" value="true"/>
+        <property key="verbose" value="false"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="data-model" value="Oa-"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-ob" value="true"/>
+      </C18>
+      <C18-AS>
+      </C18-AS>
+      <C18-LD>
+      </C18-LD>
+      <C18LanguageToolchain>
+      </C18LanguageToolchain>
+      <RealICEPlatformTool>
+        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
+        <property key="memories.id" value="false"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="tracecontrol.spiselect" value="0"/>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.programmemory.end" value="0xfff7"/>
+        <property key="tracecontrol.portselect" value="0"/>
+        <property key="memories.aux" value="false"/>
+        <property key="tracecontrol.medium" value="0"/>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC18F14K50_Low_Pin_Count_USB_Development_Kit" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F14K50</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.38</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic24.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic32.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f4550_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="storage-class" value="sca"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="code-model" value="mS"/>
+        <property key="warning-level" value="2"/>
+        <property key="extra-include-directories"
+                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include"/>
+        <property key="enable-ow" value="true"/>
+        <property key="verbose" value="false"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="data-model" value="Oa-"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-ob" value="true"/>
+      </C18>
+      <C18-AS>
+      </C18-AS>
+      <C18-LD>
+      </C18-LD>
+      <C18LanguageToolchain>
+      </C18LanguageToolchain>
+      <RealICEPlatformTool>
+        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
+        <property key="memories.id" value="false"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="tracecontrol.spiselect" value="0"/>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.programmemory.end" value="0xfff7"/>
+        <property key="tracecontrol.portselect" value="0"/>
+        <property key="memories.aux" value="false"/>
+        <property key="tracecontrol.medium" value="0"/>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC18F4550_PICDEM_FSUSB_Board" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F4550</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.38</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic24.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic32.c"
+            ex="true"
+            overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <C18>
+        <property key="storage-class" value="sca"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="code-model" value="mS"/>
+        <property key="warning-level" value="2"/>
+        <property key="extra-include-directories"
+                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include"/>
+        <property key="enable-ow" value="true"/>
+        <property key="verbose" value="false"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="data-model" value="Oa-"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-ob" value="true"/>
+      </C18>
+      <C18-AS>
+        <property key="default.radix" value="HEX"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="enable.case.sensitivity" value="false"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+        <property key="cross.reference.file" value=""/>
+      </C18-AS>
+      <C18-LD>
+      </C18-LD>
+      <C18LanguageToolchain>
+      </C18LanguageToolchain>
+      <RealICEPlatformTool>
+        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
+        <property key="memories.id" value="false"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="tracecontrol.tracefilemax" value="54600"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="tracecontrol.tracefile"
+                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="tracecontrol.select" value="0"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="tracecontrol.spiselect" value="0"/>
+        <property key="tracecontrol.tracebufmax" value="54600"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="hwtoolclock.units" value="mips"/>
+        <property key="tracecontrol.disablemacros" value="false"/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="ToolFirmwareFilePath" value=""/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="hwtoolclock.instructionspeed" value=""/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="memories.programmemory.end" value="0xfff7"/>
+        <property key="tracecontrol.portselect" value="0"/>
+        <property key="memories.aux" value="false"/>
+        <property key="tracecontrol.medium" value="0"/>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC24FJ256GB110_PIM_Exp_16_Board" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24FJ256GB110</targetDevice>
@@ -216,9 +1012,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="0"/>
         <property key="enable-procedural-abstraction" value="false"/>
+        <property key="optimization-level" value="0"/>
+        <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -235,8 +1031,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -251,6 +1047,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value=""/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -261,26 +1058,240 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="true"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
-        <property key="enable-check-sections" value="true"/>
+        <property key="enable-check-sections" value="false"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories"
-                  value="/C/Program Files/Microchip/MPLAB C30/lib;"/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="/C/Program Files/Microchip/MPLAB C30/lib"/>
       </C30-LD>
       <C30Global>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="PIC24HJ256GP610_PIM" type="2">
+    <conf name="PIC32MX795F512L_PIM_Exp_16_Board" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC32MX795F512L</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>C32</languageToolchain>
+        <languageToolchainVersion>1.12</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic18.h"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Include/Smart Card/pps18.h"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic18.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../Microchip/Smart Card/SCpic24.c"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../18f4550_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
+        <C32>
+        </C32>
+        <C32-AS>
+        </C32-AS>
+        <C32-LD>
+        </C32-LD>
+        <C32Global>
+        </C32Global>
+      </item>
+      <C32>
+        <property key="additional-warnings" value="false"/>
+        <property key="extra-include-directories"
+                  value="..;../../../Include;../../../Microchip/Include;../../../Smart Card Demo/Firmware;../../../Microchip/Include/Smart Card;../../../../Include"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point" value="false"/>
+        <property key="make-warnings-into-errors" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="use-indirect-calls" value="false"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="place-data-into-section" value="false"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
+      </C32>
+      <C32-AS>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-source" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="warning-level" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="false-conditionals" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="assembler-symbols" value=""/>
+      </C32-AS>
+      <C32-LD>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warn-section-align" value="false"/>
+        <property key="heap-size" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="stack-size" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="exclude-standard-libraries" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="input-libraries" value=""/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="extra-lib-directories" value=""/>
+      </C32-LD>
+      <C32Global>
+      </C32Global>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC24HJ256GP610_PIM_Exp_16_Board" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC24HJ256GP610</targetDevice>
@@ -429,9 +1440,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="0"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="0"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -448,8 +1459,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -464,6 +1475,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value=""/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -474,26 +1486,26 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="report-memory-usage" value="true"/>
         <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
-        <property key="enable-check-sections" value="true"/>
+        <property key="enable-check-sections" value="false"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
-        <property key="extra-lib-directories"
-                  value="/C/Program Files/Microchip/MPLAB C30/lib;"/>
         <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="extra-lib-directories"
+                  value="/C/Program Files/Microchip/MPLAB C30/lib"/>
       </C30-LD>
       <C30Global>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
     </conf>
-    <conf name="dsPIC33FJ128MC710_PIM" type="2">
+    <conf name="dsPIC33FJ128MC710_PIM_Exp_16_Board" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>dsPIC33FJ128MC710</targetDevice>
@@ -654,9 +1666,9 @@
         <property key="enable-all-warnings" value="true"/>
         <property key="pre-instruction-scheduling" value="default"/>
         <property key="enable-short-double" value="false"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="0"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="optimization-level" value="0"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="enable-omit-frame-pointer" value="false"/>
@@ -673,8 +1685,8 @@
         <property key="list-source" value="false"/>
         <property key="list-assembly" value="false"/>
         <property key="relax" value="false"/>
-        <property key="warning-level" value="emit-warnings"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="warning-level" value="emit-warnings"/>
         <property key="list-section-info" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="list-symbols" value="false"/>
@@ -689,6 +1701,7 @@
         <property key="secure-write-protect" value="no_write_protect"/>
         <property key="warn-section-align" value="false"/>
         <property key="heap-size" value=""/>
+        <property key="remove-unused-sections" value="false"/>
         <property key="stack-size" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="trace-symbols" value=""/>
@@ -699,13 +1712,13 @@
         <property key="enable-handles" value="true"/>
         <property key="enable-data-init" value="true"/>
         <property key="secure-flash" value="no_flash"/>
-        <property key="boot-flash" value="no_flash"/>
         <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="boot-flash" value="no_flash"/>
         <property key="report-memory-usage" value="true"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="input-libraries" value=""/>
         <property key="secure-ram" value="no_ram"/>
-        <property key="enable-check-sections" value="true"/>
+        <property key="enable-check-sections" value="false"/>
         <property key="enable-default-isr" value="true"/>
         <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
@@ -716,982 +1729,6 @@
       <C30Global>
       </C30Global>
       <RealICEPlatformTool>
-      </RealICEPlatformTool>
-    </conf>
-    <conf name="PIC32MX795F512L_PIM" type="2">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC32MX795F512L</targetDevice>
-        <targetHeader></targetHeader>
-        <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>1.12</languageToolchainVersion>
-        <platform>3</platform>
-      </toolsSet>
-      <compileType>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
-      </compileType>
-      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic18.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/pps18.h"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic18.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic24.c"
-            ex="true"
-            overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../18f4550_g.lkr" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
-        <C32>
-        </C32>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32Global>
-        </C32Global>
-      </item>
-      <C32>
-        <property key="extra-include-directories"
-                  value="..;../../../Include;../../../Microchip/Include;../../../Smart Card Demo/Firmware;../../../Microchip/Include/Smart Card;../../../../Include"/>
-        <property key="additional-warnings" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="exclude-floating-point" value="false"/>
-        <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="place-data-into-section" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
-      </C32>
-      <C32-AS>
-        <property key="omit-debug-dirs" value="false"/>
-        <property key="extra-include-directories-for-assembler" value=""/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="list-file" value=""/>
-        <property key="list-source" value="false"/>
-        <property key="list-assembly" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
-        <property key="warning-level" value=""/>
-        <property key="list-section-info" value="false"/>
-        <property key="omit-forms" value="false"/>
-        <property key="list-symbols" value="false"/>
-        <property key="keep-locals" value="false"/>
-        <property key="false-conditionals" value="false"/>
-        <property key="expand-macros" value="false"/>
-        <property key="assembler-symbols" value=""/>
-      </C32-AS>
-      <C32-LD>
-      </C32-LD>
-      <C32Global>
-      </C32Global>
-      <RealICEPlatformTool>
-      </RealICEPlatformTool>
-    </conf>
-    <conf name="PIC18F46J50_PIM" type="2">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC18F46J50</targetDevice>
-        <targetHeader></targetHeader>
-        <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.38</languageToolchainVersion>
-        <platform>3</platform>
-      </toolsSet>
-      <compileType>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
-      </compileType>
-      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic24.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic32.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f4550_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
-        <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
-        <property key="extra-include-directories"
-                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include;../../Microchip/Include/Smart Card"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
-        <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
-      </C18>
-      <C18-AS>
-      </C18-AS>
-      <C18-LD>
-      </C18-LD>
-      <C18LanguageToolchain>
-      </C18LanguageToolchain>
-      <RealICEPlatformTool>
-        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
-        <property key="memories.id" value="false"/>
-        <property key="Freeze Peripherals" value="true"/>
-        <property key="tracecontrol.tracefilemax" value="54600"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="tracecontrol.tracefile"
-                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
-        <property key="memories.programmemory" value="true"/>
-        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
-        <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="tracecontrol.select" value="0"/>
-        <property key="hwtoolclock.frcindebug" value="false"/>
-        <property key="tracecontrol.spiselect" value="0"/>
-        <property key="tracecontrol.tracebufmax" value="54600"/>
-        <property key="programoptions.usehighvoltageonmclr" value="false"/>
-        <property key="hwtoolclock.units" value="mips"/>
-        <property key="tracecontrol.disablemacros" value="false"/>
-        <property key="memories.eeprom" value="false"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="ToolFirmwareFilePath" value=""/>
-        <property key="hwtoolclock.instructionspeed" value=""/>
-        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
-        <property key="programoptions.preserveprogramrange" value="false"/>
-        <property key="programoptions.eraseb4program" value="true"/>
-        <property key="memories.programmemory.start" value="0x0"/>
-        <property key="tracecontrol.portselect" value="0"/>
-        <property key="memories.programmemory.end" value="0xfff7"/>
-        <property key="memories.aux" value="false"/>
-        <property key="tracecontrol.medium" value="0"/>
-      </RealICEPlatformTool>
-    </conf>
-    <conf name="PIC18F87J50_PIM" type="2">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC18F87J50</targetDevice>
-        <targetHeader></targetHeader>
-        <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.38</languageToolchainVersion>
-        <platform>3</platform>
-      </toolsSet>
-      <compileType>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
-      </compileType>
-      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic24.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic32.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f4550_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
-        <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
-        <property key="extra-include-directories"
-                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
-        <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
-      </C18>
-      <C18-AS>
-      </C18-AS>
-      <C18-LD>
-      </C18-LD>
-      <C18LanguageToolchain>
-      </C18LanguageToolchain>
-      <RealICEPlatformTool>
-        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
-        <property key="memories.id" value="false"/>
-        <property key="Freeze Peripherals" value="true"/>
-        <property key="tracecontrol.tracefilemax" value="54600"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="tracecontrol.tracefile"
-                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
-        <property key="memories.programmemory" value="true"/>
-        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
-        <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="tracecontrol.select" value="0"/>
-        <property key="hwtoolclock.frcindebug" value="false"/>
-        <property key="tracecontrol.spiselect" value="0"/>
-        <property key="tracecontrol.tracebufmax" value="54600"/>
-        <property key="programoptions.usehighvoltageonmclr" value="false"/>
-        <property key="hwtoolclock.units" value="mips"/>
-        <property key="tracecontrol.disablemacros" value="false"/>
-        <property key="memories.eeprom" value="false"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="ToolFirmwareFilePath" value=""/>
-        <property key="hwtoolclock.instructionspeed" value=""/>
-        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
-        <property key="programoptions.preserveprogramrange" value="false"/>
-        <property key="programoptions.eraseb4program" value="true"/>
-        <property key="memories.programmemory.start" value="0x0"/>
-        <property key="tracecontrol.portselect" value="0"/>
-        <property key="memories.programmemory.end" value="0xfff7"/>
-        <property key="memories.aux" value="false"/>
-        <property key="tracecontrol.medium" value="0"/>
-      </RealICEPlatformTool>
-    </conf>
-    <conf name="Low_Pin_Count_USB_Development_Kit" type="2">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC18F14K50</targetDevice>
-        <targetHeader></targetHeader>
-        <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.38</languageToolchainVersion>
-        <platform>3</platform>
-      </toolsSet>
-      <compileType>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
-      </compileType>
-      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic24.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic32.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f4550_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
-        <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
-        <property key="extra-include-directories"
-                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
-        <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
-      </C18>
-      <C18-AS>
-      </C18-AS>
-      <C18-LD>
-      </C18-LD>
-      <C18LanguageToolchain>
-      </C18LanguageToolchain>
-      <RealICEPlatformTool>
-        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
-        <property key="memories.id" value="false"/>
-        <property key="Freeze Peripherals" value="true"/>
-        <property key="tracecontrol.tracefilemax" value="54600"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="tracecontrol.tracefile"
-                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
-        <property key="memories.programmemory" value="true"/>
-        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
-        <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="tracecontrol.select" value="0"/>
-        <property key="hwtoolclock.frcindebug" value="false"/>
-        <property key="tracecontrol.spiselect" value="0"/>
-        <property key="tracecontrol.tracebufmax" value="54600"/>
-        <property key="programoptions.usehighvoltageonmclr" value="false"/>
-        <property key="hwtoolclock.units" value="mips"/>
-        <property key="tracecontrol.disablemacros" value="false"/>
-        <property key="memories.eeprom" value="false"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="ToolFirmwareFilePath" value=""/>
-        <property key="hwtoolclock.instructionspeed" value=""/>
-        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
-        <property key="programoptions.preserveprogramrange" value="false"/>
-        <property key="programoptions.eraseb4program" value="true"/>
-        <property key="memories.programmemory.start" value="0x0"/>
-        <property key="tracecontrol.portselect" value="0"/>
-        <property key="memories.programmemory.end" value="0xfff7"/>
-        <property key="memories.aux" value="false"/>
-        <property key="tracecontrol.medium" value="0"/>
-      </RealICEPlatformTool>
-    </conf>
-    <conf name="PICDEM_FSUSB" type="2">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC18F4550</targetDevice>
-        <targetHeader></targetHeader>
-        <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.38</languageToolchainVersion>
-        <platform>3</platform>
-      </toolsSet>
-      <compileType>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
-      </compileType>
-      <item path="../../../Microchip/Include/Smart Card/SCdspic33f.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic24.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/SCpic32.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Include/Smart Card/pps-macro.h"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCdspic33f.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic24.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../../../Microchip/Smart Card/SCpic32.c"
-            ex="true"
-            overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f14k50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f46j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <item path="../18f87j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
-      <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
-        <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
-        <property key="extra-include-directories"
-                  value="..;.;../../../Microchip/Include/Smart Card;../../../Microchip/Smart Card;../../Microchip/Include;../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
-        <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
-      </C18>
-      <C18-AS>
-      </C18-AS>
-      <C18-LD>
-      </C18-LD>
-      <C18LanguageToolchain>
-      </C18LanguageToolchain>
-      <RealICEPlatformTool>
-        <property key="programoptions.preserveprogramrange.end" value="0x3f"/>
-        <property key="memories.id" value="false"/>
-        <property key="Freeze Peripherals" value="true"/>
-        <property key="tracecontrol.tracefilemax" value="54600"/>
-        <property key="programoptions.preserveeeprom" value="false"/>
-        <property key="tracecontrol.tracefile"
-                  value="C:\Documents and Settings\i00154\mpdeftrace.log"/>
-        <property key="memories.programmemory" value="true"/>
-        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
-        <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="tracecontrol.select" value="0"/>
-        <property key="hwtoolclock.frcindebug" value="false"/>
-        <property key="tracecontrol.spiselect" value="0"/>
-        <property key="tracecontrol.tracebufmax" value="54600"/>
-        <property key="programoptions.usehighvoltageonmclr" value="false"/>
-        <property key="hwtoolclock.units" value="mips"/>
-        <property key="tracecontrol.disablemacros" value="false"/>
-        <property key="memories.eeprom" value="false"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="ToolFirmwareFilePath" value=""/>
-        <property key="hwtoolclock.instructionspeed" value=""/>
-        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
-        <property key="programoptions.preserveprogramrange" value="false"/>
-        <property key="programoptions.eraseb4program" value="true"/>
-        <property key="memories.programmemory.start" value="0x0"/>
-        <property key="tracecontrol.portselect" value="0"/>
-        <property key="memories.programmemory.end" value="0xfff7"/>
-        <property key="memories.aux" value="false"/>
-        <property key="tracecontrol.medium" value="0"/>
       </RealICEPlatformTool>
     </conf>
   </confs>

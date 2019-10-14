@@ -9,7 +9,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -19,7 +19,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -43,6 +43,10 @@
  * 05/13/11     Add Transparent Color support in PutImage() and PutImageRLE()
  *              functions defined in this layer. 
  * 05/20/11     Added GetCirclePoint() commonly used in Widgets.
+ * 07/05/11     Fixed GetTextHeight() limitation of 127 pixels. Limitation
+ *              is now 256 pixels. 
+ * 10/07/11     Modified GetImageHeight() and GetImageWidth() to support RLE
+ *              compressed images.
  *           
  *****************************************************************************/
 #include "HardwareProfile.h"              // needed to provide values for GetMaxX() and GetMaxY() macros
@@ -1936,7 +1940,7 @@ SHORT __attribute__((weak)) GetTextHeight(void *font)
 {
         #ifdef USE_FONT_EXTERNAL
 
-    char    height;
+    unsigned char    height;
         #endif
     switch(*((SHORT *)font))
     {
@@ -1979,23 +1983,36 @@ SHORT __attribute__((weak)) GetTextHeight(void *font)
 ********************************************************************/
 SHORT __attribute__((weak)) GetImageWidth(void *image)
 {
-    #ifdef USE_BITMAP_EXTERNAL
-
+#ifdef USE_BITMAP_EXTERNAL
     SHORT   width;
-    #endif
+#endif
+
     switch(*((SHORT *)image))
     {
-            #ifdef USE_BITMAP_FLASH
 
+#ifdef USE_BITMAP_FLASH
         case FLASH:
             return (*((FLASH_WORD *) ((IMAGE_FLASH *)image)->address + 2));
-            #endif
-            #ifdef USE_BITMAP_EXTERNAL
+
+    #if defined(USE_COMP_RLE)
+        case FLASH | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->width);
+    #endif
+#endif
+
+#ifdef USE_BITMAP_EXTERNAL
 
         case EXTERNAL:
             ExternalMemoryCallback(image, 4, 2, &width);
             return (width);
-            #endif
+
+    #if defined(USE_COMP_RLE)
+        case EXTERNAL | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->width);
+    #endif
+
+
+#endif
 
         default:
             return (0);
@@ -2020,24 +2037,38 @@ SHORT __attribute__((weak)) GetImageWidth(void *image)
 ********************************************************************/
 SHORT __attribute__((weak)) GetImageHeight(void *image)
 {
-    #ifdef USE_BITMAP_EXTERNAL
-
+#ifdef USE_BITMAP_EXTERNAL
     SHORT   height;
-    #endif
+#endif
+
     switch(*((SHORT *)image))
     {
-            #ifdef USE_BITMAP_FLASH
+#ifdef USE_BITMAP_FLASH
 
         case FLASH:
             return (*((FLASH_WORD *) ((IMAGE_FLASH *)image)->address + 1));
-            #endif
-            #ifdef USE_BITMAP_EXTERNAL
+
+    #if defined(USE_COMP_RLE)
+        case FLASH | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->height);
+    #endif
+
+
+#endif
+
+#ifdef USE_BITMAP_EXTERNAL
             
         case EXTERNAL:
             ExternalMemoryCallback(image, 2, 2, &height);
             return (height);
-            #endif
 
+    #if defined(USE_COMP_RLE)
+        case EXTERNAL | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->height);
+    #endif
+
+
+#endif
 
         default:
             return (0);
@@ -3420,6 +3451,16 @@ WORD __attribute__((weak)) DrawArc(SHORT cx, SHORT cy, SHORT r1, SHORT r2, SHORT
 
 
 #ifdef USE_GRADIENT
+
+#if ((COLOR_DEPTH != 16) && (COLOR_DEPTH != 24))
+    #error "The USE_GRADIENT feature can currently support the COLOR_DEPTH of 16 and 24 only."
+#endif
+
+#ifdef USE_PALETTE
+    #error "The USE_GRADIENT feature is not currently supported when USE_PALETTE is enabled."
+#endif
+
+
 #define WAIT_UNTIL_FINISH(x)    while(!x)
 
 #if (COLOR_DEPTH == 24)

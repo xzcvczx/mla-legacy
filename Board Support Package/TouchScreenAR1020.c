@@ -34,16 +34,10 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok		01/08/07	...
- * Anton Alkhimenok		06/06/07	Basic calibration and GOL messaging are added
- * Anton Alkhimenok     02/05/08    new PICtail support, portrait orientation is added
- * Sean Justice         02/07/08    PIC32 support
- * Anton Alkhimenok     05/27/08    More robust algorithm
- * Anton Alkhimenok     01/07/09    Graphics PICtail Version 3 support is added
- * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
- * PAT					06/29/09	Added event EVENT_STILLPRESS to support continuous press
+ * 04/21/11	    ...
+ * 10/03/11	    TouchDetectPosition() now returns SHORT for compatibility.
  *****************************************************************************/
 #include "GenericTypeDefs.h"
 #include "TouchScreenAR1020.h"
@@ -51,7 +45,7 @@
 #include "drv_spi.h"
 #include "HardwareProfile.h"
 #include "TouchScreen.h"
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 #include "TimeDelay.h"
 
 #ifdef USE_TOUCHSCREEN_AR1020
@@ -158,7 +152,7 @@ typedef union
 }AR1020_TOUCH_REPORT_PACKET;
 
 
-BYTE TouchAR1020SendCommandAndGetResponce(BYTE command, BYTE *data, BYTE dataSize);
+BYTE TouchAR1020SendCommandAndGetResponse(BYTE command, BYTE *data, BYTE dataSize);
 void TouchAR1020RegisterWrite(WORD regOffset, TOUCH_AR1020_REG *regData, BYTE numReg);
 void TouchAR1020SendCommand(BYTE command, BYTE *data, BYTE dataSize);
 BYTE TouchAR1020GetResponceData(BYTE command, BYTE cmdDataSize, BYTE *data);
@@ -178,19 +172,20 @@ static DRV_SPI_INIT_DATA spiInitData;
 * Function: AR1020 ISR
 * PreCondition: none
 * Input: none
-* Output: none
+* Output: Returns 1 if touch sampling is done.
+*         Returns 0 if the touch sampling is not successful.  
 * Side Effects: none
 * Overview: AR1020 ISR
 * Note: none
 ********************************************************************/
-void TouchDetectPosition(void)            //Routine for touch messages including cap and resistive
+SHORT TouchDetectPosition(void)            //Routine for touch messages including cap and resistive
 {
     static long xc,yc;
     AR1020_TOUCH_REPORT_PACKET touchReport;
     BYTE i;
 
     if(!SPILock(spiInitData.channel))
-        return;
+        return 0;
 
     if((TouchScreenPacketReady()) && (detectPosition))
     {
@@ -235,6 +230,7 @@ void TouchDetectPosition(void)            //Routine for touch messages including
     }
 
     SPIUnLock(spiInitData.channel);
+    return 1;    
 }
 
 /*********************************************************************
@@ -263,7 +259,7 @@ void TouchHardwareInit(void *initValues)
     TouchScreenChipDirection();
 
     
-    while(TouchAR1020SendCommandAndGetResponce(TOUCH_AR1020_CMD_ENABLE_TOUCH, NULL, 0) != TOUCHAR1020_RESP_SUCCESS);          //Enable Touch Messages
+    while(TouchAR1020SendCommandAndGetResponse(TOUCH_AR1020_CMD_ENABLE_TOUCH, NULL, 0) != TOUCHAR1020_RESP_SUCCESS);          //Enable Touch Messages
     detectPosition = 1;
 
 }
@@ -421,7 +417,7 @@ void TouchCalHWGetPoints(void)
 
     detectPosition = 0;
 
-    while(TouchAR1020SendCommandAndGetResponce(TOUCH_AR1020_CMD_DISABLE_TOUCH, NULL, 0) != TOUCHAR1020_RESP_SUCCESS);          //Disable Touch Messages
+    while(TouchAR1020SendCommandAndGetResponse(TOUCH_AR1020_CMD_DISABLE_TOUCH, NULL, 0) != TOUCHAR1020_RESP_SUCCESS);          //Disable Touch Messages
 
     DelayMs(100);                                                 //asked for in spec
     
@@ -431,10 +427,10 @@ void TouchCalHWGetPoints(void)
     
     type = 0x04;
 
-    while(TouchAR1020SendCommandAndGetResponce(TOUCH_AR1020_CMD_CALIBRATE_MODE, (BYTE *)&type, 1) != TOUCHAR1020_RESP_SUCCESS);          //Enable Touch Messages
+    while(TouchAR1020SendCommandAndGetResponse(TOUCH_AR1020_CMD_CALIBRATE_MODE, (BYTE *)&type, 1) != TOUCHAR1020_RESP_SUCCESS);          //Enable Touch Messages
 
 
-    XCHAR  	calStr1[] = {'P','r','e','s','s',' ','a','n','d',' ','R','e','l','e','a','s','e',0};
+    XCHAR  	calStr1[] = {'P','r','e','s','s',' ','&',' ','R','e','l','e','a','s','e',0};
     XCHAR   calStr2[] = {'o','n',' ','t','h','e',' ','f','i','l','l','e','d',0};
     XCHAR   calStr3[] = {'c','i','r','c','l','e',0};
     SHORT   counter;
@@ -498,7 +494,7 @@ void TouchCalHWGetPoints(void)
     DelayMs(100);                                                 //asked for in spec
 
 
-    while(TouchAR1020SendCommandAndGetResponce(TOUCH_AR1020_CMD_ENABLE_TOUCH, NULL, 0) != TOUCHAR1020_RESP_SUCCESS);          //Enable Touch Messages
+    while(TouchAR1020SendCommandAndGetResponse(TOUCH_AR1020_CMD_ENABLE_TOUCH, NULL, 0) != TOUCHAR1020_RESP_SUCCESS);          //Enable Touch Messages
     
     detectPosition = 1;
 
@@ -635,7 +631,7 @@ BYTE TouchAR1020GetResponceStatus(BYTE command, BYTE dataSize)
     return TouchAR1020GetResponceData(command, dataSize, NULL);
 }
 
-BYTE TouchAR1020SendCommandAndGetResponce(BYTE command, BYTE *data, BYTE dataSize)
+BYTE TouchAR1020SendCommandAndGetResponse(BYTE command, BYTE *data, BYTE dataSize)
 {
     BYTE responce;
 
@@ -686,7 +682,7 @@ void TouchAR1020RegisterWrite(WORD regOffset, TOUCH_AR1020_REG *regData, BYTE nu
             *regData++;
         }
 
-        if(TouchAR1020SendCommandAndGetResponce(TOUCH_AR1020_CMD_REG_WRITE, regPacket, regDataSize + 3) == TOUCHAR1020_RESP_SUCCESS)
+        if(TouchAR1020SendCommandAndGetResponse(TOUCH_AR1020_CMD_REG_WRITE, regPacket, regDataSize + 3) == TOUCHAR1020_RESP_SUCCESS)
         {
             numReg -= regDataSize;
             regOffset += regDataSize;

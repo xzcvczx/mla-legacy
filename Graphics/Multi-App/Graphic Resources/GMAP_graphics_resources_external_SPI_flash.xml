@@ -117,7 +117,7 @@
 <Font_Files>
 <Font_File_Resource>
 <label>BigFonts</label>
-<path>Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
 <name>Gentium</name>
 <size>49</size>
 <height>58</height>

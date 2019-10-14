@@ -1,6 +1,6 @@
 /******************************************************************************
 
-    USB Hardware Abstraction Layer (HAL)  (Header File)
+    USB Hardware Abstraction Layer (HAL)
 
 Summary:
     This file abstracts the hardware interface.  The USB stack firmware can be
@@ -55,23 +55,18 @@ Description:
 
  This file defines the interface to the USB hardware abstraction layer.
 
- Filename:        usb_hal.h
+ Filename:        usb_hal_pic33E.h
  Dependancies:    none
- Processor:       PIC18, PIC24, dsPIC33E, PIC24E or PIC32 USB Microcontrollers
- Hardware:        The code is natively intended to be used on the following
-     				hardware platforms: PICDEM™ FS USB Demo Board, 
-     				PIC18F87J50 FS USB Plug-In Module, or
-     				Explorer 16 + PIC24 USB PIM.  The firmware may be
-     				modified for use on other USB platforms by editing the
-     				HardwareProfile.h file.
- Compiler:        Microchip C18 (for PIC18) or C30 (for PIC24/24E/dsPIC33E)
+ Processor:       dsPIC33E USB Microcontrollers
+ Hardware:        dsPIC33E USB Microcontrollers
+ Compiler:        Microchip C30 (for PIC24)
  Company:         Microchip Technology, Inc.
 
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PICmicro® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PICmicro(R) Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PICmicro Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -80,18 +75,12 @@ Description:
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
-
- Change History:
-  Rev    Description
-  ----   -----------
-  2.6    Changed the inplementation of the interrupt clearing macro
-         to be more efficient.  
 
  *************************************************************************/
 
@@ -244,6 +233,34 @@ typedef union _POINTER
 #define ConvertToPhysicalAddress(a) ((WORD)(a))   
 #define ConvertToVirtualAddress(a)  ((void *)(a))
 
+/********************************************************************
+Function:
+    BOOL USBSleepOnSuspend(void)
+    
+Summary:
+    Places the core into sleep and sets up the USB module
+    to wake up the device on USB activity.
+    
+PreCondition:
+    IPL (in the SR register) must be non-zero.
+    
+Parameters:
+    None
+    
+Return Values:
+    TRUE  - if entered sleep successfully
+    FALSE - if there was an error entering sleep
+    
+Remarks:
+    Please note that before calling this function that it is the
+    responsibility of the application to place all of the other
+    peripherals or board features into a lower power state if
+    required.
+
+*******************************************************************/
+BOOL USBSleepOnSuspend(void);
+
+
 /****************************************************************
     Function:
         void USBModuleDisable(void)
@@ -291,32 +308,6 @@ typedef union _POINTER
  *******************************************************************/
 #define USBClearInterruptFlag(reg_name, if_flag_offset)	(reg_name = (1 << if_flag_offset))	
 
-/********************************************************************
-Function:
-    BOOL USBSleepOnSuspend(void)
-    
-Summary:
-    Places the PIC24F core into sleep and sets up the USB module
-    to wake up the device on USB activity.
-    
-PreCondition:
-    IPL (in the SR register) must be non-zero.
-    
-Parameters:
-    None
-    
-Return Values:
-    TRUE  - if entered sleep successfully
-    FALSE - if there was an error entering sleep
-    
-Remarks:
-    Please note that before calling this function that it is the
-    responsibility of the application to place all of the other
-    peripherals or board features into a lower power state if
-    required.
-
-*******************************************************************/
-BOOL USBSleepOnSuspend(void);
 
 /********************************************************************
     Function:

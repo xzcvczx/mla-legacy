@@ -61,7 +61,7 @@
 // Grid Item State Definitions
 //******************************************************************************
 	#define GRIDITEM_SELECTED           0x0001  // The cell is selected.
-    #define GRIDITEM_IS_TEXT            0x0000  // The grid item is a test string.
+    #define GRIDITEM_IS_TEXT            0x0000  // The grid item is a text string.
     #define GRIDITEM_IS_BITMAP          0x0008  // The grid item is a bitmap.
     #define GRIDITEM_TEXTRIGHT          0x0010  // Text in the cell is right aligned.
     #define GRIDITEM_TEXTLEFT           0x0020  // Text in the cell is left aligned.

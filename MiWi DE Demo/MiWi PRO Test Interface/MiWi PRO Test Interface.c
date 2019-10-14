@@ -47,10 +47,10 @@
 ********************************************************************/
 
 /************************ HEADERS **********************************/
-#include "WirelessProtocols\Console.h"
-#include "Transceivers\Transceivers.h"
-#include "WirelessProtocols\MCHP_API.h"
-//#include "WirelessProtocols\SymbolTime.h"
+#include "WirelessProtocols/Console.h"
+#include "Transceivers/Transceivers.h"
+#include "WirelessProtocols/MCHP_API.h"
+//#include "WirelessProtocols/SymbolTime.h"
 
 /************************ VARIABLES ********************************/
 

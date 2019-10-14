@@ -116,15 +116,6 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS
 /////////////////////////////////////////////////////////////////////////////
 #define WAIT_UNTIL_FINISH(x)    while(!x)
 
-//    // Macros to interface with memory
-//#if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) ||  defined (MEB_BOARD) 
-//    #define FLASHInit()                     SST25Init();
-//    #define ReadArray(address, pdata, len)  SST25ReadArray(address, pdata, len)
-//#else
-//    #define FLASHInit() 					SST39Init();
-//    #define ReadArray(address, pdata, len)  SST39ReadArray(address, pdata, len)
-//#endif
-
 /************************************************************************
  Macros: SST39PMPInit()
                                                                        
@@ -1059,6 +1050,7 @@ int tickscaler;
 
 void __T3_ISR _T3Interrupt(void)
 {
+    TMR3 = 0;
 	if (tickscaler > TICK_PRESCALER)
 	{
     	tickscaler = 0;

@@ -45,6 +45,7 @@
   ----           -----------------------
   1.2.4 - 1.2.6  No Change
   1.2.6          Add support for the PIC18F46J50_PIM
+  1.3.4          Added support for PIC18F8722 on PIC18 Explorer Board
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -71,9 +72,7 @@
 //      #pragma config PMPMX    = DEFAULT
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT   
-#endif
-
-#if defined(PIC18F46J50_PIM)
+#elif defined(PIC18F46J50_PIM)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
      #pragma config STVREN = ON            //stack overflow/underflow reset enabled
@@ -97,7 +96,11 @@
      #pragma config WPEND = PAGE_0       //Start protection at page 0
      #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
      #pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored 
+#elif defined(__18F8722)
+	#pragma config OSC=HSPLL, FCMEN=OFF, IESO=OFF, PWRT=OFF, WDT=OFF, LVP=OFF, XINST=OFF
+#else
 #endif
+
 char sendBuffer[22] = "This is test string 1";
 char send2[2] = "2";
 char receiveBuffer[50];
@@ -120,7 +123,7 @@ void main (void)
 	unsigned char attributes;
 	unsigned char size = 0, i;
 
-    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
+    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM)) || defined(__18F8722)
         ADCON1 |= 0x0F;                 // Default all pins to digital
     #elif !defined(PIC18F87J50_PIM)
         AD1PCFG = 0xFFFF;

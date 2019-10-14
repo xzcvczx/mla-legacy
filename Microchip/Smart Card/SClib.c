@@ -42,6 +42,13 @@
            Modifed PPS functionality.
            Fixed BWT (Block Wait Time) and WT (Wait Time) calculation issues.
            Modified the code to make it well structured and organized.
+  1.02.4   1) The wait time was getting reinitialized to default value
+              while communicating with smart card using T = 0 protocol.
+              So deleted "t0WWTetu = 10752;" in "SC_TransactT0" function.
+           2) Modified the function "SC_SendT1Block" in such a way that EDC 
+              is transmitted more effeciently for LRC/CRC mode in T = 1 protocol.
+           3) Initialized local variable "txLength" to '0' in function 
+              "SC_TransactT1" to remove non-critical compiler warnings.
 ********************************************************************/
 
 #include <string.h>
@@ -845,8 +852,6 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 	BYTE rx_char;
 	BYTE lcLength = 0,leLength = 0;
 
-	t0WWTetu = 10752;
-
 	// Return False if there is no Card inserted in the Slot
 	if( !SCdrv_CardPresent() || gCardState != ATR_ON )
 	{
@@ -1117,14 +1122,10 @@ static void SC_SendT1Block(BYTE nad,BYTE pcb,WORD length,BYTE *buffer)
 	}
 
 	// Transmit EDC
-	if (edcType == SC_LRC_TYPE_EDC)
+	SCdrv_SendTxData(edc);
+	if (edcType == SC_CRC_TYPE_EDC)
 	{
-		SCdrv_SendTxData(edc);
-	}
-	else
-	{
-		SCdrv_SendTxData(edc);
-	    SCdrv_SendTxData(edc>>8);
+		SCdrv_SendTxData(edc>>8);
 	}
 }
 
@@ -1266,7 +1267,7 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 {
 	BOOL	t1TransactCompleted = FALSE,txMbit = FALSE;
 	BOOL	rxMbit = FALSE,rxSbit = FALSE,transmitNextSegment = TRUE;
-	BYTE	txLength,txPCB = pfield->PCB,rxNAD,rxPCB,rxLEN;
+	BYTE	txLength = 0,txPCB = pfield->PCB,rxNAD,rxPCB,rxLEN;
 	BYTE	initialLength = pfield->LENGTH,iFieldLength,retryR = 0,retrySync = 0;
 	WORD	rxLength = 0;
 	BYTE*	rxField = iField;

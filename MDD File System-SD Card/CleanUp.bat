@@ -86,11 +86,15 @@ echo Removing *.elf files...
 del *.elf /f /q /s
 echo.
 
+rd "Object - MDD File System-SD Card" /S /Q
+
 rd .\Objects /S /Q
 
 rd .\PIC18F\"Object - MDD File System-SD-PIC18" /S /Q
 
 rd .\PIC24F\"Object - MDD File System-SD-PIC24" /S /Q
+
+rd .\PIC24F\"Object - MDD File System-SD-dsPIC33E_PIC24E" /S /Q
 
 rd .\PIC32\"Object - MDD File System-SD-PIC32" /S /Q
 

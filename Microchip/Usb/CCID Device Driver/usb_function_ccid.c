@@ -355,7 +355,7 @@ void USBCCIDBulkInService(void)
 
 /******************************************************************************
   Function:
-	void USBCCIDSendDataToHost(char *data, BYTE length)
+	void USBCCIDSendDataToHost(BYTE *data, WORD length)
 		
   Summary:
     USBCCIDSendDataToHost writes an array of data to the USB. Use this version, is
@@ -378,8 +378,8 @@ void USBCCIDBulkInService(void)
     
 
   Input:
-    char *data - pointer to a RAM array of data to be transfered to the host
-    BYTE length - the number of bytes to be transfered 
+    BYTE *data - pointer to a RAM array of data to be transfered to the host
+    WORD length - the number of bytes to be transfered 
 		
  *****************************************************************************/
 void USBCCIDSendDataToHost(BYTE *pData, WORD len)

@@ -60,8 +60,15 @@
  *                    GFX_GetDisplayArea(). This allows changing the display buffer
  *                    address at run time.
  *                  - Modified double buffering macros to functions.
- * 04/06/11         - renamed file to mchpGfxDrv.c
+ * 04/06/11        Renamed file to mchpGfxDrv.c
  * 05/04/11        Added CopyWindow(), CopyPageWindow() and GetPageAddress()
+ * 07/05/11        Fixed PutImage8BPPExt() issue on incomplete lines.
+ * 07/20/11        - Modified RopBlock to be inline. 
+ *                 - convert CopyBlock() to function.
+ * 09/01/11        - Fixed error on EPMP AMWAIT calculation.
+ *                 - EPMP should not be enabled when not used.
+ * 10/07/11        Modified GetImageHeight() and GetImageWidth() to support RLE
+ *                 compressed images.
  *****************************************************************************/
 #include "HardwareProfile.h"
    
@@ -163,26 +170,28 @@ void    SetDrvFont(void *font, FONT_HEADER *pHeader);
 void EPMP_Init(void)
 {
 	/* Note: When using the EPMP to access external RAM or Flash, PMA0-PMA16 will only access a range of 
-	         256K RAM. To increase this range enable higher Address lines.
+	         256K RAM. To increase this range enable higher Address lines. To do this set the GFX_EPMP_CS1_MEMORY_SIZE
+			 or GFX_EPMP_CS2_MEMORY_SIZE in the Hardware Profile.
 	*/
-    #if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
-        // calculate the divider if using external memory
-        WORD gfxClock = (1000000000ul) / (DWORD)((CLKDIVbits.G1CLKSEL == 1)? 96000000ul : 48000000);
+
+#if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
+    // calculate the divider if using external memory, calcAMWAIT is the minimum EPMP Alternate Master Transfer 
+    volatile WORD gfxClock = (1000000000ul) / (DWORD)((CLKDIVbits.G1CLKSEL == 1)? 96000000ul : 48000000);
+	    	 WORD calcAMWAIT = gfxClock *3;
+				 
+    ANSDbits.ANSD7 = 0;   // PMD15
+    ANSDbits.ANSD6 = 0;   // PMD14
+    ANSFbits.ANSF0 = 0;   // PMD11
     
-    	ANSDbits.ANSD7 = 0;   // PMD15
-    	ANSDbits.ANSD6 = 0;   // PMD14
-    	ANSFbits.ANSF0 = 0;   // PMD11
-    
-    	ANSBbits.ANSB15 = 0;  // PMA0
-    	ANSBbits.ANSB14 = 0;  // PMA1
-    	ANSGbits.ANSG9  = 0;  // PMA2
-    	ANSBbits.ANSB13 = 0;  // PMA10
-    	ANSBbits.ANSB12 = 0;  // PMA11
-    	ANSBbits.ANSB11 = 0;  // PMA12
-    	ANSBbits.ANSB10 = 0;  // PMA13
-    	ANSAbits.ANSA7 = 0;   // PMA17
-    	ANSGbits.ANSG6 = 0;   // PMA18
-    #endif
+    ANSBbits.ANSB15 = 0;  // PMA0
+    ANSBbits.ANSB14 = 0;  // PMA1
+    ANSGbits.ANSG9  = 0;  // PMA2
+    ANSBbits.ANSB13 = 0;  // PMA10
+    ANSBbits.ANSB12 = 0;  // PMA11
+    ANSBbits.ANSB11 = 0;  // PMA12
+    ANSBbits.ANSB10 = 0;  // PMA13
+    ANSAbits.ANSA7 = 0;   // PMA17
+    ANSGbits.ANSG6 = 0;   // PMA18
 
 	PMCON1bits.ADRMUX = 0;	    								// address is not multiplexed
 	PMCON1bits.MODE = 3;        								// master mode
@@ -218,11 +227,11 @@ void EPMP_Init(void)
 		PMCS1MDbits.ACKM = 0;        							// PMACK is not used
 		
 		// Calculate the AMWAIT cycles to satisfy the access time of the device
-		if (EPMPCS1_ACCESS_TIME <= (gfxClock*3))
+		if (EPMPCS1_ACCESS_TIME <= calcAMWAIT)
 		    PMCS1MDbits.AMWAIT = 0;
-		else if (EPMPCS1_ACCESS_TIME > gfxClock)
+		else if (EPMPCS1_ACCESS_TIME > calcAMWAIT)
 		{
-            PMCS1MDbits.AMWAIT = (EPMPCS1_ACCESS_TIME / gfxClock);
+            PMCS1MDbits.AMWAIT = ((EPMPCS1_ACCESS_TIME - calcAMWAIT) / gfxClock);
             if ((EPMPCS1_ACCESS_TIME % gfxClock) > 0)
                 PMCS1MDbits.AMWAIT += 1;
         }          
@@ -256,12 +265,12 @@ void EPMP_Init(void)
 		PMCS2MDbits.ACKM = 0;        							// PMACK is not used
 		
 		// Calculate the AMWAIT cycles to satisfy the access time of the device
-		if (EPMPCS2_ACCESS_TIME <= (gfxClock*3))
+		if (EPMPCS2_ACCESS_TIME <= calcAMWAIT)
 		    PMCS2MDbits.AMWAIT = 0;
-		else if (EPMPCS2_ACCESS_TIME > gfxClock)
+		else if (EPMPCS2_ACCESS_TIME > calcAMWAIT)
 		{
-            PMCS2MDbits.AMWAIT = (EPMPCS2_ACCESS_TIME / gfxClock);
-            if ((EPMPCS1_ACCESS_TIME % gfxClock) > 0)
+            PMCS2MDbits.AMWAIT = ((EPMPCS2_ACCESS_TIME - calcAMWAIT) / gfxClock);
+            if ((EPMPCS2_ACCESS_TIME % gfxClock) > 0)
                 PMCS2MDbits.AMWAIT += 1;
         }          
 
@@ -270,10 +279,8 @@ void EPMP_Init(void)
 		PMCS2BS = 0x0000;
 	#endif //#if defined (GFX_EPMP_CS2_BASE_ADDRESS)
 	
-#if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
 	PMCON2bits.RADDR = 0xFF;									// set CS2 end address
 	PMCON4 = 0xFFFF;            								// PMA0 - PMA15 address lines are enabled
-	
 
 	PMCON3bits.PTWREN = 1;      								// enable write strobe port
 	PMCON3bits.PTRDEN = 1;      								// enable read strobe port
@@ -281,7 +288,6 @@ void EPMP_Init(void)
 	PMCON3bits.PTBE1EN = 1;     								// enable byte enable port
 	PMCON3bits.AWAITM = 0;      								// set address latch pulses width to 1/2 Tcy
 	PMCON3bits.AWAITE = 0;      								// set address hold time to 1/4 Tcy
-#endif
 	
 	DelayMs(100);
 
@@ -289,6 +295,8 @@ void EPMP_Init(void)
 	PMCON1bits.PMPEN = 1;										// enable the module
 
 	DelayMs(100);
+
+#endif // end of #if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
 
 }
 
@@ -613,6 +621,114 @@ void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
 }
 
 /*********************************************************************
+* Function: WORD ROPBlockInline (DWORD srcAddr,   DWORD dstAddr, 
+*						   DWORD srcOffset, DWORD dstOffset, 
+*			               WORD  srcType,   WORD  dstType,  
+*                          WORD  copyOp,    WORD rop, 
+*			               WORD color,      WORD width,  WORD height)
+*
+* PreCondition: none
+*
+* Input: srcAddr - the base address of the data to be moved
+*        dstAddr - the base address of the new location of the moved data 
+*        srcOffset - offset of the data to be moved with respect to the 
+*					 source base address.
+*        dstOffset - offset of the new location of the moved data respect 
+*					 to the source base address.
+*        srcType - sets the source type (continuous or discontinuous)
+*        dstType - sets the source type (continuous or discontinuous) 
+*        copyOp - sets the type of copy operation
+*			- RCC_SOLID_FILL: Solid fill of the set color
+*			- RCC_COPY: direct copy of source to destination
+*			- RCC_TRANSPARENT_COPY: copy with transparency. Transparency color is set by color
+*        rop - sets the raster operation equation
+*			- RCC_ROP_0: Solid black color fill 
+*			- RCC_ROP_1: not (Source or Destination)
+*			- RCC_ROP_2: (not Source) and Destination
+*			- RCC_ROP_3: not Source 
+*			- RCC_ROP_4: Source and (not Destination)
+*			- RCC_ROP_5: not Destination
+*			- RCC_ROP_6: Source xor Destination
+*			- RCC_ROP_7: not (Source and Destination) 
+*			- RCC_ROP_8: Source and Destination
+*			- RCC_ROP_9: not (Source xor Destination) 
+*			- RCC_ROP_A: Destination
+*			- RCC_ROP_B: (not Source) or Destination 
+*			- RCC_ROP_C: Source 
+*			- RCC_ROP_D: Source or (not Destination)
+*			- RCC_ROP_E: Source or Destination
+*			- RCC_ROP_F: Solid white color fill 
+*        color - color value used when transparency operation is set or using solid color fill
+*        width - width of the block of data to be moved
+*        height - height of the block of data to be moved
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and operation is not completely performed.
+*         - Returns 1 when the operation is completely performed.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: This is an internal function. This is declared inline for maintenance purposes
+*           and speed of operation. There will functions that will need the basic ROP 
+*           and instead of using macros, they are declared as functions.
+*           Performs the rectangle copy operation with the indicated 
+*           type of copy and raster operation. 
+*
+* Note: none
+*
+********************************************************************/
+extern inline WORD __attribute__ ((always_inline)) ROPBlockInline(DWORD srcAddr,   DWORD dstAddr,   \
+                                                                  DWORD srcOffset, DWORD dstOffset, \
+			                                                      WORD srcType,    WORD dstType,    \
+                                                                  WORD copyOp,     WORD rop,        \
+                                                                  WORD color,      WORD width,      \
+                                                                  WORD height)
+{
+	DWORD_VAL workArea1Temp, workArea2Temp;
+	
+	GFX_WaitForCommandQueue(16);
+    GFX_WaitForGpu();
+    
+    // store the work area settings temporarily
+    workArea1Temp.w[0] = G1W1ADRL;
+    workArea1Temp.w[1] = G1W1ADRH;
+    workArea2Temp.w[0] = G1W2ADRL;
+    workArea2Temp.w[1] = G1W2ADRH;
+
+	GFX_SetWorkArea1(srcAddr);
+	GFX_SetWorkArea2(dstAddr);
+	
+	GFX_RCC_SetSrcOffset(srcOffset);
+	GFX_RCC_SetDestOffset(dstOffset);
+
+	GFX_RCC_SetSize(width, height);
+	
+	if ((copyOp == RCC_TRANSPARENT_COPY) || (copyOp == RCC_SOLID_FILL))
+		GFX_RCC_SetColor(color);
+
+    if ((srcType == GFX_DATA_CONTINUOUS) || (srcType > 0))
+        srcType = RCC_SRC_ADDR_CONTINUOUS;
+    if ((dstType == GFX_DATA_CONTINUOUS) || (dstType > 0))
+        dstType = RCC_DEST_ADDR_CONTINUOUS;
+	GFX_RCC_StartCopy(copyOp, rop, srcType, dstType);
+
+    GFX_WaitForCommandQueue(16);
+    GFX_WaitForGpu();
+
+    // restore the work area settings 
+    G1W1ADRL = workArea1Temp.w[0];
+    G1W1ADRH = workArea1Temp.w[1];
+    G1W2ADRL = workArea2Temp.w[0];
+    G1W2ADRH = workArea2Temp.w[1];
+
+	return (1);
+	
+}	
+
+
+/*********************************************************************
 * Function: WORD ROPBlock (DWORD srcAddr,   DWORD dstAddr, 
 *						   DWORD srcOffset, DWORD dstOffset, 
 *			               WORD  srcType,   WORD  dstType,  
@@ -671,42 +787,51 @@ void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
 WORD ROPBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, 
 			   WORD srcType, WORD dstType, WORD copyOp, WORD rop, WORD color, WORD width, WORD height)
 {
-	DWORD_VAL workArea1Temp, workArea2Temp;
-	
-	GFX_WaitForCommandQueue(16);
-    GFX_WaitForGpu();
-    
-    // store the work area settings temporarily
-    workArea1Temp.w[0] = G1W1ADRL;
-    workArea1Temp.w[1] = G1W1ADRH;
-    workArea2Temp.w[0] = G1W2ADRL;
-    workArea2Temp.w[1] = G1W2ADRH;
-
-	GFX_SetWorkArea1(srcAddr);
-	GFX_SetWorkArea2(dstAddr);
-	
-	GFX_RCC_SetSrcOffset(srcOffset);
-	GFX_RCC_SetDestOffset(dstOffset);
-
-	GFX_RCC_SetSize(width, height);
-	
-	if ((copyOp == RCC_TRANSPARENT_COPY) || (copyOp == RCC_SOLID_FILL))
-		GFX_RCC_SetColor(color);
-
-	GFX_RCC_StartCopy(copyOp, rop, srcType, dstType);
-
-    GFX_WaitForCommandQueue(16);
-    GFX_WaitForGpu();
-
-    // restore the work area settings 
-    G1W1ADRL = workArea1Temp.w[0];
-    G1W1ADRH = workArea1Temp.w[1];
-    G1W2ADRL = workArea2Temp.w[0];
-    G1W2ADRH = workArea2Temp.w[1];
-
-	return (1);
-	
+    return (ROPBlockInline( srcAddr, dstAddr,       \
+                            srcOffset, dstOffset,   \
+                            srcType, dstType,       \
+                            copyOp, rop,            \
+                            color, width, height));
 }	
+
+/*********************************************************************
+* Function: WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, 
+*						   DWORD srcOffset, DWORD dstOffset, 
+*                          WORD width, WORD height)
+*
+* Overview: Copies a block of data from source specified by srcAddr 
+*           and srcOffset to the destination specified by dstAddr 
+*           and dstOffset.
+*
+* PreCondition: none
+*
+* Input: srcAddr - the base address of the data to be moved
+*        dstAddr - the base address of the new location of the moved data 
+*        srcOffset - offset of the data to be moved with respect to the 
+*					 source base address.
+*        dstOffset - offset of the new location of the moved data respect 
+*					 to the source base address.
+*        width - width of the block of data to be moved
+*        height - height of the block of data to be moved
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Note: none
+*
+********************************************************************/
+WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height)
+{
+
+    return (ROPBlockInline( srcAddr, dstAddr,                                       \
+                            srcOffset, dstOffset,                                   \
+                            (GFX_DATA_DISCONTINUOUS), (GFX_DATA_DISCONTINUOUS),     \
+                            RCC_COPY, RCC_ROP_C,                                    \
+                            0, width, height));
+
+}
+
 
 /*********************************************************************
 * Function: WORD CopyWindow(WORD srcAddr, WORD dstAddr, 
@@ -1566,7 +1691,6 @@ void SetFont(void *font)
 ********************************************************************/
 void SetDrvFont(void *font, FONT_HEADER *pHeader)
 {
-//    WORD  fontHeaderSize = sizeof(FONT_HEADER);
 	WORD  TempGPUBpp;
 	
     // make sure there are no GPU commands pending and GPUs are all idle
@@ -1610,7 +1734,7 @@ void SetDrvFont(void *font, FONT_HEADER *pHeader)
 * Note: none
 *
 ********************************************************************/
-SHORT __attribute__((weak)) GetTextWidth(XCHAR *textString, void *font)
+SHORT GetTextWidth(XCHAR *textString, void *font)
 {
 		#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) 
     GLYPH_ENTRY *pChTable;
@@ -1722,11 +1846,11 @@ SHORT __attribute__((weak)) GetTextWidth(XCHAR *textString, void *font)
 * Note: none
 *
 ********************************************************************/
-SHORT __attribute__((weak)) GetTextHeight(void *font)
+SHORT GetTextHeight(void *font)
 {
         #ifdef USE_FONT_EXTERNAL
 
-    char    height;
+    unsigned char    height;
         #endif
     switch(*((SHORT *)font))
     {
@@ -2145,27 +2269,34 @@ SHORT   DrvGetTextHeight(void *pFont)
 SHORT GetImageWidth(void *image)
 {
 
-	#ifdef USE_COMP_IPU
+#ifdef USE_COMP_IPU
     
     if((*((SHORT *)image) & GFX_COMP_MASK) == COMP_IPU)
     {
 	    return ((GFX_IMAGE_HEADER*)image)->width;
 	}
 	
-	#endif
+#endif
 	
-    #ifdef USE_BITMAP_EXTERNAL
-
+#ifdef USE_BITMAP_EXTERNAL
     SHORT   width;
-    #endif
-    switch(*((SHORT *)image) & GFX_MEM_MASK)
+#endif
+
+    switch(*((SHORT *)image))
     {
-            #ifdef USE_BITMAP_FLASH
+#ifdef USE_BITMAP_FLASH
 
         case FLASH:
             return (*((FLASH_WORD *) ((IMAGE_FLASH *)image)->address + 2));
-            #endif
-            #ifdef USE_BITMAP_EXTERNAL
+
+    #if defined(USE_COMP_RLE)
+        case FLASH | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->width);
+    #endif
+
+#endif
+
+#ifdef USE_BITMAP_EXTERNAL
 
 		case EDS_EPMP:
         	return DrvGetImageWidth(image);
@@ -2173,7 +2304,14 @@ SHORT GetImageWidth(void *image)
         case EXTERNAL:
             ExternalMemoryCallback(image, 4, 2, &width);
             return (width);
-            #endif
+
+    #if defined(USE_COMP_RLE)
+        case EXTERNAL | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->width);
+    #endif
+
+
+#endif
 
         default:
             return (0);
@@ -2199,27 +2337,36 @@ SHORT GetImageWidth(void *image)
 SHORT GetImageHeight(void *image)
 {
 
-	#ifdef USE_COMP_IPU
+#ifdef USE_COMP_IPU
     
     if((*((SHORT *)image) & GFX_COMP_MASK) == COMP_IPU)
     {
 	    return ((GFX_IMAGE_HEADER*)image)->height;
 	}
 	
-	#endif
+#endif
 	
-    #ifdef USE_BITMAP_EXTERNAL
+#ifdef USE_BITMAP_EXTERNAL
 
     SHORT   height;
-    #endif
-    switch(*((SHORT *)image) & GFX_MEM_MASK)
+#endif
+
+    switch(*((SHORT *)image))
     {
-            #ifdef USE_BITMAP_FLASH
+#ifdef USE_BITMAP_FLASH
 
         case FLASH:
             return (*((FLASH_WORD *) ((IMAGE_FLASH *)image)->address + 1));
-            #endif
-            #ifdef USE_BITMAP_EXTERNAL
+
+    #if defined(USE_COMP_RLE)
+        case FLASH | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->height);
+    #endif
+
+
+#endif
+
+#ifdef USE_BITMAP_EXTERNAL
             
 		case EDS_EPMP:
         	return DrvGetImageHeight(image);
@@ -2227,7 +2374,14 @@ SHORT GetImageHeight(void *image)
         case EXTERNAL:
             ExternalMemoryCallback(image, 2, 2, &height);
             return (height);
-            #endif
+
+    #if defined(USE_COMP_RLE)
+        case EXTERNAL | COMP_RLE | IMAGE_MBITMAP:
+            return (((GFX_IMAGE_HEADER *)image)->height);
+    #endif
+
+
+#endif
 
 
         default:
@@ -2318,17 +2472,17 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     tempFlashAddress = flashAddress;
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
 	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-	for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+	for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 
         // get flash address location of current line being processed
@@ -2348,7 +2502,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             #endif
 		#elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
            	pData = &lineBuffer[outputSize-1];
-
+           	
             #ifdef USE_PALETTE
             if(IsPaletteEnabled())
             {
@@ -2506,8 +2660,8 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
            	#endif			
 
            	// Shift to the next pixel (note that if image is stretched, shifting is delayed)
-           	if ((x & testStretch) == 0) 
-              	mask >>= 1;		
+       	    if (((x+1) & testStretch) == 0) 
+              	    mask >>= 1;		
 
         } // for(x = 0; x < xLimit; x++)
 
@@ -2640,10 +2794,10 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     yc = top;
 
 	// some pre-calculations
-	if (outputSize < (GetMaxX() - left))
+	if (outputSize <= (GetMaxX() - left))
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
     // store current line data address 
     tempFlashAddress = flashAddress;
@@ -2653,7 +2807,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-	for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+	for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 
 		// get flash address location of current line being processed
@@ -2897,17 +3051,17 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     tempFlashAddress = flashAddress;
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
 	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-    for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
 	{
         // get flash address location of current line being processed
         flashAddress = tempFlashAddress;
@@ -3118,10 +3272,10 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 	GFX_RCC_SetSrcOffset(0);
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() + 1 - left;
 
     yc = top; 
 
@@ -3133,7 +3287,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-    for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
         // get flash address location of current line being processed
         flashAddress = tempFlashAddress;
@@ -3300,10 +3454,10 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 	GFX_RCC_SetSrcOffset(0);
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
     yc = top;
 
@@ -3312,7 +3466,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	   
 
-    for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 
 		// Get line
@@ -3467,7 +3621,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
        	    #endif			           	    
        	    
            	// Shift to the next pixel (note that if image is stretched, shifting is delayed)
-           	if ((x & testStretch) == 0) 
+           	if (((x+1) & testStretch) == 0) 
               	mask >>= 1;		       	    
         } // for(x = 0; x < xLimit; x++)
 
@@ -3602,17 +3756,17 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     yc = top;
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
 	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-    for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 
 		// Get line
@@ -3825,7 +3979,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 
 	// area of the buffer to use is only the area that
 	// spans the viewable area
-	if ((outputSize > GetMaxX()+1) || (left + outputSize > GetMaxX()+1))
+	if ((outputSize > GetMaxX()+1) || (left + outputSize - 1 > GetMaxX()))
 		outputSize = GetMaxX() + 1 - left; 		
 		
 	pBufAddr = lineBuffer2;
@@ -3847,14 +4001,14 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 	if (outputSize < GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
 	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-    for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 
 		// Get line
@@ -3877,9 +4031,18 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         #endif
 
         #ifdef USE_PALETTE
-            pByteData = (BYTE*)pData2;
+            if(IsPaletteEnabled())
+            {
+                #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+                    pByteData = (BYTE*)lineBuffer2;
+                #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+                    pByteData = (BYTE*)lineBuffer2;
+                    pByteData += (outputSize - 1); 
+                #endif           	
+            }
         #endif
-            
+
+
 		// process the pixels of the current line
         for(x = 0; x < xLimit; x++)
         {
@@ -4069,17 +4232,17 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     yc = top; 
 
 	// some pre-calculations
-	if (outputSize < GetMaxX() - left)
+	if (outputSize <= GetMaxX() - left)
 		xLimit = outputSize;
 	else	 
-		xLimit = GetMaxX() - left;
+		xLimit = GetMaxX() - left + 1;
 
 	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-    for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 
 		// Get line
@@ -4245,7 +4408,7 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-    for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 	    	    
 		// copy one line from the source
@@ -4345,7 +4508,7 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 
        	    // Shift to the next pixel (note that if image is stretched, shifting is delayed)
        	    //if (x%(stretch==IMAGE_X2?2:1) == 0) 
-       	    if ((x & testStretch) == 0)
+       	    if (((x+1) & testStretch) == 0)
             	mask >>= 1;		
 
         } // for(x = 0; x < xLimit; x++)
@@ -4508,7 +4671,7 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-	for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+	for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 		// copy one line from the source
 		// make sure there are no pending RCC GPU commands & 
@@ -4739,7 +4902,7 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 	
-	for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
+	for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 		// copy one line from the source
 		// make sure there are no pending RCC GPU commands & 
@@ -4982,7 +5145,7 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 #else
     #ifdef USE_DOUBLE_BUFFERING
 
-        ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, _drawbuffer(),        \
+        ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, _drawbuffer,          \
 				   3, (top * (DWORD)DISP_HOR_RESOLUTION) + left,                        \
                    GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, RCC_COPY, RCC_ROP_C,    \
                    0, sizeX, sizeY);
@@ -5006,7 +5169,7 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
                 GFX_RCC_SetColor(_colorTransparent);
         #endif	    
 
-	    for(y = 0; (y < sizeY) && (actualY < GetMaxY()); y++)
+	    for(y = 0; (y < sizeY) && (actualY <= GetMaxY()); y++)
 		{
 			// make sure there are no pending RCC GPU commands & 
 			// make sure the GPUs are not operating since changing the base addresses

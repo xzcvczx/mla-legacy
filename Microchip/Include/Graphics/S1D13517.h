@@ -68,7 +68,6 @@
 	GFX_NUM_OF_PAGES
 	} GFX_PAGE;
 
-
 #define SetForegroundPage(GFXForegroundPage) 	_GFXForegroundPage=GFXForegroundPage;
 #define GetForegroundPage() 					_GFXForegroundPage
 #define SetBackgroundPage(GFXBackgroundPage) 	_GFXBackgroundPage=GFXBackgroundPage;
@@ -174,9 +173,6 @@ extern inline BYTE __attribute__ ((always_inline)) Percentage2Alpha(BYTE alphaPe
 
     return (BYTE)percent;
 }
-
-
-void        PushRectangle(void);
 
 /*********************************************************************
 * Function:  void DisplayBrightness(WORD level)
@@ -296,31 +292,5 @@ void DisplayBrightness(WORD level);
 	#define REGFLAG_OFF_DELAY      0xFD     // LCD Panel Power Off Delay (in ms)
 	#define REGFLAG_ON_DELAY       0xFE     // LCD Panel Power On Delay (in ms)
 	#define REGFLAG_END_OF_TABLE   0xFF     // End of Registers Marker
-
-/*********************************************************************
-* Function: void CopyPageWindow(BYTE srcPage, BYTE dstPage,       
-*                               WORD srcX, WORD srcY, WORD dstX, WORD dstY, 
-*                               WORD width, WORD height)
-*
-*
-* Overview: This function alphablends two source windows to a destination window
-*
-* Input:     srcPage - page of the source to be copied
-*		 dstPage - page of the destination to paste to
-*		 srcX - x offset of the page
-*		 srcY - y offset of the page
-*            dstX - x offset of the page
-*            dstY - y offset of the page
-*            width - width of the windows
-*            height - height of the windows
-* Output: 
-*         - none
-*
-* Side Effects: none
-*
-********************************************************************/
-void 	CopyPageWindow(BYTE srcPage, BYTE dstPage,       
-                        WORD srcX, WORD srcY, WORD dstX, WORD dstY, 
-                        WORD width, WORD height);	
 
 #endif // _S1D13517_H

@@ -1,5 +1,3 @@
-
-
 /******************************************************************************
 
 * FileName:        SD Data Logger.c
@@ -29,6 +27,14 @@ IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
 *******************************************************************************/
+/********************************************************************
+ Change History:
+  Rev            Description
+  ----           -----------------------
+  1.3.4          Added support for dsPIC33E & PIC24E microcontrollers.
+                 Removed 'COE_OFF' from _CONFIG1 settings for PIC24F.
+                 Cleaned up unused code.
+********************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
@@ -63,7 +69,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #define MAX_COMMAND_LENGTH              50
 #define MAX_LOG_BUFFER_SIZE             512
 #define NUM_LOG_BUFFERS                 2
-#define VERSION                         "v1.3.0"
+#define VERSION                         "v1.3.4"
 
 // RTCC Format Correlation Constants
 // The 16-bit and 32-bit architectures use two different formats for the RTCC.
@@ -73,10 +79,10 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 // care when writing code that utilizes the weekday.
 
 #if defined( __C30__ )
-    #define DEFAULT_YEARS               0x0007
-    #define DEFAULT_MONTH_DAY           0x0815
-    #define DEFAULT_WEEKDAY_HOURS       0x0304
-    #define DEFAULT_MINUTES_SECONDS     0x2100
+    #define DEFAULT_YEARS               0x0011
+    #define DEFAULT_MONTH_DAY           0x0930
+    #define DEFAULT_WEEKDAY_HOURS       0x0504
+    #define DEFAULT_MINUTES_SECONDS     0x3000
 
     #define INDEX_HOURS                 2
     #define INDEX_MINUTES               1
@@ -342,7 +348,15 @@ void    WriteOneBuffer( FSFILE *fptr, BYTE *data, WORD size );
 #if defined (__PIC24F__)
 
     _CONFIG2(IESO_OFF & FNOSC_PRIPLL & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS)
-    _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & ICS_PGx2 & FWDTEN_OFF)
+    _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & ICS_PGx2 & FWDTEN_OFF)
+
+#elif defined (__dsPIC33E__) || defined (__PIC24E__)
+
+    _FOSCSEL(FNOSC_FRC);			
+    _FOSC(FCKSM_CSECMD & POSCMD_XT & OSCIOFNC_OFF & IOL1WAY_OFF);
+    _FWDT(FWDTEN_OFF);
+    _FPOR(FPWRT_PWR128 & BOREN_ON & ALTI2C1_ON & ALTI2C2_ON);
+    _FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 
 #elif defined (__PIC32MX__)
     #pragma config FPLLMUL  = MUL_20        // PLL Multiplier
@@ -386,21 +400,33 @@ int main (void)
         SearchRec           searchRecord;
         int                 value;
 
-        #if defined(__C30__)
+        #if defined(__PIC24F__)
             OSCCON = 0x3302;    // Enable secondary oscillator
             CLKDIV = 0x0000;    // Set PLL prescaler (1:1)
 
+	#elif defined (__dsPIC33E__) || defined (__PIC24E__)
+	
+	    // Initialize and configure Primary PLL, and enable Secondary Oscillator
+	    PLLFBD = 58;			/* M  = 60	*/
+	    CLKDIVbits.PLLPOST = 0;	/* N1 = 2	*/
+	    CLKDIVbits.PLLPRE = 0;	/* N2 = 2	*/
+	    OSCTUN = 0;
+	    __builtin_write_OSCCONH(0x03);		
+	    __builtin_write_OSCCONL(0x03);
+	    while (OSCCONbits.COSC != 0x3); 
+	    while (_LOCK == 0);
+	
         #elif defined(__PIC32MX__)
         
-        // Turn on the interrupts
-        INTEnableSystemMultiVectoredInt();
-        SYSTEMConfigPerformance(GetSystemClock());
-        mOSCSetPBDIV(OSC_PB_DIV_2);
-        //Initialize the RTCC
-        RtccInit();
-        while(RtccGetClkStat()!=RTCC_CLK_ON);// wait for the SOSC to be actually running and RTCC to have its clock source
-        						            // could wait here at most 32ms
-        RtccOpen(0x10073000, 0x07011602, 0);
+	// Turn on the interrupts
+	INTEnableSystemMultiVectoredInt();
+	SYSTEMConfigPerformance(GetSystemClock());
+	mOSCSetPBDIV(OSC_PB_DIV_2);
+	//Initialize the RTCC
+	RtccInit();
+	while(RtccGetClkStat()!=RTCC_CLK_ON);// wait for the SOSC to be actually running and RTCC to have its clock source
+								    // could wait here at most 32ms
+	RtccOpen(0x10073000, 0x07011602, 0);
 
         #else
             #error Cannot initialize
@@ -408,6 +434,11 @@ int main (void)
         
         TRISD = 0x00C0;
 
+#if defined (__dsPIC33E__) || defined (__PIC24E__)
+	/* Remap and configure the I/O pins for U2TX and U2RX */
+	RPOR9 = 0x0300; /* U2TX mapped to RP101 pin */ 
+	RPINR19 = 0x0064; /* U2RX mapped to RP100 pin */
+#endif	
         UART2Init();
         UART2PrintString( "\r\n\r\n***** Microchip Explorer " );
         UART2PrintString( VERSION );
@@ -415,7 +446,7 @@ int main (void)
 
         // Initialize the RTCC
         // Turn on the secondary oscillator
-        #if defined( __C30__)
+    #if defined( __C30__)
             __asm__ ("MOV #OSCCON,w1");
             __asm__ ("MOV.b #0x02, w0");
             __asm__ ("MOV #0x46, w2");
@@ -423,12 +454,13 @@ int main (void)
             __asm__ ("MOV.b w2, [w1]");
             __asm__ ("MOV.b w3, [w1]");
             __asm__ ("MOV.b w0, [w1]");
-
+//	    	__builtin_write_RTCWEN();
             PIC24RTCCSetDate( DEFAULT_YEARS, DEFAULT_MONTH_DAY );
             PIC24RTCCSetTime( DEFAULT_WEEKDAY_HOURS, DEFAULT_MINUTES_SECONDS );
-
             RCFGCAL = 0x8000;
-        #elif defined( __PIC32MX__)
+
+	#elif defined( __PIC32MX__)
+	
             RtccInit();
             RtccSetDate( DEFAULT_DATE );
             RtccSetTime( DEFAULT_TIME );
@@ -437,6 +469,7 @@ int main (void)
             while (RtccEnable() != RTCC_CLK_ON); // Make sure the RTCC is counting.
                 //PutChar('~');
             mRtccWrDisable();
+	    
         #else
             #error No Real Time clock
         #endif
@@ -1697,12 +1730,17 @@ void InitializeCommand( void )
 void InitializeAnalogMonitor( void )
 {
     // Set up the A/D converter
-
-    AD1PCFG     &= ~SCAN_MASK; // Disable digital input on AN4, AN5, AN8
-    AD1CSSL     = SCAN_MASK;    // Scan AN4, AN5, AN8
-    AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 5*Tcy
-    AD1CON2     = 0x040C;       // Scan inputs, 3 conversions per interrupt, MUX A only
-    AD1CON1     = 0x8046;       // Turn on, start sampling, convert on Timer 3
+    #if defined (__dsPIC33E__) || defined (__PIC24E__)
+	ANSELB      |= SCAN_MASK;   // Enable analog input on AN4, AN5, AN8
+	AD1CSSH     = 0x0000;
+	AD1CON4	 = 0x0000;	      // No DMA	
+    #else
+        AD1PCFG    &= ~SCAN_MASK; // Disable digital input on AN4, AN5, AN8
+    #endif	
+	AD1CSSL     = SCAN_MASK;    // Scan AN4, AN5, AN8
+	AD1CON3     = 0x1F05;       // 31 Tad auto-sample, Tad = 6*Tcy
+	AD1CON2     = 0x0408;       // Scan inputs, 3 conversions per interrupt, MUX A only
+	AD1CON1     = 0x8046;       // Turn on, start sampling, convert on Timer 3	
 
     // Enable A/D interrupts
 
@@ -2320,6 +2358,10 @@ void UnlockRTCC( void )
     __asm__ ("nop");
     __asm__ ("nop");
 
+//    __builtin_write_RTCWEN();
+//    Nop();
+//    Nop();
+
     if (interruptsWereOn)
     {
         RTCC_INTERRUPT_REGISTER |= RTCC_INTERRUPT_VALUE;
@@ -2441,7 +2483,11 @@ void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
     The conversion itself is triggered by Timer 3.
   ***************************************************************************/
 #if defined( __C30__ )
-void __attribute__((__interrupt__, auto_psv)) _ADC1Interrupt( void )
+	#if defined (__dsPIC33E__) || defined (__PIC24E__)
+	void __attribute__((__interrupt__, auto_psv)) _AD1Interrupt( void )
+	#else
+	void __attribute__((__interrupt__, auto_psv)) _ADC1Interrupt( void )
+	#endif
 #elif defined( __PIC32MX__ )
 #pragma interrupt _ADC1Interrupt ipl2 vector 27
 void _ADC1Interrupt( void )
@@ -2485,19 +2531,5 @@ void _ADC1Interrupt( void )
         }
     }
 }
-
-
-#if defined( __C30__ )
-/*******************************************************************************
-Function:       void __attribute__((__interrupt__, auto_psv)) _DefaultInterrupt(void)
-
-This is just here to catch any spurious interrupts that we see during debugging.
-
-*******************************************************************************/
-void __attribute__((interrupt, auto_psv)) _DefaultInterrupt(void)
-{
-  //while (1);
-}
-#endif
 
 

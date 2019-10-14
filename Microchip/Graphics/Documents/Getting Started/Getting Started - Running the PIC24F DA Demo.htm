@@ -4,14 +4,10 @@
 <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
 <meta name=Generator content="Microsoft Word 12 (filtered)">
 <title>Getting Started: Running the “Graphics PIC24F_DA” demo</title>
-
 <style>
 <!--
  /* Font Definitions */
  @font-face
-	{font-family:"MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-@font-face
 	{font-family:"Cambria Math";
 	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
@@ -20,9 +16,6 @@
 @font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
-@font-face
-	{font-family:"\@MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{margin:0in;
@@ -126,42 +119,6 @@ span.Heading3Char
 	mso-style-link:"Heading 3";
 	font-family:"Arial","sans-serif";
 	font-weight:bold;}
-p.msolistparagraph0, li.msolistparagraph0, div.msolistparagraph0
-	{mso-style-name:msolistparagraph;
-	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-p.msolistparagraph0CxSpFirst, li.msolistparagraph0CxSpFirst, div.msolistparagraph0CxSpFirst
-	{mso-style-name:msolistparagraphCxSpFirst;
-	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-p.msolistparagraph0CxSpMiddle, li.msolistparagraph0CxSpMiddle, div.msolistparagraph0CxSpMiddle
-	{mso-style-name:msolistparagraphCxSpMiddle;
-	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
-p.msolistparagraph0CxSpLast, li.msolistparagraph0CxSpLast, div.msolistparagraph0CxSpLast
-	{mso-style-name:msolistparagraphCxSpLast;
-	margin-top:0in;
-	margin-right:0in;
-	margin-bottom:0in;
-	margin-left:.5in;
-	margin-bottom:.0001pt;
-	font-size:12.0pt;
-	font-family:"Times New Roman","serif";}
 span.DocumentMapChar
 	{mso-style-name:"Document Map Char";
 	mso-style-link:"Document Map";
@@ -174,11 +131,53 @@ span.BalloonTextChar
 	{mso-style-name:"Balloon Text Char";
 	mso-style-link:"Balloon Text";
 	font-family:"Tahoma","sans-serif";}
+p.msolistparagraph0, li.msolistparagraph0, div.msolistparagraph0
+	{mso-style-name:msolistparagraph;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.msolistparagraphCxSpFirst, li.msolistparagraphCxSpFirst, div.msolistparagraphCxSpFirst
+	{mso-style-name:msolistparagraphCxSpFirst;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.msolistparagraphCxSpMiddle, li.msolistparagraphCxSpMiddle, div.msolistparagraphCxSpMiddle
+	{mso-style-name:msolistparagraphCxSpMiddle;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.msolistparagraphCxSpLast, li.msolistparagraphCxSpLast, div.msolistparagraphCxSpLast
+	{mso-style-name:msolistparagraphCxSpLast;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
 p.element10, li.element10, div.element10
 	{mso-style-name:element10;
 	margin-right:0in;
 	margin-left:0in;
 	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+p.msochpdefault, li.msochpdefault, div.msochpdefault
+	{mso-style-name:msochpdefault;
+	margin-right:0in;
+	margin-left:0in;
+	font-size:10.0pt;
 	font-family:"Times New Roman","serif";}
 .MsoChpDefault
 	{font-size:10.0pt;}
@@ -218,8 +217,8 @@ Compatibility Matrix</a></h2>
 
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
-<p class=MsoPlainText><a name="running_the_demo"></a><a name="_Toc276094098"><span
-class=Heading2Char><span style='font-size:14.0pt'>Running the Demo</span></span></a><span
+<p class=MsoPlainText><a name="_Toc276094098"></a><a name="running_the_demo"></a><span
+class=Heading2Char><span style='font-size:14.0pt'>Running the Demo</span></span><span
 style='font-family:"Arial","sans-serif"'>:</span></p>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='font-size:10.0pt;
@@ -249,28 +248,101 @@ up the External Memory Programming Mode</i></b></a></span></span></p>
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>This
-demo uses USB Device Mode when programming the external memory.  </span></p>
+demo uses USB Device Mode when programming the external memory. &nbsp;</span></p>
 
-<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>To
-program the external memory:</span></p>
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>The
+external memory data will be requested when the firmware detects that the data
+in external memory do not match the expected CRC check sum of the data in
+external flash.</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>The
+message: </span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>“Invalid External Flash Data.</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>Entering Parallel Flash</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>Programming Mode.</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>Press ‘S2’ to continue</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>then send hex data.”</span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>            will
+appear when the CRC data is mismatched.</span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>            </span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>            After
+the message appears do the following steps to program:</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Hold down MCLR and
-S2 switches on the PIC24FJ256DA210 Development Board</span></p>
+</span></span><span style='font-family:"Arial","sans-serif"'>Run the External
+Memory Programmer.jar utility that comes with the Graphics Library
+installation. Refer to the <a
+href="Getting%20Started%20-%20Programming%20Memory%20on%20Graphics%20PICtail%20Daughter%20and%20Demo%20Boards.htm">Getting
+Started - Programming Memory on Graphics PICtail Daughter and Demo Boards.htm</a>.
+For this demo use the parallel flash on the PIC24FJ256DA210 Development Board.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Release MCLR while
-holding down S2. This will place the board on programming mode.</span></p>
+</span></span><span style='font-family:"Arial","sans-serif"'>Before sending the
+hex file press ‘S2’ to set the board to programming mode.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>Send the hex data
-from the External Memory Programmer utility. </span></p>
+</span></span><span style='font-family:"Arial","sans-serif"'>Send the hex file.
+</span></p>
 
-<p class=MsoPlainText style='page-break-after:avoid'>      <a
-name="_Toc195786411"></a><a name="_Toc195786501"></a><a name="_Toc195786561"></a></p>
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>            After
+flash programming is done, the firmware will reset. The touch screen
+calibration will appear after power up. Proceed with the touch calibration to
+proceed to the icons screen.</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>            </span></p>
+
+<p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>It
+is also possible to force the external memory programming:</span></p>
+
+<p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
+style='font-family:"Arial","sans-serif"'>1.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Hold down MCLR and S2 switches on the
+PIC24FJ256DA210 Development Board</span></p>
+
+<p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
+style='font-family:"Arial","sans-serif"'>2.</span><span style='font-size:7.0pt;
+font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>Release MCLR while holding down S2. The
+message shown below will appear.</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>“Entering Parallel Flash</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>Programming Mode.</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>Press ‘S2’ to continue</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+style='font-family:"Arial","sans-serif"'>then send hex data.”      </span></p>
+
+<p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
+style='font-family:"Arial","sans-serif"'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-family:"Arial","sans-serif"'>Follow the steps above
+to proceed with programming.</span></p>
+
+<p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoNormal><b>Trademarks:</b></p>
 

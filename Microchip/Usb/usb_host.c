@@ -311,7 +311,7 @@ BOOL    USBHostDeviceSpecificClientDriver( BYTE deviceAddress )
     This function returns the current status of a device.  If the device is
     in a holding state due to an error, the error is returned.
 
-  Preconditions:
+  Precondition:
     None
 
   Parameters:
@@ -436,9 +436,9 @@ BOOL USBHostInit(  unsigned long flags  )
 
 /****************************************************************************
   Function:
-    BOOL USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData,
+    BOOL USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, 
             BYTE numberOfBuffers, WORD bufferSize )
-
+    
   Description:
     This function initializes the isochronous data buffer information and
     allocates memory for each buffer.  This function will not allocate memory
@@ -452,7 +452,7 @@ BOOL USBHostInit(  unsigned long flags  )
 
   Return Values:
     TRUE    - All buffers are allocated successfully.
-    FALSE   - Not enough heap space to allocate all buffers - adjust the
+    FALSE   - Not enough heap space to allocate all buffers - adjust the 
                 project to provide more heap space.
 
   Remarks:
@@ -495,7 +495,7 @@ BOOL USBHostIsochronousBuffersCreate( ISOCHRONOUS_DATA * isocData, BYTE numberOf
 /****************************************************************************
   Function:
     void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, BYTE numberOfBuffers )
-
+    
   Description:
     This function releases all of the memory allocated for the isochronous
     data buffers.  It also resets all other information about the buffers.
@@ -535,9 +535,9 @@ void USBHostIsochronousBuffersDestroy( ISOCHRONOUS_DATA * isocData, BYTE numberO
 /****************************************************************************
   Function:
     void USBHostIsochronousBuffersReset( ISOCHRONOUS_DATA * isocData, BYTE numberOfBuffers )
-
+    
   Description:
-    This function resets all the isochronous data buffers.  It does not do
+    This function resets all the isochronous data buffers.  It does not do 
     anything with the space allocated for the buffers.
 
   Precondition:
@@ -591,11 +591,9 @@ void USBHostIsochronousBuffersReset( ISOCHRONOUS_DATA * isocData, BYTE numberOfB
     This function does no special processing in regards to the request except
     for three requests.  If SET INTERFACE is sent, then DTS is reset for all
     endpoints.  If CLEAR FEATURE (ENDPOINT HALT) is sent, then DTS is reset
-    for that endpoint.
-
-    If the application wishes to change the device configuration, it should
-    use the function USBHostSetDeviceConfiguration() rather than this function
-    with the SET CONFIGURATION request, since endpoint definitions may
+    for that endpoint.  If SET CONFIGURATION is sent, the request is aborted
+    with a failure.  The function USBHostSetDeviceConfiguration() must be
+    called to change the device configuration, since endpoint definitions may
     change.
 
   Precondition:

@@ -96,7 +96,7 @@ Description:
 	#if defined(__dsPIC33EP512MU810__) 
 	    #include "USB/usb_hal_dspic33E.h"
 	#elif defined(__PIC24E__)
-		#include "USB/usb_hal_pic24E.h"
+		#include "USB/usb_hal_pic24e.h"
 	#else
     #include "USB/usb_hal_pic24.h"
 	#endif

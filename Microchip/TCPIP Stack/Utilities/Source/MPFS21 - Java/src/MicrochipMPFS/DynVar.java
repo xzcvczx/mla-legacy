@@ -144,15 +144,17 @@ public class DynVar {
         {
               file.fileRecordOffset=tempFileRcrdLen;
         }
+        if(file.dynVarCntr != 0)
+        {
+            file.fileRecordLength = 4 /* 4 bytes for file record length itself*/
+                                    +2 /*To store the hasIndex/isZipped flag*/
+                                    //+(UInt32)file.FileName.Length
+                                    + file.dynVarCntr*8;
 
-        file.fileRecordLength = 4 /* 4 bytes for file record length itself*/
-                                +2 /*To store the hasIndex/isZipped flag*/
-                                //+(UInt32)file.FileName.Length
-                                + file.dynVarCntr*8;
+            tempFileRcrdLen += file.fileRecordLength;
 
-        tempFileRcrdLen += file.fileRecordLength;
-
-        parseItrtn++;
+            parseItrtn++;
+        }
 
 
         // Determine if any matches were made

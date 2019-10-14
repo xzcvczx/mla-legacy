@@ -1,3 +1,6 @@
+MiWi DE 4.2.3
+Fix the bug in MiWi P2P that two MRF24J40 nodes cannot connect if Network Freezer is not enabled.
+
 MiWi DE 4.2.2
 Add out-of-box support for MRF24J40MC module
 

@@ -396,13 +396,13 @@ snmpTargetSecurityLevel OBJECT-TYPE
 
    
 snmp-demo-trap NOTIFICATION-TYPE
-	OBJECTS { analogPot0,pushButton,ledD5}
+	OBJECTS { analogPot0,pushButton,ledD5,trapCommunity}
 	STATUS current
 	DESCRIPTION 
 		"SMIV2 Trap notification information for the SNMP Manager. 
 		The objects used in the demo trap notification are 
-		analogPot0,pushButton and ledD5. User should modify this object 
-		infomration as per requirements. These object should 
+		analogPot0,pushButton,ledD5 and trapCommunity. User should modify this object 
+		information as per the requirements. These object should 
 		have been defined as part of the MIB.
 		"
 	::= {trapNotifications 1}

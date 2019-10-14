@@ -74,37 +74,17 @@ printer.
 // *****************************************************************************
 
 #ifdef __C30__
-    #define PLL_96MHZ_OFF   0xFFFF
-    #define PLL_96MHZ_ON    0xF7FF
-
-    // Configuration Bit settings  for an Explorer 16 with USB PICtail Plus
-    //      Primary Oscillator:             HS
-    //      Internal USB 3.3v Regulator:    Disabled
-    //      IOLOCK:                         Set Once
-    //      Primary Oscillator Output:      Digital I/O
-    //      Clock Switching and Monitor:    Both disabled
-    //      Oscillator:                     Primary with PLL
-    //      USB 96MHz PLL Prescale:         Divide by 2
-    //      Internal/External Switch Over:  Enabled
-    //      WDT Postscaler:                 1:32768
-    //      WDT Prescaler:                  1:128
-    //      WDT Window:                     Non-window Mode
-    //      Comm Channel:                   EMUC2/EMUD2
-    //      Clip on Emulation Mode:         Reset into Operation Mode
-    //      Write Protect:                  Disabled
-    //      Code Protect:                   Disabled
-    //      JTAG Port Enable:               Disabled
     #if defined(__PIC24FJ256GB110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+        _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
-        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__PIC24FJ256GB106__)
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV3 & IOL1WAY_ON)
     #elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
@@ -721,7 +701,7 @@ int main (void)
                             // In the demo's initial configuration, this section executes for the Lexmark E250dn.
         
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_ORIENTATION_LANDSCAPE, USB_NULL, 0, 0 );
-        
+
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_THICK, 0 );
         
                             params.sBevel.xL    = 50;     // X-axis position of the left side of the bevel.
@@ -761,7 +741,7 @@ int main (void)
         
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)20, 0 );
-        
+
                             WriteLine( 450, 150, &(businessCard[1][0]) );
                             WriteLine( 450, 175, &(businessCard[2][0]) );
                             WriteLine( 450, 200, &(businessCard[3][0]) );
@@ -776,7 +756,7 @@ int main (void)
         
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_NORMAL, 0 );
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_TYPE, USB_NULL, PRINTER_LINE_TYPE_DASHED, 0 );
-        
+
                             WriteLine( 120, 310, &(notes[0][0]) );
                             params.sLine.x1 = 170;
                             params.sLine.y1 = 290;
@@ -809,7 +789,7 @@ int main (void)
                             params.sLine.x2 = 500;
                             params.sLine.y2 = 540;
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
-        
+
                             #define TAO_UNIT    4
                             #define TAO_XL      (PRINTER_PAGE_LANDSCAPE_WIDTH - 200)
                             #define TAO_YT      (PRINTER_PAGE_LANDSCAPE_HEIGHT - 200)
@@ -834,7 +814,7 @@ int main (void)
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
         
                             USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_COLOR, USB_NULL, PRINTER_COLOR_WHITE, 0 );
-        
+
                             params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
                             params.sCircle.y    = TAO_YT + TAO_UNIT * 6;
                             params.sCircle.r    = TAO_UNIT * 6;

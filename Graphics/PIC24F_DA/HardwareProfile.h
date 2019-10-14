@@ -59,13 +59,6 @@
 	********************************************************************/
     #include "Configs/HWP_DA210_BRD_16PMP_PFLASH_QVGAv1.h"		
 
-	/*********************************************************************
-	* Hardware Configuration for 
-	* PIC24FJ256DA210 Development Board
-	* Display PH480272T-005-I11Q
-	* Using Parallel Flash
-	********************************************************************/
-	//#include "Configs/HWP_DA210_BRD_16PMP_PFLASH_WQVGAv1.h"
 
 
 #endif

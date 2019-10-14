@@ -74,15 +74,15 @@ extern USB_HANDLE USBGenericInHandle;
 
 typedef struct
 {
-    DWORD addr;
-    BYTE data;
-}COMM_PKT_MEMORY_PAYLOAD __attribute__((packed));
+    DWORD addr __attribute__((packed));
+    BYTE data __attribute__((packed));
+}COMM_PKT_MEMORY_PAYLOAD;
 
 typedef struct
 {
-    DWORD addr;
-    DWORD range;
-}COMM_PKT_VERIFY_PAYLOAD __attribute__((packed));
+    DWORD addr __attribute__((packed));
+    DWORD range __attribute__((packed));
+}COMM_PKT_VERIFY_PAYLOAD;
 
 
 

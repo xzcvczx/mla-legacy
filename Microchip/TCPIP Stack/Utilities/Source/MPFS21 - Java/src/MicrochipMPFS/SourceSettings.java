@@ -21,7 +21,7 @@ public class SourceSettings extends javax.swing.JDialog {
     MainMPFS  mainMpfs;
     ImageIcon icon = new ImageIcon(getClass().getResource("/Resource/mchpIcon.png"));
     /** Creates new form SourceSettings */
-    public SourceSettings(javax.swing.JFrame parent, boolean modal) {
+    public SourceSettings(javax.swing.JFrame parent, boolean modal,MainMPFS.DIRECTORY_OPTION directoryOpt) {
         super(parent, modal);
         initComponents();
         this.add(jFileChooser2);
@@ -37,8 +37,16 @@ public class SourceSettings extends javax.swing.JDialog {
         if(mainMpfs.getRadBotWebPageDirStatus() == true)
         {
             jFileChooser2.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            jFileChooser2.setCurrentDirectory(new
-                        java.io.File(mainMpfs.srourceDirectoryPath));
+            if(directoryOpt == MainMPFS.DIRECTORY_OPTION.SOURCE)
+            {
+                jFileChooser2.setCurrentDirectory(new
+                            java.io.File(mainMpfs.sourceDirectoryPath));
+            }
+            else if(directoryOpt == MainMPFS.DIRECTORY_OPTION.PROJECT)
+            {
+                jFileChooser2.setCurrentDirectory(new
+                            java.io.File(mainMpfs.projectDirectoryPath));
+            }
         }
         else if(mainMpfs.getRadBotPreBuildDirStatus() == true)
         {
@@ -49,6 +57,8 @@ public class SourceSettings extends javax.swing.JDialog {
             jFileChooser2.setCurrentDirectory(new
                         java.io.File(mainMpfs.projectBinFilePath));
             jFileChooser2.setDialogTitle("Browse For BIN File");
+
+
         }
 
     }

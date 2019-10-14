@@ -43,6 +43,12 @@
  *				the caret. If this bit is not set, the caret will never 
  *				be shown.
  * 02/24/11     Modified draw state machine to remove incorrect loops.
+ * 08/05/11     EB_CARET will indicate that the cursor caret will always be drawn.
+ *              Cursor caret drawing will also serve as focus indicator. EB_DRAW_CARET 
+ *              with EB_FOCUSED set will draw the cursor caret regardless of EB_CARET 
+ *              state.
+ * 09/27/11     EbTranslateMsg() should process touch without USE_FOCUS
+ *              enabled.
 *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -179,7 +185,6 @@ WORD EbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 	if (GetState(pEb, EB_DISABLED))
       return OBJ_MSG_INVALID;
 
-#ifdef  USE_FOCUS
 #ifdef  USE_TOUCHSCREEN
     if(pMsg->type == TYPE_TOUCHSCREEN) {
 		// Check if it falls in edit box borders
@@ -191,7 +196,6 @@ WORD EbTranslateMsg(void *pObj, GOL_MSG *pMsg)
 
         return OBJ_MSG_INVALID;
 	}
-#endif
 #endif
 
 #ifdef  USE_KEYBOARD
@@ -268,8 +272,8 @@ typedef enum {
 
 static EB_DRAW_STATES state = EB_STATE_START;
 static XCHAR* pText;
-SHORT temp;
-SHORT width = 0;
+static SHORT temp;
+static SHORT width = 0;
 EDITBOX *pEb;
 
     pEb = (EDITBOX *)pObj;
@@ -288,13 +292,8 @@ EDITBOX *pEb;
     
                 if(GetState(pEb,EB_DISABLED)){
                     temp = pEb->hdr.pGolScheme->ColorDisabled;
-                    ClrState(pEb,EB_CARET);
-    				SetState(pEb,EB_DRAW_CARET);
     	        }else{
                     temp = pEb->hdr.pGolScheme->Color0;
-                    if(GetState(pEb,EB_FOCUSED|EB_DRAW_CARET) ==  (EB_FOCUSED|EB_DRAW_CARET)){
-    					SetState(pEb,EB_DRAW_CARET);
-                    }
                 }
     
                 if(GetState(pEb,EB_DRAW))
@@ -408,30 +407,35 @@ EDITBOX *pEb;
                     break;
                 }    
        			
-       			state = EB_STATE_CARET;
-
-    		    // no break here since it will always go to the EB_STATE_CARET state
+                // draw the caret if required
+                if(!GetState(pEb,EB_DISABLED)){
+    	            
+                    if((GetState(pEb,EB_FOCUSED) && GetState(pEb,EB_DRAW_CARET)) || (GetState(pEb,EB_CARET)))
+                    {
+                        SetColor(pEb->hdr.pGolScheme->TextColor0);
+                    }
+                    else
+                    {
+                        SetColor(pEb->hdr.pGolScheme->Color0);
+                    }
+           			state = EB_STATE_CARET;
+        		    // no break here since it will always go to the EB_STATE_CARET state
+                }
+                else
+                {
+                    SetClip(CLIP_DISABLE);
+        			state = EB_STATE_START;
+    	    		return 1;
+                }
    
             case EB_STATE_CARET:
             
                 // draw the caret if required
-                
-                if(!GetState(pEb,EB_DISABLED)){
-    	            
-                    if(GetState(pEb,EB_DRAW_CARET) && GetState(pEb,EB_CARET)){
-                        SetColor(pEb->hdr.pGolScheme->TextColor0);
-                    }else{
-                        SetColor(pEb->hdr.pGolScheme->Color0);
-                    }
-    
-                    if(!Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight)) 
-                        return 0;
-                }
+                if(!Bar(GetX(),GetY(),GetX()+EB_CARET_WIDTH,GetY()+pEb->textHeight)) 
+                    return 0;
     
                 SetClip(CLIP_DISABLE);
-    
     			state = EB_STATE_START;
-    
     			return 1;
     			
         } // switch()

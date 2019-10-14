@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.3.0
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.8.17
  *****************************************************************************/
 
 /*****************************************************************************
@@ -56,11 +56,21 @@
  * -----
  * GOLSmallFont - Heigth: 15 pixels, range: ' ' to '~'
  * GOLMediumFont - Heigth: 19 pixels, range: ' ' to '~'
+ * VeraMono_28 - Heigth: 33 pixels, range: '.' to '9'
+ * VeraMono_17 - Heigth: 20 pixels, range: '.' to '9'
  *****************************************************************************/
 
 /*****************************************************************************
  * SECTION:  Fonts
  *****************************************************************************/
+
+/************************************************************************************
+* Created from Gentium font.
+* Gentium font is Copyright (c) 2003-2005, SIL International (http://scripts.sil.org/).
+* All Rights Reserved.
+* Gentium font is licensed under the SIL Open Font License, Version 1.0.
+* http://scripts.sil.org/OFL
+*************************************************************************************/
 
 /*********************************
  * Font File Structure
@@ -3738,6 +3748,809 @@ const char __GOLMediumFont[] __attribute__((aligned(2))) =
 
 };
 
+
+/************************************************************************************
+* Created from Bitstream Vera Fonts 
+*
+* Copyright (c) 2003, Bitstream Inc.
+* All Rights Reserved. Bitstream
+* Vera is a trademark of Bitstream, Inc.
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of the fonts accompanying this license ("Fonts") and associated
+* documentation files (the "Font Software"), to reproduce and distribute
+* the Font Software, including without limitation the rights to use,
+* copy, merge, publish, distribute, and/or sell copies of the Font
+* Software, and to permit persons to whom the Font Software is furnished
+* to do so, subject to the following conditions:
+*
+* The above copyright and trademark notices and this permission notice
+* shall be included in all copies of one or more of the Font Software
+* typefaces.
+*
+* The Font Software may be modified, altered, or added to, and in
+* particular the designs of glyphs or characters in the Fonts may be
+* modified and additional glyphs or characters may be added to the
+* Fonts, only if the fonts are renamed to names not containing either
+* the words "Bitstream" or the word "Vera".
+*
+* This License becomes null and void to the extent applicable to Fonts
+* or Font Software that has been modified and is distributed under the
+* "Bitstream Vera" names.
+*
+* The Font Software may be sold as part of a larger software package but
+* no copy of one or more of the Font Software typefaces may be sold by
+* itself.
+ 
+* THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+* OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL
+* BITSTREAM OR THE GNOME FOUNDATION BE LIABLE FOR ANY CLAIM, DAMAGES OR
+* OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL,
+* OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+* OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT
+* SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.
+*
+* Except as contained in this notice, the names of Gnome, the Gnome
+* Foundation, and Bitstream Inc., shall not be used in advertising or
+* otherwise to promote the sale, use or other dealings in this Font
+* Software without prior written authorization from the Gnome Foundation
+* or Bitstream Inc., respectively. For further information, contact:
+* fonts at gnome dot org.
+*
+*************************************************************************************/
+
+/*********************************
+ * Font File Structure
+ * Label: VeraMono_28
+ * Description:  Heigth: 33 pixels, range: '.' to '9'
+ ***********************************/
+
+extern const char __VeraMono_28[] __attribute__((aligned(2)));
+
+const FONT_FLASH VeraMono_28 =
+{
+    (FLASH | COMP_NONE),
+    __VeraMono_28
+};
+
+const char __VeraMono_28[] __attribute__((aligned(2))) =
+{
+/****************************************
+ * Font header
+ ****************************************/
+    0x00,           // Information
+    0x00,           // ID
+    0x2E, 0x00,     // First Character
+    0x39, 0x00,     // Last Character
+    0x21,           // Height
+    0x00,           // Reserved
+/****************************************
+ * Font Glyph Table
+ ****************************************/
+    0x11, 0x38, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0x9B, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0xFE, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0x61, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0xC4, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0x27, 0x02, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0x8A, 0x02, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0xED, 0x02, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0x50, 0x03, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0xB3, 0x03, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0x16, 0x04, 0x00,           // width, MSB Offset, LSB offset
+    0x11, 0x79, 0x04, 0x00,           // width, MSB Offset, LSB offset
+/***********************************
+ * Font Characters
+ ***********************************/
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x80, 0x03, 0x00,         //        ***              
+    0x80, 0x03, 0x00,         //        ***              
+    0x80, 0x03, 0x00,         //        ***              
+    0x80, 0x03, 0x00,         //        ***              
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x38, 0x00,         //            ***          
+    0x00, 0x38, 0x00,         //            ***          
+    0x00, 0x1C, 0x00,         //           ***           
+    0x00, 0x1C, 0x00,         //           ***           
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x80, 0x03, 0x00,         //        ***              
+    0x80, 0x03, 0x00,         //        ***              
+    0xC0, 0x03, 0x00,         //       ****              
+    0xC0, 0x01, 0x00,         //       ***               
+    0xC0, 0x01, 0x00,         //       ***               
+    0xE0, 0x00, 0x00,         //      ***                
+    0xE0, 0x00, 0x00,         //      ***                
+    0x70, 0x00, 0x00,         //     ***                 
+    0x70, 0x00, 0x00,         //     ***                 
+    0x38, 0x00, 0x00,         //    ***                  
+    0x38, 0x00, 0x00,         //    ***                  
+    0x1C, 0x00, 0x00,         //   ***                   
+    0x1C, 0x00, 0x00,         //   ***                   
+    0x0E, 0x00, 0x00,         //  ***                    
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xC0, 0x07, 0x00,         //       *****             
+    0xF0, 0x1F, 0x00,         //     *********           
+    0x70, 0x1C, 0x00,         //     ***   ***           
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x9C, 0x73, 0x00,         //   ***  ***  ***         
+    0x9C, 0x73, 0x00,         //   ***  ***  ***         
+    0x9C, 0x73, 0x00,         //   ***  ***  ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x70, 0x1C, 0x00,         //     ***   ***           
+    0xF0, 0x1F, 0x00,         //     *********           
+    0xC0, 0x07, 0x00,         //       *****             
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xE0, 0x07, 0x00,         //      ******             
+    0xF8, 0x07, 0x00,         //    ********             
+    0x38, 0x07, 0x00,         //    ***  ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0xF0, 0x7F, 0x00,         //     ***********         
+    0xF0, 0x7F, 0x00,         //     ***********         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xF0, 0x07, 0x00,         //     *******             
+    0xFC, 0x1F, 0x00,         //   ***********           
+    0x1C, 0x3C, 0x00,         //   ***     ****          
+    0x04, 0x78, 0x00,         //   *        ****         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x78, 0x00,         //            ****         
+    0x00, 0x3C, 0x00,         //           ****          
+    0x00, 0x3E, 0x00,         //          *****          
+    0x00, 0x1F, 0x00,         //         *****           
+    0x00, 0x0F, 0x00,         //         ****            
+    0x80, 0x07, 0x00,         //        ****             
+    0xC0, 0x03, 0x00,         //       ****              
+    0xE0, 0x00, 0x00,         //      ***                
+    0x70, 0x00, 0x00,         //     ***                 
+    0x38, 0x00, 0x00,         //    ***                  
+    0xFC, 0x7F, 0x00,         //   *************         
+    0xFC, 0x7F, 0x00,         //   *************         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xE0, 0x07, 0x00,         //      ******             
+    0xF8, 0x1F, 0x00,         //    **********           
+    0x18, 0x38, 0x00,         //    **      ***          
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x3C, 0x00,         //           ****          
+    0xC0, 0x1F, 0x00,         //       *******           
+    0xC0, 0x0F, 0x00,         //       ******            
+    0x00, 0x3C, 0x00,         //           ****          
+    0x00, 0x38, 0x00,         //            ***          
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x78, 0x00,         //            ****         
+    0x0C, 0x3C, 0x00,         //   **      ****          
+    0xFC, 0x1F, 0x00,         //   ***********           
+    0xF0, 0x07, 0x00,         //     *******             
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0F, 0x00,         //         ****            
+    0x80, 0x0F, 0x00,         //        *****            
+    0x80, 0x0F, 0x00,         //        *****            
+    0xC0, 0x0E, 0x00,         //       ** ***            
+    0xE0, 0x0E, 0x00,         //      *** ***            
+    0x60, 0x0E, 0x00,         //      **  ***            
+    0x30, 0x0E, 0x00,         //     **   ***            
+    0x30, 0x0E, 0x00,         //     **   ***            
+    0x18, 0x0E, 0x00,         //    **    ***            
+    0x1C, 0x0E, 0x00,         //   ***    ***            
+    0x0C, 0x0E, 0x00,         //   **     ***            
+    0x06, 0x0E, 0x00,         //  **      ***            
+    0xFE, 0x7F, 0x00,         //  **************         
+    0xFE, 0x7F, 0x00,         //  **************         
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xF8, 0x3F, 0x00,         //    ***********          
+    0xF8, 0x3F, 0x00,         //    ***********          
+    0x38, 0x00, 0x00,         //    ***                  
+    0x38, 0x00, 0x00,         //    ***                  
+    0x38, 0x00, 0x00,         //    ***                  
+    0x38, 0x00, 0x00,         //    ***                  
+    0xF8, 0x07, 0x00,         //    ********             
+    0xF8, 0x1F, 0x00,         //    **********           
+    0x08, 0x3C, 0x00,         //    *      ****          
+    0x00, 0x38, 0x00,         //            ***          
+    0x00, 0x78, 0x00,         //            ****         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x38, 0x00,         //            ***          
+    0x0C, 0x3C, 0x00,         //   **      ****          
+    0xFC, 0x1F, 0x00,         //   ***********           
+    0xF8, 0x07, 0x00,         //    ********             
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x80, 0x0F, 0x00,         //        *****            
+    0xE0, 0x1F, 0x00,         //      ********           
+    0xF0, 0x10, 0x00,         //     ****    *           
+    0x38, 0x00, 0x00,         //    ***                  
+    0x38, 0x00, 0x00,         //    ***                  
+    0x38, 0x00, 0x00,         //    ***                  
+    0x1C, 0x00, 0x00,         //   ***                   
+    0x9C, 0x0F, 0x00,         //   ***  *****            
+    0xDC, 0x1F, 0x00,         //   *** *******           
+    0x7C, 0x3C, 0x00,         //   *****   ****          
+    0x3C, 0x78, 0x00,         //   ****     ****         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x18, 0x70, 0x00,         //    **       ***         
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x70, 0x3C, 0x00,         //     ***   ****          
+    0xF0, 0x1F, 0x00,         //     *********           
+    0xC0, 0x0F, 0x00,         //       ******            
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xFC, 0x7F, 0x00,         //   *************         
+    0xFC, 0x7F, 0x00,         //   *************         
+    0x00, 0x78, 0x00,         //            ****         
+    0x00, 0x38, 0x00,         //            ***          
+    0x00, 0x38, 0x00,         //            ***          
+    0x00, 0x1C, 0x00,         //           ***           
+    0x00, 0x1C, 0x00,         //           ***           
+    0x00, 0x1C, 0x00,         //           ***           
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0E, 0x00,         //          ***            
+    0x00, 0x0F, 0x00,         //         ****            
+    0x00, 0x07, 0x00,         //         ***             
+    0x00, 0x07, 0x00,         //         ***             
+    0x80, 0x07, 0x00,         //        ****             
+    0x80, 0x03, 0x00,         //        ***              
+    0x80, 0x03, 0x00,         //        ***              
+    0xC0, 0x01, 0x00,         //       ***               
+    0xC0, 0x01, 0x00,         //       ***               
+    0xC0, 0x01, 0x00,         //       ***               
+    0xE0, 0x00, 0x00,         //      ***                
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xE0, 0x0F, 0x00,         //      *******            
+    0xF8, 0x3F, 0x00,         //    ***********          
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0xE0, 0x0F, 0x00,         //      *******            
+    0xE0, 0x1F, 0x00,         //      ********           
+    0x78, 0x3C, 0x00,         //    ****   ****          
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x3C, 0x78, 0x00,         //   ****     ****         
+    0x78, 0x3C, 0x00,         //    ****   ****          
+    0xF0, 0x1F, 0x00,         //     *********           
+    0xE0, 0x0F, 0x00,         //      *******            
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0xE0, 0x07, 0x00,         //      ******             
+    0xF0, 0x1F, 0x00,         //     *********           
+    0x78, 0x1C, 0x00,         //    ****   ***           
+    0x38, 0x38, 0x00,         //    ***     ***          
+    0x1C, 0x30, 0x00,         //   ***       **          
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x1C, 0x70, 0x00,         //   ***       ***         
+    0x3C, 0x78, 0x00,         //   ****     ****         
+    0x78, 0x7C, 0x00,         //    ****   *****         
+    0xF0, 0x77, 0x00,         //     ******* ***         
+    0xE0, 0x73, 0x00,         //      *****  ***         
+    0x00, 0x70, 0x00,         //             ***         
+    0x00, 0x30, 0x00,         //             **          
+    0x00, 0x38, 0x00,         //            ***          
+    0x00, 0x38, 0x00,         //            ***          
+    0x10, 0x1E, 0x00,         //     *    ****           
+    0xF0, 0x0F, 0x00,         //     ********            
+    0xE0, 0x03, 0x00,         //      *****              
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+    0x00, 0x00, 0x00,         //                         
+
+};
+
+/*********************************
+ * Font File Structure
+ * Label: VeraMono_17
+ * Description:  Heigth: 20 pixels, range: '.' to '9'
+ ***********************************/
+
+extern const char __VeraMono_17[] __attribute__((aligned(2)));
+
+const FONT_FLASH VeraMono_17 =
+{
+    (FLASH | COMP_NONE),
+    __VeraMono_17
+};
+
+const char __VeraMono_17[] __attribute__((aligned(2))) =
+{
+/****************************************
+ * Font header
+ ****************************************/
+    0x00,           // Information
+    0x00,           // ID
+    0x2E, 0x00,     // First Character
+    0x39, 0x00,     // Last Character
+    0x14,           // Height
+    0x00,           // Reserved
+/****************************************
+ * Font Glyph Table
+ ****************************************/
+    0x0A, 0x38, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0x60, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0x88, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0xB0, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0xD8, 0x00, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0x00, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0x28, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0x50, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0x78, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0xA0, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0xC8, 0x01, 0x00,           // width, MSB Offset, LSB offset
+    0x0A, 0xF0, 0x01, 0x00,           // width, MSB Offset, LSB offset
+/***********************************
+ * Font Characters
+ ***********************************/
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x30, 0x00,         //     **          
+    0x30, 0x00,         //     **          
+    0x30, 0x00,         //     **          
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x03,         //         **      
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0xC0, 0x00,         //       **        
+    0xC0, 0x00,         //       **        
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x30, 0x00,         //     **          
+    0x30, 0x00,         //     **          
+    0x18, 0x00,         //    **           
+    0x18, 0x00,         //    **           
+    0x0C, 0x00,         //   **            
+    0x0C, 0x00,         //   **            
+    0x06, 0x00,         //  **             
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x78, 0x00,         //    ****         
+    0xCC, 0x00,         //   **  **        
+    0x84, 0x00,         //   *    *        
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0xB6, 0x01,         //  ** ** **       
+    0xB6, 0x01,         //  ** ** **       
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0x84, 0x00,         //   *    *        
+    0xCC, 0x00,         //   **  **        
+    0x78, 0x00,         //    ****         
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x70, 0x00,         //     ***         
+    0x6C, 0x00,         //   ** **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0xFC, 0x03,         //   ********      
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x7C, 0x00,         //   *****         
+    0xC6, 0x00,         //  **   **        
+    0x82, 0x01,         //  *     **       
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0xC0, 0x01,         //       ***       
+    0xE0, 0x00,         //      ***        
+    0x70, 0x00,         //     ***         
+    0x38, 0x00,         //    ***          
+    0x1C, 0x00,         //   ***           
+    0x0E, 0x00,         //  ***            
+    0xFE, 0x01,         //  ********       
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x7C, 0x00,         //   *****         
+    0xC2, 0x00,         //  *    **        
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0xC0, 0x00,         //       **        
+    0x38, 0x00,         //    ***          
+    0xC0, 0x00,         //       **        
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0xC2, 0x00,         //  *    **        
+    0x7C, 0x00,         //   *****         
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0xC0, 0x00,         //       **        
+    0xE0, 0x00,         //      ***        
+    0xF0, 0x00,         //     ****        
+    0xD0, 0x00,         //     * **        
+    0xC8, 0x00,         //    *  **        
+    0xCC, 0x00,         //   **  **        
+    0xC4, 0x00,         //   *   **        
+    0xC2, 0x00,         //  *    **        
+    0xFE, 0x03,         //  *********      
+    0xC0, 0x00,         //       **        
+    0xC0, 0x00,         //       **        
+    0xC0, 0x00,         //       **        
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0xFC, 0x00,         //   ******        
+    0x0C, 0x00,         //   **            
+    0x0C, 0x00,         //   **            
+    0x0C, 0x00,         //   **            
+    0x7C, 0x00,         //   *****         
+    0xC4, 0x00,         //   *   **        
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0x80, 0x01,         //        **       
+    0xC2, 0x00,         //  *    **        
+    0x7C, 0x00,         //   *****         
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x78, 0x00,         //    ****         
+    0x8C, 0x00,         //   **   *        
+    0x0C, 0x00,         //   **            
+    0x06, 0x00,         //  **             
+    0x76, 0x00,         //  ** ***         
+    0xCE, 0x00,         //  ***  **        
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0xCC, 0x00,         //   **  **        
+    0x78, 0x00,         //    ****         
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0xFE, 0x01,         //  ********       
+    0x80, 0x01,         //        **       
+    0xC0, 0x00,         //       **        
+    0xC0, 0x00,         //       **        
+    0xC0, 0x00,         //       **        
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x60, 0x00,         //      **         
+    0x30, 0x00,         //     **          
+    0x30, 0x00,         //     **          
+    0x30, 0x00,         //     **          
+    0x18, 0x00,         //    **           
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x78, 0x00,         //    ****         
+    0xCE, 0x01,         //  ***  ***       
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0xCC, 0x00,         //   **  **        
+    0x78, 0x00,         //    ****         
+    0xCC, 0x00,         //   **  **        
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0xCC, 0x00,         //   **  **        
+    0x78, 0x00,         //    ****         
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x78, 0x00,         //    ****         
+    0xCC, 0x00,         //   **  **        
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0x86, 0x01,         //  **    **       
+    0xCC, 0x01,         //   **  ***       
+    0xB8, 0x01,         //    *** **       
+    0x80, 0x01,         //        **       
+    0xC0, 0x00,         //       **        
+    0xC4, 0x00,         //   *   **        
+    0x78, 0x00,         //    ****         
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+    0x00, 0x00,         //                 
+
+};
+
 /*****************************************************************************
  * SECTION:  BITMAPS
  *****************************************************************************/
@@ -4485,7 +5298,7 @@ const GFX_IMAGE_HEADER Engine1 =
     73,
     55,
     1524,
-    2076,
+    2073,
     4
 };
 
@@ -4608,7 +5421,7 @@ const GFX_IMAGE_HEADER Engine2 =
     73,
     55,
     1512,
-    2076,
+    2073,
     4
 };
 
@@ -4730,7 +5543,7 @@ const GFX_IMAGE_HEADER Engine3 =
     73,
     55,
     1541,
-    2076,
+    2073,
     4
 };
 
@@ -4854,7 +5667,7 @@ const GFX_IMAGE_HEADER Engine4 =
     73,
     55,
     1537,
-    2076,
+    2073,
     4
 };
 

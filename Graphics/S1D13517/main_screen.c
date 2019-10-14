@@ -74,7 +74,7 @@ void CreateMainScreen(void)
 	    	      GetMaxY(),   	
 	    	      GFX_SchemeGetDefaultScheme()->AlphaValue);						        
 
-   	SetColor(RGB565CONVERT(0xFF, 0xBB, 0x4C));        // Orange
+   	SetColor(ORANGE);                       // Orange
    	Bar((GetMaxX() >> 2), 0 , (GetMaxX() >> 2) + 2, GetMaxY());
 
     GOLFree();                              // free memory for the objects in the previous linked list and start new list

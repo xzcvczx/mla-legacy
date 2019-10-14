@@ -118,19 +118,29 @@
     #define sw2                 PORTBbits.RB2
     #define sw3                 PORTBbits.RB2
 
-	/** RS 232 lines ****************************************************/
-	#define UART_TRISTx   TRISCbits.TRISC6
-	#define UART_TRISRx   TRISCbits.TRISC7
-	#define UART_Tx       PORTCbits.RC6
-	#define UART_Rx       PORTCbits.RC7
-	#define UART_TRISRTS  TRISBbits.TRISB1
-	#define UART_RTS      PORTBbits.RB1
-	#define UART_TRISDTR  TRISBbits.TRISB2
-	#define UART_DTR      PORTBbits.RB2
-    #define UART_ENABLE RCSTAbits.SPEN
+    /** RS 232 lines ****************************************************/
+    #define UART_TRISTx   TRISCbits.TRISC6
+    #define UART_TRISRx   TRISCbits.TRISC7
+    #define UART_Tx       PORTCbits.RC6
+    #define UART_Rx       PORTCbits.RC7
+    #define UART_ENABLE	  RCSTAbits.SPEN
 
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
+
+    //These definitions are only relevant if the respective functions are enabled
+    //in the usb_config.h file.
+    //Make sure these definitions match the GPIO pins being used for your hardware
+    //setup.
+    #define UART_DTS PORTBbits.RB0
+    #define UART_DTR LATDbits.LATD7
+    #define UART_RTS LATBbits.LATB2
+    #define UART_CTS PORTBbits.RB1
+    
+    #define mInitRTSPin() {TRISBbits.TRISB2 = 0;}   //Configure RTS as a digital output.  
+    #define mInitCTSPin() {TRISBbits.TRISB1 = 1;}   //Configure CTS as a digital input.  (Make sure pin is digital if ANxx functions is present on the pin)
+    #define mInitDTSPin() {TRISBbits.TRISB0 = 1;}   //Configure DTS as a digital input.  (Make sure pin is digital if ANxx functions is present on the pin)
+    #define mInitDTRPin() {TRISDbits.TRISD7 = 0;}   //Configure DTR as a digital output.
 
 #endif  //HARDWARE_PROFILE_PIC18F46J50_PIM_H

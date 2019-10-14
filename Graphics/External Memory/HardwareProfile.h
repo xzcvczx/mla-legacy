@@ -105,8 +105,8 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-		#include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
-		//#include "Configs/HWP_GFXv3_EX16_16PMP_QVGAv1.h"
+    #include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
+	//#include "Configs/HWP_GFXv3_EX16_16PMP_QVGAv1.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -114,7 +114,7 @@
      * Graphics PicTail v3
      * Display PH480272T-005-I11Q
      ********************************************************************/
-		//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
+	//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
 	//	#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
 
     /*********************************************************************
@@ -123,7 +123,7 @@
      * Graphics PicTail v2
      * Display LGDP4531
      ********************************************************************/
-		//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
+	//#include "Configs/HWP_GFXv2_EX16_8PMP_LGDP4531.h"
 
     /*********************************************************************
      * Hardware Configuration for 

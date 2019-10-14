@@ -81,8 +81,8 @@ USB_PRINTER_INTERFACE usbPrinterClientLanguages[] =
 
 USB_PRINTER_SPECIFIC_INTERFACE usbPrinterSpecificLanguage[] = 
 { 
-    { 0x03F0ul, 0x1312ul, 1, {LANGUAGE_SUPPORT_FLAGS_PCL3} }   // HP Deskjet 460
-    ,
+    { 0x03F0ul, 0x1312ul, 1, {LANGUAGE_SUPPORT_FLAGS_PCL3} },  // HP Deskjet 460
+    { 0x043dul, 0x00f2ul, 1, {LANGUAGE_SUPPORT_FLAGS_PCL5} },   //Lexmark E250 - force to PLC5 mode
     { 0x0000, 0x0000, 0, {0} }
 };
 

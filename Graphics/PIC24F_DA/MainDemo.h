@@ -63,7 +63,9 @@
 /////////////////////////////////////////////////////////////////////////////
 //                              DEMO MACROS
 /////////////////////////////////////////////////////////////////////////////
-
+    #define monofontsmall               VeraMono_17
+    #define monofont                    VeraMono_28
+ 
     #define ID_BUTTON_A                 0x00F0
     #define ID_BUTTON_B                 0x00F1
     #define ID_BUTTON_C                 0x00F2

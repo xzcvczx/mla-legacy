@@ -30,7 +30,12 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
-
+/********************************************************************
+ Change History:
+  Rev            Description
+  ----           -----------------------
+  1.3.4          Added support for dsPIC33E & PIC24E microcontrollers.
+********************************************************************/
 
 #ifndef _HARDWAREPROFILE_H_
 #define _HARDWAREPROFILE_H_
@@ -45,7 +50,7 @@
     #define GetInstructionClock()   (GetSystemClock() / 4)          // Instruction clock freq.
 
 // Sample clock speed for a 16-bit processor
-#elif defined (__C30__)
+#elif defined (__PIC24F__)
 
     #define GetSystemClock()        32000000
     #define GetPeripheralClock()    GetSystemClock()
@@ -55,6 +60,17 @@
     #define MILLISECONDS_PER_TICK       10                      // Definition for use with a tick timer
     #define TIMER_PRESCALER             TIMER_PRESCALER_8       // Definition for use with a tick timer
     #define TIMER_PERIOD                20000                   // Definition for use with a tick timer
+
+#elif defined (__dsPIC33E__) || defined (__PIC24E__)
+
+    #define GetSystemClock()        120000000
+    #define GetPeripheralClock()    (GetSystemClock() / 2)
+    #define GetInstructionClock()   (GetSystemClock() / 2)
+
+    // Clock values
+    #define MILLISECONDS_PER_TICK       10                      // Definition for use with a tick timer
+    #define TIMER_PRESCALER             TIMER_PRESCALER_64      // Definition for use with a tick timer
+    #define TIMER_PERIOD                9375                    // Definition for use with a tick timer
 
 // Sample clock speed for a 32-bit processor
 #elif defined (__PIC32MX__)
@@ -265,6 +281,57 @@
             #error Clock speed must exceed 100 kHz
         #endif    
 
+    #elif defined (__dsPIC33E__) || defined (__PIC24E__)
+
+            // Description: SD-SPI Chip Select Output bit
+            #define SD_CS               LATBbits.LATB9
+            // Description: SD-SPI Chip Select TRIS bit
+            #define SD_CS_TRIS          TRISBbits.TRISB9
+
+		    // Description: SD-SPI Analog/Digital Select ANSEL bit
+            #define SD_CS_ANSEL			ANSELBbits.ANSB9
+            
+            // Description: SD-SPI Card Detect Input bit
+            #define SD_CD               PORTGbits.RG0
+            // Description: SD-SPI Card Detect TRIS bit
+            #define SD_CD_TRIS          TRISGbits.TRISG0
+
+            // Description: SD-SPI Write Protect Check Input bit
+            #define SD_WE               PORTGbits.RG1
+            // Description: SD-SPI Write Protect Check TRIS bit
+            #define SD_WE_TRIS          TRISGbits.TRISG1
+
+		    // Description: SD-SPI Analog/Digital Select ANSEL bit
+            #define SD_SCK_ANSEL	ANSELGbits.ANSG6
+            #define SD_SDI_ANSEL	ANSELGbits.ANSG7
+            #define SD_SDO_ANSEL	ANSELGbits.ANSG8
+            
+            // Description: The main SPI control register
+            #define SPICON1             SPI2CON1
+            // Description: The SPI status register
+            #define SPISTAT             SPI2STAT
+            // Description: The SPI Buffer
+            #define SPIBUF              SPI2BUF
+            // Description: The receive buffer full bit in the SPI status register
+            #define SPISTAT_RBF         SPI2STATbits.SPIRBF
+            // Description: The bitwise define for the SPI control register (i.e. _____bits)
+            #define SPICON1bits         SPI2CON1bits
+            // Description: The bitwise define for the SPI status register (i.e. _____bits)
+            #define SPISTATbits         SPI2STATbits
+            // Description: The enable bit for the SPI module
+            #define SPIENABLE           SPI2STATbits.SPIEN
+            // Description: The definition for the SPI baud rate generator register
+            #define SPIBRG			    SPI2BRG
+
+            // Tris pins for SCK/SDI/SDO lines
+
+            // Description: The TRIS bit for the SCK pin
+            #define SPICLOCK            TRISGbits.TRISG6
+            // Description: The TRIS bit for the SDI pin
+            #define SPIIN               TRISGbits.TRISG7
+            // Description: The TRIS bit for the SDO pin
+            #define SPIOUT              TRISGbits.TRISG8
+
     #elif defined (__PIC32MX__)
         // Registers for the SPI module you want to use
         #define MDD_USE_SPI_1
@@ -414,7 +481,7 @@
         // Description: The TRIS bit for the CF card detect signal
         #define CF_PMP_CD1DIR	    _TRISC4
     
-    #elif defined __dsPIC33F__
+    #elif defined (__dsPIC33F__) || defined (__PIC24H__) || defined (__dsPIC33E__) || defined (__PIC24E__)
     
         // Sample dsPIC33 defines
 
@@ -561,7 +628,7 @@
         // Description: The CF card detect signal TRIS bit
         #define CF_BT_CD1DIR            _TRISC4
 
-    #elif defined __dsPIC33F__
+    #elif defined (__dsPIC33F__) || defined (__PIC24H__) || defined (__dsPIC33E__) || defined (__PIC24E__)
 
         // Address lines
 

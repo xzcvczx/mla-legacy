@@ -51,7 +51,7 @@ bool USBHIDReadReport (buffer)        - Reads a packet from the device and retur
 
 bool IsConnected()                    - Checks with the OS to see if the device is connected
 									  (VID & PID specified by USBHIDClassInit).  Returns
-									  true if the device has is enumerated.  This is an OS
+									  true if the device is enumerated.  This is an OS
 									  inquiry only and does not generate any traffic on the bus.
 
 ReadReport and WriteReport functions use non-blocking IO calls.  That is the function

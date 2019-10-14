@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.3.0
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.8.17
  *****************************************************************************/
 
 #ifndef ICONDATA_H_FILE
@@ -49,6 +49,16 @@
 #error "Color Depth needs to be 16 to correctly use these resources"
 #endif
 
+
+/*****************************************************************************
+ * This is a unique marker to verify the external memory data
+ * The marker is a total of 8 bytes in length starting at the location GRC_CRC32_EXTERNAL_ADDR.
+ * The first four bytes, starting at GRC_CRC32_EXTERNAL_ADDR, will always equal 'M', 'C', 'H', 'P'.
+ * The next four byte is the generated 32-bit CRC.  The application can compare the value read from the
+ * external memory to the value of GRC_CRC32_EXTERNAL_MARKER to verify that the data is valid.
+ *****************************************************************************/
+#define GRC_CRC32_EXTERNAL_MARKER 0xA20F6E95ul
+#define GRC_CRC32_EXTERNAL_ADDR 0x00000000ul
 
 /*****************************************************************************
  * SECTION:  BITMAPS

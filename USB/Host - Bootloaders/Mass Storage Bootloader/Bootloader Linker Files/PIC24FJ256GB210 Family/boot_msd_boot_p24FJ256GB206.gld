@@ -62,6 +62,16 @@ SECTIONS
         SHORT(0);
   } >reset
 
+
+  /*
+  ** Interrupt Vector Tables
+  **
+  ** The primary and alternate tables are loaded
+  ** here, between sections .reset and .text.
+  ** Vector table source code appears below.
+  */
+
+
   /*
   ** User Code and Library Code
   **

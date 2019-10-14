@@ -1,7 +1,7 @@
 /*********************************************************************
- *                  LCC Graphics Dirver (MicrochipGraphicsDMA)
+ *                  LCC Graphics Driver (mchpGfxLCC)
  *********************************************************************
- * FileName:        MicrochipGraphicsDMA.c
+ * FileName:        mchpGfxLCC.c
  * Dependencies:    plib.h
  *
  * Processor:       PIC32
@@ -13,7 +13,7 @@
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PIC Microcontroller is intended
+ * (the "Company") for its PIC Microcontroller is intended
  * and supplied to you, the Company’s customer, for use solely and
  * exclusively on Microchip PIC Microcontroller products.
  * The software is owned by the Company and/or its supplier, and is
@@ -23,7 +23,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -37,6 +37,7 @@
 #include "HardwareProfile.h"
 
 #if defined (GFX_USE_DISPLAY_CONTROLLER_DMA)
+
 #warning "The LCC Demo board works with an explorer 16 as a proof of concept, but noise is sometimes seen on the LCD panel"
 #include "Compiler.h"
 #include "TimeDelay.h"
@@ -44,6 +45,10 @@
 #include "Graphics/mchpGfxLCC.h"
 #include "Graphics/gfxtcon.h"
 #include "Graphics/Primitive.h"
+
+#if ((COLOR_DEPTH != 8) && (COLOR_DEPTH != 16))
+    #error "The mchpGfxLCC driver can currently support the COLOR_DEPTH of 8 and 16 only."
+#endif
 
 #if defined(__32MX460F512L__) || defined (__32MX360F512L__) 
 #define LEGACY_MODE
@@ -76,8 +81,6 @@ SHORT   _clipBottom;
 
 /*Functions*/
 int _VirtToPhys(const void* p);
-//void PutPixel(short x, short y);
-//void ResetDevice(void);
 
 /*This stabilizes the pixel refresh when drawing pixels*/
 #ifdef LEGACY_MODE
@@ -295,19 +298,16 @@ PIXELCLOCK =0;
 
 #ifdef LCC_EXTERNAL_MEMORY
 
-//#ifdef LEGACY_MODE
-
-//#endif
-
 // handler for the DMA channel 1 interrupt
 void __ISR(_DMA1_VECTOR, ipl7) DmaHandler1(void)
 {
   static WORD remaining=0;
   static short line =0;
   static BYTE GraphicsState=1;
-  static WORD dmatransfersremaining=0;
  
 #ifdef LEGACY_MODE
+  static WORD dmatransfersremaining=0;
+
         if(dmatransfersremaining != 0)
          {
 

@@ -44,7 +44,7 @@ values supported among all of the transports available to and supported by the e
 
 /* Snmp Engine Group */
 UINT8 snmpEngineID[32]; //Reserving 32 bytes for the snmpEngineID as the octet string length can vary form 5 to 32 
-UINT32 snmpEngineBoots;//The number of times that the SNMP engine has (re-)initialized itself since snmpEngineID was last configured.
+UINT32 snmpEngineBoots=0;//The number of times that the SNMP engine has (re-)initialized itself since snmpEngineID was last configured.
 DWORD_VAL snmpEngineTime;//The number of seconds since the value of the snmpEngineBoots object last changed
 DWORD_VAL snmpEngineMaxMessageSize;
 
@@ -731,7 +731,7 @@ UINT16* posPtr;
   	'msgSecurityModel' decides the SNMPv3 engine processing modalities regarding 
   	request or response PDU  	
 ***************************************************************************/
-SNMP_ACTION Snmpv3MsgProcessingModelProcessPDU(BYTE inOutPdu)
+SNMP_ERR_STATUS Snmpv3MsgProcessingModelProcessPDU(BYTE inOutPdu)
 {
 	DWORD_VAL tempLen={0};
 	BYTE tempData=0;	
@@ -926,7 +926,7 @@ UINT8 localizedAuthKey[16];
 	MsgAuthEngnID+MsgAuthEngnBoots+MsgAuthEngnTime
 	+MsgUserName+MsgAuthParam+MsgPrivParam
 ***************************************************************************/
-SNMP_ACTION Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu)
+SNMP_ERR_STATUS Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu)
 {
 	DWORD_VAL tempLen={0};
 	BYTE* ptr=NULL;	
@@ -990,7 +990,7 @@ SNMP_ACTION Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu)
 		//Collect "msgUserName"	
 		tempData = Snmpv3GetWholeMsgBufferData(gSnmpV3InPduWholeMsgBuf.snmpMsgHead,&tempPos);	
 		 if ( !IS_OCTET_STRING(tempData) )
-		    return FALSE;
+		    return SNMP_NO_CREATION;
 		 
 		tempData = Snmpv3GetWholeMsgBufferData(gSnmpV3InPduWholeMsgBuf.snmpMsgHead,&tempPos);	
 		securityPrimitivesOfIncomingPdu.securityNameLength=tempData;
@@ -1023,7 +1023,7 @@ SNMP_ACTION Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu)
 		//Check and collect "msgAuthenticationParameters"	
 		tempData = Snmpv3GetWholeMsgBufferData(gSnmpV3InPduWholeMsgBuf.snmpMsgHead,&tempPos);	
 		 if ( !IS_OCTET_STRING(tempData) )
-		    return FALSE;
+		    return SNMP_NO_CREATION;
 
 		 //(snmpInMsgAuthParamLen should be 12 bytes if using HAMC-MD5-96 or HMAC-SHA-96)
 		snmpInMsgAuthParamLen=tempData= Snmpv3GetWholeMsgBufferData(gSnmpV3InPduWholeMsgBuf.snmpMsgHead,&tempPos);	
@@ -1214,7 +1214,7 @@ SNMP_ACTION Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu)
 	msg data : - <contextEngineID><context name>[<data> == <pdutype><request id>
 	<error status><error index><varbinds>
 ***************************************************************************/
-SNMP_ACTION Snmpv3ScopedPduProcessing(BYTE inOutPdu)
+SNMP_ERR_STATUS Snmpv3ScopedPduProcessing(BYTE inOutPdu)
 {
 	DWORD_VAL tempLen={0};
 	UINT8* ptr=NULL;
@@ -3023,12 +3023,12 @@ BYTE Snmpv3GetUserIndxFromUsmUserDB(BYTE targetIndex)
 	{
 		userSecurityName = snmpV3UserDataBase[i].userName;
 		userDBsecurityLevel = Snmpv3GetSecurityLevel(i);
-		userTrapSecLen = strlen(gSnmpv3TrapConfigData[targetIndex].userSecurityName);
+		userTrapSecLen = strlen((char *)gSnmpv3TrapConfigData[targetIndex].userSecurityName);
 		userTrapSecurityName = gSnmpv3TrapConfigData[targetIndex].userSecurityName;
 		
 		if(userTrapSecLen != snmpV3UserDataBase[i].userNameLength)
 			continue;
-		if(strncmp(userTrapSecurityName,userSecurityName,userTrapSecLen) == 0)
+		if(strncmp((char *)userTrapSecurityName,(char *)userSecurityName,userTrapSecLen) == 0)
 		{
 			if(trapSecurityLevel == userDBsecurityLevel)
 				return i;
@@ -3097,7 +3097,7 @@ BOOL Snmpv3CmprTrapSecNameAndSecLvlWithUSMDb(BYTE tragetIndex,BYTE userTrapSecLe
 		userDBsecurityLevel = Snmpv3GetSecurityLevel(i);
 		if(userTrapSecLen != snmpV3UserDataBase[i].userNameLength)
 			continue;
-		if(strncmp(userTrapSecurityName,userSecurityName,userTrapSecLen) == 0)
+		if(strncmp((char *)userTrapSecurityName,(char *)userSecurityName,userTrapSecLen) == 0)
 		{
 			if(trapSecurityLevel == userDBsecurityLevel)
 				return TRUE;
@@ -3204,7 +3204,7 @@ BOOL Snmpv3TrapMsgHeaderPDU(UINT targetIndex)
 	USM_Index = Snmpv3GetUserIndxFromUsmUserDB(targetIndex);
 	if(USM_Index != INVALID_INDEX)
 	{
-		securityPrimitivesOfIncomingPdu.securityNameLength = strlen(gSnmpv3TrapConfigData[targetIndex].userSecurityName);
+		securityPrimitivesOfIncomingPdu.securityNameLength = strlen((char *)gSnmpv3TrapConfigData[targetIndex].userSecurityName);
 	}
 	snmpv3Headerlength = MSGGLOBAL_HEADER_LEN(snmpv3MsgGlobalHeaderlength)+
 						  MSG_AUTHORITATIVE_HEADER_LEN(snmpv3MsgAuthHeaderLength);
@@ -3295,7 +3295,7 @@ BOOL Snmpv3TrapMsgHeaderPDU(UINT targetIndex)
 
 	//Put "msgUserName" 
 	Snmpv3BufferPut(OCTET_STRING,&gSNMPv3TrapMsgHeaderBuf);	
-	tempData = strlen(gSnmpv3TrapConfigData[targetIndex].userSecurityName);
+	tempData = strlen((char *)gSnmpv3TrapConfigData[targetIndex].userSecurityName);
 	Snmpv3BufferPut(tempData,&gSNMPv3TrapMsgHeaderBuf);	
 	if(tempData != 0)
 	{
@@ -3375,6 +3375,7 @@ BOOL Snmpv3TrapMsgHeaderPDU(UINT targetIndex)
   	msg data : - <contextEngineID><context name>[<data> == <pdutype><request id>
 	<error status><error index><varbinds>
   	
+  	For ASCII STR trap VAL(argument) contains the pointer address of the string variable.
   Precondition:
 	TRAP event is triggered.
 	
@@ -3419,7 +3420,9 @@ UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targ
 	DATA_TYPE_INFO	dataTypeInfo;
 	WORD_VAL		varBindLen = {0};
 	UINT8  			USM_Index=0,temp_index=0;
+#ifdef SNMP_STACK_USE_V2_TRAP
 	int 			i=0;
+#endif
 	
 	if(gSNMPv3TrapScopedPduResponseBuf.head == NULL)
 	{
@@ -3428,7 +3431,7 @@ UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targ
 		USM_Index = Snmpv3GetUserIndxFromUsmUserDB(targetIndex);
 		if(USM_Index != INVALID_INDEX)
 		{
-			securityPrimitivesOfIncomingPdu.securityNameLength = strlen(gSnmpv3TrapConfigData[targetIndex].userSecurityName);
+			securityPrimitivesOfIncomingPdu.securityNameLength = strlen((char *)gSnmpv3TrapConfigData[targetIndex].userSecurityName);
 		}
 		snmpv3Headerlength = MSGGLOBAL_HEADER_LEN(snmpv3MsgGlobalHeaderlength)+
 									  MSG_AUTHORITATIVE_HEADER_LEN(snmpv3MsgAuthHeaderLength);
@@ -3829,14 +3832,23 @@ UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targ
 		//where dataTypeInfo.asnLen=0xff
 		if ( dataTypeInfo.asnLen == 0xff )
 		{
-			dataTypeInfo.asnLen=0x4;
-			val.dword=0;
+			UINT8 *asciiStr= (UINT8 *)(PTR_BASE)val.dword;
+			int k=0;
+			dataTypeInfo.asnLen=strlen((char *)asciiStr);
+			len = dataTypeInfo.asnLen;
+			//val.dword=0;
+			Snmpv3BufferPut(len,dynTrapScopedPduBuf);
+			for(k=0;k<len;k++)
+				Snmpv3BufferPut(asciiStr[k],dynTrapScopedPduBuf);
 		}
-		len = dataTypeInfo.asnLen;
-
-		Snmpv3BufferPut(len,dynTrapScopedPduBuf);
-		while( len-- )
-			Snmpv3BufferPut(val.v[len],dynTrapScopedPduBuf);
+		else
+		{
+				len = dataTypeInfo.asnLen;
+		
+				Snmpv3BufferPut(len,dynTrapScopedPduBuf);
+				while( len-- )
+					Snmpv3BufferPut(val.v[len],dynTrapScopedPduBuf);
+		}
 	  
 		/*len	 = dataTypeInfo.asnLen	// data bytes count
 			 + 1                    // Length byte

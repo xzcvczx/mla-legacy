@@ -55,10 +55,10 @@
 #endif
 
 #ifdef USE_16BIT_PMP
-volatile __eds__ WORD __attribute__((space(eds),address(EPMP_REGION_START_ADDRESS),noload,section("epmp_data_for_CPU_access"))) epmp_data;
+volatile __eds__ WORD __attribute__((eds,address(EPMP_REGION_START_ADDRESS),noload,section("epmp_data_for_CPU_access"))) epmp_data;
 
 #else
-volatile __eds__ BYTE __attribute__((space(eds),address(EPMP_REGION_START_ADDRESS),noload,section("epmp_data_for_CPU_access"))) epmp_data;
+volatile __eds__ BYTE __attribute__((eds,address(EPMP_REGION_START_ADDRESS),noload,section("epmp_data_for_CPU_access"))) epmp_data;
 #endif
 
 #endif // USE_GFX_EPMP

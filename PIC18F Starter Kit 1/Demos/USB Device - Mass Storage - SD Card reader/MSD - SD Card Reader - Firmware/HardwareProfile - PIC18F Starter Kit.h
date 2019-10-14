@@ -118,6 +118,7 @@
     #define SPISTATbits         SSP2STATbits
 
     #define SPI_INTERRUPT_FLAG  PIR3bits.SSP2IF 
+    #define SPI_INTERRUPT_FLAG_ASM  PIR3, 7    
     #define SPIENABLE           SSP2CON1bits.SSPEN
 
     /*******************************************************************/

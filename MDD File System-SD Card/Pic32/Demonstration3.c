@@ -41,6 +41,7 @@
   Rev            Description
   ----           -----------------------
   1.3.0   		Initial Revision to support Long File Name Format
+  1.3.4         Cleaned up the unnecessary part of main() function.
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -185,36 +186,6 @@ int main (void)
    unsigned char attributes;
    unsigned char size = 0, i;
 
-#ifdef __PIC24__
-   // Turn on the secondary oscillator
-   __asm__ ("MOV #OSCCON,w1");
-   __asm__ ("MOV.b #0x02, w0");
-   __asm__ ("MOV #0x46, w2");
-   __asm__ ("MOV #0x57, w3");
-   __asm__ ("MOV.b w2, [w1]");
-   __asm__ ("MOV.b w3, [w1]");
-   __asm__ ("MOV.b w0, [w1]");
-
-   // Activate the RTCC module
-   __asm__ ("mov #NVMKEY,W0");
-   __asm__ ("mov #0x55,W1");
-   __asm__ ("mov #0xAA,W2");
-   __asm__ ("mov W1,[W0]");
-   __asm__ ("nop");
-   __asm__ ("mov W2,[W0]");
-   __asm__ ("bset RCFGCAL,#13");
-   __asm__ ("nop");
-   __asm__ ("nop");
-   RCFGCALbits.RTCPTR0 = 1;
-   RCFGCALbits.RTCPTR1 = 1;
-   // Set it to the correct time
-   // These values won't be accurate
-   RTCVAL = 0x0007;   
-   RTCVAL = 0x0717;
-   RTCVAL = 0x0208;
-   RTCVAL = 0x2137;
-   RCFGCAL = 0x8000;
-#elif defined (__PIC32MX__)
    // Turn on the interrupts
    INTEnableSystemMultiVectoredInt();
    SYSTEMConfigPerformance(GetSystemClock());
@@ -224,7 +195,6 @@ int main (void)
    while(RtccGetClkStat()!=RTCC_CLK_ON);// wait for the SOSC to be actually running and RTCC to have its clock source
 							            // could wait here at most 32ms
    RtccOpen(0x10073000, 0x07011602, 0);
-#endif
 
    while (!MDD_MediaDetect());
 

@@ -53,6 +53,8 @@
 #ifndef __SSL_H
 #define __SSL_H
 
+#include "TCPIP Stack/SSLClientSize.h"
+
 /****************************************************************************
   Section:
 	Configuration Settings
@@ -196,7 +198,7 @@
     typedef struct
     {
       WORD pub_size_bytes;
-      BYTE pub_key[128];
+      BYTE pub_key[SSL_RSA_CLIENT_SIZE/8];
       BYTE pub_e[3];
       BYTE pub_guid;    // This is used as a TCP_SOCKET which is a BYTE
     } SSL_PKEY_INFO;
@@ -216,7 +218,7 @@
 				BYTE MACSecret[16];			// Server's MAC write secret
 				DWORD sequence;				// Server's write sequence number
 				ARCFOUR_CTX cryptCtx;		// Server's write encryption context
-				BYTE reserved[8];			// Future expansion
+				BYTE reserved[6];			// Future expansion
 			}app;
 			BYTE random[32];				// Server.random value
 		} Local;
@@ -228,7 +230,7 @@
 				BYTE MACSecret[16];			// Client's MAC write secret
 				DWORD sequence;				// Client's write sequence number
 				ARCFOUR_CTX cryptCtx;		// Client's write encryption context
-				BYTE reserved[8];			// Future expansion
+				BYTE reserved[6];			// Future expansion
 			}app;
 			BYTE random[32];				// Client.random value
 		} Remote;		
@@ -244,9 +246,17 @@
 			HASH_SUM hash;
 			BYTE md5_hash[16];
 			BYTE sha_hash[20];
-			BYTE temp[256-sizeof(HASH_SUM)-16-20];
+			#if SSL_RSA_CLIENT_SIZE > 1024
+			    BYTE temp[(SSL_RSA_CLIENT_SIZE/4)-sizeof(HASH_SUM)-16-20];
+			#else
+			    BYTE temp[256-sizeof(HASH_SUM)-16-20];
+			#endif
 		} hashRounds;
-		BYTE full[256];
+		#if SSL_RSA_CLIENT_SIZE > 1024
+    		BYTE full[(SSL_RSA_CLIENT_SIZE/4)];
+    	#else
+    		BYTE full[256];
+    	#endif
 	} SSL_BUFFER;
 	
 	// Storage space for SSL Session identifiers.  (The SessionID and MasterSecret)

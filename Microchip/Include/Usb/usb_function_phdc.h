@@ -2,14 +2,14 @@
   File Information:
     FileName:       usb_function_phdc.h
     Dependencies:   See INCLUDES section
-    Processor:      PIC18 or PIC24 USB Microcontrollers
+    Processor:      PIC18, PIC24 or PIC32 USB Microcontrollers
     Hardware:       The code is natively intended to be used on the following
                     hardware platforms: PICDEM™ FS USB Demo Board,
                     PIC18F87J50 FS USB Plug-In Module, or
                     Explorer 16 + PIC24 USB PIM.  The firmware may be
                     modified for use on other USB platforms by editing the
                     HardwareProfile.h file.
-    Complier:   Microchip C18 (for PIC18) or C30 (for PIC24)
+    Complier:       Microchip C18 (for PIC18),  C30 (for PIC24) or C32 (for PIC32)
     Company:        Microchip Technology, Inc.
 
     Software License Agreement:

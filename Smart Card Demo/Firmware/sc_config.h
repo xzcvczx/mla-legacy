@@ -31,8 +31,8 @@
 ********************************************************************
  File Description:
 
- Change   History:
-  Rev     Description
+ Change History:
+  Rev   Description
   ----  -----------------------------------------
   1.0     Initial release
   1.01    Modified to Support T=1 protocol
@@ -41,6 +41,11 @@
           Added "TIMER1_SINGLE_COUNT_MICRO_SECONDS" and "TIMER0_SINGLE_COUNT_MICRO_SECONDS" 
           macros to configure delay for the timer.
           Removed "WaitMicroSec()" & "WaitMilliSec()" macros.
+  1.02.4  Removed unused file inclusions in the header file
+             1) libpic30.h
+             2) math.h
+             3) delays.h
+             4) plib.h
 ********************************************************************/
 
 #ifndef SCCFG_H
@@ -67,8 +72,6 @@
 		#define FCY (SYS_FREQ/2)
 
 		#include "p24Fxxxx.h"
-		#include "libpic30.h"
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -177,8 +180,6 @@
 		#define FCY (SYS_FREQ/4)
 
 		#include <p18cxxx.h>
-		#include <delays.h>
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -272,8 +273,6 @@
 		#define FCY (SYS_FREQ/4)
 
 		#include <p18cxxx.h>
-		#include <delays.h>
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -367,8 +366,6 @@
 		#define FCY (SYS_FREQ/4)
 
 		#include <p18cxxx.h>
-		#include <delays.h>
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -462,8 +459,6 @@
 		#define FCY (SYS_FREQ/4)
 
 		#include <p18cxxx.h>
-		#include <delays.h>
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -557,8 +552,6 @@
 		#define FCY (SYS_FREQ)
 
 		#include "p32xxxx.h"
-		#include "plib.h"
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -667,8 +660,6 @@
 		#define FCY (SYS_FREQ/2)
 
 		#include "p33Fxxxx.h"
-		#include "libpic30.h"
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN
@@ -777,8 +768,6 @@
 		#define FCY (SYS_FREQ/2)
 
 		#include "p24Hxxxx.h"
-		#include "libpic30.h"
-		#include <math.h>
 
 		// Enable Port Pin of Micro as Vcc for Smart Card
 		#define  ENABLE_SC_POWER_THROUGH_PORT_PIN

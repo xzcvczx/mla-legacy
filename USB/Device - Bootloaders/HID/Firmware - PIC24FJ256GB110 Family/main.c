@@ -66,8 +66,8 @@
 #if defined(EXPLORER_16)
     #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB108__) || defined(__PIC24FJ256GB106__) || defined(__PIC24FJ192GB110__) || defined(__PIC24FJ192GB108__) || defined(__PIC24FJ192GB106__) || defined(__PIC24FJ128GB110__) || defined(__PIC24FJ128GB108__) || defined(__PIC24FJ128GB106__) || defined(__PIC24FJ64GB110__) || defined(__PIC24FJ64GB108__) || defined(__PIC24FJ64GB106__) 
         //Defined by MPLAB when using 24FJ256GB110 device
-        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+        _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
+        _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
         _CONFIG3( WPCFG_WPCFGDIS & WPDIS_WPDIS)		//Disable erase/write protect of all memory regions.
     #else
         #error No hardware board defined, see "HardwareProfile.h" and __FILE__

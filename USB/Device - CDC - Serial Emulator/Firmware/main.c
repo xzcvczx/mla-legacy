@@ -1,19 +1,19 @@
 /********************************************************************
  FileName:     main.c
  Dependencies: See INCLUDES section
- Processor:		PIC18, PIC24, and PIC32 USB Microcontrollers
+ Processor:		PIC18, PIC24, dsPIC, and PIC32 USB Microcontrollers
  Hardware:		This demo is natively intended to be used on Microchip USB demo
  				boards supported by the MCHPFSUSB stack.  See release notes for
  				support matrix.  This demo can be modified for use on other hardware
  				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24/33), C32 (for PIC32)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PIC® Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -36,11 +36,11 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
-  2.1   Updated for simplicity and to use common
-                     coding style
-  2.8  Improvements to USBCBSendResume(), to make it easier to use.
-	Added runtime check to avoid buffer overflow possibility if
-	the USB IN data rate is somehow slower than the UART RX rate.
+  2.1   Updated for simplicity and to use common coding style
+  2.8   Improvements to USBCBSendResume(), to make it easier to use.
+        Added runtime check to avoid buffer overflow possibility if 
+        the USB IN data rate is somehow slower than the UART RX rate.
+  2.9b  Added support for optional hardware flow control.   
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -173,13 +173,13 @@
 #elif defined(EXPLORER_16)
     #if defined(__PIC24FJ256GB110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
-        _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
+        _CONFIG2( PLL_96MHZ_ON & IESO_OFF  & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
     #elif defined(__PIC24FJ256GB210__)
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #elif defined(__PIC24FJ64GB004__)
         _CONFIG1(WDTPS_PS1 & FWPSA_PR32 & WINDIS_OFF & FWDTEN_OFF & ICS_PGx1 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
-        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_ON)
+        _CONFIG2(POSCMOD_HS & I2C1SEL_PRI & IOL1WAY_OFF & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
         _CONFIG3(WPFP_WPFP0 & SOSCSEL_SOSC & WUTSEL_LEG & WPDIS_WPDIS & WPCFG_WPCFGDIS & WPEND_WPENDMEM)
         _CONFIG4(DSWDTPS_DSWDTPS3 & DSWDTOSC_LPRC & RTCOSC_SOSC & DSBOREN_OFF & DSWDTEN_OFF)
     #elif defined(__32MX460F512L__) || defined(__32MX795F512L__)
@@ -708,8 +708,11 @@ void InitializeUSART(void)
             // PPS - Configure U2TX - put on RC9/pin 5 (RP25)
             RPOR12bits.RP25R = 5;
         #elif defined(__PIC24FJ256DA210__)
-            // PPS - Configure U2RX - put on RC14/pin 74 (RPI37)
-            RPINR19bits.U2RXR = 37;
+            // PPS - Configure U2RX - put on RD0 pin 72 (RP11)
+            // Make sure jumper JP12 is in 2-4 position if using the 
+            // PIC24FJ256DA210 Development Board (microchipDIRECT.com DM240312).
+            // Also make sure JP16 and JP17 are in the 1-2 position on this board.
+            RPINR19bits.U2RXR = 11; //Assign U2RX to RD0/RP11 pin.  
     
             // PPS - Configure U2TX - put on RF3/pin 51 (RP16)
             RPOR8bits.RP16R = 5;
@@ -922,10 +925,23 @@ void ProcessIO(void)
     //queue.  If so, send it out the UART TX pin.
 	if(RS232_Out_Data_Rdy && mTxRdyUSART())
 	{
-		putcUSART(RS232_Out_Data[RS232cp]);
-		++RS232cp;
-		if (RS232cp == LastRS232Out)
-			RS232_Out_Data_Rdy = 0;
+    	#if defined(USB_CDC_SUPPORT_HARDWARE_FLOW_CONTROL)
+        	//Make sure the receiving UART device is ready to receive data before 
+        	//actually sending it.
+        	if(UART_CTS == USB_CDC_CTS_ACTIVE_LEVEL)
+        	{
+        		putcUSART(RS232_Out_Data[RS232cp]);
+        		++RS232cp;
+        		if (RS232cp == LastRS232Out)
+        			RS232_Out_Data_Rdy = 0;
+    	    }
+	    #else
+	        //Hardware flow control not being used.  Just send the data.
+    		putcUSART(RS232_Out_Data[RS232cp]);
+    		++RS232cp;
+    		if (RS232cp == LastRS232Out)
+    			RS232_Out_Data_Rdy = 0;	    
+	    #endif
 	}
 
     //Check if we received a character over the physical UART, and we need
@@ -936,6 +952,20 @@ void ProcessIO(void)
 		++NextUSBOut;
 		USB_Out_Buffer[NextUSBOut] = 0;
 	}
+	
+	#if defined(USB_CDC_SUPPORT_HARDWARE_FLOW_CONTROL)
+    	//Drive RTS pin, to let UART device attached know if it is allowed to 
+    	//send more data or not.  If the receive buffer is almost full, we 
+    	//deassert RTS.
+    	if(NextUSBOut <= (CDC_DATA_OUT_EP_SIZE - 5u))
+    	{
+            UART_RTS = USB_CDC_RTS_ACTIVE_LEVEL;
+        }   	
+        else
+        {
+        	UART_RTS = (USB_CDC_RTS_ACTIVE_LEVEL ^ 1);
+        }    
+    #endif	
 
     //Check if any bytes are waiting in the queue to send to the USB host.
     //If any bytes are waiting, and the endpoint is available, prepare to
@@ -947,7 +977,8 @@ void ProcessIO(void)
 	}
 
     CDCTxService();
-}		//end ProcessIO
+
+}//end ProcessIO
 
 /********************************************************************
  * Function:        void BlinkUSBStatus(void)

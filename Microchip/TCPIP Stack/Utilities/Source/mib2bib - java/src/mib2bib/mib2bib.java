@@ -786,7 +786,7 @@ static String[] CommandList =
   Returns:
   	true or false.
 *******************************************************************************/
-public boolean ProcessCommand(List pList, File file, int line)
+public boolean ProcessCommand(List<String> pList, File file, int line)
 {
     int paramCount;
 

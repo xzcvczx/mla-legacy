@@ -54,7 +54,14 @@
           Add some error recovery for FAT32 systems when there is
             corruption in the boot sector.
 
-  1.3.0  Modified to support Long File Name(LFN) format
+  1.3.0   Modified to support Long File Name(LFN) format
+  1.3.4   1) Initialized some of the local variables to default values
+             to remove non-critical compiler warnings for code sanitation.
+          2) The sector size of the media device is obtained from the MBR of media.So, 
+             instead of using the hard coded macro "DIRENTRIES_PER_SECTOR", the variables
+             "dirEntriesPerSector" & "disk->sectorSize" are used in the code. Refer 
+             "Cache_File_Entry","EraseCluster" & "writeDotEntries" fucntions to see 
+             the change.
 ********************************************************************/
 
 #include "Compiler.h"
@@ -485,9 +492,9 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 	unsigned char *dst = (unsigned char *)&fileFoundString[0];
 	unsigned short int *templfnPtr = (unsigned short int *)foCompareTo -> utf16LFNptr;
 	UINT16_VAL tempShift;
-	short int   fileCompareLfnIndex,fileFoundLfnIndex,fileFoundMaxLfnIndex,lfnCountIndex;
-	BOOL  lfnFirstCheck = FALSE,foundSFN,foundLFN,fileFoundDotPosition,fileCompareDotPosition;
-	BYTE  lfnMaxSequenceNum,reminder;
+	short int   fileCompareLfnIndex,fileFoundLfnIndex = 0,fileFoundMaxLfnIndex = 0,lfnCountIndex;
+	BOOL  lfnFirstCheck = FALSE,foundSFN,foundLFN,fileFoundDotPosition = FALSE,fileCompareDotPosition;
+	BYTE  lfnMaxSequenceNum = 0,reminder = 0;
 
 	fileNameLength = foCompareTo->utf16LFNlength;
 
@@ -2949,6 +2956,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
     DWORD ccls;
     BYTE offset2;
     BYTE numofclus;
+	BYTE dirEntriesPerSector;
 
     dsk = fo->dsk;
 
@@ -2956,8 +2964,10 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
     cluster = fo->dirclus;
     ccls = fo->dirccls;
 
+	dirEntriesPerSector = dsk->sectorSize/32;
+
      // figure out the offset from the base sector
-    offset2  = (*curEntry / (dsk->sectorSize/32));
+    offset2  = (*curEntry / dirEntriesPerSector);
 
     offset2 = offset2; // emulator issue
 
@@ -2988,7 +2998,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
     if (ForceRead || ((*curEntry & MASK_MAX_FILE_ENTRY_LIMIT_BITS) == 0))     // only 16 entries per sector
     {
         // see if we have to load a new cluster
-        if(((offset2 == 0) && (*curEntry >= DIRENTRIES_PER_SECTOR)) || ForceRead)
+        if(((offset2 == 0) && (*curEntry >= dirEntriesPerSector)) || ForceRead)
         {
             if(cluster == 0)
             {
@@ -2998,7 +3008,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
             {
                 // If ForceRead, read the number of sectors from 0
                 if(ForceRead)
-                    numofclus = ((WORD)(*curEntry) / (WORD)(((WORD)DIRENTRIES_PER_SECTOR) * (WORD)dsk->SecPerClus));
+                    numofclus = ((WORD)(*curEntry) / (WORD)(((WORD)dirEntriesPerSector) * (WORD)dsk->SecPerClus));
                 // Otherwise just read the next sector
                 else
                     numofclus = 1;
@@ -3047,7 +3057,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
                 else // Sector has been read properly, Copy the root entry info of the file searched.
                 {
                     if(ForceRead)    // Buffer holds all 16 root entry info. Point to the one required.
-                        dir = (DIRENTRY)((DIRENTRY)dsk->buffer) + ((*curEntry)%DIRENTRIES_PER_SECTOR);
+                        dir = (DIRENTRY)((DIRENTRY)dsk->buffer) + ((*curEntry)%dirEntriesPerSector);
                     else
                         dir = (DIRENTRY)dsk->buffer;
                 }
@@ -3061,7 +3071,7 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
         }
     }
     else
-        dir = (DIRENTRY)((DIRENTRY)dsk->buffer) + ((*curEntry)%DIRENTRIES_PER_SECTOR);
+        dir = (DIRENTRY)((DIRENTRY)dsk->buffer) + ((*curEntry)%dirEntriesPerSector);
 
     return(dir);
 } // Cache_File_Entry
@@ -3362,7 +3372,7 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
 {
     BYTE   status = NOT_FOUND;
     BYTE   amountfound,numberOfFileEntries;
-    BYTE   a;
+    BYTE   a = 0;
     WORD   bHandle;
     DWORD b;
     DIRENTRY    dir;
@@ -4912,7 +4922,7 @@ CETYPE FILEerase( FILEOBJ fo, WORD *fHandle, BYTE EraseClusters)
     DIRENTRY    dir;
     BYTE        a;
     CETYPE      status = CE_GOOD;
-    DWORD       clus;
+    DWORD       clus = 0;
     DISK *      disk;
 
     BYTE	numberOfFileEntries;
@@ -6122,7 +6132,7 @@ BYTE EraseCluster(DISK *disk, DWORD cluster)
     if (gBufferZeroed == FALSE)
     {
         // clear out the memory first
-        memset(disk->buffer, 0x00, MEDIA_SECTOR_SIZE);
+        memset(disk->buffer, 0x00, disk->sectorSize);
         gBufferZeroed = TRUE;
     }
 
@@ -6376,15 +6386,15 @@ int FSattrib (FSFILE * file, unsigned char attributes)
 
 /*********************************************************************************
   Function:
-    size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream)
+    size_t FSfwrite(const void *data_to_write, size_t size, size_t n, FSFILE *stream)
   Summary:
     Write data to a file
   Conditions:
     File opened in WRITE, APPEND, WRITE+, APPEND+, READ+ mode
   Input:
-    ptr -     Pointer to source buffer
-    size -    Size of units in bytes
-    n -       Number of units to transfer
+    data_to_write -     Pointer to source buffer
+    size -              Size of units in bytes
+    n -                 Number of units to transfer
     stream -  Pointer to file structure
   Return:
     size_t - number of units written
@@ -6407,10 +6417,10 @@ int FSattrib (FSFILE * file, unsigned char attributes)
   *********************************************************************************/
 
 #ifdef ALLOW_WRITES
-size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream)
+size_t FSfwrite(const void *data_to_write, size_t size, size_t n, FSFILE *stream)
 {
     DWORD       count = size * n;
-    BYTE   *    src = (BYTE *) ptr;
+    BYTE   *    src = (BYTE *) data_to_write;
     DISK   *    dsk;                 // pointer to disk structure
     CETYPE      error = CE_GOOD;
     WORD        pos;
@@ -6715,7 +6725,7 @@ size_t FSfread (void *ptr, size_t size, size_t n, FSFILE *stream)
 
 #ifdef ALLOW_WRITES
     if (gNeedDataWrite)
-        if (flushData())
+        if (flushData() != CE_GOOD)
         {
             FSerrno = CE_WRITE_ERROR;
             return 0;
@@ -6831,7 +6841,7 @@ BYTE FormatFileName( const char* fileName, FILEOBJ fptr, BYTE mode)
 	FILE_DIR_NAME_TYPE fileNameType;
     int temp,count1,count2,count3,count4;
     BOOL supportLFN = FALSE;
-	char *localFileName;
+	char *localFileName = NULL;
 
 	// go with static allocation
 	#if defined(SUPPORT_LFN)
@@ -10899,7 +10909,7 @@ BYTE writeDotEntries (DISK * disk, DWORD dotAddress, DWORD dotdotAddress)
 
     size = sizeof (_DIRENTRY);
 
-    memset(disk->buffer, 0x00, MEDIA_SECTOR_SIZE);
+	memset(disk->buffer, 0x00, disk->sectorSize);
 
     entry.DIR_Name[0] = '.';
 

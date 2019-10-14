@@ -34,9 +34,9 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date                    Comment
+ * Date                 Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Microchip	        24/12/2010	    		Initial version
+ * 24/12/2010           Initial version
  *****************************************************************************************/
 #include "Graphics/Transitions.h"
 #include "HardwareProfile.h"
@@ -47,6 +47,7 @@
 
 extern WORD _transitionpending, _left, _top, _right, _bottom, _type, _delay_ms, _param1, _param2;
 extern DWORD _srcpageaddr, _destpageaddr;
+extern void PlainCopyRectangle(void);
 
 #define RCC_SRC_ADDR_DISCONTINUOUS 1
 #define RCC_DEST_ADDR_DISCONTINUOUS 1

@@ -89,16 +89,16 @@
     BYTE RSSILock;
     ROM BYTE PVALUE[]    = {CHANNEL1_PVALUE, CHANNEL2_PVALUE, CHANNEL3_PVALUE, CHANNEL4_PVALUE, CHANNEL5_PVALUE, CHANNEL6_PVALUE,
                             CHANNEL7_PVALUE, CHANNEL8_PVALUE, CHANNEL9_PVALUE, CHANNEL10_PVALUE, CHANNEL11_PVALUE, CHANNEL12_PVALUE,
-                            CHANNEL13_PVALUE, CHANNEL14_PVALUE, CHANNEL15_PVALUE, CHANNEL16_PVALUE, CHANNEL17_PVALUE, CHANNEL8_PVALUE,
+                            CHANNEL13_PVALUE, CHANNEL14_PVALUE, CHANNEL15_PVALUE, CHANNEL16_PVALUE, CHANNEL17_PVALUE, CHANNEL18_PVALUE,
                             CHANNEL19_PVALUE, CHANNEL20_PVALUE, CHANNEL21_PVALUE, CHANNEL22_PVALUE, CHANNEL23_PVALUE, CHANNEL24_PVALUE,
-                            CHANNEL24_PVALUE, CHANNEL25_PVALUE, CHANNEL26_PVALUE, CHANNEL27_PVALUE, CHANNEL29_PVALUE, CHANNEL30_PVALUE,
-                            CHANNEL31_PVALUE, CHANNEL32_PVALUE};
+                            CHANNEL25_PVALUE, CHANNEL26_PVALUE, CHANNEL27_PVALUE, CHANNEL28_PVALUE, CHANNEL29_PVALUE, CHANNEL30_PVALUE,
+			    CHANNEL31_PVALUE, CHANNEL32_PVALUE};
     ROM BYTE SVALUE[]    = {CHANNEL1_SVALUE, CHANNEL2_SVALUE, CHANNEL3_SVALUE, CHANNEL4_SVALUE, CHANNEL5_SVALUE, CHANNEL6_SVALUE,
                             CHANNEL7_SVALUE, CHANNEL8_SVALUE, CHANNEL9_SVALUE, CHANNEL10_SVALUE, CHANNEL11_SVALUE, CHANNEL12_SVALUE,
-                            CHANNEL13_SVALUE, CHANNEL14_SVALUE, CHANNEL15_SVALUE, CHANNEL16_SVALUE, CHANNEL17_SVALUE, CHANNEL8_SVALUE,
+                            CHANNEL13_SVALUE, CHANNEL14_SVALUE, CHANNEL15_SVALUE, CHANNEL16_SVALUE, CHANNEL17_SVALUE, CHANNEL18_SVALUE,
                             CHANNEL19_SVALUE, CHANNEL20_SVALUE, CHANNEL21_SVALUE, CHANNEL22_SVALUE, CHANNEL23_SVALUE, CHANNEL24_SVALUE,
-                            CHANNEL24_SVALUE, CHANNEL25_SVALUE, CHANNEL26_SVALUE, CHANNEL27_SVALUE, CHANNEL29_SVALUE, CHANNEL30_SVALUE,
-                            CHANNEL31_SVALUE, CHANNEL32_SVALUE};
+                            CHANNEL25_SVALUE, CHANNEL26_SVALUE, CHANNEL27_SVALUE, CHANNEL28_SVALUE, CHANNEL29_SVALUE, CHANNEL30_SVALUE,
+			    CHANNEL31_SVALUE, CHANNEL32_SVALUE};
     #if defined(ENABLE_ACK)
         volatile    BOOL hasAck = FALSE;
         #if defined(ENABLE_RETRANSMISSION)
@@ -382,7 +382,10 @@ Start_CCA:
             #endif
         
             // Turn off receiver, enable the TX register
-                    
+            #if defined USE_IRQ0_AS_INTERRUPT
+                PHY_IRQ0_En = 0;
+            #endif            
+            PHY_IRQ1_En = 0;
             SetRFMode(RF_STANDBY);
             RegisterSet(FTXRXIREG | FTXRXIREG_SET | 0x01);	//Resets FIFO (If any thing is present or previous FIFO Overrun occurred then this clears it.
             WriteFIFO(TxPacketLen);    //Fill the length information - this is needed if variable length packet format is chosen
@@ -391,7 +394,10 @@ Start_CCA:
                 WriteFIFO(MACTxBuffer[i]);
             }
             SetRFMode(RF_TRANSMITTER);
-            
+            #if defined USE_IRQ0_AS_INTERRUPT
+                PHY_IRQ0_En = 1;
+            #endif            
+            PHY_IRQ1_En = 1;
             while((IRQ1_Received == 0) && (PHY_IRQ1 == 0) )
             {
         
@@ -577,7 +583,7 @@ TX_END_HERE:
      *****************************************************************************************/ 
     BOOL MiMAC_SetPower(INPUT BYTE outputPower)
     {
-        if( outputPower > TX_POWER_8_DB )
+        if( outputPower > TX_POWER_N_8_DB )
         {
             return FALSE;
         }
@@ -680,8 +686,10 @@ TX_END_HERE:
     
         SetRFMode(RF_RECEIVER);
         #if defined USE_IRQ0_AS_INTERRUPT
+            PHY_IRQ0 = 0;
             PHY_IRQ0_En = 1;
         #endif
+        PHY_IRQ1 = 0;
         PHY_IRQ1_En = 1;        
         return TRUE;
     }
@@ -1297,7 +1305,7 @@ void SetRFMode(BYTE mode)
                 WORD counter;
                 BOOL bAck;
                 BYTE ackPacket[4];
-                #if defined(__18CXX)
+                #if !defined(USE_IRQ0_AS_INTERRUPT)
                     #if !defined(TARGET_SMALL)                    
                         RSSIVal = (RegisterRead(RSTSREG>>8))>>1;        //Capturing the RSSiVal at SYNC/ADRS match
                     #endif
@@ -1505,6 +1513,7 @@ RETURN_HERE:
             #if defined USE_IRQ0_AS_INTERRUPT
                 {
                     if(PHY_IRQ0 && PHY_IRQ0_En)
+                    {
                         PHY_IRQ0 = 0;
                         
                     #if !defined(TARGET_SMALL)                    
@@ -1513,6 +1522,7 @@ RETURN_HERE:
                             RSSIVal = (RegisterRead(RSTSREG>>8))>>1;        //Capturing the RSSiVal at SYNC/ADRS match
                         }
                     #endif
+                    }
                 }
             #endif
         

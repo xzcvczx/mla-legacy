@@ -126,7 +126,7 @@
 
 #ifdef __18CXX
 	#ifdef USEREALTIMECLOCK
-		#error The PIC18 architecture does not have a Real-time clock and calander module
+		#error Not all PIC18 devices have a Real-time clock and calander module
 	#endif
 #endif
 

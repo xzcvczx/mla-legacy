@@ -645,12 +645,10 @@ int main(void)
 			#endif
 		}
 		
-    	if(GOLDraw())		
-    	{
-			TouchGetMsg(&msg);          // Get message from touch screen
-	        GOLMsg(&msg);               // Process message
-	    }	
-		
+    	while(!GOLDraw());		
+		TouchGetMsg(&msg);          // Get message from touch screen
+        GOLMsg(&msg);               // Process message
+	
 	}
 }
 
@@ -866,6 +864,7 @@ static void ProcessIO(void)
 /* Touch Screen  timer ISR */
 void __T3_ISR _T3Interrupt(void)
 {
+    TMR3 = 0;
 	TouchDetectPosition();
     // Clear flag
     #ifdef __PIC32MX__

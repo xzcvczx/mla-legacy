@@ -57,7 +57,7 @@
 								// that use EP0 IN or OUT for sending large amounts of
 								// application related data.
 									
-#define USB_MAX_NUM_INT     	1   // For tracking Alternate Setting
+#define USB_MAX_NUM_INT     	3   // For tracking Alternate Setting
 #define USB_MAX_EP_NUMBER	    3
 
 //Device descriptor - if these two definitions are not defined then
@@ -162,7 +162,7 @@
 #define MSD_INTF_ID             0x00
 #define MSD_IN_EP_SIZE          64
 #define MSD_OUT_EP_SIZE         64
-#define MAX_LUN 0
+#define MAX_LUN                 0   //base 0 number.  0 == 1 LUN
 #define MSD_DATA_IN_EP          1
 #define MSD_DATA_OUT_EP         1
 #define MSD_BUFFER_ADDRESS      0x600
@@ -170,9 +170,9 @@
 /* CDC */
 #define CDC_COMM_INTF_ID        0x01
 #define CDC_COMM_EP              2
-#define CDC_COMM_IN_EP_SIZE      8
+#define CDC_COMM_IN_EP_SIZE      10
 
-#define CDC_DATA_INTF_ID        0x01
+#define CDC_DATA_INTF_ID        0x02
 #define CDC_DATA_EP             3
 #define CDC_DATA_OUT_EP_SIZE    64
 #define CDC_DATA_IN_EP_SIZE     64

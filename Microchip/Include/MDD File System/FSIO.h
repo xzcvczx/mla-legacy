@@ -1015,16 +1015,16 @@ int wFSremove (const unsigned short int * fileName);
 
 /*********************************************************************************
   Function:
-    size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream)
+    size_t FSfwrite(const void *data_to_write, size_t size, size_t n, FSFILE *stream)
   Summary:
     Write data to a file
   Conditions:
     File opened in WRITE, APPEND, WRITE+, APPEND+, READ+ mode
   Input:
-    ptr -     Pointer to source buffer
-    size -    Size of units in bytes
-    n -       Number of units to transfer
-    stream -  Pointer to file structure
+    data_to_write -     Pointer to source buffer
+    size -              Size of units in bytes
+    n -                 Number of units to transfer
+    stream -            Pointer to file structure
   Return:
     size_t - number of units written
   Side Effects:
@@ -1045,7 +1045,7 @@ int wFSremove (const unsigned short int * fileName);
     None.
   *********************************************************************************/
 
-size_t FSfwrite(const void *ptr, size_t size, size_t n, FSFILE *stream);
+size_t FSfwrite(const void *data_to_write, size_t size, size_t n, FSFILE *stream);
 
 #endif
 

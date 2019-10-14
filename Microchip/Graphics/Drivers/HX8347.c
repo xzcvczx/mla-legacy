@@ -3,15 +3,13 @@
  *  HIMAX HX8347 controller driver
  *****************************************************************************
  * FileName:        HX8347.c
- * Dependencies:    Graphics.h
- * Processor:       PIC24, PIC32
+ * Processor:       PIC24, dsPIC, PIC32
  * Compiler:       	MPLAB C30, MPLAB C32
- * Linker:          MPLAB LINK30, MPLAB LINK32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
  *
- * Copyright © 2009 Microchip Technology Inc.  All rights reserved.
+ * Copyright (c) 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -21,7 +19,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -37,6 +35,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 05/26/09     ...
  * 04/12/11     Graphics Library Version 3.00 Support
+ * 10/09/11     Fixed WritePixel() in USE_16BIT_PMP mode
  *****************************************************************************/
 #include "HardwareProfile.h"
 
@@ -105,7 +104,7 @@ void    PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
 ********************************************************************/
 
 #ifdef USE_16BIT_PMP
-#define WritePixel(data)  DeviceWrite(data)
+#define WritePixel(data)  DisplaySetData(); DeviceWrite(data)
 #else
 #define WritePixel(data) \
     DisplaySetData(); \

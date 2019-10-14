@@ -14,7 +14,7 @@ import javax.swing.ImageIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.Action;
-
+import java.text.*;
 
 public class MainMPFS extends javax.swing.JFrame {
     public enum MPFS_OUTPUT_VERSION
@@ -28,6 +28,12 @@ public class MainMPFS extends javax.swing.JFrame {
        HTTP,
        FTP,
     };
+
+    public enum DIRECTORY_OPTION
+    {
+        SOURCE,
+        PROJECT,
+    };
     public String uploadExceptionString = null;
     public int percen=0;
     public int progressByteCount=0;
@@ -40,33 +46,113 @@ public class MainMPFS extends javax.swing.JFrame {
     public List<String> generateLog;
     public MPFS_OUTPUT_VERSION outPutVersion = MPFS_OUTPUT_VERSION.MPFS2;
     public UPLOAD_PROTOCOL_OPTION uploadProtocol = UPLOAD_PROTOCOL_OPTION.HTTP;
-    public String srourceDirectoryPath =
-            "C:\\Microchip Solutions\\TCPIP Demo App\\WebPages2";
+    public String defaultSourceDirectoryPath =
+            "C:\\Microchip Solutions\\TCPIP\\Demo App\\WebPages2";
+    public String defaultProjectBinFilePath =
+            "C:\\Microchip Solutions\\TCPIP\\Demo App\\MPFSImg2.bin";
+     public String defaultProjectDirectoryPath =
+             "C:\\Microchip Solutions\\TCPIP\\Demo App";
+
+    public String sourceDirectoryPath =
+            "..\\..\\..\\TCPIP\\Demo App\\WebPages2";
+    public String sourceDirectoryPath_old =
+            "..\\..\\..\\TCPIP Demo App\\WebPages2";
+            //"C:\\Microchip Solutions\\TCPIP\\Demo App\\WebPages2";
+            //"C:\\Microchip Solutions\\TCPIP Demo App\\WebPages2";
+
     public String projectBinFilePath =
-            "C:\\Microchip Solutions\\TCPIP Demo App\\MPFSImg2.bin";
+            "..\\..\\..\\TCPIP\\Demo App\\MPFSImg2.bin";
+    public String projectBinFilePath_old =
+            "..\\..\\..\\TCPIP Demo App\\MPFSImg2.bin";
+    // "C:\\Microchip Solutions\\TCPIP\\Demo App\\MPFSImg2.bin";
+    //         "C:\\Microchip Solutions\\TCPIP Demo App\\MPFSImg2.bin";
+
     public String projectDirectoryPath =
-            "C:\\Microchip Solutions\\TCPIP Demo App";
+            "..\\..\\..\\TCPIP\\Demo App";
+    public String projectDirectoryPath_old =
+            "..\\..\\..\\TCPIP Demo App";
+    //   "C:\\Microchip Solutions\\TCPIP\\Demo App";
+    //    "C:\\Microchip Solutions\\TCPIP Demo App";
     final ImageIcon icon = new ImageIcon(getClass().getResource("/Resource/mchpIcon.png"));
     String aboutStr;
     int progressVal = 0;
     int progressVal_temp=0;
     URL url;
-   
+   public Properties prop = System.getProperties();
 
     /** Creates new form MainMPFS */
     public MainMPFS() {
         //Date date = new Date();
         //SimpleDateFormat sdf = new SimpleDateFormat("MMMMM dd, yyyy");
-        //this.setIconImage(icon.getImage());  
-        
+        //this.setIconImage(icon.getImage());
+        //String sourceDirectoryPath_temp;
+        File sourceFile=new File(sourceDirectoryPath);
+        File projectBinFile = new File(projectBinFilePath);
+        File projectDir = new File(projectDirectoryPath);
+
+        File sourceFile_old=new File(sourceDirectoryPath_old);
+        File projectBinFile_old = new File(projectBinFilePath_old);
+        File projectDir_old = new File(projectDirectoryPath_old);
         initComponents();
         jProgressBar1.setIndeterminate(false);
         this.setIconImage(icon.getImage());
         toolTipSettings();
 
         this.setSize(638,520);
-       
-        TextSrcDir.setText(srourceDirectoryPath);
+
+        // source directory
+        try
+        {
+            sourceDirectoryPath = sourceFile.getCanonicalPath();
+            if(sourceFile.exists() == false)
+            {
+                if(sourceFile_old.exists() == false)
+                {
+                    //System.out.println("incorrect sourceDirectoryPath =" + sourceFile_old.getCanonicalPath());
+                    sourceDirectoryPath = defaultSourceDirectoryPath;
+                }
+                else
+                {
+                    //System.out.println("correct sourceDirectoryPath =" + sourceFile_old.getCanonicalPath());
+                    sourceDirectoryPath = sourceFile_old.getCanonicalPath();
+                }
+            }
+            //System.out.println("sourceDirectoryPath =" + sourceDirectoryPath);
+        }catch(IOException E){}
+
+        // project Bin File Path
+        try
+        {
+            projectBinFilePath = projectBinFile.getCanonicalPath();
+            if(projectBinFile.exists() == false)
+            {
+                 if(projectBinFile_old.exists() == false)
+                    projectBinFilePath = defaultProjectBinFilePath;
+                 else
+                 {
+                     projectBinFilePath = projectBinFile_old.getCanonicalPath();
+                 }
+            }
+            //System.out.println("projectBinFilePath =" + projectBinFilePath);
+        }catch(IOException E){}
+
+        // project directory path
+        try
+        {
+            projectDirectoryPath = projectDir.getCanonicalPath();
+            if(projectDir.exists() == false)
+            {
+               if(projectDir_old.exists() == false)
+                    projectDirectoryPath = defaultProjectDirectoryPath;
+               else
+               {
+                   projectDirectoryPath = projectDir_old.getCanonicalPath();
+               }
+            }
+            //System.out.println("projectDirectoryPath =" + projectDirectoryPath);
+        }catch(IOException E){}
+         // Soure directory Image path
+        TextSrcDir.setText(sourceDirectoryPath);
         txtProjectDir.setText(projectDirectoryPath);
         //advSetting = new AdvanceSettings(new JFrame(),true,this);
         //uploadSettings =  new UploadSettings(new JFrame(),true,this);
@@ -74,13 +160,13 @@ public class MainMPFS extends javax.swing.JFrame {
         uploadSettings =  new UploadSettings(this,true);
         aboutBox = new AboutBox(this,true);
         txtUploadPath.setText(uploadSettings.getUploadPathStr());
-        aboutStr = "<html>"+"Date JUNE,16 2011"+"<br>";
+        aboutStr = "<html>"+"Date OCT,18 2011"+"<br>";
         String version = "Version MPFS 2.2";
         lebelAbout.setText(aboutStr+version+"</html>");
         UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
         MainKeyEventActionIntialization();
-
     }
+
     /*
      * Get protocol As per the Selection
      * HTTP ==  MPFS2
@@ -288,8 +374,8 @@ public class MainMPFS extends javax.swing.JFrame {
         lblProjectImg.setText("Image Name:");
         jPanel3.add(lblProjectImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 70, -1, -1));
 
-        txtProjectImageName.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
-        txtProjectImageName.setText("mpfsimage");
+        txtProjectImageName.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11)); // NOI18N
+        txtProjectImageName.setText("MPFSImg2");
         txtProjectImageName.setToolTipText("File name for the image you'd like to create.");
         jPanel3.add(txtProjectImageName, new org.netbeans.lib.awtextra.AbsoluteConstraints(179, 68, 164, -1));
 
@@ -441,7 +527,7 @@ public class MainMPFS extends javax.swing.JFrame {
         jPanel6.add(jProgressBar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 50, 173, 20));
 
         lblMessage.setText("[Generator Idle]");
-        jPanel6.add(lblMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 50, 420, 20));
+        jPanel6.add(lblMessage, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 50, 410, 20));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -935,7 +1021,7 @@ public class MainMPFS extends javax.swing.JFrame {
     private void btnSrcBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSrcBrowseActionPerformed
         // TODO add your handling code here:
         String srcPath;
-        SourceSettings browseButton = new SourceSettings(this,true);
+        SourceSettings browseButton = new SourceSettings(this,true,DIRECTORY_OPTION.SOURCE);
         //browseButton.setVisible(true);
         //browseButton.setTitle("MPFS Browse Source Directory");
         if(getRadBotWebPageDirStatus() == true)
@@ -944,7 +1030,7 @@ public class MainMPFS extends javax.swing.JFrame {
             {
                 TextSrcDir.setText(srcPath);
                 txtProjectDir.setText(browseButton.getParentDirctoryPath());
-                srourceDirectoryPath = TextSrcDir.getText();
+                sourceDirectoryPath = TextSrcDir.getText();
             }
         }
         else if(getRadBotPreBuildDirStatus()== true)
@@ -1001,7 +1087,7 @@ public class MainMPFS extends javax.swing.JFrame {
          jPanel2.setVisible(true);
          jPanel3.setVisible(true);
          this.setSize(638, 520);
-         TextSrcDir.setText(srourceDirectoryPath);
+         TextSrcDir.setText(sourceDirectoryPath);
          if(radBin.isSelected() == true)
          {
             radBinActionPerformed(null);
@@ -1034,12 +1120,18 @@ public class MainMPFS extends javax.swing.JFrame {
     }//GEN-LAST:event_radWebDirActionPerformed
 
     private void btnProjectDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProjectDirActionPerformed
-        SourceSettings ProjectDir = new SourceSettings(this,true);
+        String projectPath;
+        SourceSettings ProjectDir = new SourceSettings(this,true,DIRECTORY_OPTION.PROJECT);
         //ProjectDir.setVisible(true);
         //ProjectDir.setTitle("MPFS Browse Project Directory");
         //jTextField1.setText(browseButton.getDirctoryPath());
-        if(ProjectDir.getOutputDirctoryPath() != null)
-            txtProjectDir.setText(ProjectDir.getParentDirctoryPath());
+        if((projectPath = ProjectDir.getDirctoryPath()) != null)
+        {
+            txtProjectDir.setText(projectPath);
+            projectDirectoryPath = projectPath;
+        }
+       //if(ProjectDir.getOutputDirctoryPath() != null)
+         //   txtProjectDir.setText(ProjectDir.getParentDirctoryPath());
     }//GEN-LAST:event_btnProjectDirActionPerformed
 
     private void btnAdvSettingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdvSettingActionPerformed
@@ -1164,7 +1256,7 @@ public class MainMPFS extends javax.swing.JFrame {
         if(radWebDir.isEnabled())
         {
             txtProjectDir.setText(dir.getParent());
-            srourceDirectoryPath = TextSrcDir.getText();
+            sourceDirectoryPath = TextSrcDir.getText();
             projectDirectoryPath = txtProjectDir.getText();
             projectBinFilePath = projectDirectoryPath+File.separator+imageName;
         }
@@ -1486,9 +1578,9 @@ public class MainMPFS extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JProgressBar jProgressBar1;
-    private javax.swing.JLabel lblMessage;
+    public javax.swing.JPanel jPanel6;
+    public javax.swing.JProgressBar jProgressBar1;
+    public static javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblOuput;
     private javax.swing.JLabel lblProcess;
     private javax.swing.JLabel lblProjectDir;

@@ -36,6 +36,11 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 01/19/11		Ported from TouchScreen driver.
  * 05/06/11     Added IDLE state and set start up state to IDLE.
+ * 10/03/11     - Modified the calibration sequence.
+ *              - Modified TouchDetectPosition() sampling to single A/D sampling.
+ *              - Modified TouchDetectPosition() to return status of sampling.
+ *              - Added Touch_ADCInit() to separate A/D initialization. This 
+ *                will be useful when A/D is shared by multiple drivers.
  *****************************************************************************/
 #include "HardwareProfile.h"
 
@@ -44,6 +49,7 @@
 #include "Graphics/Graphics.h"
 #include "TimeDelay.h"
 #include "TouchScreen.h"
+#include "TouchScreenResistive.h"
 #include "Compiler.h"
 
 #define TOUCHCAL_CA 0x2A
@@ -60,17 +66,20 @@
 #define CAL_X_INSET    (((GetMaxX()+1)*(CALIBRATIONINSET>>1))/100)
 #define CAL_Y_INSET    (((GetMaxY()+1)*(CALIBRATIONINSET>>1))/100)
 
-
 //////////////////////// Resistive Touch Driver Version ////////////////////////////
 // The first three digit is version number and 0xF is assigned to this
 // 4-wire resistive driver.
-const WORD mchpTouchScreenVersion = 0xF100;
+const WORD mchpTouchScreenVersion = 0xF101;
 
 //////////////////////// LOCAL PROTOTYPES ////////////////////////////
 void    TouchGetCalPoints(void);
 void 	TouchStoreCalibration(void);
 void 	TouchCheckForCalibration(void);
 void 	TouchLoadCalibration(void);
+
+#ifdef ENABLE_DEBUG_TOUCHSCREEN
+void TouchScreenResistiveTestXY(void);
+#endif
 
 extern NVM_READ_FUNC           pCalDataRead;                // function pointer to data read
 extern NVM_WRITE_FUNC          pCalDataWrite;               // function pointer to data write
@@ -132,7 +141,7 @@ volatile TOUCH_STATES state = IDLE;
 /*********************************************************************
 * Function: void TouchDetectPosition(void)
 ********************************************************************/
-void TouchDetectPosition(void)
+SHORT TouchDetectPosition(void)
 {
     static SHORT    tempX, tempY;
     SHORT           temp;
@@ -147,6 +156,7 @@ void TouchDetectPosition(void)
 			#endif
 			break;
         case SET_VALUES:
+			TOUCH_ADC_START = 0;    // stop sampling
             if(!TOUCH_ADC_DONE)
                 break;
 
@@ -166,51 +176,57 @@ void TouchDetectPosition(void)
 
        case RUN_POT:
        		TOUCH_ADC_INPUT_SEL = ADC_POT;
-            TOUCH_ADC_START = 1;   // run conversion
+            TOUCH_ADC_START = 1;    // run conversion
             state = GET_POT;
             break;
 
         case GET_POT:
-            if(!AD1CON1bits.DONE)
+			TOUCH_ADC_START = 0;    // stop sampling
+            if(TOUCH_ADC_DONE == 0){
                 break;
-
+            }
             adcPot = ADC1BUF0;
         #endif
             state = SET_X;
+            return 1;               // touch screen acquisition is done 
 
         case SET_X:
+			
        		TOUCH_ADC_INPUT_SEL = ADC_XPOS;
 
             TRIS_XPOS = 1;
             TRIS_YPOS = 1;
             TRIS_XNEG = 1;
-            LAT_YNEG = 0;
+            LAT_YNEG  = 0;
             TRIS_YNEG = 0;
+           
+            TOUCH_ADC_START = 1;    // run conversion
 
-            TOUCH_ADC_START = 1;   // run conversion
             state = CHECK_X;
             break;
 
         case CHECK_X:
         case CHECK_Y:
-            if(!TOUCH_ADC_DONE)
+			TOUCH_ADC_START = 0;    // stop sampling
+            if(TOUCH_ADC_DONE == 0){
                 break;
+            }
 
             if((WORD) TOUCHSCREEN_RESISTIVE_PRESS_THRESHOLD > (WORD) ADC1BUF0)
             {
 	            if (state == CHECK_X)
 	            {
-                	LAT_YPOS = 1;
+                	LAT_YPOS  = 1;
                 	TRIS_YPOS = 0;
-                	tempX = -1;
-                	state = RUN_X;
+                	tempX     = -1;
+                	state     = RUN_X;
                 } 
                 else 
                 {
-	                LAT_XPOS = 1;
+	                LAT_XPOS  = 1;
     	            TRIS_XPOS = 0;
-        	        tempY = -1;
-            	    state = RUN_Y;    
+        	        tempY     = -1;
+            	    state     = RUN_Y;    
 	            }   	
             }
             else
@@ -220,7 +236,8 @@ void TouchDetectPosition(void)
 		        #ifdef ADC_POT
             	    state = RUN_POT;
             	#else
-            		state = SET_X;	
+            		state = SET_X;
+                    return 1;       // touch screen acquisition is done 	
             	#endif	    
                 break;
             }
@@ -233,6 +250,7 @@ void TouchDetectPosition(void)
             
         case GET_X:
         case GET_Y:
+			TOUCH_ADC_START = 0;    // stop sampling
             if(!TOUCH_ADC_DONE)
                 break;
 
@@ -265,10 +283,11 @@ void TouchDetectPosition(void)
             break;
 
         case SET_Y:
+			TOUCH_ADC_START = 0;    // stop sampling
             if(!TOUCH_ADC_DONE)
                 break;
 
-            if((WORD) TOUCHSCREEN_RESISTIVE_PRESS_THRESHOLD < (WORD) ADC1BUF0)
+            if((WORD)  TOUCHSCREEN_RESISTIVE_PRESS_THRESHOLD < (WORD) ADC1BUF0)
             {
                 adcX = -1;
                 adcY = -1;
@@ -276,6 +295,7 @@ void TouchDetectPosition(void)
             	    state = RUN_POT;
             	#else
                 	state = SET_X;
+                    return 1;       // touch screen acquisition is done 
                 #endif	
                 break;
             }
@@ -288,14 +308,41 @@ void TouchDetectPosition(void)
             TRIS_XNEG = 0;
             TRIS_YNEG = 1;
 
-            TOUCH_ADC_START = 1;   // run conversion
+            TOUCH_ADC_START = 1;    // run conversion
             state = CHECK_Y;
             break;
 
         default:
             state = SET_X;
+            return 1;               // touch screen acquisition is done 
     }
 
+    return 0;                       // touch screen acquisition is not done
+}
+
+/*********************************************************************
+* Function: void Touch_ADCInit(void)
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Initializes the ADC for the touch detection.
+*
+* Note: none
+*
+********************************************************************/
+void Touch_ADCInit(void)
+{
+    // Initialize ADC
+    AD1CON1 = 0;        // reset
+    AD1CON2 = 0;        // AVdd, AVss, int every conversion, MUXA only
+    AD1CON3 = 0x0101;   // 1 Tad auto-sample, Tad = 2*Tcy
+    AD1CON1 = 0x08000;  // Turn on, single conversion
 }
 
 /*********************************************************************
@@ -309,17 +356,14 @@ void TouchDetectPosition(void)
 *
 * Side Effects: none
 *
-* Overview: Initializes the A/D channel used for the touch detection.
+* Overview: Initializes touch screen module.
 *
 * Note: none
 *
 ********************************************************************/
 void TouchHardwareInit(void *initValues)
 {
-    // Initialize ADC
-    AD1CON1 = 0x80E0;       // Turn on, auto-convert
-    AD1CON2 = 0;            // AVdd, AVss, int every conversion, MUXA only
-    AD1CON3 = 0x1FFF;       // 31 Tad auto-sample, Tad = 256*Tcy
+    Touch_ADCInit();
     
     // set the used D/A port to be analog
 	#ifdef ADPCFG_XPOS
@@ -519,17 +563,20 @@ void TouchLoadCalibration(void)
 }
 
 /*********************************************************************
-* Function: void TouchGetCalPoints(void)
+* Function: void TouchCalculateCalPoints(WORD *xTouch, WORD *yTouch, WORD *xPoint, WORD *yPoint)
 *
-* PreCondition: InitGraph() must be called before
+* PreCondition: None
 *
-* Input: none
+* Input: xTouch - pointer to the x touch positions array
+*        yTouch - pointer to the y touch positions array    
+*        xPoint - pointer to the x positions on the screen
+*        yPoint - pointer to the y positions on the screen    
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: gets values for 3 touches
+* Overview: Calculates the coefficients for the screen calibration.
 *
 * Note: none
 *
@@ -541,7 +588,7 @@ void TouchCalculateCalPoints(WORD *xTouch, WORD *yTouch, WORD *xPoint, WORD *yPo
 	long    trAhold, trBhold, trChold, trDhold;
     long 	test1, test2; 							// temp variables (must be signed type)
 
-	// calculate points transfer functiona
+ 	// calculate points transfer functions
 	// based on two simultaneous equations solve for the 
 	// constants
 	
@@ -619,14 +666,16 @@ void TouchCalHWGetPoints(void)
 
     XCHAR   calStr1[] = {'o','n',' ','t','h','e',' ','f','i','l','l','e','d',0};
     XCHAR   calStr2[] = {'c','i','r','c','l','e',0};
-    XCHAR  	calTouchPress[] = {'P','r','e','s','s',0};
-    XCHAR   calTouchHold[] = {'H','o','l','d',0};
-    XCHAR   calTouchRelease[] = {'R','e','l','e','a','s','e',0};
+    XCHAR  	calTouchPress[] = {'P','r','e','s','s',' ','&',' ','R','e','l','e','a','s','e',0};
+
+    XCHAR   calRetryPress[] = {'R','e','t','r','y',0};
+    XCHAR   *pMsgPointer;
     SHORT   counter;
 
     WORD    tx[SAMPLE_POINTS], ty[SAMPLE_POINTS];
     WORD    dx[SAMPLE_POINTS], dy[SAMPLE_POINTS];
     WORD    textHeight, msgX, msgY;
+    SHORT   tempX, tempY;
 
 	SetFont((void *) &FONTDEFAULT);
     SetColor(BRIGHTRED);
@@ -653,8 +702,6 @@ void TouchCalHWGetPoints(void)
             )
     );
 
-
-
     // calculate center points (locate them at 15% away from the corners)
 	// draw the four touch points
 
@@ -665,8 +712,10 @@ void TouchCalHWGetPoints(void)
 
 
     msgY = ((GetMaxY() >> 1) - textHeight);
+    pMsgPointer = calTouchPress;
 	
-    for(counter = 0; counter < SAMPLE_POINTS; counter++)
+    // get the four samples or calibration points
+    for(counter = 0; counter < SAMPLE_POINTS;)
     {
     
 		// redraw the filled circle to unfilled (previous calibration point)
@@ -682,63 +731,70 @@ void TouchCalHWGetPoints(void)
 	    while(!(FillCircle(dx[counter], dy[counter], TOUCH_DIAMETER-3)));
 
 		// show points left message
-        msgX = (GetMaxX() - GetTextWidth((XCHAR *)calTouchPress, (void *) &FONTDEFAULT)) >> 1;
-		TouchShowMessage(calTouchPress, BRIGHTRED, msgX, msgY);
+        msgX = (GetMaxX() - GetTextWidth((XCHAR *)pMsgPointer, (void *) &FONTDEFAULT)) >> 1;
+		TouchShowMessage(pMsgPointer, BRIGHTRED, msgX, msgY);
 
         // Wait for press
         do {} 
     	    while((TouchGetRawX() == -1) && (TouchGetRawY() == -1));
 
-		// erase points left message
-		TouchShowMessage(calTouchPress, WHITE, msgX, msgY);
-        
-		// display HOLD message
-	    msgX = (GetMaxX() - GetTextWidth((XCHAR *)calTouchHold, (void *) &FONTDEFAULT)) >> 1;
-		TouchShowMessage(calTouchHold, BRIGHTRED, msgX, msgY);
+        tempX = TouchGetRawX();
+        tempY = TouchGetRawY();
 
-       	// start the touch delay 
-        DelayMs(CALIBRATION_DELAY<<1);
+        // wait for release
+        do {}
+        	while((TouchGetRawX() != -1) && (TouchGetRawY() != -1));
 
-		#ifdef TOUCHSCREEN_RESISTIVE_FLIP_Y
-        ty[3 - counter] = TouchGetRawY();
-		#else
-        ty[counter] = TouchGetRawY();
-        #endif
+        // check if the touch was detected properly
+        if ((tempX == -1) || (tempY == -1))
+        {   
+            // cannot proceed retry the touch, display RETRY PRESS message 
 
-        #ifdef TOUCHSCREEN_RESISTIVE_FLIP_X
-        tx[3 - counter] = TouchGetRawX();
-		#else
-        tx[counter] = TouchGetRawX();
-        #endif
+            // remove the previous string
+	    	TouchShowMessage(pMsgPointer, WHITE, msgX, msgY);
+            pMsgPointer = calRetryPress;
+            // show the retry message
+    		msgX = (GetMaxX() - GetTextWidth((XCHAR *)pMsgPointer, (void *) &FONTDEFAULT)) >> 1;
+	    	TouchShowMessage(pMsgPointer, BRIGHTRED, msgX, msgY);
+        }
+        else
+        {    
 
+            // remove the previous string
+	    	TouchShowMessage(pMsgPointer, WHITE, msgX, msgY);
+            pMsgPointer = calTouchPress;
 
-		// erase HOLD message
-		TouchShowMessage(calTouchHold, WHITE, msgX, msgY);
+    		#ifdef TOUCHSCREEN_RESISTIVE_FLIP_Y
+                ty[3 - counter] = tempY; 
+    		#else
+                ty[counter] = tempY; 
+            #endif
+    
+            #ifdef TOUCHSCREEN_RESISTIVE_FLIP_X
+                tx[3 - counter] = tempX; 
+    		#else
+                tx[counter] = tempX; 
+            #endif
 
-		// show RELEASE message
-	    msgX = (GetMaxX() - GetTextWidth((XCHAR *)calTouchRelease, (void *) &FONTDEFAULT)) >> 1;
-		TouchShowMessage(calTouchRelease, BRIGHTRED, msgX, msgY);
+            counter++;
+
+        }
 
         // Wait for release
         do {} 
-        	while((TouchGetRawX() != -1) && (TouchGetRawY() != -1));
+            while((TouchGetRawX() != -1) && (TouchGetRawY() != -1));
 
         DelayMs(CALIBRATION_DELAY);
-		// erase RELEASE message
-		TouchShowMessage(calTouchRelease, WHITE, msgX, msgY);
-       
+      
     }
 
-    // Wait for release
-	do {} 
-		while((TouchGetRawX() != -1) && (TouchGetRawY() != -1));
-
-	
     TouchCalculateCalPoints(tx, ty, dx, dy);
     
     #ifdef ENABLE_DEBUG_TOUCHSCREEN
         TouchScreenResistiveTestXY();
     #endif
+
+
 }
 
 
@@ -769,6 +825,9 @@ void TouchScreenResistiveTestXY(void)
     unsigned char i;
     SHORT tempXX, tempYY,tempXX2,tempYY2, calXX, calYY;
     tempXX = tempYY = tempXX2 = tempYY2 = -1;
+
+    TouchStoreCalibration();
+
     while(1)
     {
         do{tempXX = TouchGetRawX(); tempYY = TouchGetRawY();}
@@ -788,7 +847,7 @@ void TouchScreenResistiveTestXY(void)
             SetColor(BRIGHTRED);
             sprintf(buffChar,"raw_x=%d, raw_y=%d",(WORD)tempXX, (WORD)tempYY);
 			
-            #ifdef (USE_MULTIBYTECHAR)
+            #ifdef USE_MULTIBYTECHAR
               for(i = 0; i < BUFFCHARLEN;i++)
               {
                 buffCharW[i] = buffChar[i];
@@ -799,7 +858,7 @@ void TouchScreenResistiveTestXY(void)
             #endif
             
             sprintf(buffChar,"cal_x=%d, cal_y=%d",(WORD)calXX, (WORD)calYY);
-            #ifdef (USE_MULTIBYTECHAR)
+            #ifdef USE_MULTIBYTECHAR
               for(i = 0; i < BUFFCHARLEN;i++)
               {
                 buffCharW[i] = buffChar[i];
@@ -810,7 +869,7 @@ void TouchScreenResistiveTestXY(void)
             #endif
             
             sprintf(buffChar,"_tr:A=%d,B=%d,C=%d,D=%d",(WORD)_trA,(WORD)_trB,(WORD)_trC,(WORD)_trD);
-            #ifdef (USE_MULTIBYTECHAR)
+            #ifdef USE_MULTIBYTECHAR
               for(i = 0; i < BUFFCHARLEN;i++)
               {
                 buffCharW[i] = buffChar[i];

@@ -126,14 +126,14 @@
     #define LNA_GAIN_9_DB   0x02        //10 -9dB
     #define LNA_GAIN_135_DB 0x03        //11 -13.5dB
 
-    #define TX_POWER_13_DB  0x00        //[3:1] - 13dB
-    #define TX_POWER_10_DB  0x01	
-    #define TX_POWER_7_DB   0x02
-    #define TX_POWER_4_DB   0x03
-    #define TX_POWER_1_DB   0x04
-    #define TX_POWER_2_DB   0x05
-    #define TX_POWER_5_DB   0x06
-    #define TX_POWER_8_DB   0x07
+    #define TX_POWER_13_DB      0x00    //[3:1], 13dBm
+    #define TX_POWER_10_DB      0x01	//10dBm
+    #define TX_POWER_7_DB       0x02	//7dBm
+    #define TX_POWER_4_DB       0x03	//4dBm
+    #define TX_POWER_1_DB       0x04	//1dBm
+    #define TX_POWER_N_2_DB     0x05	//-2dBm
+    #define TX_POWER_N_5_DB     0x06	//-5dBm
+    #define TX_POWER_N_8_DB     0x07	//-8dBm
 
     #define FILCON_SET_65   0x00		//65 KHz
     #define FILCON_SET_82   0x10		//82 KHz
@@ -460,11 +460,13 @@
 
 
     #if RX_PACKET_SIZE > 64
+        #warning  "Maximum RX PACKET SIZE should not be greater 64, redefine RX BUFFER SIZE"
         #undef RX_PACKET_SIZE
         #define RX_PACKET_SIZE 64
     #endif
     
     #if TX_PACKET_SIZE > 64
+        #warning  "Maximum TX PACKET SIZE should not be greater 64, redefine TX BUFFER SIZE"
         #undef TX_PACKET_SIZE
         #define TX_PACKET_SIZE 64
     #endif

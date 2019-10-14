@@ -30,7 +30,7 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/1472/DrawTool.o ${OBJECTDIR}/_ext/1472/ECG.o ${OBJECTDIR}/_ext/803622919/CheckBox.o ${OBJECTDIR}/_ext/1919882987/SSD1926.o ${OBJECTDIR}/_ext/803622919/ListBox.o ${OBJECTDIR}/_ext/1472/GraphShow.o ${OBJECTDIR}/_ext/803622919/Picture.o ${OBJECTDIR}/_ext/803622919/Button.o ${OBJECTDIR}/_ext/1687970324/cpld.o ${OBJECTDIR}/_ext/803622919/GOLSchemeDefault.o ${OBJECTDIR}/_ext/1687970324/TouchScreenResistive.o ${OBJECTDIR}/_ext/172487899/usb_host_msd.o ${OBJECTDIR}/_ext/549097302/usb_host.o ${OBJECTDIR}/_ext/1472/usb_config.o ${OBJECTDIR}/_ext/1919882987/gfxepmp.o ${OBJECTDIR}/_ext/1472/DemoSteps.o ${OBJECTDIR}/_ext/803622919/Slider.o ${OBJECTDIR}/_ext/1472/ResourcesInternalFlash\ C32.o ${OBJECTDIR}/_ext/1472/rtcc.o ${OBJECTDIR}/_ext/1472/MultiFontsDemo.o ${OBJECTDIR}/_ext/1472/ECGBitmaps.o ${OBJECTDIR}/_ext/803622919/Grid.o ${OBJECTDIR}/_ext/1919882987/mchpGfxDrv.o ${OBJECTDIR}/_ext/803622919/EditBox.o ${OBJECTDIR}/_ext/1472/MainDemo.o ${OBJECTDIR}/_ext/803622919/Meter.o ${OBJECTDIR}/_ext/1626048738/jidctint.o ${OBJECTDIR}/_ext/1626048738/GifDecoder.o ${OBJECTDIR}/_ext/1860783399/TimeDelay.o ${OBJECTDIR}/_ext/1626048738/ImageDecoder.o ${OBJECTDIR}/_ext/1472/DemoSelection.o ${OBJECTDIR}/_ext/1919882987/mchpGfxDrvBuffer.o ${OBJECTDIR}/_ext/1626048738/JpegDecoder.o ${OBJECTDIR}/_ext/803622919/RadioButton.o ${OBJECTDIR}/_ext/1788384718/FSIO.o ${OBJECTDIR}/_ext/1788384718/SD-SPI.o ${OBJECTDIR}/_ext/803622919/Chart.o ${OBJECTDIR}/_ext/1687970324/drv_spi.o ${OBJECTDIR}/_ext/1472/TimeDateDemo.o ${OBJECTDIR}/_ext/1472/SlideShowDemo.o ${OBJECTDIR}/_ext/1687970324/TouchScreen.o ${OBJECTDIR}/_ext/1472/JPEGDemo.o ${OBJECTDIR}/_ext/1626048738/BmpDecoder.o ${OBJECTDIR}/_ext/1472/Games.o ${OBJECTDIR}/_ext/1472/RGBDemo.o ${OBJECTDIR}/_ext/803622919/StaticText.o ${OBJECTDIR}/_ext/1687970324/SST39VF040.o ${OBJECTDIR}/_ext/1687970324/SST25VF016.o ${OBJECTDIR}/_ext/1472/ResourcesInternalFlash\ Set2\ C32.o ${OBJECTDIR}/_ext/803622919/Primitive.o ${OBJECTDIR}/_ext/803622919/GOLFontDefault.o ${OBJECTDIR}/_ext/1919882987/TCON_SSD1289.o ${OBJECTDIR}/_ext/1472/SideButtons.o ${OBJECTDIR}/_ext/1687970324/Beep.o ${OBJECTDIR}/_ext/803622919/GOL.o ${OBJECTDIR}/_ext/803622919/Window.o ${OBJECTDIR}/_ext/1472/Animation.o ${OBJECTDIR}/_ext/803622919/GroupBox.o ${OBJECTDIR}/_ext/172487899/usb_host_msd_scsi.o ${OBJECTDIR}/_ext/1687970324/EEPROM.o
+OBJECTFILES=${OBJECTDIR}/_ext/1472/DrawTool.o ${OBJECTDIR}/_ext/1472/ECG.o ${OBJECTDIR}/_ext/803622919/CheckBox.o ${OBJECTDIR}/_ext/1919882987/SSD1926.o ${OBJECTDIR}/_ext/803622919/ListBox.o ${OBJECTDIR}/_ext/1472/GraphShow.o ${OBJECTDIR}/_ext/803622919/Picture.o ${OBJECTDIR}/_ext/803622919/Button.o ${OBJECTDIR}/_ext/1687970324/cpld.o ${OBJECTDIR}/_ext/803622919/GOLSchemeDefault.o ${OBJECTDIR}/_ext/1687970324/TouchScreenResistive.o ${OBJECTDIR}/_ext/172487899/usb_host_msd.o ${OBJECTDIR}/_ext/549097302/usb_host.o ${OBJECTDIR}/_ext/1472/usb_config.o ${OBJECTDIR}/_ext/1919882987/gfxepmp.o ${OBJECTDIR}/_ext/1472/DemoSteps.o ${OBJECTDIR}/_ext/803622919/Slider.o ${OBJECTDIR}/_ext/1472/ResourcesInternalFlash\ C32.o ${OBJECTDIR}/_ext/1472/rtcc.o ${OBJECTDIR}/_ext/1472/MultiFontsDemo.o ${OBJECTDIR}/_ext/1472/ECGBitmaps.o ${OBJECTDIR}/_ext/803622919/Grid.o ${OBJECTDIR}/_ext/1919882987/mchpGfxDrv.o ${OBJECTDIR}/_ext/803622919/EditBox.o ${OBJECTDIR}/_ext/1472/MainDemo.o ${OBJECTDIR}/_ext/803622919/Meter.o ${OBJECTDIR}/_ext/1626048738/jidctint.o ${OBJECTDIR}/_ext/1626048738/GifDecoder.o ${OBJECTDIR}/_ext/1860783399/TimeDelay.o ${OBJECTDIR}/_ext/1626048738/ImageDecoder.o ${OBJECTDIR}/_ext/1472/DemoSelection.o ${OBJECTDIR}/_ext/1919882987/mchpGfxDrvBuffer.o ${OBJECTDIR}/_ext/1626048738/JpegDecoder.o ${OBJECTDIR}/_ext/803622919/RadioButton.o ${OBJECTDIR}/_ext/1788384718/FSIO.o ${OBJECTDIR}/_ext/803622919/Chart.o ${OBJECTDIR}/_ext/1687970324/drv_spi.o ${OBJECTDIR}/_ext/1472/TimeDateDemo.o ${OBJECTDIR}/_ext/1472/SlideShowDemo.o ${OBJECTDIR}/_ext/1687970324/TouchScreen.o ${OBJECTDIR}/_ext/1472/JPEGDemo.o ${OBJECTDIR}/_ext/1626048738/BmpDecoder.o ${OBJECTDIR}/_ext/1472/Games.o ${OBJECTDIR}/_ext/1472/RGBDemo.o ${OBJECTDIR}/_ext/803622919/StaticText.o ${OBJECTDIR}/_ext/1687970324/SST39VF040.o ${OBJECTDIR}/_ext/1687970324/SST25VF016.o ${OBJECTDIR}/_ext/1472/ResourcesInternalFlash\ Set2\ C32.o ${OBJECTDIR}/_ext/803622919/Primitive.o ${OBJECTDIR}/_ext/803622919/GOLFontDefault.o ${OBJECTDIR}/_ext/1919882987/TCON_SSD1289.o ${OBJECTDIR}/_ext/1472/SideButtons.o ${OBJECTDIR}/_ext/1687970324/Beep.o ${OBJECTDIR}/_ext/803622919/GOL.o ${OBJECTDIR}/_ext/803622919/Window.o ${OBJECTDIR}/_ext/1472/Animation.o ${OBJECTDIR}/_ext/803622919/GroupBox.o ${OBJECTDIR}/_ext/172487899/usb_host_msd_scsi.o ${OBJECTDIR}/_ext/1687970324/EEPROM.o
 
 
 CFLAGS=
@@ -425,16 +425,6 @@ ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
 	${RM} ${OBJECTDIR}/_ext/1788384718/FSIO.o.d 
 	${CP} ${OBJECTDIR}/_ext/1788384718/FSIO.o.tmp ${OBJECTDIR}/_ext/1788384718/FSIO.o.d 
 	${RM} ${OBJECTDIR}/_ext/1788384718/FSIO.o.tmp
-endif
-${OBJECTDIR}/_ext/1788384718/SD-SPI.o: ../../../Microchip/MDD\ File\ System/SD-SPI.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1788384718 
-	${RM} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_REAL_ICE=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -DCFG_INCLUDE_MPLAB_X -DCFG_INCLUDE_GFXv3_PIC_SK_16PMP_USBMSD_QVGAv1 -I".." -I"../../Common" -I"../../../Board Support Package" -I"../../../Microchip/Include" -Os -Wall -MMD -MF ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d -o ${OBJECTDIR}/_ext/1788384718/SD-SPI.o ../../../Microchip/MDD\ File\ System/SD-SPI.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	 sed -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d > ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d 
-	${CP} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.tmp ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d 
-	${RM} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.tmp
 endif
 ${OBJECTDIR}/_ext/803622919/Chart.o: ../../../Microchip/Graphics/Chart.c  nbproject/Makefile-${CND_CONF}.mk
 	${MKDIR} ${OBJECTDIR}/_ext/803622919 
@@ -1026,16 +1016,6 @@ ifneq (,$(findstring MINGW32,$(OS_CURRENT)))
 	${RM} ${OBJECTDIR}/_ext/1788384718/FSIO.o.d 
 	${CP} ${OBJECTDIR}/_ext/1788384718/FSIO.o.tmp ${OBJECTDIR}/_ext/1788384718/FSIO.o.d 
 	${RM} ${OBJECTDIR}/_ext/1788384718/FSIO.o.tmp
-endif
-${OBJECTDIR}/_ext/1788384718/SD-SPI.o: ../../../Microchip/MDD\ File\ System/SD-SPI.c  nbproject/Makefile-${CND_CONF}.mk
-	${MKDIR} ${OBJECTDIR}/_ext/1788384718 
-	${RM} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -DCFG_INCLUDE_MPLAB_X -DCFG_INCLUDE_GFXv3_PIC_SK_16PMP_USBMSD_QVGAv1 -I".." -I"../../Common" -I"../../../Board Support Package" -I"../../../Microchip/Include" -Os -Wall -MMD -MF ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d -o ${OBJECTDIR}/_ext/1788384718/SD-SPI.o ../../../Microchip/MDD\ File\ System/SD-SPI.c  
-ifneq (,$(findstring MINGW32,$(OS_CURRENT))) 
-	 sed -e 's/\\$$/__EOL__/g' -e 's/\\ /__ESCAPED_SPACES__/g' -e 's/\\/\//g' -e 's/__ESCAPED_SPACES__/\\ /g' -e 's/__EOL__$$/\\/g' ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d > ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.tmp
-	${RM} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d 
-	${CP} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.tmp ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.d 
-	${RM} ${OBJECTDIR}/_ext/1788384718/SD-SPI.o.tmp
 endif
 ${OBJECTDIR}/_ext/803622919/Chart.o: ../../../Microchip/Graphics/Chart.c  nbproject/Makefile-${CND_CONF}.mk
 	${MKDIR} ${OBJECTDIR}/_ext/803622919 

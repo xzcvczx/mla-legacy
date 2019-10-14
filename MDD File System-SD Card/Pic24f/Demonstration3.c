@@ -40,7 +40,11 @@
  Change History:
   Rev            Description
   ----           -----------------------
-  1.3.0   		Initial Revision to support Long File Name Format
+  1.3.0         Initial Revision to support Long File Name Format
+  1.3.4         Added support for PIC24FJ256DA210 Board.
+                Added support for PIC24FJ256GB110 PIM on Explorer 16 Board.
+                Removed 'COE_OFF' from _CONFIG1 settings.
+                Cleaned up the unnecessary part of main() function.
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -55,11 +59,12 @@ char sendBuffer[] = "This is test string 1";
 char send2[] = "2";
 char receiveBuffer[50];
 
-#if defined (__PIC24F__)
-
+#if defined (__PIC24FJ128GA010__) || defined (__PIC24FJ256DA210__)
     _CONFIG2(IESO_OFF & FNOSC_PRIPLL & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS)
-    _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & ICS_PGx2 & FWDTEN_OFF)
-
+    _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & ICS_PGx2 & FWDTEN_OFF)
+#elif defined(__PIC24FJ256GB110__)
+    _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
+    _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
 #endif
 
 // FILE1.TXT
@@ -172,7 +177,6 @@ int main (void)
    unsigned char attributes;
    unsigned char size = 0, i;
 
-#ifdef __PIC24__
    // Turn on the secondary oscillator
    __asm__ ("MOV #OSCCON,w1");
    __asm__ ("MOV.b #0x02, w0");
@@ -201,17 +205,41 @@ int main (void)
    RTCVAL = 0x0208;
    RTCVAL = 0x2137;
    RCFGCAL = 0x8000;
-#elif defined (__PIC32MX__)
-   // Turn on the interrupts
-   INTEnableSystemMultiVectoredInt();
-   SYSTEMConfigPerformance(GetSystemClock());
-   mOSCSetPBDIV(OSC_PB_DIV_2);
-   //Initialize the RTCC
-   RtccInit();
-   while(RtccGetClkStat()!=RTCC_CLK_ON);// wait for the SOSC to be actually running and RTCC to have its clock source
-							            // could wait here at most 32ms
-   RtccOpen(0x10073000, 0x07011602, 0);
-#endif
+
+   #if defined(__PIC24FJ256DA210__)
+
+      // Make Analog Pins Digital
+      ANSB = 0x0000 ; 
+      ANSA = 0x0000;
+      ANSC = 0x0000;
+      ANSD = 0x0000;
+
+      // Enable PLL
+      CLKDIVbits.PLLEN = 1; 
+
+      // Configure SPI1 PPS pins (ENC28J60/ENCX24J600/MRF24WB0M or other PICtail Plus cards)
+      __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
+
+      RPOR1bits.RP2R = 8;       // assign RP2 for SCK1
+      RPOR0bits.RP1R = 7;       // assign RP1 for SDO1
+      RPINR20bits.SDI1R = 0;    // assign RP0 for SDI1
+
+      __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS                
+
+	#elif defined(__PIC24FJ256GB110__)
+
+		AD1PCFGL = 0xFFFF;
+
+		//Initialize the SPI
+		RPINR20bits.SDI1R = 23;
+		RPOR7bits.RP15R = 7;
+		RPOR0bits.RP0R = 8;    
+
+		//enable a pull-up for the card detect, just in case the SD-Card isn't attached
+		//  then lets have a pull-up to make sure we don't think it is there.
+		CNPU5bits.CN68PUE = 1; 
+
+   #endif
 
    while (!MDD_MediaDetect());
 

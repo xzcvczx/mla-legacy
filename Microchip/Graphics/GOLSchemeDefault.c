@@ -64,6 +64,16 @@ const GOL_SCHEME GOLSchemeDefault =
     WHITE,                              // Color 1 usually assigned to an Object state.
     BLACK,                              // Color used when an Object is in a disabled state.
     BLACK,                              // Background color used to hide Objects.
+#elif (COLOR_DEPTH == 4)
+    GRAY006,                            // Emboss dark color used for 3d effect.
+    GRAY010,                            // Emboss light color used for 3d effect.
+    WHITE,                              // Character color 0 used for objects that supports text.
+    BLACK,                              // Character color 1 used for objects that supports text.
+    GRAY012,                            // Character color used when object is in a disabled state.
+    GRAY008,                            // Color 0 usually assigned to an Object state.
+    GRAY004,                            // Color 1 usually assigned to an Object state.
+    GRAY014,                            // Color used when an Object is in a disabled state.
+    BLACK,                              // Background color used to hide Objects.
 #else    
     RGBConvert(0x2B, 0x55, 0x87),       // Emboss dark color used for 3d effect.
     RGBConvert(0xD4, 0xE4, 0xF7),       // Emboss light color used for 3d effect.
@@ -82,6 +92,11 @@ const GOL_SCHEME GOLSchemeDefault =
 #endif
 
 #ifdef USE_GRADIENT
+
+#ifdef USE_PALETTE
+    #error "The USE_GRADIENT feature is not currently supported when USE_PALETTE is enabled."
+#endif
+
     {
         GRAD_NONE,                      // Gradient type
         RGBConvert(0xA9, 0xDB, 0xEF),   // Starting color

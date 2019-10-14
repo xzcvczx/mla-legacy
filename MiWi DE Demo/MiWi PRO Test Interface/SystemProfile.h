@@ -48,9 +48,9 @@
 /************************ HEADERS **********************************/
 #include "ConfigApp.h"
 #if defined(PROTOCOL_P2P)
-    #include "WirelessProtocols\P2P\P2P.h"
+    #include "WirelessProtocols/P2P/P2P.h"
 #elif defined(PROTOCOL_MIWI)
-    #include "WirelessProtocols\MiWi\MiWi.h"
+    #include "WirelessProtocols/MiWi/MiWi.h"
 #elif defined(PROTOCOL_MIWI_PRO)
-    #include "WirelessProtocols\MiWiPRO\MiWiPRO.h"
+    #include "WirelessProtocols/MiWiPRO/MiWiPRO.h"
 #endif

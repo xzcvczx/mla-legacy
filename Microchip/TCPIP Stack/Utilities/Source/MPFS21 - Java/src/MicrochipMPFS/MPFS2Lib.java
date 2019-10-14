@@ -13,7 +13,7 @@ import java.text.*;
 
 public class MPFS2Lib //: MPFS2Writer
 {
-    MainMPFS MPFS2;
+    MainMPFS  mainMpfs;
     public String LocalPath;
     public String LocalFile;
     public String SourcePath;
@@ -30,6 +30,7 @@ public class MPFS2Lib //: MPFS2Writer
     public int MPFS2_FLAG_HASINDEX = 0x0002;
     //public static long ImageLength=0;
     public static String ASCIILine;
+    public static String emptyStr;
     public String generatedImageName;
     public List<File> deeperList = new ArrayList<File>();
     public String DirPathString;
@@ -198,6 +199,7 @@ public class MPFS2Lib //: MPFS2Writer
 
         while((byteRead = br.read(buf))!= -1)
         {
+            if(byteRead == 0) break;
             byteCnt++;
             strLine.append(buf);
         }
@@ -207,6 +209,7 @@ public class MPFS2Lib //: MPFS2Writer
         ByteArrayOutputStream tempout = new ByteArrayOutputStream();
         while((byteRead = inputFile.read(fileData))!= -1)
         {
+           if(byteRead == 0) break;
            tempout.write(fileData);
         }
         newFile.data = tempout.toByteArray();
@@ -219,12 +222,13 @@ public class MPFS2Lib //: MPFS2Writer
         {
             idxFile = dynVarParser.Parse(newFile,strLine);
         }
-        inputFile = new FileInputStream(localName);
+        
 
         // GZip the file if possible
         int gzipRatio = 0;
         if (idxFile == null && !this.FileMatches(localName, this.nonGZipTypes))
         {
+            inputFile = new FileInputStream(localName);
            /*ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream("output.zip"));
             zipout.putNextEntry(new ZipEntry("output.zip"));*/
             GZIPOutputStream zipout  =  new GZIPOutputStream(new
@@ -239,6 +243,7 @@ public class MPFS2Lib //: MPFS2Writer
             }
             while((byteRead = inputFile.read(fileData)) != -1)
             {
+                if(byteRead == 0) break;
                 zipout.write(fileData,0,byteRead);
             }
             zipout.finish();
@@ -247,7 +252,6 @@ public class MPFS2Lib //: MPFS2Writer
 //            zipout.write(byteRead);
 //            byteRead = inputFile.read();
 //            }
-            inputFile.close();
             //zipout.closeEntry();
             zipout.close();
             File file_zip = new File("output.gzip");
@@ -257,7 +261,7 @@ public class MPFS2Lib //: MPFS2Writer
             FileInputStream inputZipFile = new FileInputStream("output.gzip");
 
             // Only use zipped copy if it's smaller
-            if (file_zip.length() < newFile.fileSizeLen)
+            if ((file_zip.length() < newFile.fileSizeLen) && (file_zip.length() > 0))
             {
                 ByteArrayInputStream tempNewFileDataArray =
                         new ByteArrayInputStream(newFile.data);
@@ -275,6 +279,7 @@ public class MPFS2Lib //: MPFS2Writer
                 tempout = new ByteArrayOutputStream();
                 while((byteRead=inputZipFile.read(fileData))!= -1)
                 {
+                    if(byteRead == 0) break;
                     tempout.write(fileData);
                 }
                 newFile.data = tempout.toByteArray();
@@ -283,6 +288,7 @@ public class MPFS2Lib //: MPFS2Writer
             }
             inputZipFile.close();
             file_zip.delete();
+            inputFile.close();
         }
 
         // Add the file and return
@@ -619,7 +625,7 @@ public class MPFS2Lib //: MPFS2Writer
     }
     public void Close()
     {
-       String tempStr;
+       String tempStr = " ";
        int lineLen=0;
 
        try{
@@ -627,9 +633,10 @@ public class MPFS2Lib //: MPFS2Writer
        {
            lineLen = (16-(ImageLength % 16))*5+1;
            String  formatString = "%"+lineLen+"c";
+           emptyStr = " ";
            //tempStr = String.format(formatString,' ');
            //tempStr = tempStr+String.format("%20s",ASCIILine);
-           tempStr = padLeft(" ",lineLen);
+           tempStr = padLeft(emptyStr,lineLen);
            tempStr = tempStr+padRight(ASCIILine,20);
            tempStr = tempStr+" */";
            //tempStr = String.format("%20s",ASCIILine+" */");
@@ -1494,6 +1501,6 @@ public static String padRight(String s, int n) {
 }
 
 public static String padLeft(String s, int n) {
-    return String.format("%1$#" + n + "s", s);
+    return String.format("%1$" + n + "s", s);
 }
 }

@@ -12,12 +12,12 @@ LIBPATH .
   #IFDEF _EXTENDEDMODE
     FILES c018i_e.o
     FILES clib_e.lib
-    FILES p18f13k50_e.lib
+    FILES p18F13K50_e.lib
 
   #ELSE
     FILES c018i.o
     FILES clib.lib
-    FILES p18f13k50.lib
+    FILES p18F13K50.lib
   #FI
 
 #FI

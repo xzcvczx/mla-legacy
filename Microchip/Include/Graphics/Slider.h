@@ -110,6 +110,30 @@ typedef struct
 void    SldSetRange(SLIDER *pSld, SHORT newRange);
 
 /*********************************************************************
+* Macros:  SldGetRange(pSld)
+*
+* Overview: Returns the current range of the thumb. 
+*
+* PreCondition: none
+*
+* Input: pSld - Pointer to the object.
+*
+* Output: Returns the current range of the slider thumb.
+*
+* Example:
+*   <CODE> 
+*	WORD range;
+*	SLIDER *pSld;
+*
+*		range = SldGetRange(pSld);
+*	</CODE> 
+*
+* Side Effects: none
+*
+********************************************************************/
+    #define SldGetRange(pSld)   (((SLIDER*)pSld)->range)
+
+/*********************************************************************
 * Function: void SldSetPage(SLIDER *pSld, WORD newPage) 
 *
 * Overview: This sets the page size of the object. Page size defines 
@@ -133,36 +157,12 @@ void    SldSetRange(SLIDER *pSld, SHORT newRange);
 void    SldSetPage(SLIDER *pSld, WORD newPage);
 
 /*********************************************************************
-* Macros:  SldGetRange(pSld)
-*
-* Overview: Returns the current slider page. Value is always
-*           in the 1-range/2 inclusive for both slider and 
-*			scrollbar type.
-*
-* PreCondition: none
-*
-* Input: pSld - Pointer to the object.
-*
-* Output: Returns the current value of the slider range.
-*
-* Example:
-*   <CODE> 
-*	WORD range;
-*	SLIDER *pSld;
-*
-*		range = SldGetRange(pSld);
-*	</CODE> 
-*
-* Side Effects: none
-*
-********************************************************************/
-    #define SldGetRange(pSld)   (((SLIDER*)pSld)->range)
-
-/*********************************************************************
 * Macros:  SldGetPage(pSld)
 *
-* Overview: Returns returns the current slider thumb position. 
-*			Value is always in the 1 to range/2 inclusive.
+* Overview: Returns the current page size of the object. Page size defines 
+*			the delta change of the thumb position when incremented 
+*      		via SldIncPos() or decremented via SldDecPos(). Page size 
+*			minimum value is 1. Maximum value is range/2. 
 *
 * PreCondition: none
 *

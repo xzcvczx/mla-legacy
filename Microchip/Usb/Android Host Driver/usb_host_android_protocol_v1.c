@@ -42,6 +42,13 @@ Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
   2.9         Initial release
+  2.9a        No Change
+  2.9b        Fixed a race condition between receiving the transfer complete
+              of the "enter accessory mode" command and the device detaching
+              from the bus.  If the detach event was passed from the stack before
+              the transfer complete, then the driver would think that the device
+              didn't successfully enter accessory mode resulting in communication
+              failure.
 
 *******************************************************************************/
 
@@ -340,12 +347,6 @@ BOOL AndroidAppIsWriteComplete_Pv1(void* handle, BYTE* errorCode, DWORD* size)
                                     size
                                 ) == TRUE)
     {
-        if(errorCode != USB_SUCCESS)
-        {
-            device->status.TXBusy = 0;
-            return TRUE;
-        }
-
         device->status.TXBusy = 0;
         return TRUE;
     }
@@ -745,7 +746,7 @@ void* AndroidInitialize_Pv1 ( BYTE address, DWORD flags, BYTE clientDriverID )
         {
             for(i=0;i<NUM_ANDROID_DEVICES_SUPPORTED;i++)
             {
-                if(devices_pv1[i].state == WAITING_FOR_ACCESSORY_RETURN)
+                if(devices_pv1[i].state == WAITING_FOR_ACCESSORY_RETURN) 
                 {
                     device = &devices_pv1[i];
                     device->state = RETURN_OF_THE_ACCESSORY;
@@ -764,7 +765,14 @@ void* AndroidInitialize_Pv1 ( BYTE address, DWORD flags, BYTE clientDriverID )
             if(devices_pv1[i].state == NO_DEVICE)
             {
                 device = &devices_pv1[i];
-                device->state = DEVICE_ATTACHED;
+                if( (flags & ANDROID_INIT_FLAG_BYPASS_PROTOCOL) == ANDROID_INIT_FLAG_BYPASS_PROTOCOL)
+                {
+                    device->state = RETURN_OF_THE_ACCESSORY;
+                }
+                else
+                {
+                    device->state = DEVICE_ATTACHED;
+                }
                 break;
             }
         }
@@ -881,17 +889,9 @@ BOOL AndroidAppDataEventHandler_Pv1( BYTE address, USB_EVENT event, void *data, 
 {
     BYTE i;
 
-    Nop();
-    Nop();
-    Nop();
-    Nop();
-
     switch (event)
     {
         case EVENT_SOF:              // Start of frame - NOT NEEDED
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
         case EVENT_1MS:              // 1ms timer
             for(i=0;i<NUM_ANDROID_DEVICES_SUPPORTED;i++)
@@ -904,8 +904,6 @@ BOOL AndroidAppDataEventHandler_Pv1( BYTE address, USB_EVENT event, void *data, 
                             //do nothing
                             break;
                         case 1:
-                            //USBHostTerminateTransfer( devices_pv1[i].address, devices_pv1[i].OUTEndpointNum );
-                            //USBHostTerminateTransfer( devices_pv1[i].address, devices_pv1[i].INEndpointNum );
                             USB_HOST_APP_EVENT_HANDLER(devices_pv1[i].address,EVENT_ANDROID_DETACH,&devices_pv1[i],sizeof(ANDROID_PROTOCOL_V1_DEVICE_DATA*));
 
                             //Device has timed out.  Destroy its info.
@@ -920,9 +918,6 @@ BOOL AndroidAppDataEventHandler_Pv1( BYTE address, USB_EVENT event, void *data, 
             }
             return TRUE;
         default:
-            Nop();
-            Nop();
-            Nop();
             break;
     }
     return FALSE;
@@ -961,25 +956,25 @@ BOOL AndroidAppEventHandler_Pv1( BYTE address, USB_EVENT event, void *data, DWOR
     ANDROID_PROTOCOL_V1_DEVICE_DATA *device = NULL;
     BYTE i;
 
-    Nop();
-    Nop();
-    Nop();
-    Nop();
-
     switch (event)
     {
         case EVENT_NONE:             // No event occured (NULL event)
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
+
         case EVENT_DETACH:           // USB cable has been detached (data: BYTE, address of device)
             for(i=0;i<NUM_ANDROID_DEVICES_SUPPORTED;i++)
             {
                 if(devices_pv1[i].address == address)
                 {
+                    if(devices_pv1[i].state == ACCESSORY_STARTING) 
+                    {
+                        devices_pv1[i].state = WAITING_FOR_ACCESSORY_RETURN;
+                    }
+
                     if(devices_pv1[i].state != WAITING_FOR_ACCESSORY_RETURN)
                     {
+                        device = &devices_pv1[i];
+
                         USBHostTerminateTransfer( device->address, device->OUTEndpointNum );
                         USBHostTerminateTransfer( device->address, device->INEndpointNum );
                         USB_HOST_APP_EVENT_HANDLER(device->address,EVENT_ANDROID_DETACH,device,sizeof(ANDROID_PROTOCOL_V1_DEVICE_DATA*));
@@ -993,14 +988,9 @@ BOOL AndroidAppEventHandler_Pv1( BYTE address, USB_EVENT event, void *data, DWOR
 
             return TRUE;
         case EVENT_HUB_ATTACH:       // USB hub has been attached
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
+
         case EVENT_TRANSFER:         // A USB transfer has completed - NOT USED
-            Nop();
-            Nop();
-            Nop();
 
             for(i=0;i<NUM_ANDROID_DEVICES_SUPPORTED;i++)
             {
@@ -1027,34 +1017,21 @@ BOOL AndroidAppEventHandler_Pv1( BYTE address, USB_EVENT event, void *data, DWOR
             
             return TRUE;
         case EVENT_RESUME:           // Device-mode resume received
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
+
         case EVENT_SUSPEND:          // Device-mode suspend/idle event received
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
+
         case EVENT_RESET:            // Device-mode bus reset received
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
+
         case EVENT_STALL:            // A stall has occured
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
+
         case EVENT_BUS_ERROR:            // BUS error has occurred
-            Nop();
-            Nop();
-            Nop();
             return TRUE;
+
         default:
-            Nop();
-            Nop();
-            Nop();
             break;
     }
     return FALSE;

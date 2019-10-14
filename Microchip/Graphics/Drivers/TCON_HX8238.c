@@ -44,7 +44,7 @@
 #include "HardwareProfile.h"
 #include "TimeDelay.h"
     
-#ifdef USE_TCON_HX8238
+#if defined (USE_TCON_HX8238)
 
 #if defined (GFX_USE_DISPLAY_CONTROLLER_SSD1926)
     #include "Graphics/SSD1926.h"
@@ -105,15 +105,15 @@
     
     // use the bitbang version using SSD1926 GPIO pins
     
-    #define TCON_CSLow()            (GfxTconSetIO(CS, 0))
-    #define TCON_CSHigh()           (GfxTconSetIO(CS, 1))
-    #define TCON_CLKLow()           (GfxTconSetIO(SCL, 0))
-    #define TCON_CLKHigh()          (GfxTconSetIO(SCL, 1))
-    #define TCON_DataLow()          (GfxTconSetIO(SDO, 0))
-    #define TCON_DataHigh()         (GfxTconSetIO(SDO, 1))
+    #define TCON_CSLow()            (GfxTconSetIO(BB_CS, 0))
+    #define TCON_CSHigh()           (GfxTconSetIO(BB_CS, 1))
+    #define TCON_CLKLow()           (GfxTconSetIO(BB_SCL, 0))
+    #define TCON_CLKHigh()          (GfxTconSetIO(BB_SCL, 1))
+    #define TCON_DataLow()          (GfxTconSetIO(BB_SDO, 0))
+    #define TCON_DataHigh()         (GfxTconSetIO(BB_SDO, 1))
 
-    #define TCON_SetCommand()       (GfxTconSetIO(DC, 0))
-    #define TCON_SetData()          (GfxTconSetIO(DC, 1))
+    #define TCON_SetCommand()       (GfxTconSetIO(BB_DC, 0))
+    #define TCON_SetData()          (GfxTconSetIO(BB_DC, 1))
 
     // this is only needed here since the controller IO's are used
     // instead of the IO's from the PIC device.
@@ -121,9 +121,9 @@
 
     // set the GPIO of SSD1926 to as outputs. (used for TCON signals)
     // and initialize them all to "1"
-    #define InitBitBangedIO() {                                     \
-                                SetCtrlBitBangedIO(0xA8, 0x1F);     \
-                                SetCtrlBitBangedIO(0xAC, 0x1F);     \
+    #define InitBitBangedIO() {                                                     \
+                                SetCtrlBitBangedIO(REG_GPIO_CONFIG0, 0x1F);         \
+                                SetCtrlBitBangedIO(REG_GPIO_STATUS_CONTROL0, 0x1F); \
                               }                                
 // end of #elif defined (USE_TCON_SSD1289) 
 
@@ -178,7 +178,7 @@ void GfxTconSetIO(BYTE mask, BYTE level)
         value |= mask;
     }
 
-    SetCtrlBitBangedIO(0xAC, value);
+    SetCtrlBitBangedIO(REG_GPIO_STATUS_CONTROL0, value);
 
 #endif    
 
@@ -275,10 +275,8 @@ void GfxTconInit(void)
     DelayMs(100);
     GfxTconWriteCommand(0x0004, 0x0447);  //Input Data and Color Filter Control
     GfxTconWriteCommand(0x0005, 0xb854);  //Function Control
-    GfxTconWriteCommand(0X000a, 0x4008);  //Contrast/Brightness Control
+    GfxTconWriteCommand(0x000a, 0x4008);  //Contrast/Brightness Control
 
-    //GfxTconWriteCommand(0X000a,0xff18);//Contrast/Brightness Control
-    
     DelayMs(40);
     GfxTconWriteCommand(0x000b, 0xd400);  //Frame Cycle Control
     GfxTconWriteCommand(0x000d, 0x123a);  //Power Control 2
@@ -286,8 +284,8 @@ void GfxTconInit(void)
     GfxTconWriteCommand(0x000e, 0x3000);  //Power Control 3
     DelayMs(200);
     GfxTconWriteCommand(0x000f, 0x0000);  //Gate Scan Position
-    GfxTconWriteCommand(0x0016, 0x9f80);  //Horizontal Porch
-    GfxTconWriteCommand(0x0017, 0x2212);  //Vertical Porch
+    GfxTconWriteCommand(0x0016, 0x9f80);  //Horizontal Porch XLIM = 0x13F or 320 pixels per line (see HX8238 data sheet)
+    GfxTconWriteCommand(0x0017, 0x2212);  //Vertical Porch  HBP = 68 ;VBP = 18
     DelayMs(200);
     GfxTconWriteCommand(0x001e, 0x00ef);  //Set the VCOMH voltage
     DelayMs(200);
@@ -302,6 +300,9 @@ void GfxTconInit(void)
     GfxTconWriteCommand(0x0037, 0x0000);  //Gamma Control
     GfxTconWriteCommand(0x003a, 0x140b);  //Gamma Control
     GfxTconWriteCommand(0x003b, 0x140b);  //Gamma Control
+    DelayMs(20);
+
+    TCON_CLKLow();    
 }
 
-#endif // #ifdef USE_TCON_HX8238
+#endif // #if defined (USE_TCON_HX8238)

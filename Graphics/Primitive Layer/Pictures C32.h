@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.3.0
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.8.17
  *****************************************************************************/
 
 #ifndef PICTURES_C32_H_FILE
@@ -48,6 +48,7 @@
 #if (COLOR_DEPTH > 16)
 #error "Color Depth needs to be 16 to correctly use these resources"
 #endif
+
 
 
 /*****************************************************************************

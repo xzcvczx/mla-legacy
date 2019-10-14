@@ -161,7 +161,7 @@
     
     // not using Double Buffering
     
-    #if (GFX_DISPLAY_BUFFER_START_ADDRESS >= GFX_EPMP_CS1_BASE_ADDRESS) || (GFX_DISPLAY_BUFFER_START_ADDRESS >= GFX_EPMP_CS1_BASE_ADDRESS)
+    #if (GFX_DISPLAY_BUFFER_START_ADDRESS >= GFX_EPMP_CS1_BASE_ADDRESS) || (GFX_DISPLAY_BUFFER_START_ADDRESS >= GFX_EPMP_CS2_BASE_ADDRESS)
         #if (COLOR_DEPTH == 16)
             
             __eds__ WORD GFXDisplayBuffer[GFX_DISPLAY_PIXEL_COUNT] __attribute__((eds, address(GFX_DISPLAY_BUFFER_START_ADDRESS), noload, section("Graphics_Display_Buffer"))); 

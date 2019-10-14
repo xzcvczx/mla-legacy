@@ -2,14 +2,8 @@
   File Information:
     FileName:     	usb_function_ccid.h
     Dependencies:	See INCLUDES section
-    Processor:		PIC18 or PIC24 USB Microcontrollers
-    Hardware:		The code is natively intended to be used on the following
-    				hardware platforms: PICDEM™ FS USB Demo Board,
-    				PIC18F87J50 FS USB Plug-In Module, or
-    				Explorer 16 + PIC24 USB PIM.  The firmware may be
-    				modified for use on other USB platforms by editing the
-    				HardwareProfile.h file.
-    Complier:  		Microchip C18 (for PIC18) or C30 (for PIC24)
+    Processor:		PIC18, PIC24 Or PIC32
+    Complier:  		C18, C30, or C32
     Company:		Microchip Technology, Inc.
 
     Software License Agreement:
@@ -38,11 +32,11 @@
 
   Summary:
     This file contains all of functions, macros, definitions, variables,
-    datatypes, etc. that are required for usage with the AUDIO function
-    driver. This file should be included in projects that use the Audio
+    datatypes, etc. that are required for usage with the USB CCID function
+    driver. This file should be included in projects that use the USB CCID
     \function driver.  This file should also be included into the
     usb_descriptors.c file and any other user file that requires access to the
-    HID interface.
+    USB CCID interface.
 
 
 
@@ -50,14 +44,14 @@
     directory.
 
   Description:
-    USB AUDIO Function Driver File
+    USB CCID Function Driver File
 
     This file contains all of functions, macros, definitions, variables,
-    datatypes, etc. that are required for usage with the AUDIO function
-    driver. This file should be included in projects that use the AUDIO
+    datatypes, etc. that are required for usage with the USB CCID function
+    driver. This file should be included in projects that use the USB CCID
     \function driver.  This file should also be included into the
     usb_descriptors.c file and any other user file that requires access to the
-    AUDIO interface.
+    USB CCID interface.
 
     This file is located in the "\<Install Directory\>\\Microchip\\Include\\USB"
     directory.
@@ -158,6 +152,18 @@
 #define USB_CCID_CMD_NOT_SUPPORTED           0x00
 
     
+
+
+/** E X T E R N S ************************************************************/
+extern volatile CTRL_TRF_SETUP SetupPkt;
+extern USB_HANDLE usbCcidBulkOutHandle;
+extern USB_HANDLE usbCcidBulkInHandle;
+extern USB_HANDLE usbCcidInterruptInHandle;
+extern unsigned char usbCcidBulkOutEndpoint[USB_EP_SIZE];	//User application buffer for receiving and holding OUT packets sent from the host
+extern unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];	//User application buffer for sending IN packets to the host
+
+/** Section: PUBLIC PROTOTYPES **********************************************/
+
 /******************************************************************************
     Function:
         void mUSBCCIDBulkInRam(BYTE *pData, BYTE len)
@@ -193,21 +199,135 @@
     usbCcidBulkInTrfState = USB_CCID_BULK_IN_BUSY;    \
 }
 
+/******************************************************************************
+ 	Function:
+ 		void USBCheckCCIDRequest(void)
+ 
+ 	Description:
+ 		This routine checks the setup data packet to see if it
+ 		knows how to handle it
+ 		
+ 	PreCondition:
+ 		None
 
-/** E X T E R N S ************************************************************/
-extern volatile CTRL_TRF_SETUP SetupPkt;
-
-
-extern USB_HANDLE usbCcidBulkOutHandle;
-extern USB_HANDLE usbCcidBulkInHandle;
-extern USB_HANDLE usbCcidInterruptInHandle;
-extern unsigned char usbCcidBulkOutEndpoint[USB_EP_SIZE];	//User application buffer for receiving and holding OUT packets sent from the host
-extern unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];		//User application buffer for sending IN packets to the host
-
-/** Section: PUBLIC PROTOTYPES **********************************************/
+	Parameters:
+		None
+		
+	Return Values:
+		None
+		
+	Remarks:
+		None
+		 
+  *****************************************************************************/
 void USBCheckCCIDRequest(void);
+
+/**************************************************************************
+  Function:
+        void USBCCIDInitEP(void)
+    
+  Summary:
+    This function initializes the CCID function driver. This function should
+    be called after the SET_CONFIGURATION command.
+  Description:
+    This function initializes the CCID function driver. This function sets
+    the default line coding (baud rate, bit parity, number of data bits,
+    and format). This function also enables the endpoints and prepares for
+    the first transfer from the host.
+    
+    This function should be called after the SET_CONFIGURATION command.
+    This is most simply done by calling this function from the
+    USBCBInitEP() function.
+    
+    Typical Usage:
+    <code>
+        void USBCBInitEP(void)
+        {
+            USBCCIDInitEP();
+        }
+    </code>
+  Conditions:
+    None
+  Remarks:
+    None                                                                   
+  **************************************************************************/
 void USBCCIDInitEP(void);
+
+/************************************************************************
+  Function:
+        void USBCCIDBulkInService(void)
+    
+  Summary:
+    USBCCIDBulkInService handles device-to-host transaction(s). This function
+    should be called once per Main Program loop after the device reaches
+    the configured state.
+  Description:
+    USBCCIDBulkInService handles device-to-host transaction(s). This function
+    should be called once per Main Program loop after the device reaches
+    the configured state.
+    
+    Typical Usage:
+    <code>
+    void main(void)
+    {
+        USBDeviceInit();
+        while(1)
+        {
+            USBDeviceTasks();
+            if((USBGetDeviceState() \< CONFIGURED_STATE) ||
+               (USBIsDeviceSuspended() == TRUE))
+            {
+                //Either the device is not configured or we are suspended
+                //  so we don't want to do execute any application code
+                continue;   //go back to the top of the while loop
+            }
+            else
+            {
+                //Run application code.
+                UserApplication();
+
+				//Keep trying to send data to the PC as required
+                USBCCIDBulkInService();
+            }
+        }
+    }
+    </code>
+  Conditions:
+    None
+  Remarks:
+    None                                                                 
+  ************************************************************************/
 void USBCCIDBulkInService(void);
+
+/******************************************************************************
+  Function:
+	void USBCCIDSendDataToHost(BYTE *data, WORD length)
+		
+  Summary:
+    USBCCIDSendDataToHost writes an array of data to the USB. Use this version, is
+    capable of transfering 0x00 (what is typically a NULL character in any of
+    the string transfer functions).
+
+  Description:
+    USBCCIDSendDataToHost writes an array of data to the USB. Use this version, is
+    capable of transfering 0x00 (what is typically a NULL character in any of
+    the string transfer functions).
+    
+    
+    The transfer mechanism for device-to-host(put) is more flexible than
+    host-to-device(get). It can handle a string of data larger than the
+    maximum size of bulk IN endpoint. A state machine is used to transfer a
+    \long string of data over multiple USB transactions. USBCCIDBulkInService()
+    must be called periodically to keep sending blocks of data to the host.
+
+  Conditions:
+    
+
+  Input:
+    BYTE *data - pointer to a RAM array of data to be transfered to the host
+    WORD length - the number of bytes to be transfered 
+		
+ *****************************************************************************/
 void USBCCIDSendDataToHost(BYTE *pData, WORD len);
 
 /** Section: STRUCTURES **********************************************/

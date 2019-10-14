@@ -50,7 +50,7 @@ extern void SetReg(WORD index, BYTE value);
  LOCAL FUNCTIONS PROTOTYPES
 **************************************************************************/
 BYTE            SDFile2JPEGFIFO(DWORD fifoAddress, DWORD byteSize, FSFILE *stream);
-void            JPEGSetup(SSD_JPEG_DECODE *decode);
+void            SSD1926Setup(SSD_JPEG_DECODE *decode);
 SSD_JPEG_ERR    JPEGHeader(SSD_JPEG_DECODE *decode);
 void            JPEGResize(SSD_JPEG_DECODE *decode);
 void            JPEGStart(void);
@@ -59,7 +59,7 @@ void            JPEGStop(void);
 
 /**************************************************************************
   Function:
-    void JPEGSetRGB(void)
+    void SSD1926SetRGB(void)
   Conditions:
     None.
   Input:
@@ -75,14 +75,14 @@ void            JPEGStop(void);
   **************************************************************************/
 inline void __attribute__ ((always_inline))
 /* */
-JPEGSetRGB(void)
+SSD1926SetRGB(void)
 {
     SetReg(REG_RGB_SETTING, 0xc0);
 }
 
 /**************************************************************************
   Function:
-    void JPEGSetYUV(void)
+    void SSD1926SetYUV(void)
   Conditions:
     None.
   Input:
@@ -98,7 +98,7 @@ JPEGSetRGB(void)
   **************************************************************************/
 inline void __attribute__ ((always_inline))
 /* */
-JPEGSetYUV(void)
+SSD1926SetYUV(void)
 {
     SetReg(REG_RGB_SETTING, 0x00);
 }
@@ -108,7 +108,7 @@ JPEGSetYUV(void)
     BYTE JPEGPutImage(char* filename)
   Conditions:
     FSInit() file system initialization must be done, 
-    JPEGSetYUV() YUV mode must be set.
+    SSD1926SetYUV() YUV mode must be set.
   Input:
     filename - pointer to the file name string.
   Return:
@@ -131,7 +131,7 @@ BYTE JPEGPutImage(char *filename)
         return (FALSE);
 
     jpeg_decode.stream = (void *)jpeg_file;
-    JPEGSetup(&jpeg_decode);
+    SSD1926Setup(&jpeg_decode);
     JPEGHeader(&jpeg_decode);
     JPEGResize(&jpeg_decode);
     JPEGStart();
@@ -219,7 +219,7 @@ BYTE SDFile2JPEGFIFO(DWORD fifoAddress, DWORD byteSize, FSFILE *stream)
 
 /*********************************************************************
  * Function:       
- *  void JPEGSetup(SSD_JPEG_DECODE *decode)
+ *  void SSD1926Setup(SSD_JPEG_DECODE *decode)
  * PreCondition:    
  *  JPEG file should be opened.
  * Input:           
@@ -233,7 +233,7 @@ BYTE SDFile2JPEGFIFO(DWORD fifoAddress, DWORD byteSize, FSFILE *stream)
  * Note:
  *  None.           
  ********************************************************************/
-void JPEGSetup(SSD_JPEG_DECODE *decode)
+void SSD1926Setup(SSD_JPEG_DECODE *decode)
 {
     DWORD_VAL   size;
 
@@ -291,7 +291,7 @@ void JPEGSetup(SSD_JPEG_DECODE *decode)
  * Function:       
  *  SSD_JPEG_ERR JPEGHeader(SSD_JPEG_DECODE *decode)
  * PreCondition:    
- *  JPEGSetup(...) must be called first.
+ *  SSD1926Setup(...) must be called first.
  * Input:           
  *  decode - pointer to decoder parameters
  * Output:          

@@ -470,9 +470,9 @@ extern BOOL SNMPIdRecrdValidation(PDU_INFO * pduPtr,OID_INFO *var,BYTE * oidValu
 
 
 
-extern SNMP_ACTION Snmpv3MsgProcessingModelProcessPDU(BYTE inOutPdu);
-extern SNMP_ACTION Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu);
-extern SNMP_ACTION Snmpv3ScopedPduProcessing(BYTE inOutPdu);
+extern SNMP_ERR_STATUS Snmpv3MsgProcessingModelProcessPDU(BYTE inOutPdu);
+extern SNMP_ERR_STATUS Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu);
+extern SNMP_ERR_STATUS Snmpv3ScopedPduProcessing(BYTE inOutPdu);
 
 extern UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targetIndex);
 extern BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len);

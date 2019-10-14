@@ -1,11 +1,11 @@
 /********************************************************************
  FileName:		SClib.h
  Dependencies:	See INCLUDES section
- Processor:		PIC18, PIC24 Microcontrollers
+ Processor:		PIC18, PIC24 & PIC32 Microcontrollers
  Hardware:		This demo is natively intended to be used on Exp 16, LPC
  				& HPC Exp board. This demo can be modified for use on other hardware
  				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24)
+ Complier:  	Microchip C18 (for PIC18), C30 (for PIC24) & C30 (for PIC32)
  Company:		Microchip Technology, Inc.
 
  Software License Agreement:

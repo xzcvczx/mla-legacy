@@ -8,3 +8,6 @@ http://www.unifont.org/fontguide/
 
 UnBatang:
 http://www.unifont.org/fontguide/
+
+VeraMono:
+http://www-old.gnome.org/fonts/#Final_Bitstream_Vera_Fonts

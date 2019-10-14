@@ -8,7 +8,7 @@ Signature = "$Windows NT$"
 Class = CustomUSBDevices
 ClassGuid= {a503e2d3-a031-49dc-b684-c99085dbfe92}
 Provider = %MFGNAME%
-DriverVer=07/14/2011,1.0.0.4
+DriverVer=08/02/2011,1.0.0.6
 CatalogFile=MPLABCommWinUSB.cat		;CAT file used when obtaining a WHQL signature on the driver package
 					;Otherwise isn't needed.
 ;------------------------------------------------------------------------------
@@ -67,6 +67,7 @@ ServiceBinary   = %12%\WinUSB.sys
 
 [USB_Install.Wdf]
 KmdfService=WINUSB, WinUsb_Install
+UmdfServiceOrder=WINUSB
 
 [WinUSB_Install]
 KmdfLibraryVersion=1.9
@@ -85,28 +86,45 @@ AddReg=CoInstallers_AddReg
 CopyFiles=CoInstallers_CopyFiles
 
 [CoInstallers_AddReg]
-HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll","WUDFUpdate_01009.dll"
 
 [CoInstallers_CopyFiles]
 WinUSBCoInstaller2.dll
 WdfCoInstaller01009.dll
+WUDFUpdate_01009.dll
 
 [DestinationDirs]
 CoInstallers_CopyFiles=11
 
 ; ================= Source Media Section =====================
 
-[SourceDisksNames]
+[SourceDisksNames.x86]
 1 = %DISK_NAME%,,,\i386
+
+[SourceDisksNames.amd64]
 2 = %DISK_NAME%,,,\amd64
 
 [SourceDisksFiles.x86]
 WinUSBCoInstaller2.dll=1
 WdfCoInstaller01009.dll=1
+WUDFUpdate_01009.dll=1
 
 [SourceDisksFiles.amd64]
 WinUSBCoInstaller2.dll=2
 WdfCoInstaller01009.dll=2
+WUDFUpdate_01009.dll=2
+
+; Copy Files section
+;------------------------------------------------------------------------------
+[_CopyFiles_sys]
+winusb.sys
+
+;************************************************* *****************************
+; Destination Directories
+;------------------------------------------------------------------------------
+[DestinationDirs]
+DefaultDestDir = 12 ; %SystemRoot%\system32\drivers
+_CopyFiles_sys = 12
 
 ; =================== Strings ===================
 

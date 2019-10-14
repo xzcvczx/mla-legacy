@@ -5,6 +5,60 @@ Microchip TCP/IP Stack Version Log:
 Note: Please file bug-reports/bug-fixes at http://support.microchip.com/ or post 
       to the Microchip TCP/IP -> Ethernet Forum at http://forum.microchip.com/
       Look for stack updates at http://www.microchip.com/mal/
+      
+      
+********
+v5.36.4     Oct 2011
+********      
+Changes:
+1.  SNMPNotify() is updated to support ASCII string varible type for 
+    both TRAPv1 and TRAPv2.ASCII string address pointer is assigned to argument 
+    val(SNMP_VAL) of SNMPNotify().
+2.  The SSL module has been updated to support 1024-bit RSA key lengths for server and
+    client on all architectures.  PIC32 microcontrollers now support client/server
+    RSA key lengths of 2048 bits.  NOTE: To support these changes, you must manually
+    modify your copy of RSA.c.  A description of the required changes ("Required SSL 
+    Changes.pdf") can be found in your Microchip Applications Libraries installation 
+    directory in the "\Microchip\Help\Supplementary TCPIP Help" subdirectory.
+
+Fixes:
+1.  SNMP local variable community length increased with plus one.SNMP warnings 
+    has been removed for the compiler version C32 2.01 for zero optimisation.
+2.  Updated MPFS2.jar and mib2bib.jar to support Java version 1.7. 
+3.  Fixed MPFS2.jar offset issue for fileRcrd.bin and dynRcrd.bin file and it was 
+    due to the file which has zero dynamic variable.Fixed Crimson editor problem 
+    with webPage2 folder where user couldn't save files using Crimson Editor 
+    if the WebPages2 folder that contained those files was selected in the MPFS2
+    utility.
+4.  MPFS2.jar file was getting hanged for the zero file size access.Now Zero file 
+    size also is the part of the respective generated files.
+
+Known Problems:
+1.  Telnet server module does not implement a lot of Telnet functions.  As a 
+    result, it will likely not display correctly or work at all with some Telnet 
+    clients.  The server was tested with the Microsoft telnet.exe utility which 
+    is provided with Microsoft Windows.
+2.  If the DHCP client and DHCP server are used at the same time and you connect 
+    two similar boards to each other (ex: two PICDEM.net 2 boards connected via 
+    a crossover cable), a race condition can occur where both nodes will disable 
+    their DHCP server and neither board will get a successful DHCP lease.  If 
+    this unlikely scenario occurs, as a work around, simply reset one of the 
+    boards to reenable it's DHCP server.
+3.  LCDBlocking.c timing for the LCD_E_IO enable signal is too fast to meet 
+    published data sheet limits for various LCD controllers when compiling for 
+    a PIC32 running at > 43MHz.  Despite this potential timing violation, the 
+    LCD does normally work correctly on the precompiled PIC32 demos for the 
+    Explorer 16 at 80MHz.
+4.  For PIC32 implementations, depending on the configuration, it is possible that the
+    MACGetFreeRxSize() returns a value greater than 64 KB.
+    For backward compatibility reasons the stack uses a 16 bit value to check the returned value
+    and it won't work corretly.
+5.  Limiting the number of UDP sockets to 8 in the stack demos may prevent SNMP trap
+    functionality.  If this occurs, you can increase the MAX_UDP_SOCKETS definition in 
+    TCPIPConfig.h to 10 (if your system will support the increased data memory usage) 
+    to fix this issue.
+6.  The SNMP mib file's date and version parameter does not match the date/version of
+    the current stack release.    
 
 ********
 v5.36.2     July 2011

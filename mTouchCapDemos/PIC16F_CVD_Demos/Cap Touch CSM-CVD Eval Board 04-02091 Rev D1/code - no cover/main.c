@@ -62,11 +62,17 @@
 */
 /// @cond
 
-#include <includes/mTouchCVD.h>              // Required Include
+#include "mTouchCVD.h"              // Required Include
 
 // CONFIGURATION SETTINGS
-__CONFIG(FOSC_INTOSC & WDTE_OFF & PWRTE_ON & MCLRE_OFF & CP_OFF & CPD_OFF & BOREN_ON & CLKOUTEN_OFF & IESO_OFF & FCMEN_OFF);
-__CONFIG(WRT_OFF & PLLEN_ON & STVREN_OFF & BORV_25 & LVP_OFF);
+#include "generic_processorConfigBits.h"        // Provided for ease-of-development. 
+                                                // Should not be used in an actual 
+                                                // application.
+
+    // TIP: Valid configuration bit labels can be found in Hi-Tech's folder.
+    //      C:\Program Files\HI-TECH Software\<COMPILER NAME>\<VERSION NUMBER>\include
+    //      Open the 'pic' header file that corresponds to your microcontroller.
+    //      Ex: 'pic16f1937.h'  --  NOT 'as16f1937.h' or 'cas16f1937.h'
 
 // PROTOTYPES
 void Example_System_Init(void);
