@@ -10,7 +10,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright ¬© 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -20,7 +20,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -73,9 +73,11 @@
         #define SCR2_IMAGE              ((void*)&mchpGraphics)
         #define SCR2_BTN_IMAGE          ((void*)&SettingsMono1BPP)
         #define SCR2_BTN_IMAGE_PRESSED  ((void*)&SettingsPressedMono1BPP)
-
+#ifdef USE_COMP_IPU
+        #define LABEL_TEXT                ("1 BPP - Compressed")
+#else
         #define LABEL_TEXT                ("1 BPP")
-
+#endif
         #define SCR1_PALETTE            (Screen_1BPP_Palette)
         #define SCR2_PALETTE            (Screen_1BPP_Palette)
 
@@ -89,7 +91,11 @@
         #define SCR2_BTN_IMAGE          ((void*)&SettingsMono4BPP)
         #define SCR2_BTN_IMAGE_PRESSED  ((void*)&SettingsPressedMono4BPP)
 
-        #define LABEL_TEXT                ("4 BPP")
+#ifdef USE_COMP_IPU
+        #define LABEL_TEXT              ("4 BPP - Compressed")
+#else
+        #define LABEL_TEXT              ("4 BPP")
+#endif
 
         #define SCR1_PALETTE            (Screen1_4BPP_Palette)
         #define SCR2_PALETTE            (Screen2_4BPP_Palette)
@@ -104,7 +110,11 @@
         #define SCR2_BTN_IMAGE          ((void*)&Settings8BPP)
         #define SCR2_BTN_IMAGE_PRESSED  ((void*)&SettingsPressed8BPP)
 
-        #define LABEL_TEXT                ("8 BPP")
+#ifdef USE_COMP_IPU
+        #define LABEL_TEXT              ("8 BPP - Compressed")
+#else
+        #define LABEL_TEXT              ("8 BPP")
+#endif
 
         #define SCR1_PALETTE            (Screen1_8BPP_Palette)
         #define SCR2_PALETTE            (Screen2_8BPP_Palette)

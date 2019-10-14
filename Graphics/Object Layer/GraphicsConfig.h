@@ -170,4 +170,9 @@
 
     #define COLOR_DEPTH             16
 
+/*********************************************************************
+* Overview: Use RLE compression
+*********************************************************************/
+#define USE_COMP_RLE
+
 #endif // _GRAPHICSCONFIG_H

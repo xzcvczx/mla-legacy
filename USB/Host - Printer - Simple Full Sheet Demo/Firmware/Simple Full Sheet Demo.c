@@ -73,7 +73,7 @@ printer.
 // *****************************************************************************
 // *****************************************************************************
 
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2) 
         _CONFIG2( PLL_96MHZ_ON & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL & PLLDIV_DIV2 & IOL1WAY_ON)
@@ -144,7 +144,7 @@ typedef struct
 // *****************************************************************************
 
 void    MonitorVBUS( void );
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     void PrintImageFullSheet( BYTE __prog__ *ptr, USB_PRINTER_IMAGE_INFO *imageInfo );
 #elif defined( __PIC32MX__ )
     void PrintImageFullSheet( const BYTE *ptr, USB_PRINTER_IMAGE_INFO *imageInfo );
@@ -369,7 +369,7 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
 
 void InitializeVbusMonitor( void )
 {
-    #if defined( __C30__)
+    #if defined( __C30__) || defined __XC16__
         // Set up the A/D converter
         #if defined(__PIC24FJ256DA210__) 
         #elif defined(__PIC24FJ256GB210__)
@@ -472,7 +472,7 @@ void MonitorVBUS( void )
   Remarks:
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void PrintImageFullSheet( BYTE __prog__ *ptr, USB_PRINTER_IMAGE_INFO *imageInfo )
 #elif defined( __PIC32MX__ )
 void PrintImageFullSheet( const BYTE *ptr, USB_PRINTER_IMAGE_INFO *imageInfo )
@@ -537,7 +537,7 @@ void WriteLine( SHORT x, SHORT y, char *p )
 int main (void)
 {
 
-    #if defined (__C30__)
+    #if defined (__C30__) || defined __XC16__
         #if defined( __PIC24FJ256GB110__ ) || defined(__PIC24FJ256GB210__)
             // Configure U2RX - put on pin 49 (RP10)
             RPINR19bits.U2RXR = 10;
@@ -661,7 +661,7 @@ int main (void)
                             imageInfo.scale         = 1.0;
                             imageInfo.positionX     = (PRINTER_PAGE_PORTRAIT_WIDTH - 0x120)/2;
                             imageInfo.positionY     = 100;
-                            #if defined( __C30__ )
+                            #if defined( __C30__ ) || defined __XC16__
                                 PrintImageFullSheet( (BYTE __prog__ *)(logoMCHP.address), &imageInfo );
                             #elif defined( __PIC32MX__ )
                                 PrintImageFullSheet( (const BYTE *)(logoMCHP.address), &imageInfo );
@@ -715,7 +715,7 @@ int main (void)
                             imageInfo.scale         = 1.0;
                             imageInfo.positionX     = 100;
                             imageInfo.positionY     = 100;
-                            #if defined( __C30__ )
+                            #if defined( __C30__ ) || defined __XC16__
                                 PrintImageFullSheet( (BYTE __prog__ *)(logoMCHP.address), &imageInfo );
                             #elif defined( __PIC32MX__ )
                                 PrintImageFullSheet( (const BYTE *)(logoMCHP.address), &imageInfo );
@@ -857,7 +857,7 @@ These are just here to catch any spurious interrupts that we see during
 debugging.
 
 *******************************************************************************/
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 
 void __attribute__((interrupt, auto_psv)) _DefaultInterrupt(void)
 {

@@ -135,8 +135,12 @@
 		* Side Effects: none
 		*
 		********************************************************************/	
-        #define RGBConvert(red, green, blue)    (GFX_COLOR) (((((GFX_COLOR)(red) & 0xF8) >> 3) << 11) | ((((GFX_COLOR)(green) & 0xFC) >> 2) << 5) | (((GFX_COLOR)(blue) & 0xF8) >> 3))                                               
+        #define RGBConvert(red, green, blue)    (GFX_COLOR) ((((GFX_COLOR)(red) & 0xF8) << 8) | (((GFX_COLOR)(green) & 0xFC) << 3) | ((GFX_COLOR)(blue) >> 3))                                               
     #endif
+
+   #define ConvertColor50(color)  (GFX_COLOR)((color & (0b1111011111011110))>>1)
+   #define ConvertColor25(color)  (GFX_COLOR)((color & (0b1110011110011100))>>2)
+   #define ConvertColor75(color)  (GFX_COLOR)(ConvertColor50(color) + ConvertColor25(color))
 
 #elif (COLOR_DEPTH == 24)
 
@@ -168,6 +172,10 @@
 		********************************************************************/	
          #define RGBConvert(red, green, blue)    (GFX_COLOR) (((GFX_COLOR)(red) << 16) | ((GFX_COLOR)(green) << 8) | (GFX_COLOR)(blue))
     #endif
+
+   #define ConvertColor50(color)  (GFX_COLOR)((color & (0x00FEFEFEul))>>1)
+   #define ConvertColor25(color)  (GFX_COLOR)((color & (0x00FCFCFCul))>>2)
+   #define ConvertColor75(color)  (GFX_COLOR)(ConvertColor50(color) + ConvertColor25(color))
 
 #endif
 
@@ -255,6 +263,13 @@
 		#ifndef WHITE
 			#define WHITE   15
 		#endif
+
+		#ifndef LIGHTGRAY
+			#define LIGHTGRAY      GRAY012
+		#endif	
+		#ifndef DARKGRAY
+			#define DARKGRAY        GRAY004
+		#endif	
 		
 	#elif (COLOR_DEPTH == 8) || (COLOR_DEPTH == 16) || (COLOR_DEPTH == 24)
 

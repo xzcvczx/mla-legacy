@@ -43,7 +43,7 @@
 /*
     Grid Object
 
-TODO: Currently the grid does not support scroll bars. It must fit on the screen.
+    Grid does not support scroll bars. Size defined must fit on the screen.
 
 */
 #include <string.h>
@@ -162,7 +162,6 @@ WORD GridDraw(void *pObj)
                 SetColor(pGrid->hdr.pGolScheme->EmbossLtColor);
 
                 // Draw the outside of the box
-                // TODO This should have some 3D effects added with GOL_EMBOSS_SIZE
                 if(pGrid->hdr.state & (GRID_SHOW_LINES | GRID_SHOW_BORDER_ONLY))
                 {
                     while(!Line(pGrid->hdr.left, pGrid->hdr.top, pGrid->hdr.right, pGrid->hdr.top));

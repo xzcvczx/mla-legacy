@@ -52,7 +52,7 @@
 
 #ifndef CFG_INCLUDE_MPLAB_X
 
-#if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
+#if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)  || defined (__dsPIC33E__)
 
 	#if defined (__PIC24FJ256DA210__)
 		/*********************************************************************
@@ -68,6 +68,32 @@
 	     * Display PH480272T-005-I11Q
 	     ********************************************************************/
 		//#include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
+
+    #elif defined (__dsPIC33EP512MU810__)
+
+		/*********************************************************************
+	     * Hardware Configuration for 
+	     * Explorer 16
+    	 * Graphics PicTail v3
+	     * Display TFT-G240320LTSW-118W-E
+	     ********************************************************************/
+		//#include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
+
+		/*********************************************************************
+	     * Hardware Configuration for 
+	     * Explorer 16
+    	 * Graphics PicTail v3
+	     * Display PH480272T-005-I11Q
+	     ********************************************************************/
+		//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
+
+        /*********************************************************************
+         * Hardware Configuration for 
+         * Starter Kit (dsPIC33E Starter Kit)
+         * MultiMedia Development Board
+         * Display TFT-G240320LTSW-118W-E
+         ********************************************************************/
+        #include "Configs/HWP_MEB_PIC_SK_8PMP.h"
 
 	#else
 		/*********************************************************************
@@ -98,7 +124,7 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-    #include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
+    //#include "Configs/HWP_GFXv3_EX16_8PMP_QVGAv1.h"
 	//#include "Configs/HWP_GFXv3_EX16_16PMP_QVGAv1.h"
 
     /*********************************************************************
@@ -127,6 +153,22 @@
      ********************************************************************/
 	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_WQVGAv1.h"
 	//#include "Configs/HWP_GFXv3_PIC_SK_16PMP_WQVGAv1.h"
+	
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Starter Kit
+     * Graphics PicTail LCC
+     ********************************************************************/
+	//#include "Configs/HWP_LCC_EX16_EXT_WQVGAv1.h"
+	#include "Configs/HWP_LCC_PIC_SK_EXT_WQVGAv1.h"
+
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Starter Kit
+     * Graphics PicTail GFX3e
+     ********************************************************************/
+	//#include "Configs/HWP_GFX3e_EX16_8PMP_WQVGAv1.h"
+	//#include "Configs/HWP_GFX3e_PIC_SK_8PMP_WQVGAv1.h"
 	
     /*********************************************************************
      * Hardware Configuration for 
@@ -196,6 +238,8 @@
  * Multimedia Expasion Board 
  * 8 or 16-bit PMP
  ********************************************************************/
+#elif defined(CFG_INCLUDE_MEB_PIC_SK_8PMP)
+    #include "Configs/HWP_MEB_PIC_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_8PMP)
     #include "Configs/HWP_MEB_PIC32_GP_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_16PMP)

@@ -208,6 +208,10 @@ typedef union _POINTER
     //rom far word* fwRom;
 } POINTER;
 
+#define BDT_BASE_ADDR_TAG   __attribute__ ((aligned (512)))
+#define CTRL_TRF_SETUP_ADDR_TAG
+#define CTRL_TRF_DATA_ADDR_TAG
+
  //******** Depricated: v2.2 - will be removed at some point of time ***
 #define _LS         0x00            // Use Low-Speed USB Mode
 #define _FS         0x00            // Use Full-Speed USB Mode

@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FileName:        ExternalResource.h
  * Processor:       PIC24F, PIC24H, dsPIC
- * Compiler:        MPLAB C30 (see release notes for tested revision)
- * Linker:          MPLAB LINK30
+ * Compiler:        MPLAB C30/XC16 (see release notes for tested revision)
+ * Linker:          MPLAB LINK30/XC16
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.45
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.28.15
  *****************************************************************************/
 
 #ifndef EXTERNALRESOURCE_H_FILE
@@ -40,12 +40,20 @@
  * SECTION:  Includes
  *****************************************************************************/
 #include <Graphics/Graphics.h>
+#include "HardwareProfile.h"
 
 /*****************************************************************************
  * SECTION:  Graphics Library Firmware Check
  *****************************************************************************/
-#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
-#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#if(GRAPHICS_LIBRARY_VERSION != 0x0306)
+#warning "It is suggested to use Graphics Library version 3.06 with this version of GRC."
+#endif
+
+/*****************************************************************************
+ * SECTION:  Graphics Bitmap Padding Check
+ *****************************************************************************/
+#ifdef USE_BITMAP_NO_PADDING_LINE
+#error These bitmap resources have been converted with padding of the horizontal lines, but USE_BITMAP_NO_PADDING_LINE is defined in GraphicsConfig.h.
 #endif
 
 
@@ -270,11 +278,9 @@ extern const IMAGE_EXTERNAL head;
  * Description:  Height: 58 pixels, 1 bit per pixel, Range: ' ' to ':'
  * Comment Block:
  * Created from Gentium font. 
- * Gentium font is Copyright (c) 2003-2005, SIL International 
- * (http://scripts.sil.org/). 
+ * Gentium font is Copyright (c) 2003-2005, SIL International (http://scripts.sil.org/). 
  * All Rights Reserved. 
- * Gentium font is licensed under the SIL Open Font 
- * License, Version 1.0. 
+ * Gentium font is licensed under the SIL Open Font License, Version 1.0. 
  * http://scripts.sil.org/OFL 
  ***********************************/
 extern const FONT_EXTERNAL BigFonts;

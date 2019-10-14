@@ -87,8 +87,8 @@ const GOL_SCHEME GOLSchemeDefault =
 #endif
     (void *)&FONTDEFAULT,               // Font selected for the scheme.
 
-#ifdef USE_ALPHABLEND
-    0,                                  // Alpha value used (percent based)
+#if defined USE_ALPHABLEND_LITE || defined USE_ALPHABLEND
+    100,                                // Alpha value used (percent based)
 #endif
 
 #ifdef USE_GRADIENT

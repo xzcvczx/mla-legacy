@@ -64,7 +64,7 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 // *****************************************************************************
 // *****************************************************************************
 
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
 
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
@@ -82,26 +82,6 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
         _CONFIG1(FWDTEN_OFF & ICS_PGx2 & GWRP_OFF & GCP_OFF & JTAGEN_OFF)
         _CONFIG2(POSCMOD_HS & IOL1WAY_ON & OSCIOFNC_ON & FCKSM_CSDCMD & FNOSC_PRIPLL & PLL96MHZ_ON & PLLDIV_DIV2 & IESO_OFF)
     #endif
-#elif defined( __PIC32MX__ )
-    #pragma config UPLLEN   = ON            // USB PLL Enabled
-    #pragma config FPLLMUL  = MUL_20        // PLL Multiplier
-    #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
-    #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
-    #pragma config FPLLODIV = DIV_1         // PLL Output Divider
-    #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
-    #pragma config FWDTEN   = OFF           // Watchdog Timer
-    #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
-    #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
-    #pragma config OSCIOFNC = OFF           // CLKO Enable
-    #pragma config POSCMOD  = HS            // Primary Oscillator
-    #pragma config IESO     = OFF           // Internal/External Switch-over
-    #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
-    #pragma config FNOSC    = PRIPLL        // Oscillator Selection
-    #pragma config CP       = OFF           // Code Protect
-    #pragma config BWP      = OFF           // Boot Flash Write Protect
-    #pragma config PWP      = OFF           // Program Flash Write Protect
-    #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-    #pragma config DEBUG    = OFF           // Background debugger is OFF.
 
 #else
 
@@ -261,17 +241,6 @@ void LoadApplication ( void )
 ***************************************************************************/
 int main ( void )
 {
-    #if defined(__PIC32MX__)
-        // Initialize the MCU
-        SYSTEMConfigWaitStatesAndPB( GetSystemClock() );
-        CheKseg0CacheOn();
-        INTEnableSystemMultiVectoredInt();
-        /* Disable JTAG as this interferes with
-         * with the Explorer 16 LED operation in
-         * Release Mode. */
-        DDPCONbits.JTAGEN = 0;
-    #endif
-
     // Initialize the boot loader IO
     BLIO_InitializeIO();
     BLIO_ReportBootStatus(BL_RESET, "BL: ***** Reset *****\r\n");
@@ -311,22 +280,13 @@ int main ( void )
 
         // Must disable all interrupts
         BLMedia_DeinitializeTransport();
-        
-
-        #if defined(__PIC32MX__)
-
-        INTDisableInterrupts();
-
-        #else
-
         U1IE = 0;
         U1IR = 0xFF;
         IEC5 = 0;
         IFS5 = 0;
         INTCON2bits.ALTIVT = 0;
 
-        #endif
-
+  
         ////////////////////////////
         // Launch the application //
         ////////////////////////////

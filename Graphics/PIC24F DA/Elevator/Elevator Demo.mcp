@@ -56,21 +56,20 @@ file_028=Common
 file_029=Display Driver
 file_030=Display Driver
 file_031=Display Driver
-file_032=Display Driver
+file_032=Memory Programmer
 file_033=Memory Programmer
 file_034=Memory Programmer
 file_035=Memory Programmer
-file_036=Memory Programmer
-file_037=Graphics
+file_036=Graphics
+file_037=.
 file_038=.
-file_039=.
+file_039=Board Support Package
 file_040=Board Support Package
-file_041=Board Support Package
+file_041=.
 file_042=.
-file_043=.
-file_044=Memory Programmer
+file_043=Memory Programmer
+file_044=.
 file_045=.
-file_046=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -118,7 +117,6 @@ file_042=no
 file_043=no
 file_044=no
 file_045=no
-file_046=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -164,9 +162,8 @@ file_040=no
 file_041=no
 file_042=no
 file_043=no
-file_044=no
+file_044=yes
 file_045=yes
-file_046=yes
 [FILE_INFO]
 file_000=..\..\..\Microchip\Graphics\Primitive.c
 file_001=..\..\..\Microchip\Common\TimeDelay.c
@@ -197,49 +194,39 @@ file_025=..\..\..\Microchip\Include\Graphics\GOL.h
 file_026=..\..\..\Board Support Package\SST39LF400.h
 file_027=..\..\..\Microchip\Include\GenericTypeDefs.h
 file_028=..\..\..\Microchip\Include\TimeDelay.h
-file_029=..\..\..\Microchip\Include\Graphics\DisplayDriver.h
-file_030=..\..\..\Microchip\Include\Graphics\gfxtcon.h
-file_031=..\..\..\Microchip\Include\Graphics\gfxepmp.h
-file_032=..\..\..\Microchip\Include\Graphics\mchpGfxDrv.h
-file_033=..\..\Common\comm_pkt.h
-file_034=..\..\Common\comm_pkt_callback.h
-file_035=..\..\Common\ExternalMemory.h
-file_036=..\..\Common\FlashProgrammer.h
-file_037=..\..\..\Microchip\Include\Graphics\gfxcolors.h
-file_038=ElevatorDemo.h
-file_039=ElevatorResources.h
-file_040=..\..\..\Board Support Package\SST25VF016.h
-file_041=..\..\..\Board Support Package\drv_spi.h
-file_042=ElevatorDemoStrings.h
-file_043=..\..\..\Microchip\Include\Compiler.h
-file_044=..\..\..\Microchip\Include\USB\usb.h
-file_045=Getting Started - Loading a precompiled demo.htm
-file_046=Getting Started - Running the Elevator Demo.htm
+file_029=..\..\..\Microchip\Include\Graphics\gfxtcon.h
+file_030=..\..\..\Microchip\Include\Graphics\gfxepmp.h
+file_031=..\..\..\Microchip\Include\Graphics\mchpGfxDrv.h
+file_032=..\..\Common\comm_pkt.h
+file_033=..\..\Common\comm_pkt_callback.h
+file_034=..\..\Common\ExternalMemory.h
+file_035=..\..\Common\FlashProgrammer.h
+file_036=..\..\..\Microchip\Include\Graphics\gfxcolors.h
+file_037=ElevatorDemo.h
+file_038=ElevatorResources.h
+file_039=..\..\..\Board Support Package\SST25VF016.h
+file_040=..\..\..\Board Support Package\drv_spi.h
+file_041=ElevatorDemoStrings.h
+file_042=..\..\..\Microchip\Include\Compiler.h
+file_043=..\..\..\Microchip\Include\USB\usb.h
+file_044=Getting Started - Loading a precompiled demo.htm
+file_045=Getting Started - Running the Elevator Demo.htm
 [SUITE_INFO]
-suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+suite_guid={9BCCB495-CD65-480A-BA76-63D8E78B117F}
 suite_state=
 [TOOL_SETTINGS]
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g -al="$(BINDIR_)$(INFILEBASE).lst"
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -Os
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=3000 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}001=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}001=-g
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}001=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}001=
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}002=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}002=-g -mlarge-code -mlarge-data -mlarge-scalar
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}002=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}002=
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}005=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}005=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -mlarge-arrays -Os
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}005_alt=yes
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}005=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}005=
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}=-g -Wall -mlarge-code -mlarge-data -Os -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}=--heap=2000 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}=
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}005=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}005=-g -Wall -mlarge-code -mlarge-data -Os -mlarge-arrays -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}005_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}005=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}005=
 [ACTIVE_FILE_SETTINGS]
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}001_active=yes
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}002_active=yes
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}005_active=yes
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}005_active=yes
 [INSTRUMENTED_TRACE]
 enable=0
 transport=0

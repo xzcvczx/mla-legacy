@@ -203,7 +203,7 @@ void DemoOutput_Instruction(void)
 }    
 
 
-void DemoOutput_HandleMessage(BYTE TxNum, BYTE RxNum)
+void DemoOutput_HandleMessage(void)
 {
     BYTE i;
     

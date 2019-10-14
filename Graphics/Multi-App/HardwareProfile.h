@@ -18,7 +18,7 @@
  * distribute: 
  * (i)  the Software when embedded on a Microchip microcontroller or 
  *      digital signal controller product ("Device") which is 
- *      integrated into Licensee’s product; or
+ *      integrated into Licenseeï¿½s product; or
  * (ii) ONLY the Software driver source files ENC28J60.c and 
  *      ENC28J60.h ported to a non-Microchip device used in 
  *      conjunction with a Microchip ethernet controller for the 
@@ -28,7 +28,7 @@
  * Software for additional information regarding your rights and 
  * obligations.
  *
- * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT 
+ * THE SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT 
  * WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT 
  * LIMITATION, ANY WARRANTY OF MERCHANTABILITY, FITNESS FOR A 
  * PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL 
@@ -310,7 +310,7 @@
  * USB MSD
  ********************************************************************/
 #elif defined(CFG_INCLUDE_MEB_dsPIC33E_SK_8PMP)
-    #include "Configs/HWP_MEB_dsPIC33E_SK_8PMP_USBMSD.h"
+    #include "Configs/HWP_MEB_PIC_SK_8PMP_USBMSD.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_8PMP)
     #include "Configs/HWP_MEB_PIC32_GP_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_16PMP)

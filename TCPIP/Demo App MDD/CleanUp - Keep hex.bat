@@ -43,12 +43,12 @@ del "..\Microchip\TCPIP Stack\*.p1" /f /q
 del "Makefile" /f /q
 del "a.out" /f /q
 rmdir "TempOBJ" /s /q
-rmdir "Objects - TCPIP MDD Demo App-C18" /s /q
-rmdir "Objects - TCPIP MDD Demo App-C30" /s /q
-rmdir "Objects - TCPIP MDD Demo App-C32" /s /q
-rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP MDD Demo App-C18" /s /q
-rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP MDD Demo App-C30" /s /q
-rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP MDD Demo App-C32" /s /q
+rmdir "Obj-Demo App MDD-C18" /s /q
+rmdir "Obj-Demo App MDD-XC16" /s /q
+rmdir "Obj-Demo App MDD-XC32" /s /q
+rmdir "..\Microchip\TCPIP Stack\Obj-Demo App MDD-C18" /s /q
+rmdir "..\Microchip\TCPIP Stack\Obj-Demo App MDD-XC16" /s /q
+rmdir "..\Microchip\TCPIP Stack\Obj-Demo App MDD-XC32" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\publish" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\obj" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\bin\Debug" /s /q

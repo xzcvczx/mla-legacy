@@ -211,7 +211,7 @@ static void TouchIntInit(void);
 // If your code gets here, you either tried to read or write
 // a NULL pointer, or your application overflowed the stack
 // by having too many local variables or parameters declared.
-#elif defined(__C30__)
+#elif defined(__C30__) || defined(__XC16__)
 	void _ISR __attribute__((__no_auto_psv__)) _AddressError(void)
 	{
 	    Nop();
@@ -831,7 +831,7 @@ void DisplayIPValue(IP_ADDR IPVal)
 // Processes A/D data from the potentiometer
 static void ProcessIO(void)
 {
-#if defined(__C30__) || defined(__C32__)
+#if defined(__C30__) || defined(__C32__) || defined(__XC16__)
     // Convert potentiometer result into ASCII string
     uitoa((WORD)ADC1BUF0, AN0String);
 #else
@@ -1083,7 +1083,7 @@ static void InitializeBoard(void)
 		UARTRX_TRIS = 1;
 		UMODE = 0x8000;			// Set UARTEN.  Note: this must be done before setting UTXEN
 
-		#if defined(__C30__)
+		#if defined(__C30__) || defined(__XC16__)
 			USTA = 0x0400;		// UTXEN set
 			#define CLOSEST_UBRG_VALUE ((GetPeripheralClock()+8ul*BAUD_RATE)/16/BAUD_RATE-1)
 			#define BAUD_ACTUAL (GetPeripheralClock()/16/(CLOSEST_UBRG_VALUE+1))

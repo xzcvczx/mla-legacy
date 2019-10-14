@@ -58,6 +58,10 @@
               when LC & LE bytes are 0x00.
            4) Changed the local variable 'edc' from 'WORD' type to 'unsigned short int' type.
               (In static function :- 'SC_ReceiveT1Block')
+  1.02.8   1) "SC_TransactT0" function is modified to handle a 256 bytes read from smart card as
+              per the "Case 2S" requirement of ISO 7816 specification.
+           2) The assignment of "apduResponse->SW1" & "apduResponse->SW2" is modified in 
+		      "SC_TransactT1" function
 ********************************************************************/
 
 #include <string.h>
@@ -856,10 +860,11 @@ static void SC_CalculateWaitTime()
   *****************************************************************************/
 BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse, BYTE* apduDataBuffer)
 {
+	unsigned short int leLength = 0,le = apduCommand->LE;
 	BYTE* apduCommandBuffer;
-	BYTE index,lc = apduCommand->LC,le = apduCommand->LE,ins = apduCommand->INS;
+	BYTE index,lc = apduCommand->LC,ins = apduCommand->INS;
 	BYTE rx_char;
-	BYTE lcLength = 0,leLength = 0;
+	BYTE lcLength = 0;
 
 	// Return False if there is no Card inserted in the Slot
 	if( !SCdrv_CardPresent() || gCardState != ATR_ON )
@@ -887,8 +892,13 @@ BOOL SC_TransactT0(SC_APDU_COMMAND* apduCommand, SC_APDU_RESPONSE* apduResponse,
 	else if( le )
 		SCdrv_SendTxData( le );
 	else
+	{		
 		SCdrv_SendTxData(0x00);
-
+		// If LE is '0x00' then u expect 256 bytes.
+		// if LE is absent, then there is no issue in writing le variable as 256
+		le = 256;
+	}
+			
 	while (1)
 	{
     	// Get Procedure byte
@@ -1438,8 +1448,8 @@ BOOL SC_TransactT1(SC_T1_PROLOGUE_FIELD* pfield,BYTE* iField,SC_APDU_RESPONSE* a
 																if(rxLength >= 2)
 																{
 																	apduResponse->RXDATALEN = rxLength - 2;
-																	apduResponse->SW1 = *(initialField + (BYTE)rxLength - (BYTE)2);
-																	apduResponse->SW2 = *(initialField + (BYTE)rxLength - (BYTE)1);
+																	apduResponse->SW1 = *(initialField + rxLength - (BYTE)2);
+																	apduResponse->SW2 = *(initialField + rxLength - (BYTE)1);
 																}
 															}
 															else

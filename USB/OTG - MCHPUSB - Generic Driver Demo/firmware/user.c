@@ -109,7 +109,7 @@ void UserInit(void)
     /* Init Timer0 for data logging interval (every 1 second) */
     T0CON = 0b10010111;
     /* Timer0 is already enabled by default */
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
     #endif
 }//end UserInit
 
@@ -222,7 +222,7 @@ WORD_VAL ReadPOT(void)
         w.v[0] = ADRESL;
         w.v[1] = ADRESH;
 
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         AD1CHS = 0x5;           //MUXA uses AN5
 
         // Get an ADC sample

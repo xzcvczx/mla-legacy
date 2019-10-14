@@ -456,7 +456,7 @@ file_041=..\..\Board Support Package\SST25VF016.c
 file_042=..\..\Board Support Package\TouchScreen.c
 file_043=..\..\Board Support Package\SST39VF040.c
 file_044=..\..\Board Support Package\EEPROM.c
-file_045=InternalResourceC30.c
+file_045=InternalResourceXC16.c
 file_046=ExternalResource.c
 file_047=..\..\Board Support Package\TouchScreenResistive.c
 file_048=..\..\Board Support Package\drv_spi.c
@@ -523,7 +523,7 @@ file_108=..\..\Board Support Package\TouchScreen.h
 file_109=..\..\Board Support Package\SST39VF040.h
 file_110=..\..\Board Support Package\EEPROM.h
 file_111=ExternalResource.h
-file_112=InternalResourceC30.h
+file_112=InternalResourceXC16.h
 file_113=..\..\Microchip\Include\Graphics\SSD1926.h
 file_114=..\..\Microchip\Include\Graphics\gfxepmp.h
 file_115=..\..\Microchip\Include\Graphics\gfxpmp.h
@@ -540,19 +540,14 @@ file_125=UART.h
 file_126=Getting Started - Loading a precompiled demo.htm
 file_127=Getting Started - Running the Graphics MultiApp Demo.htm
 [SUITE_INFO]
-suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+suite_guid={9BCCB495-CD65-480A-BA76-63D8E78B117F}
 suite_state=
 [TOOL_SETTINGS]
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-a="$(BINDIR_)$(INFILEBASE).lst"
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -mlarge-code -mlarge-data -mlarge-scalar -mconst-in-code -Os
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=3000 -Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}039=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}039=-g -mlarge-code -mlarge-data -mlarge-scalar -mconst-in-code -Os
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}039=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}039=
-[ACTIVE_FILE_SETTINGS]
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}039_active=yes
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}=-Wall -mlarge-code -mlarge-data -mlarge-scalar -Os -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}=--heap=2048 -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}=
 [INSTRUMENTED_TRACE]
 enable=0
 transport=2

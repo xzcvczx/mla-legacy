@@ -11,7 +11,7 @@
  * Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
- * Version:         1.3.0
+ * Version:         1.4.0
  *
  * Software License Agreement
  *
@@ -237,7 +237,7 @@ typedef struct
 	#ifdef SUPPORT_LFN
     	BOOL			AsciiEncodingType;          // Ascii file name or Non-Ascii file name indicator
 		unsigned short int *utf16LFNptr;	        // Pointer to long file name in UTF16 format
-		unsigned short int utf16LFNlength;          // LFN length in terms of words including the NULL word at the last.
+		unsigned short int utf16LFNlength;          // LFN length in terms of words excluding the NULL word at the last.
 	#endif
     WORD            entry;          // The position of the file's directory entry in it's directory
     WORD            chk;            // File structure checksum

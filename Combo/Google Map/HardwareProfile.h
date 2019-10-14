@@ -65,7 +65,6 @@
     // Truly 3.2" 320x240 display
     #include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
 #elif defined(CFG_INCLUDE_DA210_BRD_16PMP_WQVGAv1)
-	#include "Configs/HWP_DA210_BRD_16PMP_QVGAv1.h"
     #include "Configs/HWP_DA210_BRD_16PMP_WQVGAv1.h"
 #elif defined(__PIC32MX__)
     // Graphics Hardware Configurations

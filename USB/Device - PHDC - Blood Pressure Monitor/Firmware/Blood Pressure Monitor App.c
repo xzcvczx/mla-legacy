@@ -12,8 +12,8 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the �Company�) for its PIC� Microcontroller is intended and
- supplied to you, the Company�s customer, for use solely and
+ (the "Company") for its PIC(R) Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN �AS IS� CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -356,7 +356,7 @@ WORD_VAL ReadPOT(void);
  *****************************************************************************/
 void ApplicationInit()
 {
-    AppState = PHD_INITIALIZED;
+    AppState = PHD_DISCONNECTED;
 	PHDAppInit(PhdComToAppCb); //Register Call Back Function
 	PHDSendAppBufferPointer(PhdAppBuffer);	// Pass the address of the application buffer to the lower layer. 
 	sw2ButtonPressCounter =0; 
@@ -409,7 +409,7 @@ void ApplicationTask(void)
        if(dataSendingUnderProgress == FALSE)
        {
            sw2ButtonPressCounter++; 
-	       if(AppState == PHD_INITIALIZED)
+	       if(AppState == PHD_DISCONNECTED)
 		   {
 		       PHDConnect();
 		   }
@@ -456,7 +456,7 @@ void ApplicationTask(void)
 			if(connectionUnderProgress == FALSE)
 			{
     			connectionUnderProgress = TRUE;
-				if(AppState == PHD_INITIALIZED)
+				if(AppState == PHD_DISCONNECTED)
 				{
 					PHDConnect();
 				}
@@ -521,7 +521,7 @@ void PhdComToAppCb(UINT8 event)
 		break;
 
 		case PHD_DISCONNECTED:
-		AppState = PHD_INITIALIZED;
+		AppState = PHD_DISCONNECTED;
 		break;
 	}	
 }
@@ -699,7 +699,7 @@ void PhdTimeoutHandlerApp(void)
         w.v[0] = ADRESL;
         w.v[1] = ADRESH;
 
-    #elif defined(__C30__) || defined(__C32__)
+    #elif defined(__C30__) || defined(__C32__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM) || \
             defined(PIC24FJ256DA210_DEV_BOARD) || \
             defined(PIC24FJ256GB210_PIM)

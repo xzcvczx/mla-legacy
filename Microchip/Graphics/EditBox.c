@@ -277,6 +277,7 @@ typedef enum {
 
 static EB_DRAW_STATES state = EB_STATE_START;
 static XCHAR* pText;
+static GFX_COLOR tempColor;
 static SHORT temp;
 static SHORT width = 0;
 EDITBOX *pEb;
@@ -310,16 +311,16 @@ EDITBOX *pEb;
         	    }
     
                 if(GetState(pEb,EB_DISABLED)){
-                    temp = pEb->hdr.pGolScheme->ColorDisabled;
+                    tempColor = pEb->hdr.pGolScheme->ColorDisabled;
     	        }else{
-                    temp = pEb->hdr.pGolScheme->Color0;
+                    tempColor = pEb->hdr.pGolScheme->Color0;
                 }
     
                 if(GetState(pEb,EB_DRAW))
                 {
     
                     GOLPanelDraw(pEb->hdr.left,pEb->hdr.top,pEb->hdr.right,pEb->hdr.bottom,0,
-                        temp,
+                        tempColor,
                         pEb->hdr.pGolScheme->EmbossDkColor,
                         pEb->hdr.pGolScheme->EmbossLtColor,
                         NULL,

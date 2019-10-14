@@ -1,3 +1,6 @@
+MiWi DE 4.2.5
+Add support for XC16 and XC32 compilers. Fix bug that associated with symbol timer for PIC32. 
+
 MiWi DE 4.2.4
 Fix the bug in corner cases. User for previous versions generally do not need to update.
 Further simplified demos and focus on MiApp interfaces in demo main function.

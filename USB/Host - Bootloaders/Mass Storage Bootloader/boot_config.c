@@ -39,34 +39,6 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 #include "Compiler.h"
 
 #ifndef OVERRIDE_CONFIG_BITS
-    #if defined(__PIC32__)        
-    
-        #pragma config UPLLEN   = ON            // USB PLL Enabled
-        #pragma config FPLLMUL  = MUL_15        // PLL Multiplier
-        #pragma config UPLLIDIV = DIV_2         // USB PLL Input Divider
-        #pragma config FPLLIDIV = DIV_2         // PLL Input Divider
-        #pragma config FPLLODIV = DIV_1         // PLL Output Divider
-        #pragma config FPBDIV   = DIV_1         // Peripheral Clock divisor
-        #pragma config FWDTEN   = OFF           // Watchdog Timer
-        #pragma config WDTPS    = PS1           // Watchdog Timer Postscale
-        #pragma config FCKSM    = CSDCMD        // Clock Switching & Fail Safe Clock Monitor
-        #pragma config OSCIOFNC = OFF           // CLKO Enable
-        #pragma config POSCMOD  = HS            // Primary Oscillator
-        #pragma config IESO     = OFF           // Internal/External Switch-over
-        #pragma config FSOSCEN  = OFF           // Secondary Oscillator Enable (KLO was off)
-        #pragma config FNOSC    = PRIPLL        // Oscillator Selection
-        #pragma config CP       = OFF           // Code Protect
-        #pragma config BWP      = OFF           // Boot Flash Write Protect
-        #pragma config PWP      = OFF           // Program Flash Write Protect
-        #pragma config ICESEL   = ICS_PGx2      // ICE/ICD Comm Channel Select
-        
-        #if defined( __DEBUG ) && !defined( PIC32_STARTER_KIT)
-            #pragma config DEBUG    = ON        // Background Debugger Enable
-        #else
-            #pragma config DEBUG    = OFF       // Background Debugger Disable
-        #endif
-    #endif
-
     #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256GB210_PIM) || defined(PIC24FJ128GB110_PIM)
        #ifndef PLL_96MHZ_ON
          #define PLL_96MHZ_ON PLL96MHZ_ON

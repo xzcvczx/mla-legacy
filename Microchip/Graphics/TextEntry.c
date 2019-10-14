@@ -45,6 +45,10 @@
  * 12/02/11     Fix memory leak issue when TeCreateKeyMembers fails to allocate
  *              memory for all keys.
  * 12/13/11     Fix issue when displaying string with length equal to max size.
+ * 03/05/12     - Added Gradient feature.
+ *              - Enabled use of rounded buttons. User can now specify the rounded
+ *                edge radius in the GraphicsConfing.h file. 
+*                 (See TE_ROUNDEDBUTTON_RADIUS macro for deatils).
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -109,7 +113,7 @@ TEXTENTRY *TeCreate
 
     // Set the font to be used
     if(pDisplayFont == NULL)
-        pTe->pDisplayFont = (void *) &GOLFontDefault;
+        pTe->pDisplayFont = (void *) &FONTDEFAULT;
     else
         pTe->pDisplayFont = pDisplayFont;
 
@@ -139,13 +143,16 @@ TEXTENTRY *TeCreate
 ********************************************************************/
 WORD TeDraw(void *pObj)
 {
-    static WORD         faceClr, embossLtClr, embossDkClr, xText, yText;
+    static GFX_COLOR    faceClr, embossLtClr, embossDkClr;
+    static WORD         xText, yText;
     static XCHAR        XcharTmp;
     static KEYMEMBER    *pKeyTemp = NULL;
 
     static WORD         CountOfKeys = 0;
     static WORD         counter = 0;
     static XCHAR        hideChar[2] = {0x2A, 0x00};
+    
+    GFX_COLOR           color1, color2;
 
     typedef enum
     {
@@ -189,6 +196,16 @@ WORD TeDraw(void *pObj)
 				{
 					if(GetState(pTe, TE_DRAW))
 					{
+                        if (TE_ROUNDEDBUTTON_RADIUS == 0)
+                        {
+                            color1 = pTe->hdr.pGolScheme->EmbossDkColor;
+                            color2 = pTe->hdr.pGolScheme->EmbossLtColor;
+                        }
+                        else
+                        {                    
+                            color1 = pTe->hdr.pGolScheme->Color0;
+                            color2 = pTe->hdr.pGolScheme->Color0;
+                        }
 
 						/************DRAW THE WIDGET PANEL*****************************/
 						GOLPanelDraw
@@ -199,8 +216,8 @@ WORD TeDraw(void *pObj)
 							pTe->hdr.bottom,
 							0,
 							pTe->hdr.pGolScheme->Color0,        //face color of panel
-							pTe->hdr.pGolScheme->EmbossDkColor, //emboss dark color
-							pTe->hdr.pGolScheme->EmbossLtColor, //emboss light color
+							color1, //emboss dark color
+							color2, //emboss light color
 							NULL,
 							GOL_EMBOSS_SIZE
 						);
@@ -249,7 +266,7 @@ WORD TeDraw(void *pObj)
 					pTe->hdr.left,
 					pTe->hdr.top,
 					pTe->hdr.right,
-					pTe->hdr.top + GetTextHeight(pTe->pDisplayFont) + (GOL_EMBOSS_SIZE << 1),
+					pTe->hdr.top + GetTextHeight(pTe->pDisplayFont) + GOL_EMBOSS_SIZE,
 					0,
 					pTe->hdr.pGolScheme->Color1; ,
 					pTe->hdr.pGolScheme->EmbossDkColor,
@@ -324,14 +341,19 @@ WORD TeDraw(void *pObj)
 						faceClr = SetColor(pTe->hdr.pGolScheme->ColorDisabled);
 					}
 
+#ifdef USE_GRADIENT
+                    // set the gradient parameters
+                    GOLGradientPanelDraw(pTe->hdr.pGolScheme);                
+#endif
+
 					// set up the panel
 					GOLPanelDraw
 					(
-						pKeyTemp->left,
-						pKeyTemp->top,
-						pKeyTemp->right,
-						pKeyTemp->bottom,
-						0,
+						pKeyTemp->left+TE_ROUNDEDBUTTON_RADIUS,
+						pKeyTemp->top+TE_ROUNDEDBUTTON_RADIUS,
+						pKeyTemp->right-TE_ROUNDEDBUTTON_RADIUS,
+						pKeyTemp->bottom-TE_ROUNDEDBUTTON_RADIUS,
+						TE_ROUNDEDBUTTON_RADIUS,
 						faceClr,
 						embossLtClr,
 						embossDkClr,

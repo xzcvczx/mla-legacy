@@ -11,58 +11,58 @@
 <Font_Files>
 <Font_File_Resource>
 <label>RussianFont</label>
-<path>UnBatang_0613.ttf</path>
+<path>../../../../../Microchip/Graphics/Fonts/unbatang/UnBatang_0613.ttf</path>
 <name>UnBatang</name>
 <size>20</size>
 <height>25</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../../../Microchip/Graphics/Fonts/UnbatangGNULicense.txt</comment_file>
+<comment_file>../../../../../Microchip/Graphics/Fonts/unbatang/UnbatangGNULicense.txt</comment_file>
 <first_character>32</first_character>
 <last_character>1091</last_character>
 <font_filter>HWRussian.txt</font_filter>
 </Font_File_Resource>
 <Font_File_Resource>
 <label>ChineseFont</label>
-<path>fireflysung.ttf</path>
+<path>../../../../../Microchip/Graphics/Fonts/firefly/fireflysung.ttf</path>
 <name>AR PL New Sung</name>
 <size>20</size>
 <height>22</height>
 <bold>true</bold>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../../../Microchip/Graphics/Fonts/FireflysungLicense.txt</comment_file>
+<comment_file>../../../../../Microchip/Graphics/Fonts/firefly/FireflysungLicense.txt</comment_file>
 <first_character>33</first_character>
 <last_character>30028</last_character>
 <font_filter>HWChinese.txt</font_filter>
 </Font_File_Resource>
 <Font_File_Resource>
 <label>JapaneseFont</label>
-<path>fireflysung.ttf</path>
+<path>../../../../../Microchip/Graphics/Fonts/firefly/fireflysung.ttf</path>
 <name>AR PL New Sung</name>
 <size>22</size>
 <height>25</height>
 <bold>true</bold>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../../../Microchip/Graphics/Fonts/FireflysungLicense.txt</comment_file>
+<comment_file>../../../../../Microchip/Graphics/Fonts/firefly/FireflysungLicense.txt</comment_file>
 <first_character>33</first_character>
 <last_character>12435</last_character>
 <font_filter>HWJapanese.txt</font_filter>
 </Font_File_Resource>
 <Font_File_Resource>
 <label>KoreanFont</label>
-<path>UnBatang_0613.ttf</path>
+<path>../../../../../Microchip/Graphics/Fonts/UnBatang/unbatang_0613.ttf</path>
 <name>UnBatang</name>
 <size>18</size>
 <height>23</height>
 <bold>true</bold>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../../../Microchip/Graphics/Fonts/UnbatangGNULicense.txt</comment_file>
+<comment_file>../../../../../Microchip/Graphics/Fonts/unbatang/UnbatangGNULicense.txt</comment_file>
 <first_character>33</first_character>
 <last_character>54616</last_character>
 <font_filter>HWKorean.txt</font_filter>
 </Font_File_Resource>
 <Font_File_Resource>
 <label>HindiFont</label>
-<path>JAIPUR__.TTF</path>
+<path>../../../../../Microchip/Graphics/Fonts/jaipur/JAIPUR__.TTF</path>
 <name>Jaipur</name>
 <size>26</size>
 <height>31</height>
@@ -74,7 +74,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>ThaiFont</label>
-<path>dbtt.ttf</path>
+<path>../../../../../Microchip/Graphics/Fonts/db/dbtt.ttf</path>
 <name>DB ThaiText</name>
 <size>48</size>
 <height>29</height>

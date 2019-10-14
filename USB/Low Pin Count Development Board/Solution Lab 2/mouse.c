@@ -349,7 +349,7 @@ void YourLowPriorityISRCode();
 	
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
 
-#elif defined(__C30__)
+#elif defined(__C30__) || defined __XC16__
     #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
         /*
          *	ISR JUMP TABLE
@@ -400,7 +400,7 @@ int main(void)
 #endif
 {
 //    //This can be used for user entry into the bootloader  
-//    #if defined(__C30__) 
+//    #if defined(__C30__)  || defined __XC16__
 //        mInitSwitch2();
 //        if(sw2 == 0)
 //        {
@@ -464,7 +464,7 @@ static void InitializeSystem(void)
 {
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         AD1PCFGL = 0xFFFF;
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
@@ -894,7 +894,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;

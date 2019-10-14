@@ -1,13 +1,13 @@
 /********************************************************************
  FileName:      main.c
  Dependencies:  See INCLUDES section
- Processor:	    PIC18, PIC24, dsPIC, and PIC32 USB Microcontrollers
+ Processor:     PIC18, PIC24, dsPIC, and PIC32 USB Microcontrollers
  Hardware:      This demo is natively intended to be used on Microchip USB demo
                 boards supported by the MCHPFSUSB stack.  See release notes for
                 support matrix.  This demo can be modified for use on other 
                 hardware platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24/33), C32 (for PIC32)
- Company:		Microchip Technology, Inc.
+ Complier:      Microchip C18 (for PIC18), XC16 (for PIC24/dsPIC), XC32 (for PIC32)
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
@@ -39,6 +39,7 @@
   2.1   Updated for simplicity and to use common
                      coding style
   2.7b  Improvements to USBCBSendResume(), to make it easier to use.
+  2.9f  Adding new part support
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -90,6 +91,27 @@
 //      #pragma config EBTR3    = OFF
         #pragma config EBTRB    = OFF
 
+#elif defined(PICDEM_FS_USB_K50)
+        #pragma config PLLSEL   = PLL3X     // 3X PLL multiplier selected
+        #pragma config CFGPLLEN = OFF       // PLL turned on during execution
+        #pragma config CPUDIV   = NOCLKDIV  // 1:1 mode (for 48MHz CPU)
+        #pragma config LS48MHZ  = SYS48X8   // Clock div / 8 in Low Speed USB mode
+        #pragma config FOSC     = INTOSCIO  // HFINTOSC selected at powerup, no clock out
+        #pragma config PCLKEN   = OFF       // Primary oscillator driver
+        #pragma config FCMEN    = OFF       // Fail safe clock monitor
+        #pragma config IESO     = OFF       // Internal/external switchover (two speed startup)
+        #pragma config nPWRTEN  = OFF       // Power up timer
+        #pragma config BOREN    = SBORDIS   // BOR enabled
+        #pragma config nLPBOR   = ON        // Low Power BOR
+        #pragma config WDTEN    = SWON      // Watchdog Timer controlled by SWDTEN
+        #pragma config WDTPS    = 32768     // WDT postscalar
+        #pragma config PBADEN   = OFF       // Port B Digital/Analog Powerup Behavior
+        #pragma config SDOMX    = RC7       // SDO function location
+        #pragma config LVP      = OFF       // Low voltage programming
+        #pragma config MCLRE    = ON        // MCLR function enabled (RE3 disabled)
+        #pragma config STVREN   = ON        // Stack overflow reset
+        //#pragma config ICPRT  = OFF       // Dedicated ICPORT program/debug pins enable
+        #pragma config XINST    = OFF       // Extended instruction set
 
 #elif defined(PIC18F87J50_PIM)				// Configuration bits for PIC18F87J50 FS USB Plug-In Module board
         #pragma config XINST    = OFF   	// Extended instruction set
@@ -110,7 +132,30 @@
 //      #pragma config PMPMX    = DEFAULT
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT   
-
+        
+// Configuration bits for PIC18F97J94 PIM and PIC18F87J94 PIM
+#elif defined(PIC18F97J94_PIM) || defined(PIC18F87J94_PIM)
+        #pragma config STVREN   = ON      	// Stack overflow reset
+        #pragma config XINST    = OFF   	// Extended instruction set
+        #pragma config BOREN    = ON        // BOR Enabled
+        #pragma config BORV     = 0         // BOR Set to "2.0V" nominal setting
+        #pragma config CP0      = OFF      	// Code protect disabled
+        #pragma config FOSC     = FRCPLL    // Firmware should also enable active clock tuning for this setting
+        #pragma config SOSCSEL  = LOW       // SOSC circuit configured for crystal driver mode
+        #pragma config CLKOEN   = OFF       // Disable clock output on RA6
+        #pragma config IESO     = OFF      	// Internal External (clock) Switchover
+        #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
+        #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
+        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config WPDIS    = WPDIS     // Program memory not write protected
+        #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
+        #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
+        #pragma config LS48MHZ  = SYSX2     // Low Speed USB clock divider
+        #pragma config WDTCLK   = LPRC      // WDT always uses INTOSC/LPRC oscillator
+        #pragma config WDTEN    = ON        // WDT disabled; SWDTEN can control WDT
+        #pragma config WINDIS   = WDTSTD    // Normal non-window mode WDT.
+        #pragma config VBTBOR   = OFF       // VBAT BOR disabled
+      
 #elif defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
@@ -259,8 +304,8 @@ unsigned char ToSendDataBuffer[64];
 #pragma udata
 #endif
 
-USB_HANDLE USBOutHandle = 0;
-USB_HANDLE USBInHandle = 0;
+USB_HANDLE USBOutHandle = 0;  //Needs to be initialized to 0 at startup.
+USB_HANDLE USBInHandle = 0;   //Needs to be initialized to 0 at startup.
 BOOL blinkStatusValid = TRUE;
 
 //The LUN variable definition is critical to the MSD function driver.  This
@@ -425,7 +470,7 @@ void BlinkUSBStatus(void);
 
 /** DECLARATIONS ***************************************************/
 #if defined(__18CXX)
-#pragma code
+    #pragma code
 #endif
 
 /********************************************************************
@@ -503,73 +548,100 @@ int main(void)
  *******************************************************************/
 static void InitializeSystem(void)
 {
-#if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
-    ADCON1 |= 0x0F;                 // Default all pins to digital
-#elif defined(__C30__)
-#if defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
-    ANSA = 0x0000;
-    ANSB = 0x0000;
-    ANSC = 0x0000;
-    ANSD = 0x0000;
-    ANSE = 0x0000;
-    ANSF = 0x0000;
-    ANSG = 0x0000;
-#elif defined(__dsPIC33EP512MU810__) || defined (__PIC24EP512GU810__)
-    ANSELA = 0x0000;
-    ANSELB = 0x0000;
-    ANSELC = 0x0000;
-    ANSELD = 0x0000;
-    ANSELE = 0x0000;
-    ANSELG = 0x0000;
+    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM) & !defined(PIC18F97J94_FAMILY))
+        ADCON1 |= 0x0F;                 // Default all pins to digital
+    #elif defined(__C30__) || defined __XC16__
+    	#if defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
+    		ANSA = 0x0000;
+    		ANSB = 0x0000;
+    		ANSC = 0x0000;
+    		ANSD = 0x0000;
+    		ANSE = 0x0000;
+    		ANSF = 0x0000;
+    		ANSG = 0x0000;
+     #elif defined(__dsPIC33EP512MU810__) || defined (__PIC24EP512GU810__)
+        	ANSELA = 0x0000;
+    		ANSELB = 0x0000;
+    		ANSELC = 0x0000;
+    		ANSELD = 0x0000;
+    		ANSELE = 0x0000;
+    		ANSELG = 0x0000;
+            
+            // The dsPIC33EP512MU810 features Peripheral Pin
+            // select. The following statements map UART2 to 
+            // device pins which would connect to the the 
+            // RX232 transciever on the Explorer 16 board.
 
-    // The dsPIC33EP512MU810 features Peripheral Pin
-    // select. The following statements map UART2 to 
-    // device pins which would connect to the the 
-    // RX232 transciever on the Explorer 16 board.
+             RPINR19 = 0;
+             RPINR19 = 0x64;
+             RPOR9bits.RP101R = 0x3;
 
-    RPINR19 = 0;
-    RPINR19 = 0x64;
-    RPOR9bits.RP101R = 0x3;
+        #else
+        	AD1PCFGL = 0xFFFF;
+        #endif        
+    #elif defined(__C32__)
+        AD1PCFG = 0xFFFF;
+    #endif
 
-#else
-    AD1PCFGL = 0xFFFF;
-#endif
-#elif defined(__C32__)
-    AD1PCFG = 0xFFFF;
-#endif
+    #if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
+    	//On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
+    	//by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+    	//This allows the device to power up at a lower initial operating frequency, which can be
+    	//advantageous when powered from a source which is not gauranteed to be adequate for 48MHz
+    	//operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
+    	//power up the PLL.
+        {
+            unsigned int pll_startup_counter = 600;
+            OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+            while(pll_startup_counter--);
+        }
+        //Device switches over automatically to PLL output after PLL is locked and ready.
+    #endif
 
-#if defined(PIC18F87J50_PIM) || defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
-    //On the PIC18F87J50 Family of USB microcontrollers, the PLL will not power up and be enabled
-    //by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
-    //This allows the device to power up at a lower initial operating frequency, which can be
-    //advantageous when powered from a source which is not gauranteed to be adequate for 48MHz
-    //operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
-    //power up the PLL.
-    {
-        unsigned int pll_startup_counter = 600;
-        OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-        while(pll_startup_counter--);
-    }
-    //Device switches over automatically to PLL output after PLL is locked and ready.
-#endif
+    #if defined(PIC18F87J50_PIM)
+    	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
+    	//use the ANCONx registers to control this, which is different from other devices which
+    	//use the ADCON1 register for this purpose.
+        WDTCONbits.ADSHR = 1;			// Select alternate SFR location to access ANCONx registers
+        ANCON0 = 0xFF;                  // Default all pins to digital
+        ANCON1 = 0xFF;                  // Default all pins to digital
+        WDTCONbits.ADSHR = 0;			// Select normal SFR locations
+    #endif
 
-#if defined(PIC18F87J50_PIM)
-    //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-    //use the ANCONx registers to control this, which is different from other devices which
-    //use the ADCON1 register for this purpose.
-    WDTCONbits.ADSHR = 1;			// Select alternate SFR location to access ANCONx registers
-    ANCON0 = 0xFF;                  // Default all pins to digital
-    ANCON1 = 0xFF;                  // Default all pins to digital
-    WDTCONbits.ADSHR = 0;			// Select normal SFR locations
-#endif
+    #if defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
+        //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
+        //use the ANCONx registers to control this, which is different from other devices which
+        //use the ADCON1 register for this purpose.
+        ANCON0 = 0x7F;                  // Default all pins to digital (except AN7: temp sensor)
+        ANCON1 = 0xBF;                  // Default all pins to digital. Bandgap on.
+    #endif
+    
+    #if defined(PIC18F97J94_FAMILY)
+        //Configure I/O pins for digital input mode.
+        ANCON1 = 0xFF;
+        ANCON2 = 0xFF;
+        ANCON3 = 0xFF;
+        #if(USB_SPEED_OPTION == USB_FULL_SPEED)
+            //Enable INTOSC active clock tuning if full speed
+            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
+                                            //with USB operation (ex: if using two speed 
+                                            //startup or otherwise performing clock switching)
+        #endif
+    #endif
+    
+    #if defined(PIC18F45K50_FAMILY)
+        //Configure oscillator settings for clock settings compatible with USB 
+        //operation.  Note: Proper settings depends on USB speed (full or low).
+        #if(USB_SPEED_OPTION == USB_FULL_SPEED)
+            OSCTUNE = 0x80; //3X PLL ratio mode selected
+            OSCCON = 0x70;  //Switch to 16MHz HFINTOSC
+            OSCCON2 = 0x10; //Enable PLL, SOSC, PRI OSC drivers turned off
+            while(OSCCON2bits.PLLRDY != 1);   //Wait for PLL lock
+            *((unsigned char*)0xFB5) = 0x90;  //Enable active clock tuning for USB operation
+        #endif
+    #endif
 
-#if defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
-    //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-    //use the ANCONx registers to control this, which is different from other devices which
-    //use the ADCON1 register for this purpose.
-    ANCON0 = 0xFF;                  // Default all pins to digital
-    ANCON1 = 0xFF;                  // Default all pins to digital
-#endif
 
 #if defined(PIC24FJ64GB004_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
     //On the PIC24FJ64GB004 Family of USB microcontrollers, the PLL will not power up and be enabled
@@ -761,24 +833,28 @@ void ProcessIO(void)
                 }
                 break;
             case 0x81:  //Get push button state
-                ToSendDataBuffer[0] = 0x81;				//Echo back to the host PC the command we are fulfilling in the first byte.  In this case, the Get Pushbutton State command.
-				if(sw2 == 1)							//pushbutton not pressed, pull up resistor on circuit board is pulling the PORT pin high
-				{
-					ToSendDataBuffer[1] = 0x01;			
-				}
-				else									//sw2 must be == 0, pushbutton is pressed and overpowering the pull up resistor
-				{
-					ToSendDataBuffer[1] = 0x00;
-				}
+                //First check to make sure the endpoint is available before modifying the data buffer contents
                 if(!HIDTxHandleBusy(USBInHandle))
                 {
-                    USBInHandle = HIDTxPacket(HID_EP,(BYTE*)&ToSendDataBuffer,64);
+                    //Prepare a response packet to send to the host
+                    ToSendDataBuffer[0] = 0x81;				//Echo back to the host PC the command we are fulfilling in the first byte.  In this case, the Get Pushbutton State command.
+    				if(sw2 == 1)							//pushbutton not pressed, pull up resistor on circuit board is pulling the PORT pin high
+    				{
+    					ToSendDataBuffer[1] = 0x01;			
+    				}
+    				else									//sw2 must be == 0, pushbutton is pressed and overpowering the pull up resistor
+    				{
+    					ToSendDataBuffer[1] = 0x00;
+    				}
+    				//Prepare the USB module to send the data packet to the host
+                    USBInHandle = HIDTxPacket(HID_EP,(BYTE*)&ToSendDataBuffer[0],64);
                 }
                 break;
             case 0x37:	//Read POT command.  Uses ADC to measure an analog voltage on one of the ANxx I/O pins, and returns the result to the host
                 {
                     WORD_VAL w;
-
+                    
+                    //Check to make sure the endpoint/buffer is free before we modify the contents
 	                if(!HIDTxHandleBusy(USBInHandle))
 	                {
 	                    mInitPOT();
@@ -790,13 +866,15 @@ void ProcessIO(void)
 						ToSendDataBuffer[1] = w.v[0];  	//Measured analog voltage LSB
 						ToSendDataBuffer[2] = w.v[1];  	//Measured analog voltage MSB
 
+                        //Prepare the USB module to send the data packet to the host
 	                    USBInHandle = HIDTxPacket(HID_EP,(BYTE*)&ToSendDataBuffer[0],64);
 	                }					
                 }
                 break;
         }
-        //Re-arm the OUT endpoint for the next packet
-        USBOutHandle = HIDRxPacket(HID_EP,(BYTE*)&ReceivedDataBuffer,64);
+        //Re-arm the OUT endpoint, so we can receive the next OUT data packet 
+        //that the host may try to send us.
+        USBOutHandle = HIDRxPacket(HID_EP, (BYTE*)&ReceivedDataBuffer, 64);
     }
 
     MSDTasks(); 
@@ -827,15 +905,24 @@ WORD_VAL ReadPOT(void)
     WORD_VAL w;
 
     #if defined(__18CXX)
-        mInitPOT();
+        #if defined(PIC18F97J94_PIM) 
+            ADCON1Lbits.SAMP = 1;           // Start AD sampling/convert sequence
+            while(ADCON1Lbits.DONE == 0);   // Wait for result complete
+            w.v[0] = ADCBUF3L;
+            w.v[1] = ADCBUF3H;       
+        #elif defined(PIC18F87J94_PIM)
+            ADCON1Lbits.SAMP = 1;           // Start AD sampling/convert sequence
+            while(ADCON1Lbits.DONE == 0);   // Wait for result complete
+            w.v[0] = ADCBUF0L;
+            w.v[1] = ADCBUF0H;       
+        #else
+            ADCON0bits.GO = 1;              // Start AD conversion
+            while(ADCON0bits.NOT_DONE);     // Wait for conversion
+            w.v[0] = ADRESL;
+            w.v[1] = ADRESH;
+        #endif
 
-        ADCON0bits.GO = 1;              // Start AD conversion
-        while(ADCON0bits.NOT_DONE);     // Wait for conversion
-
-        w.v[0] = ADRESL;
-        w.v[1] = ADRESH;
-
-    #elif defined(__C30__) || defined(__C32__)
+    #elif defined(__C30__) || defined(__C32__) || defined __XC16__
         #if defined(DSPIC33E_USB_STARTER_KIT) || defined(PIC24FJ64GB502_MICROSTICK)
             /*******************************
              * The dsPIC33E USB starter kit
@@ -1067,7 +1154,7 @@ void BlinkUSBStatus(void)
 // The USB firmware stack will call the callback functions USBCBxxx() in response to certain USB related
 // events.  For example, if the host PC is powering down, it will stop sending out Start of Frame (SOF)
 // packets to your device.  In response to this, all USB devices are supposed to decrease their power
-// consumption from the USB Vbus to <2.5mA each.  The USB module detects this condition (which according
+// consumption from the USB Vbus to <2.5mA* each.  The USB module detects this condition (which according
 // to the USB specifications is 3+ms of no bus activity/SOF packets) and then calls the USBCBSuspend()
 // function.  You should modify these callback functions to take appropriate actions for each of these
 // conditions.  For example, in the USBCBSuspend(), you may wish to add code that will decrease power
@@ -1078,6 +1165,10 @@ void BlinkUSBStatus(void)
 // The USBCBSendResume() function is special, in that the USB stack will not automatically call this
 // function.  This function is meant to be called from the application firmware instead.  See the
 // additional comments near the function.
+
+// Note *: The "usb_20.pdf" specs indicate 500uA or 2.5mA, depending upon device classification. However,
+// the USB-IF has officially issued an ECN (engineering change notice) changing this to 2.5mA for all 
+// devices.  Make sure to re-download the latest specifications to get all of the newest ECNs.
 
 /******************************************************************************
  * Function:        void USBCBSuspend(void)
@@ -1113,7 +1204,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;
@@ -1189,11 +1280,13 @@ void USBCBWakeFromSuspend(void)
 	// If clock switching or other power savings measures were taken when
 	// executing the USBCBSuspend() function, now would be a good time to
 	// switch back to normal full power run mode conditions.  The host allows
-	// a few milliseconds of wakeup time, after which the device must be 
+	// 10+ milliseconds of wakeup time, after which the device must be 
 	// fully back to normal, and capable of receiving and processing USB
 	// packets.  In order to do this, the USB module must receive proper
 	// clocking (IE: 48MHz clock must be available to SIE for full speed USB
-	// operation).
+	// operation).  
+	// Make sure the selected oscillator settings are consistent with USB 
+    // operation before returning from this function.
 }
 
 /********************************************************************

@@ -46,6 +46,7 @@
  *              in rendering the thumb path.
  * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
  * 07/29/11     Fixed state transition when hiding the slider.
+ * 05/10/12     Added Alpha Blending Support
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -118,6 +119,7 @@ SLIDER *SldCreate
         pSld->hdr.pGolScheme = _pDefaultGolScheme;  // use default scheme
     else
         pSld->hdr.pGolScheme = (GOL_SCHEME *)pScheme;   // user defined scheme
+
     GOLAddObject((OBJ_HEADER *)pSld);                   // add the new object to the current list
     return (pSld);
 }
@@ -664,7 +666,7 @@ WORD SldDraw(void *pObj)
         SLD_STATE_FOCUS
     } SLD_DRAW_STATES;
 
-    static WORD colorTemp = 0;
+    static GFX_COLOR colorTemp = 0;
 
     static SLD_DRAW_STATES state = SLD_STATE_IDLE;
     static WORD left, top, right, bottom;
@@ -673,6 +675,15 @@ WORD SldDraw(void *pObj)
     SLIDER *pSld;
 
     pSld = (SLIDER *)pObj;
+
+	#ifdef USE_ALPHABLEND
+	if(pSld->hdr.pGolScheme->AlphaValue != 100) 						     
+			CopyPageWindow(_GFXActivePage, 
+					   _GFXBackgroundPage, 
+                       pSld->hdr.left, pSld->hdr.top,pSld->hdr.left, pSld->hdr.top,
+					   pSld->hdr.right - pSld->hdr.left, 
+					   pSld->hdr.bottom - pSld->hdr.top);
+	#endif
 
 	while(1)
 	{
@@ -756,6 +767,17 @@ WORD SldDraw(void *pObj)
                                                 pSld->hdr.right,
                                                 pSld->hdr.bottom);
 #endif
+#ifdef USE_ALPHABLEND
+                if(pSld->hdr.pGolScheme->AlphaValue != 100) 
+                {
+		           AlphaBlendWindow(_GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+						            _GFXBackgroundPage, pSld->hdr.left, pSld->hdr.top,
+						            _GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+					                pSld->hdr.right - pSld->hdr.left, 
+					                pSld->hdr.bottom - pSld->hdr.top,  	
+					                pSld->hdr.pGolScheme->AlphaValue);
+                }
+ #endif
 				return (1);
 				
 			case SLD_STATE_PANEL:
@@ -944,6 +966,18 @@ WORD SldDraw(void *pObj)
                                                 pSld->hdr.right,
                                                 pSld->hdr.bottom);
 #endif
+#ifdef USE_ALPHABLEND
+                if(pSld->hdr.pGolScheme->AlphaValue != 100) 
+                {
+		           AlphaBlendWindow(_GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+						    _GFXBackgroundPage, pSld->hdr.left, pSld->hdr.top,
+						    _GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+					          pSld->hdr.right - pSld->hdr.left, 
+					          pSld->hdr.bottom - pSld->hdr.top,  	
+					          pSld->hdr.pGolScheme->AlphaValue);
+
+                }
+ #endif
 					return (1);
 				}
 
@@ -956,6 +990,18 @@ WORD SldDraw(void *pObj)
                                                 pSld->hdr.right,
                                                 pSld->hdr.bottom);
 #endif
+#ifdef USE_ALPHABLEND
+                if(pSld->hdr.pGolScheme->AlphaValue != 100) 
+                {
+		           AlphaBlendWindow(_GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+						    _GFXBackgroundPage, pSld->hdr.left, pSld->hdr.top,
+						    _GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+					          pSld->hdr.right - pSld->hdr.left, 
+					          pSld->hdr.bottom - pSld->hdr.top,  	
+					          pSld->hdr.pGolScheme->AlphaValue);
+
+                }
+ #endif
 					return (1);
 				}
 
@@ -995,6 +1041,18 @@ WORD SldDraw(void *pObj)
                                             pSld->hdr.right,
                                             pSld->hdr.bottom);
 #endif
+#ifdef USE_ALPHABLEND
+                if(pSld->hdr.pGolScheme->AlphaValue != 100) 
+                {
+		           AlphaBlendWindow(_GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+						    _GFXBackgroundPage, pSld->hdr.left, pSld->hdr.top,
+						    _GFXActivePage, pSld->hdr.left, pSld->hdr.top,
+					          pSld->hdr.right - pSld->hdr.left, 
+					          pSld->hdr.bottom - pSld->hdr.top,  	
+					          pSld->hdr.pGolScheme->AlphaValue);
+
+                }
+ #endif
 				return (1); // return as done
 		}
     } // end of while(1)

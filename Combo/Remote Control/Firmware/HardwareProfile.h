@@ -237,19 +237,30 @@
     // ADC Port Control Bits
     #define ADPCFG_XPOS	ANSBbits.ANSB12
     #define ADPCFG_YPOS	ANSBbits.ANSB13
-    
+   
+   
     // X port definitions
-    #define LAT_XPOS    LATBbits.LATB12
-    #define TRIS_XPOS   TRISBbits.TRISB12
-    #define LAT_XNEG    LATBbits.LATB14
-    #define TRIS_XNEG   TRISBbits.TRISB14
-    
-    // Y port definitions
-    #define LAT_YPOS    LATBbits.LATB13
-    #define TRIS_YPOS   TRISBbits.TRISB13
-    #define LAT_YNEG    LATBbits.LATB15
-    #define TRIS_YNEG   TRISBbits.TRISB15
-    
+    #define ResistiveTouchScreen_XPlus_Drive_High()         LATBbits.LATB12   = 1
+    #define ResistiveTouchScreen_XPlus_Drive_Low()          LATBbits.LATB12   = 0
+    #define ResistiveTouchScreen_XPlus_Config_As_Input()    TRISBbits.TRISB12 = 1
+    #define ResistiveTouchScreen_XPlus_Config_As_Output()   TRISBbits.TRISB12 = 0
+		
+    #define ResistiveTouchScreen_XMinus_Drive_High()        LATBbits.LATB14   = 1   
+    #define ResistiveTouchScreen_XMinus_Drive_Low()         LATBbits.LATB14   = 0
+    #define ResistiveTouchScreen_XMinus_Config_As_Input()   TRISBbits.TRISB14 = 1  
+    #define ResistiveTouchScreen_XMinus_Config_As_Output()  TRISBbits.TRISB14 = 0
+
+	// Y port definitions
+    #define ResistiveTouchScreen_YPlus_Drive_High()         LATBbits.LATB13   = 1
+    #define ResistiveTouchScreen_YPlus_Drive_Low()          LATBbits.LATB13   = 0
+    #define ResistiveTouchScreen_YPlus_Config_As_Input()    TRISBbits.TRISB13 = 1
+    #define ResistiveTouchScreen_YPlus_Config_As_Output()   TRISBbits.TRISB13 = 0
+		
+    #define ResistiveTouchScreen_YMinus_Drive_High()        LATBbits.LATB15   = 1   
+    #define ResistiveTouchScreen_YMinus_Drive_Low()         LATBbits.LATB15   = 0
+    #define ResistiveTouchScreen_YMinus_Config_As_Input()   TRISBbits.TRISB15 = 1  
+    #define ResistiveTouchScreen_YMinus_Config_As_Output()  TRISBbits.TRISB15 = 0
+	    
     /*********************************************************************
     * Touch Screen X and Y orientation
     *********************************************************************/

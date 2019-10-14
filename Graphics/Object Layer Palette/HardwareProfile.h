@@ -114,11 +114,46 @@
 /*********************************************************************
  * Hardware Configuration for
  * DA210 Developement board
- * 16-bit PMP
- * QVGA or WQVGA
+ * Internal RAM
+ * QVGA
  ********************************************************************/
-#if defined(CFG_INCLUDE_DA210_BRD_16PMP_QVGAv1)
+#if defined(CFG_INCLUDE_DA210_BRD_INTERNAL_QVGAv1)
     #include "Configs/HWP_DA210_BRD_INT_QVGAv1.h"
+/*********************************************************************
+ * Hardware Configuration for
+ * DA210 Developement board
+ * 16 bit PMP
+ * VGA
+ ********************************************************************/
+#elif defined(CFG_INCLUDE_DA210_BRD_16PMP_VGAv1)
+    #include "Configs/HWP_DA210_BRD_16PMP_VGAv1.h"
+/*********************************************************************
+ * Hardware Configuration for
+ * DA210 Developement board
+ * 16 bit PMP
+ * VGA
+ * AR1020
+ ********************************************************************/
+#elif defined(CFG_INCLUDE_DA210_BRD_16PMP_AR1020_VGAv1)
+    #include "Configs/HWP_DA210_BRD_16PMP_AR1020_VGAv1.h"
+/*********************************************************************
+ * Hardware Configuration for
+ * DA210 Developement board
+ * 16 bit PMP
+ * VGA
+ * AR1020
+ ********************************************************************/
+#elif defined(CFG_INCLUDE_DA210_BRD_16PMP_WVGAv1)
+    #include "Configs/HWP_DA210_BRD_16PMP_WVGAv1.h"
+/*********************************************************************
+ * Hardware Configuration for
+ * DA210 Developement board
+ * 16 bit PMP
+ * VGA
+ * AR1020
+ ********************************************************************/
+#elif defined(CFG_INCLUDE_DA210_BRD_16PMP_AR1020_WVGAv1)
+    #include "Configs/HWP_DA210_BRD_16PMP_AR1020_WVGAv1.h"
 /*********************************************************************
  * Hardware Configuration for
  * LCC Developement board

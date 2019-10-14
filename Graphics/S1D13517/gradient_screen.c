@@ -62,22 +62,17 @@ void CreateGradientScreen(void)
     scheme1.gradientType         = GRAD_UP; 
     scheme1.gradientStartColor   = BRIGHTRED;
     scheme1.gradientEndColor     = BLACK;
-    scheme1.gradientLength       = GRADIENT_SIZE_H;
- 
+    scheme1.gradientLength       = GRADIENT_SIZE_H; 
 
  	SetColor(GFX_SchemeGetCurrentScheme()->Color0);	 
-	FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
+	while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));
      
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+					 GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
 				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
 				     GetMaxY() - 90,  	
-				     GFX_SchemeGetDefaultScheme()->AlphaValue);
-
-    SetActivePage(GetDestinationPage());
-
-
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));
 
     BevelGradient(  (GetMaxX() >> 2) +40, 
    				     120,  
@@ -150,5 +145,4 @@ void CreateGradientScreen(void)
                     scheme1.gradientEndColor,
                     100,
                     scheme1.gradientType);
-
 }

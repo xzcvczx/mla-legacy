@@ -85,6 +85,8 @@ PICTURE *PictCreate
     pPict->hdr.MsgDefaultObj = NULL;		// default message function
     pPict->hdr.FreeObj = NULL;				// free function
 
+    pPict->partial.width=0;                //This voids the partial image
+
     // Set the style scheme to be used
     if(pScheme == NULL)
         pPict->hdr.pGolScheme = _pDefaultGolScheme;
@@ -191,7 +193,7 @@ WORD PictDraw(void *pObj)
             {
                 if(IsDeviceBusy())
                     return (0);
-                if(!PutImage(posleft, postop, pPict->pBitmap, pPict->scale))
+                if(!PutImagePartial(posleft, postop, pPict->pBitmap, pPict->scale, pPict->partial.xoffset,pPict->partial.yoffset,pPict->partial.width,pPict->partial.height))
                     return (0);
             }
 

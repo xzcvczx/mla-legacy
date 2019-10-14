@@ -98,7 +98,7 @@
 
 
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     // Select how you want the timestamps to be updated
     // Use the Real-time clock peripheral to set the clock
     // You must configure the RTC in your application code

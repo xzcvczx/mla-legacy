@@ -58,7 +58,7 @@ Change History
 
 // Configuration bits for the device.  Please refer to the device datasheet for each device
 //   to determine the correct configuration bit settings
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #define PLL_96MHZ_OFF   0xFFFF
     #define PLL_96MHZ_ON    0xF7FF
 
@@ -157,7 +157,7 @@ Change History
 // If your code gets here, you either tried to read or write
 // a NULL pointer, or your application overflowed the stack
 // by having too many local variables or parameters declared.
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
 	void _ISR __attribute__((__no_auto_psv__)) _AddressError(void)
 	{
         DEBUG_ERROR("Address error");

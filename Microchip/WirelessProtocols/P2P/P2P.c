@@ -353,8 +353,6 @@ void P2PTasks(void)
                 #if defined(ENABLE_HAND_SHAKE)
                     case CMD_P2P_CONNECTION_REQUEST:
                         {
-                            BYTE status = STATUS_SUCCESS;
-
                             // if a device goes to sleep, it can only have one
                             // connection, as the result, it cannot accept new
                             // connection request
@@ -362,7 +360,9 @@ void P2PTasks(void)
                                 MiMAC_DiscardPacket();
                                 break;
                             #else
-
+                                
+                                BYTE status = STATUS_SUCCESS;
+                                
                                 // if channel does not math, it may be a 
                                 // sub-harmonics signal, ignore the request
                                 if( currentChannel != rxMessage.Payload[1] )
@@ -1052,7 +1052,7 @@ BOOL MiApp_ProtocolInit(BOOL bNetworkFreezer)
      *****************************************************************************************/
     BYTE MiApp_TransceiverPowerState(INPUT BYTE Mode)
     {
-        BYTE status;
+        //BYTE status;
         
         switch(Mode)
         {
@@ -1770,7 +1770,7 @@ BOOL    isSameAddress(INPUT BYTE *Address1, INPUT BYTE *Address2)
         {
             return 0xFF;
         }
-        
+       
         t1 = MiWi_TickGet();
         t1.Val -= (ONE_SECOND);
         ConnMode = ENABLE_ALL_CONN;

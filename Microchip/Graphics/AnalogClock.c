@@ -281,25 +281,21 @@ WORD AcHandsDraw(ANALOGCLOCK *pAc, SHORT hand, SHORT thickness, WORD color, void
     static SHORT	cnt_thick=0;
     SHORT 	radius = pAc->radius;
     BYTE    colorDepth;
-
-    ////////////////////////////////////////////////////////    
     register FLASH_WORD *flashAddress = 0;
-    register FLASH_WORD *tempFlashAddress;
     static WORD                sizeX=0, sizeY=0;
 
 
 			
-	tempFlashAddress = (FLASH_WORD *)pBitmap; 
     // Move pointer to size information
-    if(tempFlashAddress != NULL)
+    if(NULL != pBitmap)
     {
-    flashAddress = (FLASH_WORD *)((IMAGE_FLASH *)pBitmap)->address + 1;
-	colorDepth = *(flashAddress+1);
-    // Read image size
-    sizeY = *flashAddress;
-    flashAddress++;
-    sizeX = *flashAddress;
-    flashAddress++;
+        flashAddress = (FLASH_WORD *)((IMAGE_FLASH *)pBitmap)->address + 1;
+    	colorDepth = *(flashAddress+1);
+        // Read image size
+        sizeY = *flashAddress;
+        flashAddress++;
+        sizeX = *flashAddress;
+        flashAddress++;
     }
     
     switch(hand)
@@ -414,7 +410,7 @@ WORD AcHandsDraw(ANALOGCLOCK *pAc, SHORT hand, SHORT thickness, WORD color, void
 					
 					if(templ>tempr && templ<temps)
 					{
-                    if(tempFlashAddress != NULL)
+                    if(pBitmap != NULL)
 					{SetColor(*(flashAddress + sizeX*(temp-yi_prev)+(x1 + cnt_thick - xi_prev)));}
                     else SetColor(pAc->hdr.pGolScheme->Color0);
 					PutPixel(x1 + cnt_thick, temp);
@@ -449,7 +445,7 @@ WORD AcHandsDraw(ANALOGCLOCK *pAc, SHORT hand, SHORT thickness, WORD color, void
 					
 					if(templ>tempr && templ<temps)
 					{
-                    if(tempFlashAddress != NULL)
+                    if(pBitmap != NULL)
 					{SetColor(*(flashAddress + sizeX*(y1 + cnt_thick -yi_prev)+(temp - xi_prev)));}
                     else SetColor(pAc->hdr.pGolScheme->Color0);
 					PutPixel(temp, y1 + cnt_thick);
@@ -535,7 +531,7 @@ WORD AcHandsDraw(ANALOGCLOCK *pAc, SHORT hand, SHORT thickness, WORD color, void
 					if(templ>tempr && templ<temps)
 					{
 
-                    if(tempFlashAddress != NULL)
+                    if(pBitmap != NULL)
 					{SetColor(*(flashAddress + sizeX*(x1 -yi_prev)+(y1 + cnt_thick - xi_prev)));}					
                     else SetColor(pAc->hdr.pGolScheme->Color0);
 
@@ -553,7 +549,7 @@ WORD AcHandsDraw(ANALOGCLOCK *pAc, SHORT hand, SHORT thickness, WORD color, void
 					
 					if(templ>tempr && templ<temps)
 					{
-                        if(tempFlashAddress != NULL){
+                        if(pBitmap != NULL){
 						SetColor(*(flashAddress + sizeX*(y1 + cnt_thick -yi_prev)+(x1 - xi_prev)));
                         }
                         else SetColor(pAc->hdr.pGolScheme->Color0);

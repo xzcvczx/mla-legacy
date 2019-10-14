@@ -32,10 +32,9 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok
- * Paolo Tamayo         03/10/08    ...
+ * 03/10/08    ...
  ********************************************************************/
 #ifndef GOOGLEMAPMENU_H
     #define GOOGLEMAPMENU_H
@@ -46,12 +45,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //                            MACROS
 /////////////////////////////////////////////////////////////////////////////
-// Panning button IDs
-#define PANUP_ID		0x0A00
-#define PANDOWN_ID		0x0A01
-#define PANLEFT_ID		0x0A02
-#define PANRIGHT_ID		0x0A03
-
 // zoom buttons
 #define ZOOMIN_ID		0x0A04
 #define ZOOMOUT_ID		0x0A05
@@ -126,20 +119,6 @@
 #define ENTER_Y				(MAP_Y)
 #define MENU_BTN_RADIUS		(GOOGLEMENUHEIGHT>>1)
 
-// zooming and panning, they will be in the same locations as the menu buttons
-// above. A touch on the map area activates them
-#define PANBUTTONWIDTH		GOOGLEMENUWIDTH
-#define PANBUTTONHEIGHT		GOOGLEMENUHEIGHT
-
-#define PANLEFT_X			MAP_X
-#define PANLEFT_Y			MAP_Y
-#define PANUP_X				SAT_X
-#define PANUP_Y				SAT_Y
-#define PANDOWN_X			TER_X
-#define PANDOWN_Y			TER_Y
-#define PANRIGHT_X			ENTER_X
-#define PANRIGHT_Y			ENTER_Y
-
 // Map Area dimensions
 #define MAPAREA_X1			10
 #define MAPAREA_Y1			10
@@ -171,9 +150,6 @@
 // defines for menu status
 #define NORMALMENU			0
 #define ALTERNATEMENU		1
-
-// Uncomment this to enable panning (TO DO)
-//#define ENABLE_PANNING
 
 // structure defining the current user download request
 typedef struct

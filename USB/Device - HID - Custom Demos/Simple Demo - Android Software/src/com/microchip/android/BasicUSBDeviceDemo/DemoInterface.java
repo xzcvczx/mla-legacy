@@ -53,4 +53,5 @@ public interface DemoInterface {
 	 * Request to toggle the LEDs on the attached board
 	 */
 	public void toggleLEDs();
+	
 }

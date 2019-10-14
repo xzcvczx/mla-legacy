@@ -36,9 +36,18 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.method.KeyListener;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 /**
@@ -47,7 +56,7 @@ import android.widget.TextView;
  * for the USB device demos
  *
  */
-public class ActivityBasicUSBDeviceDemo extends Activity {
+public class ActivityBasicUSBDeviceDemo extends Activity{
 	
 	Demo demo = null;
 	PendingIntent pendingIntent = null;
@@ -138,16 +147,45 @@ public class ActivityBasicUSBDeviceDemo extends Activity {
 				findViewById(R.id.layout_toggle_led).setVisibility(View.VISIBLE);
 				findViewById(R.id.layout_button_status).setVisibility(View.VISIBLE);
 				findViewById(R.id.layout_potentiometer_status).setVisibility(View.GONE);
+				findViewById(R.id.layout_MCP2200).setVisibility(View.GONE);
 				
 			} else if(tempDemo.getClass().equals(DemoMCHPUSB.class)) {
 				findViewById(R.id.layout_toggle_led).setVisibility(View.VISIBLE);
 				findViewById(R.id.layout_button_status).setVisibility(View.GONE);
 				findViewById(R.id.layout_potentiometer_status).setVisibility(View.VISIBLE);
+				findViewById(R.id.layout_MCP2200).setVisibility(View.GONE);
 				
 			} else if(tempDemo.getClass().equals(DemoCustomHID.class)) {
 				findViewById(R.id.layout_toggle_led).setVisibility(View.VISIBLE);
 				findViewById(R.id.layout_button_status).setVisibility(View.VISIBLE);
 				findViewById(R.id.layout_potentiometer_status).setVisibility(View.VISIBLE);
+				findViewById(R.id.layout_MCP2200).setVisibility(View.GONE);
+				
+			} else if(tempDemo.getClass().equals(DemoMCP2200.class)) {
+				findViewById(R.id.layout_toggle_led).setVisibility(View.GONE);
+				findViewById(R.id.layout_button_status).setVisibility(View.GONE);
+				findViewById(R.id.layout_potentiometer_status).setVisibility(View.GONE);
+				findViewById(R.id.layout_MCP2200).setVisibility(View.VISIBLE);
+				
+		        Spinner s = (Spinner) findViewById(R.id.baud_rate_select);
+		        ArrayAdapter adapter = ArrayAdapter.createFromResource(
+		                this, R.array.baud_rates, android.R.layout.simple_spinner_item);
+		        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		        s.setAdapter(adapter);
+		        
+		        s.setOnItemSelectedListener(
+	        	    new AdapterView.OnItemSelectedListener() {
+	
+						public void onItemSelected(AdapterView<?> arg0, View arg1,
+								int arg2, long arg3) {
+								((DemoMCP2200)demo).setBaudRate( arg0.getItemAtPosition(arg2).toString() );
+						}
+	
+						public void onNothingSelected(AdapterView<?> arg0) {
+							// TODO Auto-generated method stub
+							
+						}
+        	    });
 			}
 			
 			/* Set the title of the view to show the device information */
@@ -173,6 +211,26 @@ public class ActivityBasicUSBDeviceDemo extends Activity {
 	    	}
     	}
     }
+    
+    /**
+     * Toggles the LEDs on the attached board, if supported.
+     * @param v View that caused the toggle request
+     */
+    public void sendStringOnClick(View v) {
+    	/* Synchronized on demo here just in case a broadcast
+    	 * event occurs and attempts to modify the demo
+    	 * local variable while we are issuing the toggle LED
+    	 * request.
+    	 */
+    	synchronized(demo) {
+	    	if(demo != null) {
+	    		EditText box = (EditText)findViewById(R.id.entry);
+	    		((DemoMCP2200)demo).sendString( box.getText().toString() );
+	    		box.getText().clear();
+	    	}
+    	}
+    }
+    
     
     /**
      * Sets the R.id.title object of the current view with the
@@ -208,7 +266,7 @@ public class ActivityBasicUSBDeviceDemo extends Activity {
     				 * doing something with the demo at the moment.  
     				 */
     				synchronized(demo) {
-    					/* If the demo exists, close it down and free it up */
+    					/* If the demo exits, close it down and free it up */
     					if(demo != null) {
     						demo.close();
 		    				demo = null;
@@ -232,6 +290,8 @@ public class ActivityBasicUSBDeviceDemo extends Activity {
 				updateButton(R.id.button_status, ((MessageButton)msg.obj).isPressed);
 			} else if(msg.obj.getClass().equals(MessagePotentiometer.class)) {
 				updatePotentiometer(R.id.potentiometer_status, ((MessagePotentiometer)msg.obj).percentage);
+			} else if(msg.obj.getClass().equals(MessageText.class)) {
+				updateTextView(((MessageText)msg.obj).message);
 			}
     	} //handleMessage
     }; //handler
@@ -278,4 +338,17 @@ public class ActivityBasicUSBDeviceDemo extends Activity {
 		bar = (ProgressBar)findViewById(id);
 		bar.setProgress(percentage);
     }
+    
+    /**
+     * Updates the text box with the specified text
+     * @param Text to place in the textbox
+     */
+    private void updateTextView(String text) {
+		TextView box;
+		
+		box = (TextView)findViewById(R.id.basic_text_view);
+		box.setText(box.getText()+text);
+    }
+   
+    
 }

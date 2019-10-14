@@ -18,8 +18,9 @@ c. A debugging/programming development tool
     - MPLAB ICD 3 In-Circuit Debugger (DV164035), or
     - MPLAB REAL ICE In-Circuit Emulator (DV244005) 
       and the RJ-11 to ICSP Adapter (AC164110)
-d. MPLAB IDE V8.63 or better
-e. C32 Compiler V2.02
+d. MPLAB IDE V8.63 or better and  C32 Compiler V2.02
+ OR
+d. MPLAB.X V 1.20 and XC32 Compiler V1.00
 
 
 Optional Development Resources:
@@ -82,7 +83,7 @@ Out of the box the PICKit Serial Analyzer (PKSA) does not support the serial
 data stream provided by the demo. Firmware must be loaded using the application
 found in the directory
 
-    .\ProfiLabGUIs\mTouch GUI\Pickit Serial Loader
+    mTouchCapDemos\Utilities\mTouch GUI\Pickit Serial Loader
 
 Launch the executable PickitLoaderAuto.exe to load the firmware.  Follow the
 instructions shown in the dialog window to reset the PKSA and then to load
@@ -119,7 +120,7 @@ project.
    
    The Profilab mTouch GUI executable is located in the project subfolder
    
-       .\ProfiLabGUIs\mTouch GUI\Executable
+       mTouchCapDemos\Utilities\mTouch GUI\Executable
         
    After the executable is launched, you will notice 7 icons on the upper right
    side of the GUI window.  The are, from left to right:

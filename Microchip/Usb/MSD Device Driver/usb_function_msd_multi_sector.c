@@ -98,7 +98,7 @@ Change History:
     #define LUN_INDEX gblCBW.bCBWLUN
 #endif
 
-#if defined(__C30__) || defined(__C32__)
+#if defined(__C30__) || defined(__C32__) || defined __XC16__
     #if defined(USE_INTERNAL_FLASH)
         #include "MDD File System/Internal Flash.h"
     #endif

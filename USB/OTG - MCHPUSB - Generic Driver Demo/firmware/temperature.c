@@ -127,14 +127,14 @@ BOOL AcquireTemperature(void)
 		if(temperature.bits.b2 == 0)
 			return FALSE;
 
-	#elif defined(__C30__) || defined(__C32__)
+	#elif defined(__C30__) || defined(__C32__) || defined __XC16__
 
 		//Create temp variables to store the conversion data
 		float temp;
 
 		//get ready to sample the A/D
 
-        #if defined(__C30__)
+        #if defined(__C30__) || defined __XC16__
     		AD1CHS = 0x4;           //MUXA uses AN4
     		AD1PCFGLbits.PCFG4 = 0;
     		for(temp=0;temp<1000;temp++); //Sample delay

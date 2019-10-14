@@ -49,7 +49,7 @@ ADG         14-Apr-2008 First release
 
 // Define a fast instruction execution time in terms of loop time
 // typically > 43us
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
 #define LCD_F_INSTR     100
 #elif defined(__PIC32MX__)
 #define LCD_F_INSTR     1000

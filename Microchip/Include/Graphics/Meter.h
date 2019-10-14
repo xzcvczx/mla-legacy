@@ -151,12 +151,12 @@ typedef struct
     // This is computed automatically.
     SHORT       xPos;           // The current x position of the needle. This is computed automatically.
     SHORT       yPos;           // The current y position of the needle. This is computed automatically.
-    WORD        arcColor6;      // Arc 6 color parameter.
-    WORD        arcColor5;      // Arc 5 color parameter
-    WORD        arcColor4;      // Arc 4 color parameter
-    WORD        arcColor3;      // Arc 3 color parameter
-    WORD        arcColor2;      // Arc 2 color parameter
-    WORD        arcColor1;      // Arc 1 color parameter
+    GFX_COLOR   arcColor6;      // Arc 6 color parameter.
+    GFX_COLOR   arcColor5;      // Arc 5 color parameter
+    GFX_COLOR   arcColor4;      // Arc 4 color parameter
+    GFX_COLOR   arcColor3;      // Arc 3 color parameter
+    GFX_COLOR   arcColor2;      // Arc 2 color parameter
+    GFX_COLOR   arcColor1;      // Arc 1 color parameter
 
     // The following three points define three fonts used in meter widget, they can be different from the scheme font.
     // Note that the sizes of these fonts are not checked with the meter dimension. In cases where font sizes are

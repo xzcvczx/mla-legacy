@@ -58,17 +58,16 @@
 #include "Graphics/Graphics.h"
 #include "HardwareProfile.h"
 #include "Graphics/S1D13517.h"
-#include "SST39VF040.h"
 #include "SST25VF016.h"
 #include "EEPROM.h"
 #include "Beep.h"
 #include "Graphics/Transitions.h"
 #include "FlashProgrammer.h"
-#if defined (__C30__)
+#if defined (__C30__) || defined(__XC16__)
     #include "ExternalResource.h"
-    #include "InternalResourceC30.h"
+    #include "InternalResourceXC16.h"
 #else
-    #include "InternalResourceC32.h"
+    #include "InternalResourceXC32.h"
 #endif
 
 /*****************************************************************************
@@ -123,8 +122,7 @@ extern SCREEN_STATES    screenState;    // current state of main demo state mash
  * SECTION: Graphics Page Defines
  *****************************************************************************/
 #define DISPLAY_BUFFER	GFX_PAGE0	
-#define INPUT1_BUFFER	GFX_PAGE9
-#define INPUT2_BUFFER	GFX_PAGE10	
+#define DOUBLE_BUFFER	GFX_PAGE8	
 #define IMAGE1_PINGPONG GFX_PAGE7
 #define IMAGE2_PINGPONG GFX_PAGE8
 

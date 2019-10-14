@@ -3,7 +3,6 @@
  *  Epson S1D13522 EPD controllers driver
  *****************************************************************************
  * FileName:        S1D13522.h
- * Compiler:        MPLAB C30, C32
  * Company:         Microchip Technology Incorporated
  *
  * Software License Agreement
@@ -68,8 +67,8 @@
 * PARAMETERS VALIDATION
 *********************************************************************/
 
-    #if (COLOR_DEPTH != 1) && (COLOR_DEPTH != 2) && (COLOR_DEPTH != 4) && (COLOR_DEPTH != 8)
-        #error This driver supports 1, 2, 4 and 8 BPP only.
+    #if (COLOR_DEPTH != 1) && (COLOR_DEPTH != 4) && (COLOR_DEPTH != 8)
+        #error This driver supports 1, 4 and 8 BPP only.
     #endif
     #if (DISP_HOR_RESOLUTION % 8) != 0
         #error Horizontal resolution must be divisible by 8.
@@ -77,32 +76,6 @@
     #if (DISP_ORIENTATION != 0) && (DISP_ORIENTATION != 180) && (DISP_ORIENTATION != 90) && (DISP_ORIENTATION != 270)
         #error The display orientation selected is not supported. It can be only 0,90,180 or 270.
     #endif
-
-/*********************************************************************
-* Overview: Clipping region control codes to be used with SetClip(...)
-*           function. 
-*********************************************************************/
-    #define CLIP_DISABLE    0   // Disables clipping.
-    #define CLIP_ENABLE     1   // Enables clipping.
-
-/*********************************************************************
-* Overview: Clipping region control and border settings.
-*********************************************************************/
-
-// Clipping region enable control
-extern SHORT    _clipRgn;
-
-// Left clipping region border
-extern SHORT    _clipLeft;
-
-// Top clipping region border
-extern SHORT    _clipTop;
-
-// Right clipping region border
-extern SHORT    _clipRight;
-
-// Bottom clipping region border
-extern SHORT    _clipBottom;
 
 
 #define GFX_UPDATE_AS_IT_DRAWS 			0x0001
@@ -235,10 +208,7 @@ extern SHORT    _clipBottom;
 #define WRITE_TO_MAIN		0x0000			// Writes image data to Main Image Buffer
 #define WRITE_TO_PIP		0x0400			// Writes image data to PIP Image Buffer
 
-//#define BITEXPAND_DIS		0x0040			// Disables Bit Expansion
-
 #define SRC_1BIT			0x0000			// Sets host packed pixel select bits (bits 5-4)
-#define SRC_2BIT			0x0010
 #define SRC_4BIT			0x0020
 #define SRC_8BIT			0x0030
 
@@ -246,7 +216,7 @@ extern SHORT    _clipBottom;
 #define SRC_BPPtp(aaa)		SRC_##aaa##BIT
 #define SRC_BPP(bbb)		SRC_BPPtp(bbb)
 #define SRC_COLOR			SRC_BPP(COLOR_DEPTH)
-#if (SRC_COLOR != SRC_1BIT ) && (SRC_COLOR != SRC_2BIT ) && (SRC_COLOR != SRC_3BIT ) && (SRC_COLOR != SRC_4BIT ) && (SRC_COLOR != SRC_8BIT )
+#if (SRC_COLOR != SRC_1BIT ) && (SRC_COLOR != SRC_4BIT ) && (SRC_COLOR != SRC_8BIT )
 	#error "Source color not defined."
 #endif
 
@@ -335,17 +305,17 @@ void GFX_DRIVER_InitRotmode( WORD RotMode );
 /// \param	HostOptions		Corresponds with parameter 1. This value configures
 ///							various Host settings such as the input pixel mode.
 ///
-/// \param	XStart			Corresponds with parameter 2. This value configures
+/// \param	xStart			Corresponds with parameter 2. This value configures
 ///							the X start position for the packed pixel write.
 ///
-/// \param	YStart			Corresponds with parameter 3. This value configures
+/// \param	yStart			Corresponds with parameter 3. This value configures
 ///							the Y start position for the packed pixel write.
 ///
-/// \param	Width			Corresponds with parameter 4. This value configures
-///							the width for the packed pixel write.
+/// \param	xEnd			Corresponds with parameter 4. This value configures
+///							the ending position of X corridate for the packed pixel write.
 ///
-/// \param	Height			Corresponds with parameter 5. This value configures
-///							the height for the packed pixel write.
+/// \param	yEnd			Corresponds with parameter 5. This value configures
+///							the ending position of Y corridate for the packed pixel write.
 ///
 /// \param	pData			Pointer to the data to write. If pData is NULL, the
 ///							image load will be setup, but no data will be
@@ -355,7 +325,7 @@ void GFX_DRIVER_InitRotmode( WORD RotMode );
 /// \return void
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void GFX_DRIVER_LoadImage( WORD HostOptions, WORD XStart, WORD YStart, WORD Width, WORD Height, const WORD* pData );
+void GFX_DRIVER_LoadImage( WORD HostOptions, WORD xStart, WORD yStart, WORD xEnd, WORD yEnd, const WORD* pData );
 
 
 typedef enum { GFX_MAIN_LAYER, GFX_PIP_LAYER, GFX_CURSOR_LAYER } GFX_LAYER;
@@ -366,10 +336,10 @@ typedef enum { GFX_MAIN_LAYER, GFX_PIP_LAYER, GFX_CURSOR_LAYER } GFX_LAYER;
 ///	This function is used to create an additional layer that can be used for PIP, 
 /// Cursor or other porpouse.
 ///
-/// \param	Layer		    Corresponds with layer. 
+/// \param	layer		    Corresponds with layer. 
 ///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
 ///
-/// \param  Config			This value makes configuration for the Layer that 
+/// \param  config			This value makes configuration for the Layer that 
 ///                         can be combained with the following flags:
 ///								GFX_LAYER_TRANS_EN
 ///								GFX_LAYER_OUTPUT_NORMAL
@@ -380,19 +350,19 @@ typedef enum { GFX_MAIN_LAYER, GFX_PIP_LAYER, GFX_CURSOR_LAYER } GFX_LAYER;
 ///							( GFX_LAYER_TRANS_EN | GFX_LAYER_OUTPUT_NORMAL | 0xA )
 ///							where 0xA is value of transparency.  
 ///
-/// \param	XStart			This value configures the X start position for the Layer
+/// \param	xStart			This value configures the X start position for the Layer
 ///
-/// \param	YStart			This value configures the Y start position for the Layer
+/// \param	yStart			This value configures the Y start position for the Layer
 ///
-/// \param	Width			This value configures the width for the Layer
+/// \param	xEnd			This value configures the X start position for the Layer
 ///							 
 ///
-/// \param	Height			This value configures the height for the Layer
+/// \param	yEnd			This value configures the Y start position for the Layer
 ///
 /// \return void
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void GFX_DRIVER_CreateLayer( GFX_LAYER Layer, WORD Config, WORD XStart,  WORD YStart,  WORD Width,  WORD Height );
+void GFX_DRIVER_CreateLayer( GFX_LAYER layer, WORD config, WORD xStart,  WORD yStart,  WORD xEnd,  WORD yEnd );
 
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief
@@ -474,19 +444,19 @@ void GFX_DRIVER_ActivateLayer( GFX_LAYER Layer );
 ///							Note that GFX_UPDATE_XXX can be combined with GFX_WAIT_XXX 
 ///
 ///							The folowing configures area for update:
-/// \param	XStart			This value configures the X start position for update.
+/// \param	xStart			This value configures the X start position for update.
 ///
-/// \param	YStart			This value configures the Y start position for update.
+/// \param	yStart			This value configures the Y start position for update.
 ///
-/// \param	Width			This value configures the width for update.
+/// \param	xEnd			This value configures the X end position for update.
 ///							 
 ///
-/// \param	Height			This value configures the height for update.
+/// \param	yEnd			This value configures the Y end position for update.
 ///
 /// \return void
 ///
 ////////////////////////////////////////////////////////////////////////////////
-void GFX_DRIVER_UpdateEpd( WORD UpdateOptions, WORD XStart, WORD YStart, WORD Width, WORD Height );
+void GFX_DRIVER_UpdateEpd( WORD UpdateOptions, WORD xStart, WORD yStart, WORD xEnd, WORD yEnd );
 
 
 ///////////////////////////////////////////////////////////////////////////////

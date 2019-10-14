@@ -600,7 +600,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
 
                 if (transferFlags & USB_PRINTER_TRANSFER_FROM_ROM)
                 {
-                    #if defined( __C30__ )
+                    #if defined( __C30__ ) || defined __XC16__
                         char __prog__   *ptr;
                     #elif defined( __PIC32MX__ )
                         const char      *ptr;
@@ -787,7 +787,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
 
                 if (transferFlags & USB_PRINTER_TRANSFER_FROM_ROM)
                 {
-                    #if defined( __C30__ )
+                    #if defined( __C30__ ) || defined __XC16__
                         char __prog__   *ptr;
                     #elif defined( __PIC32MX__ )
                         const char      *ptr;

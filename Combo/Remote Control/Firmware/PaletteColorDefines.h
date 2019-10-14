@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FileName:        PaletteColorDefines.h
  * Processor:       PIC24F, PIC24H, dsPIC
- * Compiler:        MPLAB C30 (see release notes for tested revision)
- * Linker:          MPLAB LINK30
+ * Compiler:        MPLAB C30/XC16 (see release notes for tested revision)
+ * Linker:          MPLAB LINK30/XC16
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.46
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.28.15
  *****************************************************************************/
 
 #ifndef PALETTECOLORDEFINES_H_FILE

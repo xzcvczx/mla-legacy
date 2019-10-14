@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FileName:        ExternalResource.c
  * Processor:       PIC24F, PIC24H, dsPIC
- * Compiler:        MPLAB C30 (see release notes for tested revision)
- * Linker:          MPLAB LINK30
+ * Compiler:        MPLAB C30/XC16 (see release notes for tested revision)
+ * Linker:          MPLAB LINK30/XC16
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,20 +31,22 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.46
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.28.15
  *****************************************************************************/
 
 /*****************************************************************************
  * SECTION:  Includes
  *****************************************************************************/
 #include <Graphics/Graphics.h>
+#include "HardwareProfile.h"
 
 /*****************************************************************************
  * SECTION:  Graphics Library Firmware Check
  *****************************************************************************/
-#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
-#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#if(GRAPHICS_LIBRARY_VERSION != 0x0306)
+#warning "It is suggested to use Graphics Library version 3.06 with this version of GRC."
 #endif
+
 
 /*****************************************************************************
  * SECTION:  BITMAPS
@@ -55,7 +57,7 @@
  * Label: Favorites
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Favorites = 
+const IMAGE_EXTERNAL Favorites = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -66,7 +68,7 @@ IMAGE_EXTERNAL Favorites =
  * Label: Home
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Home = 
+const IMAGE_EXTERNAL Home = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -77,7 +79,7 @@ IMAGE_EXTERNAL Home =
  * Label: Play_DiscPressed
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Play_DiscPressed = 
+const IMAGE_EXTERNAL Play_DiscPressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -88,7 +90,7 @@ IMAGE_EXTERNAL Play_DiscPressed =
  * Label: SettingsPressed
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL SettingsPressed = 
+const IMAGE_EXTERNAL SettingsPressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -99,7 +101,7 @@ IMAGE_EXTERNAL SettingsPressed =
  * Label: HomeIconSmallPressed
  * Description:  60x59 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL HomeIconSmallPressed = 
+const IMAGE_EXTERNAL HomeIconSmallPressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -110,7 +112,7 @@ IMAGE_EXTERNAL HomeIconSmallPressed =
  * Label: button7
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button7 = 
+const IMAGE_EXTERNAL button7 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -121,7 +123,7 @@ IMAGE_EXTERNAL button7 =
  * Label: button7press
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button7press = 
+const IMAGE_EXTERNAL button7press = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -132,7 +134,7 @@ IMAGE_EXTERNAL button7press =
  * Label: button2
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button2 = 
+const IMAGE_EXTERNAL button2 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -143,7 +145,7 @@ IMAGE_EXTERNAL button2 =
  * Label: button4
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button4 = 
+const IMAGE_EXTERNAL button4 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -154,7 +156,7 @@ IMAGE_EXTERNAL button4 =
  * Label: button3
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button3 = 
+const IMAGE_EXTERNAL button3 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -165,7 +167,7 @@ IMAGE_EXTERNAL button3 =
  * Label: button2press
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button2press = 
+const IMAGE_EXTERNAL button2press = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -176,7 +178,7 @@ IMAGE_EXTERNAL button2press =
  * Label: button6
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button6 = 
+const IMAGE_EXTERNAL button6 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -187,7 +189,7 @@ IMAGE_EXTERNAL button6 =
  * Label: button1
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button1 = 
+const IMAGE_EXTERNAL button1 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -198,7 +200,7 @@ IMAGE_EXTERNAL button1 =
  * Label: button4press
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button4press = 
+const IMAGE_EXTERNAL button4press = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -209,7 +211,7 @@ IMAGE_EXTERNAL button4press =
  * Label: button6press
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button6press = 
+const IMAGE_EXTERNAL button6press = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -220,7 +222,7 @@ IMAGE_EXTERNAL button6press =
  * Label: button5press
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button5press = 
+const IMAGE_EXTERNAL button5press = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -231,7 +233,7 @@ IMAGE_EXTERNAL button5press =
  * Label: button3press
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button3press = 
+const IMAGE_EXTERNAL button3press = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -242,7 +244,7 @@ IMAGE_EXTERNAL button3press =
  * Label: button1press
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button1press = 
+const IMAGE_EXTERNAL button1press = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -253,7 +255,7 @@ IMAGE_EXTERNAL button1press =
  * Label: button5
  * Description:  55x55 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL button5 = 
+const IMAGE_EXTERNAL button5 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -264,7 +266,7 @@ IMAGE_EXTERNAL button5 =
  * Label: HomePressed
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL HomePressed = 
+const IMAGE_EXTERNAL HomePressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -275,7 +277,7 @@ IMAGE_EXTERNAL HomePressed =
  * Label: TV
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL TV = 
+const IMAGE_EXTERNAL TV = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -286,7 +288,7 @@ IMAGE_EXTERNAL TV =
  * Label: TVPressed
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL TVPressed = 
+const IMAGE_EXTERNAL TVPressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -297,7 +299,7 @@ IMAGE_EXTERNAL TVPressed =
  * Label: InternetPressed
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL InternetPressed = 
+const IMAGE_EXTERNAL InternetPressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -308,7 +310,7 @@ IMAGE_EXTERNAL InternetPressed =
  * Label: FavoritesPressed
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL FavoritesPressed = 
+const IMAGE_EXTERNAL FavoritesPressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -319,7 +321,7 @@ IMAGE_EXTERNAL FavoritesPressed =
  * Label: Smaller_FavoritesPressed
  * Description:  50x50 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Smaller_FavoritesPressed = 
+const IMAGE_EXTERNAL Smaller_FavoritesPressed = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -330,7 +332,7 @@ IMAGE_EXTERNAL Smaller_FavoritesPressed =
  * Label: Play_Disc
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Play_Disc = 
+const IMAGE_EXTERNAL Play_Disc = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -341,7 +343,7 @@ IMAGE_EXTERNAL Play_Disc =
  * Label: Smaller_Favorites
  * Description:  50x50 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Smaller_Favorites = 
+const IMAGE_EXTERNAL Smaller_Favorites = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -352,7 +354,7 @@ IMAGE_EXTERNAL Smaller_Favorites =
  * Label: Internet
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Internet = 
+const IMAGE_EXTERNAL Internet = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -363,7 +365,7 @@ IMAGE_EXTERNAL Internet =
  * Label: HomeIconSmall
  * Description:  60x59 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL HomeIconSmall = 
+const IMAGE_EXTERNAL HomeIconSmall = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -374,7 +376,7 @@ IMAGE_EXTERNAL HomeIconSmall =
  * Label: Settings
  * Description:  80x79 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Settings = 
+const IMAGE_EXTERNAL Settings = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -385,7 +387,7 @@ IMAGE_EXTERNAL Settings =
  * Label: MICH4CBsmall
  * Description:  35x33 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL MICH4CBsmall = 
+const IMAGE_EXTERNAL MICH4CBsmall = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,

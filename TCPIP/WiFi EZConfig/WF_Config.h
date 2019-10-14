@@ -1,9 +1,9 @@
 /******************************************************************************
 
- MRF24WB0M Driver Customization
+ MRF24W Driver Customization
  Module for Microchip TCP/IP Stack
-  -Provides access to MRF24WB0M WiFi controller
-  -Reference: MRF24WB0M Data sheet, IEEE 802.11 Standard
+  -Provides access to MRF24W WiFi controller
+  -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
  FileName:		WF_Config.h
@@ -44,12 +44,14 @@
 
  Author				Date		Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- KH                 27 Jan 2010 Created for MRF24WB0M
+ KH                 27 Jan 2010 Created for MRF24W
 ******************************************************************************/
 
 
 #ifndef __WF_CONFIG_H_
 #define __WF_CONFIG_H_
+
+#define WF_EASY_CONFIG_DEMO
 
 /*
 *********************************************************************************************************
@@ -57,28 +59,6 @@
 *********************************************************************************************************
 */
 
-/*----------------------------------------------------------------------------*/
-/* This block of defines allows for code and data reduction by removing       */
-/* WiFi driver code and or data that is not needed by the application.        */
-/* Comment out those function blocks that are not needed.                     */
-/*----------------------------------------------------------------------------*/
-#define WF_USE_SCAN_FUNCTIONS
-#define WF_USE_TX_POWER_CONTROL_FUNCTIONS
-#define WF_USE_POWER_SAVE_FUNCTIONS
-#define WF_USE_MULTICAST_FUNCTIONS
-#define WF_USE_INDIVIDUAL_SET_GETS
-#define WF_USE_GROUP_SET_GETS
-//#define WF_USE_DATA_TX_RX_FUNCTIONS
-//#define USE_GRATUITOUS_ARP
-
-
-
-/*= WF_ASSERT MACRO ==================================================================*/
-/* Customize how the WiFi driver assert macro (WF_ASSERT) should operate.             */
-/*  To DISABLE the WF_ASSERT macro: Comment out '#define WF_DEBUG'                    */
-/*  To ENABLE the WF_ASSERT macro:  Unomment out '#define WF_DEBUG'                   */
-/*====================================================================================*/
-#define WF_DEBUG 
 
 /*= WF_CONSOLE =======================================================================*/
 /* Customize whether the WiFi Driver supports a serial console application            */
@@ -88,38 +68,62 @@
 #define WF_CONSOLE              /* needed for console demo */
 #define WF_CONSOLE_IFCFGUTIL    /* needed for console demo */
 
+#define ADHOC_RETRY_COUNT           (3)
+
+#define CFG_WF_ADHOC          2	
+#define CFG_WF_SOFT_AP        4 
+
+#define MY_DEFAULT_DOMAIN                   WF_DOMAIN_FCC
+#define MY_DEFAULT_NETWORK_TYPE             CFG_WF_ADHOC   /*  CFG_WF_ADHOC, CFG_WF_SOFT_AP  */    
+#define MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE  WF_RETRY_FOREVER
 
 /*--------------------------------------------*/
-/* Default settings for Connection Management */
+/* Default settings for Adhoc mode  */
 /*--------------------------------------------*/
+#if MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC
 #define MY_DEFAULT_SSID_NAME                "EasyConfig"
-
-#define MY_DEFAULT_NETWORK_TYPE             WF_ADHOC   /* WF_INFRASTRUCTURE or WF_ADHOC     */
-
+#define MY_DEFAULT_BEACON_TIMEOUT           (40)   /* Number of beacon periods */
 #define MY_DEFAULT_SCAN_TYPE                WF_ACTIVE_SCAN      /* WF_ACTIVE_SCAN or WF_PASSIVE_SCAN */
-
-#define MY_DEFAULT_CHANNEL_LIST             {1,2,3,4,5,6,7,8,9,10,11}	/* Desired channel list for FCC, use less channels to minimize scan time */
-
-#define MY_DEFAULT_LIST_RETRY_COUNT_ADHOC           (3)                 /* Number of times to try to connect to the SSID when using Ad/Hoc network type */
-#define MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE  (WF_RETRY_FOREVER)  /* Number of times to try to connect to the SSID when using Infrastructure network type */
+#define MY_DEFAULT_CHANNEL_LIST             {}            /* Desired channel list             */
+#define MY_DEFAULT_LIST_RETRY_COUNT          ADHOC_RETRY_COUNT
+#define MY_DEFAULT_PS_POLL                   WF_DISABLED    /* PS is not supported in Adhoc */
+#if !defined(MRF24WG)
+/* #define WF_AGGRESSIVE_PS */	/* WARNING !!! : This only can work with 1209 module FW version or later.
+						* If you use the earlier version such as 1207 or 1205, then you should not define this.
+						* Defining this will lead ASSERT problem with old module FW.
+						*/
+#endif
+#define MY_DEFAULT_WIFI_SECURITY_MODE        WF_SECURITY_OPEN
+/*------------------------------------------*/
+/* else if starting this demo in SoftAP mode */
+/*------------------------------------------*/
+#elif MY_DEFAULT_NETWORK_TYPE == CFG_WF_SOFT_AP
+/* Please note that this demo is only for demoing SoftAP function, but full "EasyConfig" function. 
+* Your STA can connect to the SoftAP as a client, get the DHCP IP, run ping, and run web browser to connect to Web Server
+* of SoftAP. But unlike Adhoc mode above it may not direct you to connect to another AP in infrastructure mode.
+* The reason this demo sits here is simply A) borrow DHCP server; B) borrow HTTP server.
+*
+* Also note that this is a very simplified SoftAP. So its function is limited as , A) no routing supported; B) only 1 client allowed
+* at a time.  And security wise currently it only supports open mode.
+*/
+#if defined (MRF24WG)
+	#define MY_DEFAULT_WIFI_SECURITY_MODE				WF_SECURITY_OPEN			/* only open security supported */
+    #define MY_DEFAULT_SCAN_TYPE                        WF_ACTIVE_SCAN   			 /* Dummy, Not used  */
+    #define MY_DEFAULT_SSID_NAME                        "MCHPSoftAP" 				/* Set SoftAP ssid */
+    #define MY_DEFAULT_LIST_RETRY_COUNT                 ADHOC_RETRY_COUNT            /* Dummy, Not used  */
+    #define MY_DEFAULT_CHANNEL_LIST                     {6}                    /* Set SoftAP network channel */
+    #define MY_DEFAULT_BEACON_TIMEOUT                   (40)       					 /* Dummy, Not used  */
+    #define MY_DEFAULT_PS_POLL                          WF_DISABLED					 /* Dummy, Not used  */
+#else	/* !defined (MRF24WG) */
+#error "MRF24WB does not support SoftAP"
+#endif	/* defined (MRF24WG) */
+#endif	/* MY_DEFAULT_NETWORK_TYPE == CFG_WF_ADHOC */
 
 #define MY_DEFAULT_EVENT_NOTIFICATION_LIST  (WF_NOTIFY_CONNECTION_ATTEMPT_SUCCESSFUL  |         \
                                              WF_NOTIFY_CONNECTION_ATTEMPT_FAILED      |         \
                                              WF_NOTIFY_CONNECTION_TEMPORARILY_LOST    |         \
                                              WF_NOTIFY_CONNECTION_PERMANENTLY_LOST    |         \
                                              WF_NOTIFY_CONNECTION_REESTABLISHED)
-
-#define MY_DEFAULT_PS_POLL                   WF_DISABLED         /* WF_DISABLED or WF_ENABLED */
-/* #define WF_AGGRESSIVE_PS */ 	/* WARNING !!! : This only can work with 1209 module FW version or later.
-							* If you use the earlier version such as 1207 or 1205, then you should not define this.
-							* Defining this will lead ASSERT problem with old module FW.
-							*/
-
-
-
-#define MY_DEFAULT_WIFI_SECURITY_MODE        WF_SECURITY_OPEN
-#define MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE  WF_SECURITY_WEP_OPENKEY /* WF_SECURITY_WEP_OPENKEY (default) or	  */
-																		 /*  WF_SECURITY_WEP_SHAREDKEY. 			 */ 
 
 //#define USE_MRF24W_HOST_BUFFER
 
@@ -129,6 +133,21 @@
 #define EZ_CONFIG_STORE
 
 
+/* Warning !!! Please note that :
+* RF Module FW has a built-in connection manager, and it is enabled by default.
+* So if you want to run your own connection manager in host stack application side,
+* then you should disable the module connection manager to avoid some possible conflict
+* between the two.  Especially these two APIs can be affected if you do not disable it.  
+* A) UINT16 WF_CMDisconnect(void)
+* B) UINT16 WF_Scan(UINT8 CpId)
+* If some conflict occurs then these APIs will return failure. 
+* Furthermore if you use old MRF24WB FW version, older than 120C, then 
+* it can cause fatal issue in module FW side such as FW crash.
+* So for simplicity, if you want to run your own connection manager actively,
+* we strongly recommend to disable the module connection manager, and this
+* #define is make that thing possible. Just un-comment it to do so !
+*/
+//#define DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE
 
 
 /*****************************************************************************/
@@ -140,19 +159,39 @@
 //   WF_SECURITY_OPEN                      : No security
 //   WF_SECURITY_WEP_40                    : WEP Encryption using 40 bit keys
 //   WF_SECURITY_WEP_104                   : WEP Encryption using 104 bit keys
-//   WF_SECURITY_WPA_WITH_KEY              : WPA-PSK Personal where binary key is given to MRF24WB0M 
-//   WF_SECURITY_WPA_WITH_PASS_PHRASE      : WPA-PSK Personal where passphrase is given to MRF24WB0M and it calculates the binary key
-//   WF_SECURITY_WPA2_WITH_KEY             : WPA2-PSK Personal where binary key is given to MRF24WB0M 
-//   WF_SECURITY_WPA2_WITH_PASS_PHRASE     : WPA2-PSK Personal where passphrase is given to MRF24WB0M and it calculates the binary key
-//   WF_SECURITY_WPA_AUTO_WITH_KEY         : WPA-PSK Personal or WPA2-PSK Personal where binary key is given and MRF24WB0M will 
+//   WF_SECURITY_WPA_WITH_KEY              : WPA-PSK Personal where binary key is given to MRF24W 
+//   WF_SECURITY_WPA_WITH_PASS_PHRASE      : WPA-PSK Personal where passphrase is given to MRF24W and it calculates the binary key
+//   WF_SECURITY_WPA2_WITH_KEY             : WPA2-PSK Personal where binary key is given to MRF24W 
+//   WF_SECURITY_WPA2_WITH_PASS_PHRASE     : WPA2-PSK Personal where passphrase is given to MRF24W and it calculates the binary key
+//   WF_SECURITY_WPA_AUTO_WITH_KEY         : WPA-PSK Personal or WPA2-PSK Personal where binary key is given and MRF24W will 
 //                                             connect at highest level AP supports (WPA or WPA2)                                                
-//   WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE : WPA-PSK Personal or WPA2-PSK Personal where passphrase is given to MRF24WB0M and it 
+//   WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE : WPA-PSK Personal or WPA2-PSK Personal where passphrase is given to MRF24W and it 
 //                                             calculates the binary key and connects at highest level AP supports (WPA or WPA2)
 
 // Default pass phrase used for WF_SECURITY_WPA_WITH_PASS_PHRASE and 
 // WF_SECURITY_WPA2_WITH_PASS_PHRASE security modes
 #define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
 
+#if defined(__C32__)
+/* This option allows host to convert the passphrase to the key by itself instead of relying on RF module FW.
+* Even if you do not use this option, RF module FW will still take care of this key deriviation.  
+* However it will take much more time such as 32 seconds for MRF24WB or 25 seconds for MRF24WG.
+* Also note that the reason PIC18/24 are not allowed to use this option is just to save memory space on it. 
+* So if you have enough memory on PIC18/24, then you can also use this option with adding WF_pbkdf2.c
+* in your projects.
+*/
+#define DERIVE_KEY_FROM_PASSPHRASE_IN_HOST
+#endif
+
+#if defined (MRF24WG)
+/* The module HW has 2 hardware multicast filters. If that is not enough on your application, 
+* then you can choose this option to extend it to max 16.  As the macro name indicates this forces 
+* the module FW to use software to run the filters instead of hardware.  Downside of this option 
+* is the performance can degrade when there are so many multicast packets on air becasue the 
+* filtering is done by SW
+*/
+//#define ENABLE_SOFTWARE_MULTICAST_FILTER
+#endif
 
 // If using security mode of WF_SECURITY_WPA_WITH_KEY or WF_SECURITY_WPA2_WITH_KEY, then this section 
 // must be set to  match the key for MY_DEFAULT_SSID_NAME and MY_DEFAULT_PSK_PHRASE

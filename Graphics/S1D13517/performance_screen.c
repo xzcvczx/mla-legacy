@@ -57,7 +57,7 @@
 float FPS_PPS(void);
 void CharStringToXCharString(XCHAR *xstring, char *string);
 /*****************************************************************************
- * void CreatePerformanceScreen(void)
+ * void CreatePerformanceScreen(BYTE drawFlag)
  *****************************************************************************/
 void CreatePerformanceScreen(void)
 {
@@ -69,26 +69,25 @@ void CreatePerformanceScreen(void)
    	Bar((GetMaxX() >> 2), 0 , (GetMaxX() >> 2) + 2, GetMaxY());
 
     SetColor(currentScheme->Color0);
-	FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5);
+
+	while(!FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5));
 	PutImage((GetMaxX() >> 2)+20, 10, (void *) &appointment_new, IMAGE_NORMAL);
-	FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
-     
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
+	while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));
+ 
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
+					 GFX_PAGE1, (GetMaxX() >> 2)+15, 5,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
 				     (GetMaxX()) - ((GetMaxX() >> 2)+20), 
 				     60,  	
-				     GFX_SchemeGetDefaultScheme()->AlphaValue);
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));
 				     	
 
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+					 GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
 				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
 				     GetMaxY() - 90,  	
-				     GFX_SchemeGetDefaultScheme()->AlphaValue);
-    
-    SetActivePage(GetDestinationPage());
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));
 
 	SetColor(RGB565CONVERT(255, 102, 0));
     SetFont((void *) &FONTDEFAULT);
@@ -212,8 +211,8 @@ WORD MsgPerformanceScreen(WORD objMsg, OBJ_HEADER *pObj)
                 SetColor(RGB565CONVERT(255, 102, 0));
                 SetFont((void *) &FONTDEFAULT);
                 OutTextXY((GetMaxX() >> 2) + 60,150,(XCHAR *)FadingStr);
-                SetActivePage(GetDestinationPage());
-
+                SetActivePage(GetDrawBufferAddress());
+              
                 screenState = DISPLAY_ALPHABLEND;
             }    
             return (1);        
@@ -222,12 +221,12 @@ WORD MsgPerformanceScreen(WORD objMsg, OBJ_HEADER *pObj)
             if(objMsg == BTN_MSG_RELEASED)
             {
       
-                AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-                                 GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-                                 GFXGetPageXYAddress(GFX_PAGE4, 0, 0),
+                while(!AlphaBlendWindow(GetDrawBufferAddress(), 0, 0,
+                                 GetDrawBufferAddress(), 0, 0,
+                                 GFX_PAGE4, 0, 0,
                                  GetMaxX(), 
                                  GetMaxY(),   	
-                                 GFX_SchemeGetDefaultScheme()->AlphaValue);   
+                                 GFX_SchemeGetDefaultScheme()->AlphaValue));   
 
                 GFXTransition(0,0,(GetMaxX() >> 2) + 10,GetMaxY(),
                            PUSH,GFXGetPageOriginAddress(1),GFXGetPageOriginAddress(0),
@@ -236,6 +235,10 @@ WORD MsgPerformanceScreen(WORD objMsg, OBJ_HEADER *pObj)
                 GFXTransition(0,0,(GetMaxX() >> 2) + 10,GetMaxY(),
                            SLIDE,GFXGetPageOriginAddress(GFX_PAGE2),GFXGetPageOriginAddress(0),
                            2,8,LEFT_TO_RIGHT);
+
+                 CopyPageWindow( 1, GetDrawBufferAddress(),       
+                           0, 0, 0, 0, 
+                           GetMaxX(), GetMaxY());
 
                 screenState = CREATE_MAIN; 
 
@@ -254,14 +257,14 @@ void CreateColorDepthScreen(void)
      
     SetColor(GFX_SchemeGetCurrentScheme()->Color0);	 	 
 
-    FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
+    while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));
 
-    AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-	                GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-	                GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+    while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+	                GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+	                GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
                     (GetMaxX())-((GetMaxX() >> 2) + 15), 
                     GetMaxY() - 90,  	
-                    GFX_SchemeGetDefaultScheme()->AlphaValue);
+                    GFX_SchemeGetDefaultScheme()->AlphaValue));
 
     SetColor(RGB565CONVERT(255, 102, 0));
     SetFont((void *) &FONTDEFAULT);
@@ -298,18 +301,14 @@ void CreateSpeed(void)
 
     SetColor(GFX_SchemeGetCurrentScheme()->Color0);
 
-	FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
+	while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));
      
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+					 GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
 				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
 				     GetMaxY() - 90,  	
-				     GFX_SchemeGetDefaultScheme()->AlphaValue);
-				     
-    SetActivePage(GetDestinationPage());
-
-
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));
 
     SetColor(RGB565CONVERT(255, 102, 0)); //Text Font Color
 	fps = FPS_PPS();
@@ -338,9 +337,9 @@ void CreateSpeed(void)
 	
     Stopwatch_Start();
 	DrawPoly(4, (SHORT *)polyPoints);
-	cTmrCount = Stopwatch_Stop()
-        ;
-	SetActivePage(0);
+	cTmrCount = Stopwatch_Stop();
+
+	SetActivePage(GetDrawBufferAddress());
 	
     sprintf(text, "%s%1.3f", "Polygons Per Second: ", (double)((GetSystemClock()/(double)cTmrCount)));
 	MoveTo((GetMaxX() >> 2) + 70,300);
@@ -364,7 +363,7 @@ float FPS_PPS(void)
 	cTmrCount = Stopwatch_Stop();
 	framespersec = ((float)GetSystemClock() / (float)cTmrCount);
 	
-	SetActivePage(0);
+	SetActivePage(GetDrawBufferAddress());
 	
 	return(framespersec);	
 

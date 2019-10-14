@@ -238,7 +238,7 @@ void Main(void)
 	//NOTE: The c018.o file is not included in the linker script for this project.
 	//The C initialization code in the c018.c (comes with C18 compiler in the src directory)
 	//file is instead modified and included here manually.  This is done so as to provide
-	//a more convenient entry method into the bootloader firmware.  Ordinarilyy the _entry_scn
+	//a more convenient entry method into the bootloader firmware.  Ordinarily the _entry_scn
 	//program code section starts at 0x00 and is created by the code of c018.o.  However,
 	//the linker will not work if there is more than one section of code trying to occupy 0x00.
 	//Therefore, must not use the c018.o code, must instead manually include the useful code

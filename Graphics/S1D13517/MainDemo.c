@@ -45,6 +45,7 @@
 #include "timer_tick.h"
 #include "FlashProgrammer.h"
 #include "TouchScreen.h"
+#include "JPEGImage.h"
 
 /*****************************************************************************
  * Section: Configuration bits
@@ -128,8 +129,13 @@ int main(void)
 {
     GOL_MSG msg;                        // GOL message structure to interact with GOL
    
-   InitializeBoard();
+    InitializeBoard();
 
+#ifdef __PIC32MX__
+    ImageDecoderInit();
+    JPEGInit();                  // Initialize JPEG
+#endif
+    
     SetColor(WHITE);
     ClearDevice();
 
@@ -175,8 +181,6 @@ WORD ExternalMemoryCallback(IMAGE_EXTERNAL *memory, LONG offset, WORD nCount, vo
 /////////////////////////////////////////////////////////////////////////////
 void InitializeBoard(void)
 {
-
-
         /////////////////////////////////////////////////////////////////////////////
         // ADC Explorer 16 Development Board Errata (work around 2)
         // RB15 should be output

@@ -173,7 +173,7 @@ extern inline void __attribute__ ((always_inline)) DeviceWrite(WORD data)
 	PMPWaitBusy();
 }
 
-#elif defined (USE_8BIT_PMP)
+#else//if defined (USE_8BIT_PMP)
 
 extern inline void __attribute__ ((always_inline)) DeviceWrite(BYTE data)
 {
@@ -213,7 +213,7 @@ WORD value;
 	return value;
 }
 
-#elif defined (USE_8BIT_PMP)
+#else//if defined (USE_8BIT_PMP)
 
 
 extern inline BYTE __attribute__ ((always_inline)) DeviceRead(){
@@ -255,7 +255,7 @@ WORD value;
 	return value;
 }
 
-#elif defined (USE_8BIT_PMP)
+#else//if defined (USE_8BIT_PMP)
 extern inline BYTE __attribute__ ((always_inline)) SingleDeviceRead()
 {
 BYTE value;
@@ -373,12 +373,12 @@ extern inline void __attribute__ ((always_inline)) DriverInterfaceInit(void)
             PMMODEbits.WAITE = (PMP_DATA_HOLD_TIME / pClockPeriod) + 1;
     #endif
 
-    #ifdef USE_16BIT_PMP
+    #if defined(USE_16BIT_PMP)
     PMMODEbits.MODE16 = 1;              // 16 bit mode
-    #else
+    #elif defined(USE_8BIT_PMP)
     PMMODEbits.MODE16 = 0;              // 8 bit mode
     #endif
-    
+  
     PMCONbits.PTRDEN = 1;               // enable RD line
     PMCONbits.PTWREN = 1;               // enable WR line
     PMCONbits.PMPEN = 1;                // enable PMP

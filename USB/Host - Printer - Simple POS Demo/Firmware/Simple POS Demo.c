@@ -63,7 +63,7 @@ full sheet printer.
 // *****************************************************************************
 // *****************************************************************************
 
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
@@ -132,7 +132,7 @@ typedef struct
 // *****************************************************************************
 
 void    MonitorVBUS( void );
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     void PrintImagePOS( BYTE __prog__ *ptr, USB_PRINTER_IMAGE_INFO *imageInfo );
 #elif defined( __PIC32MX__ )
     void PrintImagePOS( const BYTE *ptr, USB_PRINTER_IMAGE_INFO *imageInfo );
@@ -337,7 +337,7 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
 
 void InitializeVbusMonitor( void )
 {
-    #if defined( __C30__)
+    #if defined( __C30__) || defined __XC16__
         // Set up the A/D converter
         #if defined(__PIC24FJ256DA210__) 
             //The over current detection of the PIC24FJ256DA210 development board is
@@ -442,7 +442,7 @@ void MonitorVBUS( void )
   Remarks:
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void PrintImagePOS( BYTE __prog__ *ptr, USB_PRINTER_IMAGE_INFO *imageInfo )
 #elif defined( __PIC32MX__ )
 void PrintImagePOS( const BYTE *ptr, USB_PRINTER_IMAGE_INFO *imageInfo )
@@ -495,7 +495,7 @@ void PrintImagePOS( const BYTE *ptr, USB_PRINTER_IMAGE_INFO *imageInfo )
 int main (void)
 {
 
-    #if defined (__C30__)
+    #if defined (__C30__) || defined __XC16__
         #if defined( __PIC24FJ256GB110__ ) || defined(__PIC24FJ256GB210__)
             // Configure U2RX - put on pin 49 (RP10)
             RPINR19bits.U2RXR = 10;
@@ -590,7 +590,7 @@ int main (void)
                 imageInfo.densityHorizontal = 2;    // Double density
                 imageInfo.positionX         = 0;
                 imageInfo.positionY         = 0;
-                #if defined( __C30__ )
+                #if defined( __C30__ ) || defined __XC16__
                     PrintImagePOS( (BYTE __prog__ *)(logoMCHP.address), &imageInfo );
                 #elif defined( __PIC32MX__ )
                     PrintImagePOS( (const BYTE *)(logoMCHP.address), &imageInfo );
@@ -691,7 +691,7 @@ These are just here to catch any spurious interrupts that we see during
 debugging.
 
 *******************************************************************************/
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 
 void __attribute__((interrupt, auto_psv)) _DefaultInterrupt(void)
 {

@@ -33,7 +33,7 @@
  */
 
 /*
- * The poop on this scaling stuff is as follows:
+ * The scoop on this scaling stuff is as follows:
  *
  * Each 1-D IDCT step produces outputs which are a factor of sqrt(N)
  * larger than the true IDCT outputs.  The final outputs are therefore

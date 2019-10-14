@@ -68,13 +68,6 @@
 	GFX_NUM_OF_PAGES
 	} GFX_PAGE;
 
-#define SetForegroundPage(GFXForegroundPage) 	_GFXForegroundPage=GFXForegroundPage;
-#define GetForegroundPage() 					_GFXForegroundPage
-#define SetBackgroundPage(GFXBackgroundPage) 	_GFXBackgroundPage=GFXBackgroundPage;
-#define GetBackgroundPage() 					_GFXBackgroundPage
-#define SetDestinationPage(GFXDestinationPage) 	_GFXDestinationPage=GFXDestinationPage;
-#define GetDestinationPage() 					_GFXDestinationPage
-
     #ifndef DISP_HOR_RESOLUTION
         #error DISP_HOR_RESOLUTION must be defined in HardwareProfile.h
     #endif
@@ -131,31 +124,8 @@
         #error The display orientation selected is not supported. It can be only 0,90,180 or 270.
     #endif
 
-/*********************************************************************
-* Overview: Clipping region control codes to be used with SetClip(...)
-*           function. 
-*********************************************************************/
-    #define CLIP_DISABLE    0   // Disables clipping.
-    #define CLIP_ENABLE     1   // Enables clipping.
-
-/*********************************************************************
-* Overview: Clipping region control and border settings.
-*********************************************************************/
-
-// Clipping region enable control
-extern SHORT    _clipRgn;
-
-// Left clipping region border
-extern SHORT    _clipLeft;
-
-// Top clipping region border
-extern SHORT    _clipTop;
-
-// Right clipping region border
-extern SHORT    _clipRight;
-
-// Bottom clipping region border
-extern SHORT    _clipBottom;
+void  SetReg(WORD index, BYTE value);
+BYTE  GetReg(WORD index);
 
 /*********************************************************************
 * Function: Alpha Macros
@@ -167,7 +137,7 @@ extern SHORT    _clipBottom;
 ********************************************************************/
 extern inline BYTE __attribute__ ((always_inline)) Percentage2Alpha(BYTE alphaPercentage)
 {
-    DWORD percent = (DWORD)(100 - alphaPercentage);
+    DWORD percent = (DWORD)(alphaPercentage);
     percent *= ALPHA_DELTA;
     percent >>= 5;
 
@@ -189,6 +159,90 @@ extern inline BYTE __attribute__ ((always_inline)) Percentage2Alpha(BYTE alphaPe
 *
 ********************************************************************/
 void DisplayBrightness(WORD level);
+
+typedef enum { GFX_MAIN_LAYER, GFX_PIP_LAYER, GFX_CURSOR_LAYER } GFX_LAYER;
+///////////////////////////////////////////////////////////////////////////////
+/// \brief
+/// Creates a layer. 
+///
+///	This function is used to create an additional layer that can be used for PIP, 
+/// Cursor or other porpouse.
+///
+/// \param	Layer		    Corresponds with layer. 
+///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
+///
+/// \param  Config			This value makes configuration for the Layer that 
+///                         can be combained with the following flags:
+///								GFX_LAYER_TRANS_EN
+///								GFX_LAYER_OUTPUT_NORMAL
+///								GFX_LAYER_OUTPUT_XOR
+///								GFX_LAYER_OUTPUT_XORNOT
+///								GFX_LAYER_OUTPUT_NOT
+///							and alpha color 4 bit value. For instance, Config can be 
+///							( GFX_LAYER_TRANS_EN | GFX_LAYER_OUTPUT_NORMAL | 0xA )
+///							where 0xA is value of transparency.  
+///
+/// \param	XStart			This value configures the X start position for the Layer
+///
+/// \param	YStart			This value configures the Y start position for the Layer
+///
+/// \param	Width			This value configures the width for the Layer
+///							 
+///
+/// \param	Height			This value configures the height for the Layer
+///
+/// \return void
+///
+////////////////////////////////////////////////////////////////////////////////
+void GFX_DRIVER_CreateLayer( GFX_LAYER Layer, WORD Config, WORD XStart,  WORD YStart,  WORD Width,  WORD Height );
+
+///////////////////////////////////////////////////////////////////////////////
+/// \brief
+/// Moves a layer.
+///
+///	This function is used to move an additional layer, PIP or Cursor.
+///
+/// \param	Layer		    Corresponds with layer. 
+///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
+///
+/// \param	X				This value of new X start position for the Layer
+///
+/// \param	Y			     This value of new Y start position for the Layer
+///
+/// \return void
+///
+////////////////////////////////////////////////////////////////////////////////
+void GFX_DRIVER_MoveLayer( GFX_LAYER Layer, WORD X, WORD Y );
+
+void GFX_DRIVER_LayerStartAddress( GFX_LAYER Layer, WORD page, WORD X, WORD Y );
+
+///////////////////////////////////////////////////////////////////////////////
+/// \brief
+/// Shows a layer.
+///
+///	This function is used to show an additional layer, PIP or Cursor.
+///
+/// \param	Layer		    Corresponds with layer. 
+///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
+///
+/// \return void
+///
+////////////////////////////////////////////////////////////////////////////////
+void GFX_DRIVER_ShowLayer( GFX_LAYER Layer );
+
+///////////////////////////////////////////////////////////////////////////////
+/// \brief
+/// Hides a layer.
+///
+///	This function is used to hide an additional layer, PIP or Cursor.
+///
+/// \param	Layer		    Corresponds with layer. 
+///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
+///
+/// \return void
+///
+////////////////////////////////////////////////////////////////////////////////
+void GFX_DRIVER_HideLayer( GFX_LAYER Layer );
 
 /*********************************************************************
 * Overview: SSD1926 registers definitions.
@@ -286,11 +340,27 @@ void DisplayBrightness(WORD level);
 	#define REGB2_INTERRUPT_CTRL   0xB2     // Interrupt Control Register
 	#define REGB4_INTERRUPT_STAT   0xB4     // Interrupt Status Register [READONLY]
 	#define REGB6_INTERRUPT_CLEAR  0xB6     // Interrupt Clear Register [WRITEONLY]
-
 	#define REGFLAG_BASE           0xF0     // Special reserved flags beyond this point
 	#define REGFLAG_DELAY          0xFC     // PLL Register Programming Delay (in us)
 	#define REGFLAG_OFF_DELAY      0xFD     // LCD Panel Power Off Delay (in ms)
 	#define REGFLAG_ON_DELAY       0xFE     // LCD Panel Power On Delay (in ms)
 	#define REGFLAG_END_OF_TABLE   0xFF     // End of Registers Marker
+
+#if defined (USE_DOUBLE_BUFFERING)
+
+typedef struct
+{
+    WORD X;
+    WORD Y;
+    WORD W;
+    WORD H;
+} RectangleArea;
+
+    #define GFX_BUFFER1 (0)
+    #define GFX_BUFFER2 (5)
+    #define PIP_BUFFER  (6)
+
+    #define GFX_MAX_INVALIDATE_AREAS 5
+#endif
 
 #endif // _S1D13517_H

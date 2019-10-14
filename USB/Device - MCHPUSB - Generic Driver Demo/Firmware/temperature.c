@@ -12,8 +12,8 @@
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PICmicro® Microcontroller is intended and
- * supplied to you, the Company’s customer, for use solely and
+ * (the ï¿½Companyï¿½) for its PICmicroï¿½ Microcontroller is intended and
+ * supplied to you, the Companyï¿½s customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
  * protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN ï¿½AS ISï¿½ CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -76,29 +76,35 @@ char tempString[10];        // Buffer for storing data in ASCII format
  *****************************************************************************/
 void InitTempSensor(void)
 {
-    #if defined(PICDEM_FS_USB)
-    cs_temp_sensor = 1;
-    tris_cs_temp_sensor = OUTPUT_PIN;
-    OpenSPI(SPI_FOSC_64, MODE_11, SMPMID);
-    
-    // Initialize readable values - default to room temperature
-    temperature.Val = 0x0C87;       // 25 degree celsius
-    UpdateCelsiusASCII();
-
+    #if defined(PICDEM_FS_USB) || defined(PICDEM_FS_USB_K50)
+        cs_temp_sensor = 1;
+        tris_cs_temp_sensor = OUTPUT_PIN;
+        //OpenSPI(SPI_FOSC_16, MODE_11, SMPMID);
+        mInitSPI();
+       
+        // Initialize readable values - default to room temperature
+        temperature.Val = 0x0C87;       // 25 degree celsius
+        UpdateCelsiusASCII();
 	#elif defined(PIC18F87J50_PIM)
-    temperature.Val = 0x0C87;       // 25 degree celsius
-    UpdateCelsiusASCII();
-
-	//Need to initialize I2C Module to prepare for communication with
-	//TC74 temperature sensor on the HPC Explorer board.
-	mInitI2CPins();				// See io_cfg.h
-	SSP1STAT = 0xC0;			// Slew rate control disabled, SMBus
-	SSP1CON1 = 0x08;			// I2C Master mode
-	SSP1CON2 = 0x00;
-	SSP1ADD = 0x7D;				// Just under 100kHz at 48MHz core frequency
-	SSP1CON1bits.SSPEN = 1;		// Enable MSSP module	
-
-	I2CStateVariable = 0;		// Initial state for I2C state machine
+        temperature.Val = 0x0C87;       // 25 degree celsius
+        UpdateCelsiusASCII();
+    
+    	//Need to initialize I2C Module to prepare for communication with
+    	//TC74 temperature sensor on the HPC Explorer board.
+    	mInitI2CPins();				// See io_cfg.h
+    	SSP1STAT = 0xC0;			// Slew rate control disabled, SMBus
+    	SSP1CON1 = 0x08;			// I2C Master mode
+    	SSP1CON2 = 0x00;
+    	SSP1ADD = 0x7D;				// Just under 100kHz at 48MHz core frequency
+    	SSP1CON1bits.SSPEN = 1;		// Enable MSSP module	
+    
+    	I2CStateVariable = 0;		// Initial state for I2C state machine
+    #elif defined(PIC18F97J94_PIM)
+        //This board uses TC1047A analog output temperature sensor located on 
+        //the LCD Explorer 3 board.  The analog temperature voltage is connected
+        //to microcontroller pin RA4/AN6
+        TRISAbits.TRISA4 = 1;
+        ANCON1bits.ANSEL6 = 0;  //Analog mode
 
     #endif    
 }//end InitTempSensor
@@ -120,18 +126,29 @@ void InitTempSensor(void)
  *****************************************************************************/
 BOOL AcquireTemperature(void)
 {
-    #if defined(PICDEM_FS_USB)
+    #if defined(PICDEM_FS_USB) || defined(PICDEM_FS_USB_K50)
+        unsigned char Dummy;
 		//The PICDEM FS USB Demo Board uses a TC77 (13 bit) temperature sensor and
 		//communicates with it through the SPI interface.
-		cs_temp_sensor = 0;
-		temperature.v[1] = ReadSPI();
-		temperature.v[0] = ReadSPI();
-		cs_temp_sensor = 1;
+		cs_temp_sensor = 0;     //Assert chip select for temperature sensor
+		//Read a byte from SPI temp sensor
+        PIR1bits.SSPIF = 0;
+        Dummy = SSPBUF;
+        SSPBUF = 0xFF;
+        while(PIR1bits.SSPIF == 0);
+      	temperature.v[1] = SSPBUF;	
+      	//Read second byte from SPI temp sensor
+        PIR1bits.SSPIF = 0;
+        SSPBUF = 0xFF;
+        while(PIR1bits.SSPIF == 0);	
+		temperature.v[0] = SSPBUF;
+        PIR1bits.SSPIF = 0;
+		cs_temp_sensor = 1;     //De-assert chip select for temperature sensor
 	    
 		if(temperature.bits.b2 == 0)
 			return FALSE;
 
-	#elif defined(__C30__) || defined(__C32__)
+	#elif defined(__C30__) || defined(__C32__) || defined __XC16__
 
 		//Create temp variables to store the conversion data
 		unsigned int tempADC;
@@ -232,9 +249,9 @@ BOOL AcquireTemperature(void)
 						// done with the PollTempOnHPCExplorer() function.
 						// This is done so the I2C communication can be done with
 						// a non-blocking approach.
-    #elif defined(LOW_PIN_COUNT_USB_DEVELOPMENT_KIT)
+    #elif defined(LOW_PIN_COUNT_USB_DEVELOPMENT_KIT) || defined(PIC16F1_LPC_USB_DEVELOPMENT_KIT)
         temperature.Val = 0x0000;
-        return TRUE;
+        
     #elif defined(PIC18F46J50_PIM) || defined(PIC18F47J53_PIM)
 		//Create temp variables to store the conversion data
 		unsigned int tempADC;
@@ -243,11 +260,11 @@ BOOL AcquireTemperature(void)
 		//get ready to sample the A/D
         ADCON0bits.CHS = 0x07;
 
-		for(tempADC = 0; tempADC < 50; tempADC++); 
+		for(tempADC = 0; tempADC < 20; tempADC++); 
         ADCON0bits.GO = 1;              // Start AD acquisition and conversion cycle
         while(ADCON0bits.NOT_DONE);     // Wait for conversion
 		
-        tempADC = (signed int)(ADRES - 124);	
+        tempADC = ((signed int)ADRES - 124);	
             //At 0 deg C, MCP9701A outputs ~400mV, which at Vdd/Vss 
             //  reference of (3.3V/0V) provides ADC result of 124.
             //  At 3.3V reference, each LSb is worth 3.2227mV.  However, 
@@ -260,7 +277,7 @@ BOOL AcquireTemperature(void)
 
         //2708 is magic number.  This and the below line used 
         //to avoid having to use floating point math.
-        tempADClong = (unsigned long)tempADC * 2708;
+        tempADClong = (signed long)tempADC * 2708;
         tempADC = (signed int)(tempADClong >> 7);
 
         temperature.Val = (WORD)tempADC;
@@ -270,8 +287,94 @@ BOOL AcquireTemperature(void)
     #elif defined(PIC18F_STARTER_KIT_1)
         temperature.Val = 0x0000;
         return TRUE;
+
+    #elif defined(PIC18F97J94_PIM)
+		//Create temp variables to store the conversion data
+		signed int tempADC;
+		signed long int tempADClong;
+		
+        //TC1047A analog output temp sensor located on LCD Explorer 3 board.
+        //Connected to microcontroller pin RA4/AN6
+        ADCON1Hbits.MODE12 = 1;         //12-bit mode
+        ADCHS0L = 0x06;                 //RA4/AN6 selected
+        ADCON1Lbits.SAMP = 1;           //Start sample/convert sequence
+        while(ADCON1Lbits.DONE == 0);   //Wait until result available
+
+        //At 0 deg C, TC1047A outputs ~500mV, which at Vdd/Vss 
+        //reference of (3.3V/0V) provides ADC result of ~621 (12-bit ADC mode).
+        //At 3.3V reference, we get 806uV/LSB.  We can multiply
+        //this by the tempco of the TC1047A (1 deg C / 0.010 V) to get
+        //a value of 0.08057 deg C / LSB.
+        tempADC = (signed int)ADCBUF6 - 621;
+
+        //Convert to TC77 style output, since this is what the 
+        //PC application is expecting.
+        //TC77 uses twos complement output with each LSb worth 0.0625 degrees C.
+
+        //To get TC77 equivalent value, we need to scale the tempADC value by:
+        //(0.08057 deg C / LSB TC1047A) / (0.0625 deg C / LSB TC77) = (1.289 LSB TC77) / (1 LSB TC1047A)
+        //To get the TC77 formatted data, multiply the ADC result (which is in 
+        //units of LSB TC1047A) by the scaling factor, to get a value in units 
+        //of LSB TC77.
+        //To avoid floating point math, we can instead multiply both numerator
+        //and denominator by big integers, to achieve the same effect as 
+        //floating point multiply.
+        //Ex: 1.289 = ((1.289 * 32768) / 32768) = ~42240 / 32768
+        //In other words: we should mutliply by 42240, then divide the result
+        //by 32768, to achieve the same effect as floating point multiply 
+        //by 1.289.  Doing this as integer math can save code space and 
+        //execution speed.
+        tempADClong = (signed long)tempADC * 42240;
+        temperature.Val = tempADClong >> 12;    //Equivalent to (dividing by 32768) and then multiplying by 8 (since TC77 bottom 3 LSBs don't contain data)
+        temperature.Val |= 0x7;                 //Bottom three LSBs set for TC77 style coding.
+        return TRUE;
+
+    #elif defined(PIC18F87J94_PIM)
+        //MCP9701A located on the PIC18 Explorer board.
+        //Connected to microcontroller pin RA1/AN1
+        
+		//Create temp variables to store the conversion data
+		signed int tempADC;
+		signed long int tempADClong;
+		
+        //TC1047A analog output temp sensor located on LCD Explorer 3 board.
+        //Connected to microcontroller pin RA4/AN6
+        ADCON1Hbits.MODE12 = 1;         //12-bit mode
+        ADCHS0L = 0x01;                 //RA1/AN1 selected
+        ADCON1Lbits.SAMP = 1;           //Start sample/convert sequence
+        while(ADCON1Lbits.DONE == 0);   //Wait until result available
+
+        //At 0 deg C, MCP9701A outputs ~400mV, which at Vdd/Vss 
+        //reference of (3.3V/0V) provides ADC result of ~496 (12-bit ADC mode).
+        //At 3.3V reference, we get 806uV/LSB.  We can multiply
+        //this by the tempco of the MCP9701A (1 deg C / 0.0195 V) to get
+        //a value of 0.041316 deg C / LSB.
+        tempADC = (signed int)ADCBUF1 - 496;
+
+        //Convert to TC77 style output, since this is what the 
+        //PC application is expecting.
+        //TC77 uses twos complement output with each LSb worth 0.0625 degrees C.
+
+        //To get TC77 equivalent value, we need to scale the tempADC value by:
+        //(0.041316 deg C / LSB MCP9701A) / (0.0625 deg C / LSB TC77) = (0.6611 LSB TC77) / (1 LSB MCP9701A)
+        //To get the TC77 formatted data, multiply the ADC result (which is in 
+        //units of LSB MCP9701A) by the scaling factor, to get a value in units 
+        //of LSB TC77.
+        //To avoid floating point math, we can instead multiply both numerator
+        //and denominator by big integers, to achieve the same effect as 
+        //floating point multiply.
+        //Ex: 0.6611 = ((0.6611 * 65536) / 65536) = ~43323 / 65536
+        //In other words: we should mutliply by 43323, then divide the result
+        //by 65536, to achieve the same effect as floating point multiply 
+        //by 0.6611.  Doing this as integer math can save code space and 
+        //execution speed.
+        tempADClong = (signed long)tempADC * 43323;
+        temperature.Val = tempADClong >> 13;    //Equivalent to (dividing by 65536) and then multiplying by 8 (since TC77 bottom 3 LSBs don't contain data)
+        temperature.Val |= 0x7;                 //Bottom three LSBs set for TC77 style coding.
+        return TRUE;
+
 	#else
-		#error "Unknown temperature acquire configuration.  See AcquireTemperature function in __FILE__"
+		#error "Unknown temperature acquire configuration.  See AcquireTemperature function in temperature.c"
     #endif
     return TRUE;
 }//end AcquireTemperature

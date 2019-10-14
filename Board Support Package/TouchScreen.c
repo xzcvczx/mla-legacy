@@ -74,6 +74,20 @@ NVM_SECTORERASE_FUNC    pCalDataSectorErase = NULL;         // function pointer 
 //////////////////////// GLOBAL VARIABLES ////////////////////////////
 #define CALIBRATION_DELAY   300                             // delay between calibration touch points
 
+#if (COLOR_DEPTH == 8) || (COLOR_DEPTH == 16) || (COLOR_DEPTH == 24)
+    #define RESISTIVETOUCH_MSG_BACKGROUND_COLOR     WHITE
+    #define RESISTIVETOUCH_MSG_FOREGROUND1_COLOR    BRIGHTRED
+    #define RESISTIVETOUCH_MSG_FOREGROUND2_COLOR    BLACK
+#elif (COLOR_DEPTH == 4)
+    #define RESISTIVETOUCH_MSG_BACKGROUND_COLOR     GRAY015
+    #define RESISTIVETOUCH_MSG_FOREGROUND1_COLOR    GRAY008
+    #define RESISTIVETOUCH_MSG_FOREGROUND2_COLOR    GRAY000
+#elif (COLOR_DEPTH == 1)
+    #define RESISTIVETOUCH_MSG_BACKGROUND_COLOR     WHITE
+    #define RESISTIVETOUCH_MSG_FOREGROUND1_COLOR    BLACK
+    #define RESISTIVETOUCH_MSG_FOREGROUND2_COLOR    BLACK
+#endif
+
 
 /*********************************************************************
 * Function: void TouchInit(NVM_WRITE_FUNC pWriteFunc, NVM_READ_FUNC pReadFunc, NVM_SECTORERASE_FUNC pSectorErase, void *initValues)
@@ -305,16 +319,16 @@ void TouchCalibration(void)
     textHeight = GetTextHeight((void *) &FONTDEFAULT);
     textStart =  (GetMaxY() - (textHeight*8)) >> 1;
 
-    SetColor(WHITE);
+    SetColor(RESISTIVETOUCH_MSG_BACKGROUND_COLOR);
     ClearDevice();
 
-    SetColor(BRIGHTRED);
+    SetColor(RESISTIVETOUCH_MSG_FOREGROUND1_COLOR);
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn1, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (textHeight), (XCHAR *)scr1StrLn1)));
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn2, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (2*textHeight), (XCHAR *)scr1StrLn2)));
 
-    SetColor(BRIGHTRED);
+    SetColor(RESISTIVETOUCH_MSG_FOREGROUND1_COLOR);
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
     							textStart + (4*textHeight), (XCHAR *)scr1StrLn3)));
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
@@ -342,7 +356,7 @@ void TouchCalibration(void)
 
     DelayMs(CALIBRATION_DELAY);
     
-    SetColor(WHITE);
+    SetColor(RESISTIVETOUCH_MSG_BACKGROUND_COLOR);
     ClearDevice();
 
 
@@ -350,10 +364,10 @@ void TouchCalibration(void)
     // call actual calibration routine
     TouchCalHWGetPoints();
 
-    SetColor(WHITE);
+    SetColor(RESISTIVETOUCH_MSG_BACKGROUND_COLOR);
     ClearDevice();
 
-    SetColor(BLACK);
+    SetColor(RESISTIVETOUCH_MSG_FOREGROUND2_COLOR);
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn1, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (1*textHeight), (XCHAR *)scr2StrLn1)));
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn2, (void *) &FONTDEFAULT))>>1,  \
@@ -364,7 +378,7 @@ void TouchCalibration(void)
     							 textStart + (4*textHeight), (XCHAR *)scr2StrLn4)));
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr2StrLn5, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (5*textHeight), (XCHAR *)scr2StrLn5)));
-    SetColor(BRIGHTRED);
+    SetColor(RESISTIVETOUCH_MSG_FOREGROUND1_COLOR);
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn3, (void *) &FONTDEFAULT))>>1,  \
     							 textStart + (6*textHeight), (XCHAR *)scr1StrLn3)));
     while(!(OutTextXY((GetMaxX()-GetTextWidth((XCHAR *)scr1StrLn4, (void *) &FONTDEFAULT))>>1,  \
@@ -379,7 +393,7 @@ void TouchCalibration(void)
 
     DelayMs(CALIBRATION_DELAY);
 
-    SetColor(BLACK);
+    SetColor(RESISTIVETOUCH_MSG_FOREGROUND2_COLOR);
     ClearDevice();
 }
 

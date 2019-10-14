@@ -458,13 +458,13 @@ file_046=..\..\Board Support Package\SST25VF016.c
 file_047=..\..\Board Support Package\TouchScreen.c
 file_048=..\..\Board Support Package\cpld.c
 file_049=..\..\Board Support Package\EEPROM.c
-file_050=InternalResourceC32.c
+file_050=InternalResourceXC32.c
 file_051=..\..\Microchip\Graphics\Drivers\TCON_SSD1289.c
 file_052=..\..\Microchip\Graphics\Drivers\SSD1926.c
 file_053=..\..\Microchip\Graphics\GOLSchemeDefault.c
 file_054=..\..\Board Support Package\drv_spi.c
 file_055=..\..\Board Support Package\TouchScreenResistive.c
-file_056=InternalResourceSet2C32.c
+file_056=InternalResourceSet2XC32.c
 file_057=..\..\Microchip\Graphics\Drivers\mchpGfxLCC.c
 file_058=MainDemo.h
 file_059=SideButtons.h
@@ -526,29 +526,23 @@ file_114=..\..\Board Support Package\SST25VF016.h
 file_115=..\..\Board Support Package\TouchScreen.h
 file_116=..\..\Board Support Package\cpld.h
 file_117=..\..\Board Support Package\EEPROM.h
-file_118=InternalResourceC32.h
+file_118=InternalResourceXC32.h
 file_119=..\..\Board Support Package\drv_spi.h
 file_120=..\..\Microchip\Include\Graphics\DisplayDriver.h
 file_121=..\..\Microchip\Include\Graphics\DisplayDriverInterface.h
 file_122=..\..\Microchip\Include\Graphics\SSD1926.h
-file_123=InternalResourceSet2C32.h
+file_123=InternalResourceSet2XC32.h
 file_124=..\Common\ExternalMemory.h
 file_125=Getting Started - Running the Graphics MultiApp Demo.htm
 file_126=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
-suite_guid={14495C23-81F8-43F3-8A44-859C583D7760}
+suite_guid={62D235D8-2DB2-49CD-AF24-5489A6015337}
 suite_state=
 [TOOL_SETTINGS]
-TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}=-gdwarf-2
-TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}=-g -Wall
-TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}=--defsym=_min_heap_size=3000 --defsym=_min_stack_size=2600 -Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
-TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}=
-TS{CB0AF4B8-4022-429D-8F99-8A56782B2C6D}044=-gdwarf-2
-TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}044=-Os
-TS{77F59DA1-3C53-4677-AC5F-A03EB0125170}044=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" "-mperipheral-libs"
-TS{0396C0A1-9052-4E4F-8B84-EF0162B1B4E9}044=
-[ACTIVE_FILE_SETTINGS]
-TS{9C698E0A-CBC9-4EFF-AE7D-B569F93E7322}044_active=yes
+TS{6F324298-6323-4781-8C43-43FA5E6F3646}=
+TS{1F324EFA-C0BA-4A8F-A85A-B21644939CAD}=-Wall -Os
+TS{29D3B6CC-DCAB-4659-8011-FFF75BB7F8D7}=--defsym=_min_heap_size=2048 -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" "-mperipheral-libs"
+TS{AD4C3FBD-B6BB-4F50-AB4E-35BF132D4D60}=
 [INSTRUMENTED_TRACE]
 enable=0
 transport=2

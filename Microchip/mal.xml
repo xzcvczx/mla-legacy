@@ -11,7 +11,7 @@
     <NAME>Microchip Application Libraries</NAME>
     <SHORT_NAME>MAL</SHORT_NAME>
     <VERSION>
-      <STRING>2012-04-03</STRING>
+      <STRING>2012-07-18</STRING>
     </VERSION>
   </INFO>
 
@@ -22,16 +22,17 @@
       <SHORT_NAME>GFX</SHORT_NAME>
       <VERSION>
         <MAJOR>3</MAJOR>
-        <MINOR>04</MINOR>
-        <DOT>02</DOT>
+        <MINOR>06</MINOR>
+        <DOT>00</DOT>
       </VERSION>
+      <GDD_COMPATIBILITY>1</GDD_COMPATIBILITY>
     </LIBRARY>
 
     <LIBRARY>
       <NAME>Microchip Full Speed USB Library</NAME>
       <SHORT_NAME>MCHPFSUSB</SHORT_NAME>
       <VERSION>
-        <STRING>2.9e</STRING>
+        <STRING>2.9f</STRING>
       </VERSION>
     </LIBRARY>
 
@@ -40,8 +41,8 @@
       <SHORT_NAME>MDD</SHORT_NAME>
       <VERSION>
         <MAJOR>1</MAJOR>
-        <MINOR>3</MINOR>
-        <DOT>8</DOT>
+        <MINOR>4</MINOR>
+        <DOT>0</DOT>
       </VERSION>
     </LIBRARY>
 
@@ -50,8 +51,8 @@
       <SHORT_NAME>TCPIP</SHORT_NAME>
       <VERSION>
         <MAJOR>5</MAJOR>
-        <MINOR>41</MINOR>
-        <DOT>02</DOT>
+        <MINOR>42</MINOR>
+        <DOT>00</DOT>
       </VERSION>
     </LIBRARY>
 
@@ -60,8 +61,8 @@
       <SHORT_NAME>MTOUCHCAP</SHORT_NAME>
       <VERSION>
         <MAJOR>1</MAJOR>
-        <MINOR>40</MINOR>
-        <DOT>02</DOT>
+        <MINOR>41</MINOR>
+        <DOT>00</DOT>
       </VERSION>
     </LIBRARY>
 
@@ -71,7 +72,7 @@
       <VERSION>
         <MAJOR>1</MAJOR>
         <MINOR>02</MINOR>
-        <DOT>6</DOT>
+        <DOT>8</DOT>
       </VERSION>
     </LIBRARY>
 
@@ -81,7 +82,7 @@
       <VERSION>
         <MAJOR>4</MAJOR>
         <MINOR>2</MINOR>
-        <DOT>4</DOT>
+        <DOT>5</DOT>
       </VERSION>
     </LIBRARY>
 
@@ -91,8 +92,19 @@
       <VERSION>
         <MAJOR>1</MAJOR>
         <MINOR>01</MINOR>
-        <DOT>02</DOT>
+        <DOT>03</DOT>
       </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Cryptographics</NAME>
+      <SHORT_NAME>CRYPTO</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>00</MINOR>
+        <!-- Intentionally no DOT information. MAJOR/MINOR will increment when there's API/file location compatibility change. This serves as a marker if a crypto installer is compatible with this MLA version or not. -->
+      </VERSION>
+    <INSTALLED>NO</INSTALLED>
     </LIBRARY>
 
   </LIBRARIES>

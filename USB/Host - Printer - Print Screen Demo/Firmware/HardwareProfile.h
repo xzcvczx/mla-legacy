@@ -120,7 +120,7 @@
 * UART SETTINGS
 *********************************************************************/
 // Define the baud rate constants
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
     #define BAUDRATE2       57600UL
     #define BRG_DIV2        4
     #define BRGH2           1
@@ -1475,18 +1475,31 @@
 		#define ADC_POT_PCFG	ANSBbits.ANSB5
 		#define ADPCFG_XPOS		ANSCbits.ANSC4
 		#define ADPCFG_YPOS		ANSGbits.ANSG7
+        #define RESISTIVETOUCH_ANALOG  1
+        #define RESISTIVETOUCH_DIGITAL 0
 
-		// Y port definitions
-		#define LAT_XPOS    LATCbits.LATC4
-		#define TRIS_XPOS   TRISCbits.TRISC4
-		#define LAT_XNEG    LATAbits.LATA2
-		#define TRIS_XNEG   TRISAbits.TRISA2
-	     
 		// X port definitions
-		#define LAT_YPOS    LATGbits.LATG7
-		#define TRIS_YPOS   TRISGbits.TRISG7
-   		#define LAT_YNEG    LATAbits.LATA1
-		#define TRIS_YNEG   TRISAbits.TRISA1
+        #define ResistiveTouchScreen_XPlus_Drive_High()         LATCbits.LATC4   = 1
+        #define ResistiveTouchScreen_XPlus_Drive_Low()          LATCbits.LATC4   = 0
+        #define ResistiveTouchScreen_XPlus_Config_As_Input()    TRISCbits.TRISC4 = 1
+        #define ResistiveTouchScreen_XPlus_Config_As_Output()   TRISCbits.TRISC4 = 0
+		
+        #define ResistiveTouchScreen_XMinus_Drive_High()        LATAbits.LATA2   = 1   
+        #define ResistiveTouchScreen_XMinus_Drive_Low()         LATAbits.LATA2   = 0
+        #define ResistiveTouchScreen_XMinus_Config_As_Input()   TRISAbits.TRISA2 = 1  
+        #define ResistiveTouchScreen_XMinus_Config_As_Output()  TRISAbits.TRISA2 = 0
+		
+	     
+		// Y port definitions
+        #define ResistiveTouchScreen_YPlus_Drive_High()         LATGbits.LATG7   = 1
+        #define ResistiveTouchScreen_YPlus_Drive_Low()          LATGbits.LATG7   = 0
+        #define ResistiveTouchScreen_YPlus_Config_As_Input()    TRISGbits.TRISG7 = 1
+        #define ResistiveTouchScreen_YPlus_Config_As_Output()   TRISGbits.TRISG7 = 0
+		
+        #define ResistiveTouchScreen_YMinus_Drive_High()        LATAbits.LATA1   = 1   
+        #define ResistiveTouchScreen_YMinus_Drive_Low()         LATAbits.LATA1   = 0
+        #define ResistiveTouchScreen_YMinus_Config_As_Input()   TRISAbits.TRISA1 = 1  
+        #define ResistiveTouchScreen_YMinus_Config_As_Output()  TRISAbits.TRISA1 = 0
     
     // end of #if defined (PIC24FJ256DA210_DEV_BOARD)...
     
@@ -1506,20 +1519,28 @@
 			#define ADC_YPOS    14
 		
 			// X port definitions
-			#define LAT_XPOS    LATBbits.LATB11
-			#define TRIS_XPOS   TRISBbits.TRISB11
-			#define LAT_XNEG    LATBbits.LATB13
-			#define TRIS_XNEG   ANSELBbits.ANSB13 = 1, TRISBbits.TRISB13
-		
+            #define ResistiveTouchScreen_XPlus_Drive_High()         LATBbits.LATB11   = 1
+            #define ResistiveTouchScreen_XPlus_Drive_Low()          LATBbits.LATB11   = 0
+            #define ResistiveTouchScreen_XPlus_Config_As_Input()    TRISBbits.TRISB11 = 1
+            #define ResistiveTouchScreen_XPlus_Config_As_Output()   TRISBbits.TRISB11 = 0
+			
+            #define ResistiveTouchScreen_XMinus_Drive_High()        LATBbits.LATB13   = 1   
+            #define ResistiveTouchScreen_XMinus_Drive_Low()         LATBbits.LATB13   = 0
+            #define ResistiveTouchScreen_XMinus_Config_As_Input()   {ANSELBbits.ANSB13 = ANSEL_ANALOG; TRISBbits.TRISB13 = 1;}  
+            #define ResistiveTouchScreen_XMinus_Config_As_Output()  {ANSELBbits.ANSB13 = ANSEL_ANALOG; TRISBbits.TRISB13 = 0;}
+
 			// Y port definitions
-			#define LAT_YPOS    LATBbits.LATB14
-			#define TRIS_YPOS   TRISBbits.TRISB14
-			#define LAT_YNEG    LATBbits.LATB12 
-			#define TRIS_YNEG   ANSELBbits.ANSB12 = 1, TRISBbits.TRISB12
-		
+            #define ResistiveTouchScreen_YPlus_Drive_High()         LATBbits.LATB14   = 1
+            #define ResistiveTouchScreen_YPlus_Drive_Low()          LATBbits.LATB14   = 0
+            #define ResistiveTouchScreen_YPlus_Config_As_Input()    TRISBbits.TRISB14 = 1
+            #define ResistiveTouchScreen_YPlus_Config_As_Output()   TRISBbits.TRISB14 = 0
+			
+            #define ResistiveTouchScreen_YMinus_Drive_High()        LATBbits.LATB12   = 1   
+            #define ResistiveTouchScreen_YMinus_Drive_Low()         LATBbits.LATB12   = 0
+            #define ResistiveTouchScreen_YMinus_Config_As_Input()   {ANSELBbits.ANSB12 = ANSEL_ANALOG; TRISBbits.TRISB12 = 1;}  
+            #define ResistiveTouchScreen_YMinus_Config_As_Output()  {ANSELBbits.ANSB12 = ANSEL_ANALOG; TRISBbits.TRISB12 = 0;}			
 		
 		#else
-
 		
 			#define ADC_XPOS    ADC_CH0_POS_SAMPLEA_AN11
 			#define ADC_YPOS    ADC_CH0_POS_SAMPLEA_AN14
@@ -1527,18 +1548,30 @@
 			// ADC Port Control Bits
 			#define ADPCFG_XPOS AD1PCFGbits.PCFG11
 			#define ADPCFG_YPOS AD1PCFGbits.PCFG14
+	        #define RESISTIVETOUCH_ANALOG  0
+            #define RESISTIVETOUCH_DIGITAL 1
 			
 			// X port definitions
-			#define LAT_XPOS    LATBbits.LATB11
-			#define TRIS_XPOS   TRISBbits.TRISB11
-			#define LAT_XNEG    LATBbits.LATB13
-			#define TRIS_XNEG   AD1PCFGbits.PCFG13 = 1, TRISBbits.TRISB13
-	
+            #define ResistiveTouchScreen_XPlus_Drive_High()         LATBbits.LATB11   = 1
+            #define ResistiveTouchScreen_XPlus_Drive_Low()          LATBbits.LATB11   = 0
+            #define ResistiveTouchScreen_XPlus_Config_As_Input()    TRISBbits.TRISB11 = 1
+            #define ResistiveTouchScreen_XPlus_Config_As_Output()   TRISBbits.TRISB11 = 0
+			
+            #define ResistiveTouchScreen_XMinus_Drive_High()        LATBbits.LATB13   = 1   
+            #define ResistiveTouchScreen_XMinus_Drive_Low()         LATBbits.LATB13   = 0
+            #define ResistiveTouchScreen_XMinus_Config_As_Input()   {AD1PCFGbits.PCFG13 = 1; TRISBbits.TRISB13 = 1;}  
+            #define ResistiveTouchScreen_XMinus_Config_As_Output()  {AD1PCFGbits.PCFG13 = 1; TRISBbits.TRISB13 = 0;}
+
 			// Y port definitions
-			#define LAT_YPOS    LATBbits.LATB14
-			#define TRIS_YPOS   TRISBbits.TRISB14
-			#define LAT_YNEG    LATBbits.LATB12 
-			#define TRIS_YNEG   AD1PCFGbits.PCFG12 = 1, TRISBbits.TRISB12
+            #define ResistiveTouchScreen_YPlus_Drive_High()         LATBbits.LATB14   = 1
+            #define ResistiveTouchScreen_YPlus_Drive_Low()          LATBbits.LATB14   = 0
+            #define ResistiveTouchScreen_YPlus_Config_As_Input()    TRISBbits.TRISB14 = 1
+            #define ResistiveTouchScreen_YPlus_Config_As_Output()   TRISBbits.TRISB14 = 0
+			
+            #define ResistiveTouchScreen_YMinus_Drive_High()        LATBbits.LATB12   = 1   
+            #define ResistiveTouchScreen_YMinus_Drive_Low()         LATBbits.LATB12   = 0
+            #define ResistiveTouchScreen_YMinus_Config_As_Input()   {AD1PCFGbits.PCFG12 = 1;  TRISBbits.TRISB12 = 1;}  
+            #define ResistiveTouchScreen_YMinus_Config_As_Output()  {AD1PCFGbits.PCFG12 = 1;  TRISBbits.TRISB12 = 0;}
 		
 		#endif // defined(__dsPIC33E__) || defined(__PIC24E__)
 
@@ -1560,113 +1593,39 @@
 		// ADC Port Control Bits
         #define ADPCFG_XPOS AD1PCFGbits.PCFG0
         #define ADPCFG_YPOS AD1PCFGbits.PCFG1
+        #define RESISTIVETOUCH_ANALOG  0
+        #define RESISTIVETOUCH_DIGITAL 1
 		
 		// X port definitions
-        #define LAT_XPOS    LATBbits.LATB0
-        #define TRIS_XPOS   TRISBbits.TRISB0
-
+        #define ResistiveTouchScreen_XPlus_Drive_High()             LATBbits.LATB0   = 1
+        #define ResistiveTouchScreen_XPlus_Drive_Low()              LATBbits.LATB0   = 0
+        #define ResistiveTouchScreen_XPlus_Config_As_Input()        TRISBbits.TRISB0 = 1
+        #define ResistiveTouchScreen_XPlus_Config_As_Output()       TRISBbits.TRISB0 = 0
+			
         #if defined(_USB) && !defined (PIC32_SK)
-            #define LAT_XNEG    LATGbits.LATG15
-            #define TRIS_XNEG   TRISGbits.TRISG15
+           #define ResistiveTouchScreen_XMinus_Drive_High()         LATGbits.LATG15   = 1   
+           #define ResistiveTouchScreen_XMinus_Drive_Low()          LATGbits.LATG15   = 0
+           #define ResistiveTouchScreen_XMinus_Config_As_Input()    TRISGbits.TRISG15 = 1  
+           #define ResistiveTouchScreen_XMinus_Config_As_Output()   TRISGbits.TRISG15 = 0
         #else
-            #define LAT_XNEG    LATDbits.LATD9
-            #define TRIS_XNEG   TRISDbits.TRISD9
+           #define ResistiveTouchScreen_XMinus_Drive_High()         LATDbits.LATD9    = 1   
+           #define ResistiveTouchScreen_XMinus_Drive_Low()          LATDbits.LATD9    = 0
+           #define ResistiveTouchScreen_XMinus_Config_As_Input()    TRISDbits.TRISD9  = 1  
+           #define ResistiveTouchScreen_XMinus_Config_As_Output()   TRISDbits.TRISD9  = 0
         #endif
 
 		// Y port definitions
-
-        #define LAT_YPOS    LATBbits.LATB1
-        #define TRIS_YPOS   TRISBbits.TRISB1
-        #define LAT_YNEG    LATBbits.LATB9
-        #define TRIS_YNEG   TRISBbits.TRISB9
+        #define ResistiveTouchScreen_YPlus_Drive_High()             LATBbits.LATB1   = 1
+        #define ResistiveTouchScreen_YPlus_Drive_Low()              LATBbits.LATB1   = 0
+        #define ResistiveTouchScreen_YPlus_Config_As_Input()        TRISBbits.TRISB1 = 1
+        #define ResistiveTouchScreen_YPlus_Config_As_Output()       TRISBbits.TRISB1 = 0
+			
+        #define ResistiveTouchScreen_YMinus_Drive_High()            LATBbits.LATB9   = 1   
+        #define ResistiveTouchScreen_YMinus_Drive_Low()             LATBbits.LATB9   = 0
+        #define ResistiveTouchScreen_YMinus_Config_As_Input()       TRISBbits.TRISB9 = 1  
+        #define ResistiveTouchScreen_YMinus_Config_As_Output()      TRISBbits.TRISB9 = 0
 
     // end of #elif defined (GFX_PICTAIL_LCC)...    
-    
-	/* ----------------------------------------- */
-	#elif defined (GFX_PICTAIL_V2) // && defined (EXPLORER_16)  
-	/* ----------------------------------------- */
-	// NOTE: GFX_PICTAIL_V2 can only be paired with Explorer 16
-
-		#if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-			// ADC channel constants
-			// Potentiometer and Temperature sensor
-			#define ADC_TEMP        4
-			#define ADC_POT         0
-			#define ADC_XPOS		5
-			#define ADC_YPOS		4
-
-			// ADC Port Control Bits
-			#define ADC_POT_TRIS    TRISAbits.TRISA0
-			#define ADC_POT_PCFG    AD1PCFGLbits.PCFG0
-			#define ADPCFG_XPOS		AD1PCFGLbits.PCFG5
-			#define ADPCFG_YPOS		AD1PCFGLbits.PCFG4
-
-			// X port definitions
-			#define LAT_XPOS		LATBbits.LATB3
-			#define TRIS_XPOS		TRISBbits.TRISB3
-			#define LAT_XNEG		LATCbits.LATC9
-			#define TRIS_XNEG		TRISCbits.TRISC9
-
-			// Y port definitions
-			#define LAT_YPOS		LATBbits.LATB2
-			#define TRIS_YPOS		TRISBbits.TRISB2
-			#define LAT_YNEG		LATCbits.LATC8
-			#define TRIS_YNEG		TRISCbits.TRISC8
-
-		#elif defined(__PIC32MX__)
-
-			// ADC channel constants
-			// Potentiometer and Temperature sensor
-			#define ADC_TEMP		ADC_CH0_POS_SAMPLEA_AN4
-			#define ADC_POT			ADC_CH0_POS_SAMPLEA_AN5
-			#define ADC_XPOS		ADC_CH0_POS_SAMPLEA_AN11
-			#define ADC_YPOS		ADC_CH0_POS_SAMPLEA_AN10
-
-			// ADC Port Control Bits
-			#define ADC_POT_PCFG    AD1PCFGbits.PCFG5
-	        #define ADPCFG_XPOS		AD1PCFGbits.PCFG11
-			#define ADPCFG_YPOS		AD1PCFGbits.PCFG10
-
-			// X port definitions
-			#define LAT_XPOS		LATBbits.LATB11
-			#define TRIS_XPOS		TRISBbits.TRISB11
-			#define LAT_XNEG		LATGbits.LATG13
-			#define TRIS_XNEG		TRISGbits.TRISG13
-			// Y port definitions
-			#define LAT_YPOS		LATBbits.LATB10
-			#define TRIS_YPOS		TRISBbits.TRISB10
-			#define LAT_YNEG		LATGbits.LATG12
-			#define TRIS_YNEG		TRISGbits.TRISG12
-
-
-		#else // all other supported PIC devices
-
-			// ADC channel constants
-			// Potentiometer and Temperature sensor
-			#define ADC_TEMP		4
-			#define ADC_POT			5
-			#define ADC_XPOS		11
-			#define ADC_YPOS		10
-
-			// ADC Port Control Bits
-			#define ADC_POT_PCFG    AD1PCFGbits.PCFG5
-	        #define ADPCFG_XPOS		AD1PCFGbits.PCFG11
-			#define ADPCFG_YPOS		AD1PCFGbits.PCFG10
-
-			// X port definitions
-			#define LAT_XPOS		LATBbits.LATB11
-			#define TRIS_XPOS		TRISBbits.TRISB11
-			#define LAT_XNEG		LATGbits.LATG13
-			#define TRIS_XNEG		TRISGbits.TRISG13
-			// Y port definitions
-			#define LAT_YPOS		LATBbits.LATB10
-			#define TRIS_YPOS		TRISBbits.TRISB10
-			#define LAT_YNEG		LATGbits.LATG12
-			#define TRIS_YNEG		TRISGbits.TRISG12
-
-		#endif
-
-    // end of #elif defined (GFX_PICTAIL_V2) ...
     
 	/* ----------------------------------------- */
 	#elif defined (GFX_PICTAIL_V3) || defined (GFX_PICTAIL_V3E)  // && defined (EXPLORER_16) || PIC32 Starter Kits 
@@ -1686,18 +1645,30 @@
 			#define ADC_POT_PCFG    AD1PCFGLbits.PCFG0
 			#define ADPCFG_XPOS		AD1PCFGLbits.PCFG5
 			#define ADPCFG_YPOS		AD1PCFGLbits.PCFG4
+            #define RESISTIVETOUCH_ANALOG  0
+            #define RESISTIVETOUCH_DIGITAL 1
 
 			// X port definitions
-			#define LAT_XPOS		LATBbits.LATB3
-			#define TRIS_XPOS		TRISBbits.TRISB3
-			#define LAT_XNEG		LATCbits.LATC9
-			#define TRIS_XNEG		TRISCbits.TRISC9
-
+            #define ResistiveTouchScreen_XPlus_Drive_High()         LATBbits.LATB3   = 1
+            #define ResistiveTouchScreen_XPlus_Drive_Low()          LATBbits.LATB3   = 0
+            #define ResistiveTouchScreen_XPlus_Config_As_Input()    TRISBbits.TRISB3 = 1
+            #define ResistiveTouchScreen_XPlus_Config_As_Output()   TRISBbits.TRISB3 = 0
+			
+            #define ResistiveTouchScreen_XMinus_Drive_High()        LATCbits.LATC9   = 1   
+            #define ResistiveTouchScreen_XMinus_Drive_Low()         LATCbits.LATC9   = 0
+            #define ResistiveTouchScreen_XMinus_Config_As_Input()   TRISCbits.TRISC9 = 1  
+            #define ResistiveTouchScreen_XMinus_Config_As_Output()  TRISCbits.TRISC9 = 0
+	     
 			// Y port definitions
-			#define LAT_YPOS		LATBbits.LATB2
-			#define TRIS_YPOS		TRISBbits.TRISB2
-			#define LAT_YNEG		LATCbits.LATC8
-			#define TRIS_YNEG		TRISCbits.TRISC8
+            #define ResistiveTouchScreen_YPlus_Drive_High()         LATBbits.LATB2   = 1
+            #define ResistiveTouchScreen_YPlus_Drive_Low()          LATBbits.LATB2   = 0
+            #define ResistiveTouchScreen_YPlus_Config_As_Input()    TRISBbits.TRISB2 = 1
+            #define ResistiveTouchScreen_YPlus_Config_As_Output()   TRISBbits.TRISB2 = 0
+			
+            #define ResistiveTouchScreen_YMinus_Drive_High()        LATCbits.LATC8   = 1   
+            #define ResistiveTouchScreen_YMinus_Drive_Low()         LATCbits.LATC8   = 0
+            #define ResistiveTouchScreen_YMinus_Config_As_Input()   TRISCbits.TRISC8 = 1  
+            #define ResistiveTouchScreen_YMinus_Config_As_Output()  TRISCbits.TRISC8 = 0
 
 		#elif defined(__PIC32MX__)
 
@@ -1721,31 +1692,46 @@
             #endif    
 	        #define ADPCFG_XPOS		AD1PCFGbits.PCFG11
 			#define ADPCFG_YPOS		AD1PCFGbits.PCFG10
+            #define RESISTIVETOUCH_ANALOG  0
+            #define RESISTIVETOUCH_DIGITAL 1
 
-			// X port definitions
-			#define LAT_XPOS		LATBbits.LATB11
-			#define TRIS_XPOS		TRISBbits.TRISB11
+			    // X port definitions
+            #define ResistiveTouchScreen_XPlus_Drive_High()             LATBbits.LATB11   = 1
+            #define ResistiveTouchScreen_XPlus_Drive_Low()              LATBbits.LATB11   = 0
+            #define ResistiveTouchScreen_XPlus_Config_As_Input()        TRISBbits.TRISB11 = 1
+            #define ResistiveTouchScreen_XPlus_Config_As_Output()       TRISBbits.TRISB11 = 0
+
 
             #if defined(_USB) && !defined (PIC32_SK)
- 				#define LAT_XNEG		LATGbits.LATG15
-				#define TRIS_XNEG		TRISGbits.TRISG15
-			#else  // other supported PIC 32 devices
-				#define LAT_XNEG		LATDbits.LATD9
-				#define TRIS_XNEG		TRISDbits.TRISD9
-			#endif
+                #define ResistiveTouchScreen_XMinus_Drive_High()        LATGbits.LATG15   = 1   
+                #define ResistiveTouchScreen_XMinus_Drive_Low()         LATGbits.LATG15   = 0
+                #define ResistiveTouchScreen_XMinus_Config_As_Input()   TRISGbits.TRISG15 = 1  
+                #define ResistiveTouchScreen_XMinus_Config_As_Output()  TRISGbits.TRISG15 = 0
+            #else  // other supported PIC 32 devices
+                #define ResistiveTouchScreen_XMinus_Drive_High()        LATDbits.LATD9   = 1   
+                #define ResistiveTouchScreen_XMinus_Drive_Low()         LATDbits.LATD9   = 0
+                #define ResistiveTouchScreen_XMinus_Config_As_Input()   TRISDbits.TRISD9 = 1  
+                #define ResistiveTouchScreen_XMinus_Config_As_Output()  TRISDbits.TRISD9 = 0
+            #endif
 
-			// Y port definitions
-			#define LAT_YPOS		LATBbits.LATB10
-			#define TRIS_YPOS		TRISBbits.TRISB10
+            // Y port definitions
+            #define ResistiveTouchScreen_YPlus_Drive_High()             LATBbits.LATB10   = 1
+            #define ResistiveTouchScreen_YPlus_Drive_Low()              LATBbits.LATB10   = 0
+            #define ResistiveTouchScreen_YPlus_Config_As_Input()        TRISBbits.TRISB10 = 1
+            #define ResistiveTouchScreen_YPlus_Config_As_Output()       TRISBbits.TRISB10 = 0
 
             #if defined (GFX_PICTAIL_V3E) && defined(PIC32_SK)
-                  #define LAT_YNEG		LATBbits.LATB15
-            #define TRIS_YNEG		TRISBbits.TRISB15
-                  #else
-                #define LAT_YNEG		LATDbits.LATD8
-                #define TRIS_YNEG		TRISDbits.TRISD8
+                #define ResistiveTouchScreen_YMinus_Drive_High()        LATBbits.LATB15   = 1   
+                #define ResistiveTouchScreen_YMinus_Drive_Low()         LATBbits.LATB15   = 0
+                #define ResistiveTouchScreen_YMinus_Config_As_Input()   TRISBbits.TRISB15 = 1  
+                #define ResistiveTouchScreen_YMinus_Config_As_Output()  TRISBbits.TRISB15 = 0
+            #else
+                #define ResistiveTouchScreen_YMinus_Drive_High()        LATDbits.LATD8    = 1   
+                #define ResistiveTouchScreen_YMinus_Drive_Low()         LATDbits.LATD8    = 0
+                #define ResistiveTouchScreen_YMinus_Config_As_Input()   TRISDbits.TRISD8  = 1  
+                #define ResistiveTouchScreen_YMinus_Config_As_Output()  TRISDbits.TRISD8  = 0
             #endif
-       
+                       
        #else	//#else defined (__PIC24F__) || defined(__dsPIC33E__) || defined(__PIC24E__)
 
 			// ADC channel constants
@@ -1754,32 +1740,57 @@
 			    #define ADC_TEMP        4
 			    #define ADC_POT         5
 
-			// ADC Port Control Bits
-    		#if defined(__PIC24FJ256GB210__)
-	        	#define ADC_POT_PCFG	ANSBbits.ANSB5
-    		    #define ADPCFG_XPOS		ANSBbits.ANSB11
-		        #define ADPCFG_YPOS		ANSBbits.ANSB10
-            #else
-        		#define ADC_POT_PCFG    AD1PCFGbits.PCFG5
-    	        #define ADPCFG_XPOS		AD1PCFGbits.PCFG11
-    			#define ADPCFG_YPOS		AD1PCFGbits.PCFG10
-            #endif
+    			// ADC Port Control Bits
+        		#if defined(__PIC24FJ256GB210__)
+    	        	#define ADC_POT_PCFG	ANSBbits.ANSB5
+        		    #define ADPCFG_XPOS		ANSBbits.ANSB11
+    		        #define ADPCFG_YPOS		ANSBbits.ANSB10
+                #else
+            		#define ADC_POT_PCFG    AD1PCFGbits.PCFG5
+        	        #define ADPCFG_XPOS		AD1PCFGbits.PCFG11
+        			#define ADPCFG_YPOS		AD1PCFGbits.PCFG10
+                #endif
+
+            #elif defined(__dsPIC33E__)
+
+    		    #define ADC_POT         5
+    			#define ADC_XPOS        11
+    			#define ADC_YPOS        10
+
+                // ADC Port Control Bits
+           		#define ADC_POT_PCFG	ANSELBbits.ANSB5
+           		#define ADPCFG_XPOS		ANSELBbits.ANSB11
+           		#define ADPCFG_YPOS		ANSELBbits.ANSB10
+
 			#endif
+
+            #define RESISTIVETOUCH_ANALOG  0
+            #define RESISTIVETOUCH_DIGITAL 1
 
 			#define ADC_XPOS        11
 			#define ADC_YPOS        10
 
             // X port definitions
-			#define LAT_XPOS		LATBbits.LATB11
-			#define TRIS_XPOS		TRISBbits.TRISB11
-			#define LAT_XNEG		LATDbits.LATD9
-			#define TRIS_XNEG		TRISDbits.TRISD9 
+            #define ResistiveTouchScreen_XPlus_Drive_High()         LATBbits.LATB11   = 1
+            #define ResistiveTouchScreen_XPlus_Drive_Low()          LATBbits.LATB11   = 0
+            #define ResistiveTouchScreen_XPlus_Config_As_Input()    TRISBbits.TRISB11 = 1
+            #define ResistiveTouchScreen_XPlus_Config_As_Output()   TRISBbits.TRISB11 = 0
 			
+            #define ResistiveTouchScreen_XMinus_Drive_High()        LATDbits.LATD9    = 1   
+            #define ResistiveTouchScreen_XMinus_Drive_Low()         LATDbits.LATD9    = 0
+            #define ResistiveTouchScreen_XMinus_Config_As_Input()   TRISDbits.TRISD9  = 1  
+            #define ResistiveTouchScreen_XMinus_Config_As_Output()  TRISDbits.TRISD9  = 0
+
             // Y port definitions
-			#define LAT_YPOS		LATBbits.LATB10
-			#define TRIS_YPOS		TRISBbits.TRISB10
-			#define LAT_YNEG		LATDbits.LATD8
-			#define TRIS_YNEG		TRISDbits.TRISD8
+            #define ResistiveTouchScreen_YPlus_Drive_High()         LATBbits.LATB10   = 1
+            #define ResistiveTouchScreen_YPlus_Drive_Low()          LATBbits.LATB10   = 0
+            #define ResistiveTouchScreen_YPlus_Config_As_Input()    TRISBbits.TRISB10 = 1
+            #define ResistiveTouchScreen_YPlus_Config_As_Output()   TRISBbits.TRISB10 = 0
+            
+            #define ResistiveTouchScreen_YMinus_Drive_High()        LATDbits.LATD8    = 1   
+            #define ResistiveTouchScreen_YMinus_Drive_Low()         LATDbits.LATD8    = 0
+            #define ResistiveTouchScreen_YMinus_Config_As_Input()   TRISDbits.TRISD8  = 1  
+            #define ResistiveTouchScreen_YMinus_Config_As_Output()  TRISDbits.TRISD8  = 0
 
 		#endif
 

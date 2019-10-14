@@ -49,7 +49,7 @@
 #if defined(__PIC32MX__)
     #define MBR_ATTRIBUTES                      __attribute__((aligned (ERASE_BLOCK_SIZE),section(".MDD_FILES")))
     #define PARTITION_ATTRIBUTES(sector_num)    __attribute__ ((section(".MDD_FILES")))
-#elif defined(__C30__)
+#elif defined(__C30__) || defined __XC16__
     #define MBR_ATTRIBUTES                      __attribute__((space(psv), address(FILES_ADDRESS)))
     #define PARTITION_ATTRIBUTES(sector_num)    __attribute__((space(psv), address(FILES_ADDRESS + (sector_num * MEDIA_SECTOR_SIZE))))
 #elif defined(__18CXX)

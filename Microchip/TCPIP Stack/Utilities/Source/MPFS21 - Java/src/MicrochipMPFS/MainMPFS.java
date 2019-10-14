@@ -251,7 +251,7 @@ public class MainMPFS extends javax.swing.JFrame {
         uploadSettings =  new UploadSettings(this,true);
         aboutBox = new AboutBox(this,true);
         txtUploadPath.setText(uploadSettings.getUploadPathStr());
-        aboutStr = "<html>"+"Date Feb,12 2012"+"<br>";
+        aboutStr = "<html>"+"Date June,26 2012"+"<br>";
         String version = "Version MPFS 2.2.1";
         lebelAbout.setText(aboutStr+version+"</html>");
         UIManager.put("Button.defaultButtonFollowsFocus", Boolean.TRUE);
@@ -543,7 +543,7 @@ public class MainMPFS extends javax.swing.JFrame {
         lblProjectImg.setText("Image Name:");
         jPanel3.add(lblProjectImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 70, -1, -1));
 
-        txtProjectImageName.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11)); // NOI18N
+        txtProjectImageName.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
         txtProjectImageName.setText("MPFSImg2");
         txtProjectImageName.setToolTipText("File name for the image you'd like to create.");
         txtProjectImageName.addActionListener(new java.awt.event.ActionListener() {
@@ -580,8 +580,7 @@ public class MainMPFS extends javax.swing.JFrame {
         jPanel2.add(lblProcess, new org.netbeans.lib.awtextra.AbsoluteConstraints(74, 63, -1, -1));
 
         processOpnButGrp.add(radBin);
-        radBin.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
-        radBin.setSelected(true);
+        radBin.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11)); // NOI18N
         radBin.setText("BIN Image");
         radBin.setToolTipText("Output a BIN image to be uploaded to external storage, such as EEPROM or serial Flash.");
         radBin.addActionListener(new java.awt.event.ActionListener() {
@@ -589,31 +588,32 @@ public class MainMPFS extends javax.swing.JFrame {
                 radBinActionPerformed(evt);
             }
         });
-        jPanel2.add(radBin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 28, -1, -1));
+        jPanel2.add(radBin, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 30, -1, -1));
 
         processOpnButGrp.add(radC18C32);
-        radC18C32.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
-        radC18C32.setText("C18/C32 Image");
-        radC18C32.setToolTipText("Output an image compatible with C18/C32 to be stored in internal Flash program memory.");
+        radC18C32.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11)); // NOI18N
+        radC18C32.setSelected(true);
+        radC18C32.setText("PIC18/PIC32 Image");
+        radC18C32.setToolTipText("Output an image compatible with PIC18/PIC32 to be stored in internal Flash program memory.");
         radC18C32.setName("radC18C30Image"); // NOI18N
         radC18C32.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radC18C32ActionPerformed(evt);
             }
         });
-        jPanel2.add(radC18C32, new org.netbeans.lib.awtextra.AbsoluteConstraints(264, 28, -1, -1));
+        jPanel2.add(radC18C32, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 30, -1, -1));
 
         processOpnButGrp.add(radAsm);
-        radAsm.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
-        radAsm.setText("ASM30 Image");
-        radAsm.setToolTipText("Output an image compatible with C30 to be stored in internal Flash program memory.  Remember to add the generated .S file to your project.");
+        radAsm.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11)); // NOI18N
+        radAsm.setText("PIC24/dsPIC Image");
+        radAsm.setToolTipText("Output an image compatible with 16-bit parts to be stored in internal Flash program memory.  Remember to add the generated .S file to your project.");
         radAsm.setName("radASM30Image"); // NOI18N
         radAsm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radAsmActionPerformed(evt);
             }
         });
-        jPanel2.add(radAsm, new org.netbeans.lib.awtextra.AbsoluteConstraints(383, 28, -1, -1));
+        jPanel2.add(radAsm, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 30, -1, -1));
 
         processOpnButGrp.add(radMdd);
         radMdd.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
@@ -624,7 +624,7 @@ public class MainMPFS extends javax.swing.JFrame {
                 radMddActionPerformed(evt);
             }
         });
-        jPanel2.add(radMdd, new org.netbeans.lib.awtextra.AbsoluteConstraints(486, 28, -1, -1));
+        jPanel2.add(radMdd, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 30, -1, -1));
 
         btnAdvSetting.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 14));
         btnAdvSetting.setText("Advanced Settings");
@@ -1509,9 +1509,9 @@ public class MainMPFS extends javax.swing.JFrame {
              "uploaded to external storage,<br>such as EEPROM or serial Flash."
              +"</body></html>" );
         radC18C32.setToolTipText(infoString+"Output an image compatible with " +
-                "<br>C18/C32 to be stored in internal Flash <br>progra" +
+                "<br>PIC18/PIC32 to be stored in internal Flash <br>progra" +
                 "m memory."+"</body></html>");
-        radAsm.setToolTipText(infoString+ "Output an image compatible with C30" +
+        radAsm.setToolTipText(infoString+ "Output an image compatible with 16-bit parts" +
                 "<br>to be stored in internal Flash program<br> memory. " +
                 "Remember to add the <br>generated .S file to your project."
                 +"</body></html>");
@@ -1816,8 +1816,8 @@ public class MainMPFS extends javax.swing.JFrame {
                 System.out.println("\n" +
                     "Usage: MPFS2 [options] <SourceDir> <ProjectDir> <OutputFile>\n" +
                     "    /BIN\t\t(/b)\t: Output a BIN image (Default)\n" +
-                    "    /C18_C32\t\t(/c)\t: Output a C18 or C32 image\n" +
-                    "    /ASM30\t\t(/s)\t: Output an ASM30 image\n" +
+                    "    /C18_C32\t\t(/c)\t: Output a PIC18 or PIC32 image\n" +
+                    "    /ASM30\t\t(/s)\t: Output an ASM16 image\n" +
                    // "    /C32\t\t(/x)\t: Output a C32 image\n" +
                  //   "    /classic\t\t(/1)\t: MPFSClassic format\n" +
                     "    /mpfs2\t\t(/2)\t: MPFS2 format (Default)\n" +

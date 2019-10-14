@@ -665,7 +665,7 @@ BOOL BLMedia_LoadFile (  char *file_name )
                             totalAddress.word.HW = extendedAddress.Val;
                             totalAddress.word.LW = current_record.LoadOffset;
     
-                            #if defined(__C30__)
+                            #if defined(__C30__) || defined __XC16__
                                 //divide by 2 since the C30 hex file addresses are 2x the actual physical address
                                 totalAddress.Val >>= 1; 
                             #endif

@@ -66,12 +66,8 @@ extern const FONT_FLASH GOLSmallFont;   // small font
 /////////////////////////////////////////////////////////////////////////////
 typedef enum
 {
-    CREATE_DEMOSELECTION    = 0,
-    DISPLAY_DEMOSELECTION,
-    CREATE_GOOGLEMAP,
+    CREATE_GOOGLEMAP = 0,
     DISPLAY_GOOGLEMAP,
-    CREATE_DEMO_A,
-    DISPLAY_DEMO_A,
 } SCREEN_STATES;
 
 /////////////////////////////////////////////////////////////////////////////

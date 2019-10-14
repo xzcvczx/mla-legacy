@@ -3978,21 +3978,27 @@ NO_INDIRECT_MESSAGE:
                                                     
                     openSocketInfo.socketHandle = AddNodeToNetworkTable();
                     
-                    #if ADDITIONAL_NODE_ID_SIZE > 0
-                        for(i = 0; i < ADDITIONAL_NODE_ID_SIZE; i++)
-                        {
-                            ConnectionTable[openSocketInfo.socketHandle].PeerInfo[i] = openSocketInfo.AdditionalNodeID1[i];
-                        }    
-                    #endif
+                    if( openSocketInfo.socketHandle < 0xFF )
+                    {
+                        #if ADDITIONAL_NODE_ID_SIZE > 0
+                            for(i = 0; i < ADDITIONAL_NODE_ID_SIZE; i++)
+                            {
+                                ConnectionTable[openSocketInfo.socketHandle].PeerInfo[i] = openSocketInfo.AdditionalNodeID1[i];
+                            }    
+                        #endif
+                    }    
                     
                     //RouteMessage(myPANID,openSocketInfo.ShortAddress1,FALSE);
                     MiApp_UnicastAddress(openSocketInfo.ShortAddress1.v, FALSE, FALSE);
                     openSocketInfo.status.bits.requestIsOpen = 0;
                     openSocketInfo.status.bits.matchFound = 1;    
                     
-                    #if defined(ENABLE_NETWORK_FREEZER)
-                        nvmPutConnectionTableIndex(&(ConnectionTable[openSocketInfo.socketHandle]), openSocketInfo.socketHandle);
-                    #endif
+                    if( openSocketInfo.socketHandle < 0xFF )
+                    {
+                        #if defined(ENABLE_NETWORK_FREEZER)
+                            nvmPutConnectionTableIndex(&(ConnectionTable[openSocketInfo.socketHandle]), openSocketInfo.socketHandle);
+                        #endif
+                    }
                     
                 }            
             }

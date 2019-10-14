@@ -56,6 +56,12 @@
 _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
+#elif defined(__dsPIC33E__) 
+_FOSCSEL(FNOSC_FRC);			
+_FOSC(FCKSM_CSECMD & POSCMD_XT & OSCIOFNC_OFF & IOL1WAY_OFF);
+_FWDT(FWDTEN_OFF);
+_FPOR(FPWRT_PWR128 & BOREN_ON & ALTI2C1_ON & ALTI2C2_ON);
+_FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 #elif defined(__PIC32MX__)
     #pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_20, FPLLIDIV = DIV_1, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
@@ -191,7 +197,7 @@ typedef enum
 // iinternal flash image
 extern const IMAGE_FLASH    MCHPFolderFile_8bpp_72x72;
 extern const IMAGE_FLASH    MCHPFolderEmpty_8bpp_72x72;
-
+
 /////////////////////////////////////////////////////////////////////////////
 //                            FONTS USED
 /////////////////////////////////////////////////////////////////////////////
@@ -656,12 +662,18 @@ void InitializeBoard(void)
             CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
    #endif      // #ifdef MEB_BOARD    
  
-    #if defined(__dsPIC33F__) || defined(__PIC24H__)
+    #if defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__dsPIC33E__) 
 
         // Configure Oscillator to operate the device at 40Mhz
         // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-        // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-        PLLFBD = 38;                    // M=40
+        #if defined(__dsPIC33E__) 
+            //Fosc = 8M * 60/(2*2) = 120MHz for 8M input clock
+            PLLFBD = 58;                // M=60         
+        #else
+        	// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+        	PLLFBD = 38;                // M=40
+        #endif
+
         CLKDIVbits.PLLPOST = 0;         // N1=2
         CLKDIVbits.PLLPRE = 0;          // N2=2
         OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
@@ -680,14 +692,23 @@ void InitializeBoard(void)
         // Wait for PLL to lock
         while(OSCCONbits.LOCK != 1)
         { };
-        
+
+        #if defined(__dsPIC33F__) || defined(__PIC24H__)
         // Set PMD0 pin functionality to digital
         AD1PCFGL = AD1PCFGL | 0x1000;
 
-        #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-            AD1PCFGLbits.PCFG6 = 1;
-            AD1PCFGLbits.PCFG7 = 1;
-            AD1PCFGLbits.PCFG8 = 1;
+            #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+                AD1PCFGLbits.PCFG6 = 1;
+                AD1PCFGLbits.PCFG7 = 1;
+                AD1PCFGLbits.PCFG8 = 1;
+            #endif
+        
+        #elif defined(__dsPIC33E__)
+            ANSELE = 0x00;
+            ANSELDbits.ANSD6 = 0;
+
+            // Set all touch screen related pins to Analog mode.
+            ANSELBbits.ANSB11 = 1; 
         #endif
         
     #elif defined(__PIC32MX__)
@@ -719,7 +740,7 @@ void InitializeBoard(void)
             SST25_SCK_TRIS = 0;
             SST25_SDO_TRIS = 0;
             SST25_SDI_TRIS = 1;
-            #if defined(__PIC24FJ256GB210__)
+            #if defined(__PIC24FJ256GB210__) || defined(__dsPIC33E__) 
             	SST25_SDI_ANS = 0;
     	    #endif
         #endif

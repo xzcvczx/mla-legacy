@@ -62,6 +62,7 @@
 // Include all headers for any enabled TCPIP Stack functions
 #include "TCPIP Stack/TCPIP.h"
 
+
 #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
 #include "TCPIP Stack/ZeroconfLinkLocal.h"
 #endif
@@ -75,15 +76,6 @@
 // Used for Wi-Fi assertions
 #define WF_MODULE_NUMBER   WF_MODULE_MAIN_DEMO
 
-
-#if defined( WF_CONSOLE )
-#include "TCPIP Stack/WFConsole.h"
-#include "IperfApp.h"
-#endif 
-
-#if defined(WF_HOST_SCAN)
-extern UINT8 hostScanProfileID;
-#endif
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
@@ -103,23 +95,19 @@ static void InitAppConfig(void);
 static void InitializeBoard(void);
 
 #if defined(WF_CS_TRIS)
-    static void WF_Connect(void);
-    UINT8 ConnectionProfileID;
+    void WF_Connect(void);
+#if !defined(MRF24WG)
 	extern BOOL gRFModuleVer1209orLater;
+#endif	/* !defined(MRF24WG) */
+#if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
+tPassphraseReady g_WpsPassphrase;
+#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
+#endif	/* defined(WF_CS_TRIS) */
+
+#if !defined(STACK_USE_UART)
+#error "Must have STACK_USE_UART defined for the console demo"
 #endif
 
-#if defined( WF_CONSOLE_IFCFGUTIL )
-extern UINT8 g_hibernate_state;
-extern UINT8 g_wakeup_notice;
-#endif
-
-#if defined (WF_HOST_SCAN)
-extern BOOL	gHostScanNotAllowed;
-#endif
-
-#if defined ( WF_CONSOLE ) && defined ( EZ_CONFIG_SCAN ) && !defined(__18CXX)
-extern void WFDisplayScanMgr();
-#endif
 
 //
 // PIC18 Interrupt Service Routines
@@ -233,6 +221,10 @@ extern void WFDisplayScanMgr();
 	}
 #endif
 
+#ifdef WF_CS_TRIS
+// Global variables
+UINT8 ConnectionProfileID;
+#endif	/* WF_CS_TRIS */
 
 //
 // Main application entry point.
@@ -316,9 +308,12 @@ int main(void)
     StackInit();
 
     #if defined(WF_CS_TRIS)
+	#if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
+		g_WpsPassphrase.valid = FALSE;
+	#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
     WF_Connect();
     #endif
-
+  
 	// Initialize any application-specific modules or functions/
 	// For this demo application, this only includes the
 	// UART 2 TCP Bridge
@@ -342,13 +337,9 @@ int main(void)
 		NULL							    // no application context
 		);
 
-    mDNSMulticastFilterRegister();			
+    mDNSMulticastFilterRegister();
 	#endif
 
-	#if defined(WF_CONSOLE)
-	WFConsoleInit();
-	IperfAppInit();
-	#endif
 
 	// Now that all items are initialized, begin the co-operative
 	// multitasking loop.  This infinite loop will continuously 
@@ -363,19 +354,6 @@ int main(void)
     // down into smaller pieces so that other tasks can have CPU time.
     while(1)
     {
-		#if defined( WF_CONSOLE_IFCFGUTIL )
-  	  	if (g_wakeup_notice && g_hibernate_state == WF_HB_WAIT_WAKEUP) {
-			DelayMs(200);
-			g_hibernate_state = WF_HB_NO_SLEEP;
-			StackInit();
-        		#if defined(WF_CONSOLE)
-			IperfAppInit();
-			#endif
-    		#if defined(WF_CS_TRIS)
-    		WF_Connect();
-    		#endif
-		}
-		#endif
         // Blink LED0 (right most one) every second.
         if(TickGet() - t >= TICK_SECOND/2ul)
         {
@@ -387,11 +365,14 @@ int main(void)
         // for incoming packet, type of packet and calling
         // appropriate stack entity to process it.
         StackTask();
-        
+
         #if defined(WF_CS_TRIS)
-		if (gRFModuleVer1209orLater)
-        	WiFiTask();
+        #if !defined(MRF24WG)
+        if (gRFModuleVer1209orLater)
         #endif
+            WiFiTask();
+        #endif
+
 
         // This tasks invokes each of the core stack application tasks
         StackApplications();
@@ -413,32 +394,8 @@ int main(void)
 		// the inputs on the board itself.
 		// Any custom modules or processing you need to do should
 		// go here.
-		#if defined( WF_CONSOLE_IFCFGUTIL )
-		wait_console_input:
-		#endif
-        #if defined(WF_CONSOLE)
-		WFConsoleProcess();
-		#if defined( WF_CONSOLE_IFCFGUTIL )
-		if (g_hibernate_state == WF_HB_NO_SLEEP)
-			IperfAppCall();
-		#else
-			IperfAppCall();
-		#endif
-		WFConsoleProcessEpilogue();
-		#endif
-		#if defined( WF_CONSOLE_IFCFGUTIL )
-		if (g_hibernate_state != WF_HB_NO_SLEEP) {
-			if (g_hibernate_state == WF_HB_ENTER_SLEEP) {
-				SetLogicalConnectionState(FALSE);
-				WF_HibernateEnable();
-				g_hibernate_state = WF_HB_WAIT_WAKEUP;
-			}
-			if (g_wakeup_notice) 
-				continue;
-			else
-				goto wait_console_input;
-		}
-		#endif
+	
+		
 		#if defined(STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE)
 		GenericTCPClient();
 		#endif
@@ -469,9 +426,6 @@ int main(void)
 			SNMPSendTrap();
 		#endif
 
-		#if defined ( WF_CONSOLE ) && defined ( EZ_CONFIG_SCAN ) && !defined(__18CXX) 
-        WFDisplayScanMgr();
-		#endif
 		
 		#if defined(STACK_USE_BERKELEY_API)
 		BerkeleyTCPClientDemo();
@@ -505,7 +459,16 @@ int main(void)
             #if defined(STACK_USE_ZEROCONF_MDNS_SD)
 				mDNSFillHostRecord();
 			#endif
+		
 		}
+		#if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) && defined (MRF24WG)
+			if (g_WpsPassphrase.valid) {
+				WF_ConvPassphrase2Key(g_WpsPassphrase.passphrase.keyLen, g_WpsPassphrase.passphrase.key,
+				g_WpsPassphrase.passphrase.ssidLen, g_WpsPassphrase.passphrase.ssid);
+				WF_SetPSK(g_WpsPassphrase.passphrase.key);
+				g_WpsPassphrase.valid = FALSE;
+			}
+		#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
 	}
 }
 
@@ -520,147 +483,121 @@ int main(void)
  *  NOTES:   Connects to an 802.11 network.  Customize this function as needed 
  *           for your application.
  *****************************************************************************/
-static void WF_Connect(void)
+void WF_Connect(void)
 {
-    //UINT8 ConnectionProfileID;
     UINT8 channelList[] = MY_DEFAULT_CHANNEL_LIST;
-    
+   
     /* create a Connection Profile */
     WF_CPCreate(&ConnectionProfileID);
+    
+    WF_SetRegionalDomain(MY_DEFAULT_DOMAIN);  
 
-#if defined (WF_HOST_SCAN)
-	hostScanProfileID = ConnectionProfileID;	// assign default profile to host scan
-	gHostScanNotAllowed = TRUE;					// disallow host scan while trying to connect
-#endif
-
-    #if defined(STACK_USE_UART)
-    putrsUART("Set SSID (");
-    putsUART((char *)AppConfig.MySSID);
-    putrsUART(")\r\n");
-    #endif
     WF_CPSetSsid(ConnectionProfileID, 
                  AppConfig.MySSID, 
                  AppConfig.SsidLength);
-
-    #if defined(STACK_USE_UART)
-    putrsUART("Set Network Type\r\n");
-	#endif
+    
     WF_CPSetNetworkType(ConnectionProfileID, MY_DEFAULT_NETWORK_TYPE);
     
-	#if defined(STACK_USE_UART)
-	putrsUART("Set Scan Type\r\n");
-	#endif
     WF_CASetScanType(MY_DEFAULT_SCAN_TYPE);
     
-    #if defined(STACK_USE_UART)
-    putrsUART("Set Channel List\r\n");
-    #endif    
     WF_CASetChannelList(channelList, sizeof(channelList));
     
-    #if defined(STACK_USE_UART)
-    putrsUART("Set list retry count\r\n");
-    #endif
     // The Retry Count parameter tells the WiFi Connection manager how many attempts to make when trying
     // to connect to an existing network.  In the Infrastructure case, the default is to retry forever so that
     // if the AP is turned off or out of range, the radio will continue to attempt a connection until the
     // AP is eventually back on or in range.  In the Adhoc case, the default is to retry 3 times since the 
     // purpose of attempting to establish a network in the Adhoc case is only to verify that one does not
     // initially exist.  If the retry count was set to WF_RETRY_FOREVER in the AdHoc mode, an AdHoc network
-    // would never be established.  The constants MY_DEFAULT_LIST_RETRY_COUNT_ADHOC and 
-    // MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE have been created specifically for the June 2011 MAL release.
-    #if defined(EZ_CONFIG_STORE)
-        if (AppConfig.networkType == WF_ADHOC)
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_ADHOC);
-        else
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE);
-    #else
-        #if (MY_DEFAULT_NETWORK_TYPE == WF_ADHOC)
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_ADHOC);
-        #else
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE);
-        #endif
-    #endif
+    // would never be established.  
+    WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT);
 
-    #if defined(STACK_USE_UART)        
-    putrsUART("Set Event Notify\r\n");    
-    #endif
     WF_CASetEventNotificationAction(MY_DEFAULT_EVENT_NOTIFICATION_LIST);
     
-    #if defined(STACK_USE_UART)
-    putrsUART("Set Beacon Timeout\r\n");
-    #endif
-    WF_CASetBeaconTimeout(40);
-
-    if (gRFModuleVer1209orLater)
-    {
-        // If WEP security is used, set WEP Key Type.  The default WEP Key Type is Shared Key.
-        if (AppConfig.SecurityMode == WF_SECURITY_WEP_40 || AppConfig.SecurityMode == WF_SECURITY_WEP_104)
-        {
-            WF_CPSetWepKeyType(ConnectionProfileID, MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE);
-        }
-    }    
+    WF_CASetBeaconTimeout(MY_DEFAULT_BEACON_TIMEOUT);
     
-    /* Set Security */
-    #if (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_OPEN)
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (Open)\r\n");
-        #endif
-    #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WEP_40)
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WEP40)\r\n");
-        #endif
-    #elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WEP_104)
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WEP104)\r\n");
-        #endif
-    #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_WITH_KEY 
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WPA with key)\r\n");
-        #endif
-    #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA2_WITH_KEY 
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WPA2 with key)\r\n");
-        #endif
-    #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_WITH_PASS_PHRASE
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WPA with pass phrase)\r\n");
-        #endif
-    #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA2_WITH_PASS_PHRASE
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WPA2 with pass phrase)\r\n");    
-        #endif
-    #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_AUTO_WITH_KEY
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WPA with key, auto-select)\r\n");
-        #endif
-    #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE
-        #if defined(STACK_USE_UART)
-        putrsUART("Set Security (WPA with pass phrase, auto-select)\r\n");
-        #endif
-    #endif /* MY_DEFAULT_WIFI_SECURITY_MODE */
+    #if !defined(MRF24WG)
+        if (gRFModuleVer1209orLater)
+    #else
+        {
+            // If WEP security is used, set WEP Key Type.  The default WEP Key Type is Shared Key.
+            if (AppConfig.SecurityMode == WF_SECURITY_WEP_40 || AppConfig.SecurityMode == WF_SECURITY_WEP_104)
+            {
+            	WF_CPSetWepKeyType(ConnectionProfileID, MY_DEFAULT_WIFI_SECURITY_WEP_KEYTYPE);
+            }
+        }    
+    #endif
+	
+    #if defined(MRF24WG)
+        // Error check items specific to WPS Push Button mode 
+        #if (MY_DEFAULT_WIFI_SECURITY_MODE==WF_SECURITY_WPS_PUSH_BUTTON)
+            #if !defined(WF_P2P)
+                WF_ASSERT(strlen(AppConfig.MySSID) == 0);  // SSID must be empty when using WPS
+                WF_ASSERT(sizeof(channelList)==11);        // must scan all channels for WPS        
+            #endif
+            
+            #if (MY_DEFAULT_NETWORK_TYPE == WF_P2P)
+                WF_ASSERT(strcmp((char *)AppConfig.MySSID, "DIRECT-") == 0);
+                WF_ASSERT(sizeof(channelList) == 3);
+                WF_ASSERT(channelList[0] == 1);
+                WF_ASSERT(channelList[1] == 6);
+                WF_ASSERT(channelList[2] == 11);           
+            #endif
+
+        #endif    
+
+    #endif /* MRF24WG */
+
+	#if defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST)
+		if (AppConfig.SecurityMode == WF_SECURITY_WPA_WITH_PASS_PHRASE
+			|| AppConfig.SecurityMode == WF_SECURITY_WPA2_WITH_PASS_PHRASE
+			|| AppConfig.SecurityMode == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE) {
+			WF_ConvPassphrase2Key(AppConfig.SecurityKeyLength, AppConfig.SecurityKey,
+				AppConfig.SsidLength, AppConfig.MySSID);
+			AppConfig.SecurityMode--;
+			AppConfig.SecurityKeyLength = 32;
+		}
+	#if defined (MRF24WG)
+		else if (AppConfig.SecurityMode == WF_SECURITY_WPS_PUSH_BUTTON
+					|| AppConfig.SecurityMode == WF_SECURITY_WPS_PIN) {
+			WF_YieldPassphrase2Host();	
+		}
+	#endif	/* defined (MRF24WG) */
+	#endif	/* defined(DERIVE_KEY_FROM_PASSPHRASE_IN_HOST) */
 
     WF_CPSetSecurity(ConnectionProfileID,
                      AppConfig.SecurityMode,
                      AppConfig.WepKeyIndex,   /* only used if WEP enabled */
                      AppConfig.SecurityKey,
                      AppConfig.SecurityKeyLength);
-                     
+    
     #if MY_DEFAULT_PS_POLL == WF_ENABLED
-        WF_PsPollEnable(TRUE);
+		WF_PsPollEnable(TRUE);
+    #if !defined(MRF24WG)
         if (gRFModuleVer1209orLater)
-            WFEnableDeferredPowerSave();
-    #else
+            WFEnableDeferredPowerSave();     
+    #endif	/* !defined(MRF24WG) */
+    #else	/* MY_DEFAULT_PS_POLL != WF_ENABLED */
         WF_PsPollDisable();
+    #endif	/* MY_DEFAULT_PS_POLL == WF_ENABLED */
+
+    #ifdef WF_AGGRESSIVE_PS
+    #if !defined(MRF24WG)
+        if (gRFModuleVer1209orLater)
+			WFEnableAggressivePowerSave();
+    #endif
+    #endif
+    
+	#if defined(STACK_USE_UART)
+	    WF_OutputConnectionInfo(&AppConfig);
     #endif
 
-	#ifdef WF_AGGRESSIVE_PS
-        if (gRFModuleVer1209orLater)
-            WFEnableAggressivePowerSave();
+	#if defined(DISABLE_MODULE_FW_CONNECT_MANAGER_IN_INFRASTRUCTURE)
+		WF_DisableModuleConnectionManager();
 	#endif
-                     
-    #if defined(STACK_USE_UART)                     
-    putrsUART("Start WiFi Connect\r\n");        
+    #if defined(MRF24WG)
+    WFEnableDebugPrint(ENABLE_WPS_PRINTS | ENABLE_P2P_PRINTS);
     #endif
+    
     WF_CMConnect(ConnectionProfileID);
 }   
 #endif /* WF_CS_TRIS */
@@ -669,7 +606,12 @@ static void WF_Connect(void)
 void DisplayIPValue(IP_ADDR IPVal)
 {
 //	printf("%u.%u.%u.%u", IPVal.v[0], IPVal.v[1], IPVal.v[2], IPVal.v[3]);
+#if defined (__dsPIC33E__) || defined (__PIC24E__)
+	static BYTE IPDigit[4];    					/* Needs to be declared as static to avoid the array getting optimized by C30 v3.30 compiler for dsPIC33E/PIC24E. 
+												   Otherwise the LCD displays corrupted IP address on Explorer 16. To be fixed in the future compiler release*/
+#else
     BYTE IPDigit[4];
+#endif
 	BYTE i;
 #ifdef USE_LCD
 	BYTE j;
@@ -840,12 +782,75 @@ static void InitializeBoard(void)
 	
 		// Port I/O
 		AD1PCFGHbits.PCFG23 = 1;	// Make RA7 (BUTTON1) a digital input
-		AD1PCFGHbits.PCFG20 = 1;	// Make RA12 (INT1) a digital input for MRF24WB0M PICtail Plus interrupt
+		AD1PCFGHbits.PCFG20 = 1;	// Make RA12 (INT1) a digital input for MRF24W PICtail Plus interrupt
 
 		// ADC
 	    AD1CHS0 = 0;				// Input to AN0 (potentiometer)
 		AD1PCFGLbits.PCFG5 = 0;		// Disable digital input on AN5 (potentiometer)
 		AD1PCFGLbits.PCFG4 = 0;		// Disable digital input on AN4 (TC1047A temp sensor)
+
+
+	#elif defined(__dsPIC33E__)||defined(__PIC24E__)
+
+		// Crank up the core frequency
+		PLLFBD = 38;				/* M  = 30	*/
+		CLKDIVbits.PLLPOST = 0;		/* N1 = 2	*/
+		CLKDIVbits.PLLPRE = 0;		/* N2 = 2	*/
+		OSCTUN = 0;	
+		
+	    /*	Initiate Clock Switch to Primary
+	     *	Oscillator with PLL (NOSC= 0x3)*/
+	    __builtin_write_OSCCONH(0x03);		
+		__builtin_write_OSCCONL(0x01);
+		// Disable Watch Dog Timer
+	    RCONbits.SWDTEN = 0;
+		while (OSCCONbits.COSC != 0x3); 
+		while (_LOCK == 0);			/* Wait for PLL lock at 60 MIPS */		
+		// Port I/O
+		ANSELAbits.ANSA7 = 0 ;   //Make RA7 (BUTTON1) a digital input
+		#if defined ENC100_INTERFACE_MODE > 0
+			ANSELEbits.ANSE0 = 0;      // Make these PMP pins as digital output when the interface is parallel.
+			ANSELEbits.ANSE1 = 0;
+			ANSELEbits.ANSE2 = 0;
+			ANSELEbits.ANSE3 = 0;	
+			ANSELEbits.ANSE4 = 0;
+			ANSELEbits.ANSE5 = 0;
+			ANSELEbits.ANSE6 = 0;
+			ANSELEbits.ANSE7 = 0;	
+			ANSELBbits.ANSB10 = 0;
+			ANSELBbits.ANSB11 = 0;
+			ANSELBbits.ANSB12 = 0;
+			ANSELBbits.ANSB13 = 0;
+			ANSELBbits.ANSB15 = 0;
+		#endif
+
+		ANSELEbits.ANSE8= 0 ;    // Make RE8(INT1) a digital input for ZeroG ZG2100M PICtail 
+					
+		AD1CHS0 = 0;		     // Input to AN0 (potentiometer)
+		ANSELBbits.ANSB0= 1;     // Input to AN0 (potentiometer)
+		ANSELBbits.ANSB5= 1;     // Disable digital input on AN5 (potentiometer)
+		ANSELBbits.ANSB4= 1;     // Disable digital input on AN4 (TC1047A temp sensor)
+					
+		ANSELDbits.ANSD7 =0;     //  Digital Pin Selection for S3(Pin 83) and S4(pin 84).
+		ANSELDbits.ANSD6 =0;
+			
+		ANSELGbits.ANSG6 =0;     // Enable Digital input for RG6 (SCK2)
+		ANSELGbits.ANSG7 =0;     // Enable Digital input for RG7 (SDI2)
+		ANSELGbits.ANSG8 =0;     // Enable Digital input for RG8 (SDO2)
+		ANSELGbits.ANSG9 =0;     // Enable Digital input for RG9 (CS)
+				
+		#if defined ENC100_INTERFACE_MODE == 0	// SPI Interface, UART can be used for debugging. Not allowed for other interfaces.
+			RPOR9 = 0x0300;          //RP101= U2TX
+			RPINR19 = 0X0064;  		 //RP100= U2RX
+		#endif
+
+		#if defined WF_CS_TRIS
+			RPINR1bits.INT3R = 30;
+			WF_CS_IO = 1;
+			WF_CS_TRIS = 0;		
+
+		#endif
+
 	#else	//defined(__PIC24F__) || defined(__PIC32MX__)
 		#if defined(__PIC24F__)
 			CLKDIVbits.RCDIV = 0;		// Set 1:1 8MHz FRC postscalar
@@ -884,6 +889,25 @@ static void InitializeBoard(void)
 
 	// UART
 	#if defined(STACK_USE_UART)
+
+		#if defined(__PIC24E__) || defined(__dsPIC33E__)
+			#if defined (ENC_CS_IO) || defined (WF_CS_IO)   // UART to be used in case of ENC28J60 or MRF24W
+				__builtin_write_OSCCONL(OSCCON & 0xbf);
+				RPOR9bits.RP101R = 3; //Map U2TX to RF5
+				RPINR19bits.U2RXR = 0;
+				RPINR19bits.U2RXR = 0x64; //Map U2RX to RF4
+				__builtin_write_OSCCONL(OSCCON | 0x40);
+			#endif
+			#if(ENC100_INTERFACE_MODE == 0)                 // UART to be used only in case of SPI interface with ENC624Jxxx
+					__builtin_write_OSCCONL(OSCCON & 0xbf);
+				RPOR9bits.RP101R = 3; //Map U2TX to RF5
+				RPINR19bits.U2RXR = 0;
+				RPINR19bits.U2RXR = 0x64; //Map U2RX to RF4
+				__builtin_write_OSCCONL(OSCCON | 0x40);
+
+			#endif
+		#endif
+
 		UARTTX_TRIS = 0;
 		UARTRX_TRIS = 1;
 		UMODE = 0x8000;			// Set UARTEN.  Note: this must be done before setting UTXEN
@@ -971,7 +995,7 @@ static void InitializeBoard(void)
 	// Inputs
 	RPINR19bits.U2RXR = 11;	// U2RX = RP11
 	RPINR20bits.SDI1R = 0;	// SDI1 = RP0
-	RPINR0bits.INT1R = 34;	// Assign RE9/RPI34 to INT1 (input) for MRF24WB0M Wi-Fi PICtail Plus interrupt
+	RPINR0bits.INT1R = 34;	// Assign RE9/RPI34 to INT1 (input) for MRF24W Wi-Fi PICtail Plus interrupt
 	
 	// Outputs
 	RPOR8bits.RP16R = 5;	// RP16 = U2TX
@@ -984,7 +1008,7 @@ static void InitializeBoard(void)
 #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
 	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
 	
-	// Configure SPI1 PPS pins (ENC28J60/ENCX24J600/MRF24WB0M or other PICtail Plus cards)
+	// Configure SPI1 PPS pins (ENC28J60/ENCX24J600/MRF24W or other PICtail Plus cards)
 	RPOR0bits.RP0R = 8;		// Assign RP0 to SCK1 (output)
 	RPOR7bits.RP15R = 7;	// Assign RP15 to SDO1 (output)
 	RPINR20bits.SDI1R = 23;	// Assign RP23 to SDI1 (input)
@@ -1000,10 +1024,10 @@ static void InitializeBoard(void)
 	RPOR8bits.RP17R = 5;	// Assign RF5/RP17 to U2TX (output)
 	#endif
 	
-	// Configure INT1 PPS pin (MRF24WB0M Wi-Fi PICtail Plus interrupt signal when in SPI slot 1)
+	// Configure INT1 PPS pin (MRF24W Wi-Fi PICtail Plus interrupt signal when in SPI slot 1)
 	RPINR0bits.INT1R = 33;	// Assign RE8/RPI33 to INT1 (input)
 
-	// Configure INT3 PPS pin (MRF24WB0M Wi-Fi PICtail Plus interrupt signal when in SPI slot 2)
+	// Configure INT3 PPS pin (MRF24W Wi-Fi PICtail Plus interrupt signal when in SPI slot 2)
 	RPINR1bits.INT3R = 40;	// Assign RC3/RPI40 to INT3 (input)
 
 	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
@@ -1012,8 +1036,8 @@ static void InitializeBoard(void)
 #if defined(__PIC24FJ256GA110__)
 	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
 	
-	// Configure SPI2 PPS pins (25LC256 EEPROM on Explorer 16 and ENC28J60/ENCX24J600/MRF24WB0M or other PICtail Plus cards)
-	// Note that the ENC28J60/ENCX24J600/MRF24WB0M PICtails SPI PICtails must be inserted into the middle SPI2 socket, not the topmost SPI1 slot as normal.  This is because PIC24FJ256GA110 A3 silicon has an input-only RPI PPS pin in the ordinary SCK1 location.  Silicon rev A5 has this fixed, but for simplicity all demos will assume we are using SPI2.
+	// Configure SPI2 PPS pins (25LC256 EEPROM on Explorer 16 and ENC28J60/ENCX24J600/MRF24W or other PICtail Plus cards)
+	// Note that the ENC28J60/ENCX24J600/MRF24W PICtails SPI PICtails must be inserted into the middle SPI2 socket, not the topmost SPI1 slot as normal.  This is because PIC24FJ256GA110 A3 silicon has an input-only RPI PPS pin in the ordinary SCK1 location.  Silicon rev A5 has this fixed, but for simplicity all demos will assume we are using SPI2.
 	RPOR10bits.RP21R = 11;	// Assign RG6/RP21 to SCK2 (output)
 	RPOR9bits.RP19R = 10;	// Assign RG8/RP19 to SDO2 (output)
 	RPINR22bits.SDI2R = 26;	// Assign RG7/RP26 to SDI2 (input)
@@ -1022,7 +1046,7 @@ static void InitializeBoard(void)
 	RPINR19bits.U2RXR = 10;	// Assign RF4/RP10 to U2RX (input)
 	RPOR8bits.RP17R = 5;	// Assign RF5/RP17 to U2TX (output)
 	
-	// Configure INT3 PPS pin (MRF24WB0M PICtail Plus interrupt signal)
+	// Configure INT3 PPS pin (MRF24W PICtail Plus interrupt signal)
 	RPINR1bits.INT3R = 36;	// Assign RA14/RPI36 to INT3 (input)
 
 	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
@@ -1089,21 +1113,56 @@ static void InitAppConfig(void)
 		// deterministic for checksum generation
 		memset((void*)&AppConfig, 0x00, sizeof(AppConfig));
 		
-		AppConfig.Flags.bIsDHCPEnabled = TRUE;
+		#if defined ENABLE_STATIC_IP
+			AppConfig.Flags.bIsDHCPEnabled = FALSE;
+
+			AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2<<8ul | MY_DEFAULT_IP_ADDR_BYTE3<<16ul | MY_DEFAULT_IP_ADDR_BYTE4<<24ul;
+			AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
+			AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | MY_DEFAULT_MASK_BYTE2<<8ul | MY_DEFAULT_MASK_BYTE3<<16ul | MY_DEFAULT_MASK_BYTE4<<24ul;
+			AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
+			AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | MY_DEFAULT_GATE_BYTE2<<8ul | MY_DEFAULT_GATE_BYTE3<<16ul | MY_DEFAULT_GATE_BYTE4<<24ul;
+			AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | MY_DEFAULT_PRIMARY_DNS_BYTE2<<8ul  | MY_DEFAULT_PRIMARY_DNS_BYTE3<<16ul  | MY_DEFAULT_PRIMARY_DNS_BYTE4<<24ul;
+			AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2<<8ul  | MY_DEFAULT_SECONDARY_DNS_BYTE3<<16ul  | MY_DEFAULT_SECONDARY_DNS_BYTE4<<24ul;
+		#elif defined ENABLE_DHCP_IP
+			AppConfig.Flags.bIsDHCPEnabled = TRUE;
+
+			AppConfig.MyIPAddr.Val = 0;
+			AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
+			AppConfig.MyMask.Val = 0;
+			AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
+			AppConfig.MyGateway.Val = 0;
+			AppConfig.PrimaryDNSServer.Val = 0;
+			AppConfig.SecondaryDNSServer.Val = 0;
+		#endif
+
+
 		AppConfig.Flags.bInConfigMode = TRUE;
-		memcpypgm2ram((void*)&AppConfig.MyMACAddr, (ROM void*)SerializedMACAddress, sizeof(AppConfig.MyMACAddr));
-//		{
-//			_prog_addressT MACAddressAddress;
-//			MACAddressAddress.next = 0x157F8;
-//			_memcpy_p2d24((char*)&AppConfig.MyMACAddr, MACAddressAddress, sizeof(AppConfig.MyMACAddr));
-//		}
-		AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2<<8ul | MY_DEFAULT_IP_ADDR_BYTE3<<16ul | MY_DEFAULT_IP_ADDR_BYTE4<<24ul;
-		AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
-		AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | MY_DEFAULT_MASK_BYTE2<<8ul | MY_DEFAULT_MASK_BYTE3<<16ul | MY_DEFAULT_MASK_BYTE4<<24ul;
-		AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
-		AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | MY_DEFAULT_GATE_BYTE2<<8ul | MY_DEFAULT_GATE_BYTE3<<16ul | MY_DEFAULT_GATE_BYTE4<<24ul;
-		AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | MY_DEFAULT_PRIMARY_DNS_BYTE2<<8ul  | MY_DEFAULT_PRIMARY_DNS_BYTE3<<16ul  | MY_DEFAULT_PRIMARY_DNS_BYTE4<<24ul;
-		AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2<<8ul  | MY_DEFAULT_SECONDARY_DNS_BYTE3<<16ul  | MY_DEFAULT_SECONDARY_DNS_BYTE4<<24ul;
+
+		#if	defined MY_DEFAULT_MAC_ADDRESS
+    		// Use application MAC address
+    		AppConfig.MyMACAddr.v[0] = 0x00;
+            AppConfig.MyMACAddr.v[1] = 0x1e;
+            AppConfig.MyMACAddr.v[2] = 0xc0;
+            AppConfig.MyMACAddr.v[3] = 0x11;
+            AppConfig.MyMACAddr.v[4] = 0x22;
+            AppConfig.MyMACAddr.v[5] = 0x33;
+		#else
+    		// Use default MAC address of the module	
+    		memcpypgm2ram((void*)&AppConfig.MyMACAddr, (ROM void*)SerializedMACAddress, sizeof(AppConfig.MyMACAddr));
+    //		{
+    //			_prog_addressT MACAddressAddress;
+    //			MACAddressAddress.next = 0x157F8;
+    //			_memcpy_p2d24((char*)&AppConfig.MyMACAddr, MACAddressAddress, sizeof(AppConfig.MyMACAddr));
+    //		}
+		#endif
+
+//		AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2<<8ul | MY_DEFAULT_IP_ADDR_BYTE3<<16ul | MY_DEFAULT_IP_ADDR_BYTE4<<24ul;
+//		AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
+//		AppConfig.MyMask.Val = MY_DEFAULT_MASK_BYTE1 | MY_DEFAULT_MASK_BYTE2<<8ul | MY_DEFAULT_MASK_BYTE3<<16ul | MY_DEFAULT_MASK_BYTE4<<24ul;
+//		AppConfig.DefaultMask.Val = AppConfig.MyMask.Val;
+//		AppConfig.MyGateway.Val = MY_DEFAULT_GATE_BYTE1 | MY_DEFAULT_GATE_BYTE2<<8ul | MY_DEFAULT_GATE_BYTE3<<16ul | MY_DEFAULT_GATE_BYTE4<<24ul;
+//		AppConfig.PrimaryDNSServer.Val = MY_DEFAULT_PRIMARY_DNS_BYTE1 | MY_DEFAULT_PRIMARY_DNS_BYTE2<<8ul  | MY_DEFAULT_PRIMARY_DNS_BYTE3<<16ul  | MY_DEFAULT_PRIMARY_DNS_BYTE4<<24ul;
+//		AppConfig.SecondaryDNSServer.Val = MY_DEFAULT_SECONDARY_DNS_BYTE1 | MY_DEFAULT_SECONDARY_DNS_BYTE2<<8ul  | MY_DEFAULT_SECONDARY_DNS_BYTE3<<16ul  | MY_DEFAULT_SECONDARY_DNS_BYTE4<<24ul;
 	
 	
 		// SNMP Community String configuration
@@ -1160,17 +1219,18 @@ static void InitAppConfig(void)
 			AppConfig.SsidLength = sizeof(MY_DEFAULT_SSID_NAME) - 1;
 	
 	        AppConfig.SecurityMode = MY_DEFAULT_WIFI_SECURITY_MODE;
-	        AppConfig.WepKeyIndex  = MY_DEFAULT_WEP_KEY_INDEX;
 	        
 	        #if (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_OPEN)
 	            memset(AppConfig.SecurityKey, 0x00, sizeof(AppConfig.SecurityKey));
 	            AppConfig.SecurityKeyLength = 0;
 	
 	        #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WEP_40
+				AppConfig.WepKeyIndex  = MY_DEFAULT_WEP_KEY_INDEX;
 	            memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_WEP_KEYS_40, sizeof(MY_DEFAULT_WEP_KEYS_40) - 1);
 	            AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_WEP_KEYS_40) - 1;
 	
 	        #elif MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WEP_104
+				AppConfig.WepKeyIndex  = MY_DEFAULT_WEP_KEY_INDEX;
 			    memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_WEP_KEYS_104, sizeof(MY_DEFAULT_WEP_KEYS_104) - 1);
 			    AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_WEP_KEYS_104) - 1;
 	
@@ -1185,7 +1245,15 @@ static void InitAppConfig(void)
 	              (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPA_AUTO_WITH_PASS_PHRASE)
 	            memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_PSK_PHRASE, sizeof(MY_DEFAULT_PSK_PHRASE) - 1);
 	            AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_PSK_PHRASE) - 1;
-	
+			#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PUSH_BUTTON)
+				memset(AppConfig.SecurityKey, 0x00, sizeof(AppConfig.SecurityKey));
+	            AppConfig.SecurityKeyLength = 0;
+			#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_WPS_PIN)
+				memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_WPS_PIN, sizeof(MY_DEFAULT_WPS_PIN) - 1);
+			    AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_WPS_PIN) - 1;
+			#elif (MY_DEFAULT_WIFI_SECURITY_MODE == WF_SECURITY_EAP)
+	            memset(AppConfig.SecurityKey, 0x00, sizeof(AppConfig.SecurityKey));
+	            AppConfig.SecurityKeyLength = 0;
 	        #else 
 	            #error "No security defined"
 	        #endif /* MY_DEFAULT_WIFI_SECURITY_MODE */
@@ -1284,4 +1352,5 @@ void SaveAppConfig(const APP_CONFIG *ptrAppConfig)
     #endif
 }
 #endif
+
 

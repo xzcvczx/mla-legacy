@@ -96,7 +96,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -150,31 +163,31 @@
         </C18LanguageToolchain>
       </item>
       <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
         <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
       </C18>
       <C18-AS>
       </C18-AS>
@@ -200,7 +213,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -254,40 +280,40 @@
         </C18LanguageToolchain>
       </item>
       <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
         <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
       </C18>
       <C18-AS>
       </C18-AS>
       <C18-LD>
-        <property key="hex-output-format" value="INHX32"/>
-        <property key="generate-hex" value="false"/>
-        <property key="map-file" value=""/>
-        <property key="generate-cod" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-cod" value="false"/>
+        <property key="generate-hex" value="false"/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
       </C18-LD>
       <C18LanguageToolchain>
       </C18LanguageToolchain>
@@ -309,7 +335,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -363,31 +402,31 @@
         </C18LanguageToolchain>
       </item>
       <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
         <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
       </C18>
       <C18-AS>
       </C18-AS>
@@ -413,7 +452,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -467,31 +519,31 @@
         </C18LanguageToolchain>
       </item>
       <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
         <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
       </C18>
       <C18-AS>
       </C18-AS>
@@ -517,7 +569,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -571,31 +636,31 @@
         </C18LanguageToolchain>
       </item>
       <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
         <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
       </C18>
       <C18-AS>
       </C18-AS>
@@ -604,16 +669,16 @@
       <C18LanguageToolchain>
       </C18LanguageToolchain>
       <RealICEPlatformTool>
-        <property key="memories.eeprom" value="false"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
         <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="memories.programmemory.start" value="0x0"/>
-        <property key="programoptions.usehighvoltageonmclr" value="false"/>
-        <property key="memories.id" value="false"/>
-        <property key="memories.programmemory.end" value="0x7fff"/>
         <property key="Freeze Peripherals" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="memories.eeprom" value="false"/>
+        <property key="memories.id" value="false"/>
         <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory.end" value="0x7fff"/>
+        <property key="memories.programmemory.start" value="0x0"/>
         <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
       </RealICEPlatformTool>
     </conf>
     <conf name="PIC18F_Starter_Kit_1" type="2">
@@ -631,7 +696,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -695,31 +773,31 @@
         </C18LanguageToolchain>
       </item>
       <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value="PIC18F_STARTER_KIT_1"/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
         <property key="code-model" value="ms"/>
-        <property key="warning-level" value="2"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="true"/>
+        <property key="enable-od" value="true"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="true"/>
+        <property key="enable-opa" value="true"/>
+        <property key="enable-or" value="true"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="true"/>
+        <property key="enable-ou" value="true"/>
+        <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
+        <property key="optimization-master" value="Enable all"/>
+        <property key="preprocessor-macros" value="PIC18F_STARTER_KIT_1"/>
         <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
       </C18>
       <C18-AS>
       </C18-AS>
@@ -736,8 +814,8 @@
         <targetDevice>PIC24FJ256GB106</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -745,7 +823,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../rm18f14k50.lkr" ex="true" overriding="false">
         <C30>
         </C30>
@@ -797,30 +888,53 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="default"/>
-        <property key="extra-include-directories"
-                  value="..;../../../../Microchip/Include"/>
-        <property key="preprocessor-macros" value=""/>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="true"/>
-        <property key="enable-ansi-warnings" value="false"/>
-        <property key="optimization-level" value="0"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="enable-fatal-warnings" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-ansi-std" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="true"/>
+        <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="0"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="scalar-model" value="default"/>
+        <appendMe value=" -fno-ivopts"/>
       </C30>
       <C30-AS>
       </C30-AS>
       <C30-LD>
       </C30-LD>
       <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="generic-16-bit" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
@@ -831,8 +945,8 @@
         <targetDevice>PIC24FJ64GB004</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -840,7 +954,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../rm18f14k50.lkr" ex="true" overriding="false">
         <C30>
         </C30>
@@ -892,30 +1019,53 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="default"/>
-        <property key="extra-include-directories"
-                  value="..;../../../../Microchip/Include"/>
-        <property key="preprocessor-macros" value=""/>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="true"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="0"/>
+        <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="true"/>
+        <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="0"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="scalar-model" value="default"/>
+        <appendMe value=" -fno-ivopts"/>
       </C30>
       <C30-AS>
       </C30-AS>
       <C30-LD>
       </C30-LD>
       <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="generic-16-bit" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
@@ -926,8 +1076,8 @@
         <targetDevice>PIC24FJ256GB110</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -935,7 +1085,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../rm18f14k50.lkr" ex="true" overriding="false">
         <C30>
         </C30>
@@ -987,30 +1150,53 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="default"/>
-        <property key="extra-include-directories"
-                  value="..;../../../../Microchip/Include"/>
-        <property key="preprocessor-macros" value=""/>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="true"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="0"/>
+        <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="true"/>
+        <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="0"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="scalar-model" value="default"/>
+        <appendMe value=" -fno-ivopts"/>
       </C30>
       <C30-AS>
       </C30-AS>
       <C30-LD>
       </C30-LD>
       <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="generic-16-bit" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
@@ -1021,8 +1207,8 @@
         <targetDevice>PIC24FJ256GB210</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1030,7 +1216,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../rm18f14k50.lkr" ex="true" overriding="false">
         <C30>
         </C30>
@@ -1082,30 +1281,53 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="default"/>
-        <property key="extra-include-directories"
-                  value="..;../../../../Microchip/Include"/>
-        <property key="preprocessor-macros" value=""/>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="true"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="0"/>
+        <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="true"/>
+        <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="0"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="scalar-model" value="default"/>
+        <appendMe value=" -fno-ivopts"/>
       </C30>
       <C30-AS>
       </C30-AS>
       <C30-LD>
       </C30-LD>
       <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="generic-16-bit" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
@@ -1116,8 +1338,8 @@
         <targetDevice>PIC24FJ256DA210</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1125,7 +1347,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../rm18f14k50.lkr" ex="true" overriding="false">
         <C30>
         </C30>
@@ -1177,30 +1412,184 @@
         </C30Global>
       </item>
       <C30>
-        <property key="scalar-model" value="default"/>
-        <property key="extra-include-directories"
-                  value="..;../../../../Microchip/Include"/>
-        <property key="preprocessor-macros" value=""/>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-short-double" value="true"/>
-        <property key="enable-procedural-abstraction" value="false"/>
-        <property key="optimization-level" value="0"/>
+        <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
         <property key="enable-fatal-warnings" value="false"/>
-        <property key="post-instruction-scheduling" value="default"/>
+        <property key="enable-large-arrays" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="true"/>
+        <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
-        <property key="const-model" value="default"/>
-        <property key="code-model" value="default"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="0"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="scalar-model" value="default"/>
+        <appendMe value=" -fno-ivopts"/>
       </C30>
       <C30-AS>
       </C30-AS>
       <C30-LD>
       </C30-LD>
       <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="generic-16-bit" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
+      </C30Global>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC24FJ64GB502_Microstick" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC24FJ64GB502</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../rm18f14k50.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../rm18f4550 - HID Bootload.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../rm18f46j50_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../rm18f47j53_g.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../rm18f87j50.lkr" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
+        <property key="data-model" value="default"/>
+        <property key="enable-all-warnings" value="false"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="true"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="extra-include-directories"
+                  value="..;../../../../Microchip/Include"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="0"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="scalar-model" value="default"/>
+        <appendMe value=" -fno-ivopts"/>
+      </C30>
+      <C30-AS>
+      </C30-AS>
+      <C30-LD>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="generic-16-bit" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
@@ -1211,7 +1600,7 @@
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
+        <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
@@ -1220,7 +1609,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -1284,23 +1686,23 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="additional-warnings" value="false"/>
-        <property key="preprocessor-macros" value="PIC32MX460F512L_PIM"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value="PIC32MX460F512L_PIM"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
@@ -1317,7 +1719,7 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
+        <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
@@ -1326,7 +1728,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -1390,23 +1805,23 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="additional-warnings" value="false"/>
-        <property key="preprocessor-macros" value="PIC32MX795F512L_PIM"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value="PIC32MX795F512L_PIM"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
@@ -1423,7 +1838,7 @@
         <targetDevice>PIC32MX460F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
+        <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
@@ -1432,7 +1847,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -1496,23 +1924,23 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="additional-warnings" value="false"/>
-        <property key="preprocessor-macros" value="PIC32_USB_STARTER_KIT"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value="PIC32_USB_STARTER_KIT"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
@@ -1529,7 +1957,7 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
+        <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
@@ -1538,7 +1966,20 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
       <item path="../../../../Microchip/USB/usb_hal_pic24.c"
             ex="true"
             overriding="false">
@@ -1602,23 +2043,23 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../../../Microchip/Include"/>
-        <property key="additional-warnings" value="false"/>
-        <property key="preprocessor-macros" value="PIC32_USB_STARTER_KIT"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value=""/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value="PIC32_USB_STARTER_KIT"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>

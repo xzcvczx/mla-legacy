@@ -92,14 +92,13 @@ BYTE AN0String[8];
 	int __C30_UART = 2;
 #endif
 
-
 // Private helper functions.
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
 static void InitializeBoard(void);
 
 #if defined(WF_CS_TRIS)
-    static void WF_Connect(void);
+    void WF_Connect(void);
 #endif
 
 //
@@ -214,6 +213,10 @@ static void InitializeBoard(void);
 	}
 #endif
 
+    #if defined(WF_CS_TRIS)
+// Global variables
+UINT8 ConnectionProfileID;
+#endif
 
 //
 // Main application entry point.
@@ -299,7 +302,7 @@ int main(void)
 	// Initialize core stack layers (MAC, ARP, TCP, UDP) and
 	// application modules (HTTP, SNMP, etc.)
     StackInit();
-    
+
     #if defined ( EZ_CONFIG_SCAN )
     WFInitScan();
     #endif
@@ -336,7 +339,9 @@ int main(void)
 
 	#if defined(WF_CONSOLE)
 	WFConsoleInit();
-	IperfAppInit();
+		#if !defined(STACK_USE_EZ_CONFIG)
+		IperfAppCall();
+		#endif
 	#endif
 
 	// Now that all items are initialized, begin the co-operative
@@ -432,7 +437,9 @@ int main(void)
 
         #if defined(WF_CONSOLE)
 		WFConsoleProcess();
-		IperfAppCall();
+		    #if !defined(STACK_USE_EZ_CONFIG)
+			IperfAppCall();
+            #endif
 		WFConsoleProcessEpilogue();
 		#endif
 
@@ -466,10 +473,6 @@ int main(void)
 			SNMPSendTrap();
 		#endif
 		
-		#if defined ( WF_CONSOLE ) && defined ( EZ_CONFIG_SCAN ) 
-        WFDisplayScanMgr();
-        #endif
-		
 		#if defined(STACK_USE_BERKELEY_API)
 		BerkeleyTCPClientDemo();
 		BerkeleyTCPServerDemo();
@@ -502,11 +505,13 @@ int main(void)
             #if defined(STACK_USE_ZEROCONF_MDNS_SD)
 				mDNSFillHostRecord();
 			#endif
-		}
+		}		
 	}
 }
 
 #if defined(WF_CS_TRIS)
+
+
 /*****************************************************************************
  * FUNCTION: WF_Connect
  *
@@ -517,37 +522,30 @@ int main(void)
  *  NOTES:   Connects to an 802.11 network.  Customize this function as needed 
  *           for your application.
  *****************************************************************************/
-static void WF_Connect(void)
+void WF_Connect(void)
 {
-    UINT8 ConnectionProfileID;
+    //UINT8 ConnectionProfileID;
     UINT8 channelList[] = MY_DEFAULT_CHANNEL_LIST;
-    #if defined(WF_USE_POWER_SAVE_FUNCTIONS)
-    BOOL  PsPollEnabled;
-    #endif
-    
+	 
     /* create a Connection Profile */
     WF_CPCreate(&ConnectionProfileID);
+    
+    WF_SetRegionalDomain(MY_DEFAULT_DOMAIN);  
 
-    #if defined(STACK_USE_UART)
-    putrsUART("Set SSID (");
-    putsUART(AppConfig.MySSID);
-    putrsUART(")\r\n");
-    #endif
     WF_CPSetSsid(ConnectionProfileID, 
                  AppConfig.MySSID, 
                  AppConfig.SsidLength);
-
-    #if defined(STACK_USE_UART)
-    putrsUART("Set Network Type\r\n");
-	#endif
+    
+    #if defined(WF_USE_HIDDEN_SSID)
+   	    WF_CPSetSsidType(ConnectionProfileID, FALSE);
+    #endif
+ 
     WF_CPSetNetworkType(ConnectionProfileID, AppConfig.networkType);
-
     if (AppConfig.networkType == WF_ADHOC)
     {
         WF_CPSetAdHocBehavior(ConnectionProfileID, WF_ADHOC_CONNECT_THEN_START);
     }
-    
-    putrsUART("Set Security\r\n");
+	
     switch(AppConfig.SecurityMode) {
         case WF_SECURITY_OPEN:
             WF_CPSetSecurity(ConnectionProfileID, WF_SECURITY_OPEN, 0, NULL, 0);
@@ -572,20 +570,12 @@ static void WF_Connect(void)
 			putrsUART("\r\n\r\nCaptain this should NOT happen.\r\n\r\n");
 
     }
+
         
-	#if defined(STACK_USE_UART)
-	putrsUART("Set Scan Type\r\n");
-	#endif
     WF_CASetScanType(MY_DEFAULT_SCAN_TYPE);
     
-    #if defined(STACK_USE_UART)
-    putrsUART("Set Channel List\r\n");
-    #endif    
     WF_CASetChannelList(channelList, sizeof(channelList));
     
-    #if defined(STACK_USE_UART)
-    putrsUART("Set list retry count\r\n");
-    #endif
     // The Retry Count parameter tells the WiFi Connection manager how many attempts to make when trying
     // to connect to an existing network.  In the Infrastructure case, the default is to retry forever so that
     // if the AP is turned off or out of range, the radio will continue to attempt a connection until the
@@ -594,53 +584,25 @@ static void WF_Connect(void)
     // initially exist.  If the retry count was set to WF_RETRY_FOREVER in the AdHoc mode, an AdHoc network
     // would never be established.  The constants MY_DEFAULT_LIST_RETRY_COUNT_ADHOC and 
     // MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE have been created specifically for the June 2011 MAL release.
-    #if defined(EZ_CONFIG_STORE)
-        if (AppConfig.networkType == WF_ADHOC)
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_ADHOC);
-        else
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE);
-    #else
-        #if (MY_DEFAULT_NETWORK_TYPE == WF_ADHOC)
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_ADHOC);
-        #else
-            WF_CASetListRetryCount(MY_DEFAULT_LIST_RETRY_COUNT_INFRASTRUCTURE);
-        #endif
-    #endif
 
-    #if defined(STACK_USE_UART)        
-    putrsUART("Set Event Notify\r\n");    
-    #endif
+    WF_CASetListRetryCount(ADHOC_RETRY_COUNT);
+	
     WF_CASetEventNotificationAction(MY_DEFAULT_EVENT_NOTIFICATION_LIST);
     
-#if defined(WF_USE_POWER_SAVE_FUNCTIONS)
-    PsPollEnabled = (MY_DEFAULT_PS_POLL == WF_ENABLED);
-    if (!PsPollEnabled)
-    {    
-        /* disable low power (PS-Poll) mode */
-        #if defined(STACK_USE_UART)
-        putrsUART("Disable PS-Poll\r\n");        
+    #if defined(WF_USE_POWER_SAVE_FUNCTIONS)
+        #if (MY_DEFAULT_PS_POLL == WF_ENABLED)
+            WF_PsPollEnable(TRUE);
+        #else
+            WF_PsPollDisable();    
         #endif
-        WF_PsPollDisable();
-    }    
-    else
-    {
-        /* Enable low power (PS-Poll) mode */
-        #if defined(STACK_USE_UART)
-        putrsUART("Enable PS-Poll\r\n");        
-        #endif
-        WF_PsPollEnable(TRUE);
-    }    
-#endif
-
-    #if defined(STACK_USE_UART)
-    putrsUART("Set Beacon Timeout\r\n");
     #endif
-    WF_CASetBeaconTimeout(40);
 
-
-    #if defined(STACK_USE_UART)                     
-    putrsUART("Start WiFi Connect\r\n");        
+    WF_CASetBeaconTimeout(MY_DEFAULT_BEACON_TIMEOUT);
+	
+    #if defined(STACK_USE_UART)   
+        WF_OutputConnectionInfo(&AppConfig);
     #endif
+
     WF_CMConnect(ConnectionProfileID);
 }   
 #endif /* WF_CS_TRIS */
@@ -820,7 +782,7 @@ static void InitializeBoard(void)
 	
 		// Port I/O
 		AD1PCFGHbits.PCFG23 = 1;	// Make RA7 (BUTTON1) a digital input
-		AD1PCFGHbits.PCFG20 = 1;	// Make RA12 (INT1) a digital input for MRF24WB0M PICtail Plus interrupt
+		AD1PCFGHbits.PCFG20 = 1;	// Make RA12 (INT1) a digital input for MRF24W PICtail Plus interrupt
 
 		// ADC
 	    AD1CHS0 = 0;				// Input to AN0 (potentiometer)
@@ -951,7 +913,7 @@ static void InitializeBoard(void)
 	// Inputs
 	RPINR19bits.U2RXR = 11;	// U2RX = RP11
 	RPINR20bits.SDI1R = 0;	// SDI1 = RP0
-	RPINR0bits.INT1R = 34;	// Assign RE9/RPI34 to INT1 (input) for MRF24WB0M Wi-Fi PICtail Plus interrupt
+	RPINR0bits.INT1R = 34;	// Assign RE9/RPI34 to INT1 (input) for MRF24W Wi-Fi PICtail Plus interrupt
 	
 	// Outputs
 	RPOR8bits.RP16R = 5;	// RP16 = U2TX
@@ -964,7 +926,7 @@ static void InitializeBoard(void)
 #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
 	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
 	
-	// Configure SPI1 PPS pins (ENC28J60/ENCX24J600/MRF24WB0M or other PICtail Plus cards)
+	// Configure SPI1 PPS pins (ENC28J60/ENCX24J600/MRF24W or other PICtail Plus cards)
 	RPOR0bits.RP0R = 8;		// Assign RP0 to SCK1 (output)
 	RPOR7bits.RP15R = 7;	// Assign RP15 to SDO1 (output)
 	RPINR20bits.SDI1R = 23;	// Assign RP23 to SDI1 (input)
@@ -980,10 +942,10 @@ static void InitializeBoard(void)
 	RPOR8bits.RP17R = 5;	// Assign RF5/RP17 to U2TX (output)
 	#endif
 	
-	// Configure INT1 PPS pin (MRF24WB0M Wi-Fi PICtail Plus interrupt signal when in SPI slot 1)
+	// Configure INT1 PPS pin (MRF24W Wi-Fi PICtail Plus interrupt signal when in SPI slot 1)
 	RPINR0bits.INT1R = 33;	// Assign RE8/RPI33 to INT1 (input)
 
-	// Configure INT3 PPS pin (MRF24WB0M Wi-Fi PICtail Plus interrupt signal when in SPI slot 2)
+	// Configure INT3 PPS pin (MRF24W Wi-Fi PICtail Plus interrupt signal when in SPI slot 2)
 	RPINR1bits.INT3R = 40;	// Assign RC3/RPI40 to INT3 (input)
 
 	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
@@ -992,8 +954,8 @@ static void InitializeBoard(void)
 #if defined(__PIC24FJ256GA110__)
 	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
 	
-	// Configure SPI2 PPS pins (25LC256 EEPROM on Explorer 16 and ENC28J60/ENCX24J600/MRF24WB0M or other PICtail Plus cards)
-	// Note that the ENC28J60/ENCX24J600/MRF24WB0M PICtails SPI PICtails must be inserted into the middle SPI2 socket, not the topmost SPI1 slot as normal.  This is because PIC24FJ256GA110 A3 silicon has an input-only RPI PPS pin in the ordinary SCK1 location.  Silicon rev A5 has this fixed, but for simplicity all demos will assume we are using SPI2.
+	// Configure SPI2 PPS pins (25LC256 EEPROM on Explorer 16 and ENC28J60/ENCX24J600/MRF24W or other PICtail Plus cards)
+	// Note that the ENC28J60/ENCX24J600/MRF24W PICtails SPI PICtails must be inserted into the middle SPI2 socket, not the topmost SPI1 slot as normal.  This is because PIC24FJ256GA110 A3 silicon has an input-only RPI PPS pin in the ordinary SCK1 location.  Silicon rev A5 has this fixed, but for simplicity all demos will assume we are using SPI2.
 	RPOR10bits.RP21R = 11;	// Assign RG6/RP21 to SCK2 (output)
 	RPOR9bits.RP19R = 10;	// Assign RG8/RP19 to SDO2 (output)
 	RPINR22bits.SDI2R = 26;	// Assign RG7/RP26 to SDI2 (input)
@@ -1002,7 +964,7 @@ static void InitializeBoard(void)
 	RPINR19bits.U2RXR = 10;	// Assign RF4/RP10 to U2RX (input)
 	RPOR8bits.RP17R = 5;	// Assign RF5/RP17 to U2TX (output)
 	
-	// Configure INT3 PPS pin (MRF24WB0M PICtail Plus interrupt signal)
+	// Configure INT3 PPS pin (MRF24W PICtail Plus interrupt signal)
 	RPINR1bits.INT3R = 36;	// Assign RA14/RPI36 to INT3 (input)
 
 	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
@@ -1138,11 +1100,22 @@ static void InitAppConfig(void)
 			WF_ASSERT(sizeof(MY_DEFAULT_SSID_NAME) <= sizeof(AppConfig.MySSID));
 			memcpypgm2ram(AppConfig.MySSID, (ROM void*)MY_DEFAULT_SSID_NAME, sizeof(MY_DEFAULT_SSID_NAME));
 			AppConfig.SsidLength = sizeof(MY_DEFAULT_SSID_NAME) - 1;
-	        #if defined (EZ_CONFIG_STORE)
 	        AppConfig.SecurityMode = MY_DEFAULT_WIFI_SECURITY_MODE;
+            if (AppConfig.SecurityMode == WF_SECURITY_WEP_40)
+            {
+                AppConfig.WepKeyIndex  = MY_DEFAULT_WEP_KEY_INDEX;
+                memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_WEP_KEYS_40, sizeof(MY_DEFAULT_WEP_KEYS_40) - 1);
+	            AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_WEP_KEYS_40) - 1;
+
+            }
+            else if (AppConfig.SecurityMode == WF_SECURITY_WEP_104)
+            {
+				AppConfig.WepKeyIndex  = MY_DEFAULT_WEP_KEY_INDEX;
+			    memcpypgm2ram(AppConfig.SecurityKey, (ROM void*)MY_DEFAULT_WEP_KEYS_104, sizeof(MY_DEFAULT_WEP_KEYS_104) - 1);
+			    AppConfig.SecurityKeyLength = sizeof(MY_DEFAULT_WEP_KEYS_104) - 1;
+            }
 	        AppConfig.networkType = MY_DEFAULT_NETWORK_TYPE;
 	        AppConfig.dataValid = 0;
-	        #endif // EZ_CONFIG_STORE
 		#endif
 
 		// Compute the checksum of the AppConfig defaults as loaded from ROM

@@ -1,7 +1,7 @@
 [HEADER]
 magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
 file_version=1.0
-device=PIC24FJ256GB110
+device=PIC24FJ256DA210
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
@@ -509,7 +509,7 @@ file_058=..\Common\comm_pkt.c
 file_059=..\Common\comm_pkt_callback.c
 file_060=UART.c
 file_061=ExternalResource.c
-file_062=InternalResourceC30.c
+file_062=InternalResourceXC16.c
 file_063=MainDemo.h
 file_064=SideButtons.h
 file_065=rtcc.h
@@ -584,24 +584,25 @@ file_133=..\Common\comm_pkt.h
 file_134=..\Common\comm_pkt_callback.h
 file_135=..\Common\ExternalMemory.h
 file_136=ExternalResource.h
-file_137=InternalResourceC30.h
+file_137=InternalResourceXC16.h
 file_138=Getting Started - Running the Graphics MultiApp Demo.htm
 file_139=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
-suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+suite_guid={9BCCB495-CD65-480A-BA76-63D8E78B117F}
 suite_state=
 [TOOL_SETTINGS]
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-ahl="$(BINDIR_)$(INFILEBASE).lst"
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -mconst-in-code -Os
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=3500 -Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}054=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}054=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -mlarge-arrays -mconst-in-code -Os
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}054_alt=yes
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}054=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}054=
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}=-Wall -mlarge-code -mlarge-data -mlarge-scalar -Os -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}=--heap=2048 -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}=
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}054=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}054=-Wall -mlarge-code -mlarge-data -mlarge-scalar -Os -mlarge-arrays -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}054_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}054=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}054=
 [ACTIVE_FILE_SETTINGS]
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}054_active=yes
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}054_active=yes
 [INSTRUMENTED_TRACE]
 enable=0
 transport=2

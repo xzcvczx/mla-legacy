@@ -58,10 +58,10 @@
 <Font_Files>
 <Font_File_Resource>
 <label>JapaneseFont</label>
-<path>fireflysung.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/firefly/fireflysung.ttf</path>
 <name>AR PL New Sung</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/FireflysungLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/firefly/FireflysungLicense.txt</comment_file>
 <size>22</size>
 <height>25</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
@@ -71,10 +71,10 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>ChineseFont</label>
-<path>fireflysung.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/firefly/fireflysung.ttf</path>
 <name>AR PL New Sung</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/FireflysungLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/firefly/FireflysungLicense.txt</comment_file>
 <size>22</size>
 <height>25</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
@@ -84,10 +84,10 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>KoreanFont</label>
-<path>UnBatang_0613.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/unbatang/UnBatang_0613.ttf</path>
 <name>UnBatang</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/UnbatangGNULicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/unbatang/UnbatangGNULicense.txt</comment_file>
 <size>20</size>
 <height>25</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
@@ -97,10 +97,10 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>RussianFont</label>
-<path>UnBatang_0613.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/unbatang/UnBatang_0613.ttf</path>
 <name>UnBatang</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/UnbatangGNULicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/unbatang/UnbatangGNULicense.txt</comment_file>
 <size>20</size>
 <height>25</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
@@ -110,10 +110,10 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>GOLSmallFont</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/GentiumLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/gentium/GentiumLicense.txt</comment_file>
 <size>14</size>
 <height>17</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
@@ -123,10 +123,10 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>GOLMediumFont</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/GentiumLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/gentium/GentiumLicense.txt</comment_file>
 <size>16</size>
 <height>19</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>

@@ -79,10 +79,27 @@ void CreateSecurityScreen(void)
 
     currentScheme = GFX_SchemeGetCurrentScheme();
 
-    GOLFree();          // free memory for the objects in the previous linked list and start new list
+    CreatePanelScreen();                    // This adds the widgets seen on the left of the screen
 
-    CreatePanelScreen(); //Draw Panel Screen to the left
     SetState(GOLFindObject(PANEL_SCREEN_ID_SECURITY_BUT), BTN_DISABLED);
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT),BTN_DISABLED))
+    {
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT),BTN_DRAW);
+    }
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT),BTN_DISABLED))
+    {
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT),BTN_DRAW);
+    }
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT),BTN_DISABLED))
+    { 
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT),BTN_DRAW);
+    }
 
 
      SetFont((void *) &FONTDEFAULT);
@@ -117,8 +134,7 @@ void CreateSecurityScreen(void)
         (XCHAR *)ArmedStr,                 // "Button",     	// text
         currentScheme
     ); 
-
-    
+ 
     BtnCreate         //Sleeping
     (
         SERCURITY_SCREEN_ID_SLEEPING_BUT,                         // button ID
@@ -131,8 +147,8 @@ void CreateSecurityScreen(void)
         NULL,                               // no bitmap
         (XCHAR *)SleepingStr,                 // "Button",     	// text
         currentScheme
-    ); 
-   
+    );  
+
     BtnCreate         //Vacation
     (
         SERCURITY_SCREEN_ID_VACATION_BUT,                         // button ID
@@ -146,7 +162,7 @@ void CreateSecurityScreen(void)
         (XCHAR *)VacationStr,                 // "Button",     	// text
         currentScheme
     ); 
-   
+ 
     BtnCreate       //Entertaining
     (
         SERCURITY_SCREEN_ID_ENTERTAINING_BUT,                         // button ID
@@ -306,8 +322,6 @@ void CreateSecurityScreen(void)
         currentScheme
     );                              // alternative GOL scheme
 
-
-
     BtnCreate
     (
         SERCURITY_SCREEN_ID_CLEAR_BUT,                // ID
@@ -335,6 +349,7 @@ void CreateSecurityScreen(void)
         currentScheme
     );                              // alternative GOL scheme
 
+  
 }
 /*****************************************************************************
  * WORD MsgSecurityScreen(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
@@ -388,6 +403,6 @@ WORD MsgSecurityScreen(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
             return (1);
 
         default:
-            return (1);                         // process by default
+            return (0);                         // process by default
     }
 }

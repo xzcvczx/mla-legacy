@@ -50,7 +50,7 @@ public abstract class Demo implements DemoInterface {
 			return new DemoMCHPUSB(context, device, handler);
 		}
 		
-		//Check the USB device to see if it is a Microchip MCHPUSB demo device
+		//Check the USB device to see if it is a Microchip WinUSB demo device
 		if((device.getVendorId() == (int)0x04D8) && (device.getProductId() == (int)0x0053)) {
 			return new DemoWinUSB(context, device, handler);
 		}
@@ -58,6 +58,11 @@ public abstract class Demo implements DemoInterface {
 		//Check the USB device to see if it is a Microchip Custom HID demo device
 		if((device.getVendorId() == (int)0x04D8) && (device.getProductId() == (int)0x003F)) {
 			return new DemoCustomHID(context, device, handler);
+		}
+		
+		//Check the USB device to see if it is a MCP2200EV-VCP demo board
+		if((device.getVendorId() == (int)0x04D8) && (device.getProductId() == (int)0x00DF)) {
+			return new DemoMCP2200(context, device, handler);
 		}
 	
 		//If we don't know what type of demo this is, return null.

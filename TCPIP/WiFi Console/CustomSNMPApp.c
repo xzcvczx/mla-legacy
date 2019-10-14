@@ -76,7 +76,7 @@ BYTE gGenericTrapNotification=ENTERPRISE_SPECIFIC;
 BYTE gSpecificTrapNotification=VENDOR_TRAP_DEFAULT; // Vendor specific trap code
 
 #ifdef STACK_USE_SNMPV3_SERVER
-static BYTE gSnmpv3UserSecurityName[USER_SECURITY_NAME_LEN];
+static BYTE gSnmpv3UserSecurityName[SNMPV3_USER_SECURITY_NAME_LEN_MEM_USE];
 #endif
 
 /*
@@ -1077,7 +1077,7 @@ BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len,BYTE index)
     switch(var)
     {
     case TRAP_COMMUNITY:
-        if ( len < (BYTE)TRAP_COMMUNITY_MAX_LEN+1 )
+        if ( len < (BYTE)TRAP_COMMUNITY_MAX_LEN)
             return TRUE;
         break;
 #ifdef STACK_USE_SNMPV3_SERVER			

@@ -83,6 +83,9 @@ ADG          9-Apr-2008 First release
   2.7       Fixed issue where deviceInfoHID[i].rptDescriptor was freed
             twice.  The second free results in possible issues in future
             malloc() calls in the C32 compiler.
+            Fixed Issue with heap not freeing up for the variable 
+            allocated in other file. 'parsedDataMem' needs to be freed in
+            the file 'usb_host_hid_parser.c'.
 ********************************************************************/
 
 #include <stdlib.h>
@@ -919,7 +922,7 @@ void USBHostHIDTasks( void )
                             }
                             else
                             {
-                                // TODO assuming only a STALL here
+                                // MCHP - assuming only a STALL here
                                 // Clear the STALL.  Since it is EP0, we do not have to clear the stall.
                                 USBHostClearEndpointErrors( deviceInfoHID[i].ID.deviceAddress, deviceInfoHID[i].endpointDATA);
                                 _USBHostHID_SetNextSubState();
@@ -2047,7 +2050,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
 
     // Set current configuration to this configuration.  We can change it later.
 
-    // TODO Check power requirement
+    // MCHP - Check power requirement
 
     // Find the next interface descriptor.
     while (i < ((USB_CONFIGURATION_DESCRIPTOR *)descriptor)->wTotalLength)
@@ -2109,7 +2112,7 @@ BOOL USBHostHIDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                                                                           ((descriptor[i+8]) << 8));
 
                             // Look for IN and OUT endpoints.
-                            // TODO what if there are no endpoints?
+                            // MCHP - what if there are no endpoints?
                             endpointIN  = 0;
                             endpointOUT = 0;
                             temp_i = 0;
@@ -2275,11 +2278,6 @@ void _USBHostHID_FreeRptDecriptorDataMem(BYTE deviceAddress)
     for (i=0; (i<USB_MAX_HID_DEVICES) && (deviceInfoHID[i].ID.deviceAddress != deviceAddress); i++);
     if (i < USB_MAX_HID_DEVICES)
     {
-    /* free memory allocated to HID parser */
-        if(parsedDataMem != NULL)
-        {
-            USB_FREE_AND_CLEAR(parsedDataMem); /* will be indexed once multiple  device support is added */
-        }
         if(deviceInfoHID[i].rptDescriptor != NULL)
         {
             USB_FREE_AND_CLEAR(deviceInfoHID[i].rptDescriptor);

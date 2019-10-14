@@ -46,6 +46,8 @@
  *                      BLACK color. Replaced them to use the emboss light 
  *                      and dark color instead.
  * 02/03/12             Added missing cases in GOLRedrawRec().
+ * 03/05/12             Enabled Gradient feature when rendering in blocking 
+ *                      mode.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -257,7 +259,7 @@ WORD GOLCanBeFocused(OBJ_HEADER *object)
     return (0);
 }
 
-    #endif
+    #endif //#ifdef USE_FOCUS
 
 /*********************************************************************
 * Function: GOL_SCHEME *GOLCreateScheme(void)
@@ -736,10 +738,15 @@ _rpnlY1,                // Center y position of upper left corner
 _rpnlX2,                // Center x position of lower right corner
 _rpnlY2,                // Center y position of lower right corner
 _rpnlR;                 // radius
-WORD    _rpnlFaceColor, // face color
-_rpnlEmbossLtColor,     // emboss light color
-_rpnlEmbossDkColor,     // emboss dark color
-_rpnlEmbossSize;        // emboss size
+GFX_COLOR _rpnlFaceColor,   // face color
+_rpnlEmbossLtColor,         // emboss light color
+_rpnlEmbossDkColor,         // emboss dark color
+_rpnlEmbossSize;            // emboss size
+
+#ifdef USE_ALPHABLEND_LITE
+WORD        _rpnlAlpha; // alpha value
+#endif
+
 void    *_pRpnlBitmap = NULL;
 
 /*********************************************************************
@@ -762,10 +769,9 @@ void    *_pRpnlBitmap = NULL;
 WORD GOLPanelDrawTsk(void)
 {
 
-        #ifndef USE_NONBLOCKING_CONFIG
+#ifndef USE_NONBLOCKING_CONFIG
 
     WORD    counter;
-
 
     // check if we need to draw the panels and emboss sides
     if 	(
@@ -813,11 +819,28 @@ WORD GOLPanelDrawTsk(void)
 	
 	    // draw the face color
 	    SetColor(_rpnlFaceColor);
+#ifdef USE_ALPHABLEND_LITE
+        // set alpha value
+        SetAlpha(_rpnlAlpha); 
+#endif
+
 	    if(_rpnlR)
+
+#ifdef USE_GRADIENT
+            if(_gradientScheme.gradientType != GRAD_NONE)
+            {
+                BevelGradient(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize,
+                              _gradientScheme.gradientStartColor,_gradientScheme.gradientEndColor,
+                              _gradientScheme.gradientLength,_gradientScheme.gradientType);
+            }
+            else
+#endif
 	        FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize);
 	    else
-	        Bar(_rpnlX1 + _rpnlEmbossSize, _rpnlY1 + _rpnlEmbossSize, _rpnlX2 - _rpnlEmbossSize, _rpnlY2 - _rpnlEmbossSize);
-	
+            { 
+
+             Bar(_rpnlX1 + _rpnlEmbossSize, _rpnlY1 + _rpnlEmbossSize, _rpnlX2 - _rpnlEmbossSize, _rpnlY2 - _rpnlEmbossSize);
+	        }
 	            #if (COLOR_DEPTH == 1)
 	    if(_rpnlFaceColor == _rpnlEmbossDkColor)
 	    {
@@ -848,7 +871,12 @@ WORD GOLPanelDrawTsk(void)
             _pRpnlBitmap,
             IMAGE_NORMAL
         );
-    }
+   }
+
+#ifdef USE_ALPHABLEND_LITE
+    //Disable Alpha Blending
+    SetAlpha(100); 
+#endif
 
     // check if we need to draw the frame
     if
@@ -868,7 +896,7 @@ WORD GOLPanelDrawTsk(void)
 
     return (1);
 
-        #else
+#else
 
     typedef enum
     {
@@ -1009,6 +1037,11 @@ WORD GOLPanelDrawTsk(void)
             // draw the face color
             case DRAW_FACECOLOR:
                 rnd_panel_draw_facecolor : SetColor(_rpnlFaceColor);
+#ifdef USE_ALPHABLEND_LITE
+                // set alpha value
+                SetAlpha(_rpnlAlpha); 
+#endif
+
                 if(_rpnlR)
                 {
                     #ifdef USE_GRADIENT
@@ -1064,6 +1097,11 @@ WORD GOLPanelDrawTsk(void)
                         return (0);
                     }
                 }
+#ifdef USE_ALPHABLEND_LITE
+                //Disable Alpha Blending
+                SetAlpha(100); 
+#endif
+
 
                         #if (COLOR_DEPTH == 1)
                 state = DRAW_INNERFRAME;
@@ -1137,7 +1175,7 @@ WORD GOLPanelDrawTsk(void)
                 return (1);
         }   // end of switch
     }       // end of while
-        #endif //#ifndef USE_NONBLOCKING_CONFIG
+#endif //#ifndef USE_NONBLOCKING_CONFIG
 }
 
 

@@ -114,9 +114,9 @@
                                 TCON_SCL_TRIS = 0;  \
                                 TCON_SDO_TRIS = 0;  \
                                 TCON_DC_TRIS = 0;   \
-                        		TCON_CS_DIG();      \
+                        	  TCON_CS_DIG();      \
                                 TCON_SCL_DIG();     \
-                        		TCON_SDO_DIG();     \
+                        	  TCON_SDO_DIG();     \
                                 TCON_DC_DIG();      \
                                 TCON_CSHigh();      \
                                 TCON_CLKHigh();     \
@@ -155,27 +155,25 @@
 
 #elif defined (GFX_USE_DISPLAY_CONTROLLER_S1D13517)
 
-     // use the bitbang version using SSD1926 GPIO pins
+     // use the bitbang version using S1D13517 GPIO pins
     
-    #define TCON_CSLow()            (GfxTconSetIO(CS, 0))
-    #define TCON_CSHigh()           (GfxTconSetIO(CS, 1))
-    #define TCON_CLKLow()           (GfxTconSetIO(SCL, 0))
-    #define TCON_CLKHigh()          (GfxTconSetIO(SCL, 1))
-    #define TCON_DataLow()          (GfxTconSetIO(SDO, 0))
-    #define TCON_DataHigh()         (GfxTconSetIO(SDO, 1))
+    #define TCON_CSLow()            (GfxTconSetIO(BB_CS, 0))
+    #define TCON_CSHigh()           (GfxTconSetIO(BB_CS, 1))
+    #define TCON_CLKLow()           (GfxTconSetIO(BB_SCL, 0))
+    #define TCON_CLKHigh()          (GfxTconSetIO(BB_SCL, 1))
+    #define TCON_DataLow()          (GfxTconSetIO(BB_SDO, 0))
+    #define TCON_DataHigh()         (GfxTconSetIO(BB_SDO, 1))
 
-    #define TCON_SetCommand()       (GfxTconSetIO(DC, 0))
-    #define TCON_SetData()          (GfxTconSetIO(DC, 1))
+    #define TCON_SetCommand()       (GfxTconSetIO(BB_DC, 0))
+    #define TCON_SetData()          (GfxTconSetIO(BB_DC, 1))
 
     // this is only needed here since the controller IO's are used
     // instead of the IO's from the PIC device.
     #define SetCtrlBitBangedIO(addr, data)    (SetReg(addr, data))
 
-    // set the GPIO of SSD1926 to as outputs. (used for SSD1289 TCON signals)
-    // and initialize them all to "1"
     #define InitBitBangedIO() {                                     \
-                                SCL_TRIS = 0;                       \
-                                SDO_TRIS = 0;                       \
+                                TCON_SCL_TRIS = 0;                       \
+                                TCON_SDO_TRIS = 0;                       \
                               }                                
 
 // end of #elif defined (USE_DISPLAY_CONTROLLER_S1D13517)
@@ -234,22 +232,24 @@ void GfxTconSetIO(BYTE mask, BYTE level)
 
 #elif defined (GFX_USE_DISPLAY_CONTROLLER_S1D13517)  
 
+    static BYTE temp = 0;
+
     switch(mask)
     {
-        case CS:      
+        case BB_CS:      
                     temp = GetReg(REG6E_GPO_1);
                     if(level == 1)  temp  |= 0x02;
                     else            temp  &= 0xFD;       
                     SetReg(REG6E_GPO_1,temp);
                     break;
 
-        case SCL:   SCL_PORT = level;
+        case BB_SCL:   TCON_SCL_PORT = level;
                     break;
 
-        case SDO:   SDO_PORT = level;
+        case BB_SDO:   TCON_SDO_PORT = level;
                     break;
 
-        case DC:    
+        case BB_DC:    
                     temp = GetReg(REG6E_GPO_1);
                     if(level == 1)  temp  |= 0x04;
                     else            temp  &= 0xFB;       

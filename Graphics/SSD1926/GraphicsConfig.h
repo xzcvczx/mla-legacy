@@ -137,7 +137,7 @@
 *
 *********************************************************************/
 
-//#define USE_BITMAP_FLASH          // Support for bitmaps located in internal flash
+#define USE_BITMAP_FLASH          // Support for bitmaps located in internal flash
 //#define USE_BITMAP_EXTERNAL		// Support for bitmaps located in external memory
 
 /*********************************************************************
@@ -152,5 +152,11 @@
 *
 *********************************************************************/
     #define COLOR_DEPTH             16
+
+/*********************************************************************
+* Overview: Specifies gradients used in the demo.
+*
+*********************************************************************/
+    #define USE_GRADIENT
 
 #endif // _GRAPHICSCONFIG_H

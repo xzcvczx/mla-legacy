@@ -873,7 +873,7 @@ void MonitorDriveMedia(void)
 // for the SPI1 or SPI2 modules on the PIC24FJ256GB110 microcontroller
 void Configure_SDSPI_PPS(void)
 {
-            #if defined(__C30__)
+            #if defined(__C30__) || defined(__XC16__)
                 #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
 
     // Although there are other SPI channels SPI 1 is chosen since USB PICtail does not

@@ -29,10 +29,10 @@
 <Font_Files>
 <Font_File_Resource>
 <label>Gentium_16</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/GentiumLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/gentium/GentiumLicense.txt</comment_file>
 <size>15</size>
 <height>18</height>
 <first_character>32</first_character>

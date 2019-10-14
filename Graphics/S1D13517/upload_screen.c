@@ -64,20 +64,20 @@ void UploadExternalMemory(void)
 	PutImage((GetMaxX() >> 2)+20, 10, (void *) &help_faq, IMAGE_NORMAL);
 	FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
      
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
+	while(!AlphaBlendWindow(GetDestinationPage(), (GetMaxX() >> 2)+15, 5,
+					GFX_PAGE1, (GetMaxX() >> 2)+15, 5,
+					GetDestinationPage(), (GetMaxX() >> 2)+15, 5,
 				     (GetMaxX()) - ((GetMaxX() >> 2)+20), 
 				     60,  	
-				     defaultScheme->AlphaValue);
+				     defaultScheme->AlphaValue));
 				     	
 
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+	while(!AlphaBlendWindow(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85,
+					GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					GetDestinationPage(), (GetMaxX() >> 2) + 15, 85,
 				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
 				     GetMaxY() - 90,  	
-				     defaultScheme->AlphaValue);
+				     defaultScheme->AlphaValue));
 	
     SetActivePage(GetDestinationPage());	
 				     

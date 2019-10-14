@@ -68,6 +68,12 @@
 _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
+#elif defined(__dsPIC33E__) 
+_FOSCSEL(FNOSC_FRC);			
+_FOSC(FCKSM_CSECMD & POSCMD_XT & OSCIOFNC_OFF & IOL1WAY_OFF);
+_FWDT(FWDTEN_OFF);
+_FPOR(FPWRT_PWR128 & BOREN_ON & ALTI2C1_ON & ALTI2C2_ON);
+_FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 #elif defined(__PIC32MX__)
     #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
@@ -135,45 +141,53 @@ DEMO_FILE_TYPE currentFileType;
  ************************************************************/
 int main (void)
 {
-    #if defined(__dsPIC33F__) || defined(__PIC24H__)
+    #if defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__dsPIC33E__)
 
-    // Configure Oscillator to operate the device at 40Mhz
-    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-    PLLFBD = 38;                    // M=40
-    CLKDIVbits.PLLPOST = 0;         // N1=2
-    CLKDIVbits.PLLPRE = 0;          // N2=2
-    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
-
-    // Disable Watch Dog Timer
-    RCONbits.SWDTEN = 0;
-
-    // Clock switching to incorporate PLL
-    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
-
-    // Oscillator with PLL (NOSC=0b011)
-    __builtin_write_OSCCONL(0x01);  // Start clock switching
-    while(OSCCONbits.COSC != 0b011);
-
-    // Wait for Clock switch to occur	
-    // Wait for PLL to lock
-    while(OSCCONbits.LOCK != 1)
-    { };
+        // Configure Oscillator to operate the device at 40Mhz
+        // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+        #if defined(__dsPIC33E__) 
+            //Fosc = 8M * 60/(2*2) = 120MHz for 8M input clock
+            PLLFBD = 58;    			// M=60         
+        #else
+            // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+            PLLFBD = 38;                    // M=40
+        #endif
+        CLKDIVbits.PLLPOST = 0;         // N1=2
+        CLKDIVbits.PLLPRE = 0;          // N2=2
+        OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
+    
+        // Disable Watch Dog Timer
+        RCONbits.SWDTEN = 0;
+    
+        // Clock switching to incorporate PLL
+        __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
+    
+        // Oscillator with PLL (NOSC=0b011)
+        __builtin_write_OSCCONL(0x01);  // Start clock switching
+        while(OSCCONbits.COSC != 0b011);
+    
+        // Wait for Clock switch to occur	
+        // Wait for PLL to lock
+        while(OSCCONbits.LOCK != 1)
+        { };
     
     #elif defined(__PIC32MX__)
-    SYSTEMConfig(GetSystemClock(), SYS_CFG_ALL);
-    #ifdef MEB_BOARD
-    CPLDInitialize();
-    CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
-    CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
-    #endif
+        SYSTEMConfig(GetSystemClock(), SYS_CFG_ALL);
+        #ifdef MEB_BOARD
+            CPLDInitialize();
+            CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+            CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+        #endif
     #endif
 
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
-    AD1PCFGL = 0xffff;
+        AD1PCFGL = 0xffff;
+    #elif defined(__dsPIC33E__) 
+        ANSELE = 0x00;
+        ANSELDbits.ANSD6 = 0;
     #endif
+ 
     InitGraph();                // Graphics
-
     FSInit();                   // File system
 
     currentFileType = DEMO_FILE_TYPE_RGB;
@@ -211,6 +225,7 @@ int main (void)
                     }
                     
                     PlayRGB(nextFile.filename);
+                    
                 }
                 else
                 {

@@ -316,6 +316,7 @@ WORD SST39LF400CheckID()
 ************************************************************************/
 void lWrite16(DWORD address, WORD data)
 {
+#if __XC16_VERSION != 1000
 
 	volatile __eds__ WORD *pWord;
 
@@ -325,9 +326,9 @@ void lWrite16(DWORD address, WORD data)
 	// See EPMP FRM (DS39730) Section on Read/Write Operation
 	while(PMCON2bits.BUSY);
 		*pWord = data;
-		
+#else		
 // Example code to do the writes manually
-/*
+
 WORD pointer;
 WORD temp;
 		address <<= 1;
@@ -340,13 +341,15 @@ WORD temp;
 		*((WORD*)pointer) = data;
 		while(PMCON2bits.BUSY);
         DSWPAG = temp;
-*/
+#endif
 }
 
 /************************************************************************
 ************************************************************************/
 WORD lRead16(DWORD address)
 {
+#if __XC16_VERSION != 1000
+
 	volatile __eds__ WORD *pWord;
 	WORD temp;
 
@@ -357,9 +360,9 @@ WORD lRead16(DWORD address)
 	// See EPMP FRM (DS39730) Section on Read/Write Operation
 	while(PMCON2bits.BUSY);
 	return PMDIN1;
-
+#else
 // Example code to do the writes manually
-/*
+
 WORD pointer;
 volatile WORD data;
 WORD temp;
@@ -375,7 +378,7 @@ WORD temp;
 		data = PMDIN1;
 		DSRPAG = temp;
 		return data;
-*/
+#endif
 }
 
 #endif //USE_SST39LF400

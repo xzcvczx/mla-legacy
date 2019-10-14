@@ -45,19 +45,19 @@ del "a.out" /f /q
 rmdir "TempOBJ" /s /q
 rmdir "Obj-C18-PICDN2_ETH97" /s /q
 rmdir "Obj-C18-PICDN2_ENC28" /s /q
-rmdir "Obj-C30-EX16_ENC28" /s /q
-rmdir "Obj-C30-EX16_ENC624" /s /q
-rmdir "Obj-C30-EX16_MRF24WB" /s /q
-rmdir "Obj-C32-EX16_ENC28" /s /q
-rmdir "Obj-C32-EX16_ENC624" /s /q
-rmdir "Obj-C32-EX16_MRF24WB" /s /q
+rmdir "Obj-XC16-EX16_ENC28" /s /q
+rmdir "Obj-XC16-EX16_ENC624" /s /q
+rmdir "Obj-XC16-EX16_MRF24WB" /s /q
+rmdir "Obj-XC32-EX16_ENC28" /s /q
+rmdir "Obj-XC32-EX16_ENC624" /s /q
+rmdir "Obj-XC32-EX16_MRF24WB" /s /q
 ;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- C18 - PICDEMNET2_INTERNAL_ETHERNET" /s /q
 ;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- C18 - PICDEMNET2_ONBOARD_ENC28J60" /s /q
 ;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- C18 - PICDEMNET2_ENC624J600" /s /q
-;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- C30 - EXPLORER_16_ENC28J60" /s /q
-;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- C30 - EXPLORER_16_ENC624J600" /s /q
-;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- C32 - EXPLORER_16_ENC28J60" /s /q
-;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- C32 - EXPLORER_16_ENC624J600" /s /q
+;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- XC16 - EXPLORER_16_ENC28J60" /s /q
+;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- XC16 - EXPLORER_16_ENC624J600" /s /q
+;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- XC32 - EXPLORER_16_ENC28J60" /s /q
+;rmdir "..\Microchip\TCPIP Stack\Objects - TCPIP WebVend App- XC32 - EXPLORER_16_ENC624J600" /s /q
 ;rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\publish" /s /q
 ;rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\obj" /s /q
 ;rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\bin\Debug" /s /q

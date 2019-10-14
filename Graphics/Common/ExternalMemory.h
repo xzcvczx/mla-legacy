@@ -63,7 +63,7 @@
 /*****************************************************************************
  * Section: Macros
  *****************************************************************************/
-#if defined (USE_SST25VF016)
+#if defined (USE_SST25VF016) || defined (USE_SST25VF064)
     #define FLASHInit(initData)             SST25Init(initData);
 	#define ChipErase()                     SST25ChipErase();
 	#define WriteArray(address, pdata, len) SST25WriteArray(address, pdata, len)

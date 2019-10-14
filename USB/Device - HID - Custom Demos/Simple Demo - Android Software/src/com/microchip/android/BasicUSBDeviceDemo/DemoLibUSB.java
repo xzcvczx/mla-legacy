@@ -150,7 +150,6 @@ public class DemoLibUSB extends Demo implements Runnable, DemoInterface {
 	/**
 	 * The main thread for the demo
 	 */
-	@Override
 	public void run() {	
 		/* Get the OUT endpoint.  It is the first endpoint in the interface */
 		UsbEndpoint endpointOUT = intf.getEndpoint(0);
@@ -264,4 +263,5 @@ public class DemoLibUSB extends Demo implements Runnable, DemoInterface {
 		connection = null;
 		intf = null;
 	}
+
 }

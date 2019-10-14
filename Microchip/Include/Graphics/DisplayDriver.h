@@ -475,7 +475,7 @@ void SetClip(BYTE control);
 WORD IsDeviceBusy();
 
 /*********************************************************************
-* Function: WORD PutImageDrv(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: WORD PutImageDrv(SHORT left, SHORT top, void* image, BYTE stretch, void *pPartialImageData)
 *
 * Overview: Optional function that can be implemented in Display 
 *           Driver Layer to implement PutImage() functions.
@@ -485,6 +485,7 @@ WORD IsDeviceBusy();
 * Input: left,top - left top image corner,
 *        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters 
 *
 * Output: For NON-Blocking configuration:
 *         - Returns 0 when device is busy and the image is not yet completely drawn.
@@ -495,7 +496,7 @@ WORD IsDeviceBusy();
 * Side Effects: none
 *
 ********************************************************************/
-WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch);
+WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch, void *pPartialImageData);
 
 
 /*********************************************************************
@@ -833,7 +834,7 @@ DWORD GetFrameBufferAddress(void);
 *
 * Side Effects: none
 ********************************************************************/
-void GFX_DRIVER_SetupDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt16 endy);
+void GFX_DRIVER_SetupDrawUpdate(WORD startx, WORD starty, WORD endx, WORD endy);
 
 /*********************************************************************
 * Function: void GFX_DRIVER_CompleteDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt16 endy)
@@ -851,7 +852,7 @@ void GFX_DRIVER_SetupDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt1
 *
 * Side Effects: none
 ********************************************************************/
-void GFX_DRIVER_CompleteDrawUpdate(UInt16 startx, UInt16 starty, UInt16 endx, UInt16 endy)
+void GFX_DRIVER_CompleteDrawUpdate(WORD startx, WORD starty, WORD endx, WORD endy);
 #endif
 
 #endif

@@ -54,10 +54,8 @@
     #include <plib.h>
 #endif
 
-//#define DEBUG_MODE
-#ifdef DEBUG_MODE
-    #include "uart2.h"
-#endif
+#include "uart2.h"
+
 
 /** CONFIGURATION **************************************************/
 #if defined(EXPLORER_16)
@@ -383,7 +381,7 @@ void InitializeSystem(void)
 
     if (USBOTGCurrentRoleIs()== ROLE_DEVICE)
     {
-        #if defined(__C30__)
+        #if defined(__C30__) || defined __XC16__
             AD1PCFGL = 0xFFFF;
         #endif
         
@@ -433,7 +431,7 @@ void InitializeSystem(void)
 
     else if (USBOTGCurrentRoleIs() == ROLE_HOST)
     {
-        #if defined(__C30__)
+        #if defined(__C30__) || defined __XC16__
             // Init LEDs
             mInitAllLEDs();
             mLED_9_Off();
@@ -512,7 +510,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;
@@ -896,7 +894,7 @@ BOOL USB_ApplicationEventHandler ( BYTE address, USB_EVENT event, void *data, DW
     #endif
 
     // Handle specific events.
-    switch (event)
+    switch ( (int)event )
     {
         case EVENT_GENERIC_ATTACH:
             if (size == sizeof(GENERIC_DEVICE_ID))
@@ -1004,7 +1002,7 @@ BOOL USB_ApplicationEventHandler ( BYTE address, USB_EVENT event, void *data, DW
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch( (int)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

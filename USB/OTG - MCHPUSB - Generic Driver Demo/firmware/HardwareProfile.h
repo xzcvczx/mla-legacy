@@ -78,7 +78,7 @@
  #define mLED_9_Off()        mLED_9  = 0;
  #define mLED_10_Off()       mLED_10 = 0;
 
-#if defined (__C30__)
+#if defined (__C30__) || defined __XC16__
     // Various clock values
     #define GetSystemClock()            32000000UL
     #define GetPeripheralClock()        (GetSystemClock())
@@ -109,7 +109,7 @@
 
 
 #if !defined(DEMO_BOARD)
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         #if defined(__PIC24FJ256GB110__)
             #define DEMO_BOARD PIC24FJ256GB110_PIM
             #define EXPLORER_16

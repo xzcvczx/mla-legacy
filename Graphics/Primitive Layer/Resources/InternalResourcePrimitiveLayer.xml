@@ -53,7 +53,7 @@
 <Font_Files>
 <Font_File_Resource>
 <label>Font25</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <size>21</size>
 <height>25</height>
@@ -64,7 +64,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>Font35</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <size>29</size>
 <height>35</height>
@@ -75,7 +75,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>Font35_Antialiased</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <size>29</size>
 <height>35</height>

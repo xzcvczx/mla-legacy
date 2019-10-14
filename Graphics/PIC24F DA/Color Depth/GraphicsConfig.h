@@ -10,7 +10,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright ï¿½ 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -20,7 +20,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -144,7 +144,25 @@
 *           included file.
 *
 *********************************************************************/
+#ifndef CFG_INCLUDE_MPLAB_X
 #define COLOR_DEPTH 8 // change to 8, 4 or 1 
+#else
+
+#if defined (CFG_INCLUDE_REMOTECONTROL_8BPP_INTERNAL_QVGA) || defined (CFG_INCLUDE_DA210_BRD_16PMP_8BPP_INTERNAL_QVGAv1) ||  \
+    defined (CFG_INCLUDE_DA210_BRD_16PMP_8BPP_WQVGAv1) || defined (CFG_INCLUDE_DA210_BRD_16PMP_8BPP_INTERNAL_IPU_QVGAv1) ||  \
+    defined (CFG_INCLUDE_DA210_BRD_16PMP_8BPP_IPU_WQVGAv1)
+        #define COLOR_DEPTH 8
+#elif defined (CFG_INCLUDE_REMOTECONTROL_4BPP_INTERNAL_QVGA) || defined (CFG_INCLUDE_DA210_BRD_16PMP_4BPP_INTERNAL_QVGAv1) || \
+      defined (CFG_INCLUDE_DA210_BRD_16PMP_4BPP_INTERNAL_WQVGAv1) || defined (CFG_INCLUDE_DA210_BRD_16PMP_4BPP_INTERNAL_IPU_QVGAv1) || \
+      defined (CFG_INCLUDE_DA210_BRD_16PMP_4BPP_INTERNAL_IPU_WQVGAv1)
+        #define COLOR_DEPTH 4
+#elif defined (CFG_INCLUDE_REMOTECONTROL_1BPP_INTERNAL_QVGA) || defined (CFG_INCLUDE_DA210_BRD_16PMP_1BPP_INTERNAL_QVGAv1) || \
+      defined (CFG_INCLUDE_DA210_BRD_16PMP_1BPP_INTERNAL_WQVGAv1) || defined (CFG_INCLUDE_DA210_BRD_16PMP_1BPP_INTERNAL_IPU_QVGAv1) || \
+      defined (CFG_INCLUDE_DA210_BRD_16PMP_1BPP_INTERNAL_IPU_WQVGAv1)
+        #define COLOR_DEPTH 1
+#endif
+
+#endif
 
 /*********************************************************************
 * Overview: Specifies the default font to be used is the user defined
@@ -165,8 +183,17 @@
 *           Define this in GraphicsConfig.h
 *
 *********************************************************************/
+#ifndef CFG_INCLUDE_MPLAB_X
 //#define USE_COMP_IPU
+#else
 
+#if defined (CFG_INCLUDE_DA210_BRD_16PMP_8BPP_INTERNAL_IPU_QVGAv1) || defined (CFG_INCLUDE_DA210_BRD_16PMP_4BPP_INTERNAL_IPU_QVGAv1) || \
+    defined (CFG_INCLUDE_DA210_BRD_16PMP_1BPP_INTERNAL_IPU_QVGAv1) || defined (CFG_INCLUDE_DA210_BRD_16PMP_8BPP_IPU_WQVGAv1) || \
+    defined (CFG_INCLUDE_DA210_BRD_16PMP_4BPP_INTERNAL_IPU_WQVGAv1) || defined (CFG_INCLUDE_DA210_BRD_16PMP_1BPP_INTERNAL_IPU_WQVGAv1)
+#define USE_COMP_IPU
+#endif
+
+#endif
 /*********************************************************************
 * Overview: Specifies the colors used in different color depths.
 *           BRIGHTRED is requires by the Resistive Touchscreen driver.

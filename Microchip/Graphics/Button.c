@@ -12,7 +12,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2008 Microchip Technology Inc.  All rights reserved.
+ * Copyright ï¿½ 2008 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -22,7 +22,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -47,6 +47,7 @@
  *              bitmaps that is of the same size or larger than the button
  *              dimension to skip drawing of the panel. 
  * 04/20/11     Fixed KEYBOARD bug on object ID and GOL_MSG param1 comparison.
+ * 06/11/12     Added Alpha Blending features.
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
@@ -111,21 +112,31 @@ BUTTON *BtnCreate
 	    BtnSetText(pB, pText);
     }
 
-	#ifdef USE_ALPHABLEND
-	if(pB->hdr.pGolScheme->AlphaValue > 0) 						     
-			CopyPageWindow(_GFXDestinationPage, 
-					   _GFXBackgroundPage, 
-                       pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top,
-					   pB->hdr.right - pB->hdr.left, 
-					   pB->hdr.bottom - pB->hdr.top);
-	#endif
+#ifdef USE_ALPHABLEND_LITE
+    pB->previousAlphaColor = BLACK;
+#endif
+
+#ifdef USE_ALPHABLEND                //Store the background image
+if(pB->hdr.pGolScheme->AlphaValue != 100) 
+{
+    CopyPageWindow(_GFXActivePage, 
+		       _GFXBackgroundPage,
+                   pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top, 
+		       pB->hdr.right - pB->hdr.left, 
+		       pB->hdr.bottom - pB->hdr.top);	             									            
+}
+#endif
+
 
     GOLAddObject((OBJ_HEADER *)pB);
 
-        #ifdef USE_FOCUS
+#ifdef USE_FOCUS
+// focus and alpha blend cannot be used together    
+#ifndef USE_ALPHABLEND_LITE
     if(GetState(pB, BTN_FOCUSED))
         GOLSetFocus((OBJ_HEADER *)pB);
-        #endif
+#endif
+#endif
     return (pB);
 }
 
@@ -199,7 +210,8 @@ void BtnMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
 
     pB = (BUTTON *)pObj;
 
-        #ifdef USE_FOCUS
+#ifdef USE_FOCUS  
+    #ifndef USE_ALPHABLEND_LITE
             #ifdef USE_TOUCHSCREEN
     if(pMsg->type == TYPE_TOUCHSCREEN)
     {
@@ -210,7 +222,8 @@ void BtnMsgDefault(WORD translatedMsg, void *pObj, GOL_MSG *pMsg)
     }
 
             #endif
-        #endif
+    #endif
+#endif
     switch(translatedMsg)
     {
         case BTN_MSG_PRESSED:
@@ -372,8 +385,10 @@ inline WORD __attribute__((always_inline)) DrawButtonFocus(BUTTON *button, SHORT
     
     *current_state = FOCUS_DRAW;
 
+#ifdef USE_NONBLOCKING_CONFIG
     if(IsDeviceBusy()) 
         return (0);
+#endif
 
     if(GetState(button, BTN_FOCUSED))
     {
@@ -428,16 +443,14 @@ inline WORD __attribute__((always_inline)) DrawButtonFocus(BUTTON *button, SHORT
     }
 
 	#ifdef USE_ALPHABLEND
-    if(button->hdr.pGolScheme->AlphaValue > 0) 
+    if(button->hdr.pGolScheme->AlphaValue != 100) 
     {
-		AlphaBlendWindow(GFXGetPageXYAddress(_GFXForegroundPage, button->hdr.left, button->hdr.top),
-						 GFXGetPageXYAddress(_GFXBackgroundPage, button->hdr.left, button->hdr.top),
-						 GFXGetPageXYAddress(_GFXDestinationPage, button->hdr.left, button->hdr.top),
+		AlphaBlendWindow(_GFXActivePage, button->hdr.left, button->hdr.top,
+						 _GFXBackgroundPage, button->hdr.left, button->hdr.top,
+						 _GFXActivePage, button->hdr.left, button->hdr.top,
 					     button->hdr.right - button->hdr.left, 
 					     button->hdr.bottom - button->hdr.top,  	
-					     button->hdr.pGolScheme->AlphaValue);
-		SetActivePage(_GFXDestinationPage);	
-	    			
+					     button->hdr.pGolScheme->AlphaValue);			
 	}  
 	#endif
 
@@ -445,7 +458,7 @@ inline WORD __attribute__((always_inline)) DrawButtonFocus(BUTTON *button, SHORT
     return 1;
 }
 /*********************************************************************
-* Function: WORD BtnDraw(void *pObj)
+* Function: inline void __attribute__((always_inline)) SetButtonTextPosition(BUTTON *button, XCHAR *pCurLine, SHORT lineCtr)
 ********************************************************************/
 #ifdef USE_BUTTON_MULTI_LINE
 inline void __attribute__((always_inline)) SetButtonTextPosition(BUTTON *button, XCHAR *pCurLine, SHORT lineCtr)
@@ -511,7 +524,8 @@ WORD BtnDraw(void *pObj)
     #else
     WORD xText, yText;
     #endif
-    WORD faceClr, embossLtClr, embossDkClr;
+    GFX_COLOR embossLtClr, embossDkClr;
+    static GFX_COLOR faceClr;
     BUTTON *pB;
     
     pB = (BUTTON *)pObj;
@@ -535,11 +549,11 @@ WORD BtnDraw(void *pObj)
             {                       // Hide the button (remove from screen)
 
 				#ifdef USE_ALPHABLEND
-				if(pB->hdr.pGolScheme->AlphaValue > 0)
+				if(pB->hdr.pGolScheme->AlphaValue != 100)
            		{
 					  
 					CopyPageWindow(_GFXBackgroundPage, 
-							   _GFXDestinationPage,
+							   _GFXActivePage,
                                pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top, 
 							   pB->hdr.right - pB->hdr.left, 
 							   pB->hdr.bottom - pB->hdr.top);
@@ -599,17 +613,13 @@ WORD BtnDraw(void *pObj)
                 }
 
 			    #ifdef USE_ALPHABLEND
-			    if(pB->hdr.pGolScheme->AlphaValue > 0) 
+			    if(pB->hdr.pGolScheme->AlphaValue != 100) 
                 {
-                      
-
-				    CopyPageWindow(_GFXBackgroundPage, 
-						       _GFXForegroundPage, 
-                               pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top,
-						       pB->hdr.right - pB->hdr.left, 
-						       pB->hdr.bottom - pB->hdr.top);	             
-        							
-				    SetActivePage(_GFXForegroundPage);			            
+                      CopyPageWindow(_GFXBackgroundPage, 
+							   _GFXActivePage,
+                               pB->hdr.left, pB->hdr.top,pB->hdr.left, pB->hdr.top, 
+							   pB->hdr.right - pB->hdr.left, 
+							   pB->hdr.bottom - pB->hdr.top);	             									            
 			    }
 			    #endif
 
@@ -617,7 +627,12 @@ WORD BtnDraw(void *pObj)
                 SetLineType(SOLID_LINE);
 
                 #ifdef USE_GRADIENT
-                GOLGradientPanelDraw(pB->hdr.pGolScheme);                
+                SetGOLPanelGradient(pB->hdr.pGolScheme);                
+                #endif
+
+                #ifdef USE_ALPHABLEND_LITE
+                SetPrevAlphaColor(pB->previousAlphaColor); 
+                SetGOLPanelAlpha(pB->hdr.pGolScheme->AlphaValue);
                 #endif
 
                 GOLPanelDraw
@@ -670,8 +685,13 @@ WORD BtnDraw(void *pObj)
 		            if(!GOLPanelDrawTsk())
 		            {
 		                return (0);
-		            }									
+		            }
+                    //while(!GOLPanelDrawTsk());    									
 				}
+
+                #ifdef USE_ALPHABLEND_LITE
+                pB->previousAlphaColor = faceClr;
+                #endif
 			}
 
             #ifdef USE_BUTTON_MULTI_LINE

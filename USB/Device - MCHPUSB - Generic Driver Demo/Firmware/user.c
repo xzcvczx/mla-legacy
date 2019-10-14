@@ -1,34 +1,32 @@
 /********************************************************************
  FileName:		user.c
- Dependencies:	See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing the
- 				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
- * Company:         Microchip Technology, Inc.
- *
- * Software License Agreement
+ Dependencies:  See INCLUDES section
+ Processor:     PIC18, PIC24, and PIC32 USB Microcontrollers
+ Hardware:      This demo is natively intended to be used on Microchip USB demo
+                boards supported by the MCHPFSUSB stack.  See release notes for
+                support matrix.  This demo can be modified for use on other hardware
+                platforms.
+ Complier:      Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
+ Company:       Microchip Technology, Inc.
+
+ Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PICï¿½ Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
- * Any use in violation of the foregoing restrictions may subject the
- * user to criminal sanctions under applicable laws, as well as to
- * civil liability for the breach of the terms and conditions of this
- * license.
- *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
- * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
- * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
- * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
+ Any use in violation of the foregoing restrictions may subject the
+ user to criminal sanctions under applicable laws, as well as to
+ civil liability for the breach of the terms and conditions of this
+ license.
+
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
+ WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
+ TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
+ IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
 ********************************************************************
@@ -39,6 +37,7 @@
   1.0   11/19/2004   Initial release
   2.1   02/26/2007   Updated for simplicity and to use common
                      coding style
+  2.9f  05/14/2012   Update to add PIC18F97J94/PIC18F87J94 support.                   
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -59,20 +58,61 @@ BYTE trf_state;
 BYTE temp_mode;
 
 #if defined(__18CXX)
+    #pragma udata
+
+    //The INPacket[] and OUTPacket[] arrays are used as
+    //USB packet buffers in this firmware.  Therefore, they must be located in
+    //a USB module accessible portion of microcontroller RAM.
     #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
         #pragma udata usbram2
     #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
-        || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)
+        || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)\
+        || defined(__18LF24K50) || defined(__18F24K50) || defined(__18LF25K50)\
+        || defined(__18F25K50) || defined(__18LF45K50) || defined(__18F45K50)
         #pragma udata USB_VARIABLES=0x500
     #elif defined(__18F4450) || defined(__18F2450)
         #pragma udata USB_VARIABLES=0x480
     #else
         #pragma udata
-   #endif
+    #endif
 #endif
 
-DATA_PACKET INPacket;
-DATA_PACKET OUTPacket;
+#if defined(__XC8)
+    #if defined(_18F14K50) || defined(_18F13K50) || defined(_18LF14K50) || defined(_18LF13K50)
+        #define IN_DATA_BUFFER_ADDRESS 0x260
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + USBGEN_EP_SIZE)
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #elif  defined(_18F2455)   || defined(_18F2550)   || defined(_18F4455)  || defined(_18F4550)\
+        || defined(_18F2458)   || defined(_18F2453)   || defined(_18F4558)  || defined(_18F4553)\
+        || defined(_18LF24K50) || defined(_18F24K50)  || defined(_18LF25K50)\
+        || defined(_18F25K50)  || defined(_18LF45K50) || defined(_18F45K50)
+        #define IN_DATA_BUFFER_ADDRESS 0x500
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + USBGEN_EP_SIZE)
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #elif defined(_18F4450) || defined(_18F2450)
+        #define IN_DATA_BUFFER_ADDRESS 0x480
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + USBGEN_EP_SIZE)
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #elif defined(_16F1459)
+        #define IN_DATA_BUFFER_ADDRESS 0x2140
+        #define OUT_DATA_BUFFER_ADDRESS 0x2190
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #else
+        #define IN_DATA_BUFFER_ADDRESS_TAG
+        #define OUT_DATA_BUFFER_ADDRESS_TAG
+    #endif
+#else
+    #define IN_DATA_BUFFER_ADDRESS_TAG
+    #define OUT_DATA_BUFFER_ADDRESS_TAG
+#endif
+
+DATA_PACKET INPacket IN_DATA_BUFFER_ADDRESS_TAG;    //USB packet buffer.  Must be located in USB module accessible portion of RAM.
+DATA_PACKET OUTPacket OUT_DATA_BUFFER_ADDRESS_TAG;   //USB packet buffer.  Must be located in USB module accessible portion of RAM.
+
 #if defined(__18CXX)
     #pragma udata
 #endif
@@ -82,8 +122,8 @@ BYTE pTemp;                     // Pointer to current logging position, will
 BYTE valid_temp;                // Keeps count of the valid data points
 WORD temp_data[30];             // 30 points of data
 
-USB_HANDLE USBGenericOutHandle;
-USB_HANDLE USBGenericInHandle;
+USB_HANDLE USBGenericOutHandle; // Must be initialized to 0 at startup
+USB_HANDLE USBGenericInHandle;  // Must be initialized to 0 at startup
 BOOL blinkStatusValid;
 
 // Timer0 - 1 second interval setup.
@@ -123,7 +163,7 @@ void UserInit(void)
     /* Init Timer0 for data logging interval (every 1 second) */
     T0CON = 0b10010111;
     /* Timer0 is already enabled by default */
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
     #endif
 
     USBGenericInHandle = 0;
@@ -238,16 +278,26 @@ WORD_VAL ReadPOT(void)
 {
     WORD_VAL w;
 
-    #if defined(__18CXX)
-        mInitPOT();
-
-        ADCON0bits.GO = 1;              // Start AD conversion
-        while(ADCON0bits.NOT_DONE);     // Wait for conversion
-
-        w.v[0] = ADRESL;
-        w.v[1] = ADRESH;
-
-    #elif defined(__C30__) || defined(__C32__)
+    #if defined(__18CXX) || defined(__XC8)
+        #if defined(PIC18F97J94_PIM) 
+            ADCON1Hbits.MODE12 = 0;         // PC application expects 10-bit result
+            ADCHS0L = 0x03;                 // AN3 has potentiometer on LCD Explorer 3
+            ADCON1Lbits.SAMP = 1;           // Start AD sampling/convert sequence
+            while(ADCON1Lbits.DONE == 0);   // Wait for result complete
+            w.Val = ADCBUF3;
+        #elif defined(PIC18F87J94_PIM)
+            ADCON1Hbits.MODE12 = 0;         // PC application expects 10-bit result
+            ADCHS0L = 0x00;                 // AN0 has potentiometer on PIC18 Explorer
+            ADCON1Lbits.SAMP = 1;           // Start AD sampling/convert sequence
+            while(ADCON1Lbits.DONE == 0);   // Wait for result complete
+            w.Val = ADCBUF0;
+        #else
+            ADCON0bits.GO = 1;              // Start AD conversion
+            while(ADCON0bits.GO);     // Wait for conversion
+            w.v[0] = ADRESL;
+            w.v[1] = ADRESH;
+        #endif
+    #elif defined(__C30__) || defined(__C32__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD) || defined(PIC24FJ256GB210_PIM)
             AD1CHS = 0x5;           //MUXA uses AN5
 
@@ -476,7 +526,6 @@ void ServiceRequests(void)
                 break;
                 
             default:
-                Nop();
                 break;
         }//end switch()
         if(counter != 0)

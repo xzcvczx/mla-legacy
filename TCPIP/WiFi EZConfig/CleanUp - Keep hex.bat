@@ -44,9 +44,9 @@ del "Makefile" /f /q
 del "a.out" /f /q
 rmdir "TempOBJ" /s /q
 rmdir "Obj-WiFi EasyConfig-C18-PICDN2_MRF24WB" /s /q
-rmdir "Obj-WiFi EasyConfig-C30-EX16_MRF24WB" /s /q
-rmdir "Obj-WiFi EasyConfig-C30-DA210_BRD_MRF24WB" /s /q
-rmdir "Obj-WiFi EasyConfig-C32-EX16_MRF24WB" /s /q
+rmdir "Obj-WiFi EasyConfig-XC16-EX16_MRF24WB" /s /q
+rmdir "Obj-WiFi EasyConfig-XC16-DA210_BRD_MRF24WB" /s /q
+rmdir "Obj-WiFi EasyConfig-XC32-EX16_MRF24WB" /s /q
 
 
 IF %1==deletesvn (

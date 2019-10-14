@@ -47,7 +47,7 @@
     #include "UART.h"
     #include "SST39LF400.h"    
     #include "FlashProgrammer.h"   
-    #include "InternalResourceC30.h"    
+    #include "InternalResourceXC16.h"
     #include "ExternalResource.h"    
     #include "TouchScreen.h"
     #include "Potentiometer.h"

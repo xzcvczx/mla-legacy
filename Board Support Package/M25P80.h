@@ -41,8 +41,8 @@
  * 05/11/11     - Updated this file to support both SST25VF016 and M25P80 families
  *              - Although the file name is still specific for M25P80
  *****************************************************************************/
-#ifndef _SST25VF016_H
-#define _SST25VF016_H
+#ifndef _M25P80_H
+#define _M25P80_H
 
 /************************************************************************
  * Section:  Includes                                                       
@@ -218,4 +218,4 @@ void    SST25ResetWriteProtection(void);
 *                                                                       
 ************************************************************************/
 void    SST25SectorErase(DWORD address);
-#endif //_SST25VF016_H
+#endif //_M25P80_H

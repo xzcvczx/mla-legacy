@@ -96,16 +96,15 @@ file_068=Board Support Package
 file_069=Board Support Package
 file_070=Board Support Package
 file_071=Common
-file_072=.
-file_073=Display Driver
-file_074=Graphics
+file_072=Display Driver
+file_073=Graphics
+file_074=Board Support Package
 file_075=Board Support Package
-file_076=Board Support Package
+file_076=Display Driver
 file_077=Display Driver
-file_078=Display Driver
+file_078=.
 file_079=.
 file_080=.
-file_081=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -188,7 +187,6 @@ file_077=no
 file_078=no
 file_079=no
 file_080=no
-file_081=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -269,11 +267,10 @@ file_075=no
 file_076=no
 file_077=no
 file_078=no
-file_079=no
+file_079=yes
 file_080=yes
-file_081=yes
 [FILE_INFO]
-file_000=InternalResourceC30.c
+file_000=InternalResourceXC16.c
 file_001=CustomControlDemo.c
 file_002=SideButtons.c
 file_003=MainDemo.c
@@ -345,24 +342,24 @@ file_068=..\..\Board Support Package\Beep.h
 file_069=..\..\Board Support Package\SST25VF016.h
 file_070=..\..\Board Support Package\drv_spi.h
 file_071=..\..\Microchip\Include\TimeDelay.h
-file_072=PaletteColorDefines.h
-file_073=..\..\Microchip\Include\Graphics\mchpGfxDrv.h
-file_074=..\..\Microchip\Include\Graphics\gfxcolors.h
-file_075=..\..\Board Support Package\TouchScreen.h
-file_076=..\..\Board Support Package\Potentiometer.h
-file_077=..\..\Microchip\Include\Graphics\gfxtcon.h
-file_078=..\..\Microchip\Include\Graphics\gfxepmp.h
-file_079=InternalResourceC30.h
-file_080=Getting Started - Running the Graphics Object Layer Palette Demo.htm
-file_081=Getting Started - Loading a precompiled demo.htm
+file_072=..\..\Microchip\Include\Graphics\mchpGfxDrv.h
+file_073=..\..\Microchip\Include\Graphics\gfxcolors.h
+file_074=..\..\Board Support Package\TouchScreen.h
+file_075=..\..\Board Support Package\Potentiometer.h
+file_076=..\..\Microchip\Include\Graphics\gfxtcon.h
+file_077=..\..\Microchip\Include\Graphics\gfxepmp.h
+file_078=InternalResourceXC16.h
+file_079=Getting Started - Running the Graphics Object Layer Palette Demo.htm
+file_080=Getting Started - Loading a precompiled demo.htm
 [SUITE_INFO]
-suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+suite_guid={9BCCB495-CD65-480A-BA76-63D8E78B117F}
 suite_state=
 [TOOL_SETTINGS]
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -Os
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=3000 -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}=-g -Wall -mlarge-code -mlarge-data -Os -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}=--heap=2000 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}=
 [INSTRUMENTED_TRACE]
 enable=0
 transport=2

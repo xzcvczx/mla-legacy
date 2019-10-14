@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FileName:        ExternalResource.c
  * Processor:       PIC24F, PIC24H, dsPIC
- * Compiler:        MPLAB C30 (see release notes for tested revision)
- * Linker:          MPLAB LINK30
+ * Compiler:        MPLAB C30/XC16 (see release notes for tested revision)
+ * Linker:          MPLAB LINK30/XC16
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.17.47
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.28.15
  *****************************************************************************/
 
 /*****************************************************************************
@@ -43,9 +43,10 @@
 /*****************************************************************************
  * SECTION:  Graphics Library Firmware Check
  *****************************************************************************/
-#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
-#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#if(GRAPHICS_LIBRARY_VERSION != 0x0306)
+#warning "It is suggested to use Graphics Library version 3.06 with this version of GRC."
 #endif
+
 
 /*****************************************************************************
  * SECTION:  BITMAPS
@@ -56,7 +57,7 @@
  * Label: icon5
  * Description:  50x50 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon5 = 
+const IMAGE_EXTERNAL icon5 = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -67,7 +68,7 @@ IMAGE_EXTERNAL icon5 =
  * Label: icon5_large
  * Description:  70x70 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon5_large = 
+const IMAGE_EXTERNAL icon5_large = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -78,7 +79,7 @@ IMAGE_EXTERNAL icon5_large =
  * Label: icon6
  * Description:  50x50 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon6 = 
+const IMAGE_EXTERNAL icon6 = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -89,7 +90,7 @@ IMAGE_EXTERNAL icon6 =
  * Label: icon6_large
  * Description:  70x70 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon6_large = 
+const IMAGE_EXTERNAL icon6_large = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -100,7 +101,7 @@ IMAGE_EXTERNAL icon6_large =
  * Label: icon1
  * Description:  50x50 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon1 = 
+const IMAGE_EXTERNAL icon1 = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -111,7 +112,7 @@ IMAGE_EXTERNAL icon1 =
  * Label: icon1_large
  * Description:  70x70 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon1_large = 
+const IMAGE_EXTERNAL icon1_large = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -122,7 +123,7 @@ IMAGE_EXTERNAL icon1_large =
  * Label: icon2
  * Description:  50x50 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon2 = 
+const IMAGE_EXTERNAL icon2 = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -133,7 +134,7 @@ IMAGE_EXTERNAL icon2 =
  * Label: icon2_large
  * Description:  70x70 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon2_large = 
+const IMAGE_EXTERNAL icon2_large = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -144,7 +145,7 @@ IMAGE_EXTERNAL icon2_large =
  * Label: icon3
  * Description:  50x50 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon3 = 
+const IMAGE_EXTERNAL icon3 = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -155,7 +156,7 @@ IMAGE_EXTERNAL icon3 =
  * Label: icon3_large
  * Description:  70x70 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon3_large = 
+const IMAGE_EXTERNAL icon3_large = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -166,7 +167,7 @@ IMAGE_EXTERNAL icon3_large =
  * Label: icon4
  * Description:  50x50 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon4 = 
+const IMAGE_EXTERNAL icon4 = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,
@@ -177,7 +178,7 @@ IMAGE_EXTERNAL icon4 =
  * Label: icon4_large
  * Description:  70x70 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL icon4_large = 
+const IMAGE_EXTERNAL icon4_large = 
 {
     (EDS_EPMP | IMAGE_MBITMAP | COMP_NONE),
     0x0002,

@@ -34,10 +34,9 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Anton Alkhimenok
- * Paolo Tamayo         03/10/08    ...
+ * 03/10/08    ...
  *****************************************************************************/
 #include "MainDemo.h"
 #include "MainDemoStrings.h"
@@ -971,7 +970,7 @@ BOOL USB_ApplicationEventHandler(BYTE address, USB_EVENT event, void *data, DWOR
 ********************************************************************/
 void Init_CPUClocks(void)
 {
-    #if defined(__C30__)
+    #if defined(__C30__) || defined(__XC16__)
         #if defined(ENABLE_USB_MSD_DEMO)
 
     // set up USB clock source
@@ -1230,13 +1229,14 @@ void InitializeBoard(void)
     #elif defined(__PIC32MX__)
         INTEnableSystemMultiVectoredInt();
         SYSTEMConfigPerformance(GetSystemClock());
-        #ifdef MEB_BOARD
-            CPLDInitialize();
-            CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
-            CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
-        #endif // #ifdef MEB_BOARD
     #endif // #if defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__dsPIC33E__) || defined(__PIC24E__)
-    
+
+    #ifdef MEB_BOARD
+        CPLDInitialize();
+        CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+        CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+    #endif // #ifdef MEB_BOARD
+   
 
     #if defined (EXPLORER_16)
 /************************************************************************
@@ -1284,7 +1284,7 @@ void InitializeBoard(void)
        
 	#endif
 
-    // set the peripheral pin select for the PSI channel used
+    // set the peripheral pin select for the SPI channel used
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
         AD1PCFGL = 0xFFFF;
         RPOR9bits.RP18R = 11;                   // assign RP18 for SCK2

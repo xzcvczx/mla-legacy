@@ -56,7 +56,7 @@ extern BYTE backgroundScheme;
 /*****************************************************************************
  * SECTION: Variables
  *****************************************************************************/
-static BYTE scrollpage = 1;
+
 /************************************************************************
  Function: WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER* pObj, GOL_MSG* pMsg)
 
@@ -150,6 +150,8 @@ WORD GOLDrawCallback(void)
         	return PreLoadDrawScreens();
 
         case CREATE_MAIN:
+            GFX_DRIVER_HideLayer(1);
+            SwitchOnDoubleBuffering();  
             CreateMainScreen();
             screenState = DISPLAY_MAIN;                                 // switch to next state
             timeClock =0;
@@ -173,13 +175,14 @@ WORD GOLDrawCallback(void)
  
             return (1);     
                         
-        case CREATE_INFO:
-        	CreateInfo();
+        case CREATE_INFO:                     //Use PIP for this screen
+            SwitchOffDoubleBuffering();
+            GFX_DRIVER_CreateLayer(1,1,164,0,GetMaxX()-164,GetMaxY());
+            GFX_DRIVER_LayerStartAddress(1,6,160,0);
+            GFX_DRIVER_ShowLayer(1);
+        	CreateInfo(1);
             screenState = DISPLAY_INFO;     // switch to next state
             return (1);                                                
-
-        case DISPLAY_INFO:           
-            return(1); 
 
   #ifndef __PIC32MX                       
  
@@ -195,6 +198,8 @@ WORD GOLDrawCallback(void)
             return (1);
   #endif
         case CREATE_PERFORMANCE:
+            GFX_DRIVER_HideLayer(1); 
+            SwitchOnDoubleBuffering(); 
             CreatePerformanceScreen();                                       // create window and radio buttons
             screenState = DISPLAY_PERFORMANCE;                         // switch to next state
             return (1);                                                 // draw objects created
@@ -208,42 +213,27 @@ WORD GOLDrawCallback(void)
             screenState = DISPLAY_24BPPCOLOR;                        // switch to next state
             return (1);                                                 // draw objects created
 
-		case DISPLAY_24BPPCOLOR:
-            return (1);                                                 // draw objects created
-
 		case CREATE_SPEED:
 			CreateSpeed();
             screenState = DISPLAY_SPEED;                       // switch to next state
             return (1);                                                 // draw objects created
-
-		case DISPLAY_SPEED:
-            return (1); 		
-			           
+	           
         case CREATE_CONFIG:
+            GFX_DRIVER_HideLayer(1);
+            SwitchOnDoubleBuffering();  
             CreateConfigScreen();                                         // create window, group box, static text
             screenState = DISPLAY_CONFIG;                           // switch to next state
             return (1);                                                 // draw objects created
-
-        case DISPLAY_CONFIG:
-            return (1);                         // redraw objects if needed
 
         case CREATE_COMFORT:
             CreateComfortScreen();                     // create window and sliders
             screenState = DISPLAY_COMFORT;   // switch to next state
             return (1);                         // draw objects created
 
-        case DISPLAY_COMFORT:
-            return (1);                         // redraw objects if needed
-
         case CREATE_SCROLLING:           
-			AlphaBlendWindow(GFXGetPageXYAddress(scrollpage, 0, 0),
-							 GFXGetPageXYAddress(scrollpage, 0, 0),
-							 GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-						     GetMaxX(), 
-						     GetMaxY(),   	
-						     GFX_SchemeGetDefaultScheme()->AlphaValue);			     
-         
-
+            
+            GFX_DRIVER_HideLayer(1);    
+            SwitchOnDoubleBuffering();
             GFXTransition(0,0,GetMaxX(),GetMaxY(),
                        PUSH,GFXGetPageOriginAddress(2),GFXGetPageOriginAddress(0),
                        10,64,LEFT_TO_RIGHT);
@@ -261,11 +251,15 @@ WORD GOLDrawCallback(void)
                        PUSH,GFXGetPageOriginAddress(1),GFXGetPageOriginAddress(0),
                        10,40,BOTTOM_TO_TOP);
 
-            screenState = CREATE_MAIN;
-            return (1);                         // draw objects created
+            CopyPageWindow( 2, GetDrawBufferAddress(),       
+                           0, 0, 0, 0, 
+                        GetMaxX(), GetMaxY());
 
-        case DISPLAY_SCROLLING:
-            return (1);                         // redraw objects if needed
+            pAc=(ANALOGCLOCK *)GOLFindObject(MAIN_SCREEN_ID_ANALOG_CLOCK);
+            AcSetSecond(pAc,0);
+
+            screenState = DISPLAY_MAIN;
+            return (1);                         // draw objects created
 
         case CREATE_LIGHTING:
             CreateLightingScreen();
@@ -281,23 +275,25 @@ WORD GOLDrawCallback(void)
             screenState = DISPLAY_SECURITY;      // switch to next state
             return (1);                         // draw objects created
 
-        case DISPLAY_SECURITY:
-            return (1);                         // draw objects
-
         case CREATE_ENERGY:
             CreateEnergyScreen();                    // create list box test screen
             screenState = DISPLAY_ENERGY;      // switch to next state
             return (1);                         // draw objects created
-
-        case DISPLAY_ENERGY:
-            return (1);                         // draw objects
 
         case CREATE_GRADIENT:
             CreateGradientScreen();                  // create window
             screenState = DISPLAY_GRADIENT;   // switch to next state
             return (1);                         // draw objects created
 
+        case DISPLAY_SCROLLING:
+        case DISPLAY_SECURITY:
+        case DISPLAY_ENERGY:
         case DISPLAY_GRADIENT:
+        case DISPLAY_COMFORT:
+        case DISPLAY_SPEED:
+	    case DISPLAY_24BPPCOLOR:
+        case DISPLAY_CONFIG:
+        case DISPLAY_INFO:
             return (1);                         // redraw objects if needed
 
         case DISPLAY_ALPHABLEND:

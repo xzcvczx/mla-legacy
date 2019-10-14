@@ -11,7 +11,7 @@
 <Font_Files>
 <Font_File_Resource>
 <label>DroidSansMono_11</label>
-<path>Fonts/Droid_Sans_Mono/DroidSansMono.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/Droid_Sans/DroidSansMono.ttf</path>
 <name>Droid Sans Mono</name>
 <size>11</size>
 <height>15</height>
@@ -22,7 +22,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>DroidSansMono_22</label>
-<path>Fonts/Droid_Sans_Mono/DroidSansMono.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/Droid_Sans/DroidSansMono.ttf</path>
 <name>Droid Sans Mono</name>
 <size>22</size>
 <height>30</height>
@@ -33,7 +33,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>DroidSans_18</label>
-<path>Fonts/Droid_Sans/DroidSans.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/Droid_Sans/DroidSans.ttf</path>
 <name>Droid Sans</name>
 <size>18</size>
 <height>22</height>
@@ -44,7 +44,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>DroidSans_Bold_14</label>
-<path>Fonts/Droid_Sans/DroidSans-Bold.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/Droid_Sans/DroidSans-Bold.ttf</path>
 <name>Droid Sans</name>
 <size>14</size>
 <height>17</height>
@@ -55,7 +55,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>DroidSansMono_36</label>
-<path>Fonts/Droid_Sans_Mono/DroidSansMono.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/Droid_Sans/DroidSansMono.ttf</path>
 <name>Droid Sans Mono</name>
 <size>36</size>
 <height>48</height>

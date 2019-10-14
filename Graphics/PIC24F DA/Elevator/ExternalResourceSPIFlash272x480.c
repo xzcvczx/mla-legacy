@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FileName:        ExternalResourceSPIFlash272x480.c
  * Processor:       PIC24F, PIC24H, dsPIC
- * Compiler:        MPLAB C30 (see release notes for tested revision)
- * Linker:          MPLAB LINK30
+ * Compiler:        MPLAB C30/XC16 (see release notes for tested revision)
+ * Linker:          MPLAB LINK30/XC16
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.17.47
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.28.15
  *****************************************************************************/
 
 /*****************************************************************************
@@ -43,8 +43,15 @@
 /*****************************************************************************
  * SECTION:  Graphics Library Firmware Check
  *****************************************************************************/
-#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
-#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#if(GRAPHICS_LIBRARY_VERSION != 0x0306)
+#warning "It is suggested to use Graphics Library version 3.06 with this version of GRC."
+#endif
+
+/*****************************************************************************
+ * SECTION:  Graphics Bitmap Padding Check
+ *****************************************************************************/
+#ifdef USE_BITMAP_NO_PADDING_LINE
+#error These bitmap resources have been converted with padding of the horizontal lines, but USE_BITMAP_NO_PADDING_LINE is defined in GraphicsConfig.h.
 #endif
 
 /*****************************************************************************
@@ -104,7 +111,7 @@ const XCHAR strOpeningEng[] = {   0x0026, 0x0035, 0x002E, 0x0033, 0x0030, 0x0033
  * Label: Background272x480
  * Description:  272x480 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Background272x480 = 
+const IMAGE_EXTERNAL Background272x480 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -115,7 +122,7 @@ IMAGE_EXTERNAL Background272x480 =
  * Label: arrowUpComposite
  * Description:  100x230 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL arrowUpComposite = 
+const IMAGE_EXTERNAL arrowUpComposite = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -126,7 +133,7 @@ IMAGE_EXTERNAL arrowUpComposite =
  * Label: arrowDownComposite
  * Description:  100x230 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL arrowDownComposite = 
+const IMAGE_EXTERNAL arrowDownComposite = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -309,7 +316,7 @@ IMAGE_EXTERNAL arrowDownComposite =
  *  
  * ====================================================================== 
  ***********************************/
-FONT_EXTERNAL fireflysung_40 = 
+const FONT_EXTERNAL fireflysung_40 = 
 {
     (EXTERNAL | COMP_NONE),
     0x0000,

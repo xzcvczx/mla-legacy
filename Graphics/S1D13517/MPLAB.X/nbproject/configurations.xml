@@ -19,8 +19,8 @@
       <itemPath>../ExternalResource.h</itemPath>
       <itemPath>../GraphicsConfig.h</itemPath>
       <itemPath>../HardwareProfile.h</itemPath>
-      <itemPath>../InternalResourceC30.h</itemPath>
-      <itemPath>../InternalResourceC32.h</itemPath>
+      <itemPath>../InternalResourceXC16.h</itemPath>
+      <itemPath>../InternalResourceXC32.h</itemPath>
       <itemPath>../MainDemo.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
@@ -67,10 +67,16 @@
         <itemPath>../../../Microchip/Graphics/Transitions_weak.c</itemPath>
         <itemPath>../../../Microchip/Graphics/Drivers/gfxepmp.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="Image Decoder" projectFiles="true">
+        <itemPath>../JPEGImage.c</itemPath>
+        <itemPath>../../../Microchip/Image Decoders/ImageDecoder.c</itemPath>
+        <itemPath>../../../Microchip/Image Decoders/jidctint.c</itemPath>
+        <itemPath>../../../Microchip/Image Decoders/JpegDecoder.c</itemPath>
+      </logicalFolder>
       <logicalFolder name="Images" displayName="Images" projectFiles="true">
         <itemPath>../ExternalResource.c</itemPath>
-        <itemPath>../InternalResourceC30.c</itemPath>
-        <itemPath>../InternalResourceC32.c</itemPath>
+        <itemPath>../InternalResourceXC16.c</itemPath>
+        <itemPath>../InternalResourceXC32.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Screens" displayName="Screens" projectFiles="true">
         <itemPath>../alpha_blend_screen.c</itemPath>
@@ -107,8 +113,8 @@
         <targetDevice>PIC24FJ256GB210</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C30</languageToolchain>
-        <languageToolchainVersion>3_31</languageToolchainVersion>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -116,39 +122,43 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../../../Microchip/Graphics/AnalogClock.c"
             ex="false"
             overriding="true">
         <C30>
-          <property key="scalar-model" value="default"/>
-          <property key="extra-include-directories"
-                    value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-          <property key="preprocessor-macros"
-                    value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
+          <property key="code-model" value="large-code"/>
+          <property key="const-model" value="default"/>
           <property key="data-model" value="default"/>
           <property key="enable-all-warnings" value="false"/>
-          <property key="pre-instruction-scheduling" value="default"/>
-          <property key="enable-short-double" value="false"/>
-          <property key="enable-procedural-abstraction" value="false"/>
-          <property key="optimization-level" value="0"/>
+          <property key="enable-ansi-std" value="false"/>
           <property key="enable-ansi-warnings" value="false"/>
           <property key="enable-fatal-warnings" value="false"/>
-          <property key="post-instruction-scheduling" value="default"/>
           <property key="enable-omit-frame-pointer" value="false"/>
-          <property key="enable-ansi-std" value="false"/>
+          <property key="enable-procedural-abstraction" value="false"/>
+          <property key="enable-short-double" value="false"/>
           <property key="enable-unroll-loops" value="false"/>
-          <property key="const-model" value="default"/>
-          <property key="code-model" value="large-code"/>
+          <property key="extra-include-directories"
+                    value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
+          <property key="optimization-level" value="0"/>
+          <property key="post-instruction-scheduling" value="default"/>
+          <property key="pre-instruction-scheduling" value="default"/>
+          <property key="preprocessor-macros"
+                    value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
+          <property key="scalar-model" value="default"/>
         </C30>
         <C30-AS>
         </C30-AS>
@@ -157,7 +167,9 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../InternalResourceC32.c" ex="true" overriding="false">
+      <item path="../../../Microchip/Image Decoders/ImageDecoder.c"
+            ex="true"
+            overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -167,7 +179,51 @@
         <C30Global>
         </C30Global>
       </item>
-      <item path="../InternalResourceC32.h" ex="true" overriding="false">
+      <item path="../../../Microchip/Image Decoders/JpegDecoder.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/Image Decoders/jidctint.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceXC32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceXC32.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../JPEGImage.c" ex="true" overriding="false">
         <C30>
         </C30>
         <C30-AS>
@@ -178,82 +234,321 @@
         </C30Global>
       </item>
       <C30>
-        <property key="optimization-level" value="s"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
         <property key="code-model" value="large-code"/>
         <property key="const-model" value="default"/>
-        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="data-model" value="default"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
         <property key="enable-short-double" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="enable-unroll-loops" value="false"/>
         <property key="extra-include-directories"
                   value="../../Common;..;../../../Microchip/Include;../../../Board Support Package"/>
-        <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="enable-symbols" value="true"/>
-        <property key="data-model" value="default"/>
         <property key="isolate-each-function" value="false"/>
-        <property key="enable-fatal-warnings" value="false"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-ansi-std" value="false"/>
-        <property key="enable-all-warnings" value="true"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="s"/>
+        <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
-        <property key="enable-large-arrays" value="false"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
         <property key="scalar-model" value="default"/>
+        <appendMe value="-fno-ivopts"/>
       </C30>
       <C30-AS>
-        <property key="omit-debug-dirs" value="false"/>
-        <property key="extra-include-directories-for-assembler" value=".."/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="list-file" value=""/>
-        <property key="list-source" value="false"/>
-        <property key="list-assembly" value="false"/>
-        <property key="relax" value="false"/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
-        <property key="warning-level" value="emit-warnings"/>
-        <property key="list-section-info" value="false"/>
-        <property key="omit-forms" value="false"/>
-        <property key="list-symbols" value="false"/>
-        <property key="keep-locals" value="false"/>
-        <property key="false-conditionals" value="false"/>
-        <property key="expand-macros" value="false"/>
         <property key="assembler-symbols" value=""/>
+        <property key="expand-macros" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=".."/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="false-conditionals" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="relax" value="false"/>
+        <property key="warning-level" value="emit-warnings"/>
       </C30-AS>
       <C30-LD>
-        <property key="preprocessor-macros" value=""/>
-        <property key="general-code-protect" value="no_code_protect"/>
-        <property key="secure-write-protect" value="no_write_protect"/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
-        <property key="enable-pack-data" value="true"/>
         <property key="boot-eeprom" value="no_eeprom"/>
-        <property key="general-write-protect" value="no_write_protect"/>
-        <property key="enable-handles" value="true"/>
-        <property key="enable-data-init" value="true"/>
-        <property key="secure-flash" value="no_flash"/>
-        <property key="boot-write-protect" value="no_write_protect"/>
         <property key="boot-flash" value="no_flash"/>
-        <property key="report-memory-usage" value="true"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
-        <property key="secure-ram" value="no_ram"/>
-        <property key="enable-check-sections" value="true"/>
-        <property key="enable-default-isr" value="true"/>
-        <property key="symbol-stripping" value="keep-all"/>
         <property key="boot-ram" value="no_ram"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="true"/>
         <property key="secure-eeprom" value="no_eeprom"/>
-        <property key="extra-lib-directories"
-                  value="../../../../../../Program Files/Microchip/MPLAB C30/lib"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
       </C30-LD>
       <C30Global>
         <property key="fast-math" value="false"/>
-        <property key="output-file-format" value="elf"/>
+        <property key="generic-16-bit" value="false"/>
         <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
+      </C30Global>
+      <RealICEPlatformTool>
+      </RealICEPlatformTool>
+    </conf>
+    <conf name="PIC24_GB210_GFXv3e_EX16_16PMP_AR1020_VGA" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC24FJ256GB210</targetDevice>
+        <targetHeader></targetHeader>
+        <platformTool>RealICEPlatformTool</platformTool>
+        <languageToolchain>XC16</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <item path="../../../Microchip/Graphics/AnalogClock.c"
+            ex="false"
+            overriding="true">
+        <C30>
+          <property key="code-model" value="large-code"/>
+          <property key="const-model" value="default"/>
+          <property key="data-model" value="default"/>
+          <property key="enable-all-warnings" value="false"/>
+          <property key="enable-ansi-std" value="false"/>
+          <property key="enable-ansi-warnings" value="false"/>
+          <property key="enable-fatal-warnings" value="false"/>
+          <property key="enable-omit-frame-pointer" value="false"/>
+          <property key="enable-procedural-abstraction" value="false"/>
+          <property key="enable-short-double" value="false"/>
+          <property key="enable-unroll-loops" value="false"/>
+          <property key="extra-include-directories"
+                    value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
+          <property key="optimization-level" value="0"/>
+          <property key="post-instruction-scheduling" value="default"/>
+          <property key="pre-instruction-scheduling" value="default"/>
+          <property key="preprocessor-macros"
+                    value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
+          <property key="scalar-model" value="default"/>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/Image Decoders/ImageDecoder.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/Image Decoders/JpegDecoder.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../../../Microchip/Image Decoders/jidctint.c"
+            ex="true"
+            overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceXC32.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../InternalResourceXC32.h" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <item path="../JPEGImage.c" ex="true" overriding="false">
+        <C30>
+        </C30>
+        <C30-AS>
+        </C30-AS>
+        <C30-LD>
+        </C30-LD>
+        <C30Global>
+        </C30Global>
+      </item>
+      <C30>
+        <property key="code-model" value="large-code"/>
+        <property key="const-model" value="default"/>
+        <property key="data-model" value="default"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="enable-symbols" value="true"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="extra-include-directories"
+                  value="../../Common;..;../../../Microchip/Include;../../../Board Support Package"/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="oXC16gcc-align-arr" value="false"/>
+        <property key="oXC16gcc-cnsts-mauxflash" value="false"/>
+        <property key="oXC16gcc-data-sects" value="false"/>
+        <property key="oXC16gcc-errata" value=""/>
+        <property key="oXC16gcc-fillupper" value=""/>
+        <property key="oXC16gcc-large-aggregate" value="false"/>
+        <property key="oXC16gcc-mauxflash" value="false"/>
+        <property key="oXC16gcc-mpa-lvl" value=""/>
+        <property key="oXC16gcc-name-text-sec" value=""/>
+        <property key="oXC16gcc-near-chars" value="false"/>
+        <property key="oXC16gcc-no-isr-warn" value="false"/>
+        <property key="oXC16gcc-sfr-warn" value="false"/>
+        <property key="oXC16gcc-smar-io-lvl" value="1"/>
+        <property key="oXC16gcc-smart-io-fmt" value=""/>
+        <property key="optimization-level" value="s"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_AR1020_VGAv1"/>
+        <property key="scalar-model" value="default"/>
+        <appendMe value="-fno-ivopts"/>
+      </C30>
+      <C30-AS>
+        <property key="assembler-symbols" value=""/>
+        <property key="expand-macros" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=".."/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="false-conditionals" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="relax" value="false"/>
+        <property key="warning-level" value="emit-warnings"/>
+      </C30-AS>
+      <C30-LD>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="enable-check-sections" value="true"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="extra-lib-directories" value=""/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value="keep-all"/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="generic-16-bit" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="oXC16glb-macros" value=""/>
+        <property key="output-file-format" value="elf"/>
       </C30Global>
       <RealICEPlatformTool>
       </RealICEPlatformTool>
@@ -264,8 +559,8 @@
         <targetDevice>PIC32MX360F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -273,15 +568,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -293,7 +592,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -303,7 +602,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -314,47 +613,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_VGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_VGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -368,8 +667,8 @@
         <targetDevice>PIC32MX360F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -377,15 +676,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -397,7 +700,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -407,7 +710,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -418,47 +721,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_WVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_WVGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -472,8 +775,8 @@
         <targetDevice>PIC32MX360F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -481,15 +784,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -501,7 +808,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -511,7 +818,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -522,47 +829,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -576,8 +883,8 @@
         <targetDevice>PIC32MX360F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -585,15 +892,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -605,7 +916,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -615,7 +926,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -626,63 +937,63 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_WVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_WVGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
-        <property key="omit-debug-dirs" value="false"/>
-        <property key="extra-include-directories-for-assembler" value=""/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="list-file" value=""/>
-        <property key="list-source" value="false"/>
-        <property key="list-assembly" value="false"/>
-        <property key="warning-level" value=""/>
-        <property key="extra-include-directories-for-preprocessor" value=""/>
-        <property key="list-section-info" value="false"/>
-        <property key="omit-forms" value="false"/>
-        <property key="list-symbols" value="false"/>
-        <property key="keep-locals" value="false"/>
-        <property key="false-conditionals" value="false"/>
-        <property key="expand-macros" value="false"/>
         <property key="assembler-symbols" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="expand-macros" value="false"/>
+        <property key="extra-include-directories-for-assembler" value=""/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="false-conditionals" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-file" value=""/>
+        <property key="list-section-info" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="warning-level" value=""/>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -698,8 +1009,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -707,15 +1018,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -727,7 +1042,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -737,7 +1052,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -748,47 +1063,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_VGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_VGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -802,8 +1117,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -811,15 +1126,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -831,7 +1150,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -841,7 +1160,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -852,47 +1171,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_WVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_8PMP_WVGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -906,8 +1225,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -915,15 +1234,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -935,7 +1258,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -945,7 +1268,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -956,47 +1279,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_VGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -1010,8 +1333,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1019,15 +1342,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -1039,7 +1366,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1049,7 +1376,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1060,47 +1387,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_WVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="strict-ansi" value="false"/>
-        <property key="support-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_EX16_16PMP_WVGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -1114,8 +1441,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1123,15 +1450,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -1143,7 +1474,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1153,7 +1484,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1164,47 +1495,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_VGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_VGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -1220,8 +1551,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1229,15 +1560,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -1249,7 +1584,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1259,7 +1594,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1270,47 +1605,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_WVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_8PMP_WVGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -1326,8 +1661,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1335,15 +1670,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -1355,7 +1694,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1365,7 +1704,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1376,47 +1715,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_VGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_VGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>
@@ -1432,8 +1771,8 @@
         <targetDevice>PIC32MX795F512L</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>RealICEPlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -1441,15 +1780,19 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
-        <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
-        <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <item path="../ExternalResource.c" ex="true" overriding="false">
         <C32>
@@ -1461,7 +1804,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.c" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.c" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1471,7 +1814,7 @@
         <C32Global>
         </C32Global>
       </item>
-      <item path="../InternalResourceC30.h" ex="true" overriding="false">
+      <item path="../InternalResourceXC16.h" ex="true" overriding="false">
         <C32>
         </C32>
         <C32-AS>
@@ -1482,47 +1825,47 @@
         </C32Global>
       </item>
       <C32>
+        <property key="additional-warnings" value="true"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
                   value="..;../../common;../../../Board Support Package;../../../Microchip/Include"/>
-        <property key="additional-warnings" value="true"/>
-        <property key="preprocessor-macros"
-                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_WVGAv1"/>
-        <property key="exclude-floating-point" value="false"/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
-        <property key="pre-instruction-scheduling" value="default"/>
-        <property key="use-indirect-calls" value="false"/>
-        <property key="support-ansi" value="false"/>
-        <property key="strict-ansi" value="false"/>
         <property key="optimization-level" value="-Os"/>
         <property key="place-data-into-section" value="false"/>
         <property key="post-instruction-scheduling" value="default"/>
-        <property key="enable-omit-frame-pointer" value="false"/>
-        <property key="enable-unroll-loops" value="false"/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="isolate-each-function" value="false"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros"
+                  value="CFG_INCLUDE_MPLAB_X;CFG_INCLUDE_GFXv3e_PIC_SK_16PMP_WVGAv1"/>
+        <property key="strict-ansi" value="false"/>
+        <property key="support-ansi" value="false"/>
+        <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
       </C32-AS>
       <C32-LD>
-        <property key="exclude-floating-point-library" value="false"/>
-        <property key="optimization-level" value=""/>
-        <property key="generate-16-bit-code" value="false"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="warn-section-align" value="false"/>
-        <property key="heap-size" value="4000"/>
-        <property key="no-startup-files" value="false"/>
-        <property key="remove-unused-sections" value="false"/>
-        <property key="stack-size" value="4000"/>
-        <property key="linker-symbols" value=""/>
-        <property key="trace-symbols" value=""/>
-        <property key="map-file" value=""/>
-        <property key="exclude-standard-libraries" value="false"/>
-        <property key="report-memory-usage" value="false"/>
-        <property key="generate-cross-reference-file" value="false"/>
-        <property key="input-libraries" value=""/>
         <property key="enable-check-sections" value="false"/>
-        <property key="symbol-stripping" value=""/>
+        <property key="exclude-floating-point-library" value="false"/>
+        <property key="exclude-standard-libraries" value="false"/>
         <property key="extra-lib-directories" value=""/>
+        <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-cross-reference-file" value="false"/>
+        <property key="heap-size" value="4000"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value=""/>
+        <property key="no-startup-files" value="false"/>
+        <property key="optimization-level" value=""/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="false"/>
+        <property key="stack-size" value="4000"/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="false"/>
         <appendMe value="--report-mem &quot;-mperipheral-libs&quot;"/>
       </C32-LD>
       <C32Global>

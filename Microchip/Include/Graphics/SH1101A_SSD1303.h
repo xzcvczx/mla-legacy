@@ -54,36 +54,36 @@
 #endif
 
     #ifdef USE_16BIT_PMP
-        #error This driver doesn't support 16-bit PMP (remove USE_16BIT_PMP option from HardwareProfile.h)
+        #error "This driver do not support 16-bit PMP (remove USE_16BIT_PMP option from HardwareProfile.h)"
     #endif
     #ifndef DISP_HOR_RESOLUTION
-        #error DISP_HOR_RESOLUTION must be defined in HardwareProfile.h
+        #error "DISP_HOR_RESOLUTION must be defined in HardwareProfile.h"
     #endif
     #ifndef DISP_VER_RESOLUTION
-        #error DISP_VER_RESOLUTION must be defined in HardwareProfile.h
+        #error "DISP_VER_RESOLUTION must be defined in HardwareProfile.h"
     #endif
     #ifndef COLOR_DEPTH
-        #error COLOR_DEPTH must be defined in GraphicsConfig.h
+        #error "COLOR_DEPTH must be defined in GraphicsConfig.h"
     #endif
     #ifndef DISP_ORIENTATION
-        #error DISP_ORIENTATION must be defined in HardwareProfile.h
+        #error "DISP_ORIENTATION must be defined in HardwareProfile.h"
     #endif
 
 /*********************************************************************
 * Overview: Horizontal and vertical screen size.
 *********************************************************************/
     #if (DISP_HOR_RESOLUTION != 128)
-        #error This driver doesn't supports this resolution. Horisontal resolution must be 128 pixels.
+        #error "This driver do not support this resolution. Set horisontal resolution to 128 pixels."
     #endif
     #if (DISP_VER_RESOLUTION != 64)
-        #error This driver doesn't supports this resolution. Vertical resolution must be 64 pixels.
+        #error "This driver do not support this resolution. Set vertical resolution to 64 pixels."
     #endif
 
 /*********************************************************************
 * Overview: Display orientation.
 *********************************************************************/
     #if (DISP_ORIENTATION != 0)
-        #error This driver doesn't support this orientation.
+        #error "This driver do not support this orientation. Set the DISP_ORIENTATION to 0."
     #endif
 
 /*********************************************************************
@@ -92,12 +92,6 @@
 *********************************************************************/
     #define OFFSET  2
 
-/*********************************************************************
-* Overview: Clipping region control codes to be used with SetClip(...)
-*           function. 
-*********************************************************************/
-    #define CLIP_DISABLE    0   // Disables clipping.
-    #define CLIP_ENABLE     1   // Enables clipping.
 
 /*********************************************************************
 * Overview: Screen Saver parameters. 

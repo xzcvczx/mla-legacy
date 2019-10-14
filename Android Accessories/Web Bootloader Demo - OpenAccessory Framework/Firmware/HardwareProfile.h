@@ -65,7 +65,7 @@
         #endif
     #endif
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         #if defined(__PIC24FJ256GB110__)
             #if defined(PIC24F_ADK_FOR_ANDROID)
                 #include "HardwareProfile - PIC24F ADK for Android.h"

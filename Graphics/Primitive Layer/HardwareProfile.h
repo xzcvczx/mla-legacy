@@ -52,7 +52,7 @@
 
 #ifndef CFG_INCLUDE_MPLAB_X
 
-#if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
+#if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__dsPIC33E__) 
 
 	#if defined (__PIC24FJ256DA210__)
 		/*********************************************************************
@@ -88,6 +88,22 @@
 		//#include "Configs/HWP_GFXv3_EX16_8PMP_WQVGAv1.h"
 		//#include "Configs/HWP_GFXv3_EX16_16PMP_WQVGAv1.h"
 
+        /*********************************************************************
+         * Hardware Configuration for 
+         * Starter Kit
+         * Graphics PicTail v3
+         * Display TFT-G240320LTSW-118W-E
+         ********************************************************************/
+    	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
+
+        /*********************************************************************
+         * Hardware Configuration for 
+         * Starter Kit
+         * Graphics PicTail v3
+         * Display PH480272T-005-I11Q
+         ********************************************************************/
+    	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_WQVGAv1.h"
+
 	#endif
 
 #elif defined (__PIC32MX__) 
@@ -116,8 +132,8 @@
      * Graphics PicTail v3
      * Display TFT-G240320LTSW-118W-E
      ********************************************************************/
-	//#include "Configs/HWP_GFXv3_PIC_STK_8PMP_QVGAv1.h"
-	//#include "Configs/HWP_GFXv3_PIC_STK_16PMP_QVGAv1.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_QVGAv1.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_16PMP_QVGAv1.h"
 
     /*********************************************************************
      * Hardware Configuration for 
@@ -125,8 +141,8 @@
      * Graphics PicTail v3
      * Display PH480272T-005-I11Q
      ********************************************************************/
-	//#include "Configs/HWP_GFXv3_PIC_STK_8PMP_WQVGAv1.h"
-	//#include "Configs/HWP_GFXv3_PIC_STK_16PMP_WQVGAv1.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_8PMP_WQVGAv1.h"
+	//#include "Configs/HWP_GFXv3_PIC_SK_16PMP_WQVGAv1.h"
 	
     /*********************************************************************
      * Hardware Configuration for 

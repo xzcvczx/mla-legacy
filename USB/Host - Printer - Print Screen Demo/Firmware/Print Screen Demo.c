@@ -93,7 +93,7 @@ typedef enum
 // *****************************************************************************
 // *****************************************************************************
 
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
@@ -896,7 +896,7 @@ int main (void)
 {
     GOL_MSG msg;                                    // GOL message structure to interact with GOL
 
-    #if defined (__C30__)
+    #if defined (__C30__) || defined __XC16__
         #if defined(__PIC24FJ256GB110__) || defined (__PIC24FJ256GB210__)
         __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
         RPOR10bits.RP21R = 11;                  // assign RP21 for SCK2
@@ -1058,7 +1058,7 @@ debugging.
 
 *******************************************************************************/
 
-#if defined ( __C30__ )
+#if defined ( __C30__ ) || defined __XC16__
 
 void __attribute__((interrupt, auto_psv)) _DefaultInterrupt(void)
 {

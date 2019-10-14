@@ -54,7 +54,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 // *****************************************************************************
 // *****************************************************************************
 
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
@@ -255,7 +255,7 @@ BOOL USB_ApplicationEventHandler(BYTE address, USB_EVENT event, void *data, DWOR
 // UART2 Receive Interrupt
 // ******************************************************************************
 // ******************************************************************************
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
 void __attribute__ ((__interrupt__,no_auto_psv)) _U2RXInterrupt(void)
 #elif defined(__PIC32MX__)
 #pragma interrupt _U2RxInterrupt ipl5 vector 41

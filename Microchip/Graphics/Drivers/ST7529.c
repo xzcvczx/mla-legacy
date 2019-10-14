@@ -52,32 +52,22 @@
     #include "Graphics/gfxpmp.h"
 #elif defined (USE_GFX_EPMP)
     #include "Graphics/gfxepmp.h"
-#endif    
+#endif  
+
+// Clipping region control
+SHORT       _clipRgn;
+
+// Clipping region borders
+SHORT       _clipLeft;
+SHORT       _clipTop;
+SHORT       _clipRight;
+SHORT       _clipBottom;  
 
 // Color
 GFX_COLOR   _color;
 #ifdef USE_TRANSPARENT_COLOR
 GFX_COLOR   _colorTransparent;
 SHORT       _colorTransparentEnable;
-#endif
-
-// Clipping region control
-SHORT   _clipRgn;
-
-// Clipping region borders
-SHORT   _clipLeft;
-SHORT   _clipTop;
-SHORT   _clipRight;
-SHORT   _clipBottom;
-
-/////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
-#ifndef USE_TRANSPARENT_COLOR
-void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void    PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void    PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 #endif
 
 /*********************************************************************
@@ -484,53 +474,6 @@ GFX_COLOR GetPixel(SHORT x, SHORT y)
 	DisplaySetData();
 
     return (columnPixel[x % 3]);
-}
-
-/*********************************************************************
-* Function: SetClipRgn(left, top, right, bottom)
-*
-* Overview: Sets clipping region.
-*
-* PreCondition: none
-*
-* Input: left - Defines the left clipping region border.
-*		 top - Defines the top clipping region border.
-*		 right - Defines the right clipping region border.
-*	     bottom - Defines the bottom clipping region border.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
-{
-    _clipLeft=left;
-    _clipTop=top;
-    _clipRight=right;
-    _clipBottom=bottom;
-
-}
-
-/*********************************************************************
-* Function: SetClip(control)
-*
-* Overview: Enables/disables clipping.
-*
-* PreCondition: none
-*
-* Input: control - Enables or disables the clipping.
-*			- 0: Disable clipping
-*			- 1: Enable clipping
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClip(BYTE control)
-{
-    _clipRgn=control;
 }
 
 /*********************************************************************

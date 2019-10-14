@@ -44,6 +44,7 @@
 #include "gfx_schemes.h"
 #include "gol_ids.h"
 #include "timer_tick.h"
+#include "JPEGImage.h"
 /*****************************************************************************
  * SECTION: Local Prototypes
  *****************************************************************************/
@@ -69,6 +70,8 @@ void CreatePreLoadScreen(void)
 {
     SHORT x, y;
 
+    SwitchOffDoubleBuffering();
+
     SetActivePage(IMAGE2_PINGPONG);
     SetColor(WHITE);
     ClearDevice();
@@ -81,6 +84,7 @@ void CreatePreLoadScreen(void)
 
     MoveTo(x, y);
     GFX_BlockUntilFinished(OutText((XCHAR *)loading));  //Loading Text
+
     PreLoadDrawProgress();
 
     SetVisualPage(IMAGE2_PINGPONG);
@@ -96,8 +100,23 @@ void CreatePreLoadScreen(void)
     }  
     else
     { 
+     #ifdef __PIC32MX__
+        ImageDecode                            
+        (                                      
+            JPEGfopen((void *)&Background),         
+            IMG_JPEG,                          
+            0,                              
+            0,                               
+            (GetMaxX()),                   
+            (GetMaxY()),                   
+            0,                                 
+            &_jpegFileApi,                     
+            JPEG_PixelOutput                   
+        );
+      #else
         //DarkBlue Gradient Background
          BarGradient(0,0,GetMaxX(),GetMaxY(),BRIGHTBLUE,BLACK,100,GRAD_RIGHT);
+      #endif
     }
 
 }
@@ -111,103 +130,85 @@ WORD PreLoadDrawScreens(void)
     switch(preLoadPage)
     {
         case PRE_LOAD_PAGE_1:                  //Contains the background image
-            SetDestinationPage(1);
+
             SetActivePage(1);
-			AlphaBlendWindow(GFXGetPageXYAddress(DISPLAY_BUFFER, 0, 0),
-				GFXGetPageXYAddress(DISPLAY_BUFFER, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
+			while(!AlphaBlendWindow(DISPLAY_BUFFER, 0, 0,
+				DISPLAY_BUFFER, 0, 0,
+				GFX_PAGE1, 0, 0,
 				GetMaxX(), 
 				GetMaxY(),   	
-				GFX_SchemeGetDefaultScheme()->AlphaValue);  
+				GFX_SchemeGetDefaultScheme()->AlphaValue));  
             preLoadPage = PRE_LOAD_PAGE_2;                                      // switch to next state
             return (1);                                                 // draw objects created 
 
         case PRE_LOAD_PAGE_2: 
-            SetDestinationPage(2);
 
            SetActivePage(2);
-			AlphaBlendWindow(GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE2, 0, 0),
+			while(!AlphaBlendWindow(GFX_PAGE1, 0, 0,
+				GFX_PAGE1, 0, 0,
+				GFX_PAGE2, 0, 0,
 				GetMaxX(), 
 				GetMaxY(),   	
-				GFX_SchemeGetDefaultScheme()->AlphaValue);  
+				GFX_SchemeGetDefaultScheme()->AlphaValue));  
             
             CreateMainScreen();                                            // create window and check boxes
             preLoadPage = PRE_LOAD_PAGE_3;                                         // switch to next state
-            return (1);         
+            return (1);    
 
-       case PRE_LOAD_PAGE_3:
-            SetDestinationPage(3);
+        case PRE_LOAD_PAGE_3: 
+
            SetActivePage(3);
-           AlphaBlendWindow(GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE3, 0, 0),
+			while(!AlphaBlendWindow(GFX_PAGE1, 0, 0,
+				GFX_PAGE1, 0, 0,
+				GFX_PAGE3, 0, 0,
 				GetMaxX(), 
 				GetMaxY(),   	
-				GFX_SchemeGetDefaultScheme()->AlphaValue);  
-             
+				GFX_SchemeGetDefaultScheme()->AlphaValue));  
+            
             CreatePanelScreen();                                            // create window and check boxes
             preLoadPage = PRE_LOAD_PAGE_4;                                         // switch to next state
-            return (1);      
- 
-       case PRE_LOAD_PAGE_4:
-            SetDestinationPage(4);
-           SetActivePage(4);
-           AlphaBlendWindow(GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE4, 0, 0),
-				GetMaxX(), 
-				GetMaxY(),   	
-				GFX_SchemeGetDefaultScheme()->AlphaValue); 
-             
-            CreatePerformanceScreen();                                          // create window and check boxes
-            preLoadPage = PRE_LOAD_PAGE_5;                                         // switch to next state
-            return (1);                                              
+            return (1);  
 
-       case PRE_LOAD_PAGE_5:
-            SetDestinationPage(5);
-           SetActivePage(5);
-           AlphaBlendWindow(GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE5, 0, 0),
+        case PRE_LOAD_PAGE_4: 
+
+           SetActivePage(4);
+			while(!AlphaBlendWindow(GFX_PAGE1, 0, 0,
+				GFX_PAGE1, 0, 0,
+				GFX_PAGE4, 0, 0,
 				GetMaxX(), 
 				GetMaxY(),   	
-				GFX_SchemeGetDefaultScheme()->AlphaValue); 
-             
-            CreateConfigScreen();                                         // create window and check boxes
+				GFX_SchemeGetDefaultScheme()->AlphaValue));  
+            
+            CreatePerformanceScreen();                                            // create window and check boxes
             preLoadPage = PRE_LOAD_PAGE_6;                                         // switch to next state
-            return (1);   
+            return (1);    
 
        case PRE_LOAD_PAGE_6:                 //Lighting Screen
-           SetDestinationPage(6);
            SetActivePage(6);
 
-           AlphaBlendWindow(GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE1, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE6, 0, 0),
+           while(!AlphaBlendWindow(GFX_PAGE1, 0, 0,
+				GFX_PAGE1, 0, 0,
+				GFX_PAGE6, 0, 0,
 				GetMaxX(), 
 				GetMaxY(),   	
-				GFX_SchemeGetDefaultScheme()->AlphaValue); 
+				GFX_SchemeGetDefaultScheme()->AlphaValue)); 
              
-            CreateLightingScreen();                                         // create window and check boxes
+            CreateInfo(0);                                         
             preLoadPage = PRE_LOAD_PAGE_7;                                             // switch to next state
             return (1);   
 
          case PRE_LOAD_PAGE_7:
-            SetDestinationPage(0);
-             AlphaBlendWindow(GFXGetPageXYAddress(GFX_PAGE2, 0, 0),
-				GFXGetPageXYAddress(GFX_PAGE2, 0, 0),
-				GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
+             while(!AlphaBlendWindow(GFX_PAGE2, 0, 0,
+				GFX_PAGE2, 0, 0,
+				GetDrawBufferAddress(), 0, 0,
 				GetMaxX(), 
 				GetMaxY(),   	
-				GFX_SchemeGetDefaultScheme()->AlphaValue); 
-             SetActivePage(GetDestinationPage());
-           
+				GFX_SchemeGetDefaultScheme()->AlphaValue)); 
+            SetActivePage(0);
              CreateMainScreen();                                            // Start the first demo screen     
              preLoadPage = NUM_PRE_LOAD_PAGES;                
-             
-             SetVisualPage(0);
+
+             SwitchOnDoubleBuffering();
              screenState = DISPLAY_MAIN;
              return (1);      
         
@@ -238,7 +239,7 @@ void PreLoadDrawProgress(void)
         else
             SetColor(GRAY224);
 
-        FillCircle(x, y, PRE_LOAD_ANIMATION_RADIUS);
+        Bar(x, y, x+PRE_LOAD_ANIMATION_RADIUS,y+PRE_LOAD_ANIMATION_RADIUS);
         x += PRE_LOAD_AMINATION_CIRCLE_X_DELTA;
     }
 

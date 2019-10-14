@@ -94,5 +94,7 @@ echo Removing MPLABX and MPLAB8 Compiler Output directories...
 @rd "%~dp0\Objects" /S /Q 2>NUL
 @rd "%~dp0\MPLAB.X\Build" /S /Q 2>NUL
 @rd "%~dp0\MPLAB.X\dist" /S /Q 2>NUL
+@del "%~dp0\MPLAB.X\nbproject\Makefile-local-*.mk" /f /q /s 2>NUL
+@del "%~dp0\MPLAB.X\nbproject\Makefile-genesis.properties" /f /q /s 2>NUL
 
 echo Done.

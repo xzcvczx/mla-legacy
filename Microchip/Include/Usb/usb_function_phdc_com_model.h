@@ -79,11 +79,13 @@ typedef void(* PHDC_APP_CB)(UINT8);
 
 
 /* Application States */
-#define PHD_INITIALIZED  0x00
-#define PHD_CONNECTED    0x01
-#define PHD_MEASUREMENT_SENT 0x02
-#define PHD_DISCONNECTED  0x03
-#define PHD_DISCONNECTING 0x04
+#define PHD_DISCONNECTED  0x00
+#define PHD_CONNECTING    0x01
+#define PHD_CONNECTED     0x02
+#define PHD_DISCONNECTING 0x03
+#define PHD_MEASUREMENT_SENT 0x04
+#define PHD_MEASUREMENT_SENDING 0x05
+
 
 /* Agent states */
 #define  PHD_COM_STATE_DISCONNECTED                  0x00

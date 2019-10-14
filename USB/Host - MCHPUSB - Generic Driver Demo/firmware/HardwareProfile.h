@@ -8,7 +8,7 @@
 
 //#define USE_USB_PLL
 
-#if defined (__C30__)
+#if defined (__C30__) || defined __XC16__
     #if defined (__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
         #define GetSystemClock()            40000000UL
         #define GetPeripheralClock()        (GetSystemClock())
@@ -73,7 +73,7 @@
 #define OUTPUT_PIN          0
 
 
-#if defined (__C30__)
+#if defined (__C30__) || defined __XC16__
     #if defined(__PIC24FJ256GB110__) || defined (__dsPIC33EP512MU810__) || defined (__PIC24EP512GU810__) ||defined(__PIC24FJ256GB210__)
     	// LCD Module I/O pins
     	#define LCD_DATA0_TRIS		(TRISEbits.TRISE0)		// Multiplexed with LED6

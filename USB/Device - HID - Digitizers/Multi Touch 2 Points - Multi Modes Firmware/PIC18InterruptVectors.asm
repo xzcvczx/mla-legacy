@@ -8,8 +8,8 @@
 ; Software License Agreement:
 ;
 ; The software supplied herewith by Microchip Technology Incorporated
-; (the “Company”) for its PIC® Microcontroller is intended and
-; supplied to you, the Company’s customer, for use solely and
+; (the "Company") for its PIC® Microcontroller is intended and
+; supplied to you, the Company's customer, for use solely and
 ; exclusively on Microchip PIC Microcontroller products. The
 ; software is owned by the Company and/or its supplier, and is
 ; protected under applicable copyright laws. All rights are reserved.
@@ -18,7 +18,7 @@
 ; civil liability for the breach of the terms and conditions of this
 ; license.
 ;
-; THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+; THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
 ; WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
 ; TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 ; PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -95,6 +95,7 @@ HighPriorityIntVector:
 		;operation, so we need to be careful not to touch any important resources yet.
 		bcf		OSCCON, SCS0		
 		bcf		OSCCON, SCS1			;OSCCON<SCS1:SCS0> now = 00 <-- Primary Clock Source Selected
+		bsf		OSCCON, IRCF2			;Switch to some moderate frequency well above 31kHz (if the "primary clock" happens to be the (HF)INTOSC)
 GotoHighPriorityInterruptHandler:
 		goto	YourHighPriorityISRCode	;Interrupt context save will be done at the start of this C function.
 
@@ -111,6 +112,7 @@ LowPriorityIntVector:
 		;operation, so we need to be careful not to touch any important resources yet.
 		bcf		OSCCON, SCS0		
 		bcf		OSCCON, SCS1			;OSCCON<SCS1:SCS0> now = 00 <-- Primary Clock Source Selected
+		bsf		OSCCON, IRCF2			;Switch to some moderate frequency well above 31kHz (if the "primary clock" happens to be the (HF)INTOSC)
 GotoLowPriorityInterruptHandler:
 		goto	YourLowPriorityISRCode	;Interrupt context save will be done at the start of this C function.
 
@@ -136,6 +138,7 @@ Remapped_HighPriorityIntVector:
 		;operation, so we need to be careful not to touch any important resources yet.
 		bcf		OSCCON, SCS0		
 		bcf		OSCCON, SCS1			;OSCCON<SCS1:SCS0> now = 00 <-- Primary Clock Source Selected
+		bsf		OSCCON, IRCF2			;Switch to some moderate frequency well above 31kHz (if the "primary clock" happens to be the (HF)INTOSC)
 Remapped_GotoHighPriIntHandler:
 		goto	YourHighPriorityISRCode	;Interrupt context save will be done at the start of this C function.
 
@@ -152,6 +155,7 @@ Remapped_LowPriorityIntVector:
 		;operation, so we need to be careful not to touch any important resources yet.
 		bcf		OSCCON, SCS0		
 		bcf		OSCCON, SCS1			;OSCCON<SCS1:SCS0> now = 00 <-- Primary Clock Source Selected
+		bsf		OSCCON, IRCF2			;Switch to some moderate frequency well above 31kHz (if the "primary clock" happens to be the (HF)INTOSC)
 Remapped_GotoLowPriIntHandler:
 		goto	YourLowPriorityISRCode	;Interrupt context save will be done at the start of this C function.
 		

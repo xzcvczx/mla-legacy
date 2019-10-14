@@ -38,6 +38,8 @@
            Modified the code in more structured way.
   1.02.6  The variable 'delayLapsedFlag' is declared as 'volatile' type,
           as it is modified in the Interrupt Service Routine.
+  1.02.8  "SCdrv_InitUART" function is modifed to switch on the power
+          supply to the smart card during initialization phase.
 ********************************************************************/
 
 #include    <Compiler.h>
@@ -388,7 +390,7 @@ void SCdrv_InitUART(void)
 	SCdrv_EnableSimPresentPinPullUp();
 
 	#ifdef ENABLE_SC_POWER_THROUGH_PORT_PIN
-		SCdrv_SetSwitchCardPower(0);	//Turn off power to smart card
+		SCdrv_SetSwitchCardPower(1);	//Turn on power to smart card
 	#endif
 
 	SCdrv_SetSwitchCardReset(0); //keep card in reset state		

@@ -117,7 +117,7 @@ void USBOTGDisableInterrupts();
 //DOM-IGNORE-END
 void USBOTGDisableInterrupts()
 {
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
           //Disable All Interrupts
           IEC5 = 0; 
           U1IR=0xFF;
@@ -301,7 +301,7 @@ void USBOTGInitialize()
         SRPTimeOutFlag = 0;
         SRPReady = 0;
 
-        #if defined(__C30__)
+        #if defined(__C30__) || defined __XC16__
             //Configure VBUS I/O
             PORTGbits.RG12 = 0;
             LATGbits.LATG12 = 0;
@@ -387,7 +387,7 @@ void USBOTGInitialize()
         SRPTimeOutFlag = 0;
         SRPReady = 0;
 
-        #if defined(__C30__)
+        #if defined(__C30__) || defined __XC16__
             //Configure VBUS I/O
             PORTGbits.RG12 = 0;
             LATGbits.LATG12 = 0;
@@ -512,7 +512,7 @@ void USBOTGSelectRole(BOOL role)
                 U1IEbits.DETACHIE = 1;
 
                 //Enable USB Interrupt
-                #if defined(__C30__)
+                #if defined(__C30__) || defined __XC16__
                     IFS5 &= 0xFFBF;
                     IEC5 |= 0x0040;
                 #elif defined(__PIC32MX__)
@@ -606,7 +606,7 @@ void USBOTGSelectRole(BOOL role)
                 U1IR = 0x40;
 
                 //Enable USB Interrupt
-                 #if defined(__C30__)
+                 #if defined(__C30__) || defined __XC16__
                     IFS5 &= 0xFFBF;
                     IEC5 |= 0x0040;
                 #elif defined(__PIC32MX__)
@@ -898,7 +898,7 @@ BOOL USBOTGSession(BYTE Value)
         else
         {  
             #ifdef  OVERCURRENT_DETECTION
-                #if defined(__C30__)
+                #if defined(__C30__) || defined __XC16__
                     //Enable Change Notification For Overcurrent Detection
                     CNEN6bits.CN80IE = 1;
                     IFS1bits.CNIF = 0;
@@ -929,7 +929,7 @@ BOOL USBOTGSession(BYTE Value)
    else if (Value == END_SESSION || (Value == TOGGLE_SESSION && VBUS_Status == 1))
    {   
         #ifdef  OVERCURRENT_DETECTION
-            #if defined(__C30__)
+            #if defined(__C30__) || defined __XC16__
                 //Disable Change Notification For Overcurrent Detection
                 IEC1bits.CNIE = 0;
                 CNEN6bits.CN80IE = 0;
@@ -1276,7 +1276,7 @@ void USB_OTGEventHandler ( BYTE address, BYTE event, void *data, DWORD size )
   ***************************************************************************/
 //DOM-IGNORE-END
 #ifdef  OVERCURRENT_DETECTION
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     void __attribute__((__interrupt__, auto_psv)) _CNInterrupt(void)
     #elif defined(__PIC32MX__)
     #pragma interrupt _CNInterrupt ipl5 vector 26
@@ -1301,7 +1301,7 @@ void USB_OTGEventHandler ( BYTE address, BYTE event, void *data, DWORD size )
             //Indicate Error
             UART2PrintString( "\r\n***** USB OTG A Error - Overcurrent Condition Detected - Session Ended *****\r\n" );
 
-            #if defined(__C30__)
+            #if defined(__C30__) || defined __XC16__
                 //Disable Change Notification 
                 IEC1bits.CNIE = 0;
                 CNEN6bits.CN80IE = 0;
@@ -1316,7 +1316,7 @@ void USB_OTGEventHandler ( BYTE address, BYTE event, void *data, DWORD size )
             USBOTGInitializeHostStack();
         }
 
-        #if defined(__C30__)
+        #if defined(__C30__) || defined __XC16__
             //Clear Interrupt Flag
             IFS1bits.CNIF = 0;
         #elif defined(__PIC32MX__)

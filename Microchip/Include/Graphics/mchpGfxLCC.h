@@ -102,5 +102,99 @@
         #error The display orientation selected is not supported. It can be only 0,90,180 or 270.
     #endif
 
+/*Macros for timing signals*/
+#define DATA_ENABLE      LATDbits.LATD2
+#define DATA_ENABLE_TRIS TRISDbits.TRISD2
+#define HSYNC            LATBbits.LATB8
+#define HSYNC_TRIS       TRISBbits.TRISB8
+#define VSYNC            LATCbits.LATC3 
+#define VSYNC_TRIS       TRISCbits.TRISC3
+
+/*Macros for LCD IO*/ 
+#define BACKLIGHT      LATDbits.LATD3
+#define BACKLIGHT_TRIS TRISDbits.TRISD3
+#define LCD_RESET      LATCbits.LATC1
+#define LCD_RESET_TRIS TRISCbits.TRISC1
+#define LCD_CS         LATCbits.LATC2
+#define LCD_CS_TRIS    TRISCbits.TRISC2
+#define LCD_DC         LATBbits.LATB3
+#define LCD_DC_TRIS    TRISBbits.TRISB3
+
+/*Macros for External SRAM*/
+#define SRAM_CS       LATFbits.LATF13      
+#define SRAM_TRIS     TRISFbits.TRISF13
+
+#define ADDR15        LATAbits.LATA15
+#define ADDR15_TRIS   TRISAbits.TRISA15
+#define ADDR16        LATDbits.LATD8
+#define ADDR16_TRIS   TRISDbits.TRISD8
+#define ADDR17        LATEbits.LATE9
+#define ADDR17_TRIS   TRISEbits.TRISE9
+#define ADDR18        LATFbits.LATF12
+#define ADDR18_TRIS   TRISFbits.TRISF12
+
+#define PIXELCLOCK        LATDbits.LATD5
+#define PIXELCLOCK_TRIS   TRISDbits.TRISD5
+
+/*These define the size (in resolution) of the LCD being used*/
+#define LINE_LENGTH              DISP_HOR_RESOLUTION
+#define FRAME_HEIGHT             DISP_VER_RESOLUTION
+
+#if defined(__32MX460F512L__) || defined (__32MX360F512L__) 
+#define MAX_DMA_TRANSFER 254
+#else
+#define MAX_DMA_TRANSFER 65536
+#endif
+
+#if(MAX_DMA_TRANSFER < LINE_LENGTH)
+#define LEGACY_MODE
+#endif
+
+/*This stabilizes the pixel refresh when drawing pixels*/
+#ifdef LEGACY_MODE
+#define PIXEL_DRAW_PER_DMA_TX          10  
+#else
+#define PIXEL_DRAW_PER_DMA_TX          20 
+#endif
+
+/*This defines the polarity of the pixel clock as defined in LCD specs*/
+#ifdef DISP_INV_LSHIFT
+#define PCLK_POLARITY PMP_READ_POL_LO
+#else
+#define PCLK_POLARITY PMP_READ_POL_HI
+#endif
+
+/*These define the size (in resolution) of the LCD being used*/
+#define LINE_LENGTH              DISP_HOR_RESOLUTION
+#define FRAME_HEIGHT             DISP_VER_RESOLUTION
+
+#define VER_BLANK                 (DISP_VER_PULSE_WIDTH+DISP_VER_BACK_PORCH+DISP_VER_FRONT_PORCH)
+
+#define  PMADDR_OVERFLOW               32768          /* Set for 2^15 because that is how many address lines are connected from the PIC32*/
+
+#if defined (USE_PIP)
+void SetPIPWindow(WORD left, WORD top, WORD hlength, WORD vlength, WORD pipx,WORD pipy);
+#define PIP_BUFFER  (2)
+#endif
+
+#if defined (USE_LCC_SCROLLING)
+extern WORD scroll,scrollLine,scrollPage;
+#endif
+
+#if defined (USE_DOUBLE_BUFFERING)
+
+typedef struct
+{
+    WORD X;
+    WORD Y;
+    WORD W;
+    WORD H;
+} RectangleArea;
+
+    #define GFX_BUFFER1 (0)
+    #define GFX_BUFFER2 (1)
+
+    #define GFX_MAX_INVALIDATE_AREAS 5
+#endif
 
 #endif // _mchpGfxLCC_H

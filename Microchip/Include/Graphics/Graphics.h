@@ -55,13 +55,13 @@
  *************************************************/
 #ifdef __C30_VERSION__
 #if (__C30_VERSION__ == 325)
-#error "C30 compiler version 3.25 is not compatable with the Graphics Library, please use a different compiler version."
+#error "C30 compiler version 3.25 is not compatible with the Graphics Library, please use a different compiler version."
 #endif
 #endif
 
 /////////////////////// GRAPHICS_LIBRARY_VERSION /////////////////////
 // MSB is version, LSB is subversion
-    #define GRAPHICS_LIBRARY_VERSION    0x0304
+    #define GRAPHICS_LIBRARY_VERSION    0x0306
 
 ////////////////////////////// INCLUDES //////////////////////////////
     #include <stdlib.h>             // needed because of malloc()

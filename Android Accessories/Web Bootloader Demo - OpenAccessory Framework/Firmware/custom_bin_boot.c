@@ -38,7 +38,7 @@ Change History
 #include "custom_bin_boot.h"
 
 // Include the proper hardware abstraction layer boot file
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
 #include "boot_hal_pic24.h"
 #elif defined(__C32__)
 #include "boot_hal_pic32.h"

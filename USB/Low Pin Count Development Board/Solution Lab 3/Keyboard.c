@@ -221,6 +221,62 @@
 
 
 /** VARIABLES ******************************************************/
+#if defined(__18CXX)
+    #pragma udata
+
+    //The ReceivedDataBuffer[] and ToSendDataBuffer[] arrays are used as
+    //USB packet buffers in this firmware.  Therefore, they must be located in
+    //a USB module accessible portion of microcontroller RAM.
+    #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50)
+        #pragma udata usbram2
+    #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
+        || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)\
+        || defined(__18LF24K50) || defined(__18F24K50) || defined(__18LF25K50)\
+        || defined(__18F25K50) || defined(__18LF45K50) || defined(__18F45K50)
+        #pragma udata USB_VARIABLES=0x500
+    #elif defined(__18F4450) || defined(__18F2450)
+        #pragma udata USB_VARIABLES=0x480
+    #else
+        #pragma udata
+    #endif
+#endif
+
+#if defined(__XC8)
+    #if defined(_18F14K50) || defined(_18F13K50) || defined(_18LF14K50) || defined(_18LF13K50)
+        #define IN_DATA_BUFFER_ADDRESS 0x260
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + HID_INT_IN_EP_SIZE)
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #elif  defined(_18F2455)   || defined(_18F2550)   || defined(_18F4455)  || defined(_18F4550)\
+        || defined(_18F2458)   || defined(_18F2453)   || defined(_18F4558)  || defined(_18F4553)\
+        || defined(_18LF24K50) || defined(_18F24K50)  || defined(_18LF25K50)\
+        || defined(_18F25K50)  || defined(_18LF45K50) || defined(_18F45K50)
+        #define IN_DATA_BUFFER_ADDRESS 0x500
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + HID_INT_IN_EP_SIZE)
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #elif defined(_18F4450) || defined(_18F2450)
+        #define IN_DATA_BUFFER_ADDRESS 0x480
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + HID_INT_IN_EP_SIZE)
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #elif defined(_16F1459)
+        #define IN_DATA_BUFFER_ADDRESS 0x2050
+        #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + HID_INT_IN_EP_SIZE)
+        #define IN_DATA_BUFFER_ADDRESS_TAG @IN_DATA_BUFFER_ADDRESS
+        #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
+    #else
+        #define IN_DATA_BUFFER_ADDRESS_TAG
+        #define OUT_DATA_BUFFER_ADDRESS_TAG
+    #endif
+#else
+    #define IN_DATA_BUFFER_ADDRESS_TAG
+    #define OUT_DATA_BUFFER_ADDRESS_TAG
+#endif
+
+unsigned char hid_report_in[HID_INT_IN_EP_SIZE] IN_DATA_BUFFER_ADDRESS_TAG;
+unsigned char hid_report_out[HID_INT_OUT_EP_SIZE] OUT_DATA_BUFFER_ADDRESS_TAG;
+
 #pragma udata
 BYTE old_sw2,old_sw3;
 char buffer[8];
@@ -342,7 +398,7 @@ void Keyboard(void);
 	
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
 
-#elif defined(__C30__)
+#elif defined(__C30__) || defined __XC16__
     #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
         /*
          *	ISR JUMP TABLE
@@ -393,7 +449,7 @@ int main(void)
 #endif
 {
 //    //This can be used for user entry into the bootloader  
-//    #if defined(__C30__) 
+//    #if defined(__C30__)  || defined __XC16__
 //        mInitSwitch2();
 //        if(sw2 == 0)
 //        {
@@ -457,7 +513,7 @@ static void InitializeSystem(void)
 {
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         AD1PCFGL = 0xFFFF;
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
@@ -875,7 +931,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;

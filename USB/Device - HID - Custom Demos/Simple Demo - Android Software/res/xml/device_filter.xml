@@ -5,4 +5,5 @@
 	<usb-device vendor-id="1240" product-id="12"/>  <!-- MCHPUSB demo -->
 	<usb-device vendor-id="1240" product-id="83"/>  <!-- WinUSB demo -->
 	<usb-device vendor-id="1240" product-id="63"/>  <!-- Custom HID demo -->
+	<usb-device vendor-id="1240" product-id="223"/> <!-- MCP2200EV-VCP -->
 </resources>

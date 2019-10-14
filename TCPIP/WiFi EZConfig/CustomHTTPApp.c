@@ -50,7 +50,7 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Elliott Wood     	6/18/07	    Original
- * Brad Rex             04 Apr 2010 Updated for MRF24WB0M
+ * Brad Rex             04 Apr 2010 Updated for MRF24W
  ********************************************************************/
 #define __CUSTOMHTTPAPP_C
 
@@ -421,11 +421,7 @@ static HTTP_IO_RESULT HTTPPostWifiConfig(void)
 	// increase the TCP RX FIFO size for the HTTP server.  This will allow more 
 	// data to be POSTed by the web browser before hitting this limit.
 
-    UINT8 ConnectionProfileID;
-    UINT8 ConnectionState;
     UINT8 ssidLen;
-
-    WF_CMGetConnectionState(&ConnectionState, &ConnectionProfileID);
 
 	if(curHTTP.byteCount > TCPIsGetReady(sktHTTP) + TCPGetRxFIFOFree(sktHTTP))
 		goto ConfigFailure;
@@ -551,7 +547,7 @@ static HTTP_IO_RESULT HTTPPostWifiConfig(void)
                 CFGCXT.ssid[strlen((char*)(curHTTP.data+6))] = 0; /* Terminate string */
 
                 /* save current profile SSID for displaying later */
-                WF_CPGetSsid(ConnectionProfileID, (UINT8*)&CFGCXT.prevSSID, &ssidLen);
+                WF_CPGetSsid(1, (UINT8*)&CFGCXT.prevSSID, &ssidLen);
                 CFGCXT.prevSSID[ssidLen] = 0;
 			}
 			else
@@ -578,7 +574,7 @@ static HTTP_IO_RESULT HTTPPostWifiConfig(void)
                 CFGCXT.type = WF_ADHOC;
 
                 // always setup adhoc to attempt to connect first, then start
-                WF_CPSetAdHocBehavior(ConnectionProfileID, WF_ADHOC_CONNECT_THEN_START);
+                WF_CPSetAdHocBehavior(1, WF_ADHOC_CONNECT_THEN_START);
             }
 		    else 
             {   //Mode type no good  :-(
@@ -590,7 +586,7 @@ static HTTP_IO_RESULT HTTPPostWifiConfig(void)
             }
 
             // save old WLAN mode
-            WF_CPGetNetworkType(ConnectionProfileID, &CFGCXT.prevWLAN);				
+            WF_CPGetNetworkType(1, &CFGCXT.prevWLAN);				
 		}
 	}
 
@@ -605,7 +601,7 @@ static HTTP_IO_RESULT HTTPPostWifiConfig(void)
      */
 #if defined ( EZ_CONFIG_STORE )
     /* Copy wifi cfg data to be committed to NVM */
-    memcpy(AppConfig.MySSID, CFGCXT.ssid, strlen((char*)(CFGCXT.ssid)));
+    strcpy((char *)AppConfig.MySSID, (char *)CFGCXT.ssid);
     AppConfig.SsidLength = strlen((char*)(CFGCXT.ssid));
     /* Going to set security type */
     AppConfig.SecurityMode = CFGCXT.security; 
@@ -2243,10 +2239,15 @@ void HTTPPrint_scan(void)
 
 void HTTPPrint_fwver(void)
 {
-	tWFDeviceInfo deviceInfo;
+    static BOOL firstTime = TRUE;
+	static tWFDeviceInfo deviceInfo;
 	BYTE fwVerString[8];
 	
-	WF_GetDeviceInfo(&deviceInfo);
+	if (firstTime)
+	{
+	    firstTime = FALSE;
+	    WF_GetDeviceInfo(&deviceInfo);  // only call this once, not continually
+	}    
 	
 	uitoa((deviceInfo.romVersion << 8) | deviceInfo.patchVersion, fwVerString);
 	TCPPutString(sktHTTP, fwVerString);
@@ -2254,18 +2255,18 @@ void HTTPPrint_fwver(void)
 
 void HTTPPrint_ssid(void)
 {
-	BYTE ssidString[33];
-	BYTE ssidLength;
-	
-	BYTE connState;
-	BYTE currCpId;
-	
-	WF_CMGetConnectionState(&connState, &currCpId);
+	static BOOL firstTime = TRUE;
+	static BYTE ssidString[33];
+	static BYTE ssidLength;
 	
 	// we don't need to check the connection state as the only way this function
 	// is called is from the webserver.  if the webserver is requesting this,
 	// then you can infer that we should be connected to the network
-	WF_CPGetSsid(currCpId, ssidString, &ssidLength);		
+	if (firstTime)
+	{
+	    firstTime = FALSE;
+	    WF_CPGetSsid(1, ssidString, &ssidLength);		
+	}    
 	
 	TCPPutArray(sktHTTP, ssidString, ssidLength);
 }	

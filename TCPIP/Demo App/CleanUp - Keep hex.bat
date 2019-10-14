@@ -51,21 +51,21 @@ rmdir "Obj-C18-PICDN2_ETH97" /s /q
 rmdir "Obj-C18-PICDN2_MRF24WB" /s /q
 rmdir "Obj-C18-PICDN2_ENC28" /s /q
 rmdir "Obj-C30-EX16_ENC28" /s /q
-rmdir "Obj-C30-EX16_ENC624" /s /q
-rmdir "Obj-C30-EX16_MRF24WB" /s /q
-rmdir "Obj-C30-DA210_BRD_ENC28" /s /q
-rmdir "Obj-C30-DA210_BRD_ENC624" /s /q
-rmdir "Obj-C30-DA210_BRD_MRF24WB" /s /q
-rmdir "Obj-C32-EX16_ENC28" /s /q
-rmdir "Obj-C32-EX16_ENC624" /s /q
-rmdir "Obj-C32-EX16_MRF24WB" /s /q
-rmdir "Obj-C32-PIC32_ETH_SK_ETH795" /s /q
-rmdir "Obj-C32-PIC32_GP_SK_ENC28" /s /q
-rmdir "Obj-C32-PIC32_GP_SK_ENC624" /s /q
-rmdir "Obj-C32-PIC32_GP_SK_MRF24WB" /s /q
-rmdir "Obj-C32-PIC32_USB_SK_ENC28" /s /q
-rmdir "Obj-C32-PIC32_USB_SK_ENC624" /s /q
-rmdir "Obj-C32-PIC32_USB_SK_MRF24WB" /s /q
+rmdir "Obj-XC16-EX16_ENC624" /s /q
+rmdir "Obj-XC16-EX16_MRF24WB" /s /q
+rmdir "Obj-XC16-DA210_BRD_ENC28" /s /q
+rmdir "Obj-XC16-DA210_BRD_ENC624" /s /q
+rmdir "Obj-XC16-DA210_BRD_MRF24WB" /s /q
+rmdir "Obj-XC32-EX16_ENC28" /s /q
+rmdir "Obj-XC32-EX16_ENC624" /s /q
+rmdir "Obj-XC32-EX16_MRF24WB" /s /q
+rmdir "Obj-XC32-PIC32_ETH_SK_ETH795" /s /q
+rmdir "Obj-XC32-PIC32_GP_SK_ENC28" /s /q
+rmdir "Obj-XC32-PIC32_GP_SK_ENC624" /s /q
+rmdir "Obj-XC32-PIC32_GP_SK_MRF24WB" /s /q
+rmdir "Obj-XC32-PIC32_USB_SK_ENC28" /s /q
+rmdir "Obj-XC32-PIC32_USB_SK_ENC624" /s /q
+rmdir "Obj-XC32-PIC32_USB_SK_MRF24WB" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\publish" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\obj" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\bin\Debug" /s /q

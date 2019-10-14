@@ -101,7 +101,7 @@ public class MPFS2Lib //: MPFS2Writer
     File[] filesAndDirs = aStartingDir.listFiles();
     List<File> filesDirs = Arrays.asList(filesAndDirs);
     //List<File> deeperList = new ArrayList<File>();
-    result.add(aStartingDir);
+    //result.add(aStartingDir);
     for(File file : filesDirs) {
         if(file.isHidden())
             continue;
@@ -114,8 +114,8 @@ public class MPFS2Lib //: MPFS2Writer
       else
         result.add(file); //always add, even if directory
     }
-    if(DirPathString.contains(aStartingDir.getPath())==true)
-        Collections.sort(deeperList);
+//    if(DirPathString.contains(aStartingDir.getPath())==true)
+//        Collections.sort(deeperList);
     result.addAll(deeperList);
     return result;
   }
@@ -343,7 +343,9 @@ public class MPFS2Lib //: MPFS2Writer
 
     public boolean AddDirectory(String dataPath)
     {
-       String imagePath="";
+       String imagePath="",tempImagePath="";
+       String parentPath = "";
+      // String rootFilePath;
         List<File> ListFiles;
         File dir = new File(dataPath);
         if(dir.exists() == false)
@@ -368,6 +370,7 @@ public class MPFS2Lib //: MPFS2Writer
                     "<br>directory before continuing.</html>");
             return false;
         }
+        //rootFilePath = ListFiles.get(0).getPath();
 
         for (File f : ListFiles)
         {
@@ -378,16 +381,29 @@ public class MPFS2Lib //: MPFS2Writer
            if (f.isDirectory())
            {
               //AddDirectory(f.getPath());
-               log.add(f.getPath() + " :");
-               if(dataPath.contains(f.getPath()) == false)
-               {
-                 imagePath = f.getName();
-                 imagePath = imagePath+"/";
-               }
+//              log.add(f.getPath() + " :");
+//               if(dataPath.contains(f.getPath()) == false)
+//               {
+//                  if((tempImagePath.length() > 0) &&(f.getPath().contains(tempImagePath.split("/")[0])))
+//                    tempImagePath = tempImagePath+"/" + f.getName();
+//                  else
+//                    tempImagePath = f.getName();
+//
+//                 imagePath = tempImagePath;
+//                 imagePath = imagePath+"/";
+//               }
            }
            else
            {
-               AddFile(f.getPath(),imagePath+f.getName(),f);
+               if(f.getParent().compareTo(parentPath) != 0)
+                log.add(f.getParent() + " :");
+               tempImagePath = f.getPath();
+               imagePath = tempImagePath.replace(dataPath,"").replace("\\","/");
+               imagePath = imagePath.substring(1);
+               //imagePath = imagePath+"/";
+               //AddFile(f.getPath(),imagePath+f.getName(),f);
+               AddFile(f.getPath(),imagePath,f);
+               parentPath = f.getParent();
            }
         }
     

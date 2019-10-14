@@ -1134,7 +1134,7 @@ typedef enum
         // USB_PRINTER_COMMAND enumeration for more information.
 typedef union {
     void            *pointerRAM;    // Pointer to data in RAM.
-  #if defined( __C30__ )
+  #if defined( __C30__ ) || defined __XC16__
     __prog__ void   *pointerROM;    // Pointer to data in ROM.
   #elif defined( __PIC32MX__ )
     const void      *pointerROM;    // Pointer to data in ROM.
@@ -1146,7 +1146,7 @@ typedef union {
 #define USB_DATA_POINTER_RAM(x)  ((USB_DATA_POINTER)(void *)x)
         // Use this definition to cast a pointer being passed to the function
         // USBHostPrinterCommand() that points to data in ROM.
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     #define USB_DATA_POINTER_ROM(x)  ((USB_DATA_POINTER)(__prog__ void *)x)
 #elif defined( __PIC32MX__ )
     #define USB_DATA_POINTER_ROM(x)  ((USB_DATA_POINTER)(const void *)x)

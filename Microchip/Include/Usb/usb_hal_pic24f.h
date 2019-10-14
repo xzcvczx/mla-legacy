@@ -240,6 +240,11 @@ Description:
 // Cfg Control pipe for this ep
 #define EP_CTRL                         0x0C        
 
+
+#define BDT_BASE_ADDR_TAG   __attribute__ ((aligned (512)))
+#define CTRL_TRF_SETUP_ADDR_TAG
+#define CTRL_TRF_DATA_ADDR_TAG
+
 //----- Depricated defintions - will be removed at some point of time----------
 //--------- Depricated in v2.2
 #define _LS                             0x00        // Use Low-Speed USB Mode

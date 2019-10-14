@@ -73,7 +73,7 @@
 <Font_Files>
 <Font_File_Resource>
 <label>GOLFontDefault</label>
-<path>Gentium8.fnt</path>
+<path>../../Microchip/Graphics/Fonts/gentium/Gentium8.fnt</path>
 <first_character>28</first_character>
 <last_character>127</last_character>
 <font_filter>None</font_filter>

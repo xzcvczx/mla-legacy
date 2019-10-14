@@ -18,8 +18,8 @@
 <Font_Files>
 <Font_File_Resource>
 <label>internalfont</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium27.fnt</path>
-<comment_file>../../../Microchip/Graphics/Fonts/GentiumLicense.txt</comment_file>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium27.fnt</path>
+<comment_file>../../../Microchip/Graphics/Fonts/gentium/GentiumLicense.txt</comment_file>
 <first_character>0</first_character>
 <last_character>127</last_character>
 <font_filter>None</font_filter>

@@ -9,7 +9,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2011 Microchip Technology Inc.  All rights reserved.
+ * Copyright ¬© 2011 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -19,7 +19,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED ìAS ISî WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ‚ÄúAS IS‚Äù WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -349,6 +349,17 @@ extern volatile DWORD _workArea2BaseAddr;
 
 #define GFX_DATA_CONTINUOUS                 (0x01)
 #define GFX_DATA_DISCONTINUOUS              (0x00)
+
+/* Definition of macros
+
+ * GFX_DISPLAY_BUFFER_START_ADDRESS - This defines the constant used to set the
+ * location of the display buffer location. for the PIC24FJ256DA210 the
+ * address used must be consistent with the "DATA SPACE MEMORY MAP FOR
+ * PIC24FJ256DA210 FAMILY DEVICES"
+ * GFX_DISPLAY_BUFFER_LENGTH - This defines the size of the display buffer in
+ * bytes.
+
+*/
 
 // Calculate Display Buffer Size required in bytes
 

@@ -559,7 +559,7 @@ void AndroidTasks_Pv1(void)
                 //Fall through
             case SEND_MANUFACTUER_STRING:
                 //Check to see if something else is going on with EP0
-                //TODO: should switch this to use the transfer events instead.  It is safer.
+                //MCHP: should switch this to use the transfer events instead.  It is safer.
                 if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
                 {
                     //If not, then let's send the manufacturer's string
@@ -574,7 +574,7 @@ void AndroidTasks_Pv1(void)
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
-                    //TODO: should switch this to use the transfer events instead.  It is safer.
+                    //MCHP: should switch this to use the transfer events instead.  It is safer.
                     if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
                     {
                         //If not, then let's send the manufacturer's string
@@ -590,7 +590,7 @@ void AndroidTasks_Pv1(void)
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
-                    //TODO: should switch this to use the transfer events instead.  It is safer.
+                    //MCHP: should switch this to use the transfer events instead.  It is safer.
                     if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
                     {
                         //If not, then let's send the manufacturer's string
@@ -606,7 +606,7 @@ void AndroidTasks_Pv1(void)
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
-                    //TODO: should switch this to use the transfer events instead.  It is safer.
+                    //MCHP: should switch this to use the transfer events instead.  It is safer.
                     if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
                     {
                         //If not, then let's send the manufacturer's string
@@ -622,7 +622,7 @@ void AndroidTasks_Pv1(void)
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
-                    //TODO: should switch this to use the transfer events instead.  It is safer.
+                    //MCHP: should switch this to use the transfer events instead.  It is safer.
                     if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
                     {
                         //If not, then let's send the manufacturer's string
@@ -638,7 +638,7 @@ void AndroidTasks_Pv1(void)
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
-                    //TODO: should switch this to use the transfer events instead.  It is safer.
+                    //MCHP: should switch this to use the transfer events instead.  It is safer.
                     if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
                     {
                         //If not, then let's send the manufacturer's string
@@ -654,7 +654,7 @@ void AndroidTasks_Pv1(void)
                 if(device->status.EP0TransferPending == 0)
                 {
                     //The manufacturing string is sent.  Now try to send the model string
-                    //TODO: should switch this to use the transfer events instead.  It is safer.
+                    //MCHP: should switch this to use the transfer events instead.  It is safer.
                     if(AndroidIsLastCommandComplete(device->address, &errorCode, &byteCount) == TRUE)
                     {
                         //Set up a timer to remove the device if it hasn't returned to us as an

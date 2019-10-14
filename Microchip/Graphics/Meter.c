@@ -131,7 +131,13 @@ METER *MtrCreate
     pMtr->hdr.FreeObj = NULL;					// free function
 
     // set the default scale colors
+#if (COLOR_DEPTH == 8) || (COLOR_DEPTH == 16) || (COLOR_DEPTH == 24)
     MtrSetScaleColors(pMtr, LIGHTGREEN, YELLOW, BRIGHTGREEN, BRIGHTBLUE, RED, BRIGHTRED);
+#elif (COLOR_DEPTH == 4)
+    MtrSetScaleColors(pMtr, GRAY000, GRAY003, GRAY006, GRAY009, GRAY012, GRAY015);
+#elif (COLOR_DEPTH == 1)
+    MtrSetScaleColors(pMtr, WHITE, BLACK, WHITE, BLACK, WHITE, BLACK);
+#endif
 
     // Set the color scheme to be used
     if(pScheme == NULL)
@@ -804,7 +810,13 @@ WORD MtrDraw(void *pObj)
                 pMtr->yPos = ((y2) * (((i == 0) ? y1 : x1) >> 8)) + pMtr->yCenter;
     
                 // now draw the needle with the new position	
+#if (COLOR_DEPTH == 8) || (COLOR_DEPTH == 16) || (COLOR_DEPTH == 24)
                 SetColor(BRIGHTRED);
+#elif (COLOR_DEPTH == 4)
+                SetColor(GRAY000);
+#elif (COLOR_DEPTH == 1)
+                SetColor(BLACK);
+#endif
                 SetLineThickness(THICK_LINE);
                 if(!Line(pMtr->xCenter, pMtr->yCenter, pMtr->xPos, pMtr->yPos))
                     return (0);

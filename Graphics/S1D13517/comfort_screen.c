@@ -68,7 +68,7 @@ XCHAR *LevelTemp[2]     = { (XCHAR *)SetHeatStr,
  * SECTION: Externs
  *****************************************************************************/
 extern const FONT_FLASH     Large;          // equal width font
-extern WORD                 _page;
+
 /*****************************************************************************
  * void CreateComfortScreen(void)
  *****************************************************************************/
@@ -82,16 +82,9 @@ void CreateComfortScreen(void)
     currentTemperatureScheme    = GFX_SchemeGetCurrentTScheme();
     defaultScheme               = GFX_SchemeGetDefaultScheme();
 
-    GOLFree();                              // free memory for the objects in the previous linked list and start new list
-   
     CreatePanelScreen();                    // This adds the widgets seen on the left of the screen
+ 
     SetState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT),BTN_DISABLED);
-
-
-    SetColor(currentTemperatureScheme->Color0);
-    FillBevel(COMFORT_SCREEN_END - 235,(GetMaxY()>>1) - 80 , COMFORT_SCREEN_END + 5, (GetMaxY()>>1) - 21,5);
-    FillBevel(COMFORT_SCREEN_END - 235,(GetMaxY()>>1) + 1 , COMFORT_SCREEN_END + 5, (GetMaxY()>>1) + 60,5);
-    FillBevel(COMFORT_SCREEN_START - 5,(GetMaxY()>>1) - 80 , COMFORT_SCREEN_START + 115, (GetMaxY()>>1) + 60,5);
 
     SetFont((void *) &FONTDEFAULT);
     SetColor(RGB565CONVERT(255, 102, 0));//WHITE);
@@ -350,12 +343,12 @@ WORD MsgComfortScreen(WORD objMsg, OBJ_HEADER *pObj)
                Bar(COMFORT_SCREEN_START + 135,90,COMFORT_SCREEN_START + 255,120);
                
                           
-               AlphaBlendWindow(GFXGetPageXYAddress(_page, COMFORT_SCREEN_START + 140, 90),
-							    GFXGetPageXYAddress(GFX_PAGE1, COMFORT_SCREEN_START + 140, 90),
-							    GFXGetPageXYAddress(_page, COMFORT_SCREEN_START + 140, 90),
+               while(!AlphaBlendWindow(1, COMFORT_SCREEN_START + 140, 90,
+							    GFX_PAGE1, COMFORT_SCREEN_START + 140, 90,
+							    1, COMFORT_SCREEN_START + 140, 90,
 						        120, 
 						        30,   	
-						        GFX_SchemeGetDefaultScheme()->AlphaValue); 
+						        GFX_SchemeGetDefaultScheme()->AlphaValue)); 
  
                SetColor(RGB565CONVERT(40, 84, 217));
                Bar(COMFORT_SCREEN_START - 5,(GetMaxY()>>1) - 80 , COMFORT_SCREEN_START + 115, (GetMaxY()>>1) + 60);

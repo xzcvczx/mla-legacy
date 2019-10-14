@@ -1,9 +1,9 @@
 /******************************************************************************
 
- MRF24WB0M Driver iperf
+ MRF24W Driver iperf
  Module for Microchip TCP/IP Stack
-  -Provides access to MRF24WB0M WiFi controller
-  -Reference: MRF24WB0M Data sheet, IEEE 802.11 Standard
+  -Provides access to MRF24W WiFi controller
+  -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
  FileName:		IperfApp.c
@@ -44,15 +44,14 @@
 
  Author				Date		Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- KH                 27 Jan 2010 Updated for MRF24WB0M
+ KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
 
 #include <string.h> /* for memcpy */
 
 #include "TCPIP Stack/TCPIP.h"
 
-#if defined (WF_CONSOLE)
-
+#if defined (WF_CONSOLE) && !defined (STACK_USE_EZ_CONFIG)
 #include "IperfApp.h"
 #include "TCPIP Stack/WFConsole.h"
 
@@ -368,13 +367,13 @@ ReportBW_Jitter_Loss(tIperfReport reportType)
 
             sec = (APPCTX.lastCheckTime - APPCTX.startTime)/TICK_SECOND;
 
-            sprintf( (char *) g_ConsoleContext.txBuf,"    - [%2lu- %2lu sec] %3lu/ %3lu (%2lu%%)    %4lu Kbps",
-                      (unsigned long)sec, 
-                      (unsigned long)sec + ( (unsigned long) (APPCTX.mInterval/TICK_SECOND) ),
-                      (unsigned long)nDropped,
-                      (unsigned long)nAttempted,
-                      (unsigned long)nDropped*100/(unsigned long)nAttempted,
-                      (unsigned long) (kbps + ((double) 0.5)));
+            sprintf( (char *) g_ConsoleContext.txBuf, "    - [0.0- %lu.%lu sec] %3lu/ %3lu (%2lu%%)    %4lu Kbps",
+                             (unsigned long)(msec/1000),
+                             (unsigned long)((msec%1000)/100),
+                             (unsigned long)nDropped,
+                             (unsigned long)nAttempted,
+                             (nAttempted == 0u) ? 0 : ((unsigned long)nDropped*100/(unsigned long)nAttempted),
+                             (unsigned long) (kbps + ((double) 0.5)));
 
             WFConsolePrintRamStr( (char *) g_ConsoleContext.txBuf , TRUE);
 

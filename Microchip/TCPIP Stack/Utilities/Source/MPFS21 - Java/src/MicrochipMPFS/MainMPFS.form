@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.1" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
@@ -388,7 +388,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Microsoft Sans Serif" size="11" style="0"/>
             </Property>
-            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="BIN Image"/>
             <Property name="toolTipText" type="java.lang.String" value="Output a BIN image to be uploaded to external storage, such as EEPROM or serial Flash."/>
           </Properties>
@@ -397,7 +396,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="160" y="28" width="-1" height="-1"/>
+              <AbsoluteConstraints x="150" y="30" width="-1" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -409,8 +408,9 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Microsoft Sans Serif" size="11" style="0"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="C18/C32 Image"/>
-            <Property name="toolTipText" type="java.lang.String" value="Output an image compatible with C18/C32 to be stored in internal Flash program memory."/>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="PIC18/PIC32 Image"/>
+            <Property name="toolTipText" type="java.lang.String" value="Output an image compatible with PIC18/PIC32 to be stored in internal Flash program memory."/>
             <Property name="name" type="java.lang.String" value="radC18C30Image" noResource="true"/>
           </Properties>
           <Events>
@@ -418,7 +418,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="264" y="28" width="-1" height="-1"/>
+              <AbsoluteConstraints x="240" y="30" width="-1" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -430,8 +430,8 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Microsoft Sans Serif" size="11" style="0"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="ASM30 Image"/>
-            <Property name="toolTipText" type="java.lang.String" value="Output an image compatible with C30 to be stored in internal Flash program memory.  Remember to add the generated .S file to your project."/>
+            <Property name="text" type="java.lang.String" value="PIC24/dsPIC Image"/>
+            <Property name="toolTipText" type="java.lang.String" value="Output an image compatible with 16-bit parts to be stored in internal Flash program memory.  Remember to add the generated .S file to your project."/>
             <Property name="name" type="java.lang.String" value="radASM30Image" noResource="true"/>
           </Properties>
           <Events>
@@ -439,7 +439,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="383" y="28" width="-1" height="-1"/>
+              <AbsoluteConstraints x="370" y="30" width="-1" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -459,7 +459,7 @@
           </Events>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="486" y="28" width="-1" height="-1"/>
+              <AbsoluteConstraints x="500" y="30" width="-1" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>

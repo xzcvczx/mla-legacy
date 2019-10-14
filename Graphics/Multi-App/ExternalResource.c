@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FileName:        ExternalResource.c
  * Processor:       PIC24F, PIC24H, dsPIC
- * Compiler:        MPLAB C30 (see release notes for tested revision)
- * Linker:          MPLAB LINK30
+ * Compiler:        MPLAB C30/XC16 (see release notes for tested revision)
+ * Linker:          MPLAB LINK30/XC16
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,19 +31,27 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.45
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.28.15
  *****************************************************************************/
 
 /*****************************************************************************
  * SECTION:  Includes
  *****************************************************************************/
 #include <Graphics/Graphics.h>
+#include "HardwareProfile.h"
 
 /*****************************************************************************
  * SECTION:  Graphics Library Firmware Check
  *****************************************************************************/
-#if(GRAPHICS_LIBRARY_VERSION != 0x0304)
-#warning "It is suggested to use Graphics Library verson 3.04 with this version of GRC."
+#if(GRAPHICS_LIBRARY_VERSION != 0x0306)
+#warning "It is suggested to use Graphics Library version 3.06 with this version of GRC."
+#endif
+
+/*****************************************************************************
+ * SECTION:  Graphics Bitmap Padding Check
+ *****************************************************************************/
+#ifdef USE_BITMAP_NO_PADDING_LINE
+#error These bitmap resources have been converted with padding of the horizontal lines, but USE_BITMAP_NO_PADDING_LINE is defined in GraphicsConfig.h.
 #endif
 
 /*****************************************************************************
@@ -55,7 +63,7 @@
  * Label: DateAndTime_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL DateAndTime_4bpp_72x72 = 
+const IMAGE_EXTERNAL DateAndTime_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -66,7 +74,7 @@ IMAGE_EXTERNAL DateAndTime_4bpp_72x72 =
  * Label: DateAndTime_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL DateAndTime_mono_72x72 = 
+const IMAGE_EXTERNAL DateAndTime_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -77,7 +85,7 @@ IMAGE_EXTERNAL DateAndTime_mono_72x72 =
  * Label: DrawingScreen_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL DrawingScreen_4bpp_72x72 = 
+const IMAGE_EXTERNAL DrawingScreen_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -88,7 +96,7 @@ IMAGE_EXTERNAL DrawingScreen_4bpp_72x72 =
  * Label: DrawingScreen_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL DrawingScreen_mono_72x72 = 
+const IMAGE_EXTERNAL DrawingScreen_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -99,7 +107,7 @@ IMAGE_EXTERNAL DrawingScreen_mono_72x72 =
  * Label: ECG_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL ECG_4bpp_72x72 = 
+const IMAGE_EXTERNAL ECG_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -110,7 +118,7 @@ IMAGE_EXTERNAL ECG_4bpp_72x72 =
  * Label: ECG_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL ECG_mono_72x72 = 
+const IMAGE_EXTERNAL ECG_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -121,7 +129,7 @@ IMAGE_EXTERNAL ECG_mono_72x72 =
  * Label: FolderPhoto_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL FolderPhoto_4bpp_72x72 = 
+const IMAGE_EXTERNAL FolderPhoto_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -132,7 +140,7 @@ IMAGE_EXTERNAL FolderPhoto_4bpp_72x72 =
  * Label: FolderPhoto_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL FolderPhoto_mono_72x72 = 
+const IMAGE_EXTERNAL FolderPhoto_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -143,7 +151,7 @@ IMAGE_EXTERNAL FolderPhoto_mono_72x72 =
  * Label: intro
  * Description:  158x55 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL intro = 
+const IMAGE_EXTERNAL intro = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -154,7 +162,7 @@ IMAGE_EXTERNAL intro =
  * Label: Language_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Language_4bpp_72x72 = 
+const IMAGE_EXTERNAL Language_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -165,7 +173,7 @@ IMAGE_EXTERNAL Language_4bpp_72x72 =
  * Label: Language_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Language_mono_72x72 = 
+const IMAGE_EXTERNAL Language_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -176,7 +184,7 @@ IMAGE_EXTERNAL Language_mono_72x72 =
  * Label: PCGaming2_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL PCGaming2_4bpp_72x72 = 
+const IMAGE_EXTERNAL PCGaming2_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -187,7 +195,7 @@ IMAGE_EXTERNAL PCGaming2_4bpp_72x72 =
  * Label: PCGaming2_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL PCGaming2_mono_72x72 = 
+const IMAGE_EXTERNAL PCGaming2_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -198,7 +206,7 @@ IMAGE_EXTERNAL PCGaming2_mono_72x72 =
  * Label: RGBLighting_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL RGBLighting_4bpp_72x72 = 
+const IMAGE_EXTERNAL RGBLighting_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -209,7 +217,7 @@ IMAGE_EXTERNAL RGBLighting_4bpp_72x72 =
  * Label: RGBLighting_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL RGBLighting_mono_72x72 = 
+const IMAGE_EXTERNAL RGBLighting_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -220,7 +228,7 @@ IMAGE_EXTERNAL RGBLighting_mono_72x72 =
  * Label: Animation_4bpp_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Animation_4bpp_72x72 = 
+const IMAGE_EXTERNAL Animation_4bpp_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -231,7 +239,7 @@ IMAGE_EXTERNAL Animation_4bpp_72x72 =
  * Label: Animation_mono_72x72
  * Description:  72x72 pixels, 4-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL Animation_mono_72x72 = 
+const IMAGE_EXTERNAL Animation_mono_72x72 = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -242,7 +250,7 @@ IMAGE_EXTERNAL Animation_mono_72x72 =
  * Label: rose
  * Description:  113x85 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL rose = 
+const IMAGE_EXTERNAL rose = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -253,7 +261,7 @@ IMAGE_EXTERNAL rose =
  * Label: body
  * Description:  24x24 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL body = 
+const IMAGE_EXTERNAL body = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -264,7 +272,7 @@ IMAGE_EXTERNAL body =
  * Label: food
  * Description:  24x24 pixels, 8-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL food = 
+const IMAGE_EXTERNAL food = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -275,7 +283,7 @@ IMAGE_EXTERNAL food =
  * Label: head
  * Description:  24x24 pixels, 16-bits per pixel
  ***********************************/
-IMAGE_EXTERNAL head = 
+const IMAGE_EXTERNAL head = 
 {
     (EXTERNAL | IMAGE_MBITMAP | COMP_NONE),
     0x0000,
@@ -291,14 +299,12 @@ IMAGE_EXTERNAL head =
  * Description:  Height: 58 pixels, 1 bit per pixel, Range: ' ' to ':'
  * Comment Block:
  * Created from Gentium font. 
- * Gentium font is Copyright (c) 2003-2005, SIL International 
- * (http://scripts.sil.org/). 
+ * Gentium font is Copyright (c) 2003-2005, SIL International (http://scripts.sil.org/). 
  * All Rights Reserved. 
- * Gentium font is licensed under the SIL Open Font 
- * License, Version 1.0. 
+ * Gentium font is licensed under the SIL Open Font License, Version 1.0. 
  * http://scripts.sil.org/OFL 
  ***********************************/
-FONT_EXTERNAL BigFonts = 
+const FONT_EXTERNAL BigFonts = 
 {
     (EXTERNAL | COMP_NONE),
     0x0000,

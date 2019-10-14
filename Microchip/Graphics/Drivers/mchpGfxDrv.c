@@ -80,6 +80,14 @@
  * 01/12/12        Modified OutChar(), GetTextWidth(), GetTextHeight and SetFont()
  *                 functions to use Primitive Layer routines when performing 
  *                 PutPixel() text rendering.
+ * 03/16/12        - Fixed error in calculating AMWAIT when device access time is 
+ *                   larger than 3 Tam.
+ *                 - Fixed PMA singal enabling to match the actual device size. 
+ *                 - Fixed SetPaletteFlash() to program colors from any
+ *                   address loaction of the Color Look Up Table (CLUT).
+ * 05/17/12        - corrected DPPOWER usage.
+ *                 - Added PutImagePartial() support.    
+ * 06/15/12        - Added Alpha Blend lite support to Bar().
  *****************************************************************************/
 #include "HardwareProfile.h"
    
@@ -104,6 +112,15 @@
     extern WORD PendingLength;
 
 #endif
+
+// Clipping region control
+SHORT       _clipRgn;
+
+// Clipping region borders
+SHORT       _clipLeft;
+SHORT       _clipTop;
+SHORT       _clipRight;
+SHORT       _clipBottom;
 
 #ifdef USE_DOUBLE_BUFFERING
 
@@ -193,16 +210,6 @@ GFX_COLOR   _colorTransparent;
 SHORT       _colorTransparentEnable;
 #endif
 
-
-// Clipping region control
-SHORT       _clipRgn;
-
-// Clipping region borders
-SHORT       _clipLeft;
-SHORT       _clipTop;
-SHORT       _clipRight;
-SHORT       _clipBottom;
-
 // work areas base addresses
 volatile DWORD 		_workArea1BaseAddr;
 volatile DWORD 		_workArea2BaseAddr;
@@ -237,12 +244,29 @@ void EPMP_Init(void)
 	*/
 
 #if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
-    // calculate the divider if using external memory, calcAMWAIT is the minimum EPMP Alternate Master Transfer 
-    // from (1000000000ul) / (DWORD)((CLKDIVbits.G1CLKSEL == 1)? 96000000ul : 48000000ul);
-    // there is a factor of 100 to take care of the two decimal places on the calculation
-    volatile WORD gfxClockPeriod = (CLKDIVbits.G1CLKSEL == 1)? 1041 : 2083; 
+
+    volatile WORD gfxAccessTime; 
 	    	 WORD deviceAccessTime;
 
+    /* Depends on the selected clock source frequency calculate the divider if using 
+       external memory, calcAMWAIT is the minimum EPMP Alternate Master Transfer 
+       from (1000000000ul) / (DWORD)((CLKDIVbits.G1CLKSEL == 1)? 96000000ul : 48000000ul);
+       there is a factor of 100 to take care of the two decimal places on the calculation
+
+    */
+    if (CLKDIVbits.G1CLKSEL == 1)
+        gfxAccessTime = 1041; // from 1/96 Mhz 
+    else
+        gfxAccessTime = 2083; // from 1/48 Mhz 
+
+    /* Note:
+        When using devices that has Alternate PMP pin configuration (ALTPMP)
+        there are address pins that are remapped to other pins to free
+        up some analog pins. Make sure the pins assigned to address lines 
+        PMA[x] are set to digital mode.
+        See Device Data Sheet for details.
+    */
+    // Assuming ALTPMP = 0 
     ANSDbits.ANSD7 = 0;   // PMD15
     ANSDbits.ANSD6 = 0;   // PMD14
     ANSFbits.ANSF0 = 0;   // PMD11
@@ -257,6 +281,14 @@ void EPMP_Init(void)
     ANSAbits.ANSA7 = 0;   // PMA17
     ANSGbits.ANSG6 = 0;   // PMA18
 
+    // uncomment corresponding lines if PMA22:19] is/are used
+    // as device address lines
+    //ANSEbits.ANSE9 = 0;   // PMA19
+    //ANSGbits.ANSG7 = 0;   // PMA20
+    //ANSGbits.ANSG8 = 0;   // PMA21
+    //ANSCbits.ANSC4 = 0;   // PMA22
+
+
 	PMCON1bits.ADRMUX = 0;	    								// address is not multiplexed
 	PMCON1bits.MODE = 3;        								// master mode
 	PMCON1bits.CSF = 0;         								// PMCS1 pin used for chip select 1, PMCS2 pin used for chip select 2
@@ -268,16 +300,25 @@ void EPMP_Init(void)
 
 		PMCS1BS = (GFX_EPMP_CS1_BASE_ADDRESS>>8);				// CS1 start address
 		
-		// check if how many address lines to use
-		// check for 17 address lines (PMA[16:0])
-		// note that GFX_EPMP_CS1_MEMORY_SIZE is in bytes
-		#if ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x40000)
-			PMCON3 |= 0x0001;           						// PMA16 address line is enabled 
-		#elif ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x80000)
-			PMCON3 |= 0x0003;     								// PMA17, PMA16 address lines are enabled 
-		#else // ((GFX_EPMP_CS1_MEMORY_SIZE) > 0x80000)
-			PMCON3 |= 0x0007;     								// PMA18, PMA17, PMA16 address lines are enabled 
-		#endif	     					
+		// check if how many address lines to use 
+        // Note: 
+        //      - GFX_EPMP_CS1_MEMORY_SIZE is word (2 bytes) count
+        //      - assumes that the PMA[x] signal/pin is mapped to an actual device
+#if   (((GFX_EPMP_CS1_MEMORY_SIZE) > 0x10000ul)  && ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x20000ul))
+        PMCON3 |= 0x0001;                                       // PMA16 address line is enabled 
+#elif (((GFX_EPMP_CS1_MEMORY_SIZE) > 0x20000ul)  && ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x40000ul))
+        PMCON3 |= 0x0003;                                       // PMA[17:16] address lines are enabled 
+#elif (((GFX_EPMP_CS1_MEMORY_SIZE) > 0x40000ul)  && ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x80000ul))
+        PMCON3 |= 0x0007;                                       // PMA[18:16] address lines are enabled 
+#elif (((GFX_EPMP_CS1_MEMORY_SIZE) > 0x80000ul)  && ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x100000ul))
+        PMCON3 |= 0x000F;                                       // PMA[19:16] address lines are enabled 
+#elif (((GFX_EPMP_CS1_MEMORY_SIZE) > 0x100000ul) && ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x200000ul))
+        PMCON3 |= 0x001F;                                       // PMA[20:16] address lines are enabled 
+#elif (((GFX_EPMP_CS1_MEMORY_SIZE) > 0x200000ul) && ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x400000ul))
+        PMCON3 |= 0x003F;                                       // PMA[21:16] address lines are enabled 
+#elif (((GFX_EPMP_CS1_MEMORY_SIZE) > 0x400000ul) && ((GFX_EPMP_CS1_MEMORY_SIZE) <= 0x800000ul))
+        PMCON3 |= 0x007F;                                       // PMA[22:16] address lines are enabled 
+#endif           
 
 		PMCS1CFbits.CSDIS = 0;      							// enable CS
 		PMCS1CFbits.CSP = EPMPCS1_CS_POLARITY;        			// CS1 polarity 
@@ -294,14 +335,14 @@ void EPMP_Init(void)
 		// Calculate the AMWAIT cycles to satisfy the access time of the device
         deviceAccessTime = EPMPCS1_ACCESS_TIME*100;
 
-		if ((deviceAccessTime) < gfxClockPeriod)
+        if ((deviceAccessTime) < gfxAccessTime)
 		    PMCS1MDbits.AMWAIT = 0;
-		else if (deviceAccessTime >= gfxClockPeriod)
+		else if (deviceAccessTime >= gfxAccessTime)
 		{
-            PMCS1MDbits.AMWAIT = (deviceAccessTime/gfxClockPeriod);
-            if ((deviceAccessTime % gfxClockPeriod) > 0)
+            PMCS1MDbits.AMWAIT = (deviceAccessTime/gfxAccessTime);
+            if ((deviceAccessTime % gfxAccessTime) > 0)
                 PMCS1MDbits.AMWAIT += 1;
-        }          
+        }   
 
 	#else
 			PMCS1CFbits.CSDIS = 1;       						// disable CS1 functionality  
@@ -311,13 +352,25 @@ void EPMP_Init(void)
 
 		PMCS2BS = (GFX_EPMP_CS2_BASE_ADDRESS>>8);				// CS2 start address
 
-		#if ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x40000)
-			PMCON3 |= 0x0001;           						// PMA16 address line is enabled 
-		#elif ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x80000)
-			PMCON3 |= 0x0003;     								// PMA17, PMA16 address lines are enabled 
-		#else // ((GFX_EPMP_CS2_MEMORY_SIZE) > 0x80000)
-			PMCON3 |= 0x0007;     								// PMA18, PMA17, PMA16 address lines are enabled 
-		#endif	     					
+		// check if how many address lines to use 
+        // Note: 
+        //      - GFX_EPMP_CS2_MEMORY_SIZE is in word (2 bytes) count
+        //      - assumes that the PMA[x] signal/pin is mapped to an actual device
+#if   (((GFX_EPMP_CS2_MEMORY_SIZE) > 0x10000ul)  && ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x20000ul))
+        PMCON3 |= 0x0001;                                       // PMA16 address line is enabled 
+#elif (((GFX_EPMP_CS2_MEMORY_SIZE) > 0x20000ul)  && ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x40000ul))
+        PMCON3 |= 0x0003;                                       // PMA[17:16] address lines are enabled 
+#elif (((GFX_EPMP_CS2_MEMORY_SIZE) > 0x40000ul)  && ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x80000ul))
+        PMCON3 |= 0x0007;                                       // PMA[18:16] address lines are enabled 
+#elif (((GFX_EPMP_CS2_MEMORY_SIZE) > 0x80000ul)  && ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x100000ul))
+        PMCON3 |= 0x000F;                                       // PMA[19:16] address lines are enabled 
+#elif (((GFX_EPMP_CS2_MEMORY_SIZE) > 0x100000ul) && ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x200000ul))
+        PMCON3 |= 0x001F;                                       // PMA[20:16] address lines are enabled 
+#elif (((GFX_EPMP_CS2_MEMORY_SIZE) > 0x200000ul) && ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x400000ul))
+        PMCON3 |= 0x003F;                                       // PMA[21:16] address lines are enabled 
+#elif (((GFX_EPMP_CS2_MEMORY_SIZE) > 0x400000ul) && ((GFX_EPMP_CS2_MEMORY_SIZE) <= 0x800000ul))
+        PMCON3 |= 0x007F;                                       // PMA[22:16] address lines are enabled 
+#endif           
 
 		PMCS2CFbits.CSDIS = 0;      							// enable CS
 
@@ -334,15 +387,14 @@ void EPMP_Init(void)
 		// Calculate the AMWAIT cycles to satisfy the access time of the device
         deviceAccessTime = EPMPCS2_ACCESS_TIME*100;
 
-		if ((deviceAccessTime) < gfxClockPeriod)
+		if ((deviceAccessTime) < gfxAccessTime)
 		    PMCS2MDbits.AMWAIT = 0;
-		else if (deviceAccessTime >= gfxClockPeriod)
+		else if (deviceAccessTime >= gfxAccessTime)
 		{
-            PMCS2MDbits.AMWAIT = (deviceAccessTime/gfxClockPeriod);
-            if ((deviceAccessTime % gfxClockPeriod) > 0)
+            PMCS2MDbits.AMWAIT = (deviceAccessTime/gfxAccessTime);
+            if ((deviceAccessTime % gfxAccessTime) > 0)
                 PMCS2MDbits.AMWAIT += 1;
         }          
-
 
 	#else	
 		PMCS2CFbits.CSDIS = 1;       							// disable CS2 functionality  
@@ -457,10 +509,9 @@ void ResetDevice(void)
     #endif
     
     #ifdef GFX_DISPLAYPOWER_ENABLE
-    	// set the display power (GPWR) signal polarity 
-        _DPPOWER = GFX_DISPLAYPOWER_POLARITY;
+        // enable the GPWR pin, when this is enabled it can be used
+        // to control external power circuitry for the display
         _DPPWROE = 1;
-    
     #endif
     
     /* Display timing signal configurations */
@@ -533,9 +584,14 @@ void ResetDevice(void)
 
     DelayMs(100);
     
-    _DPPWROE = 1;					// enable the display power sequencer port to function as GPWR
-    _DPPOWER = 1;					// turn on the display power sequencer	
-
+    // Turn on the display refresh sequence. This control signal
+    // will be reflected in GPWR pin if  _DPPWROE is set to 1.
+    // GPWR will immediately be set to 1 after DPPOWER bit is set.
+    // Actual refresh sequence will be delayed and the delay is set 
+    // by GICLUTWR<15:0> x 64 GCLK Cycles. 
+    // Refer to the Graphics Module FRM document for details.
+    // Section 43.7 DISPLAY POWER SEQUENCING
+    _DPPOWER = 1;					
 
 #ifdef USE_DOUBLE_BUFFERING
     // initialize double buffering feature
@@ -758,7 +814,7 @@ inline WORD __attribute__ ((always_inline)) ROPBlockInline(DWORD srcAddr,   DWOR
 {
 	DWORD_VAL workArea1Temp, workArea2Temp;
 	
-	GFX_WaitForCommandQueue(16);
+	GFX_WaitForCommandQueue(GFX_COMMAND_QUEUE_LENGTH);
     GFX_WaitForGpu();
     
     // store the work area settings temporarily
@@ -784,7 +840,7 @@ inline WORD __attribute__ ((always_inline)) ROPBlockInline(DWORD srcAddr,   DWOR
         dstType = RCC_DEST_ADDR_CONTINUOUS;
 	GFX_RCC_StartCopy(copyOp, rop, srcType, dstType);
 
-    GFX_WaitForCommandQueue(16);
+    GFX_WaitForCommandQueue(GFX_COMMAND_QUEUE_LENGTH);
     GFX_WaitForGpu();
 
     // restore the work area settings 
@@ -1078,10 +1134,10 @@ WORD Scroll(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT delta, WORD 
     SHORT width, height;
 
 	// make sure there are no pending RCC GPU commands
-    if(GFX_GetFreeCommandSpace() < 16)
+    if(GFX_GetFreeCommandSpace() < GFX_COMMAND_QUEUE_LENGTH)
     {
         #ifndef USE_NONBLOCKING_CONFIG
-            GFX_WaitForCommandQueue(16);
+            GFX_WaitForCommandQueue(GFX_COMMAND_QUEUE_LENGTH);
         #else
             return (0);
         #endif
@@ -1316,8 +1372,26 @@ GFX_COLOR GetPixel(SHORT x, SHORT y)
 ********************************************************************/
 WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 {
-    DWORD address;
+    DWORD srcOffsetAddr;
     SHORT width, height;
+
+#ifdef USE_ALPHABLEND_LITE
+
+    DWORD srcAddr;
+    BYTE TempGPUBpp; 
+
+    #define MASK_50_PERCENT 0b1111011111011110
+    #define MASK_25_PERCENT 0b1110011110011100
+
+    WORD resLineBuffer[GetMaxX()];      // resulting colors
+    WORD rawLineBuffer[GetMaxX()];      // raw data 
+    WORD sf1LineBuffer[GetMaxX()];      // shifted line buffer
+    WORD sf2LineBuffer[GetMaxX()];      // shifted line buffer
+    WORD mask, p, y, shift;
+
+    GFX_COLOR fcolor;
+
+#endif
 
     if(left > right)
     {
@@ -1383,28 +1457,212 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 
     #endif
 
-    if(GFX_GetFreeCommandSpace() < 4)
+#ifdef USE_ALPHABLEND_LITE
+
+    if (GetAlpha() != 100)
     {
-        #ifndef USE_NONBLOCKING_CONFIG
-            GFX_WaitForCommandQueue(4);
+    
+        /*
+            When alpha blending a bar to the display buffer the operation performed is this:
+    
+            for 50: newColor = ConvertColor50(fcolor) + ConvertColor50(bcolor); break;
+            for 25: newColor = ConvertColor25(fcolor) + ConvertColor75(bcolor); break;
+            for 75: newColor = ConvertColor75(fcolor) + ConvertColor25(bcolor); break;
+    
+            where:
+                #define ConvertColor50(color)  (GFX_COLOR)((color & (0b1111011111011110))>>1)
+                #define ConvertColor25(color)  (GFX_COLOR)((color & (0b1110011110011100))>>2)
+                #define ConvertColor75(color)  (GFX_COLOR)(ConvertColor50(color) + ConvertColor25(color))
+            
+        */
+
+        TempGPUBpp = _PUBPP;
+    
+        // Get the current set color (shift depending on the alpha percentage)
+        // this calculates the resulting foreground color that will be added to the 
+        // resulting background color (operation depends on the alpha percentage)
+        fcolor = GetColor();
+
+        switch(GetAlpha())
+        {
+            case 50: 
+                fcolor = ConvertColor50(fcolor); 
+                mask = MASK_50_PERCENT;
+                shift = 1;
+                break;
+            case 25: 
+                fcolor = ConvertColor25(fcolor); 
+                mask = MASK_50_PERCENT;
+                shift = 1;
+                break;
+            case 75: 
+                fcolor = ConvertColor75(fcolor); 
+                mask = MASK_25_PERCENT;
+                shift = 2;
+                break;
+            default:   
+                // any other alpha percentage value is not supported and should never happen
+                // so just exit the function.
+                return 1;
+        }
+    
+        // just to make sure set the work area bpp to 16 bpp
+        _PUBPP = GFX_16_BPP;
+    
+        // grab a line from the target 
+        #ifdef USE_DOUBLE_BUFFERING
+            srcAddr = _drawbuffer;
         #else
-            return (0);
+            srcAddr = _workArea2BaseAddr; 
         #endif
+        
+        for(y=top; y < bottom; y++)
+        {
+    
+            srcOffsetAddr = (y * (DWORD)DISP_HOR_RESOLUTION) + left;
+            
+            // get a line from the target memory
+            ROPBlock(   srcAddr, (DWORD)(WORD)rawLineBuffer, srcOffsetAddr, 0, 
+        			    GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, 
+                        RCC_COPY, RCC_ROP_C, 0, width, 1);
+    
+            if(GetPrevAlphaColor() != BLACK)
+            {
+                for (p=0; p<width;p++)
+                {
+                    switch(GetAlpha())
+                    {
+                        case 50: 
+                            resLineBuffer[p] = (rawLineBuffer[p] - ConvertColor50(GetPrevAlphaColor())) + fcolor;
+                            break;
+                        case 75: 
+                            resLineBuffer[p] = (rawLineBuffer[p] - ConvertColor75(GetPrevAlphaColor())) + fcolor;
+                            break;
+                        case 25: 
+                            resLineBuffer[p] = (rawLineBuffer[p] - ConvertColor25(GetPrevAlphaColor())) + fcolor;
+                            break;
+                        default: 
+                            break;
+                    }
+                }
+            }
+            else
+            {    
+                // now the rawLineBuffer has a the raw line data 
+                // do an AND with the mask
+               ROPBlock(    0, (DWORD)(WORD)rawLineBuffer, 0, 0, 
+            			    GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, 
+                            RCC_SOLID_FILL, RCC_ROP_8, mask, width, 1);
+            
+    
+                // at this point rawLineBuffer has been masked
+                // do the shift once
+    
+                // set to 1 bpp since we are shifting on the bit level
+                _PUBPP = GFX_1_BPP;    
+            
+                //set the offset of source by the shift value (1 for 50% & 25% and 2 for 75%)
+                ROPBlock(   (DWORD)(WORD)rawLineBuffer, (DWORD)(WORD)sf1LineBuffer, shift, 0, 
+            			    GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, 
+                            RCC_COPY, RCC_ROP_C, 0, (width<<4)-shift, 1);
+    
+                // set the MSBits and LSBits of the line to zero (first and last entry)
+                if (shift == 1)
+                {
+                    sf1LineBuffer[0] = sf1LineBuffer[0] & (0x7FFF);
+                    sf1LineBuffer[width-1] = sf1LineBuffer[width-1] & (0xFFFE);
+                }
+                if (shift == 2)
+                {
+                    sf1LineBuffer[0] = sf1LineBuffer[0] & (0x3FFF);
+                    sf1LineBuffer[width-1] = sf1LineBuffer[width-1] & (0xFFFC);
+                }
+        
+                // at this point sf1LineBuffer will contain 50% of the background when shift == 1
+                // or contain 25% of the background when shift == 2
+    
+    
+                if (GetAlpha() == 25)
+                {
+    
+                    // rawLineBuffer still has the raw data but was masked for 50%
+                    // therefore if we mask for 25% it does not matter
+                    _PUBPP = GFX_16_BPP;   
+    
+                    // mask operation
+                    ROPBlock(   0, (DWORD)(WORD)rawLineBuffer, 0, 0, 
+            			        GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, 
+                                RCC_SOLID_FILL, RCC_ROP_8, MASK_25_PERCENT, width, 1);
+    
+                    _PUBPP = GFX_1_BPP;    
+    
+                    // shift operation (shift to get 25%)
+                    ROPBlock(   (DWORD)(WORD)rawLineBuffer, (DWORD)(WORD)sf2LineBuffer, 2, 0, 
+                			    GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, 
+                                RCC_COPY, RCC_ROP_C, 0, (width<<4)-2, 1);
+    
+    
+                    // set the MSBs of the first entry in array to zero
+                    sf2LineBuffer[0] = sf2LineBuffer[0] & 0x7FFF;
+                    sf2LineBuffer[width-1] = sf2LineBuffer[width-1] & (0xFFFE);
+                }
+        
+                for (p=0; p<width; p++)
+                {
+                    switch(GetAlpha())
+                    {
+                        case 50 : 
+                        case 75 : 
+                            resLineBuffer[p] = fcolor + sf1LineBuffer[p]; 
+                            break;
+                        case 25 : 
+                            resLineBuffer[p] = fcolor + sf1LineBuffer[p] + sf2LineBuffer[p]; 
+                            break;
+                        default :
+                            break;    
+                    }
+                }
+    
+                _PUBPP = GFX_16_BPP;    
+            }   // end of -- if(GetPrevAlphaColor() != BLACK) else 
+            
+            // copy back the results to the display
+            ROPBlock(   (DWORD)(WORD)resLineBuffer, srcAddr, 0, srcOffsetAddr, 
+        			    GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, 
+                        RCC_COPY, RCC_ROP_C, 0, width, 1);
+    
+        } // end of -- for(y=top; y < bottom; y++)
+    
+        _PUBPP = TempGPUBpp;
+
+    }
+    else
+#endif
+
+    {
+        if(GFX_GetFreeCommandSpace() < GFX_COMMAND_QUEUE_LENGTH)
+        {
+            #ifndef USE_NONBLOCKING_CONFIG
+                GFX_WaitForCommandQueue(GFX_COMMAND_QUEUE_LENGTH);
+            #else
+                return (0);
+            #endif
+        }
+    
+        srcOffsetAddr = (top * (DWORD)DISP_HOR_RESOLUTION) + left;
+    
+        #ifdef USE_DOUBLE_BUFFERING
+            GFX_SetWorkArea2(_drawbuffer);
+        #else
+            GFX_SetWorkArea2(GFX_GetDisplayArea()); 
+        #endif
+    
+        GFX_RCC_SetColor(GetColor());
+        GFX_RCC_SetDestOffset(srcOffsetAddr);
+        GFX_RCC_SetSize(width, height);
+        GFX_RCC_StartCopy(RCC_SOLID_FILL, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
     }
 
-    address = (top * (DWORD)DISP_HOR_RESOLUTION) + left;
-
-    #ifdef USE_DOUBLE_BUFFERING
-        GFX_SetWorkArea2(_drawbuffer);
-    #else
-        GFX_SetWorkArea2(GFX_GetDisplayArea()); 
-    #endif
-
-    GFX_RCC_SetColor(GetColor());
-    GFX_RCC_SetDestOffset(address);
-    GFX_RCC_SetSize(width, height);
-    GFX_RCC_StartCopy(RCC_SOLID_FILL, RCC_ROP_C, RCC_SRC_ADDR_DISCONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
-    
     /* Note: No need to wait for  complete execution of the command even for Blocking Mode. The next commands will be in the queue & hence will execute only after the completion of this command. */
     return (1);
 }
@@ -1465,7 +1723,6 @@ void ClearDevice(void)
 * Note: none
 *
 ********************************************************************/
-
 WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 {
     SHORT   deltaX, deltaY;
@@ -1749,7 +2006,7 @@ void SetFontEds(void *pFont)
     _PUBPP = GFX_8_BPP;
 
     // grab the font header from memory
-    while(!ROPBlock( ((FONT_EXTERNAL*) pFont)->address, (DWORD)&(currentFont.fontHeader), 0, 0, 					\
+    while(!ROPBlock( ((FONT_EXTERNAL*) pFont)->address, (DWORD)(WORD)&(currentFont.fontHeader), 0, 0, 					\
 	                   GFX_DATA_CONTINUOUS, GFX_DATA_CONTINUOUS, RCC_COPY, RCC_ROP_C, 0,   \
                        sizeof(FONT_HEADER), 1));
 
@@ -2285,13 +2542,14 @@ SHORT GetImageHeight(void *image)
     #ifdef USE_BITMAP_FLASH
 
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
 *        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to partial image parameters
 *
 * Output: none
 *
@@ -2302,7 +2560,7 @@ SHORT GetImageHeight(void *image)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
@@ -2330,6 +2588,8 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 #endif
 
     CHAR                testStretch = (stretch == IMAGE_NORMAL) ? 0x00 : 0x01;
+    WORD                addressOffset = 0, adjOffset;
+    BYTE                maskOffset = 0;     // adjusted offset for partial image rendering
 
 
     // Move pointer to size information
@@ -2345,13 +2605,41 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     palette[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-	if (stretch == IMAGE_X2) {
-		outputSize = sizeX << 1;
-	}   	
-	else //if (stretch == IMAGE_NORMAL)
-	{
-		outputSize = sizeX;
-	}
+    if (sizeX & 0x07)
+        adjOffset = 1; 
+    else
+        adjOffset = 0;
+
+    // compute for addressOffset this is the offset needed to jump to the 
+    // next line 
+    addressOffset = ((sizeX >> 3) + adjOffset); 
+
+    if(pPartialImageData->width != 0)
+    {
+
+        // adjust the flashAddress to the starting pixel location
+        // adjust one address if the data is not byte aligned
+        flashAddress += (pPartialImageData->yoffset*((sizeX >> 3) + adjOffset));
+
+        // adjust flashAddress for x offset (if xoffset is zero address stays the same)
+        flashAddress += ((pPartialImageData->xoffset) >> 3);
+
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+
+        // check the bit position of the starting pixel
+        maskOffset = pPartialImageData->xoffset & 0x07;
+    }
+    
+    if (stretch == IMAGE_X2) {
+        outputSize = sizeX << 1;
+    }   	
+    else //if (stretch == IMAGE_NORMAL)
+    {
+        outputSize = sizeX;
+    }
+
 	// area of the buffer to use is only the area that
 	// spans the viewable area
 	if ((outputSize > GetMaxX()+1) || (left + outputSize > GetMaxX()+1))
@@ -2389,7 +2677,14 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 
         // get flash address location of current line being processed
         flashAddress = tempFlashAddress;
-        mask = 0;
+        if (maskOffset)
+		{
+            // grab the first set of data then set up the mask to the starting pixel
+			temp = *flashAddress++;
+            mask = 0x01 << maskOffset;
+        }
+        else
+            mask = 0;
 
 		// get the location of the line buffer 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
@@ -2441,7 +2736,9 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 		#endif
 
 
-		GFX_WaitForCommandQueue(3);
+        // check if previous RCCGPU copies are done so we do
+        // not overwrite the buffers still being copied.
+		GFX_WaitForCommandQueue(16);
     	GFX_WaitForGpu();
 
 		// process the pixels of the current line
@@ -2451,7 +2748,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             if(mask == 0)
 			{
 				temp = *flashAddress++;
-                mask = 0x80;
+                mask = 0x01;
             }
 
             // Set color
@@ -2576,7 +2873,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 
            	// Shift to the next pixel (note that if image is stretched, shifting is delayed)
        	    if (((x+1) & testStretch) == 0) 
-              	    mask >>= 1;		
+              	    mask <<= 1;		
 
         } // for(x = 0; x < xLimit; x++)
 
@@ -2593,9 +2890,9 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 	        #elif (DISP_ORIENTATION == 90)
 	    		GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
 	        #elif (DISP_ORIENTATION == 180)
-	    		GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+	    		GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
 	        #elif (DISP_ORIENTATION == 270)
-	    		GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+	    		GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 
 			#ifdef USE_TRANSPARENT_COLOR
@@ -2610,13 +2907,10 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 } 
 
 	        yc++;
-		} // for(stretchY = 0; stretchY < stretch; stretchY++)
 
-        // adjust for the next line data address 
-       	tempFlashAddress += (sizeX >> 3);
-		
-        if(sizeX & 0x07)
-            tempFlashAddress++;
+    	} // for(stretchY = 0; stretchY < stretch; stretchY++)
+
+        tempFlashAddress += addressOffset;
 
     } // for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
@@ -2626,7 +2920,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -2643,32 +2937,32 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 *
 ********************************************************************/
         #if (COLOR_DEPTH >= 4)
-
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
-    register WORD       x, y, yc;
+    WORD                x, y, yc;
 
     BYTE                temp = 0;
     BYTE       			stretchY;
     WORD                palette[16], color;
-    WORD                counter;
+    WORD            	*pData; 
     WORD                outputSize;
 	WORD				xLimit;
+    WORD                counter;
 
     WORD            	lineBuffer[(GetMaxX() + (DWORD) 1)];
-    WORD            	*pData; 
 
 #ifdef USE_PALETTE
-    BYTE            	*pByteData = NULL; // To supress warning 
+    BYTE            	*pByteData = NULL; 
 #if (COLOR_DEPTH == 4) && ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
-    BYTE nibblePos = 0;
+    BYTE                nibblePos = 0;
 #endif
 #endif
 
     CHAR                testStretch = (stretch == IMAGE_NORMAL) ? 0x01 : 0x03;
+    WORD                nibbleOffset = 0, addressOffset = 0, adjOffset;
 
     // Move pointer to size information
     flashAddress = image + 2;
@@ -2679,6 +2973,39 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
+    // Read palette
+    for(counter = 0; counter < 16; counter++)
+    {
+        palette[counter] = *((FLASH_WORD *)flashAddress);
+        flashAddress += 2;
+    }
+
+    if (sizeX & 0x01)
+        adjOffset = 1; 
+    else
+        adjOffset = 0;
+
+    // compute for addressOffset this is the offset needed to jump to the 
+    // next line 
+    addressOffset = ((sizeX >> 1) + adjOffset); 
+
+    if(pPartialImageData->width != 0)
+    {
+        // check the bit position of the starting pixel
+        nibbleOffset = pPartialImageData->xoffset & 0x01;
+
+        // adjust the flashAddress to the starting pixel location
+        // adjust one address if the data is not byte aligned
+        flashAddress += (pPartialImageData->yoffset*((sizeX >> 1) + adjOffset));
+
+        // adjust flashAddress for x offset (if xoffset is zero address stays the same)
+        flashAddress += ((pPartialImageData->xoffset - nibbleOffset) >> 1);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width + nibbleOffset;
+
+    }
+
 	if (stretch == IMAGE_X2) {
 		outputSize = sizeX << 1;
 	}   	
@@ -2688,9 +3015,9 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 	}
 	// area of the buffer to use is only the area that
 	// spans the viewable area
-	if ((outputSize > GetMaxX()+1) || ((left + outputSize) > (GetMaxX()+1)))
+	if ((outputSize > (GetMaxX()+1)) || ((left + outputSize) > (GetMaxX()+1)))
 		outputSize = GetMaxX() + 1 - left; 		
-		
+
 	GFX_WaitForCommandQueue(16);
 	GFX_WaitForGpu();
 
@@ -2700,14 +3027,12 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 	#else
         GFX_SetWorkArea2(GFX_GetDisplayArea());    
 	#endif
-	GFX_RCC_SetSrcOffset(0);
 
-    // Read palette
-    for(counter = 0; counter < 16; counter++)
-    {
-        palette[counter] = *((FLASH_WORD *)flashAddress);
-        flashAddress += 2;
-    }
+    #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+    	GFX_RCC_SetSrcOffset(nibbleOffset*stretch);
+    #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+    	GFX_RCC_SetSrcOffset(0);
+    #endif    
 
     yc = top;
 
@@ -2725,7 +3050,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             GFX_RCC_SetColor(_colorTransparent);
     #endif	    
 
-	for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
+    for(y = 0; (y < sizeY) && (yc <= GetMaxY()); y++)
     {
 
 		// get flash address location of current line being processed
@@ -2756,7 +3081,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 #if (COLOR_DEPTH == 4)
 
                     pByteData += outputSize / 2;
-					nibblePos = (outputSize & 0x01);	
+                    nibblePos = (outputSize & 0x01);	
                     if(nibblePos == 0)
                     {
                         pByteData--;
@@ -2767,8 +3092,9 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 
         #endif
 
-
-		GFX_WaitForCommandQueue(3);
+        // check if previous RCCGPU copies are done so we do
+        // not overwrite the buffers still being copied.
+		GFX_WaitForCommandQueue(16);
     	GFX_WaitForGpu();
 
 		// process the pixels of the current line
@@ -2792,17 +3118,17 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     	          	if(IsPaletteEnabled())
     	          	{
                         #if (COLOR_DEPTH == 8)
-                        *pByteData++ = (BYTE)color;
+                            *pByteData++ = (BYTE)color;
                         #endif
 
                         #if (COLOR_DEPTH == 4)
-                        if(x & 0x01)
-                        {
-                            *pByteData++ |= color << 4;
-                        } else
-                        {
-                            *pByteData = color & 0x0F;
-                        }
+                            if(x & 0x01)
+                            {
+                                *pByteData++ |= color << 4;
+                            } else
+                            {
+                                *pByteData = color & 0x0F;
+                            }
                         #endif
     	          	}
     	          	else
@@ -2821,7 +3147,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                         #endif
 
                         #if (COLOR_DEPTH == 4)
-                        if (nibblePos == 1)
+						if (nibblePos == 1)
                         {
                             *pByteData = ((*pByteData & 0xF0) | (color & 0x0F));
                             pByteData--;
@@ -2840,13 +3166,14 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 #else
                     *pData-- = color;
                 #endif
-       	    #endif			
-        } // for(x = 0; x < xLimit; x++) 
+       	    #endif			           	    
+       	    		
+        } // for(x = 0; x < xLimit; x++)
 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180))
-			GFX_RCC_SetSize(x, 1);
+			GFX_RCC_SetSize((x - (nibbleOffset*stretch)), 1);
 		#else	
-			GFX_RCC_SetSize(1, x);
+			GFX_RCC_SetSize(1, (x - (nibbleOffset*stretch)));
 		#endif
 	
 		for(stretchY = 0; stretchY < stretch; stretchY++)
@@ -2854,11 +3181,11 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             #if (DISP_ORIENTATION == 0) 
     			GFX_RCC_SetDestOffset((yc * (DWORD)DISP_HOR_RESOLUTION) + left);
             #elif (DISP_ORIENTATION == 90)
-    			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
+    			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize - (nibbleOffset*stretch))) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left + outputSize - (nibbleOffset*stretch)));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 
 			#ifdef USE_TRANSPARENT_COLOR
@@ -2872,11 +3199,12 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     		        GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                 } 
 
+			// update the vertical position counter
             yc++;
         }  // for(stretchY = 0; stretchY < stretch; stretchY++)
 
    	    // adjust for the next line data address 
-       	tempFlashAddress += ((sizeX>>1)+(sizeX&1));
+       	tempFlashAddress += addressOffset;
 					
     } // for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
@@ -2888,7 +3216,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
         #endif //#if (COLOR_DEPTH >= 4)
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -2906,7 +3234,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 ********************************************************************/
         #if (COLOR_DEPTH >= 8)
 
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
@@ -2926,6 +3254,8 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     BYTE            	*pByteData = NULL; // To supress warning 
     #endif
 
+    WORD                addressOffset;
+
     // Move pointer to size information
     flashAddress = image + 2;
 
@@ -2934,6 +3264,31 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     flashAddress += 2;
     sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
+
+    // Read palette
+    for(counter = 0; counter < 256; counter++)
+    {
+        palette[counter] = *((FLASH_WORD *)flashAddress);
+        flashAddress += 2;
+    }
+
+    // compute for addressOffset this is the offset needed to jump to the 
+    // next line 
+    addressOffset = sizeX; 
+
+    if(pPartialImageData->width != 0)
+    {
+        // adjust the flashAddress to the starting pixel location
+        // adjust one address if the data is not byte aligned
+        flashAddress += (pPartialImageData->yoffset*sizeX);
+
+        // adjust flashAddress for x offset (if xoffset is zero address stays the same)
+        flashAddress += (pPartialImageData->xoffset);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+
+    }
 
 	if (stretch == IMAGE_X2) {
 		outputSize = sizeX << 1;
@@ -2959,14 +3314,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 	#endif
     
 	GFX_RCC_SetSrcOffset(0);
-
-    // Read palette
-    for(counter = 0; counter < 256; counter++)
-    {
-        palette[counter] = *((FLASH_WORD *)flashAddress);
-        flashAddress += 2;
-    }
-
+    
     yc = top;
 
     // store current line data address 
@@ -3014,7 +3362,9 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 
 	    #endif
 
-		GFX_WaitForCommandQueue(3);
+        // check if previous RCCGPU copies are done so we do
+        // not overwrite the buffers still being copied.
+		GFX_WaitForCommandQueue(16);
 		GFX_WaitForGpu();
 
 		// process the pixels of the current line
@@ -3098,9 +3448,9 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 			
 			#ifdef USE_TRANSPARENT_COLOR
@@ -3118,7 +3468,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
         }  // for(stretchY = 0; stretchY < stretch; stretchY++)
 
    	    // adjust for the next line data address 
-        tempFlashAddress += (sizeX);
+        tempFlashAddress += (addressOffset);
 
     } // for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
@@ -3131,7 +3481,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
         #endif //#if (COLOR_DEPTH >= 8)
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -3148,7 +3498,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 *
 ********************************************************************/
  		#if (COLOR_DEPTH == 16)
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_WORD *flashAddress;
     register FLASH_WORD *tempFlashAddress;
@@ -3163,6 +3513,8 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     WORD            	lineBuffer[(GetMaxX() + (DWORD) 1)];
     WORD            	*pData; 
 
+    WORD                addressOffset;
+
 	// Move pointer to size information
     flashAddress = (FLASH_WORD *)image + 1;
 
@@ -3171,6 +3523,24 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     flashAddress++;
     sizeX = *flashAddress;
     flashAddress++;
+
+    // compute for addressOffset this is the offset needed to jump to the 
+    // next line 
+    addressOffset = sizeX; 
+
+    if(pPartialImageData->width != 0)
+    {
+        // adjust the flashAddress to the starting pixel location
+        // adjust one address if the data is not byte aligned
+        flashAddress += (pPartialImageData->yoffset*sizeX);
+
+        // adjust flashAddress for x offset (if xoffset is zero address stays the same)
+        flashAddress += (pPartialImageData->xoffset);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+
+    }
 
 	if (stretch == IMAGE_X2) 
 	    outputSize = sizeX << 1;
@@ -3221,7 +3591,9 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
            	pData = &lineBuffer[outputSize-1];
         #endif
 
-		GFX_WaitForCommandQueue(3);
+        // check if previous RCCGPU copies are done so we do
+        // not overwrite the buffers still being copied.
+		GFX_WaitForCommandQueue(16);
 		GFX_WaitForGpu();
 
 		// process the pixels of the current line
@@ -3259,9 +3631,9 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 			
 			#ifdef USE_TRANSPARENT_COLOR
@@ -3279,7 +3651,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
         }  // for(stretchY = 0; stretchY < stretch; stretchY++)
 
    	    // adjust for the next line data address 
-        tempFlashAddress += (sizeX);
+        tempFlashAddress += (addressOffset);
     } // for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
 	// make sure the GPUs are done before exiting
@@ -3293,7 +3665,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -3309,7 +3681,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -3340,6 +3712,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 #endif
 
     CHAR            testStretch = (stretch == IMAGE_NORMAL) ? 0x00 : 0x01;
+    BYTE            maskOffset = 0;     // adjusted offset for partial image rendering
 
 
     // Get image header
@@ -3348,16 +3721,31 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 2 * sizeof(WORD), palette);
     // Set offset to the image data
 	memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
-	
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
 
-	// Line width in bytes
-    byteWidth = sizeX >> 3;
-    if(sizeX & 0x0007)
+	// Get the image line width in bytes
+    byteWidth = (bmp.width) >> 3;
+    if(bmp.width & 0x07)
         byteWidth++;	
-    
+	
+    if(pPartialImageData->width != 0)
+    {
+        // adjust to the location of the starting data for partial image rendering 
+        memOffset += pPartialImageData->yoffset*byteWidth;
+        memOffset += pPartialImageData->xoffset>>3;
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+
+        // check the bit position of the starting pixel
+        maskOffset = pPartialImageData->xoffset & 0x07;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
+
 	if (stretch == IMAGE_X2) {
 		outputSize = sizeX << 1;
 	}   	
@@ -3402,8 +3790,18 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 		// Get line
 	    ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
     	memOffset += byteWidth;
-    	
+
 	  	pData = lineBuffer;
+
+        if (maskOffset)
+		{
+            // grab the first set of data then set up the mask to the starting pixel
+			temp = *pData++;
+            mask = 0x01 << maskOffset;
+        }
+        else
+            mask = 0;
+    	
 		// get the location of the line buffer 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
           	pData2 = lineBuffer2;
@@ -3453,8 +3851,6 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 			#endif
         #endif
             
-		mask = 0;
-
 		// process the pixels of the current line
 		for(x = 0; x < xLimit; x++)
         {
@@ -3462,7 +3858,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 			if (mask == 0) 
 			{
 				temp = *pData++;
-				mask = 0x80;
+				mask = 0x01;
 			}	
 			if (mask & temp)
 			{
@@ -3575,10 +3971,12 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
        	    
            	// Shift to the next pixel (note that if image is stretched, shifting is delayed)
            	if (((x+1) & testStretch) == 0) 
-              	mask >>= 1;		       	    
+              	mask <<= 1;		       	    
         } // for(x = 0; x < xLimit; x++)
 
-		GFX_WaitForCommandQueue(5);
+		GFX_WaitForCommandQueue(16);
+    	GFX_WaitForGpu();
+
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180))
 			GFX_RCC_SetSize(x, 1);
 		#else	
@@ -3592,9 +3990,9 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 
 			#ifdef USE_TRANSPARENT_COLOR
@@ -3622,7 +4020,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -3639,54 +4037,67 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 *
 ********************************************************************/
         #if (COLOR_DEPTH >= 4)
-void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD  memOffset;
-    BITMAP_HEADER   bmp;
-    BYTE            lineBuffer[((GetMaxX() + (DWORD) 1) / 2) + 1];
-    WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
+    register DWORD      memOffset;
+    BITMAP_HEADER       bmp;
+    BYTE                readLineBuffer[((GetMaxX() + (DWORD) 1) / 2) + 1];
+    WORD                sizeX, sizeY;
+    WORD                x, y, yc;
 
-    WORD            palette[16], color;
-    BYTE            *pData; 
-	WORD			*pData2;
-    WORD 			outputSize;
-	WORD			xLimit;
-	WORD			*pBufAddr;
+    BYTE                temp = 0;
+    BYTE       			stretchY;
+    WORD                palette[16], color;
+    BYTE                *pReadData; 
+    WORD            	*pData; 
+    WORD                outputSize;
+	WORD				xLimit;
 
-    BYTE            temp = 0;
-    WORD            sizeX, sizeY;
-    WORD            x, y;
-    WORD            yc;
-    BYTE            stretchY;
+    WORD            	lineBuffer[(GetMaxX() + (DWORD) 1)];
 
-    SHORT           byteWidth;
+    SHORT               byteWidth;
 
 #ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; 
 #if (COLOR_DEPTH == 4) && ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
-    BYTE nibblePos = 0;
+    BYTE                nibblePos = 0;
 #endif
 #endif
 
     CHAR                testStretch = (stretch == IMAGE_NORMAL) ? 0x01 : 0x03;
-
+    WORD                nibbleOffset = 0; 
+	
     // Get image header
     ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
     // Get palette (16 entries)
     ExternalMemoryCallback(image, sizeof(BITMAP_HEADER), 16 * sizeof(WORD), palette);
     // Set offset to the image data
 	memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
-	
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
 
-	// Line width in bytes
-    byteWidth = sizeX >> 1;
-    if(sizeX & 0x0001)
+	// Get the image line width in bytes
+    byteWidth = (bmp.width) >> 1;
+    if(bmp.width & 0x01)
         byteWidth++;	
-    
-	yc = top;
+	
+    if(pPartialImageData->width != 0)
+    {
+        // check the bit position of the starting pixel
+        nibbleOffset = pPartialImageData->xoffset & 0x01;
+
+        // adjust to the location of the starting data for partial image rendering 
+        memOffset += pPartialImageData->yoffset * byteWidth;
+        memOffset += ((pPartialImageData->xoffset - nibbleOffset) >> 1);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width + nibbleOffset;
+
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
 	if (stretch == IMAGE_X2) {
 		outputSize = sizeX << 1;
@@ -3697,26 +4108,29 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 	}
 	// area of the buffer to use is only the area that
 	// spans the viewable area
-	if ((outputSize > (GetMaxX()+1)) || (left + outputSize > (GetMaxX()+1)))
+	if ((outputSize > (GetMaxX()+1)) || ((left + outputSize) > (GetMaxX()+1)))
 		outputSize = GetMaxX() + 1 - left; 		
-
-	pBufAddr = lineBuffer2;
 
 	GFX_WaitForCommandQueue(16);
 	GFX_WaitForGpu();
 
-   	GFX_SetWorkArea1((WORD)pBufAddr);
+   	GFX_SetWorkArea1((WORD)lineBuffer);
     #ifdef USE_DOUBLE_BUFFERING
 		GFX_SetWorkArea2(_drawbuffer);
 	#else
         GFX_SetWorkArea2(GFX_GetDisplayArea());    
 	#endif
-	GFX_RCC_SetSrcOffset(0);
+
+    #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
+    	GFX_RCC_SetSrcOffset(nibbleOffset*stretch);
+    #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
+    	GFX_RCC_SetSrcOffset(0);
+    #endif    
 
     yc = top;
 
 	// some pre-calculations
-	if (outputSize <= GetMaxX() - left)
+	if (outputSize <= (GetMaxX() - left))
 		xLimit = outputSize;
 	else	 
 		xLimit = GetMaxX() - left + 1;
@@ -3730,26 +4144,26 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     {
 
 		// Get line
-	    ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+	    ExternalMemoryCallback(image, memOffset, byteWidth, readLineBuffer);
     	memOffset += byteWidth;
     	
-	  	pData = lineBuffer;
+	  	pReadData = readLineBuffer;
 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
-          	pData2 = lineBuffer2;
+          	pData = lineBuffer;
             #ifdef USE_PALETTE
             	if(IsPaletteEnabled())
             	{
-            	    pByteData = (BYTE*)lineBuffer2;
+            	    pByteData = (BYTE*)lineBuffer;
             	}    
             #endif
         #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
-           	pData2 = &lineBuffer2[outputSize-1];
+           	pData = &lineBuffer[outputSize-1];
 
             #ifdef USE_PALETTE
             if(IsPaletteEnabled())
             {
-                pByteData = (BYTE*)lineBuffer2;
+                pByteData = (BYTE*)lineBuffer;
 
                 #if (COLOR_DEPTH == 8)
                     pByteData += outputSize;
@@ -3759,26 +4173,28 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                 #if (COLOR_DEPTH == 4)
 
                     pByteData += outputSize / 2;
-					nibblePos = (outputSize & 0x01);
+                    nibblePos = (outputSize & 0x01);	
                     if(nibblePos == 0)
-					{
+                    {
                         pByteData--;
-					}
-				#endif
-
+                    }
+                #endif
             }
 			#endif
 
         #endif
 
+        // check if previous RCCGPU copies are done so we do
+        // not overwrite the buffers still being copied.
+		GFX_WaitForCommandQueue(16);
+    	GFX_WaitForGpu();
 
 		// process the pixels of the current line
         for(x = 0; x < xLimit; x++)
-        {
-
+        {            
             // take one pixel data when needed 
             if ((x & testStretch) == 0)
-            	temp = *pData++; 
+            	temp = *pReadData++; 
 
             #ifdef USE_PALETTE
                	if(IsPaletteEnabled())
@@ -3788,34 +4204,34 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
             #else
                 color = palette[(temp >> (((x>>(stretch-1))&0x0001)*4)) & 0x000F];
             #endif	            
-            
+
             #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
                 #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
                         #if (COLOR_DEPTH == 8)
-                        *pByteData++ = (BYTE)color;
+                            *pByteData++ = (BYTE)color;
                         #endif
 
                         #if (COLOR_DEPTH == 4)
-                        if(x & 0x01)
-                        {
-                            *pByteData++ |= color << 4;
-                        }else
-                        {
-                            *pByteData = color & 0x0F;
-                        }
+                            if(x & 0x01)
+                            {
+                                *pByteData++ |= color << 4;
+                            } else
+                            {
+                                *pByteData = color & 0x0F;
+                            }
                         #endif
     	          	}
     	          	else
     	          	{
-                        *pData2++ = color;
+                        *pData++ = color;
     	          	}    
                 #else
-                	*pData2++ = color;
+                    *pData++ = color;
                 #endif
             #elif ((DISP_ORIENTATION == 180) || (DISP_ORIENTATION == 90))   
-               #ifdef USE_PALETTE
+                #ifdef USE_PALETTE
     	          	if(IsPaletteEnabled())
     	          	{
                         #if (COLOR_DEPTH == 8)
@@ -3837,32 +4253,31 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     	          	}
     	          	else
     	          	{
-                        *pData2-- = color;
+                        *pData-- = color;
     	          	}    
                 #else
-                	*pData2-- = color;
+                    *pData-- = color;
                 #endif
        	    #endif			           	    
        	    		
         } // for(x = 0; x < xLimit; x++)
 
-		GFX_WaitForCommandQueue(5);
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180))
-			GFX_RCC_SetSize(x, 1);
+			GFX_RCC_SetSize((x - (nibbleOffset*stretch)), 1);
 		#else	
-			GFX_RCC_SetSize(1, x);
+			GFX_RCC_SetSize(1, (x - (nibbleOffset*stretch)));
 		#endif
-
+	
 		for(stretchY = 0; stretchY < stretch; stretchY++)
 		{
             #if (DISP_ORIENTATION == 0) 
     			GFX_RCC_SetDestOffset((yc * (DWORD)DISP_HOR_RESOLUTION) + left);
             #elif (DISP_ORIENTATION == 90)
-    			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
+    			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize - (nibbleOffset*stretch))) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left + outputSize - (nibbleOffset*stretch)));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 
 			#ifdef USE_TRANSPARENT_COLOR
@@ -3875,7 +4290,6 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         	    {
     		        GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_DISCONTINUOUS);
                 } 
-
 
 			// update the vertical position counter
             yc++;
@@ -3890,7 +4304,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         #endif //#if (COLOR_DEPTH >= 4)
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -3908,7 +4322,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 ********************************************************************/
         #if (COLOR_DEPTH >= 8)
 
-void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -3920,7 +4334,6 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     WORD			*pData2;
     WORD 			outputSize;
 	WORD			xLimit;
-    WORD			*pBufAddr;
 
     BYTE            temp = 0;
     WORD            sizeX, sizeY;
@@ -3939,9 +4352,18 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     // Set offset to the image data
 	memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
 	
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width);
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
 	if (stretch == IMAGE_X2) {
 		outputSize = sizeX << 1;
@@ -3956,12 +4378,10 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 	if ((outputSize > GetMaxX()+1) || (left + outputSize - 1 > GetMaxX()))
 		outputSize = GetMaxX() + 1 - left; 		
 		
-	pBufAddr = lineBuffer2;
-
 	GFX_WaitForCommandQueue(16);
 	GFX_WaitForGpu();
 
-	GFX_SetWorkArea1((WORD)pBufAddr);
+	GFX_SetWorkArea1((WORD)lineBuffer2);
     #ifdef USE_DOUBLE_BUFFERING
 		GFX_SetWorkArea2(_drawbuffer);
 	#else
@@ -3987,7 +4407,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 
 		// Get line
 	    ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
-    	memOffset += sizeX;
+        memOffset += bmp.width;
     	
       	pData = lineBuffer;
 		// get the location of the line buffer 
@@ -4084,7 +4504,8 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
        	    #endif			
         } // for(x = 0; (x < outputSize) && (x + left < GetMaxX()); x++)
 
-		GFX_WaitForCommandQueue(5);
+		GFX_WaitForCommandQueue(16);
+        GFX_WaitForGpu();
 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180))
 			GFX_RCC_SetSize(x, 1);
@@ -4099,9 +4520,9 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 			#ifdef USE_TRANSPARENT_COLOR
 			    if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
@@ -4128,7 +4549,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         #endif //#if (COLOR_DEPTH >= 8)
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -4146,14 +4567,14 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 ********************************************************************/
         #if (COLOR_DEPTH == 16)
 
-void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
     WORD            lineBuffer[(GetMaxX() + (DWORD) 1)];
     WORD            *pData; 
     WORD 			outputSize;
-    WORD			*pBufAddr, *pData2;
+    WORD			*pData2;
     WORD            lineBuffer2[(GetMaxX() + (DWORD) 1)];
     WORD            byteWidth;
 	WORD			xLimit;
@@ -4170,9 +4591,18 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += ((pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width)) << 1);
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
 	// calculate how many bytes to fetch
     byteWidth = sizeX << 1;
@@ -4190,12 +4620,10 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 	if ((outputSize > GetMaxX()+1) || (left + outputSize > GetMaxX()+1))
 		outputSize = GetMaxX() + 1 - left; 
 		
-	pBufAddr = lineBuffer2;
-
 	GFX_WaitForCommandQueue(16);
 	GFX_WaitForGpu();
 
-   	GFX_SetWorkArea1((WORD)pBufAddr);
+   	GFX_SetWorkArea1((WORD)lineBuffer2);
     #ifdef USE_DOUBLE_BUFFERING
 		GFX_SetWorkArea2(_drawbuffer);
 	#else
@@ -4221,7 +4649,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 
 		// Get line
 	    ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
-	    memOffset += byteWidth;
+        memOffset += (bmp.width << 1);
     	
       	pData = lineBuffer;
 		// get the location of the line buffer 
@@ -4254,7 +4682,8 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 
         } // for(x = 0; x < xLimit; x++)
 
-		GFX_WaitForCommandQueue(5);
+		GFX_WaitForCommandQueue(16);
+    	GFX_WaitForGpu();
 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180))
 			GFX_RCC_SetSize(x, 1);
@@ -4269,9 +4698,9 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 
 			#ifdef USE_TRANSPARENT_COLOR
@@ -4301,7 +4730,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     #endif //#ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage1BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -4317,7 +4746,7 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: Image must be located in EDS memory that is accessible by the GPUs.
 *
 ********************************************************************/
-void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     BYTE			TempGPUBpp;
     BYTE            lineBuffer[((GetMaxX() + (DWORD) 1) / 8) + 1];
@@ -4337,6 +4766,7 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     BYTE            stretchY;
     
     CHAR            testStretch = (stretch == IMAGE_NORMAL) ? 0x00 : 0x01;
+    WORD            lineSize;           // this includes the padding
 
 	#ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; 
@@ -4362,10 +4792,31 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	GFX_RCC_SetDestOffset(0);
 	GFX_RCC_SetSize(2, 1);
 	GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS);
-	
-    // Get the image size
-    sizeY = DrvGetImageHeight(image);
-    sizeX = DrvGetImageWidth(image);
+
+	// 32 is used here since the palette size is 2 words or 32 bits
+	offsetCount = 32 + (sizeof(BITMAP_HEADER)*8);
+
+	// Get the image line width in bytes
+    lineSize = DrvGetImageWidth(image);
+    // account for padding    
+    if (lineSize&0x07)
+        lineSize += (8 - (lineSize&0x07));
+
+    if(pPartialImageData->width != 0)
+    {
+        // adjust to the location of the starting data for partial image rendering 
+        offsetCount += (pPartialImageData->yoffset*lineSize);
+        offsetCount += (pPartialImageData->xoffset);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get the image size
+        sizeY = DrvGetImageHeight(image);
+        sizeX = DrvGetImageWidth(image);
+    }
 
     yc = top;
 
@@ -4387,9 +4838,6 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 		xLimit = outputSize;
 	else	 
 		xLimit = GetMaxX() - left + 1;
-
-	// 32 is used here since the palette size is 2 words or 32 bits
-	offsetCount = 32 + (sizeof(BITMAP_HEADER)*8);
 
    	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
@@ -4414,20 +4862,14 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    TempGPUBpp = _PUBPP;
 	    _PUBPP = GFX_1_BPP;
 
+        // copy one line of data to the buffer
 		GFX_SetWorkArea1(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress);
 		GFX_SetWorkArea2((DWORD)(WORD)lineBuffer);
 				
 		GFX_RCC_SetSrcOffset(offsetCount);
 		GFX_RCC_SetDestOffset(0);
-		// check if there are padded bits
-		if (sizeX&7)
-		{
-			GFX_RCC_SetSize(outputSize+(8-(outputSize&7)), 1);
-		}
-		else
-		{
-			GFX_RCC_SetSize(outputSize, 1);
-		}
+
+        GFX_RCC_SetSize(sizeX, 1);
 		GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS);
 
 		// wait until copying is done
@@ -4438,6 +4880,7 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	    _PUBPP = TempGPUBpp;
 
        	pData = lineBuffer;
+        mask = 0;
 
 		// get the location of the line buffer 
         #if ((DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270))
@@ -4488,16 +4931,13 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 			#endif
         #endif
 
-
-        mask = 0;
-        
         // process the pixels on the current line
         for(x = 0; x < xLimit; x++)
         {
 			if (mask == 0) 
 			{
 				temp = *pData++;
-				mask = 0x80;
+				mask = 0x01;
 			}	
 
 			if (mask & temp)
@@ -4615,7 +5055,7 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
        	    // Shift to the next pixel (note that if image is stretched, shifting is delayed)
        	    //if (x%(stretch==IMAGE_X2?2:1) == 0) 
        	    if (((x+1) & testStretch) == 0)
-            	mask >>= 1;		
+            	mask <<= 1;		
 
         } // for(x = 0; x < xLimit; x++)
 
@@ -4646,9 +5086,9 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 		
 	        #ifdef USE_TRANSPARENT_COLOR
@@ -4666,11 +5106,9 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
             yc++;
         } // for(stretchY = 0; stretchY < stretch; stretchY++)
                     
-        // adjust the offset counter (adjust the offset if there are padded bits)
-        if (sizeX&7)
-			offsetCount += (sizeX + (8-(sizeX&7)));
-		else
-			offsetCount += (sizeX);
+        // adjust the offset counter (padding is already taken cared 
+        // of in calculating lineSize
+        offsetCount += lineSize;
 
     } //for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
@@ -4681,7 +5119,7 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage4BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -4699,7 +5137,7 @@ void PutImage1BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 ********************************************************************/
         #if (COLOR_DEPTH >= 4)
 
-void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     BYTE			TempGPUBpp;
     BYTE            lineBuffer[((GetMaxX() + (DWORD) 1) / 2) + 1];
@@ -4720,6 +5158,7 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     DWORD 			offsetCount;
 
     CHAR            testStretch = (stretch == IMAGE_NORMAL) ? 0x01 : 0x03;
+    WORD            lineSize;
 
 #ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; 
@@ -4740,10 +5179,30 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	GFX_RCC_SetDestOffset(0);
 	GFX_RCC_SetSize(16, 1);
 	GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS);
-	
-    // Get the image size
-    sizeY = DrvGetImageHeight(image);
-    sizeX = DrvGetImageWidth(image);
+
+	// 64 is used here since the palette size is 16 words or 64 nibbles
+	offsetCount = 64 + (sizeof(BITMAP_HEADER)<<1);
+
+	// Get the image line width in bytes
+    lineSize = DrvGetImageWidth(image);
+    // account for padding    
+    lineSize += (lineSize&0x01);
+
+    if(pPartialImageData->width != 0)
+    {
+        // adjust to the location of the starting data for partial image rendering 
+        offsetCount += (pPartialImageData->yoffset*lineSize);
+        offsetCount += (pPartialImageData->xoffset);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get the image size
+        sizeY = DrvGetImageHeight(image);
+        sizeX = DrvGetImageWidth(image);
+    }
 
     yc = top;
 
@@ -4765,9 +5224,6 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 		xLimit = outputSize;
 	else	 
 		xLimit = GetMaxX() - left + 1;
-
-	// 64 is used here since the palette size is 16 words or 64 nibbles
-	offsetCount = 64 + (sizeof(BITMAP_HEADER)<<1);
 
    	#ifdef USE_TRANSPARENT_COLOR
         if (_colorTransparentEnable == TRANSPARENT_COLOR_ENABLE)
@@ -4941,9 +5397,9 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 		
 			#ifdef USE_TRANSPARENT_COLOR
@@ -4961,9 +5417,7 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
         } // for(stretchY = 0; stretchY < stretch; stretchY++)
         
         // adjust the offset counter (adjust the offset if there are padded bits)
-        offsetCount += sizeX;
-        if (sizeX & 1)
-            offsetCount += 1;
+        offsetCount += lineSize;
 
     } //for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
@@ -4976,7 +5430,7 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
         #endif //#if (COLOR_DEPTH >= 4)
     
 /*********************************************************************
-* Function: void PutImage8BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage8BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -4994,7 +5448,7 @@ void PutImage4BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 ********************************************************************/
         #if (COLOR_DEPTH >= 8)
 
-void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     BYTE			TempGPUBpp;
     BYTE            lineBuffer[(GetMaxX() + (DWORD) 1)];
@@ -5011,6 +5465,9 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     WORD            x, y;
     WORD            yc;
     BYTE            stretchY;
+
+    DWORD 			offsetCount;
+    WORD            lineSize;
 
     #ifdef USE_PALETTE
     BYTE            	*pByteData = NULL; // To supress warning 
@@ -5029,11 +5486,28 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 	GFX_RCC_SetDestOffset(0);
 	GFX_RCC_SetSize(256, 1);
 	GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS);
-	
-    // Get the image size
-    sizeY = DrvGetImageHeight(image);
-    sizeX = DrvGetImageWidth(image);
 
+    // 512 is used here since the palette size is 256 words or 512 bytes
+	offsetCount = 512 + sizeof(BITMAP_HEADER);
+
+    lineSize = DrvGetImageWidth(image);
+
+    if(pPartialImageData->width != 0)
+    {
+        // adjust to the location of the starting data for partial image rendering 
+        offsetCount += (pPartialImageData->yoffset*lineSize);
+        offsetCount += (pPartialImageData->xoffset);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get the image size
+        sizeY = DrvGetImageHeight(image);
+        sizeX = DrvGetImageWidth(image);
+    }
+	
     yc = top;
 
 	if (stretch == IMAGE_X2) {
@@ -5076,7 +5550,7 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 		GFX_SetWorkArea1(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress);
 		GFX_SetWorkArea2((DWORD)(WORD)lineBuffer);
 		// 512 is used here since the palette size is 256 words or 512 bytes
-		GFX_RCC_SetSrcOffset(512 + sizeof(BITMAP_HEADER) + (sizeX*(DWORD)y));
+		GFX_RCC_SetSrcOffset(offsetCount);
 		GFX_RCC_SetDestOffset(0);
 		GFX_RCC_SetSize(sizeX, 1);
 		GFX_RCC_StartCopy(RCC_COPY, RCC_ROP_C, RCC_SRC_ADDR_CONTINUOUS, RCC_DEST_ADDR_CONTINUOUS);
@@ -5212,9 +5686,9 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
             #elif (DISP_ORIENTATION == 90)
     			GFX_RCC_SetDestOffset(((GetMaxX() + 1 - (left + outputSize)) * (DWORD)DISP_HOR_RESOLUTION) + yc);
             #elif (DISP_ORIENTATION == 180)
-    			GFX_RCC_SetDestOffset(((GetMaxY() + 1 - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
+    			GFX_RCC_SetDestOffset(((GetMaxY() - yc) * (DWORD)DISP_HOR_RESOLUTION) + GetMaxX() + 1 - (left+outputSize));
             #elif (DISP_ORIENTATION == 270)
-    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() + 1 - yc));
+    			GFX_RCC_SetDestOffset((left * (DWORD)DISP_HOR_RESOLUTION) + (GetMaxY() - yc));
 			#endif	 
 	
 			#ifdef USE_TRANSPARENT_COLOR
@@ -5231,6 +5705,9 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 			// update the vertical position counter
             yc++;
         } // for(stretchY = 0; stretchY < stretch; stretchY++)
+
+        offsetCount += lineSize;
+
     } //for(y = 0; (y < sizeY) && (yc < GetMaxY()); y++)
 
 	// make sure the GPUs are done before exiting
@@ -5242,7 +5719,7 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
         #endif //#if (COLOR_DEPTH >= 8)
        
 /*********************************************************************
-* Function: void PutImage16BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage16BPPEDS(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
@@ -5259,7 +5736,7 @@ void PutImage8BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 *
 ********************************************************************/
         #if (COLOR_DEPTH == 16)
-void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register WORD       x, y; 
     register BYTE       stretchY;
@@ -5270,39 +5747,50 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     WORD				*pSrc;
     SHORT               xc, yc;
 
-    // Read image size
-    sizeY = DrvGetImageHeight(image);
-    sizeX = DrvGetImageWidth(image);
+    WORD                lineSize;
+    DWORD               offsetCount;
+
+    lineSize = DrvGetImageWidth(image);
+    offsetCount = 0;
+
+    if(pPartialImageData->width != 0)
+    {
+        // adjust to the location of the starting data for partial image rendering 
+        offsetCount += (pPartialImageData->yoffset*lineSize);
+        offsetCount += (pPartialImageData->xoffset);
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Read image size
+        sizeY = DrvGetImageHeight(image);
+        sizeX = lineSize;
+    }
     
-	// this initialization of outputSize is not performed only 
-	// when DISP_ORIENTATION == 0 and image is not stretched
-#if (DISP_ORIENTATION == 0) 
-	if (stretch == IMAGE_X2) 
-#endif   		
+	if (stretch == IMAGE_X2) {
+		outputSize = sizeX << 1;
+	}   	
+	else //if (stretch == IMAGE_NORMAL)
 	{
-		if (stretch == IMAGE_X2) {
-			outputSize = sizeX << 1;
-		}   	
-		else //if (stretch == IMAGE_NORMAL)
-		{
-			outputSize = sizeX;
-		}
+		outputSize = sizeX;
+	}
 			
-		// area of the buffer to use is only the area that
-		// spans the viewable area
-		if ((outputSize > (GetMaxX()+1)) || (left + outputSize > (GetMaxX()+1)))
-			outputSize = GetMaxX() + 1 - left; 		
-	}	
+	// area of the buffer to use is only the area that
+	// spans the viewable area
+	if ((outputSize > (GetMaxX()+1)) || (left + outputSize > (GetMaxX()+1)))
+		outputSize = GetMaxX() + 1 - left; 		
 
 	// When the DISP_ORIENTATION = 0, the image can be transferred to the display buffer
-	// using one transfer. If stretched or using other orientation, the transfers
-	// are performed line by line.
+	// using one transfer. If doing partial image, stretched or using other orientation, 
+	// the transfers are performed line by line.
 #if (DISP_ORIENTATION == 0) 
-	if (stretch != IMAGE_X2) 
+	if ((stretch != IMAGE_X2) && (pPartialImageData->width == 0))
 	{
     	// Since the data in memory is oriented in the same way as the display we 
     	// can move the whole block. The source is continuous and destination is  
-    	// discontinupus since it is the display buffer. The magic number 3 is the 
+    	// discontinuous since it is the display buffer. The magic number 3 is the 
     	// offset of the actual image data in the image structure.
 
         // Known issue:
@@ -5312,32 +5800,34 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 
 #ifdef USE_TRANSPARENT_COLOR
     #ifdef USE_DOUBLE_BUFFERING
-		ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, _drawbuffer, 
-				  3, (top * (DWORD)DISP_HOR_RESOLUTION) + left, 
-				  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
-				  RCC_TRANSPARENT_COPY, RCC_ROP_C, GetTransparentColor(),
-				  sizeX, sizeY);
+		ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, _drawbuffer,
+                  3, (top * (DWORD)DISP_HOR_RESOLUTION) + left, 
+                  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
+                  RCC_TRANSPARENT_COPY, RCC_ROP_C, GetTransparentColor(),
+                  sizeX, sizeY);
 	#else
 		ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, GFX_GetDisplayArea(), 
 				  3, (top * (DWORD)DISP_HOR_RESOLUTION) + left, 
-				  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
-				  RCC_TRANSPARENT_COPY, RCC_ROP_C, GetTransparentColor(),
-				  sizeX, sizeY);
+                  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
+                  RCC_TRANSPARENT_COPY, RCC_ROP_C, GetTransparentColor(),
+                  sizeX, sizeY);
 	#endif
 
 #else
     #ifdef USE_DOUBLE_BUFFERING
 
-        ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, _drawbuffer,          \
-				   3, (top * (DWORD)DISP_HOR_RESOLUTION) + left,                        \
-                   GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, RCC_COPY, RCC_ROP_C,    \
-                   0, sizeX, sizeY);
+        ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, _drawbuffer,          
+                  3, (top * (DWORD)DISP_HOR_RESOLUTION) + left, 
+                  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
+                  RCC_COPY, RCC_ROP_C,    
+                  0, sizeX, sizeY);
 	#else
 
-        ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, GFX_GetDisplayArea(), \
-				   3, (top * (DWORD)DISP_HOR_RESOLUTION) + left,                        \
-                   GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, RCC_COPY, RCC_ROP_C,    \
-                   0, sizeX, sizeY);
+        ROPBlock(((GFX_IMAGE_HEADER*)image)->LOCATION.extAddress, GFX_GetDisplayArea(), 
+                  3, (top * (DWORD)DISP_HOR_RESOLUTION) + left, 
+                  GFX_DATA_CONTINUOUS, GFX_DATA_DISCONTINUOUS, 
+                  RCC_COPY, RCC_ROP_C,    
+                  0, sizeX, sizeY);
 	#endif
 #endif				  
 	}
@@ -5365,7 +5855,8 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 			GFX_SetWorkArea2((WORD)lineBuffer);					  // buffer is the destination
 			GFX_RCC_SetSize(outputSize, 1);						  // copy one line of the image
 				
-			GFX_RCC_SetSrcOffset(3 + (sizeX*(DWORD)y));			  // set the offset of the source
+			GFX_RCC_SetSrcOffset(3 + offsetCount);                // set the offset of the source
+            
 			GFX_RCC_SetDestOffset(0);							  // no offset for the destination
 
 			// initiate the copy, the source is continuous and the 
@@ -5399,7 +5890,11 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
     		    // swap data
 				for (x = 0; x < (outputSize); x += 1)
 				{
-   					lineBuffer2[outputSize-x-1] = lineBuffer[x];
+        		    #if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 270)
+       					lineBuffer2[x] = lineBuffer[x];
+                    #else
+       					lineBuffer2[outputSize-x-1] = lineBuffer[x];
+                    #endif
    	            }				
 		    	
 		    	pSrc = lineBuffer2;
@@ -5429,11 +5924,11 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 			    #elif (DISP_ORIENTATION == 180)
 			    {
 			        xc = GetMaxX() + 1 - (left + outputSize);
-			        yc = GetMaxY() + 1 - actualY;
+			        yc = GetMaxY() - actualY;
 			    }
 			    #elif (DISP_ORIENTATION == 270)
 			    {
-		        	xc = GetMaxY() + 1 - actualY;
+		        	xc = GetMaxY() - actualY;
 			        yc = left;
 			    }
 				#endif		
@@ -5459,6 +5954,9 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 
 				actualY++;		
 			} //for(stretchY = 0; stretchY < stretch; stretchY++)
+    
+            offsetCount += lineSize;
+
 		} // for(y = 0; (y < sizeY) && (y < GetMaxY()); y++)
 	}	
 
@@ -5470,13 +5968,14 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
         #endif //#if (COLOR_DEPTH == 16)
 
 /*********************************************************************
-* Function: WORD PutImageDrv(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: WORD PutImageDrv(SHORT left, SHORT top, void* image, BYTE stretch, void *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
 *        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: For NON-Blocking configuration:
 *         - Returns 0 when device is busy and the image is not yet completely drawn.
@@ -5491,11 +5990,12 @@ void PutImage16BPPEDS(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch)
+WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch, void *pPartialImageData)
 {
     BYTE        colorDepth;
     WORD        colorTemp;
     WORD        resType;
+    PUTIMAGE_PARAM *pParImageData = pPartialImageData;
 
     if(GFX_GetFreeCommandSpace() < 4)
     {
@@ -5697,18 +6197,18 @@ WORD PutImageDrv(SHORT left, SHORT top, void *image, BYTE stretch)
     // Draw picture
     switch(colorDepth)
     {
-        case 1:     PutImage1BPPEDS(left, top, image, stretch); break; 
+        case 1:     PutImage1BPPEDS(left, top, image, stretch, pParImageData); break; 
         
             #if (COLOR_DEPTH >= 4)
-        case 4:     PutImage4BPPEDS(left, top, image, stretch); break; 
+        case 4:     PutImage4BPPEDS(left, top, image, stretch, pParImageData); break; 
             #endif
                     
             #if (COLOR_DEPTH >= 8)
-        case 8:     PutImage8BPPEDS(left, top, image, stretch); break;
+        case 8:     PutImage8BPPEDS(left, top, image, stretch, pParImageData); break;
             #endif
                     
             #if (COLOR_DEPTH == 16)
-        case 16:    PutImage16BPPEDS(left, top, image, stretch); break;
+        case 16:    PutImage16BPPEDS(left, top, image, stretch, pParImageData); break;
             #endif
                     
         default:    break;
@@ -6478,7 +6978,7 @@ BYTE SetPaletteBpp(BYTE bpp)
 * PreCondition: PaletteInit() must be called before.
 *
 * Input: pPaletteEntry   - Pointer to the palette table in ROM
-*        startEntry      - Start entry to load (inclusive)
+*        startEntry      - CLUT table will be loaded from this address
 *        length          - Number of entries
 *
 * Output: Status: Zero -> Success, Non-zero -> Error.
@@ -6499,7 +6999,7 @@ BYTE SetPaletteFlash(PALETTE_ENTRY *pPaletteEntry, WORD startEntry, WORD length)
     _CLUTRWEN = 1;
     for(counter = 0; counter < length; counter++)
     {
-        _CLUTADR = counter;
+        _CLUTADR = startEntry + counter;
         _CLUTWR  = pPaletteEntry[counter].value;
         while(_CLUTBUSY)
         {

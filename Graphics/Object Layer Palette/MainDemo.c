@@ -1635,6 +1635,7 @@ void CreateButtons(void)
     #define BTN_ORIGIN_Y    ((40 + GetMaxY() - 177 + 1) / 2)
 
     GOLFree();                              // free memory for the objects in the previous linked list and start new list
+    TransparentColorDisable();
     CreatePage(ButtonStr);                  // CreatePage("Buttons");
     BtnCreate
     (
@@ -2662,6 +2663,8 @@ void CreateEditBox(void)
     #define KEYSIZEX    53
     #define KEYSIZEY    39
     #define MAXCHARSIZE 17
+
+    TransparentColorEnable(0x44); // this is the index of the background color of the red and green phones.
 
     EbCreate
     (
@@ -4321,6 +4324,7 @@ WORD MsgPicture(WORD objMsg, OBJ_HEADER *pObj)
 void CreateCustomControl(void)
 {
     GOLFree();                                      // free memory for the objects in the previous linked list and start new list
+    TransparentColorDisable();
     CreatePage(CustomStr);                          // CreatePage("Custom control");
     CcCreate
     (

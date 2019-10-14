@@ -84,6 +84,9 @@ typedef struct
     SHORT       textHeight; // Computed text height, done at creation.
     XCHAR       *pText;     // Pointer to the text used.
     void        *pBitmap;   // Pointer to bitmap used.
+    #ifdef USE_ALPHABLEND_LITE
+    GFX_COLOR    previousAlphaColor;
+    #endif
 } BUTTON;
 
 /*********************************************************************

@@ -8,12 +8,6 @@
 <!--
  /* Font Definitions */
  @font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
 	{font-family:"Arial Unicode MS";
 	panose-1:2 11 6 4 2 2 2 2 2 4;}
 @font-face
@@ -197,11 +191,6 @@ p.msochpdefault, li.msochpdefault, div.msochpdefault
 	margin:1.0in 65.95pt 1.0in 65.95pt;}
 div.WordSection1
 	{page:WordSection1;}
- /* List Definitions */
- ol
-	{margin-bottom:0in;}
-ul
-	{margin-bottom:0in;}
 -->
 </style>
 
@@ -340,10 +329,11 @@ or pictures stored in the on-board Flash memory.</span></p>
 style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
 "Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
 style='font-family:"Arial","sans-serif"'>Thumb Drive: This portion is enabled
-when using the PIC devices with USB module. The demo uses the USB Host interface
-to read a thumb drive connected to the USB port and scan it for graphics files
-(JPEG or BMP formats only). The application then produces a directory of
-graphics images, and displays the corresponding file when selected.</span></p>
+when using the PIC devices with USB module. The demo uses the USB Host
+interface to read a thumb drive connected to the USB port and scan it for
+graphics files (JPEG or BMP formats only). The application then produces a
+directory of graphics images, and displays the corresponding file when
+selected.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.0in;text-indent:-.25in'><span
 style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
@@ -392,53 +382,56 @@ hardware profile in the project HardwareProfile.h file: </span></p>
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>To run the demo
-with SD Card as a Mass Storage Device on selected Development Boards using QVGA
-display use:</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>To run the demo with SD Card as a Mass
+Storage Device on selected Development Boards using QVGA display use:</span></p>
 
 <p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
 &quot;Configs/HWP_XXX_SDMSD_QVGAv1.h”</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>To run the demo
-with SD Card as a Mass Storage Device on selected Development Boards using WQVGA
-display use:</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>To run the demo with SD Card as a Mass
+Storage Device on selected Development Boards using WQVGA display use:</span></p>
 
 <p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
 &quot;Configs/HWP_XXX_SDMSD_WQVGAv1.h”</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>To run the demo
-with USB Thumb Drive as a Mass Storage Device on selected Development Boards using
-QVGA display use:</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>To run the demo with USB Thumb Drive
+as a Mass Storage Device on selected Development Boards using QVGA display use:</span></p>
 
 <p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
 &quot;Configs/HWP_XXX_USBMSD_QVGAv1.h”</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>To run the demo
-with USB Thumb Drive as a Mass Storage Device on selected Development Boards using
-WQVGA display use:</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>To run the demo with USB Thumb Drive
+as a Mass Storage Device on selected Development Boards using WQVGA display
+use:</span></p>
 
 <p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
 &quot;Configs/HWP_XXX_USBMSD_WQVGAv1.h”</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>To run the demo
-with SD Card as a Mass Storage Device on Multimedia Expansion Board use:</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>To run the demo with SD Card as a Mass
+Storage Device on Multimedia Expansion Board use:</span></p>
 
 <p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
 &quot;Configs/HWP_MEB_XXX_SDMSD.h”</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in;text-indent:-.25in'><span
-style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:"Arial","sans-serif"'>To run the demo
-with USB Thumb Drive as a Mass Storage Device on Multimedia Expansion Board use:</span></p>
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:"Arial","sans-serif"'>To run the demo with USB Thumb Drive
+as a Mass Storage Device on Multimedia Expansion Board use:</span></p>
 
 <p class=MsoPlainText style='margin-left:.75in'><span style='font-family:"Arial","sans-serif"'>#include
 &quot;Configs/HWP_MEB_XXX_USBMSD.h”</span></p>
@@ -446,8 +439,8 @@ with USB Thumb Drive as a Mass Storage Device on Multimedia Expansion Board use:
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoPlainText style='margin-left:.25in;text-indent:.25in'><span
-style='font-family:"Arial","sans-serif"'>Where: XXX represents any of the selected
-Development Boards. </span></p>
+style='font-family:"Arial","sans-serif"'>Where: XXX represents any of the
+selected Development Boards. </span></p>
 
 <p class=MsoPlainText style='margin-left:.25in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
@@ -660,10 +653,6 @@ style='font-size:14.0pt'>Required Hardware/Configuring the Hardware</span></span
   <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>+
   </span></p>
   <p class=MsoPlainText><span lang=DE style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
-  href="http://www.microchipdirect.com/productsearch.aspx?Keywords=MA240025-1">PIC24EP512GU810
-  Plug-In-Module (PIM)</a> (MA240025-1)</span></p>
-  <p class=MsoPlainText><span lang=DE style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>OR</span></p>
-  <p class=MsoPlainText><span lang=DE style='font-size:8.0pt;font-family:"Verdana","sans-serif"'><a
   href="http://www.microchipdirect.com/productsearch.aspx?Keywords=MA330024-1">dsPIC33EP512MU810
   Plug-In-Module(PIM)</a> (MA330024-1)</span></p>
   </td>
@@ -679,13 +668,13 @@ style='font-size:14.0pt'>Required Hardware/Configuring the Hardware</span></span
   border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   background:#B8CCE4;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#9746;</span></p>
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
   </td>
   <td width=130 style='width:97.8pt;border-top:none;border-left:none;
   border-bottom:solid windowtext 1.0pt;border-right:solid black 1.0pt;
   background:#B8CCE4;padding:0in 5.4pt 0in 5.4pt'>
   <p class=MsoNormal align=center style='text-align:center'><span
-  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#9746;</span></p>
+  style='font-size:14.0pt;font-family:"Arial Unicode MS","sans-serif"'>&#10003;</span></p>
   </td>
  </tr>
  <tr>
@@ -741,8 +730,8 @@ style='font-size:14.0pt'>Required Hardware/Configuring the Hardware</span></span
   <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
   style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-</span><span
   style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
-  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>JP8 – don’t care (color
-  depth is 16BPP, byte access is not performed)</span></p>
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>JP8 – don’t care
+  (color depth is 16BPP, byte access is not performed)</span></p>
   <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
   style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-</span><span
   style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
@@ -771,8 +760,8 @@ style='font-size:14.0pt'>Required Hardware/Configuring the Hardware</span></span
   <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
   style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-</span><span
   style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
-  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>JP14 – set to RE9-S2
-  (use S2 switch)</span></p>
+  style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>JP14 – set to
+  RE9-S2 (use S2 switch)</span></p>
   <p class=MsoListParagraph style='margin-left:1.25in;text-indent:-.25in'><span
   style='font-size:8.0pt;font-family:"Verdana","sans-serif"'>-</span><span
   style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
@@ -1109,8 +1098,8 @@ will show the invalid data <b>Programming External Memory Message</b>.</span></p
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;
 font-family:"Arial","sans-serif";color:black'>The Microchip name and logo, the
-Microchip logo, MPLAB, and PIC are registered trademarks of Microchip
-Technology Incorporated in the U.S.A. and other countries.</span></i></p>
+Microchip logo, MPLAB, and PIC are registered trademarks of Microchip Technology
+Incorporated in the U.S.A. and other countries.</span></i></p>
 
 <p class=MsoNormal style='margin-left:.5in'><i><span style='font-size:10.0pt;
 font-family:"Arial","sans-serif";color:black'>PICDEM and PICTail are trademarks

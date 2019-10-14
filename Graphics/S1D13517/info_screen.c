@@ -50,36 +50,36 @@
 /*****************************************************************************
  * void CreateInfo(void)
  *****************************************************************************/
-void CreateInfo(void)
+void CreateInfo(BYTE pipControl)
 {
+
 	GOL_SCHEME *defaultScheme;
 
     defaultScheme = GFX_SchemeGetDefaultScheme();
 
 	SetColor(GFX_SchemeGetCurrentScheme()->Color0);	 
 
-	FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5);
+if(pipControl == 0)
+{
+	while(!FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5));
 	PutImage((GetMaxX() >> 2)+20, 10, (void *) &help_faq, IMAGE_NORMAL);
-	FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
+	while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));
      
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
+					 GFX_PAGE1, (GetMaxX() >> 2)+15, 5,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
 				     (GetMaxX()) - ((GetMaxX() >> 2)+20), 
 				     60,  	
-				     defaultScheme->AlphaValue);
+				     defaultScheme->AlphaValue));
 				     	
 
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+					 GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
 				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
 				     GetMaxY() - 90,  	
-				     defaultScheme->AlphaValue);
-				     
-    SetActivePage(GetDestinationPage());	
-				     
-		     				     
+				     defaultScheme->AlphaValue));			     	
+				     		     				     
 	SetColor(RGB565CONVERT(255, 102, 0));
     SetFont((void *) &FONTDEFAULT);
 
@@ -97,9 +97,11 @@ void CreateInfo(void)
 		(void *)InformationStr,                            
 		defaultScheme
 	);  
-	
+}	
+else
+{
 	ClrState(GOLFindObject(MAIN_SCREEN_ID_CONFIG_BUT),BTN_DISABLED);
 	SetState(GOLFindObject(MAIN_SCREEN_ID_CONFIG_BUT),BTN_DRAW);
 	SetState(GOLFindObject(MAIN_SCREEN_ID_INFO_BUT),BTN_DRAW|BTN_DISABLED);
-      	
+}      	
 }

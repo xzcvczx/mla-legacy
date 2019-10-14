@@ -352,7 +352,7 @@ WORD RbDraw(void *pObj)
     static SHORT            x, y;
     static DWORD_VAL        temp;
 
-    WORD                    faceClr;
+    GFX_COLOR               faceClr;
     RADIOBUTTON *pRb;
 
     pRb = (RADIOBUTTON *)pObj;

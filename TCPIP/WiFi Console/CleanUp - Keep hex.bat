@@ -44,9 +44,9 @@ del "Makefile" /f /q
 del "a.out" /f /q
 rmdir "TempOBJ" /s /q
 rmdir "Obj-WiFi Console-C18-PICDN2_MRF24WB" /s /q
-rmdir "Obj-WiFi Console-C30-EX16_MRF24WB" /s /q
-rmdir "Obj-WiFi Console-C30-DA210_BRD_MRF24WB" /s /q
-rmdir "Obj-WiFi Console-C32-EX16_MRF24WB" /s /q
+rmdir "Obj-WiFi Console-XC16-EX16_MRF24WB" /s /q
+rmdir "Obj-WiFi Console-XC16-DA210_BRD_MRF24WB" /s /q
+rmdir "Obj-WiFi Console-XC32-EX16_MRF24WB" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\publish" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\obj" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\bin\Debug" /s /q

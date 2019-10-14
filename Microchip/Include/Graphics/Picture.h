@@ -56,9 +56,10 @@
  *****************************************************************************/
 typedef struct
 {
-    OBJ_HEADER  hdr;        // Generic header for all Objects (see OBJ_HEADER).
-    char        scale;      // Scale factor for the bitmap
-    void        *pBitmap;   // Pointer to the bitmap
+    OBJ_HEADER     hdr;        // Generic header for all Objects (see OBJ_HEADER).
+    char           scale;      // Scale factor for the bitmap
+    void           *pBitmap;   // Pointer to the bitmap
+    PUTIMAGE_PARAM partial;     //structure containing parital image data 
 } PICTURE;
 
 /*********************************************************************
@@ -113,6 +114,28 @@ typedef struct
 *
 ********************************************************************/
     #define PictSetScale(pPict, scl)    pPict->scale = scl
+
+/*********************************************************************
+* Macros:  PictSetPartial(xoffset,yoffset,width,height)
+*
+* Overview: This macro sets the partial image used to render the 
+*			bitmap used in the object. 
+*
+* PreCondition: none
+*
+* Input: xoffset,yoffset - x and y offset of the bitmap 
+*        width,height    - width and height of the parital image
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+    #define PictSetPartial(xoffset, yoffset, width, height)    \
+                                         pPict->partial.xoffset = xoffset;\
+                                         pPict->partial.yoffset = yoffset;\
+                                         pPict->partial.width = width;\
+                                         pPict->partial.height = height
 
 /*********************************************************************
 * Macros:  PictGetScale(pPict,scl)

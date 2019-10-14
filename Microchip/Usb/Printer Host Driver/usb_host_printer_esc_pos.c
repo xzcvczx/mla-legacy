@@ -537,7 +537,7 @@ EjectPage:
                 if (transferFlags & USB_PRINTER_TRANSFER_FROM_ROM)
                 {
                     DWORD   di;
-                    #if defined( __C30__ )
+                    #if defined( __C30__ ) || defined __XC16__
                         char __prog__   *ptr;
                     #elif defined( __PIC32MX__ )
                         const char      *ptr;
@@ -702,7 +702,7 @@ EjectPage:
 
                 if (transferFlags & USB_PRINTER_TRANSFER_FROM_ROM)
                 {
-                    #if defined( __C30__ )
+                    #if defined( __C30__ ) || defined __XC16__
                         char __prog__   *ptr;
                     #elif defined( __PIC32MX__ )
                         const char      *ptr;
@@ -1271,7 +1271,7 @@ BOOL USBHostPrinterLanguageESCPOSIsSupported( char *deviceID,
         BYTE                    *imageDataPOS;
         USB_PRINTER_IMAGE_INFO  imageInfo;
         BYTE                    returnCode;
-        #if defined (__C30__)
+        #if defined (__C30__) || defined __XC16__
             BYTE __prog__       *ptr;
             ptr = (BYTE __prog__ *)logoMCHP.address;
         #elif defined (__PIC32MX__)
@@ -1349,7 +1349,7 @@ USB_DATA_POINTER USBHostPrinterPOSImageDataFormat( USB_DATA_POINTER image,
     BYTE                maskHorizontal;
     BYTE                maskVertical;
     BYTE                *ptrRAM = NULL;
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
         BYTE __prog__   *ptrROM = NULL;
     #elif defined( __PIC32MX__ )
         const BYTE      *ptrROM = NULL;

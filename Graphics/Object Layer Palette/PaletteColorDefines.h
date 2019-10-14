@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FileName:        PaletteColorDefines.h
  * Processor:       PIC32MX
- * Compiler:        MPLAB C32 (see release notes for tested revision)
- * Linker:          MPLAB LINK32
+ * Compiler:        MPLAB C32/XC32 (see release notes for tested revision)
+ * Linker:          MPLAB LINK32/XC32
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
@@ -31,7 +31,7 @@
  *
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.16.45
+ * AUTO-GENERATED CODE:  Graphics Resource Converter version: 3.28.15
  *****************************************************************************/
 
 #ifndef PALETTECOLORDEFINES_H_FILE

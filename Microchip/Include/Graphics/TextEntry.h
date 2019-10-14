@@ -37,6 +37,7 @@
  * Date         Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 10/24/08		...
+ * 03/05/12		Enabled gradient feature and rounded buttons.
  *****************************************************************************/
 #ifndef _TEXTENTRY_H
     #define _TEXTENTRY_H
@@ -63,10 +64,16 @@
     #define TE_ENTER_COM    0x03    // This macro is used to assign an "enter" (carriage return) command on a key.
 
 // User can use this command to customize application code in the message
-
 // callback function. Use the returned translated TE_MSG_ENTER to detect the key
-
 // pressed was assigned the enter command. Refer to TeTranslateMsg() for details.
+
+/*********************************************************************
+* Optional settigns
+*********************************************************************/
+#ifndef TE_ROUNDEDBUTTON_RADIUS    
+    #define TE_ROUNDEDBUTTON_RADIUS 0    // You can set this parameter in the GraphicsConfig.h
+#endif
+
 
 /*********************************************************************
 * Overview: Defines the parameters and the strings assigned for each key. 

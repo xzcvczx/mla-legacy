@@ -4,8 +4,8 @@
   <defaultConf>2</defaultConf>
   <confs>
     <conf name="PIC24FJ64GB004_PIM" type="2">
-      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT084290000:=x:=en</platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\MPLAB C30\bin</languageToolchainDir>
+      <platformToolSN></platformToolSN>
+      <languageToolchainDir>C:\Program Files\Microchip\xc16\v1.00\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -22,8 +22,8 @@
       </runprofile>
     </conf>
     <conf name="PIC24FJ256GB110_PIM" type="2">
-      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT084290000:=x:=en</platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\MPLAB C30\bin</languageToolchainDir>
+      <platformToolSN></platformToolSN>
+      <languageToolchainDir>C:\Program Files\Microchip\xc16\v1.00\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -40,8 +40,8 @@
       </runprofile>
     </conf>
     <conf name="PIC24FJ256GB210_PIM" type="2">
-      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT084290000:=x:=en</platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\MPLAB C30\bin</languageToolchainDir>
+      <platformToolSN></platformToolSN>
+      <languageToolchainDir>C:\Program Files\Microchip\xc16\v1.00\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -58,8 +58,8 @@
       </runprofile>
     </conf>
     <conf name="PIC24FJ256DA210_Development_Board" type="2">
-      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT084290000:=x:=en</platformToolSN>
-      <languageToolchainDir>C:\Program Files\Microchip\MPLAB C30\bin</languageToolchainDir>
+      <platformToolSN></platformToolSN>
+      <languageToolchainDir>C:\Program Files\Microchip\xc16\v1.00\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

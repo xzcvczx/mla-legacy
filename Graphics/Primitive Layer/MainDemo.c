@@ -46,10 +46,22 @@
 _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
+#elif defined(__dsPIC33E__) 
+_FOSCSEL(FNOSC_FRC);			
+_FOSC(FCKSM_CSECMD & POSCMD_XT & OSCIOFNC_OFF & IOL1WAY_OFF);
+_FWDT(FWDTEN_OFF);
+_FPOR(FPWRT_PWR128 & BOREN_ON & ALTI2C1_ON & ALTI2C2_ON);
+_FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 #elif defined(__PIC32MX__)
+   #if defined(__32MX250F128D__)
+    #pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config OSCIOFNC = OFF, POSCMOD = XT, FSOSCEN = OFF, FNOSC = PRIPLL
+    #pragma config CP = OFF, BWP = OFF, PWP = OFF
+   #else
     #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
+   #endif
 #else
     #if defined(__PIC24FJ256GB110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
@@ -493,21 +505,24 @@ int main(void)
 void InitializeBoard(void)
 {
 
-    #ifdef MEB_BOARD
-        CPLDInitialize();
-        CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
-        CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
-    #endif
+#ifdef MEB_BOARD
+    CPLDInitialize();
+    CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+    CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+#endif
 
-
-
-
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
+#if defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__dsPIC33E__)
 
     // Configure Oscillator to operate the device at 40Mhz
     // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-    PLLFBD = 38;                    // M=40
+    #if defined(__dsPIC33E__) || defined(__PIC24E__)
+        //Fosc = 8M * 60/(2*2) = 120MHz for 8M input clock
+        PLLFBD = 58;    			// M=60         
+    #else
+        // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+        PLLFBD = 38;                    // M=40
+    #endif
+
     CLKDIVbits.PLLPOST = 0;         // N1=2
     CLKDIVbits.PLLPRE = 0;          // N2=2
     OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
@@ -529,9 +544,13 @@ void InitializeBoard(void)
 
 #elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
-    SYSTEMConfigPerformance(GetSystemClock());   
-#endif
+    SYSTEMConfigPerformance(GetSystemClock());
 
+    #if defined(__32MX250F128D__)
+    DDPCONbits.JTAGEN = 0; // Disable JTAG
+    ANSELA = ANSELB = ANSELC = 0x0000; // Disable all ADC inputs
+    #endif
+#endif
 
     /////////////////////////////////////////////////////////////////////////////
     // ADC Explorer 16 Development Board Errata (work around 2)
@@ -545,6 +564,9 @@ void InitializeBoard(void)
     /////////////////////////////////////////////////////////////////////////////
 #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
     AD1PCFGL = 0xffff;
+#elif defined(__dsPIC33E__) || defined(__PIC24E__)
+    ANSELE = 0x00;
+    ANSELDbits.ANSD6 = 0;
 #endif
 
     InitGraph();

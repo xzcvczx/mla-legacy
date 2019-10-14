@@ -849,7 +849,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         //USBSleepOnSuspend();      //Need to include usb_hal_pic24.c if this function is enabled.
     #endif
 }
@@ -1201,7 +1201,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((int)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

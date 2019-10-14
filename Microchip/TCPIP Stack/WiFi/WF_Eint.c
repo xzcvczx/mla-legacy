@@ -1,9 +1,9 @@
 /******************************************************************************
 
- MRF24WB0M Driver Exernal Interrupt
+ MRF24W Driver Exernal Interrupt
  Module for Microchip TCP/IP Stack
-  -Provides access to MRF24WB0M WiFi controller
-  -Reference: MRF24WB0M Data sheet, IEEE 802.11 Standard
+  -Provides access to MRF24W WiFi controller
+  -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
  FileName:		WF_Eint.c
@@ -47,7 +47,7 @@
  Michael Palladino	10/13/07	Original
  KO					31 Oct 2008	Port to PIC24F and PIC32 for TCP/IP stack v4.52
  KH					19 Jun 2009	Modified MACMemCopyAsync to support TCB to TCB copy
- KH                 27 Jan 2010 Updated for MRF24WB0M
+ KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
 
 
@@ -70,11 +70,11 @@
 /*****************************************************************************
  * FUNCTION:WF_EintIsDisabled
  *
- * RETURNS: TRUE if MRF24WB0M External Interrupt is disabled, else returns FALSE
+ * RETURNS: TRUE if MRF24W External Interrupt is disabled, else returns FALSE
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to determine if the MRF24WB0M External Interrupt 
+ * NOTES:   Called by WiFi Driver to determine if the MRF24W External Interrupt 
  *          is disabled.  
  *****************************************************************************/
 BOOL WF_EintIsDisabled(void)
@@ -121,7 +121,7 @@ void WFEintISR(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to enable the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to enable the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintEnable(void)
 {
@@ -130,8 +130,8 @@ void WF_EintEnable(void)
     if ( WF_INT_IO == 0 )
     {
         // if the interrupt pin is active
-        // then the MRF24WB0M has another event that needs to be serviced.
-        // This means that the MRF24WB0M will never generate another falling edge
+        // then the MRF24W has another event that needs to be serviced.
+        // This means that the MRF24W will never generate another falling edge
         // required to trigger the interrupt... So, we must force an interrupt.
         // force the EINT
         WF_INT_IF = 1;
@@ -148,7 +148,7 @@ void WF_EintEnable(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to disable the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to disable the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintDisable(void)
 {
@@ -163,7 +163,7 @@ void WF_EintDisable(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to initialize the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to initialize the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintInit(void)
 {
@@ -191,7 +191,7 @@ void WF_EintInit(void)
 /*****************************************************************************
  * PIC24 INTERRUPT SERVICE ROUTINE
  *****************************************************************************/
-#if defined(MRF24WB0M_IN_SPI2 )
+#if defined(MRF24W_IN_SPI2 )
     void __attribute__((interrupt, auto_psv)) _INT3Interrupt(void)
 #else
     void __attribute__((interrupt, auto_psv)) _INT1Interrupt(void)
@@ -214,7 +214,7 @@ void WF_EintInit(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to enable the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to enable the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintEnable(void)
 {
@@ -223,8 +223,8 @@ void WF_EintEnable(void)
     if ( WF_INT_IO == 0 )
     {
         // if the interrupt pin is active
-        // then the MRF24WB0M has another event that needs to be serviced.
-        // This means that the MRF24WB0M will never generate another falling edge
+        // then the MRF24W has another event that needs to be serviced.
+        // This means that the MRF24W will never generate another falling edge
         // required to trigger the interrupt... So, we must force an interrupt.
         // force the EINT
         WF_INT_IF = 1;
@@ -242,7 +242,7 @@ void WF_EintEnable(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to disable the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to disable the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintDisable(void)
 {
@@ -257,7 +257,7 @@ void WF_EintDisable(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to initialize the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to initialize the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintInit(void)
 {
@@ -285,7 +285,7 @@ void WF_EintInit(void)
 /*****************************************************************************
  * PIC32 INTERRUPT SERVICE ROUTINE
  *****************************************************************************/
-#if defined( MRF24WB0M_IN_SPI2 )
+#if defined( MRF24W_IN_SPI2 )
 void __attribute((interrupt(ipl3), vector(_EXTERNAL_3_VECTOR), nomips16)) _WFInterrupt(void)
 #else
 void __attribute((interrupt(ipl3), vector(_EXTERNAL_1_VECTOR), nomips16)) _WFInterrupt(void)
@@ -309,7 +309,7 @@ void __attribute((interrupt(ipl3), vector(_EXTERNAL_1_VECTOR), nomips16)) _WFInt
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to enable the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to enable the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintEnable(void)
 {
@@ -318,8 +318,8 @@ void WF_EintEnable(void)
     if ( WF_INT_IO == 0 )
     {
         // if the interrupt pin is active
-        // then the MRF24WB0M has another event that needs to be serviced.
-        // This means that the MRF24WB0M will never generate another falling edge
+        // then the MRF24W has another event that needs to be serviced.
+        // This means that the MRF24W will never generate another falling edge
         // required to trigger the interrupt... So, we must force an interrupt.
         // force the EINT
         WF_INT_IF_SET = WF_INT_BIT;
@@ -337,7 +337,7 @@ void WF_EintEnable(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to disable the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to disable the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintDisable(void)
 {
@@ -352,7 +352,7 @@ void WF_EintDisable(void)
  *
  * PARAMS:  None
  *
- * NOTES:   Called by WiFi Driver to initialize the MRF24WB0M External Interrupt.  
+ * NOTES:   Called by WiFi Driver to initialize the MRF24W External Interrupt.  
  *****************************************************************************/
 void WF_EintInit(void)
 {

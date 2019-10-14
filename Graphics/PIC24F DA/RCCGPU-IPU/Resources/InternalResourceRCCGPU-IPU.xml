@@ -43,7 +43,7 @@
 <Font_Files>
 <Font_File_Resource>
 <label>GOLSmallFont</label>
-<path>../../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <size>12</size>
 <height>15</height>
@@ -54,7 +54,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>GOLMediumFont</label>
-<path>../../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <size>16</size>
 <height>19</height>
@@ -65,7 +65,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>VeraMono_28</label>
-<path>../../../../Microchip/Graphics/Fonts/VeraMono.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/vera/VeraMono.ttf</path>
 <name>Bitstream Vera Sans Mono</name>
 <size>28</size>
 <height>33</height>
@@ -76,7 +76,7 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>VeraMono_17</label>
-<path>../../../../Microchip/Graphics/Fonts/VeraMono.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/vera/VeraMono.ttf</path>
 <name>Bitstream Vera Sans Mono</name>
 <size>17</size>
 <height>20</height>

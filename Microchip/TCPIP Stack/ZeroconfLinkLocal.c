@@ -48,7 +48,7 @@
  * Pradeep Reddy        01 Mar 2009 Initial
  * Pradeep Reddy        12 May 2009 Enhancements and fixes
  * Pradeep Reddy        13 May 2010 Code documentation and cleanup
- * Brad Rex             05 Apr 2010 Updated for MRF24WB0M.
+ * Brad Rex             05 Apr 2010 Updated for MRF24W.
  ********************************************************************/
 #define __Zeroconf__Link_Local_C
 
@@ -969,7 +969,6 @@ void ZeroconfLLProcess(void)
 			temp_IP_addr.Val = swapl((DWORD) temp_IP_addr.Val);
 		}
 
-		// ToDo: check the max probe limit and probing rate
 		if((zcll_flags.bits.probe_conflict == 1) || (probe_count < PROBE_NUM))
 		{
 

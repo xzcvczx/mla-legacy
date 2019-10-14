@@ -248,7 +248,7 @@
     #pragma udata
 #endif
 
-#if defined(__C30__) || defined(__C32__)
+#if defined(__C30__) || defined(__C32__) || defined __XC16__
 //The LUN variable definition is critical to the MSD function driver.  This
 //  array is a structure of function pointers that are the functions that 
 //  will take care of each of the physical media.  For each additional LUN
@@ -489,7 +489,7 @@ static void InitializeSystem(void)
 {
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ64GB004_PIM)
             AD1PCFGL = 0xFFFF;
         #endif
@@ -724,7 +724,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;

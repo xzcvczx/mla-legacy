@@ -106,7 +106,8 @@
 /*************************************************************************/
 BYTE myChannel = 24;
 
-
+BYTE tempAddr[8] = {0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA};
+extern DWORD_VAL OutgoingFrameCounter; 
 /*********************************************************************
 * Function:         void main(void)
 *
@@ -310,6 +311,7 @@ int main(void)
                     // the buffer one byte by one byte by calling function 
                     // MiApp_WriteData
                     /*******************************************************************/
+                    
                     MiApp_FlushTx();
                     for(i = 0; i < 21; i++)
                     {
@@ -317,13 +319,16 @@ int main(void)
                     }
                     TxSynCount++;
                     
+                    
                     /*******************************************************************/
                     // Function MiApp_BroadcastPacket is used to broadcast a message
                     //    The only parameter is the boolean to indicate if we need to
                     //       secure the frame
                     /*******************************************************************/
                     MiApp_BroadcastPacket(FALSE);
+
                     DemoOutput_UpdateTxRx(++TxNum, RxNum);
+
                     break;
                     
                 case 2:

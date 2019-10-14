@@ -163,4 +163,12 @@
 *********************************************************************/
 #define GFX_SCHEMEDEFAULT GOLSchemeDefault
 
+
+/*********************************************************************
+* Overview: Enable the transparent color features in PutImage()
+*
+*********************************************************************/
+#define USE_TRANSPARENT_COLOR
+
+
 #endif // _GRAPHICSCONFIG_H

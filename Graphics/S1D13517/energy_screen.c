@@ -74,18 +74,42 @@ void CreateEnergyScreen(void)
     GOL_SCHEME *currentScheme;
     WORD state;
 
-    
-    GOLFree();                              // free memory for the objects in the previous linked list and start new list
-
-    CreatePanelScreen();                    // This adds the widgets seen on the left of the screen
-
     currentScheme = GFX_SchemeGetCurrentScheme();
 
-    SetState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT), BTN_DISABLED);
+    SetState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT), BTN_DISABLED|BTN_DRAW);
 
     SetColor(currentScheme->Color0);
-    FillBevel(ENERGY_ESCREEN_START+10 , ENERGY_EB_ORIGIN_Y , ENERGY_ESCREEN_START + 125, ENERGY_EB_ORIGIN_Y+70,20);
-    FillBevel(ENERGY_ESCREEN_START +210+10,  ENERGY_EB_ORIGIN_Y , ENERGY_ESCREEN_START + 335, ENERGY_EB_ORIGIN_Y+70,20);
+
+    while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));				     	
+
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+					 GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
+				     GetMaxY() - 90,  	
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT),BTN_DISABLED))
+    {
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT),BTN_DRAW);
+    }
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_SECURITY_BUT),BTN_DISABLED))
+    {
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_SECURITY_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_SECURITY_BUT),BTN_DRAW);
+    }
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT),BTN_DISABLED))
+    { 
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT),BTN_DRAW);
+    }
+
+    SetColor(currentScheme->Color0);
+    while(!FillBevel(ENERGY_ESCREEN_START+10 , ENERGY_EB_ORIGIN_Y , ENERGY_ESCREEN_START + 125, ENERGY_EB_ORIGIN_Y+70,20));
+    while(!FillBevel(ENERGY_ESCREEN_START +210+10,  ENERGY_EB_ORIGIN_Y , ENERGY_ESCREEN_START + 335, ENERGY_EB_ORIGIN_Y+70,20));
 
     SetFont((void *) &FONTDEFAULT);
     SetColor(RGB565CONVERT(255, 102, 0));//SetColor(WHITE);

@@ -94,13 +94,6 @@
 #endif
 
 /*********************************************************************
-* Overview: Clipping region control codes to be used with SetClip(...)
-*           function. 
-*********************************************************************/
-    #define CLIP_DISABLE    0   // Disables clipping.
-    #define CLIP_ENABLE     1   // Enables clipping.
-
-/*********************************************************************
 * Overview: Screen Saver parameters. 
 *			- SSON - Means that screen saver will be enabled when 
 *					 ScreenSaver(SSON) function is called with SSON as 

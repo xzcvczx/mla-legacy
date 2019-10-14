@@ -1,19 +1,19 @@
 /********************************************************************
  FileName:      main.c
  Dependencies:  See INCLUDES section
- Processor:		PIC18, PIC24, and PIC32 USB Microcontrollers
- Hardware:		This demo is natively intended to be used on Microchip USB demo
- 				boards supported by the MCHPFSUSB stack.  See release notes for
- 				support matrix.  This demo can be modified for use on other hardware
- 				platforms.
- Complier:  	Microchip C18 (for PIC18), C30 (for PIC24), C32 (for PIC32)
- Company:		Microchip Technology, Inc.
+ Processor:     PIC18, PIC24, dsPIC, and PIC32 USB Microcontrollers
+ Hardware:      This demo is natively intended to be used on Microchip USB demo
+                boards supported by the MCHPFSUSB stack.  See release notes for
+                support matrix.  This demo can be modified for use on other 
+                hardware platforms.
+ Complier:      Microchip C18 (for PIC18), XC16 (for PIC24/dsPIC), XC32 (for PIC32)
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PIC® Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -44,6 +44,8 @@
 
   2.7   Updated demo to place the PIC24F devices into sleep when the
         USB is in suspend.  
+        
+  2.9f  Adding new part support        
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -104,6 +106,27 @@
 //      #pragma config EBTR3    = OFF
         #pragma config EBTRB    = OFF
 
+#elif defined(PICDEM_FS_USB_K50)
+        #pragma config PLLSEL   = PLL3X     // 3X PLL multiplier selected
+        #pragma config CFGPLLEN = OFF       // PLL turned on during execution
+        #pragma config CPUDIV   = NOCLKDIV  // 1:1 mode (for 48MHz CPU)
+        #pragma config LS48MHZ  = SYS48X8   // Clock div / 8 in Low Speed USB mode
+        #pragma config FOSC     = INTOSCIO  // HFINTOSC selected at powerup, no clock out
+        #pragma config PCLKEN   = OFF       // Primary oscillator driver
+        #pragma config FCMEN    = OFF       // Fail safe clock monitor
+        #pragma config IESO     = OFF       // Internal/external switchover (two speed startup)
+        #pragma config nPWRTEN  = OFF       // Power up timer
+        #pragma config BOREN    = SBORDIS   // BOR enabled
+        #pragma config nLPBOR   = ON        // Low Power BOR
+        #pragma config WDTEN    = SWON      // Watchdog Timer controlled by SWDTEN
+        #pragma config WDTPS    = 32768     // WDT postscalar
+        #pragma config PBADEN   = OFF       // Port B Digital/Analog Powerup Behavior
+        #pragma config SDOMX    = RC7       // SDO function location
+        #pragma config LVP      = OFF       // Low voltage programming
+        #pragma config MCLRE    = ON        // MCLR function enabled (RE3 disabled)
+        #pragma config STVREN   = ON        // Stack overflow reset
+        //#pragma config ICPRT  = OFF       // Dedicated ICPORT program/debug pins enable
+        #pragma config XINST    = OFF       // Extended instruction set
 
 #elif defined(PIC18F87J50_PIM)				// Configuration bits for PIC18F87J50 FS USB Plug-In Module board
         #pragma config XINST    = OFF   	// Extended instruction set
@@ -124,7 +147,30 @@
 //      #pragma config PMPMX    = DEFAULT
 //      #pragma config ECCPMX   = DEFAULT
         #pragma config CCP2MX   = DEFAULT   
-
+        
+// Configuration bits for PIC18F97J94 PIM and PIC18F87J94 PIM
+#elif defined(PIC18F97J94_PIM) || defined(PIC18F87J94_PIM)
+        #pragma config STVREN   = ON      	// Stack overflow reset
+        #pragma config XINST    = OFF   	// Extended instruction set
+        #pragma config BOREN    = ON        // BOR Enabled
+        #pragma config BORV     = 0         // BOR Set to "2.0V" nominal setting
+        #pragma config CP0      = OFF      	// Code protect disabled
+        #pragma config FOSC     = FRCPLL    // Firmware should also enable active clock tuning for this setting
+        #pragma config SOSCSEL  = LOW       // SOSC circuit configured for crystal driver mode
+        #pragma config CLKOEN   = OFF       // Disable clock output on RA6
+        #pragma config IESO     = OFF      	// Internal External (clock) Switchover
+        #pragma config PLLDIV   = NODIV     // 4 MHz input (from 8MHz FRC / 2) provided to PLL circuit
+        #pragma config POSCMD   = NONE      // Primary osc disabled, using FRC
+        #pragma config FSCKM    = CSECMD    // Clock switching enabled, fail safe clock monitor disabled
+        #pragma config WPDIS    = WPDIS     // Program memory not write protected
+        #pragma config WPCFG    = WPCFGDIS  // Config word page of program memory not write protected
+        #pragma config IOL1WAY  = OFF       // IOLOCK can be set/cleared as needed with unlock sequence
+        #pragma config LS48MHZ  = SYSX2     // Low Speed USB clock divider
+        #pragma config WDTCLK   = LPRC      // WDT always uses INTOSC/LPRC oscillator
+        #pragma config WDTEN    = ON        // WDT disabled; SWDTEN can control WDT
+        #pragma config WINDIS   = WDTSTD    // Normal non-window mode WDT.
+        #pragma config VBTBOR   = OFF       // VBAT BOR disabled
+      
 #elif defined(PIC18F46J50_PIM) || defined(PIC18F_STARTER_KIT_1) || defined(PIC18F47J53_PIM)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
@@ -160,7 +206,6 @@
         #pragma config PWRTEN = OFF
         #pragma config BOREN  = OFF
         #pragma config BORV   = 30
-//        #pragma config VREGEN = ON
         #pragma config WDTEN  = OFF
         #pragma config WDTPS  = 32768
         #pragma config MCLRE  = OFF
@@ -379,7 +424,7 @@ char* InitgerToAscii(int val);
 	
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
 
-#elif defined(__C30__)
+#elif defined(__C30__) || defined __XC16__
     #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
         /*
          *	ISR JUMP TABLE
@@ -446,10 +491,10 @@ int main(void)
                 USBDeviceAttach();
                 ApplicationInit(); 
             } 
-        #endif
-	if(USBDeviceState < CONFIGURED_STATE)
-            ApplicationInit();      
-
+        #endif     
+        
+        if(USBDeviceState < CONFIGURED_STATE)
+            ApplicationInit();    
         #if defined(USB_POLLING)
 		// Check bus status and service USB interrupts.
         USBDeviceTasks(); // Interrupt or polling method.  If using polling, must call
@@ -459,11 +504,11 @@ int main(void)
         				  // plug in).  USB hosts require that USB devices should accept
         				  // and process SETUP packets in a timely fashion.  Therefore,
         				  // when using polling, this function should be called 
-        				  // frequently (such as once about every 100 microseconds) at any
-        				  // time that a SETUP packet might reasonably be expected to
-        				  // be sent by the host to your device.  In most cases, the
-        				  // USBDeviceTasks() function does not take very long to
-        				  // execute (~50 instruction cycles) before it returns.
+        				  // regularly (such as once every 1.8ms or faster** [see 
+        				  // inline code comments in usb_device.c for explanation when
+        				  // "or faster" applies])  In most cases, the USBDeviceTasks() 
+        				  // function does not take very long to execute (ex: <100 
+        				  // instruction cycles) before it returns.
         #endif
     				  
 
@@ -500,9 +545,9 @@ int main(void)
  *******************************************************************/
 static void InitializeSystem(void)
 {
-    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
+    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM) & !defined(PIC18F97J94_FAMILY))
         ADCON1 |= 0x0F;                 // Default all pins to digital
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
     	#if defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
     		ANSA = 0x0000;
     		ANSB = 0x0000;
@@ -539,6 +584,39 @@ static void InitializeSystem(void)
     }
     //Device switches over automatically to PLL output after PLL is locked and ready.
     #endif
+
+    #if defined(PIC18F97J94_FAMILY)
+        //Configure I/O pins for digital input mode.
+        ANCON1 = 0xFF;
+        ANCON2 = 0xFF;
+        ANCON3 = 0xFF;
+        #if(USB_SPEED_OPTION == USB_FULL_SPEED)
+            //Enable INTOSC active clock tuning if full speed
+            OSCCON5 = 0x90; //Enable active clock self tuning for USB operation
+            while(OSCCON2bits.LOCK == 0);   //Make sure PLL is locked/frequency is compatible
+                                            //with USB operation (ex: if using two speed 
+                                            //startup or otherwise performing clock switching)
+        #endif
+    #endif
+    
+    #if defined(PIC18F45K50_FAMILY)
+        //Configure oscillator settings for clock settings compatible with USB 
+        //operation.  Note: Proper settings depends on USB speed (full or low).
+        #if(USB_SPEED_OPTION == USB_FULL_SPEED)
+            OSCTUNE = 0x80; //3X PLL ratio mode selected
+            OSCCON = 0x70;  //Switch to 16MHz HFINTOSC
+            OSCCON2 = 0x10; //Enable PLL, SOSC, PRI OSC drivers turned off
+            while(OSCCON2bits.PLLRDY != 1);   //Wait for PLL lock
+            *((unsigned char*)0xFB5) = 0x90;  //Enable active clock tuning for USB operation
+        #endif
+        //Configure all I/O pins for digital mode (except RA0/AN0 which has POT on demo board)
+        ANSELA = 0x01;
+        ANSELB = 0x00;
+        ANSELC = 0x00;
+        ANSELD = 0x00;
+        ANSELE = 0x00;
+    #endif
+    
     #if defined(__dsPIC33EP512MU810__)
 	PLLFBD = 38;				/* M  = 60	*/
 	CLKDIVbits.PLLPOST = 0;		/* N1 = 2	*/
@@ -571,8 +649,9 @@ static void InitializeSystem(void)
 	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
 	//use the ANCONx registers to control this, which is different from other devices which
 	//use the ADCON1 register for this purpose.
-    ANCON0 = 0xFF;                  // Default all pins to digital
-    ANCON1 = 0xFF;                  // Default all pins to digital
+    ANCON0 = 0x7F;                  // All pins to digital (except AN7: temp sensor)
+    ANCON1 = 0xBF;                  // Default all pins to digital.  Bandgap on.
+
     #endif
     
    #if defined(PIC24FJ64GB004_PIM) || defined(PIC24FJ256DA210_DEV_BOARD)
@@ -623,8 +702,8 @@ static void InitializeSystem(void)
 //	on the PICDEM FS USB Demo Board, an I/O pin can be polled to determine the
 //	currently selected power source.  On the PICDEM FS USB Demo Board, "RA2" 
 //	is used for	this purpose.  If using this feature, make sure "USE_SELF_POWER_SENSE_IO"
-//	has been defined in HardwareProfile.h, and that an appropriate I/O pin has been mapped
-//	to it in HardwareProfile.h.
+//	has been defined in HardwareProfile - (platform).h, and that an appropriate I/O pin 
+//  has been mapped	to it.
     #if defined(USE_SELF_POWER_SENSE_IO)
     tris_self_power = INPUT_PIN;	// See HardwareProfile.h
     #endif
@@ -800,7 +879,7 @@ void LCDScreenUpdate (void)
                 LCDText[22] = ' ';
                 LCDText[23] = ' ';
             }    
-            else if (PHDGetAgentState() == PHD_INITIALIZED)
+            else if (PHDGetAgentState() == PHD_DISCONNECTED)
             {
                 LCDText[16] = 'D'; 
                 LCDText[17] = 'I';
@@ -997,7 +1076,7 @@ void BlinkUSBStatus(void)
 // The USB firmware stack will call the callback functions USBCBxxx() in response to certain USB related
 // events.  For example, if the host PC is powering down, it will stop sending out Start of Frame (SOF)
 // packets to your device.  In response to this, all USB devices are supposed to decrease their power
-// consumption from the USB Vbus to <2.5mA each.  The USB module detects this condition (which according
+// consumption from the USB Vbus to <2.5mA* each.  The USB module detects this condition (which according
 // to the USB specifications is 3+ms of no bus activity/SOF packets) and then calls the USBCBSuspend()
 // function.  You should modify these callback functions to take appropriate actions for each of these
 // conditions.  For example, in the USBCBSuspend(), you may wish to add code that will decrease power
@@ -1008,6 +1087,10 @@ void BlinkUSBStatus(void)
 // The USBCBSendResume() function is special, in that the USB stack will not automatically call this
 // function.  This function is meant to be called from the application firmware instead.  See the
 // additional comments near the function.
+
+// Note *: The "usb_20.pdf" specs indicate 500uA or 2.5mA, depending upon device classification. However,
+// the USB-IF has officially issued an ECN (engineering change notice) changing this to 2.5mA for all 
+// devices.  Make sure to re-download the latest specifications to get all of the newest ECNs.
 
 /******************************************************************************
  * Function:        void USBCBSuspend(void)
@@ -1043,7 +1126,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         USBSleepOnSuspend();
     #endif
 }
@@ -1074,11 +1157,13 @@ void USBCBWakeFromSuspend(void)
 	// If clock switching or other power savings measures were taken when
 	// executing the USBCBSuspend() function, now would be a good time to
 	// switch back to normal full power run mode conditions.  The host allows
-	// a few milliseconds of wakeup time, after which the device must be 
+	// 10+ milliseconds of wakeup time, after which the device must be 
 	// fully back to normal, and capable of receiving and processing USB
 	// packets.  In order to do this, the USB module must receive proper
 	// clocking (IE: 48MHz clock must be available to SIE for full speed USB
-	// operation).
+	// operation).  
+	// Make sure the selected oscillator settings are consistent with USB 
+    // operation before returning from this function.
 }
 
 /********************************************************************
@@ -1330,7 +1415,8 @@ void USBCBInitEP(void)
  *					to send this special USB signalling which wakes 
  *					up the PC.  This function may be called by
  *					application firmware to wake up the PC.  This
- *					function should only be called when:
+ *					function will only be able to wake up the host if
+ *                  all of the below are true:
  *					
  *					1.  The USB driver used on the host PC supports
  *						the remote wakeup capability.
@@ -1342,22 +1428,39 @@ void USBCBInitEP(void)
  *						FEATURE setup packet which "armed" the
  *						remote wakeup capability.   
  *
+ *                  If the host has not armed the device to perform remote wakeup,
+ *                  then this function will return without actually performing a
+ *                  remote wakeup sequence.  This is the required behavior, 
+ *                  as a USB device that has not been armed to perform remote 
+ *                  wakeup must not drive remote wakeup signalling onto the bus;
+ *                  doing so will cause USB compliance testing failure.
+ *                  
  *					This callback should send a RESUME signal that
  *                  has the period of 1-15ms.
  *
- * Note:            Interrupt vs. Polling
- *                  -Primary clock
- *                  -Secondary clock ***** MAKE NOTES ABOUT THIS *******
- *                   > Can switch to primary first by calling USBCBWakeFromSuspend()
- 
- *                  The modifiable section in this routine should be changed
+ * Note:            This function does nothing and returns quickly, if the USB
+ *                  bus and host are not in a suspended condition, or are 
+ *                  otherwise not in a remote wakeup ready state.  Therefore, it
+ *                  is safe to optionally call this function regularly, ex: 
+ *                  anytime application stimulus occurs, as the function will
+ *                  have no effect, until the bus really is in a state ready
+ *                  to accept remote wakeup. 
+ *
+ *                  When this function executes, it may perform clock switching,
+ *                  depending upon the application specific code in 
+ *                  USBCBWakeFromSuspend().  This is needed, since the USB
+ *                  bus will no longer be suspended by the time this function
+ *                  returns.  Therefore, the USB module will need to be ready
+ *                  to receive traffic from the host.
+ *
+ *                  The modifiable section in this routine may be changed
  *                  to meet the application needs. Current implementation
  *                  temporary blocks other functions from executing for a
- *                  period of 1-13 ms depending on the core frequency.
+ *                  period of ~3-15 ms depending on the core frequency.
  *
  *                  According to USB 2.0 specification section 7.1.7.7,
  *                  "The remote wakeup device must hold the resume signaling
- *                  for at lest 1 ms but for no more than 15 ms."
+ *                  for at least 1 ms but for no more than 15 ms."
  *                  The idea here is to use a delay counter loop, using a
  *                  common value that would work over a wide range of core
  *                  frequencies.
@@ -1481,16 +1584,10 @@ void USBCBEP0DataReceived(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((int)event)
     {
-        case EVENT_CONFIGURED: 
-            USBCBInitEP();
-            break;
-        case EVENT_SET_DESCRIPTOR:
-            USBCBStdSetDscHandler();
-            break;
-        case EVENT_EP0_REQUEST:
-            USBCBCheckOtherReq();
+        case EVENT_TRANSFER:
+	        USBDevicePHDCTxRXService((USTAT_FIELDS*)pdata);
             break;
         case EVENT_SOF:
             USBCB_SOF_Handler();
@@ -1501,11 +1598,27 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
         case EVENT_RESUME:
             USBCBWakeFromSuspend();
             break;
+        case EVENT_CONFIGURED: 
+            USBCBInitEP();
+            break;
+        case EVENT_SET_DESCRIPTOR:
+            USBCBStdSetDscHandler();
+            break;
+        case EVENT_EP0_REQUEST:
+            USBCBCheckOtherReq();
+            break;
         case EVENT_BUS_ERROR:
             USBCBErrorHandler();
             break;
-        case EVENT_TRANSFER:
-	        USBDevicePHDCTxRXService((USTAT_FIELDS*)pdata);
+        case EVENT_TRANSFER_TERMINATED:
+            //Add application specific callback task or callback function here if desired.
+            //The EVENT_TRANSFER_TERMINATED event occurs when the host performs a CLEAR
+            //FEATURE (endpoint halt) request on an application endpoint which was 
+            //previously armed (UOWN was = 1).  Here would be a good place to:
+            //1.  Determine which endpoint the transaction that just got terminated was 
+            //      on, by checking the handle value in the *pdata.
+            //2.  Re-arm the endpoint if desired (typically would be the case for OUT 
+            //      endpoints).
             break;
         default:
             break;

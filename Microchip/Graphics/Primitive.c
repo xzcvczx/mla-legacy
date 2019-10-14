@@ -54,7 +54,9 @@
  *              - break up SetFont(), OutChar() and GetTextWidth() to allow
  *                versatility of implementing text rendering functions in drivers.
  *              - added extended glyph support and font anti-aliasing
- *           
+ * 05/01/12     - Added clipping support commonly used in drivers
+ *              - Added putimagepartial support                          
+ * 06/11/12     - Added alpha blending support for Bar(), FillBevel(), Arc().
  *****************************************************************************/
 #include "HardwareProfile.h"              // needed to provide values for GetMaxX() and GetMaxY() macros
 #include "Graphics/DisplayDriver.h"
@@ -63,10 +65,10 @@
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
 #ifdef USE_BITMAP_FLASH
-    void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
-    void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
-    void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
-    void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);        
+    void    PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+    void    PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+    void    PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+    void    PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);         
 
 #ifdef USE_COMP_RLE
     void    PutImageRLE4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
@@ -75,10 +77,10 @@
 #endif
 
 #ifdef USE_BITMAP_EXTERNAL
-    void    PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-    void    PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-    void    PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-    void    PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
+    void    PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData); 
+    void    PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData); 
+    void    PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData); 
+    void    PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
 
 #ifdef USE_COMP_RLE
     void    PutImageRLE4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
@@ -143,6 +145,134 @@ const SHORT   _CosineTable[COSINETABLEENTRIES+1] __attribute__((aligned(2))) =
 							0 
 						};
 
+#ifdef USE_ALPHABLEND_LITE
+GFX_COLOR _prevAlphaColor = BLACK;
+BYTE      _alpha = 100;
+#endif
+
+/*********************************************************************
+* Function: SetClipRgn(left, top, right, bottom)
+*
+* Overview: Sets clipping region.
+*
+* PreCondition: none
+*
+* Input: left - Defines the left clipping region border.
+*		 top - Defines the top clipping region border.
+*		 right - Defines the right clipping region border.
+*	     bottom - Defines the bottom clipping region border.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void __attribute__((weak)) SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
+{
+    _clipLeft=left;
+    _clipTop=top;
+    _clipRight=right;
+    _clipBottom=bottom;
+
+}
+
+/*********************************************************************
+* Function: SetClip(control)
+*
+* Overview: Enables/disables clipping.
+*
+* PreCondition: none
+*
+* Input: control - Enables or disables the clipping.
+*			- 0: Disable clipping
+*			- 1: Enable clipping
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void __attribute__((weak)) SetClip(BYTE control)
+{
+    _clipRgn=control;
+}
+
+#ifdef USE_ALPHABLEND_LITE
+/*********************************************************************
+* Function: void BarAlpha(SHORT left, SHORT top, SHORT right, SHORT bottom)
+*
+* PreCondition: alphaPercentage > 0
+*
+* Input: left,top - top left corner coordinates,
+*        right,bottom - bottom right corner coordinates
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: Draws alpha blended bar. The bar is color is alpha blended to the
+*           current pixel colors in the display buffer area set by left, top, right
+*           and bottom. The alpha blending percentage used is the value set by 
+*           SetAlpha(). 
+*
+* Note: none
+*
+********************************************************************/
+WORD __attribute__((weak)) BarAlpha(SHORT left, SHORT top,WORD  right, WORD bottom)
+{
+
+    SHORT x,y;
+    GFX_COLOR  fcolor, bcolor, newColor;
+    
+    // save current color
+    newColor = fcolor = GetColor();
+
+    for(y=top;y<bottom+1;y++)
+    {
+        if(GetPrevAlphaColor() != BLACK)
+        {
+            for(x=left;x<right+1;x++)
+            {
+                bcolor = GetPixel(x,y);
+                switch(GetAlpha())
+                {
+                    case 50: newColor = (bcolor - ConvertColor50(GetPrevAlphaColor())) + ConvertColor50(fcolor);break;
+                    case 75: newColor = (bcolor - ConvertColor75(GetPrevAlphaColor())) + ConvertColor75(fcolor);break;
+                    case 25: newColor = (bcolor - ConvertColor25(GetPrevAlphaColor())) + ConvertColor25(fcolor);break;
+                    default: break;
+                }
+                SetColor(newColor);
+                PutPixel(x,y);
+            }     
+        }
+        else
+        {                          
+            for(x=left;x<right+1;x++)
+            {
+                bcolor = GetPixel(x,y);
+                switch(GetAlpha())
+                {
+                    case 50: newColor = ConvertColor50(fcolor) + ConvertColor50(bcolor); break;
+                    case 25: newColor = ConvertColor25(fcolor) + ConvertColor75(bcolor); break;
+                    case 75: newColor = ConvertColor75(fcolor) + ConvertColor25(bcolor); break;
+                    default: break;
+                } 
+                SetColor(newColor);
+                PutPixel(x,y);
+            } 
+        }        
+    }
+
+    // reset to original _color
+    SetColor(fcolor); 
+    return (1);
+}
+#endif
+
 /*********************************************************************
 * Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 *
@@ -169,18 +299,30 @@ WORD __attribute__((weak)) Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 {
     SHORT   x, y;
 
-        #ifndef USE_NONBLOCKING_CONFIG
+#ifndef USE_NONBLOCKING_CONFIG
     while(IsDeviceBusy() != 0) Nop();
 
     /* Ready */
-        #else
+#else
     if(IsDeviceBusy() != 0)
         return (0);
-        #endif
-    for(y = top; y < bottom + 1; y++)
-        for(x = left; x < right + 1; x++)
-            PutPixel(x, y);
+#endif
 
+#ifdef USE_ALPHABLEND_LITE
+    // NOTE: Alpha is never set to 0 so no need to check
+    if(GetAlpha() != 100) 
+    {
+        return (BarAlpha(left,top,right,bottom));
+    }
+    else 
+        // if alpha = 100, then just perform the normal Bar() rendering
+        // since pixel colors will be replaced by the SetColor()
+#endif
+    {
+        for(y = top; y < bottom + 1; y++)
+            for(x = left; x < right + 1; x++)
+                PutPixel(x, y);
+    }
     return (1);
 }
 
@@ -456,6 +598,10 @@ void InitGraph(void)
     TransparentColorDisable();
 #endif    
 
+#ifdef USE_ALPHABLEND_LITE
+    SetAlpha(100);
+#endif
+
     // Clear screen
     ClearDevice();
 
@@ -512,7 +658,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
     #ifndef USE_NONBLOCKING_CONFIG
 
     SHORT       y1Limit, y2Limit;
-    SHORT       x1, x2, y1, y2;
+    SHORT       x1, x2, y1, y2, ovrlap;
     SHORT       err1, err2;
     SHORT       x1Cur, y1Cur, y1New;
     SHORT       x2Cur, y2Cur, y2New;
@@ -535,7 +681,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
     y2 = 0;
 
     x1Cur = x1;
-    y1Cur = y1;
+    y1Cur = y1 + 1;
     y1New = y1;
     x2Cur = x2;
     y2Cur = y2;
@@ -595,42 +741,82 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
         {
             if(octant & 0x01)
             {
-                Bar(xR + y2Cur, yT - x2Cur, xR + y1New, yT - x1Cur);    // 1st octant
+                // check overlaps
+                if (yT - x1Cur < yT - y1New)
+                    ovrlap = yT - x1Cur;
+                else    
+                    ovrlap = yT - y1New - 1;
+                Bar(xR + y2Cur, yT - x2Cur, xR + y1New, ovrlap);    // 1st octant
             }
 
             if(octant & 0x02)
             {
-                Bar(xR + x1Cur, yT - y1New, xR + x2Cur, yT - y2Cur);    // 2nd octant
+                // check overlaps
+                if (xR + x1Cur > xR + y1New)
+                    ovrlap = xR + x1Cur;
+                else    
+                    ovrlap = xR + y1New;
+                Bar(ovrlap, yT - y1New, xR + x2Cur, yT - y2Cur);    // 2nd octant
             }
 
             if(octant & 0x04)
             {
-                Bar(xR + x1Cur, yB + y1Cur, xR + x2Cur, yB + y2New);    // 3rd octant
+                // check overlaps
+                if (xR + x1Cur > xR + y2New)
+                    ovrlap = xR + x1Cur;
+                else    
+                    ovrlap = xR + y2New;
+                Bar(ovrlap, yB + y1Cur, xR + x2Cur, yB + y2New);    // 3rd octant
             }
 
             if(octant & 0x08)
             {
-                Bar(xR + y1Cur, yB + x1Cur, xR + y2New, yB + x2Cur);    // 4th octant
+                // check overlaps
+                if (yB + x1Cur > yB + y2New)
+                    ovrlap = yB + x1Cur;
+                else    
+                    ovrlap = yB + y2New + 1;
+                Bar(xR + y1Cur, ovrlap, xR + y2New, yB + x2Cur);    // 4th octant
             }
 
             if(octant & 0x10)
             {
-                Bar(xL - y1New, yB + x1Cur, xL - y2Cur, yB + x2Cur);    // 5th octant
+                // check overlaps
+                if (yB + x1Cur > yB + y1New)
+                    ovrlap = yB + x1Cur;
+                else    
+                    ovrlap = yB + y1New + 1;
+                Bar(xL - y1New, ovrlap, xL - y2Cur, yB + x2Cur);    // 5th octant
             }
 
             if(octant & 0x20)
             {
-                Bar(xL - x2Cur, yB + y2Cur, xL - x1Cur, yB + y1New);    // 6th octant
+                // check overlaps
+                if (xL - x1Cur < xL - y1New)
+                    ovrlap = xL - x1Cur;
+                else    
+                    ovrlap = xL - y1New;
+                Bar(xL - x2Cur, yB + y2Cur, ovrlap, yB + y1New);    // 6th octant
             }
 
             if(octant & 0x40)
             {
-                Bar(xL - x2Cur, yT - y2New, xL - x1Cur, yT - y1Cur);    // 7th octant
+                // check overlaps
+                if (xL - x1Cur < xL - y2New)
+                    ovrlap = xL - x1Cur;
+                else    
+                    ovrlap = xL - y2New;
+                Bar(xL - x2Cur, yT - y2New, ovrlap, yT - y1Cur);    // 7th octant
             }
 
             if(octant & 0x80)
             {
-                Bar(xL - y2New, yT - x2Cur, xL - y1Cur, yT - x1Cur);    // 8th octant
+                // check overlaps
+                if (yT - x1Cur < yT - y2New)
+                    ovrlap = yT - x1Cur;
+                else    
+                    ovrlap = yT - y2New - 1;
+                Bar(xL - y2New, yT - x2Cur, xL - y1Cur, ovrlap);    // 8th octant
             }
 
             // update current values
@@ -638,33 +824,33 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
             y1Cur = y1;
             x2Cur = x2;
             y2Cur = y2;
+
         }
     }                           // end of while loop
 
     // draw the width and height
     if((xR - xL) || (yB - yT))
     {
-
         // draw right
         if(octant & 0x02)
         {
-            Bar(xR + r1, yT, xR + r2, (yB + yT) >> 1);
+            Bar(xR + r1, yT + 1, xR + r2, (yB + yT) >> 1);
         }
 
         if(octant & 0x04)
         {
-            Bar(xR + r1, ((yB + yT) >> 1), xR + r2, yB);
+            Bar(xR + r1, ((yB + yT) >> 1) + 1, xR + r2, yB);
         }
 
         // draw bottom
         if(octant & 0x10)
         {
-            Bar(xL, yB + r1, ((xR + xL) >> 1), yB + r2);
+            Bar(xL + 1, yB + r1, ((xR + xL) >> 1), yB + r2);
         }
 
         if(octant & 0x08)
         {
-            Bar(((xR + xL) >> 1), yB + r1, xR, yB + r2);
+            Bar(((xR + xL) >> 1) + 1, yB + r1, xR, yB + r2);
         }
 
         if(xR - xL)
@@ -678,7 +864,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
 
             if(octant & 0x01)
             {
-                Bar(((xR + xL) >> 1), yT - r2, xR, yT - r1);
+                Bar(((xR + xL) >> 1) + 1, yT - r2, xR - 1, yT - r1);
             }
         }
 
@@ -693,7 +879,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
 
             if(octant & 0x20)
             {
-                Bar(xL - r2, ((yB + yT) >> 1), xL - r1, yB);
+                Bar(xL - r2, ((yB + yT) >> 1) + 1, xL - r1, yB - 1);
             }
         }
     }
@@ -727,7 +913,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
 
     //	LONG temp1;
     static SHORT y1Limit, y2Limit;
-    static SHORT x1, x2, y1, y2;
+    static SHORT x1, x2, y1, y2, ovrlap;
     static SHORT err1, err2;
     static SHORT x1Cur, y1Cur, y1New;
     static SHORT x2Cur, y2Cur, y2New;
@@ -757,7 +943,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 y2 = 0;
 
                 x1Cur = x1;
-                y1Cur = y1;
+                y1Cur = y1 + 1;
                 y1New = y1;
                 x2Cur = x2;
                 y2Cur = y2;
@@ -813,7 +999,8 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 y2++;
 
                 state = QUAD11;
-                break;
+
+                //break;
 
             case QUAD11:
                 if((x1Cur != x1) || (x2Cur != x2))
@@ -822,8 +1009,13 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                     // 1st octant
                     if(octant & 0x01)
                     {
-                        if(Bar(xR + y2Cur, yT - x2Cur, xR + y1New, yT - x1Cur) == 0)
-                            return (0);
+                        // check overlaps
+                        if (yT - x1Cur < yT - y1New)
+                            ovrlap = yT - x1Cur;
+                        else    
+                            ovrlap = yT - y1New - 1;
+                        if(Bar(xR + y2Cur, yT - x2Cur, xR + y1New, ovrlap) == 0)
+                            return 0;    
                     }
                 }
                 else
@@ -840,8 +1032,13 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // 2nd octant
                 if(octant & 0x02)
                 {
-                    if(Bar(xR + x1Cur, yT - y1New, xR + x2Cur, yT - y2Cur) == 0)
-                        return (0);
+                    // check overlaps
+                    if (xR + x1Cur > xR + y1New)
+                        ovrlap = xR + x1Cur;
+                    else    
+                        ovrlap = xR + y1New;
+                    if(Bar(ovrlap, yT - y1New, xR + x2Cur, yT - y2Cur) == 0)
+                        return 0;    
                 }
 
                 state = QUAD21;
@@ -852,8 +1049,13 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // 3rd octant
                 if(octant & 0x04)
                 {
-                    if(Bar(xR + x1Cur, yB + y1Cur, xR + x2Cur, yB + y2New) == 0)
-                        return (0);
+                    // check overlaps
+                    if (xR + x1Cur > xR + y2New)
+                        ovrlap = xR + x1Cur;
+                    else    
+                        ovrlap = xR + y2New;
+                    if(Bar(ovrlap, yB + y1Cur, xR + x2Cur, yB + y2New) == 0)
+                        return 0;    
                 }
 
                 state = QUAD22;
@@ -864,8 +1066,14 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // 4th octant
                 if(octant & 0x08)
                 {
-                    if(Bar(xR + y1Cur, yB + x1Cur, xR + y2New, yB + x2Cur) == 0)
-                        return (0);
+
+                    // check overlaps
+                    if (yB + x1Cur > yB + y2New)
+                        ovrlap = yB + x1Cur;
+                    else    
+                        ovrlap = yB + y2New + 1;
+                    if(Bar(xR + y1Cur, ovrlap, xR + y2New, yB + x2Cur) == 0)
+                        return 0;    
                 }
 
                 state = QUAD31;
@@ -876,8 +1084,13 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // 5th octant
                 if(octant & 0x10)
                 {
-                    if(Bar(xL - y1New, yB + x1Cur, xL - y2Cur, yB + x2Cur) == 0)
-                        return (0);
+                    // check overlaps
+                    if (yB + x1Cur > yB + y1New)
+                        ovrlap = yB + x1Cur;
+                    else    
+                        ovrlap = yB + y1New + 1;
+                    if(Bar(xL - y1New, ovrlap, xL - y2Cur, yB + x2Cur) == 0)
+                        return 0;    
                 }
 
                 state = QUAD32;
@@ -888,8 +1101,13 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // 6th octant
                 if(octant & 0x20)
                 {
-                    if(Bar(xL - x2Cur, yB + y2Cur, xL - x1Cur, yB + y1New) == 0)
-                        return (0);
+                    // check overlaps
+                    if (xL - x1Cur < xL - y1New)
+                        ovrlap = xL - x1Cur;
+                    else    
+                        ovrlap = xL - y1New;
+                    if(Bar(xL - x2Cur, yB + y2Cur, ovrlap, yB + y1New) == 0)
+                        return 0;
                 }
 
                 state = QUAD41;
@@ -900,8 +1118,13 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // 7th octant
                 if(octant & 0x40)
                 {
-                    if(Bar(xL - x2Cur, yT - y2New, xL - x1Cur, yT - y1Cur) == 0)
-                        return (0);
+                    // check overlaps
+                    if (xL - x1Cur < xL - y2New)
+                        ovrlap = xL - x1Cur;
+                    else    
+                        ovrlap = xL - y2New;
+                    if(Bar(xL - x2Cur, yT - y2New, ovrlap, yT - y1Cur) == 0)
+                        return 0;
                 }
 
                 state = QUAD42;
@@ -912,8 +1135,13 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // 8th octant
                 if(octant & 0x80)
                 {
-                    if(Bar(xL - y2New, yT - x2Cur, xL - y1Cur, yT - x1Cur) == 0)
-                        return (0);
+                    // check overlaps
+                    if (yT - x1Cur < yT - y2New)
+                        ovrlap = yT - x1Cur;
+                    else    
+                        ovrlap = yT - y2New - 1;
+                    if(Bar(xL - y2New, yT - x2Cur, xL - y1Cur, ovrlap) == 0)
+                        return 0;    
                 }
 
                 // update current values
@@ -931,8 +1159,8 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                     // draw right
                     if(octant & 0x02)
                     {
-                        if(Bar(xR + r1, yT, xR + r2, (yB + yT) >> 1) == 0)
-                            return (0);
+                        if(Bar(xR + r1, yT + 1, xR + r2, (yB + yT) >> 1) == 0)
+                            return 0;
                     }
                 }
                 else
@@ -947,7 +1175,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
             case BARRIGHT2:     // draw lower right
                 if(octant & 0x04)
                 {
-                    if(Bar(xR + r1, ((yB + yT) >> 1), xR + r2, yB) == 0)
+                    if(Bar(xR + r1, ((yB + yT) >> 1) + 1, xR + r2, yB) == 0)
                         return (0);
                 }
 
@@ -958,7 +1186,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
                 // draw bottom
                 if(octant & 0x10)
                 {
-                    if(Bar(xL, yB + r1, ((xR + xL) >> 1), yB + r2) == 0)
+                    if(Bar(xL + 1, yB + r1, ((xR + xL) >> 1), yB + r2) == 0)
                         return (0);
                 }
 
@@ -968,7 +1196,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
             case BARBOTTOM2:    // draw right bottom
                 if(octant & 0x08)
                 {
-                    if(Bar(((xR + xL) >> 1), yB + r1, xR, yB + r2) == 0)
+                    if(Bar(((xR + xL) >> 1) + 1, yB + r1, xR, yB + r2) == 0)
                         return (0);
                 }
 
@@ -995,7 +1223,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
             case BARTOP2:               // draw right top
                 if(octant & 0x01)
                 {
-                    if(Bar(((xR + xL) >> 1), yT - r2, xR, yT - r1) == 0)
+                    if(Bar(((xR + xL) >> 1) + 1, yT - r2, xR - 1, yT - r1) == 0)
                         return (0);
                 }
 
@@ -1026,7 +1254,7 @@ WORD __attribute__((weak)) Arc(SHORT xL, SHORT yT, SHORT xR, SHORT yB, SHORT r1,
             case BARLEFT2:              // draw lower left
                 if(octant & 0x20)
                 {
-                    if(Bar(xL - r2, ((yB + yT) >> 1), xL - r1, yB) == 0)
+                    if(Bar(xL - r2, ((yB + yT) >> 1) + 1, xL - r1, yB - 1) == 0)
                         return (0);
                 }
 
@@ -1188,12 +1416,23 @@ WORD __attribute__((weak)) Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT r
 ********************************************************************/
 WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 {
+
     #ifndef USE_NONBLOCKING_CONFIG
 
     SHORT       yLimit, xPos, yPos, err;
     SHORT       xCur, yCur, yNew;
+    SHORT       last54Y, last18Y;
     DWORD_VAL   temp;
 
+
+    // this covers filled rectangle.
+    if (_bevelDrawType == DRAWFULLBEVEL) 
+	    Bar(x1 - rad, y1, x2 + rad, y2);
+    else if (_bevelDrawType == DRAWTOPBEVEL)    
+	    Bar(x1 - rad, y1, x2 + rad, y1+((y2-y1)>>1));
+    else    
+	    Bar(x1 - rad, y1+((y2-y1)>>1), x2 + rad, y2);
+	 
     // note that octants here is defined as:
     // from yPos=-radius, xPos=0 in the clockwise direction octant 1 to 8 are labeled
     // assumes an origin at 0,0. Quadrants are defined in the same manner
@@ -1206,19 +1445,23 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
         xPos = rad;
         yPos = 0;
 
+        // yCur starts at 1 so the center line is not drawn and will be drawn separately
+        // this is to avoid rendering twice on the same line
+        yCur = 1;           
         xCur = xPos;
-        yCur = yPos;
         yNew = yPos;
+
+        // note initial values are important
+        last54Y = GetMaxY();
+        last18Y = 0;
 
         while(yPos <= yLimit)
         {
-
             // Drawing of the rounded panel is done only when there is a change in the
             // x direction. Bars are drawn to be efficient.
             // detect changes in the x position. Every change will mean a bar will be drawn
-            // to cover the previous area. y1New records the last position of y before the
+            // to cover the previous area. yNew records the last position of y before the
             // change in x position.
-            // y1New records the last y position
             yNew = yPos;
 
             if(err > 0)
@@ -1235,70 +1478,120 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 	            if (_bevelDrawType & DRAWBOTTOMBEVEL) 
 	            { 
 	                // 6th octant to 3rd octant
-	                Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew);
-	
-	                // 5th octant to 4th octant
-	                Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur);
+                    // check first if there will be an overlap
+                    if (y2 + yNew > last54Y)
+    	                Bar(x1 - xCur, y2 + yCur, x2 + xCur, last54Y - 1);
+                    else
+    	                Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew);
+            
+   	                // 5th octant to 4th octant
+                    // check: if overlapping then no need to proceed
+                    if ((y2 + xCur) > (y2 + yNew))
+                    {
+   	                    Bar(x1 - yNew, y2 + xCur, x2 + yNew, y2 + xCur);
+                        last54Y = (y2 + xCur);
+  
+                    }
+                    
 				}
 
 	            if (_bevelDrawType & DRAWTOPBEVEL) 
 				{
+                    // 7th octant to 2nd octant
+                    // check: if overlapping then no need to proceed
+                    if (y1 - yNew < last18Y)
+	                    Bar(x1 - xCur, last18Y + 1, x2 + xCur, y1 - yCur);
+                    else
+	                    Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur);
+
 	                // 8th octant to 1st octant
-	                Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos);
-	
-	                // 7th octant to 2nd octant
-	                Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur);
+                    // check first if there will be an overlap
+                    if ((y1 - xCur) < (y1 - yNew))
+                    {
+    	                Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xCur);
+                        last18Y = y1 - xCur;    
+                    }
+
 				}
                 // update current values
                 xCur = xPos;
                 yCur = yPos;
             }
         }
-    }
 
-    // this covers both filled rounded object and filled rectangle.
-    if((x2 - x1) || (y2 - y1))
-    {
-		if (_bevelDrawType == DRAWFULLBEVEL) 
-	        Bar(x1 - rad, y1, x2 + rad, y2);
-	    else if (_bevelDrawType == DRAWTOPBEVEL)    
-	        Bar(x1 - rad, y1, x2 + rad, y1+((y2-y1)>>1));
-	    else    
-	        Bar(x1 - rad, y1+((y2-y1)>>1), x2 + rad, y2);
-	}     
-	        
+        if ((y1 - yNew) > (y1 - xPos)) 
+        {
+            // there is a missing line, draw that line
+            if (_bevelDrawType & DRAWTOPBEVEL)
+                Bar(x1 - yNew, y1 - xPos, x2 + yNew, y1 - xPos);
+        }
+        if ((y2 + yNew) < (y2 + xPos)) 
+        {
+            // there is a missing line, draw that line
+            if (_bevelDrawType & DRAWBOTTOMBEVEL)
+                Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xPos);
+        }
+    }
+   
     return (1);
+
     #else
 
     typedef enum
     {
-        BEGIN,
-        CHECK,
-        Q8TOQ1,
-        Q7TOQ2,
-        Q6TOQ3,
-        Q5TOQ4,
-        WAITFORDONE,
-        FACE
-    } FILLCIRCLE_STATES;
+        FB_BEGIN,
+        FB_INIT_FILL,
+        FB_CHECK,
+        FB_Q8TOQ1,
+        FB_Q7TOQ2,
+        FB_Q6TOQ3,
+        FB_Q5TOQ4,
+        FB_DRAW_MISSING_1,    
+        FB_DRAW_MISSING_2,    
+        FB_WAITFORDONE,        
+    } FB_FILLCIRCLE_STATES;
 
-    DWORD_VAL temp;
-    static LONG err;
+    static SHORT err;
     static SHORT yLimit, xPos, yPos;
     static SHORT xCur, yCur, yNew;
+    static SHORT last54Y, last18Y;
+    DWORD_VAL temp;
 
-    static FILLCIRCLE_STATES state = BEGIN;
+    static FB_FILLCIRCLE_STATES state = FB_BEGIN;
 
     while(1)
     {
         if(IsDeviceBusy())
             return (0);
+
         switch(state)
         {
-            case BEGIN:
+            case FB_BEGIN:
+
+                // draw the face
+                if (_bevelDrawType == DRAWFULLBEVEL)
+				{ 
+				    if(Bar(x1 - rad, y1, x2 + rad, y2) == 0)
+	                    return (0);
+				}
+                else if (_bevelDrawType == DRAWTOPBEVEL)
+				{    
+				    if(Bar(x1 - rad, y1, x2 + rad, y1+((y2-y1)>>1)) == 0)
+	                    return (0);
+                }
+				else    
+				{
+				    if(Bar(x1 - rad, y1+((y2-y1)>>1), x2 + rad, y2) == 0)
+	                    return (0);
+    			}            
+                state = FB_INIT_FILL;
+                break;
+            
+            case FB_INIT_FILL:
+
                 if(!rad)
                 {   // no radius object is a filled rectangle
-                    state = FACE;
+                    state = FB_WAITFORDONE;
                     break;
                 }
 
@@ -1309,19 +1602,32 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
                 err = (SHORT) (temp.w[1]);
                 xPos = rad;
                 yPos = 0;
-                xCur = xPos;
-                yCur = yPos;
-                yNew = yPos;
-                state = CHECK;
 
-            case CHECK:
-                bevel_fill_check : if(yPos > yLimit)
+                // yCur starts at 1 so the center line is not drawn and will be drawn separately
+                // this is to avoid rendering twice on the same line
+                yCur = 1;           
+                xCur = xPos;
+                yNew = yPos;
+    
+                // note initial values are important
+                last54Y = GetMaxY();
+                last18Y = 0;
+
+                state = FB_CHECK;
+
+            case FB_CHECK:
+
+                // check first for limits
+                if(yPos > yLimit)
                 {
-                    state = FACE;
+                    if (rad)
+                        state = FB_DRAW_MISSING_1;
+                    else
+                        state = FB_WAITFORDONE;
                     break;
                 }
 
-                // y1New records the last y position
+                // yNew records the last y position
                 yNew = yPos;
 
                 // calculate the next value of x and y
@@ -1333,95 +1639,130 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
                 else
                     err += 3 + (yPos << 1);
                 yPos++;
-                state = Q6TOQ3;
+                state = FB_Q6TOQ3;
 
-            case Q6TOQ3:
+            case FB_Q6TOQ3:
+
                 if(xCur != xPos)
                 {
 
                     // 6th octant to 3rd octant
 	            	if (_bevelDrawType & DRAWBOTTOMBEVEL) 
 	            	{ 
-                    	if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0)
-                        	return (0);
+
+                        // check first if there will be an overlap
+                        if (y2 + yNew > last54Y)
+                        {
+        	                if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, last54Y - 1) == 0)
+                                return 0;
+                        }        
+                        else
+                        {
+        	               if (Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0)
+                                return 0;
+                        }
               		}          	
-                    state = Q5TOQ4;
+                    state = FB_Q5TOQ4;
                     break;
                 }
 
-                state = CHECK;
-                goto bevel_fill_check;
+                state = FB_CHECK;
+                break;
 
-            case Q5TOQ4:
+            case FB_Q5TOQ4:
 
             	if (_bevelDrawType & DRAWBOTTOMBEVEL) 
             	{ 
-	                // 5th octant to 4th octant
-	                if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0)
-	                    return (0);
+
+   	                // 5th octant to 4th octant
+                    // check: if overlapping then no need to proceed
+                    if ((y2 + xCur) > (y2 + yNew))
+                    {
+   	                    if (Bar(x1 - yNew, y2 + xCur, x2 + yNew, y2 + xCur) == 0)
+                            return 0;
+                        last54Y = (y2 + xCur);
+  
+                    }
+
 				}
-                state = Q8TOQ1;
+                state = FB_Q7TOQ2;
                 break;
 
-            case Q8TOQ1:
-
-                // 8th octant to 1st octant
-	            if (_bevelDrawType & DRAWTOPBEVEL) 
-				{
-					if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0)
-                    	return (0);
-    			}                	
-                state = Q7TOQ2;
-                break;
-
-            case Q7TOQ2:
+            case FB_Q7TOQ2:
 
                 // 7th octant to 2nd octant
 	            if (_bevelDrawType & DRAWTOPBEVEL) 
 				{
-	                if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0)
-    	                return (0);
+                    // check: if overlapping then no need to proceed
+                    if (y1 - yNew < last18Y)
+                    {
+	                    if (Bar(x1 - xCur, last18Y + 1, x2 + xCur, y1 - yCur) == 0)
+                            return 0;
+                    }
+                    else
+                    {
+	                    if (Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0)   
+                            return 0;
+                    }
+
 				}
+                state = FB_Q8TOQ1;
+                break;
+
+            case FB_Q8TOQ1:
+
+                // 8th octant to 1st octant
+	            if (_bevelDrawType & DRAWTOPBEVEL) 
+				{
+
+                    // check first if there will be an overlap
+                    if ((y1 - xCur) < (y1 - yNew))
+                    {
+    	                if (Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xCur) == 0)
+                            return 0;
+                        last18Y = y1 - xCur;    
+                    }
+
+    			}                	
                 // update current values
                 xCur = xPos;
                 yCur = yPos;
-                state = CHECK;
+
+                state = FB_CHECK;
                 break;
 
- 
-
-            case FACE:
-                if((x2 - x1) || (y2 - y1))
+            case FB_DRAW_MISSING_1:
+                // check only one side since they are the same    
+                if ((y1 - yNew) > (y1 - xPos)) 
                 {
-					if (_bevelDrawType == DRAWFULLBEVEL)
-					{ 
-				        if(Bar(x1 - rad, y1, x2 + rad, y2) == 0)
-	                        return (0);
-				 	}
-				    else if (_bevelDrawType == DRAWTOPBEVEL)
-				    {    
-				        if(Bar(x1 - rad, y1, x2 + rad, y1+((y2-y1)>>1)) == 0)
-	                        return (0);
-				    }
-				    else    
-				    {
-				        if(Bar(x1 - rad, y1+((y2-y1)>>1), x2 + rad, y2) == 0)
-	                        return (0);
-        			}            
-
-                    state = WAITFORDONE;
+                    // there is a missing line, draw that line
+                    if (_bevelDrawType & DRAWTOPBEVEL)
+                        if (Bar(x1 - yNew, y1 - xPos, x2 + yNew, y1 - xPos) == 0)
+                            return 0;
+                    
+                    state = FB_DRAW_MISSING_2;
                 }
                 else
-                {
-                    state = BEGIN;
-                    return (1);
-                }
+                    state = FB_WAITFORDONE;
+                break;
 
-            case WAITFORDONE:
+            case FB_DRAW_MISSING_2:
+                if ((y2 + yNew) < (y2 + xPos)) 
+                {
+                    if (_bevelDrawType & DRAWBOTTOMBEVEL)
+                        if (Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xPos) == 0)
+
+                            return 0;
+                }
+                state = FB_WAITFORDONE;
+
+            case FB_WAITFORDONE:
                 if(IsDeviceBusy())
                     return (0);
-                state = BEGIN;
+                
+                state = FB_BEGIN;
                 return (1);
+
         }           // end of switch
     }               // end of while
     #endif // end of USE_NONBLOCKING_CONFIG
@@ -1539,16 +1880,25 @@ WORD __attribute__((weak)) DrawPoly(SHORT numPoints, SHORT *polyPoints)
 ********************************************************************/
 void __attribute__((weak)) SetFontFlash(void *pFont)
 {
-#if defined (USE_FONT_FLASH) || defined (USE_FONT_RAM)
-    FONT_HEADER *pHeader;
+#if defined (USE_FONT_FLASH)
+    GFX_FONT_SPACE BYTE *src;
+    BYTE *dest;
+    int i;
 
-#if defined (USE_FONT_FLASH) 
-    pHeader = (FONT_HEADER *) ((FONT_FLASH *)pFont)->address;
+    src = (GFX_FONT_SPACE BYTE *)((FONT_FLASH *)pFont)->address;
+    dest = (BYTE *)&(currentFont.fontHeader);
+    for(i = 0; i < sizeof(FONT_HEADER); i++)
+    {
+        *dest = *src;
+        src++;
+        dest++;
+    }
+    currentFont.pFont = pFont;
 #endif
 #if defined (USE_FONT_RAM)
-    pHeader = (FONT_HEADER *) ((FONT_RAM *)pFont)->address;
-#endif
-    memcpy(&(currentFont.fontHeader), pHeader, sizeof(FONT_HEADER));
+    memcpy( &(currentFont.fontHeader), 
+            (FONT_HEADER *) ((FONT_RAM *)pFont)->address, 
+            sizeof(FONT_HEADER));
     currentFont.pFont = pFont;
 #endif
 }
@@ -1651,24 +2001,14 @@ static void __attribute__((always_inline)) calculateColors(void)
     GFX_COLOR   _fgcolor50;
     GFX_COLOR   _bgcolor50;
     
-#if (COLOR_DEPTH == 16)
+#if (COLOR_DEPTH == 16) || (COLOR_DEPTH == 24)
 
-    _fgcolor50  = (_fgcolor100 &  0b1111011111011110u) >> 1;
-    _fgcolor25  = (_fgcolor50  &  0b1111011111011110u) >> 1;
-    _fgcolor75  = _fgcolor50   +  _fgcolor25;
-    
-    _bgcolor50  = (_bgcolor100 &  0b1111011111011110u) >> 1;
-    _bgcolor25  = (_bgcolor50  &  0b1111011111011110u) >> 1;
-    _bgcolor75  = _bgcolor50   +  _bgcolor25;
-
-#elif (COLOR_DEPTH == 24)
-    
-    _fgcolor50  = (_fgcolor100 &  0x00FEFEFEul) >> 1;
-    _fgcolor25  = (_fgcolor50  &  0x00FEFEFEul) >> 1;
+    _fgcolor50  = ConvertColor50(_fgcolor100);
+    _fgcolor25  = ConvertColor25(_fgcolor100);
     _fgcolor75  = _fgcolor50   +  _fgcolor25;
 
-    _bgcolor50  = (_bgcolor100 &  0x00FEFEFEul) >> 1;
-    _bgcolor25  = (_bgcolor50  &  0x00FEFEFEul) >> 1;
+    _bgcolor50  = ConvertColor50(_bgcolor100);
+    _bgcolor25  = ConvertColor50(_bgcolor100);
     _bgcolor75  = _bgcolor50   +  _bgcolor25;
 
 #elif ((COLOR_DEPTH == 8) || (COLOR_DEPTH == 4))
@@ -1719,8 +2059,8 @@ void __attribute__((weak)) OutCharGetInfoFlash (XCHAR ch, OUTCHAR_PARAM *pParam)
 {
 #ifdef USE_FONT_FLASH
 
-    GLYPH_ENTRY_EXTENDED    *pChTableExtended;
-    GLYPH_ENTRY             *pChTable;
+    GFX_FONT_SPACE GLYPH_ENTRY_EXTENDED    *pChTableExtended;
+    GFX_FONT_SPACE GLYPH_ENTRY             *pChTable;
 
     // set color depth of font,
     // based on 2^bpp where bpp is the color depth setting in the FONT_HEADER
@@ -1728,8 +2068,8 @@ void __attribute__((weak)) OutCharGetInfoFlash (XCHAR ch, OUTCHAR_PARAM *pParam)
 
     if(currentFont.fontHeader.extendedGlyphEntry)
     {
-        pChTableExtended = (GLYPH_ENTRY_EXTENDED *) (((FONT_FLASH *)currentFont.pFont)->address + sizeof(FONT_HEADER)) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar);
-        pParam->pChImage = (BYTE *) (((FONT_FLASH *)currentFont.pFont)->address + pChTableExtended->offset);
+        pChTableExtended = (GFX_FONT_SPACE GLYPH_ENTRY_EXTENDED *) (((FONT_FLASH *)currentFont.pFont)->address + sizeof(FONT_HEADER)) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar);
+        pParam->pChImage = (GFX_FONT_SPACE BYTE *) (((FONT_FLASH *)currentFont.pFont)->address + pChTableExtended->offset);
         pParam->chGlyphWidth = pChTableExtended->glyphWidth;
         pParam->xWidthAdjust = pChTableExtended->glyphWidth - pChTableExtended->cursorAdvance;
         pParam->xAdjust = pChTableExtended->xAdjust;
@@ -1742,8 +2082,8 @@ void __attribute__((weak)) OutCharGetInfoFlash (XCHAR ch, OUTCHAR_PARAM *pParam)
     }
     else
     {
-        pChTable = (GLYPH_ENTRY *) (((FONT_FLASH *)currentFont.pFont)->address + sizeof(FONT_HEADER)) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar);
-        pParam->pChImage = (BYTE *) (((FONT_FLASH *)currentFont.pFont)->address + ((DWORD)(pChTable->offsetMSB) << 8) + pChTable->offsetLSB);
+        pChTable = (GFX_FONT_SPACE GLYPH_ENTRY *) (((FONT_FLASH *)currentFont.pFont)->address + sizeof(FONT_HEADER)) + ((UXCHAR)ch - (UXCHAR)currentFont.fontHeader.firstChar);
+        pParam->pChImage = (GFX_FONT_SPACE BYTE *) (((FONT_FLASH *)currentFont.pFont)->address + ((DWORD)(pChTable->offsetMSB) << 8) + pChTable->offsetLSB);
         pParam->chGlyphWidth = pChTable->width;
     }
 
@@ -2099,10 +2439,6 @@ WORD __attribute__((weak)) OutChar(XCHAR ch)
     static OUTCHAR_PARAM OutCharParam;
 
     // initialize variables
-#ifdef USE_FONT_FLASH	
-    OutCharParam.pChTable = NULL;
-    OutCharParam.pChTableExtended = NULL;
-#endif
 #ifdef USE_FONT_EXTERNAL	
     OutCharParam.pChImage = NULL;
 #endif
@@ -2321,25 +2657,25 @@ SHORT __attribute__((weak)) GetTextWidthRam(XCHAR* textString, void* pFont)
 SHORT __attribute__((weak)) GetTextWidthFlash(XCHAR* textString, void* pFont)
 {
 #if defined (USE_FONT_FLASH) 
-    GLYPH_ENTRY *pChTable = NULL;
-    GLYPH_ENTRY_EXTENDED *pChTableExtended = NULL;
-    FONT_HEADER *pHeader;
+    GFX_FONT_SPACE GLYPH_ENTRY *pChTable = NULL;
+    GFX_FONT_SPACE GLYPH_ENTRY_EXTENDED *pChTableExtended = NULL;
+    GFX_FONT_SPACE FONT_HEADER *pHeader;
 
     SHORT       textWidth;
     XCHAR       ch;
     XCHAR       fontFirstChar;
     XCHAR       fontLastChar;
 
-    pHeader = (FONT_HEADER *) ((FONT_FLASH *)pFont)->address;
+    pHeader = (GFX_FONT_SPACE FONT_HEADER *) ((FONT_FLASH *)pFont)->address;
     fontFirstChar = pHeader->firstChar;
     fontLastChar = pHeader->lastChar;
     if(pHeader->extendedGlyphEntry)
     {
-        pChTableExtended = (GLYPH_ENTRY_EXTENDED *) (pHeader + 1);
+        pChTableExtended = (GFX_FONT_SPACE GLYPH_ENTRY_EXTENDED *) (pHeader + 1);
     }
     else
     {
-        pChTable = (GLYPH_ENTRY *) (pHeader + 1);
+        pChTable = (GFX_FONT_SPACE GLYPH_ENTRY *) (pHeader + 1);
     }    
     textWidth = 0;
     while((UXCHAR)15 < (UXCHAR)(ch = *textString++))
@@ -2512,7 +2848,7 @@ SHORT __attribute__((weak)) GetTextHeight(void *pFont)
                     
 #ifdef USE_FONT_FLASH
             case FLASH:
-                return ((FONT_HEADER *) ((FONT_FLASH *)pFont)->address)->height;
+                return ((GFX_FONT_SPACE FONT_HEADER *) ((FONT_FLASH *)pFont)->address)->height;
 #endif
                     
 #ifdef USE_FONT_EXTERNAL
@@ -2640,13 +2976,14 @@ SHORT __attribute__((weak)) GetImageHeight(void *image)
     #ifdef USE_BITMAP_FLASH
 
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
 *        image - image pointer,
 *        stretch - image stretch factor
+*        partialImage - partial image pointer
 *
 * Output: none
 *
@@ -2657,16 +2994,18 @@ SHORT __attribute__((weak)) GetImageHeight(void *image)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register FLASH_BYTE *flashAddress;
+    register FLASH_BYTE *flashAddress, *tempFlashAddress;
     BYTE                temp = 0;
     WORD                sizeX, sizeY;
     WORD                x, y;
     WORD                xc, yc;
     WORD                pallete[2];
-    BYTE                mask;
-
+    WORD                mask;
+    WORD                addressOffset = 0, adjOffset;
+    WORD                OffsetFlag = 0x01;     //Offset from BYTE color bit0 for the partial image 
+                  
     // Move pointer to size information
     flashAddress = image + 2;
 
@@ -2680,23 +3019,62 @@ void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
+    if (sizeX & 0x07)
+        adjOffset = 1; 
+    else
+        adjOffset = 0;
+
+    // compute for addressOffset this is the offset needed to jump to the 
+    // next line 
+    addressOffset = ((sizeX >> 3) + adjOffset); 
+
+    if(pPartialImageData->width != 0)
+    {
+        WORD mod3 = ((pPartialImageData->xoffset) & 0x07);
+
+        // adjust the flashAddress to the starting pixel location
+        // adjust one address if the data is not byte aligned
+        flashAddress += (pPartialImageData->yoffset*((sizeX >> 3) + adjOffset));
+
+        // adjust flashAddress for x offset (if xoffset is zero address stays the same)
+        flashAddress += ((pPartialImageData->xoffset) >> 3);
+
+        OffsetFlag <<= mod3;
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+    }
+
     yc = top;
-    
+
+    // store current line data address 
+    tempFlashAddress = flashAddress;
+
     // Note: For speed the code for loops are repeated. A small code size increase for performance
     if (stretch == IMAGE_NORMAL)
     {
+
         for(y = 0; y < sizeY; y++)
         {
+            // get flash address location of current line being processed
+            flashAddress = tempFlashAddress;
+
             xc = left;
-            mask = 0;
+            if (OffsetFlag != 0x01)
+    		{
+                // grab the first set of data then set up the mask to the starting pixel
+    			temp = *flashAddress++;
+            }
+            mask = OffsetFlag;
+ 
             for(x = 0; x < sizeX; x++)
             {
 
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *flashAddress++;
-                    mask = 0x80;
+            	// Read 8 pixels from flash
+                if(mask == 0x01)
+			    {
+				    temp = *flashAddress++;
+                    mask = 0x01;
                 }
 
                 // Set color
@@ -2726,9 +3104,15 @@ void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image
                         PutPixel(xc, yc);
                     // adjust to next location
                     xc++;
+
+                // Read 8 pixels from flash
+                if(mask == 0x80)
+                    mask = 0x01;
+                else
                     // Shift to the next pixel
-                    mask >>= 1;    
-            }            
+                    mask <<= 1;
+            }  
+            tempFlashAddress += (addressOffset);          
             yc++;
         }
     }
@@ -2736,17 +3120,25 @@ void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image
     {
         for(y = 0; y < sizeY; y++)
         {
+            // get flash address location of current line being processed
+            flashAddress = tempFlashAddress;
+
             xc = left;
-            mask = 0;
+            if (OffsetFlag != 0x01)
+    		{
+                // grab the first set of data then set up the mask to the starting pixel
+    			temp = *flashAddress++;
+            }
+            mask = OffsetFlag;
 
             for(x = 0; x < sizeX; x++)
             {
 
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *flashAddress++;
-                    mask = 0x80;
+            	// Read 8 pixels from flash
+                if(mask == 0x01)
+			    {
+				    temp = *flashAddress++;
+                    mask = 0x01;
                 }
 
                     // Set color
@@ -2772,16 +3164,23 @@ void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
                         PutPixel(xc+1, yc+1);  
                     }
                     xc += 2;
-                // Shift to the next pixel
-                mask >>= 1;    
+                                // Read 8 pixels from flash
+
+                // Read 8 pixels from flash
+                if(mask == 0x80)
+                    mask = 0x01;
+                else
+                    // Shift to the next pixel
+                    mask <<= 1;
             }
+            tempFlashAddress += (addressOffset);
             yc+=2;
         }
     }    
@@ -2789,13 +3188,13 @@ void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
-*
+*        partialImage - partial image pointer
 * Output: none
 *
 * Side Effects: none
@@ -2808,7 +3207,7 @@ void __attribute__((weak)) PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image
         #if (COLOR_DEPTH >= 4)
 
 /* */
-void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     WORD                sizeX, sizeY;
@@ -2817,6 +3216,8 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
     BYTE                temp = 0;
     WORD                pallete[16];
     WORD                counter;
+    WORD                addressOffset = 0;
+    BYTE                OffsetFlag = 0;
 
     // Move pointer to size information
     flashAddress = image + 2;
@@ -2834,6 +3235,30 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
         flashAddress += 2;
     }
 
+    if(pPartialImageData->width != 0)
+    {
+         WORD mod1 = (sizeX & 1);
+         WORD mod2 = (pPartialImageData->width) & 1; 
+         WORD mod3 = (pPartialImageData->xoffset) & 1; 
+
+         flashAddress += (pPartialImageData->yoffset)*((sizeX>>1)+mod1);
+         flashAddress += ((pPartialImageData->xoffset)>>1);                
+
+         addressOffset = (sizeX>>1)+mod1;
+         addressOffset -= ((pPartialImageData->width)>>1);
+         addressOffset -= mod3;
+         OffsetFlag = (mod3);
+
+          if(OffsetFlag == 0)
+          {
+            addressOffset -= mod2;
+          }
+         
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+         
+    }
+
     yc = top;
 
     // Note: For speed the code for loops are repeated. A small code size increase for performance
@@ -2842,13 +3267,14 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
         for(y = 0; y < sizeY; y++)
         {
             xc = left;
-            for(x = 0; x < sizeX; x++)
+            temp = *flashAddress;
+            flashAddress += OffsetFlag;
+
+            for(x = OffsetFlag; x < (sizeX+OffsetFlag); x++)
             {
-
                 // Read 2 pixels from flash
-                if(x & 0x0001)
+                if(x & 0x01)
                 {
-
                 // second pixel in byte
                 // Set color
                 #ifdef USE_PALETTE
@@ -2860,7 +3286,6 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
                 else
                 {
                     temp = *flashAddress++;
-
                 // first pixel in byte
                 // Set color
                 #ifdef USE_PALETTE
@@ -2875,20 +3300,27 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
                 #endif
                         // Write pixel(s) to screen
                         PutPixel(xc, yc);
-                    xc++;
-            }            
+                        xc++;
+            }  
+
+            flashAddress += addressOffset;
+  
             yc++;
         }
+
     }
     else
     {
         for(y = 0; y < sizeY; y++)
         {
             xc = left;
-            for(x = 0; x < sizeX; x++)
+            temp = *flashAddress;
+            flashAddress += OffsetFlag;
+
+            for(x = OffsetFlag; x < (sizeX+OffsetFlag); x++)
             {
 
-               if(x & 0x0001)
+               if(x & 0x01)
                {
 
                 // second pixel in byte
@@ -2916,7 +3348,7 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
@@ -2924,6 +3356,7 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
                     }
                     xc += 2;
             }
+            flashAddress += addressOffset;
             yc+=2;
         }
     }    
@@ -2931,13 +3364,13 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
         #endif // #if (COLOR_DEPTH >= 4)
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
-*
+*        partialImage - partial image pointer
 * Output: none
 *
 * Side Effects: none
@@ -2950,7 +3383,7 @@ void __attribute__((weak)) PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image
         #if (COLOR_DEPTH >= 8)
 
 /* */
-void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     WORD                sizeX, sizeY;
@@ -2959,6 +3392,7 @@ void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image
     BYTE                temp;
     WORD                pallete[256];
     WORD                counter;
+    WORD                addressOffset = 0;
 
     // Move pointer to size information
     flashAddress = image + 2;
@@ -2976,6 +3410,14 @@ void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image
         flashAddress += 2;
     }
 
+    if(pPartialImageData->width != 0)
+    {
+         flashAddress += pPartialImageData->xoffset + pPartialImageData->yoffset*(sizeX);
+         addressOffset = sizeX - pPartialImageData->width;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+
     yc = top;
 
     // Note: For speed the code for loops are repeated. A small code size increase for performance
@@ -3001,7 +3443,8 @@ void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image
                         // Write pixel(s) to screen
                         PutPixel(xc, yc);
                     xc++;
-            }            
+            }   
+            flashAddress += addressOffset;         
             yc++;
         }
     }
@@ -3025,14 +3468,15 @@ void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
                         PutPixel(xc+1, yc+1);  
                     }
                     xc += 2;
-            }            
+            }    
+            flashAddress += addressOffset;        
             yc+=2;
         }
     }    
@@ -3041,13 +3485,13 @@ void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image
         #endif // #if (COLOR_DEPTH >= 8)
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
-*
+*        partialImage - partial image pointer
 * Output: none
 *
 * Side Effects: none
@@ -3060,13 +3504,14 @@ void __attribute__((weak)) PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image
         #if (COLOR_DEPTH == 16)
 
 /* */
-void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_WORD *flashAddress;
     WORD                sizeX, sizeY;
     register WORD       x, y;
     WORD                xc, yc;
     WORD                temp;
+    WORD                addressOffset = 0;
 
     // Move pointer to size information
     flashAddress = (FLASH_WORD *)image + 1;
@@ -3076,6 +3521,14 @@ void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *imag
     flashAddress++;
     sizeX = *flashAddress;
     flashAddress++;
+    
+    if(pPartialImageData->width != 0)
+    {
+         flashAddress += pPartialImageData->xoffset + pPartialImageData->yoffset*(sizeX);
+         addressOffset = sizeX - pPartialImageData->width;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
 
     yc = top;
 
@@ -3083,7 +3536,7 @@ void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *imag
     if (stretch == IMAGE_NORMAL)
     {
         for(y = 0; y < sizeY; y++)
-        {
+        {    
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
@@ -3096,7 +3549,8 @@ void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *imag
                         // Write pixel(s) to screen
                         PutPixel(xc, yc);
                     xc++;
-            }            
+            }          
+            flashAddress += addressOffset;  
             yc++;
         }
     }
@@ -3107,6 +3561,7 @@ void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *imag
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
+                
                 temp = *flashAddress++;
                 SetColor(temp);
     
@@ -3114,14 +3569,15 @@ void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *imag
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
                         PutPixel(xc+1, yc+1);  
                     } 
                     xc += 2;   
-            }            
+            }      
+            flashAddress += addressOffset;      
             yc+=2;
         }
     }    
@@ -3134,13 +3590,13 @@ void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *imag
     #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
-*
+*        partialImage - partial image pointer
 * Output: none
 *
 * Side Effects: none
@@ -3150,7 +3606,7 @@ void __attribute__((weak)) PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *imag
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -3161,9 +3617,10 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
 
     BYTE            temp = 0;
     BYTE            mask;
-    WORD            sizeX, sizeY;
+    WORD            sizeX, sizeY, lineLength;
     WORD            x, y;
     WORD            xc, yc;
+    BYTE                OffsetFlag = 0x01;     //Offset from BYTE color bit0 for the partial image 
 
     // Get image header
     ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
@@ -3175,14 +3632,33 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
 
     // Line width in bytes
-    byteWidth = bmp.width >> 3;
-    if(bmp.width & 0x0007)
+    byteWidth = (bmp.width >> 3);
+    if(bmp.width & 0x07)
         byteWidth++;
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
 
+         memOffset += pPartialImageData->yoffset*byteWidth;
+         memOffset += (pPartialImageData->xoffset)>>3;
+
+         OffsetFlag <<= ((pPartialImageData->xoffset) & 0x07);
+
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
+
+    // calculate the length of bytes needed per line
+    lineLength = (sizeX >> 3) + 1;
+    if (sizeX & 0x07)
+        lineLength++;
+    
     yc = top;
     
     // Note: For speed the code for loops are repeated. A small code size increase for performance
@@ -3191,23 +3667,15 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
         for(y = 0; y < sizeY; y++)
         {
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
             
             pData = lineBuffer;
-            mask = 0;
-            
+            mask = OffsetFlag;
+            temp = *pData++;
             xc = left;
             for(x = 0; x < sizeX; x++)
             {
-
-                    // Read 8 pixels from flash
-                    if(mask == 0)
-                    {
-                        temp = *pData++;
-                        mask = 0x80;
-                    }
-                
                     // Set color
                     if(mask & temp)
                     {
@@ -3235,8 +3703,18 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
                         // Write pixel(s) to screen
                         PutPixel(xc, yc);
                     xc++;
-                // Shift to the next pixel
-                mask >>= 1;
+
+                // Read 8 pixels from flash
+                if(mask == 0x80)
+                {
+                    temp = *pData++;
+                    mask = 0x01;
+                }
+                else
+                {
+                    // Shift to the next pixel
+                    mask <<= 1;
+                }    
             }            
             yc++;
         }
@@ -3246,23 +3724,16 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
         for(y = 0; y < sizeY; y++)
         {
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
             
             pData = lineBuffer;
-            mask = 0;
-            
+            mask = OffsetFlag;
+            temp = *pData++;
             xc = left;
+
             for(x = 0; x < sizeX; x++)
             {
-
-                      // Read 8 pixels from flash
-                    if(mask == 0)
-                    {
-                        temp = *pData++;
-                        mask = 0x80;
-                    }
-                
                     // Set color
                     if(mask & temp)
                     {
@@ -3288,15 +3759,25 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
                         PutPixel(xc+1, yc+1);  
                     }
                     xc += 2;
-                // Shift to the next pixel
-                mask >>= 1;
+
+                // Read 8 pixels from flash
+                if(mask == 0x80)
+                {
+                    temp = *pData++;
+                    mask = 0x01;
+                }
+                else
+                {
+                    // Shift to the next pixel
+                    mask <<= 1;
+                }  
 
             }            
             yc+=2;
@@ -3306,13 +3787,13 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
-*
+*        partialImage - partial image pointer
 * Output: none
 *
 * Side Effects: none
@@ -3325,7 +3806,7 @@ void __attribute__((weak)) PutImage1BPPExt(SHORT left, SHORT top, void *image, B
         #if (COLOR_DEPTH >= 4)
 
 /* */
-void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -3335,9 +3816,11 @@ void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, B
     SHORT           byteWidth;
 
     BYTE            temp = 0;
-    WORD            sizeX, sizeY;
+    WORD            sizeX, sizeY, lineLength;
     WORD            x, y;
     WORD            xc, yc;
+    WORD            nibbleOffset = 0; 
+
 
     // Get image header
     ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
@@ -3348,14 +3831,36 @@ void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, B
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
 
-    // Line width in bytes
-    byteWidth = bmp.width >> 1;
-    if(bmp.width & 0x0001)
+     // Line width in bytes
+    byteWidth = (bmp.width) >> 1;
+
+    // if the width is odd, add another byte count since the shift 1 caused
+    // us to loose a nibble
+    if(bmp.width & 0x01)
         byteWidth++;
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+        // check the bit position of the starting pixel
+        nibbleOffset = pPartialImageData->xoffset & 0x01;
+
+        memOffset += (pPartialImageData->yoffset)*byteWidth;
+        memOffset += (pPartialImageData->xoffset) >> 1;
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
+
+    // calculate the length of bytes needed per line
+    lineLength = (sizeX >> 1) + 1;
+    if (sizeX & 0x01)
+        lineLength++;
 
     yc = top;
 
@@ -3365,13 +3870,17 @@ void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, B
         for(y = 0; y < sizeY; y++)
         {
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
             
             pData = lineBuffer;
+            if (nibbleOffset)
+            {
+                temp = *pData++;
+            }
             
             xc = left;
-            for(x = 0; x < sizeX; x++)
+            for(x = nibbleOffset; x < (sizeX + nibbleOffset); x++)
             {
                 
                 // Read 2 pixels from flash
@@ -3414,13 +3923,17 @@ void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, B
         for(y = 0; y < sizeY; y++)
         {
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
             
             pData = lineBuffer;
+            if (nibbleOffset)
+            {
+                temp = *pData++;
+            }
             
             xc = left;
-            for(x = 0; x < sizeX; x++)
+            for(x = nibbleOffset; x < (sizeX + nibbleOffset); x++)
             {
 
                 // Read 2 pixels from flash
@@ -3452,7 +3965,7 @@ void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, B
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {    
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
@@ -3468,13 +3981,13 @@ void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, B
         #endif
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *partialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
-*
+*        partialImage - partial image pointer
 * Output: none
 *
 * Side Effects: none
@@ -3487,7 +4000,7 @@ void __attribute__((weak)) PutImage4BPPExt(SHORT left, SHORT top, void *image, B
         #if (COLOR_DEPTH >= 8)
 
 /* */
-void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -3509,9 +4022,18 @@ void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, B
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width);
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
     yc = top;
 
@@ -3522,7 +4044,7 @@ void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, B
         {
             // Get line
             ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
-            memOffset += sizeX;
+            memOffset += bmp.width;
             
             pData = lineBuffer;
             
@@ -3554,7 +4076,7 @@ void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, B
         {
             // Get line
             ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
-            memOffset += sizeX;
+            memOffset += bmp.width;
             
             pData = lineBuffer;
             
@@ -3574,7 +4096,7 @@ void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, B
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
@@ -3591,13 +4113,13 @@ void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, B
         #endif
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
-*
+*        partialImage - partial image pointer
 * Output: none
 *
 * Side Effects: none
@@ -3610,7 +4132,7 @@ void __attribute__((weak)) PutImage8BPPExt(SHORT left, SHORT top, void *image, B
         #if (COLOR_DEPTH == 16)
 
 /* */
-void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -3629,12 +4151,20 @@ void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += (pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width))<<1;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
-    byteWidth = sizeX << 1;
-
+    byteWidth = bmp.width << 1;
     yc = top;
 
     // Note: For speed the code for loops are repeated. A small code size increase for performance
@@ -3671,7 +4201,6 @@ void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, 
             // Get line
             ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
             memOffset += byteWidth;
-            
             pData = lineBuffer;
             
             xc = left;
@@ -3684,7 +4213,7 @@ void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, 
                     if (!((GetTransparentColor() == GetColor()) && (GetTransparentColorStatus() == TRANSPARENT_COLOR_ENABLE)))
                 #endif
                     {
-                        // Write pixel(s) to screen, basically writes a tile of 4x4 pixels to the screen
+                        // Write pixel(s) to screen, basically writes a tile of 2x2 pixels to the screen
                         PutPixel(xc,   yc);
                         PutPixel(xc,   yc+1);  
                         PutPixel(xc+1, yc);
@@ -3700,30 +4229,44 @@ void __attribute__((weak)) PutImage16BPPExt(SHORT left, SHORT top, void *image, 
         #endif
     #endif
 
+
 /*********************************************************************
-* Function: WORD PutImage(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: WORD PutImagePartial(SHORT left, SHORT top, void* image, BYTE stretch, SHORT xoffset, SHORT yoffset, WORD width, WORD height)
 *
-* PreCondition: none
+* Overview: This function outputs a full or a partial image starting 
+*           from left,top coordinates. The partial image starts at 
+*           xoffset and yoffset and is given a width and height.
 *
-* Input: left,top - left top image corner,
-*        image - image pointer,
-*        stretch - image stretch factor
+* Input: left - horizontal starting position of full or partial image on the screen
+*        top - vertical starting position of full or partial image on the screen,
+*        image - pointer to the image location.
+*        stretch - The image stretch factor. 
+*                  - IMAGE_NORMAL : no stretch 
+*                  - IMAGE_X2 : image is stretched to twice 
+*                    its width and height
+*        xoffset – Specifies the horizontal offset in pixels of the selected partial 
+*                  image from the left most pixel of the full image.
+*        yoffset – Specifies the vertical offset in pixels of the selected partial 
+*                  image from the top most pixel of the full image.
+*        width - width of the partial image to be rendered. 
+*                xoffset + width must not exceed the full image width. 
+*        height - height of the partial image to be rendered. 
+*                 yoffset + height must not exceed the full image height.
 *
 * Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 0 when device is busy and the image is not 
+*           yet completely drawn.
 *         - Returns 1 when the image is completely drawn.
 *         For Blocking configuration:
 *         - Always return 1.
-*
+* 
 * Side Effects: none
-*
-* Overview: outputs image starting from left,top coordinates
-*
-* Note: image must be located in flash
-*
 ********************************************************************/
-WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE stretch)
+WORD PutImagePartial(SHORT left, SHORT top, void *image, BYTE stretch, SHORT xoffset, SHORT yoffset, WORD width, WORD height)
 {
+
+   PUTIMAGE_PARAM partialImage;
+
 #if defined (USE_BITMAP_FLASH)
     FLASH_BYTE  *flashAddress;
 #endif    
@@ -3750,6 +4293,11 @@ WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE str
     colorTemp = GetColor();
     resType = *((WORD *)image);
 
+    // Store the partial image offset
+    partialImage.xoffset = xoffset;
+    partialImage.yoffset = yoffset;
+    partialImage.width   = width;
+    partialImage.height = height;
 
     switch(resType & (GFX_MEM_MASK | GFX_COMP_MASK))
     {
@@ -3820,21 +4368,21 @@ WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE str
             switch(colorDepth)
             {
                 case 1:     
-                    PutImage1BPP(left, top, flashAddress, stretch); break;
+                    PutImage1BPP(left, top, flashAddress, stretch, &partialImage); break;
                 
                     #if (COLOR_DEPTH >= 4)
                 case 4:     
-                    PutImage4BPP(left, top, flashAddress, stretch); break;
+                    PutImage4BPP(left, top, flashAddress, stretch, &partialImage); break;
                     #endif
                     
                     #if (COLOR_DEPTH >= 8)
                 case 8:     
-                    PutImage8BPP(left, top, flashAddress, stretch); break;
+                    PutImage8BPP(left, top, flashAddress, stretch, &partialImage); break;
                     #endif
                     
                     #if (COLOR_DEPTH == 16)
                 case 16:    
-                    PutImage16BPP(left, top, flashAddress, stretch); break;
+                    PutImage16BPP(left, top, flashAddress, stretch, &partialImage); break;
                     #endif
                     
                 default:    break;
@@ -3855,21 +4403,21 @@ WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE str
             switch(colorDepth)
             {
                 case 1:     
-                    PutImage1BPPExt(left, top, image, stretch); break;
+                    PutImage1BPPExt(left, top, image, stretch, &partialImage); break;
                 
                     #if (COLOR_DEPTH >= 4)
                 case 4:     
-                    PutImage4BPPExt(left, top, image, stretch); break;
+                    PutImage4BPPExt(left, top, image, stretch, &partialImage); break;
                     #endif
                     
                     #if (COLOR_DEPTH >= 8)
                 case 8:     
-                    PutImage8BPPExt(left, top, image, stretch); break;
+                    PutImage8BPPExt(left, top, image, stretch, &partialImage); break;
                     #endif
                     
                     #if (COLOR_DEPTH == 16)
                 case 16:    
-                    PutImage16BPPExt(left, top, image, stretch); break;
+                    PutImage16BPPExt(left, top, image, stretch, &partialImage); break;
                     #endif
                     
                 default:    break;
@@ -3888,7 +4436,7 @@ WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE str
         
             // this requires special processing of images in Extended Data Space
             // call the driver specific function to perform the processing
-            PutImageDrv(left, top, image, stretch); 
+            PutImageDrv(left, top, image, stretch, &partialImage); 
             break;
 
                 #endif //#if defined (__PIC24FJ256DA210__)
@@ -3901,6 +4449,7 @@ WORD __attribute__((weak)) PutImage(SHORT left, SHORT top, void *image, BYTE str
     SetColor(colorTemp);
     return (1);
 }
+
 
 /*********************************************************************
 * Function:  SHORT GetSineCosine(SHORT v, WORD type)
@@ -4369,7 +4918,7 @@ WORD BevelGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT rad, 
                            case GRAD_LEFT:
                                if(i>length) SetColor(EndColor);
                                Bar(left - yNew, top - xCur, left - yCur, bottom + xCur);
-                                break;
+                               break;
                            
                            case GRAD_RIGHT:                     
                            case GRAD_DOUBLE_VER:
@@ -5356,3 +5905,5 @@ void GetCirclePoint(SHORT radius, SHORT angle, SHORT *x, SHORT *y)
         *y = -*y;
     }
 }
+
+

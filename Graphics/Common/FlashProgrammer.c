@@ -123,7 +123,7 @@ int ProgramFlash(void)
     
     #else
 
-		#if defined (__PIC24FJ256GB210__)
+		#if defined (__PIC24FJ256GB210__) 
 		    // Make all the analog pins digital.
 			ANSA = 0x0000;
 		    ANSB = 0x0000;		
@@ -132,6 +132,14 @@ int ProgramFlash(void)
 		    ANSE = 0x0000;
 		    ANSF = 0x0000;
 		    ANSG = 0x0000;		
+        #elif defined (__dsPIC33E__)
+		    // Make all the analog pins digital.
+			ANSELA = 0x0000;
+		    ANSELB = 0x0000;		
+		    ANSELC = 0x0000;		
+		    ANSELD = 0x0000;
+		    ANSELE = 0x0000;
+		    ANSELG = 0x0000;		
 		#endif
 
     /////////////////////////////////////////////////////////////////////////////

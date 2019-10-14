@@ -73,7 +73,7 @@
         #endif
     #endif
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         #if defined(__PIC24FJ256GB110__)
             #include "HardwareProfile - PIC24FJ256GB110 PIM.h"
         #elif defined(__PIC24FJ256GB210__)

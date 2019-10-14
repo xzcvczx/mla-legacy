@@ -64,6 +64,12 @@
 _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
+#elif defined(__dsPIC33E__) 
+_FOSCSEL(FNOSC_FRC);			
+_FOSC(FCKSM_CSECMD & POSCMD_XT & OSCIOFNC_OFF & IOL1WAY_OFF);
+_FWDT(FWDTEN_OFF);
+_FPOR(FPWRT_PWR128 & BOREN_ON & ALTI2C1_ON & ALTI2C2_ON);
+_FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 #elif defined(__PIC32MX__)
     #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
@@ -104,7 +110,16 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPD
     #ifdef __PIC32MX__
         const DRV_SPI_INIT_DATA SPI_Init_Data = {SST25_SPI_CHANNEL, 1, 0, 0, 1, 1, 0};
     #else    
-        const DRV_SPI_INIT_DATA SPI_Init_Data = {SST25_SPI_CHANNEL, 3, 6, 0, 1, 1, 0};
+        #if defined(__dsPIC33E__) 
+            #if defined (MEB_BOARD)
+                // since the SPI is muxed through the CPLD, we use a slower clock for MEB_BOARD
+                const DRV_SPI_INIT_DATA SPI_Init_Data = {SST25_SPI_CHANNEL, 3, 6, 0, 1, 1, 0};
+            #else
+                const DRV_SPI_INIT_DATA SPI_Init_Data = {SST25_SPI_CHANNEL, 3, 7, 0, 1, 1, 0};
+            #endif
+        #else
+            const DRV_SPI_INIT_DATA SPI_Init_Data = {SST25_SPI_CHANNEL, 3, 6, 0, 1, 1, 0};
+        #endif
     #endif
 #elif defined (USE_MCHP25LC256)       
     const DRV_SPI_INIT_DATA SPI_Init_Data = {MCHP25LC256_SPI_CHANNEL, 6, 3, 0, 1, 1, 0};
@@ -119,51 +134,15 @@ extern const IMAGE_FLASH   internalbitmap;
 
 // External font and bitmap must be stored in external flash memory installed on
 // Graphics PICTail Plus board 
-//See "ExternalResource.h" included in MainDemo.h:
+// See "ExternalResource.h" included in MainDemo.h:
 // FONT_EXTERNAL        externalfont;
 // IMAGE_EXTERNAL      externalbitmap;
 
 /////////////////////////////////////////////////////////////////////////////
 // Function Prototypes
 /////////////////////////////////////////////////////////////////////////////
-void BoardInit(void);
+void InitializeBoard(void);
 void CheckExternalFlashHex();
-
-/************************************************************************
-* Macros: SST39PMPInit()
-*                                                                       
-* Overview: initializes PMP only
-*                                                                       
-* Input: none                                                          
-*                                                                       
-* Output: none
-*                                                                       
-************************************************************************/
-#define SST39PMPInit()          \
-    {                           \
-        while(PMMODEbits.BUSY); \
-        PMMODE = 0x0a49;        \
-        PMAEN = 0x0003;         \
-        PMCON = 0x9320;         \
-    }
-
-/************************************************************************
-* Macros: LCDPMPInit()
-*                                                                       
-* Overview: initializes PMP only
-*                                                                       
-* Input: none                                                          
-*                                                                       
-* Output: none
-*                                                                       
-************************************************************************/
-#define LCDPMPInit()            \
-    {                           \
-        while(PMMODEbits.BUSY); \
-        PMMODE = 0x0204;        \
-        PMAEN = 0x0000;         \
-        PMCON = 0x8300;         \
-    }
 
 #define DEMODELAY 	2000
 
@@ -177,7 +156,7 @@ int main(void)
 {
     SHORT   width, height;
 
-    BoardInit();
+    InitializeBoard();
 
     // Initialize graphics
     InitGraph();
@@ -268,9 +247,9 @@ int main(void)
     }
 }
 /////////////////////////////////////////////////////////////////////////////
-// void BoardInit(void)
+// void InitializeBoard(void)
 /////////////////////////////////////////////////////////////////////////////
-void BoardInit(void)
+void InitializeBoard(void)
 {
      #if defined(PIC24FJ256DA210_DEV_BOARD)
     
@@ -292,57 +271,100 @@ void BoardInit(void)
     #endif
 
     /////////////////////////////////////////////////////////////////////////////
-    #if defined(__dsPIC33F__) || defined(__PIC24H__)
+    #if defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__dsPIC33E__)
 
-    // Configure Oscillator to operate the device at 40Mhz
-    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-    PLLFBD = 38;                    // M=40
-    CLKDIVbits.PLLPOST = 0;         // N1=2
-    CLKDIVbits.PLLPRE = 0;          // N2=2
-    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
+        // Configure Oscillator to operate the device at 40Mhz
+        // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+        #if defined(__dsPIC33E__) 
+            //Fosc = 8M * 60/(2*2) = 120MHz for 8M input clock
+            PLLFBD = 58;                // M=60         
+        #else
+        	// Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+        	PLLFBD = 38;                // M=40
+        #endif
 
-    // Disable Watch Dog Timer
-    RCONbits.SWDTEN = 0;
+        CLKDIVbits.PLLPOST = 0;         // N1=2
+        CLKDIVbits.PLLPRE = 0;          // N2=2
+        OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
 
-    // Clock switching to incorporate PLL
-    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
+        // Disable Watch Dog Timer
+        RCONbits.SWDTEN = 0;
 
-    // Oscillator with PLL (NOSC=0b011)
-    __builtin_write_OSCCONL(0x01);  // Start clock switching
-    while(OSCCONbits.COSC != 0b011);
-
-    // Wait for Clock switch to occur	
-    // Wait for PLL to lock
-    while(OSCCONbits.LOCK != 1)
-    { };     
+        // Clock switching to incorporate PLL
+        __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
     
-    // Set PMD0 pin functionality to digital
-    AD1PCFGL = AD1PCFGL | 0x1000;
+        // Oscillator with PLL (NOSC=0b011)
+        __builtin_write_OSCCONL(0x01);  // Start clock switching
+        while(OSCCONbits.COSC != 0b011);
+
+        // Wait for Clock switch to occur	
+        // Wait for PLL to lock
+        while(OSCCONbits.LOCK != 1)
+        { };     
+    
+        #if defined(__dsPIC33F__) || defined(__PIC24H__)
+            // Set PMD0 pin functionality to digital
+            AD1PCFGL = AD1PCFGL | 0x1000;
+
+        #elif defined(__dsPIC33E__) || defined(__PIC24E__)
+            ANSELE = 0x00;
+            ANSELDbits.ANSD6 = 0;
+
+		    // Set all touch screen related pins to Analog mode.
+	        ANSELBbits.ANSB11 = 1; 	        
+	        #ifdef MEB_BOARD
+	        	// Configure auxiliary PLL for USB.
+		        // Configuring the auxiliary PLL, since the primary
+	    		// oscillator provides the source clock to the auxiliary
+	    		// PLL, the auxiliary oscillator is disabled. Note that
+	    		// the AUX PLL is enabled. The input 8MHz clock is divided
+	    		// by 2, multiplied by 24 and then divided by 2. Wait till 
+	    		// the AUX PLL locks.	
+			    ACLKCON3 = 0x24C1;   
+			    ACLKDIV3 = 0x7;
+			    
+			    ACLKCON3bits.ENAPLL = 1;
+			    while(ACLKCON3bits.APLLCK != 1); 
+			    // Power USB device.
+			    ANSELBbits.ANSB5 = 0;
+			    TRISBbits.TRISB5 = 0;
+			    LATBbits.LATB5 = 1;	
+
+		    #endif
+        #endif
        
     #elif defined(__PIC32MX__)
-    INTEnableSystemMultiVectoredInt();
-    SYSTEMConfigPerformance(GetSystemClock());
+        INTEnableSystemMultiVectoredInt();
+        SYSTEMConfigPerformance(GetSystemClock());
+    #endif
+
     #ifdef MEB_BOARD
         CPLDInitialize();
         CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
         CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
     #endif
-    #endif
 
-     //The following are PIC device specific settings for the SPI channel
-     //used. 
-    
-     //Set IOs directions for SST25 SPI
-        #if defined (GFX_PICTAIL_V3) || defined (MEB_BOARD)   
+
+    //The following are PIC device specific settings for the SPI channel used. 
+
+    //Set IOs directions for SST25 SPI
+    #if defined (GFX_PICTAIL_V3) || defined (MEB_BOARD) || defined (GFX_PICTAIL_V3E) || defined (GFX_PICTAIL_LCC)  
+	    #if defined SST25_CS_ANS
+		    SST25_CS_ANS = 0; // Change port to digital from analog.
+        #endif   
         SST25_CS_LAT = 1;
         SST25_CS_TRIS = 0;
         #ifndef __PIC32MX__
             SST25_SCK_TRIS = 0;
             SST25_SDO_TRIS = 0;
             SST25_SDI_TRIS = 1;
-            #if defined(__PIC24FJ256GB210__)
+            #if defined(__PIC24FJ256GB210__) 
             	SST25_SDI_ANS = 0;
+            #elif defined(__dsPIC33E__) 
+            	SST25_SDI_ANS = 0;
+	    	    SST25_SCK_ANS = 0;
+	    	    SST25_SDO_ANS = 0; 
+	            SST25_SDI_ANS = 0;
     	    #endif
         #endif
     
@@ -372,6 +394,8 @@ void BoardInit(void)
         RPOR9bits.RP19R = 10;                   // assign RP19 for SDO2
         RPINR22bits.SDI2R = 26;                 // assign RP26 for SDI2
         __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
+    #elif defined(__dsPIC33EP512MU810__) 
+        // nothing to be done here since SPI2 is not remappable
     #elif defined(__PIC24FJ256DA210__)
 
         __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS

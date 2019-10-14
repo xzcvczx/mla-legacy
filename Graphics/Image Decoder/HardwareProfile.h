@@ -52,7 +52,7 @@
 
 #ifndef CFG_INCLUDE_MPLAB_X
 
-#if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
+#if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__) || defined (__dsPIC33E__)
 
 	#if defined (__PIC24FJ256DA210__)
 		/*********************************************************************

@@ -825,7 +825,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         //USBSleepOnSuspend();      //Need to include usb_hal_pic24.c if this function is enabled.
     #endif
 }

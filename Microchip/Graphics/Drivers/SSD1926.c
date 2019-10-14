@@ -56,6 +56,7 @@
  *                PutImageXBPPExt().
  *              - Added DisplayBrightness() to control the backlight.
  *              - Added GFX_LCD_TYPE to select type of display
+ * 04/01/12     - Added putimagepartial support
  *****************************************************************************/
 #include "HardwareProfile.h"
 
@@ -68,19 +69,11 @@
 #include "Graphics/gfxtcon.h"
 #include "Graphics/Primitive.h"
   
-
 #if defined (USE_GFX_PMP)
     #include "Graphics/gfxpmp.h"
 #elif defined (USE_GFX_EPMP)
     #include "Graphics/gfxepmp.h"
 #endif    
-
-// Color
-GFX_COLOR   _color;
-#ifdef USE_TRANSPARENT_COLOR
-GFX_COLOR   _colorTransparent;
-SHORT       _colorTransparentEnable;
-#endif
 
 // Clipping region control
 SHORT       _clipRgn;
@@ -91,23 +84,16 @@ SHORT       _clipTop;
 SHORT       _clipRight;
 SHORT       _clipBottom;
 
+// Color
+GFX_COLOR   _color;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
+
 #define RED8(color16)   (BYTE) ((color16 & 0xF800) >> 8)
 #define GREEN8(color16) (BYTE) ((color16 & 0x07E0) >> 3)
 #define BLUE8(color16)  (BYTE) ((color16 & 0x001F) << 3)
-
-/////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
-void        SetAddress(DWORD address);
-BYTE        GetReg(WORD index);
-
-void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-
-void        PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-void        PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-void        PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-void        PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
 
 #ifdef USE_PALETTE
 extern void *_palette;
@@ -388,7 +374,7 @@ void ResetDevice(void)
 	DriverInterfaceInit();
 
     // give time for the controller to power up
-    DelayMs(250);
+    DelayMs(500);
 
     /////////////////////////////////////////////////////////////////////
     // PLL SETUP
@@ -1077,6 +1063,7 @@ WORD Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
 ********************************************************************/
 WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 {
+
         #ifdef USE_PALETTE
 
     DWORD           address;
@@ -1119,14 +1106,15 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
     DWORD   address;
     SHORT   width, height;
 
-            #ifndef USE_NONBLOCKING_CONFIG
+#ifndef USE_NONBLOCKING_CONFIG
     while(IsDeviceBusy() != 0);
 
     /* Ready */
-            #else
+#else
     if(IsDeviceBusy() != 0)
         return (0);
-            #endif
+#endif
+
     if(left > right)
     {
         return (1); /* Don't draw but return 1 */
@@ -1144,6 +1132,16 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 		top    = (top    < _clipTop)    ? _clipTop    : ((top    > _clipBottom) ? _clipBottom : top);
 		bottom = (bottom > _clipBottom) ? _clipBottom : ((bottom < _clipTop)    ? _clipTop    : bottom);
     }
+
+#ifdef USE_ALPHABLEND_LITE
+    if(GetAlpha() != 100)
+    {
+        if (BarAlpha(left,top,right,bottom))
+            return 1;
+        else
+            return 0;
+    }
+#endif
 
     width = right - left + 1;
     height = bottom - top + 1;
@@ -1256,13 +1254,14 @@ void ClearDevice(void)
 
 #ifdef USE_BITMAP_FLASH
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
 *        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -1273,7 +1272,7 @@ void ClearDevice(void)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -1282,6 +1281,9 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     WORD                sizeX, sizeY;
     WORD                x, y;
     WORD                pallete[2];
+
+    WORD                addressOffset = 0, adjOffset;
+    BYTE                OffsetFlag = 0x01;     //Offset from BYTE color bit0 for the partial image 
 
     // Move pointer to size information
     flashAddress = image + 2;
@@ -1303,6 +1305,36 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
+    if(sizeX & 0x07) 
+        adjOffset = 1;
+    else
+        adjOffset = 0;
+    
+    // compute for addressOffset this is the offset needed to jump to the 
+    // next line 
+    addressOffset = (sizeX>>3)+adjOffset;
+
+    if(pPartialImageData->width != 0)
+    {
+
+         WORD mod3 = ((pPartialImageData->xoffset) & 0x07);
+
+        // adjust the flashAddress to the starting pixel location
+        // adjust one address if the data is not byte aligned
+         flashAddress += (pPartialImageData->yoffset)*((sizeX>>3)+adjOffset);
+
+        // adjust flashAddress for x offset (if xoffset is zero address stays the same)
+         flashAddress += (pPartialImageData->xoffset)>>3;
+
+         OffsetFlag <<= mod3;
+
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+
+    // store current line data address 
+    tempFlashAddress = flashAddress;
+
     DisplayEnable();      // enable SSD1926
 
    // Note: For speed the code for loops are repeated. A small code size increase for performance
@@ -1312,16 +1344,24 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
         for(y = 0; y < sizeY; y++)
         {
             SetAddress(address);
-            mask = 0;
+
+            // get flash address location of current line being processed
+            flashAddress = tempFlashAddress;
+
+            if (OffsetFlag != 0x01)
+    		{
+                // grab the first set of data then set up the mask to the starting pixel
+    			temp = *flashAddress++;
+            }
+            mask = OffsetFlag;
+
             for(x = 0; x < sizeX; x++)
             {
-                
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *flashAddress;
-                    flashAddress++;
-                    mask = 0x80;
+            	// Read 8 pixels from flash
+                if(mask == 0x01)
+			    {
+				    temp = *flashAddress++;
+                    mask = 0x01;
                 }
 
                 // Set color
@@ -1371,10 +1411,19 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                             WritePixel(pallete[0]);
                     }
                 }
-                // shift to the next pixel
-                mask >>= 1; 
+                               // Read 8 pixels from flash
+                if(mask == 0x80)
+                {
+                    mask = 0x01;
+                }
+                else
+                {
+                    // Shift to the next pixel
+                    mask <<= 1;
+                }    
             }
-            
+            tempFlashAddress += (addressOffset);
+    
             #ifndef USE_PALETTE
                 address += (GetMaxX() + 1) << 1;
             #else
@@ -1386,22 +1435,28 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
    {    
         for(y = 0; y < sizeY; y++)
         {
-            tempFlashAddress = flashAddress;
             for(stretchY = 0; stretchY < stretch; stretchY++)
             {
+                // get flash address location of current line being processed
                 flashAddress = tempFlashAddress;
                 SetAddress(address);
-                mask = 0;
+
+                if (OffsetFlag != 0x01)
+    		    {
+                    // grab the first set of data then set up the mask to the starting pixel
+    			    temp = *flashAddress++;
+                }
+                mask = OffsetFlag;
+
                 for(x = 0; x < sizeX; x++)
                 {
                     // Read 8 pixels from flash
-                    if(mask == 0)
-                    {
-                        temp = *flashAddress;
-                        flashAddress++;
-                        mask = 0x80;
+                    if(mask == 0x01)
+			        {
+				        temp = *flashAddress++;
+                        mask = 0x01;
                     }
-    
+
                     // Set color
                     if(mask & temp)
                     {
@@ -1474,27 +1529,40 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                             }    
                         }
                     }
-                    // shift to the next pixel
-                    mask >>= 1; 
+
+                    if(mask == 0x80)
+                    {
+                        mask = 0x01;
+                    }
+                    else
+                    {
+                        // Shift to the next pixel
+                        mask <<= 1;
+                    }     
                 }
+
+                flashAddress += (addressOffset);
+
                 #ifndef USE_PALETTE
                     address += (GetMaxX() + 1) << 1;
                 #else
                     address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
                 #endif
             }
+            tempFlashAddress += (addressOffset);
         }
    }    
     DisplayDisable();
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -1505,7 +1573,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -1515,6 +1583,8 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     WORD                x, y;
     WORD                pallete[16];
     WORD                counter;
+    WORD                addressOffset = 0;
+    BYTE                OffsetFlag = 0;
 
     // Move pointer to size information
     flashAddress = image + 2;
@@ -1539,6 +1609,30 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
         flashAddress += 2;
     }
 
+    if(pPartialImageData->width != 0)
+    {
+         WORD mod1 = (sizeX & 1);
+         WORD mod2 = (pPartialImageData->width) & 1; 
+         WORD mod3 = (pPartialImageData->xoffset) & 1; 
+
+         flashAddress += (pPartialImageData->yoffset)*((sizeX>>1)+mod1);
+         flashAddress += ((pPartialImageData->xoffset)>>1);                
+
+         addressOffset = (sizeX>>1)+mod1;
+         addressOffset -= ((pPartialImageData->width)>>1);
+         addressOffset -= mod3;
+         OffsetFlag = (mod3);
+
+          if(OffsetFlag == 0)
+          {
+            addressOffset -= mod2;
+          }
+         
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+         
+    }
+
     DisplayEnable();      // enable SSD1926
 
    // Note: For speed the code for loops are repeated. A small code size increase for performance
@@ -1548,8 +1642,10 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
         for(y = 0; y < sizeY; y++)
         {
             SetAddress(address);
-            for(x = 0; x < sizeX; x++)
-            {
+            temp = *flashAddress;
+            flashAddress += OffsetFlag;
+            for(x = OffsetFlag; x < (sizeX+OffsetFlag); x++)
+            { 
                 // Read 2 pixels from flash
                 if(x & 0x0001)
                 {
@@ -1611,6 +1707,9 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                     }
                 }
             }
+
+            flashAddress += (addressOffset);
+
             #ifndef USE_PALETTE
                 address += (GetMaxX() + 1) << 1;
             #else
@@ -1627,8 +1726,10 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
             {
                 flashAddress = tempFlashAddress;
                 SetAddress(address);
-    
-                for(x = 0; x < sizeX; x++)
+                temp = *flashAddress;
+                flashAddress += OffsetFlag;
+
+            for(x = OffsetFlag; x < (sizeX+OffsetFlag); x++)
                 {
                     // Read 2 pixels from flash
                     if(x & 0x0001)
@@ -1707,6 +1808,9 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                         }
                     }
                 }
+
+                flashAddress += (addressOffset);
+
                 #ifndef USE_PALETTE
                     address += (GetMaxX() + 1) << 1;
                 #else
@@ -1720,12 +1824,13 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -1736,7 +1841,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD      address;
     register FLASH_BYTE *flashAddress;
@@ -1746,6 +1851,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     WORD                x, y;
     WORD                pallete[256];
     WORD                counter;
+    WORD                addressOffset = 0;
 
     // Move pointer to size information
     flashAddress = image + 2;
@@ -1768,6 +1874,14 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     {
         pallete[counter] = *((FLASH_WORD *)flashAddress);
         flashAddress += 2;
+    }
+
+    if(pPartialImageData->width != 0)
+    {
+         flashAddress += pPartialImageData->xoffset + pPartialImageData->yoffset*(sizeX);
+         addressOffset = sizeX - pPartialImageData->width;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
     }
 
     DisplayEnable();      // enable SSD1926
@@ -1811,6 +1925,9 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 }
 
             }
+
+            flashAddress += addressOffset;
+
             #ifndef USE_PALETTE
                 address += (GetMaxX() + 1) << 1;
             #else
@@ -1868,6 +1985,9 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                     }
 
                 }
+
+                flashAddress += addressOffset;
+
                 #ifndef USE_PALETTE
                     address += (GetMaxX() + 1) << 1;
                 #else
@@ -1881,12 +2001,13 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -1897,7 +2018,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD      address;
     register FLASH_WORD *flashAddress;
@@ -1905,6 +2026,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     WORD                temp, stretchY;
     WORD                sizeX, sizeY;
     WORD                x, y;
+    WORD                addressOffset = 0;
 
     // Move pointer to size information
     flashAddress = (FLASH_WORD *)image + 1;
@@ -1921,6 +2043,14 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
     flashAddress++;
     sizeX = *flashAddress;
     flashAddress++;
+
+    if(pPartialImageData->width != 0)
+    {
+         flashAddress += pPartialImageData->xoffset + pPartialImageData->yoffset*(sizeX);
+         addressOffset = sizeX - pPartialImageData->width;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
     
     DisplayEnable();      // enable SSD1926
 
@@ -1963,6 +2093,9 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 }
 
             }
+
+            flashAddress += addressOffset;
+
             #ifndef USE_PALETTE
                 address += (GetMaxX() + 1) << 1;
             #else
@@ -2018,6 +2151,9 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                         }    
                     }    
                 }
+
+                flashAddress += addressOffset;
+
                 #ifndef USE_PALETTE
                     address += (GetMaxX() + 1) << 1;
                 #else
@@ -2034,12 +2170,13 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -2050,7 +2187,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -2062,8 +2199,9 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 
     BYTE            temp = 0, stretchY;
     BYTE            mask;
-    WORD            sizeX, sizeY;
+    WORD            sizeX, sizeY, lineLength;
     WORD            x, y;
+    BYTE            OffsetFlag = 0x01;     //Offset from BYTE color bit0 for the partial image
 
     // Set start address
         #ifndef USE_PALETTE
@@ -2082,13 +2220,31 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(WORD);
 
     // Line width in bytes
-    byteWidth = bmp.width >> 3;
+    byteWidth = (bmp.width >> 3);
     if(bmp.width & 0x0007)
         byteWidth++;
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += pPartialImageData->yoffset*byteWidth;
+         memOffset += (pPartialImageData->xoffset)>>3;
+
+         OffsetFlag <<= ((pPartialImageData->xoffset) & 0x07);
+
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
+
+    // calculate the length of bytes needed per line
+    lineLength = (sizeX >> 3) + 1;
+    if (sizeX & 0x07)
+        lineLength++;
 
     // Note: For speed the code for loops are repeated. A small code size increase for performance
 
@@ -2098,23 +2254,16 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         {
     
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
             DisplayEnable();      // enable SSD1926
 
             pData = lineBuffer;
             SetAddress(address);
-            mask = 0;
+            mask = OffsetFlag;
+            temp = *pData++;
             for(x = 0; x < sizeX; x++)
             {
-
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *pData++;
-                    mask = 0x80;
-                }
-
                 // Set color
                 if(mask & temp)
                 {
@@ -2163,8 +2312,17 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                     }
                 }
 
-                // Shift to the next pixel
-                mask >>= 1;
+                // Read 8 pixels from flash
+                if(mask == 0x80)
+                {
+                    temp = *pData++;
+                    mask = 0x01;
+                }
+                else
+                {
+                    // Shift to the next pixel
+                    mask <<= 1;
+                }  
             }
     
             address += (GetMaxX() + 1) << 1;
@@ -2176,24 +2334,18 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         for(y = 0; y < sizeY; y++)
         {
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
             DisplayEnable();      // enable SSD1926
             for(stretchY = 0; stretchY < stretch; stretchY++)
             {
                 pData = lineBuffer;
                 SetAddress(address);
-                mask = 0;
+                mask = OffsetFlag;
+                temp = *pData++;
+
                 for(x = 0; x < sizeX; x++)
                 {
-
-                    // Read 8 pixels from flash
-                    if(mask == 0)
-                    {
-                        temp = *pData++;
-                        mask = 0x80;
-                    }
-    
                     // Set color
                     if(mask & temp)
                     {
@@ -2266,8 +2418,17 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                         }
                     }
 
+                // Read 8 pixels from flash
+                if(mask == 0x80)
+                {
+                    temp = *pData++;
+                    mask = 0x01;
+                }
+                else
+                {
                     // Shift to the next pixel
-                    mask >>= 1;
+                    mask <<= 1;
+                } 
                 }
                 address += (GetMaxX() + 1) << 1;
             }
@@ -2275,14 +2436,14 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         }
    }    
 }
-
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -2293,7 +2454,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -2304,8 +2465,9 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     SHORT           byteWidth;
 
     BYTE            temp = 0, stretchY;
-    WORD            sizeX, sizeY;
+    WORD            sizeX, sizeY, lineLength;
     WORD            x, y;
+    WORD            nibbleOffset = 0; 
 
     // Set start address
         #ifndef USE_PALETTE
@@ -2324,13 +2486,36 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(WORD);
 
     // Line width in bytes
-    byteWidth = bmp.width >> 1;
-    if(bmp.width & 0x0001)
-        byteWidth++;
+    byteWidth = (bmp.width) >> 1;
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    // if the width is odd, add another byte count since the shift 1 caused
+    // us to loose a nibble
+    if(bmp.width & 0x01)
+        byteWidth++;
+    
+    if(pPartialImageData->width != 0)
+    {
+        // check the bit position of the starting pixel
+        nibbleOffset = pPartialImageData->xoffset & 0x01;
+
+        memOffset += (pPartialImageData->yoffset)*byteWidth;
+        memOffset += (pPartialImageData->xoffset) >> 1;
+
+        sizeY = pPartialImageData->height;
+        sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
+
+
+    // calculate the length of bytes needed per line
+    lineLength = (sizeX >> 1) + 1;
+    if (sizeX & 0x01)
+        lineLength++;
 
     // Note: For speed the code for loops are repeated. A small code size increase for performance
 
@@ -2340,14 +2525,19 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         {
     
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
-            DisplayEnable();      // enable SSD1926
 
             pData = lineBuffer;
+            if (nibbleOffset)
+            {
+                temp = *pData++;
+            }
+
+            DisplayEnable();      // enable SSD1926
             SetAddress(address);
     
-            for(x = 0; x < sizeX; x++)
+            for(x = nibbleOffset; x < (sizeX + nibbleOffset); x++)
             {
                 // Read 2 pixels from flash
                 if(x & 0x0001)
@@ -2411,15 +2601,23 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         for(y = 0; y < sizeY; y++)
         {
             // Get line
-            ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+            ExternalMemoryCallback(image, memOffset, lineLength, lineBuffer);
             memOffset += byteWidth;
+
+
             DisplayEnable();      // enable SSD1926
+
             for(stretchY = 0; stretchY < stretch; stretchY++)
             {
+                //pData = lineBuffer;
                 pData = lineBuffer;
+                if (nibbleOffset)
+                {
+                    temp = *pData++;
+                }
                 SetAddress(address);
     
-                for(x = 0; x < sizeX; x++)
+                for(x = nibbleOffset; x < (sizeX + nibbleOffset); x++)
                 {
 
                     // Read 2 pixels from flash
@@ -2504,14 +2702,14 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         }
    }    
 }
-
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -2522,7 +2720,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -2551,9 +2749,18 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(WORD);
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width);
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
     // Note: For speed the code for loops are repeated. A small code size increase for performance
 
@@ -2564,7 +2771,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     
             // Get line
             ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
-            memOffset += sizeX;
+            memOffset += bmp.width;
             DisplayEnable();      // enable SSD1926
 
             pData = lineBuffer;
@@ -2606,7 +2813,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         {
             // Get line
             ExternalMemoryCallback(image, memOffset, sizeX, lineBuffer);
-            memOffset += sizeX;
+            memOffset += bmp.width;
             DisplayEnable();      // enable SSD1926
             for(stretchY = 0; stretchY < stretch; stretchY++)
             {
@@ -2657,14 +2864,14 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
         }
    }    
 }
-
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - pointer to the partial image parameters
 *
 * Output: none
 *
@@ -2675,7 +2882,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  address;
     register DWORD  memOffset;
@@ -2701,11 +2908,20 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += (pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width))<<1;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
-    byteWidth = sizeX << 1;
+    byteWidth = bmp.width << 1;
 
     // Note: For speed the code for loops are repeated. A small code size increase for performance
   
@@ -2778,52 +2994,6 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 }
 #endif
 
-/*********************************************************************
-* Function: SetClipRgn(left, top, right, bottom)
-*
-* Overview: Sets clipping region.
-*
-* PreCondition: none
-*
-* Input: left - Defines the left clipping region border.
-*		 top - Defines the top clipping region border.
-*		 right - Defines the right clipping region border.
-*	     bottom - Defines the bottom clipping region border.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
-{
-    _clipLeft=left;
-    _clipTop=top;
-    _clipRight=right;
-    _clipBottom=bottom;
-
-}
-
-/*********************************************************************
-* Function: SetClip(control)
-*
-* Overview: Enables/disables clipping.
-*
-* PreCondition: none
-*
-* Input: control - Enables or disables the clipping.
-*			- 0: Disable clipping
-*			- 1: Enable clipping
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClip(BYTE control)
-{
-    _clipRgn=control;
-}
 
 /*********************************************************************
 * Function: IsDeviceBusy()

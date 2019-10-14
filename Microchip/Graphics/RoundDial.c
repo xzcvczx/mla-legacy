@@ -402,7 +402,7 @@ WORD RdiaDraw(void *pObj)
 
     static RDIA_DRAW_STATES state = REMOVE;
     static SHORT dimpleRadius;
-    WORD faceClr;
+    GFX_COLOR faceClr;
     ROUNDDIAL *pDia;
 
     pDia = (ROUNDDIAL *)pObj;

@@ -39,6 +39,7 @@
  * 04/11/11		- Modified for Graphics Library Version 3.00
  *              - Replace color data type from WORD_VAL to GFX_COLOR
  *              - Replace DeviceInit() to DriverInterfaceInit()
+ * 07/02/12     Modified PutImageXBPPYYY() functions to use new API.
  *****************************************************************************/
 #include "HardwareProfile.h"
 
@@ -59,13 +60,11 @@
 // Unsupported Graphics Library Features
 #ifdef USE_TRANSPARENT_COLOR
     #warning "This driver does not support the transparent feature on PutImage(). Build will use the PutImage() functions defined in the Primitive.c"
-#endif    
+#endif   
 
-// Color
-GFX_COLOR    _color;
-#ifdef USE_TRANSPARENT_COLOR
-GFX_COLOR   _colorTransparent;
-SHORT       _colorTransparentEnable;
+//#define USE_PRIMITIVE_PUTIMAGE
+#ifndef USE_PRIMITIVE_PUTIMAGE
+    #warning "This driver does not support partial putImage feature. To enable partial putimage feature, uncomment the macro USE_PRIMITIVE_PUTIMAGE in this file. This will enable the PutImageXBPPYYY() in the Primitive.c implementation."
 #endif
 
 // Clipping region control
@@ -75,20 +74,27 @@ SHORT       _clipRgn;
 SHORT       _clipLeft;
 SHORT       _clipTop;
 SHORT       _clipRight;
-SHORT       _clipBottom;
+SHORT       _clipBottom; 
+
+// Color
+GFX_COLOR    _color;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
 
 /////////////////////// LOCAL FUNCTIONS PROTOTYPES ////////////////////////////
-#ifndef USE_TRANSPARENT_COLOR
-void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
-void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
-void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
-void        PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch);
+#if !defined(USE_TRANSPARENT_COLOR) && !defined(USE_PRIMITIVE_PUTIMAGE)
+void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+void        PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
 
-void        PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-void        PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-void        PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-void        PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch);
-#endif
+void        PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+void        PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+void        PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+void        PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData);
+#endif //#if !defined(USE_TRANSPARENT_COLOR) && !defined(USE_PRIMITIVE_PUTIMAGE)
 
 /*********************************************************************
 * Macros:  SetAddress(x, y)
@@ -319,53 +325,6 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 }
 
 /*********************************************************************
-* Function: SetClipRgn(left, top, right, bottom)
-*
-* Overview: Sets clipping region.
-*
-* PreCondition: none
-*
-* Input: left - Defines the left clipping region border.
-*		 top - Defines the top clipping region border.
-*		 right - Defines the right clipping region border.
-*	     bottom - Defines the bottom clipping region border.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
-{
-    _clipLeft=left;
-    _clipTop=top;
-    _clipRight=right;
-    _clipBottom=bottom;
-
-}
-
-/*********************************************************************
-* Function: SetClip(control)
-*
-* Overview: Enables/disables clipping.
-*
-* PreCondition: none
-*
-* Input: control - Enables or disables the clipping.
-*			- 0: Disable clipping
-*			- 1: Enable clipping
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClip(BYTE control)
-{
-    _clipRgn=control;
-}
-
-/*********************************************************************
 * Function: IsDeviceBusy()
 *
 * Overview: Returns non-zero if LCD controller is busy 
@@ -419,17 +378,19 @@ void ClearDevice(void)
     DisplayDisable();
 }
 
-#ifndef USE_TRANSPARENT_COLOR
+#if !defined(USE_TRANSPARENT_COLOR) && !defined(USE_PRIMITIVE_PUTIMAGE)
 
 #ifdef USE_BITMAP_FLASH
 
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -440,7 +401,7 @@ void ClearDevice(void)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
@@ -484,7 +445,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 {
                     temp = *flashAddress;
                     flashAddress++;
-                    mask = 0x80;
+                    mask = 0x01;
                 }
 
                 // Set color
@@ -505,7 +466,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
                 }
 
                 // Shift to the next pixel
-                mask >>= 1;
+                mask <<= 1;
             }
         }
     }
@@ -514,12 +475,14 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -530,7 +493,7 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
@@ -604,12 +567,14 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -620,7 +585,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_BYTE *flashAddress;
     register FLASH_BYTE *tempFlashAddress;
@@ -682,12 +647,14 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -698,7 +665,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register FLASH_WORD *flashAddress;
     register FLASH_WORD *tempFlashAddress;
@@ -754,12 +721,14 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -770,7 +739,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -825,7 +794,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                 if(mask == 0)
                 {
                     temp = *pData++;
-                    mask = 0x80;
+                    mask = 0x01;
                 }
 
                 // Set color
@@ -846,7 +815,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
                 }
 
                 // Shift to the next pixel
-                mask >>= 1;
+                mask <<= 1;
             }
         }
 
@@ -855,12 +824,14 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -871,7 +842,7 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -955,12 +926,14 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -971,7 +944,7 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -1034,12 +1007,14 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, image - image pointer,
+* Input: left,top - left top image corner,
+*        image - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - (currently not implemented in this driver)
 *
 * Output: none
 *
@@ -1050,7 +1025,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -1112,6 +1087,6 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch)
 }
 
 #endif // USE_BITMAP_EXTERNAL
-#endif //#ifndef USE_TRANSPARENT_COLOR
-#endif //if defined(GFX_USE_DISPLAY_CONTROLLER_SSD1339)
+#endif // #if !defined(USE_TRANSPARENT_COLOR) && !defined(USE_PRIMITIVE_PUTIMAGE)
+#endif // if defined(GFX_USE_DISPLAY_CONTROLLER_SSD1339)
 

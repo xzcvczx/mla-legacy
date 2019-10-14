@@ -100,7 +100,7 @@ Description:
 
 //Only include the source for this file if you are using C30.  This code
 //  applies only to PIC24 parts.
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
 
 /********************************************************************
 Function:

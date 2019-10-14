@@ -1358,5 +1358,4 @@ void            DisplayBrightness(WORD level);
     #define GFX_LCD_CSTN 0x03			// Type Color STN Display 
     #define GFX_LCD_MSTN 0x02			// Type Mono STN Display 
     
-    
 #endif // _SSD1926_H

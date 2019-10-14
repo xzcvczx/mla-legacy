@@ -249,7 +249,7 @@
     #pragma udata
 #endif
 
-#if defined(__C30__) || defined(__C32__)
+#if defined(__C30__) || defined(__C32__) || defined __XC16__
 //The LUN variable definition is critical to the MSD function driver.  This
 //  array is a structure of function pointers that are the functions that 
 //  will take care of each of the physical media.  For each additional LUN
@@ -405,7 +405,7 @@ void USBCBSendResume(void);
 	
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
 
-#elif defined(__C30__)
+#elif defined(__C30__) || defined __XC16__
     #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
         /*
          *	ISR JUMP TABLE
@@ -608,7 +608,7 @@ static void InitializeSystem(void)
 {
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ64GB004_PIM)
             AD1PCFGL = 0xFFFF;
         #endif
@@ -815,7 +815,7 @@ WORD_VAL ReadPOT(void)
         w.v[0] = ADRESL;
         w.v[1] = ADRESH;
 
-    #elif defined(__C30__) || defined(__C32__)
+    #elif defined(__C30__) || defined(__C32__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM)
             AD1CHS = 0x5;           //MUXA uses AN5
 
@@ -922,7 +922,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;

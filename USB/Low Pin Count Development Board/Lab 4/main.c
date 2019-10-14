@@ -47,7 +47,7 @@
 
 #include "HardwareProfile.h"
 
-#if defined (__C30__) || defined(__C32__)
+#if defined (__C30__) || defined(__C32__) || defined __XC16__
     #include "./uart2.h"
 #endif
 
@@ -341,7 +341,7 @@ unsigned char getcUSART ();
 	
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
 
-#elif defined(__C30__)
+#elif defined(__C30__) || defined __XC16__
     #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
         /*
          *	ISR JUMP TABLE
@@ -447,7 +447,7 @@ static void InitializeSystem(void)
 {
     #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
         ADCON1 |= 0x0F;                 // Default all pins to digital
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         AD1PCFGL = 0xFFFF;
     #elif defined(__C32__)
         AD1PCFG = 0xFFFF;
@@ -587,7 +587,7 @@ void InitializeUSART(void)
     
     //ADD C18 PIC18F14K50 EUSART INITIALIZATION CODE HERE
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         #if defined( __PIC24FJ256GB110__ )
             // PPS - Configure U2RX - put on pin 49 (RP10)
             RPINR19bits.U2RXR = 10;
@@ -610,7 +610,7 @@ void InitializeUSART(void)
 #if defined(__18CXX)
     #define mDataRdyUSART() PIR1bits.RCIF
     #define mTxRdyUSART()   TXSTAbits.TRMT
-#elif defined(__C30__) || defined(__C32__)
+#elif defined(__C30__) || defined(__C32__) || defined __XC16__
     #define mDataRdyUSART() UART2IsPressed()
     #define mTxRdyUSART()   U2STAbits.TRMT
 #endif
@@ -694,7 +694,7 @@ void mySetLineCodingHandler(void)
             dwBaud.Val = (GetSystemClock()/4)/line_coding.dwDTERate.Val-1;
             SPBRG = dwBaud.v[0];
             SPBRGH = dwBaud.v[1];
-        #elif defined(__C30__)
+        #elif defined(__C30__) || defined __XC16__
             dwBaud.Val = (((GetPeripheralClock()/2)+(BRG_DIV2/2*line_coding.dwDTERate.Val))/BRG_DIV2/line_coding.dwDTERate.Val-1);
             U2BRG = dwBaud.Val;
         #elif defined(__C32__)
@@ -742,7 +742,7 @@ unsigned char getcUSART ()
 
     #endif
 
-    #if defined(__C30__) || defined(__C32__)
+    #if defined(__C30__) || defined(__C32__) || defined __XC16__
         c = UART2GetChar();
     #endif
 
@@ -950,7 +950,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;

@@ -34,9 +34,9 @@
  * CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
  * OR OTHER SIMILAR COSTS.
  *
- * Author               Date        Comment
+ * Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo Tamayo         03/18/08    ...
+ * 03/18/08    ...
  *****************************************************************************/
 #include "GoogleStaticMapClient.h"
 #include "JPEGImage.h"
@@ -46,16 +46,6 @@ extern GOOGLE_STATIC_MAP_STATE MapDownloaderState;
 
 
 #define BUTTONINITSTATE (BTN_DRAW|BTN_TWOTONE)
-
-/* ******************************************** */
-// images used
-/* ******************************************** */
-
-// arrows
-extern const IMAGE_FLASH arrow3RIGHT_4bpp_16x16;
-extern const IMAGE_FLASH arrow3LEFT_4bpp_16x16;
-extern const IMAGE_FLASH arrow3UP_4bpp_16x16;
-extern const IMAGE_FLASH arrow3DOWN_4bpp_16x16;
 
 /* ******************************************** */
 // Local Prototypes
@@ -313,81 +303,6 @@ void CreateGoogleMapScreen(void)
         pGoogleMapMenuScheme1				// style scheme used
     );            
 
-#ifdef ENABLE_PANNING
-    // Pan Up Button
-    BtnCreate
-    (
-        PANUP_ID,                 			// button ID
-        PANUP_X,                			// button dimensions
-        PANUP_Y,
-        PANUP_X+PANBUTTONWIDTH,
-        PANUP_Y+PANBUTTONHEIGHT, 
-        MENU_BTN_RADIUS,                          	
-        BTN_TWOTONE|BTN_DISABLED,			// do not draw the button yet
-        (void *) &arrow3UP_4bpp_16x16,		// bitmap that overlaps the button
-        NULL,   							// no label
-        pGoogleMapMenuScheme1				// style scheme used
-    );                              
-
-    // Pan Left Button
-    BtnCreate
-    (
-        PANLEFT_ID,                 		// button ID
-        PANLEFT_X,                			// button dimensions
-        PANLEFT_Y,
-        PANLEFT_X+PANBUTTONWIDTH,
-        PANLEFT_Y+PANBUTTONHEIGHT, 
-        MENU_BTN_RADIUS,                          	
-        BTN_TWOTONE|BTN_DISABLED,			// do not draw the button yet
-        (void *) &arrow3LEFT_4bpp_16x16,	// bitmap that overlaps the button
-        NULL,   							// no label
-        pGoogleMapMenuScheme1				// style scheme used
-    );                              
-
-    // Pan Right Button
-    BtnCreate
-    (
-        PANRIGHT_ID,                 		// button ID
-        PANRIGHT_X,                			// button dimensions
-        PANRIGHT_Y,
-        PANRIGHT_X+PANBUTTONWIDTH,
-        PANRIGHT_Y+PANBUTTONHEIGHT, 
-        MENU_BTN_RADIUS,                          	
-        BTN_TWOTONE|BTN_DISABLED,			// do not draw the button yet
-        (void *) &arrow3RIGHT_4bpp_16x16,	// bitmap that overlaps the button
-        NULL,   							// no label
-        pGoogleMapMenuScheme1				// style scheme used
-    );       
-
-    // Pan Down Button
-    BtnCreate
-    (
-        PANDOWN_ID,                 		// button ID
-        PANDOWN_X,                			// button dimensions
-        PANDOWN_Y,
-        PANDOWN_X+PANBUTTONWIDTH,
-        PANDOWN_Y+PANBUTTONHEIGHT, 
-        MENU_BTN_RADIUS,                          	
-        BTN_TWOTONE|BTN_DISABLED,			// do not draw the button yet
-        (void *) &arrow3DOWN_4bpp_16x16,	// bitmap that overlaps the button
-        NULL,   							// no label
-        pGoogleMapMenuScheme1				// style scheme used
-    );       
-    
-	StCreate
-    (
-        MAPAREAST_ID,             			// ghost Static Text ID
-        MAPAREA_X1,					
-        MAPAREA_Y1,
-        MAPAREA_X2,
-        MAPAREA_Y2,          				// dimensions
-        0,         							// this is always hidden 
-        NULL,  								// will contain no text
-        pGoogleMapMenuScheme1
-    );  
-
-#endif // ENABLE_PANNING
-    
     // Initialize default values and call callback first time
     CurrentDownloadRequest.vZoom = 16;
     CurrentDownloadRequest.vMapType = GOOGLE_STATIC_MAP_HYBRID;
@@ -641,9 +556,6 @@ WORD GoogleMapMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 			            SetState((BUTTON *)GOLFindObject(ZOOMIN_ID), 	BTN_DRAW);
 			            SetState((BUTTON *)GOLFindObject(ZOOMOUT_ID), 	BTN_DRAW);
 			            
-#ifdef ENABLE_PANNING	            
-			            ClrState((STATICTEXT *)GOLFindObject(MAPAREAST_ID), ST_DISABLED);
-#endif						
 						SetState((TEXTENTRY*)GOLFindObject(KEYBOARD_ID), TE_DISABLED|TE_HIDE);
 						SetState((LISTBOX *)GOLFindObject(LIST_ID), 	LB_DISABLED|LB_HIDE);
 					
@@ -658,52 +570,6 @@ WORD GoogleMapMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 
 			}
 			break;
-
-#ifdef ENABLE_PANNING	            
-        case MAPAREAST_ID:				// A tap on the map area occured
-
-            if((objMsg == ST_MSG_SELECTED) && (pMsg->uiEvent == EVENT_RELEASE))
-            {
-	            // toggle the menu buttons
-	            // check if one of tha pan buttons are hidden if they are
-	            // then toggle to show them.
-	            if (GetState((BUTTON *)GOLFindObject(PANUP_ID), BTN_DISABLED))
-	            {
-		            SetState((BUTTON *)GOLFindObject(MAP_ID), 		BTN_DISABLED);
-		            SetState((BUTTON *)GOLFindObject(SAT_ID), 		BTN_DISABLED);
-		            SetState((BUTTON *)GOLFindObject(TER_ID), 		BTN_DISABLED);
-		            SetState((BUTTON *)GOLFindObject(ENTER_ID), 	BTN_DISABLED);
-
-		            ClrState((BUTTON *)GOLFindObject(PANUP_ID), 	BTN_DISABLED);
-		            ClrState((BUTTON *)GOLFindObject(PANDOWN_ID), 	BTN_DISABLED);
-		            ClrState((BUTTON *)GOLFindObject(PANLEFT_ID), 	BTN_DISABLED);
-		            ClrState((BUTTON *)GOLFindObject(PANRIGHT_ID), 	BTN_DISABLED);
-
-		            SetState((BUTTON *)GOLFindObject(PANUP_ID), 	BTN_DRAW);
-		            SetState((BUTTON *)GOLFindObject(PANDOWN_ID), 	BTN_DRAW);
-		            SetState((BUTTON *)GOLFindObject(PANLEFT_ID), 	BTN_DRAW);
-		            SetState((BUTTON *)GOLFindObject(PANRIGHT_ID), 	BTN_DRAW);
-				} 
-				else 
-				{
-		            SetState((BUTTON *)GOLFindObject(PANUP_ID), 	BTN_DISABLED);
-		            SetState((BUTTON *)GOLFindObject(PANDOWN_ID), 	BTN_DISABLED);
-		            SetState((BUTTON *)GOLFindObject(PANLEFT_ID), 	BTN_DISABLED);
-		            SetState((BUTTON *)GOLFindObject(PANRIGHT_ID), 	BTN_DISABLED);
-
-		            ClrState((BUTTON *)GOLFindObject(MAP_ID), 		BTN_DISABLED);
-		            ClrState((BUTTON *)GOLFindObject(SAT_ID), 		BTN_DISABLED);
-		            ClrState((BUTTON *)GOLFindObject(TER_ID), 		BTN_DISABLED);
-		            ClrState((BUTTON *)GOLFindObject(ENTER_ID), 	BTN_DISABLED);
-
-		            SetState((BUTTON *)GOLFindObject(MAP_ID), 		BTN_DRAW);
-		            SetState((BUTTON *)GOLFindObject(SAT_ID), 		BTN_DRAW);
-		            SetState((BUTTON *)GOLFindObject(TER_ID), 		BTN_DRAW);
-		            SetState((BUTTON *)GOLFindObject(ENTER_ID), 	BTN_DRAW);		          
-				} 
-			}
-            break;
-#endif //ENABLE_PANNING
 
 	    case ENTER_ID:					// enter address button was pressed
             if (objMsg == BTN_MSG_RELEASED)
@@ -737,10 +603,6 @@ WORD GoogleMapMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 		            SetState((BUTTON *)GOLFindObject(ZOOMIN_ID), 	BTN_DISABLED);
 		            SetState((BUTTON *)GOLFindObject(ZOOMOUT_ID), 	BTN_DISABLED);
 		            
-#ifdef ENABLE_PANNING		            
-		            SetState((STATICTEXT *)GOLFindObject(MAPAREAST_ID), ST_DISABLED);
-#endif //ENABLE_PANNING
-					
 					// use the key upper case set as default everytime the keyboard is opened
 					//CurrentKeySetStatus = SHOWUPPERKEYS;
 					//AlternateKeys((TEXTENTRY*)pObj, pUpperKeyNames);
@@ -808,9 +670,6 @@ WORD GoogleMapMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 			            SetState((BUTTON *)GOLFindObject(ZOOMIN_ID), 	BTN_DRAW);
 			            SetState((BUTTON *)GOLFindObject(ZOOMOUT_ID), 	BTN_DRAW);
 			            
-#ifdef ENABLE_PANNING	            
-			            ClrState((STATICTEXT *)GOLFindObject(MAPAREAST_ID), ST_DISABLED);
-#endif						
 						SetState((TEXTENTRY*)GOLFindObject(KEYBOARD_ID), TE_DISABLED|TE_HIDE);
 						SetState((LISTBOX *)GOLFindObject(LIST_ID), 	LB_DISABLED|LB_HIDE);
 					
@@ -848,10 +707,6 @@ WORD GoogleMapMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 		            SetState((BUTTON *)GOLFindObject(ZOOMIN_ID), 	BTN_DRAW);
 		            SetState((BUTTON *)GOLFindObject(ZOOMOUT_ID), 	BTN_DRAW);
 		            
-#ifdef ENABLE_PANNING		            
-		            ClrState((STATICTEXT *)GOLFindObject(MAPAREAST_ID), ST_DISABLED);
-#endif //ENABLE_PANNING		            
-					
 					SetState((TEXTENTRY*)GOLFindObject(KEYBOARD_ID), TE_DISABLED|TE_HIDE);
 					SetState((LISTBOX *)GOLFindObject(LIST_ID), 	LB_DISABLED|LB_HIDE);
 				

@@ -3,7 +3,7 @@
 #ifndef _HARDWARE_PROFILE_H_
 #define _HARDWARE_PROFILE_H_
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 
     #if defined (__dsPIC33EP512MU810__)||defined(__PIC24EP512GU810__)
     
@@ -63,7 +63,7 @@
 
 
 // Define the baud rate constants
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
     #define BAUDRATE2       57600UL
     #define BRG_DIV2        4
     #define BRGH2           1

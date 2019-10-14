@@ -213,10 +213,6 @@
 #define EEPROM_SPISTAT		(SSP1STAT)
 #define EEPROM_SPISTATbits	(SSP1STATbits)
 
-// LCD I/O pins
-// TODO: Need to add support for LCD behind MCP23S17 I/O expander.  This 
-// requires code that isn't in the TCP/IP stack, not just a hardware 
-// profile change.
 
 // Register name fix up for certain processors
 #define SPBRGH			SPBRGH1

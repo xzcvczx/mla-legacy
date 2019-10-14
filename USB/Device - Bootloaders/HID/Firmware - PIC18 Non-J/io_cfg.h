@@ -47,7 +47,7 @@
 #define INPUT_PIN           1
 #define OUTPUT_PIN          0
 
-#if defined(PIC18F4550_PICDEM_FS_USB)
+#if defined(PIC18F4550_PICDEM_FS_USB) || defined(PIC18F4550_PICDEM_FS_USB_K50)
 /** U S B ***********************************************************/
 #define tris_usb_bus_sense  TRISAbits.TRISA1    // Input
 
@@ -197,5 +197,15 @@
 #else
     #error Not a supported board (yet), add I/O pin mapping in __FILE__, line __LINE__
 #endif
+
+
+//Special register re-definitions, for accessing the USBIF and USBIE interrupt 
+//related bits.  These bits are located in PIR3/PIE3 on PIC18F45K50 Family devices,
+//but this fimware expects them to be in PIR2/PIE2 instead, like on previous devices.
+#if defined(PIC18F4550_PICDEM_FS_USB_K50)
+    #define PIR2bits  PIR3bits
+    #define PIE2bits  PIE3bits
+#endif
+
 
 #endif //IO_CFG_H

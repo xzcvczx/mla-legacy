@@ -48,7 +48,7 @@
 #define DARKGREEN   RGBConvert(0, 100, 0)
 #define PALEGREEN   RGBConvert(152, 251, 152)
 
-#define ALPHA_VAL   0x14
+#define ALPHA_VAL   50
 /*****************************************************************************
  * SECTION: Variables
  *****************************************************************************/

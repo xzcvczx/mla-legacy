@@ -41,6 +41,7 @@
  *             - Abstracted out SPI component 
  * 05/11/11    - Updated this file to support both SST25VF016 and M25P80 families
  *             - Although the file name is still specific for SST25VF016
+ * 02/29/12    - Updated this file for specific M25P80 families usage.
  *****************************************************************************/
 #include "HardwareProfile.h"
 
@@ -57,20 +58,27 @@
     #define SST25_CMD_READ  (unsigned)0x03
     #define SST25_CMD_WRITE (unsigned)0x02
     #define SST25_CMD_WREN  (unsigned)0x06
-    #define SST25_CMD_RDSR  (unsigned)0x05
-    #define SST25_CMD_ERASE (unsigned)0x60
-	
+	#define SST25_CMD_RDSR  (unsigned)0x05
+
     #if defined(USE_M25P80)
       #define SST25_CMD_EWSR  (unsigned)0x06
       #define SST25_CMD_SER   (unsigned)0xD8
+      #define SST25_CMD_READ_HIGH_SPEED  (unsigned) 0x0B
+      #define SST25_CMD_ERASE (unsigned) 0xC7  // in M25P80 data sheet this is BULK ERASE
+	  
+      #define SST25_WIP_STATUS (unsigned) 0x01
+      #define SST25_WEL_STATUS (unsigned) 0x02
+	  #define SST25_STATUS_MASK (unsigned) 0x60
     #elif defined(USE_SST25VF016)
       #define SST25_CMD_EWSR  (unsigned)0x50
       #define SST25_CMD_SER   (unsigned)0x20
+      #define SST25_CMD_ERASE (unsigned)0x60
 	#else
 	  #error "EWSR and SER commands not defined for the selected Serial flash."
-    #endif
-    
-    #define SST25_CMD_WRSR  (unsigned)0x01
+    #endif	
+     
+    #define SST25_CMD_WRSR  (unsigned)0x01  // Write Status Register 
+
 
 static DRV_SPI_INIT_DATA spiInitData;
 
@@ -288,6 +296,9 @@ BYTE SST25WriteArray(DWORD address, BYTE *pData, WORD nCount)
     DWORD   addr;
     BYTE    *pD;
     WORD    counter;
+#if defined(USE_M25P80)    
+    BYTE status;
+#endif
 
     addr = address;
     pD = pData;
@@ -297,6 +308,25 @@ BYTE SST25WriteArray(DWORD address, BYTE *pData, WORD nCount)
     {
         SST25WriteByte(*pD++, addr++);
     }
+
+#if defined(USE_M25P80)
+
+    // check status of Write in Progress
+    // wait for BULK ERASE to be done
+    SST25CSLow();
+    SPIPut(spiInitData.channel, SST25_CMD_RDSR);
+    SPIGet(spiInitData.channel);
+    while(1)
+    {
+        SPIPut(spiInitData.channel, 0);
+        status = (SPIGet(spiInitData.channel)& SST25_WIP_STATUS);
+        if ((status & SST25_WIP_STATUS) == 0)
+            break;
+    }
+
+    SST25CSHigh();
+	
+#endif
 
     // VERIFY
     for(counter = 0; counter < nCount; counter++)
@@ -359,20 +389,69 @@ void SST25ReadArray(DWORD address, BYTE *pData, WORD nCount)
 ************************************************************************/
 void SST25ChipErase(void)
 {
+#if defined(USE_M25P80)    
+    BYTE status;
+#endif
+
+#if defined(USE_SST25VF016)
     SST25WriteEnable();
+#endif
 
     while(!SPILock(spiInitData.channel))
         ;
 
     DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
     SST25CSLow();
+#if defined(USE_M25P80)    
+    // send write enable command
+    SPIPut(spiInitData.channel, SST25_CMD_EWSR);
+    SPIGet(spiInitData.channel);
+
+    SST25CSHigh();
+    Nop();
+    SST25CSLow();
+
+    // verify if the WEL bit is set high
+    while(1)
+    {
+        SPIPut(spiInitData.channel, SST25_CMD_RDSR);
+        SPIGet(spiInitData.channel);
+        status = 0xFF;
+        while((status & SST25_STATUS_MASK) > 0)
+        {
+            SPIPut(spiInitData.channel, 0);
+            status = SPIGet(spiInitData.channel);
+        }
+        if ((status & SST25_WEL_STATUS) == SST25_WEL_STATUS)
+            break;
+    }
+    SST25CSHigh();
+#endif
+
+    SST25CSLow();
 
     SPIPut(spiInitData.channel, SST25_CMD_ERASE);
     SPIGet(spiInitData.channel);
 
     SST25CSHigh();
-    SPIUnLock(spiInitData.channel);
 
+#if defined (USE_M25P80)
+    // wait for BULK ERASE to be done
+    SST25CSLow();
+    SPIPut(spiInitData.channel, SST25_CMD_RDSR);
+    SPIGet(spiInitData.channel);
+    while(1)
+    {
+        SPIPut(spiInitData.channel, 0);
+        status = (SPIGet(spiInitData.channel)& SST25_WIP_STATUS);
+        if ((status & SST25_WIP_STATUS) == 0)
+            break;
+    }
+
+    SST25CSHigh();
+#endif
+    SPIUnLock(spiInitData.channel);
+    
     // Wait for write end
     while(SST25IsWriteBusy());
 }
@@ -389,17 +468,43 @@ void SST25ChipErase(void)
 ************************************************************************/
 void SST25ResetWriteProtection(void)
 {
+#if defined(USE_M25P80)    
+    BYTE status;
+#endif
+
     while(!SPILock(spiInitData.channel))
         ;
     
     DRV_SPI_Initialize(spiInitData.channel, (DRV_SPI_INIT_DATA *)&spiInitData);
 
     SST25CSLow();
-
+    
+    // send write enable command
     SPIPut(spiInitData.channel, SST25_CMD_EWSR);
     SPIGet(spiInitData.channel);
-
+	
     SST25CSHigh();
+	
+#if defined(USE_M25P80)    
+    SST25CSLow();
+    // verify if the WEL bit is set high
+    while(1)
+    {
+        SPIPut(spiInitData.channel, SST25_CMD_RDSR);
+        SPIGet(spiInitData.channel);
+
+        status = 0xFF;
+        while((status & SST25_STATUS_MASK) > 0)
+        {
+            SPIPut(spiInitData.channel, 0);
+            status = SPIGet(spiInitData.channel);
+        }
+        if ((status & SST25_WEL_STATUS) == SST25_WEL_STATUS)
+            break;
+    }
+    SST25CSHigh();
+#endif
+
 
     SST25CSLow();
 

@@ -44,7 +44,22 @@
  * 01/13/12     - Modified the calibration to store 8 data points.  
  *              - Modified the calculation of the x,y touch positions to fix
  *                overflow issue.
+ * 05/16/12     Modified macros to be flexible with other PIC devices:
+ *              - TRIS_XPOS, TRIS_YPOS, TRIS_XNEG, TRIS_YNEG,    
+ *                LAT_XPOS, LAT_YPOS, LAT_XNEG, LAT_YNEG to 
+ *                ResistiveTouchScreen_X(Y)Plus_Drive_High(), 
+ *                ResistiveTouchScreen_X(Y)Plus_Drive_Low(), 
+ *                ResistiveTouchScreen_X(Y)Plus_Config_As_Input(), 
+ *                ResistiveTouchScreen_X(Y)Plus_Config_As_Output()  
+ *                ResistiveTouchScreen_X(Y)Minus_Drive_High(), 
+ *                ResistiveTouchScreen_X(Y)Minus_Drive_Low(), 
+ *                ResistiveTouchScreen_X(Y)Minus_Config_As_Input(), 
+ *                ResistiveTouchScreen_X(Y)Minus_Config_As_Output().
+ *              - added two macros RESISTIVETOUCH_ANALOG and 
+ *                RESISTIVETOUCH_DIGITAL to indicate pin mode.
+ *
  *****************************************************************************/
+
 #include "HardwareProfile.h"
 
 #if defined (USE_TOUCHSCREEN_RESISTIVE)
@@ -95,6 +110,78 @@ const WORD mchpTouchScreenVersion = 0xF110 | CALIBRATIONINSET;
 #elif (COLOR_DEPTH == 8) || (COLOR_DEPTH == 16) || (COLOR_DEPTH == 24) 
     #define RESISTIVETOUCH_FOREGROUNDCOLOR BRIGHTRED	   
     #define RESISTIVETOUCH_BACKGROUNDCOLOR WHITE	   
+#endif
+
+//////////////////////// Deprecated Macros ///////////////////////////
+// the following macros are deprecated
+#ifdef TRIS_XPOS
+    #warning "TRIS_XPOS is deprecated please use ResistiveTouchScreen_XPlus_Config_As_Input() macro instead. Where ResistiveTouchScreen_XPlus_Config_As_Input() is defined to the required pin. Ex: #define ResistiveTouchScreen_XPlus_Config_As_Input() TRISCbits.TRISC4 = 1"
+#endif
+#ifdef TRIS_YPOS
+    #warning "TRIS_YPOS is deprecated please use ResistiveTouchScreen_YPlus_Config_As_Input() macro instead. Where ResistiveTouchScreen_YPlus_Config_As_Input() is defined to the required pin. Ex: #define ResistiveTouchScreen_YPlus_Config_As_Input() TRISGbits.TRISG7 = 1"
+#endif
+#ifdef TRIS_XNEG
+    #warning "TRIS_XNEG is deprecated please use ResistiveTouchScreen_XMinus_Config_As_Input() macro instead. Where ResistiveTouchScreen_XMinus_Config_As_Input() is defined to the required pin. Ex: #define ResistiveTouchScreen_XMinus_Config_As_Input() TRISAbits.TRISA2 = 1"
+#endif
+#ifdef TRIS_YNEG
+    #warning "TRIS_YNEG is deprecated please use ResistiveTouchScreen_YMinus_Config_As_Input() macro instead. Where ResistiveTouchScreen_YMinus_Config_As_Input() is defined to the required pin. Ex: #define ResistiveTouchScreen_YMinus_Config_As_Input() TRISAbits.TRISA1 = 1"
+#endif
+
+#ifdef LAT_XPOS
+    #warning "LAT_XPOS is deprecated please use ResistiveTouchScreen_XPlus_Drive_Low() or ResistiveTouchScreen_XPlus_Drive_High() macros instead. Where ResistiveTouchScreen_XPlus_Drive_Low() or ResistiveTouchScreen_XPlus_Drive_High() are defined to drive the required pin. Ex: #define ResistiveTouchScreen_XPlus_Drive_Low() LATCbits.LATC4 = 0"
+#endif
+#ifdef LAT_YPOS
+    #warning "LAT_YPOS is deprecated please use ResistiveTouchScreen_YPlus_Drive_Low() or ResistiveTouchScreen_YPlus_Drive_High() macros instead. Where ResistiveTouchScreen_YPlus_Drive_Low() or ResistiveTouchScreen_YPlus_Drive_High() are defined to drive the required pin. Ex: #define ResistiveTouchScreen_YPlus_Drive_Low() LATGbits.LATG7 = 0"
+#endif
+#ifdef LAT_XNEG
+    #warning "LAT_XNEG is deprecated please use ResistiveTouchScreen_XMinus_Drive_Low() or ResistiveTouchScreen_XMinus_Drive_High() macros instead. Where ResistiveTouchScreen_XMinus_Drive_Low() or ResistiveTouchScreen_XMinus_Drive_High() are defined to drive the required pin. Ex: #define ResistiveTouchScreen_XMinus_Drive_Low() LATAbits.LATA2 = 0"
+#endif
+#ifdef LAT_YNEG
+    #warning "LAT_YNEG is deprecated please use ResistiveTouchScreen_YMinus_Drive_Low() or yMinusDrive() macros instead. Where ResistiveTouchScreen_YMinus_Drive_Low() or yMinusDrive() are defined to drive the required pin. Ex: #define ResistiveTouchScreen_YMinus_Drive_Low() LATAbits.LATA1 = 0"
+#endif
+
+
+#ifndef ResistiveTouchScreen_XPlus_Config_As_Input
+    #define ResistiveTouchScreen_XPlus_Config_As_Input() (TRIS_XPOS = 1)
+#endif
+#ifndef ResistiveTouchScreen_YPlus_Config_As_Input
+    #define ResistiveTouchScreen_YPlus_Config_As_Input() (TRIS_YPOS = 1)
+#endif
+#ifndef ResistiveTouchScreen_XMinus_Config_As_Input
+    #define ResistiveTouchScreen_XMinus_Config_As_Input() (TRIS_XNEG = 1)
+#endif
+#ifndef ResistiveTouchScreen_YMinus_Config_As_Input
+    #define ResistiveTouchScreen_YMinus_Config_As_Input() (TRIS_YNEG = 1)
+#endif
+#ifndef ResistiveTouchScreen_XPlus_Config_As_Output
+    #define ResistiveTouchScreen_XPlus_Config_As_Output() (TRIS_XPOS = 0)
+#endif
+#ifndef ResistiveTouchScreen_YPlus_Config_As_Output
+    #define ResistiveTouchScreen_YPlus_Config_As_Output() (TRIS_YPOS = 0)
+#endif
+#ifndef ResistiveTouchScreen_XMinus_Config_As_Output
+    #define ResistiveTouchScreen_XMinus_Config_As_Output() (TRIS_XNEG = 0)
+#endif
+#ifndef ResistiveTouchScreen_YMinus_Config_As_Output
+    #define ResistiveTouchScreen_YMinus_Config_As_Output() (TRIS_YNEG = 0)
+#endif
+#ifndef ResistiveTouchScreen_XMinus_Drive_Low
+    #define ResistiveTouchScreen_XMinus_Drive_Low() (LAT_XNEG = 0)
+#endif
+#ifndef ResistiveTouchScreen_YMinus_Drive_Low
+    #define ResistiveTouchScreen_YMinus_Drive_Low() (LAT_YNEG = 0)
+#endif
+#ifndef ResistiveTouchScreen_XPlus_Drive_High
+    #define ResistiveTouchScreen_XPlus_Drive_High() (LAT_XPOS = 1)
+#endif
+#ifndef ResistiveTouchScreen_YPlus_Drive_High
+    #define ResistiveTouchScreen_YPlus_Drive_High() (LAT_YPOS = 1)
+#endif
+#ifndef RESISTIVETOUCH_ANALOG
+    #define RESISTIVETOUCH_ANALOG  0
+#endif
+#ifndef RESISTIVETOUCH_DIGITAL
+    #define RESISTIVETOUCH_DIGITAL 1 
 #endif
 
 //////////////////////// LOCAL PROTOTYPES ////////////////////////////
@@ -236,17 +323,17 @@ SHORT TouchDetectPosition(void)
 			
        		TOUCH_ADC_INPUT_SEL = ADC_XPOS;
 
-            TRIS_XPOS = 1;
-            TRIS_YPOS = 1;
-            TRIS_XNEG = 1;
-            LAT_YNEG  = 0;
-            TRIS_YNEG = 0;
+            ResistiveTouchScreen_XPlus_Config_As_Input();
+            ResistiveTouchScreen_YPlus_Config_As_Input();
+            ResistiveTouchScreen_XMinus_Config_As_Input();
+            ResistiveTouchScreen_YMinus_Drive_Low();
+            ResistiveTouchScreen_YMinus_Config_As_Output();
 
 #ifdef ADPCFG_YPOS
-            ADPCFG_YPOS = 1;        // set to digital pin
+            ADPCFG_YPOS = RESISTIVETOUCH_DIGITAL;        // set to digital pin
 #endif
 #ifdef ADPCFG_YPOS
-            ADPCFG_XPOS = 0;        // set to analog pin
+            ADPCFG_XPOS = RESISTIVETOUCH_ANALOG;        // set to analog pin
 #endif
 
             TOUCH_ADC_START = 1;    // run conversion
@@ -266,15 +353,15 @@ SHORT TouchDetectPosition(void)
             {
 	            if (state == CHECK_X)
 	            {
-                	LAT_YPOS  = 1;
-                	TRIS_YPOS = 0;
+                	ResistiveTouchScreen_YPlus_Drive_High();
+                	ResistiveTouchScreen_YPlus_Config_As_Output();
                 	tempX     = -1;
                 	state     = RUN_X;
                 } 
                 else 
                 {
-	                LAT_XPOS  = 1;
-    	            TRIS_XPOS = 0;
+	                ResistiveTouchScreen_XPlus_Drive_High();
+                    ResistiveTouchScreen_XPlus_Config_As_Output();
         	        tempY     = -1;
             	    state     = RUN_Y;    
 	            }   	
@@ -328,9 +415,9 @@ SHORT TouchDetectPosition(void)
 		    }     
 
             if (state == GET_X) 
-            	TRIS_YPOS = 1;
+            	ResistiveTouchScreen_YPlus_Config_As_Input();
             else	
-	            TRIS_XPOS = 1;
+	            ResistiveTouchScreen_XPlus_Config_As_Input();
             TOUCH_ADC_START = 1;
             state = (state == GET_X) ? SET_Y : SET_VALUES;
             break;
@@ -357,17 +444,17 @@ SHORT TouchDetectPosition(void)
 			
        		TOUCH_ADC_INPUT_SEL = ADC_YPOS;
 
-            TRIS_XPOS = 1;
-            TRIS_YPOS = 1;
-            LAT_XNEG = 0;
-            TRIS_XNEG = 0;
-            TRIS_YNEG = 1;
+            ResistiveTouchScreen_XPlus_Config_As_Input();
+            ResistiveTouchScreen_YPlus_Config_As_Input();
+            ResistiveTouchScreen_XMinus_Drive_Low();
+            ResistiveTouchScreen_XMinus_Config_As_Output();
+            ResistiveTouchScreen_YMinus_Config_As_Input();
 
 #ifdef ADPCFG_YPOS
-            ADPCFG_YPOS = 0;        // set to analog pin
+            ADPCFG_YPOS = RESISTIVETOUCH_ANALOG;        // set to analog pin
 #endif
 #ifdef ADPCFG_YPOS
-            ADPCFG_XPOS = 1;        // set to digital pin
+            ADPCFG_XPOS = RESISTIVETOUCH_DIGITAL;        // set to digital pin
 #endif
 
 
@@ -442,13 +529,13 @@ void TouchHardwareInit(void *initValues)
     
     // set the used D/A port to be analog
 	#ifdef ADPCFG_XPOS
-    	ADPCFG_XPOS = 0;
+    	ADPCFG_XPOS = RESISTIVETOUCH_ANALOG;
 	#endif
 	#ifdef ADPCFG_YPOS
-    	ADPCFG_YPOS = 0;
+    	ADPCFG_YPOS = RESISTIVETOUCH_ANALOG;
     #endif   
 	#ifdef ADC_POT
-    	ADC_POT_PCFG = 0;
+    	ADC_POT_PCFG = RESISTIVETOUCH_ANALOG;
     #endif	
     
     AD1CSSL = 0;            // No scanned inputs

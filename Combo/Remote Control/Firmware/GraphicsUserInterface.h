@@ -46,7 +46,7 @@
     #include "GenericTypeDefs.h"
 	#include "Graphics/Graphics.h"
 	#include "ExternalResource.h"
-	#include "InternalResourceC30.h"
+	#include "InternalResourceXC16.h"
 	#include "rtcc.h"
     #include "ExternalMemory.h"
     #include "TimeDelay.h"

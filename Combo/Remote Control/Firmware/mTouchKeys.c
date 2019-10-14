@@ -9,14 +9,14 @@
  *
  * Software License Agreement
  *
- * Copyright © 2009 Microchip Technology Inc.  
+ * Copyright ï¿½ 2009 Microchip Technology Inc.  
  * Microchip licenses this software to you solely for use with Microchip products, according to the terms of the  
  * accompanying click-wrap software license.  Microchip and its licensors retain all right, title and interest in 
  * and to the software.  All rights reserved. This software and any accompanying information is for suggestion only.  
- * It shall not be deemed to modify Microchip’s standard warranty for its products.  It is your responsibility to ensure 
+ * It shall not be deemed to modify Microchipï¿½s standard warranty for its products.  It is your responsibility to ensure 
  * that this software meets your requirements.
 
- * SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, 
+ * SOFTWARE IS PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, 
  * INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT 
  * AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT WILL MICROCHIP OR ITS LICENSORS BE LIABLE 
  * FOR ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES INCLUDING BUT NOT LIMITED TO INCIDENTAL, 
@@ -38,7 +38,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~	Includes	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  	*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#include "mTouch.h"
+#include "mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouch.h"
 #include "mTouchKeys.h"
 #include "RF4CEController.h"
 #include "led.h"

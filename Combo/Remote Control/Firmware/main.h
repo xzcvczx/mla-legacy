@@ -20,7 +20,7 @@
 #include "sleep.h"
 
 #include "mTouchKeys.h"
-#include "mTouch.h"
+#include "mTouchCap/PIC18F PIC24F PIC24H dsPIC Library/mTouch.h"
 
 #include "GraphicsUserInterface.h"
 #include "FlashProgrammer.h"

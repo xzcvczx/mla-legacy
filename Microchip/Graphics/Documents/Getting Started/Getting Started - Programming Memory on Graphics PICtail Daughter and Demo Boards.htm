@@ -15,10 +15,10 @@ Demo Boards</title>
 	{font-family:Cambria;
 	panose-1:2 4 5 3 5 4 6 3 2 4;}
 @font-face
-	{font-family:Calibri;
-	panose-1:2 15 5 2 2 2 4 3 2 4;}
-@font-face
 	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+@font-face
+	{font-family:Verdana;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
  /* Style Definitions */
  p.MsoNormal, li.MsoNormal, div.MsoNormal
@@ -200,11 +200,11 @@ span.grame
 	{mso-style-name:grame;}
 .MsoChpDefault
 	{font-size:10.0pt;}
-@page Section1
+@page WordSection1
 	{size:8.5in 11.0in;
 	margin:1.0in 65.95pt 1.0in 65.95pt;}
-div.Section1
-	{page:Section1;}
+div.WordSection1
+	{page:WordSection1;}
 -->
 </style>
 
@@ -212,7 +212,7 @@ div.Section1
 
 <body lang=EN-US link=blue vlink=purple>
 
-<div class=Section1>
+<div class=WordSection1>
 
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>Graphics
 PICtail™ Plus boards and PIC24FJ256DA210 Development Boards features flash
@@ -249,17 +249,23 @@ demo projects that include flash programming are created to run on supported
 Microchip Demo Boards and development hardware. Pre-generated hex files are
 available on the &quot;Precompiled Demos&quot; sub-directory found in the demo
 directory. These hex files are generated using the alternative hardware
-profiles found in the sub-directory named &quot;Alternative
-Configurations&quot;. Use the &quot;<a
+profiles found in the sub-directory named &quot;Configs&quot;. Use the &quot;<a
 href="Getting%20Started%20-%20Demo%20Compatibility%20Matrix.htm">Demo
 Compatibility Matrix</a>&quot; when running pre-generated hex files appropriate
-for your hardware.&nbsp;</span></p>
+for your hardware.</span></p>
 
 <p class=element10><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>This
 programmer allows downloading Intel Hex file into memory installed on selected
 hardware.&nbsp; Refer to the memory_programmer help file for details on the
 programmer utility operation. Instructions on how to install drivers for USB
 Device programming mode can also be found on this help file.</span></p>
+
+<p class=element10><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>The
+communication protocol used in the demos and the programming utility is
+described in a document named “Communication Protocol Overview.pdf” located in:</span></p>
+
+<p class=MsoPlainText><b><span style='font-family:"Arial","sans-serif"'>..\
+&lt;Installed Directory&gt; \Graphics\Common</span></b></p>
 
 <p class=element10><span style='font-size:10.0pt;font-family:"Arial","sans-serif"'>The
 figure below shows the possible combination of your hardware that requires
@@ -271,26 +277,23 @@ different. Please refer to the different configurations below for details.</span
 
 <p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc307412869">Configuration
 1: PIC24FJ256DA210 Development Board<span style='color:windowtext;display:none;
-text-decoration:none'>. </span><span
-style='color:windowtext;display:none;text-decoration:none'>1</span></a></span></p>
+text-decoration:none'>. 1</span></a></span></p>
 
 <p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc307412870">Configuration
 1: Troubleshooting<span style='color:windowtext;display:none;text-decoration:
-none'>. </span><span
-style='color:windowtext;display:none;text-decoration:none'>1</span></a></span></p>
+none'>. 1</span></a></span></p>
 
 <p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc307412871">Configuration
-2: Explorer 16<span style='color:windowtext;display:none;text-decoration:none'>. </span><span
-style='color:windowtext;display:none;text-decoration:none'>1</span></a></span></p>
+2: Explorer 16<span style='color:windowtext;display:none;text-decoration:none'>.
+1</span></a></span></p>
 
 <p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc307412872">Configuration
 2: Troubleshooting<span style='color:windowtext;display:none;text-decoration:
-none'>. </span><span
-style='color:windowtext;display:none;text-decoration:none'>2</span></a></span></p>
+none'>. 2</span></a></span></p>
 
 <p class=MsoToc3><span class=MsoHyperlink><a href="#_Toc307412873">Configurations
-3, 4, 5, and 6<span style='color:windowtext;display:none;text-decoration:none'>. </span><span
-style='color:windowtext;display:none;text-decoration:none'>2</span></a></span></p>
+3, 4, 5, and 6<span style='color:windowtext;display:none;text-decoration:none'>.
+2</span></a></span></p>
 
 <p class=MsoNormal>&nbsp;</p>
 
@@ -353,26 +356,25 @@ the EPMP SFRs to use the address lines. Please refer to EPMP FRM Chapter
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>3)</span><span style='font-size:7.0pt;
 font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
-style='font-family:"Arial","sans-serif"'>To program (using Serial
-Communications)</span></p>
+style='font-family:"Arial","sans-serif"'>To program (using Serial Communications)</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>a.<span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; </span><span
-style='font-family:"Arial","sans-serif"'>Program the PIC24FJ256DA210 with the application
-hex code that contains the programming routine.</span></p>
+style='font-family:"Arial","sans-serif"'>Program the PIC24FJ256DA210 with the
+application hex code that contains the programming routine.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>b.<span
-style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; &nbsp;</span><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span><span
 style='font-family:"Arial","sans-serif"'>Connect the PIC24FJ256DA210
 Development Board to the PC with a RS232 cable.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>c.<span
-style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; &nbsp;</span><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span><span
 style='font-family:"Arial","sans-serif"'>With the PIC24FJ256DA210 Development
 Board powered up, hold down button S2.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>d.<span
-style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; &nbsp;</span><span
+style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span><span
 style='font-family:"Arial","sans-serif"'>While holding button S2, push down and
 release button S4 (MCLR) to erase the data in flash memory then release the S2
 button. This will put the application in programming mode.</span></p>
@@ -380,7 +382,8 @@ button. This will put the application in programming mode.</span></p>
 <p class=MsoPlainText style='margin-left:1.0in'>&nbsp;</p>
 
 <p class=MsoNormal style='text-indent:.5in;page-break-after:avoid'><img
-width=618 height=422 src="images/DA210DevBoard%20Flash%20Programming.jpg"></p>
+border=0 width=618 height=422
+src="images/DA210DevBoard%20Flash%20Programming.jpg"></p>
 
 <p class=MsoNormal style='text-indent:.5in'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
@@ -406,8 +409,8 @@ style='font-family:"Arial","sans-serif"'>To program (using USB Communications)</
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>a.<span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; </span><span
-style='font-family:"Arial","sans-serif"'>Program the PIC24FJ256DA210 with the
-application hex code that contains the programming routine.</span></p>
+style='font-family:"Arial","sans-serif"'>Program the PIC24FJ256DA210 with the application
+hex code that contains the programming routine.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>b.<span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; </span><span
@@ -421,8 +424,8 @@ Development Board to the PC with a USB cable on J2.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>d.<span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; &nbsp;</span><span
-style='font-family:"Arial","sans-serif"'>With the PIC24FJ256DA210 Development
-Board powered up, hold down button S2.</span></p>
+style='font-family:"Arial","sans-serif"'>With the PIC24FJ256DA210 Development Board
+powered up, hold down button S2.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'>e.<span
 style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp; &nbsp;</span><span
@@ -432,8 +435,8 @@ button. This will put the application in programming mode.</span></p>
 
 <p class=MsoPlainText style='margin-left:.5in'>&nbsp;</p>
 
-<h3 style='text-indent:.5in'><a name="_Toc307412870"></a><a name="_Toc276132318">Configuration
-1: Troubleshooting</a></h3>
+<h3><a name="_Toc276132318"></a><a name="_Toc307412870"></a>Configuration 1:
+Troubleshooting</h3>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>In
 some cases, programming will fail due varied reasons.</span></p>
@@ -458,11 +461,7 @@ font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
 style='font-family:"Arial","sans-serif"'>“Programming Failed” message always
 appears. Check if the correct COM port is selected. This can be verified by
 looking at the Windows “Device Manager”. Verify the COM port under the “Ports
-(COM &amp; LPT)”. </span></p>
-
-<p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in'><span
-style='font-family:"Arial","sans-serif"'>4)</span><span style='font-size:7.0pt;
-font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span>&nbsp;</p>
+(COM &amp; LPT)”.</span></p>
 
 <h3><a name="_Toc307412871"></a><a name="_Toc276132319"></a><a
 name="_Toc274902561"></a><a name="config_3"></a><a name="_Toc274828941"></a>Configuration
@@ -495,9 +494,8 @@ Cost Controllerless (LCC) Graphics PICtail™ Plus&nbsp; Board</a> (AC164144)</spa
 <p class=MsoListParagraph style='margin-left:1.0in;text-indent:-.25in'>&nbsp;</p>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='font-size:10.0pt;
-font-family:"Arial","sans-serif"'>Programming the SPI Memory of the Graphics
-PICtail boards connected to Explorer 16 is possible through the UART connector
-P1.</span></p>
+font-family:"Arial","sans-serif"'>Programming the SPI Memory of the Graphics PICtail
+boards connected to Explorer 16 is possible through the UART connector P1.</span></p>
 
 <p class=MsoNormal style='margin-left:.5in'>&nbsp;</p>
 
@@ -509,8 +507,8 @@ style='font-family:"Arial","sans-serif"'>For each Graphics PICtail:</span></p>
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>a.</span><span style='font-size:7.0pt;
 font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
-style='font-family:"Arial","sans-serif"'>Graphics LCD Controller PICtail™ Plus SSD1926
-Board -&gt; </span><span style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span><span
+style='font-family:"Arial","sans-serif"'>Graphics LCD Controller PICtail™ Plus
+SSD1926 Board -&gt; </span><span style='font-size:7.0pt;font-family:"Times New Roman","serif"'>&nbsp;</span><span
 style='font-family:"Arial","sans-serif"'>Set jumper (JP3) to FLASH CS-RD1 to
 select SPI flash.</span></p>
 
@@ -543,9 +541,9 @@ Communications)</span></p>
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>a.</span><span style='font-size:7.0pt;
 font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
-style='font-family:"Arial","sans-serif"'>Program the selected PIC device (PIM
-mounted on the Explorer 6 board) with the application hex code that contains
-the programming routine.</span></p>
+style='font-family:"Arial","sans-serif"'>Program the selected PIC device (PIM mounted
+on the Explorer 6 board) with the application hex code that contains the
+programming routine.</span></p>
 
 <p class=MsoPlainText style='margin-left:1.25in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>b.</span><span style='font-size:7.0pt;
@@ -589,8 +587,8 @@ Programmer Help.pdf” or “External Memory Programmer Help.chm”).</span></p>
 
 <p class=MsoNormal style='text-indent:.5in;page-break-after:avoid'>&nbsp;</p>
 
-<h3 style='text-indent:.5in'><a name="_Toc307412872"></a><a name="_Toc276132320">Configuration
-2: Troubleshooting</a></h3>
+<h3><a name="_Toc276132320"></a><a name="_Toc307412872"></a>Configuration 2:
+Troubleshooting</h3>
 
 <p class=MsoPlainText style='margin-left:.5in'><span style='font-family:"Arial","sans-serif"'>In
 some cases, programming will fail due varied reasons.</span></p>
@@ -606,9 +604,9 @@ flash memory chip select signal.</span></p>
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in'><span
 style='font-family:"Arial","sans-serif"'>2.</span><span style='font-size:7.0pt;
 font-family:"Times New Roman","serif"'>&nbsp;&nbsp;&nbsp;&nbsp; </span><span
-style='font-family:"Arial","sans-serif"'>When using Graphics PICtail™ Plus
-Daughter Board, programming the parallel flash it always fails on a specific
-line number. Check the address lines of the parallel flash. One or more address
+style='font-family:"Arial","sans-serif"'>When using Graphics PICtail™ Plus Daughter
+Board, programming the parallel flash it always fails on a specific line
+number. Check the address lines of the parallel flash. One or more address
 lines may not be connected to the parallel flash properly.</span></p>
 
 <p class=MsoPlainText style='margin-left:.75in;text-indent:-.25in'><span
@@ -646,8 +644,9 @@ Expansion Board</a> (DM320005)</span></p>
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='font-size:10.0pt;
-font-family:"Arial","sans-serif"'>Programming the SPI Memory of the Graphics PICtail
-boards connected to Starter Kits are only possible through the USB ports.</span></p>
+font-family:"Arial","sans-serif"'>Programming the SPI Memory of the Graphics
+PICtail boards connected to Starter Kits are only possible through the USB
+ports.</span></p>
 
 <p class=MsoNormal style='margin-left:.5in'><span style='font-size:10.0pt;
 font-family:"Arial","sans-serif"'>Only Starter Kits that USB features can be
@@ -662,6 +661,12 @@ USB Starter Kit II</a> (DM320003-2)</span></p>
 style='font-family:"Arial","sans-serif"'><a
 href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM320004">PIC32
 Ethernet Starter Kit</a> (DM320004)</span></p>
+
+<p class=MsoPlainText style='margin-left:.5in;text-indent:.5in'><span
+class=MsoHyperlink><span style='font-family:"Arial","sans-serif"'><a
+href="http://www.microchipdirect.com/productsearch.aspx?Keywords=DM330012">MPLAB
+Starter Kit for dsPIC33E DSCs</a></span></span><span style='font-size:8.0pt;
+font-family:"Verdana","sans-serif"'> </span><span style='font-family:"Arial","sans-serif"'>(DM330012)</span></p>
 
 <p class=MsoPlainText><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
 

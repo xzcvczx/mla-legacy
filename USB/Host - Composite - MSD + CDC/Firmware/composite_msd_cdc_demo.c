@@ -98,7 +98,7 @@ ADG          15-Sep-2008 First release
 #define GATED_TIME_DISABLED         0x0000
 #define TIMER_16BIT_MODE            0x0000
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     #define TIMER_PRESCALER_1               0x0000
     #define TIMER_PRESCALER_8               0x0010
     #define TIMER_PRESCALER_64              0x0020
@@ -143,7 +143,7 @@ ADG          15-Sep-2008 First release
 // *****************************************************************************
 // *****************************************************************************
 
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
@@ -461,7 +461,7 @@ void InitializeTimer( void )
 {
     WORD timerPeriod;
 
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
         IPC2bits.T3IP = TIMER_INTERRUPT_PRIORITY;
         IFS0bits.T3IF = 0;
         TMR3 = 0;
@@ -803,7 +803,7 @@ int main (void)
   Remarks:
     None
   ***************************************************************************/
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void __attribute__((__interrupt__, auto_psv)) _T3Interrupt( void )
 #elif defined( __PIC32MX__ )
 void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
@@ -811,7 +811,7 @@ void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
 #error Cannot prototype timer interrupt
 #endif
 {
-     #if defined( __C30__ )
+     #if defined( __C30__ ) || defined __XC16__
     if (IFS0bits.T3IF)
     #elif defined( __PIC32MX__ )
     if (IFS0 & PIC32MX_TIMER3_INTERRUPT)
@@ -820,7 +820,7 @@ void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
     #endif
     {
          // Clear the interrupt flag
-        #if defined( __C30__ )
+        #if defined( __C30__ ) || defined __XC16__
             IFS0bits.T3IF   = 0;
         #elif defined( __PIC32MX__ )
             mT3ClearIntFlag();

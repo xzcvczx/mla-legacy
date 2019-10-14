@@ -65,7 +65,7 @@
 #endif
 
 #if defined( _CTMU_IRQ )
-#   warning("Devices has CTMU, use TimerCallbackFunc4 instead!")
+#   warning("Device has CTMU, use TimerCallbackFunc4 instead!")
 #endif
 
 

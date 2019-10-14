@@ -67,20 +67,48 @@
  *****************************************************************************/
 void CreateLightingScreen(void)
 {
-    GOLFree();                              // free memory for the objects in the previous linked list and start new list
 
-    CreatePanelScreen();                    // This adds the widgets seen on the left of the screen
+    GOL_SCHEME *currentScheme;
+
+    currentScheme = GFX_SchemeGetCurrentScheme();
+
+    SetColor(currentScheme->Color0);
+
+    while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));				     	
+
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+					 GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
+				     GetMaxY() - 90,  	
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));
 
     SetState(GOLFindObject(PANEL_SCREEN_ID_LIGHTING_BUT), BTN_DISABLED);
- 
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT),BTN_DISABLED))
+    {
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_COMFORT_BUT),BTN_DRAW);
+    }
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_SECURITY_BUT),BTN_DISABLED))
+    {
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_SECURITY_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_SECURITY_BUT),BTN_DRAW);
+    }
+
+    if(GetState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT),BTN_DISABLED))
+    { 
+        ClrState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT), BTN_DISABLED);
+        SetState(GOLFindObject(PANEL_SCREEN_ID_ENERGY_USAGE_BUT),BTN_DRAW);
+    }
+
 /***
  * See above note in the function comment for more information
  **/
     #ifndef __PIC24FJ256GB210__
     GFX_BlockUntilFinished(PutImage((GetMaxX() >> 2)+40, 90+10, (void *) &House, IMAGE_NORMAL));
     #endif
-
-    SetActivePage(GetDestinationPage());
 
 }
 /*****************************************************************************
@@ -105,6 +133,7 @@ void DisplayLightingScreen(void)
 	    FillCircle(LIGHTING_SCREEN_START+290, 160, 5);            //Terrace
 	    FillCircle(LIGHTING_SCREEN_START+250, GetMaxY() - 80, 5);  //Living
 	    FillCircle(LIGHTING_SCREEN_START + 65, GetMaxY() - 200, 5);  //Bed 4
+        UpdateDisplayNow();
     }
     
 }
@@ -113,6 +142,5 @@ void DisplayLightingScreen(void)
  *****************************************************************************/
 WORD MsgLightingScreen(WORD objMsg, OBJ_HEADER *pObj)
 {
-    MsgPanelScreen(objMsg, pObj);  //Adds UI from PanelScreen
-    return(1);
+    return(MsgPanelScreen(objMsg, pObj));
 }

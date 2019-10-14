@@ -63,9 +63,15 @@ _FWDT(FWDTEN_OFF);
 _FPOR(FPWRT_PWR128 & BOREN_ON & ALTI2C1_ON & ALTI2C2_ON);
 _FICD(ICS_PGD1 & RSTPRI_PF & JTAGEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+   #if defined(__32MX250F128D__)
+    #pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config OSCIOFNC = OFF, POSCMOD = XT, FSOSCEN = OFF, FNOSC = PRIPLL
+    #pragma config CP = OFF, BWP = OFF, PWP = OFF
+   #else
+    #pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_20, FPLLIDIV = DIV_1, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
+   #endif
 #else
     #if defined(__PIC24FJ256GB110__)
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & FWDTEN_OFF & ICS_PGx2)
@@ -265,26 +271,6 @@ void                        InitializeBoard(void);                              
     #define FlashInit(pInitData) SST25Init((DRV_SPI_INIT_DATA*)pInitData)
 #endif
   
-/////////////////////////////////////////////////////////////////////////////
-
-//                            IMAGES USED
-/////////////////////////////////////////////////////////////////////////////
-// iinternal flash image
-extern const IMAGE_FLASH   intro;
-extern const IMAGE_FLASH   mchpLogo;
-extern const IMAGE_FLASH   bulbon;
-extern const IMAGE_FLASH   bulboff;
-extern const IMAGE_FLASH   Engine1;
-extern const IMAGE_FLASH   Engine2;
-extern const IMAGE_FLASH   Engine3;
-extern const IMAGE_FLASH   Engine4;
-extern const IMAGE_FLASH   arrowUp;
-extern const IMAGE_FLASH   arrowDown;
-extern const IMAGE_FLASH   redphone;
-extern const IMAGE_FLASH   greenphone;
-extern const IMAGE_FLASH   mchpIcon0;
-extern const IMAGE_FLASH   mchpIcon;
-
 /////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED
 /////////////////////////////////////////////////////////////////////////////
@@ -562,7 +548,7 @@ int main(void)
             TouchGetMsg(&msg);          // Get message from touch screen
             GOLMsg(&msg);               // Process message
 #if defined (USE_FOCUS)                    
-            #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC))
+            #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
             SideButtonsMsg(&msg);       // Get message from side buttons
             GOLMsg(&msg);               // Process message
             #endif
@@ -793,7 +779,7 @@ WORD GOLDrawCallback(void)
     SLIDER          *pSld;                                  // used when updating date and time
     LISTBOX         *pLb;                                   // used when updating date and time
 
-    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC))
+    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
 
     static DWORD    prevTime = 0;                           // keeps previous value of time tick
     WORD            i;
@@ -1415,7 +1401,7 @@ void StartScreen(void)
 
     SetClip(CLIP_DISABLE);
         
-    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC))
+    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
 
 //    // initialize date and time
     mRTCCOff();
@@ -1436,7 +1422,7 @@ void StartScreen(void)
 void CreatePage(XCHAR *pText)
 {
     OBJ_HEADER  *obj;
-    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC))
+    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
     SHORT       i;
 	#endif
 	
@@ -1479,7 +1465,7 @@ void CreatePage(XCHAR *pText)
             navScheme
         );                          // use navigation scheme
 
-    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC))
+    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
     RTCCProcessEvents();            // update the date and time strings
     i = 0;
     while(i < 12)
@@ -4206,7 +4192,7 @@ void CreateDial(void)
 
 
     GOLFree();                          // free memory for the objects in the previous linked list and start new list
-    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC))
+    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
     TRISA = 0xFF80;                     // set IO pins (0:6) to output mode,
 
     // pin 7 is used as side button S5 switch for press and release
@@ -4279,7 +4265,7 @@ WORD MsgDial(WORD objMsg, OBJ_HEADER *pObj)
                     return (0);
 
             dialVal = (dialVal - 1) % 70;       // -1 is used to avoid 70 which is also 0 after mod.
-            #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC))
+            #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
             if(dialVal <= 10)
                 LATA = 0x0001;                  // light LED 0
             else if(dialVal <= 20)
@@ -4300,7 +4286,7 @@ WORD MsgDial(WORD objMsg, OBJ_HEADER *pObj)
         case ID_BUTTON_NEXT:
             if(objMsg == BTN_MSG_RELEASED)
             {
-                #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC))
+                #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
                 LATA = 0xFF00;                  // turn off all LED
                 TRISA = 0xFFFF;                 // set IO pin to input mode
                 #endif
@@ -4312,7 +4298,7 @@ WORD MsgDial(WORD objMsg, OBJ_HEADER *pObj)
         case ID_BUTTON_BACK:
             if(objMsg == BTN_MSG_RELEASED)
             {
-                #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC))
+                #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__) || defined(__PIC24FJ256DA210__) || defined(MEB_BOARD)|| defined(GFX_PICTAIL_LCC)||defined(__32MX250F128D__))
                 LATA = 0xFF00;                  // turn off all LED
                 TRISA = 0xFFFF;                 // set IO pin to input mode
                 #endif
@@ -5318,6 +5304,10 @@ void InitializeBoard(void)
     #elif defined(__PIC32MX__)
         INTEnableSystemMultiVectoredInt();
         SYSTEMConfigPerformance(GetSystemClock());
+        #if defined(__32MX250F128D__)
+        DDPCONbits.JTAGEN = 0; // Disable JTAG
+        ANSELA = ANSELB = ANSELC = 0x0000; // Disable all ADC inputs
+        #endif
     #endif // #if defined(__dsPIC33F__) || defined(__PIC24H__)
     
 
@@ -5328,8 +5318,10 @@ void InitializeBoard(void)
 * the chip select of the EEPROM SPI should be pulled up.
 ************************************************************************/
         // Set IOs directions for EEPROM SPI
+        #if !defined(__32MX250F128D__)
         MCHP25LC256_CS_LAT = 1;			    // set initial CS value to 1 (not asserted)
     	MCHP25LC256_CS_TRIS = 0;			// set CS pin to output
+        #endif
 	#endif // #if defined (EXPLORER_16)
 
     // Initialize graphics library and create default style scheme for GOL
@@ -5341,7 +5333,7 @@ void InitializeBoard(void)
     LATGbits.LATG9 = 1;
     TRISGbits.TRISG9 = 0;
     
-    // MP3 Codac
+    // MP3 Codec
     // reset
     LATAbits.LATA5 = 0;
     TRISAbits.TRISA5 = 0;
@@ -5358,9 +5350,9 @@ void InitializeBoard(void)
 
     //The following are PIC device specific settings for the SPI channel
     //used. 
-    
+#if defined(USE_SST25VF016) || defined (USE_M25P80)  
     //Set IOs directions for SST25 SPI
-    #if defined (GFX_PICTAIL_V3) || defined (MEB_BOARD) || defined(GFX_PICTAIL_LCC) || defined(MIKRO_BOARD)
+    #if defined (GFX_PICTAIL_V3) || defined (MEB_BOARD) || defined(GFX_PICTAIL_LCC) || defined(MIKRO_BOARD) ||defined (GFX_PICTAIL_V3E)
 	    
         SST25_CS_LAT = 1;
         SST25_CS_TRIS = 0;
@@ -5419,7 +5411,7 @@ void InitializeBoard(void)
 
 	// initialize the Flash Memory driver
     FlashInit(&SPI_Init_Data);
-   
+#endif  
     // initialize the timer that manages the tick counter
     TickInit(); 
 
@@ -5428,7 +5420,7 @@ void InitializeBoard(void)
 
     HardwareButtonInit();           	// Initialize the hardware buttons
 
-    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_USE_DISPLAY_CONTROLLER_DMA))
+    #if !(defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)||defined(GFX_USE_DISPLAY_CONTROLLER_DMA)||defined(__32MX250F128D__))
         RTCCInit();                         // Setup the RTCC
         RTCCProcessEvents();
     #endif

@@ -83,10 +83,10 @@
 <Font_Files>
 <Font_File_Resource>
 <label>GOLMediumFont</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/GentiumLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/gentium/GentiumLicense.txt</comment_file>
 <size>16</size>
 <height>19</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
@@ -96,10 +96,10 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>GOLSmallFont</label>
-<path>../../../Microchip/Graphics/Fonts/Gentium.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/gentium/Gentium.ttf</path>
 <name>Gentium</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/GentiumLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/gentium/GentiumLicense.txt</comment_file>
 <size>13</size>
 <height>16</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
@@ -109,10 +109,10 @@
 </Font_File_Resource>
 <Font_File_Resource>
 <label>monofont</label>
-<path>../../../Microchip/Graphics/Fonts/VeraMono.ttf</path>
+<path>../../../Microchip/Graphics/Fonts/vera/VeraMono.ttf</path>
 <name>Bitstream Vera Sans Mono</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../Microchip/Graphics/Fonts/VeraLicense.txt</comment_file>
+<comment_file>../../../Microchip/Graphics/Fonts/vera/VeraLicense.txt</comment_file>
 <size>17</size>
 <height>20</height>
 <anti_aliasing>1 bit per pixel</anti_aliasing>

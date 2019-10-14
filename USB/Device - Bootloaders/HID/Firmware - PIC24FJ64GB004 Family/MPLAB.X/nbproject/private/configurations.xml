@@ -5,7 +5,7 @@
   <confs>
     <conf name="pic24fj64gb004_pim" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files (x86)\Microchip\mplabc30\v3.30c\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files\Microchip\xc16\v1.00\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

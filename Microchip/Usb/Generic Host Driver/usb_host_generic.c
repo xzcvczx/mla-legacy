@@ -189,7 +189,7 @@ BOOL USBHostGenericInit ( BYTE address, DWORD flags, BYTE clientDriverID )
         BYTE    *deviceDescriptor;
         BYTE    serialNumberIndex;
 
-        // TODO when multiple devices are implemented, this init will change
+        // MCHP - when multiple devices are implemented, this init will change
         // to find a free slot
         gc_DevData.flags.serialNumberValid = 0;
 

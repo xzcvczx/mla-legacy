@@ -66,17 +66,21 @@ void CreateMainScreen(void)
 
     currentScheme = GFX_SchemeGetCurrentScheme();
 
-    AlphaBlendWindow(GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2), 0),
-   	 		      GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2), 0),
-	 		      GFXGetPageXYAddress(MAIN_SCRREN_DISPLAY_BUFFER, (GetMaxX() >> 2), 0),
+    while(!AlphaBlendWindow(GFX_PAGE1, (GetMaxX() >> 2), 0,
+   	 		      GFX_PAGE1, (GetMaxX() >> 2), 0,
+	 		      MAIN_SCRREN_DISPLAY_BUFFER, (GetMaxX() >> 2), 0,
 	              GetMaxX()-(GetMaxX() >> 2), 
 	    	      GetMaxY(),   	
-	    	      GFX_SchemeGetDefaultScheme()->AlphaValue);						        
+	    	      GFX_SchemeGetDefaultScheme()->AlphaValue));						        
 
    	SetColor(ORANGE);                       // Orange
-   	Bar((GetMaxX() >> 2), 0 , (GetMaxX() >> 2) + 2, GetMaxY());
+   	while(!Bar((GetMaxX() >> 2), 0 , (GetMaxX() >> 2) + 2, GetMaxY()));
 
     GOLFree();                              // free memory for the objects in the previous linked list and start new list
+
+    CopyPageWindow( 1, GetDrawBufferAddress(),       
+                           0, 0, 0, 0, 
+                        (GetMaxX() >> 2) - 5, GetMaxY());
 
     BtnCreate
     (
@@ -162,15 +166,15 @@ void CreateMainScreen(void)
   
 	SetColor(currentScheme->Color0);	
    
-	FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5);
-	PutImage((GetMaxX() >> 2)+20, 10, (void *) &file_browser, IMAGE_NORMAL);
+	while(!FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5));
+	while(!PutImage((GetMaxX() >> 2)+20, 10, (void *) &file_browser, IMAGE_NORMAL));
      
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
+					 GFX_PAGE1, (GetMaxX() >> 2)+15, 5,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
 				     (GetMaxX()) - ((GetMaxX() >> 2)+20), 
 				     60,  	
-				     GFX_SchemeGetDefaultScheme()->AlphaValue);	
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));	
 				     		     				  
 	SetColor(RGB565CONVERT(255, 102, 0));
     SetFont((void *) &FONTDEFAULT);
@@ -190,15 +194,6 @@ WORD MsgMainScreen(WORD objMsg, OBJ_HEADER *pObj)
         case MAIN_SCREEN_ID_PANEL_BUT:
             if(objMsg == BTN_MSG_RELEASED)
             {  
-
-				AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-								GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-								GFXGetPageXYAddress(GFX_PAGE2, 0, 0),
-								GetMaxX(), 
-								GetMaxY(),   	
-								GFX_SchemeGetDefaultScheme()->AlphaValue);        
-				
-       
                GFXTransition(0,0,(GetMaxX() >> 2) + 10,GetMaxY(),
                        PUSH,GFXGetPageOriginAddress(1),GFXGetPageOriginAddress(0),
                        2,8,RIGHT_TO_LEFT);
@@ -206,14 +201,20 @@ WORD MsgMainScreen(WORD objMsg, OBJ_HEADER *pObj)
                GFXTransition(0,0,(GetMaxX() >> 2) + 10,GetMaxY(),
                        SLIDE,GFXGetPageOriginAddress(3),GFXGetPageOriginAddress(0),
                        2,8,LEFT_TO_RIGHT);
-	          
+
+                CopyPageWindow( 1, GetDrawBufferAddress(),       
+                           0, 0, 0, 0, 
+                        GetMaxX(), GetMaxY());
+
 				screenState = CREATE_COMFORT;      
             
                 return (0);                 // process by default
+
             }
             return (1);                 // process by default
 
          case MAIN_SCREEN_ID_SLIDE_SHOW_BUT:
+
             if(objMsg == BTN_MSG_RELEASED)
             {         
                       screenState = CREATE_SCROLLING;            
@@ -223,6 +224,7 @@ WORD MsgMainScreen(WORD objMsg, OBJ_HEADER *pObj)
         case MAIN_SCREEN_ID_CONFIG_BUT:
             if(objMsg == BTN_MSG_RELEASED)
             {
+                 
 		         ClrState(GOLFindObject(MAIN_SCREEN_ID_INFO_BUT),BTN_DISABLED);
                  SetState(GOLFindObject(MAIN_SCREEN_ID_INFO_BUT),BTN_DRAW);
                  SetState(GOLFindObject(MAIN_SCREEN_ID_CONFIG_BUT),BTN_DRAW|BTN_DISABLED);
@@ -238,7 +240,8 @@ WORD MsgMainScreen(WORD objMsg, OBJ_HEADER *pObj)
             }
             return (1);                 // Do not process by default
 
-        case MAIN_SCREEN_ID_UPLOAD_BUT:    //Info
+        case MAIN_SCREEN_ID_UPLOAD_BUT:    //Upload
+
             if(objMsg == BTN_MSG_RELEASED)
             {
 				 screenState = CREATE_UPLOAD;  
@@ -248,14 +251,6 @@ WORD MsgMainScreen(WORD objMsg, OBJ_HEADER *pObj)
         case MAIN_SCREEN_ID_PERFORMANCE_BUT:   //Performance Screen
             if((objMsg == BTN_MSG_RELEASED))
             {
-
-               AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-							 GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-							 GFXGetPageXYAddress(GFX_PAGE2, 0, 0),
-						     GetMaxX(), 
-						     GetMaxY(),   	
-						     GFX_SchemeGetDefaultScheme()->AlphaValue);          
-
                GFXTransition(0,0,(GetMaxX() >> 2) + 10,GetMaxY(),
                        PUSH,GFXGetPageOriginAddress(1),GFXGetPageOriginAddress(0),
                        2,8,RIGHT_TO_LEFT);
@@ -263,6 +258,10 @@ WORD MsgMainScreen(WORD objMsg, OBJ_HEADER *pObj)
                GFXTransition(0,0,(GetMaxX() >> 2) + 10,GetMaxY(),
                        SLIDE,GFXGetPageOriginAddress(4),GFXGetPageOriginAddress(0),
                        2,8,LEFT_TO_RIGHT); 
+
+                CopyPageWindow( 1, GetDrawBufferAddress(),       
+                           0, 0, 0, 0, 
+                        GetMaxX(), GetMaxY());
 
                screenState = CREATE_PERFORMANCE;  
    

@@ -1,9 +1,9 @@
 /******************************************************************************
 
- MRF24WB0M Driver WiFi Console
+ MRF24W Driver WiFi Console
  Module for Microchip TCP/IP Stack
-  -Provides access to MRF24WB0M WiFi controller
-  -Reference: MRF24WB0M Data sheet, IEEE 802.11 Standard
+  -Provides access to MRF24W WiFi controller
+  -Reference: MRF24W Data sheet, IEEE 802.11 Standard
 
 *******************************************************************************
  FileName:		WFConsole.c
@@ -44,7 +44,7 @@
 
  Author				Date		Comment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- KH                 27 Jan 2010 Updated for MRF24WB0M
+ KH                 27 Jan 2010 Updated for MRF24W
 ******************************************************************************/
 
 //============================================================================
@@ -400,11 +400,17 @@ void WFConsoleProcessEpilogue(void)
 {
     if (WFConsoleIsConsoleMsgReceived())
 	{
+		if (( memcmppgm2ram(ARGV[0], "iperf", 5) == 0 ) || ( memcmppgm2ram(ARGV[0], "kill", 4) == 0 ))
+		{
+    		return;
+        } 
+	
 		if ( memcmppgm2ram(ARGV[0], "help", 4) != 0 )
 		{
 			WFConsolePrintRomStr("Unknown cmd: ", FALSE);
 			WFConsolePrintRamStr(ARGV[0], TRUE);
 		}
+	 		
 
 	    WFConsoleReleaseConsoleMsg();
 	}
@@ -483,7 +489,7 @@ void Output_Monitor_Hdr(void)
     putrsUART("\n\r");
     OutputLine('=', 79);
     putrsUART("* WiFi Host Interface Monitor\n\r");
-    putrsUART("* (c) 2008, 2009, 2010 -- Microchip Technology, Inc.\n\r");
+    putrsUART("* (c) 2008, 2009, 2010, 2011 -- Microchip Technology, Inc.\n\r");
     putrsUART("*\n\r* Type 'help' to get a list of commands.\n\r");
     OutputLine('=', 79);
     OutputCommandPrompt();
@@ -500,7 +506,6 @@ Returns: None
 ============================================================================*/
 static void OutputLine(INT8 lineChar, UINT8 count)
 {
-#if defined( STACK_USE_UART )
     UINT8 i;
 
     for (i = 0; i < count; ++i)
@@ -509,7 +514,6 @@ static void OutputLine(INT8 lineChar, UINT8 count)
         putcUART(lineChar);
     }
     putrsUART("\n\r");
-#endif
 }
 
 

@@ -50,7 +50,7 @@
 *			configuration is assumed.
 *
 ********************************************************************/
-    #define USE_NONBLOCKING_CONFIG  // Comment this line to use blocking configuration
+   // #define USE_NONBLOCKING_CONFIG  // Comment this line to use blocking configuration
 
 /*********************************************************************
 * Overview: Using Palettes, different colors can be used with the same
@@ -68,7 +68,6 @@
 *			the GOL Focus (USE_FOCUS)support. 
 *
 *********************************************************************/
-
 #define USE_FOCUS
 
 /*********************************************************************
@@ -118,10 +117,6 @@
 ********************************************************************/
 #define USE_ALPHABLEND
 
-#ifdef USE_ALPHABLEND			// Enable Alpha Blending
-
-#endif
-
 /*********************************************************************
 * Overview: To enable support for unicode fonts, USE_MULTIBYTECHAR  
 *			must be defined. This changes XCHAR definition. See XCHAR 
@@ -169,5 +164,8 @@
 *
 *********************************************************************/
     #define COLOR_DEPTH             16
+
+	#define USE_DOUBLE_BUFFERING
+
 
 #endif // _GRAPHICSCONFIG_H

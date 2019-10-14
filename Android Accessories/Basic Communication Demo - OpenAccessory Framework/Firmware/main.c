@@ -51,7 +51,7 @@ Change History
 
 // Configuration bits for the device.  Please refer to the device datasheet for each device
 //   to determine the correct configuration bit settings
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
@@ -108,7 +108,7 @@ Change History
 // If your code gets here, you either tried to read or write
 // a NULL pointer, or your application overflowed the stack
 // by having too many local variables or parameters declared.
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
 	void _ISR __attribute__((__no_auto_psv__)) _AddressError(void)
 	{
         while(1){}
@@ -757,7 +757,7 @@ static BYTE ReadPOT(void)
         w.v[0] = ADRESL;
         w.v[1] = ADRESH;
 
-    #elif defined(__C30__) || defined(__C32__)
+    #elif defined(__C30__) || defined(__C32__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM) || \
             defined(PIC24FJ256DA210_DEV_BOARD) || \
             defined(PIC24FJ256GB210_PIM) 

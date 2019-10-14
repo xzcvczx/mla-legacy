@@ -39,9 +39,6 @@
  *****************************************************************************/
 #include "Graphics/Graphics.h"
 
-// Color
-WORD_VAL    _color;
-
 // Clipping region control
 SHORT       _clipRgn;
 
@@ -50,6 +47,9 @@ SHORT       _clipLeft;
 SHORT       _clipTop;
 SHORT       _clipRight;
 SHORT       _clipBottom;
+
+// Color
+WORD_VAL    _color;
 
 /*********************************************************************
 * Function:  void  DelayMs(WORD time)

@@ -48,7 +48,7 @@ Author          Date    Comments
 #endif
 
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 
     // Various clock values
     #define GetSystemClock()            32000000UL
@@ -98,7 +98,7 @@ Author          Date    Comments
 
 
 // Define the baud rate constants
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
     #define BAUDRATE2       57600UL
     #define BRG_DIV2        4
     #define BRGH2           1

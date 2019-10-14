@@ -15,6 +15,10 @@
     <string name="button_status_description">The box below indicates the push button status of the attached board.</string>
     <string name="button_pressed">Button pressed</string>
     <string name="button_not_pressed">Button not pressed</string>
+    <string name="button_send">Send</string>
+    
+    <string name="baud_rate">Baud Rate:</string>
     
     <string name="pot_status_description">The bar below indicates the percentage of rotation of the potentiometer.</string>
+    
 </resources>

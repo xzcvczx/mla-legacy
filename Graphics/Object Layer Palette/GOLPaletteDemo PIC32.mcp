@@ -262,7 +262,7 @@ file_027=..\..\Microchip\Common\TimeDelay.c
 file_028=..\..\Board Support Package\TouchScreenResistive.c
 file_029=..\..\Board Support Package\drv_spi.c
 file_030=..\..\Microchip\Graphics\Drivers\TCON_SSD1289.c
-file_031=InternalResourceC32.c
+file_031=InternalResourceXC32.c
 file_032=..\..\Microchip\Graphics\Drivers\mchpGfxLCC.c
 file_033=..\..\Board Support Package\TouchScreen.c
 file_034=..\..\Microchip\Graphics\GOLSchemeDefault.c
@@ -296,7 +296,7 @@ file_061=..\..\Board Support Package\TouchScreenResistive.h
 file_062=..\..\Board Support Package\drv_spi.h
 file_063=..\..\Microchip\Include\TimeDelay.h
 file_064=..\..\Microchip\Include\Graphics\drvTFT001.h
-file_065=InternalResourceC32.h
+file_065=InternalResourceXC32.h
 file_066=Getting Started - Loading a precompiled demo.htm
 file_067=Getting Started - Running the Graphics Object Layer Palette Demo.htm
 [SUITE_INFO]

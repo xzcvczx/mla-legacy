@@ -91,10 +91,6 @@
         #error This driver doesn't support this color depth. It should be 16.
     #endif
 
-// Clipping region control codes
-    #define CLIP_DISABLE    0
-    #define CLIP_ENABLE     1
-
 // Display commands
     #define CMD_COL         0x15
     #define CMD_ROW         0x75

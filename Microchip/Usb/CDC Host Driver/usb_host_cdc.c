@@ -1678,7 +1678,7 @@ void _USBHostCDC_ResetStateJump( BYTE i )
 
             if (errorCode)
             {
-                //TODO Now what??
+                //MCHP - Now what??
                 _USBHostCDC_TerminateTransfer( USB_CDC_RESET_ERROR );
             }
             else

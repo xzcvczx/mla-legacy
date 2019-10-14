@@ -90,7 +90,7 @@ extern volatile BOOL IgnoreCurrentDataFlag; // Flag set by application to signal
                                             // should ignore data being measured.
 
 // Locals
-#if defined( __32MX220F032D__ )
+#if defined( __32MX220F032D__ ) || defined( __32MX250F128D__ )
 static UINT16 OldRawData[MAX_ADC_CHANNELS] = { 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF,
                                                0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF,
                                                0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF,
@@ -100,7 +100,7 @@ static UINT16 OldRawData[MAX_ADC_CHANNELS] = { 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
                                                0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
                                                0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
                                                0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF }; // raw value from previous set of ADC scans
-#endif
+#endif//defined( __32MX220F032D__ ) || defined( __32MX250F128D__ )
 
 static UINT32 AD1CHS_Mask; //Used to change CHOSA mux bits,
 //Declared as static instead of local to allow in line assembly when needed.

@@ -44,10 +44,14 @@
 #include "Graphics/gfxtcon.h"
 #include "Graphics/Primitive.h"
 
-#if defined(__32MX460F512L__) || defined (__32MX360F512L__) 
-#define LEGACY_MODE
-#define MAX_DMA_TRANSFER 254
-#endif
+// Clipping region control
+SHORT       _clipRgn;
+
+// Clipping region borders
+SHORT       _clipLeft;
+SHORT       _clipTop;
+SHORT       _clipRight;
+SHORT       _clipBottom;
 
 #ifdef USE_PALETTE
     #include "Graphics/Palette.h"
@@ -60,75 +64,20 @@
     WORD LUT[256];
 #endif
 
+SHORT _GFXActivePage=0;
+volatile WORD VisualPage=0;
+
 /*This defines the color of the system*/
 GFX_COLOR _color;
-
-/* Clipping region control */
-SHORT   _clipRgn;
-
-/* Clipping region borders */
-SHORT   _clipLeft;
-SHORT   _clipTop;
-SHORT   _clipRight;
-SHORT   _clipBottom;
+#ifdef USE_TRANSPARENT_COLOR
+GFX_COLOR   _colorTransparent;
+SHORT       _colorTransparentEnable;
+#endif
 
 /*Functions*/
 int _VirtToPhys(const void* p);
 
-/*This stabilizes the pixel refresh when drawing pixels*/
-#ifdef LEGACY_MODE
-#define PIXEL_DRAW_PER_DMA_TX          10  
-#else
-#define PIXEL_DRAW_PER_DMA_TX          20 
-#endif
-
-/*Macros for timing signals*/
-#define DATA_ENABLE      LATDbits.LATD2
-#define DATA_ENABLE_TRIS TRISDbits.TRISD2
-#define HSYNC            LATBbits.LATB8
-#define HSYNC_TRIS       TRISBbits.TRISB8
-#define VSYNC            LATCbits.LATC3 
-#define VSYNC_TRIS       TRISCbits.TRISC3
-
-/*Macros for LCD IO*/ 
-#define BACKLIGHT      LATDbits.LATD3
-#define BACKLIGHT_TRIS TRISDbits.TRISD3
-#define LCD_RESET      LATCbits.LATC1
-#define LCD_RESET_TRIS TRISCbits.TRISC1
-#define LCD_CS         LATCbits.LATC2
-#define LCD_CS_TRIS    TRISCbits.TRISC2
-#define LCD_DC         LATBbits.LATB3
-#define LCD_DC_TRIS    TRISBbits.TRISB3
-
-/*Macros for External SRAM*/
-#define SRAM_CS       LATFbits.LATF13      
-#define SRAM_TRIS     TRISFbits.TRISF13
-
-#define ADDR15        LATAbits.LATA15
-#define ADDR15_TRIS   TRISAbits.TRISA15
-#define ADDR16        LATDbits.LATD8
-#define ADDR16_TRIS   TRISDbits.TRISD8
-#define ADDR17        LATEbits.LATE9
-#define ADDR17_TRIS   TRISEbits.TRISE9
-#define ADDR18        LATFbits.LATF12
-#define ADDR18_TRIS   TRISFbits.TRISF12
-
-#define PIXELCLOCK        LATDbits.LATD5
-#define PIXELCLOCK_TRIS   TRISDbits.TRISD5
-
-/*This defines the polarity of the pixel clock as defined in LCD specs*/
-#ifdef DISP_INV_LSHIFT
-#define PCLK_POLARITY PMP_READ_POL_LO
-#else
-#define PCLK_POLARITY PMP_READ_POL_HI
-#endif
-
-/*These define the size (in resolution) of the LCD being used*/
-#define LINE_LENGTH              DISP_HOR_RESOLUTION
-#define FRAME_HEIGHT             DISP_VER_RESOLUTION
-
-
-#if defined (USE_PALETTE) || defined(LCC_EXTERNAL_MEMORY) 
+#if defined (USE_PALETTE) 
 unsigned int HBackPorch = 2*((DISP_HOR_PULSE_WIDTH+DISP_HOR_BACK_PORCH)-1);     
 BYTE HFrontPorch = 2;
 #else
@@ -136,16 +85,13 @@ BYTE HBackPorch = (DISP_HOR_PULSE_WIDTH+DISP_HOR_BACK_PORCH)-1;
 BYTE HFrontPorch = 1;          
 #endif
 
-#define VER_BLANK                 (DISP_VER_PULSE_WIDTH+DISP_VER_BACK_PORCH+DISP_VER_FRONT_PORCH)
-
-#define  PMADDR_OVERFLOW               32768          /* Set for 2^15 because that is how many address lines are connected from the PIC32*/
 volatile BYTE DrawCount =0;                          /* The current status of how many pixels have been drawn inbetween a DMA IR*/
 volatile BYTE_VAL overflowcount;                      /* The count for the amount of overflows that have happened in the PMP Adress*/
 
 #ifdef LCC_INTERNAL_MEMORY
 BYTE GraphicsFrame[FRAME_HEIGHT][LINE_LENGTH];                   //8 BPP QVGA graphics frame
 #else 
-char GraphicsFrame[LINE_LENGTH<<1];
+char GraphicsFrame[LINE_LENGTH];
 #endif 
 
 #ifdef LCC_INTERNAL_MEMORY
@@ -160,14 +106,81 @@ char GraphicsFrame[LINE_LENGTH<<1];
 #else
 
      #define PMP_ADDRESS_LINES PMP_PEN_ALL
-     #define PMP_DATA_LENGTH PMP_DATA_BUS_16
+     #define PMP_DATA_LENGTH PMP_DATA_BUS_8
 #endif
 
 #define PMP_CONTROL	(PMP_ON | PMP_MUX_OFF | PMP_READ_WRITE_EN|\
-             		PMP_CS2_EN | PMP_CS2_POL_LO | PMP_WRITE_POL_LO | PCLK_POLARITY)
+             		 PMP_CS2_EN | PMP_WRITE_POL_LO | PCLK_POLARITY)
 
 #define PMP_MODE     (PMP_DATA_LENGTH | PMP_MODE_MASTER2 |\
-                     PMP_WAIT_BEG_1 | PMP_WAIT_MID_1 | PMP_WAIT_END_1 )
+                     PMP_WAIT_BEG_1 | PMP_WAIT_MID_2 | PMP_WAIT_END_1 )
+
+#ifdef USE_PIP
+short _GFXPIPPage = PIP_BUFFER;
+volatile WORD PipActive = 0;
+#endif
+
+#ifdef USE_DOUBLE_BUFFERING
+    #define USE_ALPHABLEND
+    BYTE blInvalidateAll;
+    BYTE blEnableDoubleBuffering;
+    BYTE NoOfInvalidatedRectangleAreas;
+    RectangleArea InvalidatedArea[GFX_MAX_INVALIDATE_AREAS];
+
+    volatile DWORD  _drawbuffer;
+    volatile BYTE   blDisplayUpdatePending;
+	
+	/*********************************************************************
+	* Function: WORD GetDrawBufferAddress(void)
+	*
+	* PreCondition: none
+	*
+	* Input: none
+	*
+	* Output: Address of the Draw Buffer
+	*
+	* Side Effects: none
+	*
+	* Overview: Returns the address of Draw Buffer
+	*
+	* Note:
+	*
+	********************************************************************/
+    DWORD GetDrawBufferAddress(void)
+	{
+        return _drawbuffer;
+    }
+	
+	/*********************************************************************
+	* Function: DWORD GetFrameBufferAddress(void)
+	*
+	* PreCondition: _drawbuffer must be set to either GFX_BUFFER1 or GFX_BUFFER2
+	*
+	* Input: none
+	*
+	* Output: Address of the Frame Buffer
+	*
+	* Side Effects: none
+	*
+	* Overview: Returns the address of Frame Buffer
+	*
+	* Note: 
+	*
+	********************************************************************/
+    DWORD GetFrameBufferAddress(void)
+	{
+
+        if(_drawbuffer == GFX_BUFFER1)
+        {
+            return GFX_BUFFER2;
+        }
+        else
+        {
+            return GFX_BUFFER1;
+        }
+    }
+
+#endif //USE_DOUBLE_BUFFERING
 
 
 /*********************************************************************
@@ -221,11 +234,11 @@ void ResetDevice(void)
 
     PIXELCLOCK_TRIS =0;
 
-#ifdef DISP_INV_LSHIFT
-PIXELCLOCK =1;
-#else
-PIXELCLOCK =0;
-#endif
+    #ifdef DISP_INV_LSHIFT
+    PIXELCLOCK =1;
+    #else
+    PIXELCLOCK =0;
+    #endif
 
     #if defined(USE_TCON_MODULE)
     GfxTconInit();
@@ -253,10 +266,10 @@ PIXELCLOCK =0;
     #else    
     #if defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
     BACKLIGHT =0;     //Turn Backlight on
-    DmaChnSetTxfer(1, (void*)&PMDIN ,&GraphicsFrame[0] , 2, HBackPorch, 2);  
+    DmaChnSetTxfer(1, (void*)&PMDIN ,&GraphicsFrame[0] , 1, HBackPorch, 2);  
     #else
     BACKLIGHT =1;
-    DmaChnSetTxfer(1, (void*)&PMDIN ,&GraphicsFrame[0] , 2, HBackPorch, 16);  
+    DmaChnSetTxfer(1, (void*)&PMDIN ,&GraphicsFrame[0] , 1, HBackPorch, 16);  
     #endif 
     #endif
     
@@ -270,33 +283,66 @@ PIXELCLOCK =0;
 	DmaChnEnable(1);
     
    #ifdef LCC_INTERNAL_MEMORY
-   #ifdef USE_PALETTE 
-   OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 70); //Start Timer
-   #else
+        #ifdef USE_PALETTE 
+        OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 70); //Start Timer
+        #else
    OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 27); //Start Timer
    #endif
    #else  //External Memory
-   OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 5); //Start Timer
+   OpenTimer2(T2_ON | T2_SOURCE_INT | T2_PS_1_1, 2); //Start Timer
    #endif
 
    DMACONbits.SUSPEND = 0;
 
+    #ifdef USE_DOUBLE_BUFFERING
+    // initialize double buffering feature
+    blInvalidateAll = 1;            
+    blDisplayUpdatePending = 0;
+    NoOfInvalidatedRectangleAreas = 0;
+    _drawbuffer = GFX_BUFFER1;
+    SetActivePage(_drawbuffer);
+    SwitchOnDoubleBuffering();
+    #endif //USE_DOUBLE_BUFFERING
+
 }
 
-#ifdef LCC_EXTERNAL_MEMORY
+#ifdef USE_PIP
+//PIP Variables (NULL at start)
+WORD PipStartT = 0;
+WORD PipStartL = 0;
+WORD PipVLength = 0;
+WORD PipHLength = 0;
+static DWORD PipX,PipY;
+extern volatile WORD PipActive;
+#endif
 
+#ifdef USE_LCC_SCROLLING
+WORD scroll,scrollLine,scrollPage =0;
+#endif
+
+#ifdef LCC_EXTERNAL_MEMORY
 // handler for the DMA channel 1 interrupt
-void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
+void __attribute__((weak)) __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
 {
   static WORD remaining=0;
   static short line =0;
-  static BYTE GraphicsState=1;
+  static BYTE GraphicsState = 1;
+  static BYTE prevGraphicsState;
+  static WORD pixelAmount=0;
+
+#if defined(USE_PIP) || defined(USE_LCC_SCROLLING)
+  static DWORD pixelAddress=0; 
+#if defined(USE_PIP)
+  static WORD pipLine =0;
+#endif
+#endif
+
 
 #ifdef LEGACY_MODE
         static WORD dmatransfersremaining=0;
 
         if(dmatransfersremaining != 0)
-         {
+        {
 
             if(dmatransfersremaining > MAX_DMA_TRANSFER)
              {
@@ -321,6 +367,9 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
        switch(GraphicsState)
        {
          case 1:
+
+           prevGraphicsState = ++GraphicsState;
+           pixelAmount = LINE_LENGTH;
  
             if(line++ >= -DISP_VER_FRONT_PORCH)
             {                   
@@ -334,7 +383,12 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
                 #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
                 ADDR17=0; ADDR18=0;
                 #endif
-                overflowcount.Val=0;  
+                overflowcount.Val=0; 
+
+                #ifdef USE_PIP
+                pipLine = 0;
+                #endif
+ 
                }
 
              else
@@ -343,47 +397,100 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
                PMMODESET = 0x0800;   //INCM = 0b01;
                VSYNC =1; 
                DATA_ENABLE =1;
+               #ifdef USE_PIP
+               if((line >= PipStartT)&&(line <= (PipStartT + PipVLength))&&(PipVLength != 0))
+               {    
+                     pixelAddress =  ((line) * LINE_LENGTH);
+                     PMADDR =  (pixelAddress)&(0x7FFF);
+                     overflowcount.Val = pixelAddress/PMADDR_OVERFLOW;
+                     ADDR15 = overflowcount.Val;          //count holds the additional address line count
+                     ADDR16 = overflowcount.bits.b1;  
+                     pixelAmount = PipStartL;
+                     GraphicsState = 4;
+                     prevGraphicsState = 4;
+               }
+               #endif
+              #ifdef USE_LCC_SCROLLING
+              else if(scroll >0)
+              {   
+                 switch(scroll)
+                 {
+                  case 1:             //Up
+                  case 2:             //Down
+                   if(line<scrollLine)
+                   {
+                   pixelAddress = (GetMaxY()-(scrollLine-line)) * LINE_LENGTH;
+                   ADDR17 = _GFXActivePage;
+                   ADDR18 = _GFXActivePage>>1;
+                   }
+                   else
+                   {
+                   pixelAddress = (line-scrollLine) * LINE_LENGTH;
+                   ADDR17 = scrollPage;
+                   ADDR18 = scrollPage>>1;
+                   }
 
-               if(((PMADDR_OVERFLOW - PMADDR) < (LINE_LENGTH)) 
-                    #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E 
-                           || ((PMADDR == 0) && (overflowcount.Val>0))) 
-                    #else 
-                           ) 
-                    #endif       
+                   PMADDR =  (pixelAddress)&(0x7FFF);
+                   overflowcount.Val = pixelAddress/PMADDR_OVERFLOW;
+                   ADDR15 = overflowcount.Val;          //count holds the additional address line count
+                   ADDR16 = overflowcount.bits.b1; 
+                   break;   
+
+                  case 3://Left
+                  case 4://Right
+                   pixelAddress = ((line+1) * LINE_LENGTH) + (GetMaxX()-scrollLine);
+                   PMADDR =  (pixelAddress)&(0x7FFF);
+                   overflowcount.Val = pixelAddress/PMADDR_OVERFLOW;
+                   ADDR15 = overflowcount.Val;          //count holds the additional address line count
+                   ADDR16 = overflowcount.bits.b1; 
+                  if(scroll == 3)
+                  {
+                   ADDR17 = _GFXActivePage;
+                   ADDR18 = _GFXActivePage>>1;
+                  }
+                  else
+                  {
+                   ADDR17 = scrollPage;
+                   ADDR18 = scrollPage>>1;
+                  }
+                   pixelAmount = scrollLine;
+                   prevGraphicsState = 7;
+                   GraphicsState = 7;
+                   break;  
+                }
+              }
+              #endif
+
+               if((PMADDR_OVERFLOW - PMADDR) < (pixelAmount))       
                {   
 
                GraphicsState = 3;      //Do Overflow routine
                remaining = ((PMADDR_OVERFLOW)- PMADDR);
- 
+                
+               //Setup DMA Transfer
+             #ifdef LEGACY_MODE
+               if((remaining) > MAX_DMA_TRANSFER)
+               {        
+               DCH1DSIZ =  MAX_DMA_TRANSFER;
+               dmatransfersremaining = (remaining )- MAX_DMA_TRANSFER; 
+               }
+                else
+            #endif
+               {
+               DCH1DSIZ =  (WORD)(remaining);
+               }    
+               break;
+               } 
+
                     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
-                        if(PMADDR == 0)
+                        if((PMADDR == 0) && (line >1))
                         {
-                            remaining = LINE_LENGTH;
                             ADDR15 = ++overflowcount.Val;          //count holds the additional address line count
                             ADDR16 = overflowcount.bits.b1; 
                             ADDR17 = overflowcount.bits.b2;
                             ADDR18 = overflowcount.bits.b3;
-                            GraphicsState=2;
                         }
                     #endif
- 
-               //Setup DMA Transfer
-             #ifdef LEGACY_MODE
-               if((remaining<<1) > MAX_DMA_TRANSFER)
-               {        
-               DCH1DSIZ =  MAX_DMA_TRANSFER;
-               dmatransfersremaining = (remaining <<1)- MAX_DMA_TRANSFER; 
-               }
-                else
-               {
-               DCH1DSIZ =  (WORD)(remaining<<1);
-               } 
-              #else
-               DCH1DSIZ =  (WORD)(remaining<<1);
-              #endif
-               
-               break;
-               } 
             
               }
              }
@@ -391,16 +498,15 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
             //Setup DMA Transfer
             #ifdef LEGACY_MODE
             DCH1DSIZ =  MAX_DMA_TRANSFER;
-            dmatransfersremaining = (LINE_LENGTH<<1) - MAX_DMA_TRANSFER; 
+            dmatransfersremaining = (pixelAmount) - MAX_DMA_TRANSFER; 
             #else
-            DCH1DSIZ =  (WORD)(LINE_LENGTH<<1);
+            DCH1DSIZ =  (WORD)(pixelAmount);
             #endif
 
-            GraphicsState++;
             break;
 
        case 3:                    //Adjust the address lines that aren't part of PMP
-             remaining = (LINE_LENGTH-remaining);
+             remaining = (pixelAmount-remaining);
  
              ADDR15 = ++overflowcount.Val;          //count holds the additional address line count
              ADDR16 = overflowcount.bits.b1; 
@@ -409,24 +515,111 @@ void __ISR(_DMA1_VECTOR, ipl6) DmaHandler1(void)
              ADDR18 = overflowcount.bits.b3;
              #endif
              
-
                //Setup DMA Transfer
               #ifdef LEGACY_MODE
-               if((remaining<<1) > MAX_DMA_TRANSFER)
+               if((remaining) > MAX_DMA_TRANSFER)
                {        
                DCH1DSIZ =  MAX_DMA_TRANSFER;
-               dmatransfersremaining = (remaining <<1)- MAX_DMA_TRANSFER; 
+               dmatransfersremaining = (remaining)- MAX_DMA_TRANSFER; 
                }
-                else
-               {
-               DCH1DSIZ =  (WORD)(remaining<<1);
-               } 
-              #else
-               DCH1DSIZ =  (WORD)(remaining<<1);
+               else
               #endif
+               {
+               DCH1DSIZ =  (WORD)(remaining);
+               } 
 
-             GraphicsState=2; //goto Front Porch
+             GraphicsState = prevGraphicsState; //goto Front Porch
              break;
+
+   #ifdef USE_PIP
+       case 4:     //Draw PIP Line      
+                  ADDR17=_GFXPIPPage;
+                  ADDR18=_GFXPIPPage>>1;
+                  PipActive = 1;
+ 
+                  pixelAddress = (DWORD)(((PipY+pipLine++)*(DISP_HOR_RESOLUTION))+(PipX));
+
+                  PMADDR = pixelAddress&(0x7FFF);
+                  overflowcount.Val = pixelAddress/PMADDR_OVERFLOW;
+                  ADDR15 = overflowcount.Val;          //count holds the additional address line count
+                  ADDR16 = overflowcount.bits.b1; 
+                  pixelAmount = PipHLength;
+
+                  if(((PMADDR_OVERFLOW - PMADDR) < (pixelAmount)))
+                  {
+                    prevGraphicsState = 5;
+                    GraphicsState = 3; 
+                    remaining = ((PMADDR_OVERFLOW)- PMADDR);
+                    DCH1DSIZ =  (WORD)((remaining));    
+                  }
+                  else
+                  {
+                    DCH1DSIZ = (WORD)(pixelAmount);
+                    GraphicsState = 5;
+                  }
+                  break;
+
+        case 5:    //Finish PIPLine
+               
+               PipActive = 0;
+               pixelAddress = ((line*LINE_LENGTH)+PipHLength+PipStartL);
+               PMADDR = pixelAddress&(0x7FFF);
+               overflowcount.Val = pixelAddress/PMADDR_OVERFLOW;
+               ADDR15 = overflowcount.Val;          //count holds the additional address line count
+               ADDR16 = overflowcount.bits.b1;  
+               ADDR17 = VisualPage;
+               ADDR18 = VisualPage>>1;
+               pixelAmount = LINE_LENGTH-PipHLength-PipStartL; 
+
+               if(((PMADDR_OVERFLOW - PMADDR) < pixelAmount)) 
+               {   
+               prevGraphicsState = 2;
+               GraphicsState = 3;      //Do Overflow routine
+               remaining = ((PMADDR_OVERFLOW)- PMADDR);
+               DCH1DSIZ =  (WORD)((remaining));
+               break;
+               }
+
+               DCH1DSIZ =  (WORD)((pixelAmount));                  
+               GraphicsState = 2; //Draw Back Porch State
+               break;
+  #endif
+
+  #ifdef USE_LCC_SCROLLING
+        case 7://Finish Scroll Line Left/Right
+                   pixelAmount = LINE_LENGTH - scrollLine;
+                   pixelAddress = ((line+1) * LINE_LENGTH);
+                   PMADDR =  (pixelAddress)&(0x7FFF);
+                   overflowcount.Val = pixelAddress/PMADDR_OVERFLOW;
+                   ADDR15 = overflowcount.Val;          //count holds the additional address line count
+                   ADDR16 = overflowcount.bits.b1; 
+
+                if(scroll == 4)
+                  {
+                   ADDR17 = _GFXActivePage;
+                   ADDR18 = _GFXActivePage>>1;
+                  }
+                  else
+                  {
+                   ADDR17 = scrollPage;
+                   ADDR18 = scrollPage>>1;
+                  }
+
+               if(((PMADDR_OVERFLOW - PMADDR) < (pixelAmount))) 
+               {   
+               prevGraphicsState = 2;
+               GraphicsState = 3;      //Do Overflow routine
+               remaining = ((PMADDR_OVERFLOW)- PMADDR);
+ 
+               //Setup DMA Transfer
+               DCH1DSIZ =  (WORD)(remaining);               
+               break;
+               } 
+
+             DCH1DSIZ =  (pixelAmount);
+             GraphicsState = 2; //goto Front Porch
+             break;
+    #endif
  
   case 2:   //Front Porch then Back Porch Start
            HSYNC = 0; 
@@ -617,19 +810,27 @@ static DWORD prevaddr;
     DMACONSET = 0x1000;
 
     while(PMMODEbits.BUSY == 1);
+    
+    PMCONCLR=0x8000;
+    PMMODEbits.MODE16 = 1;
+    PMCONSET=0x8000;
 
-  //Perform Write
+    //Perform Write
     ADDR15 = addressbit[1][0];
     ADDR16 = addressbit[1][1];
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
     ADDR17 = addressbit[1][2];
     ADDR18 = addressbit[1][3];
+    #else
+    ADDR17 = _GFXActivePage;
+    ADDR18 = _GFXActivePage>>1;
     #endif
 
     //Save previous address value
     prevaddr = PMADDR;     
     PMADDR = address[1].Val;             
     PMDIN = _color;   
+    while(PMMODEbits.BUSY == 1);
 
     //Setup Write 2
     ADDR15 = addressbit[0][0];
@@ -637,10 +838,14 @@ static DWORD prevaddr;
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
     ADDR17 = addressbit[0][2];
     ADDR18 = addressbit[0][3];
+    #else
+    ADDR17 = _GFXActivePage;
+    ADDR18 = _GFXActivePage>>1;
     #endif 
   
     PMADDR = address[0].Val;             
     PMDIN  = (WORD)color;
+    while(PMMODEbits.BUSY == 1);
 
     //Clean-up Address Lines
     ADDR15 = overflowcount.bits.b0;          //count holds the additional address line count
@@ -648,8 +853,23 @@ static DWORD prevaddr;
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
     ADDR17 = overflowcount.bits.b2;
     ADDR18 = overflowcount.bits.b3;
+    #else
+#ifdef USE_PIP
+    if(PipActive == 1)
+    {
+      ADDR17=_GFXPIPPage;
+      ADDR18=_GFXPIPPage>>1;
+    }
+   else
+#endif 
+    {
+    ADDR17 = VisualPage;
+    ADDR18 = VisualPage>>1;
+    }
     #endif
+   
     PMADDR = prevaddr; 
+    PMMODEbits.MODE16 = 0;
 
 //Restart DMA
     DMACONCLR = 0x1000;
@@ -677,52 +897,6 @@ WORD IsDeviceBusy(void)
     return 0;
 }
 
-/*********************************************************************
-* Function: SetClipRgn(left, top, right, bottom)
-*
-* Overview: Sets clipping region.
-*
-* PreCondition: none
-*
-* Input: left - Defines the left clipping region border.
-*		 top - Defines the top clipping region border.
-*		 right - Defines the right clipping region border.
-*	     bottom - Defines the bottom clipping region border.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
-{
-    _clipLeft=left;
-    _clipTop=top;
-    _clipRight=right;
-    _clipBottom=bottom;
-
-}
-
-/*********************************************************************
-* Function: SetClip(control)
-*
-* Overview: Enables/disables clipping.
-*
-* PreCondition: none
-*
-* Input: control - Enables or disables the clipping.
-*			- 0: Disable clipping
-*			- 1: Enable clipping
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClip(BYTE control)
-{
-    _clipRgn=control;
-}
 #ifdef LCC_INTERNAL_MEMORY
 /*********************************************************************
  * Function:        unsigned int _VirtToPhys(const void* p)
@@ -780,7 +954,6 @@ GFX_COLOR GetPixel(short x, short y)
     y = DISP_VER_RESOLUTION - y;
     #endif
 
-
 #ifdef LCC_INTERNAL_MEMORY
 return GraphicsFrame[y][x];
 #else
@@ -809,8 +982,12 @@ static BYTE addressbit2,addressbit3;
     DMACONSET = 0x1000;
 
     while(PMMODEbits.BUSY ==1);
+    
+    PMCONCLR=0x8000;
+    PMMODEbits.MODE16 = 1;
+    PMCONSET=0x8000;
 
-   PMCONbits.PTRDEN=0;
+    PMCONbits.PTRDEN=0;
 
 //Perform Write
     ADDR15 = addressbit0;
@@ -818,6 +995,9 @@ static BYTE addressbit2,addressbit3;
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
     ADDR17 = addressbit2;
     ADDR18 = addressbit3;
+    #else
+    ADDR17 = _GFXActivePage;
+    ADDR18 = _GFXActivePage>>1;
     #endif
 
 //Save previous address value
@@ -826,21 +1006,36 @@ static BYTE addressbit2,addressbit3;
     PMADDR =   address;
            
     getcolor = PMDIN; 
+    while(PMMODEbits.BUSY ==1);
     getcolor = PMDIN;
-
     while(PMMODEbits.BUSY ==1);
 
-  PMCONbits.PTRDEN=1;
+    PMCONbits.PTRDEN=1;
 
-//Clean-up Address Lines
+    //Clean-up Address Lines
     ADDR15 = overflowcount.Val;          //count holds the additional address line count
     ADDR16 = overflowcount.bits.b1; 
     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
     ADDR17 = overflowcount.bits.b2;
     ADDR18 = overflowcount.bits.b3;
+    #else
+#ifdef USE_PIP
+    if(PipActive == 1)
+    {
+      ADDR17=_GFXPIPPage;
+      ADDR18=_GFXPIPPage>>1;
+    }
+   else
+#endif 
+    {
+    ADDR17 = VisualPage;
+    ADDR18 = VisualPage>>1;
+    }
     #endif
 
     PMADDR = prevaddr; 
+
+    PMMODEbits.MODE16 = 0;
 
 //ReStart DMA
     DMACONCLR = 0x1000;
@@ -848,7 +1043,6 @@ static BYTE addressbit2,addressbit3;
 return getcolor;
 #endif
 }
-
 
 /*********************************************************************
 * Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
@@ -888,6 +1082,14 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
       bottom = _clipBottom;
     }
 
+        #ifdef USE_ALPHABLEND_LITE
+        if(_alpha != 100)
+        {
+        BarAlpha(left,top,right,bottom);
+        return(1);
+        }
+        #endif
+
     #if (DISP_ORIENTATION == 90)
     WORD hchange = right - left;
     WORD vchange = bottom - top;
@@ -897,6 +1099,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
     bottom = top + hchange;
     right = left + vchange;
     #endif
+
 
 #ifdef LCC_INTERNAL_MEMORY
 
@@ -949,15 +1152,22 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
                      #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
                      ADDR17 = overflowamount.bits.b2;
                      ADDR18 = overflowamount.bits.b3;
+                     #else
+                     ADDR17 = _GFXActivePage;
+                     ADDR18 = _GFXActivePage>>1;
                      #endif
 
                     //Save previous address value
                     prevaddr = PMADDR;    
        
                     PMCONCLR = 0x8000; // PMCONbits.ON = 0;
-                    PMDIN = _color;
+  
                     prevMode = (WORD)PMMODE;
+
+                    PMMODEbits.MODE16 = 1;
+
                     PMMODESET = 0x0800;     //  INCM = 0b01; Address Incrementing here
+     
                     PMADDR = address;
                     PMCONSET = 0x8000;  // PMCONbits.ON = 1; 
 
@@ -966,7 +1176,8 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
  
                    for(i=0;i<burstlength;i++)
                    {          
-                      PMDINSET = 0;
+                      PMDIN = _color;
+                      while(PMMODEbits.BUSY==1); 
                    }  
                       address += burstlength;
                    }
@@ -986,7 +1197,8 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
                         #endif
                     }
        
-                    PMDINSET = 0;
+                    PMDIN = _color; 
+                    while(PMMODEbits.BUSY==1);  
                    }  
                     }
 
@@ -996,11 +1208,25 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
                     #ifdef GFX_USE_DISPLAY_PANEL_TFT_640480_8_E
                     ADDR17 = overflowcount.bits.b2;
                     ADDR18 = overflowcount.bits.b3;
+                    #else
+                   #ifdef USE_PIP
+                     if(PipActive == 1)
+                    {
+                      ADDR17=_GFXPIPPage;
+                      ADDR18=_GFXPIPPage>>1;
+                    }
+                   else
+                #endif 
+                    {
+                    ADDR17 = VisualPage;
+                    ADDR18 = VisualPage>>1;
+                    }
                     #endif
+                   
      
                     PMMODE = prevMode;
-                    PMADDR = prevaddr; 
-                    
+                    PMADDR = prevaddr;  
+
                     //ReStart DMA
                     DMACONCLR = 0x1000;
 
@@ -1011,346 +1237,384 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
     return (1);
 }
 
-#if defined USE_BITMAP_FLASH
-/*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
-*
-* PreCondition: none
-*
-* Input: left,top - left top image corner,
-*        bitmap - image pointer,
-*        stretch - image stretch factor
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: outputs monochrome image starting from left,top coordinates
-*
-* Note: image must be located in flash
-*
-********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void SetActivePage(WORD page)
 {
-    register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
-    BYTE                temp = 0;
-    WORD                sizeX, sizeY;
-    WORD                x, y;
-    WORD                xc, yc;
-    BYTE                stretchX, stretchY;
-#if (COLOR_DEPTH != 24)	
-    WORD                pallete[2];
-#elif (COLOR_DEPTH == 24)	
-    DWORD                pallete[2];
-#endif
-    BYTE                mask;
-
-    // Move pointer to size information
-    flashAddress = bitmap + 2;
-
-    // Read image size
-    sizeY = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-    sizeX = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-    
-    #if (COLOR_DEPTH == 24)
-	((FLASH_WORD *)flashAddress)++;
-	#endif
-
-#if (COLOR_DEPTH != 24)	
-    pallete[0] = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-    pallete[1] = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-#elif (COLOR_DEPTH == 24)	
-    pallete[0] = *((FLASH_DWORD *)flashAddress);
-    flashAddress += 4;
-    pallete[1] = *((FLASH_DWORD *)flashAddress);
-    flashAddress += 4;
-#endif
-
-    yc = top;
-    for(y = 0; y < sizeY; y++)
-    {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
-        {
-            flashAddress = tempFlashAddress;
-            mask = 0;
-            xc = left;
-            for(x = 0; x < sizeX; x++)
-            {
-
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *flashAddress;
-                    flashAddress++;
-                    mask = 0x80;
-                }
-
-                // Set color
-                if(mask & temp)
-                {
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(1);
-                #else
-                     #ifdef LCC_INTERNAL_MEMORY
-                    SetColor(RGBConvert((((pallete[1]&0xF800)>>8)),(((pallete[1]&0x07FF)>>3)),(((pallete[1]&0x001F)<<3))));
-                    #else
-                    SetColor(pallete[1]);
-                    #endif
-                #endif                
-                }
-                else
-                {
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(0);
-                #else
-                   
-                    #ifdef LCC_INTERNAL_MEMORY
-                    SetColor(RGBConvert((((pallete[0]&0xF800)>>8)),(((pallete[0]&0x07FF)>>3)),(((pallete[0]&0x001F)<<3))));
-                    #else
-                    SetColor(pallete[0]);
-                    #endif
-                #endif
-                }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-
-                // Shift to the next pixel
-                mask >>= 1;
-            }
-
-            yc++;
-        }
-    }
+    _GFXActivePage = page;
 }
 
+void SetVisualPage(WORD page)
+{
+    ADDR17 = page;
+    ADDR18 = page>>1;
+    VisualPage = page;
+} 
+
+#ifdef USE_ALPHABLEND
+
+short _GFXBackgroundPage = 3;
+short _GFXDestinationPage = 0;
+short _GFXForegroundPage = 2;
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void AlphaBlendWindow(DWORD foregroundArea, SHORT foregroundLeft, SHORT foregroundTop,
+                                  DWORD backgroundArea, SHORT backgroundLeft, SHORT backgroundTop,
+					    DWORD destinationArea, SHORT destinationLeft, SHORT destinationTop,		            
+					    WORD  width, WORD height,  	
+					    BYTE  alphaPercentage)
+********************************************************************/
+WORD AlphaBlendWindow(DWORD foregroundArea, SHORT foregroundLeft, SHORT foregroundTop,
+                      DWORD backgroundArea, SHORT backgroundLeft, SHORT backgroundTop,
+					  DWORD destinationArea, SHORT destinationLeft, SHORT destinationTop,		            
+					  WORD  width, WORD height,  	
+					  BYTE  alphaPercentage)
+{
+
+WORD x,y;
+WORD bcolor;
+WORD currentPage = _GFXActivePage; 
+
+for(y=0;y<height;y++)
+{
+    for(x=0;x<width;x++)
+    {
+
+        SetActivePage(foregroundArea);
+        _color = GetPixel(foregroundLeft++,foregroundTop);
+       if(alphaPercentage != 100)
+       {
+        SetActivePage(backgroundArea);
+        bcolor = GetPixel(backgroundLeft++,backgroundTop);
+
+
+        switch(alphaPercentage)
+        {
+        case 50: _color = ConvertColor50(_color)+ ConvertColor50(bcolor);break;
+        case 75: _color = ConvertColor75(_color)+ ConvertColor25(bcolor);break;
+        case 25: _color = ConvertColor25(_color)+ ConvertColor75(bcolor);break;
+        default: break;
+        }
+        }
+        SetActivePage(destinationArea);
+        PutPixel(destinationLeft++,destinationTop);
+     }
+   
+    foregroundLeft -= width;
+    backgroundLeft -= width;
+    destinationLeft -= width;
+
+    foregroundTop++;
+    backgroundTop++;
+    destinationTop++;
+}
+
+SetActivePage(currentPage);
+return (1);
+}
+
+/*********************************************************************
+* Function:  CopyPageWindow(srcPage, dstPage, srcX, srcY, dstX, dstY, 
+*                       width, height)  
+*
+* Overview: This is a blocking call.
+*           A windows is a rectangular area with the given width and height  
+*           of a page. The source and destination window can be located in 
+*           different pages and each page is assumed to have the same dimensions
+*           (equal width and height).
 *
 * PreCondition: none
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
-*        stretch - image stretch factor
+* Input: srcPage - page number of the source window,
+*        dstPage - page number of the destination window,
+*        srcX - x location of the left top corner of the source window 
+*               respect to the srcPage.
+*        srcY - y location of the left top corner of the source window 
+*               respect to the srcPage.
+*        dstX - x location of the left top corner of the destination window 
+*               respect to the dstPage.
+*        dstY - y location of the left top corner of the destination window 
+*               respect to the dstPage.
+*        width - the width in pixels of the window to copy
+*        height - the height in pixels of the window to copy
+*
+* Output: None
+*
+* Side Effects: none
+*
+********************************************************************/
+void CopyPageWindow( BYTE srcPage, BYTE dstPage,WORD srcX, WORD srcY,WORD dstX, WORD dstY,WORD width, WORD height)
+{
+
+         AlphaBlendWindow(srcPage,srcX,srcY,srcPage,srcX,srcY,dstPage,dstX,dstY, width, height,                               
+         100);
+
+} 
+
+#endif   //USE_ALPHABLEND			
+
+#ifdef USE_DOUBLE_BUFFERING
+
+/*********************************************************************
+* Function:  SwitchOnDoubleBuffering()
+*
+* Overview: Switches on the double buffering.
+*			Double buffering utilizes two buffers. The frame buffer and the
+*           draw buffer. The frame buffer is the buffer that is being displayed
+*			while the draw buffer is used for all rendering. 
+*           When this function is called, it copies the contents of the frame buffer 
+*           to the draw buffer once and all succeeding rendering will be performed on 
+*           the draw buffer. To update the frame buffer with newly drawn 
+*           items on the draw buffer call UpdateDisplayNow() or RequestDisplayUpdate().
+*
+* PreCondition: none
+*
+* Input: none
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: outputs 16 color image starting from left,top coordinates
+********************************************************************/
+void SwitchOnDoubleBuffering(void)
+{
+    if(blEnableDoubleBuffering == 0) 
+    { 
+        blEnableDoubleBuffering = 1; 
+        InvalidateAll(); 
+    }  
+}
+
+/*********************************************************************
+* Function:  SwitchOffDoubleBuffering()
 *
-* Note: image must be located in flash
+* Overview: Switches off the double buffering.
+*           All rendering will be performed on the frame buffer. Calls
+*           to UpdateDisplayNow() or RequestDisplayUpdate() will 
+*           have no effect.
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void SwitchOffDoubleBuffering(void)
 {
-    register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
-    WORD                sizeX, sizeY;
-    register WORD       x, y;
-    WORD                xc, yc;
-    BYTE                temp = 0;
-    register BYTE       stretchX, stretchY;
-#if (COLOR_DEPTH != 24)	
-    WORD                pallete[16];
-#elif (COLOR_DEPTH == 24)	
-	DWORD               pallete[16];
-#endif
-    WORD                counter;
-
-    // Move pointer to size information
-    flashAddress = bitmap + 2;
-
-    // Read image size
-    sizeY = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-    sizeX = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-
-	#if (COLOR_DEPTH == 24)
-	((FLASH_WORD *)flashAddress)++;
-	#endif
-	
-    // Read pallete
-    for(counter = 0; counter < 16; counter++)
-    {
-	#if (COLOR_DEPTH != 24)	
-        pallete[counter] = *((FLASH_WORD *)flashAddress);
-        flashAddress += 2;
-    #elif (COLOR_DEPTH == 24)	
-		pallete[counter] = *((FLASH_DWORD *)flashAddress);
-		flashAddress += 4;
-	#endif
-    }
-
-    yc = top;
-    for(y = 0; y < sizeY; y++)
-    {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
-        {
-            flashAddress = tempFlashAddress;
-            xc = left;
-            for(x = 0; x < sizeX; x++)
-            {
-
-                // Read 2 pixels from flash
-                if(x & 0x0001)
-                {
-                    // second pixel in byte
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(temp >> 4);
-                #else
-                  
-                    #ifdef LCC_INTERNAL_MEMORY
-                    SetColor(RGBConvert((((pallete[temp >> 4]&0xF800)>>8)),(((pallete[temp >> 4]&0x07FF)>>3)),(((pallete[temp >> 4]&0x001F)<<3)))); 
-                    #else
-                    SetColor(pallete[temp >> 4]);
-                    #endif
-                #endif
-                }
-                else
-                {
-                    temp = *flashAddress;
-                    flashAddress++;
-
-                    // first pixel in byte
-                // Set color
-                #ifdef USE_PALETTE
-                    SetColor(temp & 0x0f);
-                #else
-                
-                #ifdef LCC_INTERNAL_MEMORY
-                SetColor(RGBConvert((((pallete[temp & 0x0f]&0xF800)>>8)),(((pallete[temp & 0x0f]&0x07E0)>>3)),(((pallete[temp & 0x0f]&0x001F)<<3))));
-                #else
-                SetColor(pallete[temp & 0x0f]);
-                #endif
-                #endif
-                }
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
-            yc++;
-        }
+    if(blEnableDoubleBuffering == 1) 
+    { 
+        UpdateDisplayNow(); 
+        _drawbuffer = (_drawbuffer == GFX_BUFFER1)? GFX_BUFFER2: GFX_BUFFER1;
+        SetActivePage(_drawbuffer); 
+        blEnableDoubleBuffering = 0; 
     }
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function:  void InvalidateRectangle(WORD left, WORD top, WORD right, WORD bottom)
 *
-* PreCondition: none
+* Overview: Invalidates the specified rectangular area and if the
+*           invalidated areas exceed the GFX_MAX_INVALIDATE_AREAS,
+*           whole area is marked as invalidate
 *
-* Input: left,top - left top image corner, bitmap - image pointer,
-*        stretch - image stretch factor
+* PreCondition: None
 *
-* Output: none
+* Input: left,top - top left corner coordinates,
+*        right,bottom - bottom right corner coordinates
 *
-* Side Effects: none
+* Output: None
 *
-* Overview: outputs 256 color image starting from left,top coordinates
-*
-* Note: image must be located in flash
+* Side Effects: Only copies back the invalidated areas to the draw -
+*               buffer after the exchange of draw and frame buffers
 *
 ********************************************************************/
-
-/* */
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void InvalidateRectangle(WORD left, WORD top, WORD right, WORD bottom)
 {
-    register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
-    WORD                sizeX, sizeY;
-    WORD                x, y;
-    WORD                xc, yc;
-    BYTE                temp;
-    BYTE                stretchX, stretchY;
-#if (COLOR_DEPTH != 24)	
-    WORD                pallete[256];
-#elif (COLOR_DEPTH == 24)	
-    DWORD               pallete[256];
-#endif
-    WORD                counter;
-
-    // Move pointer to size information
-    flashAddress = bitmap + 2;
-
-    // Read image size
-    sizeY = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-    sizeX = *((FLASH_WORD *)flashAddress);
-    flashAddress += 2;
-
-	#if (COLOR_DEPTH == 24)
-	((FLASH_WORD *)flashAddress)++;
-	#endif
-	
-    // Read pallete
-    for(counter = 0; counter < 256; counter++)
+    if(blInvalidateAll == 1 || blEnableDoubleBuffering == 0)
     {
-	#if (COLOR_DEPTH != 24)	
-        pallete[counter] = *((FLASH_WORD *)flashAddress);
-        flashAddress += 2;       
-    #elif (COLOR_DEPTH == 24)	
-		pallete[counter] = *((FLASH_DWORD *)flashAddress);
-		flashAddress += 4;
-	#endif
+        return;
     }
     
-    yc = top;
-    for(y = 0; y < sizeY; y++)
+    if(NoOfInvalidatedRectangleAreas >= GFX_MAX_INVALIDATE_AREAS)
     {
-        tempFlashAddress = flashAddress;
-        for(stretchY = 0; stretchY < stretch; stretchY++)
+        blInvalidateAll = 1;
+        return;
+    }
+    else
+    {
+        WORD width, height;
+
+    #if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180)
+
+        width   =   right - left + 1;
+        height  =   bottom - top + 1;
+
+    #elif (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270)
+
+        height  =   right - left + 1;
+        width   =   bottom - top + 1;
+
+    #endif
+
+    #if (DISP_ORIENTATION == 90)
+
+        bottom  =   DISP_VER_RESOLUTION - left;
+        left    =   top;
+        right   =   left + width;
+        top     =   bottom - height;
+
+    #elif (DISP_ORIENTATION == 180)
+
+        right   =   DISP_HOR_RESOLUTION - left;
+        bottom  =   DISP_VER_RESOLUTION - top;
+        left    =   right - width;
+        top     =   bottom - height;
+
+    #elif (DISP_ORIENTATION == 270)
+
+        right   =   DISP_HOR_RESOLUTION - top;
+        top     =   left;
+        bottom  =   top + height;
+        left    =   right - width;
+
+    #endif
+
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].X = left;
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].Y = top;
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].W = width;
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].H = height;
+        NoOfInvalidatedRectangleAreas++;
+    }
+}
+
+/*********************************************************************
+* Function:  void UpdateDisplayNow(void)
+*
+* Overview: Synchronizes the draw and frame buffers immediately
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void UpdateDisplayNow(void)
+{
+
+    DWORD SourceBuffer, DestBuffer;
+    
+    if(blEnableDoubleBuffering == 0)
+    {
+        return;
+    }
+    
+    if(_drawbuffer == GFX_BUFFER1)
+    {
+        SourceBuffer = GFX_BUFFER1;
+        DestBuffer   = GFX_BUFFER2;
+    }
+    else
+    {
+        SourceBuffer = GFX_BUFFER2;
+        DestBuffer   = GFX_BUFFER1;
+    }
+
+     _drawbuffer = DestBuffer;
+     SetActivePage(_drawbuffer);
+
+     #ifdef USE_ALPHABLEND
+     _GFXDestinationPage = _drawbuffer;
+     #endif
+
+     SetVisualPage(SourceBuffer);
+
+    if(blInvalidateAll == 1 || NoOfInvalidatedRectangleAreas > GFX_MAX_INVALIDATE_AREAS)
+    {
+        blInvalidateAll = 0;
+        NoOfInvalidatedRectangleAreas = 0;
+        CopyPageWindow( SourceBuffer, DestBuffer, 0, 0,0, 0,GetMaxX()+1, GetMaxY()+1);
+    }
+    else if(NoOfInvalidatedRectangleAreas)
+    {
+        while(NoOfInvalidatedRectangleAreas)
         {
-            flashAddress = tempFlashAddress;
-            xc = left;
-            for(x = 0; x < sizeX; x++)
-            {
-
-                // Read pixels from flash
-                temp = *flashAddress;
-                flashAddress++;
-
-                // Set color
-            #ifdef USE_PALETTE
-                SetColor(temp);
-            #else
-               #ifdef LCC_INTERNAL_MEMORY
-                SetColor(RGBConvert((((pallete[temp]&0xF800)>>8)),(((pallete[temp]&0x07E0)>>3)),(((pallete[temp]&0x001F)<<3)))); 
-               #else
-                SetColor(pallete[temp]);
-               #endif
-            #endif
-
-                // Write pixel to screen
-                for(stretchX = 0; stretchX < stretch; stretchX++)
-                {
-                    PutPixel(xc++, yc);
-                }
-            }
-
-            yc++;
+            NoOfInvalidatedRectangleAreas--;
+            CopyPageWindow( SourceBuffer, DestBuffer, InvalidatedArea[NoOfInvalidatedRectangleAreas].X, InvalidatedArea[NoOfInvalidatedRectangleAreas].Y,InvalidatedArea[NoOfInvalidatedRectangleAreas].X, InvalidatedArea[NoOfInvalidatedRectangleAreas].Y,InvalidatedArea[NoOfInvalidatedRectangleAreas].W, InvalidatedArea[NoOfInvalidatedRectangleAreas].H);
         }
     }
+
+}
+
+/*********************************************************************
+* Function:  void RequestDisplayUpdate(void)
+*
+* Overview: Synchronizes the draw and frame buffers at next VBlank
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void RequestDisplayUpdate(void)
+{
+      UpdateDisplayNow();
+}
+
+#endif //USE_DOUBLE_BUFFERING
+
+#ifdef USE_TRANSPARENT_COLOR
+/*********************************************************************
+* Function:  void TransparentColorEnable(GFX_COLOR color)
+*
+* Overview: Sets current transparent color.
+*
+* PreCondition: none
+*
+* Input: color - Color value chosen.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void TransparentColorEnable(GFX_COLOR color)
+{
+    _colorTransparent = color;    
+    _colorTransparentEnable = TRANSPARENT_COLOR_ENABLE;
+
 }
 #endif
 
+#ifdef USE_PIP
+void SetPIPWindow(WORD left, WORD top, WORD hlength, WORD vlength, WORD pipx, WORD pipy)
+{
+
+   #if (DISP_ORIENTATION == 90)
+     PipStartL = (top);
+     PipStartT = (DISP_VER_RESOLUTION-1)-(left + hlength);
+     PipVLength = hlength;
+     PipHLength = vlength;
+     PipY = (DISP_VER_RESOLUTION-1) - (pipx+hlength);
+     PipX = (pipy);
+   #elif (DISP_ORIENTATION == 0) 
+    PipStartT = top;
+    PipStartL = left;
+    PipVLength = vlength;
+    PipHLength = hlength;
+    PipX = pipx;
+    PipY = pipy;
+   #endif
+
+}
+#endif
 
 #endif    //if defined (GFX_USE_DISPLAY_CONTROLLER_DMA)
 

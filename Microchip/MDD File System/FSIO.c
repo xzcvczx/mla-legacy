@@ -70,6 +70,23 @@
           4) Modified "rmdirhelper", "FormatDirName" & "writeDotEntries" functions
              to remove non-critical warnings during compilation.
           5) Updated comments in most of the function header blocks.
+  1.4.0   1) While creating files in LFN format with file name length as 13,26,39,52...etc(multiples of 13),
+             MDD library was creating incorrect directory entries. To fix this issue,
+             functions "FILEfind", "CreateFileEntry", "Alias_LFN_Object", "FormatFileName", 
+             "FormatDirName", "FSgetcwd", "GetPreviousEntry" & "rmdirhelper" were modified.
+             Now "utf16LFNlength" variable part of "FSFILE" structure, indicates LFN length
+             excluding the NULL word at the last.
+          2) When creating large number of files in LFN format, some files were not getting created in disk.
+             To fix this issue,function "FILEfind" was modified.
+          3) Modified "FSformat" function to initialize "disk->sectorSize" to default value.
+          4) Modified "CreateFileEntry" & "FindEmptyEntries" functions to remove unnecessary
+             assignments & optimize the code.
+          5) Modified "FSfopen" function to prevent creating an empty file in the directory, when SD card
+             is write protected.
+          6) Variable "entry" in "writeDotEntries" function is made volatile & properly typecasted
+             in it's usage.
+          7) Modified "FSFopen" function so that when you try to open a file that doesn't exist on the disk,
+             variable "FSerrno" is assigned to CE_FILE_NOT_FOUND.
 ********************************************************************/
 
 #include "Compiler.h"
@@ -165,7 +182,6 @@ FSFILE  gFileTemp;                  // Global variable used for file operations.
 
 FSFILE   cwd;               // Global current working directory
 FSFILE * cwdptr = &cwd;     // Pointer to the current working directory
-
 
 #ifdef __18CXX
     #pragma udata dataBuffer = DATA_BUFFER_ADDRESS
@@ -498,9 +514,9 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 	unsigned char *dst = (unsigned char *)&fileFoundString[0];
 	unsigned short int *templfnPtr = (unsigned short int *)foCompareTo -> utf16LFNptr;
 	UINT16_VAL tempShift;
-	short int   fileCompareLfnIndex,fileFoundLfnIndex = 0,fileFoundMaxLfnIndex = 0,lfnCountIndex;
+	short int   fileCompareLfnIndex,fileFoundLfnIndex = 0,fileFoundMaxLfnIndex = 0,lfnCountIndex,fileFoundLength = 0;
 	BOOL  lfnFirstCheck = FALSE,foundSFN,foundLFN,fileFoundDotPosition = FALSE,fileCompareDotPosition;
-	BYTE  lfnMaxSequenceNum = 0,reminder = 0;
+	BYTE  lfnCompareMaxSequenceNum = 0,lfnFoundMaxSequenceNum,reminder = 0;
 	char  tempDst[13];
 	fileNameLength = foCompareTo->utf16LFNlength;
 
@@ -519,7 +535,7 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 		}
 
 		// The maximum sequence number of the LFN
-		lfnMaxSequenceNum = (BYTE)0x40 | (BYTE)index;
+		lfnCompareMaxSequenceNum = index;
 	}
 	#endif
 
@@ -590,9 +606,12 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 				{
 					if(lfnObject.LFN_SequenceNo & 0x40)
 					{
-						if((mode == 0x00) && ((fileNameLength && (lfnObject.LFN_SequenceNo != lfnMaxSequenceNum)) || !fileNameLength))
+						lfnFoundMaxSequenceNum = lfnObject.LFN_SequenceNo & 0x1F;
+						
+						if((mode == 0x00) && ((fileNameLength && (lfnFoundMaxSequenceNum != lfnCompareMaxSequenceNum)) || 
+						   (!fileNameLength && (lfnFoundMaxSequenceNum != 0x01))))
 						{
-//							fHandle = fHandle + (lfnObject.LFN_SequenceNo & 0xBF) + 1;
+//							fHandle = fHandle + lfnFoundMaxSequenceNum + 1;
 							fHandle++;
 							continue;
 						}
@@ -626,26 +645,25 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 						tempShift.byte.HB = lfnObject.LFN_Part1[1];
 						fileFoundString[fileFoundLfnIndex--] = tempShift.Val;
 
-						if(reminder)
-							index = reminder;
- 						else
-							index = MAX_UTF16_CHARS_IN_LFN_ENTRY;
+						
+						fileFoundLength = fileCompareLfnIndex + 1;
+						for(index = 1;index <= MAX_UTF16_CHARS_IN_LFN_ENTRY;index++)
+						{
+							if(fileFoundString[fileFoundLfnIndex + index] == 0x0000)
+								fileFoundLength = fileFoundLfnIndex + index;
+						}
 
 						if(mode == 0x00)
 						{
-							if((fileFoundString[fileFoundLfnIndex + index] != 0x00) && fileNameLength)
+							if((fileNameLength != fileFoundLength) && fileNameLength)
 							{
-//								fHandle = fHandle + (lfnObject.LFN_SequenceNo & 0xBF) + 1;
+//								fHandle = fHandle + lfnFoundMaxSequenceNum + 1;
 								fHandle++;
 								continue;
 							}
 						}
-						else
-						{
-							while(fileFoundString[fileCompareLfnIndex])
-								fileCompareLfnIndex--;
-							fileFoundMaxLfnIndex = fileCompareLfnIndex - 1;
-						}
+
+						fileFoundMaxLfnIndex = fileFoundLength - 1;
 						lfnFirstCheck = TRUE;
 					}
 					else if(lfnFirstCheck == TRUE)
@@ -767,7 +785,7 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 								}
 								else if(foundSFN && foCompareTo -> AsciiEncodingType)
 								{
-          	        				if(strlen(tempDst) != (fileNameLength -  1))
+          	        				if(strlen(tempDst) != fileNameLength)
           	        					statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	        				else
           	        				{
@@ -794,11 +812,11 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
           	            	{
           	    				if(foundLFN)
           	    				{
-          	        				if(strlen(tempDst) != fileFoundMaxLfnIndex)
+          	        				if(strlen(tempDst) != fileFoundLength)
           	        					statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	        				else
           	        				{
-          	        					for(fileCompareLfnIndex = 0;fileCompareLfnIndex <= fileFoundMaxLfnIndex;fileCompareLfnIndex++)
+          	        					for(fileCompareLfnIndex = 0;fileCompareLfnIndex < fileFoundLength;fileCompareLfnIndex++)
           	        					{
           	        						// get the source character
           	        						character = (BYTE)fileFoundString[fileCompareLfnIndex];
@@ -882,8 +900,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
           	         			   
 									if(fileCompareLfnIndex > lfnCountIndex)
           	         			    {
-//										if(foundLFN)
-//         									fHandle++;
           	         			    	statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	         			    	break;
           	         			    }
@@ -903,8 +919,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 											if((foundLFN && (fileFoundString[fileCompareLfnIndex] > 0xFF)) ||
           	         			    			(tolower(character) != tolower(test)))
           	         			    		{
-//												if(foundLFN)
-//         											fHandle++;
           	         			    			statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	         			    			break;
           	         			    		}
@@ -913,8 +927,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 				  						{
 				  							if((templfnPtr[fileCompareLfnIndex] != fileFoundString[fileCompareLfnIndex]) || foundSFN)
 				  							{
-//												if(foundLFN)
-//         											fHandle++;
           	    	   							statusB = CE_FILE_NOT_FOUND; // Nope its not a match
 				  								break;
 				  							}
@@ -926,8 +938,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
                		    	        {
                		    	            if(fileCompareLfnIndex <= lfnCountIndex)
                		    	            {
-//											if(foundLFN)
-//         										fHandle++;
           	    	   						statusB = CE_FILE_NOT_FOUND; // Nope its not a match
 										}
                		    	            break;
@@ -938,8 +948,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 								{
 									if(fileFoundDotPosition == TRUE)
           	         			    {
-//										if(foundLFN)
-//         									fHandle++;
           	         			    	statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	         			    }
 									break;
@@ -948,8 +956,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 								{
 									if(fileFoundDotPosition == FALSE)
           	         			    {
-//										if(foundLFN)
-//         									fHandle++;
           	         			    	statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	         			    	break;
           	         			    }
@@ -968,8 +974,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
           	         			   
 									if((foundLFN && (lfnCountIndex > fileFoundMaxLfnIndex)) || (foundSFN && (lfnCountIndex == 11)))
 									{
-//										if(foundLFN)
-//         									fHandle++;
           	         			    	statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	         			    	break;
 									}
@@ -988,8 +992,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 											if((foundLFN && (fileFoundString[lfnCountIndex] > 0xFF)) ||
           	         			    			(tolower(character) != tolower(test)))
           	         			    		{
-//												if(foundLFN)
-//         											fHandle++;
           	         			    			statusB = CE_FILE_NOT_FOUND; // Nope its not a match
           	         			    			break;
           	         			    		}
@@ -998,8 +1000,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 				  						{
 				  							if((templfnPtr[fileCompareLfnIndex] != fileFoundString[lfnCountIndex]) || foundSFN)
 				  							{
-//												if(foundLFN)
-//         											fHandle++;
           	    	   							statusB = CE_FILE_NOT_FOUND; // Nope its not a match
 				  								break;
 				  							}
@@ -1007,12 +1007,10 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
           	         				}
                		    	 		lfnCountIndex++;
                		    	 		fileCompareLfnIndex++;
-               		    	 		if(fileCompareLfnIndex == (fileNameLength - 1))
+               		    	 		if(fileCompareLfnIndex == fileNameLength)
                		    	        {
                		    	            if((foundLFN && (lfnCountIndex <= fileFoundMaxLfnIndex)) || (foundSFN && (lfnCountIndex < 11) && (dst[lfnCountIndex] != ' ')))
                		    	            {
-//											if(foundLFN)
-//         										fHandle++;
           	    	   						statusB = CE_FILE_NOT_FOUND; // Nope its not a match
 										}
                		    	            break;
@@ -1043,7 +1041,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 								else
 									fileCompareLfnIndex = DIR_NAMESIZE - 1;	// Short File name last char position
 
-               		    	    character = (BYTE)'m';             // random value
                		    	    if (foCompareTo->name[0] != '*')   //If "*" is passed for comparion as 1st char then don't proceed. Go back, file alreay found.
                		    	    {
                		    	        for (index = 0;;)
@@ -1052,7 +1049,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
                		    	            {
                		    	            	if((fileFoundString[index] > 0xFF) || (index > fileCompareLfnIndex))
                		    	            	{
-//         										fHandle++;
                		    	                	statusB = CE_FILE_NOT_FOUND; // it's not a match
                		    	                	break;
 											}
@@ -1082,7 +1078,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
                		    	        	{
                		    	        	    if(foundLFN && (index <= fileCompareLfnIndex))
                		    	        	    {
-//         										fHandle++;
                		    	                	statusB = CE_FILE_NOT_FOUND; // it's not a match
 											}
                		    	                break;
@@ -1099,7 +1094,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 										{
 											if(fileFoundDotPosition == TRUE)
                		    	        	    {
-//         										fHandle++;
                		    	                	statusB = CE_FILE_NOT_FOUND; // it's not a match
 											}
 											break;
@@ -1108,7 +1102,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
 										{
 											if(fileFoundDotPosition == FALSE)
 											{
-//         										fHandle++;
                		    	                	statusB = CE_FILE_NOT_FOUND; // it's not a match
 												break;
 											}
@@ -1124,7 +1117,6 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
                		    	            {
                		    	            	if((fileFoundString[fileCompareLfnIndex] > 0xFF) || (fileCompareLfnIndex > fileFoundMaxLfnIndex))
                		    	            	{
-//         										fHandle++;
                		    	                	statusB = CE_FILE_NOT_FOUND; // it's not a match
                		    	                	break;
 											}
@@ -1190,7 +1182,7 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
                		        if ((attrib & compareAttrib) != 0)
                		            statusB = CE_FILE_NOT_FOUND; // Indicate the already filled file data is correct and go back
                		        if(foundLFN)
-               		        	foDest->utf16LFNlength = fileFoundMaxLfnIndex + 1;
+               		        	foDest->utf16LFNlength = fileFoundLength;
                		        else
 								foDest->utf16LFNlength = 0;
                		        break;
@@ -1295,9 +1287,10 @@ CETYPE FILEfind( FILEOBJ foDest, FILEOBJ foCompareTo, BYTE cmd, BYTE mode)
             } // found or not
 
 			#if defined(SUPPORT_LFN)
-            if(foundLFN)
-				fHandle = fHandle + 2;
-			else
+//            if(foundLFN)
+//				fHandle = fHandle + 2;
+//			 	fHandle++;
+//			else
 			#endif
             	// increment it no matter what happened
             	fHandle++;
@@ -2805,6 +2798,9 @@ int FSformat (char mode, long int serialNumber, char * volumeID)
             }
         }
     
+		// Initialize the sector size
+        disk->sectorSize = MEDIA_SECTOR_SIZE;
+
         // Erase the root directory
         RootDirSectors = ((disk->maxroot * 32) + (disk->sectorSize - 1)) / disk->sectorSize;
     
@@ -3065,8 +3061,6 @@ DIRENTRY Cache_File_Entry( FILEOBJ fo, WORD * curEntry, BYTE ForceRead)
      // figure out the offset from the base sector
     offset2  = (*curEntry / dirEntriesPerSector);
 
-    offset2 = offset2; // emulator issue
-
     /* Settings based on FAT type */
     switch (dsk->type)
     {
@@ -3223,7 +3217,7 @@ CETYPE CreateFileEntry(FILEOBJ fo, WORD *fHandle, BYTE mode, BOOL createFirstClu
    *fHandle = 0;
 
     // figure out where to put this file in the directory stucture
-    if(FindEmptyEntries(fo, fHandle))
+    if(FindEmptyEntries(fo, fHandle) == FOUND)
     {
 		#if defined(SUPPORT_LFN)
 		// If LFN entry
@@ -3272,6 +3266,8 @@ CETYPE CreateFileEntry(FILEOBJ fo, WORD *fHandle, BYTE mode, BOOL createFirstClu
 					tempCalc1--;
 				}				 
 
+				tempString[(BYTE)index++] = 0x0000;
+				
 				// Store the remaining bytes of max sequence number entries with 0xFF
 				for(;index < MAX_UTF16_CHARS_IN_LFN_ENTRY;index++)
 				{
@@ -3469,16 +3465,12 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
     BYTE   status = NOT_FOUND;
     BYTE   amountfound,numberOfFileEntries;
     BYTE   a = 0;
-    WORD   bHandle;
+    WORD   bHandle = *fHandle;
     DWORD b;
     DIRENTRY    dir;
 
     fo->dirccls = fo->dirclus;
-    if((dir = Cache_File_Entry( fo, fHandle, TRUE)) == NULL)
-    {
-        status = CE_BADCACHEREAD;
-    }
-    else
+    if((dir = Cache_File_Entry( fo, fHandle, TRUE)) != NULL)
     {
 		#if defined(SUPPORT_LFN)
 		// If LFN entry
@@ -3497,6 +3489,7 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
 				numberOfFileEntries++;
 			}
 
+            // Increment by 1 so that you have space to store for assosciated short file name
             numberOfFileEntries = numberOfFileEntries + 1;
 		}
 		else
@@ -3542,10 +3535,7 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
                         if(FILEallocate_new_cluster(fo, 1) == CE_DISK_FULL)
                             status = NO_MORE;
                         else
-                        {
-                            *fHandle = bHandle;
                             status = FOUND;     // a new cluster will surely hold a new file name
-                        }
                     }
                 }
                 else
@@ -3556,7 +3546,6 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
                         status = NO_MORE;
                     else
                     {
-                        *fHandle = bHandle;
                         status = FOUND;     // a new cluster will surely hold a new file name
                     }
                 }
@@ -3564,21 +3553,15 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
             else
             {
                 if(amountfound == numberOfFileEntries)
-                {
                     status = FOUND;
-                    *fHandle = bHandle - numberOfFileEntries + 1;
-                }
             }
         }// while
-
-        // copy the base handle over
-        *fHandle = bHandle;
     }
 
-    if(status == FOUND)
-        return(TRUE);
-    else
-        return(FALSE);
+    // copy the base handle over
+	*fHandle = bHandle;
+
+	return(status);
 }
 #endif
 
@@ -3715,7 +3698,7 @@ BOOL Alias_LFN_Object(FILEOBJ fo)
 
 	templfnPtr = (unsigned short int *)filePtr1.utf16LFNptr;
 
-	fileNameLength = fo->utf16LFNlength - 1;
+	fileNameLength = fo->utf16LFNlength;
 
 	// Initially fill the alias name with space characters
 	for(index1 = 0;index1 < FILE_NAME_SIZE_8P3;index1++)
@@ -5404,6 +5387,15 @@ FSFILE * FSfopen( const char * fileName, const char *mode )
     WORD    fHandle;
     CETYPE   final;
 
+    //Read the mode character
+    ModeC = mode[0];
+
+    if(MDD_WriteProtectState() && (ModeC != 'r') && (ModeC != 'R')) 
+    { 
+        FSerrno = CE_WRITE_PROTECTED; 
+        return NULL; 
+    } 
+
 #ifdef FS_DYNAMIC_MEM
     filePtr = (FILEOBJ) FS_malloc(sizeof(FSFILE));
 #else
@@ -5451,9 +5443,6 @@ FSFILE * FSfopen( const char * fileName, const char *mode )
 		FSerrno = CE_INVALID_FILENAME;
         return NULL;   //bad filename
     }
-
-    //Read the mode character
-    ModeC = mode[0];
 
     filePtr->dsk = &gDiskData;
     filePtr->cluster = 0;
@@ -5626,7 +5615,10 @@ FSFILE * FSfopen( const char * fileName, const char *mode )
         }
         else
 #endif
+		{
             final = CE_FILE_NOT_FOUND;
+        	FSerrno = CE_FILE_NOT_FOUND;
+    	}
     }
 
     if (MDD_WriteProtectState())
@@ -7192,7 +7184,7 @@ BYTE FormatFileName( const char* fileName, FILEOBJ fptr, BYTE mode)
 			}
 			fptr -> utf16LFNptr[count1] = 0x0000;
 
-			fptr->utf16LFNlength = fileNameLength + 1;
+			fptr->utf16LFNlength = fileNameLength;
 		#else
 			return FALSE;
 		#endif
@@ -7399,7 +7391,7 @@ BYTE FormatDirName (char * string,FILEOBJ fptr, BYTE mode)
 				fptr -> utf16LFNptr[count1] = 0x0000;
 			}
 
-			fptr->utf16LFNlength = fileNameLength + 1;
+			fptr->utf16LFNlength = fileNameLength;
 		#endif
 	}
 	else
@@ -9457,7 +9449,7 @@ char * FSgetcwd (char * path, int numchars)
 			{
 				if((tempLFN[i - j - 1]) == 0x0000)
 				{
-					tempCWD->utf16LFNlength = i - j;
+					tempCWD->utf16LFNlength = i - j - 1;
 					break;
 				}
 			}
@@ -9495,7 +9487,7 @@ char * FSgetcwd (char * path, int numchars)
 			#if defined(SUPPORT_LFN)
             if(tempCWD->utf16LFNlength)
             {
-			    i = tempCWD->utf16LFNlength * 2 - 3;
+			    i = tempCWD->utf16LFNlength * 2 - 1;
 			    while(i >= 0)
 				{
 					#ifdef SUPPORT_LFN
@@ -9919,7 +9911,7 @@ BYTE GetPreviousEntry (FSFILE * fo)
 		{
 			if((tempLFN[i - j - 1]) == 0x0000)
 			{
-				fo->utf16LFNlength = i - j;
+				fo->utf16LFNlength = i - j - 1;
 				break;
 			}
 		}
@@ -11005,8 +10997,8 @@ BYTE writeDotEntries (DISK * disk, DWORD dotAddress, DWORD dotdotAddress)
 {
     WORD i;
     WORD size;
-    _DIRENTRY entry;
-    DIRENTRY entryptr = &entry;
+    volatile _DIRENTRY entry;
+    DIRENTRY entryptr = (DIRENTRY)&entry;
     DWORD sector;
 
     gBufferOwner = NULL;
@@ -11453,7 +11445,7 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
 						{
 							if((tempLFN[Index3 - Index - 1]) == 0x0000)
 							{
-								tempCWD->utf16LFNlength = Index3 - Index;
+								tempCWD->utf16LFNlength = Index3 - Index - 1;
 								break;
 							}
 						}
@@ -11738,7 +11730,7 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
 						{
 							if((tempLFN[Index3 - Index - 1]) == 0x0000)
 							{
-								cwdptr->utf16LFNlength = Index3 - Index;
+								cwdptr->utf16LFNlength = Index3 - Index - 1;
 								break;
 							}
 						}

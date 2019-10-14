@@ -235,7 +235,7 @@
  * 8 or 16-bit PMP
  ********************************************************************/
 #elif defined(CFG_INCLUDE_MEB_dsPIC33E_SK_8PMP)
-    #include "Configs/HWP_MEB_dsPIC33E_SK_8PMP.h"
+    #include "Configs/HWP_MEB_PIC_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_8PMP)
     #include "Configs/HWP_MEB_PIC32_GP_SK_8PMP.h"
 #elif defined(CFG_INCLUDE_MEB_PIC32_GP_SK_16PMP)

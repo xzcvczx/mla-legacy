@@ -56,13 +56,6 @@
     #error "The S1D13517 driver can currently support the COLOR_DEPTH of 16 and 24 only."
 #endif
 
-
-// Current Page
-WORD    _page;
-
-// Color
-GFX_COLOR    _color;
-
 // Clipping region control
 SHORT       _clipRgn;
 
@@ -72,11 +65,22 @@ SHORT       _clipTop;
 SHORT       _clipRight;
 SHORT       _clipBottom;
 
+// Color
+GFX_COLOR    _color;
+
+//
+SHORT _GFXActivePage = 0; //Current Active Page for writing
+
+#ifdef USE_NONBLOCKING_CONFIG
+BYTE alphablendActive =0;
+#endif
+ 
+#ifdef USE_ALPHABLEND
 // Alpha Blending Variables
 SHORT _GFXForegroundPage;
 SHORT _GFXBackgroundPage;
 SHORT _GFXDestinationPage;
-
+#endif
 #if (COLOR_DEPTH == 24)
 #define RED8(color24)   ((color24 & 0x00FF0000) >> 16)
 #define GREEN8(color24) ((color24 & 0x0000FF00) >> 8)
@@ -134,47 +138,79 @@ GFX_COLOR    pixelWindow[8] =
     TRANSPARENTCOLOR
 };
 
-
 //Internal S1D13517 Driver functions	
 DWORD 		GFXGetPageOriginAddress(SHORT pageNumber);
 DWORD 		GFXGetPageXYAddress(SHORT pageNumber, WORD x, WORD y);
 DWORD 		GFXGetWindowOriginAddress(GFX_WINDOW_INFO* GFXWindowInfo);
 DWORD 		GFXGetWindowXYAddress(GFX_WINDOW_INFO* GFXWindowInfo, WORD relX, WORD relY);
 DWORD 		GetPositionAddress(SHORT page, WORD left, WORD top);
+void              PutImage24BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
+void 		      PutImage24BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 
-void        PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
-void        PutImage24BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch);
 
-void        PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void        PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
-void 		PutImage24BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+#ifdef USE_DOUBLE_BUFFERING
 
-#if (DISPLAY_PANEL == TFT_G240320LTSW_118W_E)
-    #include "TCON_SSD1289.c"
+    #define USE_ALPHABLEND
+    BYTE blInvalidateAll;
+    volatile BYTE blEnableDoubleBuffering;
+    volatile BYTE NoOfInvalidatedRectangleAreas;
+    RectangleArea InvalidatedArea[GFX_MAX_INVALIDATE_AREAS];
 
-#elif (DISPLAY_PANEL == TFT_G320240DTSW_69W_TP_E)
-    #include "TCON_HX8238.c"
+    volatile DWORD  _drawbuffer;
+    volatile BYTE   blDisplayUpdatePending;
+	
+	/*********************************************************************
+	* Function: WORD GetDrawBufferAddress(void)
+	*
+	* PreCondition: none
+	*
+	* Input: none
+	*
+	* Output: Address of the Draw Buffer
+	*
+	* Side Effects: none
+	*
+	* Overview: Returns the address of Draw Buffer
+	*
+	* Note:
+	*
+	********************************************************************/
+    DWORD GetDrawBufferAddress(void)
+	{
+        return _drawbuffer;
+    }
+	
+	/*********************************************************************
+	* Function: DWORD GetFrameBufferAddress(void)
+	*
+	* PreCondition: _drawbuffer must be set to either GFX_BUFFER1 or GFX_BUFFER2
+	*
+	* Input: none
+	*
+	* Output: Address of the Frame Buffer
+	*
+	* Side Effects: none
+	*
+	* Overview: Returns the address of Frame Buffer
+	*
+	* Note: 
+	*
+	********************************************************************/
+    DWORD GetFrameBufferAddress(void)
+	{
 
-#elif (DISPLAY_PANEL == PH480272T_005_I06Q)
-    #include "TCON_HX8257.c"
+        if(_drawbuffer == GFX_BUFFER1)
+        {
+            return GFX_BUFFER2;
+        }
+        else
+        {
+            return GFX_BUFFER1;
+        }
+    }
 
-#else
-    #include "TCON_Custom.c"
-#endif
+#endif //USE_DOUBLE_BUFFERING
 
-#ifdef USE_PALETTE
-extern void *_palette;
-static BYTE PaletteBpp = 16;
-extern BYTE blPaletteChangeError;
-extern void *pPendingPalette;
-extern WORD PendingStartEntry;
-extern WORD PendingLength;
-#endif
 
 /*********************************************************************
 * Macro:  WritePixel(color)
@@ -202,17 +238,10 @@ extern WORD PendingLength;
 
 #else
 
-#ifdef USE_PALETTE
-#define WritePixel(color)	DeviceWrite(color)
-#else
-
 #if (COLOR_DEPTH == 16)
 #define WritePixel(color)	{ DeviceWrite(((WORD_VAL)color).v[1]); DeviceWrite(((WORD_VAL)color).v[0]);}
 #elif (COLOR_DEPTH == 24)
 #define WritePixel(color){ DeviceWrite(((DWORD_VAL)color).v[2]);DeviceWrite(((DWORD_VAL)color).v[1]); DeviceWrite(((DWORD_VAL)color).v[0]);}
-
-#endif
-
 #endif
 
 #endif
@@ -349,11 +378,6 @@ BYTE GetReg(WORD index)
 void ResetDevice(void)
 {
 
-   _GFXForegroundPage = GFX_DEFAULT_DESTINATION_PAGE;   //Initialize Alpha Values
-   _GFXBackgroundPage = GFX_DEFAULT_BACKGROUND_PAGE;
-   _GFXDestinationPage = GFX_DEFAULT_FOREGROUND_PAGE;
-
-
     /////////////////////////////////////////////////////////////////////
     // Initialize the device
     /////////////////////////////////////////////////////////////////////
@@ -416,6 +440,10 @@ void ResetDevice(void)
     SetReg(REG58_TRANSP_KEY_BLUE, BLUE8(TRANSPARENTCOLOR)); 
 	SetReg(REG6E_GPO_1,0x07);   			//GPO All High
 
+	SetReg(REG60_WRITE_WIN_X_EP,(GetMaxX() >> 2));     // Write Window X End Position Register
+	SetReg(REG62_WRITE_WIN_Y_EP_0,(GetMaxY() >> 2));   // Write Window Y End Position Register 0
+	SetReg(REG64_WRITE_WIN_Y_EP_1,(BYTE)GetMaxY());    // Write Window Y End Position Register 1
+
 	#if defined(GFX_USE_DISPLAY_PANEL_TFT_G240320LTSW_118W_E)
         DisplayBrightness(0);       //Sets Backlight Brightness Level - PWM
     #else
@@ -431,8 +459,26 @@ void ResetDevice(void)
     /////////////////////////////////////////////////////////////////////
     // Panel TCON Programming
     /////////////////////////////////////////////////////////////////////
-//    GfxTconInit();
+    #ifdef USE_TCON_MODULE
+    GfxTconInit();
+    #endif
 
+    #ifdef USE_DOUBLE_BUFFERING
+    // initialize double buffering feature
+    blInvalidateAll = 1;            
+    blDisplayUpdatePending = 0;
+    NoOfInvalidatedRectangleAreas = 0;
+    _drawbuffer = GFX_BUFFER1;
+    SetActivePage(_drawbuffer);
+    SwitchOnDoubleBuffering();
+    #endif //USE_DOUBLE_BUFFERING
+
+    #ifdef USE_ALPHABLEND
+     _GFXForegroundPage = GFX_DEFAULT_FOREGROUND_PAGE;   //Initialize Alpha Values
+     _GFXBackgroundPage = GFX_DEFAULT_BACKGROUND_PAGE;
+     _GFXDestinationPage = GFX_DEFAULT_DESTINATION_PAGE;
+	SetReg(REGB2_INTERRUPT_CTRL,0x01);				//Enable Alpha Blend Interrupt
+    #endif
 }
 
 
@@ -454,6 +500,7 @@ void ResetDevice(void)
 ********************************************************************/
 void PutPixel(SHORT x, SHORT y)
 {
+
 	static  BYTE xc=0;
 
 #if (DISP_ORIENTATION == 90)
@@ -481,7 +528,11 @@ void PutPixel(SHORT x, SHORT y)
 
 #endif
 
-    xc = x & 7;        
+    xc = x & 7;  
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif      
   
 	DisplayEnable();
 	
@@ -493,9 +544,10 @@ void PutPixel(SHORT x, SHORT y)
     DeviceWrite(x >> 2);    //Setup the start window size/position    
     DeviceWrite(y >> 2);   
     DeviceWrite(y);   
-    DeviceWrite(GetMaxX() >> 2);    //Setup the end window size/position  
-    DeviceWrite(GetMaxY() >> 2);   
-    DeviceWrite((BYTE)GetMaxY());   
+
+    DisplaySetCommand(); 
+    DeviceWrite(REG66_MEM_DATA_PORT_0);   
+	DisplaySetData();      
 
     pixelWindow[xc] = _color;
 
@@ -557,17 +609,22 @@ GFX_COLOR GetPixel(SHORT x, SHORT y)
 ********************************************************************/
 WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 {
-		
+	
     DWORD xdelta,ydelta;
     DWORD loffset,roffset;
-
 
     if(left > right) 
         return(1);        //Added to make sure function call is accurate
     
     if(bottom < top) 
         return(1);        //Added to make sure function call is accurate
-
+	
+   #ifdef USE_NONBLOCKING_CONFIG
+   if(IsDeviceBusy())
+   {
+     return 0;
+   }
+   #endif
 
 #if (DISP_ORIENTATION == 90)       //Added for rotation capabilities
     DWORD templ,tempr;
@@ -602,6 +659,14 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
     bottom = (DISP_VER_RESOLUTION-1) - tempr;
 #endif
 
+        #ifdef USE_ALPHABLEND_LITE
+    if(_alpha != 100)
+    {
+        BarAlpha(left,top,right,bottom);
+        return(1);
+    }
+        #endif
+
 	if(left>0) 
         loffset = left & 7;
 	else 
@@ -609,7 +674,6 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 	
     roffset = right & 7;
 	roffset = 8 - roffset;
-
 
 	DisplayEnable();     
 	DisplaySetCommand();       
@@ -652,6 +716,11 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
         }
     }
 
+    //Change Write Window Settings back to max
+	SetReg(REG60_WRITE_WIN_X_EP,(GetMaxX() >> 2));     // Write Window X End Position Register
+	SetReg(REG62_WRITE_WIN_Y_EP_0,(GetMaxY() >> 2));   // Write Window Y End Position Register 0
+	SetReg(REG64_WRITE_WIN_Y_EP_1,(BYTE)GetMaxY());    // Write Window Y End Position Register 1
+
     DisplayDisable();     // disable S1D13517
 
     return (1);		
@@ -674,54 +743,25 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 ********************************************************************/
 WORD IsDeviceBusy(void)
 {  
+
+    #ifdef USE_NONBLOCKING_CONFIG
+    if(alphablendActive)
+    {
+
+    if(!GetReg((REGB4_INTERRUPT_STAT)))
+    {
+      return 1;
+    }
+    else
+    {
+	  SetReg(REGB6_INTERRUPT_CLEAR,0x01);               //Send Clear Interrupt Command
+	  SetReg(REGB6_INTERRUPT_CLEAR,0x00);				//Bring value back to 0
+      alphablendActive =0;
+    }
+    }
+    #endif
     return 0;
-}
-
-/*********************************************************************
-* Function: SetClipRgn(left, top, right, bottom)
-*
-* Overview: Sets clipping region.
-*
-* PreCondition: none
-*
-* Input: left - Defines the left clipping region border.
-*		 top - Defines the top clipping region border.
-*		 right - Defines the right clipping region border.
-*	     bottom - Defines the bottom clipping region border.
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
-{
-    _clipLeft=left;
-    _clipTop=top;
-    _clipRight=right;
-    _clipBottom=bottom;
-
-}
-
-/*********************************************************************
-* Function: SetClip(control)
-*
-* Overview: Enables/disables clipping.
-*
-* PreCondition: none
-*
-* Input: control - Enables or disables the clipping.
-*			- 0: Disable clipping
-*			- 1: Enable clipping
-*
-* Output: none
-*
-* Side Effects: none
-*
-********************************************************************/
-void SetClip(BYTE control)
-{
-    _clipRgn=control;
+ 
 }
 
 #ifdef USE_DRV_OUTCHAR
@@ -762,13 +802,13 @@ WORD OutChar(XCHAR ch)
     SHORT       xCnt, yCnt, x = 0, y;
     BYTE        temp = 0, mask;
 
-    #ifndef USE_NONBLOCKING_CONFIG
-    while(IsDeviceBusy() != 0) 
-        Nop();
-    #else
-    if(IsDeviceBusy() != 0)
-        return (0);
-    #endif
+
+     #ifdef USE_NONBLOCKING_CONFIG
+     if(IsDeviceBusy())
+     {
+        return 0;
+     }
+     #endif
 
     if((XCHAR)ch < (XCHAR)_fontFirstChar)
         return (-1);
@@ -977,6 +1017,10 @@ WORD OutChar(XCHAR ch)
 ********************************************************************/
 void ClearDevice(void)
 {
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 	
     DisplayEnable();     
     DisplaySetCommand();      
@@ -990,7 +1034,6 @@ void ClearDevice(void)
     DeviceWrite((DISP_VER_RESOLUTION-1) >>2);     // Y End Position
     DeviceWrite((BYTE)(DISP_VER_RESOLUTION-1));         // Y End Position
 
-
     DWORD i;
 
     for(i = 0; i < ((DWORD)DISP_VER_RESOLUTION * (DWORD)DISP_HOR_RESOLUTION); i++)
@@ -1002,13 +1045,14 @@ void ClearDevice(void)
 
 #ifdef USE_BITMAP_FLASH
 /*********************************************************************
-* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner,
 *        bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -1019,31 +1063,21 @@ void ClearDevice(void)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-
-    register DWORD      address;
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     BYTE                temp = 0;
     WORD                sizeX, sizeY;
     WORD                x, y;
     BYTE                stretchX, stretchY;
-
-    GFX_COLOR                pallete[2];
-
+    GFX_COLOR           pallete[2];
     BYTE                mask;
-	WORD 				loffset,roffset;
+    WORD 				loffset,roffset;
+    WORD                addressOffset = 0;
+    BYTE                OffsetFlag = 0x01;     //Offset from BYTE color bit0 for the partial image 
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
-
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -1051,28 +1085,49 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 
-    #if (COLOR_DEPTH == 24)
-    flashAddress += 2;
-	#endif
-
 #if (COLOR_DEPTH == 16)	
     pallete[0] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
     pallete[1] = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 #elif (COLOR_DEPTH == 24)	
+    flashAddress +=2;
     pallete[0] = *((FLASH_DWORD *)flashAddress);
     flashAddress += 4;
     pallete[1] = *((FLASH_DWORD *)flashAddress);
     flashAddress += 4;
 #endif
 
- 	if(left>0)
-	  loffset = left % 8;
-	else
-	  loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+    if(pPartialImageData->width != 0)
+    {
+        WORD mod1;
+
+        if(sizeX & 0x07) 
+         mod1 = 1;
+        else
+         mod1 = 0;
+
+         WORD mod3 = ((pPartialImageData->xoffset) & 0x07);
+
+         flashAddress += (pPartialImageData->yoffset)*((sizeX>>3)+mod1);
+         flashAddress += (pPartialImageData->xoffset)>>3;
+
+         addressOffset = (sizeX>>3)+mod1;
+         addressOffset -= 1+((pPartialImageData->width+mod3)>>3);  
+
+         OffsetFlag <<= mod3;
+
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -1090,12 +1145,12 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 	
     for(y = 0; y < sizeY; y++)
     {
-        tempFlashAddress = flashAddress;
+
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
-            flashAddress = tempFlashAddress;
-            //SetAddress(address);
-            mask = 0;
+            mask = OffsetFlag;
+            temp = *flashAddress++;
+
             for(x = 0; x < sizeX + loffset + roffset; x++)
             {
 
@@ -1105,40 +1160,14 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
               }
 			  else
 			  {
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *flashAddress;
-                    flashAddress++;
-                    mask = 0x80;
-                }
-
                 // Set color
                 if(mask & temp)
                 {
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(1);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[1]);
-                    }
+                  SetColor(pallete[1]);  
                 }
                 else
                 {
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(0);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[0]);
-                    }
+                  SetColor(pallete[0]);
                 }
 
 				// Write pixel to screen
@@ -1147,30 +1176,35 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 					WritePixel(_color);
 			    }
 
-                // Shift to the next pixel
-                mask >>= 1;
+                // Read 8 pixels from flash
+                if(mask == 0x80)
+                {
+                    temp = *flashAddress++;
+                    mask = 0x01;
+                }
+                else
+                {
+                    // Shift to the next pixel
+                    mask <<= 1;
+                }    
             }
 		  }
-		  
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            flashAddress += (addressOffset);
         }
     }
-
 
     DisplayDisable();
 }
 
 /*********************************************************************
-* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
+
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -1181,30 +1215,23 @@ void PutImage1BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE* image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD      address;
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
     register WORD       x, y;
     BYTE                temp = 0;
     register BYTE       stretchX, stretchY;
 	WORD                image_x = 0;
-	GFX_COLOR               pallete[16];
+	GFX_COLOR           pallete[16];
 
     WORD                counter;
 	WORD 				loffset,roffset;
+    WORD                addressOffset = 0;
+    BYTE                OffsetFlag = 0;
 	
     // Move pointer to size information
-    flashAddress = bitmap + 2;
-
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
+    flashAddress = image + 2;
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
@@ -1212,28 +1239,50 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
     sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
 	
-	#if (COLOR_DEPTH == 24)
-    flashAddress += 2;
-	#endif
-	
     // Read pallete
     for(counter = 0; counter < 16; counter++)
     {
 	#if (COLOR_DEPTH == 16)	
         pallete[counter] = *((FLASH_WORD *)flashAddress);
         flashAddress += 2;
-    #elif (COLOR_DEPTH == 24)	
+    #elif (COLOR_DEPTH == 24)
+        flashAddress += 2;	
 		pallete[counter] = *((FLASH_DWORD *)flashAddress);
-		flashAddress += 4;
+		flashAddress += 2;
 	#endif
     }
 
- 	if(left>0)
-	  loffset = left % 8;
-	else
-	loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+    if(pPartialImageData->width != 0)
+    {
+         WORD mod1 = (sizeX & 1);
+         WORD mod2 = (pPartialImageData->width) & 1; 
+         WORD mod3 = (pPartialImageData->xoffset) & 1; 
+
+         flashAddress += (pPartialImageData->yoffset)*((sizeX>>1)+mod1);
+         flashAddress += ((pPartialImageData->xoffset)>>1);                
+
+         addressOffset = (sizeX>>1)+mod1;
+         addressOffset -= ((pPartialImageData->width)>>1);
+         addressOffset -= mod3;
+         OffsetFlag = (mod3);
+
+          if(OffsetFlag == 0)
+          {
+            addressOffset -= mod2;
+          }
+         
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+         
+    } 
+
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -1251,12 +1300,14 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 	
     for(y = 0; y < sizeY; y++)
     {
-        tempFlashAddress = flashAddress;
+
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
-            flashAddress = tempFlashAddress;
-            //SetAddress(address);
-            for(x = 0; x < (sizeX + loffset + roffset); x++)
+
+            temp = *flashAddress;
+            flashAddress += OffsetFlag;
+
+            for(x = OffsetFlag; x < (sizeX + loffset + roffset + OffsetFlag); x++)
             {
 
 			  if((x<=loffset) || (x > (sizeX+loffset)))
@@ -1269,18 +1320,8 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                 // Read 2 pixels from flash
                 if(image_x & 0x0001)
                 {
-
                     // second pixel in byte
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(temp >> 4);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[temp >> 4]);
-                    }
+                    SetColor(pallete[temp >> 4]);
                 }
                 else
                 {
@@ -1288,16 +1329,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
                     flashAddress++;
                         
                     // first pixel in byte
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(temp & 0x0f);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[temp & 0x0f]);
-                    }
+                    SetColor(pallete[temp & 0x0f]);  
                 }
                 image_x++;
 
@@ -1308,12 +1340,7 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 			      }
      		  }           
             }
-
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+              flashAddress += (addressOffset);
         }
     }
 
@@ -1321,12 +1348,13 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -1337,11 +1365,9 @@ void PutImage4BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD      address;
     register FLASH_BYTE *flashAddress;
-    register FLASH_BYTE *tempFlashAddress;
     WORD                sizeX, sizeY;
     WORD                x, y;
     BYTE                temp;
@@ -1351,26 +1377,16 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 
     WORD                counter;
 	WORD 				loffset,roffset;
+    WORD                addressOffset = 0;
 
     // Move pointer to size information
     flashAddress = bitmap + 2;
-
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
 
     // Read image size
     sizeY = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
     sizeX = *((FLASH_WORD *)flashAddress);
     flashAddress += 2;
-
-	#if (COLOR_DEPTH == 24)
-    flashAddress += 2;
-	#endif
 	
     // Read pallete
     for(counter = 0; counter < 256; counter++)
@@ -1378,18 +1394,28 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 	#if (COLOR_DEPTH == 16)	
         pallete[counter] = *((FLASH_WORD *)flashAddress);
         flashAddress += 2;       
-    #elif (COLOR_DEPTH == 24)	
+    #elif (COLOR_DEPTH == 24)
+        flashAddress += 2;	
 		pallete[counter] = *((FLASH_DWORD *)flashAddress);
 		flashAddress += 4;
 	#endif
     }
 
- 	if(left>0)
-	  loffset = left % 8;
-	else
-	  loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+    if(pPartialImageData->width != 0)
+    {
+         flashAddress += pPartialImageData->xoffset + pPartialImageData->yoffset*(sizeX);
+         addressOffset = sizeX - pPartialImageData->width;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -1408,11 +1434,10 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 
     for(y = 0; y < sizeY; y++)
     {
-        tempFlashAddress = flashAddress;
+
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
-            flashAddress = tempFlashAddress;
-            //SetAddress(address);
+
             for(x = 0; x < (sizeX + loffset + roffset); x++)
             {
 			  if((x<=loffset) || (x > (sizeX+loffset)))
@@ -1427,16 +1452,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 					flashAddress++;
 
 	               // Set color
-	                #ifdef USE_PALETTE
-	                if(IsPaletteEnabled())
-	                {
-	                    SetColor(temp);
-	                }
-	                else
-	                #endif
-	                {
-	                    SetColor(pallete[temp]);
-	                }
+	                SetColor(pallete[temp]);
 
 					// Write pixel to screen
 					for(stretchX = 0; stretchX < stretch; stretchX++)
@@ -1445,12 +1461,7 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 				    }
 			  }
             }
-
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            flashAddress += addressOffset;
         }
     }
 
@@ -1458,12 +1469,13 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch)
+* Function: void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -1474,42 +1486,40 @@ void PutImage8BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in flash
 *
 ********************************************************************/
-void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
+void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD      address;
-    register FLASH_WORD *flashAddress;
-    register FLASH_WORD *tempFlashAddress;
-    
+    register FLASH_WORD *flashAddress;   
     WORD                sizeX, sizeY;
     register WORD       x, y;
-
     GFX_COLOR                	temp;
-
     register BYTE       stretchX, stretchY;
 	WORD 				loffset,roffset;
+    WORD                addressOffset = 0;
 	
     // Move pointer to size information
     flashAddress = (FLASH_WORD *)bitmap + 1;
-
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
 
 	// Read image size
     sizeY = *flashAddress;
     flashAddress++;
     sizeX = *flashAddress;
     flashAddress++;
+
+    if(pPartialImageData->width != 0)
+    {
+         flashAddress += pPartialImageData->xoffset + pPartialImageData->yoffset*(sizeX);
+         addressOffset = sizeX - pPartialImageData->width;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
 	
-	if(left>0)
-	  loffset = left % 8;
-	else
-	loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -1527,10 +1537,9 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 	
     for(y = 0; y < sizeY; y++)
     {
-        tempFlashAddress = flashAddress;
+
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
-            flashAddress = tempFlashAddress;
 
             for(x = 0; x < (sizeX + loffset + roffset); x++)
             {
@@ -1558,11 +1567,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 						}
 					}
 			}
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
+            flashAddress += addressOffset;
         }
     }
 
@@ -1590,9 +1595,7 @@ void PutImage16BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 ********************************************************************/
 void PutImage24BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 {
-
 	register DWORD 	*flashAddress;
-	register DWORD 	*tempFlashAddress;
 	WORD                	sizeX, sizeY;
 	register WORD       	x, y;
 	DWORD                	temp;
@@ -1609,12 +1612,13 @@ void PutImage24BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 	((FLASH_WORD *)flashAddress)++;
 	((FLASH_WORD *)flashAddress)++;
 
-	if(left>0)
-	  loffset = left % 8;
-	else
-	  loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -1632,10 +1636,10 @@ void PutImage24BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 
     for(y = 0; y <= sizeY; y++)
     {
-        tempFlashAddress = flashAddress;
+
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
-            flashAddress = tempFlashAddress;
+
             for(x = 0; x < (sizeX + loffset + roffset); x++)
             {
 			  if((x<=loffset) || (x > (sizeX+loffset)))
@@ -1670,12 +1674,13 @@ void PutImage24BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 #ifdef USE_BITMAP_EXTERNAL
 
 /*********************************************************************
-* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage1BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -1686,9 +1691,8 @@ void PutImage24BPP(SHORT left, SHORT top, FLASH_BYTE *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD  address;
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;	
     GFX_COLOR       pallete[2];
@@ -1703,14 +1707,8 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            x, y;
     BYTE            stretchX, stretchY;
 	WORD 			loffset,roffset;
+    BYTE                OffsetFlag = 0x01;     //Offset from BYTE color bit0 for the partial image 
 	
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
-
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 	
@@ -1719,22 +1717,35 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 2 * sizeof(GFX_COLOR);
 
-
     // Line width in bytes
     byteWidth = bmp.width >> 3;
     if(bmp.width & 0x0007)
         byteWidth++;
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+     if(pPartialImageData->width != 0)
+    {
+         memOffset += pPartialImageData->yoffset*byteWidth;
+         memOffset += (pPartialImageData->xoffset)>>3;
 
-	if(left>0)
-	  loffset = left % 8;
-	else
-	  loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+         OffsetFlag <<= ((pPartialImageData->xoffset) & 0x07);
+
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
+
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -1761,7 +1772,8 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
         {
             pData = lineBuffer;
             //SetAddress(address);
-            mask = 0;
+            mask = OffsetFlag;
+            temp = *pData++;
             for(x = 0; x < (sizeX + loffset + roffset); x++)
             {
 			  if((x<=loffset) || (x > (sizeX+loffset)))
@@ -1770,39 +1782,17 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
               }
 			  else
 			  {
-                // Read 8 pixels from flash
-                if(mask == 0)
-                {
-                    temp = *pData++;
-                    mask = 0x80;
-                }
 
                 // Set color
                 if(mask & temp)
                 {
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(1);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[1]);
-                    }
+                 SetColor(pallete[1]);  
                 }
                 else
                 {
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(0);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[0]);
-                    }
+
+                 SetColor(pallete[0]);
+                    
                 }
 
                 // Write pixel to screen
@@ -1811,28 +1801,34 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 					WritePixel(_color);
                 }
 
-                // Shift to the next pixel
-                mask >>= 1;
+                                // Read 8 pixels from flash
+                if(mask == 0x80)
+                {
+                    temp = *pData++;
+                    mask = 0x01;
+                }
+                else
+                {
+                    // Shift to the next pixel
+                    mask <<= 1;
+                }  
      		 }           
             }
 
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
         }
     }
     DisplayDisable();
 }
 
 /*********************************************************************
-* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage4BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
+
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -1843,9 +1839,8 @@ void PutImage1BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD  address;
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
 	
@@ -1861,13 +1856,6 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     BYTE            stretchX, stretchY;
 	WORD 			loffset,roffset;
 	
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
-
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
 	
@@ -1877,23 +1865,33 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 16 * sizeof(GFX_COLOR);
 
-
     // Line width in bytes
     byteWidth = bmp.width >> 1;
     if(bmp.width & 0x0001)
         byteWidth++;
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += pPartialImageData->yoffset*byteWidth;
+         memOffset += pPartialImageData->xoffset>>1;
 
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    } 
+    else
+    {
+         // Get size
+         sizeX = bmp.width;
+         sizeY = bmp.height;
+    }
 
-	if(left>0)
-	  loffset = left % 8;
-	else
-	  loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -1911,7 +1909,6 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 	
     for(y = 0; y < sizeY; y++)
     {
-
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
         memOffset += byteWidth;
@@ -1934,32 +1931,16 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 if(x & 0x0001)
                 {
                     // second pixel in byte
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(temp >> 4);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[temp >> 4]);
-                    }
+                    SetColor(pallete[temp >> 4]);
+                    
                 }
                 else
                 {
                     temp = *pData++;
 
                     // first pixel in byte
-                    #ifdef USE_PALETTE
-                    if(IsPaletteEnabled())
-                    {
-                        SetColor(temp & 0x0f);
-                    }
-                    else
-                    #endif
-                    {
-                        SetColor(pallete[temp & 0x0f]);
-                    }
+                    SetColor(pallete[temp & 0x0f]);
+                   
                 }
 
                 // Write pixel to screen
@@ -1969,11 +1950,6 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 }
             }
 
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
         }
 		}
         
@@ -1982,12 +1958,13 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage8BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -1998,9 +1975,8 @@ void PutImage4BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD  address;
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
 
@@ -2013,14 +1989,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     WORD            sizeX, sizeY;
     WORD            x, y;
     BYTE            stretchX, stretchY;
-    WORD 				loffset,roffset;
-
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
+    WORD 		    loffset,roffset;
 
     // Get bitmap header
     ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
@@ -2031,17 +2000,26 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER) + 256 * sizeof(GFX_COLOR);
 
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width);
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
-
-	if(left>0)
-	  loffset = left % 8;
-	else
-	  loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -2062,11 +2040,11 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 
         // Get line
         ExternalMemoryCallback(bitmap, memOffset, sizeX, lineBuffer);
-        memOffset += sizeX;
+        memOffset += bmp.width;
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
             pData = lineBuffer;
-            //SetAddress(address);
+
 
            for(x = 0; x < (sizeX + loffset + roffset); x++)
             {
@@ -2077,18 +2055,8 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 			  else
 			  {
                 temp = *pData++;
-
-                #ifdef USE_PALETTE
-                if(IsPaletteEnabled())
-                {
-                    SetColor(temp);
-                }
-                else
-                #endif
-                {
-                    SetColor(pallete[temp]);
-                }
-
+                SetColor(pallete[temp]);
+                
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
@@ -2096,12 +2064,7 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
                 }
             }
 
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
-        }
+              }
 		}
         
     }
@@ -2109,12 +2072,13 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 }
 
 /*********************************************************************
-* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: void PutImage16BPPExt(SHORT left, SHORT top, void* bitmap, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 *
 * PreCondition: none
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
+*        pPartialImageData - partial image pointer
 *
 * Output: none
 *
@@ -2125,89 +2089,99 @@ void PutImage8BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 * Note: image must be located in external memory
 *
 ********************************************************************/
-void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
+
+void PutImage16BPPExt(SHORT left, SHORT top, void *image, BYTE stretch, PUTIMAGE_PARAM *pPartialImageData)
 {
-    register DWORD  address;
+
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
     WORD            lineBuffer[(GetMaxX() + 1)];
     WORD            *pData;
     WORD            byteWidth;
 
-    WORD            temp;
     WORD            sizeX, sizeY;
-    WORD            x, y;
+    WORD            xc, yc;
+    WORD 		    loffset,roffset;
     BYTE            stretchX, stretchY;
 
-    // Set start address
-        #ifndef USE_PALETTE
-    address = ((DWORD) (GetMaxX() + 1) * top + left) << 1;
-        #else
-    address = (((DWORD) (GetMaxX() + 1) * top + left) * PaletteBpp) >> 3;
-        #endif
-
     // Get bitmap header
-    ExternalMemoryCallback(bitmap, 0, sizeof(BITMAP_HEADER), &bmp);
+    ExternalMemoryCallback(image, 0, sizeof(BITMAP_HEADER), &bmp);
 
     // Set offset to the image data
     memOffset = sizeof(BITMAP_HEADER);
 
-    // Get size
-    sizeX = bmp.width;
-    sizeY = bmp.height;
+    if(pPartialImageData->width != 0)
+    {
+         memOffset += (pPartialImageData->xoffset + pPartialImageData->yoffset*(bmp.width))<<1;
+         sizeY = pPartialImageData->height;
+         sizeX = pPartialImageData->width;
+    }
+    else
+    {
+        // Get size
+        sizeX = bmp.width;
+        sizeY = bmp.height;
+    }
 
-    byteWidth = sizeX << 1;
+    byteWidth = bmp.width << 1;
 
-    for(y = 0; y < sizeY; y++)
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
+	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
+
+	DisplayEnable();     // enable S1D13517
+	DisplaySetCommand(); // set RS line to low for command
+	DeviceWrite(REG5A_WRITE_WIN_X_SP);
+	DisplaySetData();    // set RS line to high for data
+	DeviceWrite((left>>3)<<1);
+	DeviceWrite(top>>2);
+	DeviceWrite(top);
+	DeviceWrite(((left+(sizeX*stretch)+roffset-8)>>3)<<1);
+	DeviceWrite((top+(sizeY*stretch))>>2);
+	DeviceWrite((top+(sizeY*stretch)));
+	DisplaySetCommand(); // set RS line to low for command
+	DeviceWrite(0x66);
+	DisplaySetData();    // set RS line to high for data
+
+    for(yc = 0; yc < sizeY; yc++)
     {
 
         // Get line
-        ExternalMemoryCallback(bitmap, memOffset, byteWidth, lineBuffer);
-        memOffset += byteWidth;
-        DisplayEnable();      // enable SSD1926
+        ExternalMemoryCallback(image, memOffset, byteWidth, lineBuffer);
+
         for(stretchY = 0; stretchY < stretch; stretchY++)
         {
+
+            memOffset += byteWidth;
+
             pData = lineBuffer;
-            SetAddress(address);
 
-            for(x = 0; x < sizeX; x++)
+           for(xc = 0; xc < (sizeX + loffset + roffset); xc++)
             {
-                temp = *pData++;
-
-                #if (COLOR_DEPTH == 24) 
-                temp = RGBConvert(RED5(temp),GREEN6(temp),BLUE5(temp)); 
-                #endif
-
-                #ifdef USE_PALETTE
-                if(IsPaletteEnabled())
-                {
-                    SetColor(0); /* Paint first value of Palette instead of junk */
-                }
-                else
-                #endif
-                {
-                    SetColor(temp);
-                }
-
+			  if((xc<=loffset) || (xc > (sizeX+loffset)))
+              {
+				WritePixel(TRANSPARENTCOLOR);
+              }
+			  else
+			  {           
+                _color = *pData++;
                 // Write pixel to screen
                 for(stretchX = 0; stretchX < stretch; stretchX++)
                 {
-                    WritePixel(_color);
+			    WritePixel(_color);
                 }
+              }
             }
-
-                #ifndef USE_PALETTE
-            address += (GetMaxX() + 1) << 1;
-                #else
-            address += ((GetMaxX() + 1) * PaletteBpp) >> 3;
-                #endif
         }
-
-        DisplayDisable();
+        
     }
+    DisplayDisable();
+
 }
-
-
 
 #if (COLOR_DEPTH == 24)	
 /*********************************************************************
@@ -2217,7 +2191,6 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 *
 * Input: left,top - left top image corner, bitmap - image pointer,
 *        stretch - image stretch factor
-*
 * Output: none
 *
 * Side Effects: none
@@ -2229,8 +2202,6 @@ void PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 ********************************************************************/
 void PutImage24BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 {
-
-
     register DWORD  address;
     register DWORD  memOffset;
     BITMAP_HEADER   bmp;
@@ -2256,14 +2227,13 @@ void PutImage24BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch)
 
     byteWidth = sizeX << 2;
 
-	
-
-	if(left>0)
-	  loffset = left % 8;
-	else
-	  loffset = 0;
-	roffset = (left + (sizeX*stretch)) % 8;
+	loffset = left & 0x07;
+	roffset = (left + (sizeX*stretch)) & 0x07;
 	roffset = 8 - roffset;
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
 
 	DisplayEnable();     // enable S1D13517
 	DisplaySetCommand(); // set RS line to low for command
@@ -2377,6 +2347,15 @@ DWORD GFXGetPageXYAddress(SHORT pageNumber, WORD x, WORD y)
 {
     DWORD address;
 
+    #if (DISP_ORIENTATION == 90)       //Added for rotation capabilities
+    DWORD tempx;
+    tempx = x;
+
+    x=y;
+    y = (DWORD)(DISP_VER_RESOLUTION-1) - tempx;
+    if(tempx ==0) y=0;
+    #endif
+
     address = (DWORD)y * (DWORD)DISP_HOR_RESOLUTION;
     address += (DWORD)x;
     address *= 3;
@@ -2402,50 +2381,80 @@ DWORD GFXGetWindowXYAddress(GFX_WINDOW_INFO* GFXWindowInfo, WORD relX, WORD relY
 }
 
  #ifdef USE_ALPHABLEND
-
-#define 	NO_ALPHA_BLENDING 	0
-
 /*********************************************************************
-* Function: void AlphaBlendWindow(DWORD foregroundWindowAddr, DWORD backgroundWindowAddr,
-					  DWORD destinationWindowAddr,		            
+* Function: void AlphaBlendWindow(DWORD foregroundArea, SHORT foregroundLeft, SHORT foregroundTop,
+                      DWORD backgroundArea, SHORT backgroundLeft, SHORT backgroundTop,
+					  DWORD destinationArea, SHORT destinationLeft, SHORT destinationTop,		            
 					  WORD  width, WORD height,  	
 					  BYTE  alphaPercentage)
 ********************************************************************/
-void AlphaBlendWindow(DWORD foregroundWindowAddr, DWORD backgroundWindowAddr,
-					  DWORD destinationWindowAddr,		            
+WORD AlphaBlendWindow(DWORD foregroundArea, SHORT foregroundLeft, SHORT foregroundTop,
+                      DWORD backgroundArea, SHORT backgroundLeft, SHORT backgroundTop,
+					  DWORD destinationArea, SHORT destinationLeft, SHORT destinationTop,		            
 					  WORD  width, WORD height,  	
 					  BYTE  alphaPercentage)
-{
+{   
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   if(IsDeviceBusy())
+   {
+      return (0);
+   }
+   #endif
+
+    DWORD_VAL foregroundWindowAddr,backgroundWindowAddr,destinationWindowAddr;
+
+    foregroundWindowAddr.Val = GFXGetPageXYAddress(foregroundArea, foregroundLeft, foregroundTop);
+    backgroundWindowAddr.Val = GFXGetPageXYAddress(backgroundArea, backgroundLeft, backgroundTop);
+    destinationWindowAddr.Val = GFXGetPageXYAddress(destinationArea, destinationLeft, destinationTop);
 	
-	SetReg(REG98_ALP_HR_SIZE,((width-1)>>3)); 
+    #if (DISP_ORIENTATION == 90)       //Added for rotation capabilities
+    DWORD tempwidth;
+    DWORD address;
+    tempwidth = width;
+    width = height;
+    height = tempwidth;
+
+    address = (DWORD)height * ((DWORD)DISP_HOR_RESOLUTION);
+    address *= 3;
+
+    foregroundWindowAddr.Val -= address;
+    backgroundWindowAddr.Val -= address;
+    destinationWindowAddr.Val -= address;
+    #endif
+
+    SetReg(REG98_ALP_HR_SIZE,((width-1)>>3)); 
     SetReg(REG9A_ALP_VR_SIZE_0,height); 
     SetReg(REG9C_ALP_VR_SIZE_1,(height>>8)); 
 
-    foregroundWindowAddr  -=(foregroundWindowAddr % 8);
-    backgroundWindowAddr  -=(backgroundWindowAddr % 8);
-    destinationWindowAddr -=(destinationWindowAddr % 8);
+    foregroundWindowAddr.Val  -=(foregroundWindowAddr.Val %8);
+    backgroundWindowAddr.Val  -=(backgroundWindowAddr.Val %8);
+    destinationWindowAddr.Val -=(destinationWindowAddr.Val %8);
 	
-    SetReg(REGA0_ALP_IN_IMG1_SA_0,foregroundWindowAddr);    
-    SetReg(REGA2_ALP_IN_IMG1_SA_1,(foregroundWindowAddr>>8)); 
-    SetReg(REGA4_ALP_IN_IMG1_SA_2,(foregroundWindowAddr>>16)); 
-    SetReg(REGA6_ALP_IN_IMG2_SA_0,backgroundWindowAddr);    
-    SetReg(REGA8_ALP_IN_IMG2_SA_1,(backgroundWindowAddr>>8)); 
-    SetReg(REGAA_ALP_IN_IMG2_SA_2,(backgroundWindowAddr>>16)); 
-    SetReg(REGAC_ALP_OUT_IMG_SA_0,destinationWindowAddr);  
-    SetReg(REGAE_ALP_OUT_IMG_SA_1,(destinationWindowAddr>>8)); 
-    SetReg(REGB0_ALP_OUT_IMG_SA_2,(destinationWindowAddr>>16)); 
+    SetReg(REGA0_ALP_IN_IMG1_SA_0,foregroundWindowAddr.v[0]);    
+    SetReg(REGA2_ALP_IN_IMG1_SA_1,foregroundWindowAddr.v[1]); 
+    SetReg(REGA4_ALP_IN_IMG1_SA_2,foregroundWindowAddr.v[2]); 
+    SetReg(REGA6_ALP_IN_IMG2_SA_0,backgroundWindowAddr.v[0]);    
+    SetReg(REGA8_ALP_IN_IMG2_SA_1,backgroundWindowAddr.v[1]); 
+    SetReg(REGAA_ALP_IN_IMG2_SA_2,backgroundWindowAddr.v[2]); 
+    SetReg(REGAC_ALP_OUT_IMG_SA_0,destinationWindowAddr.v[0]);  
+    SetReg(REGAE_ALP_OUT_IMG_SA_1,destinationWindowAddr.v[1]); 
+    SetReg(REGB0_ALP_OUT_IMG_SA_2,destinationWindowAddr.v[2]); 
 	
 	SetReg(REG9E_ALP_VALUE,0x80 | Percentage2Alpha(alphaPercentage));  
-	SetReg(REGB2_INTERRUPT_CTRL,0x01);				//Enable Alpha Blend Interrupt 
+
     SetReg(REG94_ALP_CONTROL,0x01); 				//Enable Alpha Blend  
 	SetReg(REG94_ALP_CONTROL,0x00);                 // Added From DataSheet
 
- 	while(GetReg(REGB4_INTERRUPT_STAT) != 1);
+#ifndef USE_NONBLOCKING_CONFIG
+     while(!GetReg((REGB4_INTERRUPT_STAT)));
+	  SetReg(REGB6_INTERRUPT_CLEAR,0x01);               //Send Clear Interrupt Command
+	  SetReg(REGB6_INTERRUPT_CLEAR,0x00);				//Bring value back to 0
+#else
+    alphablendActive = 1;                           //Flag for Driver to know Alphablending is active
+#endif 
 
-	SetReg(REGB6_INTERRUPT_CLEAR,0x01);              //Added for DEBUG
-	SetReg(REGB6_INTERRUPT_CLEAR,0x00);				//Clear Interrupt
-	SetReg(REGB2_INTERRUPT_CTRL,0x00);              //Enable Alpha Blend Interrupt 
-	SetReg(REG94_ALP_CONTROL,0x00); 				//Disable Alpha Blend  
+   return 1;
 
 }			
 
@@ -2453,8 +2462,8 @@ void CopyPageWindow( BYTE srcPage, BYTE dstPage,
                         WORD srcX, WORD srcY, WORD dstX, WORD dstY, 
                         WORD width, WORD height)			
 {
-			AlphaBlendWindow(GFXGetPageXYAddress(srcPage,srcX,srcY), GFXGetPageXYAddress(srcPage,srcX,srcY), GFXGetPageXYAddress(dstPage,dstX,dstY), width, height,                               
-                             NO_ALPHA_BLENDING);	
+			while(!AlphaBlendWindow(srcPage,srcX,srcY, srcPage,srcX,srcY, dstPage,dstX,dstY, width, height,                               
+                             100));	
 }
 
 #endif
@@ -2475,6 +2484,7 @@ void CopyPageWindow( BYTE srcPage, BYTE dstPage,
 ********************************************************************/
 void SetActivePage(WORD page)
 {
+    _GFXActivePage = page;
     SetReg(REG52_INPUT_MODE, 0x08 | (page<<4));
 }
 
@@ -2493,8 +2503,8 @@ void SetActivePage(WORD page)
 *
 ********************************************************************/
 void SetVisualPage(WORD page)
-{	
-    SetReg(REG2A_DSP_MODE, (0x01 | (page<<4))); 
+{
+    SetReg(REG2A_DSP_MODE, 0x01 | (page<<4)); 
     SetReg(REG50_DISPLAY_CONTROL,0x80);
 }  
 
@@ -2534,17 +2544,46 @@ extern WORD Height;
 WORD CopyBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, WORD width, WORD height)
 {
 
-    DWORD source = srcAddr + 3*srcOffset;
-    DWORD destination = dstAddr + 3*dstOffset;
-    
-    
-    AlphaBlendWindow(source, source, destination, width, height,                               
-                                 NO_ALPHA_BLENDING);
+    DWORD_VAL source,destination;
+    source.Val      = srcAddr + 3*srcOffset;
+    destination.Val = dstAddr + 3*dstOffset;
 
-    return (0);
+    source.Val  -=(source.Val %8);
+    destination.Val -=(destination.Val % 8);
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
+    
+	SetReg(REG98_ALP_HR_SIZE,((width-1)>>3)); 
+    SetReg(REG9A_ALP_VR_SIZE_0,height); 
+    SetReg(REG9C_ALP_VR_SIZE_1,(height>>8)); 
+
+    SetReg(REGA0_ALP_IN_IMG1_SA_0,source.v[0]);    
+    SetReg(REGA2_ALP_IN_IMG1_SA_1,source.v[1]); 
+    SetReg(REGA4_ALP_IN_IMG1_SA_2,source.v[2]); 
+    SetReg(REGA6_ALP_IN_IMG2_SA_0,source.v[0]);    
+    SetReg(REGA8_ALP_IN_IMG2_SA_1,source.v[1]); 
+    SetReg(REGAA_ALP_IN_IMG2_SA_2,source.v[2]); 
+    SetReg(REGAC_ALP_OUT_IMG_SA_0,destination.v[0]);  
+    SetReg(REGAE_ALP_OUT_IMG_SA_1,destination.v[1]); 
+    SetReg(REGB0_ALP_OUT_IMG_SA_2,destination.v[2]); 
+	
+	SetReg(REG9E_ALP_VALUE,0x80 | Percentage2Alpha(0));  
+ 
+    SetReg(REG94_ALP_CONTROL,0x01); 				//Enable Alpha Blend  
+	SetReg(REG94_ALP_CONTROL,0x00);                 // Added From DataSheet
+
+#ifndef USE_NONBLOCKING_CONFIG
+     while(!GetReg((REGB4_INTERRUPT_STAT)));
+	  SetReg(REGB6_INTERRUPT_CLEAR,0x01);               //Send Clear Interrupt Command
+	  SetReg(REGB6_INTERRUPT_CLEAR,0x00);				//Bring value back to 0
+#else
+    alphablendActive = 1;                           //Flag for Driver to know Alphablending is active
+#endif 
+
+    return (1);
 }
-
-
 
 /*********************************************************************
 * Function: void PushRectangle(void)
@@ -2564,8 +2603,7 @@ void PushRectangle(void)
 {
 WORD direction = _param2;
 int i;
-long shift;
-
+DWORD_VAL shift;
 
     SetReg(REG2A_DSP_MODE,0x09);      //Turn on both PIP1 + PIP2
  
@@ -2584,26 +2622,25 @@ long shift;
 	SetReg(REG4C_PIP2_WIN_Y_EP_0, (Starty + Height) >> 2  );
 	SetReg(REG4E_PIP2_WIN_Y_EP_1, (Starty + Height) );
 
-
     switch(direction)
     {
 
     case LEFT_TO_RIGHT:
             for(i=0; i < (Width-9); i=i+8)
             {
-                 shift = _destpageaddr;    //Page 2
+                 shift.Val = _destpageaddr;    //Page 2
 
-                 SetReg(REG2C_PIP1_DSP_SA_0,shift); 
-	             SetReg(REG2E_PIP1_DSP_SA_1,shift >> 8);
-	             SetReg(REG30_PIP1_DSP_SA_2,shift >> 16);
+                 SetReg(REG2C_PIP1_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG2E_PIP1_DSP_SA_1,shift.v[1]);
+	             SetReg(REG30_PIP1_DSP_SA_2,shift.v[2]);
                  SetReg(REG32_PIP1_WIN_X_SP, (Startx+i) >> 2  );
 
-                 shift = _srcpageaddr;
-                 shift += (DISP_HOR_RESOLUTION-i-8)*3;
+                 shift.Val = _srcpageaddr;
+                 shift.Val += (DISP_HOR_RESOLUTION-i-8)*3;
 
-                 SetReg(REG3E_PIP2_DSP_SA_0,shift); 
-	             SetReg(REG40_PIP2_DSP_SA_1,shift >> 8);
-	             SetReg(REG42_PIP2_DSP_SA_2,shift >> 16); 
+                 SetReg(REG3E_PIP2_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG40_PIP2_DSP_SA_1,shift.v[1]);
+	             SetReg(REG42_PIP2_DSP_SA_2,shift.v[2]); 
                  SetReg(REG32_PIP1_WIN_X_SP, (Startx+i) >> 2  ); 
                  
                  SetReg(REG50_DISPLAY_CONTROL,0x80);          //Refresh must be callsed after swapping screens
@@ -2614,18 +2651,18 @@ long shift;
     case RIGHT_TO_LEFT:
             for(i=0; i < (Width-9); i=i+8)
             {
-                 shift = _destpageaddr;    //Page 2
-                 shift += 3 * i;
-                 SetReg(REG2C_PIP1_DSP_SA_0,shift); 
-	             SetReg(REG2E_PIP1_DSP_SA_1,shift >> 8);
-	             SetReg(REG30_PIP1_DSP_SA_2,shift >> 16);
+                 shift.Val = _destpageaddr;    //Page 2
+                 shift.Val += 3 * i;
+                 SetReg(REG2C_PIP1_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG2E_PIP1_DSP_SA_1,shift.v[1]);
+	             SetReg(REG30_PIP1_DSP_SA_2,shift.v[2]);
                  SetReg(REG38_PIP1_WIN_X_EP, ((Startx+Width-1)- 8-i) >> 2 );
 
-                 shift = _srcpageaddr;
+                 shift.Val = _srcpageaddr;
 
-                 SetReg(REG3E_PIP2_DSP_SA_0,shift); 
-	             SetReg(REG40_PIP2_DSP_SA_1,shift >> 8);
-	             SetReg(REG42_PIP2_DSP_SA_2,shift >> 16); 
+                 SetReg(REG3E_PIP2_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG40_PIP2_DSP_SA_1,shift.v[1]);
+	             SetReg(REG42_PIP2_DSP_SA_2,shift.v[2]); 
                  SetReg(REG44_PIP2_WIN_X_SP,((Startx+Width-1) - i) >> 2  ); 
                  
                  SetReg(REG50_DISPLAY_CONTROL,0x80);          //Refresh must be callsed after swapping screens
@@ -2636,22 +2673,22 @@ long shift;
     case TOP_TO_BOTTOM:
             for(i=0; i < Height; i=i+8)
             {
-                 shift = _destpageaddr;    //Page 2
+                 shift.Val = _destpageaddr;    //Page 2
 
-                 SetReg(REG2C_PIP1_DSP_SA_0,shift); 
-	             SetReg(REG2E_PIP1_DSP_SA_1,shift >> 8);
-	             SetReg(REG30_PIP1_DSP_SA_2,shift >> 16);
+                 SetReg(REG2C_PIP1_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG2E_PIP1_DSP_SA_1,shift.v[1]);
+	             SetReg(REG30_PIP1_DSP_SA_2,shift.v[2]);
                  SetReg(REG34_PIP1_WIN_Y_SP_0, (Starty+i) >> 2);  
                  SetReg(REG36_PIP1_WIN_Y_SP_1, (Starty+i));
 
-                 shift = (long)DISP_VER_RESOLUTION - (long)i;
-                 shift *= (long)DISP_HOR_RESOLUTION;
-                 shift *= 3;
-                 shift += _srcpageaddr;
+                 shift.Val = (long)DISP_VER_RESOLUTION - (long)i;
+                 shift.Val *= (long)DISP_HOR_RESOLUTION;
+                 shift.Val *= 3;
+                 shift.Val += _srcpageaddr;
 
-                 SetReg(REG3E_PIP2_DSP_SA_0,shift); 
-	             SetReg(REG40_PIP2_DSP_SA_1,shift >> 8);
-	             SetReg(REG42_PIP2_DSP_SA_2,shift >> 16); 
+                 SetReg(REG3E_PIP2_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG40_PIP2_DSP_SA_1,shift.v[1]);
+	             SetReg(REG42_PIP2_DSP_SA_2,shift.v[2]); 
                  SetReg(REG4C_PIP2_WIN_Y_EP_0, (Starty+i) >> 2  );
 	             SetReg(REG4E_PIP2_WIN_Y_EP_1, (Starty+i) ); 
                  
@@ -2662,21 +2699,21 @@ long shift;
     case BOTTOM_TO_TOP:
             for(i=0; i < Height; i=i+8)
             {
-                 shift = (long)DISP_HOR_RESOLUTION * (long)i;
-                 shift *= 3;
-                 shift += _destpageaddr;
+                 shift.Val = (long)DISP_HOR_RESOLUTION * (long)i;
+                 shift.Val *= 3;
+                 shift.Val += _destpageaddr;
 
-                 SetReg(REG2C_PIP1_DSP_SA_0,shift); 
-	             SetReg(REG2E_PIP1_DSP_SA_1,shift >> 8);
-	             SetReg(REG30_PIP1_DSP_SA_2,shift >> 16);
+                 SetReg(REG2C_PIP1_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG2E_PIP1_DSP_SA_1,shift.v[1]);
+	             SetReg(REG30_PIP1_DSP_SA_2,shift.v[2]);
                  SetReg(REG3A_PIP1_WIN_Y_EP_0, ((Starty+Height) - i) >> 2  );
 	             SetReg(REG3C_PIP1_WIN_Y_EP_1, ((Starty+Height) - i) );
 
-                 shift = _srcpageaddr;
+                 shift.Val = _srcpageaddr;
 
-                 SetReg(REG3E_PIP2_DSP_SA_0,shift); 
-	             SetReg(REG40_PIP2_DSP_SA_1,shift >> 8);
-	             SetReg(REG42_PIP2_DSP_SA_2,shift >> 16); 
+                 SetReg(REG3E_PIP2_DSP_SA_0,shift.v[0]); 
+	             SetReg(REG40_PIP2_DSP_SA_1,shift.v[1]);
+	             SetReg(REG42_PIP2_DSP_SA_2,shift.v[2]); 
                  SetReg(REG46_PIP2_WIN_Y_SP_0,((Starty+Height) - i) >> 2);  
                  SetReg(REG48_PIP2_WIN_Y_SP_1, ((Starty+Height)) - i); 
                  
@@ -2697,4 +2734,356 @@ long shift;
 
 }
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+/// \brief
+/// Creates a layer. 
+///
+///	This function is used to create an additional layer that can be used for PIP, 
+/// Cursor or other porpouse.
+///
+/// \param	Layer		    Corresponds with layer. 
+///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
+///
+/// \param  Config			This value makes configuration for the Layer that 
+///                         can be combained with the following flags:
+///								GFX_LAYER_TRANS_EN
+///								GFX_LAYER_OUTPUT_NORMAL
+///								GFX_LAYER_OUTPUT_XOR
+///								GFX_LAYER_OUTPUT_XORNOT
+///								GFX_LAYER_OUTPUT_NOT
+///							and alpha color 4 bit value. For instance, Config can be 
+///							( GFX_LAYER_TRANS_EN | GFX_LAYER_OUTPUT_NORMAL | 0xA )
+///							where 0xA is value of transparency.  
+///
+/// \param	XStart			This value configures the X start position for the Layer
+///
+/// \param	YStart			This value configures the Y start position for the Layer
+///
+/// \param	Width			This value configures the width for the Layer
+///							 
+///
+/// \param	Height			This value configures the height for the Layer
+///
+/// \return void
+///
+////////////////////////////////////////////////////////////////////////////////
+void GFX_DRIVER_CreateLayer( GFX_LAYER Layer, WORD Config, WORD XStart,  WORD YStart,  WORD Width,  WORD Height )
+{
+   //PIP1 screen
+	SetReg(REG32_PIP1_WIN_X_SP, XStart>>2);
+    SetReg(REG38_PIP1_WIN_X_EP, (XStart +(Width)) >> 2   );
+	SetReg(REG34_PIP1_WIN_Y_SP_0, YStart >> 2);  
+	SetReg(REG36_PIP1_WIN_Y_SP_1, YStart);
+	SetReg(REG3A_PIP1_WIN_Y_EP_0, (YStart+Height) >> 2  );
+	SetReg(REG3C_PIP1_WIN_Y_EP_1, YStart + Height );
+
+}
+
+void GFX_DRIVER_LayerStartAddress( GFX_LAYER Layer,WORD page, WORD X, WORD Y )
+{
+     X &= 0xf8; //X must be a multiple of 8
+
+    DWORD PIPStartAddress = GFXGetPageXYAddress(page,X,Y);
+
+    SetReg(REG2C_PIP1_DSP_SA_0,PIPStartAddress); 
+	SetReg(REG2E_PIP1_DSP_SA_1,PIPStartAddress >> 8);
+	SetReg(REG30_PIP1_DSP_SA_2,PIPStartAddress >> 16);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// \brief
+/// Shows a layer.
+///
+///	This function is used to show an additional layer, PIP or Cursor.
+///
+/// \param	Layer		    Corresponds with layer. 
+///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
+///
+/// \return void
+///
+////////////////////////////////////////////////////////////////////////////////
+void GFX_DRIVER_ShowLayer( GFX_LAYER Layer )
+{
+    BYTE temp = GetReg(REG2A_DSP_MODE);
+
+    SetReg(REG2A_DSP_MODE,temp|0x04);                      //Turn on PIP 1
+    SetReg(REG50_DISPLAY_CONTROL,0x80);                    //Refresh must be callsed after swapping screens
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// \brief
+/// Hides a layer.
+///
+///	This function is used to hide an additional layer, PIP or Cursor.
+///
+/// \param	Layer		    Corresponds with layer. 
+///                         This value can be either GFX_PIP_LAYER or GFX_CURSOR_LAYER.
+///
+/// \return void
+///
+////////////////////////////////////////////////////////////////////////////////
+void GFX_DRIVER_HideLayer( GFX_LAYER Layer )
+{
+
+   #ifdef USE_NONBLOCKING_CONFIG
+   while(IsDeviceBusy());
+   #endif
+
+    BYTE temp = GetReg(REG2A_DSP_MODE);
+
+    SetReg(REG2A_DSP_MODE,temp&0xf1);                           //Turn off PIP 1
+    SetReg(REG50_DISPLAY_CONTROL,0x80);                    //Refresh must be callsed after swapping screens
+}
+
+#ifdef USE_DOUBLE_BUFFERING
+
+/*********************************************************************
+* Function:  SwitchOnDoubleBuffering()
+*
+* Overview: Switches on the double buffering.
+*			Double buffering utilizes two buffers. The frame buffer and the
+*           draw buffer. The frame buffer is the buffer that is being displayed
+*			while the draw buffer is used for all rendering. 
+*           When this function is called, it copies the contents of the frame buffer 
+*           to the draw buffer once and all succeeding rendering will be performed on 
+*           the draw buffer. To update the frame buffer with newly drawn 
+*           items on the draw buffer call UpdateDisplayNow() or RequestDisplayUpdate().
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SwitchOnDoubleBuffering(void)
+{
+    if(blEnableDoubleBuffering == 0) 
+    { 
+        blEnableDoubleBuffering = 1; 
+        InvalidateAll(); 
+    }  
+}
+
+/*********************************************************************
+* Function:  SwitchOffDoubleBuffering()
+*
+* Overview: Switches off the double buffering.
+*           All rendering will be performed on the frame buffer. Calls
+*           to UpdateDisplayNow() or RequestDisplayUpdate() will 
+*           have no effect.
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void SwitchOffDoubleBuffering(void)
+{
+    if(blEnableDoubleBuffering == 1) 
+    { 
+        UpdateDisplayNow(); 
+        _drawbuffer = (_drawbuffer == GFX_BUFFER1)? GFX_BUFFER2: GFX_BUFFER1;
+        blEnableDoubleBuffering = 0; 
+    }
+}
+
+/*********************************************************************
+* Function:  void InvalidateRectangle(WORD left, WORD top, WORD right, WORD bottom)
+*
+* Overview: Invalidates the specified rectangular area and if the
+*           invalidated areas exceed the GFX_MAX_INVALIDATE_AREAS,
+*           whole area is marked as invalidate
+*
+* PreCondition: None
+*
+* Input: left,top - top left corner coordinates,
+*        right,bottom - bottom right corner coordinates
+*
+* Output: None
+*
+* Side Effects: Only copies back the invalidated areas to the draw -
+*               buffer after the exchange of draw and frame buffers
+*
+********************************************************************/
+void InvalidateRectangle(WORD left, WORD top, WORD right, WORD bottom)
+{
+    if(blInvalidateAll == 1 || blEnableDoubleBuffering == 0)
+    {
+        return;
+    }
+    
+    if(NoOfInvalidatedRectangleAreas >= GFX_MAX_INVALIDATE_AREAS)
+    {
+        blInvalidateAll = 1;
+        return;
+    }
+    else
+    {
+        WORD width, height;
+
+    #if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180)
+
+        width   =   right - left + 1;
+        height  =   bottom - top + 1;
+
+    #elif (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270)
+
+        height  =   right - left + 1;
+        width   =   bottom - top + 1;
+
+    #endif
+
+    #if (DISP_ORIENTATION == 90)
+
+        bottom  =   DISP_VER_RESOLUTION - left;
+        left    =   top;
+        right   =   left + width;
+        top     =   bottom - height;
+
+    #elif (DISP_ORIENTATION == 180)
+
+        right   =   DISP_HOR_RESOLUTION - left;
+        bottom  =   DISP_VER_RESOLUTION - top;
+        left    =   right - width;
+        top     =   bottom - height;
+
+    #elif (DISP_ORIENTATION == 270)
+
+        right   =   DISP_HOR_RESOLUTION - top;
+        top     =   left;
+        bottom  =   top + height;
+        left    =   right - width;
+
+    #endif
+
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].X = left;
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].Y = top;
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].W = width;
+        InvalidatedArea[NoOfInvalidatedRectangleAreas].H = height;
+        NoOfInvalidatedRectangleAreas++;
+    }
+}
+
+/*********************************************************************
+* Function:  void UpdateDisplayNow(void)
+*
+* Overview: Synchronizes the draw and frame buffers immediately
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void UpdateDisplayNow(void)
+{
+
+    DWORD SourceBuffer, DestBuffer;
+    
+    if(blEnableDoubleBuffering == 0)
+    {
+        return;
+    }
+    
+    if(_drawbuffer == GFX_BUFFER1)
+    {
+        SourceBuffer = GFX_BUFFER1;
+        DestBuffer   = GFX_BUFFER2;
+    }
+    else
+    {
+        SourceBuffer = GFX_BUFFER2;
+        DestBuffer   = GFX_BUFFER1;
+    }
+
+     _drawbuffer = DestBuffer;
+     SetActivePage(_drawbuffer);
+ 
+     SetVisualPage(SourceBuffer);
+
+    if(blInvalidateAll == 1 || (NoOfInvalidatedRectangleAreas > GFX_MAX_INVALIDATE_AREAS))
+    {
+        blInvalidateAll = 0;
+        NoOfInvalidatedRectangleAreas = 0;
+        CopyPageWindow( SourceBuffer, DestBuffer, 0, 0,0, 0,GetMaxX(), GetMaxY());
+    }
+    else if(NoOfInvalidatedRectangleAreas)
+    {
+        while(NoOfInvalidatedRectangleAreas)
+        {
+            NoOfInvalidatedRectangleAreas--;
+            CopyPageWindow( SourceBuffer, DestBuffer, InvalidatedArea[NoOfInvalidatedRectangleAreas].X, InvalidatedArea[NoOfInvalidatedRectangleAreas].Y,InvalidatedArea[NoOfInvalidatedRectangleAreas].X, InvalidatedArea[NoOfInvalidatedRectangleAreas].Y,InvalidatedArea[NoOfInvalidatedRectangleAreas].W, InvalidatedArea[NoOfInvalidatedRectangleAreas].H);
+        }
+    }
+
+}
+
+/*********************************************************************
+* Function:  void RequestDisplayUpdate(void)
+*
+* Overview: Synchronizes the draw and frame buffers at next VBlank
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+void RequestDisplayUpdate(void)
+{
+      UpdateDisplayNow();
+}
+
+#endif //USE_DOUBLE_BUFFERING
+
+#ifdef USE_ALPHABLEND_LITE
+/*********************************************************************
+* Function: WORD BarAlpha(SHORT Left, SHORT Top,WORD  Right, WORD Bottom)
+********************************************************************/
+WORD BarAlpha(SHORT Left, SHORT Top,WORD  Right, WORD Bottom)
+{
+
+SHORT y=Top;
+
+WORD width = (Right-Left)+8;
+
+BYTE currentAlpha = _alpha;
+
+            if(_prevAlphaColor == BLACK)
+            {
+
+                CopyPageWindow(_GFXActivePage, _GFXBackgroundPage, Left, Top, Left, Bottom, 
+                                       width, 1);
+                
+            }
+            
+            _alpha = 100;
+            
+            Bar(Left,Top,Right,Bottom);
+            
+            _alpha = currentAlpha;
+            
+            AlphaBlendWindow(_GFXActivePage, Left, Top,
+                             _GFXBackgroundPage, Left, Top,
+            		         _GFXActivePage, Left, Top,		            
+            			     width, (Bottom-Top+1),  	
+            			     _alpha);
+
+return (1);
+}
+#endif //USE_ALPHABLEND_LITE
 #endif //GFX_USE_DISPLAY_CONTROLLER_S1D13517

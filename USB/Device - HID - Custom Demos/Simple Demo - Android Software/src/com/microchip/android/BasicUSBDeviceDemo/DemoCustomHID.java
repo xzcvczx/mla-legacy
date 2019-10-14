@@ -153,7 +153,6 @@ public class DemoCustomHID extends Demo implements Runnable, DemoInterface {
 	/**
 	 * The man thread for the demo
 	 */
-	@Override
 	public void run() {	
 		/* Get the OUT endpoint.  It is the second endpoint in the interface */
 		UsbEndpoint endpointOUT = intf.getEndpoint(1);
@@ -297,4 +296,5 @@ public class DemoCustomHID extends Demo implements Runnable, DemoInterface {
 		connection = null;
 		intf = null;
 	}
+
 }

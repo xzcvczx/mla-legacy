@@ -47,25 +47,21 @@
 #include "mTouchConfig.h"
 #include "p32xxxx.h"
 
-#if !defined(USE_DIFFERENTIAL_MEASUREMENTS)
-#   error('Differential Measurements Only!')
-#else
 // Check if I/O pads on device supports better algorithm
-#   if defined(__32MX534F064H__) || \
-       defined(__32MX534F064L__) || \
-       defined(__32MX564F064H__) || \
-       defined(__32MX564F064L__) || \
-       defined(__32MX564F128H__) || \
-       defined(__32MX564F128L__) || \
-       defined(__32MX664F064H__) || \
-       defined(__32MX664F064L__) || \
-       defined(__32MX664F128H__) || \
-       defined(__32MX664F128L__) || \
-       defined(__32MX764F128H__) || \
-       defined(__32MX764F128L__)
-#       warning('You can use TimerCallbackFunc1 and avoid having pull-up resistors.')
-#   endif
-#endif//!defined(USE_DIFFERENTIAL_MEASUREMENTS)
+#if defined(__32MX534F064H__) || \
+    defined(__32MX534F064L__) || \
+    defined(__32MX564F064H__) || \
+    defined(__32MX564F064L__) || \
+    defined(__32MX564F128H__) || \
+    defined(__32MX564F128L__) || \
+    defined(__32MX664F064H__) || \
+    defined(__32MX664F064L__) || \
+    defined(__32MX664F128H__) || \
+    defined(__32MX664F128L__) || \
+    defined(__32MX764F128H__) || \
+    defined(__32MX764F128L__)
+#   warning('You can use TimerCallbackFunc1.')
+#endif
 
 #if defined( _CTMU_IRQ )
 #   warning("Devices has CTMU, use TimerCallbackFunc4 instead!")
@@ -100,7 +96,7 @@ extern volatile BOOL IgnoreCurrentDataFlag; // Flag set by application to signal
                                             // should ignore data being measured.
 
 // Locals
-#if defined( __32MX220F032D__ )
+#if defined( __32MX220F032D__ ) || defined( __32MX250F128D__ )
 static UINT16 OldRawData[MAX_ADC_CHANNELS] = { 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF,
                                                0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF,
                                                0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF,
@@ -110,7 +106,7 @@ static UINT16 OldRawData[MAX_ADC_CHANNELS] = { 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
                                                0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
                                                0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
                                                0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF }; // raw value from previous set of ADC scans
-#endif
+#endif//defined( __32MX220F032D__ ) || defined( __32MX250F128D__ )
 
 /*
     Timer ISR callback function for CVD measurements.

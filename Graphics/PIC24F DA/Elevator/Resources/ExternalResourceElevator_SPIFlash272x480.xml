@@ -28,10 +28,10 @@
 <Font_Files>
 <Font_File_Resource>
 <label>fireflysung_40</label>
-<path>fireflysung.ttf</path>
+<path>../../../../Microchip/Graphics/Fonts/firefly/fireflysung.ttf</path>
 <name>AR PL New Sung</name>
 <anti_aliasing>1 bit per pixel</anti_aliasing>
-<comment_file>../../../../Microchip/Graphics/Fonts/FireflysungLicense.txt</comment_file>
+<comment_file>../../../../Microchip/Graphics/Fonts/firefly/FireflysungLicense.txt</comment_file>
 <size>40</size>
 <height>44</height>
 <first_character>32</first_character>

@@ -457,7 +457,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
 
                 if (transferFlags & USB_PRINTER_TRANSFER_FROM_ROM)
                 {
-                    #if defined( __C30__ )
+                    #if defined( __C30__ ) || defined __XC16__
                         char __prog__   *ptr;
                     #elif defined( __PIC32MX__ )
                         const char      *ptr;
@@ -580,7 +580,7 @@ BYTE USBHostPrinterLanguagePostScript( BYTE address,
                 // use a different pointer type to get the data.
                 if (transferFlags & USB_PRINTER_TRANSFER_FROM_ROM)
                 {
-                    #if defined( __C30__ )
+                    #if defined( __C30__ ) || defined __XC16__
                         BYTE __prog__   *tempOld;
                     #elif defined( __PIC32MX__ )
                         const BYTE      *tempOld;

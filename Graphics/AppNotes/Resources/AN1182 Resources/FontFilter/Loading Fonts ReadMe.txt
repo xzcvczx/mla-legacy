@@ -48,7 +48,16 @@ for instructions on how to create filtered font tables.
 IMPORTANT:
 The GRC project AN1182Fonts.xml is included in this directory to show how the fonts
 are generated. Before opening the project in the grc.java download the required (*.ttf) font
-files first and place it in same directory where the xml project is located.
+files first and place the font files in their respective directories in the 
+<install dir>/Microchip/Graphics/Fonts directory. Each font will have its own sub-directory.
+
+1. <install dir>/Microchip/Graphics/Fonts/db/dbtt.ttf
+2. <install dir>/Microchip/Graphics/Fonts/jaipur/JAIPUR__.TTF
+3. <install dir>/Microchip/Graphics/Fonts/firefly/fireflysung.ttf
+4. <install dir>/Microchip/Graphics/Fonts/unbatang/UnBatang_0613.ttf
+5. <install dir>/Microchip/Graphics/Fonts/gentium/Gentium.ttf
+where: install_dir is the location where the Microchip Application Libraries (MLA) are installed.
+
 It is also important that the file names of the *.ttf are the same. If they are not
 the grc.java will generate an error when you load the project files.
 The file names used are:

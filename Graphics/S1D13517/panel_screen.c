@@ -53,7 +53,6 @@
 /*****************************************************************************
  * SECTION: Externs
  *****************************************************************************/
-extern WORD             _page;
 
 /*****************************************************************************
  * void CreatePanelScreen(void)
@@ -71,8 +70,7 @@ void CreatePanelScreen(void)
     currentScheme = GFX_SchemeGetCurrentScheme();
 
     SetColor(ORANGE);                       // Orange
-    Bar((GetMaxX() >> 2), 0 , (GetMaxX() >> 2) + 2, GetMaxY());
-
+    while(!Bar((GetMaxX() >> 2), 0 , (GetMaxX() >> 2) + 2, GetMaxY()));
 
     GOLFree();                              // free memory for the objects in the previous linked list and start new list
 
@@ -159,29 +157,18 @@ void CreatePanelScreen(void)
         currentScheme
     );                      // use alternate scheme 	
 
-
  	SetColor(currentScheme->Color0);
 
-	FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5);
-	PutImage((GetMaxX() >> 2)+20, 10, (void *) &appointment_new, IMAGE_NORMAL);
-	FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
-     
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2)+15, 5),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
-				     (GetMaxX()) - ((GetMaxX() >> 2)+20), 
-				     60,  	
-				     GFX_SchemeGetDefaultScheme()->AlphaValue);
-				     	
+	while(!FillBevel((GetMaxX() >> 2)+20,10 ,(GetMaxX() - 10), 60,5));
+	while(!PutImage((GetMaxX() >> 2)+20, 10, (void *) &appointment_new, IMAGE_NORMAL));
+	while(!FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5));
 
-	AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+	while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+					 GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+					 GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
 				     (GetMaxX())-((GetMaxX() >> 2) + 15), 
 				     GetMaxY() - 90,  	
-				     GFX_SchemeGetDefaultScheme()->AlphaValue);
-				     
-    SetActivePage(GetDestinationPage());
+				     GFX_SchemeGetDefaultScheme()->AlphaValue));
 
 	SetColor(RGB565CONVERT(255, 102, 0));
     SetFont((void *) &FONTDEFAULT);
@@ -199,40 +186,36 @@ WORD MsgPanelScreen(WORD objMsg, OBJ_HEADER *pObj)
     {
         case PANEL_SCREEN_ID_COMFORT_BUT:
             if((objMsg == BTN_MSG_RELEASED))
+            {
                 screenState = CREATE_COMFORT; 
-            
+            }
             return (1); // process by default
 
         case PANEL_SCREEN_ID_LIGHTING_BUT:
             if((objMsg == BTN_MSG_RELEASED))
+            {
                 screenState = CREATE_LIGHTING; 
-            
+            }            
             return (1); // process by default
 
         case PANEL_SCREEN_ID_SECURITY_BUT:
             if((objMsg == BTN_MSG_RELEASED))
+            {
                 screenState = CREATE_SECURITY; 
-            
+            }            
             return (1); // process by default
             
         case PANEL_SCREEN_ID_ENERGY_USAGE_BUT:
             if((objMsg == BTN_MSG_RELEASED))
+            {
                 screenState = CREATE_ENERGY; 
-            
+            }
             return (1); // process by default
             
 
         case PANEL_SCREEN_ID_EXIT_BUT:
             if((objMsg == BTN_MSG_RELEASED))
             {
-                _page= 1; 
-                AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-                                 GFXGetPageXYAddress(GetDestinationPage(), 0, 0),
-                                 GFXGetPageXYAddress(GFX_PAGE3, 0, 0),
-                                 GetMaxX(), 
-                                 GetMaxY(),   	
-                                 GFX_SchemeGetDefaultScheme()->AlphaValue);          
-
                 GFXTransition(0,0,(GetMaxX() >> 2) + 10,GetMaxY(),
                            PUSH,GFXGetPageOriginAddress(1),GFXGetPageOriginAddress(0),
                            2,8,RIGHT_TO_LEFT);       
@@ -241,13 +224,17 @@ WORD MsgPanelScreen(WORD objMsg, OBJ_HEADER *pObj)
                            SLIDE,GFXGetPageOriginAddress(GFX_PAGE2),GFXGetPageOriginAddress(0),
                           2,8,LEFT_TO_RIGHT);  
 
+                CopyPageWindow( 1, GetDrawBufferAddress(),       
+                           0, 0, 0, 0, 
+                        GetMaxX(), GetMaxY());
+
                 screenState = CREATE_MAIN; 
-                _page =0;
+
                 return (0);                             // process by default
             }
             return (1);
 
         default:
-            return (1);                             // process by default
+            return (0);                             // process by default
     }
 }

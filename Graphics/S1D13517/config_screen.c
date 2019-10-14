@@ -72,22 +72,20 @@ void CreateConfigScreen(void)
     PutImage((GetMaxX() >> 2)+20, 10, (void *) &preferences_system, IMAGE_NORMAL);
     FillBevel((GetMaxX() >> 2) + 20,90 ,GetMaxX() - 10, GetMaxY()-10,5);
 
-    AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
-			     GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2)+15, 5),
-			     GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2)+15, 5),
+    while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
+			     GFX_PAGE1, (GetMaxX() >> 2)+15, 5,
+			     GetDrawBufferAddress(), (GetMaxX() >> 2)+15, 5,
 		         (GetMaxX()) - ((GetMaxX() >> 2)+20), 
 		         60,  	
-		         GFX_SchemeGetDefaultScheme()->AlphaValue);
+		         GFX_SchemeGetDefaultScheme()->AlphaValue));
     		     	
 
-    AlphaBlendWindow(GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
-			     GFXGetPageXYAddress(GFX_PAGE1, (GetMaxX() >> 2) + 15, 85),
-			     GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+    while(!AlphaBlendWindow(GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
+			     GFX_PAGE1, (GetMaxX() >> 2) + 15, 85,
+			     GetDrawBufferAddress(), (GetMaxX() >> 2) + 15, 85,
 		         (GetMaxX())-((GetMaxX() >> 2) + 15), 
 		         GetMaxY() - 90,  	
-		         GFX_SchemeGetDefaultScheme()->AlphaValue);
-		         
-    SetActivePage(GetDestinationPage());
+		         GFX_SchemeGetDefaultScheme()->AlphaValue));		        
 
     SetColor(RGB565CONVERT(255, 102, 0));
     SetFont((void *) &FONTDEFAULT);

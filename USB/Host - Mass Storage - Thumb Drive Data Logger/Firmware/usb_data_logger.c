@@ -79,7 +79,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 // *****************************************************************************
 // *****************************************************************************
 
-#if defined( __C30__)
+#if defined( __C30__) || defined __XC16__
     #define ADC_READING_POTENTIOMETER   ADC1BUF1     
     #define ADC_READING_TEMPERATURE     ADC1BUF0
     #define ADC_READING_VBUS            ADC1BUF2
@@ -113,7 +113,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 // stored in a different byte.  This is done to flag the user to take special
 // care when writing code that utilizes the weekday.
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     #define DEFAULT_YEARS               0x0007
     #define DEFAULT_MONTH_DAY           0x0815
     #define DEFAULT_WEEKDAY_HOURS       0x0304
@@ -154,7 +154,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 #define GATED_TIME_DISABLED                 0x0000
 #define TIMER_16BIT_MODE                    0x0000
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     #define TIMER_PRESCALER_1               0x0000
     #define TIMER_PRESCALER_8               0x0010
     #define TIMER_PRESCALER_64              0x0020
@@ -178,7 +178,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 // Configuration Bits
 // *****************************************************************************
 // *****************************************************************************
-#if defined(__C30__)
+#if defined(__C30__) || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
@@ -321,7 +321,7 @@ typedef struct _LOGGER_STATUS
                 BYTE        readingTemperature      : 1;
             };
         };
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         union
         {
             BYTE    value;
@@ -347,7 +347,7 @@ typedef struct _OLD_COMMANDS
 } OLD_COMMANDS;
 
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 
     // PIC24 RTCC Structure
     typedef union
@@ -420,7 +420,7 @@ void    RedoCommandPrompt( void );
 void    ReplaceCommandLine( void );
 void    WriteOneBuffer( FSFILE *fptr, BYTE *data, WORD size );
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
     DWORD   PIC24RTCCGetTime( void );
     DWORD   PIC24RTCCGetDate( void );
     void    PIC24RTCCSetTime( WORD weekDay_hours, WORD minutes_seconds );
@@ -476,7 +476,7 @@ void    WriteOneBuffer( FSFILE *fptr, BYTE *data, WORD size );
     volatile LOG_DATA   logData[NUM_LOG_BUFFERS];
     VOLUME_INFO         volume;
 
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
         PIC24_RTCC_DATE currentDate;
         PIC24_RTCC_TIME currentTime;
         PIC24_RTCC_TIME previousTime;
@@ -626,7 +626,7 @@ int main (void)
 
 
         // Initialize the RTCC
-        #if defined( __C30__)
+        #if defined( __C30__) || defined __XC16__
             // Turn on the secondary oscillator
             __asm__ ("MOV #OSCCON,w1");
             __asm__ ("MOV.b #0x02, w0");
@@ -803,7 +803,7 @@ int main (void)
                         {
                             PrintString( "Current date: " );
 
-                            #if defined( __C30__)
+                            #if defined( __C30__) || defined __XC16__
                                 currentDate.l = PIC24RTCCGetDate();
                             #elif defined( __PIC32MX__ )
                                 currentDate.l   = RtccGetDate();
@@ -829,7 +829,7 @@ int main (void)
 
                             if (date.Val)
                             {
-                                #if defined( __C30__)
+                                #if defined( __C30__) || defined __XC16__
                                     PIC24RTCCSetDate( date.w[1], date.w[0] );
                                 #elif defined( __PIC32MX__ )
                                     RtccSetDate( date.Val );
@@ -984,7 +984,7 @@ int main (void)
                                 {
                                     // We are reading the potentiometer
 
-                                    #if defined( __C30__)
+                                    #if defined( __C30__) || defined __XC16__
                                         currentTime.l = PIC24RTCCGetTime();
                                         currentDate.l = PIC24RTCCGetDate();
                                     #elif defined( __PIC32MX__ )
@@ -1222,7 +1222,7 @@ int main (void)
                             // Display the current time.
                             PrintString( "Current time: " );
 
-                            #if defined( __C30__)
+                            #if defined( __C30__) || defined __XC16__
                                 currentTime.l = PIC24RTCCGetTime();
                             #elif defined( __PIC32MX__ )
                                 currentTime.l = RtccGetTime();
@@ -1246,7 +1246,7 @@ int main (void)
 
                             if (time.Val)
                             {
-                                #if defined( __C30__)
+                                #if defined( __C30__) || defined __XC16__
                                     PIC24RTCCSetTime( time.w[1], time.w[0] );
                                 #elif defined( __PIC32MX__ )
                                     RtccSetTime( time.Val );
@@ -1873,7 +1873,7 @@ void InitializeClock( void )
 {
     currentTick = 0;
 
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
         IPC2bits.T3IP = TIMER_INTERRUPT_PRIORITY;
         IFS0bits.T3IF = 0;
 
@@ -1977,7 +1977,7 @@ void InitializeCommand( void )
 void InitializeAnalogMonitor( void )
 {
     // Set up the A/D converter
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
         #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ64GB004__)
 	        AD1PCFGL    &= ~SCAN_MASK; // Disable digital input on AN4, AN5, AN8
 	    #elif defined(__PIC24FJ256GB210__) || defined(__PIC24FJ256DA210__)
@@ -1997,7 +1997,7 @@ void InitializeAnalogMonitor( void )
 
     // Enable A/D interrupts
     
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
         IEC0bits.AD1IE = 1;
     #elif defined( __PIC32MX__ )
         IEC1SET = 0x00000002;
@@ -2370,7 +2370,7 @@ void MonitorVBUS( void )
     PIC32MX format.
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 DWORD   PIC24RTCCGetDate( void )
 {
     DWORD_VAL   date1;
@@ -2422,7 +2422,7 @@ DWORD   PIC24RTCCGetDate( void )
     PIC32MX format.
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 DWORD   PIC24RTCCGetTime( void )
 {
     DWORD_VAL   time1;
@@ -2471,7 +2471,7 @@ DWORD   PIC24RTCCGetTime( void )
     For the PIC32MX, we use library routines.
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void PIC24RTCCSetDate( WORD xx_year, WORD month_day )
 {
     UnlockRTCC();
@@ -2506,7 +2506,7 @@ void PIC24RTCCSetDate( WORD xx_year, WORD month_day )
     For the PIC32MX, we use library routines.
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void PIC24RTCCSetTime( WORD weekDay_hours, WORD minutes_seconds )
 {
     UnlockRTCC();
@@ -2697,7 +2697,7 @@ void ReplaceCommandLine( void )
     #define RTCC_INTERRUPT_VALUE    0x2000
 #endif
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void UnlockRTCC( void )
 {
     BOOL interruptsWereOn;
@@ -2790,7 +2790,7 @@ void WriteOneBuffer( FSFILE *fptr, BYTE *data, WORD size )
     None
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void __attribute__((__interrupt__, auto_psv)) _T3Interrupt( void )
 #elif defined( __PIC32MX__ )
 void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
@@ -2798,7 +2798,7 @@ void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
 #error Cannot prototype timer interrupt
 #endif
 {
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
     if (IFS0bits.T3IF)
     #elif defined( __PIC32MX__ )
     if (IFS0 & PIC32MX_TIMER3_INTERRUPT)
@@ -2807,7 +2807,7 @@ void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
     #endif
     {
         // Clear the interrupt flag
-        #if defined( __C30__ )
+        #if defined( __C30__ ) || defined __XC16__
             IFS0bits.T3IF   = 0;
         #elif defined( __PIC32MX__ )
             mT3ClearIntFlag();
@@ -2842,7 +2842,7 @@ void __ISR(_TIMER_3_VECTOR, ipl2) _T3Interrupt(void)
     The conversion itself is triggered by Timer 3.
   ***************************************************************************/
 
-#if defined( __C30__ )
+#if defined( __C30__ ) || defined __XC16__
 void __attribute__((__interrupt__, auto_psv)) _ADC1Interrupt( void )
 #elif defined( __PIC32MX__ )
 #pragma interrupt _ADC1Interrupt ipl2 vector 27
@@ -2851,7 +2851,7 @@ void _ADC1Interrupt( void )
 #error Cannot prototype ADC interrupt
 #endif
 {
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
     if (IFS0bits.AD1IF)
     #elif defined( __PIC32MX__ )
     if (IFS1bits.AD1IF)
@@ -2860,7 +2860,7 @@ void _ADC1Interrupt( void )
     #endif
     {
         // Clear the interrupt flag
-        #if defined( __C30__ )
+        #if defined( __C30__ ) || defined __XC16__
             IFS0bits.AD1IF = 0;
         #elif defined( __PIC32MX__ )
             #if defined(__32MX795F512L__)
@@ -2907,7 +2907,7 @@ void _ADC1Interrupt( void )
 }
 
 
-    #if defined( __C30__ )
+    #if defined( __C30__ ) || defined __XC16__
 /*******************************************************************************
 Function:       void __attribute__((__interrupt__, auto_psv)) _DefaultInterrupt(void)
 

@@ -119,7 +119,7 @@ image file to memory.
     #define APPLICATION_ADDRESS         0x9D00F490// + VALIDATION_CODE_SIZE
 
 //245KB PIC24F variants
-#elif   defined(__C30__)
+#elif   defined(__C30__) || defined __XC16__
 		#define APPLICATION_ADDRESS         0x3000ul + VALIDATION_CODE_SIZE
 		#define FLASH_BLOCK_SIZE            (1024)          // Size in bytes
 #else

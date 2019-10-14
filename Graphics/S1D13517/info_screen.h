@@ -37,6 +37,6 @@
 #ifndef INFO_SCREEN_H_FILE
 #define INFO_SCREEN_H_FILE
 
-void CreateInfo(void);
+void CreateInfo(BYTE pipControl);
 
 #endif

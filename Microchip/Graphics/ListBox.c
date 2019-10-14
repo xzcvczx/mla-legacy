@@ -576,6 +576,7 @@ WORD LbDraw(void *pObj)
 
     static LB_DRAW_STATES state = LB_STATE_START;
     static LISTITEM *pCurItem;
+    static GFX_COLOR tempColor;
     static SHORT temp;
     LISTBOX *pLb;
 
@@ -636,11 +637,11 @@ WORD LbDraw(void *pObj)
                 {
                     if(GetState(pLb, LB_DISABLED))
                     {
-                        temp = pLb->hdr.pGolScheme->ColorDisabled;
+                        tempColor = pLb->hdr.pGolScheme->ColorDisabled;
                     }
                     else
                     {
-                        temp = pLb->hdr.pGolScheme->Color0;
+                        tempColor = pLb->hdr.pGolScheme->Color0;
                     }
     
                     GOLPanelDraw
@@ -650,7 +651,7 @@ WORD LbDraw(void *pObj)
                         pLb->hdr.right,
                         pLb->hdr.bottom,
                         0,
-                        temp,
+                        tempColor,
                         pLb->hdr.pGolScheme->EmbossDkColor,
                         pLb->hdr.pGolScheme->EmbossLtColor,
                         NULL,

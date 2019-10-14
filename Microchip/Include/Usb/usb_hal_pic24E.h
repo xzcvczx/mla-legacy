@@ -153,6 +153,10 @@ Description:
 
 /* Buffer Descriptor Status Register Initialization Parameters */
 
+#define BDT_BASE_ADDR_TAG   __attribute__ ((aligned (512)))
+#define CTRL_TRF_SETUP_ADDR_TAG
+#define CTRL_TRF_DATA_ADDR_TAG
+
 //The _BSTALL definition is changed from 0x04 to 0x00 to
 // fix a difference in the PIC18 and PIC24 definitions of this
 // bit.  This should be changed back once the definitions are

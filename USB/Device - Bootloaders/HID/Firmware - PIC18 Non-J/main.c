@@ -6,14 +6,14 @@
  * FileName:        main.c
  * Dependencies:    See INCLUDES section below
  * Processor:       PIC18
- * Compiler:        C18 3.22+
+ * Compiler:        C18 3.42+
  * Company:         Microchip Technology, Inc.
  *
  * Software License Agreement
  *
  * The software supplied herewith by Microchip Technology Incorporated
- * (the “Company”) for its PICmicro® Microcontroller is intended and
- * supplied to you, the Company’s customer, for use solely and
+ * (the "Company") for its PIC® Microcontroller is intended and
+ * supplied to you, the Company's customer, for use solely and
  * exclusively on Microchip PICmicro Microcontroller products. The
  * software is owned by the Company and/or its supplier, and is
  * protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  * civil liability for the breach of the terms and conditions of this
  * license.
  *
- * THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ * THIS SOFTWARE IS PROVIDED IN AN "AS IS"” CONDITION. NO WARRANTIES,
  * WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  * PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -34,6 +34,7 @@
  * 1.0			 06/19/2008	Original Version.  Adapted from 
  *							MCHPFSUSB v2.1 HID Bootloader
  *							for PIC18F87J50 Family devices.
+ * 2.9f          06/26/2012 Added PIC18F45K50 Family support.
  ********************************************************************/
 
 /*********************************************************************
@@ -46,6 +47,8 @@ PIC18F4553/4458/2553/2458
 PIC18F4550/4455/2550/2455
 PIC18F4450/2450
 PIC18F14K50/13K50
+PIC18F45K50/25K50/24K50
+
 
 To do so, replace the linker script with an appropriate version, and
 click "Configure --> Select Device" and select the proper
@@ -136,6 +139,29 @@ bootloader to use more program memory.
         #pragma config EBTRB    = OFF
 	#endif	//18F4550 and 18F4553
 
+
+#elif defined(PIC18F4550_PICDEM_FS_USB_K50)
+        #pragma config PLLSEL   = PLL3X     // 3X PLL multiplier selected
+        #pragma config CFGPLLEN = OFF       // PLL turned on during execution
+        #pragma config CPUDIV   = NOCLKDIV  // 1:1 mode (for 48MHz CPU)
+        #pragma config LS48MHZ  = SYS48X8   // Clock div / 8 in Low Speed USB mode
+        #pragma config FOSC     = INTOSCIO  // HFINTOSC selected at powerup, no clock out
+        #pragma config PCLKEN   = OFF       // Primary oscillator driver
+        #pragma config FCMEN    = OFF       // Fail safe clock monitor
+        #pragma config IESO     = OFF       // Internal/external switchover (two speed startup)
+        #pragma config nPWRTEN  = OFF       // Power up timer
+        #pragma config BOREN    = SBORDIS   // BOR enabled
+        #pragma config nLPBOR   = ON        // Low Power BOR
+        #pragma config WDTEN    = SWON      // Watchdog Timer controlled by SWDTEN
+        #pragma config WDTPS    = 32768     // WDT postscalar
+        #pragma config PBADEN   = OFF       // Port B Digital/Analog Powerup Behavior
+        #pragma config SDOMX    = RC7       // SDO function location
+        #pragma config LVP      = OFF       // Low voltage programming
+        #pragma config MCLRE    = ON        // MCLR function enabled (RE3 disabled)
+        #pragma config STVREN   = ON        // Stack overflow reset
+        //#pragma config ICPRT  = OFF       // Dedicated ICPORT program/debug pins enable
+        #pragma config XINST    = OFF       // Extended instruction set
+
 //If using the YOUR_BOARD hardware platform (see usbcfg.h), uncomment below and add pragmas
 //#elif defined(YOUR_BOARD)
 		//Add the configuration pragmas here for your hardware platform
@@ -199,7 +225,7 @@ void interrupt_at_low_vector(void)
 {
     _asm goto 0x1018 _endasm
 }
-#pragma code
+
 
 
 /** D E C L A R A T I O N S **************************************************/
@@ -221,19 +247,36 @@ void interrupt_at_low_vector(void)
  *****************************************************************************/
 void main(void)
 {   
-    ADCON1 = 0x0F;			//Need to make sure RB4 can be used as a digital input pin
- 	//	TRISBbits.TRISB4 = 1;	//No need to explicitly do this since reset state is = 1 already.
+    //Need to make sure RB4 can be used as a digital input pin.
+    #if defined(PIC18F4550_PICDEM_FS_USB_K50)
+        unsigned char ANSELBSave;
+        ANSELBSave = ANSELB;
+        ANSELBbits.ANSB4 = 0;   //Configure RB4/AN11 for digital input capability
+    #else
+        ADCON1 = 0x0F;			//Need to make sure RB4 can be used as a digital input pin
+    #endif
 
+ 	//	TRISBbits.TRISB4 = 1;	//No need to explicitly do this since reset state is = 1 already.
+    
     //Check Bootload Mode Entry Condition
 	if(sw2 == 1)	//This example uses the sw2 I/O pin to determine if the device should enter the bootloader, or the main application code
 	{
-       	ADCON1 = 0x07;		//Restore "reset value" of the ADCON1 register
+    	//Restore default "reset" value of registers we may have modified temporarily.
+        #if defined(PIC18F4550_PICDEM_FS_USB_K50)
+            ANSELB = ANSELBSave;
+        #else
+            ADCON1 = 0x07;		//Restore "reset value" of the ADCON1 register
+		#endif
 		_asm
 		goto 0x1000			//If the user is not trying to enter the bootloader, go straight to the main application remapped "reset" vector.
 		_endasm
 	}
 
+    //We have decided to stay in this bootloader firwmare project.  Initialize
+    //this firmware and the USB module.
     InitializeSystem();
+    
+    //Execute main loop
     while(1)
     {
 		ClrWdt();	
@@ -247,7 +290,10 @@ void main(void)
  	       ProcessIO();   // This is where all the actual bootloader related data transfer/self programming takes place
  	    }				  // see ProcessIO() function in the Boot87J50Family.c file.
     }//end while
+
 }//end main
+
+
 
 /******************************************************************************
  * Function:        static void InitializeSystem(void)
@@ -307,6 +353,17 @@ static void InitializeSystem(void)
     #if defined(USE_SELF_POWER_SENSE_IO)
     tris_self_power = INPUT_PIN;
     #endif
+    
+    //Initialize oscillator settings compatible with USB operation.  Note,
+    //these may be application specific!
+    #if defined(PIC18F4550_PICDEM_FS_USB_K50)
+        OSCTUNE = 0x80; //3X PLL ratio mode selected
+        OSCCON = 0x70;  //Switch to 16MHz HFINTOSC
+        OSCCON2 = 0x10; //Enable PLL, SOSC, PRI OSC drivers turned off
+        while(OSCCON2bits.PLLRDY != 1);   //Wait for PLL lock
+        *((unsigned char*)0xFB5) = 0x90;  //Enable active clock tuning for USB operation
+    #endif
+    
     
     mInitializeUSBDriver();         // See usbdrv.h
     
@@ -385,5 +442,10 @@ void BlinkUSBStatus(void)
      }//end if(...)
 }//end BlinkUSBStatus
 #endif
+
+
+
+
+
 
 /** EOF main.c ***************************************************************/

@@ -10,7 +10,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2007 Microchip Technology Inc.  All rights reserved.
+ * Copyright ? 2007 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -20,7 +20,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ?AS IS? WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -69,7 +69,7 @@
     #include "TimeDelay.h"
     #include "Graphics/Graphics.h"
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined (__XC16__)
         #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
             #include "usb_config.h"
             #include "USB/usb.h"
@@ -79,7 +79,8 @@
         #endif
         #include "MDD File System/FSIO.h"
     #elif defined(__PIC32MX__)
-        #if defined(__32MX460F512L__) || defined(__32MX795F512L__)
+        #if defined(__32MX460F512L__) || defined(__32MX795F512L__)
+
 
             #include "usb_config.h"
             #include "USB/usb.h"
@@ -110,20 +111,21 @@
 #if defined(EXPLORER_16) || defined(PIC24FJ256DA210_DEV_BOARD)
 	#include "ExternalResource.h"
 #endif
-#if defined(__C30__)
+#if defined(__C30__) || defined(__XC16__)
 	#if defined(dsPIC33E_SK)
-    	#include "InternalResourceSet2C30.h"
+    	#include "InternalResourceSet2XC16.h"
     #endif
-	#include "InternalResourceC30.h"
+	#include "InternalResourceXC16.h"
 #elif defined(__PIC32MX__)
     #if !defined(EXPLORER_16)
-    	#include "InternalResourceSet2C32.h"
+    	#include "InternalResourceSet2XC32.h"
     #endif
-	#include "InternalResourceC32.h"
+	#include "InternalResourceXC32.h"
 #endif
 
     #include "ExternalMemory.h"
-	/////////////////////////////////////////////////////////////////////////////
+	
+/////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED
 /////////////////////////////////////////////////////////////////////////////
 extern const FONT_FLASH GOLFontDefault; // default GOL font

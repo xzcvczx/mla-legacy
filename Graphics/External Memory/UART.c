@@ -80,6 +80,15 @@ void UARTInit(void)
 		
     #endif
 
+    #if defined(__dsPIC33EP512MU810__) 
+    
+	    __builtin_write_OSCCONL(OSCCON & 0xbf);
+	    RPINR19bits.U2RXR = 0x64; 	// assign RP100 to RX
+    	RPOR9bits.RP101R = 3;    	// assign RP101 to TX
+		__builtin_write_OSCCONL(OSCCON | 0x40); 
+		
+    #endif
+
     #if defined(__PIC24FJ256DA210__)
     
 	    __builtin_write_OSCCONL(OSCCON & 0xbf);
@@ -96,7 +105,7 @@ void UARTInit(void)
     	U2BRG = (GetPeripheralClock() / 4 / BAUDRATE) - 1;
     #else
     
-        #if defined(__dsPIC33F__) || defined(__PIC24H__)
+        #if defined(__dsPIC33F__) || defined(__PIC24H__) || defined(__dsPIC33E__)
     		// The processor frequency is set to 40MHz
     		#define BRG_TEMP    10 * GetSystemClock() / 8 / BAUDRATE	
     	#else
@@ -367,3 +376,4 @@ BYTE Hex2Char(BYTE hex)
     else
         return (h + 48);
 }
+

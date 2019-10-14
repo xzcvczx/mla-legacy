@@ -94,17 +94,24 @@
 
 /** V A R I A B L E S ********************************************************/
 #if defined(__18CXX)
+    #pragma udata
+
+    //The phdc_data_rx[] and phdc_data_tx[] arrays are used as
+    //USB packet buffers in this firmware.  Therefore, they must be located in
+    //a USB module accessible portion of microcontroller RAM.
     #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
         #pragma udata usbram2
     #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
-        || defined(__18F2458) || defined(__18F2553) || defined(__18F4458) || defined(__18F4553)
+        || defined(__18F2458) || defined(__18F2553) || defined(__18F4458) || defined(__18F4553)\
+        || defined(__18LF24K50) || defined(__18F24K50) || defined(__18LF25K50)\
+        || defined(__18F25K50) || defined(__18LF45K50) || defined(__18F45K50)
         #pragma udata USB_VARIABLES=0x500
     #elif defined(__18F4450) || defined(__18F2450)
         #pragma udata USB_VARIABLES=0x480
     #else
         #pragma udata
     #endif
-#endif 
+#endif
 
 volatile FAR unsigned char phdc_data_rx[PHDC_DATA_OUT_EP_SIZE];
 volatile FAR unsigned char phdc_data_tx[PHDC_DATA_IN_EP_SIZE];
@@ -576,10 +583,10 @@ void USBDevicePHDCTxRXService(USTAT_FIELDS* pdata)
 			     PhdAppCB(USB_APP_GET_TRANSFER_SIZE,&TransferSize);
 				 recv_endpoint->transfer_size = TransferSize;			
 			}
-			else if(recv_endpoint->transfer_size > 256)
+			else if(recv_endpoint->transfer_size > PHDC_MAX_APDU_SIZE)
 			{
-    			//do nothing
-    			recv_endpoint->offset = 0;
+    			// do not copy the data to appbuffer if transfer size is more than maximum APDU size specified by the user. 
+    			recv_endpoint->offset = 0; 
             } 			
 			else
 			{

@@ -56,6 +56,7 @@
  *              - break up SetFont(), OutChar() and GetTextWidth() to allow
  *                versatility of implementing text rendering functions in drivers.
  *              - added extended glyph support and font anti-aliasing
+ * 06/15/12     - added Alpha Blending Lite support.    
  *
  *****************************************************************************/
 #ifndef _PRIMITIVE_H
@@ -122,7 +123,11 @@ extern BYTE     _fontOrientation;
     #define ORIENT_HOR  0
     #define ORIENT_VER  1
 
-extern BYTE _antialiastype;
+extern BYTE     _antialiastype;
+#ifdef USE_ALPHABLEND_LITE
+extern GFX_COLOR    _prevAlphaColor;
+#endif
+
 /*********************************************************************
 * Overview: Fonts that enables anti-aliasing can be set to use
 *           opaque or translucent type of anti-aliasing.
@@ -267,6 +272,18 @@ typedef struct
 } BITMAP_HEADER;
 
 /*********************************************************************
+* Overview: Structure describing the partial image area to render.
+*
+*********************************************************************/
+typedef struct
+{
+    WORD         width;                       // Parital Image width
+    WORD         height;                      // Partial Image height
+    SHORT        xoffset;                     // xoffset of image 
+    SHORT        yoffset;                     // yoffset of image 
+} PUTIMAGE_PARAM;
+
+/*********************************************************************
 * Overview: Structure for images stored in FLASH memory.
 *
 *********************************************************************/
@@ -306,7 +323,11 @@ typedef struct
     BYTE        fontID;                     // User assigned value
     BYTE        extendedGlyphEntry : 1;     // Extended Glyph entry flag. When set font has extended glyph feature enabled.
     BYTE        res1               : 1;     // Reserved for future use  (must be set to 0)
-    BYTE        bpp                : 2;     // Actual BPP = 2^bpp
+    BYTE        bpp                : 2;     // Actual BPP = 2<sup>bpp</sup>  
+                                            //   - 0 - 1 BPP
+                                            //   - 1 - 2 BPP
+                                            //   - 2 - 4 BPP
+                                            //   - 3 - 8 BPP
     BYTE        orientation        : 2;     // Orientation of the character glyphs (0,90,180,270 degrees)
                                             //   - 00 - Normal
                                             //   - 01 - Characters rotated 270 degrees clockwise
@@ -340,6 +361,21 @@ typedef struct
     INT16       yAdjust;                    // y-position is adjusted as per this signed number
 } GLYPH_ENTRY_EXTENDED;
 
+/**************************************************************************
+ * Overview: Font space section.  The fonts can be located in psv (constant)
+ * or program space in PIC24/dsPIC MCUs.  This define allows for switching
+ * of the pointer type used to access the font structure in memory
+ * See: GraphicsConfig.h for the application define.
+ ***************************************************************************/
+#ifdef USE_GFX_FONT_IN_PROGRAM_SECTION
+#ifndef __PIC32MX__
+#define GFX_FONT_SPACE __prog__
+#else
+#define GFX_FONT_SPACE const
+#endif
+#else
+#define GFX_FONT_SPACE const
+#endif
 /*********************************************************************
 * Overview: Internal structure for currently set font. 
 *
@@ -360,8 +396,8 @@ typedef struct
 typedef struct 
 { 
 #ifdef USE_FONT_FLASH	
-    GLYPH_ENTRY             *pChTable;
-    GLYPH_ENTRY_EXTENDED    *pChTableExtended;
+    GFX_FONT_SPACE GLYPH_ENTRY             *pChTable;
+    GFX_FONT_SPACE GLYPH_ENTRY_EXTENDED    *pChTableExtended;
 #endif
 #ifdef USE_FONT_EXTERNAL
     BYTE                    chImage[EXTERNAL_FONT_BUFFER_SIZE];
@@ -369,7 +405,7 @@ typedef struct
 #endif
     BYTE                    bpp;
 	SHORT                   chGlyphWidth;
-    BYTE                    *pChImage;
+    GFX_FONT_SPACE BYTE     *pChImage;
     SHORT                   xAdjust;
     SHORT                   yAdjust;
     SHORT                   xWidthAdjust;
@@ -383,7 +419,7 @@ typedef struct
 typedef struct
 {
     GFX_RESOURCE  type;                     // must be FLASH
-    const char    *address;                 // font image address in FLASH
+    GFX_FONT_SPACE char    *address;                 // font image address in FLASH
 } FONT_FLASH;
 
 /*********************************************************************
@@ -1353,7 +1389,10 @@ WORD    DrawPoly(SHORT numPoints, SHORT *polyPoints);
 * Function: WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 *
 * Overview: This function draws a bar given the left, top and right, 
-*			bottom corners with the current color.
+*			bottom corners with the current set color (SetColor()). 
+*           When alpha blending is enabled the bar is alpha blended 
+*           with the existing pixels specified by the parameters.
+*           The alpha percentage used is the last value set by SetAlpha().
 *
 * Input: left - x position of the left top corner.
 *		 top - y position of the left top corner.
@@ -1366,11 +1405,133 @@ WORD    DrawPoly(SHORT numPoints, SHORT *polyPoints);
 *         For Blocking configuration:
 *         - Always return 1.
 *
-*
 * Side Effects: none
 *
 ********************************************************************/
 WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
+
+#ifdef USE_ALPHABLEND_LITE
+/*********************************************************************
+* Function: void BarAlpha(SHORT left, SHORT top, SHORT right, SHORT bottom)
+*
+* PreCondition: SetAlpha(alpha) must be called prior where 
+*               0 <= alpha <= 100.
+*               - alpha = 0       : rendering will not be performed
+*               - 0 < alpha < 100 : rendering with alpha blending will be performed
+*               - alpha = 100     : rendering with last call to SetColor(color) will replace current color
+*
+* Input: left,top - top left corner coordinates,
+*        right,bottom - bottom right corner coordinates
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the shape is not yet completely drawn.
+*         - Returns 1 when the shape is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
+*
+* Side Effects: none
+*
+* Overview: This is an internal function used to render alpha blended Bars().
+*           Draws alpha blended Bar over the area specified by left, top, right, bottom.
+*           The pixels covered by the specified area will be alpha blended to the color
+*           set by SetColor().
+*
+* Note: Application should not call this function. 
+*
+********************************************************************/
+WORD    BarAlpha(SHORT left, SHORT top,WORD  right, WORD bottom);
+
+/*********************************************************************
+* Macro: SetAlpha(alpha)
+*
+* Overview: This macro sets the alpha value. Enabling this feature 
+*           requires the macros USE_ALPHABLEND_LITE defined in the 
+*           GraphicsConfig.h. See USE_ALPHABLEND_LITE for information
+*           on supported primitive rendering functions.
+*
+* Input: alpha - Defines the alpha blending percentage of the new  
+*                color set by SetColor() to the existing pixel color.
+*                Valid values for alpha for pure primitive layer 
+*                implementation are:  
+*			    - 100 : no alpha blending, color set by last SetColor() call
+*                       will replace the pixels.
+*   			- 75  : alpha blending with new color set by last SetColor()
+*                       call will be alpha blended with 75% to the existing
+*                       pixel colors.
+*			    - 50  : alpha blending with new color set by last SetColor()
+*                       call will be alpha blended with 50% to the existing
+*                       pixel colors.
+*   			- 25  : alpha blending with new color set by last SetColor()
+*                       call will be alpha blended with 25% to the existing
+*                       pixel colors.
+*
+* Output: None
+*
+* Example:
+*	        <CODE> 
+*		    SetAlpha(50);       // set alpha level
+*		    SetColor(BLUE);     // set color to use
+*		    Bar(5,10,30,50);    // render an alpha blended Bar 
+*           </CODE>
+*
+* Side Effects: none
+*
+********************************************************************/
+#define SetAlpha(alpha) (_alpha = alpha)
+
+/*********************************************************************
+* Macro: GetAlpha(alpha)
+*
+* Overview: This macro returns the current alpha value. Enabling this  
+*           feature requires the macros USE_ALPHABLEND_LITE defined in 
+*           the GraphicsConfig.h.
+*
+* Input: none
+*
+* Output: Returns the current alpha value set by the last call to
+*         SetAlpha(). 
+*
+* Side Effects: none
+*
+********************************************************************/
+#define GetAlpha() (_alpha)
+
+/*********************************************************************
+* Macro: GetPrevAlphaColor()
+*
+* Overview: This is an internal macro. Returns the previously set color 
+*           by the SetPrevAlphaColor() function. Useful when reverting 
+*           back the overlaid Bar on a rectangular area.  Enabling this  
+*           feature requires the macros USE_ALPHABLEND_LITE defined in 
+*           the GraphicsConfig.h.    
+*
+* Input: none
+*
+* Output: Returns the previously used color set by SetPrevAlphaColor().
+*
+* Side Effects: none
+*
+********************************************************************/
+#define GetPrevAlphaColor()      (_prevAlphaColor)
+
+/*********************************************************************
+* Macro: SetPrevAlphaColor(color)
+*
+* Overview: This is an internal macro. Sets the previous alpha 
+*           color used. Enabling this  feature requires the macros 
+*           USE_ALPHABLEND_LITE defined in the GraphicsConfig.h.
+*
+* Input: color - Defines the color used when alpha blending was performed.
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+#define SetPrevAlphaColor(color) (_prevAlphaColor = (color))
+
+#endif  // #ifdef USE_ALPHABLEND_LITE
+
 
 /*********************************************************************
 * Function: void ClearDevice(void)
@@ -1398,26 +1559,69 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom);
 void    ClearDevice(void);
 
 /*********************************************************************
-* Function: WORD PutImage(SHORT left, SHORT top, void* bitmap, BYTE stretch)
+* Function: WORD PutImagePartial(SHORT left, SHORT top, void* image, BYTE stretch, SHORT xoffset, SHORT yoffset, WORD width, WORD height)
 *
-* Overview: This function outputs image starting from left,top coordinates.
+* Overview: This function outputs a full or a partial image starting 
+*           from left,top coordinates. The partial image starts at 
+*           xoffset and yoffset. Size is specified by the given 
+*           width and height parameters.
 *
-* Input: left - x coordinate position of the left top corner.
-*		 top - y coordinate position of the left top corner.
-*        bitmap - pointer to the bitmap.
-*        stretch - The image stretch factor.
+* Description: 
+*        <img name="PutImagePartialExample.jpg" />
+*
+* Input: left - horizontal starting position of full or partial image on the screen
+*        top - vertical starting position of full or partial image on the screen,
+*        image - pointer to the image location.
+*        stretch - The image stretch factor. 
+*                  - IMAGE_NORMAL : no stretch 
+*                  - IMAGE_X2 : image is stretched to twice its width and height
+*        xoffset - Specifies the horizontal offset in pixels of the selected partial 
+*                  image from the left most pixel of the full image.
+*        yoffset - Specifies the vertical offset in pixels of the selected partial 
+*                  image from the top most pixel of the full image.
+*        width - width of the partial image to be rendered. 
+*                xoffset + width must not exceed the full image width. 
+*        height - height of the partial image to be rendered. 
+*                 yoffset + height must not exceed the full image height.
 *
 * Output: For NON-Blocking configuration:
-*         - Returns 0 when device is busy and the image is not yet completely drawn.
+*         - Returns 0 when device is busy and the image is not 
+*           yet completely drawn.
 *         - Returns 1 when the image is completely drawn.
 *         For Blocking configuration:
 *         - Always return 1.
+* 
+* Side Effects: none
+********************************************************************/
+WORD     PutImagePartial(SHORT left, SHORT top, void *image, BYTE stretch, SHORT xoffset, SHORT yoffset, WORD width, WORD height);
+
+/*********************************************************************
+* Macro: WORD PutImage(SHORT left, SHORT top, void* image, BYTE stretch)
 *
+* Overview: This renders the image pointed to by "image" starting from 
+*           left, top coordinates.
+*
+* Input: left - horizontal starting position of the full 
+*               image on the screen
+*        top - vertical starting position of the full image 
+*              on the screen
+*        image - pointer to the image location.
+*        stretch - The image stretch factor. 
+*                  - IMAGE_NORMAL : no stretch 
+*                  - IMAGE_X2 : image is stretched to twice its 
+*                               width and height
+*
+* Output: For NON-Blocking configuration:
+*         - Returns 0 when device is busy and the image is not 
+*           yet completely drawn.
+*         - Returns 1 when the image is completely drawn.
+*         For Blocking configuration:
+*         - Always return 1.
 * 
 * Side Effects: none
 *
 ********************************************************************/
-WORD    PutImage(SHORT left, SHORT top, void *bitmap, BYTE stretch);
+#define PutImage(left, top, image, stretch) PutImagePartial(left, top, image, stretch, 0, 0, 0, 0)
 
 /*********************************************************************
 * Function: SHORT GetImageWidth(void* bitmap)
@@ -1652,9 +1856,9 @@ WORD        BarGradient(SHORT left, SHORT top, SHORT right, SHORT bottom, GFX_CO
 *                          SHORT rad, GFX_COLOR color1, GFX_COLOR color2, 
 *                          DWORD length, BYTE direction);
 *
-* Overview: This renders a filled bevel with gradient color on the fill. It works the same as the fillbevel function, 
-* except a gradient out of color1 and color2 is drawn depending on the direction (GFX_GRADIENT_TYPE). This function
-* is a blocking call.
+* Overview: This renders a filled bevel with gradient color on the fill. It works 
+* the same as the fillbevel function, except a gradient out of color1 and color2 
+* is drawn depending on the direction (GFX_GRADIENT_TYPE). This function is a blocking call.
 *
 * Description: 
 *        <img name="BevelGradient.jpg" />
@@ -1713,40 +1917,80 @@ typedef struct
 
 #endif
 
-#ifdef USE_ALPHABLEND
+#ifdef USE_ALPHABLEND_LITE
+extern GFX_COLOR prevAlphaColor;
+#endif
+
+#if defined USE_ALPHABLEND_LITE || defined USE_ALPHABLEND
+extern BYTE _alpha;
+
 extern SHORT _GFXForegroundPage;            // foreground page (or buffer) used in alpha blending
 extern SHORT _GFXBackgroundPage;            // background page (or buffer)  used in alpha blending
 extern SHORT _GFXDestinationPage;           // destination page (or buffer)  used in alpha blending
+extern SHORT _GFXActivePage;                // Active page of application
 
+//Macros to set/get alpha blending page information
+#define SetForegroundPage(pageNumber) _GFXForegroundPage = pageNumber;
+#define SetBackgroundPage(pageNumber) _GFXBackgroundPage = pageNumber;
+#define SetDestinationPage(pageNumber) _GFXDestinationPage = pageNumber;
+#define GetForegroundPage() 					_GFXForegroundPage
+#define GetBackgroundPage() 					_GFXBackgroundPage
+#define GetDestinationPage() 					_GFXDestinationPage
 
 /*********************************************************************
-* Function: void AlphaBlendWindow(DWORD foregroundWindowAddr, DWORD backgroundWindowAddr,
-*					  DWORD destinationWindowAddr,		            
-*					  WORD  width, WORD height,  	
-*					  BYTE  alphaPercentage)
+* Function: void AlphaBlendWindow(DWORD foregroundArea, SHORT foregroundLeft, SHORT foregroundTop,
+*                                 DWORD backgroundArea, SHORT backgroundLeft, SHORT backgroundTop,
+*				                  DWORD destinationArea, SHORT destinationLeft, SHORT destinationTop,		            
+*				                  WORD  width, WORD height,  	
+*				                  BYTE  alphaPercentage)    
+*
+* Overview: This Alpha-Blends a foreground and a background stored in frames to a 
+*           destination window. A frame is a memory area that contain array of pixels
+*           information. An example would be a display buffer. This operation can be 
+*           performed on a single frame (where foregroundArea, backgroundArea and destinationArea
+*           all points to the same frame), 2 frames (where two of the three areas are pointing 
+*           to the same frame and one is another frame), or 3 frames (where each area is a
+*           separate frame). The Alpha-Blending is performed on the windows inside the specified 
+*           frames. These windows are defined by the offsets for each frame and the given 
+*           width and height. The Alpha-Blended windows are always equal in sizes. 
+*           This function is only available when it is supported by the display 
+*           driver used. Enabling this feature requires the macros USE_ALPHABLEND_LITE 
+*           or USE_ALPHABLEND defined in the GraphicsConfig.h.
+*
 * PreCondition: none
 *
-* Input:  foregroundWindowAddr -  the starting address of the foreground window
-*	    backgroundWindowAddr -  the starting address of the background window
-*	    destinationWindowAddr - the starting address of the destination window
-*	    width - the width of the alpha blend window
-*         height - the height of the alpha blend window
-*         alphaPercentage - the amount of transparency to give the foreground Window
-*        		 
+* Input:    foregroundArea - Defines the starting address/page of the foreground window.
+*	        foregroundLeft - Defines the foreground horizontal offset in pixels starting from the 
+*                            starting address/page defined by foregroundArea. 
+*           foregroundTop -  Defines the foreground vertical offset in pixels  starting from the 
+*                            starting address/page defined by foregroundArea. 
+*           backgroundArea - Defines the starting address/page of the background window.
+*	        backgroundLeft - Defines the background horizontal offset in pixels starting from the 
+*                            starting address/page defined by backgroundArea. 
+*           backgroundTop -  Defines the background vertical offset in pixels  starting from the 
+*                            starting address/page defined by backgroundArea.
+*           destinationArea - Defines the starting address/page of the destination window.
+*	        destinationLeft - Defines the destination horizontal offset in pixels starting from the 
+*                            starting address/page defined by destinationArea. 
+*           destinationTop - Defines the destination vertical offset in pixels  starting from the 
+*                            starting address/page defined by destinationArea.
+*	        width - Defines the width of the window to be alpha blended.
+*           height - Defines the height of the window to be alpha blended.
+*           alphaPercentage - This defines the amount of transparency to give the foreground Window. 
+*                             Valid range is 0-100. Actual allowed values may be limited by 
+*                             the driver used. Refer to the specific driver for allowed values.
 *
 * Output: none
 *
 * Side Effects: none
 *
-* Overview: This alphablends a foreground and a background stored in frames to a destination window. The function
-* uses windows insides frames. Each window shares the same width and height parameters.
-*
 * Note: none
 ********************************************************************/
-extern void AlphaBlendWindow(DWORD foregroundWindowAddr, DWORD backgroundWindowAddr,
-					  DWORD destinationWindowAddr,		            
-					  WORD  width, WORD height,  	
-					  BYTE  alphaPercentage);
+extern WORD AlphaBlendWindow(DWORD foregroundArea, SHORT foregroundLeft, SHORT foregroundTop,
+                             DWORD backgroundArea, SHORT backgroundLeft, SHORT backgroundTop,
+                             DWORD destinationArea, SHORT destinationLeft, SHORT destinationTop,		            
+                             WORD  width, WORD height,  	
+                             BYTE  alphaPercentage);
 
 /*********************************************************************
 * Function: DWORD GFXGetPageXYAddress(SHORT pageNumber, WORD x, WORD y)

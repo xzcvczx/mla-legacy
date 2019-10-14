@@ -342,8 +342,8 @@
         #if defined(ENABLE_PA_LNA)
             
             #if defined(MRF24J40MC)
-                PHYSetShortRAMAddr(WRITE_GPIO, 0x08);
                 PHYSetShortRAMAddr(WRITE_GPIODIR, 0x08); 
+                PHYSetShortRAMAddr(WRITE_GPIO, 0x08);
             #endif
             PHYSetLongRAMAddr(TESTMODE, 0x0F);
             
@@ -1147,11 +1147,11 @@
             
             #if defined(ENABLE_PA_LNA)
                 #if defined(MRF24J40MC)
-                    PHYSetShortRAMAddr(WRITE_GPIO, 0x08);
                     PHYSetShortRAMAddr(WRITE_GPIODIR, 0x08);
+                    PHYSetShortRAMAddr(WRITE_GPIO, 0x08);
                 #else
-                    PHYSetShortRAMAddr(WRITE_GPIO, 0);
                     PHYSetShortRAMAddr(WRITE_GPIODIR, 0x00);
+                    PHYSetShortRAMAddr(WRITE_GPIO, 0);
                 #endif
                 PHYSetLongRAMAddr(TESTMODE, 0x0F);
             #endif
@@ -1299,11 +1299,11 @@
                         
                         #if defined(ENABLE_PA_LNA)
                             #if defined(MRF24J40MC)
-                                PHYSetShortRAMAddr(WRITE_GPIO, 0x08);
                                 PHYSetShortRAMAddr(WRITE_GPIODIR, 0x08);
+                                PHYSetShortRAMAddr(WRITE_GPIO, 0x08);
                             #else
-                                PHYSetShortRAMAddr(WRITE_GPIO, 0);
                                 PHYSetShortRAMAddr(WRITE_GPIODIR, 0x00);
+                                PHYSetShortRAMAddr(WRITE_GPIO, 0);
                             #endif
                             PHYSetLongRAMAddr(TESTMODE, 0x0F);
                         #endif             

@@ -58,12 +58,12 @@ void DisplayAlphaBlendScreen(void)
 	
 	
 
-	AlphaBlendWindow(GFXGetPageXYAddress(1, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(IMAGE2_PINGPONG, (GetMaxX() >> 2) + 15, 85),
-					 GFXGetPageXYAddress(GetDestinationPage(), (GetMaxX() >> 2) + 15, 85),
+	while(!AlphaBlendWindow(1, (GetMaxX() >> 2) + 15, 85,
+					 IMAGE2_PINGPONG, (GetMaxX() >> 2) + 15, 85,
+					 GetFrameBufferAddress(), (GetMaxX() >> 2) + 15, 85,
 				     (GetMaxX())-((GetMaxX() >> 2) + 20), 
 				     GetMaxY() - 90,  	
-				     alphaBlendPercentage); 
+				     alphaBlendPercentage)); 
 				    
 	DelayMs(ALPHA_BLEND_DELAY_MS);		
 					          

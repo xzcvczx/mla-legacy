@@ -95,7 +95,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined(__XC16__)
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;
@@ -490,7 +490,7 @@ void USBCBSendResume(void)
  *******************************************************************/
 BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
 {
-    switch(event)
+    switch((INT)event)
     {
         case EVENT_TRANSFER:
             //Add application specific callback task or callback function here if desired.

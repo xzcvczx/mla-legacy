@@ -67,7 +67,7 @@
 // Configuration Bits
 // *****************************************************************************
 // *****************************************************************************
-#ifdef __C30__
+#if defined __C30__ || defined __XC16__
     #if defined(__PIC24FJ256GB110__)
         _CONFIG2(FNOSC_PRIPLL & POSCMOD_HS & PLL_96MHZ_ON & PLLDIV_DIV2 & IESO_OFF) // Primary HS OSC with PLL, USBPLL /2
         _CONFIG1(JTAGEN_OFF & FWDTEN_OFF & ICS_PGx2)   // JTAG off, watchdog timer off
@@ -332,7 +332,7 @@ int main(void)
  *******************************************************************/
 static void InitializeSystem(void)
 {
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     	#if defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
     		ANSA = 0x0000;
     		ANSB = 0x0000;
@@ -556,7 +556,7 @@ WORD_VAL ReadPOT(void)
         w.v[0] = ADRESL;
         w.v[1] = ADRESH;
 
-    #elif defined(__C30__) || defined(__C32__)
+    #elif defined(__C30__) || defined(__C32__) || defined __XC16__
         #if defined(PIC24FJ256GB110_PIM) || defined(PIC24FJ256DA210_DEV_BOARD) || defined(PIC24FJ256GB210_PIM)
             AD1CHS = 0x5;           //MUXA uses AN5
 
@@ -820,7 +820,7 @@ void USBCBSuspend(void)
 	//things to not work as intended.	
 	
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
     #if 0
         U1EIR = 0xFFFF;
         U1IR = 0xFFFF;

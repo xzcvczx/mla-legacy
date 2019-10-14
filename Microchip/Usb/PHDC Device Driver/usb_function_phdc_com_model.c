@@ -239,7 +239,7 @@ void UsbToPHDComCB(UINT8 USB_Event, void * val)
     UINT16 length, choice;//, count;
     #if defined(__18CXX)
         UINT16 *PTR;
-    #elif defined(__C30__)
+    #elif defined(__C30__) || defined __XC16__
         //UINT16 *PTR;
     #elif defined(__PIC32MX__)
         UINT32 *PTR;
@@ -386,7 +386,7 @@ void PHDConnect(void)
 	if(PhdComState == PHD_COM_STATE_UNASSOCIATED)
 	{
 		PhdComState= PHD_COM_STATE_ASSOCIATING;
-		USBDevicePHDCSendData(SEND_QOS,(UINT8 *) ASSOCIATION_REQUEST,ASSOCIATION_REQUEST_SIZE,MEM_ROM);
+		USBDevicePHDCSendData(PHDC_BULK_IN_QOS,(UINT8 *) ASSOCIATION_REQUEST,ASSOCIATION_REQUEST_SIZE,MEM_ROM);
 		USBDevicePHDCReceiveData(PHDC_BULK_OUT_QOS,pPhdAppBuffer,0); //get ready to receive
 
 		PhdAssociationRequestTimeoutStatus = TIMEOUT_ENABLED;
@@ -441,7 +441,7 @@ void PHDDisConnect(void)
 	else
 	{
 		PhdComState= PHD_COM_STATE_DISASSOCIATING;
-		USBDevicePHDCSendData(SEND_QOS,(UINT8 *) RELEASE_REQUEST,RELEASE_REQUEST_SIZE,MEM_ROM);
+		USBDevicePHDCSendData(PHDC_BULK_IN_QOS,(UINT8 *) RELEASE_REQUEST,RELEASE_REQUEST_SIZE,MEM_ROM);
 	}
 	PHDDisableAllTimeout();
 }
@@ -507,7 +507,7 @@ static void PHDAssocRequestHandler(BYTE* apdu_val)
     if (PhdComState == PHD_COM_STATE_ASSOCIATING)
     {
         PhdComState = PHD_COM_STATE_UNASSOCIATED;
-		USBDevicePHDCSendData(SEND_QOS,(UINT8 *) ASSOCIATION_RESPONSE_REJECTED_PERMANENT, ASSOCIATION_RESPONSE_REJECTED_PERMANENT_SIZE, MEM_ROM);
+		USBDevicePHDCSendData(PHDC_BULK_IN_QOS,(UINT8 *) ASSOCIATION_RESPONSE_REJECTED_PERMANENT, ASSOCIATION_RESPONSE_REJECTED_PERMANENT_SIZE, MEM_ROM);
 		USBDevicePHDCReceiveData(PHDC_BULK_OUT_QOS,pPhdAppBuffer,0); //get ready to receive
     }
     else if ((PhdComState == PHD_COM_STATE_ASSOC_OPERATING) || (PhdComState == PHD_COM_STATE_ASSOC_CFG_WAITING_APPROVAL) || (PhdComState ==  PHD_COM_STATE_DISASSOCIATING))
@@ -559,7 +559,7 @@ static void PHDAssocResponseHandler(BYTE* apdu_val)
 		if(result.Val == ACCEPTED_UNKNOWN_CONFIG)
 		{
 			PhdComState=PHD_COM_STATE_ASSOC_CFG_SENDING_CONFIG;
-			USBDevicePHDCSendData(SEND_QOS,(UINT8 *)CONFIG_EVENT_REPORT,CONFIG_EVENT_REPORT_SIZE,MEM_ROM);
+			USBDevicePHDCSendData(PHDC_BULK_IN_QOS,(UINT8 *)CONFIG_EVENT_REPORT,CONFIG_EVENT_REPORT_SIZE,MEM_ROM);
 		}
 		else
 		{
@@ -685,6 +685,7 @@ static void PHDPrstApduHandler(BYTE* apdu_val)
     		{
                 //We have received the response for the measurement that we sent.
                 PhdConfirmTimeoutStatus = TIMEOUT_DISABLED;
+                AppCB(PHD_MEASUREMENT_SENT); 
             }
 		}
 		else if (data.Val == ROIV_CMIP_CONFIRMED_ACTION_CHOSEN)
@@ -704,7 +705,7 @@ static void PHDPrstApduHandler(BYTE* apdu_val)
                 pPhdAppBuffer[12] = 0x00; pPhdAppBuffer[13] = 0x00;
                 pPhdAppBuffer[14] = 0x0C; pPhdAppBuffer[15] = 0x17;
                 pPhdAppBuffer[16] = 0x00; pPhdAppBuffer[17] = 0x00;
-                USBDevicePHDCSendData(SEND_QOS,pPhdAppBuffer,18,MEM_RAM);
+                USBDevicePHDCSendData(PHDC_BULK_IN_QOS,pPhdAppBuffer,18,MEM_RAM);
             }
             else
             {
@@ -775,14 +776,14 @@ static void PHDReleaseRequestHandler(BYTE* apdu_val)
     }
     else if (PhdComState ==  PHD_COM_STATE_DISASSOCIATING)
     {
-        USBDevicePHDCSendData(SEND_QOS, (UINT8 *)RELEASE_RESPONSE,RELEASE_RESPONSE_SIZE,MEM_ROM);
+        USBDevicePHDCSendData(PHDC_BULK_IN_QOS, (UINT8 *)RELEASE_RESPONSE,RELEASE_RESPONSE_SIZE,MEM_ROM);
     }
 	else if ((PhdComState==PHD_COM_STATE_ASSOC_OPERATING)
 	         || (PhdComState==PHD_COM_STATE_ASSOC_CFG_SENDING_CONFIG)
 	         || (PhdComState == PHD_COM_STATE_ASSOC_CFG_WAITING_APPROVAL))
 	{
 		PhdComState=PHD_COM_STATE_UNASSOCIATED;
-		USBDevicePHDCSendData(SEND_QOS, (UINT8 *)RELEASE_RESPONSE,RELEASE_RESPONSE_SIZE,MEM_ROM);
+		USBDevicePHDCSendData(PHDC_BULK_IN_QOS, (UINT8 *)RELEASE_RESPONSE,RELEASE_RESPONSE_SIZE,MEM_ROM);
 		AppCB(PHD_DISCONNECTED);
 	}
 	PhdAssociationReleaseTimeoutStatus = TIMEOUT_DISABLED;
@@ -837,7 +838,7 @@ static void PHDSendAbortRequestToManager(UINT16 abortReason)
    pPhdAppBuffer[5] = (UINT8)abortReason;
 
    PhdComState = PHD_COM_STATE_UNASSOCIATED;
-   USBDevicePHDCSendData(SEND_QOS,(UINT8 *) pPhdAppBuffer,ABORT_SIZE,MEM_RAM);
+   USBDevicePHDCSendData(PHDC_BULK_IN_QOS,(UINT8 *) pPhdAppBuffer,ABORT_SIZE,MEM_RAM);
    AppCB(PHD_DISCONNECTED);
    PHDDisableAllTimeout();
 
@@ -869,7 +870,7 @@ void PHDSendReleaseRequestToManager(UINT16 releaseReason)
    pPhdAppBuffer[5] = (UINT8)releaseReason;
 
    PhdComState= PHD_COM_STATE_DISASSOCIATING;
-   USBDevicePHDCSendData(SEND_QOS,(UINT8 *) pPhdAppBuffer,RELEASE_REQUEST_SIZE,MEM_RAM);
+   USBDevicePHDCSendData(PHDC_BULK_IN_QOS,(UINT8 *) pPhdAppBuffer,RELEASE_REQUEST_SIZE,MEM_RAM);
 
    PhdAssociationReleaseTimeoutStatus = TIMEOUT_ENABLED;
    PhdAssociationReleaseTimeout = ASSOCIATION_RELEASE_TIMOUT;
@@ -901,7 +902,7 @@ void PHDSendRoerMessageToManager (UINT16 invoke_id, UINT16 error_value)
     pPhdAppBuffer[10] = 0x00;  pPhdAppBuffer[11] = 0x04;
     pPhdAppBuffer[12] = (UINT8)(error_value>>8);  pPhdAppBuffer[13] = (UINT8)error_value;
     pPhdAppBuffer[14] = 0x00;  pPhdAppBuffer[15] = 0x00;
-    USBDevicePHDCSendData(SEND_QOS,pPhdAppBuffer,16,MEM_RAM);
+    USBDevicePHDCSendData(PHDC_BULK_IN_QOS,pPhdAppBuffer,16,MEM_RAM);
 }
 
 /******************************************************************************
@@ -941,7 +942,7 @@ void PHDSendRoerMessageToManager (UINT16 invoke_id, UINT16 error_value)
             {
                 PhdAssociationRequestRetry--;
                 PhdComState= PHD_COM_STATE_ASSOCIATING;
-		        USBDevicePHDCSendData(SEND_QOS,(UINT8 *) ASSOCIATION_REQUEST,ASSOCIATION_REQUEST_SIZE,MEM_ROM);
+		        USBDevicePHDCSendData(PHDC_BULK_IN_QOS,(UINT8 *) ASSOCIATION_REQUEST,ASSOCIATION_REQUEST_SIZE,MEM_ROM);
 		        USBDevicePHDCReceiveData(PHDC_BULK_OUT_QOS,pPhdAppBuffer,0); //get ready to receive
 		        PhdAssociationRequestTimeoutStatus = TIMEOUT_ENABLED;
 		        PhdAssociationRequestTimeout = ASSOCIATION_REQUEST_TIMEOUT;
@@ -1066,7 +1067,7 @@ void PHDSendRoerMessageToManager (UINT16 invoke_id, UINT16 error_value)
 		 {
 		   pPhdAppBuffer[PHD_MDS_ATTR_ABS_SYNCED_POINTER] = 0x20;
 		 }
-		 USBDevicePHDCSendData(SEND_QOS,pPhdAppBuffer,MDS_ATTRIBUTES_SIZE,MEM_RAM);
+		 USBDevicePHDCSendData(PHDC_BULK_IN_QOS,pPhdAppBuffer,MDS_ATTRIBUTES_SIZE,MEM_RAM);
 	 }
 	 else
 	 {

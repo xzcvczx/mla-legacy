@@ -9,7 +9,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2010 Microchip Technology Inc.  All rights reserved.
+ * Copyright ï¿½ 2010 Microchip Technology Inc.  All rights reserved.
  * Microchip licenses to you the right to use, modify, copy and distribute
  * Software only when embedded on a Microchip microcontroller or digital
  * signal controller, which is integrated into your product or third party
@@ -20,7 +20,7 @@
  * You should refer to the license agreement accompanying this Software
  * for additional information regarding your rights and obligations.
  *
- * SOFTWARE AND DOCUMENTATION ARE PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+ * SOFTWARE AND DOCUMENTATION ARE PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY
  * OF MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR
  * PURPOSE. IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR
@@ -45,6 +45,12 @@
  *					#define FONTDEFAULT	userFont where "userFont" is the
  *				user supplied font.
  * 02/24/11     Replace color data type to GFX_COLOR
+ * 03/19/12		Default font can now be set to external memory user must add 
+ *              this line in the GraphicsConfig.h file:
+ *					#define FONTDEFAULT_EXTERNAL FontName where "FontName" is 
+ *				the user supplied font.
+ * 06/11/2012   Renamed GOLGradientPanelDraw() to SetGOLPanelGradient()
+ *              Added support for Gradient rendering of GOLPanel. 
  *****************************************************************************/
 #ifndef _GOL_H
     #define _GOL_H
@@ -74,19 +80,19 @@ typedef struct
     GFX_COLOR    CommonBkColor;     // Background color used to hide Objects.
     void        *pFont;             // Font selected for the scheme.
 
-    #ifdef USE_ALPHABLEND
-    BYTE 	AlphaValue;				// Alpha value used for alpha blending, this is available only when USE_ALPHABLEND is defined in the GraphicsConfig.h.	
+    #if defined USE_ALPHABLEND_LITE || defined USE_ALPHABLEND
+    WORD 	    AlphaValue;         // Alpha value used for alpha blending, this is available only when USE_ALPHABLEND is defined in the GraphicsConfig.h.	
     #endif
      
     #ifdef USE_GRADIENT
     GFX_GRADIENT_STYLE gradientScheme;   // Gradient Scheme for widgets, this is available only when USE_GRADIENT is defined in the GraphicsConfig.h.
     #endif
+
 } GOL_SCHEME;
 
 #ifdef USE_GRADIENT
 extern GFX_GRADIENT_STYLE _gradientScheme;
 #endif
-
 
 /*********************************************************************
 * Overview: Pointer to the GOL default scheme (GOL_SCHEME). This  
@@ -340,20 +346,56 @@ extern OBJ_HEADER   *_pObjectFocused;
 *           GOLFontDefault.c file included in the Graphics Library. 
 *           To use this default font, USE_GOL must be defined in 
 *           GraphicsConfig.h.
-*           To replace this default font, add this declaration 
-*		    in the GraphicsConfig.h:
-*				#define FONTDEFAULT yourFont
-*           Then in the project the "yourFont" must be added. 
+*           To replace this default font, add the appropriate 
+*           declaration in the GraphicsConfig.h:
+*           - #define FONTDEFAULT FontName - This macro is deprecated.
+*                                       use FONTDEFAULT_FLASH instead. 
+*                                       This is for default font 
+*                                       located in flash memory.    
+*           - #define FONTDEFAULT_FLASH FontName - This is for default
+*                                       font located in flash memory.    
+*           - #define FONTDEFAULT_EXTERNAL FontName - This is for default 
+*                                       font located in external memory.    
+*           Then in the project the "FontName" must be added. 
 *           The Graphics Library will then use the font that the user
-*			supplied.
+*           supplied.
+*
+*  Note: When the default font is placed in external resource (or memory), 
+*        any calls  to OutText(), OutTextXY() and OutChar() will not 
+*        work if the external resource is not programmed with the font 
+*        table.
 *********************************************************************/
-	#ifndef FONTDEFAULT
+	#if ((defined(FONTDEFAULT_FLASH) || defined (FONTDEFAULT)) && defined(FONTDEFAULT_EXTERNAL))
+
+		// Error check.
+    	#error "Cannot define two default fonts"
+
+	#elif !defined(FONTDEFAULT_FLASH) && !defined(FONTDEFAULT_EXTERNAL) && !defined(FONTDEFAULT)
+
 		// Use the default GOL font in GOLFontDefault.c
     	#define FONTDEFAULT GOLFontDefault
-	#endif
+    	// Default GOL font.
+	    extern const FONT_FLASH FONTDEFAULT;
 
-	// Default GOL font.
-	extern const FONT_FLASH FONTDEFAULT;
+    #elif defined(FONTDEFAULT)
+        
+        // for existing projects using FONTDEFAULT macro to define default font
+    	// Default GOL font.
+	    extern const FONT_FLASH FONTDEFAULT;
+
+    #elif defined(FONTDEFAULT_FLASH)
+
+    	// Default GOL font.
+        #define FONTDEFAULT FONTDEFAULT_FLASH
+	    extern const FONT_FLASH FONTDEFAULT_FLASH;
+
+    #elif defined(FONTDEFAULT_EXTERNAL)
+
+    	// Default GOL font.
+        #define FONTDEFAULT FONTDEFAULT_EXTERNAL
+	    extern const FONT_EXTERNAL FONTDEFAULT_EXTERNAL;
+
+	#endif
 
 /*********************************************************************
 * Overview: The following are the style scheme default settings.
@@ -558,7 +600,7 @@ void        GOLSetFocus(OBJ_HEADER *object);
 *
 * Overview: This macro tests if the object is pending to 
 *			be redrawn. This is done by testing the 6 MSBits 
-*			of object’s state to detect if the object must 
+*			of objectï¿½s state to detect if the object must 
 *			be redrawn.
 *
 * PreCondition: none
@@ -607,7 +649,7 @@ void        GOLSetFocus(OBJ_HEADER *object);
 * Macros: GOLDrawComplete(pObj)
 *
 * Overview: This macro resets the drawing states of the object 
-*			(6 MSBits of the object’s state).
+*			(6 MSBits of the objectï¿½s state).
 *
 * PreCondition: none
 *
@@ -775,7 +817,7 @@ void        GOLSetFocus(OBJ_HEADER *object);
 *	extern const char Font22[] __attribute__((aligned(2)));
 *	extern const char Font16[] __attribute__((aligned(2)));
 *
-*	GOLSCHEME *pScheme1, *pScheme2;
+*	GOL_SCHEME *pScheme1, *pScheme2;
 *	pScheme1 = GOLCreateScheme();
 *	pScheme2 = GOLCreateScheme();
 *	
@@ -803,7 +845,7 @@ GOL_SCHEME  *GOLCreateScheme(void);
 * Example:
 *   <CODE> 
 *	extern FONT_FLASH Gentium12;
-*	GOLSCHEME *pScheme1;
+*	GOL_SCHEME *pScheme1;
 *	BUTTON *pButton;
 *
 *	pScheme1 = GOLCreateScheme();
@@ -833,7 +875,7 @@ GOL_SCHEME  *GOLCreateScheme(void);
 *
 * Example:
 *   <CODE> 
-*	GOLSCHEME *pScheme2;
+*	GOL_SCHEME *pScheme2;
 *	BUTTON *pButton;
 *
 *	// assume button is created and initialized
@@ -990,9 +1032,9 @@ void    GOLAddObject(OBJ_HEADER *object);
 * Overview: This macro sets the given object list as the active 
 *			list and resets the keyboard focus to none. This macro 
 *			assigns the receiving keyboard input object _pObjectFocused 
-*			pointer to NULL. If the new active list has an object’s 
+*			pointer to NULL. If the new active list has an objectï¿½s 
 *			state set to focus, the _pObjectFocused pointer must be 
-*			set to this object or the object’s state must be change 
+*			set to this object or the objectï¿½s state must be change 
 *			to unfocused. This is to avoid two objects displaying a 
 *			focused state when only one object in the active list must 
 *			be set to a focused state at anytime.
@@ -1440,14 +1482,16 @@ extern SHORT    _rpnlY1;            // Panel center y position of upper left cor
 extern SHORT    _rpnlX2;            // Panel center x position of lower right corner
 extern SHORT    _rpnlY2;            // Panel center y position of lower right corner
 extern SHORT    _rpnlR;             // radius (defines the rounded corner size)
-extern WORD     _rpnlFaceColor;     // Panel face color
-extern WORD     _rpnlEmbossLtColor; // Panel emboss light color
-extern WORD     _rpnlEmbossDkColor; // Panel emboss dark color
-extern WORD     _rpnlEmbossSize;    // Size of panel emboss (Usually uses GOL_EMBOSS_SIZE but maybe different
+extern GFX_COLOR     _rpnlFaceColor;     // Panel face color
+extern GFX_COLOR     _rpnlEmbossLtColor; // Panel emboss light color
+extern GFX_COLOR     _rpnlEmbossDkColor; // Panel emboss dark color
+extern GFX_COLOR     _rpnlEmbossSize;    // Size of panel emboss (Usually uses GOL_EMBOSS_SIZE but maybe different
+                                    // for some objects emboss size
+#ifdef USE_ALPHABLEND_LITE
+extern WORD     _rpnlAlpha;         // alpha value when using alpha blending
+#endif
 
-// for some objects)emboss size
 extern void     *_pRpnlBitmap;      // Bitmap used in the panel
-
 /*********************************************************************
 * Macros: GOLPanelDraw(	left, top, right, bottom,
 *						radius,
@@ -1536,17 +1580,23 @@ extern void     *_pRpnlBitmap;      // Bitmap used in the panel
     _rpnlEmbossLtColor = embossLtClr;                                                              \
     _rpnlEmbossDkColor = embossDkClr;                                                              \
     _pRpnlBitmap = pBitmap;                                                                        \
-    _rpnlEmbossSize = embossSize;
-
-
+    _rpnlEmbossSize = embossSize;                                                                  \
+    
      #ifdef USE_GRADIENT
 
-     #define GOLGradientPanelDraw(pGolScheme)                                                      \
+     #define SetGOLPanelGradient(pGolScheme)                                                      \
          _gradientScheme.gradientStartColor = pGolScheme->gradientScheme.gradientStartColor;       \
          _gradientScheme.gradientEndColor = pGolScheme->gradientScheme.gradientEndColor;           \
          _gradientScheme.gradientType  = pGolScheme->gradientScheme.gradientType;                  \
          _gradientScheme.gradientLength = pGolScheme->gradientScheme.gradientLength;                                                                                                                                
      #endif
+    
+    #ifdef USE_ALPHABLEND_LITE
+    
+    #define SetGOLPanelAlpha(alphaValue)                                                          \
+         _rpnlAlpha = alphaValue;       
+    
+    #endif
 
 /*********************************************************************
 * Function: WORD GOLPanelDrawTsk()
@@ -1562,8 +1612,8 @@ extern void     *_pRpnlBitmap;      // Bitmap used in the panel
 *
 * Output: Returns the status of the panel rendering
 *	<CODE> 
-*          0 – Rendering of the panel is not yet finished.
-*          1 – Rendering of the panel is finished.
+*          0 ï¿½ Rendering of the panel is not yet finished.
+*          1 ï¿½ Rendering of the panel is finished.
 *	</CODE>	
 *
 * Example:
@@ -1588,8 +1638,8 @@ WORD    GOLPanelDrawTsk(void);
 *
 * Output: Returns the status of the panel rendering
 *	<CODE> 
-*          0 – Rendering of the panel is not yet finished.
-*          1 – Rendering of the panel is finished.
+*          0 ï¿½ Rendering of the panel is not yet finished.
+*          1 ï¿½ Rendering of the panel is finished.
 *	</CODE>	
 *
 * Example:

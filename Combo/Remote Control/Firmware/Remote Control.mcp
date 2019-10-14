@@ -8,7 +8,7 @@ dir_src=
 dir_bin=.\release
 dir_tmp=.\release
 dir_sin=
-dir_inc=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F Library;.;..\..\..\Board Support Package;..\..\..\Microchip\Include;..\..\..\Graphics\Common
+dir_inc=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library;.;..\..\..\Board Support Package;..\..\..\Microchip\Include;..\..\..\Graphics\Common
 dir_lib=
 dir_lkr=
 [CAT_FILTERS]
@@ -401,12 +401,12 @@ file_040=..\..\..\Board Support Package\SST25VF016.c
 file_041=..\..\..\Graphics\Common\FlashProgrammer.c
 file_042=..\..\..\Microchip\WirelessProtocols\Console.c
 file_043=..\..\..\Microchip\WirelessProtocols\SymbolTime.c
-file_044=InternalResourceC30.c
+file_044=InternalResourceXC16.c
 file_045=ExternalResource.c
-file_046=..\..\..\Microchip\mTouchCap\PIC18F PIC24F Library\mTouchAcquistion.c
-file_047=..\..\..\Microchip\mTouchCap\PIC18F PIC24F Library\mTouchButton.c
-file_048=..\..\..\Microchip\mTouchCap\PIC18F PIC24F Library\mTouchControl.c
-file_049=..\..\..\Microchip\mTouchCap\PIC18F PIC24F Library\mTouchSensor.c
+file_046=..\..\..\Microchip\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchAcquistion.c
+file_047=..\..\..\Microchip\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchButton.c
+file_048=..\..\..\Microchip\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchControl.c
+file_049=..\..\..\Microchip\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchSensor.c
 file_050=mTouchKeys.c
 file_051=SystemProfile.h
 file_052=ConfigApp.h
@@ -458,30 +458,31 @@ file_097=WirelessTransceivers\ConfigMRF24J40_v2.h
 file_098=PaletteColorDefines.h
 file_099=..\..\..\Microchip\Include\WirelessProtocols\Console.h
 file_100=..\..\..\Microchip\Include\WirelessProtocols\SymbolTime.h
-file_101=InternalResourceC30.h
+file_101=InternalResourceXC16.h
 file_102=ExternalResource.h
-file_103=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F Library\mTouch.h
-file_104=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F Library\mTouchAcquisitionPIC24.h
-file_105=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F Library\mTouchButton.h
-file_106=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F Library\mTouchControl.h
-file_107=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F Library\mTouchSensor.h
+file_103=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouch.h
+file_104=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchAcquisitionPIC24.h
+file_105=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchButton.h
+file_106=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchControl.h
+file_107=..\..\..\Microchip\Include\mTouchCap\PIC18F PIC24F PIC24H dsPIC Library\mTouchSensor.h
 file_108=mTouchKeys.h
 file_109=mTouchConfig.h
 [SUITE_INFO]
-suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+suite_guid={9BCCB495-CD65-480A-BA76-63D8E78B117F}
 suite_state=
 [TOOL_SETTINGS]
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall -mlarge-code -mlarge-data -Os
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=--heap=5000 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
-TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}015=-g
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}015=-g -Wall -mlarge-code -mlarge-data -mlarge-arrays -Os
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}015_alt=yes
-TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}015=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
-TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}015=
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -Os -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}=--heap=5000 -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}=
+TS{8493B2ED-D539-4951-86C9-24D5331F0393}015=-g
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}015=-g -Wall -mlarge-code -mlarge-data -mlarge-scalar -Os -mlarge-arrays -fno-ivopts
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}015_alt=yes
+TS{21A8AA9B-E75C-40B6-B3AE-9CBC16FF2EF9}015=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
+TS{45B3B6E0-6DAF-4E40-8D20-CFB1B620134D}015=
 [ACTIVE_FILE_SETTINGS]
-TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}015_active=yes
+TS{F9CE474D-6A6C-401D-A11E-BEE01B244D79}015_active=yes
 [INSTRUMENTED_TRACE]
 enable=0
 transport=0

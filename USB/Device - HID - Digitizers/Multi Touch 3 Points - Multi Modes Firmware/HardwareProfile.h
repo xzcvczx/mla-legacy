@@ -1,26 +1,21 @@
 /********************************************************************
  FileName:      HardwareProfile.h
  Dependencies:  See INCLUDES section
- Processor:     PIC18, PIC24, or PIC32 USB Microcontrollers
- Hardware:      The code is natively intended to be used on the 
-                  following hardware platforms: 
-                    PICDEM™ FS USB Demo Board
-                    PIC18F46J50 FS USB Plug-In Module
-                    PIC18F87J50 FS USB Plug-In Module
-                    Explorer 16 + PIC24 or PIC32 USB PIMs
-                    PIC24F Starter Kit
-                    Low Pin Count USB Development Kit
-                  The firmware may be modified for use on other USB 
-                    platforms by editing this file (HardwareProfile.h)
- Compiler:  	Microchip C18 (for PIC18), C30 (for PIC24), 
-                  or C32 (for PIC32)
+ Processor:     PIC18, PIC24, dsPIC33, or PIC32 USB Microcontrollers
+ Hardware:      This demo is natively intended to be used on Microchip USB demo
+                boards supported by the MCHPFSUSB stack.  See release notes for
+                support matrix.  The firmware may be modified for use on
+                other USB platforms by editing this file (HardwareProfile.h)
+                and adding a new hardware specific 
+                HardwareProfile - [platform name].h file.
+ Compiler:      Microchip C18 (for PIC18), C30 (for PIC24/dsPIC33), or C32 (for PIC32)
  Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the "Company") for its PIC® Microcontroller is intended and
+ supplied to you, the Company's customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -29,23 +24,13 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN "AS IS" CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
  IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-********************************************************************
- File Description:
-
- Change History:
-  Rev   Date         Description
-  1.0   11/19/2004   Initial release
-  2.1   02/26/2007   Updated for simplicity and to use common
-                     coding style
-  2.3   09/15/2008   Broke out each hardware platform into its own
-                     "HardwareProfile - xxx.h" file
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_H
@@ -71,7 +56,7 @@
         #endif
     #endif
 
-    #if defined(__C30__)
+    #if defined(__C30__) || defined __XC16__
         #if defined(__PIC24FJ256GB110__)
             #include "HardwareProfile - PIC24FJ256GB110 PIM.h"
         #elif defined(__PIC24FJ256GB210__)
@@ -90,10 +75,16 @@
     #if defined(__18CXX)
         #if defined(__18F4550)
             #include "HardwareProfile - PICDEM FSUSB.h"
+        #elif defined(__18F45K50)
+            #include "HardwareProfile - PICDEM FSUSB K50.h"
         #elif defined(__18F87J50)
             #include "HardwareProfile - PIC18F87J50 PIM.h"
+        #elif defined(__18F97J94)
+            #include "HardwareProfile - PIC18F97J94 PIM.h"
+        #elif defined(__18F87J94)
+            #include "HardwareProfile - PIC18F87J94 PIM.h"
         #elif defined(__18F14K50)
-            #include "HardwareProfile - Low Pin Count USB Development Kit.h"
+            #include "HardwareProfile - LPC USB Development Kit - PIC18F14K50.h"
         #elif defined(__18F46J50)
             #if defined(PIC18F_STARTER_KIT_1)
                 #include "HardwareProfile - PIC18F Starter Kit 1.h"
@@ -102,6 +93,12 @@
             #endif
         #elif defined(__18F47J53)
             #include "HardwareProfile - PIC18F47J53 PIM.h"
+        #endif
+    #endif
+
+    #if defined(_PIC14E)
+        #if defined (_16F1459)
+    		#include "HardwareProfile - LPC USB Development Kit - PIC16F1459.h"
         #endif
     #endif
 #endif
